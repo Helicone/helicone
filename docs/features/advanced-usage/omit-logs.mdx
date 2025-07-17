@@ -1,15 +1,12 @@
 ---
 title: "Omit Logs"
 sidebarTitle: "Omit Logs"
-description: "Configure Helicone to selectively exclude sensitive request and response data from your LLM application logs for privacy and compliance needs."
 "twitter:title": "Omit Logs - Helicone OSS LLM Observability"
 ---
 
 import QuestionsSection from "/snippets/questions-section.mdx";
 
-## Introduction
-
-The "Omit Logs" feature is designed for users who may not want to have Helicone store or log their request body or response body. This can be particularly useful for those concerned with privacy, data sensitivity, or simply wanting to keep their data footprint minimal.
+When handling sensitive data or operating under strict compliance requirements, you may need to track LLM metrics without storing the actual request and response content. Omit Logs lets you maintain observability for costs, latency, and usage patterns while excluding sensitive data from storage.
 
 <Frame caption="Omit requests, responses or both in your logs. ">
   <img
@@ -18,11 +15,11 @@ The "Omit Logs" feature is designed for users who may not want to have Helicone 
   />
 </Frame>
 
-### Why Omit Logs
+## Why use Omit Logs
 
-- **Privacy Concerns**: Your logs may contain sensitive information such as personally identifiable information (PII) or proprietary data. Omitting certain logs can help maintain privacy and security.
-- **Focus on Key Metrics**: Omitting requests and responses allows you to focus on capturing key metrics and making it easier to discern the most relevant information related to your LLM application.
-- **Regulatory Compliance**: In certain industries or regions, there may be regulations or compliance requirements regarding the logging and storage of data. Omitting certain logs may be necessary to ensure compliance with these regulations.
+- **Maintain compliance**: Meet GDPR, HIPAA, and other regulatory requirements by excluding sensitive content from logs
+- **Protect sensitive data**: Prevent PII, financial data, or proprietary information from being stored in observability systems
+- **Keep essential metrics**: Still track costs, latency, token usage, and performance without storing actual content
 
 <Check>
   All responses and requests are only stored in memory and never in long-term

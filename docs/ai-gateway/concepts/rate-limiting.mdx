@@ -38,8 +38,8 @@ The AI Gateway provides flexible rate limiting using GCRA (Generic Cell Rate Alg
 
     ```yaml
     helicone:
-      authentication: true
-      observability: false  # Set to true to enable observability
+      # Set to `features: observability` to enable observability and auth
+      features: auth
 
     global:
       rate-limit:
@@ -58,7 +58,7 @@ The AI Gateway provides flexible rate limiting using GCRA (Generic Cell Rate Alg
 
   <Step title="Test rate limiting">
     ```bash
-    curl -X POST http://localhost:8080/router/default/chat/completions \
+    curl -X POST http://localhost:8080/ai/chat/completions \
       -H "Content-Type: application/json" \
       -H "Authorization: Bearer sk-helicone-your-api-key" \
       -d '{
@@ -114,8 +114,8 @@ The AI Gateway provides flexible rate limiting using GCRA (Generic Cell Rate Alg
 
     ```yaml
     helicone:
-      authentication: true
-      observability: false  # Set to true to enable observability
+      # Set to `features: observability` to enable observability and auth
+      features: auth
 
     rate-limit-store:
       type: in-memory
@@ -134,8 +134,8 @@ The AI Gateway provides flexible rate limiting using GCRA (Generic Cell Rate Alg
 
     ```yaml
     helicone:
-      authentication: true
-      observability: false  # Set to true to enable observability
+      # Set to `features: observability` to enable observability and auth
+      features: auth
 
     rate-limit-store:
       type: in-memory # If the rate limit store is not set, it will use in-memory by default
@@ -164,8 +164,8 @@ The AI Gateway provides flexible rate limiting using GCRA (Generic Cell Rate Alg
 
     ```yaml
     helicone:
-      authentication: true
-      observability: false  # Set to true to enable observability
+      # Set to `features: observability` to enable observability and auth
+      features: auth
 
     routers:
       production:

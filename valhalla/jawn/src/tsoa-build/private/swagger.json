@@ -2080,6 +2080,498 @@
 					}
 				]
 			},
+			"Prompt2025": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"tags": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"created_at": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"tags",
+					"created_at"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_Prompt2025_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/Prompt2025"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_Prompt2025.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_Prompt2025_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess_string-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_string-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_string-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"PromptCreateResponse": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"versionId": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"versionId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_PromptCreateResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/PromptCreateResponse"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_PromptCreateResponse.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_PromptCreateResponse_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"Record_string.number_": {
+				"properties": {},
+				"additionalProperties": {
+					"type": "number",
+					"format": "double"
+				},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
+			"OpenAIChatRequest": {
+				"description": "Simplified interface for the OpenAI Chat request format",
+				"properties": {
+					"model": {
+						"type": "string"
+					},
+					"messages": {
+						"items": {
+							"properties": {
+								"tool_calls": {
+									"items": {
+										"properties": {
+											"type": {
+												"type": "string",
+												"enum": [
+													"function"
+												],
+												"nullable": false
+											},
+											"function": {
+												"properties": {
+													"arguments": {
+														"type": "string"
+													},
+													"name": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"arguments",
+													"name"
+												],
+												"type": "object"
+											},
+											"id": {
+												"type": "string"
+											}
+										},
+										"required": [
+											"type",
+											"function",
+											"id"
+										],
+										"type": "object"
+									},
+									"type": "array"
+								},
+								"tool_call_id": {
+									"type": "string"
+								},
+								"name": {
+									"type": "string"
+								},
+								"content": {
+									"anyOf": [
+										{
+											"type": "string"
+										},
+										{
+											"items": {
+												"properties": {
+													"image_url": {
+														"properties": {
+															"url": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"url"
+														],
+														"type": "object"
+													},
+													"text": {
+														"type": "string"
+													},
+													"type": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"type"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										}
+									],
+									"nullable": true
+								},
+								"role": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"content",
+								"role"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"temperature": {
+						"type": "number",
+						"format": "double"
+					},
+					"top_p": {
+						"type": "number",
+						"format": "double"
+					},
+					"max_tokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"max_completion_tokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"stream": {
+						"type": "boolean"
+					},
+					"stop": {
+						"anyOf": [
+							{
+								"items": {
+									"type": "string"
+								},
+								"type": "array"
+							},
+							{
+								"type": "string"
+							}
+						]
+					},
+					"tools": {
+						"items": {
+							"properties": {
+								"function": {
+									"properties": {
+										"parameters": {
+											"$ref": "#/components/schemas/Record_string.any_"
+										},
+										"description": {
+											"type": "string"
+										},
+										"name": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"parameters",
+										"description",
+										"name"
+									],
+									"type": "object"
+								},
+								"type": {
+									"type": "string",
+									"enum": [
+										"function"
+									],
+									"nullable": false
+								}
+							},
+							"required": [
+								"function",
+								"type"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"tool_choice": {
+						"anyOf": [
+							{
+								"properties": {
+									"function": {
+										"properties": {
+											"name": {
+												"type": "string"
+											},
+											"type": {
+												"type": "string",
+												"enum": [
+													"function"
+												],
+												"nullable": false
+											}
+										},
+										"required": [
+											"name",
+											"type"
+										],
+										"type": "object"
+									},
+									"type": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"type"
+								],
+								"type": "object"
+							},
+							{
+								"type": "string",
+								"enum": [
+									"none",
+									"auto",
+									"required"
+								]
+							}
+						]
+					},
+					"parallel_tool_calls": {
+						"type": "boolean"
+					},
+					"reasoning_effort": {
+						"type": "string",
+						"enum": [
+							"low",
+							"medium",
+							"high"
+						]
+					},
+					"frequency_penalty": {
+						"type": "number",
+						"format": "double"
+					},
+					"presence_penalty": {
+						"type": "number",
+						"format": "double"
+					},
+					"logit_bias": {
+						"$ref": "#/components/schemas/Record_string.number_"
+					},
+					"logprobs": {
+						"type": "boolean"
+					},
+					"top_logprobs": {
+						"type": "number",
+						"format": "double"
+					},
+					"n": {
+						"type": "number",
+						"format": "double"
+					},
+					"modalities": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"prediction": {},
+					"audio": {},
+					"response_format": {
+						"properties": {
+							"json_schema": {},
+							"type": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"type"
+						],
+						"type": "object"
+					},
+					"seed": {
+						"type": "number",
+						"format": "double"
+					},
+					"service_tier": {
+						"type": "string"
+					},
+					"store": {
+						"type": "boolean"
+					},
+					"stream_options": {},
+					"metadata": {
+						"$ref": "#/components/schemas/Record_string.string_"
+					},
+					"user": {
+						"type": "string"
+					},
+					"function_call": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"properties": {
+									"name": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"name"
+								],
+								"type": "object"
+							}
+						]
+					},
+					"functions": {
+						"items": {},
+						"type": "array"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess__id-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"id": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"id"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__id-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__id-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"ResultSuccess_number_": {
 				"properties": {
 					"data": {
@@ -2105,6 +2597,191 @@
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ResultSuccess_number_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess_Prompt2025-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/Prompt2025"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_Prompt2025-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_Prompt2025-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"Prompt2025Version": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"model": {
+						"type": "string"
+					},
+					"prompt_id": {
+						"type": "string"
+					},
+					"major_version": {
+						"type": "number",
+						"format": "double"
+					},
+					"minor_version": {
+						"type": "number",
+						"format": "double"
+					},
+					"commit_message": {
+						"type": "string"
+					},
+					"created_at": {
+						"type": "string"
+					},
+					"s3_url": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"model",
+					"prompt_id",
+					"major_version",
+					"minor_version",
+					"commit_message",
+					"created_at"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_Prompt2025Version_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/Prompt2025Version"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_Prompt2025Version.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_Prompt2025Version_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess_Prompt2025Version-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/Prompt2025Version"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_Prompt2025Version-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_Prompt2025Version-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"PromptVersionCounts": {
+				"properties": {
+					"totalVersions": {
+						"type": "number",
+						"format": "double"
+					},
+					"majorVersions": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"totalVersions",
+					"majorVersions"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_PromptVersionCounts_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/PromptVersionCounts"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_PromptVersionCounts.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_PromptVersionCounts_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -2313,6 +2990,9 @@
 			},
 			"Partial_RequestResponseRMTToOperators_": {
 				"properties": {
+					"country_code": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
 					"latency": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
@@ -2664,7 +3344,9 @@
 					"X",
 					"AVIAN",
 					"NEBIUS",
-					"NOVITA"
+					"NOVITA",
+					"OPENPIPE",
+					"META"
 				]
 			},
 			"Provider": {
@@ -3304,15 +3986,6 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Record_string.number_": {
-				"properties": {},
-				"additionalProperties": {
-					"type": "number",
-					"format": "double"
-				},
-				"type": "object",
-				"description": "Construct a type with a set of properties K of type T"
-			},
 			"HeliconeRequest": {
 				"properties": {
 					"response_id": {
@@ -3503,6 +4176,14 @@
 					},
 					"updated_at": {
 						"type": "string"
+					},
+					"gateway_router_id": {
+						"type": "string",
+						"nullable": true
+					},
+					"gateway_deployment_target": {
+						"type": "string",
+						"nullable": true
 					}
 				},
 				"required": [
@@ -4911,39 +5592,6 @@
 					}
 				]
 			},
-			"ResultSuccess_string-Array_": {
-				"properties": {
-					"data": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_string-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_string-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
 			"ResultSuccess_boolean_": {
 				"properties": {
 					"data": {
@@ -5087,6 +5735,12 @@
 			},
 			"HeliconeMeta": {
 				"properties": {
+					"gatewayDeploymentTarget": {
+						"type": "string"
+					},
+					"gatewayRouterId": {
+						"type": "string"
+					},
 					"heliconeManualAccessKey": {
 						"type": "string"
 					},
@@ -5515,44 +6169,6 @@
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ResultSuccess_StoreFilterType_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"ResultSuccess__id-string__": {
-				"properties": {
-					"data": {
-						"properties": {
-							"id": {
-								"type": "string"
-							}
-						},
-						"required": [
-							"id"
-						],
-						"type": "object"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result__id-string_.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess__id-string__"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -47620,6 +48236,579 @@
 				]
 			}
 		},
+		"/v1/prompt-2025/id/{promptId}": {
+			"get": {
+				"operationId": "GetPrompt2025",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Prompt2025.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt2025"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "promptId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/prompt-2025/{promptId}": {
+			"delete": {
+				"operationId": "DeletePrompt2025",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt2025"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "promptId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/prompt-2025/{promptId}/{versionId}": {
+			"delete": {
+				"operationId": "DeletePrompt2025Version",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt2025"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "promptId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "versionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/prompt-2025/tags": {
+			"get": {
+				"operationId": "GetPrompt2025Tags",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_string-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt2025"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/prompt-2025": {
+			"post": {
+				"operationId": "CreatePrompt2025",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptCreateResponse.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt2025"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"promptBody": {
+										"$ref": "#/components/schemas/OpenAIChatRequest"
+									},
+									"tags": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									},
+									"name": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"promptBody",
+									"tags",
+									"name"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt-2025/update": {
+			"post": {
+				"operationId": "UpdatePrompt2025",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__id-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt2025"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"promptBody": {
+										"$ref": "#/components/schemas/OpenAIChatRequest"
+									},
+									"commitMessage": {
+										"type": "string"
+									},
+									"setAsProduction": {
+										"type": "boolean"
+									},
+									"newMajorVersion": {
+										"type": "boolean"
+									},
+									"promptVersionId": {
+										"type": "string"
+									},
+									"promptId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"promptBody",
+									"commitMessage",
+									"setAsProduction",
+									"newMajorVersion",
+									"promptVersionId",
+									"promptId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt-2025/update/production-version": {
+			"post": {
+				"operationId": "SetProductionVersion",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt2025"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"promptVersionId": {
+										"type": "string"
+									},
+									"promptId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"promptVersionId",
+									"promptId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt-2025/count": {
+			"get": {
+				"operationId": "GetPrompt2025Count",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_number.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt2025"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/prompt-2025/query": {
+			"post": {
+				"operationId": "GetPrompts2025",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Prompt2025-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt2025"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"pageSize": {
+										"type": "number",
+										"format": "double"
+									},
+									"page": {
+										"type": "number",
+										"format": "double"
+									},
+									"tagsFilter": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									},
+									"search": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"pageSize",
+									"page",
+									"tagsFilter",
+									"search"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt-2025/query/version": {
+			"post": {
+				"operationId": "GetPrompt2025Version",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Prompt2025Version.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt2025"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"promptVersionId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"promptVersionId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt-2025/query/versions": {
+			"post": {
+				"operationId": "GetPrompt2025Versions",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Prompt2025Version-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt2025"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"majorVersion": {
+										"type": "number",
+										"format": "double"
+									},
+									"promptId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"promptId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt-2025/query/production-version": {
+			"post": {
+				"operationId": "GetPrompt2025ProductionVersion",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Prompt2025Version.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt2025"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"promptId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"promptId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt-2025/query/total-versions": {
+			"post": {
+				"operationId": "GetPrompt2025TotalVersions",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptVersionCounts.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt2025"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"promptId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"promptId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/request/count/query": {
 			"post": {
 				"operationId": "GetRequestCount",
@@ -52226,6 +53415,54 @@
 								"required": [
 									"payloadSize",
 									"requestId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/router/control-plane/sign-s3-get-url": {
+			"post": {
+				"operationId": "SignS3GetUrl",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__url-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Router Control Plane"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"versionId": {
+										"type": "string"
+									},
+									"promptId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"versionId",
+									"promptId"
 								],
 								"type": "object"
 							}

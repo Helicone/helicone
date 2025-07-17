@@ -1,15 +1,12 @@
 ---
 title: "User Metrics"
 sidebarTitle: "User Metrics"
-description: "Monitor individual user interactions with your LLM applications. Track per-user request volumes, costs, and usage patterns across your AI services."
 "twitter:title": "User Metrics - Helicone OSS LLM Observability"
 ---
 
 import QuestionsSection from "/snippets/questions-section.mdx";
 
-## Introduction
-
-Dive deep into individual user activity within your AI applications, uncovering usage trends and optimizing resource allocation for improved performance and user satisfaction.
+When building AI applications with multiple users, you need to track costs, usage patterns, and performance per individual user for billing, optimization, and abuse detection. User Metrics automatically aggregates all requests by user ID, giving you detailed analytics on each user's AI usage across your entire application.
 
 <Frame caption="See user metrics such as the number of requests, costs, and activities.">
   <img
@@ -18,76 +15,275 @@ Dive deep into individual user activity within your AI applications, uncovering 
   />
 </Frame>
 
-### Why User Metrics
+## Why use User Metrics
 
-- Gain detailed insights into individual user activity
-- Track per-user request volumes, costs, and usage patterns
-- Optimize resource allocation based on user-specific trends
-- Improve performance and detect potential abuse
+- **Track billing and costs**: Calculate exact costs per user for accurate billing and profitability analysis
+- **Detect abuse and anomalies**: Identify users with unusual usage patterns or potential API abuse
+- **Optimize user experience**: Find performance bottlenecks and high-cost operations affecting specific users
 
 ## Quick Start
 
-### Step 1: Add User ID
+<Steps>
+<Step title="Add user identification">
+Include a `Helicone-User-Id` header in your LLM requests:
 
-There are two ways to specify users in your requests:
+```typescript
+{
+  "Helicone-User-Id": "user-123" // Or email: "user@example.com"
+}
+```
+</Step>
+
+<Step title="Make your request">
+Execute your LLM request with the user ID header:
+
+```typescript
+const response = await openai.chat.completions.create(
+  {
+    model: "gpt-4o-mini",
+    messages: [{ role: "user", content: "Hello!" }]
+  },
+  {
+    headers: {
+      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+      "Helicone-User-Id": "user-123"
+    }
+  }
+);
+```
+</Step>
+
+<Step title="View user analytics">
+Access detailed per-user metrics in the Users tab of your Helicone dashboard, including costs, request volumes, and usage patterns.
+</Step>
+</Steps>
+
+## Configuration Options
+
+### Basic Settings
+
+User identification can be set through multiple methods:
+
+| Method | Header/Parameter | Type | Description | Example |
+|--------|------------------|------|-------------|----------|
+| **Helicone Header** | `Helicone-User-Id` | `string` | Recommended approach for user tracking | `"user-123"` |
+| **OpenAI Parameter** | `user` in request body | `string` | OpenAI's built-in user parameter | `"user-123"` |
+
+### Advanced Settings
 
 <AccordionGroup>
-  <Accordion title="Option 1: Using OpenAI API">
-    The OpenAI API has an optional [`user` parameter](https://platform.openai.com/docs/api-reference/chat/create#chat-create-user), where you can specify an end-user to help OpenAI to monitor and detect abuse. Learn more [here](https://platform.openai.com/docs/guides/safety-best-practices/end-user-ids).
-  </Accordion>
-  <Accordion title="Option 2: Sending the User ID via Helicone">
-    Alternatively, you can send a prompt with the header `Helicone-User-Id` to include the user ID. The value must be a _string_, for example, use an `email` or the `user ID`.
-      <CodeGroup>
-      ```bash Curl
-      curl https://oai.helicone.ai/v1/completions \
-        -H 'Content-Type: application/json' \
-        -H 'Helicone-Auth: Bearer YOUR_API_KEY' \
-        -H 'Helicone-User-Id: "alicebob@gmail.com"' # Add this header
-      ```
+<Accordion title="User ID Best Practices">
+Choose appropriate user identifiers for your use case:
 
-      ```python Python
-      client = OpenAI(
-        base_url="https://oai.helicone.ai/v1",
-        default_headers={
-            "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
-        }
-      )
+```typescript
+// ✅ Good - consistent and identifiable
+{
+  "Helicone-User-Id": "user-12345",        // Internal user ID
+  "Helicone-User-Id": "user@example.com",  // Email address
+  "Helicone-User-Id": "org-123-user-456"   // Hierarchical ID
+}
 
-      client.chat.completions.create(
-          model="text-davinci-003",
-          prompt="How do I log users?",
-          extra_headers={
-              "Helicone-User-Id": "alicebob@gmail.com" # Add this header
-          }
-      )
-      ```
+// ❌ Avoid - inconsistent or non-identifiable
+{
+  "Helicone-User-Id": "session-abc123",    // Session ID, not user ID
+  "Helicone-User-Id": "anonymous",         // Generic identifier
+  "Helicone-User-Id": "123"                // Too simple, potential conflicts
+}
+```
+</Accordion>
 
-      ```js Node.js
-      import { Configuration, OpenAIApi } from "openai";
-      const configuration = new Configuration({
-        apiKey: process.env.OPENAI_API_KEY,
-        basePath: "https://oai.helicone.ai/v1",
-        defaultHeaders: {
-            Helicone-User-Id: "alicebob@gmail.com", // Add this header
-        },
-      });
-      const openai = new OpenAIApi(configuration);
-      ```
+<Accordion title="Multiple Identification Methods">
+You can use both OpenAI's user parameter and Helicone's header:
 
-      </CodeGroup>
+```typescript
+const response = await openai.chat.completions.create(
+  {
+    model: "gpt-4o-mini",
+    messages: [{ role: "user", content: "Hello!" }],
+    user: "user-123" // OpenAI's user parameter
+  },
+  {
+    headers: {
+      "Helicone-User-Id": "user-123" // Helicone's header (takes precedence)
+    }
+  }
+);
+```
 
-  </Accordion>
+<Note>If both are provided, `Helicone-User-Id` takes precedence for user metrics.</Note>
+</Accordion>
 </AccordionGroup>
 
-### Step 2: View Detailed Metrics
+## Use Cases
 
-Once set up correctly, you will be able to see detailed user metrics under the `Users` tab.
+<Tabs>
+<Tab title="SaaS Billing & Analytics">
+Track costs per user for accurate billing and profitability analysis:
 
-<Frame caption="See overview, usage and detailed logs for a specific user.">
-  <img
-    src="/images/user-metrics/example-user-metric-dashboard.png"
-    alt="Detailed user dashboard in Helicone showing overview, usage, and logs under `Users` tab."
-  />
-</Frame>
+<CodeGroup>
+```typescript Node.js
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: "https://oai.helicone.ai/v1",
+  defaultHeaders: {
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+  },
+});
+
+// Track AI costs per customer for billing
+async function handleUserRequest(userId, prompt) {
+  const response = await openai.chat.completions.create(
+    {
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }]
+    },
+    {
+      headers: {
+        "Helicone-User-Id": userId,
+        "Helicone-Property-Plan": "premium", // Track by plan type
+        "Helicone-Property-Feature": "chat" // Track by feature
+      }
+    }
+  );
+  
+  // Use response...
+  return response;
+}
+
+// Now analyze:
+// - Total cost per user this month
+// - Average cost per user by plan type  
+// - Which users are most/least profitable
+```
+
+```python Python
+import openai
+
+client = openai.OpenAI(
+    api_key=os.environ.get("OPENAI_API_KEY"),
+    base_url="https://oai.helicone.ai/v1",
+    default_headers={
+        "Helicone-Auth": f"Bearer {os.environ.get('HELICONE_API_KEY')}",
+    }
+)
+
+def handle_user_request(user_id, prompt):
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}],
+        extra_headers={
+            "Helicone-User-Id": user_id,
+            "Helicone-Property-Plan": "premium",
+            "Helicone-Property-Feature": "chat"
+        }
+    )
+    return response
+```
+</CodeGroup>
+</Tab>
+
+<Tab title="Abuse Detection & Rate Limiting">
+Monitor user behavior patterns to detect abuse and implement smart rate limiting:
+
+```typescript
+import OpenAI from "openai";
+
+class AIService {
+  constructor() {
+    this.openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+      baseURL: "https://oai.helicone.ai/v1",
+      defaultHeaders: {
+        "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+      },
+    });
+  }
+
+  async processRequest(userId, prompt, userTier = "free") {
+    const response = await this.openai.chat.completions.create(
+      {
+        model: userTier === "premium" ? "gpt-4o-mini" : "gpt-3.5-turbo",
+        messages: [{ role: "user", content: prompt }]
+      },
+      {
+        headers: {
+          "Helicone-User-Id": userId,
+          "Helicone-Property-Tier": userTier,
+          "Helicone-Property-RequestType": this.classifyRequest(prompt)
+        }
+      }
+    );
+
+    return response;
+  }
+
+  classifyRequest(prompt) {
+    if (prompt.length > 1000) return "long-form";
+    if (prompt.includes("code")) return "code-generation";
+    return "general";
+  }
+}
+
+// In Helicone dashboard, monitor:
+// - Users with sudden usage spikes
+// - High-cost requests by user
+// - Request patterns that indicate abuse
+```
+</Tab>
+
+<Tab title="Multi-Tenant Application Analytics">
+Analyze usage patterns across different organizations and teams:
+
+```typescript
+// For a B2B SaaS with multiple organizations
+async function handleOrgUserRequest(orgId, userId, prompt) {
+  const response = await openai.chat.completions.create(
+    {
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }]
+    },
+    {
+      headers: {
+        "Helicone-User-Id": `${orgId}-${userId}`, // Hierarchical user ID
+        "Helicone-Property-Organization": orgId,
+        "Helicone-Property-Department": "engineering",
+        "Helicone-Property-Role": "developer"
+      }
+    }
+  );
+
+  return response;
+}
+
+// Analytics you can now track:
+// - AI costs per organization
+// - Usage by department within orgs
+// - Most active users per organization
+// - Feature adoption across different user roles
+```
+</Tab>
+</Tabs>
+
+## Related Features
+
+<CardGroup cols={2}>
+<Card title="Custom Properties" icon="tag" href="/features/advanced-usage/custom-properties">
+Combine user tracking with custom properties for deeper segmentation
+</Card>
+
+<Card title="Sessions" icon="link" href="/features/sessions">
+Track user sessions and multi-step workflows per user
+</Card>
+
+<Card title="Webhooks" icon="webhook" href="/features/webhooks">
+Get real-time notifications about user activity and usage patterns
+</Card>
+
+<Card title="Alerts" icon="bell" href="/features/alerts">
+Set up alerts for unusual user behavior or usage spikes
+</Card>
+</CardGroup>
 
 <QuestionsSection />

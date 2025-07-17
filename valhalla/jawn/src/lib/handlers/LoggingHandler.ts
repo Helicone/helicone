@@ -484,20 +484,20 @@ export class LoggingHandler extends AbstractLogHandler {
           ? request.userId
           : String(request.userId),
       request_id: request.id,
-      completion_tokens: isCacheHit ? 0 : usage.completionTokens ?? 0,
+      completion_tokens: isCacheHit ? 0 : (usage.completionTokens ?? 0),
       latency: response.delayMs ?? 0,
       model: context.processedLog.model ?? "",
-      prompt_tokens: isCacheHit ? 0 : usage.promptTokens ?? 0,
+      prompt_tokens: isCacheHit ? 0 : (usage.promptTokens ?? 0),
       prompt_cache_write_tokens: isCacheHit
         ? 0
-        : usage.promptCacheWriteTokens ?? 0,
+        : (usage.promptCacheWriteTokens ?? 0),
       prompt_cache_read_tokens: isCacheHit
         ? 0
-        : usage.promptCacheReadTokens ?? 0,
-      prompt_audio_tokens: isCacheHit ? 0 : usage.promptAudioTokens ?? 0,
+        : (usage.promptCacheReadTokens ?? 0),
+      prompt_audio_tokens: isCacheHit ? 0 : (usage.promptAudioTokens ?? 0),
       completion_audio_tokens: isCacheHit
         ? 0
-        : usage.completionAudioTokens ?? 0,
+        : (usage.completionAudioTokens ?? 0),
       cost: isCacheHit
         ? 0
         : modelCost({
@@ -543,6 +543,10 @@ export class LoggingHandler extends AbstractLogHandler {
       cache_reference_id:
         context.message.log.request.cacheReferenceId ?? undefined,
       cache_enabled: context.message.log.request.cacheEnabled ?? false,
+      gateway_router_id:
+        context.message.heliconeMeta.gatewayRouterId ?? undefined,
+      gateway_deployment_target:
+        context.message.heliconeMeta.gatewayDeploymentTarget ?? undefined,
     };
 
     return requestResponseLog;
@@ -720,6 +724,8 @@ export class LoggingHandler extends AbstractLogHandler {
       target_url: request.targetUrl,
       country_code: request?.countryCode ?? null,
       created_at: request.requestCreatedAt.toISOString(),
+      gateway_router_id: heliconeMeta.gatewayRouterId ?? null,
+      gateway_deployment_target: heliconeMeta.gatewayDeploymentTarget ?? null,
     };
 
     return requestInsert;

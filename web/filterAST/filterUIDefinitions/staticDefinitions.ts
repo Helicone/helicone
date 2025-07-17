@@ -203,6 +203,13 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
     operators: ["contains", "like", "ilike"],
     table: "request_response_rmt",
   },
+  {
+    id: "country_code",
+    label: "Country Code",
+    type: "string",
+    operators: ["eq", "neq", "like", "ilike", "contains"],
+    table: "request_response_rmt",
+  },
 
   // Number fields
   {

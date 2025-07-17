@@ -1,0 +1,20 @@
+Analyze your LLM usage patterns by geographic location with our new country-based filtering feature.
+
+## Features
+
+- **Country Code Filtering**: Filter requests by country of origin
+- **Geographic Analytics**: Understand where your API calls are coming from
+- **Global Usage Patterns**: See how your application is being used around the world
+
+## How It Works
+
+The country code is determined by the Cloudflare edge server that receives your request. Since Helicone runs on Cloudflare's global network, we can identify which region processed each request, giving you insights into where your users are located.
+
+## How to Use
+
+In the requests dashboard, you can now:
+1. Use the new country filter in the advanced filters section
+2. Add `country_code:US` (or any ISO country code) to your search queries
+3. View geographic distribution in the analytics dashboard
+
+This helps you understand your global usage patterns and user distribution. Country data is automatically collected for all new requests going forward.

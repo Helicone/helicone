@@ -262,6 +262,10 @@ export default {
       variants: ["hover"],
     },
     {
+      pattern: /^(text-chart-[1-9]|text-chart-10)$/,
+      variants: ["hover"],
+    },
+    {
       pattern: /^(fill-chart-[1-9]|fill-chart-10)$/,
       variants: ["hover"],
     },

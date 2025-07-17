@@ -132,7 +132,7 @@ services:
     restart: unless-stopped
     ports:
       - "5678:5678"
-    profiles: ["include-helix"]
+    profiles: ["include-helicone"]
     depends_on:
       redis:
         condition: service_healthy

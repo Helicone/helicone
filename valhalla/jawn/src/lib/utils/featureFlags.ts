@@ -2,6 +2,7 @@ import { dbExecute } from "../shared/db/dbExecute";
 import { Result, err, ok } from "../../packages/common/result";
 
 export const HQL_FEATURE_FLAG = "hql";
+export const PROMPTS_FEATURE_FLAG = "prompts_2025";
 
 /**
  * Check if an organization has access to a specific feature flag

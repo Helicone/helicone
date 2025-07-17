@@ -31,6 +31,7 @@ import { TagType } from "@/packages/common/sessions/tags";
 import Link from "next/link";
 import { SessionTag } from "../../feedback/sessionTag";
 import { FilterASTButton } from "@/filterAST/FilterASTButton";
+import { get24HourFromDate } from "@/components/shared/utils/utils";
 
 export const EMPTY_SESSION_NAME = "__unnamed_helicone_session__";
 
@@ -150,9 +151,9 @@ export const SessionContent: React.FC<SessionContentProps> = ({
     return [
       {
         label: "Start Time",
-        value: startTime ? startTime.toLocaleString() : "-",
+        value: startTime ? get24HourFromDate(startTime) : "-",
       },
-      { label: "End Time", value: endTime ? endTime.toLocaleString() : "-" },
+      { label: "End Time", value: endTime ? get24HourFromDate(endTime) : "-" },
       {
         label: "Cost",
         value: `$${(session.session_cost_usd ?? 0).toFixed(4)}`,

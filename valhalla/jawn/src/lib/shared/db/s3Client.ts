@@ -48,7 +48,7 @@ export class S3Client {
     secretKey: string,
     private endpoint: string,
     private bucketName: string,
-    private region: string,
+    private region: string
   ) {
     this.awsClient = new AwsS3Client({
       credentials: {
@@ -221,7 +221,11 @@ export class S3Client {
     }
   }
 
-  async putObjectSignedUrlWithExpiration(key: string, bodySize: number, expiresIn: number): Promise<Result<string, string>> {
+  async putObjectSignedUrlWithExpiration(
+    key: string,
+    bodySize: number,
+    expiresIn: number
+  ): Promise<Result<string, string>> {
     try {
       this.awsClient;
       const command = new PutObjectCommand({
@@ -345,8 +349,8 @@ export class S3Client {
     return `organizations/${orgId}/datasets/${datasetId}/requests/${requestId}/request_response_body`;
   };
 
-  getPromptKey = (promptId: string, orgId: string) => {
-    return `organizations/${orgId}/prompts/${promptId}/prompt_body`;
+  getPromptKey = (promptId: string, promptVersionId: string, orgId: string) => {
+    return `organizations/${orgId}/prompts/${promptId}/versions/${promptVersionId}/prompt_body`;
   }
 
   getRequestResponseImageKey = (

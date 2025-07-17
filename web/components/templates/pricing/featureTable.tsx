@@ -77,7 +77,7 @@ const sections: {
       {
         name: "Request Logs",
         tiers: {
-          Free: "Up to 100k Free",
+          Free: "Up to 10k Free",
           Growth: "Pay as you go",
           Enterprise: "Unlimited",
         },

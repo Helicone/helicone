@@ -29,18 +29,17 @@ const Integrations = (props: IntegrationsProps) => {
       typescript: `import OpenAI from "openai";
 
 const client = new OpenAI({
-  apiKey: "{{OPENAI_API_KEY}}",
-  baseURL: "https://oai.helicone.ai/v1/{{HELICONE_API_KEY}}"
+  apiKey: OPENAI_API_KEY,
+  baseURL: \`https://oai.helicone.ai/v1/\${HELICONE_API_KEY}\`
 });`,
       python: `from openai import OpenAI
 
 client = OpenAI(
-  api_key="{{OPENAI_API_KEY}}",
-  base_url="https://oai.helicone.ai/v1/{{HELICONE_API_KEY}}"
+  api_key=OPENAI_API_KEY,
+  base_url=f"https://oai.helicone.ai/v1/{HELICONE_API_KEY}"
 )`,
-      curl: `curl "https://oai.helicone.ai/v1/chat/completions" \\
-  -H "Authorization: Bearer {{OPENAI_API_KEY}}" \\
-  -H "Helicone-Auth: Bearer {{HELICONE_API_KEY}}" \\
+      curl: `curl "https://oai.helicone.ai/v1/$HELICONE_API_KEY/chat/completions" \\
+  -H "Authorization: Bearer $OPENAI_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
     "model": "gpt-4o-mini",
@@ -54,77 +53,102 @@ client = OpenAI(
       typescript: `import Anthropic from "@anthropic-ai/sdk";
 
 const client = new Anthropic({
-  apiKey: "{{ANTHROPIC_API_KEY}}",
-  baseURL: "https://anthropic.helicone.ai/{{HELICONE_API_KEY}}",
+  apiKey: ANTHROPIC_API_KEY,
+  baseURL: \`https://anthropic.helicone.ai/\${HELICONE_API_KEY}\`,
 });`,
       python: `from anthropic import Anthropic
 
 client = Anthropic(
-  api_key="{{ANTHROPIC_API_KEY}}",
-  base_url="https://anthropic.helicone.ai/{{HELICONE_API_KEY}}",
+  api_key=ANTHROPIC_API_KEY,
+  base_url=f"https://anthropic.helicone.ai/{HELICONE_API_KEY}",
 )`,
-      curl: `curl "https://anthropic.helicone.ai/v1/messages" \\
-  -H "x-api-key: {{ANTHROPIC_API_KEY}}" \\
-  -H "Helicone-Auth: Bearer {{HELICONE_API_KEY}}" \\
+      curl: `curl "https://anthropic.helicone.ai/$HELICONE_API_KEY/v1/messages" \\
+  -H "x-api-key: $ANTHROPIC_API_KEY" \\
   -H "anthropic-version: 2023-06-01" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "model": "claude-3-7-sonnet-20250219",
+    "model": "claude-3-5-sonnet-20241022",
     "messages": [{"role": "user", "content": "Hello!"}],
     "max_tokens": 1024
   }'`,
       docsLink:
         "https://docs.helicone.ai/getting-started/integration/anthropic",
     },
-    azure: {
-      formattedName: "Azure OpenAI",
-      logo: "/static/azure.webp",
+    google: {
+      formattedName: "Google Gemini",
+      logo: "/static/gemini.webp",
+      typescript: `import { GoogleGenAI } from "@google/genai";
+
+const genAI = new GoogleGenAI({
+  apiKey: GOOGLE_API_KEY,
+  httpOptions: {
+    baseUrl: "https://gateway.helicone.ai",
+    headers: {
+      "Helicone-Auth": \`Bearer \${HELICONE_API_KEY}\`,
+      "Helicone-Target-URL": "https://generativelanguage.googleapis.com"
+    }
+  }
+});`,
+      python: `from google import genai
+
+client = genai.Client(
+  api_key=GOOGLE_API_KEY,
+  http_options={
+    "base_url": "https://gateway.helicone.ai",
+    "headers": {
+      "helicone-auth": f"Bearer {HELICONE_API_KEY}",
+      "helicone-target-url": "https://generativelanguage.googleapis.com"
+    }
+  }
+)`,
+      curl: `curl "https://gateway.helicone.ai/v1beta/models/gemini-2.0-flash:generateContent?key=$GOOGLE_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -H "Helicone-Auth: Bearer $HELICONE_API_KEY" \\
+  -H "Helicone-Target-URL: https://generativelanguage.googleapis.com" \\
+  -d '{
+    "contents": [{
+      "parts": [{
+        "text": "Hello!"
+      }]
+    }]
+  }'`,
+      docsLink: "https://docs.helicone.ai/integrations/gemini/api/curl",
+    },
+    openrouter: {
+      formattedName: "OpenRouter",
+      logo: "/static/openrouter.webp",
       typescript: `import OpenAI from "openai";
 
 const client = new OpenAI({
-  apiKey: "{{AZURE_API_KEY}}",
-  baseURL: "https://oai.helicone.ai/openai/deployments/{{YOUR_DEPLOYMENT}}",
+  apiKey: OPENROUTER_API_KEY,
+  baseURL: "https://openrouter.helicone.ai/api/v1",
   defaultHeaders: {
-    "Helicone-Auth": "Bearer {{HELICONE_API_KEY}}",
-    "Helicone-OpenAI-Api-Base": "https://{{RESOURCE_NAME}}.openai.azure.com"
-  },
-  defaultQuery: { "api-version": "{{API_VERSION}}" }
+    "Helicone-Auth": \`Bearer \${HELICONE_API_KEY}\`
+  }
 });`,
       python: `from openai import OpenAI
 
 client = OpenAI(
-  api_key="{{AZURE_API_KEY}}",
-  base_url="https://oai.helicone.ai/openai/deployments/{{YOUR_DEPLOYMENT}}",
+  api_key=OPENROUTER_API_KEY,
+  base_url="https://openrouter.helicone.ai/api/v1",
   default_headers={
-    "Helicone-Auth": "Bearer {{HELICONE_API_KEY}}",
-    "Helicone-OpenAI-Api-Base": "https://{{RESOURCE_NAME}}.openai.azure.com"
-  },
-  default_query={ "api-version": "{{API_VERSION}}" }
+    "Helicone-Auth": f"Bearer {HELICONE_API_KEY}"
+  }
 )`,
-      curl: `curl "https://oai.helicone.ai/openai/deployments/{{YOUR_DEPLOYMENT}}/chat/completions?api-version={{API_VERSION}}" \\
-  -H "api-key: {{AZURE_API_KEY}}" \\
-  -H "Helicone-Auth: Bearer {{HELICONE_API_KEY}}" \\
-  -H "Helicone-OpenAI-Api-Base: https://{{RESOURCE_NAME}}.openai.azure.com" \\
+      curl: `curl "https://openrouter.helicone.ai/api/v1/chat/completions" \\
+  -H "Authorization: Bearer $OPENROUTER_API_KEY" \\
+  -H "Helicone-Auth: Bearer $HELICONE_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "model": "gpt-4o-mini",
+    "model": "openai/gpt-4o-mini",
     "messages": [{"role": "user", "content": "Hello!"}]
   }'`,
-      docsLink: "https://docs.helicone.ai/getting-started/integration/azure",
+      docsLink:
+        "https://docs.helicone.ai/getting-started/integration-method/openrouter",
     },
   };
 
   const ADDITIONAL_PROVIDERS = [
-    {
-      name: "Gemini",
-      logo: "/static/gemini.webp",
-      href: "https://docs.helicone.ai/integrations/gemini/api/curl",
-    },
-    {
-      name: "OpenRouter",
-      logo: "/static/openrouter.webp",
-      href: "https://docs.helicone.ai/getting-started/integration-method/openrouter",
-    },
     {
       name: "Vercel AI SDK",
       logo: "/static/vercel.webp",
@@ -155,6 +179,11 @@ client = OpenAI(
       logo: "/static/litellm.webp",
       href: "https://docs.helicone.ai/getting-started/integration-method/litellm",
     },
+    {
+      name: "Azure OpenAI",
+      logo: "/static/azure.webp",
+      href: "https://docs.helicone.ai/getting-started/integration/azure",
+    },
   ];
 
   const [currentProvider, setCurrentProvider] =
@@ -183,8 +212,8 @@ client = OpenAI(
           currentLanguage === "typescript"
             ? "javascript"
             : currentLanguage === "curl"
-            ? "bash"
-            : "python",
+              ? "bash"
+              : "python",
         theme: "github-dark",
       });
       setHighlightedCode(html);

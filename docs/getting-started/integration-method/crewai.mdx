@@ -57,7 +57,7 @@ CrewAI supports multiple LLM providers. Here's how to configure different provid
 from crewai import LLM
 
 llm = LLM(
-    model="gpt-4",
+    model="gpt-4o-mini",
     base_url="https://oai.helicone.ai/v1",
     api_key=os.environ.get("OPENAI_API_KEY"),
     extra_headers={
@@ -71,7 +71,7 @@ llm = LLM(
 ```python
 llm = LLM(
     model="anthropic/claude-3-sonnet-20240229-v1:0",
-    base_url="https://anthropic.helicone.ai",
+    base_url="https://anthropic.helicone.ai/v1",
     api_key=os.environ.get("ANTHROPIC_API_KEY"),
     extra_headers={
         "Helicone-Auth": f"Bearer {os.environ.get('HELICONE_API_KEY')}",

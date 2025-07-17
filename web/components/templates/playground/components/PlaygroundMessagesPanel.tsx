@@ -25,6 +25,9 @@ interface PlaygroundMessagesPanelProps {
   }) => void;
   modelParameters: ModelParameters;
   setModelParameters: (_modelParameters: ModelParameters) => void;
+  promptVersionId: string | undefined;
+  onCreatePrompt: (tags: string[], promptName: string) => void;
+  onSavePrompt: (newMajorVersion: boolean, setAsProduction: boolean, commitMessage: string) => void;
   onRun: () => void;
   useAIGateway: boolean;
   setUseAIGateway: (_useAIGateway: boolean) => void;
@@ -42,6 +45,9 @@ const PlaygroundMessagesPanel = ({
   setResponseFormat,
   modelParameters,
   setModelParameters,
+  promptVersionId,
+  onCreatePrompt,
+  onSavePrompt,
   onRun,
   useAIGateway,
   setUseAIGateway,
@@ -220,7 +226,7 @@ const PlaygroundMessagesPanel = ({
         ref={headerRef}
         className={`transition-all duration-200 ${
           isScrolled
-            ? "absolute bottom-0 left-1/2 -translate-x-1/2 z-50 rounded-lg shadow-xl mx-4 mb-4 w-[500px] bg-background border-none"
+            ? "absolute bottom-0 left-1/2 -translate-x-1/2 z-50 rounded-lg shadow-xl mx-4 mb-4 w-[600px] bg-background border-none"
             : "bg-sidebar-background"
         }`}
       >
@@ -236,6 +242,9 @@ const PlaygroundMessagesPanel = ({
           mappedContent={mappedContent}
           defaultContent={defaultContent}
           setMappedContent={setMappedContent}
+          promptVersionId={promptVersionId}
+          onCreatePrompt={onCreatePrompt}
+          onSavePrompt={onSavePrompt}
           onRun={onRun}
           isScrolled={isScrolled}
           useAIGateway={useAIGateway}

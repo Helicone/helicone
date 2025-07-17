@@ -712,6 +712,36 @@ const costs: ModelRow[] = [
     },
     showInPlayground: true,
   },
+  {
+    model: {
+      operator: "includes",
+      value: "openai/gpt-4o-mini-search-preview",
+    },
+    cost: {
+      prompt_token: 1.5e-7,
+      completion_token: 6e-7,
+    },
+  },
+  {
+    model: {
+      operator: "includes",
+      value: "gpt-4o-search-preview",
+    },
+    cost: {
+      prompt_token: 0.0000025,
+      completion_token: 0.00001,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "chatgpt-4o-latest",
+    },
+    cost: {
+      prompt_token: 0.000005,
+      completion_token: 0.000015,
+    }
+  }
 ];
 
 const modelDetails: ModelDetailsMap = {

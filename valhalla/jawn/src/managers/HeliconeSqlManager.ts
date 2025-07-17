@@ -1,10 +1,15 @@
-import { ClickHouseTableSchema } from "../controllers/public/heliconeSqlController";
+import {
+  ClickHouseTableSchema,
+  ExecuteSqlResponse,
+} from "../controllers/public/heliconeSqlController";
 import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
 import { AuthParams } from "../packages/common/auth/types";
 import { err, ok, Result } from "../packages/common/result";
 import { AST, Parser } from "node-sql-parser";
+import { HqlStore } from "../lib/stores/HqlStore";
 
 export const CLICKHOUSE_TABLES = ["request_response_rmt"];
+const MAX_LIMIT = 300000;
 const parser = new Parser();
 interface ClickHouseTableRow {
   name: string;
@@ -36,23 +41,23 @@ function validateSql(sql: string): Result<null, string> {
   return ok(null);
 }
 
-function addLimit(ast: AST): AST {
+function addLimit(ast: AST, limit: number): AST {
   if (ast.type !== "select") {
     throw new Error("Only select statements are allowed");
   }
 
-  // If there's already a limit, ensure it doesn't exceed 1000
+  // If there's already a limit, ensure it doesn't exceed the limit
   if (ast.limit && ast.limit.value.length > 0) {
     if (ast.limit.value.length === 1) {
       const currentLimit = ast.limit.value[0]?.value;
       if (typeof currentLimit === "number") {
-        ast.limit.value[0].value = Math.min(currentLimit, 1000);
+        ast.limit.value[0].value = Math.min(currentLimit, limit);
       }
     } else if (ast.limit.value.length === 2) {
       // Double LIMIT: LIMIT offset, count
       const currentCount = ast.limit.value[1]?.value;
       if (typeof currentCount === "number") {
-        ast.limit.value[1].value = Math.min(currentCount, 1000);
+        ast.limit.value[1].value = Math.min(currentCount, limit);
       }
     }
   } else {
@@ -62,7 +67,7 @@ function addLimit(ast: AST): AST {
       value: [
         {
           type: "number",
-          value: 1000,
+          value: limit,
         },
       ],
     };
@@ -80,7 +85,11 @@ function normalizeAst(ast: AST | AST[]): AST[] {
 }
 
 export class HeliconeSqlManager {
-  constructor(private authParams: AuthParams) {}
+  private hqlStore: HqlStore;
+
+  constructor(private authParams: AuthParams) {
+    this.hqlStore = new HqlStore();
+  }
 
   async getClickhouseSchema(): Promise<
     Result<ClickHouseTableSchema[], string>
@@ -125,11 +134,14 @@ export class HeliconeSqlManager {
   // Validate sql by only allowing select statements and tables in CLICKHOUSE_TABLES
   // Add limit check
   // Execute it
-  async executeSql(sql: string): Promise<Result<any, string>> {
+  async executeSql(
+    sql: string,
+    limit: number = 100
+  ): Promise<Result<ExecuteSqlResponse, string>> {
     try {
       const ast = parser.astify(sql, { database: "Postgresql" });
       // always get first semi colon to prevent sql injection like snowflake lol
-      const normalizedAst = addLimit(normalizeAst(ast)[0]);
+      const normalizedAst = addLimit(normalizeAst(ast)[0], limit);
       const firstSql = parser.sqlify(normalizedAst, { database: "Postgresql" });
 
       const validatedSql = validateSql(firstSql);
@@ -150,17 +162,50 @@ export class HeliconeSqlManager {
       ${firstSql}
     `;
 
-      const result = await clickhouseDb.dbQueryHql<any>(sqlWithCtes, [
-        this.authParams.organizationId,
-      ]);
+      const start = Date.now();
 
+      const result = await clickhouseDb.dbQueryHql<ExecuteSqlResponse["rows"]>(
+        sqlWithCtes,
+        [this.authParams.organizationId]
+      );
+
+      const elapsedMilliseconds = Date.now() - start;
       if (result.error) {
         return err(result.error);
       }
 
-      return ok(result.data);
+      return ok({
+        rows: result.data ?? [],
+        elapsedMilliseconds,
+        size: Buffer.byteLength(JSON.stringify(result.data), "utf8"),
+        rowCount: result.data?.length ?? 0,
+      });
     } catch (e) {
       return err(String(e));
     }
+  }
+
+  async downloadCsv(sql: string): Promise<Result<string, string>> {
+    const result = await this.executeSql(sql, MAX_LIMIT);
+    if (result.error) {
+      return err(result.error);
+    }
+
+    if (!result.data?.rows?.length) {
+      return err("No data returned from query");
+    }
+
+    // upload to s3
+    const uploadResult = await this.hqlStore.uploadCsv(
+      `${Date.now()}.csv`,
+      this.authParams.organizationId,
+      result.data.rows
+    );
+
+    if (uploadResult.error || !uploadResult.data) {
+      return err(uploadResult.error ?? "Failed to upload csv");
+    }
+
+    return ok(uploadResult.data);
   }
 }

@@ -349,34 +349,166 @@ The following fields are available for both global and router-level rate limitin
   **Note:** Only available for global rate limiting configuration.
 </ParamField>
 
+## Retries
+
+Automatically retry transient errors from AI providers using configurable strategies. Retries use smart failure detection with configurable maximum attempts and backoff timing.
+
+[Learn more](/ai-gateway/concepts/retries)
+
+### Global Retry Configuration
+
+<ParamField path="global.retries" type="object">
+  Configure an application-wide retry policy that applies to all requests.
+
+  ```yaml
+  global:
+    retries:
+      strategy: "constant"
+      delay: "50ms"
+      max-retries: 3
+  ```
+
+  **How it works:** If a transient error is encountered on any endpoint, the request will be retried with the given policy.
+</ParamField>
+
+### Router-Level Retry Configuration
+
+<ParamField path="routers.[name].retries" type="object">
+  Configure retry policy specific to this router (overrides global retry settings).
+
+  ```yaml
+  routers:
+    production:
+      retries:
+        strategy: "exponential"
+        min-delay: "100ms"
+        max-delay: "30s"
+        max-retries: 5
+        factor: 2.0
+  ```
+
+  **How it works:** Router-specific retry settings take precedence over global retry configuration.
+</ParamField>
+
+### Retry Strategy Fields
+
+The following fields are available for both global and router-level retry configuration:
+
+<ParamField path="[context].retries.strategy" type="string" required>
+  Retry backoff strategy.
+
+  ```yaml
+  retries:
+    strategy: "constant"
+  ```
+
+  **Options:**
+  - `constant` - Fixed delay between retry attempts with jitter
+  - `exponential` - Exponentially increasing delays with jitter and configurable bounds
+</ParamField>
+
+#### Constant Strategy Fields
+
+<ParamField path="[context].retries.delay" type="duration" default="1s">
+  Fixed delay between retry attempts (for constant strategy).
+
+  ```yaml
+  retries:
+    strategy: "constant"
+    delay: "50ms"
+  ```
+
+  **How it works:** Each retry waits exactly this duration (plus jitter) before attempting again.
+</ParamField>
+
+<ParamField path="[context].retries.max-retries" type="integer" default="2">
+  Maximum number of retry attempts.
+
+  ```yaml
+  retries:
+    strategy: "constant"
+    max-retries: 3
+  ```
+
+  **How it works:** After this many failed attempts, the request fails permanently.
+</ParamField>
+
+#### Exponential Strategy Fields
+
+<ParamField path="[context].retries.min-delay" type="duration" default="1s">
+  Minimum delay for exponential backoff strategy.
+
+  ```yaml
+  retries:
+    strategy: "exponential"
+    min-delay: "100ms"
+  ```
+
+  **How it works:** First retry waits this duration, then each subsequent retry increases exponentially.
+</ParamField>
+
+<ParamField path="[context].retries.max-delay" type="duration" default="30s">
+  Maximum delay cap for exponential backoff strategy.
+
+  ```yaml
+  retries:
+    strategy: "exponential"
+    max-delay: "60s"
+  ```
+
+  **How it works:** Delays will never exceed this value, even with exponential growth.
+</ParamField>
+
+<ParamField path="[context].retries.max-retries" type="integer" default="2">
+  Maximum number of retry attempts.
+
+  ```yaml
+  retries:
+    strategy: "exponential"
+    max-retries: 5
+  ```
+
+  **How it works:** After this many failed attempts, the request fails permanently.
+</ParamField>
+
+<ParamField path="[context].retries.factor" type="number" default="2.0">
+  Exponential backoff multiplication factor.
+
+  ```yaml
+  retries:
+    strategy: "exponential"
+    factor: 1.5
+  ```
+
+  **How it works:** Each retry delay is multiplied by this factor. With factor=2.0: 100ms → 200ms → 400ms → 800ms.
+</ParamField>
+
+
+
 ## Helicone Add-ons
 
-Configure integration with the Helicone platform for authentication and observability. Authentication and observability are now separate controls.
+Configure integration with the Helicone platform for authentication and observability.
 
 [Learn more about Authentication](/ai-gateway/authentication) | [Learn more about Observability](/ai-gateway/observability)
 
-<ParamField path="helicone.authentication" type="boolean" default="false">
-  Enable Helicone authentication for secure API access.
+<ParamField path="helicone.features" type="string" default="none" optional>
+  Enable Helicone features such as LLM observability and authentication for secure API access.
 
   ```yaml
   helicone:
-    authentication: true
-    observability: false  # Optional: enable observability
+    # Set to `features: observability` to enable observability and auth
+    features: auth
   ```
 
-  **When enabled:** Must set the `HELICONE_CONTROL_PLANE_API_KEY` environment variable with your Helicone API key.
-</ParamField>
-
-<ParamField path="helicone.observability" type="boolean" default="false">
-  Enable request logging to your Helicone dashboard.
+  Enable authentication (required) and request logging to your Helicone dashboard.
 
   ```yaml
   helicone:
-    authentication: true  # Required for observability
-    observability: true
+    features: observability
   ```
 
-  **Note:** Observability requires authentication to be enabled.
+  **When enabled:** Must set the `HELICONE_CONTROL_PLANE_API_KEY` environment variable with your Helicone API key when deploying
+  the AI Gateway when using Helicone add ons.
 </ParamField>
 
 <ParamField path="helicone.base-url" type="string" default="https://api.helicone.ai">

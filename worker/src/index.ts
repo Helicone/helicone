@@ -50,7 +50,8 @@ export interface BASE_Env {
     | "GATEWAY_API"
     | "CUSTOMER_GATEWAY"
     | "GENERATE_API"
-    | "VAPI_PROXY";
+    | "VAPI_PROXY"
+    | "META_PROXY";
   TOKEN_CALC_URL: string;
   VAULT_ENABLED: string;
   STORAGE_URL: string;
@@ -180,6 +181,11 @@ async function modifyEnvBasedOnPath(
       return {
         ...env,
         WORKER_TYPE: "ANTHROPIC_PROXY",
+      };
+    } else if (hostParts[0].includes("meta")) {
+      return {
+        ...env,
+        WORKER_TYPE: "META_PROXY",
       };
     } else if (hostParts[0].includes("api")) {
       return {

@@ -54,9 +54,9 @@ export function consolidateTextFields(responseBody: any[]): any {
                       )
                     : cur.choices[i].delta.function_call,
                   tool_calls: c.delta.tool_calls
-                    ? recursivelyConsolidate(
+                    ? recursivelyConsolidateToolCalls(
                         c.delta.tool_calls,
-                        cur.choices[i].delta.tool_calls ?? {}
+                        cur.choices[i].delta.tool_calls ?? []
                       )
                     : cur.choices[i].delta.tool_calls,
                 },
@@ -113,6 +113,65 @@ export function recursivelyConsolidate(body: any, delta: any): any {
     }
   });
   return body;
+}
+
+export function recursivelyConsolidateToolCalls(
+  existingToolCalls: any[],
+  newToolCalls: any[]
+): any[] {
+  if (!existingToolCalls || existingToolCalls.length === 0) {
+    return newToolCalls || [];
+  }
+
+  if (!newToolCalls || newToolCalls.length === 0) {
+    return existingToolCalls;
+  }
+
+  const finalToolCalls: { [key: number]: any } = {};
+
+  // Initialize with existing tool calls
+  existingToolCalls.forEach((toolCall) => {
+    if (toolCall.index !== undefined) {
+      finalToolCalls[toolCall.index] = { ...toolCall };
+    }
+  });
+
+  // Process new tool calls
+  newToolCalls.forEach((toolCall) => {
+    const { index } = toolCall;
+
+    if (!finalToolCalls[index]) {
+      // New tool call
+      finalToolCalls[index] = { ...toolCall };
+    } else {
+      // Existing tool call - consolidate
+      const existing = finalToolCalls[index];
+
+      // Merge function arguments if both have function data
+      if (toolCall.function && existing.function) {
+        if (!existing.function.arguments) {
+          existing.function.arguments = "";
+        }
+        if (toolCall.function.arguments) {
+          existing.function.arguments += toolCall.function.arguments;
+        }
+      } else if (toolCall.function) {
+        // If existing doesn't have function but new one does
+        existing.function = toolCall.function;
+      }
+
+      // Merge other fields
+      if (toolCall.id && !existing.id) {
+        existing.id = toolCall.id;
+      }
+      if (toolCall.type && !existing.type) {
+        existing.type = toolCall.type;
+      }
+    }
+  });
+
+  // Convert back to array and sort by index
+  return Object.values(finalToolCalls).sort((a, b) => a.index - b.index);
 }
 
 export function consolidateGoogleTextFields(responseBody: any[]): any {

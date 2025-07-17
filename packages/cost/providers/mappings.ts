@@ -69,6 +69,9 @@ const nebius = /^https:\/\/api\.studio\.nebius\.ai/;
 // https://api.novita.ai
 const novita = /^https:\/\/api\.novita\.ai/;
 
+// api.openpipe.ai
+const openpipe = /^https:\/\/api\.openpipe\.ai/;
+
 export const providersNames = [
   "OPENAI",
   "ANTHROPIC",
@@ -98,6 +101,8 @@ export const providersNames = [
   "AVIAN",
   "NEBIUS",
   "NOVITA",
+  "OPENPIPE",
+  "META",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -247,6 +252,11 @@ export const providers: {
     pattern: novita,
     provider: "NOVITA",
     costs: novitaCosts,
+  },
+  {
+    pattern: openpipe,
+    provider: "OPENPIPE",
+    costs: [],
   },
 ];
 

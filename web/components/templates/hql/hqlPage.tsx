@@ -1,5 +1,4 @@
 import { components } from "@/lib/clients/jawnTypes/public";
-import { HeliconeUser } from "@/packages/common/auth/types";
 import { useClickhouseSchemas } from "@/services/hooks/heliconeSql";
 import { useMonaco, Editor } from "@monaco-editor/react";
 import { useEffect, useRef, useState } from "react";
@@ -18,74 +17,15 @@ import { useMutation } from "@tanstack/react-query";
 import { useFeatureFlag } from "@/services/hooks/admin";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import useNotification from "@/components/shared/notification/useNotification";
-
-const SQL_KEYWORDS = [
-  "SELECT",
-  "FROM",
-  "WHERE",
-  "GROUP BY",
-  "ORDER BY",
-  "HAVING",
-  "JOIN",
-  "INNER JOIN",
-  "LEFT JOIN",
-  "RIGHT JOIN",
-  "FULL JOIN",
-  "ON",
-  "AS",
-  "AND",
-  "OR",
-  "NOT",
-  "IN",
-  "EXISTS",
-  "BETWEEN",
-  "LIKE",
-  "IS",
-  "NULL",
-  "DISTINCT",
-  "LIMIT",
-  "OFFSET",
-  "UNION",
-  "UNION ALL",
-  "WITH",
-  "CASE",
-  "WHEN",
-  "THEN",
-  "ELSE",
-  "END",
-  "COUNT",
-  "SUM",
-  "AVG",
-  "MIN",
-  "MAX",
-  "CAST",
-  "COALESCE",
-];
-
-const CLICKHOUSE_KEYWORDS = [
-  "FINAL",
-  "SAMPLE",
-  "PREWHERE",
-  "ARRAY JOIN",
-  "GLOBAL",
-  "uniq",
-  "groupArray",
-  "arrayJoin",
-  "toStartOfHour",
-  "toStartOfDay",
-  "toStartOfMonth",
-  "today",
-  "yesterday",
-  "now",
-  "formatDateTime",
-  "toString",
-  "toDate",
-  "toDateTime",
-  "splitByChar",
-  "arrayMap",
-];
-
-const ALL_KEYWORDS = [...SQL_KEYWORDS, ...CLICKHOUSE_KEYWORDS];
+import { ALL_KEYWORDS } from "./constants";
+import {
+  getTableNames,
+  getTableNamesSet,
+  parseSqlAndFindTableNameAndAliases,
+  createSaveQueryMutation,
+  createExecuteQueryMutation,
+} from "./constants";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 function HQLPage() {
   const organization = useOrg();
@@ -98,8 +38,16 @@ function HQLPage() {
   const monaco = useMonaco();
   const clickhouseSchemas = useClickhouseSchemas();
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
+  const [activeTab, setActiveTab] = useState<"tables" | "queries">("tables");
 
-  const [result, setResult] = useState<Record<string, string>[]>([]);
+  const [result, setResult] = useState<
+    components["schemas"]["ExecuteSqlResponse"]
+  >({
+    rows: [],
+    elapsedMilliseconds: 0,
+    size: 0,
+    rowCount: 0,
+  });
   const [currentQuery, setCurrentQuery] = useState<{
     id: string | undefined;
     name: string;
@@ -111,76 +59,41 @@ function HQLPage() {
   });
   const [queryLoading, setQueryLoading] = useState(false);
   const [queryError, setQueryError] = useState<string | null>(null);
-  const { mutate: handleExecuteQuery } = useMutation({
-    mutationFn: async (sql: string) => {
-      const response = await $JAWN_API.POST("/v1/helicone-sql/execute", {
-        body: {
-          sql: sql,
-        },
+  const { mutate: handleExecuteQuery } = useMutation(
+    createExecuteQueryMutation(setResult, setQueryError, setQueryLoading),
+  );
+
+  // a hack to get the latest query in the editor
+  const latestQueryRef = useRef(currentQuery);
+  const { mutate: handleSaveQuery } = useMutation(
+    createSaveQueryMutation(setCurrentQuery, setNotification),
+  );
+
+  const { data: savedQueryDetails, isLoading: savedQueryDetailsLoading } =
+    $JAWN_API.useQuery(
+      "get",
+      "/v1/helicone-sql/saved-query/{queryId}",
+      {
+        params: { path: { queryId: currentQuery.id as string } },
+      },
+      {
+        enabled: !!currentQuery.id,
+      },
+    );
+
+  useEffect(() => {
+    if (savedQueryDetails?.data) {
+      setCurrentQuery({
+        id: savedQueryDetails.data.id,
+        name: savedQueryDetails.data.name,
+        sql: savedQueryDetails.data.sql,
       });
 
-      return response;
-    },
-    onSuccess: (data) => {
-      if (data.error || !data.data?.data) {
-        // @ts-ignore
-        setQueryError(data.error.error);
-        setResult([]);
-      } else {
-        setQueryError(null);
-        setResult(data.data?.data as Record<string, string>[]);
+      if (editorRef.current) {
+        editorRef.current.setValue(savedQueryDetails.data.sql);
       }
-      setQueryLoading(false);
-    },
-    onError: (error) => {
-      setQueryError(error.message);
-      setResult([]);
-      setQueryLoading(false);
-    },
-  });
-
-  const { mutate: handleSaveQuery } = useMutation({
-    mutationFn: async (savedQuery: {
-      id?: string;
-      name: string;
-      sql: string;
-    }) => {
-      if (savedQuery.id) {
-        const response = await $JAWN_API.PUT("/v1/helicone-sql/saved-query", {
-          body: {
-            id: savedQuery.id,
-            name: savedQuery.name,
-            sql: savedQuery.sql,
-          },
-        });
-
-        return response;
-      } else {
-        const response = await $JAWN_API.POST("/v1/helicone-sql/saved-query", {
-          body: {
-            name: savedQuery.name,
-            sql: savedQuery.sql,
-          },
-        });
-
-        if (response.data?.data) {
-          setCurrentQuery({
-            id: response.data.data[0].id,
-            name: response.data.data[0].name,
-            sql: response.data.data[0].sql,
-          });
-        }
-
-        return response;
-      }
-    },
-    onSuccess: () => {
-      setNotification("Successfully saved query", "success");
-    },
-    onError: (error) => {
-      setNotification(error.message, "error");
-    },
-  });
+    }
+  }, [savedQueryDetails]);
 
   // Setup autocompletion
   useEffect(() => {
@@ -190,7 +103,7 @@ function HQLPage() {
     const schemaTableNames = getTableNames(tableSchema);
     const schemaTableNamesSet = getTableNamesSet(tableSchema);
 
-    const disposable = monaco.languages.registerCompletionItemProvider("sql", {
+    const disposable = monaco.languages.registerCompletionItemProvider("*", {
       provideCompletionItems: (model, position) => {
         let suggestions: monaco.languages.CompletionItem[] = [];
 
@@ -263,7 +176,7 @@ function HQLPage() {
         }
 
         suggestions.push(
-          ...ALL_KEYWORDS.map((keyword) => ({
+          ...ALL_KEYWORDS.map((keyword: string) => ({
             label: keyword,
             kind: monaco.languages.CompletionItemKind.Keyword,
             insertText: keyword,
@@ -290,26 +203,15 @@ function HQLPage() {
     return () => disposable.dispose();
   }, [monaco, clickhouseSchemas.data]);
 
-  const { data: savedQueries, isLoading: savedQueriesLoading } =
-    $JAWN_API.useQuery("get", "/v1/helicone-sql/saved-queries", {});
-
   useEffect(() => {
-    if (savedQueries?.data && savedQueries.data.length > 0) {
-      setCurrentQuery({
-        id: savedQueries.data[0].id,
-        name: savedQueries.data[0].name,
-        sql: savedQueries.data[0].sql,
-      });
-
-      editorRef.current?.setValue(savedQueries.data[0].sql);
-    }
-  }, [savedQueries]);
+    latestQueryRef.current = currentQuery;
+  }, [currentQuery]);
 
   if (!hasAccessToHQL) {
     return <div>You do not have access to HQL</div>;
   }
 
-  if (savedQueriesLoading) {
+  if (savedQueryDetailsLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <div className="text-lg">Loading...</div>
@@ -318,61 +220,54 @@ function HQLPage() {
   }
 
   return (
-    <div className="flex h-screen w-full flex-row">
-      <Directory tables={clickhouseSchemas.data ?? []} />
-      <ResizablePanelGroup direction="vertical">
-        <ResizablePanel
-          defaultSize={75}
-          minSize={20}
-          collapsible={false}
-          className="min-h-[64px]"
-        >
-          <TopBar
-            currentQuery={currentQuery}
-            handleExecuteQuery={handleExecuteQuery}
-            handleSaveQuery={handleSaveQuery}
-          />
-          <Editor
-            defaultLanguage="sql"
-            defaultValue={currentQuery.sql}
-            onMount={async (editor, monaco) => {
-              editorRef.current = editor;
-              const model = editor.getModel();
-              if (!model) return;
+    <ResizablePanelGroup direction="horizontal">
+      <ResizablePanel
+        defaultSize={20}
+        maxSize={40}
+        collapsible={true}
+        collapsedSize={4}
+      >
+        <Directory
+          tables={clickhouseSchemas.data ?? []}
+          currentQuery={currentQuery}
+          setCurrentQuery={setCurrentQuery}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+        />
+      </ResizablePanel>
+      <ResizableHandle />
+      <ResizablePanel defaultSize={80}>
+        <ResizablePanelGroup direction="vertical">
+          <ResizablePanel
+            defaultSize={75}
+            minSize={20}
+            collapsible={false}
+            className="min-h-[64px]"
+          >
+            <TopBar
+              currentQuery={currentQuery}
+              handleExecuteQuery={handleExecuteQuery}
+              handleSaveQuery={handleSaveQuery}
+              handleRenameQuery={(newName) => {
+                setCurrentQuery({
+                  id: currentQuery.id,
+                  name: newName,
+                  sql: currentQuery.sql,
+                });
+              }}
+            />
+            <Editor
+              defaultLanguage="sql"
+              defaultValue={currentQuery.sql}
+              onMount={async (editor, monaco) => {
+                editorRef.current = editor;
+                const model = editor.getModel();
+                if (!model) return;
 
-              // Add keyboard event listener
-              editor.onKeyDown((e) => {
-                if ((e.ctrlKey || e.metaKey) && e.code === "Enter") {
-                  setQueryLoading(true);
-                  handleExecuteQuery(currentQuery.sql);
-                }
-              });
+                // Regex to match forbidden write statements (case-insensitive, at start of line ignoring whitespace)
+                const forbidden =
+                  /\b(insert|update|delete|drop|alter|create|truncate|replace)\b/i;
 
-              // Regex to match forbidden write statements (case-insensitive, at start of line ignoring whitespace)
-              const forbidden =
-                /\b(insert|update|delete|drop|alter|create|truncate|replace)\b/i;
-
-              if (forbidden.test(currentQuery.sql)) {
-                monaco.editor.setModelMarkers(model, "custom-sql-validation", [
-                  {
-                    startLineNumber: 1,
-                    startColumn: 1,
-                    endLineNumber: 1,
-                    endColumn: 1,
-                    message:
-                      "Only read (SELECT) queries are allowed. Write operations are not permitted.",
-                    severity: monaco.MarkerSeverity.Error,
-                  },
-                ]);
-              } else {
-                // Clear custom markers if no forbidden statements
-                monaco.editor.setModelMarkers(
-                  model,
-                  "custom-sql-validation",
-                  [],
-                );
-              }
-              editor.onDidChangeModelContent(() => {
                 if (forbidden.test(currentQuery.sql)) {
                   monaco.editor.setModelMarkers(
                     model,
@@ -397,101 +292,126 @@ function HQLPage() {
                     [],
                   );
                 }
-              });
-            }}
-            onChange={(value) => {
-              setCurrentQuery({
-                id: currentQuery.id,
-                name: currentQuery.name,
-                sql: value ?? "",
-              });
-              if (value) {
-                if (!monaco || !editorRef.current) return;
+                editor.onDidChangeModelContent(() => {
+                  if (forbidden.test(currentQuery.sql)) {
+                    monaco.editor.setModelMarkers(
+                      model,
+                      "custom-sql-validation",
+                      [
+                        {
+                          startLineNumber: 1,
+                          startColumn: 1,
+                          endLineNumber: 1,
+                          endColumn: 1,
+                          message:
+                            "Only read (SELECT) queries are allowed. Write operations are not permitted.",
+                          severity: monaco.MarkerSeverity.Error,
+                        },
+                      ],
+                    );
+                  } else {
+                    // Clear custom markers if no forbidden statements
+                    monaco.editor.setModelMarkers(
+                      model,
+                      "custom-sql-validation",
+                      [],
+                    );
+                  }
+                });
 
-                const model = editorRef.current.getModel();
-                if (!model) return;
+                // Add Command/Ctrl+Enter command
+                editor.addCommand(
+                  monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+                  () => {
+                    handleExecuteQuery(latestQueryRef.current.sql);
+                  },
+                );
 
-                // Regex to match forbidden write statements (case-insensitive, at start of line ignoring whitespace)
-                const forbidden =
-                  /\b(insert|update|delete|drop|alter|create|truncate|replace)\b/i;
+                // Add Command/Ctrl+S command
+                editor.addCommand(
+                  monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
+                  () => {
+                    handleSaveQuery(latestQueryRef.current);
+                  },
+                );
+              }}
+              onChange={(value) => {
+                setCurrentQuery({
+                  id: currentQuery.id,
+                  name: currentQuery.name,
+                  sql: value ?? "",
+                });
+                if (value) {
+                  if (!monaco || !editorRef.current) return;
 
-                if (forbidden.test(value)) {
-                  monaco.editor.setModelMarkers(
-                    model,
-                    "custom-sql-validation",
-                    [
-                      {
-                        startLineNumber: 1,
-                        startColumn: 1,
-                        endLineNumber: 1,
-                        endColumn: 1,
-                        message:
-                          "Only read (SELECT) queries are allowed. Write operations are not permitted.",
-                        severity: monaco.MarkerSeverity.Error,
-                      },
-                    ],
-                  );
-                } else {
-                  // Clear custom markers if no forbidden statements
-                  monaco.editor.setModelMarkers(
-                    model,
-                    "custom-sql-validation",
-                    [],
-                  );
+                  const model = editorRef.current.getModel();
+                  if (!model) return;
+
+                  // Regex to match forbidden write statements (case-insensitive, at start of line ignoring whitespace)
+                  const forbidden =
+                    /\b(insert|update|delete|drop|alter|create|truncate|replace)\b/i;
+
+                  if (forbidden.test(value)) {
+                    monaco.editor.setModelMarkers(
+                      model,
+                      "custom-sql-validation",
+                      [
+                        {
+                          startLineNumber: 1,
+                          startColumn: 1,
+                          endLineNumber: 1,
+                          endColumn: 1,
+                          message:
+                            "Only read (SELECT) queries are allowed. Write operations are not permitted.",
+                          severity: monaco.MarkerSeverity.Error,
+                        },
+                      ],
+                    );
+                  } else {
+                    // Clear custom markers if no forbidden statements
+                    monaco.editor.setModelMarkers(
+                      model,
+                      "custom-sql-validation",
+                      [],
+                    );
+                  }
                 }
-              }
-            }}
-          />
-        </ResizablePanel>
-        <ResizableHandle withHandle={true} />
-        <ResizablePanel
-          className="max-h-full max-w-full overflow-x-scroll !overflow-y-scroll"
-          collapsible={true}
-          collapsedSize={10}
-          defaultSize={25}
-        >
-          <QueryResult
-            result={result}
-            loading={queryLoading}
-            error={queryError}
-          />
-        </ResizablePanel>
-      </ResizablePanelGroup>
-    </div>
+              }}
+            />
+          </ResizablePanel>
+          <ResizableHandle withHandle={true} />
+          <ResizablePanel
+            className="max-h-full max-w-full overflow-x-scroll !overflow-y-scroll"
+            collapsible={true}
+            collapsedSize={10}
+            defaultSize={25}
+          >
+            {result.rowCount >= 100 && (
+              <Alert variant="warning" className="mb-2">
+                <AlertTitle>Row Limit Reached</AlertTitle>
+                <AlertDescription>
+                  Only the first 100 rows are shown. Please refine your query
+                  for more specific results. Or download for more data.
+                </AlertDescription>
+              </Alert>
+            )}
+            <QueryResult
+              sql={currentQuery.sql}
+              result={result.rows}
+              queryStats={{
+                elapsedMilliseconds: result.elapsedMilliseconds,
+                rowCount: result.rowCount,
+                size: result.size,
+                rows: result.rows,
+              }}
+              loading={queryLoading}
+              error={queryError}
+            />
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      </ResizablePanel>
+    </ResizablePanelGroup>
   );
 }
 
 export default HQLPage;
-
-const getTableNames = (
-  schemas: {
-    table_name: string;
-    columns: components["schemas"]["ClickHouseTableColumn"][];
-  }[],
-) => Array.from(new Set(schemas?.map((d) => d.table_name) ?? []));
-
-const getTableNamesSet = (
-  schemas: {
-    table_name: string;
-    columns: components["schemas"]["ClickHouseTableColumn"][];
-  }[],
-) => new Set(getTableNames(schemas));
-
-function parseSqlAndFindTableNameAndAliases(sql: string) {
-  const regex =
-    /\b(?:FROM|JOIN)\s+([^\s.]+(?:\.[^\s.]+)?)\s*(?:AS)?\s*([^\s,]+)?/gi;
-  const tables = [];
-  while (true) {
-    const match = regex.exec(sql);
-    if (!match) break;
-    const table_name = match[1];
-    if (!/\(/.test(table_name)) {
-      let alias = match[2] as string | null;
-      if (alias && /on|where|inner|left|right|join/.test(alias)) {
-        alias = null;
-      }
-      tables.push({ table_name, alias: alias || table_name });
-    }
-  }
-  return tables;
-}

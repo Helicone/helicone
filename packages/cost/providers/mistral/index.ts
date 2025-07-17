@@ -6,6 +6,7 @@
 import { ModelRow } from "../../interfaces/Cost";
 
 export const costs: ModelRow[] = [
+  // Open Models (deprecated but kept for backward compatibility)
   {
     model: {
       operator: "equals",
@@ -26,14 +27,45 @@ export const costs: ModelRow[] = [
       completion_token: 0.0000007,
     },
   },
+  // Current Mistral Chat Models
+  {
+    model: {
+      operator: "equals",
+      value: "mistral-tiny",
+    },
+    cost: {
+      prompt_token: 0.00000014,
+      completion_token: 0.00000042,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "mistral-small",
+    },
+    cost: {
+      prompt_token: 0.00000014,
+      completion_token: 0.00000042,
+    },
+  },
   {
     model: {
       operator: "equals",
       value: "mistral-small-latest",
     },
     cost: {
-      prompt_token: 0.000002,
-      completion_token: 0.000006,
+      prompt_token: 0.00000014,
+      completion_token: 0.00000042,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "mistral-medium",
+    },
+    cost: {
+      prompt_token: 0.00000239,
+      completion_token: 0.00000717,
     },
   },
   {
@@ -42,8 +74,18 @@ export const costs: ModelRow[] = [
       value: "mistral-medium-latest",
     },
     cost: {
-      prompt_token: 0.0000027,
-      completion_token: 0.0000081,
+      prompt_token: 0.00000239,
+      completion_token: 0.00000717,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "mistral-large",
+    },
+    cost: {
+      prompt_token: 0.002,
+      completion_token: 0.006,
     },
   },
   {
@@ -52,10 +94,11 @@ export const costs: ModelRow[] = [
       value: "mistral-large-latest",
     },
     cost: {
-      prompt_token: 0.000008,
-      completion_token: 0.000024,
+      prompt_token: 0.002,
+      completion_token: 0.006,
     },
   },
+  // Embedding Models
   {
     model: {
       operator: "equals",
@@ -64,6 +107,155 @@ export const costs: ModelRow[] = [
     cost: {
       prompt_token: 0.0000001,
       completion_token: 0.0000001,
+    },
+  },
+  // Additional Mistral models that might be used
+  {
+    model: {
+      operator: "equals",
+      value: "mistral-7b-instruct",
+    },
+    cost: {
+      prompt_token: 0.00000014,
+      completion_token: 0.00000042,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "mistral-7b-instruct-v0.1",
+    },
+    cost: {
+      prompt_token: 0.00000014,
+      completion_token: 0.00000042,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "mistral-7b-instruct-v0.2",
+    },
+    cost: {
+      prompt_token: 0.00000014,
+      completion_token: 0.00000042,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "mistral-7b-instruct-v0.3",
+    },
+    cost: {
+      prompt_token: 0.00000014,
+      completion_token: 0.00000042,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "mixtral-8x7b-instruct",
+    },
+    cost: {
+      prompt_token: 0.00000014,
+      completion_token: 0.00000042,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "mixtral-8x22b-instruct",
+    },
+    cost: {
+      prompt_token: 0.002,
+      completion_token: 0.006,
+    },
+  },
+
+  {
+    model: {
+      operator: "equals",
+      value: "mistral-medium-3",
+    },
+    cost: {
+      prompt_token: 0.0004,
+      completion_token: 0.002,
+    },
+  },
+
+  {
+    model: {
+      operator: "equals",
+      value: "magistral-medium",
+    },
+    cost: {
+      prompt_token: 0.002,
+      completion_token: 0.005,
+    },
+  },
+
+  {
+    model: {
+      operator: "equals",
+      value: "codestral",
+    },
+    cost: {
+      prompt_token: 0.0003,
+      completion_token: 0.0009,
+    },
+  },
+
+  {
+    model: {
+      operator: "equals",
+      value: "devstral-medium",
+    },
+    cost: {
+      prompt_token: 0.0004,
+      completion_token: 0.002,
+    },
+  },
+
+  {
+    model: {
+      operator: "equals",
+      value: "mistral-saba",
+    },
+    cost: {
+      prompt_token: 0.0002,
+      completion_token: 0.0006,
+    },
+  },
+
+  {
+    model: {
+      operator: "equals",
+      value: "pixtral-large",
+    },
+    cost: {
+      prompt_token: 0.002,
+      completion_token: 0.006,
+    },
+  },
+
+  {
+    model: {
+      operator: "equals",
+      value: "mistral-small-3.2",
+    },
+    cost: {
+      prompt_token: 0.0001,
+      completion_token: 0.0003,
+    },
+  },
+
+  {
+    model: {
+      operator: "equals",
+      value: "mixtral-8x22b",
+    },
+    cost: {
+      prompt_token: 0.002,
+      completion_token: 0.006,
     },
   },
 ];

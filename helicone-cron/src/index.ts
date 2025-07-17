@@ -1,8 +1,3 @@
-import { createClient } from "@supabase/supabase-js";
-import { StripeClient } from "./client/StripeClient";
-import { ClickhouseWrapper } from "./db/ClickhouseWrapper";
-import { OrganizationStore } from "./db/OrganizationStore";
-import { RequestResponseStore } from "./db/RequestResponseStore";
 import { AnthropicProxyHeartBeat } from "./heartbeats/anthropicProxy";
 import { AsyncHeartBeat } from "./heartbeats/async";
 import { FeedbackHeartBeat } from "./heartbeats/feedback";
@@ -82,32 +77,7 @@ export default {
       await Promise.all(heartBeatPromises);
       await alertSqsCongestion(env, new AlertManager(env));
     } else if (controller.cron === "0 * * * *") {
-      const clickhouseWrapper = new ClickhouseWrapper({
-        CLICKHOUSE_HOST: env.CLICKHOUSE_HOST,
-        CLICKHOUSE_USER: env.CLICKHOUSE_USER,
-        CLICKHOUSE_PASSWORD: env.CLICKHOUSE_PASSWORD,
-      });
-
-      const supabaseClient = createClient(
-        env.SUPABASE_URL,
-        env.SUPABASE_SERVICE_ROLE_KEY
-      );
-
-      const usageManager = new UsageManager(
-        new OrganizationStore(
-          clickhouseWrapper,
-          supabaseClient,
-          new PgWrapper(env, ctx)
-        ),
-        new RequestResponseStore(clickhouseWrapper, supabaseClient),
-        new StripeClient(env.STRIPE_API_KEY)
-      );
-
-      const result = await usageManager.chargeOrgUsage();
-
-      if (result.error) {
-        console.error("Error calculating usage", result.error);
-      }
+      console.log("hourly cron");
     }
   },
 };

@@ -691,6 +691,13 @@ export type Database = {
             foreignKeyName: "public_experiment_v2_hypothesis_provider_key_fkey"
             columns: ["provider_key"]
             isOneToOne: false
+            referencedRelation: "decrypted_provider_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_experiment_v2_hypothesis_provider_key_fkey"
+            columns: ["provider_key"]
+            isOneToOne: false
             referencedRelation: "provider_keys"
             referencedColumns: ["id"]
           },
@@ -998,6 +1005,13 @@ export type Database = {
             foreignKeyName: "finetune_job_provider_key_id_fkey"
             columns: ["provider_key_id"]
             isOneToOne: false
+            referencedRelation: "decrypted_provider_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finetune_job_provider_key_id_fkey"
+            columns: ["provider_key_id"]
+            isOneToOne: false
             referencedRelation: "provider_keys"
             referencedColumns: ["id"]
           },
@@ -1222,6 +1236,13 @@ export type Database = {
             foreignKeyName: "helicone_proxy_keys_provider_key_id_fkey"
             columns: ["provider_key_id"]
             isOneToOne: false
+            referencedRelation: "decrypted_provider_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helicone_proxy_keys_provider_key_id_fkey"
+            columns: ["provider_key_id"]
+            isOneToOne: false
             referencedRelation: "provider_keys"
             referencedColumns: ["id"]
           },
@@ -1282,6 +1303,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      intercom_slack_mappings: {
+        Row: {
+          created_at: string | null
+          id: string
+          intercom_conversation_id: string
+          intercom_message_id: string
+          slack_channel_id: string
+          slack_message_ts: string
+          slack_thread_ts: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          intercom_conversation_id: string
+          intercom_message_id: string
+          slack_channel_id: string
+          slack_message_ts: string
+          slack_thread_ts: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          intercom_conversation_id?: string
+          intercom_message_id?: string
+          slack_channel_id?: string
+          slack_message_ts?: string
+          slack_thread_ts?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       job: {
         Row: {
@@ -1723,6 +1777,13 @@ export type Database = {
             foreignKeyName: "organization_org_provider_key_fkey"
             columns: ["org_provider_key"]
             isOneToOne: false
+            referencedRelation: "decrypted_provider_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_org_provider_key_fkey"
+            columns: ["org_provider_key"]
+            isOneToOne: false
             referencedRelation: "provider_keys"
             referencedColumns: ["id"]
           },
@@ -2021,6 +2082,151 @@ export type Database = {
           },
         ]
       }
+      prompts_2025: {
+        Row: {
+          created_at: string
+          id: string
+          name: string | null
+          organization: string
+          production_version: string | null
+          soft_delete: boolean
+          tags: string[] | null
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          name?: string | null
+          organization: string
+          production_version?: string | null
+          soft_delete?: boolean
+          tags?: string[] | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string | null
+          organization?: string
+          production_version?: string | null
+          soft_delete?: boolean
+          tags?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prompts_2025_organization_fkey"
+            columns: ["organization"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prompts_2025_inputs: {
+        Row: {
+          created_at: string
+          id: string
+          inputs: Json
+          request_id: string
+          version_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          inputs: Json
+          request_id: string
+          version_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          inputs?: Json
+          request_id?: string
+          version_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prompts_2025_inputs_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "request"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prompts_2025_inputs_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "prompts_2025_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prompts_2025_versions: {
+        Row: {
+          commit_message: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          major_version: number
+          minor_version: number | null
+          model: string
+          organization: string
+          prompt_id: string
+          soft_delete: boolean
+        }
+        Insert: {
+          commit_message?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          major_version: number
+          minor_version?: number | null
+          model: string
+          organization: string
+          prompt_id: string
+          soft_delete?: boolean
+        }
+        Update: {
+          commit_message?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          major_version?: number
+          minor_version?: number | null
+          model?: string
+          organization?: string
+          prompt_id?: string
+          soft_delete?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prompts_2025_versions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prompts_2025_versions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prompts_2025_versions_organization_fkey"
+            columns: ["organization"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prompts_2025_versions_prompt_id_fkey"
+            columns: ["prompt_id"]
+            isOneToOne: false
+            referencedRelation: "prompts_2025"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prompts_versions: {
         Row: {
           created_at: string | null
@@ -2155,34 +2361,40 @@ export type Database = {
           config: Json | null
           created_at: string | null
           id: string
+          key_id: string | null
+          nonce: string | null
           org_id: string
           provider_key: string
           provider_key_name: string
           provider_name: string
           soft_delete: boolean
-          vault_key_id: string
+          vault_key_id: string | null
         }
         Insert: {
           config?: Json | null
           created_at?: string | null
           id?: string
+          key_id?: string | null
+          nonce?: string | null
           org_id: string
           provider_key: string
           provider_key_name: string
           provider_name: string
           soft_delete?: boolean
-          vault_key_id: string
+          vault_key_id?: string | null
         }
         Update: {
           config?: Json | null
           created_at?: string | null
           id?: string
+          key_id?: string | null
+          nonce?: string | null
           org_id?: string
           provider_key?: string
           provider_key_name?: string
           provider_name?: string
           soft_delete?: boolean
-          vault_key_id?: string
+          vault_key_id?: string | null
         }
         Relationships: [
           {
@@ -2253,6 +2465,8 @@ export type Database = {
           country_code: string | null
           created_at: string
           formatted_prompt_id: string | null
+          gateway_deployment_target: string | null
+          gateway_router_id: string | null
           helicone_api_key_id: number | null
           helicone_org_id: string | null
           helicone_proxy_key_id: string | null
@@ -2276,6 +2490,8 @@ export type Database = {
           country_code?: string | null
           created_at?: string
           formatted_prompt_id?: string | null
+          gateway_deployment_target?: string | null
+          gateway_router_id?: string | null
           helicone_api_key_id?: number | null
           helicone_org_id?: string | null
           helicone_proxy_key_id?: string | null
@@ -2299,6 +2515,8 @@ export type Database = {
           country_code?: string | null
           created_at?: string
           formatted_prompt_id?: string | null
+          gateway_deployment_target?: string | null
+          gateway_router_id?: string | null
           helicone_api_key_id?: number | null
           helicone_org_id?: string | null
           helicone_proxy_key_id?: string | null
@@ -2318,6 +2536,13 @@ export type Database = {
           version?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "request_gateway_router_id_fkey"
+            columns: ["gateway_router_id"]
+            isOneToOne: false
+            referencedRelation: "routers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "request_helicone_api_key_id_fkey"
             columns: ["helicone_api_key_id"]
@@ -2526,74 +2751,24 @@ export type Database = {
           },
         ]
       }
-      router_keys: {
-        Row: {
-          added_by: string
-          api_key_id: number
-          created_at: string
-          id: number
-          router_id: string
-        }
-        Insert: {
-          added_by: string
-          api_key_id: number
-          created_at?: string
-          id?: number
-          router_id: string
-        }
-        Update: {
-          added_by?: string
-          api_key_id?: number
-          created_at?: string
-          id?: number
-          router_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "public_router_keys_added_by_fkey"
-            columns: ["added_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "public_router_keys_added_by_fkey"
-            columns: ["added_by"]
-            isOneToOne: false
-            referencedRelation: "users_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "public_router_keys_api_key_id_fkey"
-            columns: ["api_key_id"]
-            isOneToOne: false
-            referencedRelation: "helicone_api_keys"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "public_router_keys_router_id_fkey"
-            columns: ["router_id"]
-            isOneToOne: false
-            referencedRelation: "routers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       routers: {
         Row: {
           created_at: string
+          hash: string
           id: string
           name: string | null
           organization_id: string
         }
         Insert: {
           created_at?: string
+          hash: string
           id?: string
           name?: string | null
           organization_id: string
         }
         Update: {
           created_at?: string
+          hash?: string
           id?: string
           name?: string | null
           organization_id?: string
@@ -2601,6 +2776,41 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "public_routers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saved_queries: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          organization_id: string
+          sql: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          organization_id: string
+          sql: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          organization_id?: string
+          sql?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_queries_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organization"
@@ -2898,6 +3108,59 @@ export type Database = {
       }
     }
     Views: {
+      decrypted_provider_keys: {
+        Row: {
+          config: Json | null
+          created_at: string | null
+          decrypted_provider_key: string | null
+          id: string | null
+          key_id: string | null
+          nonce: string | null
+          org_id: string | null
+          provider_key: string | null
+          provider_key_name: string | null
+          provider_name: string | null
+          soft_delete: boolean | null
+          vault_key_id: string | null
+        }
+        Insert: {
+          config?: Json | null
+          created_at?: string | null
+          decrypted_provider_key?: string | null
+          id?: string | null
+          key_id?: string | null
+          nonce?: string | null
+          org_id?: string | null
+          provider_key?: string | null
+          provider_key_name?: string | null
+          provider_name?: string | null
+          soft_delete?: boolean | null
+          vault_key_id?: string | null
+        }
+        Update: {
+          config?: Json | null
+          created_at?: string | null
+          decrypted_provider_key?: string | null
+          id?: string | null
+          key_id?: string | null
+          nonce?: string | null
+          org_id?: string | null
+          provider_key?: string | null
+          provider_key_name?: string | null
+          provider_name?: string | null
+          soft_delete?: boolean | null
+          vault_key_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_keys_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users_view: {
         Row: {
           created_at: string | null

@@ -819,6 +819,172 @@ const CalculatorInfo: React.FC<CalculatorInfoProps> = ({ model, provider }) => {
             </ul>
           </section>
 
+          <section className="bg-white p-6 rounded-lg shadow-sm border border-slate-200 mt-8">
+            <h3 className="text-2xl font-semibold mb-6 text-slate-700">
+              API Access - Get LLM Cost Data Programmatically
+            </h3>
+            <p className="text-slate-500 mb-4">
+              Access the same pricing data used in this calculator programmatically through our API endpoint. Perfect for integrating cost calculations into your applications, scripts, or automated workflows.
+            </p>
+            
+            <div className="space-y-6">
+              <div>
+                <h4 className="font-semibold text-slate-700 mb-3">Basic Usage</h4>
+                <div className="bg-slate-900 p-4 rounded-md">
+                  <pre className="text-green-400 text-sm overflow-x-auto">
+                    <code>{`# Get all models with costs per 1 million tokens
+curl "https://helicone.ai/api/llm-costs"
+
+# Get costs for a specific provider
+curl "https://helicone.ai/api/llm-costs?provider=openai"
+
+# Search for models containing "gpt"
+curl "https://helicone.ai/api/llm-costs?model=gpt"
+
+# Combine filters
+curl "https://helicone.ai/api/llm-costs?provider=anthropic&model=claude"`}</code>
+                  </pre>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-semibold text-slate-700 mb-3">Output Formats</h4>
+                <div className="bg-slate-900 p-4 rounded-md">
+                  <pre className="text-green-400 text-sm overflow-x-auto">
+                    <code>{`# Get data as JSON (default)
+curl "https://helicone.ai/api/llm-costs?provider=openai"
+
+# Get data as CSV for spreadsheets
+curl "https://helicone.ai/api/llm-costs?provider=openai&format=csv" \\
+  --output llm-costs-per-1m.csv`}</code>
+                  </pre>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-semibold text-slate-700 mb-3">Response Format</h4>
+                <p className="text-slate-500 mb-2">The API returns structured data with metadata and cost information:</p>
+                <div className="bg-slate-900 p-4 rounded-md">
+                  <pre className="text-green-400 text-sm overflow-x-auto">
+                    <code>{`{
+  "metadata": {
+    "total_models": 250,
+    "note": "All costs are per 1 million tokens unless otherwise specified",
+    "operators_explained": {
+      "equals": "Model name must match exactly",
+      "startsWith": "Model name must start with the specified value",
+      "includes": "Model name must contain the specified value"
+    }
+  },
+  "data": [
+    {
+      "provider": "OPENAI",
+      "model": "gpt-4",
+      "operator": "equals",
+      "input_cost_per_1m": 30.0,
+      "output_cost_per_1m": 60.0,
+      "show_in_playground": true
+    }
+  ]
+}`}</code>
+                  </pre>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-semibold text-slate-700 mb-3">Parameters</h4>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-slate-200">
+                    <thead className="bg-slate-50">
+                      <tr>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Parameter</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Type</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Default</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Description</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-slate-200">
+                      <tr>
+                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">provider</td>
+                        <td className="px-4 py-2 text-sm text-slate-500">string</td>
+                        <td className="px-4 py-2 text-sm text-slate-500">-</td>
+                        <td className="px-4 py-2 text-sm text-slate-500">Filter by exact provider name (e.g., &quot;OPENAI&quot;, &quot;ANTHROPIC&quot;)</td>
+                      </tr>
+                      <tr>
+                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">model</td>
+                        <td className="px-4 py-2 text-sm text-slate-500">string</td>
+                        <td className="px-4 py-2 text-sm text-slate-500">-</td>
+                        <td className="px-4 py-2 text-sm text-slate-500">Search models containing this text (e.g., &quot;gpt&quot;, &quot;claude&quot;)</td>
+                      </tr>
+                      <tr>
+                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">format</td>
+                        <td className="px-4 py-2 text-sm text-slate-500">string</td>
+                        <td className="px-4 py-2 text-sm text-slate-500">json</td>
+                        <td className="px-4 py-2 text-sm text-slate-500">Output format: &quot;json&quot; or &quot;csv&quot;</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-semibold text-slate-700 mb-3">Response Fields</h4>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-slate-200">
+                    <thead className="bg-slate-50">
+                      <tr>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Field</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Description</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-slate-200">
+                      <tr>
+                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">provider</td>
+                        <td className="px-4 py-2 text-sm text-slate-500">Provider name (e.g., &quot;OPENAI&quot;, &quot;ANTHROPIC&quot;)</td>
+                      </tr>
+                      <tr>
+                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">model</td>
+                        <td className="px-4 py-2 text-sm text-slate-500">Model identifier</td>
+                      </tr>
+                      <tr>
+                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">operator</td>
+                        <td className="px-4 py-2 text-sm text-slate-500">How the model name matching works (&quot;equals&quot;, &quot;startsWith&quot;, &quot;includes&quot;)</td>
+                      </tr>
+                      <tr>
+                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">input_cost_per_1m</td>
+                        <td className="px-4 py-2 text-sm text-slate-500">Cost per 1 million input tokens (USD)</td>
+                      </tr>
+                      <tr>
+                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">output_cost_per_1m</td>
+                        <td className="px-4 py-2 text-sm text-slate-500">Cost per 1 million output tokens (USD)</td>
+                      </tr>
+                      <tr>
+                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">per_image</td>
+                        <td className="px-4 py-2 text-sm text-slate-500">Cost per image (USD) - if applicable</td>
+                      </tr>
+                      <tr>
+                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">per_call</td>
+                        <td className="px-4 py-2 text-sm text-slate-500">Cost per API call (USD) - if applicable</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div className="bg-blue-50 p-4 rounded-md">
+                <h4 className="font-semibold text-blue-700 mb-2">💡 Pro Tips</h4>
+                <ul className="list-disc pl-5 text-blue-700 text-sm space-y-1">
+                  <li>All costs are per 1 million tokens, making it easy to calculate expenses</li>
+                  <li>Model operators help understand how model matching works</li>
+                  <li>Results are sorted by provider, then by model name</li>
+                  <li>Data comes directly from Helicone&apos;s production cost database</li>
+                  <li>API supports CORS for browser-based applications</li>
+                  <li>Use CSV format for easy import into spreadsheets</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
           <ContributingSection />
 
           <LLMPricingFAQ />

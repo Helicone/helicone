@@ -34,4 +34,17 @@ export class ControlPlaneManager extends BaseManager {
       expiresIn
     );
   }
+
+  async signS3GetUrlForPrompt(
+    promptId: string,
+    versionId: string,
+    authParams: AuthParams
+  ): Promise<Result<string, string>> {
+    const key = this.s3Client.getPromptKey(
+      promptId,
+      versionId,
+      authParams.organizationId
+    );
+    return await this.s3Client.getSignedUrl(key);
+  }
 }

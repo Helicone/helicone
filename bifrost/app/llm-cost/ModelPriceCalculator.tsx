@@ -11,6 +11,7 @@ import {
   Calculator,
   ChevronDown,
   ChevronUp,
+  Search,
   Twitter,
   XCircle,
 } from "lucide-react";
@@ -48,20 +49,24 @@ const FilterSection = ({
   providers,
   selectedProviders,
   selectedModels,
+  searchQuery,
   onAddProvider,
   onRemoveProvider,
   onAddModel,
   onRemoveModel,
   onClearAll,
+  onSearchChange,
 }: {
   providers: ProviderWithModels[]; // Use the imported type
   selectedProviders: string[];
   selectedModels: string[];
+  searchQuery: string;
   onAddProvider: (provider: string) => void;
   onRemoveProvider: (provider: string) => void;
   onAddModel: (model: string) => void;
   onRemoveModel: (model: string) => void;
   onClearAll: () => void;
+  onSearchChange: (query: string) => void;
 }) => {
   const availableProviders = providers
     .filter((p) => !selectedProviders.includes(p.provider))
@@ -76,12 +81,24 @@ const FilterSection = ({
     .filter((model) => !selectedModels.includes(model));
 
   const hasSelections =
-    selectedProviders.length > 0 || selectedModels.length > 0;
+    selectedProviders.length > 0 || selectedModels.length > 0 || searchQuery.length > 0;
 
   return (
     <div className="mb-4">
       <div className="flex justify-between items-center mb-2">
         <div className="flex gap-2">
+          <div className="relative w-full max-w-[20rem]">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-4 w-4 text-slate-400" />
+            </div>
+            <Input
+              type="text"
+              placeholder="Search models and providers..."
+              value={searchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
+              className="pl-10 pr-3 py-2 bg-white rounded-md border border-slate-300 text-slate-700 text-xs font-normal leading-tight w-full h-8"
+            />
+          </div>
           <div className="w-full max-w-[10rem]">
             <ThemedTextDropDown
               options={availableProviders}
@@ -107,7 +124,10 @@ const FilterSection = ({
           <Button
             variant="ghost"
             size="sm"
-            onClick={onClearAll}
+            onClick={() => {
+              onClearAll();
+              onSearchChange('');
+            }}
             className="text-xs text-slate-500 hover:text-slate-700"
           >
             Clear All
@@ -183,6 +203,7 @@ export default function ModelPriceCalculator({
   // Update these state declarations
   const [selectedProviders, setSelectedProviders] = useState<string[]>([]);
   const [selectedModels, setSelectedModels] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>("");
   // Start loading as false if initial data is provided
   const [isLoading, setIsLoading] = useState<boolean>(
     !initialCostData || initialCostData.length === 0
@@ -310,12 +331,24 @@ export default function ModelPriceCalculator({
 
   // Update the memoized filtered and sorted data
   const visibleCostData = useMemo(() => {
-    let filteredData = costData.filter(
-      (data) =>
-        (selectedProviders.length === 0 ||
-          selectedProviders.includes(data.provider)) &&
-        (selectedModels.length === 0 || selectedModels.includes(data.model))
-    );
+    let filteredData = costData.filter((data) => {
+      // Provider and model filter logic
+      const providerMatch = selectedProviders.length === 0 || selectedProviders.includes(data.provider);
+      const modelMatch = selectedModels.length === 0 || selectedModels.includes(data.model);
+      
+      // Fuzzy search logic
+      let searchMatch = true;
+      if (searchQuery.trim().length > 0) {
+        const query = searchQuery.toLowerCase();
+        const providerName = data.provider.toLowerCase();
+        const modelName = data.model.toLowerCase();
+        
+        // Check if search query matches provider or model (fuzzy matching)
+        searchMatch = providerName.includes(query) || modelName.includes(query);
+      }
+      
+      return providerMatch && modelMatch && searchMatch;
+    });
 
     if (sortConfig !== null) {
       filteredData.sort((a, b) => {
@@ -330,7 +363,7 @@ export default function ModelPriceCalculator({
     }
 
     return filteredData;
-  }, [costData, selectedProviders, selectedModels, sortConfig]);
+  }, [costData, selectedProviders, selectedModels, searchQuery, sortConfig]);
 
   const handleAddProvider = (provider: string) => {
     setSelectedProviders((prev) => [...prev, provider]);
@@ -405,6 +438,10 @@ Optimize your AI API costs:`;
   const handleClearAll = () => {
     setSelectedProviders([]);
     setSelectedModels([]);
+  };
+
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
   };
 
   return (
@@ -592,11 +629,13 @@ Optimize your AI API costs:`;
           providers={providerWithModels}
           selectedProviders={selectedProviders}
           selectedModels={selectedModels}
+          searchQuery={searchQuery}
           onAddProvider={handleAddProvider}
           onRemoveProvider={handleRemoveProvider}
           onAddModel={handleAddModel}
           onRemoveModel={handleRemoveModel}
           onClearAll={handleClearAll}
+          onSearchChange={handleSearchChange}
         />
 
         {isLoading || visibleCostData.length === 0 ? (

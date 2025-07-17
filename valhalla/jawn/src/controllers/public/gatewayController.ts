@@ -17,21 +17,23 @@ import { GatewayManager } from "../../managers/gatewayManager";
 export type LatestRouterConfig = {
   id: string;
   name: string;
+  hash: string;
   version: string;
   config: string;
 };
 
-export type RouterConfig = {
+export type Router = {
   id: string;
+  hash: string;
   name: string;
   latestVersion: string;
   lastUpdatedAt: string;
 };
 
-export type CreateRouterConfigResult = {
-  routerConfigId: string;
+export type CreateRouterResult = {
+  routerId: string;
+  routerHash: string;
   routerVersionId: string;
-  apiKey: string;
 };
 
 @Route("v1/gateway")
@@ -39,13 +41,13 @@ export type CreateRouterConfigResult = {
 @Security("api_key")
 export class GatewayController extends Controller {
   @Get("/")
-  public async getRouterConfigs(
+  public async getRouters(
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<{ routerConfigs: RouterConfig[] }, string>> {
+  ): Promise<Result<{ routers: Router[] }, string>> {
     const gatewayManager = new GatewayManager(request.authParams);
-    const result = await gatewayManager.getRouterConfigs();
+    const result = await gatewayManager.getRouters();
     if (result.error || !result.data) {
-      return err(result.error ?? "Failed to get router configs");
+      return err(result.error ?? "Failed to get routers");
     }
     return ok(result.data);
   }
@@ -64,13 +66,13 @@ export class GatewayController extends Controller {
   }
 
   @Post("/")
-  public async createRouterConfig(
+  public async createRouter(
     @Request() request: JawnAuthenticatedRequest,
     @Body() body: { name: string; config: string }
-  ): Promise<Result<CreateRouterConfigResult, string>> {
+  ): Promise<Result<CreateRouterResult, string>> {
     try {
       const gatewayManager = new GatewayManager(request.authParams);
-      const result = await gatewayManager.createRouterConfig({
+      const result = await gatewayManager.createRouter({
         name: body.name,
         config: body.config,
       });
@@ -87,13 +89,13 @@ export class GatewayController extends Controller {
   }
 
   @Put("/:id")
-  public async updateRouterConfig(
+  public async updateRouter(
     @Request() request: JawnAuthenticatedRequest,
     @Path() id: string,
     @Body() body: { name: string; config: string }
   ): Promise<Result<null, string>> {
     const gatewayManager = new GatewayManager(request.authParams);
-    const result = await gatewayManager.updateRouterConfig({
+    const result = await gatewayManager.updateRouter({
       id,
       name: body.name,
       config: body.config,

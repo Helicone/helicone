@@ -174,7 +174,7 @@ For advanced use cases, you can upload a custom `config.yaml` file during deploy
       port: 8080
 
     routers:
-      default:
+      my-router:
         load-balance:
           chat:
             strategy: latency
@@ -188,8 +188,8 @@ For advanced use cases, you can upload a custom `config.yaml` file during deploy
           requests_per_minute: 1000
 
     helicone:
-      authentication: true
-      observability: true
+      # Set to `features: observability` to enable observability
+      features: auth
     ```
   </Step>
 

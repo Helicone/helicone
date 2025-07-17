@@ -28,6 +28,7 @@ const openAiPattern = /^https:\/\/api\.openai\.com/;
 const anthropicPattern = /^https:\/\/api\.anthropic\.com/;
 const azurePattern =
   /^(https?:\/\/)?([^.]*\.)?(openai\.azure\.com|azure-api\.net|cognitiveservices\.azure\.com)(\/.*)?$/;
+const llamaApiPattern = /^https:\/\/api\.llama\.com/;
 const localProxyPattern = /^http:\/\/127\.0\.0\.1:\d+\/v\d+\/?$/;
 const heliconeProxyPattern = /^https:\/\/oai\.hconeai\.com/;
 const amdbartekPattern = /^https:\/\/.*\.amdbartek\.dev/;
@@ -69,6 +70,12 @@ const nebius = /^https:\/\/api\.studio\.nebius\.ai/;
 // https://api.novita.ai
 const novita = /^https:\/\/api\.novita\.ai/;
 
+// api.openpipe.ai
+const openpipe = /^https:\/\/api\.openpipe\.ai/;
+
+// llm.chutes.com and chutes.com
+const chutes = /^https:\/\/(llm\.)?chutes\.com/;
+
 export const providersNames = [
   "OPENAI",
   "ANTHROPIC",
@@ -98,6 +105,9 @@ export const providersNames = [
   "AVIAN",
   "NEBIUS",
   "NOVITA",
+  "OPENPIPE",
+  "CHUTES",
+  "META",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -121,6 +131,11 @@ export const providers: {
     provider: "ANTHROPIC",
     costs: anthropicProvider.costs,
     modelDetails: anthropicProvider.modelDetails,
+  },
+  {
+    pattern: llamaApiPattern,
+    provider: "META",
+    // TODO: Add Llama API costs
   },
   {
     pattern: azurePattern,
@@ -248,26 +263,20 @@ export const providers: {
     provider: "NOVITA",
     costs: novitaCosts,
   },
+  {
+    pattern: openpipe,
+    provider: "OPENPIPE",
+    costs: [],
+  },
+  {
+    pattern: chutes,
+    provider: "CHUTES",
+    costs: [],
+  },
 ];
 
-export const playgroundModels: {
-  name: string;
-  provider: ProviderName;
-}[] =
-  (providers
-    .map((provider) => {
-      return provider.costs
-        ?.filter((cost) => cost.showInPlayground)
-        .map((cost) => ({
-          name: cost.model.value,
-          provider: provider.provider,
-        }));
-    })
-    .flat()
-    .filter((model) => model !== undefined) as {
-    name: string;
-    provider: ProviderName;
-  }[]) ?? [];
+export const playgroundModels =
+  openRouterCosts.map((cost) => cost.model.value) ?? [];
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 export const defaultProvider = providers.find(

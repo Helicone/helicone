@@ -181,19 +181,16 @@
             "pages": [
               "features/advanced-usage/caching",
               "features/advanced-usage/custom-properties",
-              "features/customer-portal",
-              "features/advanced-usage/omit-logs",
               "features/sessions",
-              "features/advanced-usage/user-metrics"
+              "features/advanced-usage/user-metrics",
+              "features/advanced-usage/omit-logs"
             ]
           },
           {
-            "group": "Prompt Engineering",
+            "group": "Prompts & Evals",
             "pages": [
-              "features/experiments",
-              "features/fine-tuning",
               {
-                "group": "Prompts",
+                "group": "Prompt Management",
                 "pages": [
                   "features/prompts/editor",
                   "features/prompts/generate",
@@ -202,6 +199,7 @@
               },
               "features/advanced-usage/scores",
               "features/advanced-usage/feedback",
+              "features/fine-tuning",
               {
                 "group": "Webhooks",
                 "pages": ["features/webhooks", "features/webhooks-testing"]
@@ -226,6 +224,7 @@
                   "ai-gateway/concepts/loadbalancing",
                   "ai-gateway/concepts/cache",
                   "ai-gateway/concepts/rate-limiting",
+                  "ai-gateway/concepts/retries",
                   "ai-gateway/concepts/secret-management",
                   "ai-gateway/concepts/providers",
                   "ai-gateway/concepts/model-mapping"

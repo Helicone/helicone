@@ -66,7 +66,7 @@ const Footer = () => {
           width={150}
           height={150}
         />
-        <p className="mt-2">&copy; 2024 Helicone, Inc</p>
+        <p className="mt-2">&copy; 2025 Helicone, Inc</p>
         <p className="">All rights reserved.</p>
       </div>
 

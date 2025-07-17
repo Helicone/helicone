@@ -10,8 +10,11 @@ import { Editor as MonacoEditor } from "@monaco-editor/react";
 import { editor } from "monaco-editor";
 import { useTheme } from "next-themes";
 import { useMemo, useState } from "react";
+import { TEMPLATE_REGEX } from "@helicone-package/prompts/templates";
+import { useVariableColorMapStore } from "@/store/features/playground/variableColorMap";
+import { HeliconeTemplateManager } from "@helicone-package/prompts/templates";
 
-const MAX_EDITOR_HEIGHT = 500;
+const MAX_EDITOR_HEIGHT = 1000000;
 const MonacoMarkdownEditor = (props: MarkdownEditorProps) => {
   const {
     text,
@@ -78,9 +81,9 @@ interface MarkdownEditorProps {
   containerClassName?: string;
 }
 
-const LARGE_TEXT_THRESHOLD = 20;
+const LARGE_TEXT_THRESHOLD = 100;
 
-const LARGE_TEXT_THRESHOLD_CHARS = 10_000;
+const LARGE_TEXT_THRESHOLD_CHARS = 20_000;
 
 const MarkdownEditor = (props: MarkdownEditorProps) => {
   const {
@@ -118,6 +121,7 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
   };
 
   const { lang, ref } = languageMap[language];
+  const { getColor } = useVariableColorMapStore();
 
   if (
     text.split("\n").length > LARGE_TEXT_THRESHOLD ||
@@ -136,7 +140,21 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
       highlight={(code) => {
         if (!code) return "";
         if (typeof code !== "string") return "";
-        return highlight(code, lang, ref);
+        
+        let highlighted = highlight(code, lang, ref);
+        if (language === "markdown") {
+          highlighted = highlighted.replace(
+            TEMPLATE_REGEX,
+            (match) => {
+              const variable = HeliconeTemplateManager.extractVariables(match)[0];
+              if (!variable) return match;
+              const color = getColor(variable.name);
+              return `<span class="font-bold text-${color}">${match}</span>`;
+            }
+          );
+        }
+        
+        return highlighted;
       }}
       padding={16}
       className={
