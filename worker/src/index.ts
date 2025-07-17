@@ -51,7 +51,6 @@ export interface BASE_Env {
     | "CUSTOMER_GATEWAY"
     | "GENERATE_API"
     | "VAPI_PROXY"
-    | "LLAMA_PROXY";
   TOKEN_CALC_URL: string;
   VAULT_ENABLED: string;
   STORAGE_URL: string;
@@ -182,11 +181,6 @@ async function modifyEnvBasedOnPath(
         ...env,
         WORKER_TYPE: "ANTHROPIC_PROXY",
       };
-    } else if (hostParts[0].includes("llama")) {
-      return {
-        ...env,
-        WORKER_TYPE: "LLAMA_PROXY",
-      };
     } else if (hostParts[0].includes("api")) {
       return {
         ...env,
@@ -226,6 +220,12 @@ async function modifyEnvBasedOnPath(
         ...env,
         WORKER_TYPE: "GATEWAY_API",
         GATEWAY_TARGET: "https://generativelanguage.googleapis.com",
+      };
+    } else if (hostParts[0] === "llama") {
+      return {
+        ...env,
+        WORKER_TYPE: "GATEWAY_API",
+        GATEWAY_TARGET: "https://api.llama.com",
       };
     } else if (hostParts[0].includes("openrouter")) {
       if (isRootPath(url) && request.getMethod() === "GET") {
