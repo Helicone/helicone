@@ -143,9 +143,9 @@ export const getMapperType = ({
   if (
     /^Llama/.test(model) ||
     model.includes("Llama") ||
-    provider === "META"
+    provider === "LLAMA"
   ) {
-    return "meta-chat";
+    return "llama-chat";
   }
 
   if (isAssistant) {

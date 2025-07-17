@@ -7,7 +7,7 @@ export type MapperType =
   | "openai-response"
   | "anthropic-chat"
   | "gemini-chat"
-  | "meta-chat"
+  | "llama-chat"
   | "black-forest-labs-image"
   | "openai-assistant"
   | "openai-image"

@@ -1344,7 +1344,7 @@ export interface components {
       isScored?: boolean;
     };
     /** @enum {string} */
-    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "META";
+    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "LLAMA";
     Provider: components["schemas"]["ProviderName"] | "CUSTOM";
     /** @enum {string} */
     LlmType: "chat" | "completion";
@@ -3252,7 +3252,7 @@ Json: JsonObject;
     /** @enum {string} */
     ModelName: "gpt-3.5" | "gpt-4o" | "gpt-4o-mini" | "gpt-4" | "gpt-4-turbo" | "claude-3-opus" | "claude-3-sonnet" | "claude-3-haiku" | "claude-2" | "open-mixtral" | "Llama" | "dall-e" | "text-moderation" | "text-embedding" | "anthropic/claude-3.5-sonnet";
     /** @enum {string} */
-    OpenStatsProviderName: "OPENAI" | "ANTHROPIC" | "OPENROUTER" | "MISTRAL" | "META";
+    OpenStatsProviderName: "OPENAI" | "ANTHROPIC" | "OPENROUTER" | "MISTRAL" | "LLAMA";
     DataIsBeautifulRequestBody: {
       provider?: components["schemas"]["OpenStatsProviderName"];
       models?: components["schemas"]["ModelName"][];

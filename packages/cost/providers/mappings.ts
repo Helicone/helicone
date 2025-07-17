@@ -102,7 +102,7 @@ export const providersNames = [
   "NEBIUS",
   "NOVITA",
   "OPENPIPE",
-  "META",
+  "LLAMA",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];

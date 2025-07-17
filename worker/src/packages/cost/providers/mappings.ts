@@ -107,7 +107,7 @@ export const providersNames = [
   "NOVITA",
   "OPENPIPE",
   "CHUTES",
-  "META",
+  "LLAMA",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -134,7 +134,7 @@ export const providers: {
   },
   {
     pattern: llamaApiPattern,
-    provider: "META",
+    provider: "LLAMA",
     // TODO: Add Llama API costs
   },
   {

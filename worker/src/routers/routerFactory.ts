@@ -7,7 +7,7 @@ import {
 import { Env } from "..";
 import { RequestWrapper } from "../lib/RequestWrapper";
 import { getAnthropicProxyRouter } from "./anthropicProxyRouter";
-import { getMetaProxyRouter } from "./metaProxyRouter";
+import { getLlamaProxyRouter } from "./llamaProxyRouter";
 import { getAPIRouter } from "./api/apiRouter";
 import { getOpenAIProxyRouter } from "./openaiProxyRouter";
 import { handleFeedback } from "../lib/managers/FeedbackManager";
@@ -38,7 +38,7 @@ const WORKER_MAP: Omit<
   HELICONE_API: getAPIRouter,
   GATEWAY_API: getGatewayAPIRouter,
   GENERATE_API: getGenerateRouter,
-  META_PROXY: getMetaProxyRouter,
+  LLAMA_PROXY: getLlamaProxyRouter,
   CUSTOMER_GATEWAY: (router: BaseRouter) => {
     router.all(
       "*",

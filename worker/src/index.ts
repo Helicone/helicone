@@ -51,7 +51,7 @@ export interface BASE_Env {
     | "CUSTOMER_GATEWAY"
     | "GENERATE_API"
     | "VAPI_PROXY"
-    | "META_PROXY";
+    | "LLAMA_PROXY";
   TOKEN_CALC_URL: string;
   VAULT_ENABLED: string;
   STORAGE_URL: string;
@@ -182,10 +182,10 @@ async function modifyEnvBasedOnPath(
         ...env,
         WORKER_TYPE: "ANTHROPIC_PROXY",
       };
-    } else if (hostParts[0].includes("meta")) {
+    } else if (hostParts[0].includes("llama")) {
       return {
         ...env,
-        WORKER_TYPE: "META_PROXY",
+        WORKER_TYPE: "LLAMA_PROXY",
       };
     } else if (hostParts[0].includes("api")) {
       return {

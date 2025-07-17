@@ -3,7 +3,7 @@ import { proxyForwarder } from "../lib/HeliconeProxyRequest/ProxyForwarder";
 import { RequestWrapper } from "../lib/RequestWrapper";
 import { BaseRouter } from "./routerFactory";
 
-export const getMetaProxyRouter = (router: BaseRouter) => {
+export const getLlamaProxyRouter = (router: BaseRouter) => {
   // proxy forwarder only
   router.all(
     "*",
@@ -13,7 +13,7 @@ export const getMetaProxyRouter = (router: BaseRouter) => {
       env: Env,
       ctx: ExecutionContext
     ) => {
-      return await proxyForwarder(requestWrapper, env, ctx, "META");
+      return await proxyForwarder(requestWrapper, env, ctx, "LLAMA");
     }
   );
 

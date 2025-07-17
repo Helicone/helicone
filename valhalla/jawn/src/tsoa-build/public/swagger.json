@@ -2734,7 +2734,7 @@
 					"NEBIUS",
 					"NOVITA",
 					"OPENPIPE",
-					"META"
+					"LLAMA"
 				]
 			},
 			"Provider": {
@@ -9880,7 +9880,7 @@
 					"ANTHROPIC",
 					"OPENROUTER",
 					"MISTRAL",
-					"META"
+					"LLAMA"
 				]
 			},
 			"DataIsBeautifulRequestBody": {

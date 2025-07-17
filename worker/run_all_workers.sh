@@ -13,6 +13,6 @@ npx wrangler dev --var WORKER_TYPE:GENERATE_API --port 8791 &
 sleep 1
 npx wrangler dev --var GATEWAY_TARGET:https://api.groq.com --port 8792 &
 sleep 1
-npx wrangler dev --var WORKER_TYPE:META_PROXY --port 8793 &
+npx wrangler dev --var WORKER_TYPE:LLAMA_PROXY --port 8793 &
 # Wait for all background processes to finish
 wait

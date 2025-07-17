@@ -52,12 +52,12 @@ export interface HeliconeProxyRequest {
 }
 
 const providerBaseUrlMappings: Record<
-  "OPENAI" | "ANTHROPIC" | "META" | "CUSTOM",
+  "OPENAI" | "ANTHROPIC" | "LLAMA" | "CUSTOM",
   string
 > = {
   OPENAI: "https://api.openai.com",
   ANTHROPIC: "https://api.anthropic.com",
-  META: "https://api.llama.com",
+  LLAMA: "https://api.llama.com",
   CUSTOM: "",
 };
 
@@ -166,7 +166,7 @@ export class HeliconeProxyRequestMapper {
       this.provider === "CUSTOM" ||
       this.provider === "ANTHROPIC" ||
       this.provider === "OPENAI" ||
-      this.provider === "META"
+      this.provider === "LLAMA"
     ) {
       return {
         data: providerBaseUrlMappings[this.provider],

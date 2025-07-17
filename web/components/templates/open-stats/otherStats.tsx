@@ -23,7 +23,7 @@ export const allProviders = [
   "DEEPINFRA",
   "FIREWORKS",
   "GROQ",
-  "META",
+  "LLAMA",
   "MISTRAL",
   "OTHER",
 ] as const;
@@ -86,7 +86,7 @@ export const modelNames = [
   },
   { model: "claude-2", provider: "ANTHROPIC", variations: ["claude-2"] },
   { model: "open-mixtral", provider: "MISTRAL", variations: ["open-mixtral"] },
-  { model: "Llama", provider: "META", variations: ["Llama"] },
+  { model: "Llama", provider: "LLAMA", variations: ["Llama"] },
   { model: "dall-e", provider: "OPENAI", variations: ["dall-e"] },
   {
     model: "text-moderation",
