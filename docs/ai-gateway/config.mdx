@@ -219,6 +219,41 @@ Control request frequency using GCRA (Generic Cell Rate Algorithm) with burst ca
 
 [Learn more](/ai-gateway/concepts/rate-limiting)
 
+### Rate Limit Store
+
+<ParamField path="rate-limit-store" type="object">
+  Define the rate limit storage backend. Must be configured at the top level.
+
+  <Tabs>
+    <Tab title="In-Memory">
+    **In-Memory Storage (Default):**
+    ```yaml
+    rate-limit-store:
+      type: "in-memory"
+    ```
+    </Tab>
+
+    <Tab title="Redis">
+    **Redis Storage:**
+    ```yaml
+    rate-limit-store:
+      type: "redis"
+    ```
+
+    **With custom host-url:**
+    ```yaml
+    rate-limit-store:
+      type: "redis"
+      host-url: "redis://localhost:6379"
+    ```
+    **Options:**
+    - `host-url`: Redis connection string
+      - Supports standard Redis URL format: `redis://[username:password@]host[:port][/database]`
+    - `connection-timeout`: Connection timeout in seconds (default: 5)
+    </Tab>
+  </Tabs>
+</ParamField>
+
 ### Global Rate Limiting
 
 <ParamField path="global.rate-limit" type="object">
@@ -227,7 +262,6 @@ Control request frequency using GCRA (Generic Cell Rate Algorithm) with burst ca
   ```yaml
   global:
     rate-limit:
-      store: in-memory
       per-api-key:
         capacity: 500
         refill-frequency: 1s
@@ -253,21 +287,25 @@ Control request frequency using GCRA (Generic Cell Rate Algorithm) with burst ca
   **How it works:** If global limits are configured, they're checked first. Then these router-specific limits are applied as an additional layer.
 </ParamField>
 
+<ParamField path="routers.[name].rate-limit.store" type="string" default="in-memory">
+  You can choose to override the rate limit set in the `rate-limit-store` configuration.
+
+  ```yaml
+  routers:
+    production:
+      rate-limit:
+        store:
+          type: in-memory
+        per-api-key:
+          ...
+  ```
+
+  **Options:** Refer to the [Rate Limit Store](#rate-limit-store) section for more information.
+</ParamField>
+
 ### Rate Limit Configuration Fields
 
 The following fields are available for both global and router-level rate limiting:
-
-<ParamField path="[context].rate-limit.store" type="string" default="in-memory">
-  Storage backend for rate limit counters.
-
-  ```yaml
-  store: in-memory
-  ```
-
-  **Options:**
-  - `in-memory` - Local memory storage (default)
-  - `redis` - Redis storage (coming soon...) 
-</ParamField>
 
 <ParamField path="[context].rate-limit.per-api-key" type="object">
   Rate limits applied per API key.
