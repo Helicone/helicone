@@ -28,6 +28,7 @@ const openAiPattern = /^https:\/\/api\.openai\.com/;
 const anthropicPattern = /^https:\/\/api\.anthropic\.com/;
 const azurePattern =
   /^(https?:\/\/)?([^.]*\.)?(openai\.azure\.com|azure-api\.net|cognitiveservices\.azure\.com)(\/.*)?$/;
+const llamaApiPattern = /^https:\/\/api\.llama\.com/;
 const localProxyPattern = /^http:\/\/127\.0\.0\.1:\d+\/v\d+\/?$/;
 const heliconeProxyPattern = /^https:\/\/oai\.hconeai\.com/;
 const amdbartekPattern = /^https:\/\/.*\.amdbartek\.dev/;
@@ -106,6 +107,7 @@ export const providersNames = [
   "NOVITA",
   "OPENPIPE",
   "CHUTES",
+  "META",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -129,6 +131,11 @@ export const providers: {
     provider: "ANTHROPIC",
     costs: anthropicProvider.costs,
     modelDetails: anthropicProvider.modelDetails,
+  },
+  {
+    pattern: llamaApiPattern,
+    provider: "META",
+    // TODO: Add Llama API costs
   },
   {
     pattern: azurePattern,
