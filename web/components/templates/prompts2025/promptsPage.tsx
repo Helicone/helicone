@@ -29,6 +29,7 @@ import { SimpleTable } from "@/components/shared/table/simpleTable";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import { getInitialColumns } from "./initialColumns";
 import TagsFilter from "./TagsFilter";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -44,6 +45,19 @@ const PromptsPage = (props: PromptsPageProps) => {
     number | null
   >(null);
   const organization = useOrg();
+  const auth = useHeliconeAuthClient();
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const fetchUser = async () => {
+      const user = await auth.getUser();
+      if (user.data?.email) {
+        setUserEmail(user.data.email);
+      }
+    };
+    fetchUser();
+  }, [auth]);
+  
   const { data: hasAccessToPrompts } = useFeatureFlag(
     "prompts_2025",
     organization?.currentOrg?.id ?? "",
@@ -97,7 +111,10 @@ const PromptsPage = (props: PromptsPageProps) => {
   const deletePrompt = useDeletePrompt();
   const deletePromptVersion = useDeletePromptVersion();
 
-  if (!hasAccessToPrompts) {
+  // Allow access if user has the feature flag OR if they're the specific email
+  const hasAccess = hasAccessToPrompts || userEmail === "marchukov.work@gmail.com";
+  
+  if (!hasAccess) {
     return <div>You do not have access to Prompts</div>;
   }
 
