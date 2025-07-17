@@ -1,0 +1,37 @@
+---
+title: "Llama cURL Integration"
+sidebarTitle: "cURL Integration"
+description: "Use cURL to integrate Llama with Helicone to log your Llama LLM usage."
+"twitter:title": "Llama cURL Integration - Helicone OSS LLM Observability"
+---
+
+<Steps>
+  <Step title="Create an account + Generate an API Key">
+    Log into [Helicone](https://www.helicone.ai) or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+  </Step>
+  <Step title="Modify the API base and add the `Helicone-Auth` header">
+
+    ```bash
+    curl -X POST https://llama.helicone.ai/v1/chat/completions \
+      -H "Content-Type: application/json" \
+      -H "Authorization: Bearer $LLAMA_API_KEY" \
+      -H "Helicone-Auth: Bearer $HELICONE_API_KEY" \
+      -d '{
+        "model": "Llama-4-Maverick-17B-128E-Instruct-FP8",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Hello, how are you?"
+          }
+        ],
+        "max_completion_tokens": 1024,
+        "temperature": 0.7
+      }'
+    ```
+
+  </Step>
+  <Step title="Verify your requests in Helicone">
+    With the above setup, any calls to the Llama API will automatically be logged and monitored by Helicone. Review them in your Helicone dashboard.
+  </Step>
+</Steps>

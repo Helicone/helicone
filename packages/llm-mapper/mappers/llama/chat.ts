@@ -2,7 +2,7 @@ import { LlmSchema, Message } from "../../types";
 import { MapperFn } from "../types";
 
 // NOTE FOR DEVS:
-// -> This Meta mapper is WIP! It takes a lot of code/inspo
+// -> This Llama mapper is WIP! It takes a lot of code/inspo
 // from the Anthropic mapper - hopefully everything is supported but
 // definitely something that will be improved as we go.
 
@@ -57,14 +57,14 @@ const getResponseText = (responseBody: any, statusCode: number = 200) => {
   }
 };
 
-const metaMessageToMessage = (message: any): Message => {
+const llamaMessageToMessage = (message: any): Message => {
   const messageRole = message.role || "user";
   
   if (Array.isArray(message.content)) {
     return {
       role: messageRole,
       _type: "contentArray",
-      contentArray: message.content.map((c: any) => metaMessageToMessage({
+      contentArray: message.content.map((c: any) => llamaMessageToMessage({
         ...c,
         role: messageRole
       })),
@@ -97,7 +97,7 @@ const getRequestMessages = (request: any): Message[] => {
 
   if (request.messages && Array.isArray(request.messages)) {
     requestMessages.push(
-      ...request.messages.map((message: any) => metaMessageToMessage(message))
+      ...request.messages.map((message: any) => llamaMessageToMessage(message))
     );
   }
 
@@ -148,7 +148,7 @@ const getResponseMessages = (response: any): Message[] => {
   return messages;
 };
 
-export const mapMetaRequest: MapperFn<any, any> = ({
+export const mapLlamaRequest: MapperFn<any, any> = ({
   request,
   response,
   statusCode = 200,

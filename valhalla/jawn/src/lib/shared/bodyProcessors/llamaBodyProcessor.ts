@@ -6,7 +6,7 @@ import { PromiseGenericResult, ok } from "../../../packages/common/result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 import { CreateChatCompletionResponse } from 'llama-api-client/resources/chat/chat';
 
-export class MetaBodyProcessor implements IBodyProcessor {
+export class LlamaBodyProcessor implements IBodyProcessor {
   public async parse(
     parseInput: ParseInput
   ): PromiseGenericResult<ParseOutput> {

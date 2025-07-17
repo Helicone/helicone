@@ -2734,7 +2734,7 @@
 					"NEBIUS",
 					"NOVITA",
 					"OPENPIPE",
-					"META"
+					"LLAMA"
 				]
 			},
 			"Provider": {
@@ -9866,7 +9866,6 @@
 					"claude-3-haiku",
 					"claude-2",
 					"open-mixtral",
-					"Llama",
 					"dall-e",
 					"text-moderation",
 					"text-embedding",
@@ -9879,8 +9878,7 @@
 					"OPENAI",
 					"ANTHROPIC",
 					"OPENROUTER",
-					"MISTRAL",
-					"META"
+					"MISTRAL"
 				]
 			},
 			"DataIsBeautifulRequestBody": {

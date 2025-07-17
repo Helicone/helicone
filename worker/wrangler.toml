@@ -48,6 +48,7 @@ name = "helicone-worker-prod"
 routes = [
 	{ pattern = "oai.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "anthropic.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+	{ pattern = "llama.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "google.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "groq.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "openrouter.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
