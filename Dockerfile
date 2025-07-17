@@ -125,43 +125,5 @@ ENV MINIO_ROOT_PASSWORD=minioadmin
 # Use supervisord as entrypoint
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 
-# CREATE
-# docker compose down -v && docker compose up --build --force-recreate
-# TEST POSTGRES
-# docker exec -it helicone-all-in-one su - postgres -c "psql -d helicone_test"
-# TEST CLICKHOUSE
-# docker exec -it helicone-all-in-one clickhouse-client
-# TEST MINIO
-# docker exec -it helicone-all-in-one mc ls localminio/
-# curl http://localhost:9080/minio/health/live
-# TEST JAWN (not very rigorous)
-# docker exec -it helicone-all-in-one curl http://localhost:8585
-# curl http://localhost:8585/api/v1/health
-# LOGS
-# docker exec -it helicone-all-in-one cat /var/log/supervisor/web.err.log 
-
 # --------------------------------------------------------------------------------------------------------------------
-
-FROM lukemathwalker/cargo-chef:0.1.71-rust-1.87-bookworm AS chef
-WORKDIR /app
-
-FROM chef AS planner
-COPY ./helix .
-RUN cargo chef prepare --bin llm-proxy --recipe-path recipe.json
-
-FROM chef AS builder 
-# Install OpenSSL development libraries and pkg-config for Debian
-RUN apt-get update && apt-get install -y pkg-config libssl-dev && rm -rf /var/lib/apt/lists/*
-COPY --from=planner /app/recipe.json recipe.json
-# Build dependencies - this is the caching Docker layer!
-RUN cargo chef cook --release --recipe-path recipe.json
-# Build application
-COPY ./helix .
-RUN cargo build --release -p llm-proxy
-
-# We do not need the Rust toolchain to run the binary!
-FROM debian:bookworm-slim AS runtime
-RUN apt-get update && apt install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
-WORKDIR /app
-COPY --from=builder /app/target/release/llm-proxy /usr/local/bin
-CMD ["/usr/local/bin/llm-proxy"]
+FROM helicone/ai-gateway:latest AS gateway-stage
