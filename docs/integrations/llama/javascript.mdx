@@ -25,30 +25,56 @@ import { strings } from "/snippets/strings.mdx";
   </Step>
 
   <Step title={strings.modifyBasePath}>
-    ```javascript
-    import OpenAI from "openai";
+<CodeGroup>
 
-    const openai = new OpenAI({
-      apiKey: process.env.LLAMA_API_KEY,
-      baseURL: "https://llama.helicone.ai/v1",
-      defaultHeaders: {
-        "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`
-      }
-    });
-    ```
-  </Step>
+```javascript Llama SDK
+import LlamaAPIClient from 'llama-api-client';
 
-  <Step title={strings.useTheSDK("Llama")}>
-    ```javascript
-    const response = await openai.chat.completions.create({
-      model: "Llama-4-Maverick-17B-128E-Instruct-FP8",
-      messages: [{ role: "user", content: "Hello, how are you?" }],
-      max_completion_tokens: 1024,
-      temperature: 0.7
-    });
+const client = new LlamaAPIClient({
+  apiKey: process.env.LLAMA_API_KEY,
+  baseURL: "https://llama.helicone.ai/v1",
+  defaultHeaders: {
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`
+  }
+});
 
-    console.log(response);
-    ```
+const response = await client.chat.completions.create({
+  model: 'Llama-4-Maverick-17B-128E-Instruct-FP8',
+  messages: [
+    {
+      role: 'user', 
+      content: 'Hello, how are you?' 
+    }
+  ],
+  max_completion_tokens: 1024,
+  temperature: 0.7,
+});
+
+console.log(response);
+```
+
+```javascript OpenAI SDK
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.LLAMA_API_KEY,
+  baseURL: "https://llama.helicone.ai/v1",
+  defaultHeaders: {
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`
+  }
+});
+
+const response = await openai.chat.completions.create({
+  model: "Llama-4-Maverick-17B-128E-Instruct-FP8",
+  messages: [{ role: "user", content: "Hello, how are you?" }],
+  max_completion_tokens: 1024,
+  temperature: 0.7
+});
+
+console.log(response);
+```
+
+</CodeGroup>
   </Step>
 
   <Step title={strings.verifyInHelicone}>
