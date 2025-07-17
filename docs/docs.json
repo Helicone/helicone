@@ -91,6 +91,14 @@
                       "integrations/instructor/python"
                     ]
                   },
+                  {
+                    "group": "Llama",
+                    "pages": [
+                      "integrations/llama/curl",
+                      "integrations/llama/javascript",
+                      "integrations/llama/python"
+                    ]
+                  },
                   "getting-started/integration-method/hyperbolic",
                   "getting-started/integration-method/mistral",
                   "getting-started/integration-method/nebius",
