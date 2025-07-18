@@ -1,9 +1,11 @@
+import { useOrg } from "@/components/layout/org/organizationContext";
 import FoldedHeader from "@/components/shared/FoldedHeader";
 import MarkdownEditor from "@/components/shared/markdownEditor";
 import useNotification from "@/components/shared/notification/useNotification";
 import { Button } from "@/components/ui/button";
 import { Muted, Small } from "@/components/ui/typography";
 import { $JAWN_API } from "@/lib/clients/jawn";
+import { useFeatureFlag } from "@/services/hooks/admin";
 import { useMutation } from "@tanstack/react-query";
 import yaml from "js-yaml";
 import { CopyIcon, Loader2 } from "lucide-react";
@@ -53,7 +55,6 @@ const GatewayRouterPage = () => {
           },
         );
         const data = await response.json();
-        console.log(data);
         if (response.ok && "valid" in data) {
           return {
             valid: !!data.valid,
@@ -94,6 +95,16 @@ const GatewayRouterPage = () => {
       },
     });
   };
+
+  const org = useOrg();
+  const { data: hasFeatureFlag } = useFeatureFlag(
+    "ai_gateway",
+    org?.currentOrg?.id ?? "",
+  );
+
+  if (!hasFeatureFlag?.data) {
+    return <div>You do not have access to the AI Gateway</div>;
+  }
 
   return (
     <main className="flex h-screen w-full animate-fade-in flex-col">

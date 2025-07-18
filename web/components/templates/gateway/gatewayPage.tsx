@@ -14,6 +14,8 @@ import { useState } from "react";
 import { formatTime } from "../prompts2025/timeUtils";
 import { useRouter } from "next/router";
 import CreateRouterDialog from "./createRouterDialog";
+import { useFeatureFlag } from "@/services/hooks/admin";
+import { useOrg } from "@/components/layout/org/organizationContext";
 
 type Router = components["schemas"]["Router"];
 
@@ -55,6 +57,15 @@ const GatewayPage = () => {
     useState(false);
   const router = useRouter();
   const { data: routers, isLoading } = $JAWN_API.useQuery("get", "/v1/gateway");
+  const org = useOrg();
+  const { data: hasFeatureFlag } = useFeatureFlag(
+    "ai_gateway",
+    org?.currentOrg?.id ?? "",
+  );
+
+  if (!hasFeatureFlag?.data) {
+    return <div>You do not have access to the AI Gateway</div>;
+  }
 
   return (
     <main className="flex h-screen w-full animate-fade-in flex-col">
