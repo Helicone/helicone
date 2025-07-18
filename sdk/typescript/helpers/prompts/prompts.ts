@@ -4,7 +4,7 @@ import { ChatCompletionCreateParamsNonStreaming, ChatCompletionCreateParamsStrea
  * Supported input value types for Helicone prompt templates.
  * These values will be interpolated into your prompt template.
  */
-export type HeliconeInput = string | number | boolean;
+export type HeliconeInput = any;
 
 /**
  * Parameters for using Helicone prompt templates.
