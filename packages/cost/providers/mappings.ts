@@ -1,8 +1,8 @@
 import { ModelDetailsMap, ModelRow } from "../interfaces/Cost";
 import { anthropicProvider } from "./anthropic";
 import { costs as avianCosts } from "./avian";
-import { costs as awsBedrockCosts } from "./awsBedrock";
-import { costs as awsNovaCosts } from "./awsNova";
+import { costs as awsBedrockCosts } from "./aws/awsBedrock";
+import { costs as awsNovaCosts } from "./aws/awsNova";
 import { costs as azureCosts } from "./azure";
 import { costs as llamaCosts } from "./llama";
 import { costs as cohereCosts } from "./cohere";
