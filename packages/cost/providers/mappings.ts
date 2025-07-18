@@ -2,6 +2,7 @@ import { ModelDetailsMap, ModelRow } from "../interfaces/Cost";
 import { anthropicProvider } from "./anthropic";
 import { costs as avianCosts } from "./avian";
 import { costs as awsBedrockCosts } from "./awsBedrock";
+import { costs as awsNovaCosts } from "./awsNova";
 import { costs as azureCosts } from "./azure";
 import { costs as llamaCosts } from "./llama";
 import { costs as cohereCosts } from "./cohere";
@@ -59,6 +60,8 @@ const qstash = /^https:\/\/qstash\.upstash\.io/;
 const firecrawl = /^https:\/\/api\.firecrawl\.dev/;
 // https://bedrock-runtime.{some-region}.amazonaws.com/{something-after}
 const awsBedrock = /^https:\/\/bedrock-runtime\.[a-z0-9-]+\.amazonaws\.com\/.*/;
+// https://bedrock-runtime.{some-region}.amazonaws.com/{something-after} same runtime
+const awsNova = /^https:\/\/bedrock-runtime\.[a-z0-9-]+\.amazonaws\.com\/.*/;
 // https://api.deepseek.com
 const deepseek = /^https:\/\/api\.deepseek\.com/;
 // https://api.x.ai
@@ -244,6 +247,11 @@ export const providers: {
     pattern: awsBedrock,
     provider: "AWS",
     costs: awsBedrockCosts,
+  },
+  {
+    pattern: awsNova,
+    provider: "AWS",
+    costs: awsNovaCosts,
   },
   {
     pattern: deepseek,
