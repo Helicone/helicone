@@ -8,6 +8,16 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "aws%20eu.amazon.nova-micro-v1%3A0",
+    },
+    cost: {
+      prompt_token: 0.000046,
+      completion_token: 0.000184,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
       value: "aws%20eu.amazon.nova-lite-v1%3A0",
     },
     cost: {
@@ -21,8 +31,8 @@ export const costs: ModelRow[] = [
       value: "aws%20eu.amazon.nova-pro-v1%3A0",
     },
     cost: {
-      prompt_token: 0.0008,
-      completion_token: 0.0032, //per 1k
+      prompt_token: 0.00105,
+      completion_token: 0.0042,
     },
   },
 ];
