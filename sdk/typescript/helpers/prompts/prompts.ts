@@ -1,12 +1,6 @@
 import { ChatCompletionCreateParamsNonStreaming, ChatCompletionCreateParamsStreaming } from "openai/resources/chat/completions";
 
 /**
- * Supported input value types for Helicone prompt templates.
- * These values will be interpolated into your prompt template.
- */
-export type HeliconeInput = string | number | boolean | HeliconeInput[] | { [key: string]: HeliconeInput };
-
-/**
  * Parameters for using Helicone prompt templates.
  * 
  * @example
@@ -30,7 +24,7 @@ export type HeliconePromptParams = {
      * Key-value pairs to interpolate into your prompt template.
      * Keys should match the variable names in your template.
      */
-    inputs?: Record<string, HeliconeInput>;
+    inputs?: Record<string, any>;
 }
 
 /**
