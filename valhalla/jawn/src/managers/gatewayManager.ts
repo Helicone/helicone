@@ -29,13 +29,19 @@ export class GatewayManager extends BaseManager {
         routers.id,
         routers.hash,
         routers.name,
-        router_config_versions.version as latestVersion,
-        router_config_versions.created_at as lastUpdatedAt
+        latest_config.version as "latestVersion",
+        latest_config.created_at as "lastUpdatedAt"
       FROM routers
-      INNER JOIN router_config_versions ON routers.id = router_config_versions.router_id
+      INNER JOIN (
+        SELECT DISTINCT ON (router_id)
+          router_id,
+          version,
+          created_at
+        FROM router_config_versions
+        ORDER BY router_id, created_at DESC
+      ) latest_config ON routers.id = latest_config.router_id
       WHERE routers.organization_id = $1
-      ORDER BY router_config_versions.created_at DESC
-      LIMIT 1`,
+      ORDER BY latest_config.created_at DESC`,
       [this.authParams.organizationId]
     );
 

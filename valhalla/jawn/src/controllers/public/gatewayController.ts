@@ -13,6 +13,10 @@ import {
 import type { JawnAuthenticatedRequest } from "../../types/request";
 import { err, ok, Result } from "../../packages/common/result";
 import { GatewayManager } from "../../managers/gatewayManager";
+import {
+  AI_GATEWAY_FEATURE_FLAG,
+  checkFeatureFlag,
+} from "../../lib/utils/featureFlags";
 
 export type LatestRouterConfig = {
   id: string;
@@ -44,6 +48,13 @@ export class GatewayController extends Controller {
   public async getRouters(
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<{ routers: Router[] }, string>> {
+    const featureFlagResult = await checkFeatureFlag(
+      request.authParams.organizationId,
+      AI_GATEWAY_FEATURE_FLAG
+    );
+    if (featureFlagResult.error) {
+      return err(featureFlagResult.error);
+    }
     const gatewayManager = new GatewayManager(request.authParams);
     const result = await gatewayManager.getRouters();
     if (result.error || !result.data) {
@@ -57,6 +68,13 @@ export class GatewayController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Path() id: string
   ): Promise<Result<LatestRouterConfig, string>> {
+    const featureFlagResult = await checkFeatureFlag(
+      request.authParams.organizationId,
+      AI_GATEWAY_FEATURE_FLAG
+    );
+    if (featureFlagResult.error) {
+      return err(featureFlagResult.error);
+    }
     const gatewayManager = new GatewayManager(request.authParams);
     const result = await gatewayManager.getLatestRouterConfig(id);
     if (result.error || !result.data) {
@@ -70,6 +88,13 @@ export class GatewayController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Body() body: { name: string; config: string }
   ): Promise<Result<CreateRouterResult, string>> {
+    const featureFlagResult = await checkFeatureFlag(
+      request.authParams.organizationId,
+      AI_GATEWAY_FEATURE_FLAG
+    );
+    if (featureFlagResult.error) {
+      return err(featureFlagResult.error);
+    }
     try {
       const gatewayManager = new GatewayManager(request.authParams);
       const result = await gatewayManager.createRouter({
@@ -94,6 +119,13 @@ export class GatewayController extends Controller {
     @Path() id: string,
     @Body() body: { name: string; config: string }
   ): Promise<Result<null, string>> {
+    const featureFlagResult = await checkFeatureFlag(
+      request.authParams.organizationId,
+      AI_GATEWAY_FEATURE_FLAG
+    );
+    if (featureFlagResult.error) {
+      return err(featureFlagResult.error);
+    }
     const gatewayManager = new GatewayManager(request.authParams);
     const result = await gatewayManager.updateRouter({
       id,

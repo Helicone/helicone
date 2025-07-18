@@ -90,6 +90,7 @@
     "generate-api-key": "^1.0.2",
     "immer": "^10.1.1",
     "js-cookie": "^3.0.5",
+    "js-yaml": "^4.1.0",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.487.0",
     "marked": "^13.0.3",
