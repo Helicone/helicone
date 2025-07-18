@@ -4,8 +4,9 @@ import useNotification from "@/components/shared/notification/useNotification";
 import { Button } from "@/components/ui/button";
 import { Muted, Small } from "@/components/ui/typography";
 import { $JAWN_API } from "@/lib/clients/jawn";
+import { useMutation } from "@tanstack/react-query";
 import yaml from "js-yaml";
-import { CopyIcon } from "lucide-react";
+import { CopyIcon, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -34,11 +35,65 @@ const GatewayRouterPage = () => {
     }
   }, [gatewayRouter]);
 
-  const { mutate: updateGatewayRouter } = $JAWN_API.useMutation(
+  const { mutate: updateGatewayRouter, isPending } = $JAWN_API.useMutation(
     "put",
     `/v1/gateway/{id}`,
   );
+  const { mutateAsync: validateRouterConfig } = useMutation({
+    mutationFn: async (config: unknown) => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_CLOUD_GATEWAY_BASE_URL}/validate-router-config`,
+          {
+            method: "POST",
+            body: JSON.stringify(config),
+            headers: {
+              "Content-Type": "application/json",
+            },
+          },
+        );
+        const data = await response.json();
+        console.log(data);
+        if (response.ok && "valid" in data) {
+          return {
+            valid: !!data.valid,
+          };
+        }
+        return {
+          error: "Failed to validate router config",
+        };
+      } catch (error) {
+        console.error(error);
+        return {
+          error: "Failed to validate router config",
+        };
+      }
+    },
+  });
   const { setNotification } = useNotification();
+
+  const handleConfigSave = async () => {
+    const obj = yaml.load(config);
+
+    const result = await validateRouterConfig(obj);
+    console.log(result);
+    if (!result.valid || result.error) {
+      setNotification("Invalid router config", "error");
+      return;
+    }
+
+    updateGatewayRouter({
+      params: {
+        path: {
+          id: router_id as string,
+        },
+      },
+      body: {
+        name: gatewayRouter?.data?.name ?? "",
+        config: JSON.stringify(obj),
+      },
+    });
+  };
 
   return (
     <main className="flex h-screen w-full animate-fade-in flex-col">
@@ -89,24 +144,8 @@ const GatewayRouterPage = () => {
         }}
       />
       <div className="flex flex-col gap-2">
-        <Button
-          onClick={() => {
-            const obj = yaml.load(config);
-            console.log(obj);
-            updateGatewayRouter({
-              params: {
-                path: {
-                  id: router_id as string,
-                },
-              },
-              body: {
-                name: gatewayRouter?.data?.name ?? "",
-                config: JSON.stringify(obj),
-              },
-            });
-          }}
-        >
-          Save
+        <Button disabled={!config || isPending} onClick={handleConfigSave}>
+          {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
         </Button>
       </div>
     </main>
