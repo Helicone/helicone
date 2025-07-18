@@ -9,6 +9,7 @@ import {
   getMockBooleanScoresOverTimeData,
   getMockScoresOverTimeData,
 } from "../../mockDashboardData";
+import DashboardChartTooltipContent from "../../DashboardChartTooltipContent";
 
 export const ScoresPanel = (props: ScoresPanelProps) => {
   const { timeFilter, userFilters, dbIncrement, filterBool } = props;
@@ -43,10 +44,10 @@ export const ScoresPanel = (props: ScoresPanelProps) => {
   const displayScoreKeys = shouldShowMockData ? mockScoreKeys : scoreKeys;
 
   return (
-    <Card className="border border-slate-200 bg-white text-slate-950 !shadow-sm dark:border-slate-800 dark:bg-black dark:text-slate-50 rounded-lg ring-0 h-full w-full">
-      <div className="flex flex-row items-center justify-between w-full">
-        <div className="flex flex-col space-y-0.5 w-full">
-          <p className="text-gray-500 text-sm">
+    <Card className="h-full w-full rounded-lg border border-slate-200 bg-white text-slate-950 !shadow-sm ring-0 dark:border-slate-800 dark:bg-black dark:text-slate-50">
+      <div className="flex w-full flex-row items-center justify-between">
+        <div className="flex w-full flex-col space-y-0.5">
+          <p className="text-sm text-gray-500">
             {filterBool ? "Feedback / Bool Scores" : "Scores"}
           </p>
         </div>
@@ -59,11 +60,12 @@ export const ScoresPanel = (props: ScoresPanelProps) => {
         }}
       >
         {scoresQuery.isLoading && !shouldShowMockData ? (
-          <div className="h-full w-full bg-gray-200 dark:bg-gray-800 rounded-md pt-4">
+          <div className="h-full w-full rounded-md bg-gray-200 pt-4 dark:bg-gray-800">
             <LoadingAnimation height={175} width={175} />
           </div>
         ) : (
           <LineChart
+            customTooltip={DashboardChartTooltipContent}
             className="h-[14rem]"
             data={displayScores ?? []}
             index="date"
@@ -83,7 +85,7 @@ export const ScoresPanel = (props: ScoresPanelProps) => {
             valueFormatter={(number: number | bigint) => {
               if (filterBool) {
                 return `${new Intl.NumberFormat("us").format(
-                  Number(number) * 100
+                  Number(number) * 100,
                 )}%`;
               }
               return `${new Intl.NumberFormat("us").format(Number(number))}`;

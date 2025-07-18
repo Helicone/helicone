@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { useQuantiles } from "../../../services/hooks/quantiles";
-import { Card, LineChart, Select, SelectItem } from "@tremor/react";
+import { Card, LineChart } from "@tremor/react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
@@ -8,6 +15,7 @@ import { TimeIncrement } from "../../../lib/timeCalculations/fetchTimeData";
 import { FilterNode } from "@helicone-package/filters/filterDefs";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { getMockQuantiles } from "./mockDashboardData";
+import DashboardChartTooltipContent from "./DashboardChartTooltipContent";
 
 type QuantilesGraphProps = {
   filters: FilterNode;
@@ -54,39 +62,39 @@ export const QuantilesGraph = ({
     ? mockQuantiles?.data
     : quantiles?.data;
   const maxQuantile = max(
-    quantilesData?.map((d) => d.p99).filter((d) => d !== 0) ?? []
+    quantilesData?.map((d) => d.p99).filter((d) => d !== 0) ?? [],
   );
 
   return (
-    <Card className="border border-slate-200 bg-white text-slate-950 !shadow-sm dark:border-slate-800 dark:bg-black dark:text-slate-50 rounded-lg ring-0">
-      <div className="flex flex-row items-center justify-between w-full">
-        <div className="flex flex-col space-y-0.5 w-full">
-          <p className="text-gray-500 text-sm">Quantiles</p>
+    <Card className="rounded-lg border border-slate-200 bg-white text-slate-950 !shadow-sm ring-0 dark:border-slate-800 dark:bg-black dark:text-slate-50">
+      <div className="flex w-full flex-row items-center justify-between">
+        <div className="flex w-full flex-col space-y-0.5">
+          <p className="text-sm text-gray-500">Quantiles</p>
           {currentMetric === "Latency" ? (
-            <p className="text-black dark:text-white text-xl font-semibold">
+            <p className="text-xl font-semibold text-black dark:text-white">
               {`Max: ${new Intl.NumberFormat("us").format(
-                maxQuantile / 1000
+                maxQuantile / 1000,
               )} s`}
             </p>
           ) : (
-            <p className="text-black dark:text-white text-xl font-semibold">
+            <p className="text-xl font-semibold text-black dark:text-white">
               {`Max: ${new Intl.NumberFormat("us").format(maxQuantile)} tokens`}
             </p>
           )}
         </div>
         <div>
           {(!quantilesIsLoading || shouldShowMockData) && (
-            <Select
-              placeholder="Select property"
-              value={currentMetric}
-              onValueChange={setCurrentMetric}
-              className="border border-gray-400 rounded-lg w-fit"
-            >
-              {Array.from(quantilesMetrics.entries()).map(([key, value]) => (
-                <SelectItem key={key} value={key}>
-                  {key}
-                </SelectItem>
-              ))}
+            <Select value={currentMetric} onValueChange={setCurrentMetric}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select property" />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.from(quantilesMetrics.entries()).map(([key, value]) => (
+                  <SelectItem key={key} value={key}>
+                    {key}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           )}
         </div>
@@ -99,11 +107,12 @@ export const QuantilesGraph = ({
         }}
       >
         {quantilesIsLoading && !shouldShowMockData ? (
-          <div className="h-full w-full bg-gray-200 dark:bg-gray-800 rounded-md pt-4">
+          <div className="h-full w-full rounded-md bg-gray-200 pt-4 dark:bg-gray-800">
             <LoadingAnimation height={175} width={175} />
           </div>
         ) : (
           <LineChart
+            customTooltip={DashboardChartTooltipContent}
             className="h-[14rem]"
             data={
               quantilesData?.map((r) => {
@@ -135,7 +144,7 @@ export const QuantilesGraph = ({
             valueFormatter={(number: number | bigint) => {
               if (currentMetric === "Latency") {
                 return `${new Intl.NumberFormat("us").format(
-                  Number(number) / 1000
+                  Number(number) / 1000,
                 )} s`;
               } else {
                 return `${new Intl.NumberFormat("us").format(number)} tokens`;
