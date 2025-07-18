@@ -9,6 +9,7 @@ export class CacheItem<T> {
 export class InMemoryCache {
   private cache: Map<string, CacheItem<any>> = new Map();
   private checkInterval: number = 60000; // Interval to check for expired items, e.g., every 60 seconds
+  private cleanupTimer: NodeJS.Timeout | null = null;
 
   constructor(private maxEntries: number) {
     this.startCleanupTimer();
@@ -28,7 +29,12 @@ export class InMemoryCache {
 
   // Starts a timer to periodically clean up expired items
   private startCleanupTimer(): void {
-    setInterval(() => {
+    // Clear any existing timer to prevent multiple timers
+    if (this.cleanupTimer) {
+      clearInterval(this.cleanupTimer);
+    }
+    
+    this.cleanupTimer = setInterval(() => {
       const now = Date.now();
       for (let [key, item] of this.cache.entries()) {
         if (item.expiry < now) {
@@ -54,6 +60,28 @@ export class InMemoryCache {
     if (item && item.expiry < Date.now()) {
       this.cache.delete(key);
     }
+  }
+
+  // Cleanup method to prevent memory leaks
+  destroy(): void {
+    if (this.cleanupTimer) {
+      clearInterval(this.cleanupTimer);
+      this.cleanupTimer = null;
+    }
+    this.cache.clear();
+  }
+
+  // Get cache size for monitoring
+  size(): number {
+    return this.cache.size;
+  }
+
+  // Get cache stats for monitoring
+  getStats(): { size: number; maxEntries: number } {
+    return {
+      size: this.cache.size,
+      maxEntries: this.maxEntries
+    };
   }
 }
 
