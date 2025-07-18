@@ -634,7 +634,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         mappedContent.schema.request.response_format as ResponseFormat,
         substitutionValues
       );
-      console.log("substituted", substituted);
       if (!substituted.success) {
         setNotification("Improper template values!", "error");
       }
@@ -643,7 +642,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         mappedContent.schema.request.tools as Tool[],
         substitutionValues
       );
-      console.log("substitutedTools", substitutedTools);
       if (!substitutedTools.success) {
         setNotification("Improper template values!", "error");
       }
@@ -683,7 +681,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
 
         const openaiRequest = convertMappedLLMRequestToOpenAIChatRequest(
           templatedMappedContent,
-          tools,
+          templatedMappedContent.schema.request.tools as Tool[],
           modelParameters,
           selectedModel,
           templatedMappedContent.schema.request.response_format as ResponseFormat
