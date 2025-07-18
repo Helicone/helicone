@@ -19,10 +19,10 @@ import useNotification from "@/components/shared/notification/useNotification";
 
 const defaultConfig = `load-balance:
   chat:
-    strategy: latency
-    providers:
-      - openai
-`;
+    strategy: model-latency
+    models:
+      - openai/gpt-4o-mini
+      - anthropic/claude-3-5-sonnet`;
 
 const CreateRouterDialog = ({
   open,
