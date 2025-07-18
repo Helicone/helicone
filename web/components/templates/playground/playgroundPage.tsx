@@ -634,6 +634,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         mappedContent.schema.request.response_format as ResponseFormat,
         substitutionValues
       );
+      console.log("substituted", substituted);
       if (!substituted.success) {
         setNotification("Improper template values!", "error");
       }
@@ -642,6 +643,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         mappedContent.schema.request.tools as Tool[],
         substitutionValues
       );
+      console.log("substitutedTools", substitutedTools);
       if (!substitutedTools.success) {
         setNotification("Improper template values!", "error");
       }
@@ -653,8 +655,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           request: { 
             ...mappedContent.schema.request,
             messages: templatedMessages,
-            response_format: substituted.success ? substituted.result : mappedContent.schema.request.response_format,
-            tools: substitutedTools.success ? substitutedTools.result : mappedContent.schema.request.tools
+            response_format: substituted.success ? substituted.result as ResponseFormat : mappedContent.schema.request.response_format,
+            tools: substitutedTools.success ? substitutedTools.result as Tool[] : mappedContent.schema.request.tools
           }
         }
       };
