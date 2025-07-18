@@ -15,6 +15,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 import yaml from "js-yaml";
+import useNotification from "@/components/shared/notification/useNotification";
 
 const defaultConfig = `load-balance:
   chat:
@@ -33,6 +34,7 @@ const CreateRouterDialog = ({
   const [name, setName] = useState("");
   const [config, setConfig] = useState(defaultConfig);
   const queryClient = useQueryClient();
+  const { setNotification } = useNotification();
   const { mutate: createRouter } = $JAWN_API.useMutation(
     "post",
     "/v1/gateway",
@@ -40,6 +42,7 @@ const CreateRouterDialog = ({
       onSuccess: () => {
         setOpen(false);
         queryClient.invalidateQueries({ queryKey: ["get", "/v1/gateway"] });
+        setNotification("Router created", "success");
       },
     },
   );

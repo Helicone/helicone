@@ -102,7 +102,7 @@ const GatewayRouterPage = () => {
     org?.currentOrg?.id ?? "",
   );
 
-  if (!hasFeatureFlag?.data) {
+  if (!hasFeatureFlag) {
     return <div>You do not have access to the AI Gateway</div>;
   }
 
