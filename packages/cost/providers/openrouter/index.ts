@@ -779,6 +779,26 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "anthropic/claude-sonnet-4",
+    },
+    cost: {
+      prompt_token: 3e-6,
+      completion_token: 1.5e-5, 
+    }
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "anthropic/claude-opus-4",
+    },
+    cost: {
+      prompt_token: 1.5e-5,
+      completion_token: 7.5e-5,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
       value: "perplexity/r1-1776",
     },
     cost: {
