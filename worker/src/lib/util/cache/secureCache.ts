@@ -8,8 +8,7 @@ export interface SecureCacheEnv {
 }
 
 class InMemoryCache<T> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private static instance: InMemoryCache<any>;
+  private static instance: InMemoryCache<unknown> | null = null;
   private cache: Map<string, T>;
   private maxEntries: number;
 
@@ -22,13 +21,15 @@ class InMemoryCache<T> {
     if (!InMemoryCache.instance) {
       InMemoryCache.instance = new InMemoryCache<T>(maxEntries);
     }
-    return InMemoryCache.instance;
+    return InMemoryCache.instance as InMemoryCache<T>;
   }
 
   set(key: string, value: T): void {
     if (this.cache.size >= this.maxEntries) {
       const firstKey = this.cache.keys().next().value;
-      this.cache.delete(firstKey);
+      if (firstKey) {
+        this.cache.delete(firstKey);
+      }
     }
     this.cache.set(key, value);
   }
@@ -43,6 +44,25 @@ class InMemoryCache<T> {
 
   clear(): void {
     this.cache.clear();
+  }
+
+  // Cleanup method to prevent memory leaks
+  destroy(): void {
+    this.cache.clear();
+    InMemoryCache.instance = null;
+  }
+
+  // Get cache size for monitoring
+  size(): number {
+    return this.cache.size;
+  }
+
+  // Get cache stats for monitoring
+  getStats(): { size: number; maxEntries: number } {
+    return {
+      size: this.cache.size,
+      maxEntries: this.maxEntries
+    };
   }
 }
 

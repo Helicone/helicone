@@ -48,4 +48,14 @@ export class KVCache {
       );
     }
   }
+
+  // Cleanup method to prevent memory leaks
+  destroy(): void {
+    this.cache.destroy();
+  }
+
+  // Get cache stats for monitoring
+  getStats(): { size: number; maxEntries: number } {
+    return this.cache.getStats();
+  }
 }
