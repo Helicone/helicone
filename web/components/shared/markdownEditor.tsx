@@ -31,6 +31,8 @@ const MonacoMarkdownEditor = (props: MarkdownEditorProps) => {
   const { theme: currentTheme } = useTheme();
   const minHeight = 100;
 
+  console.log("text", text);
+
   const [height, setHeight] = useState(minHeight);
   const updateHeight = (editor: editor.IStandaloneCodeEditor) =>
     setHeight(
@@ -155,13 +157,16 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
         if (typeof code !== "string") return "";
 
         let highlighted = highlight(code, lang, ref);
-        if (language === "markdown") {
-          highlighted = highlighted.replace(TEMPLATE_REGEX, (match) => {
-            const variable = HeliconeTemplateManager.extractVariables(match)[0];
-            if (!variable) return match;
-            const color = getColor(variable.name);
-            return `<span class="font-bold text-${color}">${match}</span>`;
-          });
+        if (language === "markdown" || language === "json") {
+          highlighted = highlighted.replace(
+            TEMPLATE_REGEX,
+            (match) => {
+              const variable = HeliconeTemplateManager.extractVariables(match)[0];
+              if (!variable) return match;
+              const color = getColor(variable.name);
+              return `<span class="font-bold text-${color}">${match}</span>`;
+            }
+          );
         }
 
         return highlighted;

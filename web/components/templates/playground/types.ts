@@ -4,3 +4,9 @@ export type PlaygroundModel = {
   name: string;
   provider: ProviderName;
 };
+
+export type ResponseFormatType = "text" | "json_schema";
+export type ResponseFormat = {
+  type: ResponseFormatType;
+  json_schema?: any;
+}

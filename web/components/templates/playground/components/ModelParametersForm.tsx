@@ -41,19 +41,14 @@ import Image from "next/image";
 import { ModelParameters } from "@/lib/api/llm/generate";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { useFeatureFlag } from "@/services/hooks/admin";
+import { ResponseFormat, ResponseFormatType } from "../types";
 
 interface ModelParametersFormProps {
   isScrolled: boolean;
   parameters: ModelParameters;
   onParametersChange: (_parameters: ModelParameters) => void;
-  responseFormat: {
-    type: string;
-    json_schema?: string;
-  };
-  onResponseFormatChange: (_responseFormat: {
-    type: string;
-    json_schema?: string;
-  }) => void;
+  responseFormat: ResponseFormat;
+  onResponseFormatChange: (_responseFormat: ResponseFormat) => boolean;
   useAIGateway: boolean;
   setUseAIGateway: (_useAIGateway: boolean) => void;
 }
@@ -240,7 +235,7 @@ export default function ModelParametersForm({
                     setIsResponseFormatModalOpen(true);
                   } else {
                     onResponseFormatChange({
-                      type: value,
+                      type: value as ResponseFormatType,
                       json_schema: undefined,
                     });
                   }
@@ -570,12 +565,11 @@ export default function ModelParametersForm({
         open={isResponseFormatModalOpen}
         setOpen={setIsResponseFormatModalOpen}
         responseFormat={responseFormat.json_schema ?? ""}
-        onResponseFormatChange={(format) => {
-          onResponseFormatChange({
+        onResponseFormatChange={(format) => onResponseFormatChange({
             type: format ? "json_schema" : "text",
             json_schema: format ? format : undefined,
-          });
-        }}
+          })
+        }
       />
     </>
   );

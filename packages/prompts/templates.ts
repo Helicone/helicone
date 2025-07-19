@@ -65,7 +65,7 @@ export class HeliconeTemplateManager {
     for (const variable of variables) {
       const value = inputs[variable.name];
       
-      if (value === undefined || value === null || !this.isTypeCompatible(value, variable.type)) {
+      if (!value || !this.isTypeCompatible(value, variable.type)) {
         errors.push({
           variable: variable.name,
           expected: variable.type,
@@ -93,6 +93,21 @@ export class HeliconeTemplateManager {
     };
   }
   
+  /**
+   * Replace all template variables with random values
+   * @param template - The template string containing {{hc:NAME:type}} patterns
+   * @param value - The base value to randomize for each variable
+   * @returns The template string with all variables replaced with random values
+   */
+  static placeholderAllVariables(template: string): string {
+    TEMPLATE_REGEX.lastIndex = 0;
+    let counter = 0;
+    return template.replace(TEMPLATE_REGEX, () => {
+      counter++;
+      return `"${counter}"`;
+    });
+  }
+
   /**
    * Get a list of all variable names from a template (convenience method)
    * @param template - The template string
