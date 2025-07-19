@@ -6,6 +6,7 @@ import PlaygroundHeader from "./PlaygroundHeader";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Tool } from "@helicone-package/llm-mapper/types";
 import { ModelParameters } from "@/lib/api/llm/generate";
+import { ResponseFormat } from "../types";
 
 interface PlaygroundMessagesPanelProps {
   mappedContent: MappedLLMRequest | null;
@@ -15,14 +16,8 @@ interface PlaygroundMessagesPanelProps {
   setSelectedModel: (_model: string) => void;
   tools: Tool[];
   setTools: (_tools: Tool[]) => void;
-  responseFormat: {
-    type: string;
-    json_schema?: string;
-  };
-  setResponseFormat: (_responseFormat: {
-    type: string;
-    json_schema?: string;
-  }) => void;
+  responseFormat: ResponseFormat;
+  setResponseFormat: (_responseFormat: ResponseFormat) => void;
   modelParameters: ModelParameters;
   setModelParameters: (_modelParameters: ModelParameters) => void;
   promptVersionId: string | undefined;

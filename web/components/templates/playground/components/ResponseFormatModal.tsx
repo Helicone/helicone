@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import MarkdownEditor from "@/components/shared/markdownEditor";
 import clsx from "clsx";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import useNotification from "@/components/shared/notification/useNotification";
 
 interface ResponseFormatModalProps {
@@ -49,10 +49,15 @@ export default function ResponseFormatModal({
   responseFormat,
   onResponseFormatChange,
 }: ResponseFormatModalProps) {
-  const [responseFormatText, setResponseFormatText] = useState(
-    JSON.stringify(responseFormat, null, 2)
-  );
+  const [responseFormatText, setResponseFormatText] = useState("");
   const { setNotification } = useNotification();
+
+  useEffect(() => {
+    const newValue = typeof responseFormat === 'string' 
+      ? responseFormat 
+      : JSON.stringify(responseFormat, null, 2);
+    setResponseFormatText(newValue);
+  }, [responseFormat]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -63,20 +68,21 @@ export default function ResponseFormatModal({
       </DialogTrigger> */}
       <DialogContent
         className={clsx(
-          "max-w-7xl max-h-[600px] h-full gap-0 overflow-y-auto items-start flex flex-col"
+          "max-w-7xl max-h-[600px] flex flex-col overflow-y-auto"
         )}
       >
         <DialogHeader>
           <DialogTitle>Response Format</DialogTitle>
         </DialogHeader>
-        <MarkdownEditor
-          placeholder={FORMAT_PLACEHOLDER}
-          language="json"
-          text={responseFormatText}
-          setText={setResponseFormatText}
-          className="w-full h-full overflow-y-auto border border-border rounded-md my-4"
-          containerClassName="w-full h-full"
-        />
+        <div className="max-h-[350px] min-h-[350px] overflow-y-auto border border-border">
+          <MarkdownEditor
+            placeholder={FORMAT_PLACEHOLDER}
+            language="json"
+            text={responseFormatText}
+            setText={setResponseFormatText}
+            className="w-full min-h-[350px]"
+          />
+        </div>
         <DialogFooter className="flex justify-between w-full">
           <DialogClose asChild>
             <Button variant="outline">Cancel</Button>

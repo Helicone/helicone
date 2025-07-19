@@ -339,22 +339,20 @@ export default function ToolsConfigurationModal({
             <Button
               onClick={() => {
                 try {
-                  const validatedTools = currentTools.map((tool) => {
-                    if (
-                      selectedToolIndex !== null &&
-                      tool === currentTools[selectedToolIndex]
-                    ) {
-                      return JSON.parse(toolAsString);
-                    }
-                    return {
-                      ...tool,
-                      parameters: JSON.parse(parametersAsString),
+                  if (selectedToolIndex !== null) {
+                    const updatedTools = [...currentTools];
+                    const parsedParameters = JSON.parse(parametersAsString);
+                    updatedTools[selectedToolIndex] = {
+                      ...updatedTools[selectedToolIndex],
+                      parameters: parsedParameters,
                     };
-                  });
-                  onToolsChange(validatedTools);
+                    onToolsChange(updatedTools);
+                  } else {
+                    onToolsChange(currentTools);
+                  }
                   setToolsDialogOpen(false);
                 } catch (error) {
-                  console.error("Invalid JSON in tool parameters");
+                  console.error("Invalid JSON");
                 }
               }}
             >

@@ -37,6 +37,8 @@ import { HeliconeTemplateManager } from "@helicone-package/prompts/templates";
 import { TemplateVariable } from "@helicone-package/prompts/types";
 import { Message } from "@helicone-package/llm-mapper/types";
 import { useVariableColorMapStore } from "@/store/features/playground/variableColorMap";
+import { ResponseFormat, ResponseFormatType, VariableInput } from "./types";
+import { useLocalStorage } from "@/services/hooks/localStorage";
 
 export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
   _type: "openai-chat",
@@ -111,7 +113,7 @@ const convertMappedLLMRequestToOpenAIChatRequest = (
   mappedContent: MappedLLMRequest, tools: Tool[],
   modelParameters: ModelParameters,
   selectedModel: string,
-  responseFormat: { type: string, json_schema?: string }
+  responseFormat: ResponseFormat
 ): OpenAIChatRequest => {
   const openaiRequest = openaiChatMapper.toExternal({
     ...mappedContent.schema.request,
@@ -268,55 +270,10 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         setSelectedModel(OPENROUTER_MODEL_MAP[closestMatch.target]);
       }
 
-      onUpdateMappedContent(convertedContent);
-      setDefaultContent(convertedContent);
-      setTools(convertedContent.schema.request.tools ?? []);
-
-      setModelParameters({
-        temperature: promptVersionData.promptBody.temperature,
-        max_tokens: promptVersionData.promptBody.max_tokens,
-        top_p: promptVersionData.promptBody.top_p,
-        frequency_penalty: promptVersionData.promptBody.frequency_penalty,
-        presence_penalty: promptVersionData.promptBody.presence_penalty,
-        stop: promptVersionData.promptBody.stop
-          ? Array.isArray(promptVersionData.promptBody.stop)
-            ? promptVersionData.promptBody.stop.join(",")
-            : promptVersionData.promptBody.stop
-          : undefined,
-      });
-
-      if (promptVersionData.promptBody.response_format) {
-        setResponseFormat({
-          type: promptVersionData.promptBody.response_format.type || "text",
-          json_schema: promptVersionData.promptBody.response_format.json_schema,
-        });
-      }
-    }
-  }, [promptVersionData, isPromptVersionLoading]);
-
-  useEffect(() => {
-    if (promptVersionData && promptVersionData.promptBody && !isPromptVersionLoading) {
-      const convertedContent = convertOpenAIChatRequestToMappedLLMRequest(promptVersionData.promptBody);
-      
-      const model = promptVersionData.promptBody.model;
-      if (model && model in OPENROUTER_MODEL_MAP) {
-        setSelectedModel(OPENROUTER_MODEL_MAP[model.split("/")[1]]);
-      } else if (model) {
-        const similarities = Object.keys(OPENROUTER_MODEL_MAP).map((m) => ({
-          target: m,
-          similarity: findBestMatch(model, m),
-        }));
-
-        const closestMatch = similarities.reduce((best, current) =>
-          current.similarity > best.similarity ? current : best
-        );
-        setSelectedModel(OPENROUTER_MODEL_MAP[closestMatch.target]);
-      }
-
       setMappedContent(convertedContent);
       setDefaultContent(convertedContent);
       setTools(convertedContent.schema.request.tools ?? []);
-      
+
       setModelParameters({
         temperature: promptVersionData.promptBody.temperature,
         max_tokens: promptVersionData.promptBody.max_tokens,
@@ -330,12 +287,14 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           : undefined,
       });
 
-      if (promptVersionData.promptBody.response_format) {
+      const storedResponseFormat = convertedContent?.schema.request.response_format as ResponseFormat;
+      if (storedResponseFormat) {
         setResponseFormat({
-          type: promptVersionData.promptBody.response_format.type || "text",
-          json_schema: promptVersionData.promptBody.response_format.json_schema,
+          type: "json_schema" as ResponseFormatType,
+          json_schema: storedResponseFormat.json_schema,
         });
       }
+
     }
   }, [promptVersionData, isPromptVersionLoading]);
 
@@ -350,25 +309,13 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     stop: undefined,
   });
 
-  const [responseFormat, setResponseFormat] = useState<{
-    type: string;
-    json_schema?: string;
-  }>({
+  const [responseFormat, setResponseFormat] = useState<ResponseFormat>({
     type: "text",
     json_schema: undefined,
   });
 
   const [templateVariables, setTemplateVariables] = useState<Map<string, TemplateVariable>>(new Map());
-  const [substitutionValues, setSubstitutionValues] = useState<Map<string, string>>(new Map());
-  const [templatedMessages, setTemplatedMessages] = useState<Message[]>([]);
-
-  const onUpdateSubstitutionValue = (name: string, value: string) => {
-    setSubstitutionValues(prev => {
-      const next = new Map(prev);
-      next.set(name, value);
-      return next;
-    });
-  };
+  const [variableInputs, setVariableInputs] = useLocalStorage<Record<string, VariableInput>>("variableInputs", {});
 
   useMemo(() => {
     if (!requestId) {
@@ -575,11 +522,55 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     }
   }
 
-  const createTemplatedMessages = (messages: Message[]): { hasSubstitutionFailure: boolean, templatedMessages: Message[] } => {
+  // Watch changes to mappedContent, to update template variables
+  useEffect(() => {
+    const allVariables = new Map<string, TemplateVariable>();
+
+    const processContent = (content: string) => {
+      const variables = HeliconeTemplateManager.extractVariables(content);
+      variables.forEach((variable: TemplateVariable) => allVariables.set(variable.name, variable));
+      return variables;
+    };
+    
+    if (mappedContent) {
+      const messages = mappedContent.schema.request.messages;
+      if (messages) {
+        for (const message of messages) {
+          if (message._type === "contentArray" && message.contentArray) {
+            message.contentArray.forEach(item => {
+              if (item._type === "message" && item.content) {
+                processContent(item.content);
+              }
+            });
+          } else if (message.content) {
+            processContent(message.content);
+          }
+        }
+      }
+
+      const responseFormat = mappedContent.schema.request.response_format;
+      if (responseFormat && responseFormat.type === "json_schema") {
+        if (responseFormat.json_schema) {
+          const jsonSchemaString = JSON.stringify(responseFormat.json_schema);
+          processContent(jsonSchemaString);
+        }
+      }
+
+      const tools = mappedContent.schema.request.tools;
+      if (tools) {
+        const toolsString = JSON.stringify(tools);
+        processContent(toolsString);
+      }
+    }
+
+    initializeColorMap(Array.from(allVariables.keys()));
+    setTemplateVariables(allVariables);
+  }, [mappedContent]);
+
+
+  const createTemplatedMessages = (substitutionValues: Record<string, any>, messages: Message[]): { hasSubstitutionFailure: boolean, templatedMessages: Message[] } => {
     const templatedMessages: Message[] = [];
     let hasSubstitutionFailure = false;
-
-    if (!messages) return { hasSubstitutionFailure, templatedMessages };
 
     for (const message of messages) {
       if (message._type === "contentArray" && message.contentArray) {
@@ -587,7 +578,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           if (item._type === "message" && item.content) {
             const substituted = HeliconeTemplateManager.substituteVariables(
               item.content,
-              Object.fromEntries(substitutionValues)
+              substitutionValues
             );
             if (!substituted.success) hasSubstitutionFailure = true;
             return { 
@@ -604,7 +595,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       } else if (message.content) {
         const substituted = HeliconeTemplateManager.substituteVariables(
           message.content,
-          Object.fromEntries(substitutionValues)
+          substitutionValues
         );
         if (!substituted.success) hasSubstitutionFailure = true;
         templatedMessages.push({
@@ -615,43 +606,63 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         templatedMessages.push(message);
       } 
     }
-    
+
     return { hasSubstitutionFailure, templatedMessages };
   };
 
-  const onUpdateMappedContent = (newMappedContent: MappedLLMRequest | null) => {
-    if (!newMappedContent) {
-      setMappedContent(null);
-      return;
-    }
 
-    const messages = newMappedContent.schema.request.messages;
-    const allVariables = new Map<string, TemplateVariable>();
-
-    const processContent = (content: string) => {
-      const variables = HeliconeTemplateManager.extractVariables(content);
-      variables.forEach((variable: TemplateVariable) => allVariables.set(variable.name, variable));
-      return variables;
-    };
-
-    if (messages) {
-      for (const message of messages) {
-        if (message._type === "contentArray" && message.contentArray) {
-          message.contentArray.forEach(item => {
-            if (item._type === "message" && item.content) {
-              processContent(item.content);
+  const createTemplatedMappedContent = (mappedContent: MappedLLMRequest): MappedLLMRequest => {
+    try {
+      const substitutionValues = Object.fromEntries(
+        Object.entries(variableInputs).map(([name, { isObject, value }]) => {
+          if (isObject) {
+            try {
+              return [name, JSON.parse(value)];
+            } catch (error) {
+              throw new Error(`Invalid JSON for variable "${name}": ${error}`);
             }
-          });
-        } else if (message.content) {
-          processContent(message.content);
-        }
+          }
+          return [name, value];
+        })
+      );
+      const { hasSubstitutionFailure, templatedMessages } = createTemplatedMessages(substitutionValues, mappedContent.schema.request.messages || []);
+      if (hasSubstitutionFailure) {
+        setNotification("Improper template values!", "error");
+        return mappedContent;
       }
-    }
+      const substituted = HeliconeTemplateManager.substituteVariablesJSON(
+        mappedContent.schema.request.response_format as ResponseFormat,
+        substitutionValues
+      );
+      if (!substituted.success) {
+        setNotification("Improper template values!", "error");
+      }
 
-    initializeColorMap(Array.from(allVariables.keys()));
-    setTemplateVariables(allVariables);
-    setMappedContent(newMappedContent);
-  };
+      const substitutedTools = HeliconeTemplateManager.substituteVariablesJSON(
+        mappedContent.schema.request.tools as Tool[],
+        substitutionValues
+      );
+      if (!substitutedTools.success) {
+        setNotification("Improper template values!", "error");
+      }
+
+      return {
+        ...mappedContent,
+        schema: {
+          ...mappedContent.schema,
+          request: { 
+            ...mappedContent.schema.request,
+            messages: templatedMessages,
+            response_format: substituted.success ? substituted.result as ResponseFormat : mappedContent.schema.request.response_format,
+            tools: substitutedTools.success ? substitutedTools.result as Tool[] : mappedContent.schema.request.tools
+          }
+        }
+      };
+    } catch (error) {
+      setNotification("Improper template values!", "error");
+      return mappedContent;
+    }
+  }
 
   const onRun = async () => {
     if (!mappedContent) {
@@ -665,29 +676,15 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       abortController.current = new AbortController();
 
       try {
-        const { hasSubstitutionFailure, templatedMessages } = createTemplatedMessages(mappedContent.schema.request.messages || []);
-        if (hasSubstitutionFailure) {
-          setNotification("Improper template values!", "error");
-          return;
-        }
 
-        const templatedContent = {
-          ...mappedContent,
-          schema: {
-            ...mappedContent.schema,
-            request: {
-              ...mappedContent.schema.request,
-              messages: templatedMessages
-            }
-          }
-        };
+        const templatedMappedContent = createTemplatedMappedContent(mappedContent);
 
         const openaiRequest = convertMappedLLMRequestToOpenAIChatRequest(
-          templatedContent,
-          tools,
+          templatedMappedContent,
+          templatedMappedContent.schema.request.tools as Tool[],
           modelParameters,
           selectedModel,
-          responseFormat
+          templatedMappedContent.schema.request.response_format as ResponseFormat
         );
 
         const stream = await generateStream({
@@ -759,12 +756,27 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mappedContent]);
 
+  const handleResponseFormatChange = (newResponseFormat: ResponseFormat) => {
+    setResponseFormat(newResponseFormat);
+    if (!mappedContent) {
+      return;
+    }
+    setMappedContent({
+      ...mappedContent,
+      schema: {
+        ...mappedContent.schema,
+        request: { ...mappedContent.schema.request, response_format: newResponseFormat }
+      }
+    });
+  }
+  
+  
   const handleToolsChange = (newTools: Tool[]) => {
     setTools(newTools);
     if (!mappedContent) {
       return;
     }
-    onUpdateMappedContent({
+    setMappedContent({
       ...mappedContent,
       schema: {
         ...mappedContent.schema,
@@ -778,7 +790,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     if (!mappedContent) {
       return;
     }
-    onUpdateMappedContent({
+    setMappedContent({
       ...mappedContent,
       model: newModel,
       schema: {
@@ -830,13 +842,13 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
             <PlaygroundMessagesPanel
               mappedContent={mappedContent}
               defaultContent={defaultContent}
-              setMappedContent={onUpdateMappedContent}
+              setMappedContent={setMappedContent}
               selectedModel={selectedModel}
               setSelectedModel={handleSelectedModelChange}
               tools={tools}
               setTools={handleToolsChange}
               responseFormat={responseFormat}
-              setResponseFormat={setResponseFormat}
+              setResponseFormat={handleResponseFormatChange}
               modelParameters={modelParameters}
               setModelParameters={setModelParameters}
               promptVersionId={promptVersionId}
@@ -854,7 +866,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               <ResizablePanel defaultSize={60} minSize={30}>
                 <PlaygroundResponsePanel
                   mappedContent={mappedContent}
-                  setMappedContent={onUpdateMappedContent}
+                  setMappedContent={setMappedContent}
                   error={error}
                   response={response}
                   isStreaming={isStreaming}
@@ -866,8 +878,10 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                 <ResizablePanel defaultSize={40} minSize={20}>
                   <PlaygroundVariablesPanel 
                     variables={templateVariables}
-                    onUpdateValue={onUpdateSubstitutionValue}
-                    values={substitutionValues}
+                    onUpdateValue={(name, { isObject, value }) => {
+                      setVariableInputs({ ...variableInputs, [name]: { isObject, value } });
+                    }}
+                    values={variableInputs}
                   />
                 </ResizablePanel>
               </>
