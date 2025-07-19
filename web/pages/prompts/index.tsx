@@ -1,13 +1,29 @@
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import type { ReactElement } from "react";
 import AuthLayout from "../../components/layout/auth/authLayout";
-import PromptsPage from "../../components/templates/prompts/promptsPage";
+import OldPromptsPage from "../../components/templates/prompts/promptsPage";
+import NewPromptsPage from "../../components/templates/prompts2025/promptsPage";
 import { NextPageWithLayout } from "../_app";
+import { useHasPrompts } from "../../services/hooks/prompts/prompts";
+import LoadingAnimation from "@/components/shared/loadingAnimation";
+import { useRouter } from "next/router";
 
 const Prompts: NextPageWithLayout<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = (props) => {
-  return <PromptsPage defaultIndex={props.defaultIndex} />;
+  const { hasPrompts, isLoading } = useHasPrompts();
+  const router = useRouter();
+  const forceNewVersion = router.query.v2 === "true";
+
+  if (isLoading) {
+    return <LoadingAnimation />;
+  }
+
+  return forceNewVersion || !hasPrompts ? (
+    <NewPromptsPage defaultIndex={props.defaultIndex} />
+  ) : (
+    <OldPromptsPage defaultIndex={props.defaultIndex} />
+  );
 };
 
 Prompts.getLayout = function getLayout(page: ReactElement) {

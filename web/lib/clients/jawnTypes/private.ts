@@ -225,6 +225,9 @@ export interface paths {
   "/v1/request/{requestId}/score": {
     post: operations["AddScores"];
   };
+  "/v1/prompt/has-prompts": {
+    get: operations["HasPrompts"];
+  };
   "/v1/prompt/query": {
     post: operations["GetPrompts"];
   };
@@ -1589,6 +1592,14 @@ Json: JsonObject;
     ScoreRequest: {
       scores: components["schemas"]["Scores"];
     };
+    "ResultSuccess__hasPrompts-boolean__": {
+      data: {
+        hasPrompts: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__hasPrompts-boolean_.string_": components["schemas"]["ResultSuccess__hasPrompts-boolean__"] | components["schemas"]["ResultError_string_"];
     PromptsResult: {
       id: string;
       user_defined_id: string;
@@ -16662,6 +16673,16 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  HasPrompts: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__hasPrompts-boolean_.string_"];
         };
       };
     };
