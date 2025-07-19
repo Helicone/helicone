@@ -32,7 +32,7 @@ import { ModelParameters } from "@/lib/api/llm/generate";
 import { useCreatePrompt, useUpdatePrompt, useGetPromptVersionWithBody } from "@/services/hooks/prompts";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { useOrg } from "@/components/layout/org/organizationContext";
-import { useFeatureFlag } from "@/services/hooks/admin";
+
 import { HeliconeTemplateManager } from "@helicone-package/prompts/templates";
 import { TemplateVariable } from "@helicone-package/prompts/types";
 import { Message } from "@helicone-package/llm-mapper/types";
@@ -202,10 +202,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { setNotification } = useNotification();
   const router = useRouter();
   const organization = useOrg();
-  const { data: hasAccessToPrompts } = useFeatureFlag(
-    "prompts_2025",
-    organization?.currentOrg?.id ?? "",
-  );
   const { initializeColorMap } = useVariableColorMapStore();
 
   useEffect(() => {
@@ -809,7 +805,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
             <Small className="font-bold text-gray-500 dark:text-slate-300">
               Playground
             </Small>
-            {hasAccessToPrompts && promptVersionData?.prompt && promptVersionData?.promptVersion && (
+            {promptVersionData?.prompt && promptVersionData?.promptVersion && (
               <>
                 <div className="w-px h-4 bg-border" />
                 <div className="flex items-center gap-2">
@@ -872,20 +868,16 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                   isStreaming={isStreaming}
                 />
               </ResizablePanel>
-              {hasAccessToPrompts && (
-                <>
-                <ResizableHandle />
-                <ResizablePanel defaultSize={40} minSize={20}>
-                  <PlaygroundVariablesPanel 
-                    variables={templateVariables}
-                    onUpdateValue={(name, { isObject, value }) => {
-                      setVariableInputs({ ...variableInputs, [name]: { isObject, value } });
-                    }}
-                    values={variableInputs}
-                  />
-                </ResizablePanel>
-              </>
-              )}
+              <ResizableHandle />
+              <ResizablePanel defaultSize={40} minSize={20}>
+                <PlaygroundVariablesPanel 
+                  variables={templateVariables}
+                  onUpdateValue={(name, { isObject, value }) => {
+                    setVariableInputs({ ...variableInputs, [name]: { isObject, value } });
+                  }}
+                  values={variableInputs}
+                />
+              </ResizablePanel>
             </ResizablePanelGroup>
           </ResizablePanel>
         </ResizablePanelGroup>

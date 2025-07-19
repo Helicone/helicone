@@ -1,6 +1,7 @@
 import { Small } from "@/components/ui/typography";
 
 import FoldedHeader from "@/components/shared/FoldedHeader";
+import { BookOpenIcon } from "@heroicons/react/24/outline";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -21,7 +22,6 @@ import { Search } from "lucide-react";
 import type { PromptWithVersions } from "@/services/hooks/prompts";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import TableFooter from "../requests/tableFooter";
-import { useFeatureFlag } from "@/services/hooks/admin";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import router from "next/router";
 import useNotification from "@/components/shared/notification/useNotification";
@@ -29,7 +29,7 @@ import { SimpleTable } from "@/components/shared/table/simpleTable";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import { getInitialColumns } from "./initialColumns";
 import TagsFilter from "./TagsFilter";
-import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+import { Button } from "@/components/ui/button";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -44,24 +44,6 @@ const PromptsPage = (props: PromptsPageProps) => {
   const [filteredMajorVersion, setFilteredMajorVersion] = useState<
     number | null
   >(null);
-  const organization = useOrg();
-  const auth = useHeliconeAuthClient();
-  const [userEmail, setUserEmail] = useState<string | null>(null);
-  
-  useEffect(() => {
-    const fetchUser = async () => {
-      const user = await auth.getUser();
-      if (user.data?.email) {
-        setUserEmail(user.data.email);
-      }
-    };
-    fetchUser();
-  }, [auth]);
-  
-  const { data: hasAccessToPrompts } = useFeatureFlag(
-    "prompts_2025",
-    organization?.currentOrg?.id ?? "",
-  );
   const [sortKey, setSortKey] = useState<string | undefined>("created");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -110,13 +92,6 @@ const PromptsPage = (props: PromptsPageProps) => {
   const setProductionVersion = useSetProductionVersion();
   const deletePrompt = useDeletePrompt();
   const deletePromptVersion = useDeletePromptVersion();
-
-  // Allow access if user has the feature flag OR if they're the specific email
-  const hasAccess = hasAccessToPrompts || userEmail === "marchukov.work@gmail.com";
-  
-  if (!hasAccess) {
-    return <div>You do not have access to Prompts</div>;
-  }
 
   const handleSetProductionVersion = async (promptId: string, promptVersionId: string) => {
     const result = await setProductionVersion.mutateAsync({
@@ -244,6 +219,19 @@ const PromptsPage = (props: PromptsPageProps) => {
             Prompts
           </Small>
         }
+        rightSection={
+          <section className="flex flex-row items-center gap-2">
+            <Button
+              onClick={() => {
+                // TODO: Add docs link
+              }}
+              variant="secondary"
+              size="sm"
+            >
+              <BookOpenIcon className="h-4 w-4" />
+            </Button>
+          </section>
+        }
       />
       <div className="flex flex-col w-full h-full min-h-[80vh] border-t border-border">
         <ResizablePanelGroup direction="horizontal">
@@ -278,7 +266,7 @@ const PromptsPage = (props: PromptsPageProps) => {
                   <SimpleTable
                     data={sortedPrompts}
                     columns={columns}
-                    emptyMessage="No prompts found"
+                    emptyMessage="No prompts yet. Create one in the Playground!"
                     onSelect={handleRowSelect}
                     onSort={handleSort}
                     currentSortKey={sortKey}
