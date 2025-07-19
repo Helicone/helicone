@@ -26,7 +26,7 @@ import { getJawnClient } from "@/lib/clients/jawn";
 import { cn } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { InfoIcon, PencilIcon, Settings2Icon } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ResponseFormatModal from "./ResponseFormatModal";
 import {
   DialogContent,
@@ -51,6 +51,7 @@ interface ModelParametersFormProps {
   onResponseFormatChange: (_responseFormat: ResponseFormat) => void;
   useAIGateway: boolean;
   setUseAIGateway: (_useAIGateway: boolean) => void;
+  error: string | null;
 }
 
 export default function ModelParametersForm({
@@ -68,11 +69,12 @@ export default function ModelParametersForm({
   onResponseFormatChange,
   useAIGateway,
   setUseAIGateway,
+  error,
 }: ModelParametersFormProps) {
   const organization = useOrg();
   const { data: hasAccessToAIGateway } = useFeatureFlag(
     "ai_gateway",
-    organization?.currentOrg?.id ?? ""
+    organization?.currentOrg?.id ?? "",
   );
 
   const updateParameter = (key: keyof ModelParameters, value: any) => {
@@ -112,7 +114,7 @@ export default function ModelParametersForm({
             body: {
               requestsThroughHelicone,
             },
-          }
+          },
         );
 
         if (error) {
@@ -124,7 +126,7 @@ export default function ModelParametersForm({
       onMutate: ({ requestsThroughHelicone }) => {
         queryClient.setQueryData(
           ["playground-requests-through-helicone"],
-          requestsThroughHelicone
+          requestsThroughHelicone,
         );
       },
       onSuccess: () => {
@@ -139,7 +141,7 @@ export default function ModelParametersForm({
     queryFn: async () => {
       const jawn = getJawnClient();
       const { data } = await jawn.GET(
-        "/v1/playground/requests-through-helicone"
+        "/v1/playground/requests-through-helicone",
       );
       return data?.data ?? false;
     },
@@ -147,10 +149,28 @@ export default function ModelParametersForm({
 
   const [isOpenRouterDialogOpen, setIsOpenRouterDialogOpen] = useState(false);
 
+  // Auto-open OpenRouter dialog when the specific error occurs
+  useEffect(() => {
+    console.log("error", error);
+    if (
+      error &&
+      error.includes(
+        "You have reached your free playground limit. Please add your own OpenRouter key to continue using the Playground.",
+      )
+    ) {
+      setIsOpenRouterDialogOpen(true);
+    }
+  }, [error]);
+
   return (
     <>
       <Popover
-        open={isModelParametersPopoverOpen}
+        open={
+          isModelParametersPopoverOpen ||
+          error?.includes(
+            "You have reached your free playground limit. Please add your own OpenRouter key to continue using the Playground.",
+          )
+        }
         onOpenChange={setIsModelParametersPopoverOpen}
       >
         <PopoverTrigger asChild>
@@ -158,18 +178,18 @@ export default function ModelParametersForm({
             variant="outline"
             size="icon"
             className={cn(
-              "border-none h-9 w-9",
+              "h-9 w-9 border-none",
               isScrolled &&
-                "bg-slate-100 dark:bg-slate-950 hover:bg-slate-200 dark:hover:bg-slate-900"
+                "bg-slate-100 hover:bg-slate-200 dark:bg-slate-950 dark:hover:bg-slate-900",
             )}
           >
             <Settings2Icon className="h-3.5 w-3.5" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-96 mr-2">
-          <div className="flex flex-col gap-4 py-4 w-full">
+        <PopoverContent className="mr-2 w-96">
+          <div className="flex w-full flex-col gap-4 py-4">
             <div className="flex justify-end">
-              <div className="flex gap-2 items-center">
+              <div className="flex items-center gap-2">
                 <Tooltip>
                   <TooltipTrigger>
                     <InfoIcon className="h-3 w-3 text-muted-foreground" />
@@ -199,7 +219,7 @@ export default function ModelParametersForm({
             </div>
             {hasAccessToAIGateway && (
               <div className="flex justify-end">
-                <div className="flex gap-2 items-center">
+                <div className="flex items-center gap-2">
                   <Label htmlFor="ai-gateway" className="text-sm">
                     Use Helicone AI Gateway
                   </Label>
@@ -225,7 +245,7 @@ export default function ModelParametersForm({
                 {responseFormat.type === "json_schema" && (
                   <PencilIcon
                     onClick={() => setIsResponseFormatModalOpen(true)}
-                    className="h-3 w-3 cursor-pointer text-muted-foreground hover:text-foreground mr-2"
+                    className="mr-2 h-3 w-3 cursor-pointer text-muted-foreground hover:text-foreground"
                   />
                 )}
               </div>
@@ -427,7 +447,7 @@ export default function ModelParametersForm({
                   onChange={(e) =>
                     updateParameter(
                       "frequency_penalty",
-                      parseFloat(e.target.value)
+                      parseFloat(e.target.value),
                     )
                   }
                   className="w-20"
@@ -481,7 +501,7 @@ export default function ModelParametersForm({
                   onChange={(e) =>
                     updateParameter(
                       "presence_penalty",
-                      parseFloat(e.target.value)
+                      parseFloat(e.target.value),
                     )
                   }
                   className="w-20"
@@ -565,7 +585,8 @@ export default function ModelParametersForm({
         open={isResponseFormatModalOpen}
         setOpen={setIsResponseFormatModalOpen}
         responseFormat={responseFormat.json_schema ?? ""}
-        onResponseFormatChange={(format) => onResponseFormatChange({
+        onResponseFormatChange={(format) =>
+          onResponseFormatChange({
             type: format ? "json_schema" : "text",
             json_schema: format ? format : undefined,
           })

@@ -22,10 +22,15 @@ interface PlaygroundMessagesPanelProps {
   setModelParameters: (_modelParameters: ModelParameters) => void;
   promptVersionId: string | undefined;
   onCreatePrompt: (tags: string[], promptName: string) => void;
-  onSavePrompt: (newMajorVersion: boolean, setAsProduction: boolean, commitMessage: string) => void;
+  onSavePrompt: (
+    newMajorVersion: boolean,
+    setAsProduction: boolean,
+    commitMessage: string,
+  ) => void;
   onRun: () => void;
   useAIGateway: boolean;
   setUseAIGateway: (_useAIGateway: boolean) => void;
+  error: string | null;
 }
 
 const PlaygroundMessagesPanel = ({
@@ -46,6 +51,7 @@ const PlaygroundMessagesPanel = ({
   onRun,
   useAIGateway,
   setUseAIGateway,
+  error,
 }: PlaygroundMessagesPanelProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
@@ -94,7 +100,7 @@ const PlaygroundMessagesPanel = ({
 
   const handleScroll = useCallback(() => {
     const scrollArea = scrollAreaRef.current?.querySelector(
-      "[data-radix-scroll-area-viewport]"
+      "[data-radix-scroll-area-viewport]",
     );
     if (!scrollArea) return;
 
@@ -117,7 +123,7 @@ const PlaygroundMessagesPanel = ({
   // Add resize observer
   useEffect(() => {
     const scrollArea = scrollAreaRef.current?.querySelector(
-      "[data-radix-scroll-area-viewport]"
+      "[data-radix-scroll-area-viewport]",
     );
     if (!scrollArea) return;
 
@@ -142,7 +148,7 @@ const PlaygroundMessagesPanel = ({
   useEffect(() => {
     if (mappedContent) {
       const scrollArea = scrollAreaRef.current?.querySelector(
-        "[data-radix-scroll-area-viewport]"
+        "[data-radix-scroll-area-viewport]",
       );
       if (!scrollArea) return;
       checkScrollPosition(scrollArea);
@@ -150,7 +156,7 @@ const PlaygroundMessagesPanel = ({
   }, [mappedContent]);
 
   return (
-    <div className="relative w-full h-full flex flex-col">
+    <div className="relative flex h-full w-full flex-col">
       <ScrollArea
         className="w-full flex-1"
         onScrollCapture={handleScroll}
@@ -159,9 +165,9 @@ const PlaygroundMessagesPanel = ({
         {(() => {
           if (!mappedContent) {
             return (
-              <div className="flex flex-col w-full h-full">
+              <div className="flex h-full w-full flex-col">
                 {/* Message Role Header Skeleton */}
-                <div className="h-12 w-full flex flex-row items-center justify-between px-4 sticky top-0 bg-sidebar-background dark:bg-black z-10">
+                <div className="sticky top-0 z-10 flex h-12 w-full flex-row items-center justify-between bg-sidebar-background px-4 dark:bg-black">
                   <div className="flex items-center gap-2">
                     <Skeleton className="h-6 w-24" />
                   </div>
@@ -171,11 +177,11 @@ const PlaygroundMessagesPanel = ({
                   </div>
                 </div>
                 {/* Message Content Skeleton */}
-                <div className="w-full flex flex-col px-4 pb-4 pt-0">
-                  <Skeleton className="w-full h-32 mt-4" />
+                <div className="flex w-full flex-col px-4 pb-4 pt-0">
+                  <Skeleton className="mt-4 h-32 w-full" />
                 </div>
                 {/* Additional Message Skeleton */}
-                <div className="h-12 w-full flex flex-row items-center justify-between px-4 border-t border-border">
+                <div className="flex h-12 w-full flex-row items-center justify-between border-t border-border px-4">
                   <div className="flex items-center gap-2">
                     <Skeleton className="h-6 w-24" />
                   </div>
@@ -184,8 +190,8 @@ const PlaygroundMessagesPanel = ({
                     <Skeleton className="h-8 w-8 rounded-md" />
                   </div>
                 </div>
-                <div className="w-full flex flex-col px-4 pb-4 pt-0">
-                  <Skeleton className="w-full h-24 mt-4" />
+                <div className="flex w-full flex-col px-4 pb-4 pt-0">
+                  <Skeleton className="mt-4 h-24 w-full" />
                 </div>
               </div>
             );
@@ -221,7 +227,7 @@ const PlaygroundMessagesPanel = ({
         ref={headerRef}
         className={`transition-all duration-200 ${
           isScrolled
-            ? "absolute bottom-0 left-1/2 -translate-x-1/2 z-50 rounded-lg shadow-xl mx-4 mb-4 w-[600px] bg-background border-none"
+            ? "absolute bottom-0 left-1/2 z-50 mx-4 mb-4 w-[600px] -translate-x-1/2 rounded-lg border-none bg-background shadow-xl"
             : "bg-sidebar-background"
         }`}
       >
@@ -244,6 +250,7 @@ const PlaygroundMessagesPanel = ({
           isScrolled={isScrolled}
           useAIGateway={useAIGateway}
           setUseAIGateway={setUseAIGateway}
+          error={error}
         />
       </div>
     </div>
