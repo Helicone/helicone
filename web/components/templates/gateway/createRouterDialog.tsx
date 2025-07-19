@@ -193,12 +193,6 @@ const CreateRouterDialog = ({
               </a>
             </div>
           </div>
-          {/* <a
-              href="#"
-              className="gap-1 text-xs text-muted-foreground hover:underline"
-            >
-              For more information about the configuration, see the documentation
-            </a> */}
 
           {/* Configuration Accordion */}
           <Accordion type="single" collapsible className="w-full">
