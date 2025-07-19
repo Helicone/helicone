@@ -116,7 +116,6 @@ const CreateRouterDialog = ({
   };
 
   const handleSubmit = () => {
-    console.log("submit");
     if (!name) {
       return;
     }
