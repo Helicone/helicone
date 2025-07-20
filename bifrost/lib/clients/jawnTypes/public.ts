@@ -529,6 +529,15 @@ export interface paths {
     get: operations["GetLatestRouterConfig"];
     put: operations["UpdateRouter"];
   };
+  "/v1/gateway/{routerHash}/requests-over-time": {
+    get: operations["GetRouterRequestsOverTime"];
+  };
+  "/v1/gateway/{routerHash}/cost-over-time": {
+    get: operations["GetRouterCostOverTime"];
+  };
+  "/v1/gateway/{routerHash}/latency-over-time": {
+    get: operations["GetRouterLatencyOverTime"];
+  };
   "/v1/evals/query": {
     post: operations["QueryEvals"];
   };
@@ -800,6 +809,8 @@ export interface components {
       cache_reference_id?: components["schemas"]["Partial_TextOperators_"];
       assets?: components["schemas"]["Partial_TextOperators_"];
       "helicone-score-feedback"?: components["schemas"]["Partial_BooleanOperators_"];
+      gateway_router_id?: components["schemas"]["Partial_TextOperators_"];
+      gateway_deployment_target?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
     "Pick_FilterLeaf.users_view-or-request_response_rmt_": {
@@ -3130,6 +3141,44 @@ Json: JsonObject;
       error: null;
     };
     "Result_LatestRouterConfig.string_": components["schemas"]["ResultSuccess_LatestRouterConfig_"] | components["schemas"]["ResultError_string_"];
+    RouterRequestsOverTime: {
+      /** Format: double */
+      status: number;
+      /** Format: double */
+      count: number;
+      /** Format: date-time */
+      time: string;
+    };
+    "ResultSuccess_RouterRequestsOverTime-Array_": {
+      data: components["schemas"]["RouterRequestsOverTime"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_RouterRequestsOverTime-Array.string_": components["schemas"]["ResultSuccess_RouterRequestsOverTime-Array_"] | components["schemas"]["ResultError_string_"];
+    RouterCostOverTime: {
+      /** Format: double */
+      cost: number;
+      /** Format: date-time */
+      time: string;
+    };
+    "ResultSuccess_RouterCostOverTime-Array_": {
+      data: components["schemas"]["RouterCostOverTime"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_RouterCostOverTime-Array.string_": components["schemas"]["ResultSuccess_RouterCostOverTime-Array_"] | components["schemas"]["ResultError_string_"];
+    RouterLatencyOverTime: {
+      /** Format: double */
+      duration: number;
+      /** Format: date-time */
+      time: string;
+    };
+    "ResultSuccess_RouterLatencyOverTime-Array_": {
+      data: components["schemas"]["RouterLatencyOverTime"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_RouterLatencyOverTime-Array.string_": components["schemas"]["ResultSuccess_RouterLatencyOverTime-Array_"] | components["schemas"]["ResultError_string_"];
     CreateRouterResult: {
       routerVersionId: string;
       routerHash: string;
@@ -6443,6 +6492,51 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetRouterRequestsOverTime: {
+    parameters: {
+      path: {
+        routerHash: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_RouterRequestsOverTime-Array.string_"];
+        };
+      };
+    };
+  };
+  GetRouterCostOverTime: {
+    parameters: {
+      path: {
+        routerHash: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_RouterCostOverTime-Array.string_"];
+        };
+      };
+    };
+  };
+  GetRouterLatencyOverTime: {
+    parameters: {
+      path: {
+        routerHash: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_RouterLatencyOverTime-Array.string_"];
         };
       };
     };
