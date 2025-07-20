@@ -69,8 +69,6 @@ export function RequestOverTimeChart({
       dbIncrement: timeIncrement,
     });
 
-  console.log("routerRequestsOverTime", routerRequestsOverTime);
-
   const getStatusCountsOverTime = useMemo(() => {
     const statusCounts: {
       overTime: { [key: string]: { success: number; error: number } };

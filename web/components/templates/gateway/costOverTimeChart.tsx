@@ -66,8 +66,6 @@ export function CostOverTimeChart({
       dbIncrement: timeIncrement,
     });
 
-  console.log("routerCostOverTime", routerCostOverTime);
-
   const chartData = useMemo(() => {
     return routerCostOverTime?.data?.map((d) => ({
       date: getTimeMap(timeIncrement)(new Date(d.time)),

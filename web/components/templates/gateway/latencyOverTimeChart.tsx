@@ -60,7 +60,6 @@ export function LatencyOverTimeChart({
   totalRequests: number;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  console.log("totalRequests", totalRequests);
   const { routerLatencyOverTime, isLoadingRouterLatencyOverTime } =
     useGatewayRouterStats({
       routerHash,

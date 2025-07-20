@@ -118,7 +118,6 @@ export async function getXOverTime<T>(
     right: userFilter,
     operator: "and",
   };
-  console.log({ filter });
 
   if (!isValidTimeFilter(timeFilter)) {
     return { data: null, error: "Invalid time filter" };
@@ -135,7 +134,6 @@ export async function getXOverTime<T>(
       filter,
       argsAcc: [],
     });
-  console.log({ builtFilter });
   const { fill, argsAcc } = buildFill(
     startDate,
     endDate,
@@ -160,8 +158,6 @@ WHERE (
 GROUP BY ${groupByColumns.concat([dateTrunc]).join(", ")}
 ORDER BY ${dateTrunc} ASC ${fill}
 `;
-
-  console.log(query, argsAcc);
 
   type ResultType = T & {
     created_at_trunc: Date;

@@ -699,7 +699,6 @@ export async function buildFilterWithAuth(
   })
 ): Promise<{ filter: string; argsAcc: any[] }> {
   const { org_id, filter } = args;
-  console.log("inside buildFilterWithAuth with args", { org_id, filter });
 
   const filterNode: FilterNode = {
     left: getOrgIdFilter(org_id),
