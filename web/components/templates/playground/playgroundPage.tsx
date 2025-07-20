@@ -29,7 +29,11 @@ import { OPENROUTER_MODEL_MAP } from "./new/openRouterModelMap";
 import FoldedHeader from "@/components/shared/FoldedHeader";
 import { Small } from "@/components/ui/typography";
 import { ModelParameters } from "@/lib/api/llm/generate";
-import { useCreatePrompt, useUpdatePrompt, useGetPromptVersionWithBody } from "@/services/hooks/prompts";
+import {
+  useCreatePrompt,
+  useUpdatePrompt,
+  useGetPromptVersionWithBody,
+} from "@/services/hooks/prompts";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { useFeatureFlag } from "@/services/hooks/admin";
@@ -110,10 +114,11 @@ export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
 };
 
 const convertMappedLLMRequestToOpenAIChatRequest = (
-  mappedContent: MappedLLMRequest, tools: Tool[],
+  mappedContent: MappedLLMRequest,
+  tools: Tool[],
   modelParameters: ModelParameters,
   selectedModel: string,
-  responseFormat: ResponseFormat
+  responseFormat: ResponseFormat,
 ): OpenAIChatRequest => {
   const openaiRequest = openaiChatMapper.toExternal({
     ...mappedContent.schema.request,
@@ -126,7 +131,7 @@ const convertMappedLLMRequestToOpenAIChatRequest = (
       Object.entries(modelParameters).map(([key, value]) => [
         key,
         value === null ? undefined : value,
-      ])
+      ]),
     ),
     model: selectedModel,
     response_format:
@@ -139,9 +144,11 @@ const convertMappedLLMRequestToOpenAIChatRequest = (
   };
 
   return promptBody;
-}
+};
 
-const convertOpenAIChatRequestToMappedLLMRequest = (openaiRequest: OpenAIChatRequest): MappedLLMRequest => {
+const convertOpenAIChatRequestToMappedLLMRequest = (
+  openaiRequest: OpenAIChatRequest,
+): MappedLLMRequest => {
   const internalRequest = openaiChatMapper.toInternal(openaiRequest);
 
   return {
@@ -212,7 +219,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     if (requestId && promptVersionId) {
       setNotification(
         "Cannot load request and prompt at the same time.",
-        "error"
+        "error",
       );
       router.push("/playground");
       return;
@@ -226,15 +233,15 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     useGetPromptVersionWithBody(promptVersionId);
 
   const [selectedModel, setSelectedModel] = useState<string>(
-    "openai/gpt-4.1-mini"
+    "openai/gpt-4.1-mini",
   );
 
   const [defaultContent, setDefaultContent] = useState<MappedLLMRequest | null>(
-    null
+    null,
   );
 
   const [mappedContent, setMappedContent] = useState<MappedLLMRequest | null>(
-    null
+    null,
   );
 
   useEffect(() => {
@@ -252,7 +259,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       !isPromptVersionLoading
     ) {
       const convertedContent = convertOpenAIChatRequestToMappedLLMRequest(
-        promptVersionData.promptBody
+        promptVersionData.promptBody,
       );
 
       const model = promptVersionData.promptBody.model;
@@ -265,7 +272,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         }));
 
         const closestMatch = similarities.reduce((best, current) =>
-          current.similarity > best.similarity ? current : best
+          current.similarity > best.similarity ? current : best,
         );
         setSelectedModel(OPENROUTER_MODEL_MAP[closestMatch.target]);
       }
@@ -287,14 +294,14 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           : undefined,
       });
 
-      const storedResponseFormat = convertedContent?.schema.request.response_format as ResponseFormat;
+      const storedResponseFormat = convertedContent?.schema.request
+        .response_format as ResponseFormat;
       if (storedResponseFormat) {
         setResponseFormat({
           type: "json_schema" as ResponseFormatType,
           json_schema: storedResponseFormat.json_schema,
         });
       }
-
     }
   }, [promptVersionData, isPromptVersionLoading]);
 
@@ -314,8 +321,12 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     json_schema: undefined,
   });
 
-  const [templateVariables, setTemplateVariables] = useState<Map<string, TemplateVariable>>(new Map());
-  const [variableInputs, setVariableInputs] = useLocalStorage<Record<string, VariableInput>>("variableInputs", {});
+  const [templateVariables, setTemplateVariables] = useState<
+    Map<string, TemplateVariable>
+  >(new Map());
+  const [variableInputs, setVariableInputs] = useLocalStorage<
+    Record<string, VariableInput>
+  >("variableInputs", {});
 
   useMemo(() => {
     if (!requestId) {
@@ -342,7 +353,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         }));
 
         const closestMatch = similarities.reduce((best, current) =>
-          current.similarity > best.similarity ? current : best
+          current.similarity > best.similarity ? current : best,
         );
         setSelectedModel(OPENROUTER_MODEL_MAP[closestMatch.target]);
       }
@@ -442,15 +453,18 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   const createPromptMutation = useCreatePrompt();
   const updatePromptMutation = useUpdatePrompt();
 
-  const onCreatePrompt = async (
-    tags: string[],
-    promptName: string,
-  ) => {
+  const onCreatePrompt = async (tags: string[], promptName: string) => {
     if (!mappedContent) {
       setNotification("No mapped content", "error");
       return;
     }
-    const promptBody = convertMappedLLMRequestToOpenAIChatRequest(mappedContent, tools, modelParameters, selectedModel, responseFormat);
+    const promptBody = convertMappedLLMRequestToOpenAIChatRequest(
+      mappedContent,
+      tools,
+      modelParameters,
+      selectedModel,
+      responseFormat,
+    );
     try {
       const result = await createPromptMutation.mutateAsync({
         body: {
@@ -462,10 +476,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
 
       if (result.data?.versionId) {
         router.push(`/playground?promptVersionId=${result.data.versionId}`);
-        setNotification(
-          `Prompt created successfully!`,
-          "success"
-        );
+        setNotification(`Prompt created successfully!`, "success");
       }
     } catch (error) {
       console.error("Failed to save prompt:", error);
@@ -489,11 +500,11 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     }
 
     const promptBody = convertMappedLLMRequestToOpenAIChatRequest(
-      mappedContent, 
-      tools, 
-      modelParameters, 
-      selectedModel, 
-      responseFormat
+      mappedContent,
+      tools,
+      modelParameters,
+      selectedModel,
+      responseFormat,
     );
 
     try {
@@ -510,17 +521,14 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
 
       if (result.data?.id) {
         router.push(`/playground?promptVersionId=${result.data.id}`);
-        
-        setNotification(
-          `Prompt version saved successfully!`,
-          "success"
-        );
+
+        setNotification(`Prompt version saved successfully!`, "success");
       }
     } catch (error) {
       console.error("Failed to save prompt version:", error);
       setNotification("Failed to save prompt version", "error");
     }
-  }
+  };
 
   // Watch changes to mappedContent, to update template variables
   useEffect(() => {
@@ -528,16 +536,18 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
 
     const processContent = (content: string) => {
       const variables = HeliconeTemplateManager.extractVariables(content);
-      variables.forEach((variable: TemplateVariable) => allVariables.set(variable.name, variable));
+      variables.forEach((variable: TemplateVariable) =>
+        allVariables.set(variable.name, variable),
+      );
       return variables;
     };
-    
+
     if (mappedContent) {
       const messages = mappedContent.schema.request.messages;
       if (messages) {
         for (const message of messages) {
           if (message._type === "contentArray" && message.contentArray) {
-            message.contentArray.forEach(item => {
+            message.contentArray.forEach((item) => {
               if (item._type === "message" && item.content) {
                 processContent(item.content);
               }
@@ -567,51 +577,54 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     setTemplateVariables(allVariables);
   }, [mappedContent]);
 
-
-  const createTemplatedMessages = (substitutionValues: Record<string, any>, messages: Message[]): { hasSubstitutionFailure: boolean, templatedMessages: Message[] } => {
+  const createTemplatedMessages = (
+    substitutionValues: Record<string, any>,
+    messages: Message[],
+  ): { hasSubstitutionFailure: boolean; templatedMessages: Message[] } => {
     const templatedMessages: Message[] = [];
     let hasSubstitutionFailure = false;
 
     for (const message of messages) {
       if (message._type === "contentArray" && message.contentArray) {
-        const processedContentArray = message.contentArray.map(item => {
+        const processedContentArray = message.contentArray.map((item) => {
           if (item._type === "message" && item.content) {
             const substituted = HeliconeTemplateManager.substituteVariables(
               item.content,
-              substitutionValues
+              substitutionValues,
             );
             if (!substituted.success) hasSubstitutionFailure = true;
-            return { 
+            return {
               ...item,
-              content: substituted.success ? substituted.result : item.content 
+              content: substituted.success ? substituted.result : item.content,
             };
           }
           return item;
         });
         templatedMessages.push({
           ...message,
-          contentArray: processedContentArray
+          contentArray: processedContentArray,
         });
       } else if (message.content) {
         const substituted = HeliconeTemplateManager.substituteVariables(
           message.content,
-          substitutionValues
+          substitutionValues,
         );
         if (!substituted.success) hasSubstitutionFailure = true;
         templatedMessages.push({
           ...message,
-          content: substituted.success ? substituted.result : message.content
+          content: substituted.success ? substituted.result : message.content,
         });
       } else {
         templatedMessages.push(message);
-      } 
+      }
     }
 
     return { hasSubstitutionFailure, templatedMessages };
   };
 
-
-  const createTemplatedMappedContent = (mappedContent: MappedLLMRequest): MappedLLMRequest => {
+  const createTemplatedMappedContent = (
+    mappedContent: MappedLLMRequest,
+  ): MappedLLMRequest => {
     try {
       const substitutionValues = Object.fromEntries(
         Object.entries(variableInputs).map(([name, { isObject, value }]) => {
@@ -623,16 +636,20 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
             }
           }
           return [name, value];
-        })
+        }),
       );
-      const { hasSubstitutionFailure, templatedMessages } = createTemplatedMessages(substitutionValues, mappedContent.schema.request.messages || []);
+      const { hasSubstitutionFailure, templatedMessages } =
+        createTemplatedMessages(
+          substitutionValues,
+          mappedContent.schema.request.messages || [],
+        );
       if (hasSubstitutionFailure) {
         setNotification("Improper template values!", "error");
         return mappedContent;
       }
       const substituted = HeliconeTemplateManager.substituteVariablesJSON(
         mappedContent.schema.request.response_format as ResponseFormat,
-        substitutionValues
+        substitutionValues,
       );
       if (!substituted.success) {
         setNotification("Improper template values!", "error");
@@ -640,7 +657,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
 
       const substitutedTools = HeliconeTemplateManager.substituteVariablesJSON(
         mappedContent.schema.request.tools as Tool[],
-        substitutionValues
+        substitutionValues,
       );
       if (!substitutedTools.success) {
         setNotification("Improper template values!", "error");
@@ -650,19 +667,23 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         ...mappedContent,
         schema: {
           ...mappedContent.schema,
-          request: { 
+          request: {
             ...mappedContent.schema.request,
             messages: templatedMessages,
-            response_format: substituted.success ? substituted.result as ResponseFormat : mappedContent.schema.request.response_format,
-            tools: substitutedTools.success ? substitutedTools.result as Tool[] : mappedContent.schema.request.tools
-          }
-        }
+            response_format: substituted.success
+              ? (substituted.result as ResponseFormat)
+              : mappedContent.schema.request.response_format,
+            tools: substitutedTools.success
+              ? (substitutedTools.result as Tool[])
+              : mappedContent.schema.request.tools,
+          },
+        },
       };
     } catch (error) {
       setNotification("Improper template values!", "error");
       return mappedContent;
     }
-  }
+  };
 
   const onRun = async () => {
     if (!mappedContent) {
@@ -676,15 +697,16 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       abortController.current = new AbortController();
 
       try {
-
-        const templatedMappedContent = createTemplatedMappedContent(mappedContent);
+        const templatedMappedContent =
+          createTemplatedMappedContent(mappedContent);
 
         const openaiRequest = convertMappedLLMRequestToOpenAIChatRequest(
           templatedMappedContent,
           templatedMappedContent.schema.request.tools as Tool[],
           modelParameters,
           selectedModel,
-          templatedMappedContent.schema.request.response_format as ResponseFormat
+          templatedMappedContent.schema.request
+            .response_format as ResponseFormat,
         );
 
         const stream = await generateStream({
@@ -705,7 +727,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               setResponse(result.fullContent);
             },
           },
-          abortController.current.signal
+          abortController.current.signal,
         );
 
         if (result && result.error) {
@@ -720,12 +742,13 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           } else {
             console.error("Error:", error);
             setError(
-              error.message || "An error occurred while generating the response"
+              error.message ||
+                "An error occurred while generating the response",
             );
             setNotification(
               error.message ||
                 "An error occurred while generating the response",
-              "error"
+              "error",
             );
           }
         }
@@ -765,12 +788,14 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       ...mappedContent,
       schema: {
         ...mappedContent.schema,
-        request: { ...mappedContent.schema.request, response_format: newResponseFormat }
-      }
+        request: {
+          ...mappedContent.schema.request,
+          response_format: newResponseFormat,
+        },
+      },
     });
-  }
-  
-  
+  };
+
   const handleToolsChange = (newTools: Tool[]) => {
     setTools(newTools);
     if (!mappedContent) {
@@ -780,8 +805,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       ...mappedContent,
       schema: {
         ...mappedContent.schema,
-        request: { ...mappedContent.schema.request, tools: newTools }
-      }
+        request: { ...mappedContent.schema.request, tools: newTools },
+      },
     });
   };
 
@@ -801,7 +826,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   };
 
   return (
-    <main className="h-screen flex flex-col w-full animate-fade-in">
+    <main className="flex h-screen w-full animate-fade-in flex-col">
       <FoldedHeader
         showFold={false}
         leftSection={
@@ -809,54 +834,57 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
             <Small className="font-bold text-gray-500 dark:text-slate-300">
               Playground
             </Small>
-            {hasAccessToPrompts && promptVersionData?.prompt && promptVersionData?.promptVersion && (
-              <>
-                <div className="w-px h-4 bg-border" />
-                <div className="flex items-center gap-2">
-                  <Small className="font-bold text-gray-500 dark:text-slate-300">
-                    {promptVersionData.prompt.name.length > 30
-                      ? promptVersionData.prompt.name.substring(0, 27) + "..."
-                      : promptVersionData.prompt.name}
-                  </Small>
-                  <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20">
-                    {promptVersionData.promptVersion.minor_version === 0
-                      ? `v${promptVersionData.promptVersion.major_version}`
-                      : `v${promptVersionData.promptVersion.major_version}.${promptVersionData.promptVersion.minor_version}`}
-                  </span>
-                </div>
-              </>
-            )}
+            {hasAccessToPrompts &&
+              promptVersionData?.prompt &&
+              promptVersionData?.promptVersion && (
+                <>
+                  <div className="h-4 w-px bg-border" />
+                  <div className="flex items-center gap-2">
+                    <Small className="font-bold text-gray-500 dark:text-slate-300">
+                      {promptVersionData.prompt.name.length > 30
+                        ? promptVersionData.prompt.name.substring(0, 27) + "..."
+                        : promptVersionData.prompt.name}
+                    </Small>
+                    <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20">
+                      {promptVersionData.promptVersion.minor_version === 0
+                        ? `v${promptVersionData.promptVersion.major_version}`
+                        : `v${promptVersionData.promptVersion.major_version}.${promptVersionData.promptVersion.minor_version}`}
+                    </span>
+                  </div>
+                </>
+              )}
           </div>
         }
       />
-      <div className="flex flex-col w-full h-full min-h-[80vh] border-t border-border">
+      <div className="flex h-full min-h-[80vh] w-full flex-col border-t border-border">
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel
-            className="flex w-full h-full"
+            className="flex h-full w-full"
             defaultSize={70}
             minSize={30}
           >
             {isPromptVersionLoading || isRequestLoading ? (
               <LoadingAnimation />
             ) : (
-            <PlaygroundMessagesPanel
-              mappedContent={mappedContent}
-              defaultContent={defaultContent}
-              setMappedContent={setMappedContent}
-              selectedModel={selectedModel}
-              setSelectedModel={handleSelectedModelChange}
-              tools={tools}
-              setTools={handleToolsChange}
-              responseFormat={responseFormat}
-              setResponseFormat={handleResponseFormatChange}
-              modelParameters={modelParameters}
-              setModelParameters={setModelParameters}
-              promptVersionId={promptVersionId}
-              onCreatePrompt={onCreatePrompt}
-              onSavePrompt={onSavePrompt}
-              onRun={onRun}
-              useAIGateway={useAIGateway}
+              <PlaygroundMessagesPanel
+                mappedContent={mappedContent}
+                defaultContent={defaultContent}
+                setMappedContent={setMappedContent}
+                selectedModel={selectedModel}
+                setSelectedModel={handleSelectedModelChange}
+                tools={tools}
+                setTools={handleToolsChange}
+                responseFormat={responseFormat}
+                setResponseFormat={handleResponseFormatChange}
+                modelParameters={modelParameters}
+                setModelParameters={setModelParameters}
+                promptVersionId={promptVersionId}
+                onCreatePrompt={onCreatePrompt}
+                onSavePrompt={onSavePrompt}
+                onRun={onRun}
+                useAIGateway={useAIGateway}
                 setUseAIGateway={setUseAIGateway}
+                error={error}
               />
             )}
           </ResizablePanel>
@@ -874,17 +902,20 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               </ResizablePanel>
               {hasAccessToPrompts && (
                 <>
-                <ResizableHandle />
-                <ResizablePanel defaultSize={40} minSize={20}>
-                  <PlaygroundVariablesPanel 
-                    variables={templateVariables}
-                    onUpdateValue={(name, { isObject, value }) => {
-                      setVariableInputs({ ...variableInputs, [name]: { isObject, value } });
-                    }}
-                    values={variableInputs}
-                  />
-                </ResizablePanel>
-              </>
+                  <ResizableHandle />
+                  <ResizablePanel defaultSize={40} minSize={20}>
+                    <PlaygroundVariablesPanel
+                      variables={templateVariables}
+                      onUpdateValue={(name, { isObject, value }) => {
+                        setVariableInputs({
+                          ...variableInputs,
+                          [name]: { isObject, value },
+                        });
+                      }}
+                      values={variableInputs}
+                    />
+                  </ResizablePanel>
+                </>
               )}
             </ResizablePanelGroup>
           </ResizablePanel>
