@@ -214,6 +214,8 @@ interface RequestResponseRMTToOperators {
   cache_reference_id: SingleKey<TextOperators>;
   assets: SingleKey<TextOperators>;
   "helicone-score-feedback": SingleKey<BooleanOperators>; // TODO: make this not a string literal key
+  gateway_router_id: SingleKey<TextOperators>;
+  gateway_deployment_target: SingleKey<TextOperators>;
 }
 export type FilterLeafRequestResponseRMT =
   SingleKey<RequestResponseRMTToOperators>;

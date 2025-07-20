@@ -3,13 +3,17 @@ import { AuthParams } from "../packages/common/auth/types";
 import { err, ok, Result } from "../packages/common/result";
 import { BaseManager } from "./BaseManager";
 import crypto from "crypto";
-import { KeyManager } from "./apiKeys/KeyManager";
 import {
   CreateRouterResult,
   LatestRouterConfig,
   Router,
+  RouterCostOverTime,
+  RouterLatencyOverTime,
+  RouterRequestsOverTime,
 } from "../controllers/public/gatewayController";
 import { init } from "@paralleldrive/cuid2";
+import { getXOverTime, TimeIncrement } from "./helpers/getXOverTime";
+import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 
 export class GatewayManager extends BaseManager {
   constructor(authParams: AuthParams) {
@@ -70,6 +74,167 @@ export class GatewayManager extends BaseManager {
     }
 
     return ok(result.data[0]);
+  }
+
+  async getRouterRequestsOverTime(
+    routerHash: string,
+    timeFilter: {
+      start: string;
+      end: string;
+    },
+    dbIncrement: TimeIncrement,
+    timeZoneDifference: number
+  ): Promise<Result<RouterRequestsOverTime[], string>> {
+    const res = await getXOverTime<{
+      count: number;
+      status: number;
+    }>(
+      {
+        timeFilter,
+        userFilter: {
+          left: {
+            request_response_rmt: {
+              gateway_router_id: {
+                equals: routerHash,
+              },
+            },
+          },
+          right: {
+            request_response_rmt: {
+              gateway_deployment_target: {
+                equals: "cloud",
+              },
+            },
+          },
+          operator: "and",
+        },
+        dbIncrement,
+        timeZoneDifference,
+      },
+      {
+        orgId: this.authParams.organizationId,
+        countColumns: ["count(*) as count"],
+        groupByColumns: ["status"],
+      }
+    );
+
+    if (res.error) {
+      return err(res.error);
+    }
+
+    return ok(
+      res.data?.map((d) => ({
+        time: new Date(new Date(d.created_at_trunc).getTime()),
+        count: d.count ? +d.count : 0,
+        status: d.status ? +d.status : 0,
+      })) ?? []
+    );
+  }
+
+  async getRouterCostOverTime(
+    routerHash: string,
+    timeFilter: {
+      start: string;
+      end: string;
+    },
+    dbIncrement: TimeIncrement,
+    timeZoneDifference: number
+  ): Promise<Result<RouterCostOverTime[], string>> {
+    const res = await getXOverTime<{
+      cost: number;
+    }>(
+      {
+        timeFilter,
+        userFilter: {
+          left: {
+            request_response_rmt: {
+              gateway_router_id: {
+                equals: routerHash,
+              },
+            },
+          },
+          right: {
+            request_response_rmt: {
+              gateway_deployment_target: {
+                equals: "cloud",
+              },
+            },
+          },
+          operator: "and",
+        },
+        dbIncrement,
+        timeZoneDifference,
+      },
+      {
+        orgId: this.authParams.organizationId,
+        countColumns: [`sum(cost) / ${COST_PRECISION_MULTIPLIER} as cost`],
+        groupByColumns: [],
+      }
+    );
+
+    if (res.error) {
+      return err(res.error);
+    }
+
+    return ok(
+      res.data?.map((d) => ({
+        time: new Date(new Date(d.created_at_trunc).getTime()),
+        cost: d.cost ? +d.cost : 0,
+      })) ?? []
+    );
+  }
+
+  async getRouterLatencyOverTime(
+    routerHash: string,
+    timeFilter: {
+      start: string;
+      end: string;
+    },
+    dbIncrement: TimeIncrement,
+    timeZoneDifference: number
+  ): Promise<Result<RouterLatencyOverTime[], string>> {
+    const res = await getXOverTime<{
+      latency: number;
+    }>(
+      {
+        timeFilter,
+        userFilter: {
+          left: {
+            request_response_rmt: {
+              gateway_router_id: {
+                equals: routerHash,
+              },
+            },
+          },
+          right: {
+            request_response_rmt: {
+              gateway_deployment_target: {
+                equals: "cloud",
+              },
+            },
+          },
+          operator: "and",
+        },
+        dbIncrement,
+        timeZoneDifference,
+      },
+      {
+        orgId: this.authParams.organizationId,
+        countColumns: [`avg(request_response_rmt.latency) as latency`],
+        groupByColumns: [],
+      }
+    );
+
+    if (res.error) {
+      return err(res.error);
+    }
+
+    return ok(
+      res.data?.map((d) => ({
+        time: new Date(new Date(d.created_at_trunc).getTime()),
+        duration: d.latency ? +d.latency : 0,
+      })) ?? []
+    );
   }
 
   async createRouter(params: {
