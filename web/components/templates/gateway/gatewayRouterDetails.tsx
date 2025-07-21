@@ -267,6 +267,21 @@ const GatewayRouterPage = () => {
         }
         rightSection={
           <div className="flex items-center gap-2">
+            <div className="text-sm text-muted-foreground">Router Hash</div>
+            <div className="text-sm text-muted-foreground">
+              {gatewayRouter?.data?.hash}
+            </div>
+            <Button
+              variant="ghost"
+              size="sm_sleek"
+              className="text-muted-foreground"
+              onClick={() => {
+                navigator.clipboard.writeText(gatewayRouter?.data?.hash ?? "");
+                setNotification("Copied to clipboard", "success");
+              }}
+            >
+              <CopyIcon className="h-3 w-3" />
+            </Button>
             <RouterUseDialog
               routerHash={gatewayRouter?.data?.hash ?? ""}
               open={routerUseDialogOpen}

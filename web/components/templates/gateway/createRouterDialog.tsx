@@ -93,8 +93,6 @@ const CreateRouterDialog = ({
       },
     });
 
-    console.log("router", JSON.stringify(router, null, 2));
-
     setOpen(false);
     queryClient.invalidateQueries({ queryKey: ["get", "/v1/gateway"] });
     setNotification("Router created", "success");
