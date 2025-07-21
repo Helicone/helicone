@@ -138,9 +138,7 @@ function caseForCost(
   useDefaultCost: boolean = false,
   optimized: boolean = false,
 ) {
-  return `
-  CASE
-  ${costs
+  const validCases = costs
     .map((cost) => {
       const costPerMultiple = {
         prompt: Math.round(cost.cost.prompt_token * multiple),
@@ -200,23 +198,23 @@ function caseForCost(
         costParts.push(`${costPerMultiple.per_call}`); // Assuming per_call cost is per call
       }
 
-      if (costParts.length > 0) {
-        const costString = costParts.join(" + ");
-        if (cost.model.operator === "equals") {
-          const op = optimized ? "=" : "ILIKE";
-          return `WHEN (${table}.model ${op} '${cost.model.value}') THEN ${costString}`;
-        } else if (cost.model.operator === "startsWith") {
-          return `WHEN (${table}.model LIKE '${cost.model.value}%') THEN ${costString}`;
-        } else if (cost.model.operator === "includes") {
-          return `WHEN (${table}.model ILIKE '%${cost.model.value}%') THEN ${costString}`;
-        } else {
-          throw new Error("Unknown operator");
-        }
+      const costString = costParts.length > 0 ? costParts.join(" + ") : "0";
+      
+      if (cost.model.operator === "equals") {
+        const op = optimized ? "=" : "ILIKE";
+        return `WHEN (${table}.model ${op} '${cost.model.value}') THEN ${costString}`;
+      } else if (cost.model.operator === "startsWith") {
+        return `WHEN (${table}.model LIKE '${cost.model.value}%') THEN ${costString}`;
+      } else if (cost.model.operator === "includes") {
+        return `WHEN (${table}.model ILIKE '%${cost.model.value}%') THEN ${costString}`;
       } else {
-        return ``; // Return empty string if no costs apply for this model
+        throw new Error("Unknown operator");
       }
-    })
-    .join("\n")}
+    });
+
+  return `
+  CASE
+  ${validCases.join("\n")}
   ELSE ${useDefaultCost ? `toInt64(${table}.cost)` : `toInt64(0)`}
 END
 `;
@@ -228,6 +226,8 @@ export function clickhouseModelFilter(
   rows: ModelWithProvider[],
   table = "request_response_rmt",
 ) {
+  const uniqueProviders = Array.from(new Set(rows.map(row => row.provider)));
+  
   return `
   (
     (${rows.map((row) => {
@@ -242,7 +242,7 @@ export function clickhouseModelFilter(
       }
     }).join(" OR ")})
     AND
-    (${table}.provider IN (${rows.map((row) => `'${row.provider}'`).join(",")}))
+    (${table}.provider IN (${uniqueProviders.map(provider => `'${provider}'`).join(",")}))
   )
   `
 }
@@ -253,13 +253,21 @@ export function clickhousePriceCalcNonAggregated(
   models: ModelWithProvider[],
   table = "request_response_rmt",
 ) {
+  const modelsByProvider = models.reduce((acc, model) => {
+    if (!acc[model.provider]) {
+      acc[model.provider] = [];
+    }
+    acc[model.provider].push(model.modelRow);
+    return acc;
+  }, {} as Record<string, ModelRow[]>);
+
   return `
   (
     CASE
-    ${models
-      .map((row) => {
-        return `WHEN (${table}.provider = '${row.provider}') 
-      THEN (${caseForCost([row.modelRow], table, COST_PRECISION_MULTIPLIER, false, false)})`;
+    ${Object.entries(modelsByProvider)
+      .map(([provider, modelRows]) => {
+        return `WHEN (${table}.provider = '${provider}') 
+      THEN (${caseForCost(modelRows, table, COST_PRECISION_MULTIPLIER)})`;
       })
       .join("\n    ")}
     ELSE 0
