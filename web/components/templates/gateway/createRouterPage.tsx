@@ -1,58 +1,37 @@
-import MarkdownEditor from "@/components/shared/markdownEditor";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogHeader,
-  DialogTrigger,
-  DialogFooter,
-  DialogDescription,
-  DialogClose,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { $JAWN_API } from "@/lib/clients/jawn";
-import { useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2Icon, PlusIcon } from "lucide-react";
-import { useState } from "react";
-import yaml from "js-yaml";
-import useNotification from "@/components/shared/notification/useNotification";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { InfoIcon } from "lucide-react";
+import { $JAWN_API } from "@/lib/clients/jawn";
+import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import yaml from "js-yaml";
+import useNotification from "@/components/shared/notification/useNotification";
+import { useRouter } from "next/router";
+import { InfoIcon, PlusIcon } from "lucide-react";
+import MarkdownEditor from "@/components/shared/markdownEditor";
+import { H3, Small } from "@/components/ui/typography";
+import FoldedHeader from "@/components/shared/FoldedHeader";
+import { useFeatureFlag } from "@/services/hooks/admin";
+import { useOrg } from "@/components/layout/org/organizationContext";
+import Link from "next/link";
 
-const defaultConfig = `load-balance:
-  chat:
-    strategy: model-latency
-    models:
-      - openai/gpt-4o-mini
-      - anthropic/claude-3-5-sonnet`;
+const CreateRouterPage = () => {
+  const org = useOrg();
 
-const CreateRouterDialog = ({
-  open,
-  setOpen,
-  onSuccess,
-}: {
-  open: boolean;
-  setOpen: (open: boolean) => void;
-  onSuccess: (routerHash: string) => void;
-}) => {
+  const { data: hasFeatureFlag } = useFeatureFlag(
+    "ai_gateway",
+    org?.currentOrg?.id ?? "",
+  );
+
   const [name, setName] = useState("My Router");
 
   // Cache configuration
@@ -73,30 +52,40 @@ const CreateRouterDialog = ({
 
   const queryClient = useQueryClient();
   const { setNotification } = useNotification();
-  const { mutateAsync: createRouter } = $JAWN_API.useMutation(
+  const router = useRouter();
+  const { mutateAsync: createRouter, isPending } = $JAWN_API.useMutation(
     "post",
     "/v1/gateway",
   );
 
   const handleCreateRouter = async () => {
     if (!name) {
+      setNotification("Router name is required", "error");
       return;
     }
 
     const generatedConfig = generateConfig();
     const obj = yaml.load(generatedConfig);
 
-    const router = await createRouter({
-      body: {
-        name,
-        config: JSON.stringify(obj),
-      },
-    });
+    try {
+      const routerResponse = await createRouter({
+        body: {
+          name,
+          config: JSON.stringify(obj),
+        },
+      });
 
-    setOpen(false);
-    queryClient.invalidateQueries({ queryKey: ["get", "/v1/gateway"] });
-    setNotification("Router created", "success");
-    onSuccess(router?.data?.routerHash ?? "");
+      console.log("router", JSON.stringify(routerResponse, null, 2));
+
+      queryClient.invalidateQueries({ queryKey: ["get", "/v1/gateway"] });
+      setNotification("Router created successfully", "success");
+
+      // Redirect to the new router page
+      router.push(`/gateway/${routerResponse?.data?.routerId}?new-router=true`);
+    } catch (error) {
+      setNotification("Failed to create router", "error");
+      console.error("Error creating router:", error);
+    }
   };
 
   const generateConfig = () => {
@@ -145,39 +134,39 @@ const CreateRouterDialog = ({
     return `Per API Key • ${rateLimitCapacity}/${rateLimitRefillFrequency}`;
   };
 
+  if (!hasFeatureFlag) {
+    return <div>You do not have access to the AI Gateway</div>;
+  }
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <PlusIcon className="h-4 w-4" />
-          Create Router
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="mx-2 max-h-[80vh] overflow-y-auto sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>Create Router</DialogTitle>
-          <DialogDescription>
+    <main className="flex h-screen w-full animate-fade-in flex-col">
+      <FoldedHeader
+        showFold={false}
+        leftSection={
+          <Link href="/gateway">
+            <Small className="font-bold text-gray-500 dark:text-slate-300">
+              AI Gateway
+            </Small>
+          </Link>
+        }
+      />
+
+      <div className="flex-1 overflow-y-auto p-6">
+        <div>
+          <H3>Create Router</H3>
+          <Small className="mb-4 text-muted-foreground">
             Build a custom router with load balancing, caching, and rate
             limiting
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="flex flex-col gap-4">
+          </Small>
           {/* Router Name Input */}
-          <div className="flex flex-col gap-1">
-            <div className="grid items-start gap-1.5">
-              <Label htmlFor="name" className="justify-start">
-                Router Name
-              </Label>
-              <Input
-                id="name"
-                placeholder="My Router"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
-
-            {/* Configuration Documentation Link */}
+          <div className="space-y-2 py-2">
+            <Label htmlFor="name">Router Name</Label>
+            <Input
+              id="name"
+              placeholder="My Router"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
             <div className="flex w-full items-center justify-end gap-1 text-xs text-muted-foreground">
               <InfoIcon className="h-3 w-3" />
               For more information about the configuration, see the{" "}
@@ -354,7 +343,7 @@ const CreateRouterDialog = ({
           </Accordion>
 
           {/* Generated Configuration Toggle */}
-          <div className="flex justify-center">
+          <div className="flex justify-center py-2">
             <Button
               variant="outline"
               size="sm"
@@ -388,17 +377,30 @@ const CreateRouterDialog = ({
               </div>
             </div>
           )}
-        </div>
 
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
-          </DialogClose>
-          <Button onClick={handleCreateRouter}>Create Router</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          {/* Action Buttons */}
+          <div className="flex items-end justify-end gap-3">
+            <Button variant="outline" onClick={() => router.back()}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateRouter}
+              disabled={isPending || !name.trim()}
+            >
+              {isPending ? (
+                "Creating..."
+              ) : (
+                <>
+                  <PlusIcon className="mr-2 h-4 w-4" />
+                  Create Router
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </main>
   );
 };
 
-export default CreateRouterDialog;
+export default CreateRouterPage;

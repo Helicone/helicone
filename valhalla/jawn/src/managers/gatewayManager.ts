@@ -262,7 +262,7 @@ export class GatewayManager extends BaseManager {
       .update(config ?? "{}")
       .digest("hex");
     const versionResult = await dbExecute<{ id: string }>(
-      `INSERT INTO router_config_versions (router_id, version, config) VALUES ($1, $2, $3)`,
+      `INSERT INTO router_config_versions (router_id, version, config) VALUES ($1, $2, $3) RETURNING id`,
       [routerId, versionHash, config ?? "{}"]
     );
     if (versionResult.error || !versionResult.data) {

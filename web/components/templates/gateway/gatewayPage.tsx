@@ -4,18 +4,18 @@ import {
   ColumnConfig,
   SimpleTable,
 } from "@/components/shared/table/simpleTable";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Small } from "@/components/ui/typography";
+import { Button } from "@/components/ui/button";
 import { $JAWN_API } from "@/lib/clients/jawn";
 import { components } from "@/lib/clients/jawnTypes/public";
-import { PlusIcon, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { useState } from "react";
 import { formatTime } from "../prompts2025/timeUtils";
 import { useRouter } from "next/router";
-import CreateRouterDialog from "./createRouterDialog";
 import { useFeatureFlag } from "@/services/hooks/admin";
 import { useOrg } from "@/components/layout/org/organizationContext";
+import { PlusIcon } from "lucide-react";
 
 type Router = components["schemas"]["Router"];
 
@@ -53,8 +53,6 @@ const columns: ColumnConfig<Router>[] = [
 
 const GatewayPage = () => {
   const [search, setSearch] = useState("");
-  const [isCreateRouterDialogOpen, setIsCreateRouterDialogOpen] =
-    useState(false);
   const router = useRouter();
   const { data: routers, isLoading } = $JAWN_API.useQuery("get", "/v1/gateway");
   const org = useOrg();
@@ -92,10 +90,10 @@ const GatewayPage = () => {
                 className="pl-9"
               />
             </div>
-            <CreateRouterDialog
-              open={isCreateRouterDialogOpen}
-              setOpen={setIsCreateRouterDialogOpen}
-            />
+            <Button onClick={() => router.push("/gateway/create")}>
+              <PlusIcon className="h-4 w-4" />
+              Create Router
+            </Button>
           </div>
         </div>
         <div className="flex-1 overflow-hidden">
@@ -103,7 +101,14 @@ const GatewayPage = () => {
             <LoadingAnimation />
           ) : (
             <SimpleTable
-              data={routers?.data?.routers ?? []}
+              data={
+                // TODO: Move search to jawn
+                search
+                  ? ((routers?.data?.routers ?? []).filter((router) =>
+                      router.name.toLowerCase().includes(search.toLowerCase()),
+                    ) ?? [])
+                  : (routers?.data?.routers ?? [])
+              }
               columns={columns}
               emptyMessage="No routers found"
               onSelect={(gatewayRouter) => {
