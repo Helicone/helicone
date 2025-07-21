@@ -1,4 +1,6 @@
 import { betterAuth } from "better-auth";
+import { customSession } from "better-auth/plugins";
+import { getUser } from "@/packages/common/toImplement/server/useBetterAuthClient";
 import { Pool } from "pg";
 import nodemailer from "nodemailer";
 
@@ -96,4 +98,24 @@ export const auth = betterAuth({
       }
     },
   },
+  plugins: [
+    customSession(async ({ user, session }) => {
+        const dbUser = await getUser(user.id);
+        if (dbUser.error || !dbUser.data) {
+          console.warn("could not fetch authUserId from db");
+          return {
+            user,
+            session,
+          };
+        }
+        
+        return {
+            user: {
+              authUserId: dbUser.data.id,
+              ...user,
+            },
+            session
+        };
+    }),
+  ],
 });

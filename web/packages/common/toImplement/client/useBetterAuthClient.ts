@@ -4,15 +4,11 @@ import { authClient, heliconeAuthClientFromSession } from "./betterAuthHelper";
 
 export function useBetterAuthClient(): HeliconeAuthClient {
   const session = authClient.useSession();
-
-  // Map Better Auth user to HeliconeUserobject is memoized with correct dependencies
-  const clientImplementation = useMemo((): HeliconeAuthClient => {
+  return useMemo(() => {
     return heliconeAuthClientFromSession(
-      session.data,
+      session.data as any,
       session.refetch,
-      undefined
+      undefined,
     );
   }, [session]);
-
-  return clientImplementation;
 }

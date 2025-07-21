@@ -18,7 +18,7 @@
       "type": "node-terminal",
       "request": "launch",
       "cwd": "${workspaceFolder}/web",
-      "command": "npm run dev"
+      "command": "nvm use 20 && source .env.better-auth && yarn dev:better-auth"
     },
     {
       "name": "Next.js: debug client-side",
