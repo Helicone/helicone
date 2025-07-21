@@ -4,18 +4,18 @@ import {
   ColumnConfig,
   SimpleTable,
 } from "@/components/shared/table/simpleTable";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Small } from "@/components/ui/typography";
 import { $JAWN_API } from "@/lib/clients/jawn";
 import { components } from "@/lib/clients/jawnTypes/public";
-import { PlusIcon, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { useState } from "react";
 import { formatTime } from "../prompts2025/timeUtils";
 import { useRouter } from "next/router";
 import CreateRouterDialog from "./createRouterDialog";
 import { useFeatureFlag } from "@/services/hooks/admin";
 import { useOrg } from "@/components/layout/org/organizationContext";
+import RouterUseDialog from "./routerUseDialog";
 
 type Router = components["schemas"]["Router"];
 
@@ -62,6 +62,10 @@ const GatewayPage = () => {
     "ai_gateway",
     org?.currentOrg?.id ?? "",
   );
+  const [routerUseDialogOpen, setRouterUseDialogOpen] = useState(false);
+  const [justCreatedRouterHash, setJustCreatedRouterHash] = useState<
+    string | null
+  >(null);
 
   if (!hasFeatureFlag) {
     return <div>You do not have access to the AI Gateway</div>;
@@ -95,6 +99,11 @@ const GatewayPage = () => {
             <CreateRouterDialog
               open={isCreateRouterDialogOpen}
               setOpen={setIsCreateRouterDialogOpen}
+              onSuccess={(routerHash) => {
+                console.log("sucessfull dearrrsss", routerHash);
+                setJustCreatedRouterHash(routerHash);
+                setRouterUseDialogOpen(true);
+              }}
             />
           </div>
         </div>
@@ -103,7 +112,14 @@ const GatewayPage = () => {
             <LoadingAnimation />
           ) : (
             <SimpleTable
-              data={routers?.data?.routers ?? []}
+              data={
+                // TODO: Move search to jawn
+                search
+                  ? ((routers?.data?.routers ?? []).filter((router) =>
+                      router.name.toLowerCase().includes(search.toLowerCase()),
+                    ) ?? [])
+                  : (routers?.data?.routers ?? [])
+              }
               columns={columns}
               emptyMessage="No routers found"
               onSelect={(gatewayRouter) => {
@@ -113,6 +129,13 @@ const GatewayPage = () => {
           )}
         </div>
       </div>
+
+      <RouterUseDialog
+        hideTrigger
+        routerHash={justCreatedRouterHash ?? ""}
+        open={routerUseDialogOpen}
+        setOpen={setRouterUseDialogOpen}
+      />
     </main>
   );
 };

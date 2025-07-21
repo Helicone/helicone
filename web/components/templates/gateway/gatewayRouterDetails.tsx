@@ -8,7 +8,7 @@ import { $JAWN_API } from "@/lib/clients/jawn";
 import { useFeatureFlag } from "@/services/hooks/admin";
 import { useMutation } from "@tanstack/react-query";
 import yaml from "js-yaml";
-import { CopyIcon, Loader2, Settings } from "lucide-react";
+import { CopyIcon, Loader2, Settings, HelpCircle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
@@ -29,6 +29,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ThemedTable from "@/components/shared/themed/table/themedTable";
 import { FilterNode } from "@helicone-package/filters/filterDefs";
 import { ColumnDef } from "@tanstack/react-table";
@@ -38,6 +39,8 @@ import { getInitialColumns } from "./initialColumns";
 import { useGetRequests } from "@/services/hooks/requests";
 import { CostOverTimeChart } from "./costOverTimeChart";
 import { LatencyOverTimeChart } from "./latencyOverTimeChart";
+import { DiffHighlight } from "@/components/templates/welcome/diffHighlight";
+import RouterUseDialog from "./routerUseDialog";
 
 // Hook to fetch requests for a specific gateway router
 const useGatewayRouterRequests = ({
@@ -88,25 +91,6 @@ const useGatewayRouterRequests = ({
   );
 
   const isLoading = requests.isLoading;
-
-  // const { data: requests, isLoading } = $JAWN_API.useQuery(
-  //   "post",
-  //   "/v1/request/query-clickhouse",
-  //   {
-  //     body: {
-  //       filter: filter as any,
-  //       offset: (page - 1) * pageSize,
-  //       limit: pageSize,
-  //       sort: {
-  //         created_at: "desc",
-  //       },
-  //       isCached: false,
-  //     },
-  //   },
-  //   {
-  //     enabled: !!routerHash,
-  //   },
-  // );
 
   return {
     requests: requests?.requests?.map(heliconeRequestToMappedContent) ?? [],
@@ -225,6 +209,7 @@ const GatewayRouterPage = () => {
     "ai_gateway",
     org?.currentOrg?.id ?? "",
   );
+  const [routerUseDialogOpen, setRouterUseDialogOpen] = useState(false);
 
   if (!hasFeatureFlag) {
     return <div>You do not have access to the AI Gateway</div>;
@@ -276,21 +261,11 @@ const GatewayRouterPage = () => {
         }
         rightSection={
           <div className="flex items-center gap-2">
-            <div className="text-sm text-muted-foreground">Router Hash</div>
-            <div className="text-sm text-muted-foreground">
-              {gatewayRouter?.data?.hash}
-            </div>
-            <Button
-              variant="ghost"
-              size="sm_sleek"
-              className="text-muted-foreground"
-              onClick={() => {
-                navigator.clipboard.writeText(gatewayRouter?.data?.hash ?? "");
-                setNotification("Copied to clipboard", "success");
-              }}
-            >
-              <CopyIcon className="h-3 w-3" />
-            </Button>
+            <RouterUseDialog
+              routerHash={gatewayRouter?.data?.hash ?? ""}
+              open={routerUseDialogOpen}
+              setOpen={setRouterUseDialogOpen}
+            />
             <Dialog open={configModalOpen} onOpenChange={setConfigModalOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm">
@@ -339,7 +314,7 @@ const GatewayRouterPage = () => {
         }
       />
 
-      <div className="grid grid-cols-3 gap-4 p-4">
+      <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-3">
         <RequestOverTimeChart
           routerHash={gatewayRouter?.data?.hash ?? ""}
           timeFilter={timeFilter}

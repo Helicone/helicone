@@ -47,12 +47,13 @@ const defaultConfig = `load-balance:
 const CreateRouterDialog = ({
   open,
   setOpen,
+  onSuccess,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
+  onSuccess: (routerHash: string) => void;
 }) => {
   const [name, setName] = useState("My Router");
-  const [config, setConfig] = useState(defaultConfig);
 
   // Cache configuration
   const [enableCache, setEnableCache] = useState(false);
@@ -72,17 +73,33 @@ const CreateRouterDialog = ({
 
   const queryClient = useQueryClient();
   const { setNotification } = useNotification();
-  const { mutate: createRouter } = $JAWN_API.useMutation(
+  const { mutateAsync: createRouter } = $JAWN_API.useMutation(
     "post",
     "/v1/gateway",
-    {
-      onSuccess: () => {
-        setOpen(false);
-        queryClient.invalidateQueries({ queryKey: ["get", "/v1/gateway"] });
-        setNotification("Router created", "success");
-      },
-    },
   );
+
+  const handleCreateRouter = async () => {
+    if (!name) {
+      return;
+    }
+
+    const generatedConfig = generateConfig();
+    const obj = yaml.load(generatedConfig);
+
+    const router = await createRouter({
+      body: {
+        name,
+        config: JSON.stringify(obj),
+      },
+    });
+
+    console.log("router", JSON.stringify(router, null, 2));
+
+    setOpen(false);
+    queryClient.invalidateQueries({ queryKey: ["get", "/v1/gateway"] });
+    setNotification("Router created", "success");
+    onSuccess(router?.data?.routerHash ?? "");
+  };
 
   const generateConfig = () => {
     const configObj: Record<string, unknown> = {};
@@ -113,22 +130,6 @@ const CreateRouterDialog = ({
     }
 
     return yaml.dump(configObj);
-  };
-
-  const handleSubmit = () => {
-    if (!name) {
-      return;
-    }
-
-    const generatedConfig = generateConfig();
-    const obj = yaml.load(generatedConfig);
-
-    createRouter({
-      body: {
-        name,
-        config: JSON.stringify(obj),
-      },
-    });
   };
 
   // Helper functions to get compact summaries
@@ -395,7 +396,7 @@ const CreateRouterDialog = ({
           <DialogClose asChild>
             <Button variant="outline">Cancel</Button>
           </DialogClose>
-          <Button onClick={handleSubmit}>Create Router</Button>
+          <Button onClick={handleCreateRouter}>Create Router</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
