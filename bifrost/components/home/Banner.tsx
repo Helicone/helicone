@@ -4,9 +4,9 @@ import Link from "next/link";
 const Banner = () => {
   return (
     <div
-      className={cn("flex flex-col justify-center w-full h-auto pb-4 relative")}
+      className={cn("relative flex h-auto w-full flex-col justify-center pb-4")}
     >
-      <div className="bg-sky-500 text-blue-50 text-center text-sm md:text-base py-3 w-full">
+      <div className="w-full bg-sky-500 py-3 text-center text-sm text-blue-50 md:text-base">
         <p>
           🔥 Introducing the{" "}
           <Link

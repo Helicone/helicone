@@ -54,18 +54,18 @@ const RequestLogTableV2 = (props: RequestLogTableProps) => {
     <table className="w-full border-collapse">
       <thead>
         <tr className="border-b border-gray-300">
-          <th className="text-left text-slate-500 p-2">Lower Band</th>
-          <th className="text-left text-slate-500 p-2">Upper Band</th>
-          <th className="text-left text-slate-500 p-2">Rate per log</th>
+          <th className="p-2 text-left text-slate-500">Lower Band</th>
+          <th className="p-2 text-left text-slate-500">Upper Band</th>
+          <th className="p-2 text-left text-slate-500">Rate per log</th>
         </tr>
       </thead>
       <tbody>
         {HELICONE_LOG_PRICING.map((pricing, index) => (
           <tr key={index}>
-            <td className="text-left text-slate-500 p-2">
+            <td className="p-2 text-left text-slate-500">
               {new Intl.NumberFormat("us").format(pricing.lower).toString()}
             </td>
-            <td className="text-left text-slate-500 p-2">
+            <td className="p-2 text-left text-slate-500">
               {pricing.upper === Number.MAX_SAFE_INTEGER
                 ? "∞"
                 : new Intl.NumberFormat("us").format(pricing.upper).toString()}

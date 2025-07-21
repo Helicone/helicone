@@ -16,9 +16,9 @@ const rows: FeatureRowProps[] = [
     title: "Dashboard",
     description:
       "Visualize your LLM analytics, and watch your LLM app performance improve.",
-    free: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
-    pro: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
-    enterprise: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
+    free: <CheckIcon className="h-6 w-6 text-[#6AA84F]" />,
+    pro: <CheckIcon className="h-6 w-6 text-[#6AA84F]" />,
+    enterprise: <CheckIcon className="h-6 w-6 text-[#6AA84F]" />,
   },
   {
     title: "Requests",
@@ -29,7 +29,7 @@ const rows: FeatureRowProps[] = [
         </p>
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="item-1" className="border-none">
-            <AccordionTrigger className="text-brand justify-start gap-[4px] hover:no-underline p-0">
+            <AccordionTrigger className="text-brand justify-start gap-[4px] p-0 hover:no-underline">
               How we calculate this
             </AccordionTrigger>
             <AccordionContent>
@@ -46,8 +46,8 @@ const rows: FeatureRowProps[] = [
     free: (
       <>
         <Row className="items-center gap-[4px]">
-          <h3 className="font-bold text-xl">10k</h3>
-          <p className="text-slate-500 text-md">/mo</p>
+          <h3 className="text-xl font-bold">10k</h3>
+          <p className="text-md text-slate-500">/mo</p>
         </Row>
         <p className="text-center text-sm font-light text-slate-500">
           For more requests, upgrade to Pro.
@@ -57,7 +57,7 @@ const rows: FeatureRowProps[] = [
     pro: (
       <>
         <Row className="items-center gap-[4px]">
-          <h3 className="font-bold text-xl">10k</h3>
+          <h3 className="text-xl font-bold">10k</h3>
           <p className="text-slate-500">/mo to unlimited</p>
         </Row>
         <p className="text-center text-sm font-light text-slate-500">
@@ -67,8 +67,8 @@ const rows: FeatureRowProps[] = [
     ),
     enterprise: (
       <>
-        <h3 className="font-bold text-xl">Unlimited</h3>
-        <p className="text-center text-sm font-light  text-slate-500">
+        <h3 className="text-xl font-bold">Unlimited</h3>
+        <p className="text-center text-sm font-light text-slate-500">
           At bulk discounted rate.
         </p>
       </>
@@ -78,31 +78,31 @@ const rows: FeatureRowProps[] = [
     title: "Log retention",
     description:
       "Access your logs and analytics so you can track performance over time. ",
-    free: <h3 className="font-bold text-xl">1 month</h3>,
-    pro: <h3 className="font-bold text-xl">3 months</h3>,
-    enterprise: <h3 className="font-bold text-xl">Forever</h3>,
+    free: <h3 className="text-xl font-bold">1 month</h3>,
+    pro: <h3 className="text-xl font-bold">3 months</h3>,
+    enterprise: <h3 className="text-xl font-bold">Forever</h3>,
   },
   {
     title: "Playground",
     description:
       "Test and compare model responses with different prompts and parameters",
-    free: <XMarkIcon className="w-6 h-6 text-red-500" />,
-    pro: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
-    enterprise: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
+    free: <XMarkIcon className="h-6 w-6 text-red-500" />,
+    pro: <CheckIcon className="h-6 w-6 text-[#6AA84F]" />,
+    enterprise: <CheckIcon className="h-6 w-6 text-[#6AA84F]" />,
   },
   {
     title: "Cache",
     description:
       "Reduce latency and save costs on LLM calls by caching responses on the edge. ",
-    free: <XMarkIcon className="w-6 h-6 text-red-500" />,
-    pro: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
-    enterprise: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
+    free: <XMarkIcon className="h-6 w-6 text-red-500" />,
+    pro: <CheckIcon className="h-6 w-6 text-[#6AA84F]" />,
+    enterprise: <CheckIcon className="h-6 w-6 text-[#6AA84F]" />,
   },
   {
     title: "Evals",
     description:
       "Run LLM-as-a-Judge and Python evals to assess model and prompt performance.",
-    free: <XMarkIcon className="w-6 h-6 text-red-500" />,
+    free: <XMarkIcon className="h-6 w-6 text-red-500" />,
     pro: (
       <div className="text-center">
         <p className="text-slate-500">Pass-through cost</p>
@@ -119,31 +119,31 @@ const rows: FeatureRowProps[] = [
   {
     title: "Rate limits",
     description: "Enforce custom API usage restrictions. ",
-    free: <XMarkIcon className="w-6 h-6 text-red-500" />,
-    pro: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
-    enterprise: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
+    free: <XMarkIcon className="h-6 w-6 text-red-500" />,
+    pro: <CheckIcon className="h-6 w-6 text-[#6AA84F]" />,
+    enterprise: <CheckIcon className="h-6 w-6 text-[#6AA84F]" />,
   },
   {
     title: "Sessions",
     description: "Group and visualize multi-step LLM interactions. ",
-    free: <XMarkIcon className="w-6 h-6 text-red-500" />,
-    pro: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
-    enterprise: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
+    free: <XMarkIcon className="h-6 w-6 text-red-500" />,
+    pro: <CheckIcon className="h-6 w-6 text-[#6AA84F]" />,
+    enterprise: <CheckIcon className="h-6 w-6 text-[#6AA84F]" />,
   },
   {
     title: "User tracking",
     description: "Track per-user request volumes, costs, and usage patterns. ",
-    free: <XMarkIcon className="w-6 h-6 text-red-500" />,
-    pro: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
-    enterprise: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
+    free: <XMarkIcon className="h-6 w-6 text-red-500" />,
+    pro: <CheckIcon className="h-6 w-6 text-[#6AA84F]" />,
+    enterprise: <CheckIcon className="h-6 w-6 text-[#6AA84F]" />,
   },
   {
     title: "Datasets",
     description:
       "Organize your requests into datasets for model training or fine-tuning. ",
-    free: <XMarkIcon className="w-6 h-6 text-red-500" />,
-    pro: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
-    enterprise: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
+    free: <XMarkIcon className="h-6 w-6 text-red-500" />,
+    pro: <CheckIcon className="h-6 w-6 text-[#6AA84F]" />,
+    enterprise: <CheckIcon className="h-6 w-6 text-[#6AA84F]" />,
   },
   {
     title: "API access",
@@ -161,16 +161,16 @@ const rows: FeatureRowProps[] = [
         </p>
       </>
     ),
-    free: <XMarkIcon className="w-6 h-6 text-red-500" />,
+    free: <XMarkIcon className="h-6 w-6 text-red-500" />,
     pro: (
       <Row className="items-center gap-[4px]">
-        <h3 className="font-bold text-xl">60 calls</h3>
+        <h3 className="text-xl font-bold">60 calls</h3>
         <p className="text-slate-500">/min</p>
       </Row>
     ),
     enterprise: (
       <Row className="items-center gap-[4px]">
-        <h3 className="font-bold text-xl">1k calls</h3>
+        <h3 className="text-xl font-bold">1k calls</h3>
         <p className="text-slate-500">/min</p>
       </Row>
     ),
@@ -178,16 +178,16 @@ const rows: FeatureRowProps[] = [
   {
     title: "SOC-2 Type II Compliance",
     description: "",
-    free: <XMarkIcon className="w-6 h-6 text-red-500" />,
-    pro: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
-    enterprise: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
+    free: <XMarkIcon className="h-6 w-6 text-red-500" />,
+    pro: <CheckIcon className="h-6 w-6 text-[#6AA84F]" />,
+    enterprise: <CheckIcon className="h-6 w-6 text-[#6AA84F]" />,
   },
 ];
 
 export default function PricingComparisonTableV2() {
   return (
     <div
-      className="flex flex-col max-w-6xl mx-auto pt-16 pb-2 w-full"
+      className="mx-auto flex w-full max-w-6xl flex-col pb-2 pt-16"
       id="compare-plans"
     >
       <h3 className="text-[36px] font-bold text-slate-900">Compare plans</h3>

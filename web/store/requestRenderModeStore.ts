@@ -35,6 +35,6 @@ export const useRequestRenderModeStore = create<RequestRenderModeState>()(
     }),
     {
       name: "helicone-request-render-mode",
-    }
-  )
+    },
+  ),
 );

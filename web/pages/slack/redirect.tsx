@@ -23,7 +23,7 @@ SlackRedirect.getLayout = function getLayout(page: ReactElement) {
 };
 
 export const getServerSideProps = async (
-  context: GetServerSidePropsContext
+  context: GetServerSidePropsContext,
 ) => {
   const { code, state } = context.query;
   const host = context.req.headers.host;
@@ -41,7 +41,7 @@ export const getServerSideProps = async (
     SELECT id FROM organization
     WHERE id = $1
     `,
-    [state]
+    [state],
   );
 
   if (error) {
@@ -120,7 +120,7 @@ export const getServerSideProps = async (
         team_id: responseData.team.id,
         access_token: responseData.access_token,
       },
-    ]
+    ],
   );
 
   if (slackError) {

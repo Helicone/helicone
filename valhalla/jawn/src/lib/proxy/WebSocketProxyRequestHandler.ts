@@ -8,7 +8,7 @@ import { DBLoggable } from "./DBLoggable";
 export async function handleSocketSession(
   messages: SocketMessage[],
   requestWrapper: RequestWrapper,
-  requestId?: string,
+  requestId?: string
 ): Promise<{
   loggable: DBLoggable;
   response: Response;

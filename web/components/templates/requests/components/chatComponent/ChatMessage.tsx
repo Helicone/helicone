@@ -100,7 +100,7 @@ const ContentWrapper = ({
 }) => {
   if (showDeleteButton && onDelete) {
     return (
-      <div className={cn("relative group", wrapperClassName)}>
+      <div className={cn("group relative", wrapperClassName)}>
         {children}
         <DeleteItemButton
           onDelete={onDelete}
@@ -123,7 +123,7 @@ const renderToolMessage = (
   playgroundMode: boolean,
   mappedRequest?: MappedLLMRequest,
   messageIndex?: number,
-  onChatChange?: (_mappedRequest: MappedLLMRequest) => void
+  onChatChange?: (_mappedRequest: MappedLLMRequest) => void,
 ) => {
   if (message.tool_call_id && (message.content || playgroundMode)) {
     return (
@@ -152,13 +152,13 @@ const renderToolMessage = (
   try {
     const parsedContent = JSON.parse(content);
     return (
-      <div className="p-4 bg-muted rounded-lg">
+      <div className="rounded-lg bg-muted p-4">
         <JsonRenderer data={parsedContent} />
       </div>
     );
   } catch {
     return (
-      <pre className="whitespace-pre-wrap break-words text-xs p-4">
+      <pre className="whitespace-pre-wrap break-words p-4 text-xs">
         {content}
       </pre>
     );
@@ -173,7 +173,7 @@ const renderImageContent = (
     showDeleteButton?: boolean;
     onDelete?: () => void;
     wrapperClassName?: string;
-  } = {}
+  } = {},
 ) => {
   let imageSrc = message.image_url;
   if (message.content && message.mime_type?.startsWith("image/")) {
@@ -192,7 +192,7 @@ const renderImageContent = (
         alt="Input image"
         width={1000}
         height={1000}
-        className="object-contain max-w-full w-auto h-auto max-h-[200px]"
+        className="h-auto max-h-[200px] w-auto max-w-full object-contain"
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
       />
     </div>
@@ -223,7 +223,7 @@ const renderTextContent = (
     onChatChange?: (_mappedRequest: MappedLLMRequest) => void;
     showDeleteButton?: boolean;
     onDelete?: () => void;
-  } = {}
+  } = {},
 ) => {
   const textElement = (
     <TextMessage
@@ -260,12 +260,12 @@ const renderPdfContent = (
     showDeleteButton?: boolean;
     onDelete?: () => void;
     wrapperClassName?: string;
-  } = {}
+  } = {},
 ) => {
   const filename = message.filename || "PDF File";
   const pdfElement = (
-    <div className="flex items-center gap-2 p-4 bg-muted rounded-lg border border-dashed border-border">
-      <LuFileText className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+    <div className="flex items-center gap-2 rounded-lg border border-dashed border-border bg-muted p-4">
+      <LuFileText className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
       <span className="text-sm text-muted-foreground">
         {filename} (Base64 Encoded PDF - Preview/Download not available)
       </span>
@@ -297,7 +297,7 @@ const renderContentByType = (
     onChatChange?: (_mappedRequest: MappedLLMRequest) => void;
     showDeleteButton?: boolean;
     onDelete?: () => void;
-  } = {}
+  } = {},
 ) => {
   switch (messageType) {
     case "image":
@@ -329,7 +329,7 @@ const renderContentByType = (
           chatMode === "PLAYGROUND_INPUT",
           mappedRequest,
           messageIndex,
-          options.onChatChange
+          options.onChatChange,
         )
       );
     case "text":
@@ -340,7 +340,7 @@ const renderContentByType = (
         mappedRequest,
         messageIndex,
         mode,
-        options
+        options,
       );
     default:
       return null;
@@ -401,7 +401,7 @@ export default function ChatMessage({
                     };
                   }
                   return message;
-                }
+                },
               ),
             },
           },
@@ -455,7 +455,7 @@ export default function ChatMessage({
                     };
                   }
                   return msg;
-                }
+                },
               ),
             },
           },
@@ -502,7 +502,7 @@ export default function ChatMessage({
                   };
                 }
                 return message;
-              }
+              },
             ),
           },
         },
@@ -532,7 +532,7 @@ export default function ChatMessage({
                 };
               }
               return message;
-            }
+            },
           ),
         },
       },
@@ -549,7 +549,7 @@ export default function ChatMessage({
         request: {
           ...mappedRequest.schema.request,
           messages: mappedRequest.schema.request?.messages?.filter(
-            (_, i) => i !== messageIndex
+            (_, i) => i !== messageIndex,
           ),
         },
       },
@@ -581,7 +581,7 @@ export default function ChatMessage({
                 };
               }
               return message;
-            }
+            },
           ),
         },
       },
@@ -602,7 +602,7 @@ export default function ChatMessage({
             ?.map((msg, i) => {
               if (i === messageIndex && msg._type === "contentArray") {
                 const updatedContentArray = msg.contentArray?.filter(
-                  (_, j) => j !== contentIndex
+                  (_, j) => j !== contentIndex,
                 );
 
                 if (updatedContentArray?.length === 1) {
@@ -719,8 +719,8 @@ export default function ChatMessage({
   return (
     <div
       className={cn(
-        "w-full flex flex-col border-b border-border",
-        chatMode === "PLAYGROUND_OUTPUT" && "border-0"
+        "flex w-full flex-col border-b border-border",
+        chatMode === "PLAYGROUND_OUTPUT" && "border-0",
       )}
       ref={setNodeRef}
       style={style}
@@ -757,9 +757,9 @@ export default function ChatMessage({
 
       <div
         className={cn(
-          "w-full flex flex-col relative",
+          "relative flex w-full flex-col",
           chatMode !== "PLAYGROUND_INPUT" && "px-4 pb-4 pt-0",
-          chatMode === "PLAYGROUND_OUTPUT" && "pt-4"
+          chatMode === "PLAYGROUND_OUTPUT" && "pt-4",
         )}
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
@@ -787,7 +787,7 @@ export default function ChatMessage({
                       onChatChange,
                       showDeleteButton: chatMode === "PLAYGROUND_INPUT",
                       onDelete: () => deleteContentArrayItem(index),
-                    }
+                    },
                   )}
                 </div>
               ) : null;
@@ -808,7 +808,7 @@ export default function ChatMessage({
               onChatChange,
               showDeleteButton: false,
               onDelete: () => deleteMessage(messageIndex),
-            }
+            },
           )
         )}
 
@@ -817,7 +817,7 @@ export default function ChatMessage({
             variant={"none"}
             size={"sm"}
             onClick={() => toggleMessage(messageIndex)}
-            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors py-2"
+            className="flex items-center gap-1.5 py-2 text-xs text-muted-foreground transition-colors hover:text-foreground"
           >
             <LuChevronDown
               className={`h-4 w-4 transition-transform duration-200 ${

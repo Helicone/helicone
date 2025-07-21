@@ -44,8 +44,8 @@ iconType: "solid"
             "Content-Type": "application/json",
           },
           body: JSON.stringify(reqBody)
-        }) 
-        
+        })
+
         const resBody = await r.json();
         resultRecorder.appendResult(resBody);
         return resBody;
@@ -83,13 +83,13 @@ const res = await logger.logRequest(reqBody, async (resultRecorder) => {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(reqBody)
-  }) 
-  
+    body: JSON.stringify(reqBody),
+  });
+
   const resBody = await r.json();
   resultRecorder.appendResult(resBody);
   return resBody;
-})
+});
 ```
 
 # Resources

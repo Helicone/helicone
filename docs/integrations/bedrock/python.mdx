@@ -29,46 +29,42 @@ model_id = "meta.llama3-8b-instruct-v1:0"
 
 event_system = client.meta.events
 
+def process_custom_arguments(params, context, \*\*kwargs):
+if (custom_headers := params.pop("custom_headers", None)):
+context["custom_headers"] = custom_headers
 
-def process_custom_arguments(params, context, **kwargs):
-    if (custom_headers := params.pop("custom_headers", None)):
-        context["custom_headers"] = custom_headers
-
-
-def add_custom_header_before_call(model, params, request_signer, **kwargs):
-    params['headers']['Helicone-Auth'] = f'Bearer {os.getenv("HELICONE_API_KEY")}'
-    params['headers']['aws-access-key'] = '<AWS ACCESS KEY>'
-    params['headers']['aws-secret-key'] = '<AWS SECRET KEY>'
-    # optionally, you can pass the aws-session-token instead of access and secret key if you are using temporary credentials
-    params['headers']['aws-session-token'] = '<AWS SESSION TOKEN>'
-    if (custom_headers := params.pop("custom_headers", None)):
-        params['headers'].update(custom_headers)
-    headers = params['headers']
-    print(f'param headers: {headers}')
-
+def add_custom_header_before_call(model, params, request_signer, \*\*kwargs):
+params['headers']['Helicone-Auth'] = f'Bearer {os.getenv("HELICONE_API_KEY")}'
+params['headers']['aws-access-key'] = '<AWS ACCESS KEY>'
+params['headers']['aws-secret-key'] = '<AWS SECRET KEY>' # optionally, you can pass the aws-session-token instead of access and secret key if you are using temporary credentials
+params['headers']['aws-session-token'] = '<AWS SESSION TOKEN>'
+if (custom_headers := params.pop("custom_headers", None)):
+params['headers'].update(custom_headers)
+headers = params['headers']
+print(f'param headers: {headers}')
 
 event_system.register("before-parameter-build.bedrock-runtime.InvokeModel",
-                      process_custom_arguments)
+process_custom_arguments)
 event_system.register('before-call.bedrock-runtime.InvokeModel',
-                      add_custom_header_before_call)
-
+add_custom_header_before_call)
 
 body = {
-    "prompt": "Hello, world!",
-    "max_gen_len": 512,
-    "temperature": 0.5,
-    "top_p": 0.9
+"prompt": "Hello, world!",
+"max_gen_len": 512,
+"temperature": 0.5,
+"top_p": 0.9
 }
 
 response = client.invoke_model(
-    body=json.dumps(body),
-    modelId=model_id,
-    accept="application/json",
-    contentType="application/json",
+body=json.dumps(body),
+modelId=model_id,
+accept="application/json",
+contentType="application/json",
 )
 model_response = json.loads(response["body"].read())
 print(model_response)
-```
+
+````
 
   </Step>
 </Steps>
@@ -129,3 +125,4 @@ print(model_response)
 This integration allows you to use AWS Bedrock with Helicone's async logging. The Helicone logger will automatically capture traces of your AWS Bedrock API calls, providing you with valuable insights and analytics through the Helicone dashboard.
 
 For more information on using async logging, visit the [Async Logging documentation](/getting-started/integration-method/).
+````

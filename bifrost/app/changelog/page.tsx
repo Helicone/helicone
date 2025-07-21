@@ -90,7 +90,7 @@ export default async function Home() {
 
   return (
     <>
-      <div className="flex flex-col w-full h-full antialiased relative divide-gray-200 divide-y-2">
+      <div className="relative flex h-full w-full flex-col divide-y-2 divide-gray-200 antialiased">
         {mdxs
           .reverse()
           .map(
@@ -108,10 +108,10 @@ export default async function Home() {
               i
             ) => (
               <div
-                className="flex flex-col md:flex-row items-start w-full mx-auto max-w-5xl py-16 px-4 md:py-24 relative"
+                className="relative mx-auto flex w-full max-w-5xl flex-col items-start px-4 py-16 md:flex-row md:py-24"
                 key={`changes-${i}`}
               >
-                <div className="w-56 h-full flex flex-col space-y-2 md:sticky top-16 md:top-32">
+                <div className="top-16 flex h-full w-56 flex-col space-y-2 md:sticky md:top-32">
                   <h3 className="text-sm font-semibold text-gray-500">
                     {date.toLocaleDateString("en-US", {
                       month: "long",
@@ -121,9 +121,9 @@ export default async function Home() {
                   </h3>
                 </div>
 
-                <article className="prose w-full h-full">
+                <article className="prose h-full w-full">
                   <Link href={link} className="no-underline" key={i}>
-                    <h1 className="text-sky-500 mt-16 md:mt-0 font-bold text-2xl">
+                    <h1 className="mt-16 text-2xl font-bold text-sky-500 md:mt-0">
                       {String(title)}
                     </h1>
                     {imageExists ? (
@@ -139,7 +139,7 @@ export default async function Home() {
                         }}
                       />
                     ) : (
-                      <div className="bg-gray-200 w-full flex items-center justify-center"></div>
+                      <div className="flex w-full items-center justify-center bg-gray-200"></div>
                     )}
                   </Link>
                   <p className="text-base">

@@ -13,8 +13,8 @@ export const providerEnvVars: Record<Provider, { vars: string[] }> =
         {
           vars: config.envVars,
         },
-      ]
-    )
+      ],
+    ),
   ) as Record<Provider, { vars: string[] }>;
 
 /**
@@ -32,7 +32,7 @@ export const getEnvFileExample = (provider: Provider): string => {
 export const getPromptDeploymentExample = (
   promptId: string,
   variables: StateInputs[] = [],
-  parameters?: StateParameters
+  parameters?: StateParameters,
 ) => {
   // Format variables for code examples
   const hasVariables = variables.length > 0;
@@ -92,7 +92,7 @@ console.log(chat[chat.length - 1]);`;
  */
 export const getReactComponentExample = (
   promptId: string,
-  variables: StateInputs[] = []
+  variables: StateInputs[] = [],
 ) => {
   // Format variables for code examples
   const hasVariables = variables.length > 0;
@@ -105,7 +105,7 @@ export const getReactComponentExample = (
       (v) =>
         `const [${v.name}, set${
           v.name.charAt(0).toUpperCase() + v.name.slice(1)
-        }] = useState("${v.value || "value"}");`
+        }] = useState("${v.value || "value"}");`,
     )
     .join("\n  ");
 
@@ -127,13 +127,13 @@ export function HeliconePromptComponent() {
     try {
       const result = await generate({
         promptId: "${promptId}",${
-    hasVariables
-      ? `
+          hasVariables
+            ? `
         inputs: {
 ${formattedInputsObject}
         },`
-      : ""
-  }
+            : ""
+        }
       });
       setResponse(result);
     } catch (error) {
@@ -161,7 +161,7 @@ ${formattedInputsObject}
           }(e.target.value)}
           className="w-full p-2 border rounded"
         />
-      </div>`
+      </div>`,
               )
               .join("")
           : ""
@@ -191,7 +191,7 @@ ${formattedInputsObject}
  */
 export const getNodeScriptExample = (
   promptId: string,
-  variables: StateInputs[] = []
+  variables: StateInputs[] = [],
 ) => {
   // Format variables for code examples
   const formattedVariables = variables
@@ -206,13 +206,13 @@ async function main() {
   try {
     const response = await generate({
       promptId: "${promptId}",${
-    variables.length > 0
-      ? `
+        variables.length > 0
+          ? `
       inputs: {
         ${formattedVariables}
       },`
-      : ""
-  }
+          : ""
+      }
     });
     
     console.log("Generated response:");

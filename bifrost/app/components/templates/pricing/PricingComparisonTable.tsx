@@ -443,26 +443,25 @@ export default function PricingComparisonTable() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h2 className="text-black text-4xl font-bold">Compare plans</h2>
-      <div className="rounded-xl overflow-x-auto lg:overflow-x-visible">
+      <h2 className="text-4xl font-bold text-black">Compare plans</h2>
+      <div className="overflow-x-auto rounded-xl lg:overflow-x-visible">
         <StickyTable>
-          <TableHeader className="lg:sticky top-[var(--header-offset)] z-20 bg-slate-50">
-            <TableRow className="bg-slate-50 hover:bg-slate-50 border-none">
-              <TableHead className="w-[318px] p-6 bg-white rounded-tl-xl">
-                <div className="text-slate-900 text-lg font-semibold">
+          <TableHeader className="top-[var(--header-offset)] z-20 bg-slate-50 lg:sticky">
+            <TableRow className="border-none bg-slate-50 hover:bg-slate-50">
+              <TableHead className="w-[318px] rounded-tl-xl bg-white p-6">
+                <div className="text-lg font-semibold text-slate-900">
                   {/* Empty header cell */}
                 </div>
               </TableHead>
               {tiers.map((tier, index) => (
                 <TableHead
                   key={tier.name}
-                  className={`py-3 px-6 ${
+                  className={`px-6 py-3 ${
                     tier.isPrimary ? "bg-sky-50" : "bg-white"
-                  } 
-                    ${index === tiers.length - 1 ? "rounded-tr-xl" : ""}`}
+                  } ${index === tiers.length - 1 ? "rounded-tr-xl" : ""}`}
                 >
                   <div className="flex flex-col gap-2">
-                    <div className="text-slate-900 text-lg font-semibold">
+                    <div className="text-lg font-semibold text-slate-900">
                       {tier.name}
                     </div>
                     <Link href={tier.ctaHref}>
@@ -482,7 +481,7 @@ export default function PricingComparisonTable() {
           {featureGroups.map((group, index) => (
             <TableBody key={group.title} className="relative">
               {index !== 0 && (
-                <TableRow className="h-12 bg-white hover:bg-white border-none">
+                <TableRow className="h-12 border-none bg-white hover:bg-white">
                   <TableCell colSpan={2} />
                   <TableCell colSpan={1} className="bg-sky-50" />
                   <TableCell colSpan={2} />
@@ -492,9 +491,9 @@ export default function PricingComparisonTable() {
               <TableRow className="hover:bg-white">
                 <TableCell
                   colSpan={2}
-                  className="bg-white border-b h-11 px-6 py-3"
+                  className="h-11 border-b bg-white px-6 py-3"
                 >
-                  <div className="text-slate-700 text-sm font-medium">
+                  <div className="text-sm font-medium text-slate-700">
                     {group.title}
                   </div>
                 </TableCell>
@@ -514,16 +513,16 @@ export default function PricingComparisonTable() {
                     >
                       <div className="flex flex-col">
                         <div className="flex items-center gap-2">
-                          <span className="text-slate-500 text-sm font-medium">
+                          <span className="text-sm font-medium text-slate-500">
                             {feature.name}
                           </span>
                           {feature.tooltip === "usage" && (
                             <button
                               onClick={() => setShowUsageTiers(!showUsageTiers)}
-                              className="p-1 hover:bg-slate-100 rounded-full transition-colors"
+                              className="rounded-full p-1 transition-colors hover:bg-slate-100"
                             >
                               <ChevronDownIcon
-                                className={`w-4 h-4 text-slate-400 transition-transform ${
+                                className={`h-4 w-4 text-slate-400 transition-transform ${
                                   showUsageTiers ? "rotate-180" : ""
                                 }`}
                               />
@@ -535,10 +534,10 @@ export default function PricingComparisonTable() {
                             <Table className="w-full">
                               <TableHeader>
                                 <TableRow className="hover:bg-transparent">
-                                  <TableHead className="text-slate-500 font-medium px-0 py-1">
+                                  <TableHead className="px-0 py-1 font-medium text-slate-500">
                                     Logs per month
                                   </TableHead>
-                                  <TableHead className="text-slate-500 font-medium px-0 py-1 text-right">
+                                  <TableHead className="px-0 py-1 text-right font-medium text-slate-500">
                                     Rate per log
                                   </TableHead>
                                 </TableRow>
@@ -583,11 +582,11 @@ export default function PricingComparisonTable() {
                         }`}
                       >
                         {typeof value === "string" ? (
-                          <div className="text-slate-500 text-sm font-medium">
+                          <div className="text-sm font-medium text-slate-500">
                             {value}
                           </div>
                         ) : value === true ? (
-                          <CheckIcon className="w-5 h-5 text-slate-500" />
+                          <CheckIcon className="h-5 w-5 text-slate-500" />
                         ) : null}
                       </TableCell>
                     ))}

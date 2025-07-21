@@ -12,7 +12,7 @@ Let's get started!
 
 ## Prerequisites
 
-Before we dive in, you'll need: 
+Before we dive in, you'll need:
 
 - **<a href="https://nodejs.org/" target="_blank" rel="noopener">Node.js 16+</a>** installed on your machine
 - **<a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">OpenAI API</a>** key
@@ -90,7 +90,7 @@ This approach allows the model to decide which functions to call based on the us
 
 ### 2. Basic Helicone Monitoring
 
-The financial assistant uses Helicone's basic monitoring to track the cost, latency, and error rate of our LLM calls. You can create an account for free <a href="https://www.helicone.ai/signup" target="_blank" rel="noopener">here</a>. 
+The financial assistant uses Helicone's basic monitoring to track the cost, latency, and error rate of our LLM calls. You can create an account for free <a href="https://www.helicone.ai/signup" target="_blank" rel="noopener">here</a>.
 
 ```javascript
 const openai = new OpenAI({
@@ -109,25 +109,28 @@ For company information queries, we use a vector store to retrieve relevant info
 ```javascript
 async function searchCompanyInfo(query, vectorStore) {
   console.log("Searching for company information in knowledge base...");
-  
+
   // Get relevant documents from vector store with similarity scores
-  const resultsWithScores = await vectorStore.similaritySearchWithScore(query, 2);
-    
+  const resultsWithScores = await vectorStore.similaritySearchWithScore(
+    query,
+    2
+  );
+
   // Check if we have relevant results with good similarity scores
   if (resultsWithScores.length === 0 || resultsWithScores[0][1] < 0.9) {
     console.log("No relevant company information found in the knowledge base.");
     return {
       found: false,
-      message: "No relevant company information found in the knowledge base."
+      message: "No relevant company information found in the knowledge base.",
     };
   }
-  
+
   // Extract just the documents from the results for context
   const relevantDocs = resultsWithScores.map(([doc]) => doc);
-  
+
   return {
     found: true,
-    documents: relevantDocs
+    documents: relevantDocs,
   };
 }
 ```
@@ -137,13 +140,13 @@ async function getStockData(ticker) {
   try {
     const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=${ALPHA_VANTAGE_API_KEY}`;
     const response = await axios.get(url);
-    
+
     ...
   }
 }
 ```
 
-The RAG implementation provides domain-specific knowledge to the agent. However, as we'll see later, **without proper monitoring**, detecting what's causing the system to fail when it does might be difficult. 
+The RAG implementation provides domain-specific knowledge to the agent. However, as we'll see later, **without proper monitoring**, detecting what's causing the system to fail when it does might be difficult.
 
 ### 4. Agent Loop (Tool Calling)
 
@@ -160,16 +163,16 @@ async function processQuery(userQuery, vectorStore) {
   let messages = [
     {
       role: "system",
-      content: `You're a financial assistant. Use tools when needed. If you have enough information to answer, reply normally.`
+      content: `You're a financial assistant. Use tools when needed. If you have enough information to answer, reply normally.`,
     },
-    { role: "user", content: userQuery }
+    { role: "user", content: userQuery },
   ];
-  
+
   // Add chat history for context if available
   if (chatHistory.length > 0) {
     messages.splice(1, 0, ...chatHistory);
   }
-  
+
   while (true) {
     console.log("Sending query to OpenAI...");
     const llmResp = await openai.chat.completions.create({
@@ -178,15 +181,15 @@ async function processQuery(userQuery, vectorStore) {
       messages,
       temperature: 0.1,
     });
-    
+
     const msg = llmResp.choices[0].message;
-    
+
     if (msg.tool_calls && msg.tool_calls.length > 0) {
       // Execute the helper and push message into history...
 
       continue;
     }
-    
+
     // No tool call → LLM has produced the final answer
     return msg.content;
   }
@@ -268,14 +271,14 @@ Answer: I couldn't find specific information on a company named GreenEnergy in t
 
 ```
 
-Even though GreenEnergy's profit margin (14%) is clearly **in our knowledge base**, the agent fails to retrieve it. 
+Even though GreenEnergy's profit margin (14%) is clearly **in our knowledge base**, the agent fails to retrieve it.
 
 <BottomLine
   title="The Challenge of Production Debugging 💡"
   description="These issues might seem obvious since we're running locally with CLI access, but in a production environment with thousands of queries, spotting these patterns becomes nearly impossible without proper observability tools like Helicone."
 />
 
-## Debugging Our Financial Assistant 
+## Debugging Our Financial Assistant
 
 Looking at our implementation, there are several blind spots that could potentially cause issues:
 
@@ -285,7 +288,7 @@ Looking at our implementation, there are several blind spots that could potentia
 - **Latency Issues**: If the agent becomes slow, which step is causing the bottleneck?
 - **Error Patterns**: Are certain types of queries consistently failing? Where in the pipeline do these failures occur?
 
-In <a href="https://www.helicone.ai/blog/ai-agent-monitoring-tutorial-part-2" target="_blank" rel="noopener">Part 2 of this tutorial</a> on AI agent optimization, we'll add Helicone to our financial assistant to gain comprehensive visibility into every step of the process. 
+In <a href="https://www.helicone.ai/blog/ai-agent-monitoring-tutorial-part-2" target="_blank" rel="noopener">Part 2 of this tutorial</a> on AI agent optimization, we'll add Helicone to our financial assistant to gain comprehensive visibility into every step of the process.
 
 Here's a preview of what you can see:
 
@@ -311,24 +314,30 @@ Stay tuned!
 - **<a href="https://www.helicone.ai/blog/full-guide-to-improving-ai-agents" target="_blank" rel="noopener">The Full Developer's Guide to Building Effective AI Agents</a>**
 - **<a href="https://www.helicone.ai/blog/agentic-rag-full-developer-guide" target="_blank" rel="noopener">Building Agentic RAG Systems: A Developer's Guide to Smarter Information Retrieval</a>**
 
-<FAQ 
+<FAQ
   items={[
     {
       question: "Why do AI agents need specialized observability tools?",
-      answer: "AI agents have unique monitoring challenges including non-deterministic execution paths, multi-step LLM calls, complex branching logic, and dependencies on external systems. Unlike traditional applications with fixed flows, agents' decision trees vary with each request. Standard monitoring tools can't track these dynamic workflows or evaluate response quality across interconnected steps, which is why specialized tools like Helicone's session-based tracing are essential for AI agent observability."
+      answer:
+        "AI agents have unique monitoring challenges including non-deterministic execution paths, multi-step LLM calls, complex branching logic, and dependencies on external systems. Unlike traditional applications with fixed flows, agents' decision trees vary with each request. Standard monitoring tools can't track these dynamic workflows or evaluate response quality across interconnected steps, which is why specialized tools like Helicone's session-based tracing are essential for AI agent observability.",
     },
     {
-      question: "What are the biggest blind spots when deploying AI agents to production?",
-      answer: "The most dangerous blind spots include: RAG threshold issues causing information retrieval failures, inappropriate knowledge source selection leading to hallucinations, hidden cost escalations from inefficient prompts, silent failures in multi-step reasoning chains, inconsistent performance across different user segments, and degrading accuracy over time as data or usage patterns change. Without proper observability, these issues can persist for weeks before being discovered, potentially causing significant business impact."
+      question:
+        "What are the biggest blind spots when deploying AI agents to production?",
+      answer:
+        "The most dangerous blind spots include: RAG threshold issues causing information retrieval failures, inappropriate knowledge source selection leading to hallucinations, hidden cost escalations from inefficient prompts, silent failures in multi-step reasoning chains, inconsistent performance across different user segments, and degrading accuracy over time as data or usage patterns change. Without proper observability, these issues can persist for weeks before being discovered, potentially causing significant business impact.",
     },
     {
       question: "What metrics should I monitor for any AI agent?",
-      answer: "Critical metrics for all AI agents include: end-to-end latency of complete workflows, token usage per step and total cost per request, step completion rates showing where agents get stuck, retrieval quality for RAG implementations, routing accuracy between different processing pathways, error rates for external API calls, and user satisfaction with responses. Tracking these metrics helps identify bottlenecks, optimize costs, and ensure reliable agent performance."
+      answer:
+        "Critical metrics for all AI agents include: end-to-end latency of complete workflows, token usage per step and total cost per request, step completion rates showing where agents get stuck, retrieval quality for RAG implementations, routing accuracy between different processing pathways, error rates for external API calls, and user satisfaction with responses. Tracking these metrics helps identify bottlenecks, optimize costs, and ensure reliable agent performance.",
     },
     {
-      question: "How do I implement observability across different AI agent frameworks?",
-      answer: "Helicone offers flexible integration options for all major AI frameworks. For LangChain, CrewAI, and LlamaIndex, direct integrations are available. For custom agents or other frameworks, you can typically use either Helicone's proxy approach (changing just the base URL) or the SDK integration. The Sessions feature works consistently across most major frameworks to trace multi-step agent workflows regardless of your technology choices, giving you a unified view of all AI operations."
-    }
+      question:
+        "How do I implement observability across different AI agent frameworks?",
+      answer:
+        "Helicone offers flexible integration options for all major AI frameworks. For LangChain, CrewAI, and LlamaIndex, direct integrations are available. For custom agents or other frameworks, you can typically use either Helicone's proxy approach (changing just the base URL) or the SDK integration. The Sessions feature works consistently across most major frameworks to trace multi-step agent workflows regardless of your technology choices, giving you a unified view of all AI operations.",
+    },
   ]}
 />
 

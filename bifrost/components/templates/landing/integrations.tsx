@@ -236,14 +236,14 @@ client = OpenAI(
   };
 
   return (
-    <div className={cn(ISLAND_WIDTH, "py-16 md:py-32 flex flex-col gap-10")}>
+    <div className={cn(ISLAND_WIDTH, "flex flex-col gap-10 py-16 md:py-32")}>
       <div className="flex flex-col gap-6">
-        <div className="flex flex-col lg:flex-row gap-y-8 justify-between items-center">
+        <div className="flex flex-col items-center justify-between gap-y-8 lg:flex-row">
           <div className="flex flex-col gap-5">
-            <h2 className="text-3xl sm:text-5xl font-semibold text-accent-foreground">
+            <h2 className="text-accent-foreground text-3xl font-semibold sm:text-5xl">
               Get integrated in <span className="text-brand">seconds</span>
             </h2>
-            <p className="text-lg font-normal sm:text-xl text-muted-foreground">
+            <p className="text-muted-foreground text-lg font-normal sm:text-xl">
               Add logging, monitoring, and analytics to any LLM provider with a
               single line of code.
             </p>
@@ -254,7 +254,7 @@ client = OpenAI(
                   <button
                     key={key}
                     className={cn(
-                      "flex items-center gap-3 px-4 py-3 rounded-lg border transition-all duration-200",
+                      "flex items-center gap-3 rounded-lg border px-4 py-3 transition-all duration-200",
                       currentProvider === key
                         ? "bg-brand/10 border-brand text-brand"
                         : "bg-background border-border hover:border-brand/50 hover:bg-brand/5"
@@ -268,7 +268,7 @@ client = OpenAI(
                       alt={provider.formattedName}
                       width={24}
                       height={24}
-                      className="w-6 h-6 object-contain"
+                      className="h-6 w-6 object-contain"
                     />
                     <span className="text-sm font-medium">
                       {provider.formattedName}
@@ -279,13 +279,13 @@ client = OpenAI(
 
               {/* Additional providers */}
               <div className="flex flex-wrap items-center gap-3">
-                <span className="text-sm text-muted-foreground">
+                <span className="text-muted-foreground text-sm">
                   Plus 50+ more:
                 </span>
                 {ADDITIONAL_PROVIDERS.map((provider) => (
                   <button
                     key={provider.name}
-                    className="text-sm text-brand hover:text-brand/80 underline underline-offset-2 hover:no-underline transition-colors"
+                    className="text-brand hover:text-brand/80 text-sm underline underline-offset-2 transition-colors hover:no-underline"
                     onClick={() => window.open(provider.href, "_blank")}
                   >
                     {provider.name}
@@ -297,15 +297,15 @@ client = OpenAI(
         </div>
 
         {/* Code block */}
-        <div className="rounded-2xl border border-[hsl(var(--border))] overflow-hidden">
-          <div className="flex gap-2 md:gap-4 p-2 md:p-3 bg-[#24292e] border-b border-[hsl(var(--border))]">
+        <div className="overflow-hidden rounded-2xl border border-[hsl(var(--border))]">
+          <div className="flex gap-2 border-b border-[hsl(var(--border))] bg-[#24292e] p-2 md:gap-4 md:p-3">
             {languages.map((language) => (
               <button
                 key={language}
                 onClick={() => setCurrentLanguage(language)}
-                className={`text-xs md:text-sm font-medium relative px-1 ${
+                className={`relative px-1 text-xs font-medium md:text-sm ${
                   currentLanguage === language
-                    ? "text-white after:absolute after:bottom-[-8px] md:after:bottom-[-12px] after:left-0 after:w-full after:h-[2px] after:bg-white"
+                    ? "text-white after:absolute after:bottom-[-8px] after:left-0 after:h-[2px] after:w-full after:bg-white md:after:bottom-[-12px]"
                     : "text-[hsl(var(--muted-foreground))] hover:text-white"
                 }`}
               >
@@ -325,22 +325,22 @@ client = OpenAI(
             </div>
           </div>
           <div
-            className="p-2 md:p-4 bg-[#24292e] overflow-x-auto text-xs md:text-sm"
+            className="overflow-x-auto bg-[#24292e] p-2 text-xs md:p-4 md:text-sm"
             dangerouslySetInnerHTML={{ __html: highlightedCode }}
           />
         </div>
         <Toaster />
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-2 items-start md:gap-4">
+      <div className="flex flex-col items-start gap-2 sm:flex-row md:gap-4">
         <div className="flex flex-col gap-2">
           <Link href="/signup">
-            <Button className="bg-brand px-8 py-4 text-base md:text-lg md:py-3 lg:py-6 lg:px-10 lg:text-xl gap-2 rounded-lg items-center">
+            <Button className="bg-brand items-center gap-2 rounded-lg px-8 py-4 text-base md:py-3 md:text-lg lg:px-10 lg:py-6 lg:text-xl">
               Try for free
               <ChevronRight className="size-5 md:size-6" />
             </Button>
           </Link>
-          <p className="text-sm text-landing-secondary">
+          <p className="text-landing-secondary text-sm">
             No credit card required, 7-day free trial
           </p>
         </div>

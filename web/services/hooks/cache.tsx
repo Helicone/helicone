@@ -3,14 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { Result } from "@/packages/common/result";
 import { TopCachedRequest } from "@/lib/api/cache/stats";
 
-export const useGetCacheCount = (
-  timeFilter: TimeFilter,
-) => {
+export const useGetCacheCount = (timeFilter: TimeFilter) => {
   return useQuery({
-    queryKey: [
-      "cacheCount",
-      timeFilter
-    ],
+    queryKey: ["cacheCount", timeFilter],
     queryFn: async (query) => {
       const [_, timeFilter] = query.queryKey as [string, TimeFilter];
       return await fetch("/api/cache/total", {
@@ -21,24 +16,19 @@ export const useGetCacheCount = (
         body: JSON.stringify({
           timeFilter: {
             start: timeFilter.start,
-            end: timeFilter.end
-          }
+            end: timeFilter.end,
+          },
         }),
       }).then((res) => res.json() as Promise<Result<number, string>>);
     },
     refetchOnWindowFocus: false,
     gcTime: 5 * 60 * 1000,
-  })
-}
+  });
+};
 
-export const useGetCacheTotalSavings = (
-  timeFilter: TimeFilter,
-) => {
+export const useGetCacheTotalSavings = (timeFilter: TimeFilter) => {
   return useQuery({
-    queryKey: [
-      "totalSavings",
-      timeFilter
-    ],
+    queryKey: ["totalSavings", timeFilter],
     queryFn: async (query) => {
       const [_, timeFilter] = query.queryKey as [string, TimeFilter];
       return await fetch("/api/cache/total_savings", {
@@ -49,24 +39,19 @@ export const useGetCacheTotalSavings = (
         body: JSON.stringify({
           timeFilter: {
             start: timeFilter.start,
-            end: timeFilter.end
-          }
+            end: timeFilter.end,
+          },
         }),
       }).then((res) => res.json() as Promise<Result<number, string>>);
     },
     refetchOnWindowFocus: false,
     gcTime: 5 * 60 * 1000,
-  })
-}
+  });
+};
 
-export const useGetCacheTimeSaved = (
-  timeFilter: TimeFilter,
-) => {
+export const useGetCacheTimeSaved = (timeFilter: TimeFilter) => {
   return useQuery({
-    queryKey: [
-      "timeSaved",
-      timeFilter
-    ],
+    queryKey: ["timeSaved", timeFilter],
     queryFn: async (query) => {
       const [_, timeFilter] = query.queryKey as [string, TimeFilter];
       return await fetch("/api/cache/time_saved", {
@@ -77,24 +62,19 @@ export const useGetCacheTimeSaved = (
         body: JSON.stringify({
           timeFilter: {
             start: timeFilter.start,
-            end: timeFilter.end
-          }
+            end: timeFilter.end,
+          },
         }),
       }).then((res) => res.json() as Promise<Result<number, string>>);
     },
     refetchOnWindowFocus: false,
     gcTime: 5 * 60 * 1000,
-  })
-}
+  });
+};
 
-export const useGetCacheTopRequests = (
-  timeFilter: TimeFilter,
-) => {
+export const useGetCacheTopRequests = (timeFilter: TimeFilter) => {
   return useQuery({
-    queryKey: [
-      "topRequests",
-      timeFilter
-    ],
+    queryKey: ["topRequests", timeFilter],
     queryFn: async (query) => {
       const [_, timeFilter] = query.queryKey as [string, TimeFilter];
       return await fetch("/api/cache/requests", {
@@ -105,12 +85,14 @@ export const useGetCacheTopRequests = (
         body: JSON.stringify({
           timeFilter: {
             start: timeFilter.start,
-            end: timeFilter.end
-          }
+            end: timeFilter.end,
+          },
         }),
-      }).then((res) => res.json() as Promise<Result<TopCachedRequest[], string>>);
+      }).then(
+        (res) => res.json() as Promise<Result<TopCachedRequest[], string>>,
+      );
     },
     refetchOnWindowFocus: false,
     gcTime: 5 * 60 * 1000,
-  })
-}
+  });
+};

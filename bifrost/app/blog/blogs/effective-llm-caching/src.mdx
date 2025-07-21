@@ -186,13 +186,14 @@ Helicone provides powerful observability features to monitor and optimize LLM ca
 openai.api_base = "https://oai.helicone.ai/v1"
 
 response = openai.Completion.create(
-  model="gpt-4",
-  prompt="Define machine learning",
-  extra_headers={
-    "Helicone-Cache-Enabled": "true", # simply add this header and set to true
-    "Cache-Control": "max-age=86400"
-  }
+model="gpt-4",
+prompt="Define machine learning",
+extra_headers={
+"Helicone-Cache-Enabled": "true", # simply add this header and set to true
+"Cache-Control": "max-age=86400"
+}
 )
+
 ```
 </CallToAction>
 
@@ -209,3 +210,4 @@ Using a mix of exact and semantic caching, along with appropriate architectural 
 - **<a href="https://www.helicone.ai/blog/best-arize-alternatives" target="_blank" rel="noopener">Helicone vs. Arize Phoenix: Which is the Best LLM Observability Platform?</a>**
 
 <Questions />
+```

@@ -22,9 +22,9 @@ OpenAI has recently made two significant announcements: the **full release of th
 
 ## Is OpenAI o1 available in the API?
 
-Yes, and it supports function calling, structured outputs, and has vision capabilities. 
+Yes, and it supports function calling, structured outputs, and has vision capabilities.
 
-o1-pro is also now available in the API, and it's OpenAI's most expensive model yet, costing a jaw-dropping $150 per million input tokens and $600 per million output tokens—or roughly 10 times standard o1's cost. 
+o1-pro is also now available in the API, and it's OpenAI's most expensive model yet, costing a jaw-dropping $150 per million input tokens and $600 per million output tokens—or roughly 10 times standard o1's cost.
 
 Read more about o1-pro <a href="https://www.helicone.ai/blog/o1-pro-for-developers" target="_blank" rel="noopener">here</a>.
 
@@ -35,7 +35,7 @@ Integrate LLM observability with a few lines of code. See <a href="https://docs.
 ```js
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-  baseURL: `https://oai.helicone.ai/v1/${HELICONE_API_KEY}/`
+  baseURL: `https://oai.helicone.ai/v1/${HELICONE_API_KEY}/`,
 });
 ```
 
@@ -154,35 +154,44 @@ Based on recent developments, there are also reports about OpenAI's plans to inc
     OpenAI o1 vs Claude 3.5 Sonnet: A Comprehensive Comparison
   </a>
 
-<FAQ items={[
-  {
-    question: "What is the main difference between o1 and o1-preview?",
-    answer: "o1 now supports image uploads (which wasn't possible with o1-preview), delivers more concise thinking with fewer major errors, and outperforms o1-preview by 34% on difficult real-world questions according to OpenAI's tests. It's replacing o1-preview in ChatGPT for all users."
-  },
-  {
-    question: "How does o1 compare to GPT-4o in terms of performance?",
-    answer: "o1 is more concise and offers better reasoning capabilities. In mathematics, o1 achieved 83% accuracy on the 2024 AIME exams compared to GPT-4o's 12%. It also performs better on safety benchmarks and follows instructions more effectively."
-  },
-  {
-    question: "How much does it cost to use o1 through the API?",
-    answer: "o1 is quite expensive, costing $15 per million input tokens and $60 per million output tokens."
-  },
-  {
-    question: "What is ChatGPT Pro and how much does it cost?",
-    answer: "ChatGPT Pro is OpenAI's premium subscription tier that costs $200 per month (10x the cost of ChatGPT Plus). It provides unlimited usage without daily time limits and access to all OpenAI's models, including the exclusive o1 pro mode."
-  },
-  {
-    question: "What is o1 pro mode and who can access it?",
-    answer: "o1 pro mode is an enhanced version of o1 exclusive to ChatGPT Pro subscribers. It uses more compute power to provide more refined responses to complex problems in areas like data science, programming, and legal analysis. Only ChatGPT Pro users ($200/month) can access it."
-  },
-  {
-    question: "Do I need a ChatGPT Pro subscription to use o1?",
-    answer: "No, all paid ChatGPT users (Plus and Pro) can access the standard o1 model. ChatGPT Pro subscribers get access to the enhanced o1 pro mode that uses more compute but takes longer to generate responses."
-  },
-  {
-    question: "Will ChatGPT Plus pricing change in the future?",
-    answer: "According to reports, OpenAI intends to 'aggressively raise' the cost of ChatGPT Plus over the next five years, potentially reaching $44 per month by 2029, up from the current $20 per month."
-  }
-]}/>
+<FAQ
+  items={[
+    {
+      question: "What is the main difference between o1 and o1-preview?",
+      answer:
+        "o1 now supports image uploads (which wasn't possible with o1-preview), delivers more concise thinking with fewer major errors, and outperforms o1-preview by 34% on difficult real-world questions according to OpenAI's tests. It's replacing o1-preview in ChatGPT for all users.",
+    },
+    {
+      question: "How does o1 compare to GPT-4o in terms of performance?",
+      answer:
+        "o1 is more concise and offers better reasoning capabilities. In mathematics, o1 achieved 83% accuracy on the 2024 AIME exams compared to GPT-4o's 12%. It also performs better on safety benchmarks and follows instructions more effectively.",
+    },
+    {
+      question: "How much does it cost to use o1 through the API?",
+      answer:
+        "o1 is quite expensive, costing $15 per million input tokens and $60 per million output tokens.",
+    },
+    {
+      question: "What is ChatGPT Pro and how much does it cost?",
+      answer:
+        "ChatGPT Pro is OpenAI's premium subscription tier that costs $200 per month (10x the cost of ChatGPT Plus). It provides unlimited usage without daily time limits and access to all OpenAI's models, including the exclusive o1 pro mode.",
+    },
+    {
+      question: "What is o1 pro mode and who can access it?",
+      answer:
+        "o1 pro mode is an enhanced version of o1 exclusive to ChatGPT Pro subscribers. It uses more compute power to provide more refined responses to complex problems in areas like data science, programming, and legal analysis. Only ChatGPT Pro users ($200/month) can access it.",
+    },
+    {
+      question: "Do I need a ChatGPT Pro subscription to use o1?",
+      answer:
+        "No, all paid ChatGPT users (Plus and Pro) can access the standard o1 model. ChatGPT Pro subscribers get access to the enhanced o1 pro mode that uses more compute but takes longer to generate responses.",
+    },
+    {
+      question: "Will ChatGPT Plus pricing change in the future?",
+      answer:
+        "According to reports, OpenAI intends to 'aggressively raise' the cost of ChatGPT Plus over the next five years, potentially reaching $44 per month by 2029, up from the current $20 per month.",
+    },
+  ]}
+/>
 
 <Questions />

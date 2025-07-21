@@ -1,4 +1,4 @@
-Building production-grade AI applications requires more than just crafting the perfect prompt. As your LLM applications scale, **monitoring, debugging, and optimizing them become essential**. 
+Building production-grade AI applications requires more than just crafting the perfect prompt. As your LLM applications scale, **monitoring, debugging, and optimizing them become essential**.
 
 This is where LLM observability platforms come in.
 
@@ -10,7 +10,7 @@ But with so many options available, which one should you choose? This guide comp
 
 ## Introduction to LLM Observability Platforms
 
-LLM observability platforms are tools that provide insights into how your AI applications are performing. They help you track costs, latency, token usage, and provide tools for debugging workflow issues. When we discuss <a href="https://www.helicone.ai/blog/llm-observability#what-is-llm-observability" target="_blank" rel="noopener">LLM observability</a>, it encompasses aspects like prompt engineering, LLM tracing, and evaluating the LLM outputs.   
+LLM observability platforms are tools that provide insights into how your AI applications are performing. They help you track costs, latency, token usage, and provide tools for debugging workflow issues. When we discuss <a href="https://www.helicone.ai/blog/llm-observability#what-is-llm-observability" target="_blank" rel="noopener">LLM observability</a>, it encompasses aspects like prompt engineering, LLM tracing, and evaluating the LLM outputs.
 
 As LLMs become increasingly central to production applications, these tools have **evolved from nice-to-haves** to **mission-critical infrastructure**.
 
@@ -32,7 +32,7 @@ When choosing an LLM observability platform, consider these critical factors:
 - **Integration methods**: Proxy-based, SDK-based, or both?
 - **Supported providers**: Which LLM providers and frameworks are supported?
 
-### 2. Feature Completeness 
+### 2. Feature Completeness
 
 - **Monitoring features**: Request logging, cost tracking, latency monitoring, AI agent observability, user tracking etc.
 - **Evaluation & debugging**: LLM tracing tools, session visualization, prompt testing, scoring, etc.
@@ -57,11 +57,11 @@ When choosing an LLM observability platform, consider these critical factors:
 
 The market for LLM observability has evolved into distinct categories. Here's what you need to know:
 
-| **Category** | **Examples** | **Pros** | **Cons** |
-|--------------|--------------|----------|----------|
-| **LLM-specific observability platforms** | Helicone, <br/> LangSmith, <br/> Langfuse |  • Purpose-built for LLM workflows<br/>• Deep integration with LLM providers<br/>• Specialized features for prompt management | • May lack broader application monitoring capabilities<br/>• Newer platforms with evolving feature sets |
-| **General AI observability platforms** | Arize Phoenix, <br/> Weights & Biases, <br/> Comet | • Support for both traditional ML and LLMs<br/>• More mature evaluation capabilities<br/>• Broader ecosystem integration | • Less specialized for LLM-specific workflows<br/>• Often more complex to set up |
-| **LLM gateways with observability** | Portkey, <br/> OpenRouter, <br/> Helicone | • Combined routing and observability<br/>• Model fallback capabilities<br/>• Provider-agnostic | • May prioritize routing over deep observability<br/>• Often less robust analytics |
+| **Category**                             | **Examples**                                       | **Pros**                                                                                                                     | **Cons**                                                                                                |
+| ---------------------------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| **LLM-specific observability platforms** | Helicone, <br/> LangSmith, <br/> Langfuse          | • Purpose-built for LLM workflows<br/>• Deep integration with LLM providers<br/>• Specialized features for prompt management | • May lack broader application monitoring capabilities<br/>• Newer platforms with evolving feature sets |
+| **General AI observability platforms**   | Arize Phoenix, <br/> Weights & Biases, <br/> Comet | • Support for both traditional ML and LLMs<br/>• More mature evaluation capabilities<br/>• Broader ecosystem integration     | • Less specialized for LLM-specific workflows<br/>• Often more complex to set up                        |
+| **LLM gateways with observability**      | Portkey, <br/> OpenRouter, <br/> Helicone          | • Combined routing and observability<br/>• Model fallback capabilities<br/>• Provider-agnostic                               | • May prioritize routing over deep observability<br/>• Often less robust analytics                      |
 
 ## Comparing Top LLM Observability Tools
 
@@ -69,28 +69,28 @@ The market for LLM observability has evolved into distinct categories. Here's wh
 
 Below is a quick comparison of the major competitors in the LLM observability space:
 
-| Feature | Helicone | LangSmith | Langfuse | Braintrust | Arize Phoenix | HoneyHive | Traceloop | Portkey | Galileo | W&B |
-|---------|----------|-----------|----------|------------|---------------|-----------|-----------|---------|---------|-----|
-| **Open-source** | ✅ | ❌ | ✅ | 🟠 <br/>(only the AI proxy) | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
-| **Integration method** | Proxy, or SDK | SDK | SDK (primarily) | SDK | SDK | SDK | SDK | Proxy + SDK | SDK | SDK |
-| **Self-hosting** | ✅ | ✅ (Enterprise plan only) | ✅ | ✅ | ❌ | ❌ | ✅ | ✅ | ✅ (Enterprise) | ❌ |
-| **Cost tracking** | Advanced | Basic | Basic | Basic | Basic | Basic | Limited | Advanced | Basic | Basic |
-| **Caching** | ✅ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
-| **Prompt management** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Built-in security** | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ |
-| **Evaluation** | Basic | Advanced | Basic | Advanced | Advanced | Advanced | Basic | Basic | Advanced | Basic |
-| **Multi-modal tracing** | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ |
-| **Best for** | Fastest integration, LLM provider agnostic | LangChain workflows | Complex tracing | Evaluation-first approach | Model quality analytics | Human-in-the-loop evaluation | OpenTelemetry-based observability | Routing & gateway capabilities | Enterprise evaluation | ML ecosystem users |
+| Feature                 | Helicone                                   | LangSmith                 | Langfuse        | Braintrust                  | Arize Phoenix           | HoneyHive                    | Traceloop                         | Portkey                        | Galileo               | W&B                |
+| ----------------------- | ------------------------------------------ | ------------------------- | --------------- | --------------------------- | ----------------------- | ---------------------------- | --------------------------------- | ------------------------------ | --------------------- | ------------------ |
+| **Open-source**         | ✅                                         | ❌                        | ✅              | 🟠 <br/>(only the AI proxy) | ✅                      | ❌                           | ✅                                | ✅                             | ❌                    | ❌                 |
+| **Integration method**  | Proxy, or SDK                              | SDK                       | SDK (primarily) | SDK                         | SDK                     | SDK                          | SDK                               | Proxy + SDK                    | SDK                   | SDK                |
+| **Self-hosting**        | ✅                                         | ✅ (Enterprise plan only) | ✅              | ✅                          | ❌                      | ❌                           | ✅                                | ✅                             | ✅ (Enterprise)       | ❌                 |
+| **Cost tracking**       | Advanced                                   | Basic                     | Basic           | Basic                       | Basic                   | Basic                        | Limited                           | Advanced                       | Basic                 | Basic              |
+| **Caching**             | ✅                                         | ❌                        | ❌              | ✅                          | ❌                      | ❌                           | ❌                                | ✅                             | ❌                    | ❌                 |
+| **Prompt management**   | ✅                                         | ✅                        | ✅              | ✅                          | ✅                      | ✅                           | ✅                                | ✅                             | ✅                    | ✅                 |
+| **Built-in security**   | ✅                                         | ❌                        | ❌              | ❌                          | ❌                      | ❌                           | ❌                                | ✅                             | ✅                    | ❌                 |
+| **Evaluation**          | Basic                                      | Advanced                  | Basic           | Advanced                    | Advanced                | Advanced                     | Basic                             | Basic                          | Advanced              | Basic              |
+| **Multi-modal tracing** | ✅                                         | ✅                        | ✅              | ❌                          | ✅                      | ✅                           | ❌                                | ❌                             | ❌                    | ✅                 |
+| **Best for**            | Fastest integration, LLM provider agnostic | LangChain workflows       | Complex tracing | Evaluation-first approach   | Model quality analytics | Human-in-the-loop evaluation | OpenTelemetry-based observability | Routing & gateway capabilities | Enterprise evaluation | ML ecosystem users |
 
 ### 💡 What makes Helicone different?
 
-Helicone is designed for the **fastest time-to-value** and easiest to get started with. While other platforms may require days of integration work, Helicone can be implemented in minutes with a single line change to your base URL. 
+Helicone is designed for the **fastest time-to-value** and easiest to get started with. While other platforms may require days of integration work, Helicone can be implemented in minutes with a single line change to your base URL.
 
 Teams choose Helicone when they need comprehensive observability with minimal engineering investment and want features that directly impact the bottom line, like built-in caching that can reduce API costs by 20-30%.
 
 ## Detailed Feature Comparison
 
-Let's dive deeper into how these platforms compare. 
+Let's dive deeper into how these platforms compare.
 
 ### Helicone: The Developer-First LLM Observability Platform
 
@@ -104,22 +104,22 @@ Helicone is an open-source AI observability platform designed to help teams moni
 
   ```python
   client = OpenAI(
-    api_key="your-api-key-here", 
+    api_key="your-api-key-here",
     base_url="https://oai.helicone.ai/v1",  # Change your base URL
-    default_headers= {  
+    default_headers= {
       "Helicone-Auth": f"Bearer {HELICONE_API_KEY}", # add this header
     }
   )
   ```
 
-- **Cost Monitoring & Optimization**: API costs are calculated automatically as requests are sent. Using <a href="https://docs.helicone.ai/features/advanced-usage/caching" target="_blank" rel="noopener">built-in caching</a> can reduce API costs by 20-30%. 
+- **Cost Monitoring & Optimization**: API costs are calculated automatically as requests are sent. Using <a href="https://docs.helicone.ai/features/advanced-usage/caching" target="_blank" rel="noopener">built-in caching</a> can reduce API costs by 20-30%.
   ```python
   # Enable caching with a simple header
   client.chat.completions.create(
       model="text-davinci-003",
       prompt="How do I cache with helicone?",
       extra_headers={
-        "Helicone-Cache-Enabled": "true", 
+        "Helicone-Cache-Enabled": "true",
       }
   )
   ```
@@ -279,7 +279,7 @@ Comet provides comprehensive ML experiment tracking with LLM features.
 
 ### 11. Building Your Own Observability Solution
 
-If you're looking for a more custom solution, you can build your own observability solution in-house. 
+If you're looking for a more custom solution, you can build your own observability solution in-house.
 
 Our analysis shows that while building basic LLM request logging might take just 1-2 weeks, developing a fully-featured observability system with caching, advanced analytics, and proper scaling requires 6-12 months of engineering time, plus ongoing maintenance.
 
@@ -290,7 +290,7 @@ This decision involves factors like:
 - **Feature completeness**: Can your custom solution match specialized platforms?
 - **Time-to-value**: How quickly do you need observability capabilities?
 
-For a comprehensive breakdown of this build vs. buy observability decision, read our <a href="https://www.helicone.ai/blog/buy-vs-build-llm-observability" target="_blank" rel="noopener">in-depth guide</a>. 
+For a comprehensive breakdown of this build vs. buy observability decision, read our <a href="https://www.helicone.ai/blog/buy-vs-build-llm-observability" target="_blank" rel="noopener">in-depth guide</a>.
 
 <CallToAction
   title="See the Helicone difference for yourself"
@@ -307,18 +307,18 @@ Choosing the right observability platform depends on your specific needs and con
 
 ![LLM Observability Tool Selection Guide](/static/blog/the-complete-guide-to-LLM-observability-platforms/llm-observability-platform-selection-guide.webp)
 
-| **Platform**         | **Choose if you:**                                                                                                                                                                                                                                                                                                                                                                                |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Platform**         | **Choose if you:**                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Helicone**         | - Need minimal integration effort (one-line setup) <br/> - Want comprehensive observability with cost optimization <br/> - Require <a href="https://www.helicone.ai/blog/self-hosting-launch" target="_blank" rel="noopener">easy-to-set-up self-hosting</a> <br/> - Need support for multiple LLM providers <br/> - Want both technical and business analytics in one platform <br/> - Need routing capabilities between different LLM providers |
-| **LangSmith**        | - Are heavily invested in the LangChain ecosystem <br/> - Need deep tracing for complex LangChain workflows <br/> - Prefer an SDK-based approach with detailed function-level tracing                                                                                                                                                                                                               |
-| **Langfuse**         | - Prefer open-source with simple self-hosting <br/> - Need detailed tracing for complex workflows <br/> - Are comfortable with an SDK-based approach <br/> - Want flexible community support                                                                                                                                                                                                         |
-| **Braintrust**       | - Focus primarily on LLM evaluation <br/> - Need enterprise-grade evaluation tools <br/> - Want specialized test case management <br/> - Need to implement advanced prompt iteration capabilities <br/> - Want CI/CD integration for LLM testing                                                                                                                                                      |
-| **Arize Phoenix**    | - Focus more on LLM evaluation than operational metrics <br/> - Need advanced evaluation metrics for model quality <br/> - Are less concerned with cost tracking <br/> - Want integration with broader ML observability                                                                                                                                                                              |
-| **HoneyHive**        | - Prioritize human evaluation of LLM outputs <br/> - Need detailed annotation workflows <br/> - Are less focused on operational metrics <br/> - Want specialized testing capabilities                                                                                                                                                                                                                |
-| **Traceloop**        | - Need OpenTelemetry-based observability <br/> - Want code-first observability tools <br/> - Need a standardized approach to LLM monitoring <br/> - Want to integrate with existing OpenTelemetry systems                                                                                                                                                                                            |
-| **Portkey**          | - Need advanced routing and gateway capabilities <br/> - Want model failover and load balancing <br/> - Need virtual API key management <br/> - Require modular prompt management with "prompt partials"                                                                                                                                                                                             |
-| **Galileo**          | - Need enterprise-grade evaluation metrics <br/> - Want built-in LLM guardrails <br/> - Need quality assessment tools <br/> - Are less concerned with cost optimization features                                                                                                                                                                                                                     |
-| **Weights & Biases** | - Need integrated ML experiment tracking <br/> - Already use W\&B for traditional ML models <br/> - Want visualization tools for LLM experiments <br/> - Need broader ML lifecycle management                                                                                                                                                                                                        |
+| **LangSmith**        | - Are heavily invested in the LangChain ecosystem <br/> - Need deep tracing for complex LangChain workflows <br/> - Prefer an SDK-based approach with detailed function-level tracing                                                                                                                                                                                                                                                             |
+| **Langfuse**         | - Prefer open-source with simple self-hosting <br/> - Need detailed tracing for complex workflows <br/> - Are comfortable with an SDK-based approach <br/> - Want flexible community support                                                                                                                                                                                                                                                      |
+| **Braintrust**       | - Focus primarily on LLM evaluation <br/> - Need enterprise-grade evaluation tools <br/> - Want specialized test case management <br/> - Need to implement advanced prompt iteration capabilities <br/> - Want CI/CD integration for LLM testing                                                                                                                                                                                                  |
+| **Arize Phoenix**    | - Focus more on LLM evaluation than operational metrics <br/> - Need advanced evaluation metrics for model quality <br/> - Are less concerned with cost tracking <br/> - Want integration with broader ML observability                                                                                                                                                                                                                           |
+| **HoneyHive**        | - Prioritize human evaluation of LLM outputs <br/> - Need detailed annotation workflows <br/> - Are less focused on operational metrics <br/> - Want specialized testing capabilities                                                                                                                                                                                                                                                             |
+| **Traceloop**        | - Need OpenTelemetry-based observability <br/> - Want code-first observability tools <br/> - Need a standardized approach to LLM monitoring <br/> - Want to integrate with existing OpenTelemetry systems                                                                                                                                                                                                                                         |
+| **Portkey**          | - Need advanced routing and gateway capabilities <br/> - Want model failover and load balancing <br/> - Need virtual API key management <br/> - Require modular prompt management with "prompt partials"                                                                                                                                                                                                                                          |
+| **Galileo**          | - Need enterprise-grade evaluation metrics <br/> - Want built-in LLM guardrails <br/> - Need quality assessment tools <br/> - Are less concerned with cost optimization features                                                                                                                                                                                                                                                                  |
+| **Weights & Biases** | - Need integrated ML experiment tracking <br/> - Already use W\&B for traditional ML models <br/> - Want visualization tools for LLM experiments <br/> - Need broader ML lifecycle management                                                                                                                                                                                                                                                     |
 
 <BottomLine
   title="💡 Implementation Tip"
@@ -331,40 +331,49 @@ The right AI monitoring platform can significantly improve your AI application's
 
 Ultimately, your choice should be guided by your specific requirements, team structure, and existing tech stack. Consider starting with a free trial of multiple platforms to find the best fit for your needs.
 
-<FAQ 
+<FAQ
   items={[
     {
       question: "What is LLM observability, and why is it important?",
-      answer: "LLM observability refers to the ability to monitor, analyze, and debug LLM applications. It's important because it helps teams understand how their AI applications are performing, identify issues before users do, optimize costs, and improve the quality of outputs."
+      answer:
+        "LLM observability refers to the ability to monitor, analyze, and debug LLM applications. It's important because it helps teams understand how their AI applications are performing, identify issues before users do, optimize costs, and improve the quality of outputs.",
     },
     {
       question: "How much does an LLM observability platform typically cost?",
-      answer: "Pricing varies widely. Most platforms offer free tiers for low volumes (5,000-10,000 requests per month). Paid plans typically range from $20-50 per seat per month, plus volume-based pricing. Helicone offers a transparent pricing model starting at $20/seat/month with a 10,000-request free tier."
+      answer:
+        "Pricing varies widely. Most platforms offer free tiers for low volumes (5,000-10,000 requests per month). Paid plans typically range from $20-50 per seat per month, plus volume-based pricing. Helicone offers a transparent pricing model starting at $20/seat/month with a 10,000-request free tier.",
     },
     {
       question: "Can LLM observability platforms reduce my API costs?",
-      answer: "Yes, platforms with caching capabilities, like Helicone, can reduce API costs by 20-30% by reusing responses for similar requests. Other cost-saving features include prompt optimization through testing and experimentation."
+      answer:
+        "Yes, platforms with caching capabilities, like Helicone, can reduce API costs by 20-30% by reusing responses for similar requests. Other cost-saving features include prompt optimization through testing and experimentation.",
     },
     {
-      question: "Do I need to modify my code to use an LLM observability platform?",
-      answer: "It depends on the platform. Proxy-based solutions, like Helicone, require minimal code changes (often just changing a base URL), while SDK-based solutions require decorating functions or adding specific logging calls throughout your code."
+      question:
+        "Do I need to modify my code to use an LLM observability platform?",
+      answer:
+        "It depends on the platform. Proxy-based solutions, like Helicone, require minimal code changes (often just changing a base URL), while SDK-based solutions require decorating functions or adding specific logging calls throughout your code.",
     },
     {
       question: "How do I choose between a proxy-based and SDK-based approach?",
-      answer: "Proxy-based approaches are easier to implement and maintain, requiring minimal code changes. SDK-based approaches offer more granular control but require more extensive code modifications. Your choice should depend on your integration preferences and the complexity of your workflows."
+      answer:
+        "Proxy-based approaches are easier to implement and maintain, requiring minimal code changes. SDK-based approaches offer more granular control but require more extensive code modifications. Your choice should depend on your integration preferences and the complexity of your workflows.",
     },
     {
       question: "Can I use these platforms with any LLM provider?",
-      answer: "Most platforms support major providers like OpenAI, Anthropic, and Google. Provider-specific platforms may have more limited support."
+      answer:
+        "Most platforms support major providers like OpenAI, Anthropic, and Google. Provider-specific platforms may have more limited support.",
     },
     {
       question: "What security considerations should I keep in mind?",
-      answer: "Consider data privacy (where logs are stored), PII handling, compliance requirements (HIPAA, GDPR), and API key security. Platforms like Helicone offer features like key vaults and threat detection to enhance security."
+      answer:
+        "Consider data privacy (where logs are stored), PII handling, compliance requirements (HIPAA, GDPR), and API key security. Platforms like Helicone offer features like key vaults and threat detection to enhance security.",
     },
     {
       question: "Can I self-host my LLM observability platform?",
-      answer: "Some platforms, like Helicone and Langfuse, offer self-hosting options. This keeps your data within your infrastructure and provides more control. Helicone simplifies self-hosting through Docker, Kubernetes, or manual setup options."
-    }
+      answer:
+        "Some platforms, like Helicone and Langfuse, offer self-hosting options. This keeps your data within your infrastructure and provides more control. Helicone simplifies self-hosting through Docker, Kubernetes, or manual setup options.",
+    },
   ]}
 />
 

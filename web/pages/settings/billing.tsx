@@ -20,7 +20,7 @@ PlanSettings.getLayout = function getLayout(page: ReactElement) {
 export default PlanSettings;
 
 export const getServerSideProps = async (
-  context: GetServerSidePropsContext
+  context: GetServerSidePropsContext,
 ) => {
   return {
     props: {},

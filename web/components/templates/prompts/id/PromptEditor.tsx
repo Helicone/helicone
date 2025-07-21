@@ -178,7 +178,7 @@ export default function PromptEditor({
   const { canCreate: withinVersionsLimit } = useFeatureLimit(
     "prompts",
     versionCount,
-    "versions"
+    "versions",
   );
   // - Prompt Runs
   const {
@@ -246,7 +246,9 @@ export default function PromptEditor({
         state?.messages.some(
           (m) =>
             typeof m !== "string" &&
-            (typeof m.content === "string" ? m.content.trim().length > 0 : true)
+            (typeof m.content === "string"
+              ? m.content.trim().length > 0
+              : true),
         ) ?? false
       );
     }
@@ -258,7 +260,9 @@ export default function PromptEditor({
           (m) =>
             typeof m !== "string" &&
             m.role === "user" &&
-            (typeof m.content === "string" ? m.content.trim().length > 0 : true)
+            (typeof m.content === "string"
+              ? m.content.trim().length > 0
+              : true),
         ) ?? false
       );
   }, [state?.messages, state?.parameters?.provider]);
@@ -326,9 +330,9 @@ export default function PromptEditor({
       masterVersion =
         metadata?.isProduction === true
           ? ver.major_version
-          : promptVersionsData?.find(
-              (v) => (v.metadata as { isProduction?: boolean })?.isProduction
-            )?.major_version ?? ver.major_version;
+          : (promptVersionsData?.find(
+              (v) => (v.metadata as { isProduction?: boolean })?.isProduction,
+            )?.major_version ?? ver.major_version);
 
       // Process variables and inputs
       // 1. First collect all variables from metadata inputs
@@ -369,7 +373,7 @@ export default function PromptEditor({
       const { provider: selectedProvider, model: selectedModel } =
         findClosestModelProvider(
           templateData.model || "gpt-4o-mini",
-          templateData.provider || metadata?.provider
+          templateData.provider || metadata?.provider,
         );
 
       // Update state with processed data
@@ -403,7 +407,7 @@ export default function PromptEditor({
         isDirty: false,
       });
     },
-    [promptId, promptVersionsData, editorMode]
+    [promptId, promptVersionsData, editorMode],
   );
   // - Update State
   const updateState = useCallback(
@@ -411,7 +415,7 @@ export default function PromptEditor({
       updates:
         | Partial<PromptState>
         | ((prev: PromptState | null) => Partial<PromptState>),
-      markDirty: boolean = true
+      markDirty: boolean = true,
     ) => {
       setState((prev) => {
         if (!prev) return null;
@@ -428,7 +432,7 @@ export default function PromptEditor({
         };
       });
     },
-    []
+    [],
   );
   // - Message Change
   const handleMessageChange = useCallback(
@@ -456,7 +460,7 @@ export default function PromptEditor({
         const updatedVariables = deduplicateVariables(
           extractedVars.map((newVar) => {
             const existingVar = existingVariables.find(
-              (v) => v.name === newVar.name
+              (v) => v.name === newVar.name,
             );
             console.log(
               "Processing var:",
@@ -464,10 +468,10 @@ export default function PromptEditor({
               "existing:",
               existingVar,
               "new:",
-              newVar
+              newVar,
             );
             return existingVar || newVar;
-          })
+          }),
         );
         console.log("Final updated variables:", updatedVariables);
 
@@ -477,7 +481,7 @@ export default function PromptEditor({
         };
       });
     },
-    [updateState]
+    [updateState],
   );
   // - Remove Message
   const handleRemoveMessage = useCallback(
@@ -490,7 +494,7 @@ export default function PromptEditor({
         }),
       });
     },
-    [state, updateState]
+    [state, updateState],
   );
   // - Create Variable
   const handleVariableCreate = useCallback(
@@ -499,7 +503,7 @@ export default function PromptEditor({
         if (!prev) return {};
         const currentVars = [...(prev.inputs || [])];
         const existingIndex = currentVars.findIndex(
-          (v) => v.name === newVariable.name
+          (v) => v.name === newVariable.name,
         );
 
         if (existingIndex >= 0) {
@@ -514,7 +518,7 @@ export default function PromptEditor({
         return { inputs: currentVars };
       });
     },
-    [updateState]
+    [updateState],
   );
   // - Change Variable
   const handleVariableChange = useCallback(
@@ -555,7 +559,7 @@ export default function PromptEditor({
         return { inputs: updatedVariables };
       }, false);
     },
-    [updateState]
+    [updateState],
   );
   // - Promote Version
   const handleVersionPromote = useCallback(
@@ -563,7 +567,7 @@ export default function PromptEditor({
       if (!version) return;
 
       const currentProductionVersion = promptVersionsData?.find(
-        (v) => (v.metadata as { isProduction?: boolean })?.isProduction
+        (v) => (v.metadata as { isProduction?: boolean })?.isProduction,
       );
 
       try {
@@ -579,7 +583,7 @@ export default function PromptEditor({
               previousProductionVersionId:
                 currentProductionVersion?.id ?? version.id,
             },
-          }
+          },
         );
 
         if (result.error) {
@@ -595,18 +599,18 @@ export default function PromptEditor({
                 ...prev,
                 masterVersion: version.major_version,
               }
-            : null
+            : null,
         );
         setNotification(
           `Promoted version ${version.major_version} to production.`,
-          "success"
+          "success",
         );
       } catch (error) {
         console.error("Error promoting version:", error);
         setNotification("Failed to promote version", "error");
       }
     },
-    [jawnClient, promptVersionsData, refetchPromptVersions, setNotification]
+    [jawnClient, promptVersionsData, refetchPromptVersions, setNotification],
   );
   // - Handle ID Edit
   const handleIdEdit = useCallback(
@@ -624,7 +628,7 @@ export default function PromptEditor({
             body: {
               userDefinedId: kebabId,
             },
-          }
+          },
         );
 
         if (result.error) {
@@ -636,7 +640,7 @@ export default function PromptEditor({
         await refetchPrompt();
       }
     },
-    [promptId, jawnClient, promptData?.id, refetchPrompt, setNotification]
+    [promptId, jawnClient, promptData?.id, refetchPrompt, setNotification],
   );
   // - Save &/Or Run
   const handleSaveAndRun = useCallback(async () => {
@@ -679,7 +683,7 @@ export default function PromptEditor({
 
     const variables = state.inputs || [];
     const variableMap = Object.fromEntries(
-      variables.map((v) => [v.name, v.value || ""])
+      variables.map((v) => [v.name, v.value || ""]),
     );
 
     // 3. SAVE: If from Editor, and state is dirty
@@ -716,7 +720,7 @@ export default function PromptEditor({
               metadata,
               isMajorVersion: true,
             },
-          }
+          },
         );
 
         if (result?.error || !result?.data) {
@@ -768,7 +772,7 @@ export default function PromptEditor({
               });
             },
           },
-          abortController.current.signal
+          abortController.current.signal,
         );
       } catch (error) {
         if (error instanceof Error && error.name !== "AbortError") {
@@ -842,11 +846,11 @@ export default function PromptEditor({
                   reasoning: result.reasoning,
                 },
               }),
-              false
+              false,
             );
           },
         },
-        abortController.current.signal
+        abortController.current.signal,
       );
     } catch (error) {
       if (error instanceof Error && error.name !== "AbortError") {
@@ -882,7 +886,7 @@ export default function PromptEditor({
         createdFromUi: true,
         provider: state.parameters.provider,
         inputs: Object.fromEntries(
-          (state.inputs || []).map((v) => [v.name, v.value || ""])
+          (state.inputs || []).map((v) => [v.name, v.value || ""]),
         ),
       };
 
@@ -895,7 +899,7 @@ export default function PromptEditor({
             metadata,
             isMajorVersion: true,
           },
-        }
+        },
       );
 
       if (result?.error || !result?.data) {
@@ -940,7 +944,7 @@ export default function PromptEditor({
 
       // Extract variable values for metadata
       const inputsMap = Object.fromEntries(
-        (state.inputs || []).map((v) => [v.name, v.value || ""])
+        (state.inputs || []).map((v) => [v.name, v.value || ""]),
       );
 
       // Include metadata with the request
@@ -975,13 +979,13 @@ export default function PromptEditor({
         case "fromRequest":
           if (requestData?.data) {
             const mappedContent = heliconeRequestToMappedContent(
-              requestData.data
+              requestData.data,
             );
 
             const { provider: requestProvider, model: requestModel } =
               findClosestModelProvider(
                 mappedContent.schema.request.model || "gpt-4o-mini",
-                mappedContent.schema.request.provider
+                mappedContent.schema.request.provider,
               );
 
             setState({
@@ -1029,7 +1033,7 @@ export default function PromptEditor({
             const { provider: baseProvider, model: baseModel } =
               findClosestModelProvider(
                 basePrompt.body.model || "gpt-4o-mini",
-                basePrompt.metadata.provider
+                basePrompt.metadata.provider,
               );
 
             setState({
@@ -1047,7 +1051,7 @@ export default function PromptEditor({
                   name,
                   value: value as string,
                   isValid: isValidVariableName(name),
-                })
+                }),
               ),
               isDirty: false,
             });
@@ -1136,9 +1140,9 @@ export default function PromptEditor({
   }
   // - Editor
   return (
-    <main className="relative flex flex-col h-screen">
+    <main className="relative flex h-screen flex-col">
       {/* Header */}
-      <div className="h-16 shrink-0 bg-slate-100 dark:bg-slate-900 flex flex-row items-center justify-between px-4 py-2.5 z-50 border-b border-slate-200 dark:border-slate-800">
+      <div className="z-50 flex h-16 shrink-0 flex-row items-center justify-between border-b border-slate-200 bg-slate-100 px-4 py-2.5 dark:border-slate-800 dark:bg-slate-900">
         {/* Left Side: Navigation */}
         <div className="flex flex-row items-center gap-2">
           {/* Back Button */}
@@ -1180,11 +1184,11 @@ export default function PromptEditor({
             <Drawer>
               <DrawerTrigger>
                 <Button variant="link">
-                  <PiChartBarBold className="h-4 w-4 mr-2" />
+                  <PiChartBarBold className="mr-2 h-4 w-4" />
                   Metrics
                 </Button>
               </DrawerTrigger>
-              <DrawerContent className="w-full h-[75vh]">
+              <DrawerContent className="h-[75vh] w-full">
                 <ScrollArea className="h-full">
                   <PromptMetricsTab
                     id={promptId}
@@ -1202,11 +1206,11 @@ export default function PromptEditor({
             state.isDirty && (
               <Tooltip delayDuration={100}>
                 <TooltipTrigger asChild>
-                  <div className="flex flex-row items-center gap-2 cursor-default">
+                  <div className="flex cursor-default flex-row items-center gap-2">
                     <div
-                      className={`h-2 w-2 rounded-full bg-amber-500 animate-pulse`}
+                      className={`h-2 w-2 animate-pulse rounded-full bg-amber-500`}
                     />
-                    <span className="text-sm text-secondary font-semibold">
+                    <span className="text-sm font-semibold text-secondary">
                       Unsaved Changes
                     </span>
                   </div>
@@ -1273,7 +1277,7 @@ export default function PromptEditor({
               onClick={() => setIsAutoImproveOpen(true)}
               disabled={state.isDirty || !canRun}
             >
-              <PiBrainBold className="h-4 w-4 mr-2" />
+              <PiBrainBold className="mr-2 h-4 w-4" />
               Auto-Improve
             </Button>
           )}
@@ -1291,7 +1295,7 @@ export default function PromptEditor({
             >
               {isCreatingPrompt ? (
                 <>
-                  <PiSpinnerGapBold className="h-4 w-4 mr-2 animate-spin" />
+                  <PiSpinnerGapBold className="mr-2 h-4 w-4 animate-spin" />
                   Saving...
                 </>
               ) : editorMode === "fromCode" ? (
@@ -1308,7 +1312,7 @@ export default function PromptEditor({
               <Button
                 className={`${
                   isStreaming
-                    ? "bg-red-500 hover:bg-red-500/90 dark:bg-red-500 dark:hover:bg-red-500/90 text-white hover:text-white"
+                    ? "bg-red-500 text-white hover:bg-red-500/90 hover:text-white dark:bg-red-500 dark:hover:bg-red-500/90"
                     : ""
                 }`}
                 variant={editorMode === "fromEditor" ? "action" : "outline"}
@@ -1325,19 +1329,19 @@ export default function PromptEditor({
               >
                 {hasOpenRouter &&
                   (isStreaming ? (
-                    <PiStopBold className="h-4 w-4 mr-2" />
+                    <PiStopBold className="mr-2 h-4 w-4" />
                   ) : (
-                    <PiPlayBold className="h-4 w-4 mr-2" />
+                    <PiPlayBold className="mr-2 h-4 w-4" />
                   ))}
                 <span className="mr-2">
                   {isStreaming
                     ? "Stop"
                     : state.isDirty && editorMode === "fromEditor"
-                    ? `Save${hasOpenRouter ? " & Run" : ""}`
-                    : "Run"}
+                      ? `Save${hasOpenRouter ? " & Run" : ""}`
+                      : "Run"}
                 </span>
                 {isStreaming && (
-                  <PiSpinnerGapBold className="h-4 w-4 mr-2 animate-spin" />
+                  <PiSpinnerGapBold className="mr-2 h-4 w-4 animate-spin" />
                 )}
                 <div className="flex items-center gap-0.5 text-sm opacity-60">
                   <PiCommandBold className="h-4 w-4" />
@@ -1366,7 +1370,7 @@ export default function PromptEditor({
                 router.push(`/experiments/${result.data?.data?.experimentId}`);
               }}
             >
-              <FlaskConicalIcon className="h-4 w-4 mr-2" />
+              <FlaskConicalIcon className="mr-2 h-4 w-4" />
               <span>Experiment</span>
             </Button>
           )}
@@ -1449,7 +1453,7 @@ export default function PromptEditor({
         <ResizablePanel defaultSize={50} minSize={30}>
           <ResizablePanelGroup direction="vertical">
             <ResizablePanel defaultSize={50} minSize={25}>
-              <CustomScrollbar className="h-full flex flex-col gap-4 bg-slate-50 dark:bg-slate-950">
+              <CustomScrollbar className="flex h-full flex-col gap-4 bg-slate-50 dark:bg-slate-950">
                 <ResponsePanel
                   response={state.response}
                   onAddToMessages={() =>
@@ -1474,7 +1478,7 @@ export default function PromptEditor({
             <ResizableHandle />
 
             <ResizablePanel defaultSize={50} minSize={25}>
-              <CustomScrollbar className="h-full flex flex-col gap-4 bg-white dark:bg-black">
+              <CustomScrollbar className="flex h-full flex-col gap-4 bg-white dark:bg-black">
                 <VariablesPanel
                   variables={state.inputs || []}
                   onVariableChange={handleVariableChange}
@@ -1525,8 +1529,8 @@ export default function PromptEditor({
           !withinPromptsLimit
             ? promptsLimitUpgradeMessage
             : editorMode === "fromPlayground" && !withinPlaygroundRunsLimit
-            ? playgroundRunsUpgradeMessage
-            : promptRunsUpgradeMessage
+              ? playgroundRunsUpgradeMessage
+              : promptRunsUpgradeMessage
         }
       />
 

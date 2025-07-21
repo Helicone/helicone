@@ -41,7 +41,7 @@ const CostBackfiller = () => {
               setIsRunning(false);
               resolve(null);
             },
-          }
+          },
         );
       });
     }
@@ -128,9 +128,9 @@ const CostBackfiller = () => {
         )}
       </div>
       {isRunning && (
-        <div className="w-full bg-muted rounded h-3 overflow-hidden">
+        <div className="h-3 w-full overflow-hidden rounded bg-muted">
           <div
-            className="bg-primary h-3 transition-all duration-300"
+            className="h-3 bg-primary transition-all duration-300"
             style={{ width: `${progress}%` }}
           ></div>
         </div>

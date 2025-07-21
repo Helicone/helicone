@@ -547,7 +547,7 @@ const costs: ModelRow[] = [
     cost: {
       prompt_token: 0.00015,
       completion_token: 0.0006,
-    }
+    },
   },
   {
     model: {
@@ -586,12 +586,12 @@ const costs: ModelRow[] = [
   {
     model: {
       operator: "includes",
-      value: "o3-pro"
+      value: "o3-pro",
     },
     cost: {
       prompt_token: 0.00002,
       completion_token: 0.00008,
-    }
+    },
   },
   {
     model: {
@@ -740,8 +740,8 @@ const costs: ModelRow[] = [
     cost: {
       prompt_token: 0.000005,
       completion_token: 0.000015,
-    }
-  }
+    },
+  },
 ];
 
 const modelDetails: ModelDetailsMap = {

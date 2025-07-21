@@ -78,7 +78,7 @@ export function ProviderStatusInfo({
 
     if (name === "errorCount") {
       return (
-        <div className="bg-white p-2 border rounded shadow">
+        <div className="rounded border bg-white p-2 shadow">
           <div className="text-sm text-gray-500">{timestamp}</div>
           <div className="font-medium">{value}</div>
           <div className="text-sm">500 Errors</div>
@@ -86,7 +86,7 @@ export function ProviderStatusInfo({
       );
     } else if (name === "latency") {
       return (
-        <div className="bg-white p-2 border rounded shadow">
+        <div className="rounded border bg-white p-2 shadow">
           <div className="text-sm text-gray-500">{timestamp}</div>
           <div className="font-medium">{formatLatency(value)}</div>
           <div className="text-sm">Latency</div>
@@ -103,9 +103,9 @@ export function ProviderStatusInfo({
     provider.metrics.timeSeriesData.length === 0
   ) {
     return (
-      <div className="w-full max-w-6xl mx-auto">
-        <div className="text-center p-8">
-          <h2 className="text-xl font-semibold mb-2">No data available</h2>
+      <div className="mx-auto w-full max-w-6xl">
+        <div className="p-8 text-center">
+          <h2 className="mb-2 text-xl font-semibold">No data available</h2>
           <p className="text-gray-500">
             Unable to retrieve metrics for{" "}
             {formatProviderName(provider.providerName)}
@@ -151,14 +151,14 @@ export function ProviderStatusInfo({
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-5 gap-4">
+    <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-4 lg:grid-cols-5">
       <div className="lg:col-span-5">
-        <div className="flex justify-end gap-2 mb-4">
+        <div className="mb-4 flex justify-end gap-2">
           {["24h", "7d", "30d"].map((tf) => (
             <button
               key={tf}
               onClick={() => onTimeFrameChange(tf as TimeFrame)}
-              className={`px-3 py-1 rounded-md text-sm ${
+              className={`rounded-md px-3 py-1 text-sm ${
                 timeFrame === tf
                   ? "bg-primary text-primary-foreground"
                   : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
@@ -170,8 +170,8 @@ export function ProviderStatusInfo({
         </div>
       </div>
 
-      <div className="lg:col-span-3 space-y-4">
-        <Card className="shadow-none border h-[120px]">
+      <div className="space-y-4 lg:col-span-3">
+        <Card className="h-[120px] border shadow-none">
           <CardContent className="pt-6">
             {(() => {
               const recentErrorRate =
@@ -186,7 +186,7 @@ export function ProviderStatusInfo({
 
               return (
                 <>
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="mb-2 flex items-center justify-between">
                     <h1 className="text-2xl font-bold">
                       Is {formatProviderName(provider.providerName)} down?
                     </h1>
@@ -194,14 +194,14 @@ export function ProviderStatusInfo({
                       variant="secondary"
                       className={`${status.bgColor} ${status.color} hover:${status.bgColor} px-3 py-1 text-sm font-medium`}
                     >
-                      <StatusIcon className="w-4 h-4 mr-1.5" />
+                      <StatusIcon className="mr-1.5 h-4 w-4" />
                       {status.status}
                     </Badge>
                   </div>
-                  <div className="text-gray-500 text-lg">
+                  <div className="text-lg text-gray-500">
                     <span>{status.description}</span>
                     {provider.metrics.errorRate24h > 0 && (
-                      <span className="text-gray-400 text-base ml-2">
+                      <span className="ml-2 text-base text-gray-400">
                         ({provider.metrics.errorRate24h.toFixed(2)}% in 24h)
                       </span>
                     )}
@@ -212,14 +212,14 @@ export function ProviderStatusInfo({
           </CardContent>
         </Card>
 
-        <Card className="shadow-none border">
+        <Card className="border shadow-none">
           <CardHeader>
             <CardTitle className="text-xl font-semibold">
               500 Errors in the last {timeFrameLabels[timeFrame]}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[200px] mt-4">
+            <div className="mt-4 h-[200px]">
               <ResponsiveContainer
                 width="100%"
                 height="100%"
@@ -257,12 +257,12 @@ export function ProviderStatusInfo({
             <div className="flex w-full items-start gap-2 text-sm">
               <div className="grid gap-2">
                 <div className="flex items-center gap-2 font-medium leading-none">
-                  <TrendingDown className="w-4 h-4 mr-1" />
+                  <TrendingDown className="mr-1 h-4 w-4" />
                   {Math.abs(provider.metrics.errorRateChange).toFixed(4)}%{" "}
                   {provider.metrics.errorRateChange < 0 ? "fewer" : "more"}{" "}
                   errors than average
                 </div>
-                <div className="flex items-center gap-2 leading-none text-muted-foreground">
+                <div className="text-muted-foreground flex items-center gap-2 leading-none">
                   Compared to previous {timeFrameLabels[timeFrame]}
                 </div>
               </div>
@@ -271,10 +271,10 @@ export function ProviderStatusInfo({
         </Card>
       </div>
 
-      <div className="lg:col-span-2 space-y-4">
-        <Card className="shadow-none border h-[120px]">
+      <div className="space-y-4 lg:col-span-2">
+        <Card className="h-[120px] border shadow-none">
           <CardContent className="pt-4">
-            <h2 className="text-xl font-bold mb-2">
+            <h2 className="mb-2 text-xl font-bold">
               Latency in the last {timeFrameLabels[timeFrame]}
             </h2>
             <div className="grid grid-cols-3 gap-4 text-sm">
@@ -306,14 +306,14 @@ export function ProviderStatusInfo({
           </CardContent>
         </Card>
 
-        <Card className="shadow-none border">
+        <Card className="border shadow-none">
           <CardHeader>
             <CardTitle className="text-xl font-semibold">
               Latency in the last {timeFrameLabels[timeFrame]}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[200px] mt-4">
+            <div className="mt-4 h-[200px]">
               <ResponsiveContainer
                 width="100%"
                 height="100%"
@@ -351,12 +351,12 @@ export function ProviderStatusInfo({
             <div className="flex w-full items-start gap-2 text-sm">
               <div className="grid gap-2">
                 <div className="flex items-center gap-2 font-medium leading-none">
-                  <TrendingDown className="w-4 h-4 mr-1" />
+                  <TrendingDown className="mr-1 h-4 w-4" />
                   {Math.abs(provider.metrics.latencyChange).toFixed(2)}%{" "}
                   {provider.metrics.latencyChange < 0 ? "faster" : "slower"}{" "}
                   than average
                 </div>
-                <div className="flex items-center gap-2 leading-none text-muted-foreground">
+                <div className="text-muted-foreground flex items-center gap-2 leading-none">
                   Compared to previous {timeFrameLabels[timeFrame]}
                 </div>
               </div>

@@ -104,10 +104,10 @@ Use headers to add Custom Properties to your LLM requests.
 
 Custom properties use a simple header-based format:
 
-| Header Format | Type | Description | Example |
-|---------------|------|-------------|----------|
-| `Helicone-Property-[Name]` | `string` | Any custom metadata you want to track | `"Helicone-Property-Environment": "staging"` |
-| `Helicone-User-Id` | `string` | Special property for user tracking (reserved) | `"Helicone-User-Id": "user-123"` |
+| Header Format              | Type     | Description                                   | Example                                      |
+| -------------------------- | -------- | --------------------------------------------- | -------------------------------------------- |
+| `Helicone-Property-[Name]` | `string` | Any custom metadata you want to track         | `"Helicone-Property-Environment": "staging"` |
+| `Helicone-User-Id`         | `string` | Special property for user tracking (reserved) | `"Helicone-User-Id": "user-123"`             |
 
 ## Use Cases
 
@@ -120,29 +120,30 @@ Track costs and usage per individual user for billing and optimization:
 import OpenAI from "openai";
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  baseURL: "https://oai.helicone.ai/v1",
-  defaultHeaders: {
-    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-  },
+apiKey: process.env.OPENAI_API_KEY,
+baseURL: "https://oai.helicone.ai/v1",
+defaultHeaders: {
+"Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+},
 });
 
 // Track costs per user for billing
 const response = await openai.chat.completions.create(
-  {
-    model: "gpt-4o-mini",
-    messages: [{ role: "user", content: userQuery }]
-  },
-  {
-    headers: {
-      "Helicone-Property-Plan": "premium",
-      "Helicone-Property-Feature": "chat-completion"
-    }
-  }
+{
+model: "gpt-4o-mini",
+messages: [{ role: "user", content: userQuery }]
+},
+{
+headers: {
+"Helicone-Property-Plan": "premium",
+"Helicone-Property-Feature": "chat-completion"
+}
+}
 );
 
 // Now you can analyze costs by user, plan type, and feature
-```
+
+````
 
 ```python Python
 import openai
@@ -163,7 +164,8 @@ response = client.chat.completions.create(
         "Helicone-Property-Feature": "chat-completion"
     }
 )
-```
+````
+
 </CodeGroup>
 </Tab>
 
@@ -175,14 +177,14 @@ Track costs across different projects and tasks for budget management:
 const response = await openai.chat.completions.create(
   {
     model: "gpt-4o",
-    messages: [{ role: "user", content: "Create a marketing strategy" }]
+    messages: [{ role: "user", content: "Create a marketing strategy" }],
   },
   {
     headers: {
       "Helicone-Property-Project": "q4-product-launch",
       "Helicone-Property-Task": "strategy",
-      "Helicone-Property-Client": "acme-corp"
-    }
+      "Helicone-Property-Client": "acme-corp",
+    },
   }
 );
 
@@ -190,40 +192,46 @@ const response = await openai.chat.completions.create(
 const adCopy = await openai.chat.completions.create(
   {
     model: "gpt-4o-mini",
-    messages: [{ role: "user", content: "Write ad copy" }]
+    messages: [{ role: "user", content: "Write ad copy" }],
   },
   {
     headers: {
       "Helicone-Property-Project": "q4-product-launch",
       "Helicone-Property-Task": "copywriting",
-      "Helicone-Property-Client": "acme-corp"
-    }
+      "Helicone-Property-Client": "acme-corp",
+    },
   }
 );
 
 // Analyze total cost per project and breakdown by task type
 ```
+
 </Tab>
 </Tabs>
 
 ## Understanding Custom Properties
 
 ### How Properties Work
+
 Custom properties are metadata attached to each request that help you:
 
 **What they enable:**
+
 - Filter requests in the dashboard by any property
 - Calculate costs and metrics grouped by properties
 - Export data segmented by custom dimensions
 - Set up alerts based on property values
 
 ### Updating Properties After Request
+
 You can update properties after a request is made using the [REST API](/rest/request/put-v1request-property):
 
 ```typescript
 // Get the request ID from the response
 const { data, response } = await openai.chat.completions
-  .create({ /* your request */ })
+  .create({
+    /* your request */
+  })
   .withResponse();
 
 const requestId = response.headers.get("helicone-id");
@@ -232,13 +240,13 @@ const requestId = response.headers.get("helicone-id");
 await fetch(`https://api.helicone.ai/v1/request/${requestId}/property`, {
   method: "PUT",
   headers: {
-    "Authorization": `Bearer ${HELICONE_API_KEY}`,
-    "Content-Type": "application/json"
+    Authorization: `Bearer ${HELICONE_API_KEY}`,
+    "Content-Type": "application/json",
   },
   body: JSON.stringify({
-    "Environment": "production",
-    "PostProcessed": "true"
-  })
+    Environment: "production",
+    PostProcessed: "true",
+  }),
 });
 ```
 
@@ -250,11 +258,11 @@ Track per-user costs and usage with the special Helicone-User-Id property
 </Card>
 
 <Card title="Sessions" icon="link" href="/features/sessions">
-Group related requests with Helicone-Session-Id for workflow tracking
+  Group related requests with Helicone-Session-Id for workflow tracking
 </Card>
 
 <Card title="Webhooks" icon="webhook" href="/features/webhooks">
-Filter webhook deliveries based on custom property values
+  Filter webhook deliveries based on custom property values
 </Card>
 
 <Card title="Alerts" icon="bell" href="/features/alerts">

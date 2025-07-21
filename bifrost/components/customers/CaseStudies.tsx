@@ -71,7 +71,7 @@ export async function CaseStudies() {
   );
 
   return (
-    <div className="relative w-full grid grid-cols-1 sm:grid-cols-2 gap-2 mx-auto max-w-5xl h-full py-8 md:py-12 px-4 sm:px-6">
+    <div className="relative mx-auto grid h-full w-full max-w-5xl grid-cols-1 gap-2 px-4 py-8 sm:grid-cols-2 sm:px-6 md:py-12">
       {customersWithMetadata.map((customer) => (
         <CustomerCard
           key={customer.dynamicEntry?.folderName}

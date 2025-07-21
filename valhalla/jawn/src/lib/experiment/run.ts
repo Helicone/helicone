@@ -117,9 +117,8 @@ export async function run(
   organizationId: string,
   isOriginalRequest?: boolean
 ): Promise<Result<string, string>> {
-  const tempKey: Result<BaseTempKey, string> = await generateTempHeliconeAPIKey(
-    organizationId
-  );
+  const tempKey: Result<BaseTempKey, string> =
+    await generateTempHeliconeAPIKey(organizationId);
 
   if (tempKey.error || !tempKey.data) {
     return err(tempKey.error);

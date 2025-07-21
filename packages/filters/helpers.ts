@@ -1,12 +1,23 @@
 import { z } from "zod";
-import { TimeFilter, FilterNode, TablesAndViews, FilterLeaf } from "./filterDefs";
+import {
+  TimeFilter,
+  FilterNode,
+  TablesAndViews,
+  FilterLeaf,
+} from "./filterDefs";
 import { UIFilterRow, UIFilterRowNode, UIFilterRowTree } from "./types";
 import { SingleFilterDef } from "./frontendFilterDefs";
 
 export const TimeFilterSchema = z.object({
   timeFilter: z.object({
-    start: z.string().datetime().transform(str => new Date(str)),
-    end: z.string().datetime().transform(str => new Date(str)),
+    start: z
+      .string()
+      .datetime()
+      .transform((str) => new Date(str)),
+    end: z
+      .string()
+      .datetime()
+      .transform((str) => new Date(str)),
   }),
 });
 

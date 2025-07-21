@@ -15,7 +15,6 @@ export type ColumnType =
   | "number-with-suggestions"
   | "bool";
 
-
 export type InputParam = {
   key: string;
   param: string;
@@ -195,7 +194,6 @@ export function getValueFilters(
   }));
 }
 
-
 const STATUS_OPS = numberWithSuggestions([
   {
     key: "200",
@@ -247,7 +245,7 @@ export const DASHBOARD_PAGE_TABLE_FILTERS: [
   SingleFilterDef<"request_response_rmt">,
   SingleFilterDef<"request_response_rmt">,
   SingleFilterDef<"request_response_rmt">,
-  SingleFilterDef<"request_response_rmt">
+  SingleFilterDef<"request_response_rmt">,
 ] = [
   {
     label: "Model",
@@ -290,7 +288,7 @@ export const REQUEST_TABLE_FILTERS: [
   SingleFilterDef<"request_response_rmt">,
   SingleFilterDef<"request_response_rmt">,
   SingleFilterDef<"request_response_rmt">,
-  SingleFilterDef<"request_response_rmt">
+  SingleFilterDef<"request_response_rmt">,
 ] = [
   {
     label: "Request",

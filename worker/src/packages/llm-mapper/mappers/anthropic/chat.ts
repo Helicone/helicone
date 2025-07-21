@@ -84,8 +84,8 @@ const getResponseText = (responseBody: any, statusCode: number = 200) => {
     }
 
     return responseBody?.body
-      ? responseBody?.body?.completion ?? ""
-      : responseBody?.completion ?? "";
+      ? (responseBody?.body?.completion ?? "")
+      : (responseBody?.completion ?? "");
   } else if (statusCode === 0 || statusCode === null) {
     return "";
   } else {

@@ -92,7 +92,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
   }, [rows, selectedIds]);
 
   const [datasetName, setDatasetName] = useState<string>(
-    datasetNameFromQuery || "Loading..."
+    datasetNameFromQuery || "Loading...",
   );
 
   useEffect(() => {
@@ -130,7 +130,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
       setSelectedRowIndex,
       setOpen,
       isShiftPressed,
-    ]
+    ],
   );
 
   const handlePrevious = () => {
@@ -151,7 +151,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
     (isSelected: boolean) => {
       selectAll();
     },
-    [selectAll]
+    [selectAll],
   );
 
   const handlePageChange = useCallback(
@@ -162,10 +162,10 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
           query: { ...router.query, page: newPage.toString() },
         },
         undefined,
-        { shallow: true }
+        { shallow: true },
       );
     },
-    [router]
+    [router],
   );
 
   useEffect(() => {
@@ -197,7 +197,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
       } else {
         setNotification(
           "Failed to duplicate requests to this dataset",
-          "error"
+          "error",
         );
       }
     } catch (error) {
@@ -246,10 +246,10 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
           },
         },
         undefined,
-        { shallow: true }
+        { shallow: true },
       );
     },
-    [router]
+    [router],
   );
 
   const exportedData = useCallback(async () => {
@@ -257,7 +257,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
       org?.currentOrg?.id || "",
       id,
       1,
-      500
+      500,
     );
     return rows.map((row) => {
       return {
@@ -269,9 +269,9 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
 
   return (
     <>
-      <div className="w-full h-full flex flex-col space-y-8">
+      <div className="flex h-full w-full flex-col space-y-8">
         <div className="flex flex-row items-center justify-between pl-8">
-          <div className="flex flex-col items-start space-y-4 w-full">
+          <div className="flex w-full flex-col items-start space-y-4">
             <div className="w-full pt-4">
               <HcBreadcrumb
                 pages={[
@@ -283,9 +283,9 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
                 ]}
               />
             </div>
-            <div className="flex justify-between items-center">
+            <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
-                <h1 className="font-semibold text-4xl text-black dark:text-white">
+                <h1 className="text-4xl font-semibold text-black dark:text-white">
                   {datasetName !== "Loading..."
                     ? datasetName
                     : datasets?.[0]?.name}
@@ -313,7 +313,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
               accessorKey: "request_body",
               cell: ({ row }) => {
                 return getGenericRequestText(
-                  row.original.request_response_body?.request
+                  row.original.request_response_body?.request,
                 );
               },
               size: 500,
@@ -325,7 +325,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
               cell: ({ row }) => {
                 const responseText = getGenericResponseText(
                   row.original.request_response_body?.response,
-                  200
+                  200,
                 );
                 return (
                   <div
@@ -361,7 +361,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
                       org?.currentOrg?.id || "",
                       id,
                       1,
-                      count || 0
+                      count || 0,
                     );
                     return allRows;
                   }}
@@ -391,7 +391,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
                 ></GenericButton>
                 <GenericButton
                   onClick={() => setShowRemoveModal(true)}
-                  className="!bg-destructive hover:!bg-destructive/90 !border-destructive"
+                  className="!border-destructive !bg-destructive hover:!bg-destructive/90"
                   text="Remove"
                   textClassName="text-white"
                   icon={<TrashIcon className="h-5 w-5 text-white" />}

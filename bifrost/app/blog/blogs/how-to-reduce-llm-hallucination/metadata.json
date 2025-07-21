@@ -1,4 +1,4 @@
-{ 
+{
   "title": "How to Reduce LLM Hallucination in Production Apps",
   "title1": "How to Reduce LLM Hallucination in Production Apps",
   "title2": "How to Reduce LLM Hallucination in Production Apps",
@@ -6,6 +6,6 @@
   "images": "/static/blog/how-to-reduce-llm-hallucination/llm-hallucination-cover.webp",
   "time": "8 minute read",
   "author": "Yusuf Ishola",
-  "date": "March 19, 2025", 
+  "date": "March 19, 2025",
   "badge": "Best Practices"
 }

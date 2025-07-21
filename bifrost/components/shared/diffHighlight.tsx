@@ -14,10 +14,10 @@ export function DiffHighlight(props: DiffHighlightProps) {
     <div className="ph-no-capture w-full overflow-auto rounded-b-2xl">
       <Highlight theme={themes.jettwaveDark} code={code} language={language}>
         {({ className, style, tokens, getLineProps, getTokenProps }) => (
-          <pre style={style} className="p-6 leading-7 max-h-96 overflow-auto">
+          <pre style={style} className="max-h-96 overflow-auto p-6 leading-7">
             {tokens.map((line, i) => (
               <div key={i} {...getLineProps({ line })}>
-                <span className="text-gray-500 pr-4">{i + 1}</span>
+                <span className="pr-4 text-gray-500">{i + 1}</span>
                 {line.map((token, key) => {
                   if (
                     token.content.includes("https://oai.helicone.ai") ||
@@ -27,7 +27,7 @@ export function DiffHighlight(props: DiffHighlightProps) {
                       <span
                         key={key}
                         className={
-                          "text-sky-400 underline underline-offset-4 decoration-dashed"
+                          "text-sky-400 underline decoration-dashed underline-offset-4"
                         }
                       >
                         {token.content}

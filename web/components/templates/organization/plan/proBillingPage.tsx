@@ -54,7 +54,7 @@ export const ProPlanCard = () => {
     mutationFn: async () => {
       const jawn = getJawnClient(org?.currentOrg?.id);
       const result = await jawn.POST(
-        "/v1/stripe/subscription/manage-subscription"
+        "/v1/stripe/subscription/manage-subscription",
       );
       return result;
     },
@@ -64,7 +64,7 @@ export const ProPlanCard = () => {
     mutationFn: async () => {
       const jawn = getJawnClient(org?.currentOrg?.id);
       const result = await jawn.POST(
-        "/v1/stripe/subscription/undo-cancel-subscription"
+        "/v1/stripe/subscription/undo-cancel-subscription",
       );
       return result;
     },
@@ -72,7 +72,7 @@ export const ProPlanCard = () => {
 
   const addProductToSubscription = useMutation({
     mutationFn: async (
-      productType: "alerts" | "prompts" | "evals" | "experiments"
+      productType: "alerts" | "prompts" | "evals" | "experiments",
     ) => {
       const jawn = getJawnClient(org?.currentOrg?.id);
       const result = await jawn.POST(
@@ -83,7 +83,7 @@ export const ProPlanCard = () => {
               productType,
             },
           },
-        }
+        },
       );
       return result;
     },
@@ -91,7 +91,7 @@ export const ProPlanCard = () => {
 
   const deleteProductFromSubscription = useMutation({
     mutationFn: async (
-      productType: "alerts" | "prompts" | "evals" | "experiments"
+      productType: "alerts" | "prompts" | "evals" | "experiments",
     ) => {
       const jawn = getJawnClient(org?.currentOrg?.id);
       const result = await jawn.DELETE(
@@ -102,7 +102,7 @@ export const ProPlanCard = () => {
               productType,
             },
           },
-        }
+        },
       );
       return result;
     },
@@ -118,16 +118,16 @@ export const ProPlanCard = () => {
   const isSubscriptionEnding = subscription.data?.data?.cancel_at_period_end;
 
   const hasPrompts = subscription.data?.data?.items?.some(
-    (item: any) => item.price.product?.name === "Prompts" && item.quantity > 0
+    (item: any) => item.price.product?.name === "Prompts" && item.quantity > 0,
   );
 
   const hasExperiments = subscription.data?.data?.items?.some(
     (item: any) =>
-      item.price.product?.name === "Experiments" && item.quantity > 0
+      item.price.product?.name === "Experiments" && item.quantity > 0,
   );
 
   const hasEvals = subscription.data?.data?.items?.some(
-    (item: any) => item.price.product?.name === "Evals" && item.quantity > 0
+    (item: any) => item.price.product?.name === "Evals" && item.quantity > 0,
   );
 
   const handlePromptsToggle = () => {
@@ -179,10 +179,10 @@ export const ProPlanCard = () => {
       subscription.data?.data?.current_period_end
     ) {
       const startDate = new Date(
-        subscription.data.data.current_period_start * 1000
+        subscription.data.data.current_period_start * 1000,
       );
       const endDate = new Date(
-        subscription.data.data.current_period_end * 1000
+        subscription.data.data.current_period_end * 1000,
       );
       return `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
     }
@@ -202,11 +202,11 @@ export const ProPlanCard = () => {
 
       return description;
     },
-    [isTrialActive]
+    [isTrialActive],
   );
 
   return (
-    <div className="flex flex-row gap-6 max-w-5xl pb-8">
+    <div className="flex max-w-5xl flex-row gap-6 pb-8">
       <Card className="w-full">
         <CardHeader>
           <div className="flex items-center gap-3">
@@ -228,11 +228,11 @@ export const ProPlanCard = () => {
               </div>
             )}
           {isTrialActive && (
-            <div className="bg-sky-50 border border-sky-100 rounded-lg p-4">
+            <div className="rounded-lg border border-sky-100 bg-sky-50 p-4">
               <p className="text-sm text-sky-700">
                 Your trial ends on:{" "}
                 {new Date(
-                  subscription.data!.data!.trial_end! * 1000
+                  subscription.data!.data!.trial_end! * 1000,
                 ).toLocaleDateString()}
               </p>
             </div>
@@ -350,7 +350,7 @@ export const ProPlanCard = () => {
               </Button>
             ) : (
               <Button
-                className="w-full bg-sky-600 hover:bg-sky-700 text-white"
+                className="w-full bg-sky-600 text-white hover:bg-sky-700"
                 onClick={async () => {
                   const result =
                     await manageSubscriptionPaymentLink.mutateAsync();
@@ -358,7 +358,7 @@ export const ProPlanCard = () => {
                     window.open(result.data, "_blank");
                   } else {
                     console.error(
-                      "No URL returned from manage subscription mutation"
+                      "No URL returned from manage subscription mutation",
                     );
                   }
                 }}
@@ -372,7 +372,7 @@ export const ProPlanCard = () => {
             <InvoiceSheet />
             <Link
               href="https://helicone.ai/pricing"
-              className="mt-6 text-sm text-gray-500 text-semibold text-center text-sky-600 hover:text-sky-700"
+              className="text-semibold mt-6 text-center text-sm text-gray-500 text-sky-600 hover:text-sky-700"
             >
               View pricing page
             </Link>
@@ -390,7 +390,7 @@ export const ProPlanCard = () => {
               {getDialogDescription(
                 !hasPrompts,
                 "Prompts",
-                `$${costForPrompts.data?.data ?? "loading..."}`
+                `$${costForPrompts.data?.data ?? "loading..."}`,
               )}
             </DialogDescription>
           </DialogHeader>
@@ -418,7 +418,7 @@ export const ProPlanCard = () => {
               {getDialogDescription(
                 !hasEvals,
                 "Evals",
-                `$${costForEvals.data?.data ?? "loading..."}`
+                `$${costForEvals.data?.data ?? "loading..."}`,
               )}
             </DialogDescription>
           </DialogHeader>
@@ -449,7 +449,7 @@ export const ProPlanCard = () => {
               {getDialogDescription(
                 !hasExperiments,
                 "Experiments",
-                `$${costForExperiments.data?.data ?? "loading..."}`
+                `$${costForExperiments.data?.data ?? "loading..."}`,
               )}
             </DialogDescription>
           </DialogHeader>

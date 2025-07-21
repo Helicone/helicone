@@ -87,7 +87,7 @@ export const useEvalConfigStore = create<EvalConfigState>()(
       }),
       {
         name: "eval-config-store",
-      }
-    )
-  )
+      },
+    ),
+  ),
 );

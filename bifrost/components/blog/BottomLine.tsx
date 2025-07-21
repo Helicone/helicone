@@ -11,10 +11,10 @@ export function BottomLine({
   description = "Join Helicone's community or contact us to learn more.",
 }: BottomLineProps) {
   return (
-    <section className="w-full max-w-4xl mx-auto mt-6 mb-2">
-      <div className="flex flex-col gap-2 rounded-lg bg-sky-50 px-5 pt-4 pb-2 border border-slate-200">
-        <h2 className="text-xl font-semibold text-slate-600 my-1">{title}</h2>
-        <p className="text-slate-500 text-md leading-relaxed">{description}</p>
+    <section className="mx-auto mb-2 mt-6 w-full max-w-4xl">
+      <div className="flex flex-col gap-2 rounded-lg border border-slate-200 bg-sky-50 px-5 pb-2 pt-4">
+        <h2 className="my-1 text-xl font-semibold text-slate-600">{title}</h2>
+        <p className="text-md leading-relaxed text-slate-500">{description}</p>
       </div>
     </section>
   );

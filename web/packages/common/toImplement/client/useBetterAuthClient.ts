@@ -10,7 +10,7 @@ export function useBetterAuthClient(): HeliconeAuthClient {
     return heliconeAuthClientFromSession(
       session.data,
       session.refetch,
-      undefined
+      undefined,
     );
   }, [session]);
 

@@ -5,15 +5,15 @@ import Link from "next/link";
 
 const ScaleCard = () => {
   return (
-    <div className="bg-white h-[300px] w-full rounded-lg border-brand border-2">
+    <div className="border-brand h-[300px] w-full rounded-lg border-2 bg-white">
       <Col className="h-full">
-        <Col className="py-[36px] px-[24px] justify-between h-full">
+        <Col className="h-full justify-between px-[24px] py-[36px]">
           <h1>
             <b>2 days</b> saved combing through requests.
           </h1>
-          <div className="bg-blue-100 h-[43px] w-[175px]">LOGO</div>
+          <div className="h-[43px] w-[175px] bg-blue-100">LOGO</div>
         </Col>
-        <Row className="w-full h-[72px] px-[24px] items-center justify-between border-t">
+        <Row className="h-[72px] w-full items-center justify-between border-t px-[24px]">
           <span>Scale</span>
           <Button className="bg-brand text-white" asChild>
             <Link href="https://us.helicone.ai/settings/billing">

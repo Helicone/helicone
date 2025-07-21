@@ -21,7 +21,7 @@ const EditCustomerOrgModal = (props: EditCustomerOrgModalProps) => {
   return (
     <ThemedDrawer open={open} setOpen={setOpen}>
       <div className="flex flex-col space-y-4">
-        <p className="text-2xl font-semibold text-black dark:text-white border-b border-gray-300 dark:border-gray-700 py-4">
+        <p className="border-b border-gray-300 py-4 text-2xl font-semibold text-black dark:border-gray-700 dark:text-white">
           Edit Customer
         </p>
         <CreateOrgForm

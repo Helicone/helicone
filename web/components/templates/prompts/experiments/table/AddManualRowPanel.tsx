@@ -35,13 +35,13 @@ const AddManualRowPanel = ({
 }: AddManualRowPanelProps) => {
   const { addManualRow } = useExperimentTable(experimentId);
   const [inputKV, setInputKV] = useState<Record<string, string>>(
-    Object.fromEntries(inputKeys.map((key) => [key, ""]))
+    Object.fromEntries(inputKeys.map((key) => [key, ""])),
   );
   const [showAlertDialog, setShowAlertDialog] = useState(false);
   const accordionRef = useRef(null);
 
   const hasUnsavedChanges = Object.entries(inputKV).some(
-    ([key, value]) => value !== ""
+    ([key, value]) => value !== "",
   );
 
   useEffect(() => {
@@ -75,9 +75,9 @@ const AddManualRowPanel = ({
   };
 
   return (
-    <div className="bg-white dark:bg-neutral-950 flex flex-col relative h-full overflow-y-auto ">
-      <div className="flex border-b border-slate-200 dark:border-slate-800 p-4 justify-between items-center">
-        <div className="flex gap-3 items-center">
+    <div className="relative flex h-full flex-col overflow-y-auto bg-white dark:bg-neutral-950">
+      <div className="flex items-center justify-between border-b border-slate-200 p-4 dark:border-slate-800">
+        <div className="flex items-center gap-3">
           <TextCursorInputIcon className="text-slate-500" />
           <h3 className="font-medium text-slate-900 dark:text-slate-100">
             Add inputs
@@ -85,18 +85,18 @@ const AddManualRowPanel = ({
         </div>
         <div className="flex items-center gap-3">
           {hasUnsavedChanges && (
-            <Badge variant="helicone" className="text-slate-500 gap-2">
-              <TriangleAlertIcon className="w-3 h-3" />
+            <Badge variant="helicone" className="gap-2 text-slate-500">
+              <TriangleAlertIcon className="h-3 w-3" />
               <span>Unsaved changes</span>
             </Badge>
           )}
           <XIcon
-            className="text-slate-500 hover:text-slate-700 cursor-pointer"
+            className="cursor-pointer text-slate-500 hover:text-slate-700"
             onClick={onClose}
           />
         </div>
       </div>
-      <div className="p-4 max-h-[calc(100vh-150px)] overflow-y-auto">
+      <div className="max-h-[calc(100vh-150px)] overflow-y-auto p-4">
         <Accordion type="multiple" className="w-full" defaultValue={inputKeys}>
           {inputKeys.map((inputKey) => (
             <AccordionItem
@@ -109,13 +109,13 @@ const AddManualRowPanel = ({
               <AccordionTrigger
                 iconPosition="start"
                 iconClassName="text-slate-500"
-                className="text-slate-700 dark:text-slate-300 text-[13px] font-medium"
+                className="text-[13px] font-medium text-slate-700 dark:text-slate-300"
               >
                 {inputKey}:
               </AccordionTrigger>
               <AccordionContent>
                 <MarkdownEditor
-                  className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md"
+                  className="rounded-md border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900"
                   text={inputKV[inputKey] ?? ""}
                   setText={(text) => {
                     setInputKV({
@@ -131,7 +131,7 @@ const AddManualRowPanel = ({
         </Accordion>
       </div>
       {hasUnsavedChanges && (
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200 dark:border-slate-800 flex justify-end items-center w-full gap-3 bg-white dark:bg-neutral-950">
+        <div className="absolute bottom-0 left-0 right-0 flex w-full items-center justify-end gap-3 border-t border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-neutral-950">
           <AlertDialog open={showAlertDialog} onOpenChange={setShowAlertDialog}>
             <AlertDialogTrigger asChild>
               <Button

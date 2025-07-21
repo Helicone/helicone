@@ -30,7 +30,6 @@ Note: we are in the process of updating our `docker-compose.yml` file.
 If you are looking to self-host, we also provide an up-to-date Helm
 Chart. Please reach out to us if you would like access!
 
-
 # Running for development
 
 This guide will lead you through running the infrastructure components
@@ -45,6 +44,7 @@ cd helicone
 ## Step 1 - Install all the things
 
 Requirements:
+
 - [Docker](https://docs.docker.com/engine/install/)
 - [Supabase](https://supabase.com/docs/guides/local-development/cli/getting-started)
 - [NVM](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating)
@@ -86,7 +86,7 @@ docker compose -f docker-compose-local.yml --profile include-worker up -d
 
 ### Workers
 
-*Note*: If you are developing locally on the workers, simply exclude the
+_Note_: If you are developing locally on the workers, simply exclude the
 `--profile include-worker` arguments and instead start each worker you need
 manually from the command line with the following commands:
 
@@ -131,7 +131,6 @@ Please do not hesitate to reach out on discord if you have any questions.
 Feel free to run some of the examples from `helicone/examples` against
 your new local Helicone instance!
 
-
 Alternatively, you can also test the API against your local via the following
 `curl` command:
 
@@ -158,7 +157,7 @@ curl --request POST \
 
 ## Notes
 
-- If you update the migration files, then do not forget to rebuild the 
+- If you update the migration files, then do not forget to rebuild the
   `clickhouse-migration-runner-local` Docker image!
 - Currently there are some stability issues with the local Kafka and worker
   configurations, hence the `unstable` profile for those services. It's

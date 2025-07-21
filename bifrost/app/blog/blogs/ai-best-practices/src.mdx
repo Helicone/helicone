@@ -1,4 +1,4 @@
-Building an AI-powered application is challenging, but deploying it to production and keeping it running efficiently is often where the real complexity begins. 
+Building an AI-powered application is challenging, but deploying it to production and keeping it running efficiently is often where the real complexity begins.
 
 Without proper observability and monitoring practices, production AI systems can quickly become slow, unreliable, costly, or even unsafe.
 
@@ -26,12 +26,11 @@ Let's take a look at some key practices that will help you overcome these challe
   secondaryButtonLink="https://docs.helicone.ai/integrations/openai/javascript"
 />
 
-
 ## Step 1: Define and Monitor Performance Metrics ✅
 
 For any AI application to succeed, you need clear performance metrics aligned with your goals. Start by identifying the KPIs that matter most:
 
-- **Latency**: How quickly does your model respond? Track this at the p50, p90, and p99 percentiles. 
+- **Latency**: How quickly does your model respond? Track this at the p50, p90, and p99 percentiles.
 - **Throughput**: How many requests can your system handle per second?
 - **Accuracy**: How correct are your model's predictions for your specific use case?
 - **Error Rate**: What percentage of requests fail or time out?
@@ -53,7 +52,7 @@ const openai = new OpenAI({
 
 **Pro Tip:** Look for observability solutions like Helicone that provide real-time dashboards and can handle your expected data volume. As your AI application grows, the volume of logs and metrics will increase dramatically.
 
-Here's a video showing Helicone's pre-built dashboard metrics and the ability to segment data: 
+Here's a video showing Helicone's pre-built dashboard metrics and the ability to segment data:
 
 <video width="100%" controls autoplay loop>
   <source
@@ -70,7 +69,7 @@ Comprehensive logging is essential for understanding exactly what's happening wi
 - **Full request/response pairs**: Capture both inputs and outputs to analyze prompt performance over time.
 - **Token usage**: Track the number of tokens used for each request to identify inefficient prompts and optimize them.
 - **Error context**: Include detailed context when errors occur to help you debug. For example, the user's input, data retrieved, the prompt used, and tool calls.
-- **User context**: Log user IDs and session data to understand usage patterns. 
+- **User context**: Log user IDs and session data to understand usage patterns.
 
 For agentic workflows that involve multiple LLM calls, consider implementing detailed tracing to understand the full decision-making process.
 
@@ -120,12 +119,12 @@ const openai = new OpenAI({
     "Helicone-Property-User-Type": "premium",
     "Helicone-Property-Feature": "content-generator",
     "Helicone-Property-Environment": "production",
-    "Helicone-Property-Country": "USA"
+    "Helicone-Property-Country": "USA",
   },
 });
 ```
 
-You can then filter by these properties in Helicone to see how the performance differs between each user segment: 
+You can then filter by these properties in Helicone to see how the performance differs between each user segment:
 
 <video width="100%" controls autoplay loop>
   <source src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/2.+Implement+Comprehensive+Logging.mp4" />
@@ -195,12 +194,12 @@ For example, Helicone's <a href="https://docs.helicone.ai/features/advanced-usag
 ```javascript
 // Enable caching for repeated queries
 const openai = new OpenAI({
-  // Base configuration 
+  // Base configuration
   defaultHeaders: {
     "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
     "Helicone-Cache-Enabled": "true", // Enable caching
   },
-}); 
+});
 ```
 
 More tips: **<a href="https://www.helicone.ai/blog/slash-llm-cost" target="_blank" rel="noopener">How to monitor your LLM API cost and cut spending by 90%</a>**

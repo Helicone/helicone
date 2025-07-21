@@ -1,10 +1,10 @@
-Building production-ready AI applications requires more than just good prompts—you need reliable, cost-efficient infrastructure that scales with your needs. 
+Building production-ready AI applications requires more than just good prompts—you need reliable, cost-efficient infrastructure that scales with your needs.
 
 Selecting the right LLM API provider is critical for optimizing performance, managing costs, and ensuring your AI applications can handle real-world demands.
 
-{/* The development of Large Language Model (LLM) applications is accelerating fast. Companies are using LLMs to automate tasks, improve operational efficiency, and gain newer insights. 
+{/\* The development of Large Language Model (LLM) applications is accelerating fast. Companies are using LLMs to automate tasks, improve operational efficiency, and gain newer insights.
 
-Selecting the right LLM inference platform platform is pivotal to make sure the performance, scalability, and cost is optimized for your AI products. */}
+Selecting the right LLM inference platform platform is pivotal to make sure the performance, scalability, and cost is optimized for your AI products. \*/}
 
 ![10 Top AI Inferencing Platforms in 2025 including Together AI, Hyperbolic, Replicate and HuggingFace](/static/blog/llm-api-providers/ai-inferencing.webp)
 
@@ -14,24 +14,24 @@ In this guide, we will compare the top AI inferencing platforms in 2025 to help 
 
 To compare the performance, we will evaluate the cost, time to first token, and context window for one of the latest models: DeepSeek R1. Here's a summary:
 
-| Provider | Cost/1M <br /> (Input/Output) | Output tokens | TTFT <br /> (seconds) | Context Window |
-|----------|-------------------------------------|------------------|------------------|----------------|
-| Deepseek | $0.55 / $2.19 🥇 | 25/s  | 4.25s | 64k |
-| [Together AI](#1-together-ai) | $3.00 / $7.00 | 134/s 🥈 | 0.47s 🥈 | 128k |
-| [Fireworks](#2-fireworks-ai) (Fast) | $3.00 / $8.00 | 109/s 🥉 | 0.82s | 164k |
-| [OpenRouter](#3-openrouter) | _Varies by routing_  | _Provider dependent_ | _Provider dependent_ | _Provider dependent_ |
-| [Hyperbolic](#4-hyperbolic) | $2.00 / $2.00 🥉 | 23/s | - | 131k |
-| [Replicate](#5-replicate) | $3.75 / $10.00 | - | - | 64k |
-| [HuggingFace](#6-huggingface) | _Self-hosted (compute cost)_ | Hardware dependent | Hardware dependent | 128k |
-| [Groq](#7-groq) (Distill-Llama-70B)| $0.75 / $0.99 | 275/s 🥇 | 0.14s 🥇 | 128k |
-| [DeepInfra](#8-deepinfra) | $0.55 / $2.19 🥇 | 13/s | 0.54s 🥉 | 64k |
-| [Perplexity](#9-perplexity-ai) (r1-1776)| $2.00 / $8.00 | -| - | 128k |
-| [Anyscale](#10-anyscale) | _Self-hosted (compute cost)_ | _Hardware dependent_	 | _Hardware dependent_ | 64k–128k |
-| [Novita](#11-novita-ai) (Turbo) | $0.70 / $2.50 🥈 | 34/s | 0.76s | 64k |
+| Provider                                 | Cost/1M <br /> (Input/Output) | Output tokens        | TTFT <br /> (seconds) | Context Window       |
+| ---------------------------------------- | ----------------------------- | -------------------- | --------------------- | -------------------- |
+| Deepseek                                 | $0.55 / $2.19 🥇              | 25/s                 | 4.25s                 | 64k                  |
+| [Together AI](#1-together-ai)            | $3.00 / $7.00                 | 134/s 🥈             | 0.47s 🥈              | 128k                 |
+| [Fireworks](#2-fireworks-ai) (Fast)      | $3.00 / $8.00                 | 109/s 🥉             | 0.82s                 | 164k                 |
+| [OpenRouter](#3-openrouter)              | _Varies by routing_           | _Provider dependent_ | _Provider dependent_  | _Provider dependent_ |
+| [Hyperbolic](#4-hyperbolic)              | $2.00 / $2.00 🥉              | 23/s                 | -                     | 131k                 |
+| [Replicate](#5-replicate)                | $3.75 / $10.00                | -                    | -                     | 64k                  |
+| [HuggingFace](#6-huggingface)            | _Self-hosted (compute cost)_  | Hardware dependent   | Hardware dependent    | 128k                 |
+| [Groq](#7-groq) (Distill-Llama-70B)      | $0.75 / $0.99                 | 275/s 🥇             | 0.14s 🥇              | 128k                 |
+| [DeepInfra](#8-deepinfra)                | $0.55 / $2.19 🥇              | 13/s                 | 0.54s 🥉              | 64k                  |
+| [Perplexity](#9-perplexity-ai) (r1-1776) | $2.00 / $8.00                 | -                    | -                     | 128k                 |
+| [Anyscale](#10-anyscale)                 | _Self-hosted (compute cost)_  | _Hardware dependent_ | _Hardware dependent_  | 64k–128k             |
+| [Novita](#11-novita-ai) (Turbo)          | $0.70 / $2.50 🥈              | 34/s                 | 0.76s                 | 64k                  |
 
 Sources: <a href="https://artificialanalysis.ai/models/deepseek-r1/providers?endpoints=deepseek_deepseek-r1%2Cfireworks_deepseek-r1%2Cdeepinfra_deepseek-r1_turbo-fp4%2Cdeepinfra_deepseek-r1%2Cnovita_deepseek-r1_turbo%2Cnovita_deepseek-r1%2Ctogetherai_deepseek-r1" target="_blank" rel="noopener">Artificial Analysis</a>, <a href="https://replicate.com/deepseek-ai/deepseek-r1" target="_blank" rel="noopener">Replicate</a>, <a href="https://prompt.16x.engineer/blog/deepseek-r1-cost-pricing-speed" target="_blank" rel="noopener">16x Prompt</a>
 
-<BottomLine 
+<BottomLine
   title="💡 Quick note about this table"
   description="Some providers serve variants of DeepSeek R1. For consistency, we showed the best-performing or most representative version from each provider."
 />
@@ -44,7 +44,12 @@ Sources: <a href="https://artificialanalysis.ai/models/deepseek-r1/providers?end
 
 ### What is Together AI?
 
-<a href="https://www.together.ai/" target="_blank" rel="noopener">Together AI</a> offers high-performance inference for 200+ open-source LLMs with sub-100ms latency, automated optimization, and horizontal scaling - all at a lower cost than proprietary solutions. 
+<a href="https://www.together.ai/" target="_blank" rel="noopener">
+  Together AI
+</a>
+offers high-performance inference for 200+ open-source LLMs with sub-100ms
+latency, automated optimization, and horizontal scaling - all at a lower cost
+than proprietary solutions.
 
 Their infrastructure handles token caching, model quantization, and load balancing, letting developers focus on prompt engineering and application logic rather than managing infrastructure.
 
@@ -74,9 +79,9 @@ https://together.helicone.ai/v1/
 "Helicone-Auth": "Bearer [HELICONE_API_KEY]"
 ```
 
-<BottomLine 
-title="Bottom Line"
-description="Together AI's flexible pricing and high-performance infrastructure makes it a strong choice for companies that require custom LLMs and a scalable solution that is optimized for AI workloads."
+<BottomLine
+  title="Bottom Line"
+  description="Together AI's flexible pricing and high-performance infrastructure makes it a strong choice for companies that require custom LLMs and a scalable solution that is optimized for AI workloads."
 />
 
 ## 2. Fireworks AI
@@ -87,7 +92,21 @@ description="Together AI's flexible pricing and high-performance infrastructure 
 
 ### What is Fireworks AI?
 
-<a href="https://fireworks.ai/" target="_blank" rel="noopener">Fireworks AI</a> has one of the fastest model APIs. It uses its proprietary optimized <a href="https://fireworks.ai/blog/fire-attention-serving-open-source-models-4x-faster-than-vllm-by-quantizing-with-no-tradeoffs" target="_blank" rel="noopener">FireAttention</a> inference engine to power text, image, and audio inferencing, all while prioritizing data privacy with HIPAA and SOC2 compliance. It also offers on-demand deployment as well as fine-tuning text models to use either serverless or on-demand.
+<a href="https://fireworks.ai/" target="_blank" rel="noopener">
+  Fireworks AI
+</a>
+has one of the fastest model APIs. It uses its proprietary optimized
+<a
+  href="https://fireworks.ai/blog/fire-attention-serving-open-source-models-4x-faster-than-vllm-by-quantizing-with-no-tradeoffs"
+  target="_blank"
+  rel="noopener"
+>
+  FireAttention
+</a>
+inference engine to power text, image, and audio inferencing, all while
+prioritizing data privacy with HIPAA and SOC2 compliance. It also offers
+on-demand deployment as well as fine-tuning text models to use either serverless
+or on-demand.
 
 ### Why do developers choose Fireworks AI?
 
@@ -112,7 +131,7 @@ https://fireworks.helicone.ai/inference/v1/chat/completions
 "Helicone-Auth": "Bearer [HELICONE_API_KEY]"
 ```
 
-<BottomLine 
+<BottomLine
   title="Bottom Line"
   description="Fireworks is ideal for companies looking to scale their AI applications. Moreover, developers can integrate Fireworks with Helicone to get production-grade LLM infrastructure with built-in observability and real-time cost and usage monitoring."
 />
@@ -125,8 +144,13 @@ https://fireworks.helicone.ai/inference/v1/chat/completions
 
 ### What is OpenRouter?
 
-<a href="https://openrouter.ai/" target="_blank" rel="noopener">OpenRouter</a> is an inference marketplace that provides access to over 300 models from all of the top providers through a unified OpenAI-compatible API.
-This API enables seamless integration with models from OpenAI, Anthropic, Google, Bedrock, and many others, making it a versatile LLM API platform.
+<a href="https://openrouter.ai/" target="_blank" rel="noopener">
+  OpenRouter
+</a>
+is an inference marketplace that provides access to over 300 models from all of
+the top providers through a unified OpenAI-compatible API. This API enables
+seamless integration with models from OpenAI, Anthropic, Google, Bedrock, and
+many others, making it a versatile LLM API platform.
 
 ### Why do developers choose OpenRouter?
 
@@ -134,7 +158,10 @@ Developers choose OpenRouter for its ability to provide easy access to multiple 
 
 ### OpenRouter Pricing
 
-- <a href="https://openrouter.ai/models" target="_blank" rel="noopener">Pay-as-you-go</a>, with specific pricing listed for each model (some free options). 
+- <a href="https://openrouter.ai/models" target="_blank" rel="noopener">
+    Pay-as-you-go
+  </a>
+  , with specific pricing listed for each model (some free options).
 - Flexible payment options, including cryptocurrency and API-based payments.
 
 ### Adding LLM Observability to OpenRouter
@@ -152,7 +179,7 @@ https://openrouter.helicone.ai/api/v1/chat/completions
 "Helicone-Auth": "Bearer [HELICONE_API_KEY]"
 ```
 
-<BottomLine 
+<BottomLine
   title="Bottom Line"
   description="OpenRouter is a great option for developers who want flexibility in switching between LLM providers. With a single API, you can access hundreds of AI models while getting full functionality for production deployments."
 />
@@ -165,7 +192,12 @@ https://openrouter.helicone.ai/api/v1/chat/completions
 
 ### What is Hyperbolic?
 
-<a href="https://www.hyperbolic.xyz/" target="_blank" rel="noopener">Hyperbolic</a> is a platform that provides AI inferencing service, affordable GPUs, and accessible compute for anyone who interacts with the AI system — AI researchers, developers, and startups to build AI projects at any scale.
+<a href="https://www.hyperbolic.xyz/" target="_blank" rel="noopener">
+  Hyperbolic
+</a>
+is a platform that provides AI inferencing service, affordable GPUs, and
+accessible compute for anyone who interacts with the AI system — AI researchers,
+developers, and startups to build AI projects at any scale.
 
 ### Why do developers choose Hyperbolic?
 
@@ -190,7 +222,7 @@ https://hyperbolic.helicone.ai/v1/
 "Helicone-Auth": "Bearer [HELICONE_API_KEY]"
 ```
 
-<BottomLine 
+<BottomLine
   title="Bottom Line"
   description="Hyperbolic has one of the fastest times to support new models as they are released. For those looking to serve state-of-the-art models at a competitive price, Hyperbolic would be a suitable option."
 />
@@ -203,7 +235,21 @@ https://hyperbolic.helicone.ai/v1/
 
 ### What is Replicate?
 
-<a href="https://replicate.com/" target="_blank" rel="noopener">Replicate</a> is a cloud-based platform that simplifies machine learning model deployment and scaling. Replicate uses an open-source tool called <a href="https://github.com/replicate/cog" target="_blank" rel="noopener nofollow">Cog</a> to package and deploy models, and supports a diverse range of large language models like _Llama 2_, image generation models like _Stable Diffusion_, and many others.
+<a href="https://replicate.com/" target="_blank" rel="noopener">
+  Replicate
+</a>
+is a cloud-based platform that simplifies machine learning model deployment and
+scaling. Replicate uses an open-source tool called
+<a
+  href="https://github.com/replicate/cog"
+  target="_blank"
+  rel="noopener nofollow"
+>
+  Cog
+</a>
+to package and deploy models, and supports a diverse range of large language
+models like _Llama 2_, image generation models like _Stable Diffusion_, and many
+others.
 
 ### Why do developers choose Replicate?
 
@@ -211,7 +257,7 @@ Replicate is great for **quick experiments** and **building MVPs** (model perfor
 
 ### Replicate Pricing
 
-Based on usage with a <a href="https://replicate.com/pricing" target="_blank" rel="noopener">pay-per-inference</a>  model. 
+Based on usage with a <a href="https://replicate.com/pricing" target="_blank" rel="noopener">pay-per-inference</a> model.
 
 ### Adding LLM Observability to Replicate
 
@@ -230,7 +276,7 @@ https://gateway.helicone.ai/v1/predictions
 "Helicone-Target-Provider": "Replicate",
 ```
 
-<BottomLine 
+<BottomLine
   title="Bottom Line"
   description="Replicate scales well for small to medium volumes but may need extra infrastructure for high-volume apps. It's a great choice for experimentation and for developers who need quick access to models without the overhead."
 />
@@ -243,7 +289,13 @@ https://gateway.helicone.ai/v1/predictions
 
 ### What is HuggingFace?
 
-<a href="https://huggingface.co/" target="_blank" rel="noopener">HuggingFace</a> is an open-source community where developers can build, train, and share machine learning models and datasets. It's most popularly known for its `transformer` library. HuggingFace makes it easy to collaborate, and it's a great starting point for many NLP projects.
+<a href="https://huggingface.co/" target="_blank" rel="noopener">
+  HuggingFace
+</a>
+is an open-source community where developers can build, train, and share machine
+learning models and datasets. It's most popularly known for its `transformer`
+library. HuggingFace makes it easy to collaborate, and it's a great starting
+point for many NLP projects.
 
 ### Why do developers choose HuggingFace?
 
@@ -251,7 +303,10 @@ HuggingFace has an extensive model hub with over 100,000 pre-trained models such
 
 ### HuggingFace Pricing
 
-<a href="https://huggingface.co/pricing" target="_blank" rel="noopener">Free</a> for basic use; enterprise plans available. 
+<a href="https://huggingface.co/pricing" target="_blank" rel="noopener">
+  Free
+</a>
+for basic use; enterprise plans available.
 
 ### Adding LLM Observability to HuggingFace
 
@@ -270,7 +325,7 @@ https://gateway.helicone.ai/v1/
 "Helicone-Target-Provider": "HuggingFace",
 ```
 
-<BottomLine 
+<BottomLine
   title="Bottom Line"
   description="HuggingFace places a strong emphasis on open-source, so you may find inconsistency in their docs or have trouble finding examples for more complicated use cases. However, HuggingFace is a great library of pre-trained models, which is useful for many NLP use cases."
 />
@@ -283,7 +338,20 @@ https://gateway.helicone.ai/v1/
 
 ### What is Groq?
 
-<a href="https://groq.com/" target="_blank" rel="noopener">Groq</a> specializes in hardware optimized for high-speed inference. Its <a href="https://groq.com/wp-content/uploads/2024/07/GroqThoughts_WhatIsALPU-vF.pdf" target="_blank" rel="noopener">Language Processing Unit (LPU)</a>, a specialized chip built for ultra-fast AI inference, significantly outperforms traditional GPUs, providing up to 18x faster processing speeds for latency-critical AI applications.
+<a href="https://groq.com/" target="_blank" rel="noopener">
+  Groq
+</a>
+specializes in hardware optimized for high-speed inference. Its
+<a
+  href="https://groq.com/wp-content/uploads/2024/07/GroqThoughts_WhatIsALPU-vF.pdf"
+  target="_blank"
+  rel="noopener"
+>
+  Language Processing Unit (LPU)
+</a>
+, a specialized chip built for ultra-fast AI inference, significantly
+outperforms traditional GPUs, providing up to 18x faster processing speeds for
+latency-critical AI applications.
 
 ### Why do developers choose Groq?
 
@@ -291,7 +359,7 @@ Groq scales exceptionally well in performance-critical applications. In addition
 
 ### Groq Pricing
 
-Token-based <a href="https://groq.com/pricing/" target="_blank" rel="noopener">pricing</a>, geared towards enterprise use. 
+Token-based <a href="https://groq.com/pricing/" target="_blank" rel="noopener">pricing</a>, geared towards enterprise use.
 
 ### Adding LLM Observability to Groq
 
@@ -308,7 +376,7 @@ https://groq.helicone.ai/openai/v1
 "Helicone-Auth": "Bearer [HELICONE_API_KEY]"
 ```
 
-<BottomLine 
+<BottomLine
   title="Bottom Line"
   description="If ultra-low latency and hardware-level optimization are critical for your application, using LPU can give you a significant advantage. However, you may need to adapt your existing AI workflows to leverage the LPU architecture."
 />
@@ -321,7 +389,12 @@ https://groq.helicone.ai/openai/v1
 
 ### What is DeepInfra?
 
-<a href="https://deepinfra.com/" target="_blank" rel="noopener">DeepInfra</a> offers a robust platform for running large AI models on cloud infrastructure. It's easy to use for managing large datasets and models. Its cloud-centric approach is best for enterprises needing to host large models.
+<a href="https://deepinfra.com/" target="_blank" rel="noopener">
+  DeepInfra
+</a>
+offers a robust platform for running large AI models on cloud infrastructure.
+It's easy to use for managing large datasets and models. Its cloud-centric
+approach is best for enterprises needing to host large models.
 
 ### Why do developers choose DeepInfra?
 
@@ -329,7 +402,7 @@ DeepInfra's inference API takes care of servers, GPUs, scaling, and monitoring, 
 
 ### DeepInfra Pricing
 
-Usage-based <a href="https://deepinfra.com/pricing" target="_blank" rel="noopener">pricing</a>, billed by token or at execution time. 
+Usage-based <a href="https://deepinfra.com/pricing" target="_blank" rel="noopener">pricing</a>, billed by token or at execution time.
 
 ### Adding LLM Observability to DeepInfra
 
@@ -346,7 +419,7 @@ https://deepinfra.helicone.ai/v1/
 "Helicone-Auth": "Bearer [HELICONE_API_KEY]"
 ```
 
-<BottomLine 
+<BottomLine
   title="Bottom Line"
   description="DeepInfra is a good option for projects that need to process large volumes of requests without compromising performance."
 />
@@ -359,7 +432,21 @@ https://deepinfra.helicone.ai/v1/
 
 ### What is Perplexity?
 
-<a href="https://www.perplexity.ai/" target="_blank" rel="noopener">Perplexity AI</a> is known for its AI-powered search and answer engine. While primarily a consumer-facing service, they offer APIs for developers to access intelligent search capabilities. <a href="https://www.perplexity.ai/hub/blog/introducing-pplx-api" target="_blank" rel="noopener">pplx-api</a> is a new service designed for fast access to various open-source language models.
+<a href="https://www.perplexity.ai/" target="_blank" rel="noopener">
+  Perplexity AI
+</a>
+is known for its AI-powered search and answer engine. While primarily a
+consumer-facing service, they offer APIs for developers to access intelligent
+search capabilities.
+<a
+  href="https://www.perplexity.ai/hub/blog/introducing-pplx-api"
+  target="_blank"
+  rel="noopener"
+>
+  pplx-api
+</a>
+is a new service designed for fast access to various open-source language
+models.
 
 ### Why do developers choose Perplexity?
 
@@ -367,7 +454,7 @@ Developers can quickly integrate state-of-the-art open-source models via the fam
 
 ### Perplexity Pricing
 
-Usage or subscription-based <a href="https://docs.perplexity.ai/guides/pricing" target="_blank" rel="noopener">pricing</a>. Pro users receive a recurring $5 monthly pplx-api credit. For all other users, the cost will be determined based on usage. 
+Usage or subscription-based <a href="https://docs.perplexity.ai/guides/pricing" target="_blank" rel="noopener">pricing</a>. Pro users receive a recurring $5 monthly pplx-api credit. For all other users, the cost will be determined based on usage.
 
 ### Adding LLM Observability to Perplexity AI
 
@@ -386,7 +473,7 @@ https://gateway.helicone.ai/chat/completions
 "Helicone-Target-Provider": "Perplexity",
 ```
 
-<BottomLine 
+<BottomLine
   title="Bottom Line"
   description="Perplexity AI is suitable for developers looking to incorporate advanced search and Q&A capabilities into their applications. If improving information retrieval is a crucial aspect of your project, using Perplexity can be a good move."
 />
@@ -399,7 +486,20 @@ https://gateway.helicone.ai/chat/completions
 
 ### What is Anyscale?
 
-<a href="https://www.anyscale.com/" target="_blank" rel="noopener">Anyscale</a> is a platform for scaling compute-intensive AI workloads ranging from model training to serving to batch processing. Anyscale is the company behind <a href="https://www.anyscale.com/ray-open-source" target="_blank" rel="noopener">Ray</a>, the open-source AI compute engine used by companies like Uber, Spotify, and Airbnb as the foundation of their AI platforms.
+<a href="https://www.anyscale.com/" target="_blank" rel="noopener">
+  Anyscale
+</a>
+is a platform for scaling compute-intensive AI workloads ranging from model
+training to serving to batch processing. Anyscale is the company behind
+<a
+  href="https://www.anyscale.com/ray-open-source"
+  target="_blank"
+  rel="noopener"
+>
+  Ray
+</a>
+, the open-source AI compute engine used by companies like Uber, Spotify, and
+Airbnb as the foundation of their AI platforms.
 
 ### Why do developers choose Anyscale?
 
@@ -407,7 +507,7 @@ Anyscale offers governance, admin, and billing controls as well as security and 
 
 ### Anyscale Pricing
 
-Usage-based <a href="https://www.anyscale.com/pricing" target="_blank" rel="noopener">pricing</a>, enterprise plans available. 
+Usage-based <a href="https://www.anyscale.com/pricing" target="_blank" rel="noopener">pricing</a>, enterprise plans available.
 
 ### Adding LLM Observability to Anyscale
 
@@ -425,7 +525,7 @@ https://oai.helicone.ai/v1/
 "Helicone-OpenAI-API-Base": "https://api.endpoints.anyscale.com/v1",
 ```
 
-<BottomLine 
+<BottomLine
   title="Bottom Line"
   description="Anyscale is ideal for developers building applications that require high scalability and performance. If your project uses Python and you are at the scaling stage, Anyscale can be a good option."
 />
@@ -438,7 +538,11 @@ https://oai.helicone.ai/v1/
 
 ### What is Novita AI?
 
-<a href="https://novita.ai/" target="_blank" rel="noopener">Novita AI</a> is a cloud infrastructure platform that provides both Model APIs for accessing **200+** AI models and dedicated GPU resources for running custom models. 
+<a href="https://novita.ai/" target="_blank" rel="noopener">
+  Novita AI
+</a>
+is a cloud infrastructure platform that provides both Model APIs for accessing
+**200+** AI models and dedicated GPU resources for running custom models.
 
 As a strong alternative to Together AI, Novita's platform features both GPU Instances (dedicated VMs with full hardware control) and Serverless GPUs (fully managed, on-demand service that scales dynamically).
 
@@ -448,7 +552,7 @@ Novita AI offers up to **<a href="https://novita.ai/" target="_blank" rel="noope
 
 ### Novita AI Pricing
 
-Usage-based <a href="https://novita.ai/pricing" target="_blank" rel="noopener">pricing</a>, billed by token (for LLM APIs) or by execution time (for GPUs). Dedicated Endpoint pricing available for Enterprise. 
+Usage-based <a href="https://novita.ai/pricing" target="_blank" rel="noopener">pricing</a>, billed by token (for LLM APIs) or by execution time (for GPUs). Dedicated Endpoint pricing available for Enterprise.
 
 ### Adding LLM Observability to Novita AI
 
@@ -465,31 +569,31 @@ https://novita.helicone.ai
 "Authorization": "Bearer <NOVITA_API_KEY>",
 ```
 
-<BottomLine 
+<BottomLine
   title="Bottom Line"
   description="Novita AI offers a solid balance of affordability, performance and reliability, making it particularly well-suited for AI startups and teams needing both pre-built models and custom model deployment options."
 />
 
 ## Choosing the Right API Provider
 
-When choosing an LLM API provider, it's essential to consider your specific requirements, whether it's affordability, speed, scalability, or certain functionality. Here's a quick guide to help you decide which LLM API provider is best suited for you: 
+When choosing an LLM API provider, it's essential to consider your specific requirements, whether it's affordability, speed, scalability, or certain functionality. Here's a quick guide to help you decide which LLM API provider is best suited for you:
 
-| If You Need | Provider | Why |
-| -------- | -------- | ------------ |
-| High performance and privacy | <a href="https://www.together.xyz/" target="_blank" rel="noopener">Together AI</a> | High-quality responses, faster response time, lower cost, with a focus on privacy and scalability |
-| Lowest cost solution | <a href="https://hyperbolic.xyz/" target="_blank" rel="noopener">Hyperbolic</a>, <a href="https://novita.ai/" target="_blank" rel="noopener">Novita AI</a> | Up to 50-80% cost savings over major providers |
-| Flexibility across multiple LLM providers | <a href="https://openrouter.ai/" target="_blank" rel="noopener">OpenRouter</a> | Allows routing traffic between multiple LLM providers for optimal performance |
-| Rapid prototyping and experimentation | <a href="https://replicate.com/" target="_blank" rel="noopener">Replicate</a> | Simplifies machine learning model deployment and scaling, ideal for quick experiments and building MVPs |
-| Multi-modal capabilities | <a href="https://www.together.xyz/" target="_blank" rel="noopener">Together AI</a>, <a href="https://fireworks.ai/" target="_blank" rel="noopener">Fireworks AI</a>, <a href="https://replicate.com/" target="_blank" rel="noopener">Replicate</a> | Strong support for text+image models with specialized architectures |
-| NLP projects and open-source models | <a href="https://huggingface.co/" target="_blank" rel="noopener">HuggingFace</a> | Provides an extensive library of pre-trained models and a strong open-source community |
-| Large-scale AI applications | <a href="https://deepinfra.com/" target="_blank" rel="noopener">DeepInfra</a> | Excels in hosting and managing large AI models on cloud infrastructure |
-| AI-driven search and knowledge applications | <a href="https://www.perplexity.ai/" target="_blank" rel="noopener">Perplexity AI</a> | Specializes in AI-powered search engines and knowledge retrieval |
-| Access to latest models first | <a href="https://www.perplexity.ai/" target="_blank" rel="noopener">Perplexity AI</a>, <a href="https://www.together.xyz/" target="_blank" rel="noopener">Together AI</a>, <a href="https://hyperbolic.xyz/" target="_blank" rel="noopener">Hyperbolic</a> | Deploy new open-source models often within hours of release |
-| Reliability & failover | <a href="https://openrouter.ai/" target="_blank" rel="noopener">OpenRouter</a>, <a href="https://www.together.xyz/" target="_blank" rel="noopener">Together AI</a>  | Built-in redundancy and automatic routing between providers; high availability |
+| If You Need                                 | Provider                                                                                                                                                                                                                                                   | Why                                                                                                     |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| High performance and privacy                | <a href="https://www.together.xyz/" target="_blank" rel="noopener">Together AI</a>                                                                                                                                                                         | High-quality responses, faster response time, lower cost, with a focus on privacy and scalability       |
+| Lowest cost solution                        | <a href="https://hyperbolic.xyz/" target="_blank" rel="noopener">Hyperbolic</a>, <a href="https://novita.ai/" target="_blank" rel="noopener">Novita AI</a>                                                                                                 | Up to 50-80% cost savings over major providers                                                          |
+| Flexibility across multiple LLM providers   | <a href="https://openrouter.ai/" target="_blank" rel="noopener">OpenRouter</a>                                                                                                                                                                             | Allows routing traffic between multiple LLM providers for optimal performance                           |
+| Rapid prototyping and experimentation       | <a href="https://replicate.com/" target="_blank" rel="noopener">Replicate</a>                                                                                                                                                                              | Simplifies machine learning model deployment and scaling, ideal for quick experiments and building MVPs |
+| Multi-modal capabilities                    | <a href="https://www.together.xyz/" target="_blank" rel="noopener">Together AI</a>, <a href="https://fireworks.ai/" target="_blank" rel="noopener">Fireworks AI</a>, <a href="https://replicate.com/" target="_blank" rel="noopener">Replicate</a>         | Strong support for text+image models with specialized architectures                                     |
+| NLP projects and open-source models         | <a href="https://huggingface.co/" target="_blank" rel="noopener">HuggingFace</a>                                                                                                                                                                           | Provides an extensive library of pre-trained models and a strong open-source community                  |
+| Large-scale AI applications                 | <a href="https://deepinfra.com/" target="_blank" rel="noopener">DeepInfra</a>                                                                                                                                                                              | Excels in hosting and managing large AI models on cloud infrastructure                                  |
+| AI-driven search and knowledge applications | <a href="https://www.perplexity.ai/" target="_blank" rel="noopener">Perplexity AI</a>                                                                                                                                                                      | Specializes in AI-powered search engines and knowledge retrieval                                        |
+| Access to latest models first               | <a href="https://www.perplexity.ai/" target="_blank" rel="noopener">Perplexity AI</a>, <a href="https://www.together.xyz/" target="_blank" rel="noopener">Together AI</a>, <a href="https://hyperbolic.xyz/" target="_blank" rel="noopener">Hyperbolic</a> | Deploy new open-source models often within hours of release                                             |
+| Reliability & failover                      | <a href="https://openrouter.ai/" target="_blank" rel="noopener">OpenRouter</a>, <a href="https://www.together.xyz/" target="_blank" rel="noopener">Together AI</a>                                                                                         | Built-in redundancy and automatic routing between providers; high availability                          |
 
-It's often beneficial to start with a small-scale test before committing to a provider for large-scale deployment. Many providers' free tiers offer enough tokens to test your applications before scaling. 
+It's often beneficial to start with a small-scale test before committing to a provider for large-scale deployment. Many providers' free tiers offer enough tokens to test your applications before scaling.
 
-Regardless of which provider you choose, make sure to monitor your LLM usage for cost control and performance optimization with tools like <a href="https://www.helicone.ai/" target="_blank" rel="noopener">Helicone</a>. Happy building!  
+Regardless of which provider you choose, make sure to monitor your LLM usage for cost control and performance optimization with tools like <a href="https://www.helicone.ai/" target="_blank" rel="noopener">Helicone</a>. Happy building!
 
 <CallToAction
   title="Monitor Your LLM API Costs ⚡️"
@@ -506,52 +610,67 @@ Regardless of which provider you choose, make sure to monitor your LLM usage for
 - **<a href="https://www.helicone.ai/blog/helicone-vs-traceloop" target="_blank" rel="noopener">Helicone vs Traceloop: Best Tools for Monitoring LLMs</a>**
 - **<a href="https://www.helicone.ai/blog/meta-llama-3-3-70-b-instruct" target="_blank" rel="noopener">Llama 3.3 just dropped — is it better than GPT-4 or Claude-Sonnet-3.5?</a>**
 
-<FAQ 
+<FAQ
   items={[
     {
       question: "What are LLM API providers?",
-      answer: "LLM API providers offer cloud-based platforms for accessing and utilizing Large Language Models (LLMs) through Application Programming Interfaces (APIs). They're essentially inference-as-a-service companies that allow developers to integrate AI capabilities into applications without hosting or training the models themselves."
+      answer:
+        "LLM API providers offer cloud-based platforms for accessing and utilizing Large Language Models (LLMs) through Application Programming Interfaces (APIs). They're essentially inference-as-a-service companies that allow developers to integrate AI capabilities into applications without hosting or training the models themselves.",
     },
     {
-      question: "Why should I choose an LLM API provider instead of just using OpenAI?",
-      answer: "Using alternative LLM API providers can offer several benefits:\n- Lower costs, especially for high-volume usage\n- Access to diverse, specialized models\n- Easier fine-tuning and customization\n- Better data privacy control\n- Faster performance with optimized hardware\n- Flexibility to switch between models or providers\n- Support for open-source development"
+      question:
+        "Why should I choose an LLM API provider instead of just using OpenAI?",
+      answer:
+        "Using alternative LLM API providers can offer several benefits:\n- Lower costs, especially for high-volume usage\n- Access to diverse, specialized models\n- Easier fine-tuning and customization\n- Better data privacy control\n- Faster performance with optimized hardware\n- Flexibility to switch between models or providers\n- Support for open-source development",
     },
     {
       question: "How do I choose the right LLM API provider for my project?",
-      answer: "Consider factors like performance, cost, available models, scalability, ease of integration, specialized features, infrastructure reliability, data privacy, and community support. Your choice should align with your project's specific needs and budget."
+      answer:
+        "Consider factors like performance, cost, available models, scalability, ease of integration, specialized features, infrastructure reliability, data privacy, and community support. Your choice should align with your project's specific needs and budget.",
     },
     {
       question: "Are open-source models as good as proprietary ones?",
-      answer: "Open-source models have improved significantly and can sometimes compete with proprietary models. Providers like Together AI and Fireworks AI offer high-quality open-source models that may outperform some proprietary alternatives."
+      answer:
+        "Open-source models have improved significantly and can sometimes compete with proprietary models. Providers like Together AI and Fireworks AI offer high-quality open-source models that may outperform some proprietary alternatives.",
     },
     {
       question: "What's the most cost-effective LLM API provider?",
-      answer: "Cost-effectiveness depends on your usage. Hyperbolic claims to reduce costs by up to 80% compared to traditional providers. However, it's best to compare pricing models across providers based on your expected usage."
+      answer:
+        "Cost-effectiveness depends on your usage. Hyperbolic claims to reduce costs by up to 80% compared to traditional providers. However, it's best to compare pricing models across providers based on your expected usage.",
     },
     {
       question: "Which provider offers the fastest inference?",
-      answer: "Groq specializes in ultra-fast AI inference with their Language Processing Unit (LPU). Fireworks AI also claims to have one of the fastest model APIs, though performance may vary based on your use case."
+      answer:
+        "Groq specializes in ultra-fast AI inference with their Language Processing Unit (LPU). Fireworks AI also claims to have one of the fastest model APIs, though performance may vary based on your use case.",
     },
     {
       question: "What if I need to fine-tune models for my specific use case?",
-      answer: "Providers like Together AI, Replicate, and Hugging Face offer fine-tuning capabilities. Check their documentation for specific instructions on model customization."
+      answer:
+        "Providers like Together AI, Replicate, and Hugging Face offer fine-tuning capabilities. Check their documentation for specific instructions on model customization.",
     },
     {
-      question: "Can these LLM API providers handle multi-modal AI tasks (e.g., text and image processing)?",
-      answer: "Yes, some providers support multi-modal AI. Fireworks AI, for example, offers FireLLaVA-13B, which can process both text and images."
+      question:
+        "Can these LLM API providers handle multi-modal AI tasks (e.g., text and image processing)?",
+      answer:
+        "Yes, some providers support multi-modal AI. Fireworks AI, for example, offers FireLLaVA-13B, which can process both text and images.",
     },
     {
-      question: "What's the difference between serverless and on-demand deployment options?",
-      answer: "Serverless options, like those from Fireworks AI, automatically scale resources based on demand. On-demand deployment gives you more control over the infrastructure but requires more management."
+      question:
+        "What's the difference between serverless and on-demand deployment options?",
+      answer:
+        "Serverless options, like those from Fireworks AI, automatically scale resources based on demand. On-demand deployment gives you more control over the infrastructure but requires more management.",
     },
     {
-      question: "Are these LLM API providers suitable for enterprise-level applications?",
-      answer: "Yes, many providers offer enterprise-grade solutions. Anyscale, DeepInfra, and Together AI provide scalable options for large-scale enterprise applications."
+      question:
+        "Are these LLM API providers suitable for enterprise-level applications?",
+      answer:
+        "Yes, many providers offer enterprise-grade solutions. Anyscale, DeepInfra, and Together AI provide scalable options for large-scale enterprise applications.",
     },
     {
       question: "How do I get started with using an LLM API provider?",
-      answer: "Most providers offer documentation and quickstart guides. Generally, you'll need to sign up, obtain an API key, and start making API calls to the models. Some providers also offer free tiers or credits for initial testing."
-    }
+      answer:
+        "Most providers offer documentation and quickstart guides. Generally, you'll need to sign up, obtain an API key, and start making API calls to the models. Some providers also offer free tiers or credits for initial testing.",
+    },
   ]}
 />
 

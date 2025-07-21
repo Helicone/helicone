@@ -22,7 +22,7 @@ export const VectorDB = ({
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useLocalStorage<(typeof PROMPT_MODES)[number]>(
     "vector-db-mode",
-    "Pretty"
+    "Pretty",
   );
 
   const chatTopBarProps: ChatTopBarProps = {
@@ -36,7 +36,7 @@ export const VectorDB = ({
   };
 
   const content = (
-    <div className="w-full border border-slate-200 dark:border-gray-700 divide-y divide-gray-300 dark:divide-gray-700 h-full">
+    <div className="h-full w-full divide-y divide-gray-300 border border-slate-200 dark:divide-gray-700 dark:border-gray-700">
       <VectorDBContent mode={mode} mappedRequest={mappedRequest} />
     </div>
   );
@@ -45,14 +45,14 @@ export const VectorDB = ({
     <>
       <div
         className={clsx(
-          "w-full flex flex-col text-left space-y-2 text-sm dark:bg-black",
-          className
+          "flex w-full flex-col space-y-2 text-left text-sm dark:bg-black",
+          className,
         )}
       >
         {content}
       </div>
       <ThemedModal open={open} setOpen={setOpen}>
-        <div className="w-[80vw] rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
+        <div className="h-full w-[80vw] divide-y divide-gray-300 rounded-md dark:divide-gray-700">
           <ChatTopBar {...chatTopBarProps} isModal={true} />
           <VectorDBContent mode={mode} mappedRequest={mappedRequest} />
         </div>

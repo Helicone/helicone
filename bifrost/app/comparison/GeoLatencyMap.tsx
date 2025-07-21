@@ -78,10 +78,10 @@ export const GeoMetricMap = ({
   if (data.length === 0) {
     return (
       <Card
-        className={`shadow-none border bg-[#0A192F] ${className}`}
+        className={`border bg-[#0A192F] shadow-none ${className}`}
         style={style}
       >
-        <CardContent className="p-4 flex items-center justify-center h-[400px]">
+        <CardContent className="flex h-[400px] items-center justify-center p-4">
           <p className="text-gray-400">No geographic data available</p>
         </CardContent>
       </Card>
@@ -108,7 +108,7 @@ export const GeoMetricMap = ({
 
   return (
     <Card
-      className={`shadow-none border-none bg-white ${className}`}
+      className={`border-none bg-white shadow-none ${className}`}
       style={style}
     >
       <CardContent className="p-4">
@@ -129,7 +129,7 @@ export const GeoMetricMap = ({
               rotate: [-10, 0, 0],
               scale: 147,
             }}
-            className="w-full h-full"
+            className="h-full w-full"
           >
             {/* @ts-expect-error - react-simple-maps types are not compatible with React 18 */}
             <Sphere

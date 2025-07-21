@@ -11,7 +11,7 @@ const nextConfig = {
   transpilePackages: ["next-mdx-remote"],
   images: {
     dangerouslyAllowSVG: true,
-    contentDispositionType: 'attachment',
+    contentDispositionType: "attachment",
     remotePatterns: [
       {
         protocol: "https",
@@ -35,8 +35,8 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "marketing-assets-helicone.s3.us-west-2.amazonaws.com"
-      }
+        hostname: "marketing-assets-helicone.s3.us-west-2.amazonaws.com",
+      },
     ],
   },
   async redirects() {

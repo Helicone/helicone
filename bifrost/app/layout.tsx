@@ -77,7 +77,7 @@ export default async function RootLayout({
       </Head>
       <PHProvider>
         <body>
-          <div className={`bg-white flex flex-col ${inter.className}`}>
+          <div className={`flex flex-col bg-white ${inter.className}`}>
             {children}
           </div>
           <PostHogPageView />

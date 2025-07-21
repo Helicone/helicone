@@ -107,8 +107,8 @@ export const getRequestMessages = (request: any) => {
             .map((item: any) => item.text || JSON.stringify(item))
             .join(" ")
         : typeof request.system === "string"
-        ? request.system
-        : JSON.stringify(request.system),
+          ? request.system
+          : JSON.stringify(request.system),
       _type: "message",
     });
   }

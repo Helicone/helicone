@@ -122,7 +122,10 @@ export class RequestWrapper {
     return headers;
   }
 
-  private constructor(private request: Request, private env: Env) {
+  private constructor(
+    private request: Request,
+    private env: Env
+  ) {
     this.url = new URL(request.url);
     this.headers = this.mutatedAuthorizationHeaders(request);
     this.heliconeHeaders = new HeliconeHeaders(this.headers);

@@ -52,6 +52,7 @@ helicone datasets export --format openai --id dataset-123
 helicone datasets export --format anthropic --id dataset-123
 helicone datasets export --format cohere --id dataset-123
 ```
+
 </Step>
 
 <Step title="Create fine-tuning job">
@@ -73,6 +74,7 @@ job = openai.FineTuningJob.create(
   model="gpt-3.5-turbo"
 )
 ```
+
 </Step>
 </Steps>
 
@@ -82,20 +84,20 @@ job = openai.FineTuningJob.create(
 
 Core options for dataset curation and export:
 
-| Setting | Type | Description | Default | Example |
-|---------|------|-------------|---------|---------|
-| `minScore` | `number` | Minimum score for including requests | `0` | `0.8` |
-| `maxTokens` | `number` | Maximum tokens per example | `∞` | `4096` |
-| `format` | `string` | Export format for platform | `"openai"` | `"anthropic"` |
-| `includeMetadata` | `boolean` | Include Helicone metadata | `false` | `true` |
+| Setting           | Type      | Description                          | Default    | Example       |
+| ----------------- | --------- | ------------------------------------ | ---------- | ------------- |
+| `minScore`        | `number`  | Minimum score for including requests | `0`        | `0.8`         |
+| `maxTokens`       | `number`  | Maximum tokens per example           | `∞`        | `4096`        |
+| `format`          | `string`  | Export format for platform           | `"openai"` | `"anthropic"` |
+| `includeMetadata` | `boolean` | Include Helicone metadata            | `false`    | `true`        |
 
 ### Advanced Settings
 
-| Setting | Type | Description | Default | Example |
-|---------|------|-------------|---------|---------|
-| `validationSplit` | `number` | Percentage for validation set | `0.2` | `0.15` |
-| `deduplication` | `boolean` | Remove duplicate examples | `true` | `false` |
-| `sampling` | `object` | Sampling configuration | `{}` | `{"method": "random", "size": 1000}` |
+| Setting           | Type      | Description                   | Default | Example                              |
+| ----------------- | --------- | ----------------------------- | ------- | ------------------------------------ |
+| `validationSplit` | `number`  | Percentage for validation set | `0.2`   | `0.15`                               |
+| `deduplication`   | `boolean` | Remove duplicate examples     | `true`  | `false`                              |
+| `sampling`        | `object`  | Sampling configuration        | `{}`    | `{"method": "random", "size": 1000}` |
 
 #### Detailed Explanations
 
@@ -107,11 +109,12 @@ Control how your dataset is divided for training and validation:
 // 80/20 training/validation split
 export const config = {
   validationSplit: 0.2,
-  shuffleSeed: 42 // For reproducible splits
-}
+  shuffleSeed: 42, // For reproducible splits
+};
 ```
 
 Larger validation sets help detect overfitting but reduce training data.
+
 </Accordion>
 
 <Accordion title="Deduplication Strategies">
@@ -121,15 +124,16 @@ Remove duplicate or near-duplicate examples to improve training:
 // Exact match deduplication
 export const config = {
   deduplication: true,
-  deduplicationKey: "input" // or "output" or "both"
-}
+  deduplicationKey: "input", // or "output" or "both"
+};
 
 // Semantic deduplication (coming soon)
 export const config = {
   deduplication: "semantic",
-  similarityThreshold: 0.95
-}
+  similarityThreshold: 0.95,
+};
 ```
+
 </Accordion>
 </AccordionGroup>
 
@@ -158,20 +162,21 @@ const response = await openai.chat.completions.create(
 
 // 2. Create dataset from tagged conversations
 const dataset = await helicone.datasets.create({
-  name: "support-agent-training",
-  filters: {
-    properties: {
-      Quality: "excellent",
-      UseCase: "support",
-      Resolved: "true"
-    },
-    minScore: 0.9
-  }
+name: "support-agent-training",
+filters: {
+properties: {
+Quality: "excellent",
+UseCase: "support",
+Resolved: "true"
+},
+minScore: 0.9
+}
 });
 
 // 3. Fine-tune on curated examples
 const fineTunedModel = await trainModel(dataset);
-```
+
+````
 
 ```python Python
 # Tag high-quality support conversations
@@ -195,7 +200,8 @@ dataset = helicone.datasets.create(
         }
     }
 )
-```
+````
+
 </CodeGroup>
 </Tab>
 
@@ -211,21 +217,22 @@ const codeDataset = await helicone.datasets.create({
     properties: {
       Feature: "code-generation",
       Language: "typescript",
-      TestsPassed: "true"
+      TestsPassed: "true",
     },
     responseTime: { max: 5000 }, // Fast, efficient examples
-    tags: ["reviewed", "production-ready"]
+    tags: ["reviewed", "production-ready"],
   },
-  maxExamples: 5000
+  maxExamples: 5000,
 });
 
 // Export with custom formatting
 const exported = await codeDataset.export({
   format: "openai",
   includeSystemPrompt: true,
-  validateSyntax: true // Ensure valid code examples
+  validateSyntax: true, // Ensure valid code examples
 });
 ```
+
 </Tab>
 
 <Tab title="Domain-Specific Expert">
@@ -239,21 +246,21 @@ const legalDataset = await helicone.datasets.create({
     properties: {
       Domain: "legal",
       DocumentType: ["contract", "agreement", "terms"],
-      Accuracy: { min: 0.95 }
+      Accuracy: { min: 0.95 },
     },
     user: ["senior-lawyer-1", "senior-lawyer-2"], // Verified by experts
     dateRange: {
       start: "2024-01-01",
-      end: "2024-12-31"
-    }
+      end: "2024-12-31",
+    },
   },
-  
+
   // Stratified sampling for balanced dataset
   sampling: {
     method: "stratified",
     stratifyBy: "DocumentType",
-    samplesPerStratum: 500
-  }
+    samplesPerStratum: 500,
+  },
 });
 
 // Fine-tune with platform-specific parameters
@@ -263,10 +270,11 @@ const fineTuneJob = await openai.fineTuning.create({
   hyperparameters: {
     nEpochs: 3,
     batchSize: 8,
-    learningRateMultiplier: 0.1
-  }
+    learningRateMultiplier: 0.1,
+  },
 });
 ```
+
 </Tab>
 </Tabs>
 
@@ -277,12 +285,14 @@ const fineTuneJob = await openai.fineTuning.create({
 Fine-tuning and RAG (Retrieval Augmented Generation) solve different problems:
 
 **What Fine-tuning is best for:**
+
 - Teaching consistent behavior and output formats
 - Improving performance on specific tasks
 - Reducing latency and costs with smaller models
 - Encoding domain knowledge into the model
 
 **What RAG is best for:**
+
 - Working with frequently changing information
 - Handling large knowledge bases
 - Maintaining source attribution
@@ -296,15 +306,15 @@ const apiResponseExample = {
   output: {
     status: "success",
     data: { id: 123, name: "John" },
-    metadata: { timestamp: "2024-01-01T00:00:00Z" }
-  }
+    metadata: { timestamp: "2024-01-01T00:00:00Z" },
+  },
 };
 
-// ❌ Poor fine-tuning use case  
+// ❌ Poor fine-tuning use case
 // Trying to teach current product inventory (use RAG instead)
 const inventoryExample = {
   input: "What's in stock?",
-  output: "SKU-123: 45 units, SKU-456: 0 units" // This changes daily!
+  output: "SKU-123: 45 units, SKU-456: 0 units", // This changes daily!
 };
 ```
 
@@ -313,12 +323,14 @@ const inventoryExample = {
 The quality of your fine-tuning dataset determines model performance:
 
 **Key principles:**
+
 - **Diversity**: Include varied examples covering edge cases
 - **Consistency**: Ensure similar inputs have similar outputs
 - **Quality**: Only include high-quality, verified examples
 - **Quantity**: Start with 50-100 examples minimum
 
 **Quality indicators in Helicone:**
+
 ```typescript
 // High-quality dataset criteria
 const qualityDataset = {
@@ -326,42 +338,44 @@ const qualityDataset = {
     // Performance indicators
     responseTime: { max: 3000 },
     tokenCount: { min: 50, max: 2000 },
-    
+
     // Quality signals
-    scores: { 
+    scores: {
       userFeedback: { min: 4 },
-      accuracy: { min: 0.9 }
+      accuracy: { min: 0.9 },
     },
-    
+
     // Consistency checks
     status: "success",
-    errorRate: { max: 0.01 }
-  }
+    errorRate: { max: 0.01 },
+  },
 };
 ```
 
 ### Fine-tuning Workflow Best Practices
 
 **Data preparation checklist:**
+
 - Review examples for quality and consistency
 - Remove PII and sensitive information
 - Balance dataset across different use cases
 - Validate format matches platform requirements
 
 **Monitoring fine-tuned models:**
+
 ```typescript
 // Track fine-tuned model performance
 const response = await openai.chat.completions.create(
   {
     model: "ft:gpt-3.5-turbo:org-name:model-name:id",
-    messages: [{ role: "user", content: prompt }]
+    messages: [{ role: "user", content: prompt }],
   },
   {
     headers: {
       "Helicone-Property-Model-Type": "fine-tuned",
       "Helicone-Property-Base-Model": "gpt-3.5-turbo",
-      "Helicone-Property-Training-Job": "ftjob-123"
-    }
+      "Helicone-Property-Training-Job": "ftjob-123",
+    },
   }
 );
 
@@ -376,11 +390,15 @@ Create and manage training datasets from your Helicone requests
 </Card>
 
 <Card title="Scores" icon="chart-line" href="/features/advanced-usage/scores">
-Score requests to identify high-quality training examples
+  Score requests to identify high-quality training examples
 </Card>
 
-<Card title="Request Filtering" icon="filter" href="/features/advanced-usage/filtering">
-Advanced filtering to find the perfect training examples
+<Card
+  title="Request Filtering"
+  icon="filter"
+  href="/features/advanced-usage/filtering"
+>
+  Advanced filtering to find the perfect training examples
 </Card>
 
 <Card title="Custom Properties" icon="tag" href="/features/advanced-usage/custom-properties">

@@ -35,7 +35,7 @@ export class SearchParams {
         query: { ...this.router.query, [key]: value },
       },
       undefined,
-      { shallow: true }
+      { shallow: true },
     );
   }
 
@@ -46,7 +46,7 @@ export class SearchParams {
         query: rest,
       },
       undefined,
-      { shallow: true }
+      { shallow: true },
     );
   }
 

@@ -27,7 +27,7 @@ const useGetUnauthorized = (userId: string) => {
         },
       },
     },
-    { refetchOnWindowFocus: false }
+    { refetchOnWindowFocus: false },
   );
 
   const checkAuthorizedByTier = () => {

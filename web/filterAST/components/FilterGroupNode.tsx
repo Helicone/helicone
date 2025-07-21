@@ -42,7 +42,7 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
 
   const hasGroupAlready = useMemo(() => {
     return group.expressions.find(
-      (expr) => expr.type === "and" || expr.type === "or"
+      (expr) => expr.type === "and" || expr.type === "or",
     );
   }, [group]);
   // Handle adding a nested group to this group
@@ -52,7 +52,7 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
       filterStore.setFilter(group);
     } else {
       filterStore.setFilter(
-        FilterAST.and(group, DEFAULT_FILTER_GROUP_EXPRESSION)
+        FilterAST.and(group, DEFAULT_FILTER_GROUP_EXPRESSION),
       );
     }
   };
@@ -75,10 +75,8 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
   };
 
   return (
-    <div
-      className={` rounded-md bg-transparent ${isRoot ? "" : " p-4 border "}`}
-    >
-      <div className="flex items-center justify-between mb-1.5">
+    <div className={`rounded-md bg-transparent ${isRoot ? "" : "border p-4"}`}>
+      <div className="mb-1.5 flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           <XSmall className="font-normal">Match</XSmall>
 
@@ -102,7 +100,7 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
       <div className={`flex flex-col gap-2 ${isRoot ? "" : ""}`}>
         <div className="flex flex-col gap-0">
           {group.expressions.length === 0 ? (
-            <Small className="text-muted-foreground py-1.5 block">
+            <Small className="block py-1.5 text-muted-foreground">
               No conditions. Click &quot;Add&quot; to create one.
             </Small>
           ) : (
@@ -155,11 +153,11 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
         )}
 
         {isRoot && (
-          <Row className="justify-between w-full">
+          <Row className="w-full justify-between">
             <Button
               variant="glass"
               size="xs"
-              className="flex items-center gap-1 w-fit"
+              className="flex w-fit items-center gap-1"
               onClick={() => handleAddGroup()}
             >
               <Plus size={12} />

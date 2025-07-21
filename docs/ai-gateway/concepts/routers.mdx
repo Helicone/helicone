@@ -11,6 +11,7 @@ Routers are the core concept of the Helicone AI Gateway. Unlike alternative solu
 ### What are Routers?
 
 Routers define independent routing policies within the AI Gateway, each with its own configuration for:
+
 - **Load balancing strategies** - How requests are distributed across providers
 - **Provider selection** - Which LLM providers are available for each router
 - **Middleware settings** - Caching, rate limiting, retries, and other features
@@ -35,7 +36,7 @@ curl -X POST http://localhost:8080/router/production/chat/completions \
   }'
 ```
 
-```bash Development Router  
+```bash Development Router
 # Using the 'development' router
 curl -X POST http://localhost:8080/router/development/chat/completions \
   -H "Content-Type: application/json" \
@@ -44,6 +45,7 @@ curl -X POST http://localhost:8080/router/development/chat/completions \
     "messages": [{"role": "user", "content": "Hello!"}]
   }'
 ```
+
 </CodeGroup>
 
 ### SDK Configuration
@@ -55,17 +57,20 @@ Configure your OpenAI SDK to use a specific router by setting the base URL:
 import openai
 
 # Production router
+
 client = openai.OpenAI(
-    base_url="http://localhost:8080/router/production",
-    api_key="sk-placeholder"  # Required by SDK, but gateway handles real auth
+base_url="http://localhost:8080/router/production",
+api_key="sk-placeholder" # Required by SDK, but gateway handles real auth
 )
 
 # Development router
+
 dev_client = openai.OpenAI(
-    base_url="http://localhost:8080/router/development", 
-    api_key="sk-placeholder"  # Required by SDK, but gateway handles real auth
+base_url="http://localhost:8080/router/development",
+api_key="sk-placeholder" # Required by SDK, but gateway handles real auth
 )
-```
+
+````
 
 ```javascript Node.js
 import OpenAI from 'openai';
@@ -81,7 +86,7 @@ const devClient = new OpenAI({
   baseURL: 'http://localhost:8080/router/development',
   apiKey: 'sk-placeholder'  // Required by SDK, but gateway handles real auth
 });
-```
+````
 
 ```bash cURL
 # Production router
@@ -89,11 +94,12 @@ curl -X POST http://localhost:8080/router/production/chat/completions \
   -H "Content-Type: application/json" \
   -d '{"model": "openai/gpt-4", "messages": [{"role": "user", "content": "Hello!"}]}'
 
-# Development router  
+# Development router
 curl -X POST http://localhost:8080/router/development/chat/completions \
   -H "Content-Type: application/json" \
   -d '{"model": "openai/gpt-4", "messages": [{"role": "user", "content": "Hello!"}]}'
 ```
+
 </CodeGroup>
 
 ### Basic Router Configuration
@@ -110,7 +116,7 @@ routers:
         providers:
           - openai
           - anthropic
-  
+
   # Additional named routers
   production:
     load-balance:
@@ -118,12 +124,12 @@ routers:
         strategy: weighted
         providers:
           - provider: anthropic
-            weight: '0.7'
+            weight: "0.7"
           - provider: openai
-            weight: '0.3'
+            weight: "0.3"
     cache:
       directive: "max-age=3600"
-    
+
   development:
     load-balance:
       chat:
@@ -151,7 +157,7 @@ routers:
               - gemini
         cache:
           directive: "max-age=1800"
-        
+
       staging:
         load-balance:
           chat:
@@ -159,9 +165,9 @@ routers:
             providers:
               - provider: openai
                 weight: '0.8'
-              - provider: anthropic  
+              - provider: anthropic
                 weight: '0.2'
-        
+
       development:
         load-balance:
           chat:
@@ -173,8 +179,9 @@ routers:
 
     **Usage:**
     - Production: `http://localhost:8080/router/production`
-    - Staging: `http://localhost:8080/router/staging`  
+    - Staging: `http://localhost:8080/router/staging`
     - Development: `http://localhost:8080/router/development`
+
   </Tab>
 
   <Tab title="Team-Specific Configurations">
@@ -193,7 +200,7 @@ routers:
           per-api-key:
             capacity: 1000
             refill-frequency: 1s
-        
+
       frontend-team:
         load-balance:
           chat:
@@ -212,13 +219,14 @@ routers:
     **Usage:**
     - ML Team: `http://localhost:8080/router/ml-team`
     - Frontend Team: `http://localhost:8080/router/frontend-team`
+
   </Tab>
 </Tabs>
 
 <Note>
-  For complete configuration options and syntax, see the [Configuration Reference](/ai-gateway/config#router-configuration).
+  For complete configuration options and syntax, see the [Configuration
+  Reference](/ai-gateway/config#router-configuration).
 </Note>
-
 
 ## Reference
 
@@ -227,7 +235,7 @@ routers:
 Router names must follow this regex pattern: `^[A-Za-z0-9_-]{1,12}$`
 
 - **Length:** 1-12 characters
-- **Allowed characters:** Letters (A-Z, a-z), numbers (0-9), hyphens (-), underscores (_)
+- **Allowed characters:** Letters (A-Z, a-z), numbers (0-9), hyphens (-), underscores (\_)
 - **No spaces or special characters**
 
 **Valid names:** `production`, `dev`, `team-a`, `cost_opt`, `v2`, `A`, `my_router`  
@@ -239,43 +247,23 @@ The AI Gateway supports three different routing patterns:
 
 <AccordionGroup>
   <Accordion title="Router-Based Routing (Recommended)">
-    **Pattern:** `/router/{name}/{api-path}`
-    
-    **Examples:**
-    - `/router/production/chat/completions`
-    - `/router/development/chat/completions`
-    - `/router/cost-optimized/embeddings`
-    
-    **Features:**
-    - Full router configuration support
-    - Load balancing, caching, retries
-    - Router-specific rate limiting
-    - Model mapping
+    **Pattern:** `/router/{name}/{api - path}` **Examples:** -
+    `/router/production/chat/completions` -
+    `/router/development/chat/completions` - `/router/cost-optimized/embeddings`
+    **Features:** - Full router configuration support - Load balancing, caching,
+    retries - Router-specific rate limiting - Model mapping
   </Accordion>
-  
-  <Accordion title="Direct Provider Routing">
-    **Pattern:** `/{provider}/{api-path}`
-    
-    **Examples:**
-    - `/openai/chat/completions`
-    - `/anthropic/messages`
-    - `/gemini/v1beta/generateContent`
-    
-    **Features:**
-    - Direct proxy to specific provider
-    - No load balancing or router features
-    - Global rate limiting only
-  </Accordion>
-  
+
+<Accordion title="Direct Provider Routing">
+  **Pattern:** `/{provider}/{api - path}` **Examples:** -
+  `/openai/chat/completions` - `/anthropic/messages` -
+  `/gemini/v1beta/generateContent` **Features:** - Direct proxy to specific
+  provider - No load balancing or router features - Global rate limiting only
+</Accordion>
+
   <Accordion title="Unified API Routing">
-    **Pattern:** `/ai/{api-path}`
-    
-    **Examples:**
-    - `/ai/chat/completions`
-    
-    **Features:**
-    - Automatic provider detection from model name
-    - Limited to OpenAI-compatible endpoints
-    - No router-specific configuration
+    **Pattern:** `/ai/{api - path}` **Examples:** - `/ai/chat/completions`
+    **Features:** - Automatic provider detection from model name - Limited to
+    OpenAI-compatible endpoints - No router-specific configuration
   </Accordion>
 </AccordionGroup>

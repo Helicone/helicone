@@ -73,7 +73,7 @@ export function useProFeature(featureName: FeatureName, enabled = true) {
 
   const customDescription = useMemo(
     () => descriptions[featureName],
-    [featureName]
+    [featureName],
   );
 
   const title = useMemo(() => titles[featureName], [featureName]);

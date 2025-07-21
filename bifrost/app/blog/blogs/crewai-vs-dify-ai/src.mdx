@@ -1,6 +1,6 @@
-Choosing the proper framework to build your AI agent is essential for your team's productivity and app scalability. 
+Choosing the proper framework to build your AI agent is essential for your team's productivity and app scalability.
 
-As more and more frameworks emerge in a competitive market, developers and non-technical users alike are looking for <a href="https://www.helicone.ai/blog/ai-agent-builders" target="_blank" rel="noopener">the best AI agent framework</a> to get started. 
+As more and more frameworks emerge in a competitive market, developers and non-technical users alike are looking for <a href="https://www.helicone.ai/blog/ai-agent-builders" target="_blank" rel="noopener">the best AI agent framework</a> to get started.
 
 ![CrewAI vs. Dify AI for building AI Agents](/static/blog/crewai-vs-dify-ai/cover.webp)
 
@@ -10,18 +10,18 @@ In this blog, we will explore the key differences between **CrewAI** and **Dify*
 
 ## CrewAI vs Dify: Quick Compare
 
-| **Criteria**            | **CrewAI** | **Dify.AI** |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Open-source**         | ✅ | ✅ |
-| **Beginner-friendly**   | 🟠 Code-based | ✅ No-code/low-code |
-| **Integrations**        | ✅ Extensive integrations (OpenAI, Serper, <a href="https://www.helicone.ai/" target="_blank" rel="noopener">Helicone</a>, LangChain, LlamaIndex, and custom tools) | ✅ Comprehensive BaaS APIs and tools (application monitoring like <a href="https://www.helicone.ai/" target="_blank" rel="noopener">Helicone</a>, RAG, external data sources) |
-| **Multi-model support** | ✅ Yes, via integration with LiteLLM | ✅ Yes, allows configuration of multiple models |
-| **RAG Pipeline**        | ✅ Yes, integrates with <a href="https://docs.crewai.com/concepts/llamaindex-tools#using-llamaindex-tools" target="_blank" rel="noopener">LlamaIndex toolkit</a> for Retrieval-Augmented Generation | ✅ Yes, provides a built-in RAG pipeline supporting external <a href="https://docs.dify.ai/guides/knowledge-base" target="_blank" rel="noopener">knowledge bases</a> |
-| **Code Execution**      | ✅ Robust execution with error handling | 🟠 Lightweight execution via DifySandbox (more limited) |
-| **Multi-Agent Support** | ✅ Advanced; role-based schema implementation | 🟠 Basic support; more limited for multi-agent workflows |
-| **Customization**       | ✅ High  | 🟠 Limited |
-| **Community Support**   | ✅ Strong developer focus, active GitHub contributions, extensive documentation | 🟠 Clear documentation but may feel overwhelming for beginners |
-| **Supported Tools**     | 🟠 Python-focused, but supports JavaScript | ✅ Python/NodeJS, has pre-built templates, and RAG-powered workflows |
+| **Criteria**            | **CrewAI**                                                                                                                                                                                          | **Dify.AI**                                                                                                                                                                   |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Open-source**         | ✅                                                                                                                                                                                                  | ✅                                                                                                                                                                            |
+| **Beginner-friendly**   | 🟠 Code-based                                                                                                                                                                                       | ✅ No-code/low-code                                                                                                                                                           |
+| **Integrations**        | ✅ Extensive integrations (OpenAI, Serper, <a href="https://www.helicone.ai/" target="_blank" rel="noopener">Helicone</a>, LangChain, LlamaIndex, and custom tools)                                 | ✅ Comprehensive BaaS APIs and tools (application monitoring like <a href="https://www.helicone.ai/" target="_blank" rel="noopener">Helicone</a>, RAG, external data sources) |
+| **Multi-model support** | ✅ Yes, via integration with LiteLLM                                                                                                                                                                | ✅ Yes, allows configuration of multiple models                                                                                                                               |
+| **RAG Pipeline**        | ✅ Yes, integrates with <a href="https://docs.crewai.com/concepts/llamaindex-tools#using-llamaindex-tools" target="_blank" rel="noopener">LlamaIndex toolkit</a> for Retrieval-Augmented Generation | ✅ Yes, provides a built-in RAG pipeline supporting external <a href="https://docs.dify.ai/guides/knowledge-base" target="_blank" rel="noopener">knowledge bases</a>          |
+| **Code Execution**      | ✅ Robust execution with error handling                                                                                                                                                             | 🟠 Lightweight execution via DifySandbox (more limited)                                                                                                                       |
+| **Multi-Agent Support** | ✅ Advanced; role-based schema implementation                                                                                                                                                       | 🟠 Basic support; more limited for multi-agent workflows                                                                                                                      |
+| **Customization**       | ✅ High                                                                                                                                                                                             | 🟠 Limited                                                                                                                                                                    |
+| **Community Support**   | ✅ Strong developer focus, active GitHub contributions, extensive documentation                                                                                                                     | 🟠 Clear documentation but may feel overwhelming for beginners                                                                                                                |
+| **Supported Tools**     | 🟠 Python-focused, but supports JavaScript                                                                                                                                                          | ✅ Python/NodeJS, has pre-built templates, and RAG-powered workflows                                                                                                          |
 
 ## What is CrewAI?
 
@@ -57,17 +57,19 @@ _For up-to-date pricing information, we recommend checking <a href="https://www.
 
 ## How to Build an AI Agent in CrewAI
 
-**CrewAI** offers a structured approach to building AI agents. 
+**CrewAI** offers a structured approach to building AI agents.
 
 CrewAI's CLI provides a streamlined way to scaffold and organize your agent projects. Install it by following the instructions in the <a href="https://docs.crewai.com/installation" target="_blank" rel="noopener">installation guide</a>, then:
 
 1. **Create a new crew project:**
+
    ```bash
    crewai create crew your-project-name
    cd your-project-name
    ```
 
 2. **Define your agents in `agents.yaml`:**
+
    ```yaml
    # src/your_project_name/config/agents.yaml
    researcher:
@@ -83,20 +85,22 @@ CrewAI's CLI provides a streamlined way to scaffold and organize your agent proj
 
    You can also define agents directly in Python code. Refer to the <a href="https://docs.crewai.com/concepts/agents#creating-agents" target="_blank" rel="noopener">official CrewAI documentation</a> for more details.
 
-   *Note that the YAML approach is recommended, especially for larger projects.*
+   _Note that the YAML approach is recommended, especially for larger projects._
 
 3. **Define your tasks in `tasks.yaml`:**
+
    ```yaml
    # src/your_project_name/config/tasks.yaml
-    research_task:
-      description: >
-        Conduct a thorough research about {topic}
-      expected_output: >
-        A list with 10 bullet points of relevant information
-      agent: researcher
+   research_task:
+     description: >
+       Conduct a thorough research about {topic}
+     expected_output: >
+       A list with 10 bullet points of relevant information
+     agent: researcher
    ```
 
 4. **Implement your crew in `crew.py`:**
+
    ```python
    from crewai import Agent, Crew, Process, Task
    from crewai.project import CrewBase, agent, crew, task
@@ -129,7 +133,12 @@ _For the most complete and up-to-date instructions, always refer to <a href="htt
 
 ## What is Dify?
 
-<a href="https://dify.ai/" target="_blank" rel="noopener nofollow">Dify</a> is a no-code platform that allows cross-functional teams to build AI agents rapidly and collaboratively. It supports **LLM-based workflows** and can integrate **Backend-as-a-Service (BaaS)** APIs and tools.
+<a href="https://dify.ai/" target="_blank" rel="noopener nofollow">
+  Dify
+</a>
+is a no-code platform that allows cross-functional teams to build AI agents
+rapidly and collaboratively. It supports **LLM-based workflows** and can
+integrate **Backend-as-a-Service (BaaS)** APIs and tools.
 
 ![Dify AI - No-code AI Agent Builder](/static/blog/crewai-vs-dify-ai/dify-ai.webp)
 
@@ -156,7 +165,7 @@ _For up-to-date pricing information, we recommend checking <a href="https://dify
 
 ## How to Build a Dify Agent
 
-**Dify.AI** offers two primary methods for creating agents: using pre-built templates or building your own from scratch. 
+**Dify.AI** offers two primary methods for creating agents: using pre-built templates or building your own from scratch.
 
 Both approaches leverage Dify's visual interface, requiring no coding.
 
@@ -175,7 +184,7 @@ Both approaches leverage Dify's visual interface, requiring no coding.
 
 This method is ideal for quickly launching applications like content generators, or data analysis tools without starting from scratch.
 
-#### Method 2: Build Your Own Custom **Dify Agent** 
+#### Method 2: Build Your Own Custom **Dify Agent**
 
 ![Build your own custom Dify agent - No-code AI Agent Builder](/static/blog/crewai-vs-dify-ai/dify-ai-custom.webp)
 
@@ -184,9 +193,11 @@ This method is ideal for quickly launching applications like content generators,
 **Dify.AI** provides a dedicated "Agent" application type for creating intelligent assistants. Here's how to build one using Dify's intuitive interface:
 
 1. **Navigate and Create:**
+
    - Go to Dify Studio → Create Application → Select "Agent"
 
 2. **Configure Core Components:**
+
    - **Definition:** Set name and description
    - **Instructions:** Define skills, workflow, and limitations
    - **Tools:** Add knowledge bases, search capabilities, and API integrations
@@ -197,7 +208,7 @@ This method is ideal for quickly launching applications like content generators,
    - Debug using the testing interface
    - Refine instructions and configurations
    - Publish as a web app or API endpoint
-   
+
 <BottomLine
   title="Tip 💡"
   description="Dify supports various application types beyond agents, including Chatbots, Text Generators, Chatflows, and Workflows. Choose the application type that best matches your specific use case - Agents for autonomous reasoning and tool use, Chatbots for conversation, Text Generators for content creation, and Workflows for automation."
@@ -220,10 +231,10 @@ _For the most up-to-date instructions, please check <a href="https://docs.dify.a
 
 ## How to Monitor Your CrewAI or Dify Agents
 
-As you build increasingly complex systems such as agents or complex LLM workflows, monitoring and tracing become critical. 
+As you build increasingly complex systems such as agents or complex LLM workflows, monitoring and tracing become critical.
 
 Tools like <a href="https://docs.helicone.ai/features/sessions" target="_blank" 
-rel="noopener">Helicone's Sessions</a> provide real-time traces and model performance monitoring for both CrewAI and Dify projects. Here's what Sessions look like - companies use Sessions frequently to narrow down errors in a complex LLM workflow, and identify performance improvements. 
+rel="noopener">Helicone's Sessions</a> provide real-time traces and model performance monitoring for both CrewAI and Dify projects. Here's what Sessions look like - companies use Sessions frequently to narrow down errors in a complex LLM workflow, and identify performance improvements.
 
 ![Helicone AI - Trace your agentic workflow with ease](/static/blog/crewai-vs-dify-ai/helicone-sessions.webp)
 
@@ -231,7 +242,7 @@ Integrating Helicone is simple:
 
 ### Step 1: Create a <a href="https://www.helicone.ai/signup" target="_blank" rel="noopener">Helicone account</a>
 
-Getting started is free. You get 10,000 logs/month and access to enterprise-grade features for comprehensive monitoring. 
+Getting started is free. You get 10,000 logs/month and access to enterprise-grade features for comprehensive monitoring.
 
 ### Step 2: Generate an API key
 
@@ -259,7 +270,8 @@ _For detailed documentation, please visit <a href="https://docs.helicone.ai/othe
 
 ![Helicone AI - The Best LLM Agent Monitoring Platform](/static/blog/crewai-vs-dify-ai/dashboard.webp)
 
-Once integrated, Helicone provides powerful monitoring capabilities for both your CrewAI workflows and Dify applications, where you can: 
+Once integrated, Helicone provides powerful monitoring capabilities for both your CrewAI workflows and Dify applications, where you can:
+
 - Track token usage and costs across agents
 - Monitor latency and performance metrics
 - View detailed conversation logs
@@ -277,12 +289,12 @@ Once integrated, Helicone provides powerful monitoring capabilities for both you
 
 ## Bottom Line
 
-When choosing between **Dify vs CrewAI**, think about your team's technical capabilities, project complexity, and deployment requirements. In summary: 
+When choosing between **Dify vs CrewAI**, think about your team's technical capabilities, project complexity, and deployment requirements. In summary:
 
 - **CrewAI** excels for developers building complex, role-based agent systems who need deep customization and don't mind writing code.
 - **Dify.AI** shines for teams seeking rapid development through a no-code interface, particularly those with mixed technical expertise.
 
-We encourage you to explore <a href="https://www.helicone.ai/blog/ai-agent-builders" target="_blank" rel="noopener">other AI agent building platforms</a> such as AutoGen and LangChain—who knows, you might find them a better fit for your use case! 
+We encourage you to explore <a href="https://www.helicone.ai/blog/ai-agent-builders" target="_blank" rel="noopener">other AI agent building platforms</a> such as AutoGen and LangChain—who knows, you might find them a better fit for your use case!
 
 ### Other useful comparisons:
 
@@ -308,31 +320,39 @@ We encourage you to explore <a href="https://www.helicone.ai/blog/ai-agent-build
     6 Awesome Open-Source AI Agent Frameworks
   </a>
 
-<FAQ items={[
-  {
-    question: "What is the main difference between CrewAI vs Dify?",
-    answer: "CrewAI is a code-based framework that excels at building sophisticated multi-agent systems with defined roles and complex interactions. Dify.AI is a no-code platform that prioritizes accessibility and rapid development through visual interfaces and templates."
-  },
-  {
-    question: "Which is better for beginners, Dify or CrewAI?",
-    answer: "Dify.AI is generally better for beginners due to its no-code interface and pre-built templates. CrewAI requires programming knowledge but offers more customization for developers."
-  },
-  {
-    question: "Can I build multi-agent systems with Dify.AI?",
-    answer: "Yes, Dify offers multi-agent capabilities, though these are more limited than CrewAI's advanced multi-agent orchestration capabilities."
-  },
-  {
-    question: "How do CrewAI pricing plans compare to Dify.AI?",
-    answer: "CrewAI starts with a free tier and offers paid plans starting at $29/month for Pro features. Dify.AI also has a free Sandbox plan and paid options starting at $59/month for Professional features."
-  },
-  {
-    question: "What are the best Dify.AI alternatives?",
-    answer: "Top Dify.AI alternative frameworks include Langflow, Flowise, LlamaIndex, and for broader automation capabilities, Make."
-  },
-  {
-    question: "How do Dify vs AutoGen compare for code execution?",
-    answer: "AutoGen provides significantly more robust code execution capabilities, including debugging and error handling. Dify offers basic code execution through DifySandbox but is more limited for complex computational tasks."
-  }
-]} />
+<FAQ
+  items={[
+    {
+      question: "What is the main difference between CrewAI vs Dify?",
+      answer:
+        "CrewAI is a code-based framework that excels at building sophisticated multi-agent systems with defined roles and complex interactions. Dify.AI is a no-code platform that prioritizes accessibility and rapid development through visual interfaces and templates.",
+    },
+    {
+      question: "Which is better for beginners, Dify or CrewAI?",
+      answer:
+        "Dify.AI is generally better for beginners due to its no-code interface and pre-built templates. CrewAI requires programming knowledge but offers more customization for developers.",
+    },
+    {
+      question: "Can I build multi-agent systems with Dify.AI?",
+      answer:
+        "Yes, Dify offers multi-agent capabilities, though these are more limited than CrewAI's advanced multi-agent orchestration capabilities.",
+    },
+    {
+      question: "How do CrewAI pricing plans compare to Dify.AI?",
+      answer:
+        "CrewAI starts with a free tier and offers paid plans starting at $29/month for Pro features. Dify.AI also has a free Sandbox plan and paid options starting at $59/month for Professional features.",
+    },
+    {
+      question: "What are the best Dify.AI alternatives?",
+      answer:
+        "Top Dify.AI alternative frameworks include Langflow, Flowise, LlamaIndex, and for broader automation capabilities, Make.",
+    },
+    {
+      question: "How do Dify vs AutoGen compare for code execution?",
+      answer:
+        "AutoGen provides significantly more robust code execution capabilities, including debugging and error handling. Dify offers basic code execution through DifySandbox but is more limited for complex computational tasks.",
+    },
+  ]}
+/>
 
 <Questions />

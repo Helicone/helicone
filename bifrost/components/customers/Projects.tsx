@@ -1,6 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { clsx } from "@/utils/clsx";
-import { ArrowUpRight, Brush, Building2, Code, GraduationCap, MessageSquareHeart, Sparkles, HeartPulse, Car } from "lucide-react";
+import {
+  ArrowUpRight,
+  Brush,
+  Building2,
+  Code,
+  GraduationCap,
+  MessageSquareHeart,
+  Sparkles,
+  HeartPulse,
+  Car,
+} from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 interface ProjectTag {
@@ -13,37 +23,37 @@ const TAGS: Record<string, ProjectTag> = {
   tech: {
     name: "Tech",
     href: "",
-    icon: <Code className="size-5 mr-2" />
+    icon: <Code className="mr-2 size-5" />,
   },
   marketing: {
     name: "Digital Marketing",
     href: "",
-    icon: <Brush className="size-5 mr-2" />
+    icon: <Brush className="mr-2 size-5" />,
   },
   education: {
     name: "Education",
     href: "",
-    icon: <GraduationCap className="size-5 mr-2" />
+    icon: <GraduationCap className="mr-2 size-5" />,
   },
   healthcare: {
     name: "Healthcare",
     href: "",
-    icon: <HeartPulse className="size-5 mr-2" />
+    icon: <HeartPulse className="mr-2 size-5" />,
   },
   civictech: {
     name: "Civic Technology",
     href: "",
-    icon: <Building2 className="size-5 mr-2" />
+    icon: <Building2 className="mr-2 size-5" />,
   },
   automotive: {
     name: "Automotive",
     href: "",
-    icon: <Car className="size-5 mr-2" />
+    icon: <Car className="mr-2 size-5" />,
   },
   customersupport: {
     name: "Customer Support",
     href: "",
-    icon: <MessageSquareHeart className="size-5 mr-2" />
+    icon: <MessageSquareHeart className="mr-2 size-5" />,
   },
 };
 
@@ -175,12 +185,12 @@ const projects: Project[] = [
 
 export function Projects() {
   return (
-    <div className="flex flex-col max-w-5xl mx-auto gap-8 py-16">
-      <div className="relative w-full flex flex-col gap-4 items-center">
+    <div className="mx-auto flex max-w-5xl flex-col gap-8 py-16">
+      <div className="relative flex w-full flex-col items-center gap-4">
         <h2 className="text-3xl font-bold tracking-tight">
           Community Projects
         </h2>
-        <p className="text-sm sm:text-lg text-center text-accent-foreground">
+        <p className="text-accent-foreground text-center text-sm sm:text-lg">
           Products built with Helicone, by our amazing
           <br />
           community of developers.
@@ -191,7 +201,7 @@ export function Projects() {
             target="_blank"
             rel="noopener"
           >
-            <Sparkles className="size-4 mr-2" />
+            <Sparkles className="mr-2 size-4" />
             Share Your Project
           </Link>
         </Button>
@@ -201,35 +211,31 @@ export function Projects() {
       {/* <ProjectFilter tags={allTags} /> */}
 
       {/* Project grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-4 px-4 sm:grid-cols-2 sm:px-6 md:grid-cols-3 lg:px-8">
         {projects.map((project, i) => {
           return (
-            <div
-              className="flex flex-col h-full gap-4 items-left"
-              key={i}
-            >
+            <div className="items-left flex h-full flex-col gap-4" key={i}>
               <Link
                 id="featured"
-                className="flex flex-col gap-4 w-full h-full bg-gray-50 hover:bg-brand/10 transition-all duration-200 rounded-xl py-6 px-5 group"
+                className="hover:bg-brand/10 group flex h-full w-full flex-col gap-4 rounded-xl bg-gray-50 px-5 py-6 transition-all duration-200"
                 href={project.href}
                 key={i}
                 target="_blank"
               >
                 {/* Each Project card */}
-                <div className="flex flex-col justify-between h-full w-full text-left gap-8">
+                <div className="flex h-full w-full flex-col justify-between gap-8 text-left">
                   {/* Image and usage */}
                   <div className="flex flex-col gap-6">
                     <div className="flex items-start justify-between">
-
                       <Image
                         src={project.imageHref}
                         alt={project.title}
                         width={150}
                         height={100}
-                        className="grayscale object-contain"
+                        className="object-contain grayscale"
                       />
                       {/* Make arrow appear on hover */}
-                      <ArrowUpRight className="size-4 text-accent-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                      <ArrowUpRight className="text-accent-foreground size-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
                     </div>
                     <p className="text-muted-foreground text-sm font-normal leading-normal">
                       {'"'}
@@ -238,14 +244,13 @@ export function Projects() {
                     </p>
                   </div>
                   {/* Tags */}
-                  <div className="flex items-center justify-between gap-2 overflow-hidden ">
-
+                  <div className="flex items-center justify-between gap-2 overflow-hidden">
                     {/* Industry tag */}
                     {project.tags.map((tag, index) => (
                       <span
                         key={index}
                         className={clsx(
-                          "text-xs font-medium flex flex-row text-accent-foreground items-center gap"
+                          "text-accent-foreground gap flex flex-row items-center text-xs font-medium"
                         )}
                       >
                         {tag.icon}
@@ -255,12 +260,11 @@ export function Projects() {
 
                     {/* Open Source tag */}
                     {project.isOpenSourced && (
-                      <span className="bg-slate-200 text-accent-foreground rounded-lg px-3 py-1 text-xs font-medium">
+                      <span className="text-accent-foreground rounded-lg bg-slate-200 px-3 py-1 text-xs font-medium">
                         Open-Source
                       </span>
                     )}
                   </div>
-
                 </div>
               </Link>
             </div>

@@ -29,9 +29,7 @@ Navigate to the [webhooks page](https://us.helicone.ai/webhooks) and add your we
 
 ![webhook name](/images/webhooks/webhook-name.webp)
 
-<Note>
-Your webhook endpoint should accept POST requests.
-</Note>
+<Note>Your webhook endpoint should accept POST requests.</Note>
 
 </Step>
 
@@ -55,13 +53,14 @@ function verifySignature(payload, signature, secret) {
   const hmac = crypto.createHmac("sha256", secret);
   hmac.update(JSON.stringify(payload));
   const calculatedSignature = hmac.digest("hex");
-  
+
   return crypto.timingSafeEqual(
     Buffer.from(calculatedSignature, "hex"),
     Buffer.from(signature, "hex")
   );
 }
 ```
+
 </Step>
 </Steps>
 
@@ -71,17 +70,17 @@ Configure your webhook behavior through the [dashboard](https://us.helicone.ai/w
 
 ### Basic Settings
 
-| Setting | Description | Default |
-|---------|-------------|---------|
-| **Destination URL** | URL where webhook payloads are sent | None |
-| **Sample Rate** | Percentage of requests that trigger webhooks (0-100) | 100% |
-| **Include Data** | Include enhanced metadata and S3 URLs | Enabled |
+| Setting             | Description                                          | Default |
+| ------------------- | ---------------------------------------------------- | ------- |
+| **Destination URL** | URL where webhook payloads are sent                  | None    |
+| **Sample Rate**     | Percentage of requests that trigger webhooks (0-100) | 100%    |
+| **Include Data**    | Include enhanced metadata and S3 URLs                | Enabled |
 
 ### Advanced Settings
 
-| Setting | Description | Default |
-|---------|-------------|---------|
-| **Property Filters** | Only send webhooks for requests with specific properties | None |
+| Setting              | Description                                              | Default |
+| -------------------- | -------------------------------------------------------- | ------- |
+| **Property Filters** | Only send webhooks for requests with specific properties | None    |
 
 <AccordionGroup>
 <Accordion title="Property Filters">
@@ -102,6 +101,7 @@ headers: {
 ```
 
 Only requests matching ALL specified properties will trigger webhooks.
+
 </Accordion>
 
 </AccordionGroup>
@@ -116,19 +116,25 @@ Monitor AI responses for regulatory compliance and policy violations:
 ```javascript
 export default async function handler(req, res) {
   const { request_id, request_response_url, user_id, metadata } = req.body;
-  
+
   // Verify webhook signature
-  if (!verifySignature(req.body, req.headers["helicone-signature"], process.env.WEBHOOK_SECRET)) {
+  if (
+    !verifySignature(
+      req.body,
+      req.headers["helicone-signature"],
+      process.env.WEBHOOK_SECRET
+    )
+  ) {
     return res.status(401).json({ error: "Unauthorized" });
   }
-  
+
   // Fetch complete interaction data
   const response = await fetch(request_response_url);
   const { request, response: llmResponse } = await response.json();
-  
+
   const userMessage = request.messages[0].content;
   const aiResponse = llmResponse.choices[0].message.content;
-  
+
   // Check for PII in user input
   const piiDetected = await detectPII(userMessage);
   if (piiDetected.found) {
@@ -136,10 +142,10 @@ export default async function handler(req, res) {
       requestId: request_id,
       userId: user_id,
       piiTypes: piiDetected.types,
-      content: userMessage
+      content: userMessage,
     });
   }
-  
+
   // Monitor AI response for policy violations
   const policyCheck = await checkCompliancePolicy(aiResponse);
   if (policyCheck.violations.length > 0) {
@@ -147,22 +153,23 @@ export default async function handler(req, res) {
       requestId: request_id,
       violations: policyCheck.violations,
       severity: policyCheck.severity,
-      content: aiResponse
+      content: aiResponse,
     });
   }
-  
+
   // Log compliance metrics
   await complianceLogger.log({
     requestId: request_id,
     timestamp: new Date().toISOString(),
     piiDetected: piiDetected.found,
     policyViolations: policyCheck.violations.length,
-    complianceScore: policyCheck.score
+    complianceScore: policyCheck.score,
   });
-  
+
   return res.status(200).json({ message: "Compliance check completed" });
 }
 ```
+
 </Tab>
 
 <Tab title="Data Pipeline">
@@ -171,11 +178,11 @@ Stream LLM data to external systems:
 ```javascript
 export default async function handler(req, res) {
   const { request_id, request_response_url, user_id, model } = req.body;
-  
+
   // Fetch complete interaction data
   const response = await fetch(request_response_url);
   const fullData = await response.json();
-  
+
   // Transform data for your analytics system
   const analyticsEvent = {
     id: request_id,
@@ -184,24 +191,25 @@ export default async function handler(req, res) {
     timestamp: new Date().toISOString(),
     prompt: fullData.request.messages[0].content,
     response: fullData.response.choices[0].message.content,
-    metadata: req.body.metadata
+    metadata: req.body.metadata,
   };
-  
+
   // Send to your data pipeline
   await Promise.all([
     // Send to analytics platform
     analytics.track(analyticsEvent),
-    
+
     // Store in data warehouse
     dataWarehouse.store(analyticsEvent),
-    
+
     // Update real-time dashboards
-    dashboards.updateMetrics(analyticsEvent)
+    dashboards.updateMetrics(analyticsEvent),
   ]);
-  
+
   return res.status(200).json({ message: "Data processed" });
 }
 ```
+
 </Tab>
 </Tabs>
 
@@ -212,6 +220,7 @@ export default async function handler(req, res) {
 Webhooks deliver structured data about completed LLM requests:
 
 **Standard payload:**
+
 ```json
 {
   "request_id": "550e8400-e29b-41d4-a716-446655440000",
@@ -222,11 +231,12 @@ Webhooks deliver structured data about completed LLM requests:
 ```
 
 **Enhanced payload (when `include_data` is enabled):**
+
 ```json
 {
   "request_id": "550e8400-e29b-41d4-a716-446655440000",
   "user_id": "user-123",
-  "request_body": "truncated-request-data", 
+  "request_body": "truncated-request-data",
   "response_body": "truncated-response-data",
   "request_response_url": "https://s3-url-containing-full-data",
   "model": "gpt-4o-mini",
@@ -255,7 +265,7 @@ console.log("Model:", request.model);
 console.log("Messages:", request.messages);
 console.log("Parameters:", request.temperature, request.max_tokens);
 
-// Access full response data  
+// Access full response data
 console.log("Response:", llmResponse.choices[0].message.content);
 console.log("Usage:", llmResponse.usage);
 console.log("Finish reason:", llmResponse.choices[0].finish_reason);
@@ -264,12 +274,13 @@ console.log("Finish reason:", llmResponse.choices[0].finish_reason);
 ### Security Best Practices
 
 **Always verify webhook signatures:**
+
 ```javascript
 function verifyWebhookSignature(payload, signature, secret) {
   const hmac = crypto.createHmac("sha256", secret);
   hmac.update(JSON.stringify(payload));
   const calculatedSignature = hmac.digest("hex");
-  
+
   return crypto.timingSafeEqual(
     Buffer.from(calculatedSignature, "hex"),
     Buffer.from(signature, "hex")
@@ -291,13 +302,16 @@ if (!isValid) {
 ### Performance Considerations
 
 **URL expiration:**
+
 - `request_response_url` expires after 30 minutes
 - Always use `request_response_url` for complete data
 
 **Webhook timeouts:**
+
 - Webhook delivery times out after 2 minutes
 
 **Payload size limits:**
+
 - Request/response bodies are truncated at 10KB in webhook payload
 
 ## Related Features
@@ -307,12 +321,20 @@ if (!isValid) {
 Score LLM responses automatically via webhooks for quality monitoring
 </Card>
 
-<Card title="Custom Properties" icon="tag" href="/features/advanced-usage/custom-properties">
-Add metadata to requests for filtering and organizing webhook deliveries
+<Card
+  title="Custom Properties"
+  icon="tag"
+  href="/features/advanced-usage/custom-properties"
+>
+  Add metadata to requests for filtering and organizing webhook deliveries
 </Card>
 
-<Card title="User Metrics" icon="chart-line" href="/features/advanced-usage/user-metrics">
-Track per-user usage patterns and costs via webhook data
+<Card
+  title="User Metrics"
+  icon="chart-line"
+  href="/features/advanced-usage/user-metrics"
+>
+  Track per-user usage patterns and costs via webhook data
 </Card>
 
 <Card title="Local Testing" icon="laptop" href="/features/webhooks-testing">

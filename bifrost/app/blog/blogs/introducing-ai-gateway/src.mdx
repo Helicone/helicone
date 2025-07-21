@@ -12,11 +12,11 @@ npx @helicone/ai-gateway
 ```typescript
 // Same code, any provider
 const openai = new OpenAI({
-  baseURL: "http://localhost:8080/ai"
+  baseURL: "http://localhost:8080/ai",
 });
 
 const response = await openai.chat.completions.create({
-  model: "anthropic/claude-3-sonnet"  // Route to Claude or any other model via OpenAI syntax
+  model: "anthropic/claude-3-sonnet", // Route to Claude or any other model via OpenAI syntax
 });
 ```
 
@@ -46,7 +46,7 @@ The Helicone AI Gateway is our answer. A lightweight Rust router inspired by NGI
 
 NGINX didn't win because it had the best marketing. It won because it was built right - performant, reliable, and boring. Redis didn't become the default cache because of features. It became default because it just worked, everywhere, for everyone.
 
-We're applying the same principles to AI routing. 
+We're applying the same principles to AI routing.
 
 - Rust for performance that doesn't degrade
 - Self-hosting so you never depend on our uptime

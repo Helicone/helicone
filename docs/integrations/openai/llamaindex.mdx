@@ -45,14 +45,13 @@ import { strings } from "/snippets/strings.mdx";
       )
       ```
     </CodeGroup>
+
   </Step>
 
-  <Step title={strings.useTheSDK("LlamaIndex")}>
-    ```python python
-      response = OpenAI().complete("What is the meaning of life?")
-      print(response)
-    ```
-  </Step>
+<Step title={strings.useTheSDK("LlamaIndex")}>
+  ```python python response = OpenAI().complete("What is the meaning of life?")
+  print(response) ```
+</Step>
 
   <Step title={strings.verifyInHelicone}>
     <div dangerouslySetInnerHTML={{ __html: strings.verifyInHeliconeDesciption("OpenAI") }} />
@@ -79,5 +78,5 @@ import { strings } from "/snippets/strings.mdx";
     vertical
   >
     {strings.environmentTrackingCookbookDescription}
-    </Card>
+  </Card>
 </CardGroup>

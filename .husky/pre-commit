@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Check formatting before commit
+echo "🎨 Checking code formatting..."
+yarn format:check
+
+# Check if formatting check passed
+if [ $? -ne 0 ]; then
+  echo "❌ Code formatting check failed!"
+  echo "💡 Run 'yarn format' to fix formatting issues and try committing again."
+  exit 1
+fi
+
+echo "✅ Code formatting check passed!"

@@ -201,9 +201,8 @@ export class EvaluatorController extends Controller {
     const onlineEvalStore = new OnlineEvalStore(
       request.authParams.organizationId
     );
-    const result = await onlineEvalStore.getOnlineEvaluatorsByEvaluatorId(
-      evaluatorId
-    );
+    const result =
+      await onlineEvalStore.getOnlineEvaluatorsByEvaluatorId(evaluatorId);
 
     if (result.error || !result.data) {
       this.setStatus(500);
@@ -279,9 +278,8 @@ export class EvaluatorController extends Controller {
     const onlineEvalStore = new OnlineEvalStore(
       request.authParams.organizationId
     );
-    const result = await onlineEvalStore.deleteOnlineEvaluator(
-      onlineEvaluatorId
-    );
+    const result =
+      await onlineEvalStore.deleteOnlineEvaluator(onlineEvaluatorId);
     if (result.error) {
       this.setStatus(500);
       return err(result.error || "Failed to delete online evaluator");

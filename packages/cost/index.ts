@@ -128,7 +128,7 @@ function caseForCost(
   table: string,
   multiple: number,
   useDefaultCost: boolean = false,
-  optimized: boolean = false,
+  optimized: boolean = false
 ) {
   return `
   CASE
@@ -223,7 +223,7 @@ export function clickhousePriceCalcNonAggregated(
   totalChunks: number = 1,
   chunk: number = 0,
   useDefaultCost: boolean = true,
-  optimized: boolean = false,
+  optimized: boolean = false
 ) {
   const providersWithCosts = providers.filter(
     (p) => p.costs && defaultProvider.provider !== p.provider
@@ -232,7 +232,10 @@ export function clickhousePriceCalcNonAggregated(
     throw new Error("Default provider does not have costs");
   }
 
-  const cappedTotalChunks = Math.max(1, Math.min(totalChunks, providersWithCosts.length));
+  const cappedTotalChunks = Math.max(
+    1,
+    Math.min(totalChunks, providersWithCosts.length)
+  );
   const cappedChunk = Math.min(chunk, cappedTotalChunks - 1);
 
   let providersToProcess = providersWithCosts;
@@ -274,7 +277,6 @@ export function clickhousePriceCalcNonAggregated(
 }
 
 export function clickhousePriceCalc(table: string, inDollars: boolean = true) {
-
   const providersWithCosts = providers.filter(
     (p) => p.costs && defaultProvider.provider !== p.provider
   );

@@ -21,7 +21,7 @@ export default function FunctionCallBox({
 
   // Find the first function call within the contentArray
   const functionCallMessage = message.contentArray.find(
-    (item) => item._type === "function" || item._type === "functionCall"
+    (item) => item._type === "function" || item._type === "functionCall",
   );
 
   // If no function call message is found, or if it doesn't have tool_calls, return null
@@ -32,7 +32,7 @@ export default function FunctionCallBox({
   // Render the tool calls using JsonRenderer
   return (
     <div
-      className={`w-full px-4 group relative grid h-full focus-within:border-transparent focus-within:ring-2 focus-within:ring-heliblue rounded-xl bg-white dark:bg-black ${
+      className={`group relative grid h-full w-full rounded-xl bg-white px-4 focus-within:border-transparent focus-within:ring-2 focus-within:ring-heliblue dark:bg-black ${
         disabled ? "opacity-50" : ""
       }`}
     >

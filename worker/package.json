@@ -35,6 +35,8 @@
     "deploy": "wrangler publish",
     "lint": "tsc && eslint --ext .js,.jsx,.ts,.tsx ./src --max-warnings=0",
     "lint-fix": "eslint --ext .js,.jsx,.ts,.tsx ./src --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "jest"
   },
   "dependencies": {

@@ -9,7 +9,7 @@ export const FunctionCall: React.FC<{ message: Message }> = ({ message }) => {
     return (
       <div className="flex flex-col space-y-2">
         {message.content !== null && message.content !== "" && (
-          <div className="text-xs whitespace-pre-wrap font-semibold">
+          <div className="whitespace-pre-wrap text-xs font-semibold">
             {typeof message.content === "string" ? message.content : ""}
           </div>
         )}
@@ -17,18 +17,18 @@ export const FunctionCall: React.FC<{ message: Message }> = ({ message }) => {
           tool.name && typeof tool.name === "string" ? (
             <pre
               key={index}
-              className="text-xs whitespace-pre-wrap rounded-lg overflow-auto"
+              className="overflow-auto whitespace-pre-wrap rounded-lg text-xs"
             >
               {tool.name}(<JsonRenderer data={tool.arguments} />)
             </pre>
-          ) : null
+          ) : null,
         )}
       </div>
     );
   } else if (Array.isArray(message.content)) {
     const toolUses = message.content.filter(
       (
-        item
+        item,
       ): item is {
         type: "tool_use";
         name: string;
@@ -39,12 +39,12 @@ export const FunctionCall: React.FC<{ message: Message }> = ({ message }) => {
         "type" in item &&
         item.type === "tool_use" &&
         "name" in item &&
-        "input" in item
+        "input" in item,
     );
     return (
       <div className="flex flex-col space-y-2">
         {toolUses.map((tool, index) =>
-          renderFunctionCall(tool.name, JSON.stringify(tool.input), index)
+          renderFunctionCall(tool.name, JSON.stringify(tool.input), index),
         )}
       </div>
     );

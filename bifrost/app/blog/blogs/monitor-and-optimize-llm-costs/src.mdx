@@ -1,4 +1,4 @@
-If you're building AI applications with large language models, you've likely experienced that moment of dread when checking your OpenAI or Anthropic bill. 
+If you're building AI applications with large language models, you've likely experienced that moment of dread when checking your OpenAI or Anthropic bill.
 
 You're not alone.
 
@@ -8,46 +8,45 @@ Building AI applications doesn't have to break the bank. We have 5 tips to help 
 
 ## The Reality of LLM Costs in Production
 
-Building an AI app might seem straightforward at first. You have powerful models like Claude 3.5 Sonnet and Code Copilots like Cursor at your fingertips. 
+Building an AI app might seem straightforward at first. You have powerful models like Claude 3.5 Sonnet and Code Copilots like Cursor at your fingertips.
 
-But as many developers and startups quickly discover, the reality isn't so simple. 
+But as many developers and startups quickly discover, the reality isn't so simple.
 
 Costs can quickly add up, espeically with even mid-tier models charging significant fees, production-scale applications can become expensive fast.
 
 The common approach of using cheaper models or throwing everything into one prompt often **fails in real-world environments where reliability is critical**. A 99% accuracy rate sounds good in theory, but that 1% failure rate means broken user experiences in production.
 
-Let's take a look at some practical strategies to optimize your LLM spending while maintaining (or even improving) application quality. 
+Let's take a look at some practical strategies to optimize your LLM spending while maintaining (or even improving) application quality.
 
-{/* ## Building AI Apps Isn't as Easy (or Cheap) as You Think
+{/\* ## Building AI Apps Isn't as Easy (or Cheap) as You Think
 
 Creating an AI app might seem straightforward-with powerful models like Claude 3.5 Sonnet and Code Copilots like Cursor at your fingertips, you're ready to take the world by storm.
 
-But as many developers and startups quickly discover, the reality isn't so simple. 
+But as many developers and startups quickly discover, the reality isn't so simple.
 
 Building an AI app isn't necessarily hard, but costs can quickly add up, especially with models like **GPT-4 Turbo charging 1 to 3 cents per 1,000 input/output tokens**.
 
 ## The Hidden Cost of AI Workflows
 
-Sure, you could opt for cheaper models like <a href="https://www.helicone.ai/blog/gpt-4o-mini-vs-claude-3.5-sonnet" rel="noopener" target="_blank">GPT-4o mini</a> or open-source alternatives like Llama or Mistral, throw everything into one API call with <a href="https://www.helicone.ai/blog/prompt-engineering-tools" rel="noopener" target="_blank">excellent prompt engineering</a>, and hope for the best. 
+Sure, you could opt for cheaper models like <a href="https://www.helicone.ai/blog/gpt-4o-mini-vs-claude-3.5-sonnet" rel="noopener" target="_blank">GPT-4o mini</a> or open-source alternatives like Llama or Mistral, throw everything into one API call with <a href="https://www.helicone.ai/blog/prompt-engineering-tools" rel="noopener" target="_blank">excellent prompt engineering</a>, and hope for the best.
 
 However, this approach often **falls short in production environments**.
 
-The non-deterministic nature of LLMs means that even a 99% accuracy rate isn't enough; that 1% failure can break a user's experience. 
+The non-deterministic nature of LLMs means that even a 99% accuracy rate isn't enough; that 1% failure can break a user's experience.
 
 Imagine a major software company operating at this level of reliability—it's simply unacceptable. AI applications today are often unreliable, and this unreliability can be costly.
 
 Whether you're wrestling with bloated API bills or struggling to balance performance with affordability, there are effective strategies to tackle these challenges. Here's how you can keep your AI app costs in check without sacrificing performance.
 
- */}
+\*/}
 
 ![Choosing between cheaper models vs. reliable outputs meme](/static/blog/monitor-and-optimize-llm-costs/meme-1.webp)
 
-
 ## 1. Optimize Prompt Engineering
 
-Optimizing your prompts is one of the simplest yet most effective ways to reduce LLM costs. Inefficient prompts waste tokens and drive up costs. 
+Optimizing your prompts is one of the simplest yet most effective ways to reduce LLM costs. Inefficient prompts waste tokens and drive up costs.
 
-Here are some tips to help you get started: 
+Here are some tips to help you get started:
 
 - Audit your longest prompts for unnecessary words
 - Test shorter instructions that achieve the same results
@@ -67,21 +66,21 @@ Instead, you can optimize it to:
 This shorter prompt conveys the same information while using fewer tokens, directly translating to cost savings.
 
 <CallToAction
-title="💡 What developers say about Helicone's Prompts:"
-description="The ability to test prompt variations on production traffic without touching a line of code is magical. It feels like we're cheating; it's just that good!"
-primaryButtonText="Try Helicone's Prompts"
-primaryButtonLink="https://us.helicone.ai/prompts"
-secondaryButtonText="Read the Docs"
-secondaryButtonLink="https://docs.helicone.ai/features/prompts/editor"
+  title="💡 What developers say about Helicone's Prompts:"
+  description="The ability to test prompt variations on production traffic without touching a line of code is magical. It feels like we're cheating; it's just that good!"
+  primaryButtonText="Try Helicone's Prompts"
+  primaryButtonLink="https://us.helicone.ai/prompts"
+  secondaryButtonText="Read the Docs"
+  secondaryButtonLink="https://docs.helicone.ai/features/prompts/editor"
 />
 
 ## 2. Implement Response Caching Strategically
 
-For deterministic LLM operations, caching can dramatically reduce costs and latency. Response caching involves storing and reusing previously generated responses, so you can avoid redundant requests to the LLM. 
+For deterministic LLM operations, caching can dramatically reduce costs and latency. Response caching involves storing and reusing previously generated responses, so you can avoid redundant requests to the LLM.
 
 ### When to use caching
 
-Caching is particularly useful for applications with: 
+Caching is particularly useful for applications with:
 
 - Frequently repeated queries
 - Stable content that doesn't require fresh generation
@@ -90,7 +89,7 @@ Caching is particularly useful for applications with:
 
 ### Implementation example
 
-Helicone's <a href="https://docs.helicone.ai/features/advanced-usage/caching" rel="noopener" target="_blank">LLM caching</a> feature can be implemented without code changes and typically reduces costs by **15-30%** for most applications. 
+Helicone's <a href="https://docs.helicone.ai/features/advanced-usage/caching" rel="noopener" target="_blank">LLM caching</a> feature can be implemented without code changes and typically reduces costs by **15-30%** for most applications.
 
 ```python
 openai.api_base = "https://oai.helicone.ai/v1"
@@ -102,7 +101,7 @@ client.chat.completions.create(
     "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
     "Helicone-Cache-Enabled": "true", # mandatory, enable caching
     "Cache-Control": "max-age = 2592000", # optional, cache for 30 days
-    "Helicone-Cache-Bucket-Max-Size": "3", # optional, store up to 3 variations 
+    "Helicone-Cache-Bucket-Max-Size": "3", # optional, store up to 3 variations
     "Helicone-Cache-Seed": "1", # optional deterministic seed
   }
 )
@@ -115,17 +114,17 @@ client.chat.completions.create(
 
 ## 3. Use Task-Specific, Smaller Models
 
-Not every task requires the most powerful (and expensive) model. Instead, match the model to the task complexity. 
+Not every task requires the most powerful (and expensive) model. Instead, match the model to the task complexity.
 
 ### Model selection guide
 
-| Task Complexity | Recommended Model Tier | Cost Efficiency | Sample Use Cases |
-| --------------- | ---------------------- | --------------- | ---------------- |
-| Simple text completion | GPT-4o Mini / Mistral Large 2 | High | Classification, sentiment analysis |
-| Standard reasoning | Claude 3.7 Sonnet / Llama 3.1 | Medium | Content generation, summarization |
-| Complex analysis | GPT-4.5 / Gemini 2.5 Pro Experimental | Low | Multi-step reasoning, creative tasks |
+| Task Complexity        | Recommended Model Tier                | Cost Efficiency | Sample Use Cases                     |
+| ---------------------- | ------------------------------------- | --------------- | ------------------------------------ |
+| Simple text completion | GPT-4o Mini / Mistral Large 2         | High            | Classification, sentiment analysis   |
+| Standard reasoning     | Claude 3.7 Sonnet / Llama 3.1         | Medium          | Content generation, summarization    |
+| Complex analysis       | GPT-4.5 / Gemini 2.5 Pro Experimental | Low             | Multi-step reasoning, creative tasks |
 
-By routing requests to the appropriate model tier, you can significantly reduce costs without sacrificing quality for simpler tasks. 
+By routing requests to the appropriate model tier, you can significantly reduce costs without sacrificing quality for simpler tasks.
 
 ### Fine-tuning open-source models
 
@@ -139,7 +138,6 @@ For example, if you're using an LLM for customer support, fine-tuning it on a da
 
 Tools like <a href="https://openpipe.ai/" rel="noopener" target="_blank">OpenPipe</a> simplify fine-tuning open-source models. By replacing the OpenAI SDK with OpenPipe's, you can fine-tune a cheaper model like Mistral 7B, resulting in up to an <a href="https://www.reddit.com/r/ArtificialInteligence/comments/1b92hlk/how_i_reduced_our_llm_costs_by_over_85/" rel="noopener noreferrer nofollow" target="_blank">85% cost reduction</a>.
 
-
 <BottomLine
   title="Finding the most cost-effective model 💡"
   description="Define your application's specific requirements first, then test multiple models to compare performance and cost per token. Look for the optimal balance between cost and capability, and consider fine-tuning cheaper models for specialized tasks to maximize savings while maintaining quality."
@@ -150,6 +148,7 @@ Tools like <a href="https://openpipe.ai/" rel="noopener" target="_blank">OpenPip
 **Retrieval-Augmented Generation (RAG)** can significantly reduce token usage by retrieving only the most relevant information before sending to the LLM.
 
 ### How RAG reduces costs
+
 RAG combines information retrieval with language generation by:
 
 1. Searching a pre-indexed database to find relevant snippets
@@ -171,7 +170,6 @@ Having a deep understanding of the cost patterns in your LLM application is cruc
 
 Helicone takes a simple approach with a 1-line integration that works across any models and providers of your choice. Some alternatives include <a href="http://helicone.ai/blog/langsmith-vs-helicone" rel="noopener" target="_blank">LangSmith</a>, which has steeper learning curves, closed-source limitations, and rigid pricing structures. Others like <a href="http://helicone.ai/blog/weights-and-biases" rel="noopener" target="_blank">Weights & Biases</a> are more generalized and not specifically tailored for LLMs.
 
-
 <BottomLine
   title="How often should I monitor and optimize my LLM costs? 💰"
   description="Make LLM cost reviews a regular part of your workflow, ideally monthly or quarterly. Analyze usage patterns, find high-cost areas and implement targeted optimizations like fine-tuning models, improving prompts, or switching to more cost-effective models as your application scales."
@@ -181,26 +179,26 @@ Helicone takes a simple approach with a 1-line integration that works across any
 
 ## Setting Cost Benchmarks
 
-Once you have observability in place, establish benchmarks for what constitutes "reasonable" costs for different types of LLM operations: 
+Once you have observability in place, establish benchmarks for what constitutes "reasonable" costs for different types of LLM operations:
 
-| Operation Type | Target Cost Range | Optimization Priority | Recommended Strategies |
-| -------------- | ----------------- | --------------------- | ---------------------- |
-| Content generation | $0.02-0.05 per request | Medium | Optimize prompts |
-| Classification tasks | $0.005-0.01 per request | Low | Fine-tuned small models |
-| Complex reasoning | $0.10-0.30 per request | High 🔺 | RAG + caching |
-| RAG queries | $0.03-0.08 per request | High 🔺 | Vector database optimization |
+| Operation Type       | Target Cost Range       | Optimization Priority | Recommended Strategies       |
+| -------------------- | ----------------------- | --------------------- | ---------------------------- |
+| Content generation   | $0.02-0.05 per request  | Medium                | Optimize prompts             |
+| Classification tasks | $0.005-0.01 per request | Low                   | Fine-tuned small models      |
+| Complex reasoning    | $0.10-0.30 per request  | High 🔺               | RAG + caching                |
+| RAG queries          | $0.03-0.08 per request  | High 🔺               | Vector database optimization |
 
 These benchmarks give your team targets to aim for and help prioritize optimization efforts. Your specific numbers may vary based on token usage, but maintaining this kind of tracking system will help you identify cost outliers quickly.
 
 ## Most Effective Tools for LLM Cost Tracking
 
-| Platform | Cost Tracking | Caching | Prompt Management | Integration Complexity |
-|----------|---------------|---------|-------------------|------------------------|
-| Helicone | Comprehensive | Built-in | Advanced | Very Low (1-line change) |
-| <a href="https://www.helicone.ai/blog/langsmith-vs-helicone" rel="noopener" target="_blank">LangSmith</a> | Basic | Limited | Good | Medium |
-| <a href="https://www.helicone.ai/blog/weights-and-biases" rel="noopener" target="_blank">Weights & Biases</a> | Limited | 🆇 | Limited | High |
-| <a href="http://localhost:3002/blog/portkey-vs-helicone" rel="noopener" target="_blank">Portkey</a> | Good | Built-in | Basic | Low |
-| <a href="https://www.helicone.ai/blog/best-langfuse-alternatives" rel="noopener" target="_blank">LangFuse</a> | Good | 🆇 | Good | Medium |
+| Platform                                                                                                      | Cost Tracking | Caching  | Prompt Management | Integration Complexity   |
+| ------------------------------------------------------------------------------------------------------------- | ------------- | -------- | ----------------- | ------------------------ |
+| Helicone                                                                                                      | Comprehensive | Built-in | Advanced          | Very Low (1-line change) |
+| <a href="https://www.helicone.ai/blog/langsmith-vs-helicone" rel="noopener" target="_blank">LangSmith</a>     | Basic         | Limited  | Good              | Medium                   |
+| <a href="https://www.helicone.ai/blog/weights-and-biases" rel="noopener" target="_blank">Weights & Biases</a> | Limited       | 🆇        | Limited           | High                     |
+| <a href="http://localhost:3002/blog/portkey-vs-helicone" rel="noopener" target="_blank">Portkey</a>           | Good          | Built-in | Basic             | Low                      |
+| <a href="https://www.helicone.ai/blog/best-langfuse-alternatives" rel="noopener" target="_blank">LangFuse</a> | Good          | 🆇        | Good              | Medium                   |
 
 Helicone stands out as the simplest solution to track LLM cost and tokens. The platform's focus on both monitoring and optimization tools makes it particularly well-suited for teams looking to control LLM spending.
 
@@ -247,40 +245,51 @@ Remember, the key is to find the right balance between cost-efficiency and perfo
   secondaryButtonLink="https://docs.helicone.ai/integrations/openai/javascript"
 />
 
-<FAQ 
+<FAQ
   items={[
     {
-      question: "How much can I realistically save by implementing these cost optimization techniques?",
-      answer: "Most developers see a 30-50% reduction in LLM costs by implementing prompt optimization and caching alone. Comprehensive implementation of all five strategies can reduce costs by up to 90% in specific use cases."
+      question:
+        "How much can I realistically save by implementing these cost optimization techniques?",
+      answer:
+        "Most developers see a 30-50% reduction in LLM costs by implementing prompt optimization and caching alone. Comprehensive implementation of all five strategies can reduce costs by up to 90% in specific use cases.",
     },
     {
       question: "Which optimization technique provides the fastest results?",
-      answer: "Response caching typically provides the most immediate cost savings with the least effort. By implementing a caching solution like Helicone's, you can see a 15-30% cost reduction almost instantly for applications with repetitive queries."
+      answer:
+        "Response caching typically provides the most immediate cost savings with the least effort. By implementing a caching solution like Helicone's, you can see a 15-30% cost reduction almost instantly for applications with repetitive queries.",
     },
     {
       question: "Do smaller models always perform worse than larger ones?",
-      answer: "Not necessarily. For specific, well-defined tasks, smaller models can actually outperform larger ones, especially when fine-tuned on domain-specific data. The key is matching the model complexity to the task requirements."
+      answer:
+        "Not necessarily. For specific, well-defined tasks, smaller models can actually outperform larger ones, especially when fine-tuned on domain-specific data. The key is matching the model complexity to the task requirements.",
     },
     {
       question: "How can I measure the impact of my cost optimization efforts?",
-      answer: "LLM observability platforms like Helicone provide detailed metrics on token usage, cost per request, and model performance. These tools allow you to track your optimization progress and identify further opportunities for improvement."
+      answer:
+        "LLM observability platforms like Helicone provide detailed metrics on token usage, cost per request, and model performance. These tools allow you to track your optimization progress and identify further opportunities for improvement.",
     },
     {
-      question: "Will optimizing for cost affect the quality of my LLM outputs?",
-      answer: "When done correctly, cost optimization should maintain or even improve output quality. The goal is to eliminate waste (like unnecessarily verbose prompts) and match the right model to each task, rather than compromising on performance."
+      question:
+        "Will optimizing for cost affect the quality of my LLM outputs?",
+      answer:
+        "When done correctly, cost optimization should maintain or even improve output quality. The goal is to eliminate waste (like unnecessarily verbose prompts) and match the right model to each task, rather than compromising on performance.",
     },
     {
-      question: "What are the most important metrics to track for LLM cost optimization?", 
-      answer: "Track tokens per request, cost per request, request frequency by endpoint, and cache hit rates as your core metrics."
-    }, 
+      question:
+        "What are the most important metrics to track for LLM cost optimization?",
+      answer:
+        "Track tokens per request, cost per request, request frequency by endpoint, and cache hit rates as your core metrics.",
+    },
     {
-      question: "What types of requests should never be cached?", 
-      answer: "Requests requiring real-time data, personally identifiable information, or truly random/creative outputs should not be cached."
-    }, 
+      question: "What types of requests should never be cached?",
+      answer:
+        "Requests requiring real-time data, personally identifiable information, or truly random/creative outputs should not be cached.",
+    },
     {
-      question: "What are some effective tools for LLM cost tracking?", 
-      answer: "Helicone is the simplest solution to track LLM cost and tokens. The platform's focus on both monitoring and optimization tools makes it particularly well-suited for teams looking to control LLM spending. Other alternatives include LangSmith, Weights & Biases, Portkey and LangFuse."
-    }
+      question: "What are some effective tools for LLM cost tracking?",
+      answer:
+        "Helicone is the simplest solution to track LLM cost and tokens. The platform's focus on both monitoring and optimization tools makes it particularly well-suited for teams looking to control LLM spending. Other alternatives include LangSmith, Weights & Biases, Portkey and LangFuse.",
+    },
   ]}
 />
 

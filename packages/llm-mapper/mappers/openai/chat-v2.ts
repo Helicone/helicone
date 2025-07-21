@@ -121,11 +121,12 @@ const convertRequestMessages = (
 
   return messages.map((msg, idx): Message => {
     if (msg.tool_calls || (msg as any).function_call) {
-      const convertedToolCalls = msg.tool_calls?.map((toolCall) => ({
-        id: toolCall.id,
-        name: toolCall.function.name,
-        arguments: JSON.parse(toolCall.function.arguments || "{}"),
-      })) || [];
+      const convertedToolCalls =
+        msg.tool_calls?.map((toolCall) => ({
+          id: toolCall.id,
+          name: toolCall.function.name,
+          arguments: JSON.parse(toolCall.function.arguments || "{}"),
+        })) || [];
 
       return {
         _type: "functionCall",

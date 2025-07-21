@@ -81,14 +81,16 @@ const FilterSection = ({
     .filter((model) => !selectedModels.includes(model));
 
   const hasSelections =
-    selectedProviders.length > 0 || selectedModels.length > 0 || searchQuery.length > 0;
+    selectedProviders.length > 0 ||
+    selectedModels.length > 0 ||
+    searchQuery.length > 0;
 
   return (
     <div className="mb-4">
-      <div className="flex justify-between items-center mb-2">
+      <div className="mb-2 flex items-center justify-between">
         <div className="flex gap-2">
           <div className="relative w-full max-w-[20rem]">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
               <Search className="h-4 w-4 text-slate-400" />
             </div>
             <Input
@@ -96,7 +98,7 @@ const FilterSection = ({
               placeholder="Search models and providers..."
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-10 pr-3 py-2 bg-white rounded-md border border-slate-300 text-slate-700 text-xs font-normal leading-tight w-full h-8"
+              className="h-8 w-full rounded-md border border-slate-300 bg-white py-2 pl-10 pr-3 text-xs font-normal leading-tight text-slate-700"
             />
           </div>
           <div className="w-full max-w-[10rem]">
@@ -126,7 +128,7 @@ const FilterSection = ({
             size="sm"
             onClick={() => {
               onClearAll();
-              onSearchChange('');
+              onSearchChange("");
             }}
             className="text-xs text-slate-500 hover:text-slate-700"
           >
@@ -136,34 +138,34 @@ const FilterSection = ({
       </div>
       {hasSelections && (
         <>
-          <div className="flex flex-wrap gap-2 items-center mb-2">
+          <div className="mb-2 flex flex-wrap items-center gap-2">
             {selectedProviders.map((provider) => (
               <span
                 key={provider}
-                className="inline-flex items-center bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full"
+                className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800"
               >
                 {formatProviderName(provider)}
                 <button
                   onClick={() => onRemoveProvider(provider)}
                   className="ml-2 text-slate-500 hover:text-slate-700 focus:outline-none"
                 >
-                  <XCircle className="w-4 h-4" />
+                  <XCircle className="h-4 w-4" />
                 </button>
               </span>
             ))}
           </div>
-          <div className="flex flex-wrap gap-2 items-center mb-2">
+          <div className="mb-2 flex flex-wrap items-center gap-2">
             {selectedModels.map((model) => (
               <span
                 key={model}
-                className="inline-flex items-center bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full"
+                className="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800"
               >
                 {model}
                 <button
                   onClick={() => onRemoveModel(model)}
                   className="ml-2 text-slate-500 hover:text-slate-700 focus:outline-none"
                 >
-                  <XCircle className="w-4 h-4" />
+                  <XCircle className="h-4 w-4" />
                 </button>
               </span>
             ))}
@@ -333,20 +335,23 @@ export default function ModelPriceCalculator({
   const visibleCostData = useMemo(() => {
     let filteredData = costData.filter((data) => {
       // Provider and model filter logic
-      const providerMatch = selectedProviders.length === 0 || selectedProviders.includes(data.provider);
-      const modelMatch = selectedModels.length === 0 || selectedModels.includes(data.model);
-      
+      const providerMatch =
+        selectedProviders.length === 0 ||
+        selectedProviders.includes(data.provider);
+      const modelMatch =
+        selectedModels.length === 0 || selectedModels.includes(data.model);
+
       // Fuzzy search logic
       let searchMatch = true;
       if (searchQuery.trim().length > 0) {
         const query = searchQuery.toLowerCase();
         const providerName = data.provider.toLowerCase();
         const modelName = data.model.toLowerCase();
-        
+
         // Check if search query matches provider or model (fuzzy matching)
         searchMatch = providerName.includes(query) || modelName.includes(query);
       }
-      
+
       return providerMatch && modelMatch && searchMatch;
     });
 
@@ -425,13 +430,13 @@ Optimize your AI API costs:`;
   const getSortIcon = (key: keyof CostData) => {
     if (!sortConfig || sortConfig.key !== key) {
       return (
-        <ChevronDown className="inline-block ml-1 w-4 h-4 text-slate-400" />
+        <ChevronDown className="ml-1 inline-block h-4 w-4 text-slate-400" />
       );
     }
     return sortConfig.direction === "asc" ? (
-      <ChevronUp className="inline-block ml-1 w-4 h-4 text-slate-600" />
+      <ChevronUp className="ml-1 inline-block h-4 w-4 text-slate-600" />
     ) : (
-      <ChevronDown className="inline-block ml-1 w-4 h-4 text-slate-600" />
+      <ChevronDown className="ml-1 inline-block h-4 w-4 text-slate-600" />
     );
   };
 
@@ -445,8 +450,8 @@ Optimize your AI API costs:`;
   };
 
   return (
-    <div className="w-full mx-auto p-4">
-      <div className="max-w-2xl mx-auto text-center mb-8">
+    <div className="mx-auto w-full p-4">
+      <div className="mx-auto mb-8 max-w-2xl text-center">
         <Image
           src="/static/pricing-calc/coins.webp"
           alt="Pricing Calculator Icon"
@@ -455,7 +460,7 @@ Optimize your AI API costs:`;
           quality={100}
           className="mx-auto mb-4 h-auto w-auto max-w-[100px]"
         />
-        <h1 className="text-4xl font-semibold text-slate-700 mb-2">
+        <h1 className="mb-2 text-4xl font-semibold text-slate-700">
           {provider && model ? (
             <>
               {formatProviderName(provider)}{" "}
@@ -467,140 +472,140 @@ Optimize your AI API costs:`;
           )}
           Pricing Calculator
         </h1>
-        <p className="text-slate-500 mb-4">
+        <p className="mb-4 text-slate-500">
           {provider && model
             ? `Calculate the cost of using ${model} with Helicone's free pricing tool.`
             : "Calculate the cost of using AI models with Helicone's free pricing tool."}
         </p>
       </div>
 
-      <div className="max-w-xl mx-auto h-9 flex justify-start items-start gap-4 mb-6">
-        <div className="grow shrink basis-0 h-9 flex justify-start items-center gap-4">
+      <div className="mx-auto mb-6 flex h-9 max-w-xl items-start justify-start gap-4">
+        <div className="flex h-9 shrink grow basis-0 items-center justify-start gap-4">
           <Label
             htmlFor="inputTokens"
-            className="text-black text-sm font-medium leading-tight"
+            className="text-sm font-medium leading-tight text-black"
           >
             Input Tokens
           </Label>
-          <div className="grow shrink basis-0 self-stretch relative">
+          <div className="relative shrink grow basis-0 self-stretch">
             <Input
               id="inputTokens"
               type="number"
               value={inputTokens}
               onChange={(e) => setInputTokens(e.target.value)}
-              className="pl-3 pr-3 py-2 bg-white rounded-md border border-slate-300 text-slate-700 text-sm font-normal leading-tight w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              className="w-full rounded-md border border-slate-300 bg-white py-2 pl-3 pr-3 text-sm font-normal leading-tight text-slate-700 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
             />
           </div>
         </div>
-        <div className="grow shrink basis-0 h-9 flex justify-start items-center gap-2">
+        <div className="flex h-9 shrink grow basis-0 items-center justify-start gap-2">
           <Label
             htmlFor="outputTokens"
-            className="text-black text-sm font-medium leading-tight"
+            className="text-sm font-medium leading-tight text-black"
           >
             Output Tokens
           </Label>
-          <div className="grow shrink basis-0 flex-col justify-start items-start gap-1.5 inline-flex">
-            <div className="self-stretch relative w-full">
+          <div className="inline-flex shrink grow basis-0 flex-col items-start justify-start gap-1.5">
+            <div className="relative w-full self-stretch">
               <Input
                 id="outputTokens"
                 type="number"
                 value={outputTokens}
                 onChange={(e) => setOutputTokens(e.target.value)}
-                className="pl-3 pr-3 py-2 bg-white rounded-md border border-slate-300 text-slate-700 text-sm font-normal leading-tight w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                className="w-full rounded-md border border-slate-300 bg-white py-2 pl-3 pr-3 text-sm font-normal leading-tight text-slate-700 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
               />
             </div>
           </div>
         </div>
         <button
-          className="inline-flex items-center gap-2 px-3 py-2 bg-white text-slate-700 border border-slate-300 rounded-md hover:bg-slate-50 transition-colors duration-100 h-full"
+          className="inline-flex h-full items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-700 transition-colors duration-100 hover:bg-slate-50"
           onClick={handleTwitterShare}
         >
-          <Twitter className="w-4 h-4" />
-          <span className="font-medium text-sm hidden md:block">Share</span>
+          <Twitter className="h-4 w-4" />
+          <span className="hidden text-sm font-medium md:block">Share</span>
         </button>
       </div>
 
-      <div className="max-w-xl mx-auto mb-8">
+      <div className="mx-auto mb-8 max-w-xl">
         {/* Only show the card when provider and model are in the URL/props */}
         {provider && model && selectedModelData ? (
           <Card className="p-4">
-            <CardHeader className="p-0 mb-4 mt-1">
-              <CardTitle className="text-base font-medium leading-none flex items-center gap-2 text-slate-900">
-                <Calculator className="w-4 h-4 text-slate-500 font-medium" />
+            <CardHeader className="mb-4 mt-1 p-0">
+              <CardTitle className="flex items-center gap-2 text-base font-medium leading-none text-slate-900">
+                <Calculator className="h-4 w-4 font-medium text-slate-500" />
                 Model Cost Calculation
               </CardTitle>
-              <div className="flex items-center gap-2 mt-2">
-                <div className="w-4 h-4 relative opacity-10"></div>
-                <div className="text-slate-400 text-sm font-normal leading-tight">
+              <div className="mt-2 flex items-center gap-2">
+                <div className="relative h-4 w-4 opacity-10"></div>
+                <div className="text-sm font-normal leading-tight text-slate-400">
                   {selectedModelData.provider} {selectedModelData.model}
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-0 space-y-3">
-              <div className="flex justify-between items-center pl-2">
-                <span className="text-slate-700 text-sm font-medium leading-tight">
+            <CardContent className="space-y-3 p-0">
+              <div className="flex items-center justify-between pl-2">
+                <span className="text-sm font-medium leading-tight text-slate-700">
                   Total Input Cost
                 </span>
-                <span className="text-slate-500 text-sm font-semibold">
+                <span className="text-sm font-semibold text-slate-500">
                   ${formatCost(selectedModelData.inputCost)}
                 </span>
               </div>
-              <div className="flex justify-between items-center pl-2">
-                <span className="text-slate-400 text-sm font-normal leading-tight pb-2">
+              <div className="flex items-center justify-between pl-2">
+                <span className="pb-2 text-sm font-normal leading-tight text-slate-400">
                   Input Cost/1k Tokens
                 </span>
-                <span className="text-slate-400 text-sm font-normal">
+                <span className="text-sm font-normal text-slate-400">
                   ${formatCost(selectedModelData.inputCostPer1k)}/1k Tokens
                 </span>
               </div>
               <div className="h-[0px] border-t border-slate-100 pt-2"></div>
-              <div className="flex justify-between items-center pl-2">
-                <span className="text-slate-700 text-sm font-medium leading-tight">
+              <div className="flex items-center justify-between pl-2">
+                <span className="text-sm font-medium leading-tight text-slate-700">
                   Total Output Cost
                 </span>
-                <span className="text-slate-500 text-sm font-semibold leading-4">
+                <span className="text-sm font-semibold leading-4 text-slate-500">
                   ${formatCost(selectedModelData.outputCost)}
                 </span>
               </div>
-              <div className="flex justify-between items-center pl-2">
-                <span className="text-slate-400 text-sm font-normal leading-tight pb-2">
+              <div className="flex items-center justify-between pl-2">
+                <span className="pb-2 text-sm font-normal leading-tight text-slate-400">
                   Output Cost/1k Tokens
                 </span>
-                <span className="text-slate-400 text-sm font-normal leading-4">
+                <span className="text-sm font-normal leading-4 text-slate-400">
                   ${formatCost(selectedModelData.outputCostPer1k)}/1k Tokens
                 </span>
               </div>
               <div className="h-[0px] border-t border-slate-100 pt-2"></div>
-              <div className="flex justify-between items-center pl-2">
-                <span className="text-slate-700 text-base font-semibold leading-tight">
+              <div className="flex items-center justify-between pl-2">
+                <span className="text-base font-semibold leading-tight text-slate-700">
                   Estimate Total Cost
                 </span>
-                <span className="text-sky-500 text-base font-bold leading-tight">
+                <span className="text-base font-bold leading-tight text-sky-500">
                   ${formatCost(selectedModelData.totalCost)}
                 </span>
               </div>
 
               <div className="pt-1"></div>
 
-              <div className="flex bg-sky-50 border-sky-100 border-2 text-slate-500 font-medium rounded-lg justify-left items-left px-4 py-3 flex-col gap-1">
+              <div className="justify-left items-left flex flex-col gap-1 rounded-lg border-2 border-sky-100 bg-sky-50 px-4 py-3 font-medium text-slate-500">
                 <span>
                   Helicone users save{" "}
-                  <span className="text-sky-500 font-bold">up to 70%</span> on
+                  <span className="font-bold text-sky-500">up to 70%</span> on
                   their LLM costs...
                 </span>
-                <span className="text-slate-400 font-normal text-sm mb-1">
+                <span className="mb-1 text-sm font-normal text-slate-400">
                   by caching, improving prompts, fine-tuning, etc.
                 </span>
                 <div className="mt-2">
                   <a
                     href="https://us.helicone.ai/signin"
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-sky-500 hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
+                    className="inline-flex items-center rounded-md border border-transparent bg-sky-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
                     Get started for free
                     <svg
-                      className="w-5 h-5 text-white ml-auto transform rotate-270"
+                      className="rotate-270 ml-auto h-5 w-5 transform text-white"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -644,26 +649,26 @@ Optimize your AI API costs:`;
           <div className="w-full overflow-x-auto rounded-lg shadow-sm">
             <div className="min-w-[1000px]">
               <div className="max-h-[calc(200vh-600px)] min-h-[300px] overflow-y-auto">
-                <table className="w-full divide-y divide-slate-200 border-separate border-spacing-0">
+                <table className="w-full border-separate border-spacing-0 divide-y divide-slate-200">
                   <thead className="sticky top-0 bg-slate-100">
                     <tr>
                       <th
                         scope="col"
-                        className="p-[24px] text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-1/6 bg-slate-100 border border-slate-200 first:rounded-tl-lg cursor-pointer"
+                        className="w-1/6 cursor-pointer border border-slate-200 bg-slate-100 p-[24px] text-left text-xs font-medium uppercase tracking-wider text-slate-500 first:rounded-tl-lg"
                         onClick={() => requestSort("provider")}
                       >
                         Provider {getSortIcon("provider")}
                       </th>
                       <th
                         scope="col"
-                        className="p-[24px] text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-1/6 bg-slate-100 border border-slate-200 cursor-pointer"
+                        className="w-1/6 cursor-pointer border border-slate-200 bg-slate-100 p-[24px] text-left text-xs font-medium uppercase tracking-wider text-slate-500"
                         onClick={() => requestSort("model")}
                       >
                         Model {getSortIcon("model")}
                       </th>
                       <th
                         scope="col"
-                        className="p-[24px] text-left text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-100 border border-slate-200 cursor-pointer"
+                        className="cursor-pointer border border-slate-200 bg-slate-100 p-[24px] text-left text-xs font-medium uppercase tracking-wider text-slate-500"
                         onClick={() => requestSort("inputCostPer1k")}
                       >
                         Input/1k <br />
@@ -671,7 +676,7 @@ Optimize your AI API costs:`;
                       </th>
                       <th
                         scope="col"
-                        className="p-[24px] text-left text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-100 border border-slate-200 cursor-pointer"
+                        className="cursor-pointer border border-slate-200 bg-slate-100 p-[24px] text-left text-xs font-medium uppercase tracking-wider text-slate-500"
                         onClick={() => requestSort("outputCostPer1k")}
                       >
                         Output/1k <br />
@@ -679,21 +684,21 @@ Optimize your AI API costs:`;
                       </th>
                       <th
                         scope="col"
-                        className="p-[24px] text-left text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-100 border border-slate-200 cursor-pointer"
+                        className="cursor-pointer border border-slate-200 bg-slate-100 p-[24px] text-left text-xs font-medium uppercase tracking-wider text-slate-500"
                         onClick={() => requestSort("inputCost")}
                       >
                         Input Cost {getSortIcon("inputCost")}
                       </th>
                       <th
                         scope="col"
-                        className="p-[24px] text-left text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-100 border border-slate-200 cursor-pointer"
+                        className="cursor-pointer border border-slate-200 bg-slate-100 p-[24px] text-left text-xs font-medium uppercase tracking-wider text-slate-500"
                         onClick={() => requestSort("outputCost")}
                       >
                         Output Cost {getSortIcon("outputCost")}
                       </th>
                       <th
                         scope="col"
-                        className="p-[24px] text-left text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-100 border border-slate-200 last:rounded-tr-lg cursor-pointer"
+                        className="cursor-pointer border border-slate-200 bg-slate-100 p-[24px] text-left text-xs font-medium uppercase tracking-wider text-slate-500 last:rounded-tr-lg"
                         onClick={() => requestSort("totalCost")}
                       >
                         Total Cost {getSortIcon("totalCost")}
@@ -704,79 +709,79 @@ Optimize your AI API costs:`;
                     {visibleCostData.map((data, index) => (
                       <tr
                         key={index}
-                        className={`hover:bg-sky-50 transition-colors duration-150 ${
+                        className={`transition-colors duration-150 hover:bg-sky-50 ${
                           data.provider === selectedModelData?.provider &&
                           data.model === selectedModelData?.model
                             ? "bg-sky-100"
                             : ""
                         }`}
                       >
-                        <td className="whitespace-nowrap text-sm text-slate-500 border border-slate-200 p-0">
+                        <td className="whitespace-nowrap border border-slate-200 p-0 text-sm text-slate-500">
                           <Link
                             href={`/llm-cost/provider/${encodeURIComponent(
                               data.provider.toLowerCase()
                             )}/model/${encodeURIComponent(data.model)}`}
-                            className="block w-full h-full px-6 py-2"
+                            className="block h-full w-full px-6 py-2"
                           >
                             {formatProviderName(data.provider)}
                           </Link>
                         </td>
-                        <td className="text-sm text-slate-900 font-medium border border-slate-200 p-0">
+                        <td className="border border-slate-200 p-0 text-sm font-medium text-slate-900">
                           <Link
                             href={`/llm-cost/provider/${encodeURIComponent(
                               data.provider.toLowerCase()
                             )}/model/${encodeURIComponent(data.model)}`}
-                            className="block w-full h-full px-6 py-2"
+                            className="block h-full w-full px-6 py-2"
                           >
                             <div className="break-words">{data.model}</div>
                           </Link>
                         </td>
-                        <td className="whitespace-nowrap text-sm text-slate-500 border border-slate-200 p-0">
+                        <td className="whitespace-nowrap border border-slate-200 p-0 text-sm text-slate-500">
                           <Link
                             href={`/llm-cost/provider/${encodeURIComponent(
                               data.provider.toLowerCase()
                             )}/model/${encodeURIComponent(data.model)}`}
-                            className="block w-full h-full px-6 py-2"
+                            className="block h-full w-full px-6 py-2"
                           >
                             ${formatCost(data.inputCostPer1k)}
                           </Link>
                         </td>
-                        <td className="whitespace-nowrap text-sm text-slate-500 border border-slate-200 p-0">
+                        <td className="whitespace-nowrap border border-slate-200 p-0 text-sm text-slate-500">
                           <Link
                             href={`/llm-cost/provider/${encodeURIComponent(
                               data.provider.toLowerCase()
                             )}/model/${encodeURIComponent(data.model)}`}
-                            className="block w-full h-full px-6 py-2"
+                            className="block h-full w-full px-6 py-2"
                           >
                             ${formatCost(data.outputCostPer1k)}
                           </Link>
                         </td>
-                        <td className="whitespace-nowrap text-sm text-slate-500 border border-slate-200 p-0">
+                        <td className="whitespace-nowrap border border-slate-200 p-0 text-sm text-slate-500">
                           <Link
                             href={`/llm-cost/provider/${encodeURIComponent(
                               data.provider.toLowerCase()
                             )}/model/${encodeURIComponent(data.model)}`}
-                            className="block w-full h-full px-6 py-2"
+                            className="block h-full w-full px-6 py-2"
                           >
                             ${formatCost(data.inputCost)}
                           </Link>
                         </td>
-                        <td className="whitespace-nowrap text-sm text-slate-500 border border-slate-200 p-0">
+                        <td className="whitespace-nowrap border border-slate-200 p-0 text-sm text-slate-500">
                           <Link
                             href={`/llm-cost/provider/${encodeURIComponent(
                               data.provider.toLowerCase()
                             )}/model/${encodeURIComponent(data.model)}`}
-                            className="block w-full h-full px-6 py-2"
+                            className="block h-full w-full px-6 py-2"
                           >
                             ${formatCost(data.outputCost)}
                           </Link>
                         </td>
-                        <td className="whitespace-nowrap text-sm font-medium text-sky-500 border border-slate-200 p-0">
+                        <td className="whitespace-nowrap border border-slate-200 p-0 text-sm font-medium text-sky-500">
                           <Link
                             href={`/llm-cost/provider/${encodeURIComponent(
                               data.provider.toLowerCase()
                             )}/model/${encodeURIComponent(data.model)}`}
-                            className="block w-full h-full px-6 py-2"
+                            className="block h-full w-full px-6 py-2"
                           >
                             ${formatCost(data.totalCost)}
                           </Link>

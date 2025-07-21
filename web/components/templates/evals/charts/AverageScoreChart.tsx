@@ -7,7 +7,7 @@ interface AverageScoreChartProps {
 export const AverageScoreChart: React.FC<AverageScoreChartProps> = ({
   averageOverTime,
 }) => (
-  <div className="w-full h-16">
+  <div className="h-16 w-full">
     <AreaChart
       className="h-full"
       data={averageOverTime}

@@ -10,7 +10,7 @@ import { markdownComponents } from "@/components/shared/prompts/ResponsePanel";
 // Dynamically import ReactMarkdown with no SSR
 const ReactMarkdown = dynamic(() => import("react-markdown"), {
   ssr: false,
-  loading: () => <div className="animate-pulse bg-muted h-4 w-full rounded" />,
+  loading: () => <div className="h-4 w-full animate-pulse rounded bg-muted" />,
 });
 
 interface TextMessageProps {
@@ -80,12 +80,12 @@ export default function TextMessage({
                                   };
                                 }
                                 return content;
-                              }
+                              },
                             ),
                           };
                         }
                         return message;
-                      }
+                      },
                     ),
                   },
                 },
@@ -103,7 +103,7 @@ export default function TextMessage({
   ) : (
     <ReactMarkdown
       components={markdownComponents}
-      className="w-full text-sm whitespace-pre-wrap break-words"
+      className="w-full whitespace-pre-wrap break-words text-sm"
     >
       {displayContent}
     </ReactMarkdown>

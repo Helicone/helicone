@@ -30,20 +30,22 @@ Include three required headers in your LLM requests:
 ```typescript
 {
   "Helicone-Session-Id": "unique-session-id",
-  "Helicone-Session-Path": "/trace-path", 
+  "Helicone-Session-Path": "/trace-path",
   "Helicone-Session-Name": "Session Name"
 }
 ```
+
 </Step>
 
 <Step title="Structure Your Paths">
 Use path syntax to represent parent-child relationships:
 
 ```typescript
-"/abstract"                    // Top-level trace
-"/abstract/outline"           // Child trace
-"/abstract/outline/lesson-1"  // Grandchild trace
+"/abstract"; // Top-level trace
+"/abstract/outline"; // Child trace
+"/abstract/outline/lesson-1"; // Grandchild trace
 ```
+
 </Step>
 
 <Step title="Make Your Request">
@@ -56,11 +58,12 @@ const response = await openai.chat.completions.create(
     headers: {
       "Helicone-Session-Id": sessionId,
       "Helicone-Session-Path": "/greeting",
-      "Helicone-Session-Name": "User Conversation"
-    }
+      "Helicone-Session-Name": "User Conversation",
+    },
   }
 );
 ```
+
 </Step>
 </Steps>
 
@@ -68,12 +71,11 @@ const response = await openai.chat.completions.create(
 
 ### Required Headers
 
-| Header | Type | Description | Default | Example |
-|--------|------|-------------|---------|----------|
-| `Helicone-Session-Id` | `string` | Unique identifier for the session (recommend UUID) | N/A | `"550e8400-e29b-41d4-a716-446655440000"` |
-| `Helicone-Session-Path` | `string` | Path representing the trace hierarchy using `/` syntax | N/A | `"/abstract"` or `"/parent/child"` |
-| `Helicone-Session-Name` | `string` | Human-readable name for the session | N/A | `"Course Plan"` |
-
+| Header                  | Type     | Description                                            | Default | Example                                  |
+| ----------------------- | -------- | ------------------------------------------------------ | ------- | ---------------------------------------- |
+| `Helicone-Session-Id`   | `string` | Unique identifier for the session (recommend UUID)     | N/A     | `"550e8400-e29b-41d4-a716-446655440000"` |
+| `Helicone-Session-Path` | `string` | Path representing the trace hierarchy using `/` syntax | N/A     | `"/abstract"` or `"/parent/child"`       |
+| `Helicone-Session-Name` | `string` | Human-readable name for the session                    | N/A     | `"Course Plan"`                          |
 
 <AccordionGroup>
 <Accordion title="Session ID Guidelines">
@@ -87,6 +89,7 @@ const sessionId = randomUUID();
 // ❌ Bad - Simple strings can cause conflicts
 const sessionId = "session_123";
 ```
+
 </Accordion>
 
 <Accordion title="Path Structure Best Practices">
@@ -94,17 +97,18 @@ Structure paths to reflect your application's logical flow:
 
 ```typescript
 // Multi-step conversation
-"/conversation"              // Main thread
-"/conversation/question"     // User question
-"/conversation/answer"       // AI response
-"/conversation/followup"     // Follow-up question
+"/conversation"; // Main thread
+"/conversation/question"; // User question
+"/conversation/answer"; // AI response
+"/conversation/followup"; // Follow-up question
 
 // Complex workflow
-"/workflow"                  // Main process
-"/workflow/analyze"          // Analysis step
-"/workflow/analyze/data"     // Data processing
-"/workflow/generate"         // Generation step
+"/workflow"; // Main process
+"/workflow/analyze"; // Analysis step
+"/workflow/analyze/data"; // Data processing
+"/workflow/generate"; // Generation step
 ```
+
 </Accordion>
 </AccordionGroup>
 
@@ -120,66 +124,67 @@ import { randomUUID } from "crypto";
 import OpenAI from "openai";
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  baseURL: "https://oai.helicone.ai/v1",
-  defaultHeaders: {
-    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-  },
+apiKey: process.env.OPENAI_API_KEY,
+baseURL: "https://oai.helicone.ai/v1",
+defaultHeaders: {
+"Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+},
 });
 
 const sessionId = randomUUID();
 
 // Initial feature request
 const response1 = await openai.chat.completions.create(
-  {
-    messages: [{ role: "user", content: "Create a React component for user authentication with email and password" }],
-    model: "gpt-4o-mini",
-  },
-  {
-    headers: {
-      "Helicone-Session-Id": sessionId,
-      "Helicone-Session-Path": "/request",
-      "Helicone-Session-Name": "Code Generation Assistant",
-    },
-  }
+{
+messages: [{ role: "user", content: "Create a React component for user authentication with email and password" }],
+model: "gpt-4o-mini",
+},
+{
+headers: {
+"Helicone-Session-Id": sessionId,
+"Helicone-Session-Path": "/request",
+"Helicone-Session-Name": "Code Generation Assistant",
+},
+}
 );
 
 // User asks for clarification
 const response2 = await openai.chat.completions.create(
-  {
-    messages: [
-      { role: "user", content: "Create a React component for user authentication with email and password" },
-      { role: "assistant", content: response1.choices[0].message.content },
-      { role: "user", content: "Can you add form validation and error handling?" }
-    ],
-    model: "gpt-4o-mini",
-  },
-  {
-    headers: {
-      "Helicone-Session-Id": sessionId,
-      "Helicone-Session-Path": "/request/validation",
-      "Helicone-Session-Name": "Code Generation Assistant",
-    },
-  }
+{
+messages: [
+{ role: "user", content: "Create a React component for user authentication with email and password" },
+{ role: "assistant", content: response1.choices[0].message.content },
+{ role: "user", content: "Can you add form validation and error handling?" }
+],
+model: "gpt-4o-mini",
+},
+{
+headers: {
+"Helicone-Session-Id": sessionId,
+"Helicone-Session-Path": "/request/validation",
+"Helicone-Session-Name": "Code Generation Assistant",
+},
+}
 );
 
 // User requests TypeScript version
 const response3 = await openai.chat.completions.create(
-  {
-    messages: [
-      { role: "user", content: "Convert this to TypeScript with proper interfaces" }
-    ],
-    model: "gpt-4o-mini",
-  },
-  {
-    headers: {
-      "Helicone-Session-Id": sessionId,
-      "Helicone-Session-Path": "/request/validation/typescript",
-      "Helicone-Session-Name": "Code Generation Assistant",
-    },
-  }
+{
+messages: [
+{ role: "user", content: "Convert this to TypeScript with proper interfaces" }
+],
+model: "gpt-4o-mini",
+},
+{
+headers: {
+"Helicone-Session-Id": sessionId,
+"Helicone-Session-Path": "/request/validation/typescript",
+"Helicone-Session-Name": "Code Generation Assistant",
+},
+}
 );
-```
+
+````
 
 ```python Python
 import uuid
@@ -231,7 +236,8 @@ response3 = client.chat.completions.create(
         "Helicone-Session-Name": "Code Generation Assistant",
     }
 )
-```
+````
+
 </CodeGroup>
 </Tab>
 
@@ -243,9 +249,15 @@ const sessionId = randomUUID();
 
 // Initial PR analysis
 const analysis = await openai.chat.completions.create(
-  { 
-    messages: [{ role: "user", content: "Analyze this pull request for code quality and potential issues: [PR diff content]" }],
-    model: "gpt-4o-mini" 
+  {
+    messages: [
+      {
+        role: "user",
+        content:
+          "Analyze this pull request for code quality and potential issues: [PR diff content]",
+      },
+    ],
+    model: "gpt-4o-mini",
   },
   {
     headers: {
@@ -258,9 +270,15 @@ const analysis = await openai.chat.completions.create(
 
 // Security check
 const securityCheck = await openai.chat.completions.create(
-  { 
-    messages: [{ role: "user", content: "Check for security vulnerabilities: SQL injection, XSS, authentication issues" }],
-    model: "gpt-4o-mini" 
+  {
+    messages: [
+      {
+        role: "user",
+        content:
+          "Check for security vulnerabilities: SQL injection, XSS, authentication issues",
+      },
+    ],
+    model: "gpt-4o-mini",
   },
   {
     headers: {
@@ -273,9 +291,14 @@ const securityCheck = await openai.chat.completions.create(
 
 // Generate review comments
 const reviewComments = await openai.chat.completions.create(
-  { 
-    messages: [{ role: "user", content: "Generate constructive review comments based on analysis" }],
-    model: "gpt-4o-mini" 
+  {
+    messages: [
+      {
+        role: "user",
+        content: "Generate constructive review comments based on analysis",
+      },
+    ],
+    model: "gpt-4o-mini",
   },
   {
     headers: {
@@ -286,6 +309,7 @@ const reviewComments = await openai.chat.completions.create(
   }
 );
 ```
+
 </Tab>
 
 <Tab title="API Documentation Generator">
@@ -297,7 +321,13 @@ const sessionId = randomUUID();
 // Analyze API endpoints
 const endpoints = await openai.chat.completions.create(
   {
-    messages: [{ role: "user", content: "Analyze these API routes and extract endpoint information: [code content]" }],
+    messages: [
+      {
+        role: "user",
+        content:
+          "Analyze these API routes and extract endpoint information: [code content]",
+      },
+    ],
     model: "gpt-4o-mini",
   },
   {
@@ -313,7 +343,10 @@ const endpoints = await openai.chat.completions.create(
 const openApiSpec = await openai.chat.completions.create(
   {
     messages: [
-      { role: "user", content: "Generate OpenAPI 3.0 specification based on these endpoints" }
+      {
+        role: "user",
+        content: "Generate OpenAPI 3.0 specification based on these endpoints",
+      },
     ],
     model: "gpt-4o-mini",
   },
@@ -329,7 +362,12 @@ const openApiSpec = await openai.chat.completions.create(
 // Create usage examples
 const examples = await openai.chat.completions.create(
   {
-    messages: [{ role: "user", content: "Create code examples for each endpoint in multiple languages" }],
+    messages: [
+      {
+        role: "user",
+        content: "Create code examples for each endpoint in multiple languages",
+      },
+    ],
     model: "gpt-4o-mini",
   },
   {
@@ -341,6 +379,7 @@ const examples = await openai.chat.completions.create(
   }
 );
 ```
+
 </Tab>
 </Tabs>
 
@@ -357,22 +396,27 @@ const examples = await openai.chat.completions.create(
 ## Understanding Sessions
 
 ### What Sessions Can Track
+
 Sessions can group together all types of requests in your AI workflow:
+
 - **LLM calls** - OpenAI, Anthropic, and other model requests
-- **[Vector database queries](/integrations/vectordb)** - Embeddings, similarity searches, and retrievals  
+- **[Vector database queries](/integrations/vectordb)** - Embeddings, similarity searches, and retrievals
 - **[Tool calls](/tools)** - Function executions, API calls, and custom tools
 - **Any logged request** - Anything sent through Helicone's logging
 
 This gives you a complete view of your AI agent's behavior, not just the LLM interactions.
 
 ### Session IDs
+
 The session ID is a unique identifier that groups all related requests together. Think of it as a conversation thread ID.
 
 **What to use:**
+
 - **UUIDs** (recommended): `550e8400-e29b-41d4-a716-446655440000`
 - **Unique strings**: `user_123_conversation_456`
 
 **Why it matters:**
+
 - Same ID = requests get grouped together in the dashboard
 - Different IDs = separate sessions, even if they're related
 - Reusing IDs across different workflows will mix unrelated requests
@@ -386,57 +430,63 @@ const sessionId = "chat_session"; // All users get mixed together
 ```
 
 ### Session Paths
+
 Paths create the hierarchy within your session, showing how requests relate to each other.
 
 **Path Structure Rules:**
+
 - Start with `/` (forward slash)
 - Use `/` to separate levels: `/parent/child/grandchild`
 - Keep names descriptive: `/analyze_request/fetch_data/process_results`
 
 **How Hierarchy Works:**
+
 ```typescript
-"/conversation"                    // Root level
-"/conversation/initial_question"   // Child of conversation  
-"/conversation/followup"          // Another child of conversation
-"/conversation/followup/clarify"  // Child of followup
+"/conversation"; // Root level
+"/conversation/initial_question"; // Child of conversation
+"/conversation/followup"; // Another child of conversation
+"/conversation/followup/clarify"; // Child of followup
 ```
 
 This creates a tree structure in the dashboard where you can see the flow from initial question → followup → clarification.
 
 **Path Design Patterns:**
+
 ```typescript
 // Workflow pattern - good for AI agents
-"/task"
-"/task/research" 
-"/task/research/web_search"
-"/task/generate"
+"/task";
+"/task/research";
+"/task/research/web_search";
+"/task/generate";
 
 // Conversation pattern - good for chatbots
-"/session"
-"/session/question_1"
-"/session/answer_1" 
-"/session/question_2"
+"/session";
+"/session/question_1";
+"/session/answer_1";
+"/session/question_2";
 
 // Pipeline pattern - good for data processing
-"/process"
-"/process/extract"
-"/process/transform"
-"/process/load"
+"/process";
+"/process/extract";
+"/process/transform";
+"/process/load";
 ```
 
 ### Session Names
+
 The session name is used to group related sessions together in the dashboard. Use the same name for sessions that are part of the same flow or workflow type.
 
 **Good session names:**
+
 - `"Customer Support"` - All support sessions use this name
 - `"Content Generation"` - All content creation sessions use this name
 - `"Trip Planning Agent"` - All trip planning workflows use this name
 
 **Why this matters:**
+
 - Sessions with the same name get grouped together in the dashboard
 - You can filter to see all sessions of a specific type
 - Makes it easy to compare performance across similar workflows
-
 
 ## Related Features
 
@@ -446,11 +496,15 @@ Track vector database queries and embeddings alongside LLM calls
 </Card>
 
 <Card title="Tool Call Logging" icon="wrench" href="/tools">
-Monitor tool calls and function executions within your agent workflows
+  Monitor tool calls and function executions within your agent workflows
 </Card>
 
-<Card title="Custom Properties" icon="tag" href="/features/advanced-usage/custom-properties">
-Add metadata to individual requests within sessions
+<Card
+  title="Custom Properties"
+  icon="tag"
+  href="/features/advanced-usage/custom-properties"
+>
+  Add metadata to individual requests within sessions
 </Card>
 
 <Card title="User Metrics" icon="chart-line" href="/features/advanced-usage/user-metrics">

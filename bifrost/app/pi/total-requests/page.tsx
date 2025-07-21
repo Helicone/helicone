@@ -18,7 +18,7 @@ const formatNumber = (
   "." | "," | number | null,
   number | null | ".",
   number | null,
-  number | null | "B" | "M"
+  number | null | "B" | "M",
 ] => {
   if (number < 10) {
     return [null, null, null, null, null, number];
@@ -132,10 +132,10 @@ const TotalRequestsPage = () => {
 
   return (
     <div
-      className={`w-full flex flex-col justify-center items-center h-[100vh] p-5 gap-4 ${jetbrainsMono.className}`}
+      className={`flex h-[100vh] w-full flex-col items-center justify-center gap-4 p-5 ${jetbrainsMono.className}`}
     >
-      <div className="h-full w-full bg-[#E5E5E5] border-2 border-black flex flex-col items-center justify-center gap-7">
-        <div className="bg-white p-2.5 border-2 border-black border-r-4 border-b-4 font-medium text-[21px]">
+      <div className="flex h-full w-full flex-col items-center justify-center gap-7 border-2 border-black bg-[#E5E5E5]">
+        <div className="border-2 border-b-4 border-r-4 border-black bg-white p-2.5 text-[21px] font-medium">
           Total Requests
         </div>{" "}
         <div className="flex gap-2">
@@ -143,25 +143,25 @@ const TotalRequestsPage = () => {
             (num, index) => (
               <div
                 key={index}
-                className="h-[120px] w-[82px] bg-white border-2 border-black border-r-4 border-b-4 text-[76px] font-extrabold flex items-center justify-center"
+                className="flex h-[120px] w-[82px] items-center justify-center border-2 border-b-4 border-r-4 border-black bg-white text-[76px] font-extrabold"
               >
                 {num}
               </div>
             )
           )}
         </div>
-        <div className="bg-white p-2.5 border-2 border-black border-r-4 border-b-4 font-medium text-[14px]">
+        <div className="border-2 border-b-4 border-r-4 border-black bg-white p-2.5 text-[14px] font-medium">
           Last 30 days
         </div>
         {/* {JSON.stringify(formatNumber(totalRequests.data?.data?.data ?? 0))} */}
       </div>
-      <div className="flex w-full justify-between items-center">
+      <div className="flex w-full items-center justify-between">
         <Link href="/pi/total-cost">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/static/pi/arrow-left.webp"
             alt="arrow-left"
-            className="w-16 h-16"
+            className="h-16 w-16"
           />
         </Link>
         <Link href="/pi/total-cost">
@@ -169,7 +169,7 @@ const TotalRequestsPage = () => {
           <img
             src="/static/pi/arrow-right.webp"
             alt="arrow-left"
-            className="w-16 h-16"
+            className="h-16 w-16"
           />
         </Link>
       </div>

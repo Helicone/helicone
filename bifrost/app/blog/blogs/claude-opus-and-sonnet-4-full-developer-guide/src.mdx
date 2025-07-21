@@ -1,4 +1,4 @@
-Anthropic just dropped the fourth version of the Claude models, and it's clear they're meant for developers. 
+Anthropic just dropped the fourth version of the Claude models, and it's clear they're meant for developers.
 
 After months of speculation, we finally have two new models: **Claude Opus 4** and **Claude Sonnet 4**—both featuring enhanced hybrid reasoning capabilities, allowing them to switch between instant responses and extended thinking.
 
@@ -21,13 +21,13 @@ Claude 4 builds on Anthropic's hybrid reasoning approach, now with significant i
 
 Here's a quick rundown of the key numbers:
 
-| Feature | Claude Opus 4 | Claude Sonnet 4 |
-|---------|---------------|-----------------|
-| **Context Window** | 200K tokens | 200K tokens |
-| **Pricing** | $15 input / $75 output per 1M tokens | $3 input / $15 output per 1M tokens |
-| **Knowledge Cutoff** | March 2025 | March 2025 |
-| **Safety Level** | ASL-3 | ASL-2 |
-| **Best For** | Complex reasoning, long-horizon tasks | Everyday coding, faster responses |
+| Feature              | Claude Opus 4                         | Claude Sonnet 4                     |
+| -------------------- | ------------------------------------- | ----------------------------------- |
+| **Context Window**   | 200K tokens                           | 200K tokens                         |
+| **Pricing**          | $15 input / $75 output per 1M tokens  | $3 input / $15 output per 1M tokens |
+| **Knowledge Cutoff** | March 2025                            | March 2025                          |
+| **Safety Level**     | ASL-3                                 | ASL-2                               |
+| **Best For**         | Complex reasoning, long-horizon tasks | Everyday coding, faster responses   |
 
 <CallToAction
   title="Monitor Claude 4 Usage Before Costs Spiral 🚨"
@@ -41,12 +41,13 @@ Here's a quick rundown of the key numbers:
 import Anthropic from "@anthropic-ai/sdk";
 
 const anthropic = new Anthropic({
-  baseURL: "https://anthropic.helicone.ai",
-  apiKey: process.env.ANTHROPIC_API_KEY,
-  defaultHeaders: {
-    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-  },
+baseURL: "https://anthropic.helicone.ai",
+apiKey: process.env.ANTHROPIC_API_KEY,
+defaultHeaders: {
+"Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+},
 });
+
 ```
 </CallToAction>
 
@@ -58,7 +59,7 @@ _Source: [Anthropic](https://www.anthropic.com/news/claude-4)_
 
 ### Coding: Impressive numbers
 
-Claude 4 dominates coding benchmarks, with Anthropic claiming it's now "the world's best coding model." 
+Claude 4 dominates coding benchmarks, with Anthropic claiming it's now "the world's best coding model."
 
 On SWE-bench Verified, which tests real-world GitHub issue resolution, the Claude 4 models scored consistently higher than both OpenAI's developer-focused GPT-4.1 and Google's Gemini 2.5 Pro.
 
@@ -156,7 +157,7 @@ For most development work, Claude Sonnet 4 offers the best value. Reserve Opus 4
 **Third-Party Integrations**
 
 - **GitHub Copilot**: Claude Sonnet 4 now default option
-- **Cursor and Windsurf**: Integrated for coding assistance  
+- **Cursor and Windsurf**: Integrated for coding assistance
 - **Vercel and Replit**: Available in their AI platforms
 
 **Claude Code**
@@ -172,7 +173,7 @@ For most development work, Claude Sonnet 4 offers the best value. Reserve Opus 4
 
 ## Anthropic's Strategic Pivot: Betting on Developer Infrastructure
 
-Claude 4's release signals a major strategic shift—while OpenAI and Google fight for consumer mindshare, Anthropic is doubling down on becoming the AI infrastructure layer for developers. 
+Claude 4's release signals a major strategic shift—while OpenAI and Google fight for consumer mindshare, Anthropic is doubling down on becoming the AI infrastructure layer for developers.
 
 This pivot should accelerate innovation across better coding models, deeper IDE integrations beyond simple autocomplete, agentic development workflows that handle multi-step tasks autonomously, and specialized developer APIs designed specifically for development use cases.
 
@@ -182,7 +183,7 @@ Claude 4 marks the next step in Anthropic's evolution to developer-focused AI in
 
 While the premium pricing and context window limitations restrict adoption for some use cases, the developer community seems to be more than impressed so far by the new models.
 
-If Anthropic can maintain its technical lead in coding while building out its developer ecosystem, this strategy could establish it as the preferred AI provider for serious development work. 
+If Anthropic can maintain its technical lead in coding while building out its developer ecosystem, this strategy could establish it as the preferred AI provider for serious development work.
 
 ### Related Articles
 
@@ -191,7 +192,7 @@ If Anthropic can maintain its technical lead in coding while building out its de
 - <a href="https://www.helicone.ai/blog/gpt-4o-mini-vs-claude-3.5-sonnet" target="_blank" rel="noopener">GPT-4o Mini vs. Claude 3.5 Sonnet: Which is Better for Developers?</a>
 - <a href="https://www.helicone.ai/blog/claude-3.7-benchmarks-and-examples" target="_blank" rel="noopener">Claude 3.7 Sonnet & Code: Technical Review and Benchmarks</a>
 
-<FAQ 
+<FAQ
   items={[
     {
       question: "What's the difference between Claude Opus 4 and Claude Sonnet 4?",
@@ -217,3 +218,4 @@ If Anthropic can maintain its technical lead in coding while building out its de
 />
 
 <Questions />
+```

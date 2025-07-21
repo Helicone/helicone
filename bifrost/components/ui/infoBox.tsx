@@ -28,7 +28,7 @@ const InfoBox = React.forwardRef<HTMLDivElement, InfoBoxProps>(
     return (
       <div
         className={cn(
-          "flex items-center space-x-2 rounded-md border px-4 py-2 border-l-4",
+          "flex items-center space-x-2 rounded-md border border-l-4 px-4 py-2",
           variantStyles[variant],
           className
         )}

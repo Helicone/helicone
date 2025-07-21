@@ -399,56 +399,56 @@ export default function ExperimentsWaitlist() {
 
   return (
     <div className="relative h-full min-h-[calc(100vh-65px)] w-full overflow-hidden">
-      <div className="w-screen h-[calc(100vh-65px)] relative flex flex-col justify-center">
+      <div className="relative flex h-[calc(100vh-65px)] w-screen flex-col justify-center">
         <div
           id="content"
-          className="flex flex-col w-full px-4 sm:px-16 md:px-24 lg:px-28 xl:px-32 2xl:px-40 z-[4]"
+          className="z-[4] flex w-full flex-col px-4 sm:px-16 md:px-24 lg:px-28 xl:px-32 2xl:px-40"
         >
-          <div className="flex flex-row gap-2 md:gap-3 items-center text-slate-700 mb-6 lg:mb-10">
+          <div className="mb-6 flex flex-row items-center gap-2 text-slate-700 md:gap-3 lg:mb-10">
             {/* <CubeTransparentIcon className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6" /> */}
-            <Cube className="w-5 h-5 lg:w-6 lg:h-6" />
-            <div className="text-sm md:text-base lg:text-lg font-medium">
+            <Cube className="h-5 w-5 lg:h-6 lg:w-6" />
+            <div className="text-sm font-medium md:text-base lg:text-lg">
               Experiments
             </div>
           </div>
-          <h1 className="text-5xl sm:text-7xl md:text-8xl font-medium mb-6 lg:mb-10 w-full max-w-3xl text-wrap">
+          <h1 className="mb-6 w-full max-w-3xl text-wrap text-5xl font-medium sm:text-7xl md:text-8xl lg:mb-10">
             A new way to improve your prompts.
           </h1>
-          <div className="flex flex-col gap-4 mb-6 lg:mb-10">
-            <div className="flex gap-1.5 items-center">
-              <CheckIcon className="w-5 h-5 lg:w-6 lg:h-6 text-brand" />
-              <p className="text-sm md:text-base lg:text-lg text-slate-700">
+          <div className="mb-6 flex flex-col gap-4 lg:mb-10">
+            <div className="flex items-center gap-1.5">
+              <CheckIcon className="text-brand h-5 w-5 lg:h-6 lg:w-6" />
+              <p className="text-sm text-slate-700 md:text-base lg:text-lg">
                 Test multiple prompts simultaneously over extensive datasets.
               </p>
             </div>
-            <div className="flex gap-1.5 items-center">
-              <CheckIcon className="w-5 h-5 lg:w-6 lg:h-6 text-brand" />
-              <p className="text-sm md:text-base lg:text-lg text-slate-700">
+            <div className="flex items-center gap-1.5">
+              <CheckIcon className="text-brand h-5 w-5 lg:h-6 lg:w-6" />
+              <p className="text-sm text-slate-700 md:text-base lg:text-lg">
                 Utilize real-world data to improve relevance of results.
               </p>
             </div>
-            <div className="flex gap-1.5 items-center">
-              <CheckIcon className="w-5 h-5 lg:w-6 lg:h-6 text-brand" />
-              <p className="text-sm md:text-base lg:text-lg text-slate-700">
+            <div className="flex items-center gap-1.5">
+              <CheckIcon className="text-brand h-5 w-5 lg:h-6 lg:w-6" />
+              <p className="text-sm text-slate-700 md:text-base lg:text-lg">
                 Move beyond subjective assessment.
               </p>
             </div>
           </div>
           <button
             onClick={scrollToForm}
-            className="bg-brand text-white border-2 border-[#0569A0] py-3 px-8 rounded-xl md:text-lg text-base font-semibold self-start"
+            className="bg-brand self-start rounded-xl border-2 border-[#0569A0] px-8 py-3 text-base font-semibold text-white md:text-lg"
           >
             Join the waitlist
           </button>
         </div>
         <ExperimentsTable />
-        <Purple className="absolute top-[-300px] right-0 z-[1]" />
-        <Blue className="absolute -bottom-1/2 left-[35%] -translate-x-1/2 z-[1] w-screen h-[calc(100vh-65px)]" />
-        <Pink className="absolute top-0 left-0 z-[1] w-screen h-[calc(100vh-65px)] opacity-90" />
+        <Purple className="absolute right-0 top-[-300px] z-[1]" />
+        <Blue className="absolute -bottom-1/2 left-[35%] z-[1] h-[calc(100vh-65px)] w-screen -translate-x-1/2" />
+        <Pink className="absolute left-0 top-0 z-[1] h-[calc(100vh-65px)] w-screen opacity-90" />
         <LightPurple className="absolute -bottom-3/4 right-0 z-[1]" />
       </div>
-      <div className="z-[5] mx-4 flex justify-center items-center lg:mb-52 mb-20">
-        <div className="w-full max-w-7xl h-full z-[5]">
+      <div className="z-[5] mx-4 mb-20 flex items-center justify-center lg:mb-52">
+        <div className="z-[5] h-full w-full max-w-7xl">
           <video controls autoPlay loop className="z-[5] rounded-lg">
             <source
               src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/experiments.mp4"
@@ -460,7 +460,7 @@ export default function ExperimentsWaitlist() {
       </div>
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col sm:flex-row justify-center items-stretch gap-3 z-[5] mb-60 md:mb-80 mx-4"
+        className="z-[5] mx-4 mb-60 flex flex-col items-stretch justify-center gap-3 sm:flex-row md:mb-80"
         id="waitlist-form"
       >
         <input
@@ -468,19 +468,19 @@ export default function ExperimentsWaitlist() {
           placeholder="Enter your email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="bg-black/10 py-4 px-8 border-2 border-white sm:w-[436px] w-full text-white font-medium text-sm md:text-lg placeholder:text-white rounded-xl z-[5] focus:outline-none"
+          className="z-[5] w-full rounded-xl border-2 border-white bg-black/10 px-8 py-4 text-sm font-medium text-white placeholder:text-white focus:outline-none sm:w-[436px] md:text-lg"
         />
         <button
           type="submit"
-          className="bg-brand text-white border-2 border-[#0569A0] font-semibold py-4 px-8 rounded-xl font-medium text-sm md:text-lg z-[5]"
+          className="bg-brand z-[5] rounded-xl border-2 border-[#0569A0] px-8 py-4 text-sm font-medium font-semibold text-white md:text-lg"
         >
           Join the waitlist
         </button>
       </form>
-      <LightPurpleBottom className="absolute lg:-bottom-[250px] left-[100px] z-[0] w-screen h-[calc(100vh-65px)]" />
-      <BlueBottom className="absolute -bottom-[320px] lg:-bottom-[250px] left-1/3 z-[0] w-screen h-[calc(100vh-65px)]" />
-      <PinkBottom className="absolute -bottom-[320px] lg:-bottom-[250px] -left-1/4 z-[0] w-screen h-[calc(100vh-65px)]" />
-      <TwoBillion className="absolute md:-bottom-[150px] -bottom-[180px] left-1/2 -translate-x-1/2 z-[5] leading-none m-0 p-0 whitespace-nowrap w-[90vw]" />
+      <LightPurpleBottom className="absolute left-[100px] z-[0] h-[calc(100vh-65px)] w-screen lg:-bottom-[250px]" />
+      <BlueBottom className="absolute -bottom-[320px] left-1/3 z-[0] h-[calc(100vh-65px)] w-screen lg:-bottom-[250px]" />
+      <PinkBottom className="absolute -bottom-[320px] -left-1/4 z-[0] h-[calc(100vh-65px)] w-screen lg:-bottom-[250px]" />
+      <TwoBillion className="absolute -bottom-[180px] left-1/2 z-[5] m-0 w-[90vw] -translate-x-1/2 whitespace-nowrap p-0 leading-none md:-bottom-[150px]" />
       <Toaster />
     </div>
   );
@@ -662,14 +662,14 @@ const ExperimentsTable = () => {
     if (state === 0)
       return (
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-yellow-700 rounded-full animate-pulse"></div>
+          <div className="h-2 w-2 animate-pulse rounded-full bg-yellow-700"></div>
           <div className="text-sm text-slate-700">Queued...</div>
         </div>
       );
     if (state === 1)
       return (
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-green-700 rounded-full animate-pulse"></div>
+          <div className="h-2 w-2 animate-pulse rounded-full bg-green-700"></div>
           <div className="text-sm text-slate-700">Generating...</div>
         </div>
       );
@@ -677,30 +677,30 @@ const ExperimentsTable = () => {
   };
 
   return (
-    <div className="opacity-20 md:opacity-100 absolute top-1/2 right-0 -translate-y-1/2 min-w-[1200px] w-full overflow-visible z-[2]">
-      <div className="rounded-lg overflow-visible relative">
+    <div className="absolute right-0 top-1/2 z-[2] w-full min-w-[1200px] -translate-y-1/2 overflow-visible opacity-20 md:opacity-100">
+      <div className="relative overflow-visible rounded-lg">
         {/* Add a div for the glowing box shadow effect */}
-        <div className="absolute top-0 bottom-0 left-[66.66%] right-[16.67%] z-[3] shadow-[0_0_50px_20px_#FF006B30] pointer-events-none rounded-lg"></div>
+        <div className="pointer-events-none absolute bottom-0 left-[66.66%] right-[16.67%] top-0 z-[3] rounded-lg shadow-[0_0_50px_20px_#FF006B30]"></div>
 
-        <div className="grid grid-cols-6 relative z-[4]">
+        <div className="relative z-[4] grid grid-cols-6">
           {columns.map((column, index) => (
             <div
               key={column.name}
               className={clsx(
-                "flex items-center gap-[10px] font-semibold text-sm text-slate-900 py-3 px-6",
+                "flex items-center gap-[10px] px-6 py-3 text-sm font-semibold text-slate-900",
                 index < 2
                   ? "opacity-0"
                   : index === 2
-                  ? "opacity-10"
-                  : index === 3
-                  ? "opacity-20"
-                  : index === 4
-                  ? "opacity-80 rounded-t-lg border-t border-x border-white border-opacity-15"
-                  : "opacity-50"
+                    ? "opacity-10"
+                    : index === 3
+                      ? "opacity-20"
+                      : index === 4
+                        ? "rounded-t-lg border-x border-t border-white border-opacity-15 opacity-80"
+                        : "opacity-50"
               )}
             >
               {column.name}
-              <div className="rounded-md border border-slate-800 border-opacity-20 py-0.5 px-2 font-medium text-xs">
+              <div className="rounded-md border border-slate-800 border-opacity-20 px-2 py-0.5 text-xs font-medium">
                 {column.type}
               </div>
             </div>
@@ -713,7 +713,7 @@ const ExperimentsTable = () => {
                 <div
                   key={`${rowIndex}-${colIndex}`}
                   className={clsx(
-                    "text-sm text-slate-700 py-3 px-6 no-wrap truncate",
+                    "no-wrap truncate px-6 py-3 text-sm text-slate-700",
                     key === "experiment1" &&
                       rowIndex === data.length - 1 &&
                       "rounded-b-xl", // Add slight background to Experiment 1 cells
@@ -727,17 +727,17 @@ const ExperimentsTable = () => {
                       highlightState[rowIndex][
                         key === "original" ? 0 : key === "experiment1" ? 1 : 2
                       ]
-                      ? "bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg duration-300 transition-all"
+                      ? "bg-white bg-opacity-20 backdrop-blur-lg backdrop-filter transition-all duration-300"
                       : "",
                     colIndex < 2
                       ? "opacity-0"
                       : colIndex === 2
-                      ? "opacity-10"
-                      : colIndex === 3
-                      ? "opacity-20"
-                      : colIndex === 4
-                      ? "opacity-80" // Increased opacity for emphasis
-                      : "opacity-50"
+                        ? "opacity-10"
+                        : colIndex === 3
+                          ? "opacity-20"
+                          : colIndex === 4
+                            ? "opacity-80" // Increased opacity for emphasis
+                            : "opacity-50"
                   )}
                 >
                   {key === "original" ||

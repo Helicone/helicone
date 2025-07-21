@@ -39,15 +39,15 @@ const StartPage = () => {
   if (!currentDemo) {
     return (
       <div className="p-6">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">Select a Demo</h2>
+        <h2 className="mb-6 text-2xl font-bold text-gray-800">Select a Demo</h2>
         <div className="space-y-4">
           {DEMO_GAMES.map((game) => (
             <div
               key={game.id}
-              className="flex items-center space-x-4 p-4 bg-white border border-gray-200 rounded-xl hover:shadow-md transition-all duration-300 cursor-pointer"
+              className="flex cursor-pointer items-center space-x-4 rounded-xl border border-gray-200 bg-white p-4 transition-all duration-300 hover:shadow-md"
               onClick={() => onPlay(game.id)}
             >
-              <div className="w-16 h-16 flex-shrink-0 bg-indigo-100 rounded-full flex items-center justify-center">
+              <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100">
                 <Lottie
                   animationData={game.animation}
                   style={{ height: 50, width: 50 }}
@@ -55,7 +55,7 @@ const StartPage = () => {
                 />
               </div>
               <div>
-                <h3 className="font-semibold text-lg text-gray-800">
+                <h3 className="text-lg font-semibold text-gray-800">
                   {game.name}
                 </h3>
                 <p className="text-sm text-gray-500">{game.type}</p>
@@ -69,7 +69,7 @@ const StartPage = () => {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-full bg-gray-50">
+      <div className="flex h-full flex-col items-center justify-center bg-gray-50">
         <Lottie
           animationData={
             DEMO_GAMES.find((g) => g.id === currentDemo)?.animation
@@ -87,10 +87,10 @@ const StartPage = () => {
   const GameComponent = DEMO_GAMES.find((g) => g.id === currentDemo)?.component;
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="bg-indigo-500 text-white px-4 py-3 flex justify-between items-center">
+    <div className="flex h-full flex-col">
+      <div className="flex items-center justify-between bg-indigo-500 px-4 py-3 text-white">
         <button
-          className="text-sm text-white hover:text-gray-200 transition-colors"
+          className="text-sm text-white transition-colors hover:text-gray-200"
           onClick={onReset}
         >
           ← Back to Demos

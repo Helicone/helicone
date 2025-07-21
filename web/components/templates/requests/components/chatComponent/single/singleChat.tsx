@@ -37,7 +37,7 @@ export const SingleChat: React.FC<SingleChatProps> = ({
     const contentType = messageContent._type;
     if (contentType === "autoInput" && autoInputs) {
       const indexMatch = (messageContent as any as string).match(
-        /<helicone-auto-prompt-input idx=(\d+) \/>/
+        /<helicone-auto-prompt-input idx=(\d+) \/>/,
       );
       const index = indexMatch ? parseInt(indexMatch[1], 10) : 0;
       return autoInputs[index];
@@ -50,7 +50,7 @@ export const SingleChat: React.FC<SingleChatProps> = ({
   return (
     <>
       {mappedRequest?.raw.request.instructions && (
-        <div className="p-4 mt-2 text-left bg-gray-100 dark:bg-gray-800 rounded-md shadow">
+        <div className="mt-2 rounded-md bg-gray-100 p-4 text-left shadow dark:bg-gray-800">
           <h4 className="font-semibold text-gray-900 dark:text-gray-200">
             Instructions
           </h4>
@@ -61,14 +61,14 @@ export const SingleChat: React.FC<SingleChatProps> = ({
       )}
       <div
         className={clsx(
-          "items-start p-4 text-left flex flex-row space-x-4 text-black dark:text-white ",
+          "flex flex-row items-start space-x-4 p-4 text-left text-black dark:text-white",
           isSystem && "font-semibold",
-          isLast && "rounded-b-md"
+          isLast && "rounded-b-md",
         )}
         key={index}
       >
         <MessageHeader message={message} />
-        <div className="overflow-auto w-full">
+        <div className="w-full overflow-auto">
           <MessageContent
             message={message}
             expandedProps={expandedProps}

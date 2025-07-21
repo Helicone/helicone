@@ -232,9 +232,8 @@ export class OrganizationController extends Controller {
     }
 
     // Check if user is already a member
-    const members = await organizationManager.getOrganizationMembers(
-      organizationId
-    );
+    const members =
+      await organizationManager.getOrganizationMembers(organizationId);
     if (members.error) {
       return err(`Error checking existing members: ${members.error}`);
     }
@@ -404,9 +403,8 @@ export class OrganizationController extends Controller {
   ): Promise<Result<OrganizationMember[], string>> {
     const organizationManager = new OrganizationManager(request.authParams);
 
-    const result = await organizationManager.getOrganizationMembers(
-      organizationId
-    );
+    const result =
+      await organizationManager.getOrganizationMembers(organizationId);
     if (result.error || !result.data) {
       this.setStatus(500);
       return err(result.error ?? "Error getting organization members");
@@ -446,9 +444,8 @@ export class OrganizationController extends Controller {
   ): Promise<Result<OrganizationOwner[], string>> {
     const organizationManager = new OrganizationManager(request.authParams);
 
-    const result = await organizationManager.getOrganizationOwner(
-      organizationId
-    );
+    const result =
+      await organizationManager.getOrganizationOwner(organizationId);
     if (result.error || !result.data) {
       this.setStatus(500);
       return err(result.error ?? "Error getting organization owner");

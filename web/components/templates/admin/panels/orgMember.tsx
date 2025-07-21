@@ -71,7 +71,7 @@ const OrgMember = (props: OrgMemberProps) => {
 
   return (
     <>
-      <h2 className="text-lg text-white font-semibold">
+      <h2 className="text-lg font-semibold text-white">
         Org Member Control Center
       </h2>
       <div className="flex flex-col space-y-2">
@@ -102,8 +102,8 @@ const OrgMember = (props: OrgMemberProps) => {
         </div>
         <ul>
           {orgs?.data?.orgs.map((org) => (
-            <li key={org.id} className="flex items-center py-1 space-x-1">
-              <span className="text-white text-sm font-semibold">
+            <li key={org.id} className="flex items-center space-x-1 py-1">
+              <span className="text-sm font-semibold text-white">
                 {org.name}
               </span>
               <span>-</span>
@@ -113,9 +113,9 @@ const OrgMember = (props: OrgMemberProps) => {
                   navigator.clipboard.writeText(org.id);
                   setNotification("Copied to clipboard", "success");
                 }}
-                className="text-white text-sm underline flex items-center"
+                className="flex items-center text-sm text-white underline"
               >
-                {org.id} <ClipboardIcon className="h-4 w-4 ml-1" />
+                {org.id} <ClipboardIcon className="ml-1 h-4 w-4" />
               </button>
             </li>
           ))}
@@ -146,7 +146,7 @@ const OrgMember = (props: OrgMemberProps) => {
                     ]);
                   } else {
                     setAdminIds((prev) =>
-                      prev?.filter((id) => id !== admin.user_id)
+                      prev?.filter((id) => id !== admin.user_id),
                     );
                   }
                 }}

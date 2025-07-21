@@ -54,7 +54,7 @@ function DirectComparisonCard({
     const color = better ? "bg-green-400" : "bg-sky-400";
 
     return (
-      <div className="h-1 w-full bg-gray-100 rounded-full">
+      <div className="h-1 w-full rounded-full bg-gray-100">
         <div
           className={`h-full rounded-full ${color}`}
           style={{ width: `${percentage}%` }}
@@ -125,7 +125,7 @@ function DirectComparisonCard({
           <img
             src={modelALogo}
             alt={modelA}
-            className="w-6 h-6 rounded-full mr-2"
+            className="mr-2 h-6 w-6 rounded-full"
           />
           <h3 className="text-lg font-semibold">{modelA}</h3>
         </div>
@@ -133,18 +133,18 @@ function DirectComparisonCard({
           <img
             src={modelBLogo}
             alt={modelB}
-            className="w-6 h-6 rounded-full mr-2"
+            className="mr-2 h-6 w-6 rounded-full"
           />
           <h3 className="text-lg font-semibold">{modelB}</h3>
         </div>
       </div>
 
       <div className="px-6 py-4">
-        <div className="grid grid-cols-12 mb-6">
+        <div className="mb-6 grid grid-cols-12">
           <div className="col-span-3">
             <h4 className="text-sm font-medium text-slate-600">Description</h4>
           </div>
-          <div className="col-span-4 text-sm pr-4">
+          <div className="col-span-4 pr-4 text-sm">
             <p>{modelADetails.info.description}</p>
           </div>
           <div className="col-span-4 text-sm">
@@ -152,7 +152,7 @@ function DirectComparisonCard({
           </div>
         </div>
 
-        <div className="grid grid-cols-12 mb-6">
+        <div className="mb-6 grid grid-cols-12">
           <div className="col-span-3">
             <h4 className="text-sm font-medium text-slate-600">Release Date</h4>
           </div>
@@ -164,7 +164,7 @@ function DirectComparisonCard({
           </div>
         </div>
 
-        <div className="grid grid-cols-12 mb-6">
+        <div className="mb-6 grid grid-cols-12">
           <div className="col-span-3">
             <h4 className="text-sm font-medium text-slate-600">Max Tokens</h4>
           </div>
@@ -177,7 +177,7 @@ function DirectComparisonCard({
         </div>
 
         {models[0].feedback && models[1].feedback && (
-          <div className="grid grid-cols-12 mb-8">
+          <div className="mb-8 grid grid-cols-12">
             <div className="col-span-3">
               <h4 className="text-sm font-medium text-slate-600">
                 User Satisfaction
@@ -193,10 +193,10 @@ function DirectComparisonCard({
                   {(models[0].feedback.positivePercentage * 100).toFixed(1)}%
                 </span>
                 {betterFeedback === "A" && (
-                  <span className="text-xs text-green-600 ml-1">Higher</span>
+                  <span className="ml-1 text-xs text-green-600">Higher</span>
                 )}
               </div>
-              <div className="h-1.5 w-full bg-gray-100 rounded-full mt-1">
+              <div className="mt-1 h-1.5 w-full rounded-full bg-gray-100">
                 <div
                   className={`h-full rounded-full ${
                     betterFeedback === "A" ? "bg-green-500" : "bg-sky-400"
@@ -217,10 +217,10 @@ function DirectComparisonCard({
                   {(models[1].feedback.positivePercentage * 100).toFixed(1)}%
                 </span>
                 {betterFeedback === "B" && (
-                  <span className="text-xs text-green-600 ml-1">Higher</span>
+                  <span className="ml-1 text-xs text-green-600">Higher</span>
                 )}
               </div>
-              <div className="h-1.5 w-full bg-gray-100 rounded-full mt-1">
+              <div className="mt-1 h-1.5 w-full rounded-full bg-gray-100">
                 <div
                   className={`h-full rounded-full ${
                     betterFeedback === "B" ? "bg-green-500" : "bg-sky-400"
@@ -235,7 +235,7 @@ function DirectComparisonCard({
         )}
 
         <div className="mb-8">
-          <div className="grid grid-cols-12 mb-2">
+          <div className="mb-2 grid grid-cols-12">
             <div className="col-span-3">
               <h4 className="text-sm font-medium text-slate-600">
                 Cost (per 1M tokens)
@@ -245,7 +245,7 @@ function DirectComparisonCard({
             <div className="col-span-4"></div>
           </div>
 
-          <div className="grid grid-cols-12 mb-2">
+          <div className="mb-2 grid grid-cols-12">
             <div className="col-span-3 pl-4 text-sm text-slate-500">Input</div>
             <div className="col-span-4">
               <p
@@ -255,7 +255,7 @@ function DirectComparisonCard({
               >
                 {formatCost(models[0].costs.prompt_token)}
                 {betterCosts.input === "A" && (
-                  <span className="text-xs text-green-600 ml-1">Cheaper</span>
+                  <span className="ml-1 text-xs text-green-600">Cheaper</span>
                 )}
               </p>
             </div>
@@ -267,13 +267,13 @@ function DirectComparisonCard({
               >
                 {formatCost(models[1].costs.prompt_token)}
                 {betterCosts.input === "B" && (
-                  <span className="text-xs text-green-600 ml-1">Cheaper</span>
+                  <span className="ml-1 text-xs text-green-600">Cheaper</span>
                 )}
               </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-12 mb-2">
+          <div className="mb-2 grid grid-cols-12">
             <div className="col-span-3 pl-4 text-sm text-slate-500">Output</div>
             <div className="col-span-4">
               <p
@@ -283,7 +283,7 @@ function DirectComparisonCard({
               >
                 {formatCost(models[0].costs.completion_token)}
                 {betterCosts.output === "A" && (
-                  <span className="text-xs text-green-600 ml-1">Cheaper</span>
+                  <span className="ml-1 text-xs text-green-600">Cheaper</span>
                 )}
               </p>
             </div>
@@ -295,7 +295,7 @@ function DirectComparisonCard({
               >
                 {formatCost(models[1].costs.completion_token)}
                 {betterCosts.output === "B" && (
-                  <span className="text-xs text-green-600 ml-1">Cheaper</span>
+                  <span className="ml-1 text-xs text-green-600">Cheaper</span>
                 )}
               </p>
             </div>
@@ -314,7 +314,7 @@ function DirectComparisonCard({
                     models[0].costs.completion_token
                 )}
                 {betterCosts.total === "A" && (
-                  <span className="text-xs text-green-600 ml-1">Cheaper</span>
+                  <span className="ml-1 text-xs text-green-600">Cheaper</span>
                 )}
               </p>
             </div>
@@ -329,7 +329,7 @@ function DirectComparisonCard({
                     models[1].costs.completion_token
                 )}
                 {betterCosts.total === "B" && (
-                  <span className="text-xs text-green-600 ml-1">Cheaper</span>
+                  <span className="ml-1 text-xs text-green-600">Cheaper</span>
                 )}
               </p>
             </div>
@@ -337,7 +337,7 @@ function DirectComparisonCard({
         </div>
 
         <div className="mb-8">
-          <div className="grid grid-cols-12 mb-2">
+          <div className="mb-2 grid grid-cols-12">
             <div className="col-span-3">
               <h4 className="text-sm font-medium text-slate-600">
                 Benchmark Performance
@@ -347,7 +347,7 @@ function DirectComparisonCard({
             <div className="col-span-4"></div>
           </div>
 
-          <div className="grid grid-cols-12 mb-3">
+          <div className="mb-3 grid grid-cols-12">
             <div className="col-span-3 pl-4 text-sm text-slate-500">MMLU</div>
             <div className="col-span-4">
               <div className="mb-1">
@@ -362,7 +362,7 @@ function DirectComparisonCard({
                       )}%`
                     : "-"}
                   {betterBenchmarks.mmlu === "A" && (
-                    <span className="text-xs text-green-600 ml-1">Higher</span>
+                    <span className="ml-1 text-xs text-green-600">Higher</span>
                   )}
                 </span>
               </div>
@@ -384,7 +384,7 @@ function DirectComparisonCard({
                       )}%`
                     : "-"}
                   {betterBenchmarks.mmlu === "B" && (
-                    <span className="text-xs text-green-600 ml-1">Higher</span>
+                    <span className="ml-1 text-xs text-green-600">Higher</span>
                   )}
                 </span>
               </div>
@@ -395,7 +395,7 @@ function DirectComparisonCard({
             </div>
           </div>
 
-          <div className="grid grid-cols-12 mb-3">
+          <div className="mb-3 grid grid-cols-12">
             <div className="col-span-3 pl-4 text-sm text-slate-500">
               HellaSwag
             </div>
@@ -412,7 +412,7 @@ function DirectComparisonCard({
                       ).toFixed(1)}%`
                     : "-"}
                   {betterBenchmarks.hellaswag === "A" && (
-                    <span className="text-xs text-green-600 ml-1">Higher</span>
+                    <span className="ml-1 text-xs text-green-600">Higher</span>
                   )}
                 </span>
               </div>
@@ -434,7 +434,7 @@ function DirectComparisonCard({
                       ).toFixed(1)}%`
                     : "-"}
                   {betterBenchmarks.hellaswag === "B" && (
-                    <span className="text-xs text-green-600 ml-1">Higher</span>
+                    <span className="ml-1 text-xs text-green-600">Higher</span>
                   )}
                 </span>
               </div>
@@ -458,7 +458,7 @@ function DirectComparisonCard({
                     ? `${(modelADetails.info.benchmarks.bbh * 100).toFixed(1)}%`
                     : "-"}
                   {betterBenchmarks.bbh === "A" && (
-                    <span className="text-xs text-green-600 ml-1">Higher</span>
+                    <span className="ml-1 text-xs text-green-600">Higher</span>
                   )}
                 </span>
               </div>
@@ -478,7 +478,7 @@ function DirectComparisonCard({
                     ? `${(modelBDetails.info.benchmarks.bbh * 100).toFixed(1)}%`
                     : "-"}
                   {betterBenchmarks.bbh === "B" && (
-                    <span className="text-xs text-green-600 ml-1">Higher</span>
+                    <span className="ml-1 text-xs text-green-600">Higher</span>
                   )}
                 </span>
               </div>
@@ -491,7 +491,7 @@ function DirectComparisonCard({
         </div>
 
         <div>
-          <div className="grid grid-cols-12 mb-2">
+          <div className="mb-2 grid grid-cols-12">
             <div className="col-span-3">
               <h4 className="text-sm font-medium text-slate-600">Best For</h4>
             </div>
@@ -501,7 +501,7 @@ function DirectComparisonCard({
                   .slice(0, 3)
                   .map((rec, idx) => (
                     <div key={idx} className="flex items-center gap-1.5">
-                      <CheckIcon className="w-3 h-3 text-green-500 flex-shrink-0" />
+                      <CheckIcon className="h-3 w-3 flex-shrink-0 text-green-500" />
                       <span className="text-xs text-slate-600">{rec}</span>
                     </div>
                   ))}
@@ -513,7 +513,7 @@ function DirectComparisonCard({
                   .slice(0, 3)
                   .map((rec, idx) => (
                     <div key={idx} className="flex items-center gap-1.5">
-                      <CheckIcon className="w-3 h-3 text-green-500 flex-shrink-0" />
+                      <CheckIcon className="h-3 w-3 flex-shrink-0 text-green-500" />
                       <span className="text-xs text-slate-600">{rec}</span>
                     </div>
                   ))}
@@ -573,8 +573,8 @@ export function ModelComparisonPage({
 
   return (
     <div className="grid grid-cols-1 gap-8">
-      <div className="max-w-7xl mx-auto p-4">
-        <div className="flex-col justify-start items-center gap-6 flex mb-8">
+      <div className="mx-auto max-w-7xl p-4">
+        <div className="mb-8 flex flex-col items-center justify-start gap-6">
           <div>
             <Image
               src="/static/comparison/browser.png"
@@ -584,21 +584,21 @@ export function ModelComparisonPage({
             />
           </div>
           <div className="text-center">
-            <span className="text-black text-4xl font-semibold font-['Inter'] leading-[47.28px]">
+            <span className="font-['Inter'] text-4xl font-semibold leading-[47.28px] text-black">
               {providerA}{" "}
             </span>
-            <span className="text-[#0da5e8] text-4xl font-semibold font-['Inter'] leading-[47.28px]">
+            <span className="font-['Inter'] text-4xl font-semibold leading-[47.28px] text-[#0da5e8]">
               {modelA}{" "}
             </span>
-            <span className="text-black text-4xl font-semibold font-['Inter'] leading-[47.28px]">
+            <span className="font-['Inter'] text-4xl font-semibold leading-[47.28px] text-black">
               vs. <br />
               {providerB}{" "}
             </span>
-            <span className="text-[#0da5e8] text-4xl font-semibold font-['Inter'] leading-[47.28px]">
+            <span className="font-['Inter'] text-4xl font-semibold leading-[47.28px] text-[#0da5e8]">
               {modelB}
             </span>
           </div>
-          <div className="w-[600px] text-center text-slate-400 text-[16px] font-normal font-['Inter'] leading-normal">
+          <div className="w-[600px] text-center font-['Inter'] text-[16px] font-normal leading-normal text-slate-400">
             Compare LLM performance using{" "}
             <span className="text-[#0da5e8]">real-world</span> data from
             thousands of applications. See actual latency, costs, and user
@@ -611,7 +611,7 @@ export function ModelComparisonPage({
         ) : (
           models && (
             <div className="grid grid-cols-1 gap-8">
-              <div className="max-w-5xl mx-auto">
+              <div className="mx-auto max-w-5xl">
                 <DirectComparisonCard
                   modelA={modelA}
                   modelB={modelB}
@@ -633,10 +633,10 @@ export function ModelComparisonPage({
                       subtitle="per 1000 tokens"
                     />
                   </CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 border-t">
+                  <div className="grid grid-cols-1 border-t md:grid-cols-2">
                     {/* Geographic Map Section - Left Side */}
                     <div className="border-r">
-                      <div className="p-3 border-b bg-gray-50 flex justify-between items-center h-12">
+                      <div className="flex h-12 items-center justify-between border-b bg-gray-50 p-3">
                         <h3 className="text-sm font-medium text-slate-700">
                           Region Comparison
                         </h3>
@@ -645,9 +645,9 @@ export function ModelComparisonPage({
                             <button
                               key={model.model}
                               onClick={() => setSelectedModelIndex(index)}
-                              className={`text-xs px-2 py-1 rounded ${
+                              className={`rounded px-2 py-1 text-xs ${
                                 selectedModelIndex === index
-                                  ? "bg-blue-100 text-blue-700 font-medium"
+                                  ? "bg-blue-100 font-medium text-blue-700"
                                   : "text-gray-600"
                               }`}
                             >
@@ -658,18 +658,18 @@ export function ModelComparisonPage({
                           ))}
                         </div>
                       </div>
-                      <div className="p-4 h-[320px] relative overflow-hidden">
+                      <div className="relative h-[320px] overflow-hidden p-4">
                         <GeoMetricMap
                           model={models[selectedModelIndex] ?? null}
                           metric="latency"
-                          className="w-full h-full"
+                          className="h-full w-full"
                         />
                       </div>
                     </div>
 
                     {/* Time Series Chart - Right Side */}
                     <div>
-                      <div className="p-3 border-b bg-gray-50 flex justify-between items-center h-12">
+                      <div className="flex h-12 items-center justify-between border-b bg-gray-50 p-3">
                         <h3 className="text-sm font-medium text-slate-700">
                           30-Day Trend
                         </h3>
@@ -677,7 +677,7 @@ export function ModelComparisonPage({
                           <span>Historical data</span>
                         </div>
                       </div>
-                      <div className="p-4 h-[320px]">
+                      <div className="h-[320px] p-4">
                         <ModelTimeSeriesChart
                           models={models}
                           metric="latency"
@@ -698,10 +698,10 @@ export function ModelComparisonPage({
                       subtitle="milliseconds"
                     />
                   </CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 border-t">
+                  <div className="grid grid-cols-1 border-t md:grid-cols-2">
                     {/* Geographic Map Section - Left Side */}
                     <div className="border-r">
-                      <div className="p-3 border-b bg-gray-50 flex justify-between items-center h-12">
+                      <div className="flex h-12 items-center justify-between border-b bg-gray-50 p-3">
                         <h3 className="text-sm font-medium text-slate-700">
                           Region Comparison
                         </h3>
@@ -710,9 +710,9 @@ export function ModelComparisonPage({
                             <button
                               key={model.model}
                               onClick={() => setSelectedModelIndex(index)}
-                              className={`text-xs px-2 py-1 rounded ${
+                              className={`rounded px-2 py-1 text-xs ${
                                 selectedModelIndex === index
-                                  ? "bg-blue-100 text-blue-700 font-medium"
+                                  ? "bg-blue-100 font-medium text-blue-700"
                                   : "text-gray-600"
                               }`}
                             >
@@ -723,18 +723,18 @@ export function ModelComparisonPage({
                           ))}
                         </div>
                       </div>
-                      <div className="p-4 h-[320px] relative overflow-hidden">
+                      <div className="relative h-[320px] overflow-hidden p-4">
                         <GeoMetricMap
                           model={models[selectedModelIndex] ?? null}
                           metric="ttft"
-                          className="w-full h-full"
+                          className="h-full w-full"
                         />
                       </div>
                     </div>
 
                     {/* Time Series Chart - Right Side */}
                     <div>
-                      <div className="p-3 border-b bg-gray-50 flex justify-between items-center h-12">
+                      <div className="flex h-12 items-center justify-between border-b bg-gray-50 p-3">
                         <h3 className="text-sm font-medium text-slate-700">
                           30-Day Trend
                         </h3>
@@ -742,7 +742,7 @@ export function ModelComparisonPage({
                           <span>Historical data</span>
                         </div>
                       </div>
-                      <div className="p-4 h-[320px]">
+                      <div className="h-[320px] p-4">
                         <ModelTimeSeriesChart models={models} metric="ttft" />
                       </div>
                     </div>
@@ -770,7 +770,7 @@ export function ModelComparisonPage({
                   width={0}
                   height={0}
                   sizes="100vw"
-                  className="w-full h-auto"
+                  className="h-auto w-full"
                 />
               </a>
             </div>

@@ -4,7 +4,7 @@ import { useOrg } from "../../components/layout/org/organizationContext";
 export function useLocalStorage<T>(
   key: string,
   initialValue: T,
-  onNothingStored?: (setStored: (t: T) => void) => void
+  onNothingStored?: (setStored: (t: T) => void) => void,
 ): [T, (t: T) => void] {
   const org = useOrg();
 
@@ -25,7 +25,7 @@ export function useLocalStorage<T>(
         console.error(error);
       }
     },
-    [orgKey, storedValue] // Updated dependency to orgKey
+    [orgKey, storedValue], // Updated dependency to orgKey
   );
 
   useEffect(() => {

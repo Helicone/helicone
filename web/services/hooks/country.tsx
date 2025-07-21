@@ -7,7 +7,7 @@ import { FilterNode } from "@helicone-package/filters/filterDefs";
 const useCountries = (
   timeFilter: TimeFilter,
   limit: number,
-  userFilters: FilterNode
+  userFilters: FilterNode,
 ) => {
   const {
     data: countries,

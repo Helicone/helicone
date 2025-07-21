@@ -39,8 +39,8 @@ export default function CostComparisonCard({
   return (
     <Card>
       <CardContent className="p-5">
-        <h3 className="text-lg font-semibold mb-4 flex items-center">
-          <DollarSign className="w-5 h-5 mr-2 text-sky-500" />
+        <h3 className="mb-4 flex items-center text-lg font-semibold">
+          <DollarSign className="mr-2 h-5 w-5 text-sky-500" />
           Cost Per Million Tokens
         </h3>
 
@@ -53,13 +53,13 @@ export default function CostComparisonCard({
             return (
               <div
                 key={model.model}
-                className={`p-4 rounded-lg border ${
+                className={`rounded-lg border p-4 ${
                   isWinner ? "border-sky-200 bg-sky-50" : ""
                 }`}
               >
-                <div className="flex items-center gap-2 mb-3">
+                <div className="mb-3 flex items-center gap-2">
                   <div
-                    className={`w-3 h-3 rounded-full ${
+                    className={`h-3 w-3 rounded-full ${
                       index === 0 ? "bg-red-500" : "bg-blue-500"
                     }`}
                   />
@@ -75,19 +75,19 @@ export default function CostComparisonCard({
 
                 <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <div className="text-xs text-gray-500 mb-1">Input</div>
+                    <div className="mb-1 text-xs text-gray-500">Input</div>
                     <div className="text-lg font-bold">
                       {formatCost(model.costs.prompt_token)}
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-gray-500 mb-1">Output</div>
+                    <div className="mb-1 text-xs text-gray-500">Output</div>
                     <div className="text-lg font-bold">
                       {formatCost(model.costs.completion_token)}
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-gray-500 mb-1">Total</div>
+                    <div className="mb-1 text-xs text-gray-500">Total</div>
                     <div className="text-lg font-bold">
                       {formatCost(totalCost)}
                     </div>

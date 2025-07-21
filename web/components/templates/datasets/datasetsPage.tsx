@@ -64,7 +64,7 @@ const DatasetsPage = (props: DatasetsPageProps) => {
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
   const { canCreate, freeLimit, upgradeMessage } = useFeatureLimit(
     "datasets",
-    datasets?.length || 0
+    datasets?.length || 0,
   );
 
   const router = useRouter();
@@ -127,11 +127,11 @@ const DatasetsPage = (props: DatasetsPageProps) => {
       header: "Dataset Type",
       render: (row: DatasetTableRow) => {
         return row.dataset_type === "helicone" ? (
-          <span className="inline-flex items-center rounded-md bg-blue-50 dark:bg-blue-900 px-2 py-1 -my-1 text-xs font-medium text-blue-700 dark:text-blue-300 ring-1 ring-inset ring-blue-600/20">
+          <span className="-my-1 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-600/20 dark:bg-blue-900 dark:text-blue-300">
             Helicone
           </span>
         ) : row.dataset_type === "experiment" ? (
-          <span className="inline-flex items-center rounded-md bg-green-50 dark:bg-green-900 px-2 py-1 -my-1 text-xs font-medium text-green-700 dark:text-green-300 ring-1 ring-inset ring-green-600/20">
+          <span className="-my-1 inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20 dark:bg-green-900 dark:text-green-300">
             Experiment
           </span>
         ) : (
@@ -168,7 +168,7 @@ const DatasetsPage = (props: DatasetsPageProps) => {
   // Show skeleton during loading or when data hasn't been fetched yet
   if (isLoading || isRefetching || !isFetched) {
     return (
-      <div className="flex flex-col space-y-2 w-full items-center">
+      <div className="flex w-full flex-col items-center space-y-2">
         <LoadingAnimation />
       </div>
     );
@@ -177,7 +177,7 @@ const DatasetsPage = (props: DatasetsPageProps) => {
   return (
     <>
       {datasets.length === 0 ? (
-        <div className="flex flex-col w-full min-h-screen items-center bg-slate-50">
+        <div className="flex min-h-screen w-full flex-col items-center bg-slate-50">
           <EmptyStateCard feature="datasets" />
         </div>
       ) : (
@@ -214,7 +214,7 @@ const DatasetsPage = (props: DatasetsPageProps) => {
                   &rdquo;? This action cannot be undone.
                 </DialogDescription>
               </DialogHeader>
-              <DialogFooter className="flex flex-row gap-2 justify-end">
+              <DialogFooter className="flex flex-row justify-end gap-2">
                 <Button variant="outline" onClick={handleCloseDialog}>
                   Cancel
                 </Button>

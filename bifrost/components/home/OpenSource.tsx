@@ -144,7 +144,7 @@ const CostCalculatorSvg = () => (
 
 const OpenStatsSVG = () => (
   <svg
-    className="w-1/4 absolute top-0 right-0"
+    className="absolute right-0 top-0 w-1/4"
     viewBox="0 0 119 118"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -187,13 +187,13 @@ const OpenSource = async () => {
   const stars = githubData.stargazers_count;
 
   return (
-    <div className={cn(ISLAND_WIDTH, "flex flex-col gap-12 pt-32 pb-20")}>
-      <div className="flex justify-between items-end">
+    <div className={cn(ISLAND_WIDTH, "flex flex-col gap-12 pb-20 pt-32")}>
+      <div className="flex items-end justify-between">
         <div className="flex flex-col gap-4">
-          <h2 className="font-semibold text-4xl sm:text-5xl leading-[120%]  text-black">
+          <h2 className="text-4xl font-semibold leading-[120%] text-black sm:text-5xl">
             Proudly <span className="text-brand">open-source</span>
           </h2>
-          <p className="text-lg sm:text-xl font-light leading-relaxed text-landing-description">
+          <p className="text-landing-description text-lg font-light leading-relaxed sm:text-xl">
             We value transparency and believe the best products are built in
             community.
           </p>
@@ -205,10 +205,10 @@ const OpenSource = async () => {
         >
           <div className="flex items-center">
             <Button
-              className="flex items-center gap-2 rounded-r-none border border-slate-200 text-landing-description"
+              className="text-landing-description flex items-center gap-2 rounded-r-none border border-slate-200"
               variant="secondary"
             >
-              <svg fill="black" viewBox="0 0 24 24" className="w-4 h-4">
+              <svg fill="black" viewBox="0 0 24 24" className="h-4 w-4">
                 <path
                   fillRule="evenodd"
                   d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
@@ -218,7 +218,7 @@ const OpenSource = async () => {
               Star us on Github
             </Button>
             <Button
-              className="rounded-l-none border border-l-0 border-slate-200 text-landing-description"
+              className="text-landing-description rounded-l-none border border-l-0 border-slate-200"
               variant="secondary"
             >
               {stars.toLocaleString("en-US", {
@@ -229,23 +229,23 @@ const OpenSource = async () => {
           </div>
         </a>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-6">
         <Link
           href="https://github.com/helicone/helicone"
           target="_blank"
-          className="col-span-1 md:col-span-2 p-6 bg-slate-50 rounded-xl border border-slate-200 relative hover:bg-slate-100 transition-colors flex flex-col h-full justify-between"
+          className="relative col-span-1 flex h-full flex-col justify-between rounded-xl border border-slate-200 bg-slate-50 p-6 transition-colors hover:bg-slate-100 md:col-span-2"
         >
           <div className="flex flex-col gap-2">
             <p className="text-sm text-slate-500">Become a contributor</p>
 
             <div className="flex items-center gap-2">
-              <h3 className="text-xl sm:text-2xl font-semibold text-black">
+              <h3 className="text-xl font-semibold text-black sm:text-2xl">
                 Join our community
               </h3>
-              <ArrowUpRight className="w-4 h-4 text-brand" />
+              <ArrowUpRight className="text-brand h-4 w-4" />
             </div>
           </div>
-          <p className="text-base sm:text-lg max-w-[380px] text-wrap">
+          <p className="max-w-[380px] text-wrap text-base sm:text-lg">
             Share insights, get support, and learn from other AI engineers.
           </p>
           <br />
@@ -254,25 +254,25 @@ const OpenSource = async () => {
         <Link
           href="https://docs.helicone.ai/ai-gateway/quickstart"
           target="_blank"
-          className="col-span-1 md:col-span-4 px-6 pt-6 pb-2 sm:pb-6 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row items-center sm:items-stretch gap-y-8 justify-between relative hover:bg-slate-100 transition-colors"
+          className="relative col-span-1 flex flex-col items-center justify-between gap-y-8 rounded-xl border border-slate-200 bg-slate-50 px-6 pb-2 pt-6 transition-colors hover:bg-slate-100 sm:flex-row sm:items-stretch sm:pb-6 md:col-span-4"
         >
           <div className="flex flex-col gap-4 sm:gap-10">
             <div className="flex flex-col gap-2">
               <p className="text-sm text-slate-500">AI Engineers</p>
               <div className="flex items-center gap-2">
-                <h3 className="text-xl sm:text-2xl font-semibold text-black">
+                <h3 className="text-xl font-semibold text-black sm:text-2xl">
                   Deploy your own AI Gateway
                 </h3>
-                <ArrowUpRight className="w-4 h-4 text-brand" />
+                <ArrowUpRight className="text-brand h-4 w-4" />
               </div>
             </div>
-            <p className="text-base sm:text-lg max-w-[486px] text-wrap">
+            <p className="max-w-[486px] text-wrap text-base sm:text-lg">
               Whether through single-click deployment or our production-ready
               HELM chart, self-host the AI Gateway in your own infrastructure.
             </p>
           </div>
           <Image
-            className="self-end pl-8 w-2/5"
+            className="w-2/5 self-end pl-8"
             src={DeployImg}
             alt="Deploy on prem"
           />
@@ -280,19 +280,19 @@ const OpenSource = async () => {
         <Link
           href="/llm-cost"
           target="_blank"
-          className="col-span-1 md:col-span-4 px-6 pt-6 pb-2 sm:pb-6 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row items-center sm:items-stretch gap-y-8 justify-between relative hover:bg-slate-100 transition-colors"
+          className="relative col-span-1 flex flex-col items-center justify-between gap-y-8 rounded-xl border border-slate-200 bg-slate-50 px-6 pb-2 pt-6 transition-colors hover:bg-slate-100 sm:flex-row sm:items-stretch sm:pb-6 md:col-span-4"
         >
           <div className="flex flex-col gap-4 sm:gap-10">
             <div className="flex flex-col gap-2">
               <p className="text-sm text-slate-500">Built by Helicone</p>
               <div className="flex items-center gap-2">
-                <h3 className="text-xl sm:text-2xl font-semibold text-black">
+                <h3 className="text-xl font-semibold text-black sm:text-2xl">
                   API Cost Calculator
                 </h3>
-                <ArrowUpRight className="w-4 h-4 text-brand" />
+                <ArrowUpRight className="text-brand h-4 w-4" />
               </div>
             </div>
-            <p className="text-base sm:text-lg max-w-[486px] text-wrap">
+            <p className="max-w-[486px] text-wrap text-base sm:text-lg">
               Compare LLM costs with the largest open-source API pricing
               database with 300+ models and providers such as OpenAI, Anthropic
               and more.
@@ -305,19 +305,19 @@ const OpenSource = async () => {
         <Link
           href="https://us.helicone.ai/open-stats"
           target="_blank"
-          className="col-span-1 md:col-span-2 p-6 bg-slate-50 rounded-xl border border-slate-200 relative hover:bg-slate-100 transition-colors flex flex-col h-full justify-between"
+          className="relative col-span-1 flex h-full flex-col justify-between rounded-xl border border-slate-200 bg-slate-50 p-6 transition-colors hover:bg-slate-100 md:col-span-2"
         >
           <div className="flex flex-col gap-2">
             <p className="text-sm text-slate-500">Check out our data</p>
 
             <div className="flex items-center gap-2">
-              <h3 className="text-xl sm:text-2xl font-semibold text-black">
+              <h3 className="text-xl font-semibold text-black sm:text-2xl">
                 Open Stats
               </h3>
-              <ArrowUpRight className="w-4 h-4 text-brand" />
+              <ArrowUpRight className="text-brand h-4 w-4" />
             </div>
           </div>
-          <p className="text-base sm:text-lg max-w-[380px] text-wrap">
+          <p className="max-w-[380px] text-wrap text-base sm:text-lg">
             The largest public AI conversation datasets consisting of all of
             Helicone&apos;s LLM usage data. All anonymized.
           </p>

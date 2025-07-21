@@ -1,6 +1,6 @@
 Building LLM applications is fun and exciting...until something breaks.
 
-When things break—**and they will**—you need effective ways to identify and fix issues. 
+When things break—**and they will**—you need effective ways to identify and fix issues.
 
 ![Building Agentic RAG systems](/static/blog/agentic-rag-full-developer-guide/building-agentic-rag.webp)
 
@@ -78,7 +78,7 @@ This single integration—perhaps the most impactful step in your debugging jour
   primaryButtonLink="https://helicone.ai/signup"
 />
 
-### Multi-step (Agentic) Workflow Tracing 
+### Multi-step (Agentic) Workflow Tracing
 
 For complex applications, you need to trace entire user journeys across multiple LLM calls. <a href="https://docs.helicone.ai/features/sessions" target="_blank" rel="noopener">Helicone's Sessions feature</a> enables this with just a few additional headers:
 
@@ -176,7 +176,7 @@ const replaySessionId = randomUUID();
 // Loop through original requests with modifications
 for (const request of originalRequests) {
   const modifiedRequest = modifyRequestBody(request);
-  
+
   // Send modified request with the same session structure
   await sendRequest(modifiedRequest, replaySessionId, sessionPath, sessionName);
 }
@@ -212,7 +212,7 @@ Design your application architecture with debugging in mind:
 
 1. **Add <a href="https://docs.helicone.ai/features/advanced-usage/custom-properties" target="_blank" rel="noopener">custom properties</a>**: Tag requests with metadata for better filtering
 2. **Track user IDs**: Associate requests with specific users for easier troubleshooting
-3. Implement  <a href="https://docs.helicone.ai/features/advanced-usage/caching" target="_blank" rel="noopener">caching</a> for greater reliability and cost control
+3. Implement <a href="https://docs.helicone.ai/features/advanced-usage/caching" target="_blank" rel="noopener">caching</a> for greater reliability and cost control
 4. **Implement rate limiting**: Protect your application from overuse and unexpected costs with <a href="https://docs.helicone.ai/features/advanced-usage/custom-rate-limits" target="_blank" rel="noopener">custom rate limits</a>
 
 Learn more about <a href="https://docs.helicone.ai/features/advanced-usage/user-metrics" target="_blank" rel="noopener">user metrics</a> in Helicone.
@@ -237,31 +237,72 @@ Remember that LLM debugging is an ongoing process. As models evolve and applicat
 
 ## Further Resources
 
-- <a href="https://www.helicone.ai/blog/ai-best-practices" target="_blank" rel="noopener">6 Best Practices for Building Reliable AI Applications</a>
-- <a href="https://www.helicone.ai/blog/prompt-management" target="_blank" rel="noopener">The Ultimate Guide to Effective Prompt Management</a>
-- <a href="https://www.helicone.ai/blog/test-your-llm-prompts" target="_blank" rel="noopener">How to Test Your LLM Prompts</a>
-- <a href="https://www.helicone.ai/blog/prompt-evaluation-frameworks" target="_blank" rel="noopener">Top Prompt Evaluation Frameworks</a>
-- <a href="https://docs.helicone.ai/guides/cookbooks/debugging" target="_blank" rel="noopener">Debugging Features in Helicone</a>
+- <a
+    href="https://www.helicone.ai/blog/ai-best-practices"
+    target="_blank"
+    rel="noopener"
+  >
+    6 Best Practices for Building Reliable AI Applications
+  </a>
+- <a
+    href="https://www.helicone.ai/blog/prompt-management"
+    target="_blank"
+    rel="noopener"
+  >
+    The Ultimate Guide to Effective Prompt Management
+  </a>
+- <a
+    href="https://www.helicone.ai/blog/test-your-llm-prompts"
+    target="_blank"
+    rel="noopener"
+  >
+    How to Test Your LLM Prompts
+  </a>
+- <a
+    href="https://www.helicone.ai/blog/prompt-evaluation-frameworks"
+    target="_blank"
+    rel="noopener"
+  >
+    Top Prompt Evaluation Frameworks
+  </a>
+- <a
+    href="https://docs.helicone.ai/guides/cookbooks/debugging"
+    target="_blank"
+    rel="noopener"
+  >
+    Debugging Features in Helicone
+  </a>
 
-<FAQ items={[
-  {
-    question: "What makes debugging LLM applications different from traditional software debugging?",
-    answer: "LLM applications are non-deterministic (same input can produce different outputs), often involve complex multi-step workflows, and have unique failure modes like hallucinations and prompt injections. Traditional debugging tools aren't designed to handle these challenges, which is why specialized LLM observability tools are necessary."
-  },
-  {
-    question: "How can I monitor token usage and costs in my LLM application?",
-    answer: "Tools like Helicone automatically track token usage and associated costs for all your LLM requests. You can segment this data by user, feature, or any custom property to identify expensive patterns and optimize accordingly. Setting up cost alerts helps you avoid unexpected bills."
-  },
-  {
-    question: "What's the best way to debug multi-step agent workflows?",
-    answer: "Use session tracing to visualize the entire flow of a user interaction across multiple LLM calls and tool uses. Helicone's Sessions feature lets you group related requests together and trace the complete journey, making it easier to identify which step in the process is causing issues."
-  },
-  {
-    question: "How can I test if my prompt changes actually improve performance?",
-    answer: "Use a systematic approach with prompt experimentation tools like Helicone's Experiments feature. Create multiple prompt variations, test them against the same inputs, set up automatic evaluations to score responses, and analyze metrics to see which variant performs best."
-  },
-  {
-    question: "What security concerns should I monitor in my LLM application?",
-    answer: "Monitor for prompt injection attacks (attempts to manipulate model behavior), data exfiltration (extracting sensitive data), and misuse (generating harmful content). Helicone's security feature uses Meta's security models to automatically detect and block these threats."
-  }
-]} />
+<FAQ
+  items={[
+    {
+      question:
+        "What makes debugging LLM applications different from traditional software debugging?",
+      answer:
+        "LLM applications are non-deterministic (same input can produce different outputs), often involve complex multi-step workflows, and have unique failure modes like hallucinations and prompt injections. Traditional debugging tools aren't designed to handle these challenges, which is why specialized LLM observability tools are necessary.",
+    },
+    {
+      question:
+        "How can I monitor token usage and costs in my LLM application?",
+      answer:
+        "Tools like Helicone automatically track token usage and associated costs for all your LLM requests. You can segment this data by user, feature, or any custom property to identify expensive patterns and optimize accordingly. Setting up cost alerts helps you avoid unexpected bills.",
+    },
+    {
+      question: "What's the best way to debug multi-step agent workflows?",
+      answer:
+        "Use session tracing to visualize the entire flow of a user interaction across multiple LLM calls and tool uses. Helicone's Sessions feature lets you group related requests together and trace the complete journey, making it easier to identify which step in the process is causing issues.",
+    },
+    {
+      question:
+        "How can I test if my prompt changes actually improve performance?",
+      answer:
+        "Use a systematic approach with prompt experimentation tools like Helicone's Experiments feature. Create multiple prompt variations, test them against the same inputs, set up automatic evaluations to score responses, and analyze metrics to see which variant performs best.",
+    },
+    {
+      question:
+        "What security concerns should I monitor in my LLM application?",
+      answer:
+        "Monitor for prompt injection attacks (attempts to manipulate model behavior), data exfiltration (extracting sensitive data), and misuse (generating harmful content). Helicone's security feature uses Meta's security models to automatically detect and block these threats.",
+    },
+  ]}
+/>

@@ -23,7 +23,7 @@ const CreateEvaluator = () => {
       router.push("/evaluators");
       notification.setNotification(
         "Evaluator created successfully, but couldn't navigate to edit page. Check console for details.",
-        "info"
+        "info",
       );
     }
   });
@@ -52,8 +52,8 @@ const CreateEvaluator = () => {
 
   return (
     <div>
-      <div className="w-full py-2 bg-heliblue font-medium flex items-center justify-center">
-        <p className="text-white text-sm">
+      <div className="flex w-full items-center justify-center bg-heliblue py-2 font-medium">
+        <p className="text-sm text-white">
           We are deprecating the Helicone Evaluators feature by{" "}
           <span className="font-bold">September 1st, 2025</span>.
         </p>
@@ -65,7 +65,7 @@ const CreateEvaluator = () => {
           href: "/evaluators",
         }}
       />
-      <div className="p-6 pb-24 bg-background min-h-screen">
+      <div className="min-h-screen bg-background p-6 pb-24">
         <EvaluatorForm
           initialValues={defaultValues}
           isCreating={true}

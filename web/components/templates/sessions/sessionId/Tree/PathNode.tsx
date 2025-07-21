@@ -13,7 +13,7 @@ export function PathNode(props: {
   return (
     <div
       className={
-        "flex flex-col py-2 px-4 w-full group-hover:cursor-pointer bg-slate-50 dark:bg-black group-hover:bg-slate-100 dark:group-hover:bg-slate-900 text-slate-500 dark:text-slate-200"
+        "flex w-full flex-col bg-slate-50 px-4 py-2 text-slate-500 group-hover:cursor-pointer group-hover:bg-slate-100 dark:bg-black dark:text-slate-200 dark:group-hover:bg-slate-900"
       }
       onClick={() =>
         node.children
@@ -35,7 +35,7 @@ export function PathNode(props: {
             className="text-slate-400 dark:text-slate-200"
           />
         )}
-        <div className="flex w-full gap-2 items-center">
+        <div className="flex w-full items-center gap-2">
           <div className="text-xs">{node.subPathName}</div>
           <div className="flex items-center gap-1">
             {/* <Clock4Icon

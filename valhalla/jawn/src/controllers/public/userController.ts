@@ -82,7 +82,12 @@ export class UserController extends Controller {
     @Body()
     requestBody: UserMetricsQueryParams,
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<{ users: UserMetricsResult[]; count: number; hasUsers: boolean }, string>> {
+  ): Promise<
+    Result<
+      { users: UserMetricsResult[]; count: number; hasUsers: boolean },
+      string
+    >
+  > {
     const userManager = new UserManager(request.authParams);
     if (requestBody.limit > 1000) {
       this.setStatus(400);

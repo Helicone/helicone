@@ -9,8 +9,8 @@ const getResponseText = (responseBody: any, statusCode: number = 200) => {
   return statusCode === 0 || statusCode === null
     ? ""
     : statusCode === 200
-    ? JSON.stringify(responseBody.results || "", null, 4)
-    : responseBody?.error?.message || "";
+      ? JSON.stringify(responseBody.results || "", null, 4)
+      : responseBody?.error?.message || "";
 };
 
 export const mapOpenAIModeration: MapperFn<any, any> = ({

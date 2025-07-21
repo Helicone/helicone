@@ -20,7 +20,7 @@ interface AddColumnHeaderProps {
     columnType: "experiment" | "input" | "output",
     hypothesisId?: string,
     promptVersionId?: string,
-    promptVariables?: string[]
+    promptVariables?: string[],
   ) => Promise<void>;
   wrapText: boolean;
   originalColumnPromptVersionId: string;
@@ -58,7 +58,7 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
 
   const buttonElement = (
     <Button variant="ghost" className="text-slate-900 dark:text-slate-100">
-      <PlusIcon className="w-5 h-5 text-slate-700 dark:text-slate-100" />
+      <PlusIcon className="h-5 w-5 text-slate-700 dark:text-slate-100" />
       <span className="text-sm font-medium text-slate-700 dark:text-slate-100">
         Add Prompt
       </span>
@@ -79,7 +79,7 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
         <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
           <DropdownMenuTrigger asChild>{buttonElement}</DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuLabel className="font-normal text-sm text-slate-500 leading-[140%]">
+            <DropdownMenuLabel className="text-sm font-normal leading-[140%] text-slate-500">
               Fork new prompt from
             </DropdownMenuLabel>
             {experimentPromptVersions?.map((pv, i) => (

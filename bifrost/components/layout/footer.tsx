@@ -53,13 +53,13 @@ const Footer = () => {
 
   return (
     <footer
-      className={`grid grid-cols-2 md:grid-cols-5 gap-y-8 pl-8 md:pl-0 md:justify-items-center items-start ${
+      className={`grid grid-cols-2 items-start gap-y-8 pl-8 md:grid-cols-5 md:justify-items-center md:pl-0 ${
         path === "/"
-          ? " bg-white text-slate-700 fill-slate-700 stroke-slate-700 py-16"
-          : "bg-inherit text-black/60 fill-[#5D6673] stroke-[#5D6673] py-6"
+          ? "bg-white fill-slate-700 stroke-slate-700 py-16 text-slate-700"
+          : "bg-inherit fill-[#5D6673] stroke-[#5D6673] py-6 text-black/60"
       }`}
     >
-      <div className="flex flex-col items-start font-light text-sm tracking-wide gap-1 col-span-2 md:col-span-1 justify-self-start md:justify-self-center">
+      <div className="col-span-2 flex flex-col items-start gap-1 justify-self-start text-sm font-light tracking-wide md:col-span-1 md:justify-self-center">
         <Image
           src="/static/logo-text.svg"
           alt="Bifrost"
@@ -71,8 +71,8 @@ const Footer = () => {
       </div>
 
       <div className="">
-        <p className="text-sm tracking-wide font-bold mb-2">INTEGRATIONS</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 items-start font-light text-sm tracking-wide gap-x-8 gap-y-2">
+        <p className="mb-2 text-sm font-bold tracking-wide">INTEGRATIONS</p>
+        <div className="grid grid-cols-1 items-start gap-x-8 gap-y-2 text-sm font-light tracking-wide md:grid-cols-2">
           <a
             className="hover:underline"
             href="https://docs.helicone.ai/integrations/openai/javascript"
@@ -133,8 +133,8 @@ const Footer = () => {
       </div>
 
       <div className="">
-        <p className="font-bold text-sm tracking-wide mb-2">BLOGS</p>
-        <div className="flex flex-col items-start font-light text-sm tracking-wide gap-2">
+        <p className="mb-2 text-sm font-bold tracking-wide">BLOGS</p>
+        <div className="flex flex-col items-start gap-2 text-sm font-light tracking-wide">
           <a
             className="hover:underline"
             href="/blog/ai-agent-builders"
@@ -170,8 +170,8 @@ const Footer = () => {
       </div>
 
       <div className="">
-        <p className="font-bold text-sm tracking-wide mb-2">LEARN MORE</p>
-        <div className="flex flex-col items-start font-light text-sm tracking-wide gap-2">
+        <p className="mb-2 text-sm font-bold tracking-wide">LEARN MORE</p>
+        <div className="flex flex-col items-start gap-2 text-sm font-light tracking-wide">
           <a
             className="hover:underline"
             href="https://docs.helicone.ai"
@@ -205,8 +205,8 @@ const Footer = () => {
       </div>
 
       <div className="">
-        <p className="font-bold mb-2 text-sm tracking-wide">CONNECT</p>
-        <div className="flex flex-col items-start font-light text-sm tracking-wide gap-2">
+        <p className="mb-2 text-sm font-bold tracking-wide">CONNECT</p>
+        <div className="flex flex-col items-start gap-2 text-sm font-light tracking-wide">
           <a
             className="hover:underline"
             href="https://twitter.com/helicone_ai"

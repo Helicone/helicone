@@ -42,7 +42,7 @@ const Footer = (props: FooterProps) => {
   const {} = props;
 
   return (
-    <footer className="bg-inherit dark:bg-black border-t border-gray-200 dark:border-gray-700">
+    <footer className="border-t border-gray-200 bg-inherit dark:border-gray-700 dark:bg-black">
       <div className="mx-auto max-w-5xl px-4 py-8 md:flex md:items-center md:justify-between lg:px-4">
         <div className="flex space-x-6 md:order-2">
           {meta.social.map((item) => (
@@ -58,7 +58,7 @@ const Footer = (props: FooterProps) => {
             </Link>
           ))}
         </div>
-        <div className="mt-8 md:order-1 md:mt-0 space-x-4 flex flex-row">
+        <div className="mt-8 flex flex-row space-x-4 md:order-1 md:mt-0">
           <p className="text-center text-xs leading-5 text-gray-500 dark:text-gray-300">
             &copy; 2025 Helicone, Inc. All rights reserved.
           </p>

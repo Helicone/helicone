@@ -57,19 +57,19 @@ const LLMPricingFAQ = () => {
 
   return (
     <section>
-      <h3 className="text-2xl font-semibold mb-8 mt-12">
+      <h3 className="mb-8 mt-12 text-2xl font-semibold">
         Frequently asked questions
       </h3>
       <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="faq-1" className="mb-4 mt-4">
           <AccordionTrigger
-            className="font-medium text-slate-700 mb-2 flex items-start justify-between w-full text-left"
+            className="mb-2 flex w-full items-start justify-between text-left font-medium text-slate-700"
             onClick={() => setFaq1Open(!faq1Open)}
           >
             How does LLM API pricing work?
             <svg
-              className={`w-5 h-5 text-slate-500 ml-auto ${
-                faq1Open ? "transform rotate-180" : ""
+              className={`ml-auto h-5 w-5 text-slate-500 ${
+                faq1Open ? "rotate-180 transform" : ""
               }`}
               fill="none"
               stroke="currentColor"
@@ -84,7 +84,7 @@ const LLMPricingFAQ = () => {
               ></path>
             </svg>
           </AccordionTrigger>
-          <AccordionContent className="text-slate-500 text-sm mb-6">
+          <AccordionContent className="mb-6 text-sm text-slate-500">
             LLM API pricing typically works on a pay-per-use model, where
             you&apos;re charged based on the number of tokens processed. Tokens
             are pieces of text, with prices varying for input (prompts) and
@@ -96,7 +96,7 @@ const LLMPricingFAQ = () => {
               href="https://docs.helicone.ai/features/advanced-usage/caching"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sky-600 hover:text-sky-800 underline"
+              className="text-sky-600 underline hover:text-sky-800"
             >
               Helicone Caching
             </a>
@@ -106,13 +106,13 @@ const LLMPricingFAQ = () => {
         <div className="border-t border-slate-200"></div>
         <AccordionItem value="faq-2" className="mb-4 mt-4">
           <AccordionTrigger
-            className="font-medium text-slate-700 mb-2 flex items-start justify-between w-full text-left"
+            className="mb-2 flex w-full items-start justify-between text-left font-medium text-slate-700"
             onClick={() => setFaq2Open(!faq2Open)}
           >
             What are the most cost-effective LLM APIs for startups?
             <svg
-              className={`w-5 h-5 text-slate-500 ml-auto ${
-                faq2Open ? "transform rotate-180" : ""
+              className={`ml-auto h-5 w-5 text-slate-500 ${
+                faq2Open ? "rotate-180 transform" : ""
               }`}
               fill="none"
               stroke="currentColor"
@@ -127,7 +127,7 @@ const LLMPricingFAQ = () => {
               ></path>
             </svg>
           </AccordionTrigger>
-          <AccordionContent className="text-slate-500 text-sm mb-6">
+          <AccordionContent className="mb-6 text-sm text-slate-500">
             The most cost-effective LLM API depends on your specific use case
             and volume. Generally, open-source and smaller parameter models like
             Llama 3 or Mistral can be more affordable for startups compared to
@@ -140,13 +140,13 @@ const LLMPricingFAQ = () => {
         <div className="border-t border-slate-200"></div>
         <AccordionItem value="faq-3" className="mb-4 mt-4">
           <AccordionTrigger
-            className="font-medium text-slate-700 mb-2 flex items-start justify-between w-full text-left"
+            className="mb-2 flex w-full items-start justify-between text-left font-medium text-slate-700"
             onClick={() => setFaq3Open(!faq3Open)}
           >
             How can I reduce my LLM API costs?
             <svg
-              className={`w-5 h-5 text-slate-500 ml-auto ${
-                faq3Open ? "transform rotate-180" : ""
+              className={`ml-auto h-5 w-5 text-slate-500 ${
+                faq3Open ? "rotate-180 transform" : ""
               }`}
               fill="none"
               stroke="currentColor"
@@ -161,16 +161,16 @@ const LLMPricingFAQ = () => {
               ></path>
             </svg>
           </AccordionTrigger>
-          <AccordionContent className="text-slate-500 text-sm mb-6">
+          <AccordionContent className="mb-6 text-sm text-slate-500">
             To reduce LLM API costs:
-            <ol className="list-decimal pl-5 mt-2 space-y-2">
+            <ol className="mt-2 list-decimal space-y-2 pl-5">
               <li>
                 Use Helicone&apos;s{" "}
                 <a
                   href="https://docs.helicone.ai/features/advanced-usage/caching"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sky-600 hover:text-sky-800 underline"
+                  className="text-sky-600 underline hover:text-sky-800"
                 >
                   caching feature
                 </a>{" "}
@@ -182,7 +182,7 @@ const LLMPricingFAQ = () => {
                   href="https://docs.helicone.ai/features/prompts"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sky-600 hover:text-sky-800 underline"
+                  className="text-sky-600 underline hover:text-sky-800"
                 >
                   prompt tracking and experiments feature
                 </a>{" "}
@@ -195,7 +195,7 @@ const LLMPricingFAQ = () => {
                   href="https://openpipe.ai/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sky-600 hover:text-sky-800 underline"
+                  className="text-sky-600 underline hover:text-sky-800"
                 >
                   OpenPipe
                 </a>
@@ -207,7 +207,7 @@ const LLMPricingFAQ = () => {
                   href="https://helicone.ai/experiments"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sky-600 hover:text-sky-800 underline"
+                  className="text-sky-600 underline hover:text-sky-800"
                 >
                   prompt engineering techniques
                 </a>
@@ -218,7 +218,7 @@ const LLMPricingFAQ = () => {
                   href="https://docs.helicone.ai/references/how-we-calculate-cost"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sky-600 hover:text-sky-800 underline"
+                  className="text-sky-600 underline hover:text-sky-800"
                 >
                   cost monitoring tools
                 </a>{" "}
@@ -230,14 +230,14 @@ const LLMPricingFAQ = () => {
         <div className="border-t border-slate-200"></div>
         <AccordionItem value="faq-4" className="mb-4 mt-4">
           <AccordionTrigger
-            className="font-medium text-slate-700 mb-2 flex items-start justify-between w-full text-left"
+            className="mb-2 flex w-full items-start justify-between text-left font-medium text-slate-700"
             onClick={() => setFaq4Open(!faq4Open)}
           >
             What&apos;s the difference between input and output tokens in LLM
             API pricing?
             <svg
-              className={`w-5 h-5 text-slate-500 ml-auto ${
-                faq4Open ? "transform rotate-180" : ""
+              className={`ml-auto h-5 w-5 text-slate-500 ${
+                faq4Open ? "rotate-180 transform" : ""
               }`}
               fill="none"
               stroke="currentColor"
@@ -252,7 +252,7 @@ const LLMPricingFAQ = () => {
               ></path>
             </svg>
           </AccordionTrigger>
-          <AccordionContent className="text-slate-500 text-sm mb-6">
+          <AccordionContent className="mb-6 text-sm text-slate-500">
             Input tokens refer to the text you send to the API (your prompt),
             while output tokens are the text generated by the model. Many
             providers charge different rates for input and output tokens, with
@@ -262,7 +262,7 @@ const LLMPricingFAQ = () => {
               href="https://docs.helicone.ai/features/prompts"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sky-600 hover:text-sky-800 underline"
+              className="text-sky-600 underline hover:text-sky-800"
             >
               Helicone&apos;s prompt management tools
             </a>{" "}
@@ -273,13 +273,13 @@ const LLMPricingFAQ = () => {
         <div className="border-t border-slate-200"></div>
         <AccordionItem value="faq-5" className="mb-4 mt-4">
           <AccordionTrigger
-            className="font-medium text-slate-700 mb-2 flex items-start justify-between w-full text-left"
+            className="mb-2 flex w-full items-start justify-between text-left font-medium text-slate-700"
             onClick={() => setFaq5Open(!faq5Open)}
           >
             How accurate is this LLM API pricing calculator?
             <svg
-              className={`w-5 h-5 text-slate-500 ml-auto ${
-                faq5Open ? "transform rotate-180" : ""
+              className={`ml-auto h-5 w-5 text-slate-500 ${
+                faq5Open ? "rotate-180 transform" : ""
               }`}
               fill="none"
               stroke="currentColor"
@@ -294,7 +294,7 @@ const LLMPricingFAQ = () => {
               ></path>
             </svg>
           </AccordionTrigger>
-          <AccordionContent className="text-slate-500 text-sm mb-6">
+          <AccordionContent className="mb-6 text-sm text-slate-500">
             Our LLM API pricing calculator is highly accurate and regularly
             updated with the latest pricing information from various providers.
             The same collection of LLM API pricing data is used within the
@@ -313,17 +313,17 @@ const LLMPricingFAQ = () => {
 
 // Reusable Contributing section
 const ContributingSection = () => (
-  <section className="bg-white p-6 rounded-lg shadow-sm border border-slate-200 mt-8">
-    <h3 className="text-2xl font-semibold mb-6 text-slate-700">
+  <section className="mt-8 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+    <h3 className="mb-6 text-2xl font-semibold text-slate-700">
       Contribute to the open-source LLM API pricing database
     </h3>
-    <p className="text-slate-500 mb-4">
+    <p className="mb-4 text-slate-500">
       As an open-source project, we welcome contributions from the community to
       keep the pricing data accurate and up-to-date.
     </p>
-    <div className="bg-sky-50 p-4 rounded-md mb-4">
-      <h4 className="font-semibold mb-2 text-sky-700">How to contribute:</h4>
-      <ol className="list-decimal pl-5 text-sky-700 mb-2">
+    <div className="mb-4 rounded-md bg-sky-50 p-4">
+      <h4 className="mb-2 font-semibold text-sky-700">How to contribute:</h4>
+      <ol className="mb-2 list-decimal pl-5 text-sky-700">
         <li>
           Visit our GitHub repository:{" "}
           <a
@@ -358,7 +358,7 @@ const ContributingSection = () => (
     <div className="mt-4">
       <a
         href="https://github.com/Helicone/helicone/blob/main/packages/README.md"
-        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-sky-500 hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
+        className="inline-flex items-center rounded-md border border-transparent bg-sky-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
         target="_blank"
         rel="noopener noreferrer"
       >
@@ -375,7 +375,7 @@ type CalculatorInfoProps = {
 
 const CalculatorInfo: React.FC<CalculatorInfoProps> = ({ model, provider }) => {
   return (
-    <div className="mt-12 space-y-8 max-w-3xl mx-auto">
+    <div className="mx-auto mt-12 max-w-3xl space-y-8">
       {model && provider ? (
         <>
           {(() => {
@@ -390,34 +390,34 @@ const CalculatorInfo: React.FC<CalculatorInfoProps> = ({ model, provider }) => {
                     )}/model/${encodeURIComponent(parentInfo.name)}`}
                     className="inline-flex items-center gap-2 text-sm text-sky-600 hover:text-sky-700"
                   >
-                    <ChevronRight className="w-4 h-4" />
+                    <ChevronRight className="h-4 w-4" />
                     <span>View {parentInfo.name} model family pricing</span>
                   </Link>
                 </div>
               )
             );
           })()}
-          <section className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-            <h3 className="text-2xl font-semibold mb-4 text-slate-700">
+          <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <h3 className="mb-4 text-2xl font-semibold text-slate-700">
               What is the {formatProviderName(provider)} {model} API Pricing
               Calculator?
             </h3>
-            <p className="text-slate-500 mb-4">
+            <p className="mb-4 text-slate-500">
               Our {formatProviderName(provider)} {model} API Pricing Calculator
               is a powerful tool designed to help you:
             </p>
-            <ul className="list-disc pl-6 mb-4 text-slate-500">
+            <ul className="mb-4 list-disc pl-6 text-slate-500">
               <li>Accurately estimate costs for your API usage</li>
               <li>Plan your budget more effectively</li>
               <li>Compare pricing across different models and providers</li>
             </ul>
-            <p className="text-slate-500 mb-4">
+            <p className="mb-4 text-slate-500">
               Using the latest pricing data directly from{" "}
               {formatProviderName(provider)}, this calculator provides you with
               precise cost estimates for the {model} API.
             </p>
-            <div className="bg-sky-50 p-4 rounded-md">
-              <p className="text-sky-700 font-medium">
+            <div className="rounded-md bg-sky-50 p-4">
+              <p className="font-medium text-sky-700">
                 Built and maintained by the Helicone team, this calculator is
                 part of the largest fully open-source collection of LLM API
                 pricing data, covering over 300+ models and growing.
@@ -425,16 +425,16 @@ const CalculatorInfo: React.FC<CalculatorInfoProps> = ({ model, provider }) => {
             </div>
           </section>
 
-          <section className="bg-white p-6 rounded-lg shadow-sm border border-slate-200 mt-8">
-            <h3 className="text-2xl font-semibold mb-4 text-slate-700">
+          <section className="mt-8 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <h3 className="mb-4 text-2xl font-semibold text-slate-700">
               Top benefits of the {formatProviderName(provider)} {model} pricing
               Calculator
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
               <div className="flex flex-col items-center text-center">
-                <div className="bg-sky-100 p-3 rounded-full mb-3">
+                <div className="mb-3 rounded-full bg-sky-100 p-3">
                   <svg
-                    className="w-6 h-6 text-sky-700"
+                    className="h-6 w-6 text-sky-700"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -448,14 +448,14 @@ const CalculatorInfo: React.FC<CalculatorInfoProps> = ({ model, provider }) => {
                     ></path>
                   </svg>
                 </div>
-                <p className="text-sky-700 font-medium">
+                <p className="font-medium text-sky-700">
                   Accurate real-time pricing data
                 </p>
               </div>
               <div className="flex flex-col items-center text-center">
-                <div className="bg-green-100 p-3 rounded-full mb-3">
+                <div className="mb-3 rounded-full bg-green-100 p-3">
                   <svg
-                    className="w-6 h-6 text-green-500"
+                    className="h-6 w-6 text-green-500"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -469,14 +469,14 @@ const CalculatorInfo: React.FC<CalculatorInfoProps> = ({ model, provider }) => {
                     ></path>
                   </svg>
                 </div>
-                <p className="text-green-700 font-medium">
+                <p className="font-medium text-green-700">
                   Quickly compare costs across different models and providers
                 </p>
               </div>
               <div className="flex flex-col items-center text-center">
-                <div className="bg-purple-100 p-3 rounded-full mb-3">
+                <div className="mb-3 rounded-full bg-purple-100 p-3">
                   <svg
-                    className="w-6 h-6 text-purple-600"
+                    className="h-6 w-6 text-purple-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -490,22 +490,22 @@ const CalculatorInfo: React.FC<CalculatorInfoProps> = ({ model, provider }) => {
                     ></path>
                   </svg>
                 </div>
-                <p className="text-purple-700 font-medium">
+                <p className="font-medium text-purple-700">
                   Built and maintained by the Helicone team
                 </p>
               </div>
             </div>
           </section>
 
-          <section className="bg-white p-6 rounded-lg shadow-sm border border-slate-200 mt-8">
-            <h3 className="text-2xl font-semibold mb-4 text-slate-700">
+          <section className="mt-8 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <h3 className="mb-4 text-2xl font-semibold text-slate-700">
               Tips to Use the {formatProviderName(provider)} {model} Pricing
               Calculator
             </h3>
             <ul className="space-y-4">
               <li className="flex items-start">
                 <svg
-                  className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
+                  className="mr-2 h-6 w-6 flex-shrink-0 text-green-500"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -531,7 +531,7 @@ const CalculatorInfo: React.FC<CalculatorInfoProps> = ({ model, provider }) => {
               </li>
               <li className="flex items-start">
                 <svg
-                  className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
+                  className="mr-2 h-6 w-6 flex-shrink-0 text-green-500"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -554,7 +554,7 @@ const CalculatorInfo: React.FC<CalculatorInfoProps> = ({ model, provider }) => {
               </li>
               <li className="flex items-start">
                 <svg
-                  className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
+                  className="mr-2 h-6 w-6 flex-shrink-0 text-green-500"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -578,7 +578,7 @@ const CalculatorInfo: React.FC<CalculatorInfoProps> = ({ model, provider }) => {
               </li>
               <li className="flex items-start">
                 <svg
-                  className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
+                  className="mr-2 h-6 w-6 flex-shrink-0 text-green-500"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -602,7 +602,7 @@ const CalculatorInfo: React.FC<CalculatorInfoProps> = ({ model, provider }) => {
               </li>
               <li className="flex items-start">
                 <svg
-                  className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
+                  className="mr-2 h-6 w-6 flex-shrink-0 text-green-500"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -635,15 +635,15 @@ const CalculatorInfo: React.FC<CalculatorInfoProps> = ({ model, provider }) => {
         </>
       ) : (
         <>
-          <section className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-            <h3 className="text-2xl font-semibold mb-6 text-slate-700">
+          <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <h3 className="mb-6 text-2xl font-semibold text-slate-700">
               What is the LLM API Pricing Calculator?
             </h3>
-            <p className="text-slate-500 mb-4">
+            <p className="mb-4 text-slate-500">
               Our LLM API Pricing Calculator is a powerful tool designed to help
               you:
             </p>
-            <ul className="list-disc pl-6 mb-4 text-slate-500">
+            <ul className="mb-4 list-disc pl-6 text-slate-500">
               <li>
                 Accurately estimate costs for your API usage across various
                 providers and models
@@ -651,13 +651,13 @@ const CalculatorInfo: React.FC<CalculatorInfoProps> = ({ model, provider }) => {
               <li>Plan your budget more effectively</li>
               <li>Compare pricing across different models and providers</li>
             </ul>
-            <p className="text-slate-500 mb-4">
+            <p className="mb-4 text-slate-500">
               Using the latest pricing data directly from various AI providers,
               this calculator provides you with precise cost estimates for a
               wide range of LLM APIs.
             </p>
-            <div className="bg-sky-50 p-4 rounded-md">
-              <p className="text-sky-700 font-medium">
+            <div className="rounded-md bg-sky-50 p-4">
+              <p className="font-medium text-sky-700">
                 Built and maintained by the Helicone team. This calculator is
                 part of the largest fully open-source collection of LLM API
                 pricing data, covering over 300+ models and growing.
@@ -665,15 +665,15 @@ const CalculatorInfo: React.FC<CalculatorInfoProps> = ({ model, provider }) => {
             </div>
           </section>
 
-          <section className="bg-white p-6 rounded-lg shadow-sm border border-slate-200 mt-8">
-            <h3 className="text-2xl font-semibold mb-6 text-slate-700">
+          <section className="mt-8 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <h3 className="mb-6 text-2xl font-semibold text-slate-700">
               Top benefits of the LLM API Pricing Calculator
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
               <div className="flex flex-col items-center text-center">
-                <div className="bg-sky-100 p-3 rounded-full mb-3">
+                <div className="mb-3 rounded-full bg-sky-100 p-3">
                   <svg
-                    className="w-6 h-6 text-sky-600"
+                    className="h-6 w-6 text-sky-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -687,14 +687,14 @@ const CalculatorInfo: React.FC<CalculatorInfoProps> = ({ model, provider }) => {
                     ></path>
                   </svg>
                 </div>
-                <p className="text-sky-700 font-medium">
+                <p className="font-medium text-sky-700">
                   Comprehensive model coverage
                 </p>
               </div>
               <div className="flex flex-col items-center text-center">
-                <div className="bg-green-100 p-3 rounded-full mb-3">
+                <div className="mb-3 rounded-full bg-green-100 p-3">
                   <svg
-                    className="w-6 h-6 text-green-500"
+                    className="h-6 w-6 text-green-500"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -708,14 +708,14 @@ const CalculatorInfo: React.FC<CalculatorInfoProps> = ({ model, provider }) => {
                     ></path>
                   </svg>
                 </div>
-                <p className="text-green-700 font-medium">
+                <p className="font-medium text-green-700">
                   Easy comparison across providers
                 </p>
               </div>
               <div className="flex flex-col items-center text-center">
-                <div className="bg-purple-100 p-3 rounded-full mb-3">
+                <div className="mb-3 rounded-full bg-purple-100 p-3">
                   <svg
-                    className="w-6 h-6 text-purple-600"
+                    className="h-6 w-6 text-purple-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -729,21 +729,21 @@ const CalculatorInfo: React.FC<CalculatorInfoProps> = ({ model, provider }) => {
                     ></path>
                   </svg>
                 </div>
-                <p className="text-purple-700 font-medium">
+                <p className="font-medium text-purple-700">
                   Up-to-date pricing information
                 </p>
               </div>
             </div>
           </section>
 
-          <section className="bg-white p-6 rounded-lg shadow-sm border border-slate-200 mt-8">
-            <h3 className="text-2xl font-semibold mb-6 text-slate-700">
+          <section className="mt-8 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <h3 className="mb-6 text-2xl font-semibold text-slate-700">
               Tips on using the LLM API Pricing Calculator
             </h3>
             <ul className="space-y-4">
               <li className="flex items-start">
                 <svg
-                  className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
+                  className="mr-2 h-6 w-6 flex-shrink-0 text-green-500"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -760,7 +760,7 @@ const CalculatorInfo: React.FC<CalculatorInfoProps> = ({ model, provider }) => {
                   <h4 className="font-medium text-slate-700">
                     Compare multiple models
                   </h4>
-                  <p className="text-slate-500 mb-2">
+                  <p className="mb-2 text-slate-500">
                     Use the calculator to compare costs across different models
                     and providers to find the best fit for your needs.
                   </p>
@@ -768,7 +768,7 @@ const CalculatorInfo: React.FC<CalculatorInfoProps> = ({ model, provider }) => {
               </li>
               <li className="flex items-start">
                 <svg
-                  className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
+                  className="mr-2 h-6 w-6 flex-shrink-0 text-green-500"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -785,7 +785,7 @@ const CalculatorInfo: React.FC<CalculatorInfoProps> = ({ model, provider }) => {
                   <h4 className="font-medium text-slate-700">
                     Adjust token counts
                   </h4>
-                  <p className="text-slate-500 mb-2">
+                  <p className="mb-2 text-slate-500">
                     Experiment with different input and output token counts to
                     estimate costs for various use cases.
                   </p>
@@ -793,7 +793,7 @@ const CalculatorInfo: React.FC<CalculatorInfoProps> = ({ model, provider }) => {
               </li>
               <li className="flex items-start">
                 <svg
-                  className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
+                  className="mr-2 h-6 w-6 flex-shrink-0 text-green-500"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -810,7 +810,7 @@ const CalculatorInfo: React.FC<CalculatorInfoProps> = ({ model, provider }) => {
                   <h4 className="font-medium text-slate-700">
                     Consider your usage volume
                   </h4>
-                  <p className="text-slate-500 mb-2">
+                  <p className="mb-2 text-slate-500">
                     Remember to factor in your expected usage volume when
                     comparing costs across different providers.
                   </p>
@@ -819,19 +819,24 @@ const CalculatorInfo: React.FC<CalculatorInfoProps> = ({ model, provider }) => {
             </ul>
           </section>
 
-          <section className="bg-white p-6 rounded-lg shadow-sm border border-slate-200 mt-8">
-            <h3 className="text-2xl font-semibold mb-6 text-slate-700">
+          <section className="mt-8 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <h3 className="mb-6 text-2xl font-semibold text-slate-700">
               API Access - Get LLM Cost Data Programmatically
             </h3>
-            <p className="text-slate-500 mb-4">
-              Access the same pricing data used in this calculator programmatically through our API endpoint. Perfect for integrating cost calculations into your applications, scripts, or automated workflows.
+            <p className="mb-4 text-slate-500">
+              Access the same pricing data used in this calculator
+              programmatically through our API endpoint. Perfect for integrating
+              cost calculations into your applications, scripts, or automated
+              workflows.
             </p>
-            
+
             <div className="space-y-6">
               <div>
-                <h4 className="font-semibold text-slate-700 mb-3">Basic Usage</h4>
-                <div className="bg-slate-900 p-4 rounded-md">
-                  <pre className="text-green-400 text-sm overflow-x-auto">
+                <h4 className="mb-3 font-semibold text-slate-700">
+                  Basic Usage
+                </h4>
+                <div className="rounded-md bg-slate-900 p-4">
+                  <pre className="overflow-x-auto text-sm text-green-400">
                     <code>{`# Get all models with costs per 1 million tokens
 curl "https://helicone.ai/api/llm-costs"
 
@@ -848,9 +853,11 @@ curl "https://helicone.ai/api/llm-costs?provider=anthropic&model=claude"`}</code
               </div>
 
               <div>
-                <h4 className="font-semibold text-slate-700 mb-3">Output Formats</h4>
-                <div className="bg-slate-900 p-4 rounded-md">
-                  <pre className="text-green-400 text-sm overflow-x-auto">
+                <h4 className="mb-3 font-semibold text-slate-700">
+                  Output Formats
+                </h4>
+                <div className="rounded-md bg-slate-900 p-4">
+                  <pre className="overflow-x-auto text-sm text-green-400">
                     <code>{`# Get data as JSON (default)
 curl "https://helicone.ai/api/llm-costs?provider=openai"
 
@@ -862,10 +869,15 @@ curl "https://helicone.ai/api/llm-costs?provider=openai&format=csv" \\
               </div>
 
               <div>
-                <h4 className="font-semibold text-slate-700 mb-3">Response Format</h4>
-                <p className="text-slate-500 mb-2">The API returns structured data with metadata and cost information:</p>
-                <div className="bg-slate-900 p-4 rounded-md">
-                  <pre className="text-green-400 text-sm overflow-x-auto">
+                <h4 className="mb-3 font-semibold text-slate-700">
+                  Response Format
+                </h4>
+                <p className="mb-2 text-slate-500">
+                  The API returns structured data with metadata and cost
+                  information:
+                </p>
+                <div className="rounded-md bg-slate-900 p-4">
+                  <pre className="overflow-x-auto text-sm text-green-400">
                     <code>{`{
   "metadata": {
     "total_models": 250,
@@ -892,35 +904,67 @@ curl "https://helicone.ai/api/llm-costs?provider=openai&format=csv" \\
               </div>
 
               <div>
-                <h4 className="font-semibold text-slate-700 mb-3">Parameters</h4>
+                <h4 className="mb-3 font-semibold text-slate-700">
+                  Parameters
+                </h4>
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-slate-200">
                     <thead className="bg-slate-50">
                       <tr>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Parameter</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Type</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Default</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Description</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+                          Parameter
+                        </th>
+                        <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+                          Type
+                        </th>
+                        <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+                          Default
+                        </th>
+                        <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+                          Description
+                        </th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-slate-200">
+                    <tbody className="divide-y divide-slate-200 bg-white">
                       <tr>
-                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">provider</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">string</td>
+                        <td className="px-4 py-2 font-mono text-sm text-slate-700">
+                          provider
+                        </td>
+                        <td className="px-4 py-2 text-sm text-slate-500">
+                          string
+                        </td>
                         <td className="px-4 py-2 text-sm text-slate-500">-</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">Filter by exact provider name (e.g., &quot;OPENAI&quot;, &quot;ANTHROPIC&quot;)</td>
+                        <td className="px-4 py-2 text-sm text-slate-500">
+                          Filter by exact provider name (e.g.,
+                          &quot;OPENAI&quot;, &quot;ANTHROPIC&quot;)
+                        </td>
                       </tr>
                       <tr>
-                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">model</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">string</td>
+                        <td className="px-4 py-2 font-mono text-sm text-slate-700">
+                          model
+                        </td>
+                        <td className="px-4 py-2 text-sm text-slate-500">
+                          string
+                        </td>
                         <td className="px-4 py-2 text-sm text-slate-500">-</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">Search models containing this text (e.g., &quot;gpt&quot;, &quot;claude&quot;)</td>
+                        <td className="px-4 py-2 text-sm text-slate-500">
+                          Search models containing this text (e.g.,
+                          &quot;gpt&quot;, &quot;claude&quot;)
+                        </td>
                       </tr>
                       <tr>
-                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">format</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">string</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">json</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">Output format: &quot;json&quot; or &quot;csv&quot;</td>
+                        <td className="px-4 py-2 font-mono text-sm text-slate-700">
+                          format
+                        </td>
+                        <td className="px-4 py-2 text-sm text-slate-500">
+                          string
+                        </td>
+                        <td className="px-4 py-2 text-sm text-slate-500">
+                          json
+                        </td>
+                        <td className="px-4 py-2 text-sm text-slate-500">
+                          Output format: &quot;json&quot; or &quot;csv&quot;
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -928,56 +972,102 @@ curl "https://helicone.ai/api/llm-costs?provider=openai&format=csv" \\
               </div>
 
               <div>
-                <h4 className="font-semibold text-slate-700 mb-3">Response Fields</h4>
+                <h4 className="mb-3 font-semibold text-slate-700">
+                  Response Fields
+                </h4>
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-slate-200">
                     <thead className="bg-slate-50">
                       <tr>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Field</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Description</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+                          Field
+                        </th>
+                        <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+                          Description
+                        </th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-slate-200">
+                    <tbody className="divide-y divide-slate-200 bg-white">
                       <tr>
-                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">provider</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">Provider name (e.g., &quot;OPENAI&quot;, &quot;ANTHROPIC&quot;)</td>
+                        <td className="px-4 py-2 font-mono text-sm text-slate-700">
+                          provider
+                        </td>
+                        <td className="px-4 py-2 text-sm text-slate-500">
+                          Provider name (e.g., &quot;OPENAI&quot;,
+                          &quot;ANTHROPIC&quot;)
+                        </td>
                       </tr>
                       <tr>
-                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">model</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">Model identifier</td>
+                        <td className="px-4 py-2 font-mono text-sm text-slate-700">
+                          model
+                        </td>
+                        <td className="px-4 py-2 text-sm text-slate-500">
+                          Model identifier
+                        </td>
                       </tr>
                       <tr>
-                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">operator</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">How the model name matching works (&quot;equals&quot;, &quot;startsWith&quot;, &quot;includes&quot;)</td>
+                        <td className="px-4 py-2 font-mono text-sm text-slate-700">
+                          operator
+                        </td>
+                        <td className="px-4 py-2 text-sm text-slate-500">
+                          How the model name matching works (&quot;equals&quot;,
+                          &quot;startsWith&quot;, &quot;includes&quot;)
+                        </td>
                       </tr>
                       <tr>
-                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">input_cost_per_1m</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">Cost per 1 million input tokens (USD)</td>
+                        <td className="px-4 py-2 font-mono text-sm text-slate-700">
+                          input_cost_per_1m
+                        </td>
+                        <td className="px-4 py-2 text-sm text-slate-500">
+                          Cost per 1 million input tokens (USD)
+                        </td>
                       </tr>
                       <tr>
-                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">output_cost_per_1m</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">Cost per 1 million output tokens (USD)</td>
+                        <td className="px-4 py-2 font-mono text-sm text-slate-700">
+                          output_cost_per_1m
+                        </td>
+                        <td className="px-4 py-2 text-sm text-slate-500">
+                          Cost per 1 million output tokens (USD)
+                        </td>
                       </tr>
                       <tr>
-                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">per_image</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">Cost per image (USD) - if applicable</td>
+                        <td className="px-4 py-2 font-mono text-sm text-slate-700">
+                          per_image
+                        </td>
+                        <td className="px-4 py-2 text-sm text-slate-500">
+                          Cost per image (USD) - if applicable
+                        </td>
                       </tr>
                       <tr>
-                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">per_call</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">Cost per API call (USD) - if applicable</td>
+                        <td className="px-4 py-2 font-mono text-sm text-slate-700">
+                          per_call
+                        </td>
+                        <td className="px-4 py-2 text-sm text-slate-500">
+                          Cost per API call (USD) - if applicable
+                        </td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
               </div>
 
-              <div className="bg-blue-50 p-4 rounded-md">
-                <h4 className="font-semibold text-blue-700 mb-2">💡 Pro Tips</h4>
-                <ul className="list-disc pl-5 text-blue-700 text-sm space-y-1">
-                  <li>All costs are per 1 million tokens, making it easy to calculate expenses</li>
-                  <li>Model operators help understand how model matching works</li>
+              <div className="rounded-md bg-blue-50 p-4">
+                <h4 className="mb-2 font-semibold text-blue-700">
+                  💡 Pro Tips
+                </h4>
+                <ul className="list-disc space-y-1 pl-5 text-sm text-blue-700">
+                  <li>
+                    All costs are per 1 million tokens, making it easy to
+                    calculate expenses
+                  </li>
+                  <li>
+                    Model operators help understand how model matching works
+                  </li>
                   <li>Results are sorted by provider, then by model name</li>
-                  <li>Data comes directly from Helicone&apos;s production cost database</li>
+                  <li>
+                    Data comes directly from Helicone&apos;s production cost
+                    database
+                  </li>
                   <li>API supports CORS for browser-based applications</li>
                   <li>Use CSV format for easy import into spreadsheets</li>
                 </ul>

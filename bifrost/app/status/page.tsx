@@ -35,7 +35,7 @@ export default function PriceCalcPage() {
     <div className="container mx-auto py-8">
       <Suspense
         fallback={
-          <div className="flex flex-col gap-4 w-full max-w-6xl mx-auto">
+          <div className="mx-auto flex w-full max-w-6xl flex-col gap-4">
             Loading...
           </div>
         }

@@ -127,9 +127,8 @@ export class ExperimentController extends Controller {
     >
   > {
     const experimentManager = new ExperimentManager(request.authParams);
-    const result = await experimentManager.createNewExperimentTable(
-      requestBody
-    );
+    const result =
+      await experimentManager.createNewExperimentTable(requestBody);
     if (result.error || !result.data) {
       this.setStatus(500);
       console.error(result.error);
@@ -667,9 +666,8 @@ export class ExperimentController extends Controller {
   ): Promise<Result<{ hypothesisId: string }, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
 
-    const result = await experimentManager.createNewExperimentHypothesis(
-      requestBody
-    );
+    const result =
+      await experimentManager.createNewExperimentHypothesis(requestBody);
 
     if (result.error) {
       this.setStatus(500);
@@ -701,9 +699,8 @@ export class ExperimentController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<EvaluatorResult[], string>> {
     const evaluatorManager = new EvaluatorManager(request.authParams);
-    const result = await evaluatorManager.getEvaluatorsForExperiment(
-      experimentId
-    );
+    const result =
+      await evaluatorManager.getEvaluatorsForExperiment(experimentId);
     return result;
   }
 

@@ -5,7 +5,9 @@ description: "Monitor your AI Gateway requests with Helicone"
 ---
 
 <Warning>
-  **Authentication Required**: Observability requires Helicone authentication to be enabled. Please complete the [Authentication setup](/ai-gateway/authentication) first before enabling observability.
+  **Authentication Required**: Observability requires Helicone authentication to
+  be enabled. Please complete the [Authentication
+  setup](/ai-gateway/authentication) first before enabling observability.
 </Warning>
 
 Enable observability to automatically log all requests to your Helicone dashboard for monitoring usage, costs, and performance across all providers.
@@ -19,6 +21,7 @@ Enable observability to automatically log all requests to your Helicone dashboar
     ```bash
     export HELICONE_CONTROL_PLANE_API_KEY=sk-helicone-your-api-key
     ```
+
   </Step>
   
   <Step title="Enable Helicone observability">
@@ -28,7 +31,7 @@ Enable observability to automatically log all requests to your Helicone dashboar
     helicone:
       # also enables authentication
       features: observability
-    
+
     routers:
       my-router:
         load-balance:
@@ -38,6 +41,7 @@ Enable observability to automatically log all requests to your Helicone dashboar
               - openai
               - anthropic
     ```
+
   </Step>
   
   <Step title="Start the gateway">
@@ -59,6 +63,7 @@ Enable observability to automatically log all requests to your Helicone dashboar
       }'
     ```
     ✅ Check your [Helicone dashboard](https://us.helicone.ai) to see requests logged automatically!
+
   </Step>
 </Steps>
 
@@ -73,4 +78,4 @@ curl -X POST http://localhost:8080/router/my-router/chat/completions \
   -H "x-helicone-omit-response-log: true" \
   -H "Content-Type: application/json" \
   -d '{"model": "openai/gpt-4o-mini", "messages": [{"role": "user", "content": "Sensitive data"}]}'
-``` 
+```

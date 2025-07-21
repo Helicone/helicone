@@ -194,14 +194,14 @@ export class ResponseBodyHandler extends AbstractLogHandler {
           ? {
               model: responseModel, // Put response model here, not calculated model
             }
-          : processedResponseBody.data?.processedBody ?? undefined,
+          : (processedResponseBody.data?.processedBody ?? undefined),
       };
     } else {
       return omitResponseLog
         ? {
             model: responseModel, // Put response model here, not calculated model
           }
-        : processedResponseBody.data.processedBody ?? undefined;
+        : (processedResponseBody.data.processedBody ?? undefined);
     }
   }
 

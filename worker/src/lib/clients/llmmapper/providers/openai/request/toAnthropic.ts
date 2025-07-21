@@ -16,8 +16,8 @@ export function toAnthropic(openAIBody: OpenAIRequestBody): AntRequestBody {
     antBody.stop_sequences = Array.isArray(openAIBody.stop)
       ? openAIBody.stop
       : openAIBody.stop
-      ? [openAIBody.stop]
-      : [];
+        ? [openAIBody.stop]
+        : [];
   }
 
   const { messages, system } = extractSystemMessage(openAIBody.messages);

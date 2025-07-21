@@ -90,8 +90,8 @@ export class RateLimitController extends Controller {
         result.error?.includes("Minimum time window")
           ? 400
           : result.error === "Rate limit rule not found"
-          ? 404
-          : 500
+            ? 404
+            : 500
       );
       return err(result.error || "Failed to update rate limit rule");
     }

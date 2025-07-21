@@ -69,7 +69,7 @@ export const handleToolCalls = (message: any): Message => {
             arguments: parseFunctionArguments(message.function_call.arguments),
           },
         ]
-      : message.tool_calls?.map(mapToolCallToFunction) ?? [],
+      : (message.tool_calls?.map(mapToolCallToFunction) ?? []),
     _type: "functionCall",
   };
 };

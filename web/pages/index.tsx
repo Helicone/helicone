@@ -20,7 +20,7 @@ export const Home = () => {
 export default Home;
 
 export const getServerSideProps = async (
-  context: GetServerSidePropsContext
+  context: GetServerSidePropsContext,
 ) => {
   return {
     redirect: {

@@ -22,7 +22,7 @@ const Stats = dynamic(() => import("@/components/home/Stats"));
 
 const LoadingSection = ({ height = "h-96" }: { height?: string }) => (
   <div
-    className={`w-full bg-gray-100 animate-pulse rounded-lg ${height}`}
+    className={`w-full animate-pulse rounded-lg bg-gray-100 ${height}`}
   ></div>
 );
 
@@ -48,7 +48,7 @@ export default async function Home() {
 
   return (
     <Layout>
-      <main className="bg-white text-landing-description">
+      <main className="text-landing-description bg-white">
         <div className="max-w-8xl mx-auto">
           <Hero />
           <Prototype />

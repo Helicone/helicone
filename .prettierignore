@@ -1,0 +1,55 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Build outputs
+dist/
+build/
+.next/
+*/dist/
+*/build/
+*/.next/
+
+# Generated files
+lib/clients/jawnTypes/*.ts
+web/lib/clients/jawnTypes/*.ts
+*.d.ts
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Logs
+*.log
+
+# Environment files
+.env*
+
+# Git
+.git/
+
+# IDE
+.vscode/
+.idea/
+
+# Misc
+.DS_Store
+*.tsbuildinfo
+
+# Examples (optional - remove if you want to format examples)
+examples/
+
+# Documentation build
+docs/build/
+
+# Documentation files (optional - comment out if you want to format docs)
+docs/
+
+# Migrations and seeds
+supabase/migrations/
+clickhouse/migrations/
+clickhouse/seeds/
+
+# Generated protobuf
+*.proto 

@@ -55,7 +55,7 @@ export default function AssistantToolCall({
                 };
               }
               return message;
-            }
+            },
           ),
         },
       },
@@ -70,12 +70,12 @@ export default function AssistantToolCall({
           return {
             ...message,
             tool_calls: message.tool_calls?.filter(
-              (_, toolIndex) => toolIndex !== index
+              (_, toolIndex) => toolIndex !== index,
             ),
           };
         }
         return message;
-      }
+      },
     );
     onChatChange({
       ...mappedRequest,
@@ -124,7 +124,7 @@ export default function AssistantToolCall({
                 };
               }
               return message;
-            }
+            },
           ),
         },
       },
@@ -135,14 +135,14 @@ export default function AssistantToolCall({
     <div
       key={index}
       className={cn(
-        "flex flex-col gap-2 text-sm p-2 pl-7 bg-muted",
-        !playgroundMode ? "rounded-lg" : "dark:bg-black"
+        "flex flex-col gap-2 bg-muted p-2 pl-7 text-sm",
+        !playgroundMode ? "rounded-lg" : "dark:bg-black",
       )}
     >
-      <div className="flex flex-row items-center gap-2 group">
+      <div className="group flex flex-row items-center gap-2">
         <PiToolboxBold className="text-muted-foreground" />
         {playgroundMode ? (
-          <div className="flex items-center justify-between w-full">
+          <div className="flex w-full items-center justify-between">
             <PlaygroundToolAttributes
               toolName={tool.name}
               toolCallId={tool.id}
@@ -156,7 +156,7 @@ export default function AssistantToolCall({
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100"
               onClick={deleteToolCall}
             >
               <Trash2Icon className="h-4 w-4 text-muted-foreground" />
@@ -172,7 +172,7 @@ export default function AssistantToolCall({
         <MarkdownEditor
           placeholder="{}"
           language="markdown"
-          className="bg-white dark:bg-slate-950 rounded-none"
+          className="rounded-none bg-white dark:bg-slate-950"
           setText={editPlaygroundToolCall}
           text={tool.arguments}
         />

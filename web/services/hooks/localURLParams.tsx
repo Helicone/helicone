@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 export function useURLParams<T>(
   key: string,
   initialValue: T,
-  onNothingStored?: (setStored: (t: T) => void) => void
+  onNothingStored?: (setStored: (t: T) => void) => void,
 ): [T, (t: T) => void] {
   const [storedValue, setStoredValue] = useState<T>(initialValue);
 
@@ -37,7 +37,7 @@ export function useURLParams<T>(
         window.location.pathname + "?" + params.toString();
       window.history.pushState(null, "", newRelativePathQuery);
     },
-    [key]
+    [key],
   );
 
   return [storedValue, setValue];

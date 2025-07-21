@@ -405,9 +405,8 @@ export class KeyManager extends BaseManager {
         return err(hasAccess.error);
       }
 
-      const providerKeyResult = await this.getDecryptedProviderKeyById(
-        providerKeyId
-      );
+      const providerKeyResult =
+        await this.getDecryptedProviderKeyById(providerKeyId);
 
       if (providerKeyResult.error || !providerKeyResult.data?.id) {
         return err(providerKeyResult.error || "Provider key not found");

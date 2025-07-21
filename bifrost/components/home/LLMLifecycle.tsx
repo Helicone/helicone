@@ -10,7 +10,7 @@ const SVG = () => (
   <svg
     // width="754"
     // height="525"
-    className="w-full h-full order-2 md:order-1"
+    className="order-2 h-full w-full md:order-1"
     viewBox="0 0 754 525"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -2385,9 +2385,9 @@ const SVG = () => (
 
 const LLMLifecycle = () => {
   return (
-    <div className="bg-[#f1f5f9] relative">
+    <div className="relative bg-[#f1f5f9]">
       <div
-        className="absolute inset-0 w-full h-full z-[1]"
+        className="absolute inset-0 z-[1] h-full w-full"
         style={{
           backgroundImage: "url(/static/home/grid.png)",
           backgroundSize: "contain",
@@ -2396,7 +2396,7 @@ const LLMLifecycle = () => {
         }}
       ></div>
       <div
-        className="absolute inset-0 w-full h-full z-[2]"
+        className="absolute inset-0 z-[2] h-full w-full"
         style={{
           background:
             "radial-gradient(353.66% 90.59% at 17.8% 43.09%, #F1F5F9 0%, rgba(241, 245, 249, 0.60) 44%, rgba(241, 245, 249, 0.20) 100%)",
@@ -2405,15 +2405,15 @@ const LLMLifecycle = () => {
       <div
         className={cn(
           ISLAND_WIDTH,
-          "py-16 md:py-36 grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-16 relative z-10"
+          "relative z-10 grid grid-cols-1 gap-x-4 gap-y-16 py-16 md:grid-cols-2 md:py-36"
         )}
       >
-        <div className="flex flex-col flex-1 gap-6">
-          <h2 className="text-4xl sm:text-5xl font-semibold text-black max-w-[520px] text-wrap sm:leading-[57.6px]">
+        <div className="flex flex-1 flex-col gap-6">
+          <h2 className="max-w-[520px] text-wrap text-4xl font-semibold text-black sm:text-5xl sm:leading-[57.6px]">
             The LLMOps platform behind the{" "}
             <span className="text-brand">fastest-growing AI companies</span>
           </h2>
-          <p className="text-lg sm:text-xl max-w-[440px] text-wrap font-light leading-relaxed text-landing-description">
+          <p className="text-landing-description max-w-[440px] text-wrap text-lg font-light leading-relaxed sm:text-xl">
             Route intelligently, monitor comprehensively, optimize continuously.
             The platform for every stage of your AI development lifecycle.
           </p>
@@ -2424,7 +2424,7 @@ const LLMLifecycle = () => {
           >
             <Button
               variant="link"
-              className="text-brand p-0 text-base md:text-lg lg:text-md gap-2 rounded-lg z-[10]"
+              className="text-brand lg:text-md z-[10] gap-2 rounded-lg p-0 text-base md:text-lg"
             >
               How it works
               <ChevronRight className="size-5 md:size-6" />

@@ -57,7 +57,10 @@ async function createProxyKey(
 
 class TempProxyKey implements BaseTempKey {
   private keyUsed = false;
-  constructor(private proxyKey: string, private proxyKeyId: string) {}
+  constructor(
+    private proxyKey: string,
+    private proxyKeyId: string
+  ) {}
 
   async cleanup() {
     if (this.keyUsed) {

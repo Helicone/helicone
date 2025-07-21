@@ -49,7 +49,7 @@ const icon = (model: string) => {
   if (model.includes("gpt")) {
     return (
       <svg
-        className="w-4 h-4"
+        className="h-4 w-4"
         viewBox="0 0 12 13"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -61,7 +61,7 @@ const icon = (model: string) => {
       </svg>
     );
   }
-  return <SparklesIcon className="w-4 h-4" />;
+  return <SparklesIcon className="h-4 w-4" />;
 };
 
 const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
@@ -94,7 +94,7 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
                 promptVersionId: promptVersionId,
               },
             },
-          }
+          },
         );
 
         const parentPromptVersion = await jawnClient.GET(
@@ -105,7 +105,7 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
                 promptVersionId: res.data?.data?.parent_prompt_version ?? "",
               },
             },
-          }
+          },
         );
 
         return {
@@ -117,7 +117,7 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
       refetchOnWindowFocus: false,
       refetchOnMount: false,
       refetchOnReconnect: false,
-    }
+    },
   );
 
   const queryClient = useQueryClient();
@@ -144,7 +144,7 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
   }, [promptVersionIdScore.data?.data]);
 
   const [basePrompt, setBasePrompt] = useState<string | PromptObject | null>(
-    promptTemplate?.helicone_template ?? ""
+    promptTemplate?.helicone_template ?? "",
   );
 
   useEffect(() => {
@@ -155,7 +155,7 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
     <Dialog open={showViewPrompt} onOpenChange={setShowViewPrompt}>
       <DialogTrigger asChild>
         <div
-          className="flex flex-col gap-2 h-full overflow-y-auto p-3 cursor-pointer"
+          className="flex h-full cursor-pointer flex-col gap-2 overflow-y-auto p-3"
           onClick={() => setShowViewPrompt(true)}
         >
           <div
@@ -163,35 +163,35 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
               "flex flex-col",
               Object.keys(promptVersionIdScore.data?.data ?? {}).length
                 ? "gap-4"
-                : "gap-0"
+                : "gap-0",
             )}
             onClick={(e) => e.stopPropagation()}
           >
             {promptVersionIdScore.data && (
-              <div className="flex gap-2 flex-wrap">
+              <div className="flex flex-wrap gap-2">
                 {selectedScoreKey ? (
                   <div
-                    className="w-full flex flex-col gap-1 py-1.5 px-2 rounded-md bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
+                    className="flex w-full flex-col gap-1 rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 dark:border-slate-700 dark:bg-slate-800"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <div className="flex justify-between items-center">
-                      <p className="text-[11px] font-medium text-slate-700 dark:text-slate-300 leading-tight">
+                    <div className="flex items-center justify-between">
+                      <p className="text-[11px] font-medium leading-tight text-slate-700 dark:text-slate-300">
                         {(selectedScoreKey ?? "")
                           .toString()
                           .replace("-hcone-bool", "") ?? ""}
                       </p>
                       <XMarkIcon
-                        className="w-2.5 h-2.5 text-slate-500 dark:text-slate-400"
+                        className="h-2.5 w-2.5 text-slate-500 dark:text-slate-400"
                         onClick={(e) => {
                           e.stopPropagation();
                           queryClient.setQueryData(
                             ["selectedScoreKey", experimentId],
-                            null
+                            null,
                           );
                         }}
                       />
                     </div>
-                    <div className="flex gap-3 items-center text-slate-500 text-[11px] leading-tight">
+                    <div className="flex items-center gap-3 text-[11px] leading-tight text-slate-500">
                       <p>
                         avg:{" "}
                         {
@@ -221,7 +221,7 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
                       promptVersionIdScore.data as {
                         data: Record<string, { value: any }>;
                       }
-                    )?.data ?? {}
+                    )?.data ?? {},
                   ).map(([key, value]) => {
                     const color = scoreColorMapping[key]?.color;
                     return (
@@ -233,12 +233,12 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
                           e.stopPropagation();
                           queryClient.setQueryData(
                             ["selectedScoreKey", experimentId],
-                            key
+                            key,
                           );
                         }}
                       >
                         <div
-                          className="w-2 h-2 rounded-sm"
+                          className="h-2 w-2 rounded-sm"
                           style={{ backgroundColor: color }}
                         ></div>
                         {key?.toString().replace("-hcone-bool", "") ?? ""}:{" "}
@@ -249,7 +249,7 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
                 )}
               </div>
             )}
-            <div className="flex gap-2 items-center ml-0.5">
+            <div className="ml-0.5 flex items-center gap-2">
               {icon(promptTemplate?.model ?? "")}
               <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
                 {promptTemplate?.model}
@@ -268,25 +268,25 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
             defaultEditMode={false}
             editMode={false}
             playgroundMode="experiment-compact"
-            className="border rounded-md border-slate-200 dark:border-slate-700"
+            className="rounded-md border border-slate-200 dark:border-slate-700"
           />
         </div>
       </DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-7xl max-h-[95vh] gap-0 overflow-y-auto items-start flex flex-col">
-        <div className="flex justify-between items-center mb-8">
+      <DialogContent className="flex max-h-[95vh] w-[95vw] max-w-7xl flex-col items-start gap-0 overflow-y-auto">
+        <div className="mb-8 flex items-center justify-between">
           <div className="flex items-center">
-            <FlaskConicalIcon className="w-5 h-5 mr-2.5 text-slate-500" />
+            <FlaskConicalIcon className="mr-2.5 h-5 w-5 text-slate-500" />
             <DialogTitle asChild>
-              <h3 className="text-base font-medium text-slate-950 dark:text-white mr-3">
+              <h3 className="mr-3 text-base font-medium text-slate-950 dark:text-white">
                 View Prompt
               </h3>
             </DialogTitle>
-            <div className="flex gap-1 items-center">
-              <p className="text-slate-500 text-sm font-medium leading-4">
+            <div className="flex items-center gap-1">
+              <p className="text-sm font-medium leading-4 text-slate-500">
                 Forked from
               </p>
               <Badge variant="helicone" className="text-slate-500">
-                <FlaskConicalIcon className="w-3.5 h-3.5 mr-1" />
+                <FlaskConicalIcon className="mr-1 h-3.5 w-3.5" />
                 {(promptTemplate?.parent_prompt_version?.metadata
                   ?.label as string) ??
                   `v${promptTemplate?.parent_prompt_version?.major_version}.${promptTemplate?.parent_prompt_version?.minor_version}`}
@@ -308,7 +308,7 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
               onPromptChange={(prompt) => setBasePrompt(prompt)}
               selectedInput={undefined}
               onExtractPromptVariables={() => {}}
-              className="border rounded-md border-slate-200 dark:border-slate-700"
+              className="rounded-md border border-slate-200 dark:border-slate-700"
               onSubmit={async (history, model) => {
                 const promptData = {
                   model: model,
@@ -340,7 +340,7 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
                       heliconeTemplate: JSON.stringify(promptData),
                       experimentId: experimentId ?? "",
                     },
-                  }
+                  },
                 );
 
                 queryClient.invalidateQueries({
@@ -370,9 +370,9 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
             />
           </TabsContent>
         </Tabs>
-        <div className="flex justify-between items-center mt-8">
+        <div className="mt-8 flex items-center justify-between">
           <div className="flex items-center gap-1">
-            <LightbulbIcon className="w-4 h-4 text-slate-500" />
+            <LightbulbIcon className="h-4 w-4 text-slate-500" />
             <p className="text-sm text-slate-500">
               To make changes, please create a new prompt.
             </p>
@@ -398,7 +398,7 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
 
 const InputsHeaderComponent = ({ inputs }: { inputs: string[] }) => {
   return (
-    <div className="flex flex-col h-full items-start justify-start gap-y-2 p-3">
+    <div className="flex h-full flex-col items-start justify-start gap-y-2 p-3">
       {inputs?.map((input) => (
         <Badge variant="helicone" key={input}>
           {input}
@@ -444,7 +444,7 @@ const PromptColumnHeader = ({
           body: {
             label: editedLabel,
           },
-        }
+        },
       );
 
       setLabelData(result.data?.data?.metadata?.label as string);
@@ -465,13 +465,13 @@ const PromptColumnHeader = ({
   return (
     <div
       className={cn(
-        "flex justify-between w-full items-center py-2 px-4 group h-full",
+        "group flex h-full w-full items-center justify-between px-4 py-2",
         isEditing &&
-          " border-2 border-r-[3px] border-blue-500 z-10 pl-3.5 pr-[13px]"
+          "z-10 border-2 border-r-[3px] border-blue-500 pl-3.5 pr-[13px]",
       )}
     >
       {promptVersionId === "inputs" ? (
-        <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100 leading-[130%] cursor-pointer">
+        <h3 className="cursor-pointer text-sm font-semibold leading-[130%] text-slate-900 dark:text-slate-100">
           {labelData}
         </h3>
       ) : isEditing ? (
@@ -486,18 +486,18 @@ const PromptColumnHeader = ({
               handleSave();
             }
           }}
-          className="font-semibold text-sm text-slate-900 dark:text-slate-100 leading-[130%] bg-transparent border-none focus:ring-slate-300 rounded px-[5px] py-0 w-auto h-auto border-0 outline-none focus:border-0 focus:ring-0 focus:shadow-none focus:outline-none"
+          className="h-auto w-auto rounded border-0 border-none bg-transparent px-[5px] py-0 text-sm font-semibold leading-[130%] text-slate-900 outline-none focus:border-0 focus:shadow-none focus:outline-none focus:ring-0 focus:ring-slate-300 dark:text-slate-100"
         />
       ) : (
         <h3
           onClick={() => setIsEditing(true)}
-          className="font-semibold text-sm text-slate-900 dark:text-slate-100 leading-[130%] cursor-pointer px-1 rounded transition-colors duration-150 border border-dashed border-transparent hover:border-slate-300 dark:hover:border-slate-600"
+          className="cursor-pointer rounded border border-dashed border-transparent px-1 text-sm font-semibold leading-[130%] text-slate-900 transition-colors duration-150 hover:border-slate-300 dark:text-slate-100 dark:hover:border-slate-600"
         >
           {labelData}
         </h3>
       )}
       {onForkColumn && onRunColumn && (
-        <div className="items-center justify-center hidden group-hover:flex">
+        <div className="hidden items-center justify-center group-hover:flex">
           {onDeleteColumn && (
             <Dialog
               open={isDeleteDialogOpen}
@@ -507,9 +507,9 @@ const PromptColumnHeader = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="mr-2 text-red-500 hover:text-red-600 h-auto w-auto hover:bg-transparent"
+                  className="mr-2 h-auto w-auto text-red-500 hover:bg-transparent hover:text-red-600"
                 >
-                  <Trash2Icon className="w-4 h-4" />
+                  <Trash2Icon className="h-4 w-4" />
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
@@ -540,17 +540,17 @@ const PromptColumnHeader = ({
           <Button
             variant="ghost"
             size="icon"
-            className="p-0 h-auto w-auto hover:bg-transparent"
+            className="h-auto w-auto p-0 hover:bg-transparent"
             onClick={onForkColumn}
           >
-            <GitForkIcon className="w-4 h-4 text-slate-500" />
+            <GitForkIcon className="h-4 w-4 text-slate-500" />
           </Button>
           <Button
             variant="outline"
-            className="ml-2 p-0 border rounded-md text-slate-500 h-[22px] w-[24px] items-center justify-center flex"
+            className="ml-2 flex h-[22px] w-[24px] items-center justify-center rounded-md border p-0 text-slate-500"
             onClick={onRunColumn}
           >
-            <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+            <PlayIcon className="h-4 w-4 text-gray-600 dark:text-gray-300" />
           </Button>
         </div>
       )}
@@ -572,22 +572,24 @@ const IndexColumnCell = ({
   onSelectChange: (e: unknown) => void;
 }) => {
   return (
-    <div className="absolute inset-0 flex justify-center items-start gap-1 py-2">
+    <div className="absolute inset-0 flex items-start justify-center gap-1 py-2">
       <div className="flex items-center gap-1">
-        <div className="relative flex justify-center items-center">
+        <div className="relative flex items-center justify-center">
           <p
             className={cn(
-              "text-slate-500 dark:text-slate-400 absolute inset-0 flex items-center",
+              "absolute inset-0 flex items-center text-slate-500 dark:text-slate-400",
               (areSomeSelected || isSelected) && "hidden",
-              "group-hover:hidden"
+              "group-hover:hidden",
             )}
           >
             {index}
           </p>
           <Checkbox
             className={cn(
-              "border-slate-200 dark:border-slate-800 bg-slate-200 dark:bg-slate-800 data-[state=checked]:border-0 dark:data-[state=checked]:border-0 data-[state=checked]:bg-slate-800 dark:data-[state=checked]:bg-slate-300 h-4 w-4 rounded-sm self-center",
-              !areSomeSelected && !isSelected && "invisible group-hover:visible"
+              "h-4 w-4 self-center rounded-sm border-slate-200 bg-slate-200 data-[state=checked]:border-0 data-[state=checked]:bg-slate-800 dark:border-slate-800 dark:bg-slate-800 dark:data-[state=checked]:border-0 dark:data-[state=checked]:bg-slate-300",
+              !areSomeSelected &&
+                !isSelected &&
+                "invisible group-hover:visible",
             )}
             checked={isSelected}
             onCheckedChange={onSelectChange}
@@ -596,12 +598,12 @@ const IndexColumnCell = ({
         <Button
           variant="outline"
           className={cn(
-            "p-0 border rounded-md h-[22px] w-[24px] flex items-center justify-center shrink-0",
-            !areSomeSelected && !isSelected && "invisible group-hover:visible"
+            "flex h-[22px] w-[24px] shrink-0 items-center justify-center rounded-md border p-0",
+            !areSomeSelected && !isSelected && "invisible group-hover:visible",
           )}
           onClick={onRunRow}
         >
-          <PlayIcon className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+          <PlayIcon className="h-4 w-4 text-slate-500 dark:text-slate-400" />
         </Button>
       </div>
     </div>
@@ -630,17 +632,17 @@ const InputCell = ({
 
   return (
     <div
-      className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 h-full w-full py-2 px-4 overflow-hidden"
+      className="h-full w-full cursor-pointer overflow-hidden px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800"
       style={{ cursor: "pointer", minWidth: 0 }} // Add minWidth: 0 to allow shrinking
       onClick={onClick}
     >
-      <ul className="w-full flex flex-col gap-y-1 overflow-hidden">
+      <ul className="flex w-full flex-col gap-y-1 overflow-hidden">
         {experimentInputs?.map((input) => (
           <li
             key={input}
-            className="text-slate-700 dark:text-slate-300 leading-[130%] text-[13px] max-w-full overflow-hidden whitespace-nowrap truncate flex"
+            className="flex max-w-full overflow-hidden truncate whitespace-nowrap text-[13px] leading-[130%] text-slate-700 dark:text-slate-300"
           >
-            <span className="font-medium shrink-0">{input}</span>:&nbsp;
+            <span className="shrink-0 font-medium">{input}</span>:&nbsp;
             <span className="truncate">{inputs.data?.[input]?.toString()}</span>
           </li>
         ))}
@@ -648,9 +650,9 @@ const InputCell = ({
           experimentAutoInputs?.map((input, index) => (
             <li
               key={index}
-              className="text-slate-700 dark:text-slate-300 leading-[130%] text-[13px] max-w-full overflow-hidden whitespace-nowrap truncate flex"
+              className="flex max-w-full overflow-hidden truncate whitespace-nowrap text-[13px] leading-[130%] text-slate-700 dark:text-slate-300"
             >
-              <span className="font-medium shrink-0">Message {index}</span>
+              <span className="shrink-0 font-medium">Message {index}</span>
               :&nbsp;
               <span className="truncate">{JSON.stringify(input)}</span>
             </li>

@@ -130,10 +130,10 @@ Grok 3 is now available through multiple channels:
 
 xAI is offering two flavors of its flagship model via its API:
 
-| Model Version | Input Tokens | Output Tokens | Speedier Version (Input) | Speedier Version (Output) |
-|---------------|--------------|---------------|--------------------------|---------------------------|
-| **Grok 3** | $3 per million | $15 per million | $5 per million | $25 per million |
-| **Grok 3 Mini** | $0.30 per million | $0.50 per million | $0.60 per million | $4 per million |
+| Model Version   | Input Tokens      | Output Tokens     | Speedier Version (Input) | Speedier Version (Output) |
+| --------------- | ----------------- | ----------------- | ------------------------ | ------------------------- |
+| **Grok 3**      | $3 per million    | $15 per million   | $5 per million           | $25 per million           |
+| **Grok 3 Mini** | $0.30 per million | $0.50 per million | $0.60 per million        | $4 per million            |
 
 This pricing is comparable to Anthropic's Claude 3.7 Sonnet, but more expensive than Google's Gemini 2.5 Pro, which typically scores higher on AI benchmarks.
 
@@ -149,17 +149,18 @@ This pricing is comparable to Anthropic's Claude 3.7 Sonnet, but more expensive 
 from openai import OpenAI
 
 client = OpenAI(
-    api_key="your-x-ai-api-key",  
-    base_url="https://x.helicone.ai/v1/chat/completions"  
+api_key="your-x-ai-api-key",  
+ base_url="https://x.helicone.ai/v1/chat/completions"  
 )
 
 response = client.chat.completions.create(
-    model="grok-3", 
-    messages=[
-        {"role": "user", "content": "Say this is a test"}
-    ]
+model="grok-3",
+messages=[
+{"role": "user", "content": "Say this is a test"}
+]
 )
 print(response.choices[0].message.content)
+
 ```
 </CallToAction>
 
@@ -204,7 +205,7 @@ That said, xAI's rapid progress with Grok has been nothing short of remarkable a
 - **<a href="https://www.helicone.ai/blog/openai-deep-research" target="_blank" rel="noopener">OpenAI Deep Research & How it Compares to Perplexity</a>**
 - **<a href="https://www.helicone.ai/blog/gpt-4o-mini-vs-claude-3.5-sonnet" target="_blank" rel="noopener">GPT-4o Mini vs. Claude 3.5 Sonnet</a>**
 
-<FAQ 
+<FAQ
   items={[
     {
       question: "What is Deep Search, and how does it work?",
@@ -230,3 +231,4 @@ That said, xAI's rapid progress with Grok has been nothing short of remarkable a
 />
 
 <Questions />
+```

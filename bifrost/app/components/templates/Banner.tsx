@@ -9,7 +9,7 @@ const Banner: React.FC<BannerProps> = ({
   imagePath = "/static/banners/banner_v1.png",
 }) => {
   return (
-    <div className="w-full flex justify-center py-4">
+    <div className="flex w-full justify-center py-4">
       <div className="max-w-5xl">
         <a href="/signup" target="_blank" rel="noopener noreferrer">
           <Image

@@ -165,7 +165,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       cacheSeed: heliconeHeaders.cacheHeaders.cacheSeed,
       cacheBucketMaxSize: heliconeHeaders.cacheHeaders.cacheBucketMaxSize,
       cacheControl: heliconeHeaders.cacheHeaders.cacheControl,
-    }
+    };
     this.promptName = heliconeHeaders.promptName;
     this.omitHeaders = heliconeHeaders.omitHeaders;
     this.sessionHeaders = heliconeHeaders.sessionHeaders;
@@ -319,9 +319,14 @@ export class HeliconeHeaders implements IHeliconeHeaders {
         promptVersion: this.headers.get("Helicone-Prompt-Version") ?? null,
       },
       cacheHeaders: {
-        cacheEnabled: this.headers.get("Helicone-Cache-Enabled") === "true" ? true : false,
-        cacheSeed: this.headers.get("Helicone-Cache-Seed") ? parseInt(this.headers.get("Helicone-Cache-Seed") ?? "0") : null,
-        cacheBucketMaxSize: this.headers.get("Helicone-Cache-Bucket-Max-Size") ? parseInt(this.headers.get("Helicone-Cache-Bucket-Max-Size") ?? "0") : null,
+        cacheEnabled:
+          this.headers.get("Helicone-Cache-Enabled") === "true" ? true : false,
+        cacheSeed: this.headers.get("Helicone-Cache-Seed")
+          ? parseInt(this.headers.get("Helicone-Cache-Seed") ?? "0")
+          : null,
+        cacheBucketMaxSize: this.headers.get("Helicone-Cache-Bucket-Max-Size")
+          ? parseInt(this.headers.get("Helicone-Cache-Bucket-Max-Size") ?? "0")
+          : null,
         cacheControl: this.headers.get("Helicone-Cache-Control") ?? null,
       },
       promptName: this.headers.get("Helicone-Prompt-Name") ?? null,
@@ -342,10 +347,11 @@ export class HeliconeHeaders implements IHeliconeHeaders {
         this.headers.get("Helicone-Model-Override") ??
         null,
       promptSecurityEnabled:
-        (this.headers.get("Helicone-LLM-Security-Enabled") ??
+        (
+          this.headers.get("Helicone-LLM-Security-Enabled") ??
           this.headers.get("Helicone-Prompt-Security-Enabled") ??
-          "").toLowerCase() === "true"
-      ,
+          ""
+        ).toLowerCase() === "true",
       promptSecurityAdvanced:
         this.headers.get("Helicone-LLM-Security-Advanced") ?? null,
       moderationsEnabled:
@@ -441,19 +447,23 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     }
 
     if (heliconeHeaders.cacheHeaders.cacheEnabled) {
-      heliconePropertyHeaders["Helicone-Cache-Enabled"] = heliconeHeaders.cacheHeaders.cacheEnabled.toString();
+      heliconePropertyHeaders["Helicone-Cache-Enabled"] =
+        heliconeHeaders.cacheHeaders.cacheEnabled.toString();
     }
 
     if (heliconeHeaders.cacheHeaders.cacheSeed) {
-      heliconePropertyHeaders["Helicone-Cache-Seed"] = heliconeHeaders.cacheHeaders.cacheSeed.toString();
+      heliconePropertyHeaders["Helicone-Cache-Seed"] =
+        heliconeHeaders.cacheHeaders.cacheSeed.toString();
     }
 
     if (heliconeHeaders.cacheHeaders.cacheBucketMaxSize) {
-      heliconePropertyHeaders["Helicone-Cache-Bucket-Max-Size"] = heliconeHeaders.cacheHeaders.cacheBucketMaxSize.toString();
+      heliconePropertyHeaders["Helicone-Cache-Bucket-Max-Size"] =
+        heliconeHeaders.cacheHeaders.cacheBucketMaxSize.toString();
     }
 
     if (heliconeHeaders.cacheHeaders.cacheControl) {
-      heliconePropertyHeaders["Helicone-Cache-Control"] = heliconeHeaders.cacheHeaders.cacheControl;
+      heliconePropertyHeaders["Helicone-Cache-Control"] =
+        heliconeHeaders.cacheHeaders.cacheControl;
     }
 
     return heliconePropertyHeaders;

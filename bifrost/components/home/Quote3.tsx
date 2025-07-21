@@ -4,10 +4,10 @@ import Image from "next/image";
 
 const Quote3 = () => {
   return (
-    <div className="bg-white sm:bg-gradient-to-b sm:from-white sm:to-[#F2F9FC] pt-10 pb-20 sm:pb-40">
+    <div className="bg-white pb-20 pt-10 sm:bg-gradient-to-b sm:from-white sm:to-[#F2F9FC] sm:pb-40">
       <div className={cn(ISLAND_WIDTH)}>
-        <div className="flex flex-col gap-y-9 lg:flex-row justify-between items-start lg:items-end">
-          <h2 className="text-2xl md:text-[40px] tracking-tight leading-normal md:leading-[52px] font-semibold text-[#ACB3BA] w-full lg:max-w-[780px] text-wrap mr-20">
+        <div className="flex flex-col items-start justify-between gap-y-9 lg:flex-row lg:items-end">
+          <h2 className="mr-20 w-full text-wrap text-2xl font-semibold leading-normal tracking-tight text-[#ACB3BA] md:text-[40px] md:leading-[52px] lg:max-w-[780px]">
             Helicone is{" "}
             <span className="text-black">
               essential for debugging our complex agentic flows
@@ -20,7 +20,7 @@ const Quote3 = () => {
               alt="Soohoon Choi"
               width={48}
               height={48}
-              className="w-12 h-12 rounded-full"
+              className="h-12 w-12 rounded-full"
             />
             <div className="flex flex-col gap-2">
               <Image
@@ -30,10 +30,10 @@ const Quote3 = () => {
                 height={28}
                 className="w-28 pb-2"
               />
-              <h4 className="text-[17px] sm:text-xl font-medium whitespace-nowrap">
+              <h4 className="whitespace-nowrap text-[17px] font-medium sm:text-xl">
                 Soohoon Choi
               </h4>
-              <p className="text-[15px] sm:text-lg w-auto">CTO</p>
+              <p className="w-auto text-[15px] sm:text-lg">CTO</p>
             </div>
           </div>
         </div>

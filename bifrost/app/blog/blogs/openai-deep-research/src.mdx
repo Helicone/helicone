@@ -103,12 +103,12 @@ For example, while GPT-4 with plugins achieves only `15%` accuracy, human respon
 
 ## OpenAI Deep Research: Strengths & Limitations
 
-| Strengths                                                                                      | Limitations                                                                                                                       |
-| ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| ✔️ **Detailed Summarization**: Effectively extracts and synthesizes complex concepts           | 🆇 **Hallucinations**: May fabricate sources, misinterpret data, or cite incorrect facts—which can be hidden in lengthy reports    |
-| ✔️ **Data Accuracy**: References are consistently accurate, especially for structured data     | 🆇 **Information Consistency**: Can produce contradictory information, show bias, or reference outdated data                       |
-| ✔️ **Query Processing**: Effectively refines and processes multi-step queries                  | 🆇 **Original Analysis**: Struggles with generating novel hypotheses or interpreting nuanced academic discussions                  |
-| ✔️ **Time Efficiency**: Reduces hours of manual research to minutes with high-quality sources |                                                                                                                                   |
+| Strengths                                                                                     | Limitations                                                                                                                    |
+| --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| ✔️ **Detailed Summarization**: Effectively extracts and synthesizes complex concepts          | 🆇 **Hallucinations**: May fabricate sources, misinterpret data, or cite incorrect facts—which can be hidden in lengthy reports |
+| ✔️ **Data Accuracy**: References are consistently accurate, especially for structured data    | 🆇 **Information Consistency**: Can produce contradictory information, show bias, or reference outdated data                    |
+| ✔️ **Query Processing**: Effectively refines and processes multi-step queries                 | 🆇 **Original Analysis**: Struggles with generating novel hypotheses or interpreting nuanced academic discussions               |
+| ✔️ **Time Efficiency**: Reduces hours of manual research to minutes with high-quality sources |                                                                                                                                |
 
 ## OpenAI Deep Research vs. Gemini Deep Research vs. Perplexity Deep Research
 
@@ -122,18 +122,18 @@ Let's compare OpenAI Deep Research with Gemini Deep Research and Perplexity Deep
 
 ### Detailed Comparison: OpenAI Deep Research Pricing & Features
 
-|                          | OpenAI                                                | Google                                 | Perplexity                                         |
-| ------------------------ | ----------------------------------------------------- | -------------------------------------- | -------------------------------------------------- |
-| **Cost**                 | $200/month                                            | $20/month                              | Free (5 queries/day) or $20/month                  |
-| **Level of Detail**      | Comprehensive, detailed reports                       | Concise reports                        | Structured, concise summaries                      |
-| **Search Sources**       | Websites and academic papers                          | Primarily website content              | Academic papers and real-time data                 |
-| **Accuracy**             | High accuracy with occasional errors                  | More susceptible to SEO bias           | High accuracy, slightly below OpenAI               |
-| **Citation Quality**     | Generally reliable with some errors                   | Occasionally cites unrelated sources   | Consistently reliable citations                    |
-| **Best Use Cases**       | Technical and academic research                       | General web research                   | Research, journalism, real-time analysis           |
-| **Input Support**        | Text, images, PDFs, spreadsheets                      | Primarily text-based                   | Text queries, limited file handling                |
-| **Output Format**        | Detailed reports with sources and visuals             | Reports with key findings              | Concise summaries with inline citations            |
-| **Process Transparency** | Shows detailed reasoning steps                        | Uses predetermined research paths      | Displays reasoning and search progression          |
-| **Processing Time**      | 5-30 minutes per query                                | Under 15 minutes                       | 2-4 minutes per query                              |
+|                          | OpenAI                                    | Google                               | Perplexity                                |
+| ------------------------ | ----------------------------------------- | ------------------------------------ | ----------------------------------------- |
+| **Cost**                 | $200/month                                | $20/month                            | Free (5 queries/day) or $20/month         |
+| **Level of Detail**      | Comprehensive, detailed reports           | Concise reports                      | Structured, concise summaries             |
+| **Search Sources**       | Websites and academic papers              | Primarily website content            | Academic papers and real-time data        |
+| **Accuracy**             | High accuracy with occasional errors      | More susceptible to SEO bias         | High accuracy, slightly below OpenAI      |
+| **Citation Quality**     | Generally reliable with some errors       | Occasionally cites unrelated sources | Consistently reliable citations           |
+| **Best Use Cases**       | Technical and academic research           | General web research                 | Research, journalism, real-time analysis  |
+| **Input Support**        | Text, images, PDFs, spreadsheets          | Primarily text-based                 | Text queries, limited file handling       |
+| **Output Format**        | Detailed reports with sources and visuals | Reports with key findings            | Concise summaries with inline citations   |
+| **Process Transparency** | Shows detailed reasoning steps            | Uses predetermined research paths    | Displays reasoning and search progression |
+| **Processing Time**      | 5-30 minutes per query                    | Under 15 minutes                     | 2-4 minutes per query                     |
 
 OpenAI Deep Research is more capable and feature-packed, but so far, all the models struggle with reliability. In any case, you must understand its limitations and be prepared to work with them.
 
@@ -141,8 +141,8 @@ OpenAI Deep Research is more capable and feature-packed, but so far, all the mod
 
 The value of OpenAI's Deep Research depends on your specific needs.
 
-| Recommended for                                                                                                                                                                  | Not Recommended for                                                                                                            |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Recommended for                                                                                                                                                                      | Not Recommended for                                                                                                                |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
 | ✔️ Researchers working on complex, niche topics <br/> ✔️ Projects requiring synthesis of scattered data <br/> ✔️ Tasks needing comprehensive topic reports rather than quick answers | 🆇 Simple fact-checking queries (standard GPT-4o suffices) <br/> 🆇 Financial, legal, or medical reports requiring absolute accuracy |
 
 While OpenAI's Deep Research commands a premium price, it's now available to Plus users, with plans to extend access to Free tier users in the near future.
@@ -201,28 +201,33 @@ OpenAI Deep Research represents an ambitious step toward automated AI-driven res
 - **<a href="https://helicone.ai/blog/openai-o3" target="_blank" rel="noopener">OpenAI o3 Released: Benchmarks and Comparison to o1</a>**
 - **<a href="https://www.helicone.ai/blog/prompt-evaluation-frameworks" target="_blank" rel="noopener">Top Prompt Evaluation Frameworks in 2025</a>**
 
-<FAQ 
+<FAQ
   items={[
     {
       question: "How long does Deep Research take to generate a report?",
-      answer: "Deep Research typically takes 5-30 minutes per query, with processing time varying based on topic complexity and data volume."
+      answer:
+        "Deep Research typically takes 5-30 minutes per query, with processing time varying based on topic complexity and data volume.",
     },
     {
       question: "What kind of data can Deep Research access?",
-      answer: "Deep Research can browse the open web and analyze uploaded files, but currently cannot access private, subscription-based, or internal resources. This capability is under development."
+      answer:
+        "Deep Research can browse the open web and analyze uploaded files, but currently cannot access private, subscription-based, or internal resources. This capability is under development.",
     },
     {
       question: "When should I use Deep Research vs. Search?",
-      answer: "Use Search for quick facts, news, weather, or summaries (instant results). Use Deep Research for comprehensive analysis requiring multiple sources and structured reports (longer processing time)."
+      answer:
+        "Use Search for quick facts, news, weather, or summaries (instant results). Use Deep Research for comprehensive analysis requiring multiple sources and structured reports (longer processing time).",
     },
     {
       question: "How do I use Deep Research?",
-      answer: "In ChatGPT, select 'Deep Research' and enter your query. You can attach files, images, or spreadsheets for additional context. Deep Research may ask clarifying questions before processing your request in the background to create a structured report."
+      answer:
+        "In ChatGPT, select 'Deep Research' and enter your query. You can attach files, images, or spreadsheets for additional context. Deep Research may ask clarifying questions before processing your request in the background to create a structured report.",
     },
     {
       question: "Can I use Helicone to track Deep Research usage?",
-      answer: "Currently, OpenAI Deep Research API is not available, so direct tracking is not possible. However, Helicone can track other AI-powered research models, including Open Deep Research, OpenAI's API-based models, and self-hosted LLMs."
-    }
+      answer:
+        "Currently, OpenAI Deep Research API is not available, so direct tracking is not possible. However, Helicone can track other AI-powered research models, including Open Deep Research, OpenAI's API-based models, and self-hosted LLMs.",
+    },
   ]}
 />
 

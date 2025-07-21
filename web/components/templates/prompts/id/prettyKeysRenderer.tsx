@@ -41,7 +41,7 @@ const RenderWithPrettyInputKeys: React.FC<RenderWithPrettyInputKeysProps> = ({
         lastIndex = offset + match.length;
 
         return match;
-      }
+      },
     );
 
     // Add any remaining text after the last match
@@ -52,7 +52,7 @@ const RenderWithPrettyInputKeys: React.FC<RenderWithPrettyInputKeysProps> = ({
   };
 
   return (
-    <div className="text-md leading-8 text-black dark:text-white whitespace-pre-wrap">
+    <div className="text-md whitespace-pre-wrap leading-8 text-black dark:text-white">
       {replaceInputKeysWithComponents(text)}
     </div>
   );

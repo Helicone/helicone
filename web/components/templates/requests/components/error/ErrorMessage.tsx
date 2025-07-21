@@ -17,7 +17,7 @@ export const ErrorMessage = ({
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useLocalStorage<(typeof PROMPT_MODES)[number]>(
     "error-mode",
-    "Pretty"
+    "Pretty",
   );
   const [allExpanded, setAllExpanded] = useState(false);
 
@@ -109,23 +109,23 @@ export const ErrorMessage = ({
   const renderErrorContent = (isModal = false) => {
     return (
       <div
-        className={`w-full border border-slate-200 dark:border-gray-700 divide-y divide-gray-300 dark:divide-gray-700 h-full ${className}`}
+        className={`h-full w-full divide-y divide-gray-300 border border-slate-200 dark:divide-gray-700 dark:border-gray-700 ${className}`}
       >
-        <div className="w-full flex flex-col text-left space-y-8 text-sm p-4">
-          <div className="w-full flex flex-col text-left space-y-1 text-sm">
-            <p className="font-semibold text-sm">
-              Response <span className="text-red-500 text-xs">(Error)</span>
+        <div className="flex w-full flex-col space-y-8 p-4 text-left text-sm">
+          <div className="flex w-full flex-col space-y-1 text-left text-sm">
+            <p className="text-sm font-semibold">
+              Response <span className="text-xs text-red-500">(Error)</span>
             </p>
             {mode === "Debug" ? (
-              <pre className="p-2 border rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
+              <pre className="h-full overflow-auto whitespace-pre-wrap rounded-md border p-2 leading-6">
                 {JSON.stringify(mapperContent, null, 2)}
               </pre>
             ) : mode === "JSON" ? (
-              <pre className="p-2 border rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
+              <pre className="h-full overflow-auto whitespace-pre-wrap rounded-md border p-2 leading-6">
                 {JSON.stringify(mapperContent.raw.response, null, 2)}
               </pre>
             ) : errorData.type === "parse_error" ? (
-              <div className="p-4 border rounded-md bg-destructive/10 dark:bg-destructive/20">
+              <div className="rounded-md border bg-destructive/10 p-4 dark:bg-destructive/20">
                 <div className="flex items-start">
                   <div className="flex-shrink-0">
                     <AlertTriangle className="h-5 w-5 text-destructive" />
@@ -139,7 +139,7 @@ export const ErrorMessage = ({
                         The API returned an invalid response that couldn&apos;t
                         be processed.
                       </p>
-                      <div className="overflow-auto max-h-60 rounded-md bg-destructive/5 dark:bg-destructive/10 p-2 font-mono text-xs">
+                      <div className="font-mono max-h-60 overflow-auto rounded-md bg-destructive/5 p-2 text-xs dark:bg-destructive/10">
                         {errorData.details}
                       </div>
                     </div>
@@ -147,13 +147,13 @@ export const ErrorMessage = ({
                 </div>
               </div>
             ) : (
-              <pre className="p-2 border rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
+              <pre className="h-full overflow-auto whitespace-pre-wrap rounded-md border p-2 leading-6">
                 {errorData.message}
               </pre>
             )}
           </div>
-          <p className="font-semibold text-sm">Request</p>
-          <pre className="p-2 border rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
+          <p className="text-sm font-semibold">Request</p>
+          <pre className="h-full overflow-auto whitespace-pre-wrap rounded-md border p-2 leading-6">
             <JsonRenderer data={mapperContent.raw.request} />
           </pre>
         </div>
@@ -165,7 +165,7 @@ export const ErrorMessage = ({
     <>
       {renderErrorContent()}
       <ThemedModal open={open} setOpen={setOpen}>
-        <div className="w-[80vw] rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
+        <div className="h-full w-[80vw] divide-y divide-gray-300 rounded-md dark:divide-gray-700">
           {renderErrorContent(true)}
         </div>
       </ThemedModal>

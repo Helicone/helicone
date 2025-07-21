@@ -2,9 +2,9 @@ import DashboardBig from "@/public/static/home/dashboardbig";
 
 const BigDashboard = () => {
   return (
-    <div className="w-full mx-auto h-full relative">
+    <div className="relative mx-auto h-full w-full">
       <DashboardBig />
-      <div className="h-[100px] bg-[#f2f9fc] hidden md:block absolute bottom-0 w-full"></div>
+      <div className="absolute bottom-0 hidden h-[100px] w-full bg-[#f2f9fc] md:block"></div>
     </div>
   );
 };

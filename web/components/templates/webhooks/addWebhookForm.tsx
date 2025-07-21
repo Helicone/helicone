@@ -96,7 +96,7 @@ const AddWebhookForm = (props: AddWebhookFormProps) => {
         <h2 className="text-2xl font-semibold tracking-tight">
           Listen to events
         </h2>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="mt-1 text-sm text-muted-foreground">
           Configure a webhook to receive real-time updates about your API
           requests.
         </p>
@@ -143,7 +143,7 @@ const AddWebhookForm = (props: AddWebhookFormProps) => {
                     setSampleRate(value);
                   }
                 }}
-                className="w-16 h-8 text-sm"
+                className="h-8 w-16 text-sm"
               />
               <span className="text-sm">%</span>
             </div>
@@ -168,7 +168,7 @@ const AddWebhookForm = (props: AddWebhookFormProps) => {
               <Label htmlFor="include-data" className="text-sm font-medium">
                 Include Enhanced Data
               </Label>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="mt-1 text-xs text-muted-foreground">
                 When enabled, webhooks will include additional data such as
                 costs, token counts, latency metrics, and S3 URLs.
               </p>
@@ -187,16 +187,16 @@ const AddWebhookForm = (props: AddWebhookFormProps) => {
           <div className="flex items-center justify-between">
             <div>
               <Label className="text-sm font-medium">Properties Filters</Label>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="mt-1 text-xs text-muted-foreground">
                 Filter which events are sent to the webhook using{" "}
                 <a
                   href="https://docs.helicone.ai/features/advanced-usage/custom-properties#custom-properties"
                   target="_blank"
-                  className="underline inline-flex items-center"
+                  className="inline-flex items-center underline"
                   rel="noreferrer"
                 >
                   custom properties
-                  <ExternalLink className="h-3 w-3 ml-0.5" />
+                  <ExternalLink className="ml-0.5 h-3 w-3" />
                 </a>
               </p>
             </div>
@@ -206,16 +206,16 @@ const AddWebhookForm = (props: AddWebhookFormProps) => {
               onClick={addPropertyFilter}
               className="h-8"
             >
-              <Plus className="h-3.5 w-3.5 mr-1" /> Add Property
+              <Plus className="mr-1 h-3.5 w-3.5" /> Add Property
             </Button>
           </div>
 
           {propertyFilters.length > 0 && (
-            <div className="space-y-2 mt-2">
+            <div className="mt-2 space-y-2">
               {propertyFilters.map((filter, index) => (
                 <div
                   key={index}
-                  className="grid grid-cols-3 items-center gap-2 bg-muted/40 p-2 rounded-md"
+                  className="grid grid-cols-3 items-center gap-2 rounded-md bg-muted/40 p-2"
                 >
                   <div className="col-span-1">
                     <Popover modal={true}>
@@ -250,7 +250,7 @@ const AddWebhookForm = (props: AddWebhookFormProps) => {
                                     updatePropertyFilter(
                                       index,
                                       property,
-                                      filter.value
+                                      filter.value,
                                     )
                                   }
                                   value={property}
@@ -264,7 +264,7 @@ const AddWebhookForm = (props: AddWebhookFormProps) => {
                       </PopoverContent>
                     </Popover>
                   </div>
-                  <div className="flex items-center space-x-2 col-span-2">
+                  <div className="col-span-2 flex items-center space-x-2">
                     <Input
                       placeholder="Value"
                       value={filter.value}

@@ -22,7 +22,7 @@ export AZURE_DEPLOYMENT=<your-azure-deployment>
 
 Install the required packages:
 
-```bash 
+```bash
 npm install ws dotenv
 ```
 
@@ -37,11 +37,12 @@ import { config } from "dotenv";
 config();
 
 // This is where the magic happens - simply point to Helicone's gateway instead of OpenAI
-const url = "wss://api.helicone.ai/v1/gateway/oai/realtime?model=gpt-4o-realtime-preview-2024-12-17";
+const url =
+  "wss://api.helicone.ai/v1/gateway/oai/realtime?model=gpt-4o-realtime-preview-2024-12-17";
 
 const ws = new WebSocket(url, {
   headers: {
-    "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+    Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
     "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
     // Optional Helicone properties for better analytics
     "Helicone-Session-Id": `session_${Date.now()}`,
@@ -52,25 +53,29 @@ const ws = new WebSocket(url, {
 ws.on("open", function open() {
   console.log("Connected to server");
   // Initialize session with desired configuration
-  ws.send(JSON.stringify({
-    type: "session.update",
-    session: {
-      modalities: ["text", "audio"],
-      instructions: "You are a helpful AI assistant...",
-      voice: "alloy",
-      input_audio_format: "pcm16",
-      output_audio_format: "pcm16",
-    }
-  }));
+  ws.send(
+    JSON.stringify({
+      type: "session.update",
+      session: {
+        modalities: ["text", "audio"],
+        instructions: "You are a helpful AI assistant...",
+        voice: "alloy",
+        input_audio_format: "pcm16",
+        output_audio_format: "pcm16",
+      },
+    })
+  );
 });
 ```
+
 If you're using Azure, the implementation is very similar:
+
 ```javascript
 const url = `wss://api.helicone.ai/v1/gateway/oai/realtime?resource=${process.env.AZURE_RESOURCE}&deployment=${process.env.AZURE_DEPLOYMENT}`;
 
 const ws = new WebSocket(url, {
   headers: {
-    "Authorization": `Bearer ${process.env.AZURE_API_KEY}`,
+    Authorization: `Bearer ${process.env.AZURE_API_KEY}`,
     "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
     // Optional Helicone properties
     "Helicone-Session-Id": `session_${Date.now()}`,
@@ -128,7 +133,7 @@ Helicone provides additional headers to help you track and analyze your sessions
 ```javascript
 const headers = {
   // Required headers
-  "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+  Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
   "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
 
   // Optional headers for better analytics
@@ -138,6 +143,7 @@ const headers = {
   "Helicone-Session-Path": "/voice-assistant/conversation",
 };
 ```
+
 When you run your application with these headers, Helicone will automatically log and organize your interactions based on the provided metadata.
 
 ## Testing your integration
@@ -147,6 +153,7 @@ When you run your application, you should see events from the Realtime API being
 Remember that the Realtime API maintains a stateful connection. If the connection is interrupted, you'll need to recreate the session and reinitialize the conversation state.
 
 ## Why use Helicone with OpenAI's Realtime API
+
 By integrating with Helicone, you get:
 
 - **Zero-latency overhead:** Helicone's architecture ensures that logging doesn't impact your application's performance
@@ -155,12 +162,30 @@ By integrating with Helicone, you get:
 - **Cost monitoring:** Understand how your Realtime API usage translates to costs
 - **Performance insights:** Identify latency issues or potential optimizations
 
-These headers help you group related API calls, track user sessions, analyze conversation patterns, and monitor usage and performance. For Realtime API, see <a href="https://docs.helicone.ai/integrations/openai/realtime" target="_blank" rel="noopener">docs</a>. See <a href="https://docs.helicone.ai/features/sessions" target="_blank" rel="noopener">Sessions</a> for tracing regular OpenAI API calls. 
+These headers help you group related API calls, track user sessions, analyze conversation patterns, and monitor usage and performance. For Realtime API, see <a href="https://docs.helicone.ai/integrations/openai/realtime" target="_blank" rel="noopener">docs</a>. See <a href="https://docs.helicone.ai/features/sessions" target="_blank" rel="noopener">Sessions</a> for tracing regular OpenAI API calls.
 
 ## Further reading
 
-- <a href="https://docs.helicone.ai/docs/custom-properties" target="_blank" rel="noopener">Using Custom Properties in Helicone</a>
-- <a href="https://docs.helicone.ai/features/sessions#sessions" target="_blank" rel="noopener">Managing Sessions in Helicone</a>
-- <a href="https://docs.helicone.ai/integrations/openai/realtime" target="_blank" rel="noopener">Understanding OpenAI's Realtime API</a>
+- <a
+    href="https://docs.helicone.ai/docs/custom-properties"
+    target="_blank"
+    rel="noopener"
+  >
+    Using Custom Properties in Helicone
+  </a>
+- <a
+    href="https://docs.helicone.ai/features/sessions#sessions"
+    target="_blank"
+    rel="noopener"
+  >
+    Managing Sessions in Helicone
+  </a>
+- <a
+    href="https://docs.helicone.ai/integrations/openai/realtime"
+    target="_blank"
+    rel="noopener"
+  >
+    Understanding OpenAI's Realtime API
+  </a>
 
 <Questions />

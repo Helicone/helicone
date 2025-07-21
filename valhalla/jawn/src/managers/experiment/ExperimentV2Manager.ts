@@ -35,26 +35,41 @@ export interface ExperimentOutputForScores {
 function getCustomScores(
   scores: Record<string, ScoreV2>[]
 ): Record<string, ScoreV2> {
-  const scoresValues = scores.reduce((acc, record) => {
-    for (const key in record) {
-      if (record.hasOwnProperty(key) && typeof record[key].value === "number") {
-        if (!acc[key]) {
-          acc[key] = {
-            sum: 0,
-            count: 0,
-            valueType: record[key].valueType,
-            max: record[key].value as number,
-            min: record[key].value as number,
-          };
+  const scoresValues = scores.reduce(
+    (acc, record) => {
+      for (const key in record) {
+        if (
+          record.hasOwnProperty(key) &&
+          typeof record[key].value === "number"
+        ) {
+          if (!acc[key]) {
+            acc[key] = {
+              sum: 0,
+              count: 0,
+              valueType: record[key].valueType,
+              max: record[key].value as number,
+              min: record[key].value as number,
+            };
+          }
+          acc[key].sum += record[key].value as number;
+          acc[key].count += 1;
+          acc[key].max = Math.max(acc[key].max, record[key].value as number);
+          acc[key].min = Math.min(acc[key].min, record[key].value as number);
         }
-        acc[key].sum += record[key].value as number;
-        acc[key].count += 1;
-        acc[key].max = Math.max(acc[key].max, record[key].value as number);
-        acc[key].min = Math.min(acc[key].min, record[key].value as number);
       }
-    }
-    return acc;
-  }, {} as Record<string, { sum: number; count: number; valueType: string; max: number; min: number }>);
+      return acc;
+    },
+    {} as Record<
+      string,
+      {
+        sum: number;
+        count: number;
+        valueType: string;
+        max: number;
+        min: number;
+      }
+    >
+  );
 
   return Object.fromEntries(
     Object.entries(scoresValues).map(

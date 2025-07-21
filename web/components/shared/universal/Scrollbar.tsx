@@ -87,24 +87,24 @@ const CustomScrollbar = forwardRef<
     >
       <div
         ref={containerRef}
-        className="h-full w-full overflow-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        className="h-full w-full overflow-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {children}
       </div>
       {/* Custom overlay scrollbar */}
       {scrollHeight > clientHeight + 1 && (
-        <div className="absolute top-0 right-0 bottom-0 w-[8px] pointer-events-none z-10">
+        <div className="pointer-events-none absolute bottom-0 right-0 top-0 z-10 w-[8px]">
           <div
             className={`absolute right-0 transition-opacity duration-200 ${
               withBorder
-                ? "bg-slate-200 dark:bg-slate-800 border-slate-100 dark:border-slate-900"
-                : "bg-slate-200 dark:bg-slate-800 border-transparent"
+                ? "border-slate-100 bg-slate-200 dark:border-slate-900 dark:bg-slate-800"
+                : "border-transparent bg-slate-200 dark:bg-slate-800"
             } ${hovered ? "opacity-100" : "opacity-0"} ${
               thumbTop === 0
-                ? "rounded-r-xs rounded-bl-md border-l border-b"
+                ? "rounded-r-xs rounded-bl-md border-b border-l"
                 : thumbTop + thumbHeight >= clientHeight
-                ? "rounded-r-xs rounded-tl-md border-l border-t"
-                : "rounded-l-md rounded-r-xs border-l border-y"
+                  ? "rounded-r-xs rounded-tl-md border-l border-t"
+                  : "rounded-r-xs rounded-l-md border-y border-l"
             }`}
             style={{
               top: thumbTop,

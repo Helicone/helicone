@@ -104,7 +104,7 @@ export async function checkLimits(
   }
   const limitResults = (Object.values(keyMappings?.[0])?.[0] ?? []) as [
     number,
-    number
+    number,
   ][];
 
   const remappedResults = limitResults.map(([count, cost], index) => {

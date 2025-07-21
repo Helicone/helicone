@@ -60,16 +60,16 @@ const StringRenderer: React.FC<StringRendererProps> = ({
       {isTruncated && (
         <button
           onClick={() => setExpanded(!expanded)}
-          className="ml-2 inline-flex items-center text-xs px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+          className="ml-2 inline-flex items-center rounded-md bg-slate-100 px-2 py-1 text-xs text-slate-700 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
         >
           {expanded ? (
             <>
-              <EyeSlashIcon className="h-3 w-3 mr-1" />
+              <EyeSlashIcon className="mr-1 h-3 w-3" />
               <span>Show less</span>
             </>
           ) : (
             <>
-              <EyeIcon className="h-3 w-3 mr-1" />
+              <EyeIcon className="mr-1 h-3 w-3" />
               <span>
                 Show {(data.length - maxLength).toLocaleString()} more chars
               </span>
@@ -91,7 +91,7 @@ export const JsonRenderer: React.FC<JsonRendererProps> = ({
   const shouldAutoCollapse =
     Array.isArray(data) && data.length > DEFAULT_COLLAPSE_LENGTH;
   const [expanded, setExpanded] = useState(
-    shouldAutoCollapse ? false : isExpanded
+    shouldAutoCollapse ? false : isExpanded,
   );
   const [copied, setCopied] = useState(false);
 
@@ -108,7 +108,7 @@ export const JsonRenderer: React.FC<JsonRendererProps> = ({
 
   if (typeof data === "boolean") {
     return (
-      <span className="text-indigo-600 dark:text-indigo-400 font-medium">
+      <span className="font-medium text-indigo-600 dark:text-indigo-400">
         {data.toString()}
       </span>
     );
@@ -134,7 +134,7 @@ export const JsonRenderer: React.FC<JsonRendererProps> = ({
         {level === 0 && showCopyButton && (
           <button
             onClick={handleCopy}
-            className="absolute right-0 top-0 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
+            className="absolute right-0 top-0 text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
             title="Copy JSON"
           >
             {copied ? (
@@ -145,17 +145,17 @@ export const JsonRenderer: React.FC<JsonRendererProps> = ({
           </button>
         )}
         <div
-          className="inline-flex items-center cursor-pointer group"
+          className="group inline-flex cursor-pointer items-center"
           onClick={() => setExpanded(!expanded)}
         >
           {expanded ? (
-            <ChevronDownIcon className="h-3 w-3 inline mr-1 text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200 transition-colors" />
+            <ChevronDownIcon className="mr-1 inline h-3 w-3 text-slate-500 transition-colors group-hover:text-slate-700 dark:text-slate-400 dark:group-hover:text-slate-200" />
           ) : (
-            <ChevronRightIcon className="h-3 w-3 inline mr-1 text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200 transition-colors" />
+            <ChevronRightIcon className="mr-1 inline h-3 w-3 text-slate-500 transition-colors group-hover:text-slate-700 dark:text-slate-400 dark:group-hover:text-slate-200" />
           )}
           <span className="text-slate-600 dark:text-slate-300">[</span>
           {!expanded && (
-            <span className="text-slate-500 dark:text-slate-400 italic text-xs">
+            <span className="text-xs italic text-slate-500 dark:text-slate-400">
               ...{data.length} items
             </span>
           )}
@@ -165,7 +165,7 @@ export const JsonRenderer: React.FC<JsonRendererProps> = ({
         </div>
 
         {expanded && (
-          <div className="ml-4 border-l border-slate-300 dark:border-slate-700 pl-2">
+          <div className="ml-4 border-l border-slate-300 pl-2 dark:border-slate-700">
             {data.map((item, index) => (
               <div key={index}>
                 <JsonRenderer
@@ -182,7 +182,7 @@ export const JsonRenderer: React.FC<JsonRendererProps> = ({
         )}
 
         {expanded && (
-          <div className="inline-flex items-center ml-0">
+          <div className="ml-0 inline-flex items-center">
             <span className="ml-3 text-slate-600 dark:text-slate-300">]</span>
           </div>
         )}
@@ -205,7 +205,7 @@ export const JsonRenderer: React.FC<JsonRendererProps> = ({
             copyButtonPosition === "top-left"
               ? "left-10 top-0"
               : "right-0 top-0"
-          } text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors`}
+          } text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200`}
           title="Copy JSON"
         >
           {copied ? (
@@ -216,17 +216,17 @@ export const JsonRenderer: React.FC<JsonRendererProps> = ({
         </button>
       )}
       <div
-        className="inline-flex items-center cursor-pointer group"
+        className="group inline-flex cursor-pointer items-center"
         onClick={() => setExpanded(!expanded)}
       >
         {expanded ? (
-          <ChevronDownIcon className="h-3 w-3 inline mr-1 text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200 transition-colors" />
+          <ChevronDownIcon className="mr-1 inline h-3 w-3 text-slate-500 transition-colors group-hover:text-slate-700 dark:text-slate-400 dark:group-hover:text-slate-200" />
         ) : (
-          <ChevronRightIcon className="h-3 w-3 inline mr-1 text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200 transition-colors" />
+          <ChevronRightIcon className="mr-1 inline h-3 w-3 text-slate-500 transition-colors group-hover:text-slate-700 dark:text-slate-400 dark:group-hover:text-slate-200" />
         )}
         <span className="text-slate-600 dark:text-slate-300">{"{"}</span>
         {!expanded && (
-          <span className="text-slate-500 dark:text-slate-400 italic text-xs">
+          <span className="text-xs italic text-slate-500 dark:text-slate-400">
             ...{entries.length} properties
           </span>
         )}
@@ -235,10 +235,10 @@ export const JsonRenderer: React.FC<JsonRendererProps> = ({
         )}
       </div>
       {expanded && (
-        <div className="ml-4 border-l border-slate-300 dark:border-slate-700 pl-2">
+        <div className="ml-4 border-l border-slate-300 pl-2 dark:border-slate-700">
           {entries.map(([key, value], index) => (
             <div key={key}>
-              <span className="text-sky-600 dark:text-sky-400 font-medium">
+              <span className="font-medium text-sky-600 dark:text-sky-400">
                 &quot;{key}&quot;
               </span>
               <span className="text-slate-500 dark:text-slate-400">: </span>
@@ -255,7 +255,7 @@ export const JsonRenderer: React.FC<JsonRendererProps> = ({
         </div>
       )}
       {expanded && (
-        <div className="inline-flex items-center ml-0">
+        <div className="ml-0 inline-flex items-center">
           <span className="ml-3 text-slate-600 dark:text-slate-300">{"}"}</span>
         </div>
       )}

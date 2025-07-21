@@ -46,7 +46,7 @@ export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
         <TooltipProvider>
           <Tooltip delayDuration={100}>
             <TooltipTrigger asChild>
-              <span className="text-gray-900 dark:text-gray-100 font-medium cursor-default">
+              <span className="cursor-default font-medium text-gray-900 dark:text-gray-100">
                 {getUSDateFromString(value)}
               </span>
             </TooltipTrigger>
@@ -144,7 +144,7 @@ export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
     header: "Completion Tokens",
     cell: (info) => {
       const tokens = Number(
-        info.row.original.heliconeMetadata.completionTokens
+        info.row.original.heliconeMetadata.completionTokens,
       );
       return <span>{tokens >= 0 ? tokens : "not found"}</span>;
     },
@@ -221,9 +221,9 @@ export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
       return (
         <span className={clsx(rating ? "text-green-500" : "text-red-500")}>
           {rating ? (
-            <HandThumbUpIcon className="h-5 w-5 inline" />
+            <HandThumbUpIcon className="inline h-5 w-5" />
           ) : (
-            <HandThumbDownIcon className="h-5 w-5 inline" />
+            <HandThumbDownIcon className="inline h-5 w-5" />
           )}
         </span>
       );
@@ -247,7 +247,7 @@ export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
     cell: (info) => {
       const countryCode = info.row.original.heliconeMetadata.countryCode;
       const country = COUTNRY_CODE_DIRECTORY.find(
-        (c) => c.isoCode === countryCode
+        (c) => c.isoCode === countryCode,
       );
 
       if (country === undefined) {
@@ -255,7 +255,7 @@ export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
       }
 
       return (
-        <span className="text-gray-900 dark:text-gray-100 font-medium">
+        <span className="font-medium text-gray-900 dark:text-gray-100">
           {country.emojiFlag} {country.country} ({country.isoCode})
         </span>
       );
@@ -268,7 +268,7 @@ export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
     header: "Prompt Cache Read Tokens",
     cell: (info) => {
       const tokens = Number(
-        info.row.original.heliconeMetadata.promptCacheReadTokens
+        info.row.original.heliconeMetadata.promptCacheReadTokens,
       );
       return <span>{tokens >= 0 ? tokens : "not found"}</span>;
     },
@@ -279,7 +279,7 @@ export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
     header: "Prompt Cache Write Tokens",
     cell: (info) => {
       const tokens = Number(
-        info.row.original.heliconeMetadata.promptCacheWriteTokens
+        info.row.original.heliconeMetadata.promptCacheWriteTokens,
       );
       return <span>{tokens >= 0 ? tokens : "not found"}</span>;
     },

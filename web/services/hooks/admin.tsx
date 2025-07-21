@@ -23,7 +23,7 @@ const useUpdateAlertBanner = (onSuccess?: () => void) => {
         "/v1/admin/alert_banners",
         {
           body: req,
-        }
+        },
       );
 
       if (!error) {
@@ -71,7 +71,7 @@ const useUpdateSetting = (onSuccess?: () => void) => {
 
 const useGetSetting = (
   settingName: components["schemas"]["SettingName"],
-  onSuccess?: () => void
+  onSuccess?: () => void,
 ) => {
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["settings", settingName],
@@ -87,7 +87,7 @@ const useGetSetting = (
               name: settingName,
             },
           },
-        }
+        },
       );
 
       console.log(`Received setting ${settingName}`, data);
@@ -120,7 +120,7 @@ const useChangelog = () => {
     queryFn: async () => {
       try {
         const feed = await parser.parseURL(
-          "https://www.helicone.ai/rss/changelog.xml"
+          "https://www.helicone.ai/rss/changelog.xml",
         );
         return feed.items;
       } catch (err) {
@@ -160,7 +160,7 @@ const useBackfillCosts = (onSuccess?: () => void) => {
             totalChunks: req.totalChunks,
             chunkNumber: req.chunkNumber,
           },
-        }
+        },
       );
 
       console.log(`Backfilled costs`, data);
@@ -184,7 +184,7 @@ const useFeatureFlag = (feature: string, orgId: string) => {
         feature,
         orgId,
       },
-    }
+    },
   );
   return {
     data: data?.data ?? false,

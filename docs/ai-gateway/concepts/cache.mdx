@@ -9,6 +9,7 @@ The AI Gateway automatically caches LLM responses and reuses them for identical 
 Caching uses exact parameter matching with configurable TTL, staleness policies, and bucketed responses for variety.
 
 **Benefits:**
+
 - **Eliminate CI/test costs** by reusing responses across test runs and development
 - **Reduce costs** by eliminating duplicate API calls to providers
 - **Improve latency** by serving cached responses instantly
@@ -30,13 +31,12 @@ Caching uses exact parameter matching with configurable TTL, staleness policies,
         directive: "max-age=3600, max-stale=1800"
         buckets: 1
     ```
+
   </Step>
 
-  <Step title="Start the gateway">
-    ```bash
-    npx @helicone/ai-gateway@latest --config ai-gateway-config.yaml
-    ```
-  </Step>
+<Step title="Start the gateway">
+  ```bash npx @helicone/ai-gateway@latest --config ai-gateway-config.yaml ```
+</Step>
 
   <Step title="Test caching">
     Send this request twice and see the second request return instantly from cache with `helicone-cache: HIT` header!
@@ -49,13 +49,15 @@ Caching uses exact parameter matching with configurable TTL, staleness policies,
         "messages": [{"role": "user", "content": "Hello!"}]
       }'
     ```
-    
+
     ✅ The second request returns instantly from cache with `helicone-cache: HIT` header!
+
   </Step>
 </Steps>
 
 <Note>
-  For complete configuration options and syntax, see the [Configuration Reference](/ai-gateway/config#caching).
+  For complete configuration options and syntax, see the [Configuration
+  Reference](/ai-gateway/config#caching).
 </Note>
 
 ## Cache Options
@@ -78,6 +80,7 @@ Caching uses exact parameter matching with configurable TTL, staleness policies,
         buckets: 10  # Store up to 10 different responses
         directive: "max-age=3600"
     ```
+
   </Accordion>
 
   <Accordion title="Cache Namespacing (Seeds)" icon="key">
@@ -102,11 +105,12 @@ Caching uses exact parameter matching with configurable TTL, staleness policies,
         directive: "max-age=3600, max-stale=1800"
         seed: "tenant-alpha"
     ```
-    
+
     **Example (per-request header):**
     ```bash
     curl -H "Helicone-Cache-Seed: user-123" ...
     ```
+
   </Accordion>
 </AccordionGroup>
 
@@ -125,6 +129,7 @@ Caching uses exact parameter matching with configurable TTL, staleness policies,
         directive: "max-age=7200, max-stale=3600"  # 2-hour TTL for test runs
         buckets: 1   # Consistent responses for tests
     ```
+
   </Tab>
 
   <Tab title="Production API - Cost Optimization">
@@ -139,6 +144,7 @@ Caching uses exact parameter matching with configurable TTL, staleness policies,
         directive: "max-age=1800, max-stale=900"  # 30-min TTL
         buckets: 1   # Consistent responses
     ```
+
   </Tab>
 
   <Tab title="Multi-Environment Setup">
@@ -161,7 +167,7 @@ Caching uses exact parameter matching with configurable TTL, staleness policies,
           chat:
             strategy: latency
             providers: [openai, anthropic]
-      
+
       development:
         cache:
           directive: "max-age=7200"  # 2-hour TTL to reduce dev costs
@@ -171,6 +177,7 @@ Caching uses exact parameter matching with configurable TTL, staleness policies,
             strategy: latency
             providers: [openai, anthropic]
     ```
+
   </Tab>
 </Tabs>
 
@@ -184,28 +191,30 @@ All caching uses exact parameter matching—identical requests (model, messages,
 
 <Steps>
   <Step title="Request Arrives">
-    A request comes in with specific parameters (model, messages, temperature, etc.)
+    A request comes in with specific parameters (model, messages, temperature,
+    etc.)
   </Step>
-  
-  <Step title="Configuration Merge">
-    Cache settings are merged in precedence order:
-    
-    - **Request headers**: Highest priority (can override everything)
-    - **Router configuration**: Middle priority
-    - **Global configuration**: Lowest priority (fallback defaults)
-  </Step>
-  
-  <Step title="Cache Key Generation">
-    Request parameters are hashed to create a unique cache key, optionally prefixed with seed for namespacing
-  </Step>
-  
-  <Step title="Cache Lookup">
-    System checks the cache store for an existing response that matches the key and isn't expired
-  </Step>
-  
+
+<Step title="Configuration Merge">
+  Cache settings are merged in precedence order: - **Request headers**: Highest
+  priority (can override everything) - **Router configuration**: Middle priority
+  - **Global configuration**: Lowest priority (fallback defaults)
+</Step>
+
+<Step title="Cache Key Generation">
+  Request parameters are hashed to create a unique cache key, optionally
+  prefixed with seed for namespacing
+</Step>
+
+<Step title="Cache Lookup">
+  System checks the cache store for an existing response that matches the key
+  and isn't expired
+</Step>
+
   <Step title="Cache Hit or Miss">
-    - **Hit**: Returns cached response instantly with `helicone-cache: HIT` header
-    - **Miss**: Forwards request to provider, caches response, returns with `helicone-cache: MISS` header
+    - **Hit**: Returns cached response instantly with `helicone-cache: HIT`
+    header - **Miss**: Forwards request to provider, caches response, returns
+    with `helicone-cache: MISS` header
   </Step>
 </Steps>
 
@@ -213,11 +222,11 @@ All caching uses exact parameter matching—identical requests (model, messages,
 
 Cache settings are applied in precedence order (highest to lowest priority):
 
-| Level | Description | When Applied |
-|-------|-------------|--------------|
-| **Request Headers** | Per-request cache control via headers | Overrides all other settings |
-| **Router Configuration** | Per-router cache policies | Overrides global defaults |
-| **Global Configuration** | Application-wide cache defaults | Used as fallback |
+| Level                    | Description                           | When Applied                 |
+| ------------------------ | ------------------------------------- | ---------------------------- |
+| **Request Headers**      | Per-request cache control via headers | Overrides all other settings |
+| **Router Configuration** | Per-router cache policies             | Overrides global defaults    |
+| **Global Configuration** | Application-wide cache defaults       | Used as fallback             |
 
 ### Available Headers
 
@@ -253,11 +262,12 @@ Cache responses can be stored in different backends depending on your deployment
       cache:
         directive: "max-age=3600"
     ```
-    
+
     **Best for:**
     - Single-instance deployments
     - Development environments
     - High-performance scenarios
+
   </Accordion>
 
   <Accordion title="Redis" icon="database">
@@ -274,37 +284,37 @@ Cache responses can be stored in different backends depending on your deployment
       cache:
         directive: "max-age=3600"
     ```
-    
+
     **Best for:**
     - Distributed cache sharing across multiple router instances
     - Cache persistence across restarts
+
   </Accordion>
 </AccordionGroup>
 
-<Note>
-  Database storage for caching is coming soon.
-</Note>
+<Note>Database storage for caching is coming soon.</Note>
 
 ### Strategy Selection Guide
 
-| Use Case                    | Recommended Approach               |
-| --------------------------- | ---------------------------------- |
-| **Production APIs**         | 1-hour TTL, buckets 1-3            |
-| **Development/Testing**     | 24-hour TTL, buckets 5-10          |
-| **Creative applications**   | 30-min TTL, buckets 10+            |
-| **High-traffic systems**    | Short TTL (≤2 h), buckets 3-5      |
-| **User-specific caching**   | Seeds for namespace isolation      |
-| **Single instance**         | In-memory storage                  |
-| **Multiple instances** | Redis storage |
+| Use Case                  | Recommended Approach          |
+| ------------------------- | ----------------------------- |
+| **Production APIs**       | 1-hour TTL, buckets 1-3       |
+| **Development/Testing**   | 24-hour TTL, buckets 5-10     |
+| **Creative applications** | 30-min TTL, buckets 10+       |
+| **High-traffic systems**  | Short TTL (≤2 h), buckets 3-5 |
+| **User-specific caching** | Seeds for namespace isolation |
+| **Single instance**       | In-memory storage             |
+| **Multiple instances**    | Redis storage                 |
 
 <Note>
-  For complete configuration options and syntax, see the [Configuration Reference](/ai-gateway/config#caching).
+  For complete configuration options and syntax, see the [Configuration
+  Reference](/ai-gateway/config#caching).
 </Note>
 
 ## Coming Soon
 
 The following caching features are planned for future releases:
 
-| Feature | Description | Version |
-|---------|-------------|---------|
-| **Database Storage** | Persistent cache storage with advanced analytics and compliance features | v1 |
+| Feature              | Description                                                              | Version |
+| -------------------- | ------------------------------------------------------------------------ | ------- |
+| **Database Storage** | Persistent cache storage with advanced analytics and compliance features | v1      |

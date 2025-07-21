@@ -29,37 +29,37 @@ export const metadata: Metadata = {
 const bullets: string[] = [
   "Exclusive access to our LLM observability playbooks",
   "Benchmark data from production LLM deployments",
-  "Early access to our launch features and updates"
+  "Early access to our launch features and updates",
 ];
 
 const EmailSignup = () => {
   return (
-    <div className="w-full h-full antialiased text-black">
+    <div className="h-full w-full text-black antialiased">
       <div className="h-full">
-        <div className="flex flex-col mx-auto w-full gap-8 max-w-5xl p-4 md:px-8 pb-24 pt-10 sm:pb-32 lg:flex lg:py-24 antialiased">
-          <div className="flex flex-col w-2/3">
-            <h1 className="text-2xl sm:text-4xl font-semibold leading-tight sm:leading-snug max-w-4xl">
+        <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 p-4 pb-24 pt-10 antialiased sm:pb-32 md:px-8 lg:flex lg:py-24">
+          <div className="flex w-2/3 flex-col">
+            <h1 className="max-w-4xl text-2xl font-semibold leading-tight sm:text-4xl sm:leading-snug">
               Subscribe to Helicone 💌
             </h1>
             <br />
-            <p className="text-gray-700 text-sm">
+            <p className="text-sm text-gray-700">
               The difference between good and great AI engineers? Visibility
               into what&apos;s actually happening.
             </p>
 
-            <ul className="py-8 flex flex-col space-y-4">
+            <ul className="flex flex-col space-y-4 py-8">
               {bullets.map((bullet, idx) => (
                 <li
-                  className="flex items-center text-gray-700 gap-2 text-sm sm:text-md"
+                  className="sm:text-md flex items-center gap-2 text-sm text-gray-700"
                   key={idx}
                 >
-                  <CheckCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 text-sky-500" />
+                  <CheckCircleIcon className="h-4 w-4 text-sky-500 sm:h-5 sm:w-5" />
                   {bullet}
                 </li>
               ))}
             </ul>
 
-            <p className="text-black text-sm mt-4">
+            <p className="mt-4 text-sm text-black">
               Building better AI systems starts with better insights.
             </p>
             <br />

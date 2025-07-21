@@ -13,8 +13,7 @@ export function OtherCaseStudies({ caseStudies }: OtherCaseStudiesProps) {
   }
 
   return (
-    <section className="w-full max-w-4xl mx-auto flex flex-col gap-2 mb-6">
-
+    <section className="mx-auto mb-6 flex w-full max-w-4xl flex-col gap-2">
       {/* Title */}
       {/* <h3 className="font-bold text-2xl text-accent-foreground ml-2">
         Related Stories

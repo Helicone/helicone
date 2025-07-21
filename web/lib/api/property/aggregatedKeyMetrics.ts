@@ -14,7 +14,7 @@ export async function getAggregatedKeyMetrics(
   org_id: string,
   limit: number,
   sortKey?: string,
-  sortDirection?: "asc" | "desc"
+  sortDirection?: "asc" | "desc",
 ) {
   const { filter: filterString, argsAcc } =
     await buildFilterWithAuthClickHousePropertiesV2({

@@ -8,10 +8,24 @@
     "valhalla/jawn"
   ],
   "scripts": {
-    "build:web": "yarn workspace helicone build"
+    "build:web": "yarn workspace helicone build",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "format:web": "yarn workspace helicone format",
+    "format:bifrost": "yarn workspace bifrost format",
+    "format:jawn": "yarn workspace helicone-api format",
+    "format:worker": "cd worker && npm run format",
+    "lint": "yarn workspaces run lint",
+    "lint:fix": "yarn workspaces run lint:fix",
+    "prepare": "husky"
   },
   "engines": {
     "node": "=20"
+  },
+  "devDependencies": {
+    "prettier": "^3.4.2",
+    "prettier-plugin-tailwindcss": "^0.6.13",
+    "husky": "^9.1.7"
   },
   "version": "0.1.0"
 }

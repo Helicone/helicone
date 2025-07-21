@@ -14,7 +14,7 @@ const useVaultPage = () => {
     queryKey: ["provider-keys"],
     queryFn: async () => {
       const resp = fetch("/api/provider_keys/get").then(
-        (res) => res.json() as Promise<Result<DecryptedProviderKey[], string>>
+        (res) => res.json() as Promise<Result<DecryptedProviderKey[], string>>,
       );
       return resp;
     },
@@ -30,7 +30,7 @@ const useVaultPage = () => {
     queryFn: async () => {
       const resp = fetch("/api/proxy_keys/get").then(
         (res) =>
-          res.json() as Promise<Result<DecryptedProviderKeyMapping[], string>>
+          res.json() as Promise<Result<DecryptedProviderKeyMapping[], string>>,
       );
       return resp;
     },

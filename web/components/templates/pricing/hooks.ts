@@ -33,7 +33,7 @@ export const useCostForExperiments = () => {
     queryFn: async () => {
       const jawn = getJawnClient(org?.currentOrg?.id);
       const result = await jawn.GET(
-        "/v1/stripe/subscription/cost-for-experiments"
+        "/v1/stripe/subscription/cost-for-experiments",
       );
       return result;
     },

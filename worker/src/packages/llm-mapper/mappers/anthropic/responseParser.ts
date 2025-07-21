@@ -16,10 +16,10 @@ const anthropicContentToMessage = (content: any, role: string): Message => {
         typeof content === "string"
           ? content
           : Array.isArray(content)
-          ? content
-              .map((item: any) => item.text || JSON.stringify(item))
-              .join(" ")
-          : JSON.stringify(content, null, 2),
+            ? content
+                .map((item: any) => item.text || JSON.stringify(item))
+                .join(" ")
+            : JSON.stringify(content, null, 2),
       _type: "message",
       role,
     };
@@ -54,10 +54,10 @@ const anthropicContentToMessage = (content: any, role: string): Message => {
         typeof content === "string"
           ? content
           : Array.isArray(content)
-          ? content
-              .map((item: any) => item.text || JSON.stringify(item))
-              .join(" ")
-          : JSON.stringify(content, null, 2),
+            ? content
+                .map((item: any) => item.text || JSON.stringify(item))
+                .join(" ")
+            : JSON.stringify(content, null, 2),
       _type: "message",
     };
   }

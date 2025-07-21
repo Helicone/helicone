@@ -1,4 +1,4 @@
-Running multiple LLMs in production is complex. You need to manage different API formats, handle provider outages, optimize costs, and monitor performance—all while keeping latency low. 
+Running multiple LLMs in production is complex. You need to manage different API formats, handle provider outages, optimize costs, and monitor performance—all while keeping latency low.
 
 Fortunately, **LLM Gateways** (or LLM routers) can help solve these problems, acting as intelligent gateways between your application and AI providers and becoming a must-have for anyone building production-scale AI applications.
 
@@ -12,13 +12,13 @@ Let's dive in!
 
 Here's a quick overview of the top 5 LLM Gateways:
 
-| Router                  | Strengths                                                                                                                         | Weaknesses                                               | Best For                                                                          |
-| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| **Helicone AI Gateway** | • Built with Rust (blazingly fast)<br/>• Health and rate-limit aware load-balancing<br/>• Seamless integration with Helicone for robust observability<br/>• Open-source (free to use)<br/>• Distributed rate limiting | • No pass-through billing             | • High-scale AI applications needing reliability, speed and cost optimization |
-| **OpenRouter**          | • Easy setup<br/>• Passthrough billing<br/>• Good for non-technical users                                                                 | • 5% markup on requests<br/>• No self-hosting<br/>• No custom models                  | • Quick prototyping for small projects                          |
-| **Portkey**             | • Rich enterprise features<br/>• Advanced guardrails                                                                                     | • Steep learning curve<br/>• Limited scalability and reliability<br/>• No pass-through billing                   | • Development teams needing detailed control and enterprise security                |
-| **LiteLLM**             | • Good customization<br/>• Strong community<br/>• Strong feature set                                                                                          | • Limited scalability (Each request adds > 50ms latency and is resource intensive)<br/>• Highly technical setup with a steep learning curve<br/>• No pass-through billing | • Engineering teams building custom LLM infrastructure                              |
-| **Unify AI**            | • Simple and straightforward<br/>• Good for basic needs<br/>• Pass-through billing                                                                                 | • No load-balancing<br/>• Limited production scale              | • Small projects with basic provider switching needs                                | 
+| Router                  | Strengths                                                                                                                                                                                                             | Weaknesses                                                                                                                                                                | Best For                                                                      |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| **Helicone AI Gateway** | • Built with Rust (blazingly fast)<br/>• Health and rate-limit aware load-balancing<br/>• Seamless integration with Helicone for robust observability<br/>• Open-source (free to use)<br/>• Distributed rate limiting | • No pass-through billing                                                                                                                                                 | • High-scale AI applications needing reliability, speed and cost optimization |
+| **OpenRouter**          | • Easy setup<br/>• Passthrough billing<br/>• Good for non-technical users                                                                                                                                             | • 5% markup on requests<br/>• No self-hosting<br/>• No custom models                                                                                                      | • Quick prototyping for small projects                                        |
+| **Portkey**             | • Rich enterprise features<br/>• Advanced guardrails                                                                                                                                                                  | • Steep learning curve<br/>• Limited scalability and reliability<br/>• No pass-through billing                                                                            | • Development teams needing detailed control and enterprise security          |
+| **LiteLLM**             | • Good customization<br/>• Strong community<br/>• Strong feature set                                                                                                                                                  | • Limited scalability (Each request adds > 50ms latency and is resource intensive)<br/>• Highly technical setup with a steep learning curve<br/>• No pass-through billing | • Engineering teams building custom LLM infrastructure                        |
+| **Unify AI**            | • Simple and straightforward<br/>• Good for basic needs<br/>• Pass-through billing                                                                                                                                    | • No load-balancing<br/>• Limited production scale                                                                                                                        | • Small projects with basic provider switching needs                          |
 
 ## Table of Contents
 
@@ -48,25 +48,25 @@ Here are five key things to consider when selecting the best LLM router:
 
 ## Top 5 LLM Gateways: In-Depth Comparison
 
-*Scroll to see the full table —>*
+_Scroll to see the full table —>_
 
-| Feature                                         | Helicone AI Gateway                                                                           | OpenRouter                                                                       | Portkey                                                               | LiteLLM                                                                                             | Unify AI                                                                                   |
-| ----------------------------------------------- | --------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| **Routing Strategy**                            | Latency, weighted, cost-aware, use-case dependent; **All health-aware**                               | Latency, cost-aware, weighted, tag-based; health-aware                           | Cost-aware, weighted, region-aware;  | latency, cost, weighted, least-busy;      | Quality, latency, cost, constraint-based              |
-| **Pricing**       | **Free** | **Free**: Limited models<br/> Pay-as-you-go: 5% markup | Developers: **Free**<br/> Production: $49/mo<br/> Enterprise: Custom | **Free** (self-hosted)<br/> Enterprise: Custom     | Personal: **Free**<br/> Professional: $40/seat/mo<br/> Enterprise: Custom |
-| **Language & Runtime**                          | Rust (super fast)                                                                             | Python/TypeScript                                                                | Python                                                                | Python/TypeScript                                                                                   | Python                                                                                     |
-| **Supported Providers**                         | 100+ models and 25+ providers inluding OpenAI, Anthropic, Google, Bedrock, etc.<br/> Custom models                                                                            | 400+ models and providers                                                                        | 100+ models                                                    | All major + custom                                                                                  | All major + custom                                                                         |
-| **Deployment Options**  | Docker, Kubernetes, self-hosted, cloud-managed                                 | Cloud-managed only (SaaS)                     | Docker, Kubernetes, self-hosted, cloud-managed          | Docker, Kubernetes, self-hosted only         | Cloud-managed, self-hosted                                    |
-| **Unified API**                                 | ✅                                                                                            | ✅                                                                               | ✅                                                                    | ✅                                                                                                  | ✅                                                                                         |
-| **Caching**                                     | In-memory & Redis-based caching with intelligent strategies and scopes  | Provider-native (varies by provider)  | Built-in Simple & Semantic caching  | In-memory & Redis | Client-side file-based with per-query control |
-| **Fallbacks**                                   | Automatic retries and switching with health monitoring                                                      | Automatic provider switching                                                     | Automatic, with error-based triggering   | Advanced, with cooldowns  | Automatic multi-level fallbacks  |
-| **Rate Limiting**                               | Flexible limits (global, router-level, request, token, cost) by user/team/provider; Health-aware | Global limits by API key; fixed RPM/RPD quotas                                   | Flexible limits (request, token, cost)                                | Flexible global limits(cost, tag-based, model-specific) per user/team/key                           | Provider based                                                                             |
-| **LLM Observability & Monitoring Capabilities** | Seamless integration with <a href="https://helicone.ai" target="_blank" rel="noopener">Helicone</a> and OpenTelemetry                                                    | Activity logs only                                                               | Integration with <a href="https://portkey.ai/docs" target="_blank" rel="noopener">Portkey</a>                                           | 15+ native integrations (Helicone, Langfuse, etc.) | Custom logging & visualizations (DIY)                                                      |
-| **Load-Balancing**                              | Latency, regional & weighted with automatic health monitoring. Rate-limit aware.                      | Price-weighted, latency, throughput, or order | Request distribution                                                  | Latency-based, weighted, least-busy, cost-based                                                     | ❌                                                                                         |
-| **Estimated Setup Time**                                  | &lt;5 minutes                                                                                 | &lt;5 minutes                                                                    | &lt;5 minutes                                                         | ⛔ 15-30 minutes                                                                                       | ⛔ 5-10 minutes                                                                               |
-| **Setup Difficulty**                            | Easy                                                                                          | Easy                                                                             | Easy                                                                  | ⛔ Technical                                                                                           | Easy                                                                                       |
-| **Open Source**                                 | ✅                                                                                            | ❌                                                                               | ✅                                                                    | ✅                                                                                                  | ❌                                                                                         |
-| **Security Features**   | SOC2/HIPAA/GDPR, prompt injection protection, SSO, audit trails     | Basic API security, DDoS protection           | SOC2/HIPAA/GDPR, advanced guardrails, SSO, virtual keys | DIY security, community audits, virtual keys | Basic API authentication only                                 |
+| Feature                                         | Helicone AI Gateway                                                                                                   | OpenRouter                                             | Portkey                                                                                       | LiteLLM                                                                   | Unify AI                                                                  |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| **Routing Strategy**                            | Latency, weighted, cost-aware, use-case dependent; **All health-aware**                                               | Latency, cost-aware, weighted, tag-based; health-aware | Cost-aware, weighted, region-aware;                                                           | latency, cost, weighted, least-busy;                                      | Quality, latency, cost, constraint-based                                  |
+| **Pricing**                                     | **Free**                                                                                                              | **Free**: Limited models<br/> Pay-as-you-go: 5% markup | Developers: **Free**<br/> Production: $49/mo<br/> Enterprise: Custom                          | **Free** (self-hosted)<br/> Enterprise: Custom                            | Personal: **Free**<br/> Professional: $40/seat/mo<br/> Enterprise: Custom |
+| **Language & Runtime**                          | Rust (super fast)                                                                                                     | Python/TypeScript                                      | Python                                                                                        | Python/TypeScript                                                         | Python                                                                    |
+| **Supported Providers**                         | 100+ models and 25+ providers inluding OpenAI, Anthropic, Google, Bedrock, etc.<br/> Custom models                    | 400+ models and providers                              | 100+ models                                                                                   | All major + custom                                                        | All major + custom                                                        |
+| **Deployment Options**                          | Docker, Kubernetes, self-hosted, cloud-managed                                                                        | Cloud-managed only (SaaS)                              | Docker, Kubernetes, self-hosted, cloud-managed                                                | Docker, Kubernetes, self-hosted only                                      | Cloud-managed, self-hosted                                                |
+| **Unified API**                                 | ✅                                                                                                                    | ✅                                                     | ✅                                                                                            | ✅                                                                        | ✅                                                                        |
+| **Caching**                                     | In-memory & Redis-based caching with intelligent strategies and scopes                                                | Provider-native (varies by provider)                   | Built-in Simple & Semantic caching                                                            | In-memory & Redis                                                         | Client-side file-based with per-query control                             |
+| **Fallbacks**                                   | Automatic retries and switching with health monitoring                                                                | Automatic provider switching                           | Automatic, with error-based triggering                                                        | Advanced, with cooldowns                                                  | Automatic multi-level fallbacks                                           |
+| **Rate Limiting**                               | Flexible limits (global, router-level, request, token, cost) by user/team/provider; Health-aware                      | Global limits by API key; fixed RPM/RPD quotas         | Flexible limits (request, token, cost)                                                        | Flexible global limits(cost, tag-based, model-specific) per user/team/key | Provider based                                                            |
+| **LLM Observability & Monitoring Capabilities** | Seamless integration with <a href="https://helicone.ai" target="_blank" rel="noopener">Helicone</a> and OpenTelemetry | Activity logs only                                     | Integration with <a href="https://portkey.ai/docs" target="_blank" rel="noopener">Portkey</a> | 15+ native integrations (Helicone, Langfuse, etc.)                        | Custom logging & visualizations (DIY)                                     |
+| **Load-Balancing**                              | Latency, regional & weighted with automatic health monitoring. Rate-limit aware.                                      | Price-weighted, latency, throughput, or order          | Request distribution                                                                          | Latency-based, weighted, least-busy, cost-based                           | ❌                                                                        |
+| **Estimated Setup Time**                        | &lt;5 minutes                                                                                                         | &lt;5 minutes                                          | &lt;5 minutes                                                                                 | ⛔ 15-30 minutes                                                          | ⛔ 5-10 minutes                                                           |
+| **Setup Difficulty**                            | Easy                                                                                                                  | Easy                                                   | Easy                                                                                          | ⛔ Technical                                                              | Easy                                                                      |
+| **Open Source**                                 | ✅                                                                                                                    | ❌                                                     | ✅                                                                                            | ✅                                                                        | ❌                                                                        |
+| **Security Features**                           | SOC2/HIPAA/GDPR, prompt injection protection, SSO, audit trails                                                       | Basic API security, DDoS protection                    | SOC2/HIPAA/GDPR, advanced guardrails, SSO, virtual keys                                       | DIY security, community audits, virtual keys                              | Basic API authentication only                                             |
 
 Let's now take a look at each router in detail.
 
@@ -74,7 +74,7 @@ Let's now take a look at each router in detail.
 
 ![Helicone AI Gateway Flowchart](/static/blog/top-llm-gateways-comparison-2025/ai-gateway.webp)
 
-The Helicone <a href="https://docs.helicone.ai/gateway/config" target="_blank" rel="noopener">AI Gateway</a> is one of the few LLM routers written in the highly performant Rust programming language. 
+The Helicone <a href="https://docs.helicone.ai/gateway/config" target="_blank" rel="noopener">AI Gateway</a> is one of the few LLM routers written in the highly performant Rust programming language.
 
 It provides ultra-fast performance (e.g., 8ms P50 latency) and is horizontally scalable. It also features a single binary deployment, making it simple to run on AWS, GCP, Azure, on-prem, Kubernetes, Docker, or bare metal.
 
@@ -92,14 +92,14 @@ It also integrates seamlessly with Helicone's observability tools, providing rea
 
 ### Pros & Cons
 
-| Pros                                                                      | Cons                                                            |
-| ------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| Features the most sophisticated load-balancing algorithms with automatic health monitoring                                    | No pass-through billing  |
-| Built with Rust which makes it lightweight and very fast                  | Not very suitable for non-technical users  |
-| Free to use & open-source with flexible self-hosting options                            |                                                                 |
-| Distributed rate limiting prevents cascading failures                     |                                                                 |
-| Cross-provider caching maximizes cost savings                             |                                                                 |
-| Seamless Helicone integration for comprehensive LLM observability      |                                                                 |
+| Pros                                                                                       | Cons                                      |
+| ------------------------------------------------------------------------------------------ | ----------------------------------------- |
+| Features the most sophisticated load-balancing algorithms with automatic health monitoring | No pass-through billing                   |
+| Built with Rust which makes it lightweight and very fast                                   | Not very suitable for non-technical users |
+| Free to use & open-source with flexible self-hosting options                               |                                           |
+| Distributed rate limiting prevents cascading failures                                      |                                           |
+| Cross-provider caching maximizes cost savings                                              |                                           |
+| Seamless Helicone integration for comprehensive LLM observability                          |                                           |
 
 ### Getting Started with Helicone AI Gateway
 
@@ -133,7 +133,7 @@ response = client.chat.completions.create(
 
 ```
 
-And that's it! 
+And that's it!
 
 {/* You can also <a href="https://github.com/Helicone/helicone-router?tab=readme-ov-file#option-2-binary-download" target="_blank" rel="noopener">install directly from the binary</a> or <a href="https://github.com/Helicone/helicone-router?tab=readme-ov-file#option-3-cargo-from-source" target="_blank" rel="noopener">install via Cargo</a>. */}
 
@@ -150,7 +150,12 @@ And that's it!
 
 ![OpenRouter Dashboard](/static/blog/top-llm-gateways-comparison-2025/openrouter-logo.webp)
 
-<a href="https://openrouter.ai/docs/quick-start" target="_blank" rel="noopener">OpenRouter</a> provides a unified API that gives you access to hundreds of AI models through a single endpoint, while automatically handling fallbacks and selecting the most cost-effective options.
+<a href="https://openrouter.ai/docs/quick-start" target="_blank" rel="noopener">
+  OpenRouter
+</a>
+provides a unified API that gives you access to hundreds of AI models through a
+single endpoint, while automatically handling fallbacks and selecting the most
+cost-effective options.
 
 It focuses on providing a simple, user-friendly interface for non-technical users than robust features for production-scale applications.
 
@@ -162,13 +167,13 @@ It focuses on providing a simple, user-friendly interface for non-technical user
 - **Automatic Fallbacks**: Seamlessly switches providers during outages
 - **Quick Setup**: &lt;5 minutes from signup to first request
 
-| Pros                                            | Cons                                                                                                                           |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| Easy setup                                      | 5% markup on all requests adds to costs                                                                                        |
-| Great for prototyping and experimentation       | Limited observability and monitoring capabilities                                                                              |
+| Pros                                            | Cons                                                                                                                         |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Easy setup                                      | 5% markup on all requests adds to costs                                                                                      |
+| Great for prototyping and experimentation       | Limited observability and monitoring capabilities                                                                            |
 | Free tier available with pay-as-you-go option   | Fallbacks are static, not adaptive—models and providers are tried in fixed order, without real-time performance optimization |
-| Supports both technical and non-technical users | No self-hosting option (not open-source)                                                                                       |
-|                                                 | Caching varies by provider with different requirements                                                                         |
+| Supports both technical and non-technical users | No self-hosting option (not open-source)                                                                                     |
+|                                                 | Caching varies by provider with different requirements                                                                       |
 
 **Best For**: Teams wanting immediate access to multiple LLMs without complex setup, especially when non-technical stakeholders need direct access.
 
@@ -176,7 +181,11 @@ It focuses on providing a simple, user-friendly interface for non-technical user
 
 ![Portkey Dashboard](/static/blog/top-llm-gateways-comparison-2025/portkey-logo.webp)
 
-<a href="https://github.com/Portkey-AI/gateway" target="_blank" rel="noopener">Portkey's AI Gateway</a> is a comprehensive platform designed to streamline and enhance AI integration for developers and organizations. 
+<a href="https://github.com/Portkey-AI/gateway" target="_blank" rel="noopener">
+  Portkey's AI Gateway
+</a>
+is a comprehensive platform designed to streamline and enhance AI integration
+for developers and organizations.
 
 Built on top of Portkey—an observability tool, it serves as a unified interface for interacting with over 100 AI models, offering advanced tools for control, visibility, and security in your Generative AI apps.
 
@@ -209,7 +218,11 @@ Built on top of Portkey—an observability tool, it serves as a unified interfac
 
 ![LiteLLM Logo](/static/blog/top-llm-gateways-comparison-2025/litellm-logo-dark.webp)
 
-<a href="https://www.litellm.ai/docs" target="_blank" rel="noopener">LiteLLM</a> is an LLM router that focuses on flexibility, offering a unified interface across 100+ LLM providers with completely free, open-source access. 
+<a href="https://www.litellm.ai/docs" target="_blank" rel="noopener">
+  LiteLLM
+</a>
+is an LLM router that focuses on flexibility, offering a unified interface
+across 100+ LLM providers with completely free, open-source access.
 
 It excels at advanced routing algorithms and comprehensive team management through highly customizable configurations.
 
@@ -227,7 +240,7 @@ It excels at advanced routing algorithms and comprehensive team management throu
 | Advanced routing algorithms              | All features require manual configuration        |
 | Robust retry logic and fallbacks         | Steep learning curve for advanced features       |
 | Comprehensive team and budget management | Additional setup overhead due to Redis caching   |
-| Strong community support                 |                                                                 |
+| Strong community support                 |                                                  |
 
 **Best For**: Engineering teams building production LLM infrastructure who need maximum control, extensive provider support, and advanced routing capabilities.
 
@@ -235,7 +248,11 @@ It excels at advanced routing algorithms and comprehensive team management throu
 
 ![Unify AI Logo](/static/blog/top-llm-gateways-comparison-2025/unify-ai-logo.webp)
 
-<a href="https://docs.unify.ai" target="_blank" rel="noopener">Unify.AI</a> is a highly customizable LLMOps platform that prioritizes simplicity and customization over complexity. 
+<a href="https://docs.unify.ai" target="_blank" rel="noopener">
+  Unify.AI
+</a>
+is a highly customizable LLMOps platform that prioritizes simplicity and
+customization over complexity.
 
 It's designed for developers who want to build custom interfaces for logging, evaluations, guardrails, and other LLM operations without the overhead of advanced features.
 
@@ -256,13 +273,13 @@ It's designed for developers who want to build custom interfaces for logging, ev
 
 ## Which LLM Router is Best for You?
 
-| Use Case | Requirements | Recommended Router |
-| --- | --- | --- |
-| **High-Scale Production** | Distributed rate limiting, health-aware load-balancing, native observability | Helicone's AI Gateway |
-| **Quick Prototyping** | Minimal setup with a friendly UI | OpenRouter |
-| **Maximum Control** | Open-source preference, comfortable with configuration | Helicone AI Gateway or LiteLLM (both open-source) |
-| **Enterprise Requirements** | Advanced guardrails and compliance features | Helicone AI Gateway or Portkey |
-| **Basic Routing** | Simple provider switching | Unify.AI |
+| Use Case                    | Requirements                                                                 | Recommended Router                                |
+| --------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------- |
+| **High-Scale Production**   | Distributed rate limiting, health-aware load-balancing, native observability | Helicone's AI Gateway                             |
+| **Quick Prototyping**       | Minimal setup with a friendly UI                                             | OpenRouter                                        |
+| **Maximum Control**         | Open-source preference, comfortable with configuration                       | Helicone AI Gateway or LiteLLM (both open-source) |
+| **Enterprise Requirements** | Advanced guardrails and compliance features                                  | Helicone AI Gateway or Portkey                    |
+| **Basic Routing**           | Simple provider switching                                                    | Unify.AI                                          |
 
 <CallToAction
   title="Break up with your LLM Provider Today 💔"
@@ -281,37 +298,45 @@ Helicone AI Gateway provides a robust set of production-grade features like late
 
 This guide should serve as a good starting point for your decision-making process. Good luck!
 
-<FAQ 
- items={[
-   {
-     question: "What is an LLM gateway and why do I need one?",
-     answer: "An LLM gateway (or LLM router) acts as an intelligent gateway between your application and multiple AI providers. It handles API format differences, manages failovers during provider outages, optimizes costs through smart routing, and provides monitoring capabilities. Without one, you're stuck with provider lock-in, no redundancy when services go down, and blind spots in your AI spending."
-   },
-   {
-     question: "How does Helicone AI Gateway compare to using providers directly?",
-     answer: "Helicone AI Gateway adds a thin layer that provides automatic failover, load-balancing, caching (up to 95% cost savings), and comprehensive observability. Direct provider integration means rewriting code when switching providers, no backup during outages, and limited visibility into performance and costs. The Gateway adds minimal latency (~50ms) while providing significant reliability and cost benefits."
-   },
-   {
-     question: "Which LLM router is best for production use?",
-     answer: "For production environments, Helicone AI Gateway and LiteLLM are the strongest options. Helicone excels with its Rust-based performance, sophisticated load-balancing algorithms, and native observability integration. LiteLLM offers maximum customization but requires more technical setup. OpenRouter and Portkey work well for specific use cases, while Unify AI is better suited for basic routing needs."
-   },
-   {
-     question: "How much does it cost to use an LLM gateway?",
-     answer: "Pricing varies significantly. Helicone AI Gateway and LiteLLM are open-source and free to self-host. OpenRouter adds a 5% markup on all requests. Portkey starts at $49/month. Unify AI offers a free tier with pay-as-you-go pricing. Consider both the router costs and potential savings from features like caching and intelligent routing when evaluating total cost."
-   },
-   {
-     question: "How difficult is it to set up an LLM gateway?",
-     answer: "Setup difficulty varies by router. OpenRouter, Helicone AI Gateway, and Portkey can be configured in under 5 minutes with simple API changes. LiteLLM requires 15-30 minutes of technical setup including YAML configuration. Unify AI takes 5-10 minutes. All routers provide documentation, but technical complexity increases with advanced features like custom routing algorithms or distributed deployments."
-   },
-   {
-     question: "What happens when an LLM provider goes down?",
-     answer: "Quality routers handle provider failures automatically. Helicone AI Gateway uses health-aware routing with circuit breaking to detect failures and route to healthy providers. OpenRouter and Portkey offer automatic fallbacks to backup providers. LiteLLM provides advanced retry logic with configurable cooldowns. Without a router, your application fails when your provider fails."
-   },
-   {
-     question: "Do LLM gateways add latency to requests?",
-     answer: "Yes, but it's minimal and often offset by performance improvements. Helicone AI Gateway (built with Rust) adds ~50ms latency. Other routers add 50-200ms depending on features enabled. However, intelligent routing often reduces overall latency by selecting faster providers, and caching can eliminate latency entirely for repeated requests. The reliability benefits typically outweigh the small latency cost."
-   }
- ]}
+<FAQ
+  items={[
+    {
+      question: "What is an LLM gateway and why do I need one?",
+      answer:
+        "An LLM gateway (or LLM router) acts as an intelligent gateway between your application and multiple AI providers. It handles API format differences, manages failovers during provider outages, optimizes costs through smart routing, and provides monitoring capabilities. Without one, you're stuck with provider lock-in, no redundancy when services go down, and blind spots in your AI spending.",
+    },
+    {
+      question:
+        "How does Helicone AI Gateway compare to using providers directly?",
+      answer:
+        "Helicone AI Gateway adds a thin layer that provides automatic failover, load-balancing, caching (up to 95% cost savings), and comprehensive observability. Direct provider integration means rewriting code when switching providers, no backup during outages, and limited visibility into performance and costs. The Gateway adds minimal latency (~50ms) while providing significant reliability and cost benefits.",
+    },
+    {
+      question: "Which LLM router is best for production use?",
+      answer:
+        "For production environments, Helicone AI Gateway and LiteLLM are the strongest options. Helicone excels with its Rust-based performance, sophisticated load-balancing algorithms, and native observability integration. LiteLLM offers maximum customization but requires more technical setup. OpenRouter and Portkey work well for specific use cases, while Unify AI is better suited for basic routing needs.",
+    },
+    {
+      question: "How much does it cost to use an LLM gateway?",
+      answer:
+        "Pricing varies significantly. Helicone AI Gateway and LiteLLM are open-source and free to self-host. OpenRouter adds a 5% markup on all requests. Portkey starts at $49/month. Unify AI offers a free tier with pay-as-you-go pricing. Consider both the router costs and potential savings from features like caching and intelligent routing when evaluating total cost.",
+    },
+    {
+      question: "How difficult is it to set up an LLM gateway?",
+      answer:
+        "Setup difficulty varies by router. OpenRouter, Helicone AI Gateway, and Portkey can be configured in under 5 minutes with simple API changes. LiteLLM requires 15-30 minutes of technical setup including YAML configuration. Unify AI takes 5-10 minutes. All routers provide documentation, but technical complexity increases with advanced features like custom routing algorithms or distributed deployments.",
+    },
+    {
+      question: "What happens when an LLM provider goes down?",
+      answer:
+        "Quality routers handle provider failures automatically. Helicone AI Gateway uses health-aware routing with circuit breaking to detect failures and route to healthy providers. OpenRouter and Portkey offer automatic fallbacks to backup providers. LiteLLM provides advanced retry logic with configurable cooldowns. Without a router, your application fails when your provider fails.",
+    },
+    {
+      question: "Do LLM gateways add latency to requests?",
+      answer:
+        "Yes, but it's minimal and often offset by performance improvements. Helicone AI Gateway (built with Rust) adds ~50ms latency. Other routers add 50-200ms depending on features enabled. However, intelligent routing often reduces overall latency by selecting faster providers, and caching can eliminate latency entirely for repeated requests. The reliability benefits typically outweigh the small latency cost.",
+    },
+  ]}
 />
 
 <Questions />

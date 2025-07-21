@@ -28,23 +28,23 @@ import { strings } from "/snippets/strings.mdx";
 <CodeGroup>
 
 ```javascript Llama SDK
-import LlamaAPIClient from 'llama-api-client';
+import LlamaAPIClient from "llama-api-client";
 
 const client = new LlamaAPIClient({
   apiKey: process.env.LLAMA_API_KEY,
   baseURL: "https://llama.helicone.ai/v1",
   defaultHeaders: {
-    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`
-  }
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+  },
 });
 
 const response = await client.chat.completions.create({
-  model: 'Llama-4-Maverick-17B-128E-Instruct-FP8',
+  model: "Llama-4-Maverick-17B-128E-Instruct-FP8",
   messages: [
     {
-      role: 'user', 
-      content: 'Hello, how are you?' 
-    }
+      role: "user",
+      content: "Hello, how are you?",
+    },
   ],
   max_completion_tokens: 1024,
   temperature: 0.7,
@@ -60,15 +60,15 @@ const openai = new OpenAI({
   apiKey: process.env.LLAMA_API_KEY,
   baseURL: "https://llama.helicone.ai/v1",
   defaultHeaders: {
-    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`
-  }
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+  },
 });
 
 const response = await openai.chat.completions.create({
   model: "Llama-4-Maverick-17B-128E-Instruct-FP8",
   messages: [{ role: "user", content: "Hello, how are you?" }],
   max_completion_tokens: 1024,
-  temperature: 0.7
+  temperature: 0.7,
 });
 
 console.log(response);

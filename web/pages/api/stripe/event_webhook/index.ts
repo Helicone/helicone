@@ -62,13 +62,13 @@ async function sendSubscriptionEvent(
     | "subscription_canceled"
     | "subscription_deleted",
   subscription: Stripe.Subscription,
-  additionalProperties: Record<string, any> = {}
+  additionalProperties: Record<string, any> = {},
 ) {
   try {
     const orgId = subscription.metadata?.orgId;
     if (!orgId) {
       console.log(
-        `No orgId found in subscription metadata, skipping PostHog event`
+        `No orgId found in subscription metadata, skipping PostHog event`,
       );
       return;
     }
@@ -94,7 +94,7 @@ async function sendSubscriptionEvent(
     if (additionalProperties.includeOrgData) {
       const { data } = await dbExecute<{ name: string; owner: string }>(
         `select name, owner from organization where id = $1`,
-        [orgId]
+        [orgId],
       );
       orgData = data?.[0];
       delete additionalProperties.includeOrgData;
@@ -103,7 +103,7 @@ async function sendSubscriptionEvent(
     const userId = await getUserIdFromEmail(customer.email);
     if (!userId) {
       console.error(
-        `Failed to get userId for email ${customer.email}, cannot send PostHog event`
+        `Failed to get userId for email ${customer.email}, cannot send PostHog event`,
       );
       return;
     }
@@ -133,11 +133,11 @@ async function sendSubscriptionEvent(
         ...additionalProperties,
       },
       userId,
-      orgId
+      orgId,
     );
 
     console.log(
-      `PostHog: Sent ${eventType} event for org ${orgId} (userId: ${userId}, tier: ${tier})`
+      `PostHog: Sent ${eventType} event for org ${orgId} (userId: ${userId}, tier: ${tier})`,
     );
   } catch (error) {
     console.error(`Failed to send PostHog event for ${eventType}:`, error);
@@ -145,7 +145,7 @@ async function sendSubscriptionEvent(
 }
 
 async function sendSubscriptionCanceledEvent(
-  subscription: Stripe.Subscription
+  subscription: Stripe.Subscription,
 ) {
   const isCanceling = subscription.cancel_at_period_end === true;
   const isSubscriptionActive = subscription.status === "active";
@@ -189,7 +189,7 @@ async function sendSubscriptionCanceledEvent(
       } else {
         console.log(
           `No valid customer email found. Customer object:`,
-          JSON.stringify(customer)
+          JSON.stringify(customer),
         );
       }
     } catch (loopsError) {
@@ -197,7 +197,7 @@ async function sendSubscriptionCanceledEvent(
     }
   } else {
     console.log(
-      `Subscription ${subscription.id} does not meet criteria for sending cancellation email`
+      `Subscription ${subscription.id} does not meet criteria for sending cancellation email`,
     );
   }
 }
@@ -212,7 +212,7 @@ const PricingVersionOld = {
 
     const { data: org, error: orgError } = await dbExecute(
       `UPDATE organization SET subscription_status = 'active', stripe_subscription_id = $1, stripe_subscription_item_id = $2, tier = 'growth', stripe_metadata = $3 WHERE id = $4`,
-      [subscriptionId, subscriptionItemId, {}, orgId]
+      [subscriptionId, subscriptionItemId, {}, orgId],
     );
 
     if (orgError) {
@@ -280,7 +280,7 @@ const PricingVersionOld = {
       if (orgError) {
         console.error(
           "Failed to update organization:",
-          JSON.stringify(orgError)
+          JSON.stringify(orgError),
         );
       } else {
         console.log("Organization updated successfully: ", JSON.stringify(org));
@@ -288,7 +288,7 @@ const PricingVersionOld = {
     } else {
       console.log(
         "No fields to update for organization with customer ID:",
-        subscriptionUpdated.customer
+        subscriptionUpdated.customer,
       );
     }
 
@@ -300,7 +300,7 @@ const PricingVersionOld = {
     const subscriptionDeleted = event.data.object as Stripe.Subscription;
     await dbExecute(
       `UPDATE organization SET subscription_status = 'inactive', tier = 'free', stripe_metadata = $1 WHERE stripe_subscription_id = $2`,
-      [{ addons: {} }, subscriptionDeleted.id]
+      [{ addons: {} }, subscriptionDeleted.id],
     );
   },
 
@@ -311,7 +311,7 @@ const PricingVersionOld = {
 
     const { data: org, error: orgError } = await dbExecute(
       `UPDATE organization SET subscription_status = 'active', stripe_subscription_id = $1, tier = $2 WHERE id = $3`,
-      [checkoutCompleted.subscription?.toString(), tier, orgId]
+      [checkoutCompleted.subscription?.toString(), tier, orgId],
     );
 
     if (orgError) {
@@ -324,7 +324,10 @@ const PricingVersionOld = {
 
 // TempAPIKey class for managing temporary API keys with automatic cleanup
 class TempAPIKey {
-  constructor(private apiKey: string, private keyId: number) {}
+  constructor(
+    private apiKey: string,
+    private keyId: number,
+  ) {}
 
   // Use the key for an operation and ensure cleanup afterward
   async use<T>(callback: (apiKey: string) => Promise<T>): Promise<T> {
@@ -340,7 +343,7 @@ class TempAPIKey {
     try {
       await dbExecute(
         `UPDATE helicone_api_keys SET soft_delete = true WHERE id = $1`,
-        [this.keyId]
+        [this.keyId],
       );
     } catch (error) {
       console.error("Failed to cleanup temporary API key:", error);
@@ -352,7 +355,7 @@ class TempAPIKey {
 async function generateTempAPIKey(
   organizationId: string,
   keyName: string,
-  keyPermissions: "rw" | "r" | "w"
+  keyPermissions: "rw" | "r" | "w",
 ): Promise<TempAPIKey> {
   const apiKey = `sk-helicone-${generateApiKey({
     method: "base32",
@@ -366,7 +369,7 @@ async function generateTempAPIKey(
 
   const { data: orgData, error: orgError } = await dbExecute<OrgData>(
     `SELECT owner FROM organization WHERE id = $1 LIMIT 1`,
-    [organizationId]
+    [organizationId],
   );
 
   if (orgError || !orgData || orgData.length === 0) {
@@ -386,7 +389,7 @@ async function generateTempAPIKey(
       organizationId,
       keyPermissions,
       true,
-    ]
+    ],
   );
 
   if (keyError || !keyData || keyData.length === 0) {
@@ -424,7 +427,7 @@ async function inviteOnboardingMembers(orgId: string | undefined) {
   const { data: orgDataArr, error: orgDataError } =
     await dbExecute<OnboardingData>(
       `SELECT onboarding_status FROM organization WHERE id = $1 LIMIT 1`,
-      [orgId]
+      [orgId],
     );
 
   if (orgDataError || !orgDataArr || orgDataArr.length === 0) {
@@ -451,7 +454,7 @@ async function inviteOnboardingMembers(orgId: string | undefined) {
   const tempKey = await generateTempAPIKey(
     orgId,
     "Stripe Webhook Server Key",
-    "rw"
+    "rw",
   );
 
   // Use the key with automatic cleanup
@@ -472,7 +475,7 @@ async function inviteOnboardingMembers(orgId: string | undefined) {
             body: JSON.stringify({
               email: member.email,
             }),
-          }
+          },
         );
 
         if (!response.ok) {
@@ -489,7 +492,7 @@ async function inviteOnboardingMembers(orgId: string | undefined) {
 
 async function createSlackChannelAndInviteMembers(
   orgId: string | undefined,
-  orgName: string | undefined
+  orgName: string | undefined,
 ) {
   if (!orgId || !orgName || !process.env.SLACK_BOT_TOKEN_AUTO_INVITE) {
     console.log("Missing organization ID, name, or Slack token");
@@ -521,7 +524,7 @@ async function createSlackChannelAndInviteMembers(
   const { data: orgMembers, error: orgMembersError } =
     await dbExecute<OrgMember>(
       `SELECT member FROM organization_member WHERE organization = $1`,
-      [orgId]
+      [orgId],
     );
 
   if (orgMembersError) {
@@ -529,7 +532,7 @@ async function createSlackChannelAndInviteMembers(
   }
 
   const emails = await Promise.all(
-    orgMembers?.map((member) => getUserEmail(member.member)) || []
+    orgMembers?.map((member) => getUserEmail(member.member)) || [],
   ).then((emails) => emails.filter((email) => email !== null) as string[]);
 
   // Invite all workspace members
@@ -541,7 +544,7 @@ async function createSlackChannelAndInviteMembers(
   if (allMembers.ok && allMembers.members && allMembers.members.length > 0) {
     // Filter out bots, deleted users, and restricted users
     const realUsers = allMembers.members.filter(
-      (member) => !member.is_bot && !member.deleted && !member.is_restricted
+      (member) => !member.is_bot && !member.deleted && !member.is_restricted,
     );
 
     if (realUsers.length > 0) {
@@ -559,7 +562,7 @@ async function createSlackChannelAndInviteMembers(
           users: userIds,
         });
         console.log(
-          `Invited ${realUsers.length} workspace members to the channel`
+          `Invited ${realUsers.length} workspace members to the channel`,
         );
       }
     }
@@ -568,7 +571,7 @@ async function createSlackChannelAndInviteMembers(
   // Get support team user group ID
   const userGroupId = "S08JS8UK211"; // Team support group ID
   console.log(
-    `Associating channel ${channelId} with support group ${userGroupId}`
+    `Associating channel ${channelId} with support group ${userGroupId}`,
   );
 
   // Associate the channel with the Team user group
@@ -577,7 +580,7 @@ async function createSlackChannelAndInviteMembers(
   });
 
   const targetGroup = userGroupsListResponse.usergroups?.find(
-    (group) => group.id === userGroupId
+    (group) => group.id === userGroupId,
   );
 
   if (targetGroup) {
@@ -615,13 +618,13 @@ async function createSlackChannelAndInviteMembers(
   });
 
   console.log(
-    `Successfully created Slack channel and added team members for ${orgName}`
+    `Successfully created Slack channel and added team members for ${orgName}`,
   );
 }
 
 function formatChannelName(
   organizationName: string,
-  organizationId?: string
+  organizationId?: string,
 ): string {
   // Start with the team prefix
   let name = "team-";
@@ -649,7 +652,7 @@ function formatChannelName(
 }
 
 async function getUserEmail(
-  userId: string | undefined
+  userId: string | undefined,
 ): Promise<string | null> {
   if (!userId) return null;
 
@@ -680,7 +683,7 @@ const TeamVersion20250130 = {
     const { data: orgDataArray, error: orgDataError } =
       await dbExecute<OrgSubscriptionData>(
         `SELECT stripe_subscription_id, name, owner FROM organization WHERE id = $1 LIMIT 1`,
-        [orgId || ""]
+        [orgId || ""],
       );
 
     if (orgDataError) {
@@ -716,7 +719,7 @@ const TeamVersion20250130 = {
            tier = 'team-20250130', 
            stripe_metadata = $3
        WHERE id = $4`,
-      [subscriptionId, subscriptionItemId, { addons: {} }, orgId || ""]
+      [subscriptionId, subscriptionItemId, { addons: {} }, orgId || ""],
     );
 
     if (updateError) {
@@ -773,7 +776,7 @@ const PricingVersion20240913 = {
            tier = 'pro-20250202', 
            stripe_metadata = $3
        WHERE id = $4`,
-      [subscriptionId, subscriptionItemId, { addons: addons }, orgId || ""]
+      [subscriptionId, subscriptionItemId, { addons: addons }, orgId || ""],
     );
 
     if (updateError) {
@@ -826,26 +829,26 @@ const InvoiceHandlers = {
         }
 
         const subscription = await stripe.subscriptions.retrieve(
-          invoice.subscription as string
+          invoice.subscription as string,
         );
 
         const subscriptionStartDate = new Date(
-          subscription.current_period_start * 1000
+          subscription.current_period_start * 1000,
         );
         const subscriptionEndDate = new Date(
-          subscription.current_period_end * 1000
+          subscription.current_period_end * 1000,
         );
 
         const experimentUsage = await getExperimentUsage(
           orgId,
           subscriptionStartDate,
-          subscriptionEndDate
+          subscriptionEndDate,
         );
 
         if (experimentUsage.error || !experimentUsage.data) {
           console.error(
             "Error getting experiment usage:",
-            experimentUsage.error
+            experimentUsage.error,
           );
           return;
         }
@@ -853,7 +856,7 @@ const InvoiceHandlers = {
         const evaluatorUsage = await getEvaluatorUsage(
           orgId,
           subscriptionStartDate,
-          subscriptionEndDate
+          subscriptionEndDate,
         );
 
         if (evaluatorUsage.error || !evaluatorUsage.data) {
@@ -880,7 +883,7 @@ const InvoiceHandlers = {
               amount: Math.ceil(
                 (totalCost.completion_token * usage.completion_tokens +
                   totalCost.prompt_token * usage.prompt_tokens) *
-                  100
+                  100,
               ),
               description: `Experiment: ${usage.provider}/${
                 usage.model
@@ -912,7 +915,7 @@ const InvoiceHandlers = {
               amount: Math.ceil(
                 (totalCost.completion_token * usage.completion_tokens +
                   totalCost.prompt_token * usage.prompt_tokens) *
-                  100
+                  100,
               ),
               description: `Evaluator: ${usage.provider}/${
                 usage.model
@@ -962,7 +965,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       event = stripe.webhooks.constructEvent(
         buf.toString(),
         sig,
-        process.env.STRIPE_WEBHOOK_SECRET!
+        process.env.STRIPE_WEBHOOK_SECRET!,
       ) as Stripe.Event;
     } catch (err) {
       res.status(400).send(`Webhook Error: ${err}`);
@@ -977,8 +980,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       stripeObject.metadata?.["tier"] === "pro-20250202"
         ? PricingVersion20240913
         : stripeObject.metadata?.["tier"] === "team-20250130"
-        ? TeamVersion20250130
-        : PricingVersionOld;
+          ? TeamVersion20250130
+          : PricingVersionOld;
 
     if (event.type === "test_helpers.test_clock.advancing") {
       return res.status(200).end();

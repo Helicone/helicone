@@ -23,24 +23,24 @@ export function CallToAction({
   children,
 }: CallToActionProps) {
   return (
-    <section className="w-full max-w-4xl mx-auto mt-6 mb-2">
-      <div className="rounded-lg bg-sky-50 px-5 py-4 border border-slate-200">
-        <h2 className="text-xl font-semibold text-slate-600 my-1">{title}</h2>
-        <p className="text-slate-500 text-md leading-relaxed mb-3">
+    <section className="mx-auto mb-2 mt-6 w-full max-w-4xl">
+      <div className="rounded-lg border border-slate-200 bg-sky-50 px-5 py-4">
+        <h2 className="my-1 text-xl font-semibold text-slate-600">{title}</h2>
+        <p className="text-md mb-3 leading-relaxed text-slate-500">
           {description}
         </p>
         {children && <div className="mb-4">{children}</div>}
-        <div className="flex flex-col sm:flex-row gap-4 my-1">
+        <div className="my-1 flex flex-col gap-4 sm:flex-row">
           <Button
             onClick={() => window.open(primaryButtonLink, "_blank")}
-            className="inline-flex items-center justify-center p-6 rounded-md bg-sky-500 text-white font-medium hover:bg-sky-600 transition-colors text-md"
+            className="text-md inline-flex items-center justify-center rounded-md bg-sky-500 p-6 font-medium text-white transition-colors hover:bg-sky-600"
           >
             {primaryButtonText}
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
           <Button
             onClick={() => window.open(secondaryButtonLink, "_blank")}
-            className="inline-flex items-center justify-center p-6 rounded-md bg-white text-slate-600 font-medium border border-slate-200 hover:bg-slate-50 transition-colors text-md"
+            className="text-md inline-flex items-center justify-center rounded-md border border-slate-200 bg-white p-6 font-medium text-slate-600 transition-colors hover:bg-slate-50"
           >
             {secondaryButtonText}
             <ArrowRight className="ml-2 h-4 w-4" />

@@ -48,7 +48,7 @@ export function AdminSidebar() {
     (href: string) => {
       return pathname === href;
     },
-    [pathname]
+    [pathname],
   );
 
   return (

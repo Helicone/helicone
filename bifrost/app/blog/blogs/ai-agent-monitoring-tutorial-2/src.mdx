@@ -33,15 +33,15 @@ npm install @helicone/helpers
 We'll modify our code to track each tool/RAG call and LLM interaction as part of a session:
 
 ```javascript
-import { HeliconeManualLogger } from '@helicone/helpers';
-import crypto from 'crypto';
+import { HeliconeManualLogger } from "@helicone/helpers";
+import crypto from "crypto";
 
 // Initialize Helicone manual logger
 const heliconeLogger = new HeliconeManualLogger({
   apiKey: process.env.HELICONE_API_KEY,
   headers: {
-    "Helicone-Property-Type": "Financial-Research-Agent"
-  }
+    "Helicone-Property-Type": "Financial-Research-Agent",
+  },
 });
 
 // Session management
@@ -80,55 +80,60 @@ async function searchCompanyInfo(query, vectorStore) {
       metadata: {
         searchType: "similarity_search_with_score",
         threshold: 0.9, // This threshold is too high!
-        requestTime: new Date().toISOString()
-      }
+        requestTime: new Date().toISOString(),
+      },
     },
     async (resultRecorder) => {
       console.log("Searching for company information in knowledge base...");
-      
-      const resultsWithScores = await vectorStore.similaritySearchWithScore(query, 2);
-      
+
+      const resultsWithScores = await vectorStore.similaritySearchWithScore(
+        query,
+        2
+      );
+
       if (resultsWithScores.length === 0 || resultsWithScores[0][1] < 0.9) {
         const result = {
           found: false,
-          message: "No relevant company information found in the knowledge base."
+          message:
+            "No relevant company information found in the knowledge base.",
         };
-        
+
         resultRecorder.appendResults({
           results: result,
           matchCount: 0,
           bestScore: resultsWithScores[0]?.[1] || 0,
           searchLatency: 50,
-          status: "no_match"
+          status: "no_match",
         });
-        
+
         return result;
       }
-      
+
       // Process successful results...
     },
     {
       ...sessionHeaders,
-      "Helicone-Session-Path": `/financial-research/company-search/${query.toLowerCase().replace(/\s+/g, '-')}`
+      "Helicone-Session-Path": `/financial-research/company-search/${query.toLowerCase().replace(/\s+/g, "-")}`,
     }
   );
 }
 ```
-</details>
 
+</details>
 
 With this setup, let's test our agent and see what's happening in the Helicone dashboard.
 
 ![Helicone Sessions dashboard showing agent behavior before fixes](/static/blog/ai-agent-monitoring-tutorial-2/helicone-session-before-fix.webp)
 
 The dashboard reveals the exact problems:
+
 - Vector DB searches, while successful, are failing to return appropriate results
 - The agent is making unnecessary knowledge base searches for general information
 - We can see the complete decision tree leading to these failures
 
 ## Fix #1: Adjusting the RAG Threshold
 
-The first issue is clear from our dashboard—the similarity threshold of 0.9 is too restrictive (can be viewed by clicking on the **vector_db** call row). 
+The first issue is clear from our dashboard—the similarity threshold of 0.9 is too restrictive (can be viewed by clicking on the **vector_db** call row).
 
 Even relevant documents about GreenEnergy aren't meeting this threshold.
 
@@ -162,11 +167,11 @@ async function processQuery(userQuery, vectorStore) {
                 * Recent news about specific companies
                 * Detailed information about unknown companies
               - If you have sufficient information to provide an accurate and complete answer from your existing knowledge, respond directly without using tools
-              `
+              `,
     },
-    { role: "user", content: userQuery }
+    { role: "user", content: userQuery },
   ];
-  
+
   // Rest of the function...
 }
 ```
@@ -178,17 +183,22 @@ However, testing this change alone doesn't fully resolve the issue. The model st
 Sometimes more sophisticated reasoning requires a more capable model. Let's upgrade from **GPT-3.5 Turbo** to **GPT-4o Mini**:
 
 ```javascript
-const llmResp = await openai.chat.completions.create({
-  model: "gpt-4o-mini", // Upgraded from "gpt-3.5-turbo"
-  tools,
-  messages,
-  temperature: 0.1,
-}, {
-  headers: {
-    ...currentSessionHeaders,
-    "Helicone-Prompt-Id": lastToolUsed ? `${lastToolUsed}-response` : "financial-research-reasoning"
+const llmResp = await openai.chat.completions.create(
+  {
+    model: "gpt-4o-mini", // Upgraded from "gpt-3.5-turbo"
+    tools,
+    messages,
+    temperature: 0.1,
+  },
+  {
+    headers: {
+      ...currentSessionHeaders,
+      "Helicone-Prompt-Id": lastToolUsed
+        ? `${lastToolUsed}-response`
+        : "financial-research-reasoning",
+    },
   }
-});
+);
 ```
 
 <BottomLine
@@ -233,8 +243,9 @@ Error: Rate limit exceeded for model gpt-4o-mini
 These errors didn't cause complete failures but added significant latency to responses. Without Helicone's observability, we might never have noticed these delays in a production environment.
 
 To fix rate limiting issues, you can:
+
 - Implement exponential backoff retry logic
-- Add request queuing 
+- Add request queuing
 - Monitor usage patterns to optimize request timing
 - Consider upgrading API tier limits if needed
 
@@ -246,15 +257,15 @@ Here's our final agent with all fixes applied:
 <summary>Click to see the complete code</summary>
 
 ```javascript
-import dotenv from 'dotenv';
-import axios from 'axios';
-import { OpenAI } from 'openai';
-import { MemoryVectorStore } from 'langchain/vectorstores/memory';
-import { OpenAIEmbeddings } from '@langchain/openai';
-import { Document } from '@langchain/core/documents';
-import { HeliconeManualLogger } from '@helicone/helpers';
-import readline from 'readline';
-import crypto from 'crypto';
+import dotenv from "dotenv";
+import axios from "axios";
+import { OpenAI } from "openai";
+import { MemoryVectorStore } from "langchain/vectorstores/memory";
+import { OpenAIEmbeddings } from "@langchain/openai";
+import { Document } from "@langchain/core/documents";
+import { HeliconeManualLogger } from "@helicone/helpers";
+import readline from "readline";
+import crypto from "crypto";
 
 // Load environment variables
 dotenv.config();
@@ -272,8 +283,8 @@ const openai = new OpenAI({
 const heliconeLogger = new HeliconeManualLogger({
   apiKey: process.env.HELICONE_API_KEY,
   headers: {
-    "Helicone-Property-Type": "Financial-Research-Agent"
-  }
+    "Helicone-Property-Type": "Financial-Research-Agent",
+  },
 });
 
 // Alpha Vantage API key
@@ -380,7 +391,7 @@ const companyProfiles = [
   - Annual revenue: $8.5B (up 5% YoY)
   - Profit margin: 15%
   - Dividend yield: 3.2%
-  `
+  `,
 ];
 
 // Function to initialize the vector store with company profiles
@@ -388,11 +399,11 @@ async function initializeVectorStore() {
   const embeddings = new OpenAIEmbeddings({
     openAIApiKey: process.env.OPENAI_API_KEY,
   });
-  
+
   const docs = companyProfiles.map(
     (text) => new Document({ pageContent: text })
   );
-  
+
   return MemoryVectorStore.fromDocuments(docs, embeddings);
 }
 
@@ -409,13 +420,13 @@ function startNewSession() {
 
 // Function to generate session path based on tool and arguments
 function getToolSessionPath(toolName, args) {
-  switch(toolName) {
+  switch (toolName) {
     case "getStockData":
       return `/financial-research/stock-data/${args.ticker.toLowerCase()}`;
     case "getStockNews":
       return `/financial-research/news/${args.ticker.toLowerCase()}`;
     case "searchCompanyInfo":
-      return `/financial-research/company-search/${args.query.toLowerCase().replace(/\s+/g, '-')}`;
+      return `/financial-research/company-search/${args.query.toLowerCase().replace(/\s+/g, "-")}`;
     default:
       return "/financial-research";
   }
@@ -431,56 +442,59 @@ async function getStockData(ticker) {
       metadata: {
         source: "alpha_vantage",
         operation: "global_quote",
-        requestTime: new Date().toISOString()
-      }
+        requestTime: new Date().toISOString(),
+      },
     },
     async (resultRecorder) => {
       try {
         const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=${ALPHA_VANTAGE_API_KEY}`;
         const response = await axios.get(url);
-        
-        if (response.data['Global Quote'] && Object.keys(response.data['Global Quote']).length > 0) {
-          const quote = response.data['Global Quote'];
+
+        if (
+          response.data["Global Quote"] &&
+          Object.keys(response.data["Global Quote"]).length > 0
+        ) {
+          const quote = response.data["Global Quote"];
           const result = {
             symbol: ticker.toUpperCase(),
-            price: parseFloat(quote['05. price']),
-            change: parseFloat(quote['09. change']),
-            changePercent: quote['10. change percent'],
-            volume: parseInt(quote['06. volume']),
-            latestTradingDay: quote['07. latest trading day']
+            price: parseFloat(quote["05. price"]),
+            change: parseFloat(quote["09. change"]),
+            changePercent: quote["10. change percent"],
+            volume: parseInt(quote["06. volume"]),
+            latestTradingDay: quote["07. latest trading day"],
           };
-          
+
           resultRecorder.appendResults({
             output: result,
             status: "success",
-            responseTime: Date.now()
+            responseTime: Date.now(),
           });
-          
+
           return result;
         } else {
           const error = { error: `No data found for ticker ${ticker}` };
           resultRecorder.appendResults({
             output: error,
             status: "no_data",
-            responseTime: Date.now()
+            responseTime: Date.now(),
           });
           return error;
         }
       } catch (error) {
-        console.error('Error fetching stock data:', error);
+        console.error("Error fetching stock data:", error);
         const errorResult = { error: `Failed to get stock data for ${ticker}` };
         resultRecorder.appendResults({
           output: errorResult,
           status: "error",
           error: error.message,
-          responseTime: Date.now()
+          responseTime: Date.now(),
         });
         return errorResult;
       }
     },
     {
       ...sessionHeaders,
-      "Helicone-Session-Path": `/financial-research/stock-data/${ticker.toLowerCase()}`
+      "Helicone-Session-Path": `/financial-research/stock-data/${ticker.toLowerCase()}`,
     }
   );
 }
@@ -495,55 +509,55 @@ async function getStockNews(ticker) {
       metadata: {
         source: "alpha_vantage",
         operation: "news_sentiment",
-        requestTime: new Date().toISOString()
-      }
+        requestTime: new Date().toISOString(),
+      },
     },
     async (resultRecorder) => {
       try {
         const url = `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers=${ticker}&apikey=${ALPHA_VANTAGE_API_KEY}`;
         const response = await axios.get(url);
-        
+
         if (response.data.feed && response.data.feed.length > 0) {
           const result = response.data.feed.slice(0, 3).map((item) => ({
             title: item.title,
             summary: item.summary,
             source: item.source,
             url: item.url,
-            timePublished: item.time_published
+            timePublished: item.time_published,
           }));
-          
+
           resultRecorder.appendResults({
             output: result,
             status: "success",
             newsCount: result.length,
-            responseTime: Date.now()
+            responseTime: Date.now(),
           });
-          
+
           return result;
         } else {
           const error = { error: `No news found for ticker ${ticker}` };
           resultRecorder.appendResults({
             output: error,
             status: "no_data",
-            responseTime: Date.now()
+            responseTime: Date.now(),
           });
           return error;
         }
       } catch (error) {
-        console.error('Error fetching news:', error);
+        console.error("Error fetching news:", error);
         const errorResult = { error: `Failed to get news for ${ticker}` };
         resultRecorder.appendResults({
           output: errorResult,
           status: "error",
           error: error.message,
-          responseTime: Date.now()
+          responseTime: Date.now(),
         });
         return errorResult;
       }
     },
     {
       ...sessionHeaders,
-      "Helicone-Session-Path": `/financial-research/news/${ticker.toLowerCase()}`
+      "Helicone-Session-Path": `/financial-research/news/${ticker.toLowerCase()}`,
     }
   );
 }
@@ -560,54 +574,60 @@ async function searchCompanyInfo(query, vectorStore) {
       metadata: {
         searchType: "similarity_search_with_score",
         threshold: 0.7,
-        requestTime: new Date().toISOString()
-      }
+        requestTime: new Date().toISOString(),
+      },
     },
     async (resultRecorder) => {
       console.log("Searching for company information in knowledge base...");
-      
+
       // Get relevant documents from vector store with similarity scores
-      const resultsWithScores = await vectorStore.similaritySearchWithScore(query, 2);
-      
+      const resultsWithScores = await vectorStore.similaritySearchWithScore(
+        query,
+        2
+      );
+
       // Check if we have relevant results with good similarity scores
       if (resultsWithScores.length === 0 || resultsWithScores[0][1] < 0.7) {
-        console.log("No relevant company information found in the knowledge base.");
+        console.log(
+          "No relevant company information found in the knowledge base."
+        );
         const result = {
           found: false,
-          message: "No relevant company information found in the knowledge base."
+          message:
+            "No relevant company information found in the knowledge base.",
         };
-        
+
         resultRecorder.appendResults({
           results: result,
           matchCount: 0,
           bestScore: resultsWithScores[0]?.[1] || 0,
           searchLatency: 50,
-          status: "no_match"
+          status: "no_match",
         });
-        
+
         return result;
       }
-      
+
       // Extract just the documents from the results for context
       const relevantDocs = resultsWithScores.map(([doc]) => doc);
       const result = {
         found: true,
-        documents: relevantDocs
+        documents: relevantDocs,
       };
-      
+
       resultRecorder.appendResults({
         results: result,
         matchCount: relevantDocs.length,
         bestScore: resultsWithScores[0][1],
         searchLatency: 50,
-        status: "success"
+        status: "success",
       });
-      
+
       return result;
     },
     {
       ...sessionHeaders,
-      "Helicone-Session-Path": `/financial-research/company-search/${query.toLowerCase().replace(/\s+/g, '-')}`
+      "Helicone-Session-Path": `/financial-research/company-search/${query.toLowerCase().replace(/\s+/g, "-")}`,
     }
   );
 }
@@ -618,58 +638,61 @@ const tools = [
     type: "function",
     function: {
       name: "getStockData",
-      description: "Get current price and other market information for a specific stock by ticker symbol",
+      description:
+        "Get current price and other market information for a specific stock by ticker symbol",
       parameters: {
         type: "object",
         properties: {
           ticker: {
             type: "string",
-            description: "The stock ticker symbol, e.g., AAPL for Apple Inc."
-          }
+            description: "The stock ticker symbol, e.g., AAPL for Apple Inc.",
+          },
         },
-        required: ["ticker"]
-      }
-    }
+        required: ["ticker"],
+      },
+    },
   },
   {
     type: "function",
     function: {
       name: "getStockNews",
-      description: "Get the latest news articles for a specific stock by ticker symbol",
+      description:
+        "Get the latest news articles for a specific stock by ticker symbol",
       parameters: {
         type: "object",
         properties: {
           ticker: {
             type: "string",
-            description: "The stock ticker symbol, e.g., AAPL for Apple Inc."
-          }
+            description: "The stock ticker symbol, e.g., AAPL for Apple Inc.",
+          },
         },
-        required: ["ticker"]
-      }
-    }
+        required: ["ticker"],
+      },
+    },
   },
   {
     type: "function",
     function: {
       name: "searchCompanyInfo",
-      description: "Search for detailed company information in the knowledge base",
+      description:
+        "Search for detailed company information in the knowledge base",
       parameters: {
         type: "object",
         properties: {
           query: {
             type: "string",
-            description: "The company name or topic to search for"
-          }
+            description: "The company name or topic to search for",
+          },
         },
-        required: ["query"]
-      }
-    }
-  }
+        required: ["query"],
+      },
+    },
+  },
 ];
 
 // Simple helper to map tool calls to functions
 async function callHelper(name, args, vectorStore) {
-  switch(name) {
+  switch (name) {
     case "getStockData":
       return await getStockData(args.ticker);
     case "getStockNews":
@@ -700,11 +723,11 @@ async function processQuery(userQuery, vectorStore) {
                 * Recent news about specific companies
                 * Detailed information about unknown companies
               - If you have sufficient information to provide an accurate and complete answer from your existing knowledge, respond directly without using tools
-              `
+              `,
     },
-    { role: "user", content: userQuery }
+    { role: "user", content: userQuery },
   ];
-  
+
   // Add chat history for context if available
   if (chatHistory.length > 0) {
     messages.splice(1, 0, ...chatHistory);
@@ -713,53 +736,65 @@ async function processQuery(userQuery, vectorStore) {
   // Track the last tool used for session path context
   let lastToolUsed = null;
   let lastToolArgs = null;
-  
-  while (true) {    
+
+  while (true) {
     // Determine session headers based on context
     let currentSessionHeaders = { ...sessionHeaders };
     if (lastToolUsed && lastToolArgs) {
       // If we just used a tool, update the session path for the LLM response
-      currentSessionHeaders["Helicone-Session-Path"] = getToolSessionPath(lastToolUsed, lastToolArgs);
+      currentSessionHeaders["Helicone-Session-Path"] = getToolSessionPath(
+        lastToolUsed,
+        lastToolArgs
+      );
     }
-    
-    const llmResp = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      tools,
-      messages,
-      temperature: 0.1,
-    }, {
-      headers: {
-        ...currentSessionHeaders,
-        "Helicone-Prompt-Id": lastToolUsed ? `${lastToolUsed}-response` : "financial-research-reasoning"
+
+    const llmResp = await openai.chat.completions.create(
+      {
+        model: "gpt-4o-mini",
+        tools,
+        messages,
+        temperature: 0.1,
+      },
+      {
+        headers: {
+          ...currentSessionHeaders,
+          "Helicone-Prompt-Id": lastToolUsed
+            ? `${lastToolUsed}-response`
+            : "financial-research-reasoning",
+        },
       }
-    });
-    
+    );
+
     const msg = llmResp.choices[0].message;
-    
+
     if (msg.tool_calls && msg.tool_calls.length > 0) {
       // Execute the helper
       const toolCall = msg.tool_calls[0];
       const functionName = toolCall.function.name;
       const functionArgs = JSON.parse(toolCall.function.arguments);
-      
+
       // Store the tool information for the next LLM response
       lastToolUsed = functionName;
       lastToolArgs = functionArgs;
-      
+
       console.log(`Executing ${functionName} with args:`, functionArgs);
-      const toolResult = await callHelper(functionName, functionArgs, vectorStore);
-      
+      const toolResult = await callHelper(
+        functionName,
+        functionArgs,
+        vectorStore
+      );
+
       // Push feedback & loop
-      messages.push(msg);  // LLM's tool call
+      messages.push(msg); // LLM's tool call
       messages.push({
         role: "tool",
         tool_call_id: toolCall.id,
         name: functionName,
-        content: JSON.stringify(toolResult)
+        content: JSON.stringify(toolResult),
       });
       continue;
     }
-    
+
     // No tool call → LLM has produced the final answer
     // Reset tool tracking for next query
     lastToolUsed = null;
@@ -770,50 +805,56 @@ async function processQuery(userQuery, vectorStore) {
 
 // Main function
 async function main() {
-  console.log("Initializing Financial Research Assistant with Helicone Sessions...");
-  
+  console.log(
+    "Initializing Financial Research Assistant with Helicone Sessions..."
+  );
+
   // Check for API keys
   if (!process.env.OPENAI_API_KEY) {
     console.error("Error: OPENAI_API_KEY not found in environment variables");
     process.exit(1);
   }
-  
+
   if (!process.env.ALPHA_VANTAGE_API_KEY) {
-    console.error("Error: ALPHA_VANTAGE_API_KEY not found in environment variables");
+    console.error(
+      "Error: ALPHA_VANTAGE_API_KEY not found in environment variables"
+    );
     process.exit(1);
   }
-  
+
   if (!process.env.HELICONE_API_KEY) {
     console.error("Error: HELICONE_API_KEY not found in environment variables");
     process.exit(1);
   }
-  
+
   // Initialize vector store
   const vectorStore = await initializeVectorStore();
-  
+
   // Start new session
   startNewSession();
-  
+
   // Create readline interface
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
   });
-  
+
   console.log("\n===== Financial Research Assistant with Helicone =====");
   console.log("Ask about stock prices, news, or company information.");
   console.log("Type 'exit' to quit or 'new' to start a new session.");
   console.log("======================================================\n");
-  
+
   // Start conversation loop
   const askQuestion = () => {
     rl.question("\nWhat would you like to know? ", async (query) => {
       if (query.toLowerCase() === "exit") {
-        console.log("Thank you for using the Financial Research Assistant. Goodbye!");
+        console.log(
+          "Thank you for using the Financial Research Assistant. Goodbye!"
+        );
         rl.close();
         return;
       }
-      
+
       if (query.toLowerCase() === "new") {
         startNewSession();
         chatHistory = []; // Clear chat history for new session
@@ -821,35 +862,37 @@ async function main() {
         askQuestion();
         return;
       }
-      
+
       try {
         console.log("\nResearching your question...");
-        
+
         // Process query with the agentic approach
         const answer = await processQuery(query, vectorStore);
-        
+
         // Display answer
         console.log("\nAnswer:", answer);
-        
+
         // Update chat history (maintain a limited history)
         chatHistory.push({ role: "user", content: query });
         chatHistory.push({ role: "assistant", content: answer || "" });
-        
+
         // Keep only the last 4 exchanges (8 messages)
         if (chatHistory.length > 8) {
           chatHistory.splice(0, 2);
         }
-        
+
         // Continue conversation
         askQuestion();
       } catch (error) {
         console.error("Error processing query:", error);
-        console.log("\nSorry, I encountered an error while researching your question. Please try again.");
+        console.log(
+          "\nSorry, I encountered an error while researching your question. Please try again."
+        );
         askQuestion();
       }
     });
   };
-  
+
   // Start the conversation
   askQuestion();
 }
@@ -884,7 +927,7 @@ Through this process, we learned several critical lessons:
 Building reliable AI agents requires more than just getting the basic functionality working. Through comprehensive monitoring with Helicone Sessions, we:
 
 - **Identified** the root causes of retrieval failures and inappropriate tool usage
-- **Fixed** threshold issues and improved reasoning with better prompts and model upgrades  
+- **Fixed** threshold issues and improved reasoning with better prompts and model upgrades
 - **Discovered** hidden performance issues like rate limiting that would have been invisible otherwise
 - **Optimized** our agent's decision-making process for better performance and lower costs
 
@@ -898,28 +941,36 @@ The difference between a working agent and a production-ready agent is observabi
 - **<a href="https://www.helicone.ai/blog/replaying-llm-sessions" target="_blank" rel="noopener">Optimizing AI Agents: Replaying LLM Sessions to Improve Performance</a>**
 - **<a href="https://www.helicone.ai/blog/full-guide-to-improving-ai-agents" target="_blank" rel="noopener">The Full Developer's Guide to Building Effective AI Agents</a>**
 
-<FAQ 
+<FAQ
   items={[
     {
-      question: "Why did changing the similarity threshold fix the retrieval issue?",
-      answer: "Vector similarity scores can vary significantly based on the embedding model and text content. A threshold of 0.9 was too restrictive, filtering out relevant documents that had slightly lower similarity scores. Reducing to 0.7 allowed the system to retrieve contextually relevant information while maintaining quality."
+      question:
+        "Why did changing the similarity threshold fix the retrieval issue?",
+      answer:
+        "Vector similarity scores can vary significantly based on the embedding model and text content. A threshold of 0.9 was too restrictive, filtering out relevant documents that had slightly lower similarity scores. Reducing to 0.7 allowed the system to retrieve contextually relevant information while maintaining quality.",
     },
     {
-      question: "How do I determine the right similarity threshold for my RAG system?",
-      answer: "Start with empirical testing using your actual data. Test various thresholds (0.5, 0.6, 0.7, 0.8) and manually evaluate the quality of retrieved documents. Helicone's logging can easily reveal where RAG retrieval is failing, helping you know what needs to be improved. Consider implementing dynamic thresholds based on query type or confidence levels."
+      question:
+        "How do I determine the right similarity threshold for my RAG system?",
+      answer:
+        "Start with empirical testing using your actual data. Test various thresholds (0.5, 0.6, 0.7, 0.8) and manually evaluate the quality of retrieved documents. Helicone's logging can easily reveal where RAG retrieval is failing, helping you know what needs to be improved. Consider implementing dynamic thresholds based on query type or confidence levels.",
     },
     {
-      question: "Why did upgrading from GPT-3.5 Turbo to GPT-4o Mini improve tool selection?",
-      answer: "GPT-4o Mini has better reasoning capabilities for understanding context and following complex instructions about when NOT to use tools. It's more effective at distinguishing between queries that require external data versus those that can be answered from general knowledge, leading to more appropriate tool selection and reduced unnecessary API calls."
+      question:
+        "Why did upgrading from GPT-3.5 Turbo to GPT-4o Mini improve tool selection?",
+      answer:
+        "GPT-4o Mini has better reasoning capabilities for understanding context and following complex instructions about when NOT to use tools. It's more effective at distinguishing between queries that require external data versus those that can be answered from general knowledge, leading to more appropriate tool selection and reduced unnecessary API calls.",
     },
     {
       question: "How can I prevent rate limiting issues in production?",
-      answer: "Implement exponential backoff retry logic, add request queuing to smooth out traffic spikes, monitor usage patterns to identify peak times, and consider upgrading your API tier if you consistently hit limits. Helicone's monitoring can help you identify rate limiting patterns before they become critical issues."
+      answer:
+        "Implement exponential backoff retry logic, add request queuing to smooth out traffic spikes, monitor usage patterns to identify peak times, and consider upgrading your API tier if you consistently hit limits. Helicone's monitoring can help you identify rate limiting patterns before they become critical issues.",
     },
     {
       question: "What other metrics should I monitor for production AI agents?",
-      answer: "Beyond what we covered, monitor: user satisfaction scores, end-to-end response times, cost per successful interaction, tool success rates, error patterns by user segment, and prompt effectiveness over time. Set up alerts in Helicone for sudden changes in these metrics to catch issues early."
-    }
+      answer:
+        "Beyond what we covered, monitor: user satisfaction scores, end-to-end response times, cost per successful interaction, tool success rates, error patterns by user segment, and prompt effectiveness over time. Set up alerts in Helicone for sudden changes in these metrics to catch issues early.",
+    },
   ]}
 />
 

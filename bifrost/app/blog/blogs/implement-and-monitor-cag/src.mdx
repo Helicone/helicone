@@ -19,14 +19,14 @@ Let's take a look at why this matters and how you can implement it in your LLM a
 
 ## Key Differences Between RAG and CAG
 
-| Aspect | RAG <br/>(Retrieval-Augmented Generation) | CAG <br/>(Context-Augmented Generation) |
-|--------|-------------------------------------|-----------------------------------|
-| Implementation | Complex pipeline with vector DB, embeddings, and retrieval | Load entire documents directly into context window |
-| Typical Workflow | 1. Create embeddings<br/>2. Store in vector DB<br/>3. Search relevant chunks<br/>4. Feed chunks to LLM | 1. Load document<br/>2. Send to LLM with prompt |
-| Setup Time | 🟥🟥🟥 <br/>Hours to days | 🟥 <br/>Minutes |
-| Code Complexity | 🟥🟥🟥 <br/>Moderate to high | 🟥 <br/>Very low (10-15 lines) |
-| Retrieval Accuracy | Depends on chunking strategy, embedding quality | Near-perfect (if document fits in context) |
-| Best For | Massive datasets that exceed context windows | Documents that fit within context limits |
+| Aspect             | RAG <br/>(Retrieval-Augmented Generation)                                                              | CAG <br/>(Context-Augmented Generation)            |
+| ------------------ | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------- |
+| Implementation     | Complex pipeline with vector DB, embeddings, and retrieval                                             | Load entire documents directly into context window |
+| Typical Workflow   | 1. Create embeddings<br/>2. Store in vector DB<br/>3. Search relevant chunks<br/>4. Feed chunks to LLM | 1. Load document<br/>2. Send to LLM with prompt    |
+| Setup Time         | 🟥🟥🟥 <br/>Hours to days                                                                              | 🟥 <br/>Minutes                                    |
+| Code Complexity    | 🟥🟥🟥 <br/>Moderate to high                                                                           | 🟥 <br/>Very low (10-15 lines)                     |
+| Retrieval Accuracy | Depends on chunking strategy, embedding quality                                                        | Near-perfect (if document fits in context)         |
+| Best For           | Massive datasets that exceed context windows                                                           | Documents that fit within context limits           |
 
 **The key advantage of CAG is simplicity.** No complex chunking strategies, no vector database setup, and no worrying about whether you've retrieved the right information, because everything is there.
 
@@ -45,7 +45,8 @@ Modern flagship models have context windows orders of magnitude larger than befo
 - 2024: 100K-200K tokens common, with Gemini supporting up to 2M tokens
 
 To put this in perspective, a 2M token context can fit:
-- Two complete novels the length of *War and Peace*
+
+- Two complete novels the length of _War and Peace_
 - Thousands of pages of documentation
 - Entire codebases
 
@@ -55,7 +56,7 @@ LLMs have become remarkably better at finding information in vast contexts. Goog
 
 ### 3. Token Pricing is Now More Affordable
 
-Input token costs have fallen dramatically, especially for models optimized for large contexts like <a href="https://www.helicone.ai/blog/gemini-2.5-full-developer-guide" target="_blank" rel="noopener">Gemini 2.5</a> and <a href="https://www.helicone.ai/blog/gpt-4.1-full-developer-guide" target="_blank" rel="noopener">GPT-4.1</a>. 
+Input token costs have fallen dramatically, especially for models optimized for large contexts like <a href="https://www.helicone.ai/blog/gemini-2.5-full-developer-guide" target="_blank" rel="noopener">Gemini 2.5</a> and <a href="https://www.helicone.ai/blog/gpt-4.1-full-developer-guide" target="_blank" rel="noopener">GPT-4.1</a>.
 
 ## Building a CAG Application in Just 10 Lines of Code
 
@@ -77,6 +78,7 @@ response = client.models.generate_content(
 ```
 
 That's it! Just 10 lines of code to:
+
 1. Set a document URL
 2. Download the PDF
 3. Feed it directly to Gemini
@@ -90,7 +92,7 @@ For a more in-depth tutorial on how to implement CAG, check out <a href="https:/
 
 ## Monitoring Your CAG Implementation
 
-When using CAG, especially with large documents, monitoring becomes essential to track costs and optimize performance. 
+When using CAG, especially with large documents, monitoring becomes essential to track costs and optimize performance.
 
 Helicone provides an easy way to add observability to your implementation by adding just a few lines of code.
 
@@ -115,7 +117,7 @@ filepath = pathlib.Path('file.pdf')
 filepath.write_bytes(httpx.get(doc_url).content)
 ```
 
-### Why should I integrate Helicone? 
+### Why should I integrate Helicone?
 
 By adding the Helicone integration (which is just a few lines of code using the Proxy method), you get:
 
@@ -137,12 +139,12 @@ By adding the Helicone integration (which is just a few lines of code using the 
 
 While CAG is incredibly powerful, it's not a complete replacement for RAG. Here's when to use each approach:
 
-| Choose CAG when... | Choose RAG when... |
-|:----------------|:----------------|
-| Your entire knowledge base fits within context limits (typically < 1–2M tokens) | Your knowledge base is massive (many GB or TB of text) |
-| You need a simple, quick implementation with minimal maintenance | You need to search across millions of documents |
-| You want highest possible retrieval accuracy | You require advanced filtering by metadata, dates, categories |
-| Your document set changes infrequently | You need real-time updates to your knowledge base |
+| Choose CAG when...                                                              | Choose RAG when...                                            |
+| :------------------------------------------------------------------------------ | :------------------------------------------------------------ |
+| Your entire knowledge base fits within context limits (typically < 1–2M tokens) | Your knowledge base is massive (many GB or TB of text)        |
+| You need a simple, quick implementation with minimal maintenance                | You need to search across millions of documents               |
+| You want highest possible retrieval accuracy                                    | You require advanced filtering by metadata, dates, categories |
+| Your document set changes infrequently                                          | You need real-time updates to your knowledge base             |
 
 ### Hybrid Approaches
 
@@ -168,36 +170,65 @@ As you explore CAG for your own applications, be sure to monitor your LLMs with 
 
 ## You Might Also Like
 
-- <a href="https://www.helicone.ai/blog/chain-of-draft" target="_blank" rel="noopener">Chain-of-Draft Prompting: A More Efficient Alternative to Chain of Thought</a>
+- <a
+    href="https://www.helicone.ai/blog/chain-of-draft"
+    target="_blank"
+    rel="noopener"
+  >
+    Chain-of-Draft Prompting: A More Efficient Alternative to Chain of Thought
+  </a>
 
-- <a href="https://www.helicone.ai/blog/openai-o3" target="_blank" rel="noopener">OpenAI o3 Released: Benchmarks and Comparison to o1</a>
+- <a
+    href="https://www.helicone.ai/blog/openai-o3"
+    target="_blank"
+    rel="noopener"
+  >
+    OpenAI o3 Released: Benchmarks and Comparison to o1
+  </a>
 
-- <a href="https://www.helicone.ai/blog/gpt-4.1-full-developer-guide" target="_blank" rel="noopener">GPT-4.1 Released: Benchmarks, Performance, and Migration Guide</a>
+- <a
+    href="https://www.helicone.ai/blog/gpt-4.1-full-developer-guide"
+    target="_blank"
+    rel="noopener"
+  >
+    GPT-4.1 Released: Benchmarks, Performance, and Migration Guide
+  </a>
 
-- <a href="https://www.helicone.ai/blog/claude-3.7-benchmarks-and-examples" target="_blank" rel="noopener">Claude 3.7 Sonnet & Claude Code: A Technical Review</a>
+- <a
+    href="https://www.helicone.ai/blog/claude-3.7-benchmarks-and-examples"
+    target="_blank"
+    rel="noopener"
+  >
+    Claude 3.7 Sonnet & Claude Code: A Technical Review
+  </a>
 
-<FAQ 
+<FAQ
   items={[
     {
       question: "What's the maximum document size I can use with CAG?",
-      answer: "This depends on your chosen model. Gemini 2.0 supports up to 2M tokens (approximately 1.5M words), GPT-4.1 and o3 support 1M tokens, and Claude 3.7 Sonnet supports 200K tokens. For perspective, a typical non-fiction book is around 70-100K tokens."
+      answer:
+        "This depends on your chosen model. Gemini 2.0 supports up to 2M tokens (approximately 1.5M words), GPT-4.1 and o3 support 1M tokens, and Claude 3.7 Sonnet supports 200K tokens. For perspective, a typical non-fiction book is around 70-100K tokens.",
     },
     {
       question: "How do I handle documents that exceed context limits?",
-      answer: "For documents that exceed context limits, consider: Using models with larger context windows, implementing a filter-then-CAG approach where you pre-select the most relevant sections, or falling back to traditional RAG with careful chunking strategies."
+      answer:
+        "For documents that exceed context limits, consider: Using models with larger context windows, implementing a filter-then-CAG approach where you pre-select the most relevant sections, or falling back to traditional RAG with careful chunking strategies.",
     },
     {
       question: "Is CAG always more accurate than RAG?",
-      answer: "CAG tends to be more accurate when the entire relevant document fits in context, as it eliminates retrieval errors common in RAG. However, RAG can be more accurate for massive datasets where CAG isn't possible, especially with advanced techniques like HyDE, query expansion, and reranking."
+      answer:
+        "CAG tends to be more accurate when the entire relevant document fits in context, as it eliminates retrieval errors common in RAG. However, RAG can be more accurate for massive datasets where CAG isn't possible, especially with advanced techniques like HyDE, query expansion, and reranking.",
     },
     {
       question: "How can I track costs when implementing CAG?",
-      answer: "Integrating with Helicone provides real-time cost tracking for all your LLM calls, including CAG implementations. This allows you to monitor costs per query, implement response caching to avoid redundant costs, and track usage patterns to optimize your implementation."
+      answer:
+        "Integrating with Helicone provides real-time cost tracking for all your LLM calls, including CAG implementations. This allows you to monitor costs per query, implement response caching to avoid redundant costs, and track usage patterns to optimize your implementation.",
     },
     {
       question: "Should I completely replace my RAG systems with CAG?",
-      answer: "Not necessarily. RAG still excels for massive datasets, real-time information, and complex metadata filtering. Consider your specific use case requirements—document size, update frequency, and query complexity—before deciding. Many production systems now use hybrid approaches."
-    }
+      answer:
+        "Not necessarily. RAG still excels for massive datasets, real-time information, and complex metadata filtering. Consider your specific use case requirements—document size, update frequency, and query complexity—before deciding. Many production systems now use hybrid approaches.",
+    },
   ]}
 />
 

@@ -281,9 +281,12 @@ export const approvedDomains = providers.map((provider) => provider.pattern);
 
 export const modelNames = allCosts.map((cost) => cost.model.value);
 
-export const parentModelNames = providers.reduce((acc, provider) => {
-  if (provider.modelDetails) {
-    acc[provider.provider] = Object.keys(provider.modelDetails);
-  }
-  return acc;
-}, {} as Record<ProviderName, string[]>);
+export const parentModelNames = providers.reduce(
+  (acc, provider) => {
+    if (provider.modelDetails) {
+      acc[provider.provider] = Object.keys(provider.modelDetails);
+    }
+    return acc;
+  },
+  {} as Record<ProviderName, string[]>
+);

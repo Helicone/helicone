@@ -121,9 +121,8 @@ export class OrganizationManager extends BaseManager {
     if (createOrgParams.tier !== "free") {
       return err("Only free tier is supported");
     }
-    const insert = await this.organizationStore.createNewOrganization(
-      createOrgParams
-    );
+    const insert =
+      await this.organizationStore.createNewOrganization(createOrgParams);
     if (insert.error || !insert.data) {
       return err(insert.error);
     }

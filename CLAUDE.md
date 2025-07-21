@@ -9,6 +9,7 @@ Helicone is an open-source LLM observability platform that provides monitoring, 
 ## Core Architecture
 
 ### Services
+
 - **Web (Frontend)**: Next.js dashboard app at `/web`
 - **Jawn (Backend)**: Express.js API server at `/valhalla/jawn`
 - **Worker (Proxy)**: Cloudflare Workers for LLM request interception at `/worker`
@@ -16,6 +17,7 @@ Helicone is an open-source LLM observability platform that provides monitoring, 
 - **Bifrost**: Marketing/landing page at `/bifrost`
 
 ### Data Flow
+
 1. Client → Helicone Proxy → LLM Provider
 2. Proxy sends logs to Upstash queue → Jawn processes → Databases
 3. PostgreSQL for app data, ClickHouse for analytics, MinIO for object storage
@@ -23,6 +25,7 @@ Helicone is an open-source LLM observability platform that provides monitoring, 
 ## Development Commands
 
 ### Main Development
+
 ```bash
 # Start local development (requires Docker)
 ./helicone-compose.sh helicone up
@@ -42,6 +45,7 @@ cd worker && npx wrangler dev --local --var WORKER_TYPE:OPENAI_PROXY --port 8787
 ```
 
 ### Build & Test
+
 ```bash
 # Web
 cd web && yarn build && yarn test && yarn lint
@@ -56,6 +60,7 @@ cd aigateway && cargo build && cargo test --tests --all-features && cargo clippy
 ## Code Style Guidelines
 
 ### Frontend (Web)
+
 - Use TypeScript with strict typing
 - Follow design system with semantic components from `/web/components/ui/typography`
 - Use Tailwind utility classes for styling with semantic color tokens
@@ -63,6 +68,7 @@ cd aigateway && cargo build && cargo test --tests --all-features && cargo clippy
 - Layout with flexbox + gap, avoid margins for spacing
 
 ### Component Patterns
+
 ```tsx
 // Typography components
 import { H1, H2, P, Small, Muted } from "@/components/ui/typography"
@@ -76,12 +82,14 @@ className="bg-background text-foreground border-border"
 ```
 
 ### Backend (Jawn)
+
 - Controllers in `/valhalla/jawn/src/controllers/` use TSOA decorators
 - Managers in `/valhalla/jawn/src/managers/` extend `BaseManager`
 - Use `JawnAuthenticatedRequest` and return `Result<T, string>`
 - Frontend hooks use TanStack Query with `useJawnClient()`
 
 ### Database
+
 - PostgreSQL with snake_case naming
 - ClickHouse for analytics
 - Proper RLS policies for security
@@ -89,18 +97,21 @@ className="bg-background text-foreground border-border"
 ## Tech Stack
 
 ### Frontend
+
 - Next.js 14 with React 18.3.1
 - TypeScript, Tailwind CSS, Radix UI
 - Zustand for state management
 - TanStack Query for server state
 
 ### Backend
+
 - Express.js with TSOA
 - Supabase (PostgreSQL) + ClickHouse
 - Upstash Redis for queuing
 - Better Auth for authentication
 
 ### Infrastructure
+
 - Cloudflare Workers for proxying
 - Docker for local development
 - MinIO for object storage
@@ -138,17 +149,20 @@ className="bg-background text-foreground border-border"
 ## Common Tasks
 
 ### Adding New Features
+
 1. Design API in Jawn controller with TSOA
 2. Implement manager with database operations
 3. Create frontend hooks with TanStack Query
 4. Follow design system for UI components
 
 ### Database Changes
+
 1. Add migrations in `/supabase/migrations/`
 2. Update types and managers accordingly
 3. Test with proper RLS policies
 
 ### Style Changes
+
 - Use semantic color tokens, never raw colors
 - Follow typography component system
 - Use flexbox + gap for layouts

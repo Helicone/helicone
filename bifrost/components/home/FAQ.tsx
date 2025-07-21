@@ -10,17 +10,17 @@ import {
 
 const FAQ = () => {
   return (
-    <div className={cn(ISLAND_WIDTH, "pt-14 sm:pt-20 pb-12 md:pb-14")}>
-      <div className="flex flex-col md:flex-row justify-between w-full gap-6 md:gap-10">
-        <h2 className="text-4xl sm:text-5xl font-semibold text-black">
+    <div className={cn(ISLAND_WIDTH, "pb-12 pt-14 sm:pt-20 md:pb-14")}>
+      <div className="flex w-full flex-col justify-between gap-6 md:flex-row md:gap-10">
+        <h2 className="text-4xl font-semibold text-black sm:text-5xl">
           Questions &amp; Answers
         </h2>
         <Accordion type="multiple" className="w-full">
           <AccordionItem value="item-1" className="border-b-0">
-            <AccordionTrigger className="text-foreground text-base sm:text-lg font-medium text-left">
+            <AccordionTrigger className="text-foreground text-left text-base font-medium sm:text-lg">
               Will Helicone add latency to my LLM calls?
             </AccordionTrigger>
-            <AccordionContent className="text-muted-foreground text-base sm:text-lg font-normal">
+            <AccordionContent className="text-muted-foreground text-base font-normal sm:text-lg">
               Minimal impact. Our{" "}
               <a
                 href="https://github.com/Helicone/ai-gateway/tree/main/benchmarks"
@@ -56,10 +56,10 @@ const FAQ = () => {
           </AccordionItem>
           <hr className="my-2 border-t border-slate-200" />
           <AccordionItem value="item-3" className="border-b-0">
-            <AccordionTrigger className="text-foreground text-base sm:text-lg font-medium text-left">
+            <AccordionTrigger className="text-foreground text-left text-base font-medium sm:text-lg">
               How is Helicone different from other monitoring solutions?
             </AccordionTrigger>
-            <AccordionContent className="text-muted-foreground text-base sm:text-lg font-normal">
+            <AccordionContent className="text-muted-foreground text-base font-normal sm:text-lg">
               Unlike general observability tools that treat LLMs as black boxes,
               Helicone is purpose-built for AI applications with specialized
               features like prompt version tracking, token-level cost analysis,
@@ -77,10 +77,10 @@ const FAQ = () => {
           </AccordionItem>
           <hr className="my-2 border-t border-slate-200" />
           <AccordionItem value="item-4" className="border-b-0">
-            <AccordionTrigger className="text-foreground text-base sm:text-lg font-medium text-left">
+            <AccordionTrigger className="text-foreground text-left text-base font-medium sm:text-lg">
               How quickly can I integrate Helicone?
             </AccordionTrigger>
-            <AccordionContent className="text-muted-foreground text-base sm:text-lg font-normal">
+            <AccordionContent className="text-muted-foreground text-base font-normal sm:text-lg">
               There&apos;s no SDK required, so most developers integrate
               Helicone in under 2 minutes with merely two line changes -
               starting the AI Gateway with a single command and updating the
@@ -106,10 +106,10 @@ const FAQ = () => {
           </AccordionItem>
           <hr className="my-2 border-t border-slate-200" />
           <AccordionItem value="item-5" className="border-b-0">
-            <AccordionTrigger className="text-foreground text-base sm:text-lg font-medium text-left">
+            <AccordionTrigger className="text-foreground text-left text-base font-medium sm:text-lg">
               Is Helicone secure and compliant for enterprise use?
             </AccordionTrigger>
-            <AccordionContent className="text-muted-foreground text-base sm:text-lg font-normal">
+            <AccordionContent className="text-muted-foreground text-base font-normal sm:text-lg">
               Yes, Helicone is built for enterprise-grade security and
               compliance. We&apos;re SOC 2 Type II certified, HIPAA compliant,
               and implement industry best practices including end-to-end
@@ -132,10 +132,10 @@ const FAQ = () => {
           </AccordionItem>
           <hr className="my-2 border-t border-slate-200" />
           <AccordionItem value="item-6" className="border-b-0">
-            <AccordionTrigger className="text-foreground text-base sm:text-lg font-medium text-left">
+            <AccordionTrigger className="text-foreground text-left text-base font-medium sm:text-lg">
               Can I deploy Helicone in my own infrastructure?
             </AccordionTrigger>
-            <AccordionContent className="text-muted-foreground text-base sm:text-lg font-normal">
+            <AccordionContent className="text-muted-foreground text-base font-normal sm:text-lg">
               Absolutely. As an open-source platform, Helicone offers complete
               deployment flexibility. You can self-host using our
               production-ready Helm charts on your Kubernetes cluster, deploy
@@ -150,10 +150,10 @@ const FAQ = () => {
           </AccordionItem>
           <hr className="my-2 border-t border-slate-200" />
           <AccordionItem value="item-2" className="border-b-0">
-            <AccordionTrigger className="text-foreground text-base sm:text-lg font-medium text-left">
+            <AccordionTrigger className="text-foreground text-left text-base font-medium sm:text-lg">
               What if I don&apos;t want Helicone in my critical path?
             </AccordionTrigger>
-            <AccordionContent className="text-muted-foreground text-base sm:text-lg font-normal">
+            <AccordionContent className="text-muted-foreground text-base font-normal sm:text-lg">
               You have two options: use Helicone Observability without the AI
               Gateway (SDK integration without proxying), or self-host our
               open-source AI Gateway to eliminate any dependency on

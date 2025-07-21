@@ -6,21 +6,21 @@ export default function Faqs() {
   const [open, setOpen] = useState(-1);
 
   return (
-    <div className="flex flex-col pb-2 w-full md:items-center items-start text-start md:pl-0 w-full">
-      <h2 className="text-[32px] md:text-4xl font-bold md:self-center text-start">
+    <div className="flex w-full flex-col items-start pb-2 text-start md:items-center md:pl-0">
+      <h2 className="text-start text-[32px] font-bold md:self-center md:text-4xl">
         Frequently Asked <br /> Questions
       </h2>
 
-      <div className="flex flex-col md:mt-16 mt-8 items-center gap-4 w-full">
+      <div className="mt-8 flex w-full flex-col items-center gap-4 md:mt-16">
         {FAQS.map((faq, index) => (
           <div
             onClick={() => setOpen((prev) => (prev === index ? -1 : index))}
             key={index}
-            className="w-full p-4 border-2 border-sky-100 rounded-xl cursor-pointer"
+            className="w-full cursor-pointer rounded-xl border-2 border-sky-100 p-4"
           >
-            <h3 className="text-lg font-bold flex justify-start items-center">
+            <h3 className="flex items-center justify-start text-lg font-bold">
               <ChevronRightIcon
-                className={`mx-[24px] w-10 h-10 ${
+                className={`mx-[24px] h-10 w-10 ${
                   open === index ? "rotate-90" : ""
                 }`}
               />
@@ -28,7 +28,7 @@ export default function Faqs() {
             </h3>
             <div
               className={`text-gray-500 ${
-                open === index ? "block mt-2 pl-6" : "hidden"
+                open === index ? "mt-2 block pl-6" : "hidden"
               }`}
             >
               {faq.answer}

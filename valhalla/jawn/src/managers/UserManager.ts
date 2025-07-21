@@ -141,7 +141,12 @@ export class UserManager extends BaseManager {
 
   async getUserMetrics(
     queryParams: UserMetricsQueryParams
-  ): Promise<Result<{ users: UserMetricsResult[]; count: number; hasUsers: boolean }, string>> {
+  ): Promise<
+    Result<
+      { users: UserMetricsResult[]; count: number; hasUsers: boolean },
+      string
+    >
+  > {
     const {
       filter,
       offset,
@@ -163,7 +168,10 @@ export class UserManager extends BaseManager {
     LIMIT 1
     `;
 
-    const hasUsersResult = await dbQueryClickhouse<{ has_users: number }>(hasUsersQuery, [organizationId]);
+    const hasUsersResult = await dbQueryClickhouse<{ has_users: number }>(
+      hasUsersQuery,
+      [organizationId]
+    );
 
     const builtFilter = await buildFilterWithAuthClickHouse({
       org_id: organizationId,
@@ -252,7 +260,10 @@ export class UserManager extends BaseManager {
       kv
     );
 
-    const results = await clickhouseDb.dbQuery<UserMetric>(query, builtFilter.argsAcc);
+    const results = await clickhouseDb.dbQuery<UserMetric>(
+      query,
+      builtFilter.argsAcc
+    );
 
     const users = resultMap(results, (x) =>
       x.map((y) => ({

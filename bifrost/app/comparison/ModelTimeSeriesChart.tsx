@@ -29,7 +29,7 @@ const ModelTimeSeriesChart = ({
     if (!active || !payload?.length) return null;
 
     return (
-      <div className="bg-white p-2 border rounded shadow-md">
+      <div className="rounded border bg-white p-2 shadow-md">
         <div className="text-xs text-gray-500">
           {new Date(label).toLocaleDateString([], {
             month: "short",

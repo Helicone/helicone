@@ -2,7 +2,16 @@ After a month of engineering work, we're excited to share a big milestone in our
 
 Learn more about how to <a href="https://docs.helicone.ai/getting-started/self-host/docker" target="_blank" rel="noopener noreferrer">self-host Helicone here</a>.
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/4AbyR3Q2EgU?si=C__p8deWUqWh0Xaq" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+<iframe
+  width="560"
+  height="315"
+  src="https://www.youtube.com/embed/4AbyR3Q2EgU?si=C__p8deWUqWh0Xaq"
+  title="YouTube video player"
+  frameborder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerpolicy="strict-origin-when-cross-origin"
+  allowfullscreen
+></iframe>
 
 ## The Problem: "Too Onerous"
 
@@ -54,6 +63,7 @@ The biggest architectural change was **moving away from Supabase for our self-ho
 When we first built Helicone, we chose Supabase to help us move quickly from zero to one. It was an excellent tool for getting started quickly.
 
 > When building stuff, you're a startup and you just want to move really quickly. We always take the 90-10 solution.
+
 - Justin Torre, CEO of Helicone
 
 However, Supabase comes bundled with multiple services, many of which weren't necessary for our core functionality. This added complexity to our deployment process and increased the resource requirements for self-hosting.
@@ -88,6 +98,7 @@ While the Docker Compose setup is perfect for most use cases, we've also develop
 These charts allow you to connect Helicone to an Aurora database or a dedicated ClickHouse cluster, enabling horizontal scaling for organizations processing billions of logs.
 
 > We spent a lot of time working on performance and making sure that when you load up Helicone and it's instant. If you have millions or billions of logs, which some of our customers do, all of those metrics and all those filters get aggregated instantaneously, materialized really quickly.
+
 - Justin Torre, CEO of Helicone
 
 For context, you'd typically need this level of scaling **when you're spending around $100,000 per month on OpenAI or similar services** - a good problem to have!
@@ -149,27 +160,55 @@ We're proud of how far we've come and excited to make Helicone more accessible t
 Visit our <a href="https://docs.helicone.ai/getting-started/self-host/docker" target="_blank" rel="noopener noreferrer">documentation</a> to get started, or <a href="https://helicone.ai/contact" target="_blank" rel="noopener noreferrer">reach out to our team</a> for guidance on optimal configuration for your specific needs.
 
 ### You might find these useful
-- <a href="https://www.helicone.ai/blog/slash-llm-cost" target="_blank" rel="noopener">5 Powerful Techniques to Slash Your LLM Costs</a>
-- <a href="https://www.helicone.ai/blog/monitoring-local-llms" target="_blank" rel="noopener">Complete Guide to Monitoring Local LLMs with Llama and Open WebUI</a>
-- <a href="https://www.helicone.ai/blog/test-your-llm-prompts" target="_blank" rel="noopener">How to Test Your LLM Prompts (with Helicone)</a>
 
-<FAQ items={[
-  {
-    question: "Is Helicone Self-Hosting compatible with all LLM providers?",
-    answer: "Yes, Helicone Self-Hosting works with all major LLM providers including OpenAI, Anthropic, Gemini, as well as open-source models you may be running locally."
-  },
-  {
-    question: "What are the infrastructure requirements for self-hosting Helicone?",
-    answer: "Helicone Self-Hosting is designed to be lightweight and can run on modest hardware. For most implementations, a T2 medium-sized EC2 instance is sufficient."
-  },
-  {
-    question: "Does self-hosting impact any features compared to the cloud version?",
-    answer: "No, Helicone Self-Hosting provides all the core observability features of the cloud version, including request tracking, cost optimization, and analytics. The only difference is that everything runs within your own infrastructure and you need to maintain it as it upgrades."
-  },
-  {
-    question: "How can I update my self-hosted Helicone when new updates are released?",
-    answer: "Almost every week we release a new version of Helicone which you can find in our Docker Hub repository: https://hub.docker.com/u/helicone. You can easily update your self-hosted Helicone by pulling the latest changes from our GitHub repository and rebuilding the containers."
-  }
-]} />
+- <a
+    href="https://www.helicone.ai/blog/slash-llm-cost"
+    target="_blank"
+    rel="noopener"
+  >
+    5 Powerful Techniques to Slash Your LLM Costs
+  </a>
+- <a
+    href="https://www.helicone.ai/blog/monitoring-local-llms"
+    target="_blank"
+    rel="noopener"
+  >
+    Complete Guide to Monitoring Local LLMs with Llama and Open WebUI
+  </a>
+- <a
+    href="https://www.helicone.ai/blog/test-your-llm-prompts"
+    target="_blank"
+    rel="noopener"
+  >
+    How to Test Your LLM Prompts (with Helicone)
+  </a>
+
+<FAQ
+  items={[
+    {
+      question: "Is Helicone Self-Hosting compatible with all LLM providers?",
+      answer:
+        "Yes, Helicone Self-Hosting works with all major LLM providers including OpenAI, Anthropic, Gemini, as well as open-source models you may be running locally.",
+    },
+    {
+      question:
+        "What are the infrastructure requirements for self-hosting Helicone?",
+      answer:
+        "Helicone Self-Hosting is designed to be lightweight and can run on modest hardware. For most implementations, a T2 medium-sized EC2 instance is sufficient.",
+    },
+    {
+      question:
+        "Does self-hosting impact any features compared to the cloud version?",
+      answer:
+        "No, Helicone Self-Hosting provides all the core observability features of the cloud version, including request tracking, cost optimization, and analytics. The only difference is that everything runs within your own infrastructure and you need to maintain it as it upgrades.",
+    },
+    {
+      question:
+        "How can I update my self-hosted Helicone when new updates are released?",
+      answer:
+        "Almost every week we release a new version of Helicone which you can find in our Docker Hub repository: https://hub.docker.com/u/helicone. You can easily update your self-hosted Helicone by pulling the latest changes from our GitHub repository and rebuilding the containers.",
+    },
+  ]}
+/>
 
 <Questions />

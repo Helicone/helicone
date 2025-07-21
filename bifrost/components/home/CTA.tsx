@@ -13,9 +13,9 @@ const CTA = () => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <div className="bg-[#F2F9FC] h-[80vh] relative overflow-hidden flex flex-col">
+    <div className="relative flex h-[80vh] flex-col overflow-hidden bg-[#F2F9FC]">
       <div
-        className="hidden md:block absolute inset-0 w-full h-full z-[0]"
+        className="absolute inset-0 z-[0] hidden h-full w-full md:block"
         style={{
           backgroundImage: "url(/static/home/cta-bg.webp)",
           backgroundSize: "cover",
@@ -24,9 +24,9 @@ const CTA = () => {
         }}
       ></div>
 
-      <div className="flex flex-col justify-center items-center gap-6 md:gap-12 z-[10] h-full w-full relative">
+      <div className="relative z-[10] flex h-full w-full flex-col items-center justify-center gap-6 md:gap-12">
         <div
-          className="block md:hidden absolute inset-0 w-full h-full z-[0]"
+          className="absolute inset-0 z-[0] block h-full w-full md:hidden"
           style={{
             backgroundImage: "url(/static/home/cta-mobile.png)",
             backgroundSize: "cover",
@@ -35,7 +35,7 @@ const CTA = () => {
           }}
         ></div>
         <div
-          className="block md:hidden absolute inset-0 w-full h-full z-[1]"
+          className="absolute inset-0 z-[1] block h-full w-full md:hidden"
           style={{
             backgroundImage: "url(/static/home/cta-mobile.png)",
             backgroundSize: "cover",
@@ -43,11 +43,11 @@ const CTA = () => {
             backgroundRepeat: "no-repeat",
           }}
         ></div>
-        <div className="flex flex-col items-center text-wrap text-4xl md:text-5xl font-semibold text-slate-500 leading-snug z-[10]">
-          <div className="flex flex-wrap gap-x-3 gap-y-1 items-center justify-center ">
+        <div className="z-[10] flex flex-col items-center text-wrap text-4xl font-semibold leading-snug text-slate-500 md:text-5xl">
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
             <div
               className={cn(
-                "bg-[#E7F6FD] border-[3px] border-brand rounded-xl py-2 xl:py-4 px-7 text-brand transition-transform duration-1000",
+                "border-brand text-brand rounded-xl border-[3px] bg-[#E7F6FD] px-7 py-2 transition-transform duration-1000 xl:py-4",
                 "rotate-[-3deg]"
               )}
             >
@@ -60,14 +60,14 @@ const CTA = () => {
         <Link href="https://us.helicone.ai/signup" className="z-[10]">
           <Button
             size="lg"
-            className="md:gap-3 text-base md:text-[40px] py-[18px] md:py-12 px-4 md:px-12 bg-brand hover:bg-brand/100 text-white font-normal rounded-lg md:rounded-2xl z-[10]"
+            className="bg-brand hover:bg-brand/100 z-[10] rounded-lg px-4 py-[18px] text-base font-normal text-white md:gap-3 md:rounded-2xl md:px-12 md:py-12 md:text-[40px]"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
           >
             Try Helicone for free
             {isHovered && (
               <ChevronRightIcon
-                className="md:w-12 w-5 md:h-12 h-5"
+                className="h-5 w-5 md:h-12 md:w-12"
                 strokeWidth={2.5}
               />
             )}
@@ -77,12 +77,12 @@ const CTA = () => {
       <div
         className={cn(
           ISLAND_WIDTH,
-          "z-[10] flex flex-col md:flex-row justify-between items-start md:items-center gap-y-6 md:gap-y-0 mt-11 md:mt-0 mb-11"
+          "z-[10] mb-11 mt-11 flex flex-col items-start justify-between gap-y-6 md:mt-0 md:flex-row md:items-center md:gap-y-0"
         )}
       >
-        <p className="font-medium text-sm md:text-xl">We protect your data.</p>
+        <p className="text-sm font-medium md:text-xl">We protect your data.</p>
         <div className="flex items-center gap-12">
-          <div className="flex flex-col md:flex-row items-center gap-3">
+          <div className="flex flex-col items-center gap-3 md:flex-row">
             <Image
               src="/static/home/soc2.webp"
               alt="SOC 2"
@@ -91,7 +91,7 @@ const CTA = () => {
             />
             <p className="text-xs md:text-sm">SOC2 Certified</p>
           </div>
-          <div className="flex flex-col md:flex-row items-center gap-3">
+          <div className="flex flex-col items-center gap-3 md:flex-row">
             <Image
               src="/static/home/hipaa.webp"
               alt="HIPAA"
@@ -105,9 +105,9 @@ const CTA = () => {
       <LogoBox
         imgSrc="/static/home/gemini.webp"
         className={cn(
-          "w-[178px] h-[178px] 2xl:w-[220px] 2xl:h-[220px] absolute bottom-28 left-4 rotate-[-27deg] transition-all duration-1000",
+          "absolute bottom-28 left-4 h-[178px] w-[178px] rotate-[-27deg] transition-all duration-1000 2xl:h-[220px] 2xl:w-[220px]",
           isHovered &&
-            "w-[160px] h-[160px] 2xl:w-[200px] 2xl:h-[200px] left-1/2 translate-x-[-380px] 2xl:translate-x-[-600px] bottom-16 rotate-[-27deg]"
+            "bottom-16 left-1/2 h-[160px] w-[160px] translate-x-[-380px] rotate-[-27deg] 2xl:h-[200px] 2xl:w-[200px] 2xl:translate-x-[-600px]"
         )}
         innerClassName=""
       />
@@ -115,18 +115,18 @@ const CTA = () => {
       <LogoBox
         imgSrc="/static/home/logos/deepseek.webp"
         className={cn(
-          "w-[140px] h-[140px] 2xl:w-[180px] 2xl:h-[180px] absolute top-1/3 left-44 2xl:left-56 transition-all duration-1000",
+          "absolute left-44 top-1/3 h-[140px] w-[140px] transition-all duration-1000 2xl:left-56 2xl:h-[180px] 2xl:w-[180px]",
           isHovered &&
-            "!left-1/2 translate-x-[-450px] 2xl:translate-x-[-550px] translate-y-[50px] rotate-[17deg]"
+            "!left-1/2 translate-x-[-450px] translate-y-[50px] rotate-[17deg] 2xl:translate-x-[-550px]"
         )}
       />
 
       <LogoBox
         imgSrc="/static/home/mistral.webp"
         className={cn(
-          "w-[140px] h-[140px] 2xl:w-[180px] 2xl:h-[180px] absolute left-0 top-1/4 -rotate-[25deg] transition-all duration-1000",
+          "absolute left-0 top-1/4 h-[140px] w-[140px] -rotate-[25deg] transition-all duration-1000 2xl:h-[180px] 2xl:w-[180px]",
           isHovered &&
-            "left-1/2 translate-x-[-620px] 2xl:translate-x-[-720px] translate-y-[10px] rotate-[20deg]"
+            "left-1/2 translate-x-[-620px] translate-y-[10px] rotate-[20deg] 2xl:translate-x-[-720px]"
         )}
         innerClassName="p-2"
       />
@@ -134,8 +134,8 @@ const CTA = () => {
       <LogoBox
         imgSrc="/static/home/logos/openai.webp"
         className={cn(
-          "w-[194px] h-[194px] 2xl:w-[240px] 2xl:h-[240px] absolute top-0 left-36 2xl:left-48 transition-all duration-1000",
-          isHovered && "!left-1/2 translate-x-[-470px] top-10 rotate-[-45deg]"
+          "absolute left-36 top-0 h-[194px] w-[194px] transition-all duration-1000 2xl:left-48 2xl:h-[240px] 2xl:w-[240px]",
+          isHovered && "!left-1/2 top-10 translate-x-[-470px] rotate-[-45deg]"
         )}
         innerClassName="rounded-3xl"
       />
@@ -143,7 +143,7 @@ const CTA = () => {
       <LogoBox
         imgSrc="/static/home/logos/togetherai.webp"
         className={cn(
-          "w-[142px] h-[142px] 2xl:w-[180px] 2xl:h-[180px] absolute top-0 right-4 rotate-[40deg] transition-all duration-1000",
+          "absolute right-4 top-0 h-[142px] w-[142px] rotate-[40deg] transition-all duration-1000 2xl:h-[180px] 2xl:w-[180px]",
           isHovered && "right-1/2 translate-x-[400px] rotate-[-3deg]"
         )}
         innerClassName="rounded-3xl"
@@ -152,9 +152,9 @@ const CTA = () => {
       <LogoBox
         imgSrc="/static/home/anthropic.webp"
         className={cn(
-          "w-[176px] h-[176px] 2xl:w-[220px] 2xl:h-[220px] absolute bottom-40 right-20 2xl:translate-x-[50px] translate-x-[50px] rotate-[15deg] transition-all duration-1000",
+          "absolute bottom-40 right-20 h-[176px] w-[176px] translate-x-[50px] rotate-[15deg] transition-all duration-1000 2xl:h-[220px] 2xl:w-[220px] 2xl:translate-x-[50px]",
           isHovered &&
-            "bottom-20 right-1/2 translate-x-[400px] 2xl:translate-x-[560px] rotate-[28deg]"
+            "bottom-20 right-1/2 translate-x-[400px] rotate-[28deg] 2xl:translate-x-[560px]"
         )}
         innerClassName="p-4"
       />
@@ -162,9 +162,9 @@ const CTA = () => {
       <LogoBox
         imgSrc="/static/home/logos/groq.webp"
         className={cn(
-          "w-[135px] h-[135px] 2xl:w-[160px] 2xl:h-[160px] absolute top-1/3 right-56 rotate-[43deg] transition-all duration-1000",
+          "absolute right-56 top-1/3 h-[135px] w-[135px] rotate-[43deg] transition-all duration-1000 2xl:h-[160px] 2xl:w-[160px]",
           isHovered &&
-            "right-1/2 translate-x-[400px] 2xl:translate-x-[500px] translate-y-[-30px] rotate-[15deg]"
+            "right-1/2 translate-x-[400px] translate-y-[-30px] rotate-[15deg] 2xl:translate-x-[500px]"
         )}
         innerClassName="p-2"
       />
@@ -172,8 +172,8 @@ const CTA = () => {
       <LogoBox
         imgSrc="/static/home/logos/openrouter.webp"
         className={cn(
-          "w-28 h-28 2xl:w-32 2xl:h-32 absolute top-10 right-56 rotate-[-16deg] transition-all duration-1000",
-          isHovered && "top-6 right-1/2 translate-x-[200px] rotate-[-76deg]"
+          "absolute right-56 top-10 h-28 w-28 rotate-[-16deg] transition-all duration-1000 2xl:h-32 2xl:w-32",
+          isHovered && "right-1/2 top-6 translate-x-[200px] rotate-[-76deg]"
         )}
         innerClassName="p-2"
       />
@@ -181,8 +181,8 @@ const CTA = () => {
       <LogoBox
         imgSrc="/static/home/logo4.webp"
         className={cn(
-          "w-28 h-28 2xl:w-32 2xl:h-32 absolute top-1/4 right-10 transition-all duration-1000",
-          isHovered && "right-1/2 translate-x-[550px] top-1/2 rotate-[-45deg]"
+          "absolute right-10 top-1/4 h-28 w-28 transition-all duration-1000 2xl:h-32 2xl:w-32",
+          isHovered && "right-1/2 top-1/2 translate-x-[550px] rotate-[-45deg]"
         )}
       />
     </div>

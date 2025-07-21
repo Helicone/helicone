@@ -4,7 +4,7 @@ import { $JAWN_API, getJawnClient } from "../../../lib/clients/jawn";
 
 const useExperiments = (
   req: { page: number; pageSize: number },
-  promptId?: string
+  promptId?: string,
 ) => {
   const { data, isLoading, refetch, isRefetching } = $JAWN_API.useQuery(
     "post",
@@ -25,7 +25,7 @@ const useExperiments = (
     {
       refetchOnWindowFocus: false,
       refetchInterval: 5_000,
-    }
+    },
   );
 
   const experiments = data?.data;
@@ -76,7 +76,7 @@ const useExperimentTables = () => {
     {},
     {
       refetchOnWindowFocus: false,
-    }
+    },
   );
   const deleteExperiment = useMutation({
     mutationFn: async (experimentId: string) => {
@@ -130,7 +130,7 @@ const useExperimentTableMetadata = (req: { id: string }) => {
               experimentTableId: id ?? "",
             },
           },
-        }
+        },
       );
 
       return res.data?.data;

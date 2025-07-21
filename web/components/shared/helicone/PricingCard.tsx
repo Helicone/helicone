@@ -109,53 +109,53 @@ export const PricingCard = ({
   return (
     <div
       className={cn(
-        "h-full w-full flex flex-col px-6 py-3 rounded-xl gap-2",
+        "flex h-full w-full flex-col gap-2 rounded-xl px-6 py-3",
         styles.container,
         onClick &&
-          "cursor-pointer hover:-translate-y-1 hover:shadow-lg transition-all duration-200",
-        className
+          "cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:shadow-lg",
+        className,
       )}
       onClick={onClick}
       role={onClick ? "button" : undefined}
     >
-      <div className="flex w-full justify-between items-center">
+      <div className="flex w-full items-center justify-between">
         <div
           className={cn("text-xl font-semibold leading-normal", styles.title)}
         >
           {isLoading ? "Loading..." : title}
         </div>
         {iconSrc ? (
-          <div className="w-6 h-6 relative overflow-hidden">
+          <div className="relative h-6 w-6 overflow-hidden">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              className="w-5 h-5 left-0 top-0 absolute"
+              className="absolute left-0 top-0 h-5 w-5"
               src={iconSrc}
               alt={`${title} icon`}
             />
           </div>
         ) : (
-          <div className={cn("w-5 h-5 text-current", styles.title)}>
+          <div className={cn("h-5 w-5 text-current", styles.title)}>
             {styles.icon}
           </div>
         )}
       </div>
-      <div className="flex w-full flex-wrap gap-2 justify-between items-center">
-        <div className={cn("flex items-baseline flex-wrap", styles.price)}>
+      <div className="flex w-full flex-wrap items-center justify-between gap-2">
+        <div className={cn("flex flex-wrap items-baseline", styles.price)}>
           <span className="text-2xl font-bold leading-normal">{price}</span>
           {priceSubtext && (
-            <span className="text-slate-400 text-base font-normal leading-normal ml-1">
+            <span className="ml-1 text-base font-normal leading-normal text-slate-400">
               {priceSubtext}
             </span>
           )}
         </div>
         {(isCurrentPlan || isPopular || isBestValue) && (
-          <div className={cn("px-3 shrink-0", styles.badge)}>
-            <div className="text-center text-sm font-normal whitespace-nowrap">
+          <div className={cn("shrink-0 px-3", styles.badge)}>
+            <div className="whitespace-nowrap text-center text-sm font-normal">
               {isBestValue
                 ? "BEST VALUE"
                 : isPopular
-                ? "POPULAR"
-                : "CURRENT PLAN"}
+                  ? "POPULAR"
+                  : "CURRENT PLAN"}
             </div>
           </div>
         )}

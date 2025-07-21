@@ -54,7 +54,7 @@ export function useScores({
 
   const scoreKeys = useMemo(() => {
     const keys = Array.from(
-      new Set(scoresQuery.data?.data?.data?.map((r) => r.score_key) ?? [])
+      new Set(scoresQuery.data?.data?.data?.map((r) => r.score_key) ?? []),
     ).filter((s) => s !== "");
 
     return keys
@@ -84,7 +84,7 @@ export function useScores({
         [] as {
           date: string;
           values: Record<string, number>;
-        }[]
+        }[],
       )
       .map((r) => {
         const time = new Date(r.date);

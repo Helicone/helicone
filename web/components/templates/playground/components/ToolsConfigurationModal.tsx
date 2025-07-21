@@ -41,7 +41,7 @@ export default function ToolsConfigurationModal({
 }: ToolsConfigurationModalProps) {
   const [toolsDialogOpen, setToolsDialogOpen] = useState(false);
   const [selectedToolIndex, setSelectedToolIndex] = useState<number | null>(
-    tools ? (tools.length > 0 ? 0 : null) : null
+    tools ? (tools.length > 0 ? 0 : null) : null,
   );
   const [currentTools, setCurrentTools] = useState<Tool[]>(tools || []);
 
@@ -59,14 +59,14 @@ export default function ToolsConfigurationModal({
       ? JSON.stringify(
           currentTools[selectedToolIndex]?.parameters ?? {},
           null,
-          2
+          2,
         )
-      : ""
+      : "",
   );
   const [toolAsString, setToolAsString] = useState<string>(
     selectedToolIndex !== null
       ? JSON.stringify(currentTools[selectedToolIndex] ?? {}, null, 2)
-      : ""
+      : "",
   );
 
   useEffect(() => {
@@ -75,11 +75,11 @@ export default function ToolsConfigurationModal({
         JSON.stringify(
           currentTools[selectedToolIndex]?.parameters ?? {},
           null,
-          2
-        )
+          2,
+        ),
       );
       setToolAsString(
-        JSON.stringify(currentTools[selectedToolIndex] ?? {}, null, 2)
+        JSON.stringify(currentTools[selectedToolIndex] ?? {}, null, 2),
       );
     }
   }, [selectedToolIndex, currentTools]);
@@ -116,9 +116,9 @@ export default function ToolsConfigurationModal({
               variant="outline"
               size="icon"
               className={cn(
-                "border-none h-9 w-9",
+                "h-9 w-9 border-none",
                 isScrolled &&
-                  "bg-slate-100 dark:bg-slate-950 hover:bg-slate-200 dark:hover:bg-slate-900"
+                  "bg-slate-100 hover:bg-slate-200 dark:bg-slate-950 dark:hover:bg-slate-900",
               )}
             >
               <WrenchIcon className="h-3.5 w-3.5" />
@@ -129,24 +129,24 @@ export default function ToolsConfigurationModal({
       </Tooltip>
       <DialogContent
         className={clsx(
-          "max-w-7xl max-h-[95vh] gap-0 overflow-y-auto items-start flex flex-col",
-          currentTools.length !== 0 ? "w-[95vw]" : "w-auto"
+          "flex max-h-[95vh] max-w-7xl flex-col items-start gap-0 overflow-y-auto",
+          currentTools.length !== 0 ? "w-[95vw]" : "w-auto",
         )}
       >
-        <div className="flex items center justify-between">
+        <div className="items center flex justify-between">
           <div className="flex items-center">
-            <FlaskConicalIcon className="w-5 h-5 mr-2.5 text-slate-500" />
+            <FlaskConicalIcon className="mr-2.5 h-5 w-5 text-slate-500" />
             <DialogTitle>
-              <h3 className="text-base font-medium text-slate-950 dark:text-white mr-3">
+              <h3 className="mr-3 text-base font-medium text-slate-950 dark:text-white">
                 Tools Configuration
               </h3>
             </DialogTitle>
           </div>
         </div>
         {currentTools.length === 0 ? (
-          <div className="flex-1 p-20 flex flex-col items-center justify-center gap-4">
+          <div className="flex flex-1 flex-col items-center justify-center gap-4 p-20">
             <div className="flex flex-col items-center gap-2 text-center">
-              <FlaskConicalIcon className="w-8 h-8 text-slate-400" />
+              <FlaskConicalIcon className="h-8 w-8 text-slate-400" />
               <p className="text-sm text-slate-500">No tools configured</p>
               <p className="text-xs text-slate-400">
                 Add a tool to get started
@@ -172,10 +172,10 @@ export default function ToolsConfigurationModal({
             </Button>
           </div>
         ) : (
-          <div className="flex h-full gap-4 py-4 w-full">
+          <div className="flex h-full w-full gap-4 py-4">
             {/* Tools List */}
-            <div className="w-64 border-r pr-4 flex flex-col gap-2">
-              <div className="flex justify-between items-center">
+            <div className="flex w-64 flex-col gap-2 border-r pr-4">
+              <div className="flex items-center justify-between">
                 <h3 className="font-medium">Tools</h3>
                 <Button
                   variant="ghost"
@@ -215,7 +215,7 @@ export default function ToolsConfigurationModal({
                       <ContextMenuItem
                         onSelect={() => {
                           onToolsChange(
-                            currentTools.filter((_, i) => i !== index)
+                            currentTools.filter((_, i) => i !== index),
                           );
                           if (selectedToolIndex === index) {
                             setSelectedToolIndex(
@@ -223,7 +223,7 @@ export default function ToolsConfigurationModal({
                                 ? index === 0
                                   ? 1
                                   : index - 1
-                                : null
+                                : null,
                             );
                           }
                         }}
@@ -240,7 +240,7 @@ export default function ToolsConfigurationModal({
               {selectedToolIndex !== null &&
                 currentTools[selectedToolIndex] && (
                   <div className="flex flex-col gap-4">
-                    <div className="flex justify-between ">
+                    <div className="flex justify-between">
                       <Tabs defaultValue="form" className="w-full">
                         <TabsList>
                           <TabsTrigger value="form">Form</TabsTrigger>
@@ -250,7 +250,7 @@ export default function ToolsConfigurationModal({
                           <div className="flex flex-col gap-2">
                             <div className="grid gap-2">
                               <Label
-                                className="text-sm justify-start text-slate-500"
+                                className="justify-start text-sm text-slate-500"
                                 htmlFor="name"
                               >
                                 Name
@@ -265,7 +265,7 @@ export default function ToolsConfigurationModal({
                             </div>
                             <div className="grid gap-2">
                               <Label
-                                className="text-sm justify-start text-slate-500"
+                                className="justify-start text-sm text-slate-500"
                                 htmlFor="description"
                               >
                                 Description
@@ -282,7 +282,7 @@ export default function ToolsConfigurationModal({
                             </div>
                             <div className="grid gap-2">
                               <Label
-                                className="text-sm justify-start text-slate-500"
+                                className="justify-start text-sm text-slate-500"
                                 htmlFor="parameters"
                               >
                                 Parameters (JSON Schema)
@@ -311,15 +311,15 @@ export default function ToolsConfigurationModal({
                         onClick={() => {
                           onToolsChange(
                             currentTools.filter(
-                              (_, i) => i !== selectedToolIndex
-                            )
+                              (_, i) => i !== selectedToolIndex,
+                            ),
                           );
                           setSelectedToolIndex((prev) =>
                             currentTools.length > 0
                               ? prev === 0
                                 ? 1
                                 : prev! - 1
-                              : null
+                              : null,
                           );
                         }}
                       >
@@ -332,7 +332,7 @@ export default function ToolsConfigurationModal({
           </div>
         )}
         {currentTools.length > 0 && (
-          <DialogFooter className="flex justify-between w-full">
+          <DialogFooter className="flex w-full justify-between">
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>

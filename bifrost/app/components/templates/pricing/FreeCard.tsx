@@ -6,15 +6,16 @@ import { Button } from "@/components/ui/button";
 
 const FreeCard: React.FC = () => {
   return (
-    <Card className="w-full h-full p-6 bg-background rounded-xl border-spacing-1.5 border-border md:border-transparent md:shadow-none mx-auto">
+    <Card className="bg-background border-border mx-auto h-full w-full border-spacing-1.5 rounded-xl p-6 md:border-transparent md:shadow-none">
       <Col className="h-full justify-between gap-4">
         <Col className="gap-6">
-
           <Col className="h-full gap-2">
             <div className="text-accent-foreground text-md font-semibold leading-tight">
               Hobby
             </div>
-            <div className="text-accent-foreground text-3xl font-bold">Free</div>
+            <div className="text-accent-foreground text-3xl font-bold">
+              Free
+            </div>
             <div className="text-sidebar-foreground text-sm font-normal">
               Kickstart your AI project.
             </div>
@@ -26,9 +27,9 @@ const FreeCard: React.FC = () => {
               "Requests and Dashboard",
               "Free, truly.",
             ].map((feature, index) => (
-              <div key={index} className="py-1.5 flex items-center gap-2">
-                <div className="w-4 h-4 relative overflow-hidden">
-                  <Check className="w-full h-full" />
+              <div key={index} className="flex items-center gap-2 py-1.5">
+                <div className="relative h-4 w-4 overflow-hidden">
+                  <Check className="h-full w-full" />
                 </div>
                 <div className="text-sidebar-foreground text-sm font-normal">
                   {feature}
@@ -39,8 +40,7 @@ const FreeCard: React.FC = () => {
         </Col>
 
         <Link href="/signup">
-          <Button
-            variant="secondary" className="w-full text-base py-5">
+          <Button variant="secondary" className="w-full py-5 text-base">
             Get started for free
           </Button>
         </Link>

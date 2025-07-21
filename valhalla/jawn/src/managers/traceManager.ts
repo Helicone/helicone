@@ -47,12 +47,15 @@ export class TraceManager {
         seenKeys.add(i);
         return true;
       })
-      .reduce((acc, i) => {
-        if (span.attributes.has(`${prefix}.${i}.role`)) {
-          acc.push(this.extractAttributes(span, prefix, i));
-        }
-        return acc;
-      }, [] as { role: "system" | "user" | "assistant"; content: string }[]);
+      .reduce(
+        (acc, i) => {
+          if (span.attributes.has(`${prefix}.${i}.role`)) {
+            acc.push(this.extractAttributes(span, prefix, i));
+          }
+          return acc;
+        },
+        [] as { role: "system" | "user" | "assistant"; content: string }[]
+      );
   }
 
   private extractCompletions(span: TModifiedSpan) {
@@ -208,18 +211,21 @@ export class TraceManager {
             key.startsWith("traceloop.association.properties.Helicone-") &&
             key !== "traceloop.association.properties.Helicone-User-Id"
         )
-        .reduce((acc, [key, value]) => {
-          const propertyName = key.replace(
-            key.startsWith(
-              "traceloop.association.properties.Helicone-Property-"
-            )
-              ? "traceloop.association.properties.Helicone-Property-"
-              : "traceloop.association.properties.",
-            ""
-          );
-          acc[propertyName] = value;
-          return acc;
-        }, {} as Record<string, string>);
+        .reduce(
+          (acc, [key, value]) => {
+            const propertyName = key.replace(
+              key.startsWith(
+                "traceloop.association.properties.Helicone-Property-"
+              )
+                ? "traceloop.association.properties.Helicone-Property-"
+                : "traceloop.association.properties.",
+              ""
+            );
+            acc[propertyName] = value;
+            return acc;
+          },
+          {} as Record<string, string>
+        );
 
       const requestBody = {
         model: span.attributes.get("gen_ai.response.model"),

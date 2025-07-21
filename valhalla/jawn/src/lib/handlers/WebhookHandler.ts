@@ -95,7 +95,8 @@ export class WebhookHandler extends AbstractLogHandler {
             body: context.processedLog.request.body,
 
             model: includeData
-              ? context.processedLog.model ?? context.processedLog.request.model
+              ? (context.processedLog.model ??
+                context.processedLog.request.model)
               : undefined,
             provider: includeData
               ? context.message.log.request.provider

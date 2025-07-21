@@ -93,9 +93,8 @@ export class VaultController extends Controller {
 
     const vaultManager = new VaultManager(request.authParams);
 
-    const result = await vaultManager.getDecryptedProviderKeyById(
-      providerKeyId
-    );
+    const result =
+      await vaultManager.getDecryptedProviderKeyById(providerKeyId);
     if (result.error || !result.data) {
       this.setStatus(500);
       return { data: null, error: result.error || "Failed to retrieve key" };

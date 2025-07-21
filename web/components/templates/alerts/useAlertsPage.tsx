@@ -32,7 +32,7 @@ const useAlertsPage = (orgId: string) => {
       data?.alertHistory?.sort(
         (a, b) =>
           new Date(b.alert_start_time).getTime() -
-          new Date(a.alert_start_time).getTime()
+          new Date(a.alert_start_time).getTime(),
       ) || [],
     isLoading,
     refetch,

@@ -194,7 +194,9 @@ export class PiController extends Controller {
       cost: number;
     }>(requestBody, {
       orgId: request.authParams.organizationId,
-      countColumns: [`sum(request_response_rmt.cost) / ${COST_PRECISION_MULTIPLIER} as cost`],
+      countColumns: [
+        `sum(request_response_rmt.cost) / ${COST_PRECISION_MULTIPLIER} as cost`,
+      ],
       groupByColumns: ["created_at_trunc"],
     });
   }

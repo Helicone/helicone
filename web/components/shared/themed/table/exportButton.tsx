@@ -96,7 +96,7 @@ export default function ExportButton<T>({
           <Button
             variant="none"
             size="none"
-            className="h-9 w-9 shrink-0 flex items-center justify-center text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800"
+            className="flex h-9 w-9 shrink-0 items-center justify-center text-slate-700 hover:bg-slate-200 dark:text-slate-300 dark:hover:bg-slate-800"
             onClick={() => setOpen(true)}
           >
             <LuDownload className="h-4 w-4" />
@@ -106,13 +106,13 @@ export default function ExportButton<T>({
       </Tooltip>
 
       <ThemedModal open={open} setOpen={setOpen}>
-        <div className="flex flex-col space-y-4 sm:space-y-8 min-w-[350px] max-w-sm w-full">
+        <div className="flex w-full min-w-[350px] max-w-sm flex-col space-y-4 sm:space-y-8">
           <div className="flex flex-col space-y-8">
             <div className="flex flex-col space-y-4">
-              <p className="text-md sm:text-lg font-semibold text-gray-900 dark:text-gray-100">
+              <p className="text-md font-semibold text-gray-900 dark:text-gray-100 sm:text-lg">
                 Export {format}
               </p>
-              <p className="text-sm sm:text-md text-gray-500">
+              <p className="sm:text-md text-sm text-gray-500">
                 Exporting is limited to {MAX_EXPORT_ROWS} rows due to the huge
                 amounts of data in the requests. For larger exports, please use
                 our{" "}
@@ -120,7 +120,7 @@ export default function ExportButton<T>({
                   href="https://docs.helicone.ai/helicone-api/getting-started"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="underline font-semibold text-blue-600"
+                  className="font-semibold text-blue-600 underline"
                 >
                   API
                 </Link>
@@ -141,28 +141,28 @@ export default function ExportButton<T>({
               </SelectContent>
             </Select>
 
-            <p className="text-sm sm:text-md text-gray-500">
+            <p className="sm:text-md text-sm text-gray-500">
               Exporting may take a while depending on the amount of data. Please
               do not close this modal once export is started.
             </p>
           </div>
 
-          <div className="w-full flex justify-end text-sm space-x-4">
+          <div className="flex w-full justify-end space-x-4 text-sm">
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="flex flex-row items-center rounded-md bg-white dark:bg-black px-4 py-2 text-sm font-semibold border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm hover:text-gray-700 dark:hover:text-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+              className="flex flex-row items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500 dark:border-gray-700 dark:bg-black dark:text-gray-100 dark:hover:bg-gray-900 dark:hover:text-gray-300"
             >
               Cancel
             </button>
             <button
-              className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="flex items-center rounded-md bg-black px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:bg-white dark:text-black dark:hover:bg-gray-200"
               onClick={download}
             >
               {downloadingCSV ? (
                 <>
                   <ArrowPathIcon
-                    className={clsx("h-5 w-5 inline animate-spin mr-2")}
+                    className={clsx("mr-2 inline h-5 w-5 animate-spin")}
                   />
                   Exporting
                 </>

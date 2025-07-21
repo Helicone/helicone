@@ -57,7 +57,7 @@ const ENTERPRISE_TABS: {
     cta: (
       <Link
         href="/contact"
-        className="bg-violet-500 hover:bg-violet-600 ease-in-out duration-500 text-white border-2 border-violet-700 rounded-lg px-4 py-2 font-bold shadow-lg flex w-fit items-center gap-1"
+        className="flex w-fit items-center gap-1 rounded-lg border-2 border-violet-700 bg-violet-500 px-4 py-2 font-bold text-white shadow-lg duration-500 ease-in-out hover:bg-violet-600"
       >
         Schedule a Demo
       </Link>
@@ -88,7 +88,7 @@ const ENTERPRISE_TABS: {
     cta: (
       <Link
         href="/contact"
-        className="bg-violet-500 hover:bg-violet-600 ease-in-out duration-500 text-white border-2 border-violet-700 rounded-lg px-4 py-2 font-bold shadow-lg flex w-fit items-center gap-1"
+        className="flex w-fit items-center gap-1 rounded-lg border-2 border-violet-700 bg-violet-500 px-4 py-2 font-bold text-white shadow-lg duration-500 ease-in-out hover:bg-violet-600"
       >
         Schedule a Demo
       </Link>
@@ -119,7 +119,7 @@ const ENTERPRISE_TABS: {
     cta: (
       <Link
         href="/signup"
-        className="bg-violet-500 hover:bg-violet-600 ease-in-out duration-500 text-white border-2 border-violet-700 rounded-lg px-4 py-2 font-bold shadow-lg flex w-fit items-center gap-1"
+        className="flex w-fit items-center gap-1 rounded-lg border-2 border-violet-700 bg-violet-500 px-4 py-2 font-bold text-white shadow-lg duration-500 ease-in-out hover:bg-violet-600"
       >
         Get Started
       </Link>
@@ -137,7 +137,7 @@ const ENTERPRISE_TABS: {
     cta: (
       <Link
         href="/signup"
-        className="bg-violet-500 hover:bg-violet-600 ease-in-out duration-500 text-white border-2 border-violet-700 rounded-lg px-4 py-2 font-bold shadow-lg flex w-fit items-center gap-1"
+        className="flex w-fit items-center gap-1 rounded-lg border-2 border-violet-700 bg-violet-500 px-4 py-2 font-bold text-white shadow-lg duration-500 ease-in-out hover:bg-violet-600"
       >
         Get Started
       </Link>
@@ -155,20 +155,20 @@ const Enterprise = (props: EnterpriseProps) => {
   const currentTab = ENTERPRISE_TABS.find((tab) => tab.id === activeTab);
 
   return (
-    <div className="flex flex-col space-y-16 w-full">
-      <div className="flex items-start w-full">
-        <div className="flex flex-col space-y-4 w-full lg:w-2/3 text-center lg:text-left">
+    <div className="flex w-full flex-col space-y-16">
+      <div className="flex w-full items-start">
+        <div className="flex w-full flex-col space-y-4 text-center lg:w-2/3 lg:text-left">
           <p className="text-lg font-bold text-violet-700">Enterprise</p>
-          <h2 className="text-3xl sm:text-5xl font-bold sm:leading-[1.15]">
+          <h2 className="text-3xl font-bold sm:text-5xl sm:leading-[1.15]">
             Get to production-quality{" "}
             <span className="text-violet-800">faster</span>
           </h2>
-          <p className="text-md lg:text-lg text-gray-500 leading-7">
+          <p className="text-md leading-7 text-gray-500 lg:text-lg">
             Helicone makes it easy for companies to innovate faster and smarter,
             ensuring your team can stay ahead of the competition.
           </p>
         </div>
-        <div className="w-full h-full hidden lg:flex items-center justify-center py-12">
+        <div className="hidden h-full w-full items-center justify-center py-12 lg:flex">
           <Image
             src={"/assets/home/enterprise-graphic.png"}
             alt={"enterprise-graphic"}
@@ -177,19 +177,19 @@ const Enterprise = (props: EnterpriseProps) => {
           />
         </div>
       </div>
-      <ul className="w-full hidden lg:flex justify-between items-center gap-8">
-        <li className="flex items-center justify-center w-full">
+      <ul className="hidden w-full items-center justify-between gap-8 lg:flex">
+        <li className="flex w-full items-center justify-center">
           <button
             onClick={() => {
               // go the previous tab, skipping the evaluation tab, which is the last tab in the list
               const currentIndex = ENTERPRISE_TABS.findIndex(
-                (tab) => tab.id === activeTab
+                (tab) => tab.id === activeTab,
               );
               const previousTab = ENTERPRISE_TABS[currentIndex - 1];
               setActiveTab(
                 previousTab
                   ? previousTab.id
-                  : ENTERPRISE_TABS[ENTERPRISE_TABS.length - 2].id
+                  : ENTERPRISE_TABS[ENTERPRISE_TABS.length - 2].id,
               );
             }}
           >
@@ -197,7 +197,7 @@ const Enterprise = (props: EnterpriseProps) => {
           </button>
         </li>
         {ENTERPRISE_TABS.map((tab) => (
-          <li key={tab.id} className="w-full z-10 relative">
+          <li key={tab.id} className="relative z-10 w-full">
             <button
               onClick={() => setActiveTab(tab.id)}
               className={clsx(
@@ -207,7 +207,7 @@ const Enterprise = (props: EnterpriseProps) => {
                 tab.id === "evaluations"
                   ? "bg-gray-200 hover:cursor-not-allowed"
                   : "border-gray-300",
-                "w-48 h-40 justify-center text-md border-2 px-8 py-4 rounded-lg font-semibold flex flex-col items-center gap-2"
+                "text-md flex h-40 w-48 flex-col items-center justify-center gap-2 rounded-lg border-2 px-8 py-4 font-semibold",
               )}
               disabled={tab.id === "evaluations"}
             >
@@ -215,18 +215,18 @@ const Enterprise = (props: EnterpriseProps) => {
               {tab.name}
             </button>
             {tab.new && (
-              <div className="absolute -top-2 -right-4 bg-violet-800 text-white px-2 py-1 text-sm rounded-lg rotate-12">
+              <div className="absolute -right-4 -top-2 rotate-12 rounded-lg bg-violet-800 px-2 py-1 text-sm text-white">
                 Coming Soon
               </div>
             )}
           </li>
         ))}
-        <li className="flex items-center justify-center w-full">
+        <li className="flex w-full items-center justify-center">
           <button
             onClick={() => {
               // if the current tab is one before the evaluations tab, go to the first tab, otherwise go to the next tab
               const currentIndex = ENTERPRISE_TABS.findIndex(
-                (tab) => tab.id === activeTab
+                (tab) => tab.id === activeTab,
               );
               const nextTab = ENTERPRISE_TABS[currentIndex + 1];
               if (nextTab?.id === "evaluations") {
@@ -240,9 +240,9 @@ const Enterprise = (props: EnterpriseProps) => {
           </button>
         </li>
       </ul>
-      <div className="h-full w-full border border-gray-300 rounded-lg hidden lg:flex items-center justify-center">
-        <div className="w-full grid grid-cols-1 lg:grid-cols-2 h-full bg-sky-50 rounded-lg">
-          <div className="col-span-1 h-full w-full flex flex-col items-start p-8 text-left space-y-2">
+      <div className="hidden h-full w-full items-center justify-center rounded-lg border border-gray-300 lg:flex">
+        <div className="grid h-full w-full grid-cols-1 rounded-lg bg-sky-50 lg:grid-cols-2">
+          <div className="col-span-1 flex h-full w-full flex-col items-start space-y-2 p-8 text-left">
             <div className="flex items-center space-x-4">
               <Image
                 src={currentTab?.src || "/assets/home/enterprise-graphic.png"}
@@ -254,7 +254,7 @@ const Enterprise = (props: EnterpriseProps) => {
             </div>
 
             <p className="text-lg text-gray-500">{currentTab?.description}</p>
-            <ul className="pt-4 flex flex-col space-y-6">
+            <ul className="flex flex-col space-y-6 pt-4">
               {currentTab?.bullets?.map((bullet) => (
                 <li key={bullet.text} className="flex items-center space-x-2">
                   <bullet.icon className="h-6 w-6 text-violet-700" />
@@ -264,7 +264,7 @@ const Enterprise = (props: EnterpriseProps) => {
             </ul>
             <div className="pt-4">{currentTab?.cta}</div>
           </div>
-          <div className="col-span-1 h-full w-full rounded-lg p-4 flex justify-center items-center">
+          <div className="col-span-1 flex h-full w-full items-center justify-center rounded-lg p-4">
             <Image
               src={
                 currentTab?.graphic || "/assets/home/experiments-example.png"
@@ -277,15 +277,15 @@ const Enterprise = (props: EnterpriseProps) => {
           </div>
         </div>
       </div>
-      <ul className="flex flex-col lg:hidden space-y-8">
+      <ul className="flex flex-col space-y-8 lg:hidden">
         {ENTERPRISE_TABS.filter((tab) => tab.id !== "evaluations").map(
           (tab) => (
             <div
               key={tab.id}
-              className="h-full w-full border border-gray-300 rounded-lg flex items-center justify-center"
+              className="flex h-full w-full items-center justify-center rounded-lg border border-gray-300"
             >
-              <div className="w-full grid grid-cols-1 lg:grid-cols-2 h-full bg-sky-50 rounded-lg">
-                <div className="col-span-1 h-full w-full flex flex-col items-start p-8 text-left space-y-2">
+              <div className="grid h-full w-full grid-cols-1 rounded-lg bg-sky-50 lg:grid-cols-2">
+                <div className="col-span-1 flex h-full w-full flex-col items-start space-y-2 p-8 text-left">
                   <div className="flex items-center space-x-4">
                     <Image
                       src={tab?.src || "/assets/home/enterprise-graphic.png"}
@@ -297,14 +297,14 @@ const Enterprise = (props: EnterpriseProps) => {
                   </div>
 
                   <p className="text-sm text-gray-500">{tab?.description}</p>
-                  <ul className="pt-8 pb-4 flex flex-col space-y-6">
+                  <ul className="flex flex-col space-y-6 pb-4 pt-8">
                     {tab?.bullets?.map((bullet) => (
                       <li
                         key={bullet.text}
                         className="flex items-center space-x-2"
                       >
                         <bullet.icon className="h-6 w-6 text-violet-700" />
-                        <span className="font-semibold text-sm">
+                        <span className="text-sm font-semibold">
                           {bullet.text}
                         </span>
                       </li>
@@ -312,7 +312,7 @@ const Enterprise = (props: EnterpriseProps) => {
                   </ul>
                   <div className="pt-4">{tab?.cta}</div>
                 </div>
-                <div className="col-span-1 h-full w-full rounded-lg p-4 hidden lg:flex justify-center items-center">
+                <div className="col-span-1 hidden h-full w-full items-center justify-center rounded-lg p-4 lg:flex">
                   <Image
                     src={
                       currentTab?.graphic ||
@@ -326,7 +326,7 @@ const Enterprise = (props: EnterpriseProps) => {
                 </div>
               </div>
             </div>
-          )
+          ),
         )}
       </ul>
     </div>

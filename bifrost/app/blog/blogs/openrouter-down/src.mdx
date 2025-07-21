@@ -1,4 +1,3 @@
-
 ![What to Do When OpenRouter is Down?](/static/blog/openrouter-down/thumbnail.webp)
 
 When OpenRouter goes down, you loose control of your product's entire AI operation.
@@ -16,6 +15,7 @@ You no longer need to create your own custom routing logic just to run your AI g
 Fully open-source, customizable, and built for scale - you can self-host it on your own infrastructure or use our managed service.
 
 {/* <Button variant="primary" href="https://docs.helicone.ai/ai-gateway/quickstart">Get Started</Button> */}
+
 <CallToAction
   title="Get Started with the Helicone AI Gateway"
   description="Start routing your AI traffic to the fastest, cheapest, and most reliable providers through a unified interface."
@@ -27,21 +27,21 @@ Fully open-source, customizable, and built for scale - you can self-host it on y
 
 ## OpenRouter vs. Helicone AI Gateway
 
-| Feature | OpenRouter | Helicone AI Gateway |
-| --- | --- | --- |
-| **Hosting** | Cloud service | Self-hosted & cloud service |
-| **Pricing Model** | Pass-through credits system (5% fee) | Free to use, direct provider costs |
-| **Rate Limits** | Shared infrastructure limits| Based on your configuration & provider keys |
-| **Provider Fallback** | Preconfigured logic and model mappings | Always uptime aware, fully customizable routing strategies |
-| **Load Balancing** | Basic provider fallback | Advanced: uptime and rate-limit aware latency-based, weighted, custom, etc |
-| **Caching** | Available for certain providers | Built-in caching (in-memory, redis, etc) |
-| **Authentication** | You use OpenRouter keys or your own | Key management service for your API keys |
-| **Data Privacy** | Requests go through OpenRouter | Self-host option to manage data through your infrastructure |
-| **Deployment** | N/A (cloud service) | Docker, Kubernetes, Fly.io, cloud service, etc |
-| **Monitoring** | OpenRouter dashboard | OpenTelemetry, Helicone Observability, any monitoring stack |
-| **Cost Control** | Credit limits | Rate limiting per API key you define |
-| **Latency (including provider)** | ~70-150ms | ~10-30ms (less than 1ms overhead) |
-| **Vendor Lock-in** | High (API keys, billing, routing) | None (open source, portable) |
+| Feature                          | OpenRouter                             | Helicone AI Gateway                                                        |
+| -------------------------------- | -------------------------------------- | -------------------------------------------------------------------------- |
+| **Hosting**                      | Cloud service                          | Self-hosted & cloud service                                                |
+| **Pricing Model**                | Pass-through credits system (5% fee)   | Free to use, direct provider costs                                         |
+| **Rate Limits**                  | Shared infrastructure limits           | Based on your configuration & provider keys                                |
+| **Provider Fallback**            | Preconfigured logic and model mappings | Always uptime aware, fully customizable routing strategies                 |
+| **Load Balancing**               | Basic provider fallback                | Advanced: uptime and rate-limit aware latency-based, weighted, custom, etc |
+| **Caching**                      | Available for certain providers        | Built-in caching (in-memory, redis, etc)                                   |
+| **Authentication**               | You use OpenRouter keys or your own    | Key management service for your API keys                                   |
+| **Data Privacy**                 | Requests go through OpenRouter         | Self-host option to manage data through your infrastructure                |
+| **Deployment**                   | N/A (cloud service)                    | Docker, Kubernetes, Fly.io, cloud service, etc                             |
+| **Monitoring**                   | OpenRouter dashboard                   | OpenTelemetry, Helicone Observability, any monitoring stack                |
+| **Cost Control**                 | Credit limits                          | Rate limiting per API key you define                                       |
+| **Latency (including provider)** | ~70-150ms                              | ~10-30ms (less than 1ms overhead)                                          |
+| **Vendor Lock-in**               | High (API keys, billing, routing)      | None (open source, portable)                                               |
 
 ## How to Migrate from OpenRouter to Helicone AI Gateway
 
@@ -83,14 +83,14 @@ routers:
     # Always uptime & rate-limit aware, choose your prefered routing strategy
     load-balance:
       chat:
-        strategy: latency  # Automatically picks fastest provider. Could also be weighted, custom, etc.
+        strategy: latency # Automatically picks fastest provider. Could also be weighted, custom, etc.
         providers:
           - openai
           - anthropic
           - gemini
     # Optional: Add caching for cost savings
     cache:
-      directive: "max-age=3600"  # 1 hour cache
+      directive: "max-age=3600" # 1 hour cache
     # Optional: Add rate limiting for cost control
     rate-limit:
       per-api-key:
@@ -119,7 +119,6 @@ response = openai.chat.completions.create(
 ```
 
 ### Step 5: Test Your Migration
-
 
 ```bash
 curl -X POST http://localhost:8080/router/production/chat/completions \

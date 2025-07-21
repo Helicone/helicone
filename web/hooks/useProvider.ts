@@ -81,7 +81,7 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
     onError: (error: Error) => {
       setNotification(
         "Failed to save key: " + (error.message || "Unknown error"),
-        "error"
+        "error",
       );
     },
   });
@@ -124,13 +124,13 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
     onError: (error: Error) => {
       setNotification(
         "Failed to add key: " + (error.message || "Unknown error"),
-        "error"
+        "error",
       );
     },
   });
 
   const viewDecryptedProviderKey = async (
-    keyId: string
+    keyId: string,
   ): Promise<string | null> => {
     if (!orgId) return null;
 
@@ -144,7 +144,7 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
               providerKeyId: keyId,
             },
           },
-        }
+        },
       );
 
       if (response && "error" in response) {
@@ -171,7 +171,7 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
   const providerKeys = providerKeysData || [];
   const existingKey = providerId
     ? providerKeys.find(
-        (key: any) => key.provider_name === providerName && !key.soft_delete
+        (key: any) => key.provider_name === providerName && !key.soft_delete,
       )
     : undefined;
 

@@ -12,7 +12,7 @@ let isOnPrem = false;
 // Function to get or create the OpenAI client
 async function getOpenAIClient(
   orgId: string,
-  userEmail: string
+  userEmail: string,
 ): Promise<OpenAI> {
   // Return cached client if available
   if (openaiClient) {
@@ -32,7 +32,7 @@ async function getOpenAIClient(
      AND soft_delete = false
      AND provider_name = 'OpenRouter'
      LIMIT 1`,
-    [orgId]
+    [orgId],
   );
 
   // Create and cache the client
@@ -159,7 +159,7 @@ async function handler({ req, res, userData }: HandlerWrapperOptions<any>) {
       } as any,
       {
         signal: abortController.signal,
-      }
+      },
     );
 
     if (params.stream) {
@@ -217,7 +217,7 @@ async function handler({ req, res, userData }: HandlerWrapperOptions<any>) {
       // Check if both content and calls are missing
       // Consider if an empty response should be an error or just empty strings
       console.warn(
-        "[API] LLM call resulted in empty content and no tool calls."
+        "[API] LLM call resulted in empty content and no tool calls.",
       );
       // Returning empty object might be fine depending on requirements
       // throw new Error("Failed to generate response content or tool calls");

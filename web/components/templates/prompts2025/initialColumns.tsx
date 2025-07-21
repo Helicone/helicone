@@ -12,12 +12,13 @@ export const getInitialColumns = (): ColumnConfig<PromptWithVersions>[] => [
     sortable: true,
     minSize: 250,
     render: (item) => {
-      const displayName = item.prompt.name.length > 40 
-        ? item.prompt.name.substring(0, 37) + "..." 
-        : item.prompt.name;
-      
+      const displayName =
+        item.prompt.name.length > 40
+          ? item.prompt.name.substring(0, 37) + "..."
+          : item.prompt.name;
+
       return (
-        <span className="font-medium text-sm text-foreground">
+        <span className="text-sm font-medium text-foreground">
           {displayName}
         </span>
       );
@@ -33,7 +34,7 @@ export const getInitialColumns = (): ColumnConfig<PromptWithVersions>[] => [
         item.productionVersion.minor_version === 0
           ? `v${item.productionVersion.major_version}`
           : `v${item.productionVersion.major_version}.${item.productionVersion.minor_version}`;
-      
+
       return (
         <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20">
           {versionDisplay}
@@ -49,9 +50,7 @@ export const getInitialColumns = (): ColumnConfig<PromptWithVersions>[] => [
     render: (item) => (
       <div className="flex items-center gap-1">
         <GitBranch size={14} className="text-muted-foreground" />
-        <span className="text-sm text-foreground">
-          {item.totalVersions}
-        </span>
+        <span className="text-sm text-foreground">{item.totalVersions}</span>
       </div>
     ),
   },

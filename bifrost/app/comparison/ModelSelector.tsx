@@ -34,14 +34,14 @@ const ModelDropdown = ({
   onSelect,
   color,
 }: ModelDropdownProps) => (
-  <div className="flex-1 w-full">
-    <div className="h-9 justify-start items-center gap-3 inline-flex w-full">
+  <div className="w-full flex-1">
+    <div className="inline-flex h-9 w-full items-center justify-start gap-3">
       <Badge
         style={{
           backgroundColor: `${color}20`,
           color: color,
         }}
-        className="px-2 py-1 text-[14px] font-semibold font-['Inter'] leading-tight whitespace-nowrap hover:bg-opacity-20"
+        className="whitespace-nowrap px-2 py-1 font-['Inter'] text-[14px] font-semibold leading-tight hover:bg-opacity-20"
       >
         {label}
       </Badge>
@@ -49,12 +49,12 @@ const ModelDropdown = ({
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
-            className="h-9 px-3 py-2 rounded-md border border-slate-300 justify-between items-center truncate w-full"
+            className="h-9 w-full items-center justify-between truncate rounded-md border border-slate-300 px-3 py-2"
           >
-            <span className="text-slate-700 text-base font-semibold font-['Inter'] leading-tight truncate">
+            <span className="truncate font-['Inter'] text-base font-semibold leading-tight text-slate-700">
               {selectedModel || "Select a model"}
             </span>
-            <ChevronDownIcon className="w-4 h-4" />
+            <ChevronDownIcon className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
@@ -132,15 +132,15 @@ const ModelSelector = ({
   };
 
   return (
-    <div className="flex flex-col justify-center items-center mx-auto w-full md:flex-row gap-2">
+    <div className="mx-auto flex w-full flex-col items-center justify-center gap-2 md:flex-row">
       <ModelDropdown
         label="Model A"
         selectedModel={modelA}
         onSelect={handleModelASelect}
         color="#ef4544"
       />
-      <div className="flex justify-center items-center mx-4">
-        <span className="text-black text-base font-medium font-['Inter'] leading-tight">
+      <div className="mx-4 flex items-center justify-center">
+        <span className="font-['Inter'] text-base font-medium leading-tight text-black">
           vs.
         </span>
       </div>

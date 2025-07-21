@@ -21,7 +21,7 @@ const FeatureRow: React.FC<FeatureRowProps> = ({
   <>
     <Col
       className={clsx(
-        "p-[24px] gap-[12px]",
+        "gap-[12px] p-[24px]",
         title === "SOC-2 Type II Compliance" ||
           title === "Alerts (Slack + Email)"
           ? "rounded-bl-lg"
@@ -29,7 +29,7 @@ const FeatureRow: React.FC<FeatureRowProps> = ({
       )}
     >
       <Col className="gap-[4px]">
-        <h3 className="text-lg font-semibold gap-[12px] items-center">
+        <h3 className="items-center gap-[12px] text-lg font-semibold">
           {title}
         </h3>
         {title === "Requests" || title === "API access" ? ( // doing this check to avoid hydration errors (div inside p)
@@ -39,13 +39,13 @@ const FeatureRow: React.FC<FeatureRowProps> = ({
         )}
       </Col>
     </Col>
-    <div className="p-[24px] max-w-[360px] items-center justify-center flex flex-col gap-[4px]">
+    <div className="flex max-w-[360px] flex-col items-center justify-center gap-[4px] p-[24px]">
       {free}
     </div>
-    <div className="p-[24px] max-w-[360px] items-center justify-center flex flex-col gap-[4px] bg-[rgba(12,165,234,0.05)]">
+    <div className="flex max-w-[360px] flex-col items-center justify-center gap-[4px] bg-[rgba(12,165,234,0.05)] p-[24px]">
       {pro}
     </div>
-    <div className="p-[24px] max-w-[360px] items-center justify-center flex flex-col gap-[4px]">
+    <div className="flex max-w-[360px] flex-col items-center justify-center gap-[4px] p-[24px]">
       {enterprise}
     </div>
   </>
@@ -67,25 +67,25 @@ export default function PlansTable({
     collapsible && !showAll ? rows.slice(0, initialVisibleCount) : rows;
 
   return (
-    <div className="w-full pt-10 overflow-x-auto">
+    <div className="w-full overflow-x-auto pt-10">
       <div className="w-full overflow-visible">
         <div className="min-w-[800px] overflow-visible">
-          <div className="grid grid-cols-[2fr,1fr,1fr,1fr] divide-x divide-y divide-slate-200 border-b border-r rounded-lg overflow-visible text-slate-900 border-slate-200">
-            <div className="border-l border-t rounded-tl-lg bg-slate-50 border-slate-200"></div>
-            <div className="p-[24px] bg-slate-50 font-semibold text-xl text-center">
+          <div className="grid grid-cols-[2fr,1fr,1fr,1fr] divide-x divide-y divide-slate-200 overflow-visible rounded-lg border-b border-r border-slate-200 text-slate-900">
+            <div className="rounded-tl-lg border-l border-t border-slate-200 bg-slate-50"></div>
+            <div className="bg-slate-50 p-[24px] text-center text-xl font-semibold">
               Free
             </div>
-            <div className="relative p-[24px] bg-brand text-white font-semibold text-xl text-center overflow-visible border-brand">
+            <div className="bg-brand border-brand relative overflow-visible p-[24px] text-center text-xl font-semibold text-white">
               Pro
               {isMain && (
-                <Card className="absolute top-0 right-1/2 bg-[#F3FAFE] translate-x-1/2 -translate-y-[24px] rotate-[10.2deg] px-[12px] py-[6px] border-brand border-[2px] rounded-[4px] overflow-visible">
-                  <h3 className="text-[16px] font-semibold text-brand">
+                <Card className="border-brand absolute right-1/2 top-0 -translate-y-[24px] translate-x-1/2 rotate-[10.2deg] overflow-visible rounded-[4px] border-[2px] bg-[#F3FAFE] px-[12px] py-[6px]">
+                  <h3 className="text-brand text-[16px] font-semibold">
                     Recommended
                   </h3>
                 </Card>
               )}
             </div>
-            <div className="p-[24px] bg-slate-50 font-semibold text-xl text-center rounded-tr-lg">
+            <div className="rounded-tr-lg bg-slate-50 p-[24px] text-center text-xl font-semibold">
               Enterprise
             </div>
             {visibleRows.map((row) => (
@@ -95,9 +95,9 @@ export default function PlansTable({
           {collapsible && !showAll && (
             <>
               <div className="relative">
-                <div className="absolute bottom-[100%] left-0 right-0 h-[100px] bg-gradient-to-b from-transparent to-white pointer-events-none" />
+                <div className="pointer-events-none absolute bottom-[100%] left-0 right-0 h-[100px] bg-gradient-to-b from-transparent to-white" />
               </div>
-              <div className="flex justify-end mt-4">
+              <div className="mt-4 flex justify-end">
                 <button
                   onClick={() => setShowAll(true)}
                   className="text-brand hover:text-brand/80 font-medium"

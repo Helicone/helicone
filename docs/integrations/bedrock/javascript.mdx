@@ -27,16 +27,16 @@ import {
 
 const REGION = "ap-south-1"; // or any other region
 const client = new BedrockRuntimeClient({
-  region: REGION,
-  endpoint: `https://bedrock.helicone.ai/v1/${REGION}`,
+region: REGION,
+endpoint: `https://bedrock.helicone.ai/v1/${REGION}`,
 });
 
 // Add middleware to inject custom headers
 client.middlewareStack.add(
-  (next, context) => async (args: any) => {
-    if (!args.request.headers) {
-      args.request.headers = {};
-    }
+(next, context) => async (args: any) => {
+if (!args.request.headers) {
+args.request.headers = {};
+}
 
     // Add your custom headers here
     args.request.headers["Helicone-Auth"] = `Bearer ${process.env.HELICONE_API_KEY}`;
@@ -46,11 +46,12 @@ client.middlewareStack.add(
     args.request.headers["aws-session-token"] = "<AWS SESSION TOKEN>";
 
     return next(args);
-  },
-  {
-    step: "build",
-    name: "addCustomHeaders",
-  }
+
+},
+{
+step: "build",
+name: "addCustomHeaders",
+}
 );
 
 const model_id = "meta.llama3-8b-instruct-v1:0";
@@ -68,12 +69,13 @@ export const main = async () => {
     contentType: "application/json",
   });
 
-  const response = await client.send(command);
-  console.log(response.body?.transformToString());
+const response = await client.send(command);
+console.log(response.body?.transformToString());
 };
 
 main();
-```
+
+````
 
   </Step>
 </Steps>
@@ -213,7 +215,7 @@ async function sendRequest() {
 }
 
 sendRequest();
-```
+````
 
 This integration allows you to use AWS Bedrock with Helicone's async logging. The Helicone logger will automatically capture traces of your AWS Bedrock API calls, providing you with valuable insights and analytics through the Helicone dashboard.
 

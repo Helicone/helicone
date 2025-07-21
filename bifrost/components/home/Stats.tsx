@@ -56,16 +56,16 @@ const Stats = ({
       <div
         className={cn(
           ISLAND_WIDTH,
-          "flex justify-between items-start pt-0 pb-32"
+          "flex items-start justify-between pb-32 pt-0"
         )}
       >
-        <h1 className="gap-y-4 text-3xl md:text-6xl font-semibold !leading-[150%] text-black max-w-[1100px] text-wrap">
+        <h1 className="max-w-[1100px] gap-y-4 text-wrap text-3xl font-semibold !leading-[150%] text-black md:text-6xl">
           Today,{" "}
           <span
             ref={elementRef}
             className={cn(
-              "inline-block bg-[#E7F6FD] border-[3px] border-brand rounded-xl py-1 px-5 text-brand translate-y-[-10px] transition-transform duration-500 text-nowrap",
-              isVisible ? "rotate-[-3deg]" : "rotate-[0  deg]"
+              "border-brand text-brand inline-block translate-y-[-10px] text-nowrap rounded-xl border-[3px] bg-[#E7F6FD] px-5 py-1 transition-transform duration-500",
+              isVisible ? "rotate-[-3deg]" : "rotate-[0 deg]"
             )}
           >
             {humanReadableNumber(totalValuesData?.total_requests ?? 0)}
@@ -77,12 +77,16 @@ const Stats = ({
           tokens logged and <span className="text-brand">18.3 million</span>{" "}
           users tracked
         </h1>
-        <div className="flex gap-2 items-center md:gap-4">
-          <Link href="https://us.helicone.ai/open-stats" target="_blank" rel="noopener">
+        <div className="flex items-center gap-2 md:gap-4">
+          <Link
+            href="https://us.helicone.ai/open-stats"
+            target="_blank"
+            rel="noopener"
+          >
             <Button
               variant="ghost"
               size="landing_page"
-              className="hover:bg-brand hover:border-brand hover:text-white p-5 text-base md:text-2xl md:py-4 lg:py-6 lg:px-6 lg:text-md gap-2 rounded-lg items-center z-[10]"
+              className="hover:bg-brand hover:border-brand lg:text-md z-[10] items-center gap-2 rounded-lg p-5 text-base hover:text-white md:py-4 md:text-2xl lg:px-6 lg:py-6"
             >
               Live
               <ArrowUpRight className="size-5 md:size-6" />

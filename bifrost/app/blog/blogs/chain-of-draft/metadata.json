@@ -1,4 +1,4 @@
-{ 
+{
   "title": "Chain-of-Draft Prompting: A More Efficient Alternative to Chain of Thought",
   "title1": "Chain-of-Draft Prompting: A More Efficient Alternative to Chain of Thought",
   "title2": "Chain-of-Draft Prompting: A More Efficient Alternative to Chain of Thought",
@@ -6,6 +6,6 @@
   "images": "/static/blog/chain-of-draft/chain-of-draft-cover.webp",
   "time": "6 minute read",
   "author": "Yusuf Ishola",
-  "date": "March 5, 2025", 
+  "date": "March 5, 2025",
   "badge": "Prompt Engineering"
 }

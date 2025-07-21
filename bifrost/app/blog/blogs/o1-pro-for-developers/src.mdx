@@ -1,4 +1,4 @@
-OpenAI has just released its **o1-Pro** model to its API, bringing its most powerful reasoning model to developers. Previously only available to ChatGPT Pro subscribers, this model comes with remarkable capabilities—and a price tag to match. 
+OpenAI has just released its **o1-Pro** model to its API, bringing its most powerful reasoning model to developers. Previously only available to ChatGPT Pro subscribers, this model comes with remarkable capabilities—and a price tag to match.
 
 At $150 per million input tokens and $600 per million output tokens, it's now officially OpenAI's **most expensive model**, eclipsing GPT-4.5 by a factor of 2x for input and 4x for output costs.
 
@@ -10,21 +10,21 @@ But is it worth the premium? Let's examine what this model offers, how it perfor
 
 ## What's New in o1-Pro: The Quick Rundown
 
-| **Feature** | **Details** |
-| ----------- | ----------- |
-| **Advanced Reasoning** | Uses more compute than standard o1 for "thinking harder" on complex problems |
-| **Pricing** | $150/million input tokens <br /> $600/million output tokens <br /> (10x more expensive than regular o1) |
-| **Context Window** | 200,000 tokens (same as o1) |
-| **Output Limit** | 100,000 tokens maximum per completion |
-| **Knowledge Cutoff** | October 2023 (same as other recent OpenAI models) |
-| **API Access** | Only available through the new Responses API (not Chat Completions) |
-| **Function Calling** | Supported, alongside structured outputs |
-| **Image Input** | Can process images as input, but output is text-only |
-| **Streaming** | Not supported—another first for an OpenAI model |
+| **Feature**            | **Details**                                                                                             |
+| ---------------------- | ------------------------------------------------------------------------------------------------------- |
+| **Advanced Reasoning** | Uses more compute than standard o1 for "thinking harder" on complex problems                            |
+| **Pricing**            | $150/million input tokens <br /> $600/million output tokens <br /> (10x more expensive than regular o1) |
+| **Context Window**     | 200,000 tokens (same as o1)                                                                             |
+| **Output Limit**       | 100,000 tokens maximum per completion                                                                   |
+| **Knowledge Cutoff**   | October 2023 (same as other recent OpenAI models)                                                       |
+| **API Access**         | Only available through the new Responses API (not Chat Completions)                                     |
+| **Function Calling**   | Supported, alongside structured outputs                                                                 |
+| **Image Input**        | Can process images as input, but output is text-only                                                    |
+| **Streaming**          | Not supported—another first for an OpenAI model                                                         |
 
-## o1-Pro's Technical Capabilities 
+## o1-Pro's Technical Capabilities
 
-o1-Pro is OpenAI's next step in reasoning models. Unlike standard o1, which already excels at mathematical and logical reasoning, o1-Pro allocates additional computational resources to the reasoning process. 
+o1-Pro is OpenAI's next step in reasoning models. Unlike standard o1, which already excels at mathematical and logical reasoning, o1-Pro allocates additional computational resources to the reasoning process.
 
 This means it "thinks harder" about problems, potentially leading to more reliable solutions for complex tasks.
 
@@ -39,8 +39,9 @@ This means it "thinks harder" about problems, potentially leading to more reliab
 // Using the newer Responses API required for o1-Pro
 const response = await openai.responses.create({
   model: "o1-pro",
-  input: "Explain the implications of Gödel's Incompleteness Theorems for modern mathematics.",
-  reasoning: { effort: "high" } // Optional parameter for o1-pro
+  input:
+    "Explain the implications of Gödel's Incompleteness Theorems for modern mathematics.",
+  reasoning: { effort: "high" }, // Optional parameter for o1-pro
 });
 
 console.log(response.content);
@@ -60,18 +61,19 @@ The `reasoning` parameter with `effort` set to "high" instructs the model to all
 from openai import OpenAI
 
 client = OpenAI(
-    api_key="your-api-key",
-    base_url="https://oai.helicone.ai/v1",
-    default_headers= {
-      "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
-    }
+api_key="your-api-key",
+base_url="https://oai.helicone.ai/v1",
+default_headers= {
+"Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+}
 )
 
 response = client.responses.create(
-    model="o1-pro",
-    input="Explain the implications of Gödel's Incompleteness Theorems for modern mathematics."
+model="o1-pro",
+input="Explain the implications of Gödel's Incompleteness Theorems for modern mathematics."
 )
 print(response.content)
+
 ```
 </CallToAction>
 
@@ -87,7 +89,7 @@ o1-Pro's pricing makes it OpenAI's most expensive model by a significant margin:
 | o3-mini | $1.10/1M tokens | $4.40/1M tokens |
 | gpt-4o | $5.00/1M tokens | $15.00/1M tokens |
 
-## OpenAI o1-Pro Benchmarks and Real-World Performance  
+## OpenAI o1-Pro Benchmarks and Real-World Performance
 
 o1-Pro's real-world performance has been met with mixed reviews. For some tasks, it shows remarkable capabilities that justify its premium pricing:
 
@@ -134,7 +136,7 @@ For general purposes, models like GPT-4o or o3-mini likely provide better value.
 - <a href="https://www.helicone.ai/blog/claude-3.5-sonnet-vs-openai-o1" target="_blank" rel="noopener">Claude 3.5 Sonnet vs OpenAI o1: A Comprehensive Comparison</a>
 - <a href="https://www.helicone.ai/blog/openai-o3" target="_blank" rel="noopener">OpenAI o3 Released: Benchmarks and Comparison to o1</a>
 
-<FAQ 
+<FAQ
   items={[
     {
       question: "How does o1-Pro differ from standard o1?",
@@ -159,8 +161,9 @@ For general purposes, models like GPT-4o or o3-mini likely provide better value.
 
 o1-Pro represents a significant advancement in OpenAI's reasoning capabilities, but its pricing puts it firmly in the "specialty tool" category rather than an everyday solution. For developers working on highly complex problems where accuracy and reliability are paramount, o1-Pro may be worth the premium cost.
 
-For most applications, however, models like o3-mini offer a more economical choice with comparable performance on many tasks. 
+For most applications, however, models like o3-mini offer a more economical choice with comparable performance on many tasks.
 
-The release of o1-Pro to the API also signals OpenAI's continued push toward specialized models optimized for specific types of tasks, rather than a one-size-fits-all approach. 
+The release of o1-Pro to the API also signals OpenAI's continued push toward specialized models optimized for specific types of tasks, rather than a one-size-fits-all approach.
 
 <Questions />
+```

@@ -30,11 +30,11 @@ export interface FilterState {
   setFilter: (filter: FilterExpression | null) => void;
   updateFilterExpression: (
     path: number[],
-    expression: FilterExpression
+    expression: FilterExpression,
   ) => void;
   addFilterExpression: (
     parentPath: number[],
-    expression: FilterExpression
+    expression: FilterExpression,
   ) => void;
   removeFilterExpression: (path: number[]) => void;
   setInitialFilterId: (id: string | null) => void;
@@ -293,6 +293,6 @@ export const useFilterStore = create<FilterState>()(
         activeFilterName: state.activeFilterName,
         hasUnsavedChanges: state.hasUnsavedChanges,
       }),
-    }
-  )
+    },
+  ),
 );

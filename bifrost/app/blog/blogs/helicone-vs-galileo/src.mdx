@@ -1,6 +1,10 @@
-As Large Language Models (LLMs) become central to more applications, developers need robust tools to monitor performance, debug issues, and optimize costs. 
+As Large Language Models (LLMs) become central to more applications, developers need robust tools to monitor performance, debug issues, and optimize costs.
 
-<a href="https://www.helicone.ai" target="_blank" rel="noopener">Helicone</a> and **Galileo** are two leading platforms in the LLM observability space, each bringing unique strengths to the table.
+<a href="https://www.helicone.ai" target="_blank" rel="noopener">
+  Helicone
+</a>
+and **Galileo** are two leading platforms in the LLM observability space, each
+bringing unique strengths to the table.
 
 ![Helicone vs Galileo](/static/blog/helicone-vs-galileo/helicone-vs-galileo.webp)
 
@@ -8,14 +12,14 @@ In this comparison, we'll analyze their features, integration methods, and best 
 
 ## At a Glance: Helicone vs. Galileo
 
-| **Criteria**            | **Helicone**                                                                                                                | **Galileo**                                                                                                              |
-| ----------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| **Best For**            | Any team size (startups to enterprises) needing robust monitoring and optimization tools                                                                                     | Enterprise teams focused on evaluation                                                                                   |
-| **Pricing**             | Generous <a href="https://www.helicone.ai/pricing" target="_blank" rel="noopener">free tier</a> with 10k free requests/month. Pro, Team, and Enterprise pricing—starts at `$20/seat/month`                                                                    | Limited free tier with 5,000 traces/month. Enterprise pricing (custom)                                                           |
-| **Integration**         | One-line proxy or async SDK integration                                                                                     | SDK-based integration with code instrumentation                                                                          |
-| **Architecture**        | Distributed (Cloudflare Workers, ClickHouse, Kafka)                                                                         | Proprietary backend with on-prem option for enterprise                                                                   |
-| **Strengths**           | Comprehensive logging, high reliability, scalability, data aggregation                                                      | Advanced evaluations, guardrails, quality metrics                                                                        |
-| **Drawback**            | Less focus on evaluation capabilities (though integrates with third-party evaluators)                                       | Enterprise-focused pricing, closed-source ecosystem                                                                      |
+| **Criteria**     | **Helicone**                                                                                                                                                                               | **Galileo**                                                            |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| **Best For**     | Any team size (startups to enterprises) needing robust monitoring and optimization tools                                                                                                   | Enterprise teams focused on evaluation                                 |
+| **Pricing**      | Generous <a href="https://www.helicone.ai/pricing" target="_blank" rel="noopener">free tier</a> with 10k free requests/month. Pro, Team, and Enterprise pricing—starts at `$20/seat/month` | Limited free tier with 5,000 traces/month. Enterprise pricing (custom) |
+| **Integration**  | One-line proxy or async SDK integration                                                                                                                                                    | SDK-based integration with code instrumentation                        |
+| **Architecture** | Distributed (Cloudflare Workers, ClickHouse, Kafka)                                                                                                                                        | Proprietary backend with on-prem option for enterprise                 |
+| **Strengths**    | Comprehensive logging, high reliability, scalability, data aggregation                                                                                                                     | Advanced evaluations, guardrails, quality metrics                      |
+| **Drawback**     | Less focus on evaluation capabilities (though integrates with third-party evaluators)                                                                                                      | Enterprise-focused pricing, closed-source ecosystem                    |
 
 ## How is Helicone different?
 
@@ -36,7 +40,7 @@ This flexibility makes Helicone adaptable to various architectural needs. Galile
 
 ### 3. Helicone has a friendlier pricing model
 
-Helicone offers a generous <a href="https://www.helicone.ai/pricing" target="_blank" rel="noopener">free tier</a> with 10k free requests/month. This allows you to get started with Helicone without any upfront costs. 
+Helicone offers a generous <a href="https://www.helicone.ai/pricing" target="_blank" rel="noopener">free tier</a> with 10k free requests/month. This allows you to get started with Helicone without any upfront costs.
 
 Helicone also offers Pro, Team, and Enterprise tiers with transparent pricing, catering to businesses of all sizes.
 
@@ -51,39 +55,39 @@ Galileo offers a limited free tier with 5,000 traces/month and jumps to Enterpri
 
 ### Platform
 
-| Feature | Helicone | Galileo |
-| ------- | -------- | ------- |
-| **Open-source** | ✅ | ❌ (Proprietary) |
-| **Self-hosting** | ✅ | ✅ (Enterprise only) |
-| **Free tier** | ✅ 10,000 logs/month | ✅  5,000 traces/month |
-| **Integration methods** | ✅ Proxy or async SDK | 🟠 SDK only |
-| **Seat-based pricing** | Starting at `$20/seat/month` | Enterprise custom pricing |
-| **Pricing tiers** | Free, Pro, Teams, Enterprise | Free (limited), Enterprise |
-| **Multi-modal support** <br/>Support for text and images | ✅ Text and image | 🟠 Text-focused |
-| **Integration support** <br/>Compatible LLM providers | ✅ All major LLM providers and frameworks | ✅ Major LLMs and LangChain |
+| Feature                                                  | Helicone                                  | Galileo                     |
+| -------------------------------------------------------- | ----------------------------------------- | --------------------------- |
+| **Open-source**                                          | ✅                                        | ❌ (Proprietary)            |
+| **Self-hosting**                                         | ✅                                        | ✅ (Enterprise only)        |
+| **Free tier**                                            | ✅ 10,000 logs/month                      | ✅ 5,000 traces/month       |
+| **Integration methods**                                  | ✅ Proxy or async SDK                     | 🟠 SDK only                 |
+| **Seat-based pricing**                                   | Starting at `$20/seat/month`              | Enterprise custom pricing   |
+| **Pricing tiers**                                        | Free, Pro, Teams, Enterprise              | Free (limited), Enterprise  |
+| **Multi-modal support** <br/>Support for text and images | ✅ Text and image                         | 🟠 Text-focused             |
+| **Integration support** <br/>Compatible LLM providers    | ✅ All major LLM providers and frameworks | ✅ Major LLMs and LangChain |
 
 ### LLM Evaluation & Monitoring
 
-| Feature | Helicone | Galileo |
-| ------- | -------- | ------- |
-| **Dashboard visualization** | ✅ | ✅ |
-| **Prompt management** <br/>Version and test your prompts | ✅ | ✅ |
-| **Experimentation** <br/>Test prompt variations | ✅ | ✅ |
-| **Caching** <br/>Built-in to reduce costs with response caching | ✅ | ❌ |
-| **Rate limiting** <br/>Protect against excessive usage | ✅ | ✅ <br/>(Available in Enterprise) |
-| **Agent tracing** <br/>Track multi-step workflows | ✅ <br/>Sessions feature | ✅ <br/>Agentic evaluations |
-| **Cost analysis** <br/>Track and optimize LLM spend | ✅ <br/>Comprehensive | 🟠 <br/>Basic |
-| **LLM Evaluation** <br/>Evaluate response quality | ✅ Built-in, can be enhanced via integrations (LastMile, Ragas) | ✅ Built-in guardrails |
-| **Security features** <br/>Protect against attacks | ✅ Key vault, prompt injection protection | ✅ Protect module |
+| Feature                                                         | Helicone                                                        | Galileo                           |
+| --------------------------------------------------------------- | --------------------------------------------------------------- | --------------------------------- |
+| **Dashboard visualization**                                     | ✅                                                              | ✅                                |
+| **Prompt management** <br/>Version and test your prompts        | ✅                                                              | ✅                                |
+| **Experimentation** <br/>Test prompt variations                 | ✅                                                              | ✅                                |
+| **Caching** <br/>Built-in to reduce costs with response caching | ✅                                                              | ❌                                |
+| **Rate limiting** <br/>Protect against excessive usage          | ✅                                                              | ✅ <br/>(Available in Enterprise) |
+| **Agent tracing** <br/>Track multi-step workflows               | ✅ <br/>Sessions feature                                        | ✅ <br/>Agentic evaluations       |
+| **Cost analysis** <br/>Track and optimize LLM spend             | ✅ <br/>Comprehensive                                           | 🟠 <br/>Basic                     |
+| **LLM Evaluation** <br/>Evaluate response quality               | ✅ Built-in, can be enhanced via integrations (LastMile, Ragas) | ✅ Built-in guardrails            |
+| **Security features** <br/>Protect against attacks              | ✅ Key vault, prompt injection protection                       | ✅ Protect module                 |
 
 ### Security, Compliance, Privacy
 
-| Feature | Helicone | Galileo |
-| ------- | -------- | ------- |
-| **Data retention** | 1 month (Free)<br/>3 months (Pro/Team)<br/>Forever (Enterprise) | - |
-| **HIPAA-compliant** | ✅ | ❌ |
-| **GDPR-compliant** | ✅ | ❌ |
-| **SOC I & II** | ✅ | ✅ |
+| Feature             | Helicone                                                        | Galileo |
+| ------------------- | --------------------------------------------------------------- | ------- |
+| **Data retention**  | 1 month (Free)<br/>3 months (Pro/Team)<br/>Forever (Enterprise) | -       |
+| **HIPAA-compliant** | ✅                                                              | ❌      |
+| **GDPR-compliant**  | ✅                                                              | ❌      |
+| **SOC I & II**      | ✅                                                              | ✅      |
 
 ## Helicone: Observability for the Complete LLM Lifecycle
 
@@ -91,19 +95,61 @@ Galileo offers a limited free tier with 5,000 traces/month and jumps to Enterpri
 
 ![Helicone AI - LLM Observability for Developers](/static/blog/helicone-vs-galileo/helicone-ai.webp)
 
-Helicone is an open-source observability platform built for developers who need to monitor, debug, and optimize their LLM applications. 
+Helicone is an open-source observability platform built for developers who need to monitor, debug, and optimize their LLM applications.
 
 It provides comprehensive logging, cost tracking, and debugging tools like Sessions. Developers choose Helicone because of its rich analytics and easy integration.
 
 ### Key Features
 
 - **1-Line Integration**: Get started in minutes with proxy-based integration or async logging
-- <a href="https://docs.helicone.ai/features/sessions" target="_blank" rel="noopener">Sessions</a>: Track multi-step LLM workflows and conversation flows with detailed tracing
-- <a href="https://docs.helicone.ai/getting-started/integration-method/gateway" target="_blank" rel="noopener">Routing/Gateway</a>: Connect multiple LLM providers and serve as a fallback in case of failure
-- <a href="https://docs.helicone.ai/features/advanced-usage/caching" target="_blank" rel="noopener">Response Caching</a>: Reduce costs and latency with built-in caching
-- <a href="https://docs.helicone.ai/features/prompts/editor" target="_blank" rel="noopener">Prompt Management</a>: Version, test, and optimize prompts with A/B testing
-- <a href="https://docs.helicone.ai/features/dashboard" target="_blank" rel="noopener">Comprehensive Analytics</a>: Track costs, latency, usage patterns, and more
-- <a href="https://docs.helicone.ai/features/webhooks" target="_blank" rel="noopener">Webhooks</a>: Create automations and alerts based on LLM activity
+- <a
+    href="https://docs.helicone.ai/features/sessions"
+    target="_blank"
+    rel="noopener"
+  >
+    Sessions
+  </a>
+  : Track multi-step LLM workflows and conversation flows with detailed tracing
+- <a
+    href="https://docs.helicone.ai/getting-started/integration-method/gateway"
+    target="_blank"
+    rel="noopener"
+  >
+    Routing/Gateway
+  </a>
+  : Connect multiple LLM providers and serve as a fallback in case of failure
+- <a
+    href="https://docs.helicone.ai/features/advanced-usage/caching"
+    target="_blank"
+    rel="noopener"
+  >
+    Response Caching
+  </a>
+  : Reduce costs and latency with built-in caching
+- <a
+    href="https://docs.helicone.ai/features/prompts/editor"
+    target="_blank"
+    rel="noopener"
+  >
+    Prompt Management
+  </a>
+  : Version, test, and optimize prompts with A/B testing
+- <a
+    href="https://docs.helicone.ai/features/dashboard"
+    target="_blank"
+    rel="noopener"
+  >
+    Comprehensive Analytics
+  </a>
+  : Track costs, latency, usage patterns, and more
+- <a
+    href="https://docs.helicone.ai/features/webhooks"
+    target="_blank"
+    rel="noopener"
+  >
+    Webhooks
+  </a>
+  : Create automations and alerts based on LLM activity
 
 ### Why Developers Choose Helicone
 
@@ -143,7 +189,7 @@ For other providers, check out the <a href="https://docs.helicone.ai/getting-sta
 
 ![Galileo Dashboard - Advanced evaluation metrics and guardrails](/static/blog/helicone-vs-galileo/galileo-ai.webp)
 
-Galileo AI is an "Evaluation Intelligence Platform" designed to help teams evaluate, iterate, monitor, and protect generative AI applications. 
+Galileo AI is an "Evaluation Intelligence Platform" designed to help teams evaluate, iterate, monitor, and protect generative AI applications.
 
 It focuses on ensuring quality outputs and providing guard rails for production LLM deployments.
 
@@ -168,20 +214,20 @@ Galileo integration typically uses their SDK:
 ```typescript
 import { OpenAI } from "openai";
 import { init, flush, wrapOpenAI } from "galileo";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 dotenv.config();
 
 // Initialize Galileo
 init({
   projectName: "my-project",
-  logStreamName: "development"
+  logStreamName: "development",
 });
 
 const openai = wrapOpenAI(new OpenAI({ apiKey: process.env.OPENAI_API_KEY }));
 const prompt = "Explain the following topic succinctly: Newton's First Law";
 await openai.chat.completions.create({
- model: "gpt-4o",
- messages: [{ content: prompt, role: "user" }],
+  model: "gpt-4o",
+  messages: [{ content: prompt, role: "user" }],
 });
 
 // Flush logs before exiting
@@ -192,7 +238,7 @@ await flush();
 
 Choosing the right observability tool depends on more than just features—the dashboard experience significantly impacts your team's ability to extract insights and take action.
 
-Here's a quick comparison of the two platforms: 
+Here's a quick comparison of the two platforms:
 
 ### Helicone Dashboard
 
@@ -207,7 +253,7 @@ Helicone's dashboard highlights the most important operational metrics and is de
 
 Developers choose Helicone because its UI is user-friendly for both technical and non-technical teams.
 
-### Galileo Dashboard 
+### Galileo Dashboard
 
 ![Galileo Dashboard Interface](/static/blog/helicone-vs-galileo/galileo-evaluate.webp)
 
@@ -221,16 +267,16 @@ Galileo's dashboard focuses on evaluation metrics and quality assessment:
 
 Galileo's UI is tailored for ML engineers and data scientists who need deep insights into model behavior and output quality.
 
-{/* ## How Helicone and Galileo Compare
+{/\* ## How Helicone and Galileo Compare
 
-| Feature | Helicone | Galileo |
-| ------- | -------- | ------- |
-| **Integration ease** | ⭐️ One-line change via proxy or async SDK | Requires SDK integration throughout codebase |
-| **Dashboard focus** | ⭐️ Operational metrics (costs, latency, usage) | Output quality metrics (correctness, adherence, etc.) |
-| **Evaluation approach** | Some built-in support with robust external integrations support | ⭐️ Built-in guardrail metrics |
-| **Pricing model** | ⭐️ Transparent with self-serve options | Enterprise-focused with custom pricing |
-| **Community** | ⭐️ Active open-source community | Closed ecosystem |
-| **Self-hosting** | ⭐️ Free, full-featured self-hosting | Enterprise-only on-prem option | */}
+| Feature                 | Helicone                                                        | Galileo                                               |
+| ----------------------- | --------------------------------------------------------------- | ----------------------------------------------------- | ---- |
+| **Integration ease**    | ⭐️ One-line change via proxy or async SDK                      | Requires SDK integration throughout codebase          |
+| **Dashboard focus**     | ⭐️ Operational metrics (costs, latency, usage)                 | Output quality metrics (correctness, adherence, etc.) |
+| **Evaluation approach** | Some built-in support with robust external integrations support | ⭐️ Built-in guardrail metrics                        |
+| **Pricing model**       | ⭐️ Transparent with self-serve options                         | Enterprise-focused with custom pricing                |
+| **Community**           | ⭐️ Active open-source community                                | Closed ecosystem                                      |
+| **Self-hosting**        | ⭐️ Free, full-featured self-hosting                            | Enterprise-only on-prem option                        | \*/} |
 
 ## Which platform should you choose?
 
@@ -255,39 +301,66 @@ Both platforms offer free tiers. We recommend testing them yourself before makin
 
 ### You might also like:
 
-- <a href="https://www.helicone.ai/blog/best-langfuse-alternatives" rel="noopener" target="_blank">Helicone vs. Langfuse: Comparing LLM Observability Tools</a>
-- <a href="https://www.helicone.ai/blog/langsmith-vs-helicone" rel="noopener" target="_blank">Comparing Helicone vs. LangSmith</a>
-- <a href="https://www.helicone.ai/blog/best-arize-alternatives" rel="noopener" target="_blank">Helicone vs. Arize Phoenix: Which is Better?</a>
+- <a
+    href="https://www.helicone.ai/blog/best-langfuse-alternatives"
+    rel="noopener"
+    target="_blank"
+  >
+    Helicone vs. Langfuse: Comparing LLM Observability Tools
+  </a>
+- <a
+    href="https://www.helicone.ai/blog/langsmith-vs-helicone"
+    rel="noopener"
+    target="_blank"
+  >
+    Comparing Helicone vs. LangSmith
+  </a>
+- <a
+    href="https://www.helicone.ai/blog/best-arize-alternatives"
+    rel="noopener"
+    target="_blank"
+  >
+    Helicone vs. Arize Phoenix: Which is Better?
+  </a>
 
-<FAQ items={[
-  {
-    question: "What is the main difference between Helicone and Galileo?",
-    answer: "Helicone is an open-source observability platform focused on comprehensive monitoring and optimization of LLM applications, with emphasis on operational metrics and developer experience. Galileo is a proprietary evaluation platform that specializes in quality metrics and guardrails for ensuring output correctness and safety."
-  },
-  {
-    question: "Which platform is better for startups?",
-    answer: "Helicone is generally better for startups due to its transparent pricing, free self-hosting option, and easier integration. Galileo targets enterprise customers with custom pricing models and more specialized evaluation features."
-  },
-  {
-    question: "Can I use both platforms together?",
-    answer: "Yes, since they have different focuses, Helicone is for operational monitoring, cost tracking, and routing, and Galileo is for deep evaluation of output quality where needed."
-  },
-  {
-    question: "Which has better cost tracking?",
-    answer: "Helicone provides more comprehensive cost analytics, including breakdowns by model, feature, user, and more. Its built-in caching feature also helps reduce costs directly."
-  },
-  {
-    question: "Does either platform support multi-modal models?",
-    answer: "Helicone supports both text and image inputs/outputs, providing monitoring for multi-modal interactions. Galileo primarily focuses on text-based LLM outputs."
-  },
-  {
-    question: "Which platform is better for security and compliance?",
-    answer: "Helicone is SOC 2, HIPAA, and GDPR compliant. Galileo is also SOC 2 compliant. Helicone offers self-hosting for complete data control, while Galileo offers enterprise-grade on-premises deployment with professional setup support."
-  },
-  {
-    question: "How do they handle agent workflows?",
-    answer: "Helicone uses its Sessions feature to trace multi-turn and agent-based interactions. Galileo offers specialized Agentic Evaluations that measure tool selection quality and individual steps in an agent workflow."
-  }
-]} />
+<FAQ
+  items={[
+    {
+      question: "What is the main difference between Helicone and Galileo?",
+      answer:
+        "Helicone is an open-source observability platform focused on comprehensive monitoring and optimization of LLM applications, with emphasis on operational metrics and developer experience. Galileo is a proprietary evaluation platform that specializes in quality metrics and guardrails for ensuring output correctness and safety.",
+    },
+    {
+      question: "Which platform is better for startups?",
+      answer:
+        "Helicone is generally better for startups due to its transparent pricing, free self-hosting option, and easier integration. Galileo targets enterprise customers with custom pricing models and more specialized evaluation features.",
+    },
+    {
+      question: "Can I use both platforms together?",
+      answer:
+        "Yes, since they have different focuses, Helicone is for operational monitoring, cost tracking, and routing, and Galileo is for deep evaluation of output quality where needed.",
+    },
+    {
+      question: "Which has better cost tracking?",
+      answer:
+        "Helicone provides more comprehensive cost analytics, including breakdowns by model, feature, user, and more. Its built-in caching feature also helps reduce costs directly.",
+    },
+    {
+      question: "Does either platform support multi-modal models?",
+      answer:
+        "Helicone supports both text and image inputs/outputs, providing monitoring for multi-modal interactions. Galileo primarily focuses on text-based LLM outputs.",
+    },
+    {
+      question: "Which platform is better for security and compliance?",
+      answer:
+        "Helicone is SOC 2, HIPAA, and GDPR compliant. Galileo is also SOC 2 compliant. Helicone offers self-hosting for complete data control, while Galileo offers enterprise-grade on-premises deployment with professional setup support.",
+    },
+    {
+      question: "How do they handle agent workflows?",
+      answer:
+        "Helicone uses its Sessions feature to trace multi-turn and agent-based interactions. Galileo offers specialized Agentic Evaluations that measure tool selection quality and individual steps in an agent workflow.",
+    },
+  ]}
+/>
 
 <Questions />

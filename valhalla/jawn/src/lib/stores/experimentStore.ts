@@ -1627,7 +1627,7 @@ export class ExperimentStore extends BaseStore {
             rowIndex: currentRowIndex,
             value:
               column.column_type === "output"
-                ? row.sourceRequest ?? null
+                ? (row.sourceRequest ?? null)
                 : null,
             metadata: {
               ...row.metadata,
@@ -1878,18 +1878,24 @@ function getExperimentDatasetScores(
 function getCustomScores(
   scores: Record<string, Score>[]
 ): Record<string, Score> {
-  const scoresValues = scores.reduce((acc, record) => {
-    for (const key in record) {
-      if (record.hasOwnProperty(key) && typeof record[key].value === "number") {
-        if (!acc[key]) {
-          acc[key] = { sum: 0, count: 0, valueType: record[key].valueType };
+  const scoresValues = scores.reduce(
+    (acc, record) => {
+      for (const key in record) {
+        if (
+          record.hasOwnProperty(key) &&
+          typeof record[key].value === "number"
+        ) {
+          if (!acc[key]) {
+            acc[key] = { sum: 0, count: 0, valueType: record[key].valueType };
+          }
+          acc[key].sum += record[key].value as number;
+          acc[key].count += 1;
         }
-        acc[key].sum += record[key].value as number;
-        acc[key].count += 1;
       }
-    }
-    return acc;
-  }, {} as Record<string, { sum: number; count: number; valueType: string }>);
+      return acc;
+    },
+    {} as Record<string, { sum: number; count: number; valueType: string }>
+  );
 
   return Object.fromEntries(
     Object.entries(scoresValues).map(([key, { sum, count, valueType }]) => [

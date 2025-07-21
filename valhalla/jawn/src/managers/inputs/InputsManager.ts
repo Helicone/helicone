@@ -71,12 +71,15 @@ export async function getAllSignedURLsFromInputs(
     })
   );
 
-  return result.reduce((acc, { key, value }) => {
-    return {
-      ...acc,
-      [key]: value,
-    };
-  }, {} as PromptInputRecord["inputs"]);
+  return result.reduce(
+    (acc, { key, value }) => {
+      return {
+        ...acc,
+        [key]: value,
+      };
+    },
+    {} as PromptInputRecord["inputs"]
+  );
 }
 
 export class InputsManager extends BaseManager {

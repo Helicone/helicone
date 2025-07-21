@@ -14,9 +14,9 @@ const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"] });
 const PiPageContent = () => {
   return (
     <div
-      className={`w-full flex flex-col justify-center items-center h-[100vh] ${jetbrainsMono.className}`}
+      className={`flex h-[100vh] w-full flex-col items-center justify-center ${jetbrainsMono.className}`}
     >
-      <h1 className={`text-3xl font-extrabold truncate max-w-[80vw]  py-2`}>
+      <h1 className={`max-w-[80vw] truncate py-2 text-3xl font-extrabold`}>
         Welcome to Helicone!
       </h1>
 
@@ -31,7 +31,7 @@ const PiPageContent = () => {
 
         <Link
           href="/pi/setup"
-          className="p-5 border-2  absolute top-1/2 left-1/2 transform translate-x-[16px] -translate-y-[90px] text-black font-bold h-[36.17px] px-[12.17px] py-[6.08px] origin-top-left -rotate-1 bg-white border-l-2 border-r-4 border-t-2 border-b-4 border-black flex-col justify-start items-start gap-[10.14px] inline-flex"
+          className="absolute left-1/2 top-1/2 inline-flex h-[36.17px] origin-top-left -translate-y-[90px] translate-x-[16px] -rotate-1 transform flex-col items-start justify-start gap-[10.14px] border-2 border-b-4 border-l-2 border-r-4 border-t-2 border-black bg-white p-5 px-[12.17px] py-[6.08px] font-bold text-black"
         >
           Start
         </Link>

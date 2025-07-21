@@ -57,7 +57,7 @@ export class RequestBodyParser {
       }
     } catch (e) {
       return err(
-        "Invalid time filter" + JSON.stringify(this.body.timeFilter) + e
+        "Invalid time filter" + JSON.stringify(this.body.timeFilter) + e,
       );
     }
   }
@@ -83,11 +83,11 @@ export interface HandlerWrapperOptionsAPI<RetVal>
 
 export function withAuth<T>(
   handler: (heliconeClient: HandlerWrapperOptions<T>) => Promise<void>,
-  permissions?: Permission[]
+  permissions?: Permission[],
 ) {
   return async (
     req: NextApiRequest,
-    res: NextApiResponse<T | { error: string }>
+    res: NextApiResponse<T | { error: string }>,
   ) => {
     const client = await getSSRHeliconeAuthClient({ ctx: { req, res } });
 
@@ -106,7 +106,7 @@ export function withAuth<T>(
       permissions &&
       permissions.length > 0 &&
       !permissions.every((permission) =>
-        hasPermission(org.data.role as Role, permission)
+        hasPermission(org.data.role as Role, permission),
       )
     ) {
       res.status(403).json({ error: "Forbidden" });
@@ -139,11 +139,11 @@ export interface HandlerWrapperOptionsSSR<RetVal> {
 
 export function withAuthSSR<T>(
   getServerSidePropsFunc: (
-    options: HandlerWrapperOptionsSSR<T>
-  ) => ReturnType<GetServerSideProps>
+    options: HandlerWrapperOptionsSSR<T>,
+  ) => ReturnType<GetServerSideProps>,
 ) {
   return async (
-    context: GetServerSidePropsContext
+    context: GetServerSidePropsContext,
   ): Promise<ReturnType<GetServerSideProps>> => {
     const authClient = await getSSRHeliconeAuthClient({ ctx: context });
 
@@ -174,7 +174,7 @@ export const withAdminSSR = withAuthSSR(async (options) => {
 
   const { data, error } = await dbExecute<{ user_id: string }>(
     "SELECT user_id FROM admins WHERE user_id = $1",
-    [userId]
+    [userId],
   );
 
   const admins = data?.map((admin) => admin.user_id || "") || [];

@@ -1,7 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
 import { Env, hash } from "../../..";
 import { HeliconeProxyRequest } from "../../models/HeliconeProxyRequest";
-import { ClickhouseClientWrapper, RequestResponseRMT } from "../../db/ClickhouseWrapper";
+import {
+  ClickhouseClientWrapper,
+  RequestResponseRMT,
+} from "../../db/ClickhouseWrapper";
 import { Database } from "../../../../supabase/database.types";
 import { safePut } from "../../safePut";
 import { DBLoggable } from "../../dbLogger/DBLoggable";
@@ -99,7 +102,9 @@ async function trySaveToCache(options: SaveToCacheOptions): Promise<boolean> {
   }
 }
 
-async function saveToCacheBackoff(options: SaveToCacheOptions): Promise<boolean> {
+async function saveToCacheBackoff(
+  options: SaveToCacheOptions
+): Promise<boolean> {
   for (let i = 0; i < CACHE_BACKOFF_RETRIES; i++) {
     const result = await trySaveToCache(options);
     if (result) return result;
@@ -108,7 +113,9 @@ async function saveToCacheBackoff(options: SaveToCacheOptions): Promise<boolean>
   return false;
 }
 
-export async function saveToCache(options: SaveToCacheOptions): Promise<boolean> {
+export async function saveToCache(
+  options: SaveToCacheOptions
+): Promise<boolean> {
   return await saveToCacheBackoff(options);
 }
 
@@ -147,8 +154,9 @@ export async function getCachedResponse(
         cacheIdx.toString()
       );
       cachedResponseHeaders.append(
-        "Helicone-Cache-Latency", randomCache.latency ? randomCache.latency.toString() : "0"
-      )
+        "Helicone-Cache-Latency",
+        randomCache.latency ? randomCache.latency.toString() : "0"
+      );
 
       const cachedStream = new ReadableStream({
         start(controller) {

@@ -9,7 +9,7 @@ const CODE_SNIPPETS: CodeSnippet = {
   openai_async: {
     formattedName: "OpenAI",
     typescript: (
-      key: string
+      key: string,
     ) => `import { HeliconeAsyncLogger } from "@helicone/async";
 import OpenAI from "openai";
 
@@ -37,7 +37,7 @@ client = OpenAI()`,
   anthropic_async: {
     formattedName: "Anthropic",
     typescript: (
-      key: string
+      key: string,
     ) => `import { HeliconeAsyncLogger } from "@helicone/async";
 import Anthropic from "@anthropic-ai/sdk";
 
@@ -68,7 +68,7 @@ client = Anthropic()`,
   azure_async: {
     formattedName: "Azure OpenAI",
     typescript: (
-      key: string
+      key: string,
     ) => `import { HeliconeAsyncLogger } from "@helicone/async";
 import { OpenAIClient, AzureKeyCredential } from "@azure/openai";
 
@@ -106,7 +106,7 @@ client = AzureOpenAI(
   openllmetry_other: {
     formattedName: "Additional Providers",
     typescript: (
-      key: string
+      key: string,
     ) => `import { HeliconeAsyncLogger } from "@helicone/async";
 // Import your preferred providers
 import { CohereClient } from "cohere-ai";
@@ -147,7 +147,7 @@ logger.init()`,
   custom_model: {
     formattedName: "Custom Model",
     typescript: (
-      key: string
+      key: string,
     ) => `import { HeliconeManualLogger } from "@helicone/helpers";
 
 // Initialize with your Helicone API key

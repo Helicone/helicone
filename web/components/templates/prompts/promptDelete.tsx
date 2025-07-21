@@ -26,7 +26,7 @@ const PromptDelete = (props: PromptDeleteProps) => {
           e.preventDefault();
           setOpen(true);
         }}
-        className="flex items-center hover:bg-red-500 rounded-md p-1 -m-1 z-10 bg-red-600"
+        className="z-10 -m-1 flex items-center rounded-md bg-red-600 p-1 hover:bg-red-500"
       >
         <TrashIcon className="h-4 w-4 text-white" />
       </button>
@@ -37,18 +37,18 @@ const PromptDelete = (props: PromptDeleteProps) => {
         }}
       >
         <div className="flex flex-col space-y-4">
-          <p className="font-semibold text-lg text-gray-900 dark:text-gray-100">
+          <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
             Delete Prompt: {promptName}
           </p>
-          <p className="text-gray-500 w-[400px] whitespace-pre-wrap text-sm">
+          <p className="w-[400px] whitespace-pre-wrap text-sm text-gray-500">
             Are you sure you want to delete this prompt?
           </p>
-          <div className="w-full flex justify-end gap-4 mt-4">
+          <div className="mt-4 flex w-full justify-end gap-4">
             <button
               onClick={() => {
                 setOpen(false);
               }}
-              className="flex flex-row items-center rounded-md bg-white dark:bg-black px-4 py-2 text-sm font-semibold border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm hover:text-gray-700 dark:hover:text-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+              className="flex flex-row items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500 dark:border-gray-700 dark:bg-black dark:text-gray-100 dark:hover:bg-gray-900 dark:hover:text-gray-300"
             >
               Cancel
             </button>
@@ -83,7 +83,7 @@ const PromptDelete = (props: PromptDeleteProps) => {
                   });
               }}
               className={
-                "relative inline-flex items-center rounded-md hover:bg-red-700 bg-red-500 px-4 py-2 text-sm font-medium text-white"
+                "relative inline-flex items-center rounded-md bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
               }
             >
               {isLoading && <ArrowPathIcon className={"h-4 w-4"} />}

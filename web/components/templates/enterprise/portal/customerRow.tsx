@@ -34,14 +34,14 @@ const CustomerRow = (props: CustomerRowProps) => {
   const router = useRouter();
 
   const { data: members, isLoading: isMembersLoading } = useGetOrgMembers(
-    org.id
+    org.id,
   );
 
   const startOfMonthFormatted = formatISO(
     new Date(new Date().setDate(new Date().getDate() - 30)),
     {
       representation: "date",
-    }
+    },
   );
 
   const endOfMonthFormatted = formatISO(new Date(), {
@@ -78,7 +78,7 @@ const CustomerRow = (props: CustomerRowProps) => {
   const currentIcon = ORGANIZATION_ICONS.find((icon) => icon.name === org.icon);
 
   const currentColor = ORGANIZATION_COLORS.find(
-    (icon) => icon.name === org.color
+    (icon) => icon.name === org.color,
   );
 
   return (
@@ -87,10 +87,10 @@ const CustomerRow = (props: CustomerRowProps) => {
         onClick={() => {
           router.push(`/enterprise/portal/${org.id}`);
         }}
-        className="hover:bg-gray-100 dark:hover:bg-gray-900 hover:cursor-pointer"
+        className="hover:cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-900"
       >
         <TableCell>
-          <div className="h-8 w-8 flex-none rounded-md bg-gray-100 dark:bg-gray-900 object-cover border border-gray-300 dark:border-gray-700 flex flex-col items-center justify-center">
+          <div className="flex h-8 w-8 flex-none flex-col items-center justify-center rounded-md border border-gray-300 bg-gray-100 object-cover dark:border-gray-700 dark:bg-gray-900">
             {currentIcon && (
               <currentIcon.icon
                 className={clsx(`text-${currentColor?.name}-500`, "h-6 w-6")}
@@ -109,7 +109,7 @@ const CustomerRow = (props: CustomerRowProps) => {
         <TableCell>
           <Badge
             variant="outline"
-            className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-emerald-200"
+            className="border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-50"
           >
             active
           </Badge>
@@ -126,7 +126,7 @@ const CustomerRow = (props: CustomerRowProps) => {
               categories={["requests"]}
               index={"date"}
               colors={["emerald"]}
-              className="h-10 w-48 -ml-2"
+              className="-ml-2 h-10 w-48"
               showLegend={false}
               showYAxis={false}
               showXAxis={false}
@@ -143,7 +143,7 @@ const CustomerRow = (props: CustomerRowProps) => {
                 onClick={(e: any) => {
                   e.stopPropagation();
                 }}
-                className="inline-flex w-full justify-center rounded-lg p-1.5 text-sm font-medium text-white hover:bg-gray-300 dark:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
+                className="inline-flex w-full justify-center rounded-lg p-1.5 text-sm font-medium text-white hover:bg-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75 dark:bg-gray-700"
               >
                 <EllipsisHorizontalIcon className="h-5 w-5 text-gray-700 dark:text-gray-300" />
               </Menu.Button>
@@ -157,8 +157,8 @@ const CustomerRow = (props: CustomerRowProps) => {
               leaveFrom="transform opacity-100 scale-100"
               leaveTo="transform opacity-0 scale-95"
             >
-              <Menu.Items className="z-50 border border-gray-300 dark:border-gray-700 absolute right-0 mt-2 w-32 origin-top-right rounded-md bg-white dark:bg-black shadow-lg focus:outline-none">
-                <div className="px-1 py-1 ">
+              <Menu.Items className="absolute right-0 z-50 mt-2 w-32 origin-top-right rounded-md border border-gray-300 bg-white shadow-lg focus:outline-none dark:border-gray-700 dark:bg-black">
+                <div className="px-1 py-1">
                   <Menu.Item>
                     {({ active }) => (
                       <button

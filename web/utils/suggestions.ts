@@ -17,7 +17,7 @@ export type SuggestionAction =
 
 export const suggestionReducer = (
   state: SuggestionState,
-  action: SuggestionAction
+  action: SuggestionAction,
 ): SuggestionState => {
   const now = Date.now();
   // console.log("Suggestion Reducer:", { action, prevState: state });
@@ -85,7 +85,7 @@ export const MIN_LENGTH_FOR_SUGGESTIONS = 8;
 
 export function cleanSuggestionIfNeeded(
   text: string,
-  suggestion: string
+  suggestion: string,
 ): string {
   // Only clean spaces (not newlines) if the text ends with a space
   return text.endsWith(" ") ? suggestion.replace(/^ +/, "") : suggestion;

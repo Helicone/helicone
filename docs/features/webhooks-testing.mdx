@@ -27,14 +27,14 @@ app = FastAPI()
 async def webhook_handler(request: Request):
     # Parse the webhook payload
     payload = await request.json()
-    
+
     # Log the event for debugging
     print(f"Received event: {payload['event_type']}")
     print(f"Request ID: {payload['request_id']}")
-    
+
     # Your webhook logic here
     # e.g., store in database, trigger notifications, etc.
-    
+
     return {"status": "success"}
 
 # Run with: uvicorn main:app --reload --port 8000
@@ -48,20 +48,21 @@ const app = express();
 app.use(express.json());
 
 app.post('/webhook', (req, res) => {
-  const payload = req.body;
-  
-  console.log(`Received event: ${payload.event_type}`);
-  console.log(`Request ID: ${payload.request_id}`);
-  
-  // Your webhook logic here
-  
-  res.json({ status: 'success' });
+const payload = req.body;
+
+console.log(`Received event: ${payload.event_type}`);
+console.log(`Request ID: ${payload.request_id}`);
+
+// Your webhook logic here
+
+res.json({ status: 'success' });
 });
 
 app.listen(8000, () => {
-  console.log('Webhook server running on port 8000');
+console.log('Webhook server running on port 8000');
 });
-```
+
+````
 </Accordion>
 </Step>
 
@@ -76,14 +77,16 @@ brew install ngrok
 
 # Start tunnel to your local server
 ngrok http 8000
-```
+````
 
 You'll see output like:
+
 ```
 Forwarding  https://abc123.ngrok-free.app -> http://localhost:8000
 ```
 
 Copy the HTTPS URL for the next step.
+
 </Step>
 
 <Step title="Configure webhook in Helicone">
@@ -94,7 +97,7 @@ Add your ngrok URL to Helicone's webhook settings:
 3. Enter your ngrok URL with the webhook path: `https://abc123.ngrok-free.app/webhook`
 4. Select the events you want to receive
 5. Save the webhook configuration
-</Step>
+      </Step>
 </Steps>
 
 ## Use Cases
@@ -110,41 +113,43 @@ import json
 import logging
 
 app = FastAPI()
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(**name**)
 
 @app.post("/webhook/helicone")
 async def helicone_webhook(request: Request):
-    try:
-        payload = await request.json()
-        
+try:
+payload = await request.json()
+
         # Log full payload for debugging
         logger.info(f"Webhook payload: {json.dumps(payload, indent=2)}")
-        
+
         # Process the webhook payload
         request_id = payload["request_id"]
         model = payload.get("model")
         cost = payload.get("cost", 0)
         user_id = payload.get("user_id")
-        
+
         logger.info(f"Webhook for request {request_id}")
         logger.info(f"Model: {model}, Cost: {cost}")
-        
+
         if user_id:
             logger.info(f"User: {user_id}")
-            
+
         # Check if this is a high-cost request
         if cost > 1.0:
             logger.warning(f"High cost request detected: {cost}")
-        
+
         return {"status": "processed"}
-        
+
     except Exception as e:
         logger.error(f"Webhook error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 # Test with property filter
+
 # Add header: Helicone-Property-Environment: development
-```
+
+````
 
 ```javascript Node.js
 const express = require('express');
@@ -155,31 +160,32 @@ app.use(express.json());
 // Webhook endpoint
 app.post('/webhook/helicone', (req, res) => {
   const payload = req.body;
-  
+
   console.log('Webhook received:', JSON.stringify(payload, null, 2));
-  
+
   // Process the webhook payload
   const { request_id, model, cost = 0, user_id } = payload;
-  
+
   console.log(`Webhook for request ${request_id}`);
   console.log(`Model: ${model}, Cost: $${cost}`);
-  
+
   if (user_id) {
     console.log(`User: ${user_id}`);
   }
-  
+
   // Check if this is a high-cost request
   if (cost > 1.0) {
     console.warn(`High cost request detected: $${cost}`);
   }
-  
+
   res.json({ status: 'processed' });
 });
 
 app.listen(8000, () => {
   console.log('Webhook server running on http://localhost:8000');
 });
-```
+````
+
 </CodeGroup>
 </Tab>
 
@@ -202,41 +208,41 @@ async def startup():
 
 @app.post("/webhook")
 async def webhook_handler(
-    request: Request, 
+    request: Request,
     background_tasks: BackgroundTasks
 ):
     # Quick acknowledgment
     payload = await request.json()
-    
+
     # Queue for async processing
     await redis.lpush(
-        "webhook_queue", 
+        "webhook_queue",
         json.dumps(payload)
     )
-    
+
     # Process async
     background_tasks.add_task(
-        process_webhook_event, 
+        process_webhook_event,
         payload
     )
-    
+
     return {"status": "queued"}
 
 async def process_webhook_event(payload):
     """Process webhook events asynchronously"""
     # Process completed request
     cost = payload.get("cost", 0)
-    
+
     # Check for anomalies
     if cost > 1.0:  # High cost threshold
         await send_alert(
             f"High cost request: {cost}",
             payload
         )
-    
+
     # Update metrics
     await update_usage_metrics(payload)
-    
+
     # Check rate limits
     user_id = payload.get("user_id")
     if user_id:
@@ -254,6 +260,7 @@ async def check_user_limits(user_id, cost):
     # Implement usage limiting logic
     pass
 ```
+
 </Tab>
 
 </Tabs>
@@ -265,12 +272,20 @@ async def check_user_limits(user_id, cost):
 Learn about webhook events, payloads, and production configuration
 </Card>
 
-<Card title="Custom Properties" icon="tag" href="/features/advanced-usage/custom-properties">
-Use property filters to control which requests trigger webhooks
+<Card
+  title="Custom Properties"
+  icon="tag"
+  href="/features/advanced-usage/custom-properties"
+>
+  Use property filters to control which requests trigger webhooks
 </Card>
 
-<Card title="User Feedback" icon="thumbs-up" href="/features/advanced-usage/feedback">
-Receive webhooks when users provide feedback on responses
+<Card
+  title="User Feedback"
+  icon="thumbs-up"
+  href="/features/advanced-usage/feedback"
+>
+  Receive webhooks when users provide feedback on responses
 </Card>
 
 <Card title="Alerts" icon="bell" href="/features/alerts">

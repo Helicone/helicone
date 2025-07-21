@@ -45,8 +45,8 @@ export default function Chat({
       mode === "PLAYGROUND_INPUT"
         ? requestMessages
         : mode === "PLAYGROUND_OUTPUT"
-        ? responseMessages
-        : [...requestMessages, ...responseMessages];
+          ? responseMessages
+          : [...requestMessages, ...responseMessages];
 
     // For contentArray messages, flatten. In playground, we treat as one message dynamically.
     return mode === "PLAYGROUND_INPUT"
@@ -62,7 +62,7 @@ export default function Chat({
                 ...part,
                 role: message.role || part.role, // Use parent role, fallback to part's own role if parent is missing
                 id: part.id || `${message.id}-part-${partIndex}`, // Ensure unique ID for parts
-              })
+              }),
             );
             return [...acc, ...flattenedParts];
           }
@@ -75,7 +75,7 @@ export default function Chat({
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -152,7 +152,7 @@ export default function Chat({
                 expandedMessages={expandedMessages}
                 setExpandedMessages={setExpandedMessages}
                 dragHandle={
-                  <div className="cursor-grab active:cursor-grabbing p-2">
+                  <div className="cursor-grab p-2 active:cursor-grabbing">
                     <GripVertical className="h-4 w-4 text-gray-400" />
                   </div>
                 }
@@ -178,17 +178,17 @@ export default function Chat({
   };
 
   return (
-    <div className="h-full w-full flex flex-col">
+    <div className="flex h-full w-full flex-col">
       {renderMessages()}
       {mode === "PLAYGROUND_INPUT" && (
         <div>
           <Button
             variant="outline"
             size="sm"
-            className="w-full rounded-none border-none border-b"
+            className="w-full rounded-none border-b border-none"
             onClick={addMessage}
           >
-            <LuPlus className="h-4 w-4 mr-2" />
+            <LuPlus className="mr-2 h-4 w-4" />
             Add Message
           </Button>
         </div>

@@ -37,7 +37,7 @@ const badgeVariants = cva(
       variant: "default",
       asPill: true,
     },
-  }
+  },
 );
 
 export interface BadgeProps
@@ -53,7 +53,7 @@ const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
         {...props}
       />
     );
-  }
+  },
 );
 Badge.displayName = "Badge";
 

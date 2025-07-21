@@ -8,7 +8,7 @@ import { TestConfig } from "./types";
 export async function testEvaluator(
   testData: TestConfig,
   jawn: ClientType,
-  testInput: TestInput
+  testInput: TestInput,
 ): Promise<EvaluatorTestResult> {
   if (testData._type === "llm") {
     const result = await jawn.POST("/v1/evaluator/llm/test", {

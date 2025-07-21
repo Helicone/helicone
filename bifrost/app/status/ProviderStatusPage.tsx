@@ -139,7 +139,7 @@ export function ProviderStatusPage({ provider }: ProviderStatusPageProps) {
 
   // Render a consistent structure to avoid layout shifts
   return (
-    <div className="flex flex-col gap-4 w-full max-w-6xl mx-auto">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-4">
       {/* Provider Status Info Section - Only for provider-specific pages */}
       {provider !== "all" && (
         <>
@@ -158,17 +158,17 @@ export function ProviderStatusPage({ provider }: ProviderStatusPageProps) {
       )}
 
       {/* Pro Tip Banner - Always Visible */}
-      <div className="bg-gradient-to-r from-blue-50 to-blue-100/50 rounded-xl p-6 border border-blue-200/40">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+      <div className="rounded-xl border border-blue-200/40 bg-gradient-to-r from-blue-50 to-blue-100/50 p-6">
+        <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center sm:gap-4">
           <div className="flex flex-wrap items-center gap-3">
-            <div className="bg-blue-600 text-white text-sm font-medium px-3 py-1 rounded-full whitespace-nowrap">
+            <div className="whitespace-nowrap rounded-full bg-blue-600 px-3 py-1 text-sm font-medium text-white">
               Pro Tip
             </div>
             <p className="text-gray-600">
               Want advanced LLM monitoring and reliability tools?
               <a
                 href="/signup"
-                className="text-blue-600 font-medium hover:text-blue-700 ml-2"
+                className="ml-2 font-medium text-blue-600 hover:text-blue-700"
               >
                 Get started for free →
               </a>
@@ -179,7 +179,7 @@ export function ProviderStatusPage({ provider }: ProviderStatusPageProps) {
 
       {/* All Providers Table Section */}
       <div className="container mx-auto py-8">
-        <h2 className="text-2xl font-bold mb-4">All Providers</h2>
+        <h2 className="mb-4 text-2xl font-bold">All Providers</h2>
         {isLoading.all ? (
           <ProvidersTableSkeleton />
         ) : error.all ? (

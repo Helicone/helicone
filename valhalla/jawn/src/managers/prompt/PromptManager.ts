@@ -31,7 +31,6 @@ import type { OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/ope
 import { AuthParams } from "../../packages/common/auth/types";
 import { StringChain } from "lodash";
 
-
 const PROMPT_ID_LENGTH = 6;
 const MAX_PROMPT_ID_GENERATION_ATTEMPTS = 3;
 
@@ -49,27 +48,28 @@ export class Prompt2025Manager extends BaseManager {
     );
   }
 
-  private generateRandomPromptId() : string {
-    const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    let result = '';
+  private generateRandomPromptId(): string {
+    const chars =
+      "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    let result = "";
     for (let i = 0; i < PROMPT_ID_LENGTH; i++) {
       result += chars[Math.floor(Math.random() * chars.length)];
     }
     return result;
   }
 
-  private async updateProductionVersion(promptId: string, promptVersionId: string): Promise<Result<null, string>> {
+  private async updateProductionVersion(
+    promptId: string,
+    promptVersionId: string
+  ): Promise<Result<null, string>> {
     const updateProductionVersionResult = await dbExecute(
       `
       UPDATE prompts_2025
       SET production_version = $1
       WHERE id = $2 AND organization = $3
-      `, [
-        promptVersionId,
-        promptId,
-        this.authParams.organizationId,
-      ]
-    )
+      `,
+      [promptVersionId, promptId, this.authParams.organizationId]
+    );
 
     if (updateProductionVersionResult?.error) {
       return err(updateProductionVersionResult.error);
@@ -128,9 +128,10 @@ export class Prompt2025Manager extends BaseManager {
     page: number;
     pageSize: number;
   }): Promise<Result<Prompt2025[], string>> {
-    const tagsFilterClause = params.tagsFilter.length > 0 ? `AND tags && $3::text[]` : "";
+    const tagsFilterClause =
+      params.tagsFilter.length > 0 ? `AND tags && $3::text[]` : "";
     const result = await dbExecute<Prompt2025>(
-    `
+      `
       SELECT
         id,
         name,
@@ -147,7 +148,7 @@ export class Prompt2025Manager extends BaseManager {
         this.authParams.organizationId,
         params.tagsFilter,
         params.pageSize,
-        params.page * params.pageSize
+        params.page * params.pageSize,
       ]
     );
 
@@ -161,7 +162,10 @@ export class Prompt2025Manager extends BaseManager {
   async getPromptVersionCounts(params: {
     promptId: string;
   }): Promise<Result<PromptVersionCounts, string>> {
-    const result = await dbExecute<{ total_versions: number, major_versions: number }>(
+    const result = await dbExecute<{
+      total_versions: number;
+      major_versions: number;
+    }>(
       `SELECT
         COUNT(*)::integer as total_versions,
         MAX(major_version) as major_versions
@@ -229,7 +233,7 @@ export class Prompt2025Manager extends BaseManager {
       FROM prompts_2025_versions
       WHERE prompt_id = $1
       AND organization = $2 AND soft_delete is false
-      ${params.majorVersion !== undefined ? `AND major_version = $3` : ''}
+      ${params.majorVersion !== undefined ? `AND major_version = $3` : ""}
       ORDER BY created_at DESC
       LIMIT 50
       `,
@@ -274,7 +278,10 @@ export class Prompt2025Manager extends BaseManager {
 
     const promptVersion = result.data[0];
 
-    const s3UrlResult = await this.getPromptVersionS3Url(promptVersion.prompt_id, promptVersion.id);
+    const s3UrlResult = await this.getPromptVersionS3Url(
+      promptVersion.prompt_id,
+      promptVersion.id
+    );
     if (s3UrlResult.error) {
       return err(s3UrlResult.error);
     }
@@ -284,9 +291,9 @@ export class Prompt2025Manager extends BaseManager {
   }
 
   async createPrompt(params: {
-    name: string,
-    tags: string[],
-    promptBody: OpenAIChatRequest,
+    name: string;
+    tags: string[];
+    promptBody: OpenAIChatRequest;
   }): Promise<Result<PromptCreateResponse, string>> {
     // Create prompt
     let attempts = 0;
@@ -300,30 +307,25 @@ export class Prompt2025Manager extends BaseManager {
         INSERT INTO prompts_2025 (id, name, tags, created_at, organization)
         VALUES ($1, $2, $3, NOW(), $4)
         RETURNING id
-          `, [
-            promptId,
-            params.name,
-            params.tags,
-            this.authParams.organizationId,
-          ]
+          `,
+          [promptId, params.name, params.tags, this.authParams.organizationId]
         );
         break;
       } catch (error: any) {
-        if (error.code === '23505') {
+        if (error.code === "23505") {
           attempts++;
           continue;
         }
         return err(error);
       }
     }
-    
+
     if (insertPromptResult?.error) {
       return err(insertPromptResult.error);
     }
-    
-    const promptId = insertPromptResult?.data?.[0]?.id ?? '';
-    
-    
+
+    const promptId = insertPromptResult?.data?.[0]?.id ?? "";
+
     const insertPromptVersionResult = await dbExecute<{ id: string }>(
       `
       INSERT INTO prompts_2025_versions (
@@ -338,26 +340,34 @@ export class Prompt2025Manager extends BaseManager {
       )
       VALUES (NOW(), $1, 0, 0, 'First version.', $2, $3, $4)
       RETURNING id
-      `, [
+      `,
+      [
         promptId,
         this.authParams.userId,
         this.authParams.organizationId,
         params.promptBody.model,
       ]
-    )
-    
+    );
+
     if (insertPromptVersionResult?.error) {
       return err(insertPromptVersionResult.error);
     }
 
-    const promptVersionId = insertPromptVersionResult?.data?.[0]?.id ?? '';
+    const promptVersionId = insertPromptVersionResult?.data?.[0]?.id ?? "";
 
-    const updateProductionVersionResult = await this.updateProductionVersion(promptId, promptVersionId);
+    const updateProductionVersionResult = await this.updateProductionVersion(
+      promptId,
+      promptVersionId
+    );
     if (updateProductionVersionResult?.error) {
       return err(updateProductionVersionResult.error);
     }
 
-    const s3Result = await this.storePromptBody(promptId, promptVersionId, params.promptBody);
+    const s3Result = await this.storePromptBody(
+      promptId,
+      promptVersionId,
+      params.promptBody
+    );
     if (s3Result.error) {
       return err(s3Result.error);
     }
@@ -401,7 +411,9 @@ export class Prompt2025Manager extends BaseManager {
       );
 
       if (maxMajorResult.error || !maxMajorResult.data?.[0]) {
-        return err(maxMajorResult.error || "Failed to calculate next major version");
+        return err(
+          maxMajorResult.error || "Failed to calculate next major version"
+        );
       }
 
       nextMajor = maxMajorResult.data[0].next_major;
@@ -415,7 +427,9 @@ export class Prompt2025Manager extends BaseManager {
       );
 
       if (maxMinorResult.error || !maxMinorResult.data?.[0]) {
-        return err(maxMinorResult.error || "Failed to calculate next minor version");
+        return err(
+          maxMinorResult.error || "Failed to calculate next minor version"
+        );
       }
 
       nextMajor = current.major_version;
@@ -436,7 +450,8 @@ export class Prompt2025Manager extends BaseManager {
       )
       VALUES (NOW(), $1, $2, $3, $4, $5, $6, $7)
       RETURNING id
-      `, [
+      `,
+      [
         params.promptId,
         nextMajor,
         nextMinor,
@@ -445,22 +460,29 @@ export class Prompt2025Manager extends BaseManager {
         this.authParams.organizationId,
         params.promptBody.model,
       ]
-    )
+    );
 
     if (insertPromptVersionResult?.error) {
       return err(insertPromptVersionResult.error);
     }
 
-    const promptVersionId = insertPromptVersionResult?.data?.[0]?.id ?? '';
+    const promptVersionId = insertPromptVersionResult?.data?.[0]?.id ?? "";
 
     if (params.setAsProduction) {
-      const updateProductionVersionResult = await this.updateProductionVersion(params.promptId, promptVersionId);
+      const updateProductionVersionResult = await this.updateProductionVersion(
+        params.promptId,
+        promptVersionId
+      );
       if (updateProductionVersionResult?.error) {
         return err(updateProductionVersionResult.error);
       }
     }
 
-    const s3Result = await this.storePromptBody(params.promptId, promptVersionId, params.promptBody);
+    const s3Result = await this.storePromptBody(
+      params.promptId,
+      promptVersionId,
+      params.promptBody
+    );
     if (s3Result.error) {
       return err(s3Result.error);
     }
@@ -483,7 +505,9 @@ export class Prompt2025Manager extends BaseManager {
     }
 
     if (!versionCheck.data?.[0]) {
-      return err("Prompt version not found or does not belong to the specified prompt");
+      return err(
+        "Prompt version not found or does not belong to the specified prompt"
+      );
     }
 
     const result = await dbExecute<null>(
@@ -514,7 +538,10 @@ export class Prompt2025Manager extends BaseManager {
     for (const version of versionIds) {
       const s3Result = await this.deletePromptBody(params.promptId, version.id);
       if (s3Result.error) {
-        console.error(`Failed to delete S3 object for version ${version.id}:`, s3Result.error);
+        console.error(
+          `Failed to delete S3 object for version ${version.id}:`,
+          s3Result.error
+        );
         // continue with other deletions even if one fails
       }
     }
@@ -554,7 +581,10 @@ export class Prompt2025Manager extends BaseManager {
       return err(result.error);
     }
 
-    const s3Result = await this.deletePromptBody(params.promptId, params.promptVersionId);
+    const s3Result = await this.deletePromptBody(
+      params.promptId,
+      params.promptVersionId
+    );
     if (s3Result.error) {
       return err(s3Result.error);
     }
@@ -570,11 +600,15 @@ export class Prompt2025Manager extends BaseManager {
     promptBody: OpenAIChatRequest
   ): Promise<Result<null, string>> {
     if (!promptId) return err("Prompt ID is required");
-    const key = this.s3Client.getPromptKey(promptId, promptVersionId, this.authParams.organizationId);
-    
-    const s3result = await this.s3Client.store(key, JSON.stringify(promptBody)); 
+    const key = this.s3Client.getPromptKey(
+      promptId,
+      promptVersionId,
+      this.authParams.organizationId
+    );
+
+    const s3result = await this.s3Client.store(key, JSON.stringify(promptBody));
     if (s3result.error) return err(s3result.error);
-    
+
     return ok(null);
   }
 
@@ -582,18 +616,29 @@ export class Prompt2025Manager extends BaseManager {
     promptId: string,
     promptVersionId: string
   ): Promise<Result<null, string>> {
-    const key = this.s3Client.getPromptKey(promptId, promptVersionId, this.authParams.organizationId);
-    
+    const key = this.s3Client.getPromptKey(
+      promptId,
+      promptVersionId,
+      this.authParams.organizationId
+    );
+
     const s3Result = await this.s3Client.remove(key);
     if (s3Result.error) return err(s3Result.error);
     return ok(null);
   }
 
-  private async getPromptVersionS3Url(promptId: string, promptVersionId: string): Promise<Result<string, string>> {
-    const key = this.s3Client.getPromptKey(promptId, promptVersionId, this.authParams.organizationId);
+  private async getPromptVersionS3Url(
+    promptId: string,
+    promptVersionId: string
+  ): Promise<Result<string, string>> {
+    const key = this.s3Client.getPromptKey(
+      promptId,
+      promptVersionId,
+      this.authParams.organizationId
+    );
     const s3Result = await this.s3Client.getSignedUrl(key);
     if (s3Result.error) return err(s3Result.error);
-    return ok(s3Result.data ?? '');
+    return ok(s3Result.data ?? "");
   }
 
   // TODO: add other methods for deletion, etc.
@@ -607,16 +652,14 @@ export class PromptManager extends BaseManager {
     requestId: string
   ): Promise<Result<string, string>> {
     const requestManager = new RequestManager(this.authParams);
-    const requestResult = await requestManager.uncachedGetRequestByIdWithBody(
-      requestId
-    );
+    const requestResult =
+      await requestManager.uncachedGetRequestByIdWithBody(requestId);
     if (requestResult.error || !requestResult.data) {
       return err(requestResult.error);
     }
 
-    const promptVersionResult = await this.getPromptVersionFromRequest(
-      requestId
-    );
+    const promptVersionResult =
+      await this.getPromptVersionFromRequest(requestId);
     if (promptVersionResult.data) {
       return ok(promptVersionResult.data);
     }

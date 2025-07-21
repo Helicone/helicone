@@ -212,7 +212,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
         : new Date(new Date().getTime() + 1000),
       timeToFirstToken: async () =>
         asyncLogModel.timing
-          ? Number(asyncLogModel.timing.timeToFirstToken) ?? null
+          ? (Number(asyncLogModel.timing.timeToFirstToken) ?? null)
           : null,
     },
     tokenCalcUrl: env.VALHALLA_URL,

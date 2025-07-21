@@ -36,26 +36,29 @@ import (
 )
 
 func main() {
-    // Replace with your actual API key
-	apiKey := os.Getenv("HELICONE_API_KEY")
-	openaiApiKey := os.Getenv("OPENAI_API_KEY")
+// Replace with your actual API key
+apiKey := os.Getenv("HELICONE_API_KEY")
+openaiApiKey := os.Getenv("OPENAI_API_KEY")
 
-	// Example: Basic Logger
-	fmt.Println("Testing Basic Logger...")
-	chatCompletionOperation(apiKey, openaiApiKey)
+    // Example: Basic Logger
+    fmt.Println("Testing Basic Logger...")
+    chatCompletionOperation(apiKey, openaiApiKey)
+
 }
 
 func chatCompletionOperation(apiKey string, openaiApiKey string) {
-    manualLogger := logger.New(logger.LoggerOptions{
-		APIKey: apiKey,
-		Headers: map[string]string{
-			"Helicone-User-Id": "test-user-123",
-		},
-	})
+manualLogger := logger.New(logger.LoggerOptions{
+APIKey: apiKey,
+Headers: map[string]string{
+"Helicone-User-Id": "test-user-123",
+},
+})
 
     openaiClient := openai.NewClient(option.WithAPIKey(openaiApiKey))
+
 }
-```
+
+````
 </Step>
 
 <Step title="Define your operation and make the request">
@@ -89,7 +92,7 @@ result, err := manualLogger.LogRequest(request, func(recorder *logger.ResultReco
 }, map[string]string{
     "Helicone-Session-Id":   sessionId, // Optional session tracking
 })
-```
+````
 
   </Step>
 </Steps>

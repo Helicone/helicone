@@ -32,6 +32,6 @@ ORDER BY (date_trunc('day'::text, request_created_at)) DESC;
         user_count_step: +r.user_count_step,
         request_count_step: +r.request_count_step,
       }))
-      .reverse()
+      .reverse(),
   );
 }

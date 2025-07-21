@@ -40,7 +40,7 @@ export const ChatWindow = ({
     if (sendingMessage) return;
     setSendingMessage(true);
     const chatHistoryCopy: ChatHistory[] = JSON.parse(
-      JSON.stringify(chatHistory)
+      JSON.stringify(chatHistory),
     );
     setMessage("");
 
@@ -126,12 +126,12 @@ DO NOT GIVE AWAY YOUR IDENTITY. THE USER IS TRYING TO GUESS THE CHARACTER.
   }
 
   return (
-    <Col className="w-full h-full flex flex-col">
+    <Col className="flex h-full w-full flex-col">
       <Col className="flex-shrink-0 p-4">
-        <p className="text-2xl tracking-[10px] animate-popin text-center">
+        <p className="animate-popin text-center text-2xl tracking-[10px]">
           Your movie is
         </p>
-        <div className="tracking-[5px] flex justify-center">
+        <div className="flex justify-center tracking-[5px]">
           <Typewriter
             text={movieTitle}
             speed={50}
@@ -140,21 +140,21 @@ DO NOT GIVE AWAY YOUR IDENTITY. THE USER IS TRYING TO GUESS THE CHARACTER.
           />
         </div>
       </Col>
-      <Col className="flex-grow overflow-hidden bg-white bg-opacity-20 rounded-xl">
-        <Col className="h-full flex flex-col">
-          <Col className="flex-grow overflow-y-auto p-4 space-y-4 text-white">
+      <Col className="flex-grow overflow-hidden rounded-xl bg-white bg-opacity-20">
+        <Col className="flex h-full flex-col">
+          <Col className="flex-grow space-y-4 overflow-y-auto p-4 text-white">
             {chatHistory.map((chat, index) => (
               <Row
                 key={index}
                 className={clsx(
                   "w-full",
-                  chat.role === "user" ? "justify-end" : "justify-start"
+                  chat.role === "user" ? "justify-end" : "justify-start",
                 )}
               >
                 <Col
                   className={clsx(
-                    "max-w-[80%] p-2 rounded-lg shadow-sm px-3",
-                    chat.role === "user" ? "bg-blue-500" : "bg-blue-400"
+                    "max-w-[80%] rounded-lg p-2 px-3 shadow-sm",
+                    chat.role === "user" ? "bg-blue-500" : "bg-blue-400",
                   )}
                 >
                   {chat.role === "user" ? (
@@ -175,11 +175,11 @@ DO NOT GIVE AWAY YOUR IDENTITY. THE USER IS TRYING TO GUESS THE CHARACTER.
               </Row>
             ))}
             {sendingMessage && (
-              <Row className={clsx("w-full", "justify-start animate-pulse")}>
+              <Row className={clsx("w-full", "animate-pulse justify-start")}>
                 <Col
                   className={clsx(
-                    "max-w-[80%] p-2 rounded-lg shadow-sm px-3",
-                    "bg-blue-400"
+                    "max-w-[80%] rounded-lg p-2 px-3 shadow-sm",
+                    "bg-blue-400",
                   )}
                 >
                   ...
@@ -188,7 +188,7 @@ DO NOT GIVE AWAY YOUR IDENTITY. THE USER IS TRYING TO GUESS THE CHARACTER.
             )}
             <div ref={chatEndRef} />
           </Col>
-          <Col className="flex-shrink-0 p-4 bg-white bg-opacity-10">
+          <Col className="flex-shrink-0 bg-white bg-opacity-10 p-4">
             <Row className={clsx("w-full", sendingMessage && "opacity-50")}>
               <Textarea
                 disabled={sendingMessage}
@@ -204,12 +204,12 @@ DO NOT GIVE AWAY YOUR IDENTITY. THE USER IS TRYING TO GUESS THE CHARACTER.
               />
               <button
                 onClick={() => sendMessage(message)}
-                className="text-2xl flex items-center justify-center p-2 ml-2"
+                className="ml-2 flex items-center justify-center p-2 text-2xl"
               >
                 🚀
               </button>
             </Row>
-            <div className="text-center text-opacity-45 text-sm italic mt-2">
+            <div className="mt-2 text-center text-sm italic text-opacity-45">
               Ask questions to try to guess the character from the movie.
             </div>
           </Col>

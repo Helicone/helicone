@@ -50,7 +50,7 @@ const ChatSession: React.FC<ChatSessionProps> = ({
       .sort(
         (a, b) =>
           new Date(a?.request_created_at || "").getTime() -
-          new Date(b?.request_created_at || "").getTime()
+          new Date(b?.request_created_at || "").getTime(),
       );
   }, [isRealtime, requests.requests.requests, originalRequest]);
 
@@ -62,7 +62,7 @@ const ChatSession: React.FC<ChatSessionProps> = ({
           return (
             <Row
               key={request.request_id}
-              className="request-item mb-4 shadow-sm border-y border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950"
+              className="request-item mb-4 border-y border-slate-300 bg-slate-50 shadow-sm dark:border-slate-700 dark:bg-slate-950"
             >
               <div className="flex-1">
                 <RequestDrawer
@@ -71,10 +71,10 @@ const ChatSession: React.FC<ChatSessionProps> = ({
                   showCollapse={false}
                 />
               </div>
-              <div className="lg:min-w-[350px] p-5 rounded-lg bg-slate-100 dark:bg-black">
-                <Col className="justify-between h-full">
+              <div className="rounded-lg bg-slate-100 p-5 dark:bg-black lg:min-w-[350px]">
+                <Col className="h-full justify-between">
                   <Col className="gap-y-2">
-                    <Row className="justify-between mb-2 w-full">
+                    <Row className="mb-2 w-full justify-between">
                       <StatusBadge
                         statusType={
                           mappedRequest.heliconeMetadata.status.statusType
@@ -92,7 +92,7 @@ const ChatSession: React.FC<ChatSessionProps> = ({
                             ? Number(
                                 mappedRequest.heliconeMetadata.scores[
                                   "helicone-score-feedback"
-                                ]
+                                ],
                               ) === 1
                               ? true
                               : false
@@ -101,32 +101,32 @@ const ChatSession: React.FC<ChatSessionProps> = ({
                       />
                     </Row>
 
-                    <Row className="justify-between flex-wrap">
-                      <div className="text-sm text-slate-500 dark:text-slate-200 font-medium w-full sm:w-auto">
+                    <Row className="flex-wrap justify-between">
+                      <div className="w-full text-sm font-medium text-slate-500 dark:text-slate-200 sm:w-auto">
                         Created at
                       </div>
-                      <i className="text-sm font-light text-slate-500 dark:text-slate-200 w-full sm:w-auto">
+                      <i className="w-full text-sm font-light text-slate-500 dark:text-slate-200 sm:w-auto">
                         {new Date(request.request_created_at).toLocaleString()}
                       </i>
                     </Row>
-                    <Row className="justify-between flex-wrap">
-                      <div className="text-sm text-slate-500 dark:text-slate-200 font-medium">
+                    <Row className="flex-wrap justify-between">
+                      <div className="text-sm font-medium text-slate-500 dark:text-slate-200">
                         Cost
                       </div>
-                      <div className="text-sm font-light text-slate-500 dark:text-slate-200 w-full sm:w-auto">
+                      <div className="w-full text-sm font-light text-slate-500 dark:text-slate-200 sm:w-auto">
                         $ {mappedRequest.heliconeMetadata.cost}
                       </div>
                     </Row>
-                    <Row className="justify-between flex-wrap">
-                      <div className="text-sm text-slate-500 dark:text-slate-200 font-medium">
+                    <Row className="flex-wrap justify-between">
+                      <div className="text-sm font-medium text-slate-500 dark:text-slate-200">
                         Latency
                       </div>
-                      <div className="text-sm font-light text-slate-500 dark:text-slate-200 w-full sm:w-auto">
+                      <div className="w-full text-sm font-light text-slate-500 dark:text-slate-200 sm:w-auto">
                         {mappedRequest.heliconeMetadata.latency} ms
                       </div>
                     </Row>
-                    <Col className="justify-between flex-wrap">
-                      <div className="text-sm font-medium text-slate-500 dark:text-slate-200 w-full sm:w-auto">
+                    <Col className="flex-wrap justify-between">
+                      <div className="w-full text-sm font-medium text-slate-500 dark:text-slate-200 sm:w-auto">
                         Custom Properties
                       </div>
                       {mappedRequest.heliconeMetadata.customProperties &&
@@ -134,23 +134,26 @@ const ChatSession: React.FC<ChatSessionProps> = ({
                         properties.properties.length > 0 && (
                           <CustomPropertiesCard
                             customProperties={Object.entries(
-                              mappedRequest.heliconeMetadata.customProperties
+                              mappedRequest.heliconeMetadata.customProperties,
                             )
                               .filter(
-                                ([key]) => !key.includes("Helicone-Session")
+                                ([key]) => !key.includes("Helicone-Session"),
                               )
-                              .reduce((acc, [key, value]) => {
-                                acc[key] = value as string;
-                                return acc;
-                              }, {} as Record<string, string>)}
+                              .reduce(
+                                (acc, [key, value]) => {
+                                  acc[key] = value as string;
+                                  return acc;
+                                },
+                                {} as Record<string, string>,
+                              )}
                             properties={properties.properties}
                           />
                         )}
                     </Col>
                   </Col>
-                  <Row className="justify-end mt-4">
+                  <Row className="mt-4 justify-end">
                     <button
-                      className="text-sm flex items-center text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                      className="flex items-center text-sm text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                       onClick={() => {
                         setRequestDrawerRequest(mappedRequest);
                         setOpen(true);

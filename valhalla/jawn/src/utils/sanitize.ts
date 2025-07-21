@@ -77,8 +77,8 @@ export function safeJSONStringify(obj: any): string {
             ])
           )
         : typeof obj === "string"
-        ? obj.replace(/[\uD800-\uDFFF]/g, "")
-        : obj
+          ? obj.replace(/[\uD800-\uDFFF]/g, "")
+          : obj
     );
   }
 }

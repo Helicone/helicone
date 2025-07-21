@@ -89,82 +89,82 @@ export default function Platform() {
     "monitoring" | "logs" | "templates"
   >("monitoring");
   return (
-    <div className="flex flex-col w-full items-center px-2">
-      <h2 className="text-3xl md:text-4xl font-bold text-black md:text-center text-start tracking-tight leading-tight">
+    <div className="flex w-full flex-col items-center px-2">
+      <h2 className="text-start text-3xl font-bold leading-tight tracking-tight text-black md:text-center md:text-4xl">
         One platform with{" "}
         <span className="text-sky-500">all the essential tools.</span>
       </h2>
 
-      <div className="flex flex-col md:justify-stretch md:flex-row items-start gap-4 md:mt-16 mt-4 ">
-        <div className="flex flex-col h-min border border-gray-200 rounded-xl md:py-8 pt-2 px-4 pl-1 pr-3 bg-gradient-to-t from-white to-sky-50 h-fit">
-          <div className="flex flex-row items-center justify-between gap-2 text-sm pl-4">
-            <p className="font-bold text-xs text-blue-500 bg-blue-100 rounded-xl p-2">
+      <div className="mt-4 flex flex-col items-start gap-4 md:mt-16 md:flex-row md:justify-stretch">
+        <div className="flex h-fit h-min flex-col rounded-xl border border-gray-200 bg-gradient-to-t from-white to-sky-50 px-4 pl-1 pr-3 pt-2 md:py-8">
+          <div className="flex flex-row items-center justify-between gap-2 pl-4 text-sm">
+            <p className="rounded-xl bg-blue-100 p-2 text-xs font-bold text-blue-500">
               POST
             </p>
             <input
               disabled={true}
               type="text"
-              className="text-sm border border-gray-200 w-full bg-white rounded-xl p-2 placeholder:text-black"
+              className="w-full rounded-xl border border-gray-200 bg-white p-2 text-sm placeholder:text-black"
               placeholder=" / v1 / chat / completions / query "
             />
-            <button className="bg-blue-500 text-xs text-white rounded-xl p-2">
+            <button className="rounded-xl bg-blue-500 p-2 text-xs text-white">
               SEND
             </button>
           </div>
 
           <Image src={miniRequestsPage} alt="Requests table" />
-          <h3 className="text-xl font-bold text-blue-500 relative top-[-2em] bg-gradient-to-t from-white via-white self-start w-full pt-8 md:pt-2 px-4 pb-0">
+          <h3 className="relative top-[-2em] w-full self-start bg-gradient-to-t from-white via-white px-4 pb-0 pt-8 text-xl font-bold text-blue-500 md:pt-2">
             Send requests in seconds
           </h3>
-          <p className="relative top-[-3em] md:mb-[-3em] pt-2 left-[1em] text-gray-500 bg-gradient-to-t from-white">
+          <p className="relative left-[1em] top-[-3em] bg-gradient-to-t from-white pt-2 text-gray-500 md:mb-[-3em]">
             Filter, segment, and analyze your requests
           </p>
         </div>
 
         <div
-          className="flex flex-col items-auto border border-gray-200 rounded-xl md:py-8 py-2 px-4 bg-gradient-to-t from-white to-sky-50 h-full"
+          className="items-auto flex h-full flex-col rounded-xl border border-gray-200 bg-gradient-to-t from-white to-sky-50 px-4 py-2 md:py-8"
           dir="rtl"
         >
-          <div className="flex flex-row items-center gap-2 text-sm pl-4 bg-white border border-gray-200 rounded-xl p-2 w-fit self-center">
-            <p className="font-bold text-xs text-blue-500 bg-blue-100 rounded-lg p-2">
+          <div className="flex w-fit flex-row items-center gap-2 self-center rounded-xl border border-gray-200 bg-white p-2 pl-4 text-sm">
+            <p className="rounded-lg bg-blue-100 p-2 text-xs font-bold text-blue-500">
               Costs
             </p>
-            <p className="font-bold text-xs text-black rounded-lg p-2">
+            <p className="rounded-lg p-2 text-xs font-bold text-black">
               Requests
             </p>
           </div>
 
           <Image src={costsGraph} alt="Costs graph" />
-          <h3 className="text-xl font-bold text-blue-500 relative md:top-[-1em] top-[-2em] bg-gradient-to-t from-white via-white/90 pt-8 md:mr-5 mr-3 pr-1 pb-0 w-full">
+          <h3 className="relative top-[-2em] mr-3 w-full bg-gradient-to-t from-white via-white/90 pb-0 pr-1 pt-8 text-xl font-bold text-blue-500 md:top-[-1em] md:mr-5">
             Instant Analytics
           </h3>
-          <p className="relative md:top-[-2em] md:mb-[-2em] top-[-3em] md:mr-5 mr-3 pt-3 pr-1 bg-gradient-to-t from-white via-white/90 text-gray-500 w-full">
+          <p className="relative top-[-3em] mr-3 w-full bg-gradient-to-t from-white via-white/90 pr-1 pt-3 text-gray-500 md:top-[-2em] md:mb-[-2em] md:mr-5">
             Get detailed metrics such as latency, cost, time to first token
           </p>
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row items-stretch justify-stretch gap-4 mt-4 md:mt-6">
-        <div className="flex flex-col border border-gray-200 rounded-xl py-4 px-4 bg-gradient-to-t from-white to-sky-50">
+      <div className="mt-4 flex flex-col items-stretch justify-stretch gap-4 md:mt-6 md:flex-row">
+        <div className="flex flex-col rounded-xl border border-gray-200 bg-gradient-to-t from-white to-sky-50 px-4 py-4">
           <Image src={promptManagementCard} alt="Prompt management card" />
-          <div className="flex flex-col justify-end flex-grow">
-            <h3 className="text-xl font-bold text-blue-500 bg-gradient-to-t from-white via-white/90 pl-4 w-full">
+          <div className="flex flex-grow flex-col justify-end">
+            <h3 className="w-full bg-gradient-to-t from-white via-white/90 pl-4 text-xl font-bold text-blue-500">
               Prompt Management
             </h3>
-            <p className="bg-gradient-to-t from-white via-white/90 md:bg-white text-gray-500 w-full pl-4">
+            <p className="w-full bg-gradient-to-t from-white via-white/90 pl-4 text-gray-500 md:bg-white">
               Access features such as prompt versioning, prompt testing and
               prompt templates
             </p>
           </div>
         </div>
 
-        <div className="flex flex-col justify-between border border-gray-200 rounded-xl py-4 pt-2 pr-4 bg-gradient-to-t from-white to-sky-50">
+        <div className="flex flex-col justify-between rounded-xl border border-gray-200 bg-gradient-to-t from-white to-sky-50 py-4 pr-4 pt-2">
           <Image src={uptimeCard} alt="Uptime card" />
           <div>
-            <h3 className="text-xl font-bold text-blue-500 bg-gradient-to-t from-white w-full pl-4">
+            <h3 className="w-full bg-gradient-to-t from-white pl-4 text-xl font-bold text-blue-500">
               99.99% Uptime
             </h3>
-            <p className="bg-gradient-to-t from-white text-gray-500 w-full pl-4">
+            <p className="w-full bg-gradient-to-t from-white pl-4 text-gray-500">
               Helicone leverages Cloudflare Workers to maintain low latency and
               high reliability
             </p>

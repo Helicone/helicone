@@ -149,7 +149,7 @@
 */
 
 .glass {
-  @apply backdrop-blur-md bg-white/[.3333] dark:bg-slate-950/[.3333];
+  @apply bg-white/[.3333] backdrop-blur-md dark:bg-slate-950/[.3333];
 }
 
 .interactive {

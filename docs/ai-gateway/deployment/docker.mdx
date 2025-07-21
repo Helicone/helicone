@@ -32,6 +32,7 @@ Deploy the AI Gateway using Docker for easy containerized deployment to any clou
     <Note>
       The `AI_GATEWAY__SERVER__ADDRESS=0.0.0.0` is required for Docker to work properly.
     </Note>
+
   </Step>
 
   <Step title="Run the container">
@@ -44,8 +45,9 @@ Deploy the AI Gateway using Docker for easy containerized deployment to any clou
     The Gateway will be running on `http://localhost:8080` with these routes:
 
     - `/ai` - Unified API that works out of the box
-    - `/router/{router-name}` - Custom routing with load balancing  
+    - `/router/{router-name}` - Custom routing with load balancing
     - `/{provider-name}` - Direct provider access
+
   </Step>
 
   <Step title="Test your deployment">
@@ -95,6 +97,7 @@ Deploy the AI Gateway using Docker for easy containerized deployment to any clou
     </CodeGroup>
 
     You should see a response from the AI model! 🎉
+
   </Step>
 </Steps>
 
@@ -116,6 +119,7 @@ For custom routing and advanced features, create a `config.yaml` file:
               - openai
               - anthropic
     ```
+
   </Step>
 
   <Step title="Mount config and run">
@@ -126,6 +130,7 @@ For custom routing and advanced features, create a `config.yaml` file:
       -v $(pwd)/config.yaml:/helicone-config/config.yaml \
       helicone/ai-gateway:main ai-gateway -c /helicone-config/config.yaml
     ```
+
   </Step>
 
   <Step title="Test your router">
@@ -173,6 +178,7 @@ For custom routing and advanced features, create a `config.yaml` file:
       }'
     ```
     </CodeGroup>
+
   </Step>
 </Steps>
 
@@ -198,7 +204,7 @@ The containerized AI Gateway can be deployed to various cloud platforms:
   <Card title="Porter" href="/ai-gateway/deployment/porter">
     Container registry and app platform
   </Card>
-    <Card title="Kubernetes" href="/ai-gateway/deployment/k8s">
+  <Card title="Kubernetes" href="/ai-gateway/deployment/k8s">
     Deploy using Helm charts for production workloads
   </Card>
 </CardGroup>

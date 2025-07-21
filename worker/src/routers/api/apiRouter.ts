@@ -311,9 +311,10 @@ function getAPIRouterV1(
         return client.response.unauthorized();
       }
 
-      const requestData = await requestWrapper.getJson<
-        Database["public"]["Tables"]["alert"]["Insert"]
-      >();
+      const requestData =
+        await requestWrapper.getJson<
+          Database["public"]["Tables"]["alert"]["Insert"]
+        >();
 
       const alert = {
         ...requestData,
@@ -326,9 +327,8 @@ function getAPIRouterV1(
         return client.response.newError(validateError, 400);
       }
 
-      const { data: alertRow, error: alertError } = await client.db.insertAlert(
-        alert
-      );
+      const { data: alertRow, error: alertError } =
+        await client.db.insertAlert(alert);
 
       if (alertError || !alertRow) {
         return client.response.newError(alertError, 500);

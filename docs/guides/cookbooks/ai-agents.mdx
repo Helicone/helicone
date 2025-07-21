@@ -7,7 +7,7 @@ description: "Learn how to build autonomous AI agents, monitor and optimize thei
 
 import QuestionsSection from "/snippets/questions-section.mdx";
 
-AI agents are transforming how we interact with software, moving beyond simple question-answer systems to tools that can actually *do things* for us. But as agents become more autonomous and complex, monitoring their behavior becomes critical.
+AI agents are transforming how we interact with software, moving beyond simple question-answer systems to tools that can actually _do things_ for us. But as agents become more autonomous and complex, monitoring their behavior becomes critical.
 
 This guide shows you how to build a **true AI agent**—one that can think, decide, and act autonomously—while using [Helicone's Sessions](https://docs.helicone.ai/features/sessions) to track every decision, tool usage, and interaction.
 
@@ -30,7 +30,7 @@ We'll create a stock information agent that can:
 What makes this a **true agent** is that it autonomously decides:
 
 - Which tool to use for each query
-- When to chain multiple tools together  
+- When to chain multiple tools together
 - When to ask the user for more information
 - How to handle errors and retry with different approaches
 
@@ -87,7 +87,7 @@ OPENAI_API_KEY=your_openai_key_here
                     "Helicone-Auth": f"Bearer {os.getenv('HELICONE_API_KEY')}"
                 }
             )
-            
+
             # Initialize Helicone manual logger for tool calls
             self.helicone_logger = HeliconeManualLogger(
                 api_key=os.getenv('HELICONE_API_KEY'),
@@ -95,7 +95,7 @@ OPENAI_API_KEY=your_openai_key_here
                     "Helicone-Property-Type": "Stock-Info-Agent"
                 }
             )
-            
+
             self.conversation_history = []
             self.session_id = None
             self.session_headers = {}
@@ -131,7 +131,7 @@ OPENAI_API_KEY=your_openai_key_here
                 stock = yf.Ticker(ticker_symbol.upper())
                 info = stock.info
                 current_price = info.get('currentPrice') or info.get('regularMarketPrice')
-                
+
                 if current_price:
                     result = f"{current_price:.2f} USD"
                     result_recorder.append_results({
@@ -155,7 +155,7 @@ OPENAI_API_KEY=your_openai_key_here
                     "status": "error"
                 })
                 return None
-        
+
         # Log the tool call with Helicone
         return self.helicone_logger.log_request(
             provider=None,
@@ -181,7 +181,7 @@ OPENAI_API_KEY=your_openai_key_here
             try:
                 stock = yf.Ticker(ticker_symbol.upper())
                 info = stock.info
-                
+
                 ceo = None
                 for field in ['companyOfficers', 'officers']:
                     if field in info:
@@ -193,14 +193,14 @@ OPENAI_API_KEY=your_openai_key_here
                                     if 'ceo' in title or 'chief executive' in title:
                                         ceo = officer.get('name')
                                         break
-                
+
                 result_recorder.append_results({
                     "ticker": ticker_symbol.upper(),
                     "ceo": ceo,
                     "status": "success" if ceo else "not_found"
                 })
                 return ceo
-                
+
             except Exception as e:
                 result_recorder.append_results({
                     "ticker": ticker_symbol.upper(),
@@ -208,7 +208,7 @@ OPENAI_API_KEY=your_openai_key_here
                     "status": "error"
                 })
                 return None
-        
+
         return self.helicone_logger.log_request(
             provider=None,
             request={
@@ -233,7 +233,7 @@ OPENAI_API_KEY=your_openai_key_here
             try:
                 lookup = yf.Lookup(company_name)
                 stock_results = lookup.get_stock(count=5)
-                
+
                 if not stock_results.empty:
                     ticker = stock_results.index[0]
                     result_recorder.append_results({
@@ -244,7 +244,7 @@ OPENAI_API_KEY=your_openai_key_here
                         "status": "success"
                     })
                     return ticker
-                
+
                 all_results = lookup.get_all(count=5)
                 if not all_results.empty:
                     ticker = all_results.index[0]
@@ -256,14 +256,14 @@ OPENAI_API_KEY=your_openai_key_here
                         "status": "success"
                     })
                     return ticker
-                
+
                 result_recorder.append_results({
                     "company_name": company_name,
                     "error": "No ticker found",
                     "status": "not_found"
                 })
                 return None
-                    
+
             except Exception as e:
                 result_recorder.append_results({
                     "company_name": company_name,
@@ -271,7 +271,7 @@ OPENAI_API_KEY=your_openai_key_here
                     "status": "error"
                 })
                 return None
-        
+
         return self.helicone_logger.log_request(
             provider=None,
             request={
@@ -300,21 +300,21 @@ OPENAI_API_KEY=your_openai_key_here
     def process_user_query(self, user_query: str) -> str:
         """Processes a user query with comprehensive Helicone logging."""
         self.conversation_history.append({"role": "user", "content": user_query})
-        
+
         system_prompt = """You are a helpful stock information assistant. You have access to tools that can:
     1. Get current stock prices
     2. Find company CEOs
     3. Find ticker symbols for company names
 
-    Use these tools to help answer user questions about stocks and companies. 
+    Use these tools to help answer user questions about stocks and companies.
     If information is ambiguous, ask for clarification."""
-        
+
         while True:
             messages = [
                 {"role": "system", "content": system_prompt},
                 *self.conversation_history
             ]
-            
+
             def openai_operation(result_recorder):
                 response = self.client.chat.completions.create(
                     model="gpt-4o-mini-2024-07-18",
@@ -322,15 +322,15 @@ OPENAI_API_KEY=your_openai_key_here
                     tools=self.create_tool_definitions(),
                     tool_choice="auto"
                 )
-                
+
                 result_recorder.append_results({
                     "model": "gpt-4o-mini-2024-07-18",
                     "response": response.choices[0].message.model_dump(),
                     "usage": response.usage.model_dump() if response.usage else None
                 })
-                
+
                 return response
-            
+
             # Log the OpenAI call
             response = self.helicone_logger.log_request(
                 provider="openai",
@@ -346,25 +346,25 @@ OPENAI_API_KEY=your_openai_key_here
                     "Helicone-Prompt-Id": "stock-agent-reasoning"
                 }
             )
-            
+
             response_message = response.choices[0].message
-            
+
             # If no tool calls, we're done
             if not response_message.tool_calls:
                 self.conversation_history.append({
-                    "role": "assistant", 
+                    "role": "assistant",
                     "content": response_message.content
                 })
                 return response_message.content
-            
+
             # Execute the tool (logged separately by each tool method)
             tool_call = response_message.tool_calls[0]
             function_name = tool_call.function.name
             function_args = json.loads(tool_call.function.arguments)
-            
+
             print(f"\nExecuting tool: {function_name} with args: {function_args}")
             result = self.execute_tool(function_name, function_args)
-            
+
             # Add to conversation history
             self.conversation_history.append({
                 "role": "assistant",
@@ -378,7 +378,7 @@ OPENAI_API_KEY=your_openai_key_here
                     }
                 }]
             })
-            
+
             self.conversation_history.append({
                 "tool_call_id": tool_call.id,
                 "role": "tool",
@@ -398,17 +398,17 @@ OPENAI_API_KEY=your_openai_key_here
         print("Stock Information Agent with Helicone Monitoring")
         print("Ask me about stock prices, company CEOs, or any stock-related questions!")
         print("Type 'quit' to exit.\n")
-        
+
         # Start a new session
         self.start_new_session()
-        
+
         while True:
             user_input = input("You: ")
-            
+
             if user_input.lower() in ['quit', 'exit', 'bye']:
                 print("Goodbye!")
                 break
-            
+
             try:
                 response = self.process_user_query(user_input)
                 print(f"\nAgent: {response}\n")
@@ -428,6 +428,7 @@ OPENAI_API_KEY=your_openai_key_here
     ```bash
     python stock_agent.py
     ```
+
   </Step>
 </Steps>
 
@@ -497,7 +498,7 @@ Each tool execution is logged individually, making it easy to identify which too
 
 Tool calls include detailed input/output information and error states for comprehensive debugging.
 
-### Session Flow Visualization  
+### Session Flow Visualization
 
 See exactly how your agent chains tools together and where decision points occur.
 
@@ -521,19 +522,19 @@ import os
 from helicone_helpers import HeliconeManualLogger
 
 # Load environment variables
+
 load_dotenv()
 
 class StockInfoAgent:
-    def __init__(self):
-        # Initialize OpenAI client with Helicone 
-        self.client = OpenAI(
-            api_key=os.getenv('OPENAI_API_KEY'),
-            base_url="https://oai.helicone.ai/v1",
-            default_headers={
-                "Helicone-Auth": f"Bearer {os.getenv('HELICONE_API_KEY')}"
-            }
-        )
-        
+def **init**(self): # Initialize OpenAI client with Helicone
+self.client = OpenAI(
+api_key=os.getenv('OPENAI_API_KEY'),
+base_url="https://oai.helicone.ai/v1",
+default_headers={
+"Helicone-Auth": f"Bearer {os.getenv('HELICONE_API_KEY')}"
+}
+)
+
         # Initialize Helicone manual logger for tool calls
         self.helicone_logger = HeliconeManualLogger(
             api_key=os.getenv('HELICONE_API_KEY'),
@@ -541,11 +542,11 @@ class StockInfoAgent:
                 "Helicone-Property-Type": "Stock-Info-Agent",
             }
         )
-        
+
         self.conversation_history = []
         self.session_id = None
         self.session_headers = {}
-        
+
     def start_new_session(self):
         """Initialize a new session for tracking."""
         self.session_id = str(uuid.uuid4())
@@ -556,7 +557,7 @@ class StockInfoAgent:
             "Helicone-Property-Environment": "production"
         }
         print(f"Started new session: {self.session_id}")
-        
+
     def get_stock_price(self, ticker_symbol: str) -> Optional[str]:
         """Fetches the current stock price for the given ticker_symbol with Helicone logging."""
         def price_operation(result_recorder):
@@ -564,7 +565,7 @@ class StockInfoAgent:
                 stock = yf.Ticker(ticker_symbol.upper())
                 info = stock.info
                 current_price = info.get('currentPrice') or info.get('regularMarketPrice')
-                
+
                 if current_price:
                     result = f"{current_price:.2f} USD"
                     result_recorder.append_results({
@@ -589,7 +590,7 @@ class StockInfoAgent:
                 })
                 print(f"Error fetching stock price: {e}")
                 return None
-        
+
         # Log the tool call with Helicone
         return self.helicone_logger.log_request(
             provider=None,
@@ -608,14 +609,14 @@ class StockInfoAgent:
                 "Helicone-Session-Path": f"/stock-chat/price/{ticker_symbol.lower()}"
             }
         )
-    
+
     def get_company_ceo(self, ticker_symbol: str) -> Optional[str]:
         """Fetches the name of the CEO for the company with Helicone logging."""
         def ceo_operation(result_recorder):
             try:
                 stock = yf.Ticker(ticker_symbol.upper())
                 info = stock.info
-                
+
                 # Look for CEO in various possible fields
                 ceo = None
                 for field in ['companyOfficers', 'officers']:
@@ -628,14 +629,14 @@ class StockInfoAgent:
                                     if 'ceo' in title or 'chief executive' in title:
                                         ceo = officer.get('name')
                                         break
-                
+
                 result_recorder.append_results({
                     "ticker": ticker_symbol.upper(),
                     "ceo": ceo,
                     "status": "success" if ceo else "not_found"
                 })
                 return ceo
-                
+
             except Exception as e:
                 result_recorder.append_results({
                     "ticker": ticker_symbol.upper(),
@@ -644,7 +645,7 @@ class StockInfoAgent:
                 })
                 print(f"Error fetching CEO info: {e}")
                 return None
-        
+
         return self.helicone_logger.log_request(
             provider=None,
             request={
@@ -662,16 +663,16 @@ class StockInfoAgent:
                 "Helicone-Session-Path": f"/stock-chat/ceo/{ticker_symbol.lower()}"
             }
         )
-    
+
     def find_ticker_symbol(self, company_name: str) -> Optional[str]:
         """Tries to identify the stock ticker symbol with Helicone logging."""
         def ticker_search_operation(result_recorder):
             try:
                 # Use yfinance Lookup to search for the company
                 lookup = yf.Lookup(company_name)
-                
+
                 stock_results = lookup.get_stock(count=5)
-                
+
                 if not stock_results.empty:
                     ticker = stock_results.index[0]
                     result_recorder.append_results({
@@ -682,10 +683,10 @@ class StockInfoAgent:
                         "status": "success"
                     })
                     return ticker
-                
+
                 # If no stocks found, try all instruments
                 all_results = lookup.get_all(count=5)
-                
+
                 if not all_results.empty:
                     ticker = all_results.index[0]
                     result_recorder.append_results({
@@ -696,14 +697,14 @@ class StockInfoAgent:
                         "status": "success"
                     })
                     return ticker
-                
+
                 result_recorder.append_results({
                     "company_name": company_name,
                     "error": "No ticker found",
                     "status": "not_found"
                 })
                 return None
-                    
+
             except Exception as e:
                 result_recorder.append_results({
                     "company_name": company_name,
@@ -712,7 +713,7 @@ class StockInfoAgent:
                 })
                 print(f"Error searching for ticker: {e}")
                 return None
-        
+
         return self.helicone_logger.log_request(
             provider=None,
             request={
@@ -730,7 +731,7 @@ class StockInfoAgent:
                 "Helicone-Session-Path": f"/stock-chat/search/{company_name.lower().replace(' ', '-')}"
             }
         )
-    
+
     def create_tool_definitions(self) -> List[Dict[str, Any]]:
         """Creates OpenAI function calling definitions for the tools."""
         return [
@@ -786,7 +787,7 @@ class StockInfoAgent:
                 }
             }
         ]
-    
+
     def execute_tool(self, tool_name: str, arguments: Dict[str, Any]) -> Any:
         """Executes the specified tool with given arguments."""
         if tool_name == "get_stock_price":
@@ -797,27 +798,28 @@ class StockInfoAgent:
             return self.find_ticker_symbol(arguments["company_name"])
         else:
             return None
-    
+
     def process_user_query(self, user_query: str) -> str:
         """Processes a user query using the OpenAI API with function calling and Helicone logging."""
         # Add user message to conversation history
         self.conversation_history.append({"role": "user", "content": user_query})
-        
+
         # System prompt to guide the agent's behavior
         system_prompt = """You are a helpful stock information assistant. You have access to tools that can:
+
 1. Get current stock prices
 2. Find company CEOs
 3. Find ticker symbols for company names
 4. Ask users for clarification when needed
 
 Use these tools one at a time to help answer user questions about stocks and companies. If information is ambiguous, ask for clarification."""
-        
+
         while True:
             messages = [
                 {"role": "system", "content": system_prompt},
                 *self.conversation_history
             ]
-            
+
             def openai_operation(result_recorder):
                 # Call OpenAI API with function calling
                 response = self.client.chat.completions.create(
@@ -826,16 +828,16 @@ Use these tools one at a time to help answer user questions about stocks and com
                     tools=self.create_tool_definitions(),
                     tool_choice="auto"
                 )
-                
+
                 # Log the response
                 result_recorder.append_results({
                     "model": "gpt-4o-mini-2024-07-18",
                     "response": response.choices[0].message.model_dump(),
                     "usage": response.usage.model_dump() if response.usage else None
                 })
-                
+
                 return response
-            
+
             # Log the OpenAI call
             response = self.helicone_logger.log_request(
                 provider="openai",
@@ -851,24 +853,24 @@ Use these tools one at a time to help answer user questions about stocks and com
                     "Helicone-Prompt-Id": "stock-agent-reasoning"
                 }
             )
-            
+
             response_message = response.choices[0].message
-            
+
             # If no tool calls, we're done
             if not response_message.tool_calls:
                 self.conversation_history.append({"role": "assistant", "content": response_message.content})
                 return response_message.content
-            
+
             # Execute the first tool call
             tool_call = response_message.tool_calls[0]
             function_name = tool_call.function.name
             function_args = json.loads(tool_call.function.arguments)
-            
+
             print(f"\nExecuting tool: {function_name} with args: {function_args}")
-            
+
             # Execute the tool (this will be logged separately by each tool method)
             result = self.execute_tool(function_name, function_args)
-            
+
             # Add the assistant's message with tool calls to history
             self.conversation_history.append({
                 "role": "assistant",
@@ -882,7 +884,7 @@ Use these tools one at a time to help answer user questions about stocks and com
                     }
                 }]
             })
-            
+
             # Add tool result to history
             self.conversation_history.append({
                 "tool_call_id": tool_call.id,
@@ -890,32 +892,33 @@ Use these tools one at a time to help answer user questions about stocks and com
                 "name": function_name,
                 "content": str(result) if result is not None else "No result found"
             })
-    
+
     def chat(self):
         """Interactive chat loop with session tracking."""
         print("Stock Information Agent with Helicone Monitoring")
         print("Ask me about stock prices, company CEOs, or any stock-related questions!")
         print("Type 'quit' to exit.\n")
-        
+
         # Start a new session
         self.start_new_session()
-        
+
         while True:
             user_input = input("You: ")
-            
+
             if user_input.lower() in ['quit', 'exit', 'bye']:
                 print("Goodbye!")
                 break
-            
+
             try:
                 response = self.process_user_query(user_input)
                 print(f"\nAgent: {response}\n")
             except Exception as e:
                 print(f"\nError: {e}\n")
 
-if __name__ == "__main__":
-    agent = StockInfoAgent()
-    agent.chat()
+if **name** == "**main**":
+agent = StockInfoAgent()
+agent.chat()
+
 ```
   </Accordion>
 </AccordionGroup>
@@ -930,3 +933,4 @@ With Helicone's Manual Logger, you have complete visibility into your agent's de
 - **Monitor production usage** with detailed request tracking
 
 <QuestionsSection />
+```

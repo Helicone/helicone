@@ -10,14 +10,14 @@ This guide provides a comprehensive overview to help you navigate these choices 
 
 Here are some of the best models available and their capabilities:
 
-| Model Family | Latest Models | Context Window | Knowledge Cutoff | Multimodal | Best For |
-|--------------|---------------|----------------|------------------|------------|----------|
-| **OpenAI** | <a href="https://www.helicone.ai/blog/gpt-4.1-full-developer-guide" target="_blank" rel="noopener">GPT-4.1</a>, <a href="https://www.helicone.ai/blog/gpt-4.5-benchmarks" target="_blank" rel="noopener">GPT-4.5</a>, <a href="https://www.helicone.ai/blog/openai-o3" target="_blank" rel="noopener">o3</a> | 128K-1M | Oct 2023-Jun 2024 | Text, Image | General-purpose, coding, reasoning |
-| **Anthropic** | <a href="https://www.helicone.ai/blog/claude-3.7-benchmarks-and-examples" target="_blank" rel="noopener">Claude 3.7 Sonnet</a>, <a href="https://www.helicone.ai/blog/claude-3.5-sonnet-vs-openai-o1" target="_blank" rel="noopener">Claude 3.5 Sonnet</a> | 200K | Apr 2024 | Text, Image | Coding, factual content, reasoning |
-| **Google** | <a href="https://www.helicone.ai/blog/gemini-2.5-full-developer-guide" target="_blank" rel="noopener">Gemini 2.5 Pro</a>, <a href="https://www.helicone.ai/blog/google-gemini-exp-1206" target="_blank" rel="noopener">Gemini-Exp-1206</a> | 1M | Dec 2023 | Text, Image, Audio | Research, long-context tasks |
-| **Meta** | <a href="https://www.helicone.ai/blog/meta-llama-3-3-70-b-instruct" target="_blank" rel="noopener">Llama 3.3</a> | 128K | Dec 2023 | Text | Open deployment, cost-efficiency |
-| **xAI** | <a href="https://www.helicone.ai/blog/grok-3-benchmark-comparison" target="_blank" rel="noopener">Grok 3</a> | 1M | Dec 2023 | Text, Image | Math, visual reasoning |
-| **DeepSeek** | <a href="https://www.helicone.ai/blog/deepseek-v3" target="_blank" rel="noopener">DeepSeek V3</a>, <a href="https://www.helicone.ai/blog/deepseek-janus-pro" target="_blank" rel="noopener">Janus Pro</a> | 64K-128K | Jan 2024 | Text, Image | Cost-effective performance |
+| Model Family  | Latest Models                                                                                                                                                                                                                                                                                                | Context Window | Knowledge Cutoff  | Multimodal         | Best For                           |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------- | ----------------- | ------------------ | ---------------------------------- |
+| **OpenAI**    | <a href="https://www.helicone.ai/blog/gpt-4.1-full-developer-guide" target="_blank" rel="noopener">GPT-4.1</a>, <a href="https://www.helicone.ai/blog/gpt-4.5-benchmarks" target="_blank" rel="noopener">GPT-4.5</a>, <a href="https://www.helicone.ai/blog/openai-o3" target="_blank" rel="noopener">o3</a> | 128K-1M        | Oct 2023-Jun 2024 | Text, Image        | General-purpose, coding, reasoning |
+| **Anthropic** | <a href="https://www.helicone.ai/blog/claude-3.7-benchmarks-and-examples" target="_blank" rel="noopener">Claude 3.7 Sonnet</a>, <a href="https://www.helicone.ai/blog/claude-3.5-sonnet-vs-openai-o1" target="_blank" rel="noopener">Claude 3.5 Sonnet</a>                                                   | 200K           | Apr 2024          | Text, Image        | Coding, factual content, reasoning |
+| **Google**    | <a href="https://www.helicone.ai/blog/gemini-2.5-full-developer-guide" target="_blank" rel="noopener">Gemini 2.5 Pro</a>, <a href="https://www.helicone.ai/blog/google-gemini-exp-1206" target="_blank" rel="noopener">Gemini-Exp-1206</a>                                                                   | 1M             | Dec 2023          | Text, Image, Audio | Research, long-context tasks       |
+| **Meta**      | <a href="https://www.helicone.ai/blog/meta-llama-3-3-70-b-instruct" target="_blank" rel="noopener">Llama 3.3</a>                                                                                                                                                                                             | 128K           | Dec 2023          | Text               | Open deployment, cost-efficiency   |
+| **xAI**       | <a href="https://www.helicone.ai/blog/grok-3-benchmark-comparison" target="_blank" rel="noopener">Grok 3</a>                                                                                                                                                                                                 | 1M             | Dec 2023          | Text, Image        | Math, visual reasoning             |
+| **DeepSeek**  | <a href="https://www.helicone.ai/blog/deepseek-v3" target="_blank" rel="noopener">DeepSeek V3</a>, <a href="https://www.helicone.ai/blog/deepseek-janus-pro" target="_blank" rel="noopener">Janus Pro</a>                                                                                                    | 64K-128K       | Jan 2024          | Text, Image        | Cost-effective performance         |
 
 <BottomLine
   title="The Current State of AI Models"
@@ -28,40 +28,59 @@ Here are some of the best models available and their capabilities:
 
 Let's now look at some benchmark results for key models:
 
-| Model | Knowledge<br/>(MMLU) | Reasoning<br/>(GPQA) | Coding<br/>(SWE-bench) | Speed<br/>(tokens/sec) | Cost<br/>(Input/Output per 1M) | Best For |
-|-------|---------------------|---------------------|------------------------|------------------------|-------------------------------|----------|
-| **OpenAI o3** | 84.2% | **87.7%** | **69.1%** | 85 | $10 / $40 | Complex reasoning, math |
-| **Claude 3.7** | 90.5% | 78.2% | **70.3%** | 74 | $3 / $15 | Software engineering |
-| **GPT-4.1** | **91.2%** | 79.3% | 54.6% | 145 | $2 / $8 | General use, knowledge |
-| **Gemini 2.5 Pro** | 89.8% | 84.0% | 63.8% | 86 | $1.25 / $10 | Balanced performance/cost |
-| **Groq (Llama-3)** | 82.8% | 59.1% | 42.0% | **275** | $0.75 / $0.99 | High-volume, speed-critical |
-| **DeepSeek V3** | 88.5% | 71.5% | 49.2% | 60 | **$0.27 / $1.10** | Budget-conscious apps |
-| **Grok 3** | 86.4% | 80.2% | - | 112 | $3 / $15 | Mathematics, innovation |
+| Model              | Knowledge<br/>(MMLU) | Reasoning<br/>(GPQA) | Coding<br/>(SWE-bench) | Speed<br/>(tokens/sec) | Cost<br/>(Input/Output per 1M) | Best For                    |
+| ------------------ | -------------------- | -------------------- | ---------------------- | ---------------------- | ------------------------------ | --------------------------- |
+| **OpenAI o3**      | 84.2%                | **87.7%**            | **69.1%**              | 85                     | $10 / $40                      | Complex reasoning, math     |
+| **Claude 3.7**     | 90.5%                | 78.2%                | **70.3%**              | 74                     | $3 / $15                       | Software engineering        |
+| **GPT-4.1**        | **91.2%**            | 79.3%                | 54.6%                  | 145                    | $2 / $8                        | General use, knowledge      |
+| **Gemini 2.5 Pro** | 89.8%                | 84.0%                | 63.8%                  | 86                     | $1.25 / $10                    | Balanced performance/cost   |
+| **Groq (Llama-3)** | 82.8%                | 59.1%                | 42.0%                  | **275**                | $0.75 / $0.99                  | High-volume, speed-critical |
+| **DeepSeek V3**    | 88.5%                | 71.5%                | 49.2%                  | 60                     | **$0.27 / $1.10**              | Budget-conscious apps       |
+| **Grok 3**         | 86.4%                | 80.2%                | -                      | 112                    | $3 / $15                       | Mathematics, innovation     |
 
 For model-specific benchmark comparisons:
-- <a href="https://www.helicone.ai/blog/gpt-4.1-full-developer-guide" target="_blank" rel="noopener">GPT-4.1 vs. Claude 3.7</a>
-- <a href="https://www.helicone.ai/blog/gpt-4.5-benchmarks" target="_blank" rel="noopener">GPT-4.5 vs. Other Models</a>
-- <a href="https://www.helicone.ai/blog/gemini-2.5-full-developer-guide" target="_blank" rel="noopener">Gemini 2.5 Pro Benchmarks</a>
+
+- <a
+    href="https://www.helicone.ai/blog/gpt-4.1-full-developer-guide"
+    target="_blank"
+    rel="noopener"
+  >
+    GPT-4.1 vs. Claude 3.7
+  </a>
+- <a
+    href="https://www.helicone.ai/blog/gpt-4.5-benchmarks"
+    target="_blank"
+    rel="noopener"
+  >
+    GPT-4.5 vs. Other Models
+  </a>
+- <a
+    href="https://www.helicone.ai/blog/gemini-2.5-full-developer-guide"
+    target="_blank"
+    rel="noopener"
+  >
+    Gemini 2.5 Pro Benchmarks
+  </a>
 
 ## Top LLM API Provider Comparison
 
-LLM API providers serve as an infrastructure layer between models and your applications. Though you don't necessarily have to use them, they can add a lot of value to your application such as greater reliability, customizability, and cost-efficiency. 
+LLM API providers serve as an infrastructure layer between models and your applications. Though you don't necessarily have to use them, they can add a lot of value to your application such as greater reliability, customizability, and cost-efficiency.
 
 Your choice significantly impacts cost, performance, and reliability. Here's a quick rundown of the top providers:
 
-| Provider | Strengths | Models Available | Best For | Infrastructure |
-|----------|-----------|------------------|----------|----------------|
-| <a href="https://www.helicone.ai/blog/llm-api-providers#1-together-ai" target="_blank" rel="noopener">Together AI</a> | Sub-100ms latency, horizontal scaling | 200+ open-source LLMs | Large-scale deployments | Proprietary inference optimization |
-| <a href="https://www.helicone.ai/blog/llm-api-providers#2-fireworks-ai" target="_blank" rel="noopener">Fireworks AI</a> | Speed, FireAttention engine | Open & proprietary models | Multi-modal applications | HIPAA, SOC2 compliant |
-| <a href="https://www.helicone.ai/blog/llm-api-providers#3-openrouter" target="_blank" rel="noopener">OpenRouter</a> | Model flexibility, routing | 300+ models | Multi-model applications | Distributed provider network |
-| <a href="https://www.helicone.ai/blog/llm-api-providers#4-hyperbolic" target="_blank" rel="noopener">Hyperbolic</a> | Cost-effective GPU rental | Latest models | Cost-conscious startups | GPU marketplace |
-| <a href="https://www.helicone.ai/blog/llm-api-providers#7-groq" target="_blank" rel="noopener">Groq</a> | Ultra-low latency | Llama, Claude, etc. | Speed-critical applications | Custom LPU hardware |
-| <a href="https://www.helicone.ai/blog/llm-api-providers#5-replicate" target="_blank" rel="noopener">Replicate</a> | Easy deployment | Thousands of models | Experimentation, MVPs | Container-based deployment |
-| <a href="https://www.helicone.ai/blog/llm-api-providers#6-huggingface" target="_blank" rel="noopener">HuggingFace</a> | Open-source focus, community | 100,000+ models | NLP research, education | Spaces, Inference API |
-| <a href="https://www.helicone.ai/blog/llm-api-providers#8-deepinfra" target="_blank" rel="noopener">DeepInfra</a> | Cloud-based hosting | Popular open-source | Enterprise scalability | Custom inference infrastructure |
-| <a href="https://www.helicone.ai/blog/llm-api-providers#9-perplexity-ai" target="_blank" rel="noopener">Perplexity</a> | Search & knowledge focus | PPLX models, others | AI-powered search | Knowledge-optimized infrastructure |
-| <a href="https://www.helicone.ai/blog/llm-api-providers#10-anyscale" target="_blank" rel="noopener">Anyscale</a> | Ray integration, scalability | Open-source models | High-scale distributed AI | Ray-based compute engine |
-| <a href="https://www.helicone.ai/blog/llm-api-providers#11-novita-ai" target="_blank" rel="noopener">Novita AI</a> | Low-cost, reliability | 200+ models | Budget-conscious apps | Global distributed infrastructure |
+| Provider                                                                                                                | Strengths                             | Models Available          | Best For                    | Infrastructure                     |
+| ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------- | ------------------------- | --------------------------- | ---------------------------------- |
+| <a href="https://www.helicone.ai/blog/llm-api-providers#1-together-ai" target="_blank" rel="noopener">Together AI</a>   | Sub-100ms latency, horizontal scaling | 200+ open-source LLMs     | Large-scale deployments     | Proprietary inference optimization |
+| <a href="https://www.helicone.ai/blog/llm-api-providers#2-fireworks-ai" target="_blank" rel="noopener">Fireworks AI</a> | Speed, FireAttention engine           | Open & proprietary models | Multi-modal applications    | HIPAA, SOC2 compliant              |
+| <a href="https://www.helicone.ai/blog/llm-api-providers#3-openrouter" target="_blank" rel="noopener">OpenRouter</a>     | Model flexibility, routing            | 300+ models               | Multi-model applications    | Distributed provider network       |
+| <a href="https://www.helicone.ai/blog/llm-api-providers#4-hyperbolic" target="_blank" rel="noopener">Hyperbolic</a>     | Cost-effective GPU rental             | Latest models             | Cost-conscious startups     | GPU marketplace                    |
+| <a href="https://www.helicone.ai/blog/llm-api-providers#7-groq" target="_blank" rel="noopener">Groq</a>                 | Ultra-low latency                     | Llama, Claude, etc.       | Speed-critical applications | Custom LPU hardware                |
+| <a href="https://www.helicone.ai/blog/llm-api-providers#5-replicate" target="_blank" rel="noopener">Replicate</a>       | Easy deployment                       | Thousands of models       | Experimentation, MVPs       | Container-based deployment         |
+| <a href="https://www.helicone.ai/blog/llm-api-providers#6-huggingface" target="_blank" rel="noopener">HuggingFace</a>   | Open-source focus, community          | 100,000+ models           | NLP research, education     | Spaces, Inference API              |
+| <a href="https://www.helicone.ai/blog/llm-api-providers#8-deepinfra" target="_blank" rel="noopener">DeepInfra</a>       | Cloud-based hosting                   | Popular open-source       | Enterprise scalability      | Custom inference infrastructure    |
+| <a href="https://www.helicone.ai/blog/llm-api-providers#9-perplexity-ai" target="_blank" rel="noopener">Perplexity</a>  | Search & knowledge focus              | PPLX models, others       | AI-powered search           | Knowledge-optimized infrastructure |
+| <a href="https://www.helicone.ai/blog/llm-api-providers#10-anyscale" target="_blank" rel="noopener">Anyscale</a>        | Ray integration, scalability          | Open-source models        | High-scale distributed AI   | Ray-based compute engine           |
+| <a href="https://www.helicone.ai/blog/llm-api-providers#11-novita-ai" target="_blank" rel="noopener">Novita AI</a>      | Low-cost, reliability                 | 200+ models               | Budget-conscious apps       | Global distributed infrastructure  |
 
 For a complete breakdown of all providers, see our <a href="https://www.helicone.ai/blog/llm-api-providers" target="_blank" rel="noopener">Top 11 LLM API Providers in 2025</a> guide.
 
@@ -71,50 +90,50 @@ Selecting the optimal model for your application requires evaluating several key
 
 ### Proprietary vs. Open Source Models
 
-| Aspect | Proprietary Models<br/>(OpenAI, Anthropic, Google) | Open Source Models<br/>(Llama, DeepSeek, Mistral) |
-|--------|---------------------------------------------------|---------------------------------------------------|
-| **Performance** | Higher benchmark scores | Usually trail proprietary models |
-| **Deployment** | Easy via API | More setup required |
-| **Customization** | Limited | Full control |
-| **Cost** | Higher operational costs | Lower operational costs |
-| **Privacy** | Data may be shared with provider | Complete data privacy possible |
-| **Dependencies** | Reliance on third-party providers | Self-hosted options available |
-| **Example Models** | GPT-4.1, Claude 3.7, Gemini 2.5 | Llama 3.3, DeepSeek V3, Mistral 7B |
+| Aspect             | Proprietary Models<br/>(OpenAI, Anthropic, Google) | Open Source Models<br/>(Llama, DeepSeek, Mistral) |
+| ------------------ | -------------------------------------------------- | ------------------------------------------------- |
+| **Performance**    | Higher benchmark scores                            | Usually trail proprietary models                  |
+| **Deployment**     | Easy via API                                       | More setup required                               |
+| **Customization**  | Limited                                            | Full control                                      |
+| **Cost**           | Higher operational costs                           | Lower operational costs                           |
+| **Privacy**        | Data may be shared with provider                   | Complete data privacy possible                    |
+| **Dependencies**   | Reliance on third-party providers                  | Self-hosted options available                     |
+| **Example Models** | GPT-4.1, Claude 3.7, Gemini 2.5                    | Llama 3.3, DeepSeek V3, Mistral 7B                |
 
 ### Reasoning vs. Non-Reasoning Models
 
-| Aspect | Reasoning Models<br/>(o1, o3, Claude 3.7 Sonnet Extended Thinking) | Non-Reasoning Models<br/>(GPT-4o, GPT-4.1, Standard Claude) |
-|--------|-------------------------------------------------------------|-------------------------------------------------------------|
-| **Problem Solving** | Step-by-step approach | Pattern-based approach |
-| **Strengths** | Mathematics, logic, complex decisions | Conversational, creative tasks |
-| **Thinking Process** | Explicit, visible reasoning | Implicit reasoning |
-| **Token Costs** | Higher due to additional compute | Lower, more efficient |
-| **Response Time** | Slower, more thorough | Faster responses |
-| **Best For** | Scientific, mathematical, logical tasks | General use, customer-facing applications |
-| **Example Models** | OpenAI o3, o1, Claude 3.7 (Extended Thinking) | GPT-4.1, GPT-4o, Standard Claude 3.7 |
+| Aspect               | Reasoning Models<br/>(o1, o3, Claude 3.7 Sonnet Extended Thinking) | Non-Reasoning Models<br/>(GPT-4o, GPT-4.1, Standard Claude) |
+| -------------------- | ------------------------------------------------------------------ | ----------------------------------------------------------- |
+| **Problem Solving**  | Step-by-step approach                                              | Pattern-based approach                                      |
+| **Strengths**        | Mathematics, logic, complex decisions                              | Conversational, creative tasks                              |
+| **Thinking Process** | Explicit, visible reasoning                                        | Implicit reasoning                                          |
+| **Token Costs**      | Higher due to additional compute                                   | Lower, more efficient                                       |
+| **Response Time**    | Slower, more thorough                                              | Faster responses                                            |
+| **Best For**         | Scientific, mathematical, logical tasks                            | General use, customer-facing applications                   |
+| **Example Models**   | OpenAI o3, o1, Claude 3.7 (Extended Thinking)                      | GPT-4.1, GPT-4o, Standard Claude 3.7                        |
 
 Read our guide to <a href="https://www.helicone.ai/blog/prompt-thinking-models" target="_blank" rel="noopener">Prompting Thinking Models</a> for more details.
 
 ### Multimodal vs. Text-Only Models
 
-| Aspect | Multimodal Models | Text-Only Models |
-|--------|-------------------|------------------|
-| **Input Types** | Text, images, sometimes audio/video | Text only |
-| **Use Cases** | Visual programming, design workflows | Document analysis, coding |
-| **Cost** | Generally more expensive | Often lower cost |
-| **Complexity** | More complex prompting strategies | Simpler integration |
-| **Efficiency** | Lower token efficiency for mixed inputs | Better token efficiency |
-| **Example Models** | GPT-4o, Claude 3.7, Gemini 2.5 Pro | Earlier GPT models, specialized coding models |
+| Aspect             | Multimodal Models                       | Text-Only Models                              |
+| ------------------ | --------------------------------------- | --------------------------------------------- |
+| **Input Types**    | Text, images, sometimes audio/video     | Text only                                     |
+| **Use Cases**      | Visual programming, design workflows    | Document analysis, coding                     |
+| **Cost**           | Generally more expensive                | Often lower cost                              |
+| **Complexity**     | More complex prompting strategies       | Simpler integration                           |
+| **Efficiency**     | Lower token efficiency for mixed inputs | Better token efficiency                       |
+| **Example Models** | GPT-4o, Claude 3.7, Gemini 2.5 Pro      | Earlier GPT models, specialized coding models |
 
 ### General vs. Specialized Models
 
-| Aspect | General Models<br/>(GPT-4.1, Claude 3.7) | Specialized Models<br/>(Claude Code, Janus Pro) |
-|--------|------------------------------------------|------------------------------------------------|
-| **Versatility** | Good across many domains | Excellent in specific domains |
-| **Integration** | Single integration for multiple use cases | May require multiple specialized integrations |
-| **Performance** | Good baseline across tasks | Superior in target domains |
-| **Cost Efficiency** | Consistent pricing model | Sometimes lower cost for specialized tasks |
-| **Example Models** | GPT-4.1, Claude 3.7, Gemini 2.5 Pro | Claude Code, DeepSeek Janus Pro, SAM 2 |
+| Aspect              | General Models<br/>(GPT-4.1, Claude 3.7)  | Specialized Models<br/>(Claude Code, Janus Pro) |
+| ------------------- | ----------------------------------------- | ----------------------------------------------- |
+| **Versatility**     | Good across many domains                  | Excellent in specific domains                   |
+| **Integration**     | Single integration for multiple use cases | May require multiple specialized integrations   |
+| **Performance**     | Good baseline across tasks                | Superior in target domains                      |
+| **Cost Efficiency** | Consistent pricing model                  | Sometimes lower cost for specialized tasks      |
+| **Example Models**  | GPT-4.1, Claude 3.7, Gemini 2.5 Pro       | Claude Code, DeepSeek Janus Pro, SAM 2          |
 
 <CallToAction
   title="Compare Models with Helicone ⚡️"
@@ -131,43 +150,43 @@ When selecting an API provider, consider these critical factors:
 
 ### Performance & Reliability
 
-| Factor | Considerations |
-|--------|----------------|
-| **Response Time** | How quickly does the provider deliver first token and complete responses? |
-| **Uptime SLA** | What uptime guarantees does the provider offer? |
-| **Global Distribution** | How globally distributed is the infrastructure? |
-| **Rate Limits** | What are the token-per-minute and requests-per-minute limits? |
-| **Burst Capacity** | How well does the provider handle traffic spikes? |
+| Factor                  | Considerations                                                            |
+| ----------------------- | ------------------------------------------------------------------------- |
+| **Response Time**       | How quickly does the provider deliver first token and complete responses? |
+| **Uptime SLA**          | What uptime guarantees does the provider offer?                           |
+| **Global Distribution** | How globally distributed is the infrastructure?                           |
+| **Rate Limits**         | What are the token-per-minute and requests-per-minute limits?             |
+| **Burst Capacity**      | How well does the provider handle traffic spikes?                         |
 
 ### Security & Compliance
 
-| Security Aspect | Key Considerations |
-|-----------------|---------------------|
-| **Data Privacy** | Does the provider store your prompts/responses? Are they used for training? |
-| **SOC 2 Compliance** | Does the provider have SOC 2 Type II certification? |
-| **GDPR Compliance** | How does the provider handle EU data? Are there EU-specific data centers? |
-| **Encryption** | Is data encrypted in transit and at rest? |
-| **Access Controls** | What authentication methods are supported? Is SSO available? |
-| **Logging & Auditing** | Are all interactions logged and available for audit? |
+| Security Aspect        | Key Considerations                                                          |
+| ---------------------- | --------------------------------------------------------------------------- |
+| **Data Privacy**       | Does the provider store your prompts/responses? Are they used for training? |
+| **SOC 2 Compliance**   | Does the provider have SOC 2 Type II certification?                         |
+| **GDPR Compliance**    | How does the provider handle EU data? Are there EU-specific data centers?   |
+| **Encryption**         | Is data encrypted in transit and at rest?                                   |
+| **Access Controls**    | What authentication methods are supported? Is SSO available?                |
+| **Logging & Auditing** | Are all interactions logged and available for audit?                        |
 
 ### Pricing & Cost Structure
 
-| Factor | What to Look For |
-|--------|------------------|
-| **Token Pricing** | Compare input and output token costs |
-| **Context Caching** | Does the provider offer discounted rates for repeated context? |
-| **Usage Tiers** | Are there volume discounts for higher usage? |
-| **Minimums/Commitments** | Are there monthly minimums or annual commitments? |
-| **Overages** | How are usage spikes billed? |
+| Factor                   | What to Look For                                               |
+| ------------------------ | -------------------------------------------------------------- |
+| **Token Pricing**        | Compare input and output token costs                           |
+| **Context Caching**      | Does the provider offer discounted rates for repeated context? |
+| **Usage Tiers**          | Are there volume discounts for higher usage?                   |
+| **Minimums/Commitments** | Are there monthly minimums or annual commitments?              |
+| **Overages**             | How are usage spikes billed?                                   |
 
 ### Feature Support
 
-| Feature | Questions to Ask |
-|---------|------------------|
-| **Model Selection** | Which models does the provider support? |
-| **Function Calling** | Is function/tool calling supported? |
-| **Streaming Support** | Can responses be streamed token-by-token? |
-| **Fine-tuning** | Can you fine-tune models on your data? |
+| Feature               | Questions to Ask                                         |
+| --------------------- | -------------------------------------------------------- |
+| **Model Selection**   | Which models does the provider support?                  |
+| **Function Calling**  | Is function/tool calling supported?                      |
+| **Streaming Support** | Can responses be streamed token-by-token?                |
+| **Fine-tuning**       | Can you fine-tune models on your data?                   |
 | **Prompt Management** | Does the provider offer prompt versioning or management? |
 
 Enterprise-grade providers like OpenAI, Anthropic, and AWS Bedrock offer the most robust security features, while newer or smaller providers may have more limited options but often lead in specific areas like speed or cost-efficiency.
@@ -184,13 +203,13 @@ Effectively monitoring your LLM applications is crucial for production readiness
 
 ### Key Monitoring Metrics
 
-| Metric Category | What to Track | Why It Matters |
-|-----------------|---------------|----------------|
-| **Cost** | Token usage, total spend, cost per request | Prevent budget overruns, identify optimization opportunities |
-| **Performance** | Response time, TTFT, tokens per second | Ensure consistent user experience |
-| **Quality** | Error rates, hallucination frequency, user feedback | Maintain output reliability |
-| **Usage Patterns** | Request volume, peak times, user distribution | Plan capacity, understand user behavior |
-| **Cache Efficiency** | Cache hit rate, cost savings from caching | Optimize cost efficiency |
+| Metric Category      | What to Track                                       | Why It Matters                                               |
+| -------------------- | --------------------------------------------------- | ------------------------------------------------------------ |
+| **Cost**             | Token usage, total spend, cost per request          | Prevent budget overruns, identify optimization opportunities |
+| **Performance**      | Response time, TTFT, tokens per second              | Ensure consistent user experience                            |
+| **Quality**          | Error rates, hallucination frequency, user feedback | Maintain output reliability                                  |
+| **Usage Patterns**   | Request volume, peak times, user distribution       | Plan capacity, understand user behavior                      |
+| **Cache Efficiency** | Cache hit rate, cost savings from caching           | Optimize cost efficiency                                     |
 
 With monitoring tools, you can:
 
@@ -273,32 +292,46 @@ By combining the right model, provider, and monitoring solution, you can build A
 
 For more specific comparisons, explore these:
 
-- <a href="https://www.helicone.ai/blog/claude-3.5-sonnet-vs-openai-o1">Claude 3.5 Sonnet vs OpenAI o1</a>
-- <a href="https://www.helicone.ai/blog/gpt-4o-mini-vs-claude-3.5-sonnet">GPT-4o Mini vs Claude 3.5 Sonnet</a>
-- <a href="https://www.helicone.ai/blog/grok-3-benchmark-comparison">Grok 3 Technical Review</a>
-- <a href="https://www.helicone.ai/blog/meta-llama-3-3-70-b-instruct">Llama 3.3 vs GPT-4 vs Claude 3.5</a>
+- <a href="https://www.helicone.ai/blog/claude-3.5-sonnet-vs-openai-o1">
+    Claude 3.5 Sonnet vs OpenAI o1
+  </a>
+- <a href="https://www.helicone.ai/blog/gpt-4o-mini-vs-claude-3.5-sonnet">
+    GPT-4o Mini vs Claude 3.5 Sonnet
+  </a>
+- <a href="https://www.helicone.ai/blog/grok-3-benchmark-comparison">
+    Grok 3 Technical Review
+  </a>
+- <a href="https://www.helicone.ai/blog/meta-llama-3-3-70-b-instruct">
+    Llama 3.3 vs GPT-4 vs Claude 3.5
+  </a>
 
-<FAQ 
+<FAQ
   items={[
     {
       question: "What is the best LLM model for production in 2025?",
-      answer: "The 'best' model depends on your specific requirements. For general applications, GPT-4.1 and Claude 3.7 Sonnet offer excellent performance. For cost-sensitive deployments, open-source models like Llama 3.3 or DeepSeek V3 provide strong capabilities at lower costs. For specialized reasoning tasks, consider OpenAI's o3 or Claude 3.7's extended thinking mode."
+      answer:
+        "The 'best' model depends on your specific requirements. For general applications, GPT-4.1 and Claude 3.7 Sonnet offer excellent performance. For cost-sensitive deployments, open-source models like Llama 3.3 or DeepSeek V3 provide strong capabilities at lower costs. For specialized reasoning tasks, consider OpenAI's o3 or Claude 3.7's extended thinking mode.",
     },
     {
       question: "How do I choose between proprietary and open-source LLMs?",
-      answer: "Consider your requirements for performance, cost, privacy, and customization. Proprietary models typically offer higher performance with less setup, while open-source models provide greater control, privacy, and cost advantages. For applications requiring the highest performance on complex tasks, proprietary models generally lead, while open-source options work well for more standard applications where cost-efficiency is important."
+      answer:
+        "Consider your requirements for performance, cost, privacy, and customization. Proprietary models typically offer higher performance with less setup, while open-source models provide greater control, privacy, and cost advantages. For applications requiring the highest performance on complex tasks, proprietary models generally lead, while open-source options work well for more standard applications where cost-efficiency is important.",
     },
     {
       question: "What are the most cost-effective LLM API providers?",
-      answer: "Hyperbolic, Novita AI, and Groq consistently offer some of the lowest prices, especially for open-source models. OpenRouter allows you to dynamically route to the most cost-effective provider for each request. Together AI offers a good balance of performance and price for many popular models."
+      answer:
+        "Hyperbolic, Novita AI, and Groq consistently offer some of the lowest prices, especially for open-source models. OpenRouter allows you to dynamically route to the most cost-effective provider for each request. Together AI offers a good balance of performance and price for many popular models.",
     },
     {
       question: "How can I monitor LLM performance across different providers?",
-      answer: "Helicone provides unified monitoring across all major LLM providers with minimal setup. By simply changing your base URL and adding an authentication header, you can track costs, usage patterns, latency, and other key metrics across all your LLM interactions in one dashboard."
+      answer:
+        "Helicone provides unified monitoring across all major LLM providers with minimal setup. By simply changing your base URL and adding an authentication header, you can track costs, usage patterns, latency, and other key metrics across all your LLM interactions in one dashboard.",
     },
     {
-      question: "What security certifications should I look for in an LLM provider?",
-      answer: "For enterprise use, prioritize providers with SOC 2 Type II compliance, GDPR compliance (if operating in Europe), and HIPAA compliance (for healthcare applications). Major providers like OpenAI, Anthropic, AWS Bedrock, and Google Vertex AI offer the most comprehensive security certifications and enterprise features."
-    }
+      question:
+        "What security certifications should I look for in an LLM provider?",
+      answer:
+        "For enterprise use, prioritize providers with SOC 2 Type II compliance, GDPR compliance (if operating in Europe), and HIPAA compliance (for healthcare applications). Major providers like OpenAI, Anthropic, AWS Bedrock, and Google Vertex AI offer the most comprehensive security certifications and enterprise features.",
+    },
   ]}
 />

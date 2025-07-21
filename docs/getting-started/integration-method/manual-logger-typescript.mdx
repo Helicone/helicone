@@ -125,9 +125,8 @@ const streamingRequestBody = {
   stream: true,
 };
 
-const streamingResponse = await openai.chat.completions.create(
-  streamingRequestBody
-);
+const streamingResponse =
+  await openai.chat.completions.create(streamingRequestBody);
 
 const [streamForUser, streamForLogging] = stream.tee();
 

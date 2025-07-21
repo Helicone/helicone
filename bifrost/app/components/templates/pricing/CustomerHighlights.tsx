@@ -54,21 +54,20 @@ const highlights: CustomerHighlight[] = [
 
 export default function CustomerHighlights() {
   return (
-    <div className="min-h-[200px] flex items-center justify-center">
-      <div className="w-full rounded-xl flex flex-col md:flex-row border border-border">
+    <div className="flex min-h-[200px] items-center justify-center">
+      <div className="border-border flex w-full flex-col rounded-xl border md:flex-row">
         {highlights.map((highlight, index) => (
           <div
             key={index}
-            className={`flex-1 flex flex-col justify-between items-start
-              ${index !== highlights.length - 1
-                ? "border-b md:border-b-0 md:border-r border-border"
+            className={`flex flex-1 flex-col items-start justify-between ${
+              index !== highlights.length - 1
+                ? "border-border border-b md:border-b-0 md:border-r"
                 : ""
-              }
-            `}
+            } `}
           >
             <div className="flex flex-col-reverse gap-8 px-6 py-9">
               <div className="self-stretch">
-                <span className="text-xl text-slate-700 font-bold">
+                <span className="text-xl font-bold text-slate-700">
                   {highlight.metric}
                 </span>
                 <br />
@@ -76,7 +75,7 @@ export default function CustomerHighlights() {
                   {" " + highlight.description}
                 </span>
               </div>
-              <div className="w-[120px] h-auto">
+              <div className="h-auto w-[120px]">
                 <Image
                   src={highlight.logoSrc}
                   alt={highlight.logoAlt}
@@ -85,8 +84,8 @@ export default function CustomerHighlights() {
                 />
               </div>
             </div>
-            <div className="w-full border-t border-border">
-              <div className="px-6 py-4 flex justify-between items-center">
+            <div className="border-border w-full border-t">
+              <div className="flex items-center justify-between px-6 py-4">
                 <span className="text-primary font-medium">
                   {highlight.tier.name}
                 </span>

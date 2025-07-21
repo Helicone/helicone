@@ -39,10 +39,7 @@ export default async function Home({
         remarkGfm,
         [remarkToc, { heading: "Table of Contents", tight: true, maxDepth: 2 }],
       ],
-      rehypePlugins: [
-        rehypeSlug,
-        rehypeHighlight,
-      ],
+      rehypePlugins: [rehypeSlug, rehypeHighlight],
     },
   });
 
@@ -53,14 +50,14 @@ export default async function Home({
   }
 
   return (
-    <div className="w-full bg-white h-full antialiased relative">
-      <div className="flex flex-col md:flex-row items-start w-full mx-auto max-w-5xl py-16 px-4 md:py-24 relative gap-8">
-        <div className="hidden md:flex w-56 h-full flex-col space-y-6 md:sticky top-16 md:top-32">
+    <div className="relative h-full w-full bg-white antialiased">
+      <div className="relative mx-auto flex w-full max-w-5xl flex-col items-start gap-8 px-4 py-16 md:flex-row md:py-24">
+        <div className="top-16 hidden h-full w-56 flex-col space-y-6 md:sticky md:top-32 md:flex">
           <Link
             href="/blog"
-            className="flex items-center gap-1.5 text-slate-600 hover:text-slate-700 transition-colors group"
+            className="group flex items-center gap-1.5 text-slate-600 transition-colors hover:text-slate-700"
           >
-            <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+            <ChevronLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
             <span className="text-sm font-medium">Back</span>
           </Link>
 
@@ -73,10 +70,10 @@ export default async function Home({
                     <img
                       src={HEADSHOTS[author as keyof typeof HEADSHOTS]}
                       alt={`${author}'s headshot`}
-                      className="w-9 h-9 rounded-full object-cover border border-slate-200"
+                      className="h-9 w-9 rounded-full border border-slate-200 object-cover"
                     />
                     <div>
-                      <div className="text-slate-700 text-sm font-medium">
+                      <div className="text-sm font-medium text-slate-700">
                         {author}
                       </div>
                     </div>
@@ -88,10 +85,10 @@ export default async function Home({
                 <img
                   src={HEADSHOTS[metadata.author as keyof typeof HEADSHOTS]}
                   alt={`${metadata.author}'s headshot`}
-                  className="w-9 h-9 rounded-full object-cover border border-slate-200"
+                  className="h-9 w-9 rounded-full border border-slate-200 object-cover"
                 />
                 <div>
-                  <div className="text-slate-700 text-sm font-medium">
+                  <div className="text-sm font-medium text-slate-700">
                     {metadata.author}
                   </div>
                 </div>
@@ -99,34 +96,34 @@ export default async function Home({
             )}
           </div>
 
-          <section className="rounded-xl overflow-hidden border border-sky-100 shadow-sm">
-            <div className="bg-sky-50 p-4 space-y-2">
-              <h3 className="font-semibold text-slate-700 text-sm">
+          <section className="overflow-hidden rounded-xl border border-sky-100 shadow-sm">
+            <div className="space-y-2 bg-sky-50 p-4">
+              <h3 className="text-sm font-semibold text-slate-700">
                 Join Helicone
               </h3>
 
               <div className="flex flex-col space-y-1.5 pb-2">
                 <div className="flex items-center gap-2">
-                  <Check className="w-3.5 h-3.5 text-slate-400" />
-                  <span className="text-slate-600 text-sm">
+                  <Check className="h-3.5 w-3.5 text-slate-400" />
+                  <span className="text-sm text-slate-600">
                     Real-time monitoring
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Check className="w-3.5 h-3.5 text-slate-400" />
-                  <span className="text-slate-600 text-sm">
+                  <Check className="h-3.5 w-3.5 text-slate-400" />
+                  <span className="text-sm text-slate-600">
                     Cost optimization
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Check className="w-3.5 h-3.5 text-slate-400" />
-                  <span className="text-slate-600 text-sm">
+                  <Check className="h-3.5 w-3.5 text-slate-400" />
+                  <span className="text-sm text-slate-600">
                     Advanced analytics
                   </span>
                 </div>
               </div>
               <Link href="https://us.helicone.ai/signin" className="block">
-                <Button className="w-full bg-sky-500 hover:bg-sky-600 text-white font-medium text-sm shadow-none transition-colors">
+                <Button className="w-full bg-sky-500 text-sm font-medium text-white shadow-none transition-colors hover:bg-sky-600">
                   Get started for free
                   <ChevronRight className="ml-2 h-3.5 w-3.5" />
                 </Button>
@@ -138,16 +135,16 @@ export default async function Home({
             </div>
           </section>
         </div>
-        <article className="prose w-full h-full">
+        <article className="prose h-full w-full">
           <h1 className="text-bold text-sky-500">{String(metadata.title)}</h1>
 
           {/* Desktop date display */}
-          <div className="hidden md:flex items-center gap-2 -mt-4 mb-8">
+          <div className="-mt-4 mb-8 hidden items-center gap-2 md:flex">
             <div className="flex items-center gap-2">
-              <span className="text-slate-500 text-sm font-medium">
+              <span className="text-sm font-medium text-slate-500">
                 {String(metadata.date)}
               </span>
-              <span className="text-slate-400 text-sm font-medium">
+              <span className="text-sm font-medium text-slate-400">
                 {" "}
                 · {String(metadata.time)}
               </span>
@@ -155,8 +152,8 @@ export default async function Home({
           </div>
 
           {/* Mobile view for author info */}
-          <div className="flex md:hidden items-center gap-2 -mt-8 -mb-6">
-            <div className="flex items-center justify-between w-full">
+          <div className="-mb-6 -mt-8 flex items-center gap-2 md:hidden">
+            <div className="flex w-full items-center justify-between">
               <div className="flex items-center gap-2">
                 {metadata.authors && metadata.authors.length > 0 ? (
                   <>
@@ -165,15 +162,15 @@ export default async function Home({
                         <img
                           src={HEADSHOTS[author as keyof typeof HEADSHOTS]}
                           alt={`${author}'s headshot`}
-                          className="w-8 h-8 rounded-full"
+                          className="h-8 w-8 rounded-full"
                         />
-                        <span className="text-slate-500 text-sm font-medium">
+                        <span className="text-sm font-medium text-slate-500">
                           {author}
                           {i < (metadata.authors?.length ?? 0) - 1 && ","}
                         </span>
                       </div>
                     ))}
-                    <span className="text-slate-400 text-sm font-medium">
+                    <span className="text-sm font-medium text-slate-400">
                       · {String(metadata.date)}
                     </span>
                   </>
@@ -182,12 +179,12 @@ export default async function Home({
                     <img
                       src={HEADSHOTS[metadata.author as keyof typeof HEADSHOTS]}
                       alt={`${metadata.author}'s headshot`}
-                      className="w-8 h-8 rounded-full"
+                      className="h-8 w-8 rounded-full"
                     />
-                    <span className="text-slate-600 text-sm font-medium">
+                    <span className="text-sm font-medium text-slate-600">
                       {metadata.author}
                     </span>
-                    <span className="text-slate-400 text-sm font-medium">
+                    <span className="text-sm font-medium text-slate-400">
                       · {String(metadata.date)}
                     </span>
                   </>

@@ -53,7 +53,7 @@ const ThemedDrawer: React.FC<ThemedDrawerProps> = ({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-slate-300 dark:bg-slate-700 bg-opacity-50 dark:bg-opacity-50 transition-opacity" />
+          <div className="fixed inset-0 bg-slate-300 bg-opacity-50 transition-opacity dark:bg-slate-700 dark:bg-opacity-50" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-hidden">
@@ -73,21 +73,21 @@ const ThemedDrawer: React.FC<ThemedDrawerProps> = ({
                     defaultExpanded
                       ? defaultWidth
                       : expanded
-                      ? "md:min-w-[60rem] w-full md:w-[60vw]"
-                      : "md:min-w-[35rem] w-full md:w-[36vw]",
-                    "pointer-events-auto ease-in-out duration-300"
+                        ? "w-full md:w-[60vw] md:min-w-[60rem]"
+                        : "w-full md:w-[36vw] md:min-w-[35rem]",
+                    "pointer-events-auto duration-300 ease-in-out",
                   )}
                 >
                   <div
                     className={clsx(
-                      "flex h-full flex-col overflow-y-scroll bg-white dark:bg-black shadow-2xl relative"
+                      "relative flex h-full flex-col overflow-y-scroll bg-white shadow-2xl dark:bg-black",
                     )}
                   >
-                    <div className="px-4 sm:px-6 py-6 flex flex-row justify-between sticky top-0 bg-white dark:bg-black z-50 ">
-                      <div className="flex flex-row items-center space-x-2 text-slate-500 w-full">
+                    <div className="sticky top-0 z-50 flex flex-row justify-between bg-white px-4 py-6 dark:bg-black sm:px-6">
+                      <div className="flex w-full flex-row items-center space-x-2 text-slate-500">
                         <button
                           onClick={() => setOpen(false)}
-                          className="hover:bg-slate-200 dark:hover:bg-slate-800 rounded-md -m-1 p-1"
+                          className="-m-1 rounded-md p-1 hover:bg-slate-200 dark:hover:bg-slate-800"
                         >
                           <ChevronDoubleRightIcon className="h-5 w-5" />
                         </button>
@@ -95,7 +95,7 @@ const ThemedDrawer: React.FC<ThemedDrawerProps> = ({
                           <Tooltip title={clsx(expanded ? "Shrink" : "Expand")}>
                             <button
                               onClick={() => setExpanded(!expanded)}
-                              className="hover:bg-slate-200 dark:hover:bg-slate-800 rounded-md -m-1 p-1"
+                              className="-m-1 rounded-md p-1 hover:bg-slate-200 dark:hover:bg-slate-800"
                             >
                               {expanded ? (
                                 <ArrowsPointingInIcon className="h-5 w-5" />

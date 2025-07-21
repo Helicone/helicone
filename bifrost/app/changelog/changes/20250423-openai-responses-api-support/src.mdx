@@ -6,24 +6,25 @@ The OpenAI Responses API enables you to provide text or image inputs to generate
 
 ### Integrating with Helicone
 
-1. Create a Helicone account and API key. 
+1. Create a Helicone account and API key.
 2. Set environment variables
 3. Install the OpenAI SDK:
-    ```bash
-    npm install openai
-    ```
+   ```bash
+   npm install openai
+   ```
 4. Configure your OpenAI client to use the Helicone proxy:
-    ```typescript
-    import OpenAI from "openai";
 
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-      baseURL: "https://oai.helicone.ai/v1", // Route requests through Helicone
-      defaultHeaders: {
-        "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`, // Authenticate with Helicone
-      },
-    });
-    ```
+   ```typescript
+   import OpenAI from "openai";
+
+   const openai = new OpenAI({
+     apiKey: process.env.OPENAI_API_KEY,
+     baseURL: "https://oai.helicone.ai/v1", // Route requests through Helicone
+     defaultHeaders: {
+       "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`, // Authenticate with Helicone
+     },
+   });
+   ```
 
 With this setup, any calls to the OpenAI Responses API will be automatically logged and monitored by Helicone.
 

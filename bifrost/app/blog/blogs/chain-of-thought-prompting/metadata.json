@@ -1,4 +1,4 @@
-{ 
+{
   "title": "Chain-of-Thought Prompting: Techniques, Tips, and Code Examples",
   "title1": "Chain-of-Thought Prompting: Techniques, Tips, and Code Examples",
   "title2": "Chain-of-Thought Prompting: Techniques, Tips, and Code Examples",
@@ -6,6 +6,6 @@
   "images": "/static/blog/chain-of-thought/chain-of-thought-cover.webp",
   "time": "12 minute read",
   "author": "Lina Lam",
-  "date": "Jan 7, 2025", 
+  "date": "Jan 7, 2025",
   "badge": "Prompt Engineering"
 }

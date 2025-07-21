@@ -3,7 +3,10 @@ import { redisClient } from "../clients/redisClient";
 import { Result, ok } from "../../packages/common/result";
 
 export class CacheItem<T> {
-  constructor(public value: T, public expiry: number) {}
+  constructor(
+    public value: T,
+    public expiry: number
+  ) {}
 }
 
 export class InMemoryCache {

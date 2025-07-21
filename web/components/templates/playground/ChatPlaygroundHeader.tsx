@@ -5,11 +5,11 @@ const ChatPlaygroundHeader: React.FC<{
   setMode: (mode: "pretty" | "json") => void;
 }> = ({ mode, setMode }) => {
   return (
-    <ul className="w-full rounded-lg relative h-fit">
-      <li className="flex justify-end items-center">
+    <ul className="relative h-fit w-full rounded-lg">
+      <li className="flex items-center justify-end">
         <div>
           <button
-            className="text-gray-500 dark:text-gray-400 bg-white px-3 py-2 rounded-lg shadow-sm text-xs"
+            className="rounded-lg bg-white px-3 py-2 text-xs text-gray-500 shadow-sm dark:text-gray-400"
             onClick={() => setMode(mode === "pretty" ? "json" : "pretty")}
           >
             {mode === "pretty" ? "JSON" : "Pretty"}

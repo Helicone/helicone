@@ -39,7 +39,7 @@ export const useContextHelpers = ({
 
       return false;
     },
-    [filterCrud, filterStore, pathname, searchParams, router]
+    [filterCrud, filterStore, pathname, searchParams, router],
   );
 
   const clearFilter = useCallback(() => {
@@ -94,11 +94,11 @@ export const useContextHelpers = ({
    */
   const updateFilterById = async (
     filterId: string,
-    updates: Partial<StoreFilterType>
+    updates: Partial<StoreFilterType>,
   ) => {
     let filterToUpdate: StoreFilterType | undefined =
       filterCrud.savedFilters.find(
-        (filter: StoreFilterType) => filter.id === filterId
+        (filter: StoreFilterType) => filter.id === filterId,
       );
 
     if (!filterToUpdate) {

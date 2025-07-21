@@ -43,14 +43,14 @@ export default function ProductComparisonTable() {
   const renderSupportCell = (value: string) => {
     switch (value.toLowerCase()) {
       case "yes":
-        return <CheckIcon className="w-6 h-6 text-green-500 mx-auto" />;
+        return <CheckIcon className="mx-auto h-6 w-6 text-green-500" />;
       case "no":
-        return <XMarkIcon className="w-6 h-6 text-red-500 mx-auto" />;
+        return <XMarkIcon className="mx-auto h-6 w-6 text-red-500" />;
       case "limited":
         return (
           <div className="flex flex-col items-center">
-            <ExclamationTriangleIcon className="w-6 h-6 text-amber-500" />
-            <span className="text-xs font-medium text-amber-700 mt-1">
+            <ExclamationTriangleIcon className="h-6 w-6 text-amber-500" />
+            <span className="mt-1 text-xs font-medium text-amber-700">
               Limited
             </span>
           </div>
@@ -63,28 +63,28 @@ export default function ProductComparisonTable() {
   };
 
   return (
-    <div className="flex flex-col max-w-6xl mx-auto space-y-8 w-full">
+    <div className="mx-auto flex w-full max-w-6xl flex-col space-y-8">
       <h3 className="text-[36px] font-bold text-slate-900">
         Compare to similar products
       </h3>
 
-      <div className="overflow-x-auto relative rounded-lg">
+      <div className="relative overflow-x-auto rounded-lg">
         <table
           ref={tableRef}
-          className="w-full border-separate border-spacing-0 bg-slate-50 rounded-lg border border-slate-200"
+          className="w-full border-separate border-spacing-0 rounded-lg border border-slate-200 bg-slate-50"
         >
           <thead className="rounded-t-lg">
             <tr>
-              <th className="p-2 text-left font-semibold bg-slate-50 border-r border-slate-200 rounded-tl-lg"></th>
+              <th className="rounded-tl-lg border-r border-slate-200 bg-slate-50 p-2 text-left font-semibold"></th>
               {products.map((product) => (
                 <th
                   key={product.name}
-                  className="p-2 text-center text-slate-900 font-semibold last:bg-white last:rounded-tr-lg last:border-b-0 last:border-brand last:border-2 border-slate-200"
+                  className="last:border-brand border-slate-200 p-2 text-center font-semibold text-slate-900 last:rounded-tr-lg last:border-2 last:border-b-0 last:bg-white"
                 >
                   <img
                     src={product.logo}
                     alt={product.logo}
-                    className="h-6 mx-auto mb-2 mt-2"
+                    className="mx-auto mb-2 mt-2 h-6"
                   />
                   {product.name}
                 </th>
@@ -116,9 +116,9 @@ export default function ProductComparisonTable() {
                   <td
                     key={`${feature.name}-${products[i].name}`}
                     className={clsx(
-                      "p-2 text-center last:bg-white last:border-r-2 last:border-l-2 last:border-brand",
+                      "last:border-brand p-2 text-center last:border-l-2 last:border-r-2 last:bg-white",
                       index === featureMatrix.length - 1
-                        ? "last:border-b-2 last:rounded-br-lg"
+                        ? "last:rounded-br-lg last:border-b-2"
                         : "last:border-b-0"
                     )}
                   >

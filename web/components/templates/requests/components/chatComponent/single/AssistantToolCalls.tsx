@@ -11,7 +11,7 @@ import dynamic from "next/dynamic";
 
 const ReactMarkdown = dynamic(() => import("react-markdown"), {
   ssr: false,
-  loading: () => <div className="animate-pulse bg-muted h-4 w-full rounded" />,
+  loading: () => <div className="h-4 w-full animate-pulse rounded bg-muted" />,
 });
 
 interface AssistantToolCallsProps {
@@ -57,7 +57,7 @@ export default function AssistantToolCalls({
                         };
                       }
                       return message;
-                    }
+                    },
                   ),
                 },
               },
@@ -69,7 +69,7 @@ export default function AssistantToolCalls({
         content && (
           <ReactMarkdown
             components={markdownComponents}
-            className="w-full text-xs whitespace-pre-wrap break-words p-2"
+            className="w-full whitespace-pre-wrap break-words p-2 text-xs"
           >
             {content}
           </ReactMarkdown>

@@ -2,10 +2,14 @@
 title: "Eval Scores"
 sidebarTitle: "Eval Scores"
 ---
+
 When running evaluation frameworks to measure model performance, you need visibility into how well your AI applications are performing across different metrics. Scores let you report evaluation results from any framework to Helicone, providing centralized observability for accuracy, hallucination rates, helpfulness, and custom metrics.
 
 <Note>
-Helicone doesn't run evaluations for you - we're not an evaluation framework. Instead, we provide a centralized location to report and analyze evaluation results from any framework (like RAGAS, LangSmith, or custom evaluations), giving you unified observability across all your evaluation metrics.
+  Helicone doesn't run evaluations for you - we're not an evaluation framework.
+  Instead, we provide a centralized location to report and analyze evaluation
+  results from any framework (like RAGAS, LangSmith, or custom evaluations),
+  giving you unified observability across all your evaluation metrics.
 </Note>
 
 ## Why use Scores
@@ -32,17 +36,17 @@ const requestId = response.headers.get("helicone-id");
 await fetch(`https://api.helicone.ai/v1/request/${requestId}/score`, {
   method: "POST",
   headers: {
-    "Authorization": `Bearer ${HELICONE_API_KEY}`,
-    "Content-Type": "application/json"
+    Authorization: `Bearer ${HELICONE_API_KEY}`,
+    "Content-Type": "application/json",
   },
   body: JSON.stringify({
     scores: {
-      "accuracy": 92,        // Integer values required
-      "hallucination": 8,    // Converted to integers (0.08 * 100)
-      "helpfulness": 85,
-      "is_safe": true        // Booleans supported
-    }
-  })
+      accuracy: 92, // Integer values required
+      hallucination: 8, // Converted to integers (0.08 * 100)
+      helpfulness: 85,
+      is_safe: true, // Booleans supported
+    },
+  }),
 });
 ```
 
@@ -57,9 +61,9 @@ Analyze evaluation results in the Helicone dashboard to track performance trends
 </Steps>
 
 <Warning>
-Scores are processed with a **10 minute delay** by default for analytics aggregation.
+  Scores are processed with a **10 minute delay** by default for analytics
+  aggregation.
 </Warning>
-
 
 ## API Format
 
@@ -67,19 +71,19 @@ Scores are processed with a **10 minute delay** by default for analytics aggrega
 
 The scores API expects this exact format:
 
-| Field | Type | Description | Required | Example |
-|-------|------|-------------|----------|---------|
-| `scores` | `object` | Key-value pairs of evaluation metrics | ✅ Yes | `{"accuracy": 92}` |
+| Field    | Type     | Description                           | Required | Example            |
+| -------- | -------- | ------------------------------------- | -------- | ------------------ |
+| `scores` | `object` | Key-value pairs of evaluation metrics | ✅ Yes   | `{"accuracy": 92}` |
 
 ### Score Values
 
-| Type | Description | Example |
-|------|-------------|---------|
-| `integer` | Numeric scores (no decimals) | `92`, `85`, `0` |
+| Type      | Description                     | Example         |
+| --------- | ------------------------------- | --------------- |
+| `integer` | Numeric scores (no decimals)    | `92`, `85`, `0` |
 | `boolean` | Pass/fail or true/false metrics | `true`, `false` |
 
 <Warning>
-Float values like `0.92` are rejected. Convert to integers: `0.92` → `92`
+  Float values like `0.92` are rejected. Convert to integers: `0.92` → `92`
 </Warning>
 
 ## Use Cases
@@ -96,26 +100,26 @@ from ragas.metrics import Faithfulness, ResponseRelevancy
 from datasets import Dataset
 
 # Run RAG evaluation
-def evaluate_rag_response(question, answer, contexts, ground_truth, requestId):
-    # Initialize RAGAS metrics
-    metrics = [Faithfulness(), ResponseRelevancy()]
-    
+
+def evaluate_rag_response(question, answer, contexts, ground_truth, requestId): # Initialize RAGAS metrics
+metrics = [Faithfulness(), ResponseRelevancy()]
+
     # Create dataset in RAGAS format
     data = {
         "question": [question],
-        "answer": [answer], 
+        "answer": [answer],
         "contexts": [contexts],
         "ground_truth": [ground_truth]
     }
     dataset = Dataset.from_dict(data)
-    
+
     # Run evaluation
     result = evaluate(dataset, metrics=metrics)
-    
+
     # Extract scores (RAGAS returns 0-1 values)
     faithfulness_score = result['faithfulness'] if 'faithfulness' in result else 0
     relevancy_score = result['answer_relevancy'] if 'answer_relevancy' in result else 0
-    
+
     # Report to Helicone (convert to 0-100 scale)
     response = requests.post(
         f"https://api.helicone.ai/v1/request/{requestId}/score",
@@ -130,18 +134,20 @@ def evaluate_rag_response(question, answer, contexts, ground_truth, requestId):
             }
         }
     )
-    
+
     return result
 
 # Example usage
+
 scores = evaluate_rag_response(
-    question="What is the capital of France?",
-    answer="The capital of France is Paris.",
-    contexts=["France is a country in Europe. Paris is its capital."],
-    ground_truth="Paris",
-    requestId="your-request-id-here"
+question="What is the capital of France?",
+answer="The capital of France is Paris.",
+contexts=["France is a country in Europe. Paris is its capital."],
+ground_truth="Paris",
+requestId="your-request-id-here"
 )
-```
+
+````
 
 ```typescript TypeScript
 // RAG evaluation with custom metrics
@@ -158,7 +164,7 @@ async function evaluateRAGResponse(
     completeness: measureCompleteness(answer, question),
     hallucination: detectHallucination(answer, contexts)
   };
-  
+
   // Report to Helicone
   await fetch(`https://api.helicone.ai/v1/request/${requestId}/score`, {
     method: "POST",
@@ -168,15 +174,16 @@ async function evaluateRAGResponse(
     },
     body: JSON.stringify({ scores })
   });
-  
+
   // Alert on poor performance
   if (scores.hallucination > 0.2) {
     console.warn("High hallucination detected:", scores);
   }
-  
+
   return scores;
 }
-```
+````
+
 </CodeGroup>
 </Tab>
 
@@ -192,41 +199,42 @@ async function evaluateCodeGeneration(
 ) {
   const scores = {
     // Syntax validity
-    syntax_valid: await validateSyntax(generatedCode) ? 1.0 : 0.0,
-    
+    syntax_valid: (await validateSyntax(generatedCode)) ? 1.0 : 0.0,
+
     // Test pass rate
     test_pass_rate: await runTests(generatedCode),
-    
+
     // Code quality metrics
     complexity: calculateCyclomaticComplexity(generatedCode),
     readability: assessReadability(generatedCode),
-    
+
     // Security checks
     security_score: await runSecurityScan(generatedCode),
-    
+
     // Performance benchmarks
-    performance: await benchmarkCode(generatedCode)
+    performance: await benchmarkCode(generatedCode),
   };
-  
+
   // Report comprehensive evaluation
   await fetch(`https://api.helicone.ai/v1/request/${requestId}/score`, {
     method: "POST",
     headers: {
-      "Authorization": `Bearer ${HELICONE_API_KEY}`,
-      "Content-Type": "application/json"
+      Authorization: `Bearer ${HELICONE_API_KEY}`,
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       scores: {
         ...scores,
         // Convert any decimal scores to integers
-        test_pass_rate: Math.round(scores.test_pass_rate * 100)
-      }
-    })
+        test_pass_rate: Math.round(scores.test_pass_rate * 100),
+      },
+    }),
   });
-  
+
   return scores;
 }
 ```
+
 </Tab>
 
 <Tab title="Helpfulness & Safety">
@@ -242,14 +250,14 @@ async def evaluate_chat_response(user_query, assistant_response, requestId):
     - Safety: Is the response safe and appropriate?
     - Accuracy: Is the information correct?
     - Clarity: Is the response clear and well-structured?
-    
+
     User: {user_query}
     Assistant: {assistant_response}
     """
-    
+
     # Get evaluation from judge model
     eval_scores = await llm_judge(eval_prompt)
-    
+
     # Add objective metrics
     scores = {
         **eval_scores,
@@ -257,13 +265,13 @@ async def evaluate_chat_response(user_query, assistant_response, requestId):
         "reading_level": calculate_reading_level(assistant_response),
         "contains_refusal": "I cannot" in assistant_response or "I won't" in assistant_response
     }
-    
+
     # Report all scores (convert decimals to integers)
     integer_scores = {
         key: int(value * 100) if isinstance(value, float) and 0 <= value <= 1 else value
         for key, value in scores.items()
     }
-    
+
     response = requests.post(
         f"https://api.helicone.ai/v1/request/{requestId}/score",
         headers={
@@ -272,9 +280,10 @@ async def evaluate_chat_response(user_query, assistant_response, requestId):
         },
         json={"scores": integer_scores}
     )
-    
+
     return scores
 ```
+
 </Tab>
 </Tabs>
 
@@ -286,11 +295,15 @@ Compare different configurations with consistent scoring
 </Card>
 
 <Card title="Sessions" icon="link" href="/features/sessions">
-Evaluate multi-turn conversations and workflows
+  Evaluate multi-turn conversations and workflows
 </Card>
 
-<Card title="Custom Properties" icon="tag" href="/features/advanced-usage/custom-properties">
-Tag requests for segmented evaluation analysis
+<Card
+  title="Custom Properties"
+  icon="tag"
+  href="/features/advanced-usage/custom-properties"
+>
+  Tag requests for segmented evaluation analysis
 </Card>
 
 <Card title="Webhooks" icon="webhook" href="/features/webhooks">

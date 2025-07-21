@@ -45,29 +45,30 @@ const ExperimentConfig = (props: ExperimentConfigProps) => {
     props;
 
   const [selectedVersion, setSelectedVersion] = useState<string>(
-    initialValues?.version.toString() || currentPrompt.latest_version.toString()
+    initialValues?.version.toString() ||
+      currentPrompt.latest_version.toString(),
   );
   const [providerKeyId, setProviderKeyId] = useState(
-    initialValues?.providerKey || ""
+    initialValues?.providerKey || "",
   );
   const [experimentName, setExperimentName] = useState(
-    initialValues?.experimentName || ""
+    initialValues?.experimentName || "",
   );
   const [requestIdList, setRequestIdList] = useState<string[]>(
-    initialValues?.requestIds || []
+    initialValues?.requestIds || [],
   );
   const [experimentModel, setExperimentModel] = useState<string>(
-    initialValues?.model || "gpt-3.5-turbo-1106"
+    initialValues?.model || "gpt-3.5-turbo-1106",
   );
   const { setNotification } = useNotification();
   const orgContext = useOrg();
 
   return (
-    <div className="flex flex-col space-y-8 w-full">
-      <div className="flex flex-col space-y-1 w-1/4">
+    <div className="flex w-full flex-col space-y-8">
+      <div className="flex w-1/4 flex-col space-y-1">
         <label
           htmlFor="experiment-name"
-          className="text-gray-900 dark:text-gray-100 text-xs font-semibold"
+          className="text-xs font-semibold text-gray-900 dark:text-gray-100"
         >
           Name
         </label>
@@ -77,10 +78,10 @@ const ExperimentConfig = (props: ExperimentConfigProps) => {
         />
       </div>
       <div className="flex w-full gap-4">
-        <div className="flex flex-col space-y-1 w-1/4">
+        <div className="flex w-1/4 flex-col space-y-1">
           <label
             htmlFor="alert-metric"
-            className="text-gray-900 dark:text-gray-100 text-xs font-semibold"
+            className="text-xs font-semibold text-gray-900 dark:text-gray-100"
           >
             Version
           </label>
@@ -96,7 +97,7 @@ const ExperimentConfig = (props: ExperimentConfigProps) => {
             <SelectContent>
               {Array.from(
                 { length: currentPrompt.latest_version + 1 },
-                (_, i) => i
+                (_, i) => i,
               )
                 .reverse()
                 .map((version: any, i: number) => (
@@ -107,10 +108,10 @@ const ExperimentConfig = (props: ExperimentConfigProps) => {
             </SelectContent>
           </Select>
         </div>
-        <div className="flex flex-col space-y-1 w-1/4">
+        <div className="flex w-1/4 flex-col space-y-1">
           <label
             htmlFor="experiment-model"
-            className="text-gray-900 dark:text-gray-100 text-xs font-semibold"
+            className="text-xs font-semibold text-gray-900 dark:text-gray-100"
           >
             Experiment Model
           </label>
@@ -142,14 +143,14 @@ const ExperimentConfig = (props: ExperimentConfigProps) => {
         }}
         variant="basic"
       />
-      <div className="flex flex-col space-y-1 w-full pt-8">
+      <div className="flex w-full flex-col space-y-1 pt-8">
         <label
           htmlFor="experiment-sample"
-          className="text-gray-900 dark:text-gray-100 text-xs font-semibold"
+          className="text-xs font-semibold text-gray-900 dark:text-gray-100"
         >
           Random Data Set Sample (up to 10)
         </label>
-        <div className="flex w-full overflow-auto gap-4">
+        <div className="flex w-full gap-4 overflow-auto">
           {/* get a random `n=10` sample of the properties and then render cards */}
           {[...promptProperties].slice(0, 10).map((property, i) => (
             <div
@@ -171,10 +172,10 @@ const ExperimentConfig = (props: ExperimentConfigProps) => {
           ))}
         </div>
       </div>
-      <div className="border-t border-gray-300 py-4 flex items-center justify-end space-x-2">
+      <div className="flex items-center justify-end space-x-2 border-t border-gray-300 py-4">
         <button
           onClick={close}
-          className="flex flex-row items-center rounded-md bg-white dark:bg-black px-4 py-2 text-sm font-semibold border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm hover:text-gray-700 dark:hover:text-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+          className="flex flex-row items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500 dark:border-gray-700 dark:bg-black dark:text-gray-100 dark:hover:bg-gray-900 dark:hover:text-gray-300"
         >
           Cancel
         </button>
@@ -194,7 +195,7 @@ const ExperimentConfig = (props: ExperimentConfigProps) => {
             }
             // set the request id list
             setRequestIdList(
-              promptProperties.map((property) => property.id).slice(0, 10)
+              promptProperties.map((property) => property.id).slice(0, 10),
             );
 
             onFormSubmit({
@@ -205,7 +206,7 @@ const ExperimentConfig = (props: ExperimentConfigProps) => {
               requestIds: requestIdList,
             });
           }}
-          className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          className="flex items-center rounded-md bg-black px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:bg-white dark:text-black dark:hover:bg-gray-200"
         >
           Next
         </button>

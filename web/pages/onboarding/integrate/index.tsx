@@ -35,19 +35,19 @@ export default function IntegratePage() {
 
   return (
     <OnboardingHeader>
-      <div className="flex flex-col gap-6 mx-auto max-w-4xl py-12">
+      <div className="mx-auto flex max-w-4xl flex-col gap-6 py-12">
         <div className="flex flex-col gap-2">
           <H1>Get integrated</H1>
           <Muted>Choose your preferred integration method.</Muted>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-6">
+        <div className="flex flex-col gap-6 md:flex-row">
           {/* Async Card */}
           <Link href="/onboarding/integrate/async" className="flex-1">
             <Card className="h-full transition-colors hover:bg-[hsl(var(--muted))]">
               <div className="p-4">
                 <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center bg-[hsl(var(--muted))] rounded-md border border-[hsl(var(--border))]">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--muted))] md:h-12 md:w-12">
                     <ArrowLeftRight
                       size={20}
                       className="text-[hsl(var(--foreground))]"
@@ -67,7 +67,7 @@ export default function IntegratePage() {
                 </div>
               </div>
               <div className="border-t border-[hsl(var(--border))] p-4">
-                <ul className="text-sm space-y-1 text-[hsl(var(--muted-foreground))] ml-4 list-disc list-inside">
+                <ul className="ml-4 list-inside list-disc space-y-1 text-sm text-[hsl(var(--muted-foreground))]">
                   <li>No latency impact</li>
                   <li>Does not support all languages and frameworks.</li>
                   <li>Requires SDK</li>
@@ -81,7 +81,7 @@ export default function IntegratePage() {
             <Card className="h-full transition-colors hover:bg-[hsl(var(--muted))]">
               <div className="p-4">
                 <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center bg-[hsl(var(--muted))] rounded-md border border-[hsl(var(--border))]">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--muted))] md:h-12 md:w-12">
                     <Waypoints
                       size={20}
                       className="text-[hsl(var(--foreground))]"
@@ -102,7 +102,7 @@ export default function IntegratePage() {
               </div>
               <div className="border-t border-[hsl(var(--border))] p-4">
                 <div className="flex flex-col gap-2.5">
-                  <ul className="text-sm text-[hsl(var(--muted-foreground))] ml-4 list-disc list-inside">
+                  <ul className="ml-4 list-inside list-disc text-sm text-[hsl(var(--muted-foreground))]">
                     <li>~50ms latency impact</li>
                     <li>Supports 300+ LLMs</li>
                     <li>Built-in caching, rate limiting and more.</li>

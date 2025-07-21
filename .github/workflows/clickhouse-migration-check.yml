@@ -2,12 +2,12 @@ name: ClickHouse Migration Check
 on:
   pull_request:
     paths:
-      - 'clickhouse/migrations/**'
+      - "clickhouse/migrations/**"
   push:
     branches:
       - main
     paths:
-      - 'clickhouse/migrations/**'
+      - "clickhouse/migrations/**"
 
 jobs:
   check-migrations:
@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.x'
+          python-version: "3.x"
 
       - name: Check Migration Numbers
         run: |
@@ -36,7 +36,7 @@ jobs:
               match = re.search(r'schema_(\d+)_', f)
               if match:
                   nums.append(int(match.group(1)))
-          
+
           nums.sort()
           if len(nums) != len(set(nums)):
               print("Found duplicate numbers")

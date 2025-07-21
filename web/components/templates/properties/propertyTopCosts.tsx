@@ -50,9 +50,9 @@ const PropertyTopCosts = ({ property, timeFilter }: PropertyTopCostsProps) => {
     return (
       <Card className="rounded-none border-0 shadow-none">
         <CardContent className="flex flex-col items-center p-6">
-          <Skeleton className="h-8 w-48 mb-6 bg-slate-200 dark:bg-slate-700" />
-          <div className="w-full min-h-[300px] flex items-center justify-center">
-            <div className="relative w-[250px] h-[250px]">
+          <Skeleton className="mb-6 h-8 w-48 bg-slate-200 dark:bg-slate-700" />
+          <div className="flex min-h-[300px] w-full items-center justify-center">
+            <div className="relative h-[250px] w-[250px]">
               {/* Outer circle skeleton */}
               <Skeleton className="absolute inset-0 rounded-full bg-slate-200 dark:bg-slate-700" />
               {/* Inner circle skeleton (for donut chart effect) */}
@@ -78,10 +78,10 @@ const PropertyTopCosts = ({ property, timeFilter }: PropertyTopCostsProps) => {
     <>
       {topCosts.data?.data?.data &&
         Array.isArray(topCosts.data?.data?.data) && (
-          <Card className="rounded-none border-0 shadow-none bg-background dark:bg-sidebar-background">
+          <Card className="rounded-none border-0 bg-background shadow-none dark:bg-sidebar-background">
             <CardContent className="flex flex-col items-center p-4 md:p-6">
               <H4 className="mb-4">Top Costs by {property}</H4>
-              <div className="w-full min-h-[300px] max-h-[400px]">
+              <div className="max-h-[400px] min-h-[300px] w-full">
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart margin={{ top: 25, right: 0, bottom: 0, left: 0 }}>
                     <Pie
@@ -114,7 +114,7 @@ const PropertyTopCosts = ({ property, timeFilter }: PropertyTopCostsProps) => {
                       {topCosts.data?.data?.data.map(
                         (
                           entry: { value: string; cost: number },
-                          index: number
+                          index: number,
                         ) => (
                           <Cell
                             key={`cell-${index}`}
@@ -136,7 +136,7 @@ const PropertyTopCosts = ({ property, timeFilter }: PropertyTopCostsProps) => {
                             strokeWidth={1}
                             stroke="#ffffff"
                           />
-                        )
+                        ),
                       )}
                     </Pie>
                     <Tooltip
@@ -144,8 +144,8 @@ const PropertyTopCosts = ({ property, timeFilter }: PropertyTopCostsProps) => {
                         if (active && payload && payload.length) {
                           const data = payload[0];
                           return (
-                            <div className="bg-white dark:bg-slate-800 p-3 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700">
-                              <p className="font-medium text-sm mb-1">
+                            <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-lg dark:border-slate-700 dark:bg-slate-800">
+                              <p className="mb-1 text-sm font-medium">
                                 {data.name || "Empty"}
                               </p>
                               <p className="text-sm text-muted-foreground">

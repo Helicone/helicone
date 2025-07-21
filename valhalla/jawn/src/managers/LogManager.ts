@@ -226,7 +226,8 @@ export class LogManager {
       });
 
       console.error(
-        `Error inserting logs: ${JSON.stringify(result.error)} for batch ${logMetaData.batchId
+        `Error inserting logs: ${JSON.stringify(result.error)} for batch ${
+          logMetaData.batchId
         }`
       );
 

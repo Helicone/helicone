@@ -56,7 +56,7 @@ export default function ParametersPanel({
     if (parameters.provider && parameters.model) {
       const creator = findCreatorForProviderAndModel(
         parameters.provider as Provider,
-        parameters.model
+        parameters.model,
       );
       if (creator) {
         setSelectedCreator(creator);
@@ -67,13 +67,13 @@ export default function ParametersPanel({
   // Memoize the list of available creators to prevent unnecessary re-renders
   const creators: Creator[] = useMemo(
     () => Object.keys(modelMapping) as Creator[],
-    []
+    [],
   );
 
   // Memoize the list of models for the selected creator
   const models = useMemo(
     () => getModelsForCreator(selectedCreator),
-    [selectedCreator]
+    [selectedCreator],
   );
 
   // Get model info from the model string
@@ -103,7 +103,7 @@ export default function ParametersPanel({
       currentModelName
         ? getProvidersForModel(selectedCreator, currentModelName)
         : [],
-    [currentModelName, selectedCreator]
+    [currentModelName, selectedCreator],
   );
 
   // Memoize the model parameters
@@ -115,7 +115,7 @@ export default function ParametersPanel({
     const providerModelParams =
       currentModelName && parameters.provider
         ? creatorModels?.[currentModelName]?.providers.find(
-            (p: ProviderModel) => p.provider === parameters.provider
+            (p: ProviderModel) => p.provider === parameters.provider,
           )?.parameters
         : null;
 
@@ -131,17 +131,17 @@ export default function ParametersPanel({
   // Memoize derived parameter values
   const supportsReasoningEffort = useMemo(
     () => !!mergedParams?.reasoning_effort,
-    [mergedParams]
+    [mergedParams],
   );
 
   const supportsStopSequences = useMemo(
     () => !!mergedParams?.stop,
-    [mergedParams]
+    [mergedParams],
   );
 
   const supportsResponseFormat = useMemo(
     () => mergedParams?.response_format === true,
-    [mergedParams]
+    [mergedParams],
   );
 
   const maxTokens = useMemo(() => mergedParams?.max_tokens, [mergedParams]);
@@ -160,7 +160,7 @@ export default function ParametersPanel({
       const modelString = getModelString(
         defaultCreator,
         defaultModel,
-        defaultProvider
+        defaultProvider,
       );
 
       if (modelString) {
@@ -191,7 +191,7 @@ export default function ParametersPanel({
         const modelString = getModelString(
           validCreator,
           defaultModel,
-          defaultProvider
+          defaultProvider,
         );
 
         if (modelString) {
@@ -227,7 +227,7 @@ export default function ParametersPanel({
         const modelConfig = getModelConfig(
           selectedCreator,
           model,
-          providerToUse
+          providerToUse,
         );
 
         const updates: Partial<StateParameters> = {
@@ -239,7 +239,7 @@ export default function ParametersPanel({
         const creatorModels = modelMapping[selectedCreator];
         const modelParams = creatorModels?.[model]?.defaultParameters;
         const providerModelParams = creatorModels?.[model]?.providers.find(
-          (p: ProviderModel) => p.provider === providerToUse
+          (p: ProviderModel) => p.provider === providerToUse,
         )?.parameters;
 
         // Merge default parameters with provider-specific parameters
@@ -273,7 +273,7 @@ export default function ParametersPanel({
     if (currentModelName) {
       const providersForCurrentModel = getProvidersForModel(
         selectedCreator,
-        currentModelName
+        currentModelName,
       );
 
       // Check if the new provider is compatible with the current model
@@ -282,7 +282,7 @@ export default function ParametersPanel({
         const modelString = getModelString(
           selectedCreator,
           currentModelName,
-          validProvider
+          validProvider,
         );
 
         if (modelString) {
@@ -290,7 +290,7 @@ export default function ParametersPanel({
           const modelConfig = getModelConfig(
             selectedCreator,
             currentModelName,
-            validProvider
+            validProvider,
           );
 
           const updates: Partial<StateParameters> = {
@@ -305,7 +305,7 @@ export default function ParametersPanel({
           const providerModelParams = creatorModels?.[
             currentModelName
           ]?.providers.find(
-            (p: ProviderModel) => p.provider === validProvider
+            (p: ProviderModel) => p.provider === validProvider,
           )?.parameters;
 
           // Merge default parameters with provider-specific parameters
@@ -343,7 +343,7 @@ export default function ParametersPanel({
       const modelString = getModelString(
         selectedCreator,
         compatibleModel,
-        validProvider
+        validProvider,
       );
 
       if (modelString) {
@@ -356,20 +356,20 @@ export default function ParametersPanel({
   };
 
   return (
-    <div className="w-full flex flex-col">
+    <div className="flex w-full flex-col">
       {/* Header */}
       <GlassHeader className="h-14 px-4">
         <h2 className="font-semibold text-secondary">Parameters</h2>
       </GlassHeader>
       <div className="w-full divide-y divide-slate-100 dark:divide-slate-900">
         {/* Creator / Model / Provider */}
-        <div className="w-full flex flex-row items-center justify-between gap-4 py-1 first:pt-0 px-4">
+        <div className="flex w-full flex-row items-center justify-between gap-4 px-4 py-1 first:pt-0">
           <ParameterLabel icon={<PiPlugsBold className="shrink-0" />}>
             Creator / Model / Provider
           </ParameterLabel>
           <div className="flex gap-2">
             <Select value={selectedCreator} onValueChange={handleCreatorChange}>
-              <SelectTrigger variant="helicone" className="w-28 h-8">
+              <SelectTrigger variant="helicone" className="h-8 w-28">
                 <SelectValue placeholder="Creator" />
               </SelectTrigger>
               <SelectContent>
@@ -384,7 +384,7 @@ export default function ParametersPanel({
               value={currentModelName || ""}
               onValueChange={handleModelChange}
             >
-              <SelectTrigger variant="helicone" className="w-36 h-8">
+              <SelectTrigger variant="helicone" className="h-8 w-36">
                 <SelectValue placeholder="Model" />
               </SelectTrigger>
               <SelectContent>
@@ -399,7 +399,7 @@ export default function ParametersPanel({
               value={parameters.provider as string}
               onValueChange={handleProviderChange}
             >
-              <SelectTrigger variant="helicone" className="w-28 h-8">
+              <SelectTrigger variant="helicone" className="h-8 w-28">
                 <SelectValue placeholder="Provider" />
               </SelectTrigger>
               <SelectContent>
@@ -474,7 +474,7 @@ export default function ParametersPanel({
                   })
                 }
               >
-                <SelectTrigger variant="helicone" className="w-28 h-8">
+                <SelectTrigger variant="helicone" className="h-8 w-28">
                   <SelectValue placeholder="Effort" />
                 </SelectTrigger>
                 <SelectContent>
@@ -507,7 +507,7 @@ export default function ParametersPanel({
                 asPill
                 onClick={() => setIsResponseFormatEditorOpen(true)}
               >
-                <PiPencilSimpleBold className="w-4 h-4" />
+                <PiPencilSimpleBold className="h-4 w-4" />
               </Button>
             </div>
           </ParameterRow>
@@ -515,7 +515,7 @@ export default function ParametersPanel({
 
         {/* Stop Sequences */}
         {supportsStopSequences && (
-          <div className="w-full flex flex-row items-center justify-between pl-4">
+          <div className="flex w-full flex-row items-center justify-between pl-4">
             <ParameterLabel icon={<PiHandPalmBold />}>
               Stop Sequences
             </ParameterLabel>
@@ -554,7 +554,7 @@ const ParameterRow: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   return (
-    <div className="w-full flex flex-row items-center justify-between gap-4 py-2 px-4">
+    <div className="flex w-full flex-row items-center justify-between gap-4 px-4 py-2">
       {children}
     </div>
   );
@@ -567,7 +567,7 @@ export const ParameterLabel: React.FC<{
   return (
     <div className="flex items-center gap-2 text-secondary">
       {icon}
-      <label className="text-sm font-medium whitespace-nowrap">
+      <label className="whitespace-nowrap text-sm font-medium">
         {children}
       </label>
     </div>

@@ -14,7 +14,7 @@ const getScoreColorMapping = (scores: string[]) => {
         label: score.replace("-hcone-bool", ""),
         color: `oklch(var(--chart-${(index % 10) + 1}))`,
       },
-    ])
+    ]),
   );
 };
 
@@ -59,7 +59,7 @@ const useExperimentScores = (experimentId: string) => {
               experimentId: experimentId,
             },
           },
-        }
+        },
       );
       return evaluators;
     },
@@ -79,12 +79,12 @@ const useExperimentScores = (experimentId: string) => {
           body: {
             evaluatorId: evaluatorId,
           },
-        }
+        },
       );
       if (!evaluator.response.ok) {
         notification.setNotification(
           `Failed to add evaluator: ${evaluator.response.statusText}`,
-          "error"
+          "error",
         );
       }
     },
@@ -106,7 +106,7 @@ const useExperimentScores = (experimentId: string) => {
               evaluatorId: evaluatorId,
             },
           },
-        }
+        },
       );
     },
     onSuccess: () => {
@@ -157,11 +157,11 @@ const useExperimentScores = (experimentId: string) => {
               promptVersionId,
             },
           },
-        }
+        },
       );
       return result.data ?? {};
     },
-    [currentOrgId, experimentId]
+    [currentOrgId, experimentId],
   );
 
   const shouldRunEvaluators = useQuery({
@@ -175,7 +175,7 @@ const useExperimentScores = (experimentId: string) => {
               experimentId,
             },
           },
-        }
+        },
       );
       return result.data?.data ?? false;
     },

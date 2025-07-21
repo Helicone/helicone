@@ -76,7 +76,7 @@ const AuthForm = (props: AuthFormProps) => {
   // Function to highlight keywords in quotes
   const highlightText = (
     text: string,
-    highlights: { text: string; color: string }[]
+    highlights: { text: string; color: string }[],
   ) => {
     if (!highlights || highlights.length === 0) return <>{text}</>;
 
@@ -97,7 +97,7 @@ const AuthForm = (props: AuthFormProps) => {
         result.push(
           <span key={`text-${lastIndex}`}>
             {text.substring(lastIndex, index)}
-          </span>
+          </span>,
         );
       }
 
@@ -105,7 +105,7 @@ const AuthForm = (props: AuthFormProps) => {
       result.push(
         <span key={`highlight-${index}`} className="text-slate-800">
           {highlight.text}
-        </span>
+        </span>,
       );
 
       lastIndex = index + highlight.text.length;
@@ -114,7 +114,7 @@ const AuthForm = (props: AuthFormProps) => {
     // Add any remaining text after the last highlight
     if (lastIndex < text.length) {
       result.push(
-        <span key={`text-${lastIndex}`}>{text.substring(lastIndex)}</span>
+        <span key={`text-${lastIndex}`}>{text.substring(lastIndex)}</span>,
       );
     }
 
@@ -181,7 +181,7 @@ const AuthForm = (props: AuthFormProps) => {
   const [password, setPassword] = useState("");
 
   const handleEmailSubmitHandler = async (
-    event: FormEvent<HTMLFormElement>
+    event: FormEvent<HTMLFormElement>,
   ) => {
     event.preventDefault();
 
@@ -225,13 +225,13 @@ const AuthForm = (props: AuthFormProps) => {
   };
 
   return (
-    <div className="w-full h-screen flex">
+    <div className="flex h-screen w-full">
       {/* Left Panel - Branding and Visual Elements */}
       <div
-        className={`hidden md:flex md:w-1/2 md:m-4 bg-gradient-to-br from-slate-100 to-sky-100 flex-col justify-between p-10 relative overflow-hidden md:rounded-3xl`}
+        className={`relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-slate-100 to-sky-100 p-10 md:m-4 md:flex md:w-1/2 md:rounded-3xl`}
       >
         <div className="relative z-20">
-          <div className="flex justify-between items-center gap-4">
+          <div className="flex items-center justify-between gap-4">
             <Link href="https://www.helicone.ai/" className="flex">
               <Image
                 src={"/static/logo-no-border.png"}
@@ -265,7 +265,7 @@ const AuthForm = (props: AuthFormProps) => {
               alt="Helicone Featured Image"
               fill
               style={{ objectFit: "cover" }}
-              className="w-full h-full"
+              className="h-full w-full"
               priority={true}
             />
           </div>
@@ -274,16 +274,16 @@ const AuthForm = (props: AuthFormProps) => {
         {/* Quote - Only shown when showQuote is true */}
         {showQuote && isContentLoaded ? (
           <>
-            <div className="relative z-20 space-y-3 w-full">
+            <div className="relative z-20 w-full space-y-3">
               <h1 className="text-4xl font-extrabold text-slate-300">&quot;</h1>
-              <p className="text-slate-400 text-4xl font-medium w-full">
+              <p className="w-full text-4xl font-medium text-slate-400">
                 {highlightText(selectedQuote.text, selectedQuote.highlights)}
               </p>
               <h1 className="text-4xl font-bold text-slate-300">&quot;</h1>
             </div>
 
             {/* Name and logo - Only shown with quote */}
-            <div className="relative z-20 space-y-1 flex items-center gap-3">
+            <div className="relative z-20 flex items-center gap-3 space-y-1">
               <Image
                 src={selectedQuote.image}
                 alt={selectedQuote.author}
@@ -292,10 +292,10 @@ const AuthForm = (props: AuthFormProps) => {
                 className="rounded-full"
               />
               <div>
-                <p className="text-slate-500 text-md max-w-md">
+                <p className="text-md max-w-md text-slate-500">
                   {selectedQuote.author}
                 </p>
-                <p className="text-slate-400 text-sm max-w-md">
+                <p className="max-w-md text-sm text-slate-400">
                   {selectedQuote.title}
                 </p>
               </div>
@@ -307,12 +307,12 @@ const AuthForm = (props: AuthFormProps) => {
             <div className="flex-grow"></div>
 
             {/* Attribution at bottom when showing image */}
-            <div className="relative z-20 space-y-1 flex items-center gap-3">
+            <div className="relative z-20 flex items-center gap-3 space-y-1">
               <div>
-                <p className="text-slate-500 text-md max-w-md">
+                <p className="text-md max-w-md text-slate-500">
                   Designed for the entire LLM lifecycle
                 </p>
-                <p className="text-slate-400 text-sm max-w-md">
+                <p className="max-w-md text-sm text-slate-400">
                   The CI workflow to take your LLM application from MVP to
                   production.
                 </p>
@@ -323,10 +323,10 @@ const AuthForm = (props: AuthFormProps) => {
       </div>
 
       {/* Right Panel - Auth Form */}
-      <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-6 md:p-12 bg-white">
+      <div className="flex w-full flex-col items-center justify-center bg-white p-6 md:w-1/2 md:p-12">
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
-          <div className="md:hidden flex justify-center mb-8">
+          <div className="mb-8 flex justify-center md:hidden">
             <Link href="https://www.helicone.ai/" className="flex">
               <Image
                 src={"/static/logo.svg"}
@@ -343,8 +343,8 @@ const AuthForm = (props: AuthFormProps) => {
               {authFormType === "signin"
                 ? "Sign in to your account"
                 : authFormType === "signup"
-                ? "Create an account"
-                : "Reset your password"}
+                  ? "Create an account"
+                  : "Reset your password"}
             </h2>
             {authFormType === "signup" ? (
               <p className="mt-2 text-sm text-gray-600">
@@ -470,7 +470,7 @@ const AuthForm = (props: AuthFormProps) => {
               <div className="flex justify-end">
                 <Link
                   href={"/reset"}
-                  className="text-sky-500 hover:text-sky-700 text-sm"
+                  className="text-sm text-sky-500 hover:text-sky-700"
                 >
                   Forgot your password?
                 </Link>
@@ -482,15 +482,15 @@ const AuthForm = (props: AuthFormProps) => {
               disabled={
                 isLoading || (authFormType === "signup" && !acceptedTerms)
               }
-              className="w-full py-2 text-white bg-sky-500"
+              className="w-full bg-sky-500 py-2 text-white"
             >
               {authFormType === "signin"
                 ? "Sign in with email"
                 : authFormType === "signup"
-                ? "Create account"
-                : authFormType === "reset"
-                ? "Reset password"
-                : "Update password"}
+                  ? "Create account"
+                  : authFormType === "reset"
+                    ? "Reset password"
+                    : "Update password"}
             </Button>
           </form>
 
@@ -504,7 +504,7 @@ const AuthForm = (props: AuthFormProps) => {
                   <div className="w-full border-t border-gray-200" />
                 </div>
                 <div className="relative flex justify-center">
-                  <span className="px-4 text-sm text-gray-500 bg-white">
+                  <span className="bg-white px-4 text-sm text-gray-500">
                     Or continue with
                   </span>
                 </div>
@@ -514,7 +514,7 @@ const AuthForm = (props: AuthFormProps) => {
                 {handleGoogleSubmit && (
                   <button
                     onClick={() => handleGoogleSubmit()}
-                    className="flex items-center justify-center gap-2 py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white hover:bg-gray-50 text-sm font-medium text-gray-700"
+                    className="flex items-center justify-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
                   >
                     <BsGoogle />
                     <span>Google</span>
@@ -523,7 +523,7 @@ const AuthForm = (props: AuthFormProps) => {
                 {handleGithubSubmit && (
                   <button
                     onClick={() => handleGithubSubmit()}
-                    className="flex items-center justify-center gap-2 py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white hover:bg-gray-50 text-sm font-medium text-gray-700"
+                    className="flex items-center justify-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
                   >
                     <BsGithub />
                     <span>GitHub</span>
@@ -534,7 +534,7 @@ const AuthForm = (props: AuthFormProps) => {
           )}
 
           {customerPortalContent && (
-            <div className="text-xs text-gray-500 text-center mt-8 italic">
+            <div className="mt-8 text-center text-xs italic text-gray-500">
               Powered by Helicone
             </div>
           )}

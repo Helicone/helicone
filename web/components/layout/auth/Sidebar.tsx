@@ -156,7 +156,7 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
         ],
       },
     ],
-    [pathname]
+    [pathname],
   );
 
   return (

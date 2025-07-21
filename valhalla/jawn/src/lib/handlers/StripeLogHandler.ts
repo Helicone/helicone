@@ -48,7 +48,11 @@ export class StripeLogHandler extends AbstractLogHandler {
       return await super.handle(context);
     }
 
-    if (context.message.log.request.cacheReferenceId && (context.message.log.request.cacheReferenceId !== DEFAULT_CACHE_REFERENCE_ID)) {
+    if (
+      context.message.log.request.cacheReferenceId &&
+      context.message.log.request.cacheReferenceId !==
+        DEFAULT_CACHE_REFERENCE_ID
+    ) {
       return await super.handle(context);
     }
 

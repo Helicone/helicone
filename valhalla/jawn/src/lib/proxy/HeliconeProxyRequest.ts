@@ -64,7 +64,10 @@ const providerBaseUrlMappings: Record<
 export class HeliconeProxyRequestMapper {
   heliconeErrors: string[] = [];
 
-  constructor(private request: RequestWrapper, private provider: Provider) {}
+  constructor(
+    private request: RequestWrapper,
+    private provider: Provider
+  ) {}
 
   private async getHeliconeTemplate() {
     if (this.request.heliconeHeaders.promptHeaders.promptId) {

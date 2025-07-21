@@ -51,17 +51,17 @@ export default async function Home({
   );
   return (
     <>
-      <div className="w-full h-full antialiased relative">
-        <div className="w-full h-full antialiased relative">
-          <div className="flex flex-col md:flex-row items-start w-full mx-auto max-w-5xl py-16 px-4 md:py-24 relative">
-            <div className="w-56 h-full flex flex-col space-y-2 md:sticky top-16 md:top-32">
+      <div className="relative h-full w-full antialiased">
+        <div className="relative h-full w-full antialiased">
+          <div className="relative mx-auto flex w-full max-w-5xl flex-col items-start px-4 py-16 md:flex-row md:py-24">
+            <div className="top-16 flex h-full w-56 flex-col space-y-2 md:sticky md:top-32">
               <Link href="/changelog" className="flex items-center gap-1">
-                <ChevronLeftIcon className="w-4 h-4" />
+                <ChevronLeftIcon className="h-4 w-4" />
                 <span className="text-sm font-bold">changelog</span>
               </Link>
             </div>
-            <article className="prose w-full h-full">
-              <h1 className="text-bold text-sky-500 mt-16 md:mt-0">
+            <article className="prose h-full w-full">
+              <h1 className="text-bold mt-16 text-sky-500 md:mt-0">
                 {String(metadata?.title)}
               </h1>
               <h3 className="text-sm font-semibold text-gray-500">

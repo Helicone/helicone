@@ -10,8 +10,8 @@ interface LoginProps {
 
 const SignedUpConfirmation = ({ email }: { email: string }) => {
   return (
-    <div className="flex flex-col border border-black rounded-lg p-8 items-center text-center justify-center text-black text-lg sm:text-lg bg-gray-200 max-w-[450px]">
-      <InboxArrowDownIcon className="w-12 h-12 mb-4 animate-bounce" />
+    <div className="flex max-w-[450px] flex-col items-center justify-center rounded-lg border border-black bg-gray-200 p-8 text-center text-lg text-black sm:text-lg">
+      <InboxArrowDownIcon className="mb-4 h-12 w-12 animate-bounce" />
       <p>
         Check your email ({email}) for a confirmation link. If you don&apos;t
         see it, check your spam folder.
@@ -23,7 +23,7 @@ const SignedUpConfirmation = ({ email }: { email: string }) => {
 const Login = (props: LoginProps) => {
   const { formState: defaultFormState } = props;
   const [formState, setFormState] = useState<"login" | "reset" | "signup">(
-    defaultFormState
+    defaultFormState,
   );
   const [authError, setAuthError] = useState<string>();
   const [email, setEmail] = useState<string>("");
@@ -69,19 +69,19 @@ const Login = (props: LoginProps) => {
   }
 
   return (
-    <div className="sm:max-w-2xl flex flex-col space-y-0 w-full min-w-[300px] sm:min-w-[450px]">
-      <div className="w-full border-b border-gray-300 pb-2 justify-between flex flex-row items-center">
-        <p className="text-lg font-medium w-full">
+    <div className="flex w-full min-w-[300px] flex-col space-y-0 sm:min-w-[450px] sm:max-w-2xl">
+      <div className="flex w-full flex-row items-center justify-between border-b border-gray-300 pb-2">
+        <p className="w-full text-lg font-medium">
           {formState === "login"
             ? "Login"
             : formState === "reset"
-            ? "Reset Password"
-            : "Welcome to Helicone"}
+              ? "Reset Password"
+              : "Welcome to Helicone"}
         </p>
       </div>
       <div className="flex flex-col space-y-2">
-        <div className="h-full flex flex-col w-full pt-2">
-          <div className="pt-2 w-full flex-auto">
+        <div className="flex h-full w-full flex-col pt-2">
+          <div className="w-full flex-auto pt-2">
             <div className="flex min-h-full items-center justify-center">
               {formState === "reset" ? (
                 <div className="w-full max-w-md space-y-8">
@@ -99,13 +99,13 @@ const Login = (props: LoginProps) => {
                           autoComplete="email"
                           onChange={(e) => setEmail(e.target.value)}
                           required
-                          className="relative block w-full appearance-none rounded-md border border-gray-300 text-md sm:text-lg p-2 sm:p-4 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                          className="text-md relative block w-full appearance-none rounded-md border border-gray-300 p-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:p-4 sm:text-lg"
                           placeholder="Email address"
                         />
                       </div>
                     </div>
                     {authError && (
-                      <div className="mt-4 text-sm text-red-600 w-full">
+                      <div className="mt-4 w-full text-sm text-red-600">
                         <p>{authError}</p>
                       </div>
                     )}
@@ -129,18 +129,18 @@ const Login = (props: LoginProps) => {
                             setAuthError(res.error);
                           } else {
                             setAuthError(
-                              `If an account exists with email (${email}), you will receive an email with a link to reset your password.`
+                              `If an account exists with email (${email}), you will receive an email with a link to reset your password.`,
                             );
                           }
                           setLoading(false);
                         });
                     }}
                     type="submit"
-                    className="flex w-full justify-center rounded-md border border-transparent bg-gradient-to-r from-sky-600 to-indigo-500  py-2 px-4 text-md font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    className="text-md flex w-full justify-center rounded-md border border-transparent bg-gradient-to-r from-sky-600 to-indigo-500 px-4 py-2 font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                   >
                     {loading ? (
                       <div className="flex flex-row items-center">
-                        <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
+                        <ArrowPathIcon className="mr-1.5 h-4 w-4 animate-spin" />
                         Resetting...
                       </div>
                     ) : (
@@ -166,7 +166,7 @@ const Login = (props: LoginProps) => {
                           autoComplete="email"
                           onChange={(e) => setEmail(e.target.value)}
                           required
-                          className="relative block w-full appearance-none rounded-none rounded-t-md border border-gray-300 text-md sm:text-lg p-2 sm:p-4 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                          className="text-md relative block w-full appearance-none rounded-none rounded-t-md border border-gray-300 p-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:p-4 sm:text-lg"
                           placeholder="Email address"
                         />
                       </div>
@@ -181,7 +181,7 @@ const Login = (props: LoginProps) => {
                           autoComplete="current-password"
                           onChange={(e) => setPassword(e.target.value)}
                           required
-                          className="relative block w-full appearance-none rounded-none rounded-b-md border border-gray-300 text-md sm:text-lg p-2 sm:p-4 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                          className="text-md relative block w-full appearance-none rounded-none rounded-b-md border border-gray-300 p-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:p-4 sm:text-lg"
                           placeholder="Password"
                         />
                       </div>
@@ -200,7 +200,7 @@ const Login = (props: LoginProps) => {
                       </div>
                     )}
                     {authError && (
-                      <div className="mt-4 text-sm text-red-600 w-full">
+                      <div className="mt-4 w-full text-sm text-red-600">
                         <p>{authError}</p>
                       </div>
                     )}
@@ -233,11 +233,11 @@ const Login = (props: LoginProps) => {
                         }
                       }}
                       type="button"
-                      className="flex w-full justify-center rounded-md border border-transparent bg-gradient-to-r from-sky-600 to-indigo-500  py-2 px-4 text-md font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                      className="text-md flex w-full justify-center rounded-md border border-transparent bg-gradient-to-r from-sky-600 to-indigo-500 px-4 py-2 font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                     >
                       {loading ? (
                         <div className="flex flex-row items-center">
-                          <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
+                          <ArrowPathIcon className="mr-1.5 h-4 w-4 animate-spin" />
                           Logging in...
                         </div>
                       ) : (
@@ -261,10 +261,10 @@ const Login = (props: LoginProps) => {
                         setLoading(false);
                       }}
                       type="button"
-                      className="flex w-full justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-md font-medium text-gray-900 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      className="text-md flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 font-medium text-gray-900 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                     >
                       <div className="flex flex-row items-center">
-                        <BsGoogle className="w-5 h-5 mr-2" />
+                        <BsGoogle className="mr-2 h-5 w-5" />
                         Sign {formState === "signup" ? "Up" : "In"} with Google
                       </div>
                     </button>
@@ -272,7 +272,7 @@ const Login = (props: LoginProps) => {
                       <div>
                         Already have an account?{" "}
                         <a
-                          className="text-indigo-600 hover:text-indigo-500 hover:cursor-pointer"
+                          className="text-indigo-600 hover:cursor-pointer hover:text-indigo-500"
                           onClick={() => setFormState("login")}
                         >
                           Login
@@ -283,7 +283,7 @@ const Login = (props: LoginProps) => {
                         don{"'"}t have an account?{" "}
                         <a
                           onClick={() => setFormState("signup")}
-                          className="text-indigo-600 hover:text-indigo-500 hover:cursor-pointer"
+                          className="text-indigo-600 hover:cursor-pointer hover:text-indigo-500"
                         >
                           Sign Up
                         </a>

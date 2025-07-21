@@ -3,7 +3,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import clsx from "clsx";
 
-export const ISLAND_MARGIN = clsx("px-8 max-w-[100rem]");
+export const ISLAND_MARGIN = clsx("max-w-[100rem] px-8");
 
 const IslandContainer = React.forwardRef<
   HTMLDivElement,

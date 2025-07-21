@@ -7,7 +7,9 @@ description: "Deploy Helicone AI Gateway to Porter in 5 minutes through their in
 Deploy the AI Gateway to Porter for a simple, scalable cloud deployment with an intuitive web interface and automatic infrastructure management.
 
 <Warning>
-  **Security Notice**: Porter deployments are publicly accessible. You **must** enable authentication to prevent unauthorized access to your provider API keys. This guide includes authentication setup as a required step.
+  **Security Notice**: Porter deployments are publicly accessible. You **must**
+  enable authentication to prevent unauthorized access to your provider API
+  keys. This guide includes authentication setup as a required step.
 </Warning>
 
 ## Quick Start
@@ -24,6 +26,7 @@ Deploy the AI Gateway to Porter for a simple, scalable cloud deployment with an 
     <Note>
       Porter handles all the infrastructure complexity for you. The onboarding process typically takes 5-10 minutes and includes automatic cluster provisioning.
     </Note>
+
   </Step>
 
   <Step title="Get your Helicone API key">
@@ -39,6 +42,7 @@ Deploy the AI Gateway to Porter for a simple, scalable cloud deployment with an 
     <Note>
       No Helicone subscription is required, but the API key is essential for securing your publicly accessible gateway.
     </Note>
+
   </Step>
 
   <Step title="Navigate to the Helicone AI Gateway Add-on">
@@ -51,6 +55,7 @@ Deploy the AI Gateway to Porter for a simple, scalable cloud deployment with an 
     ![Porter Add-ons](../images/porter2.webp)
     4. Click on the Helicone AI Gateway tile
     ![Porter Add-ons](../images/porter3.webp)
+
   </Step>
 
   <Step title="Configure deployment settings">
@@ -72,6 +77,7 @@ Deploy the AI Gateway to Porter for a simple, scalable cloud deployment with an 
     <Warning>
       The Helicone API Key is mandatory for authentication. Without it, your gateway will be publicly accessible without security.
     </Warning>
+
   </Step>
 
   <Step title="Configure provider API keys">
@@ -81,7 +87,7 @@ Deploy the AI Gateway to Porter for a simple, scalable cloud deployment with an 
 
     **Provider Configuration:**
     - **OpenAI**: Toggle on and enter your OpenAI API key
-    - **Anthropic**: Toggle on and enter your Anthropic API key  
+    - **Anthropic**: Toggle on and enter your Anthropic API key
     - **Gemini**: Toggle on and enter your Google Gemini API key
     - **Other Providers**: Enable additional providers as needed
 
@@ -92,6 +98,7 @@ Deploy the AI Gateway to Porter for a simple, scalable cloud deployment with an 
     <Note>
       Only enable providers you plan to use. You can always add more providers later by updating your deployment.
     </Note>
+
   </Step>
 
   <Step title="Deploy your gateway">
@@ -105,6 +112,7 @@ Deploy the AI Gateway to Porter for a simple, scalable cloud deployment with an 
     <Note>
       Deployment typically takes 2-3 minutes. Porter will show real-time status updates during the process.
     </Note>
+
   </Step>
 </Steps>
 
@@ -117,17 +125,18 @@ Once deployed, Porter will provide you with a public URL. Test your AI Gateway w
 import { OpenAI } from "openai";
 
 const openai = new OpenAI({
-  baseURL: "https://your-gateway-url.porter.run/ai", // Use your Porter URL
-  apiKey: "sk-helicone-your-api-key", // Your Helicone API key
+baseURL: "https://your-gateway-url.porter.run/ai", // Use your Porter URL
+apiKey: "sk-helicone-your-api-key", // Your Helicone API key
 });
 
 const response = await openai.chat.completions.create({
-  model: "openai/gpt-4o-mini",
-  messages: [{ role: "user", content: "Hello from Porter!" }],
+model: "openai/gpt-4o-mini",
+messages: [{ role: "user", content: "Hello from Porter!" }],
 });
 
 console.log(response);
-```
+
+````
 ```python Python
 import openai
 
@@ -142,7 +151,8 @@ response = client.chat.completions.create(
 )
 
 print(response)
-```
+````
+
 ```bash cURL
 curl https://your-gateway-url.porter.run/ai/v1/chat/completions \
   -H "Authorization: Bearer sk-helicone-your-api-key" \
@@ -154,10 +164,12 @@ curl https://your-gateway-url.porter.run/ai/v1/chat/completions \
     ]
   }'
 ```
+
 </CodeGroup>
 
 <Note>
-  Replace `your-gateway-url.porter.run` with your actual Porter deployment URL and `sk-helicone-your-api-key` with your Helicone API key.
+  Replace `your-gateway-url.porter.run` with your actual Porter deployment URL
+  and `sk-helicone-your-api-key` with your Helicone API key.
 </Note>
 
 ## Custom Configuration
@@ -191,19 +203,21 @@ For advanced use cases, you can upload a custom `config.yaml` file during deploy
       # Set to `features: observability` to enable observability
       features: auth
     ```
+
   </Step>
 
   <Step title="Upload during deployment">
     In the Porter configuration UI:
 
     1. Scroll to the **"Custom Config"** section
-    2. Click **"Upload File"** 
+    2. Click **"Upload File"**
     3. Select your `config.yaml` file
     4. Continue with the deployment process
 
     <Note>
       Custom configurations override the default settings. Make sure your config includes all necessary authentication settings.
     </Note>
+
   </Step>
 </Steps>
 

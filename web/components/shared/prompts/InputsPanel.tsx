@@ -56,7 +56,7 @@ export default function VariablesPanel({
             limit: 1,
             random: true,
           },
-        }
+        },
       );
     },
   });
@@ -95,7 +95,7 @@ export default function VariablesPanel({
                     disabled={!hasInputs}
                     onClick={() => setOpenInputSelector(true)}
                   >
-                    <PiDatabaseBold className="w-4 h-4 text-secondary" />
+                    <PiDatabaseBold className="h-4 w-4 text-secondary" />
                   </Button>
                 </div>
               </TooltipTrigger>
@@ -119,7 +119,7 @@ export default function VariablesPanel({
                     onClick={importRandom}
                     disabled={!hasInputs}
                   >
-                    <PiShuffleBold className="w-4 h-4 text-secondary" />
+                    <PiShuffleBold className="h-4 w-4 text-secondary" />
                   </Button>
                 </div>
               </TooltipTrigger>
@@ -137,7 +137,7 @@ export default function VariablesPanel({
 
       {/* No Variables */}
       {validVariablesWithIndices.length === 0 ? (
-        <p className="text-sm text-slate-400 text-center text-balance px-4">
+        <p className="text-balance px-4 text-center text-sm text-slate-400">
           Make your prompt dynamic with{" "}
           <span className="font-semibold">Inputs</span>. Type{" "}
           <span className="text-heliblue">{`{{name}}`}</span> or highlight a
@@ -145,7 +145,7 @@ export default function VariablesPanel({
           .
         </p>
       ) : (
-        <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-900 px-4">
+        <div className="flex flex-col divide-y divide-slate-100 px-4 dark:divide-slate-900">
           {/* Variables */}
           {validVariablesWithIndices.map(({ variable, originalIndex }) => (
             <VariableItem
@@ -184,10 +184,10 @@ export default function VariablesPanel({
 const VariableItem = memo(
   ({ variable, originalIndex, onVariableChange }: VariableItemProps) => (
     <div className="flex flex-col py-1 first:pt-0">
-      <div className="flex flex-d items-center justify-between gap-2 text-sm">
+      <div className="flex-d flex items-center justify-between gap-2 text-sm">
         <div className="flex items-center gap-2">
           <div
-            className={`font-medium flex flex-row items-center gap-1 ${
+            className={`flex flex-row items-center gap-1 font-medium ${
               variable.value ? "text-heliblue" : "text-red-500"
             }`}
           >
@@ -209,7 +209,7 @@ const VariableItem = memo(
         />
       </div>
     </div>
-  )
+  ),
 );
 
 VariableItem.displayName = "VariableItem";

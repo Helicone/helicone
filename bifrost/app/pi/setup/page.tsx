@@ -25,9 +25,9 @@ const PiPageContent = () => {
   }
 
   return (
-    <div className="w-full flex flex-col justify-center items-center h-[100vh]">
+    <div className="flex h-[100vh] w-full flex-col items-center justify-center">
       <h1
-        className={`text-3xl font-extrabold truncate max-w-[80vw] ${jetbrainsMono.className} py-2`}
+        className={`max-w-[80vw] truncate text-3xl font-extrabold ${jetbrainsMono.className} py-2`}
       >
         Welcome to Helicone!
       </h1>
@@ -47,7 +47,7 @@ const PiPageContent = () => {
         <Link href={`/pi`} className="text-blue-500">
           Cancel
         </Link>
-        <div className=" bg-blue-500 bg-opacity-60 absolute top-1/2 left-1/2 transform translate-x-[20px] -translate-y-[110px] text-white font-bold">
+        <div className="absolute left-1/2 top-1/2 -translate-y-[110px] translate-x-[20px] transform bg-blue-500 bg-opacity-60 font-bold text-white">
           <QRCode
             value={`https://helicone.ai/signin?pi_session=${sessionUUID}`}
             size={75}

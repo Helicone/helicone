@@ -53,15 +53,15 @@ export default function BlogFilter({ badges }: BlogFilterProps) {
   }, [searchTerm, searchParams, router]);
 
   return (
-    <div className="overflow-x-auto pb-2 mb-6">
-      <div className="flex justify-between items-center gap-4">
-        <div className="flex gap-2 min-w-max">
+    <div className="mb-6 overflow-x-auto pb-2">
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex min-w-max gap-2">
           {filters.map((filter) => (
             <button
               key={filter}
               onClick={() => handleFilterClick(filter)}
               className={clsx(
-                "px-3 py-1 rounded-md text-sm font-medium transition-colors",
+                "rounded-md px-3 py-1 text-sm font-medium transition-colors",
                 activeFilter === filter
                   ? "bg-sky-200 text-sky-700"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -77,7 +77,7 @@ export default function BlogFilter({ badges }: BlogFilterProps) {
           ))}
         </div>
         <div className="relative min-w-[200px]">
-          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
             <Search size={16} className="text-slate-400" />
           </div>
           <input
@@ -85,7 +85,7 @@ export default function BlogFilter({ badges }: BlogFilterProps) {
             placeholder="Search blog posts..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full py-1 pl-9 pr-3 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-sky-500 focus:border-sky-500"
+            className="w-full rounded-md border border-slate-200 py-1 pl-9 pr-3 text-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
           />
         </div>
       </div>

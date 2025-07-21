@@ -1,6 +1,6 @@
-Building effective AI agents is hard. 
+Building effective AI agents is hard.
 
-So hard that even tech giants like Apple and Amazon continue to struggle with implementing reliable AI features due to hallucination and inconsistent performance. 
+So hard that even tech giants like Apple and Amazon continue to struggle with implementing reliable AI features due to hallucination and inconsistent performance.
 
 Yet, there's no shortage of tutorials and pre-built agents that make it all seem trivial.
 
@@ -21,17 +21,18 @@ The distinction matters because it affects your development approach. **For many
 
 ## When to Use Agents vs. Workflows
 
-| **Use an Agent when...** | **Use a Workflow when...** |
-| --------------------- | ----------------------- |
-| The number of steps is unpredictable | The task has clear, predictable steps |
-| The task requires dynamic decision-making | You need consistent, deterministic behavior |
+| **Use an Agent when...**                         | **Use a Workflow when...**                     |
+| ------------------------------------------------ | ---------------------------------------------- |
+| The number of steps is unpredictable             | The task has clear, predictable steps          |
+| The task requires dynamic decision-making        | You need consistent, deterministic behavior    |
 | Tools and actions need to be selected adaptively | The process can be broken into discrete chunks |
 
 ## Core Patterns for Building AI Systems
 
 Whether you're creating workflows or agents, there are a few common workflow patterns you should know. Ideally, you're building with an LLM that is capable of:
-- **Retrieval** (Accessing external knowledge from databases or vector stores) 
-- **Tool use** (API calls to external services), and 
+
+- **Retrieval** (Accessing external knowledge from databases or vector stores)
+- **Tool use** (API calls to external services), and
 - **Memory** (Context from previous interactions).
 
 Here are five common workflow patterns for building AI agents:
@@ -79,7 +80,7 @@ Start by **testing the process manually** to confirm it works and calculating th
 
 ### 2. Use the right tooling
 
-Many platforms have emerged to make building agents easier and faster, and choosing the right one for your specific use case can significantly impact your success. 
+Many platforms have emerged to make building agents easier and faster, and choosing the right one for your specific use case can significantly impact your success.
 
 Here are a few popular ones:
 
@@ -96,7 +97,7 @@ Remember that the right tool isn't necessarily the most complex one. In fact, si
 
 ### 3. Use dedicated agents
 
-When building AI agents, consider breaking complex workflows into multiple dedicated agents rather than overloading a single agent. 
+When building AI agents, consider breaking complex workflows into multiple dedicated agents rather than overloading a single agent.
 
 There's a performance threshold where single agents become ineffective—typically when handling more than 5-10 tools, managing complex context, or requiring multiple areas of specialization.
 
@@ -104,7 +105,7 @@ Multi-agent architectures provide several advantages:
 
 - **Modularity**: Easier to develop, test, and maintain individual components
 - **Specialization**: Expert agents focused on particular domains (math, coding, planning) tend to perform better
-- **Context management**: Allow for better utilization of a limited context window 
+- **Context management**: Allow for better utilization of a limited context window
 - **Controlled communication**: Enable the definition of explicit communication patterns, ensuring controlled and efficient information sharing
 
 {/* <a href="https://langchain-ai.github.io/langgraph/concepts/multi_agent/#multi-agent-architectures" target="_blank" rel="noreferrer">Common architectures</a> include supervisor agents (where one agent routes to specialized sub-agents), hierarchical systems (layered supervision), or custom cognitive architectures tailored to your specific domain. When implementing multi-agent systems, carefully consider how agents will communicate - either through shared state objects or via tool-calling parameters. */}
@@ -128,7 +129,7 @@ Think of the LLM as a new team member who needs to learn your API. The clearer y
 
 ### 5. Implement proper verification
 
-The more you verify LLM outputs at each step of the way, the more you can rely on your system to get the job done. 
+The more you verify LLM outputs at each step of the way, the more you can rely on your system to get the job done.
 
 For coding agents, verification is easier because you can run tests. However, you generally want verification steps involving:
 
@@ -165,11 +166,11 @@ Remember that the first version is rarely the best—successful agents evolve th
 
 ### 8. Measure everything
 
-Effective agent development hinges on measuring performance and iterating on implementations. Without comprehensive measurement, you're building blind. 
+Effective agent development hinges on measuring performance and iterating on implementations. Without comprehensive measurement, you're building blind.
 
 The most successful builders follow a core principle: **use the simplest solution possible, and only increase complexity when it demonstrably improves outcomes**.
 
-Establish clear metrics for success—task completion rate, accuracy, or user satisfaction—and implement logging for every significant action. 
+Establish clear metrics for success—task completion rate, accuracy, or user satisfaction—and implement logging for every significant action.
 
 A good LLM observability platform like <a href="https://helicone.ai" target="_blank" rel="noopener">Helicone</a> can provide the measurement infrastructure you need to keep your agents in good shape.
 
@@ -186,15 +187,15 @@ Observability tools like <a href="https://helicone.ai" target="_blank" rel="noop
 
 ## Debugging and Improving Agent Performance
 
-Debugging agents can be quite tricky because their decision paths are non-deterministic and errors can cascade through multiple steps. 
+Debugging agents can be quite tricky because their decision paths are non-deterministic and errors can cascade through multiple steps.
 
 However, by carefully tracking and analyzing your LLMs' actions at each step of the way, you can greatly simplify the process. Here's how:
 
-### How to debug AI agents 
+### How to debug AI agents
 
 One easy way to <a href="https://www.helicone.ai/blog/debugging-chatbots-and-ai-agents-with-sessions" target="_blank" rel="noopener">debug AI agents</a> is with step-by-step tracing using Helicone's Sessions feature.
 
-Helicone's Sessions feature provides a structured way to visualize and analyze multi-step agent processes. It groups related requests together, making it easier to trace the flow of information and identify issues. 
+Helicone's Sessions feature provides a structured way to visualize and analyze multi-step agent processes. It groups related requests together, making it easier to trace the flow of information and identify issues.
 
 <CallToAction
   title="Debug Complex AI Agents with Helicone"
@@ -218,13 +219,13 @@ const response = await openai.chat.completions({
 ```
 </CallToAction>
 
-Session-based tracking is particularly valuable for complex agents because it provides end-to-end visibility and even allows you to view **tool** and **retrieval** actions. 
+Session-based tracking is particularly valuable for complex agents because it provides end-to-end visibility and even allows you to view **tool** and **retrieval** actions.
 
 ## Bottom Line
 
-Building effective AI agents isn't about using complex frameworks or architecture. 
+Building effective AI agents isn't about using complex frameworks or architecture.
 
-It's more about choosing the right level of complexity for your problem, implementing reliable verification systems, scaling gradually, and extensive measurement. 
+It's more about choosing the right level of complexity for your problem, implementing reliable verification systems, scaling gradually, and extensive measurement.
 
 The most successful implementations follow this pragmatic approach, focusing on simple, composable patterns rather than intricate frameworks.
 
@@ -252,24 +253,30 @@ The most successful implementations follow this pragmatic approach, focusing on 
     7 Awesome Open-Source Frameworks for Building AI Agents
   </a>
 
-<FAQ items={[
-  {
-    question: "What's the difference between AI agents and traditional chatbots?",
-    answer: "Unlike traditional chatbots that follow explicit rules, AI agents can autonomously perform tasks with advanced decision-making abilities. They collect data, process it, and decide on actions to achieve a goal, without being limited to predetermined responses or workflows."
-  },
-  {
-    question: "What tools should I use for debugging AI agents?",
-    answer: "Several observability tools can help including Helicone, LangSmith, LangFuse, Portkey, and more."
-    
-  },
-  {
-    question: "How can I ensure my AI agent is reliable?",
-    answer: "Add explicit verification steps after each significant action and use checkpoints with human approval for critical actions. Finally, implement guard rails for hallucination detection and content filtering."
-  },
-  {
-  question: "Should I build an agent or a workflow?",
-  answer: "Use workflows when you have clear, predictable steps with consistent behavior. Choose agents when tasks require dynamic decision-making with unpredictable steps. Many applications work better with workflows than true agents due to their reliability and simplicity."
-  }
-]} />
+<FAQ
+  items={[
+    {
+      question:
+        "What's the difference between AI agents and traditional chatbots?",
+      answer:
+        "Unlike traditional chatbots that follow explicit rules, AI agents can autonomously perform tasks with advanced decision-making abilities. They collect data, process it, and decide on actions to achieve a goal, without being limited to predetermined responses or workflows.",
+    },
+    {
+      question: "What tools should I use for debugging AI agents?",
+      answer:
+        "Several observability tools can help including Helicone, LangSmith, LangFuse, Portkey, and more.",
+    },
+    {
+      question: "How can I ensure my AI agent is reliable?",
+      answer:
+        "Add explicit verification steps after each significant action and use checkpoints with human approval for critical actions. Finally, implement guard rails for hallucination detection and content filtering.",
+    },
+    {
+      question: "Should I build an agent or a workflow?",
+      answer:
+        "Use workflows when you have clear, predictable steps with consistent behavior. Choose agents when tasks require dynamic decision-making with unpredictable steps. Many applications work better with workflows than true agents due to their reliability and simplicity.",
+    },
+  ]}
+/>
 
 <Questions />

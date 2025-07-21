@@ -83,42 +83,42 @@ export default function Platform() {
   >("monitoring");
   return (
     <>
-      <div className="flex flex-col space-y-4 pb-2 w-full items-center">
-        <h2 className="text-3xl sm:text-5xl font-bold text-black text-center tracking-tight leading-tight">
+      <div className="flex w-full flex-col items-center space-y-4 pb-2">
+        <h2 className="text-center text-3xl font-bold leading-tight tracking-tight text-black sm:text-5xl">
           One observability platform,{" "}
           <span className="text-sky-500">everything you need</span>
         </h2>
-        <p className="text-lg md:text-xl text-gray-600 max-w-4xl text-center">
+        <p className="max-w-4xl text-center text-lg text-gray-600 md:text-xl">
           Collect data, monitor performance, and improve your LLM-powered
           application over time
         </p>
-        <ul className="hidden md:flex items-center justify-between w-full px-4 sm:px-8 pt-8 relative gap-8">
+        <ul className="relative hidden w-full items-center justify-between gap-8 px-4 pt-8 sm:px-8 md:flex">
           {tabs.map((tab) => (
-            <li key={tab.name} className="w-full z-10">
+            <li key={tab.name} className="z-10 w-full">
               <button
                 onClick={() =>
                   setActiveTab(tab.key as "monitoring" | "logs" | "templates")
                 }
                 className={clsx(
-                  "w-full justify-center text-md border px-8 py-4 rounded-lg font-semibold flex items-center gap-2",
+                  "text-md flex w-full items-center justify-center gap-2 rounded-lg border px-8 py-4 font-semibold",
                   activeTab === tab.key
-                    ? "bg-sky-500 text-white border-sky-700"
-                    : "border-gray-300 bg-gray-200 text-gray-500"
+                    ? "border-sky-700 bg-sky-500 text-white"
+                    : "border-gray-300 bg-gray-200 text-gray-500",
                 )}
               >
-                <tab.icon className="w-5 h-5" />
+                <tab.icon className="h-5 w-5" />
                 {tab.name}
               </button>
               {/* display a gray line that connects these list items */}
             </li>
           ))}
-          <div className="w-full flex items-center justify-center absolute">
-            <div className="h-0.5 w-2/3 bg-gray-200 flex mx-auto" />
+          <div className="absolute flex w-full items-center justify-center">
+            <div className="mx-auto flex h-0.5 w-2/3 bg-gray-200" />
           </div>
         </ul>
       </div>
       <div className="relative overflow-hidden pt-2">
-        <div className="mx-auto max-w-8xl px-6 lg:px-8">
+        <div className="max-w-8xl mx-auto px-6 lg:px-8">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={
@@ -135,7 +135,7 @@ export default function Platform() {
           </div>
         </div>
       </div>
-      <div className="mx-auto mt-16 max-w-8xl px-6 sm:mt-20 md:mt-24 lg:px-8">
+      <div className="max-w-8xl mx-auto mt-16 px-6 sm:mt-20 md:mt-24 lg:px-8">
         <dl className="mx-auto grid max-w-2xl grid-cols-1 gap-x-6 gap-y-10 text-base leading-7 text-gray-600 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3 lg:gap-x-8 lg:gap-y-16">
           {features.map((feature) => (
             <div key={feature.name} className="relative pl-9">

@@ -39,7 +39,7 @@ const ModelInfoCard = ({
     else color = "bg-red-400";
 
     return (
-      <div className="h-1 w-full bg-gray-100 rounded-full mt-1">
+      <div className="mt-1 h-1 w-full rounded-full bg-gray-100">
         <div
           className={`h-full rounded-full ${color}`}
           style={{ width: `${percentage}%` }}
@@ -71,35 +71,35 @@ const ModelInfoCard = ({
     : null;
 
   return (
-    <div className="w-full flex-1 p-6 bg-white rounded-lg shadow-sm border border-slate-200">
+    <div className="w-full flex-1 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
       {/* Header */}
-      <div className="flex gap-3 items-center mb-6">
+      <div className="mb-6 flex items-center gap-3">
         {logo && (
           <img
             src={logo}
             alt={`${title} logo`}
-            className="w-8 h-8 rounded-full object-cover"
+            className="h-8 w-8 rounded-full object-cover"
           />
         )}
-        <h3 className="text-black text-lg font-semibold">{title}</h3>
+        <h3 className="text-lg font-semibold text-black">{title}</h3>
       </div>
 
       {/* Description */}
-      <p className="text-slate-600 text-sm mb-6 leading-relaxed">
+      <p className="mb-6 text-sm leading-relaxed text-slate-600">
         {modelDetails.info.description}
       </p>
 
       {/* Key Details */}
-      <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
+      <div className="mb-6 grid grid-cols-2 gap-4 text-sm">
         <div>
-          <div className="text-slate-400 mb-1">Release Date</div>
+          <div className="mb-1 text-slate-400">Release Date</div>
           <div className="font-medium">
             {modelDetails.info.releaseDate || "N/A"}
           </div>
         </div>
 
         <div>
-          <div className="text-slate-400 mb-1">Max Tokens</div>
+          <div className="mb-1 text-slate-400">Max Tokens</div>
           <div className="font-medium">
             {modelDetails.info.maxTokens?.toLocaleString() || "N/A"}
           </div>
@@ -109,24 +109,24 @@ const ModelInfoCard = ({
       {/* Cost Information */}
       {costs && (
         <div className="mb-6">
-          <div className="text-slate-600 font-medium mb-2">
+          <div className="mb-2 font-medium text-slate-600">
             Cost (per 1M tokens)
           </div>
           <div className="grid grid-cols-3 gap-4 text-sm">
             <div>
-              <div className="text-slate-400 mb-1">Input</div>
+              <div className="mb-1 text-slate-400">Input</div>
               <div className="font-medium">
                 {formatCost(costs.prompt_token)}
               </div>
             </div>
             <div>
-              <div className="text-slate-400 mb-1">Output</div>
+              <div className="mb-1 text-slate-400">Output</div>
               <div className="font-medium">
                 {formatCost(costs.completion_token)}
               </div>
             </div>
             <div>
-              <div className="text-slate-400 mb-1">Total</div>
+              <div className="mb-1 text-slate-400">Total</div>
               <div className="font-medium">{formatCost(totalCost || 0)}</div>
             </div>
           </div>
@@ -136,10 +136,10 @@ const ModelInfoCard = ({
       {/* User Feedback */}
       {feedback && positivePercentage && (
         <div className="mb-6">
-          <div className="flex justify-between items-center mb-2">
-            <div className="text-slate-600 font-medium">User Satisfaction</div>
+          <div className="mb-2 flex items-center justify-between">
+            <div className="font-medium text-slate-600">User Satisfaction</div>
             {isBetterFeedback && (
-              <span className="text-xs text-green-600 font-medium">
+              <span className="text-xs font-medium text-green-600">
                 Higher rating
               </span>
             )}
@@ -149,14 +149,14 @@ const ModelInfoCard = ({
               {positivePercentage}%
             </div>
             <div className="flex-1">
-              <div className="h-1.5 w-full bg-gray-100 rounded-full">
+              <div className="h-1.5 w-full rounded-full bg-gray-100">
                 <div
                   className="h-full rounded-full bg-sky-400"
                   style={{ width: `${positivePercentage}%` }}
                 />
               </div>
               {feedback.count && (
-                <div className="text-xs text-slate-400 mt-1">
+                <div className="mt-1 text-xs text-slate-400">
                   Based on {feedback.count.toLocaleString()} ratings
                 </div>
               )}
@@ -167,12 +167,12 @@ const ModelInfoCard = ({
 
       {/* Performance */}
       <div className="mb-6">
-        <div className="text-slate-600 font-medium mb-2">
+        <div className="mb-2 font-medium text-slate-600">
           Benchmark Performance
         </div>
         <div className="grid grid-cols-3 gap-4 text-sm">
           <div>
-            <div className="flex justify-between mb-1">
+            <div className="mb-1 flex justify-between">
               <span className="text-slate-400">MMLU</span>
               <span className="font-medium">
                 {modelDetails.info.benchmarks?.mmlu
@@ -183,7 +183,7 @@ const ModelInfoCard = ({
             {renderBenchmarkBar(modelDetails.info.benchmarks?.mmlu)}
           </div>
           <div>
-            <div className="flex justify-between mb-1">
+            <div className="mb-1 flex justify-between">
               <span className="text-slate-400">HellaSwag</span>
               <span className="font-medium">
                 {modelDetails.info.benchmarks?.hellaswag
@@ -196,7 +196,7 @@ const ModelInfoCard = ({
             {renderBenchmarkBar(modelDetails.info.benchmarks?.hellaswag)}
           </div>
           <div>
-            <div className="flex justify-between mb-1">
+            <div className="mb-1 flex justify-between">
               <span className="text-slate-400">BBH</span>
               <span className="font-medium">
                 {modelDetails.info.benchmarks?.bbh
@@ -211,7 +211,7 @@ const ModelInfoCard = ({
 
       {/* Recommended for */}
       <div>
-        <div className="text-slate-600 font-medium mb-2">Best For</div>
+        <div className="mb-2 font-medium text-slate-600">Best For</div>
         <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
           {modelDetails.info.recommendations
             .slice(0, 4)
@@ -220,7 +220,7 @@ const ModelInfoCard = ({
                 key={index}
                 className="flex items-center gap-1.5 text-slate-600"
               >
-                <CheckIcon className="w-3 h-3 text-green-500 flex-shrink-0" />
+                <CheckIcon className="h-3 w-3 flex-shrink-0 text-green-500" />
                 <span>{recommendation}</span>
               </div>
             ))}

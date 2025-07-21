@@ -53,7 +53,7 @@ const RateLimitRuleClientSchema = z.object({
       {
         message:
           "Segment must be 'user', empty (global), or a valid property key (alphanumeric/hyphen/underscore).",
-      }
+      },
     ),
 });
 
@@ -124,7 +124,7 @@ const RateLimitRuleModal = ({
     CreateRateLimitPayload | UpdateRateLimitPayload // Input type depends on mode
   >({
     mutationFn: async (
-      data: CreateRateLimitPayload | UpdateRateLimitPayload
+      data: CreateRateLimitPayload | UpdateRateLimitPayload,
     ): Promise<Result<RateLimitRuleView | null, string>> => {
       let resp;
       if (isEditMode && rule) {
@@ -143,7 +143,7 @@ const RateLimitRuleModal = ({
       if (resp.error || !resp.data?.data) {
         console.error("Failed to save rate limit rule:", resp.error);
         throw new Error(
-          resp.error || "An error occurred while saving the rule."
+          resp.error || "An error occurred while saving the rule.",
         );
       }
 
@@ -182,7 +182,7 @@ const RateLimitRuleModal = ({
     } else if (segmentType === "property") {
       if (!customPropertyKey.trim()) {
         setError(
-          "Property Key cannot be empty when segment type is 'Custom Property'."
+          "Property Key cannot be empty when segment type is 'Custom Property'.",
         );
         return;
       }
@@ -282,7 +282,7 @@ const RateLimitRuleModal = ({
           </div>
 
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="windowSeconds" className="text-right pt-2">
+            <Label htmlFor="windowSeconds" className="pt-2 text-right">
               Time Window (sec)
             </Label>
             <Input
@@ -345,8 +345,8 @@ const RateLimitRuleModal = ({
           <div className="px-4 pb-2 text-sm text-destructive">
             {" "}
             {/* Adjusted padding */}
-            <P className="font-semibold mb-1">Error</P>
-            <pre className="whitespace-pre-wrap font-sans">{error}</pre>
+            <P className="mb-1 font-semibold">Error</P>
+            <pre className="font-sans whitespace-pre-wrap">{error}</pre>
           </div>
         )}
         <DialogFooter>
@@ -368,8 +368,8 @@ const RateLimitRuleModal = ({
                 ? "Saving..."
                 : "Creating..."
               : isEditMode
-              ? "Save Changes"
-              : "Create Rule"}
+                ? "Save Changes"
+                : "Create Rule"}
           </Button>
         </DialogFooter>
       </DialogContent>

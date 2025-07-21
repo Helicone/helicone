@@ -19,7 +19,7 @@ export async function getCountries(
   timeFilter: {
     start: Date;
     end: Date;
-  }
+  },
 ): Promise<Result<CountryData[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
@@ -76,7 +76,7 @@ export async function getCountries(
 
   const { data, error } = await dbQueryClickhouse<CountryData>(
     query,
-    havingFilter.argsAcc
+    havingFilter.argsAcc,
   );
   if (error !== null) {
     return { data: null, error: error };

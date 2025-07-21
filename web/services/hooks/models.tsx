@@ -7,7 +7,7 @@ import { FilterNode } from "@helicone-package/filters/filterDefs";
 const useModels = (
   timeFilter: TimeFilter,
   limit: number,
-  userFilters?: FilterNode
+  userFilters?: FilterNode,
 ) => {
   const { data: models, isLoading } = useQuery({
     queryKey: ["modelMetrics", timeFilter, userFilters],

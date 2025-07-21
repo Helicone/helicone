@@ -21,73 +21,73 @@ const data: {
   prompt1: string;
   prompt2: string;
 }[] = [
-    {
-      messages: `{"role": "system", "content": "Get...`,
-      original: `This beginner-friendly course guides you through foundational concepts with real-world examples...`,
-      prompt1: `Master the fundamentals in this hands-on learning journey, featuring practical exercises...`,
-      prompt2: `A practical journey through essential topics, designed to build your confidence...`,
-    },
-    {
-      messages: `{"role": "system", "content": "Get...`,
-      original: `An introductory series covering key principles through interactive lessons and projects...`,
-      prompt1: `Step-by-step tutorials designed for newcomers, with comprehensive practice materials...`,
-      prompt2: `Build your skills with this comprehensive guide, featuring hands-on workshops...`,
-    },
-    {
-      messages: `{"role": "system", "content": "Get...`,
-      original: `Learn the basics through interactive sessions and guided practice assignments...`,
-      prompt1: `A structured approach to mastering core concepts, with real-world applications...`,
-      prompt2: `Dive into core concepts with guided exercises and practical implementations...`,
-    },
-    {
-      messages: `{"role": "system", "content": "Get...`,
-      original: `Start your journey with this accessible introduction to fundamental principles...`,
-      prompt1: `From novice to practitioner: a carefully structured learning experience...`,
-      prompt2: `An engaging introduction that transforms complex topics into digestible lessons...`,
-    },
-    {
-      messages: `{"role": "system", "content": "Get...`,
-      original: `A comprehensive beginner's guide featuring step-by-step instruction and exercises...`,
-      prompt1: `Progress through carefully crafted lessons designed for optimal learning...`,
-      prompt2: `Experience a thoughtfully designed curriculum that builds lasting knowledge...`,
-    },
-    {
-      messages: `{"role": "system", "content": "Get...`,
-      original: `Begin your learning journey with this foundational course packed with examples...`,
-      prompt1: `A beginner-focused approach that ensures steady progress through key concepts...`,
-      prompt2: `Master essential skills through this methodically structured learning path...`,
-    },
-    {
-      messages: `{"role": "system", "content": "Get...`,
-      original: `Perfect for newcomers: a gentle introduction to core principles and practices...`,
-      prompt1: `Build confidence through structured learning and hands-on practice sessions...`,
-      prompt2: `Transform your understanding with this carefully paced learning experience...`,
-    },
-    {
-      messages: `{"role": "system", "content": "Get...`,
-      original: `Start strong with this beginner-oriented course featuring practical exercises...`,
-      prompt1: `An accessible approach to mastering fundamentals through guided practice...`,
-      prompt2: `Develop your skills progressively with this well-structured learning path...`,
-    },
-    {
-      messages: `{"role": "system", "content": "Get...`,
-      original: `A foundation-building course designed to make complex concepts approachable...`,
-      prompt1: `Learn at your pace with this methodically structured beginner's guide...`,
-      prompt2: `A comprehensive introduction focusing on practical skill development...`,
-    },
-    {
-      messages: `{"role": "system", "content": "Get...`,
-      original: `Begin your learning adventure with this accessible, example-rich course...`,
-      prompt1: `A carefully crafted journey from basic concepts to practical mastery...`,
-      prompt2: `Gain confidence through this structured approach to essential skills...`,
-    },
-    {
-      messages: `{"role": "system", "content": "Get...`,
-      original: `An entry-level course that breaks down complex topics into manageable steps...`,
-      prompt1: `Master the basics through this engaging, practice-oriented curriculum...`,
-      prompt2: `A systematic approach to building fundamental knowledge and skills...`,
-    },
-  ];
+  {
+    messages: `{"role": "system", "content": "Get...`,
+    original: `This beginner-friendly course guides you through foundational concepts with real-world examples...`,
+    prompt1: `Master the fundamentals in this hands-on learning journey, featuring practical exercises...`,
+    prompt2: `A practical journey through essential topics, designed to build your confidence...`,
+  },
+  {
+    messages: `{"role": "system", "content": "Get...`,
+    original: `An introductory series covering key principles through interactive lessons and projects...`,
+    prompt1: `Step-by-step tutorials designed for newcomers, with comprehensive practice materials...`,
+    prompt2: `Build your skills with this comprehensive guide, featuring hands-on workshops...`,
+  },
+  {
+    messages: `{"role": "system", "content": "Get...`,
+    original: `Learn the basics through interactive sessions and guided practice assignments...`,
+    prompt1: `A structured approach to mastering core concepts, with real-world applications...`,
+    prompt2: `Dive into core concepts with guided exercises and practical implementations...`,
+  },
+  {
+    messages: `{"role": "system", "content": "Get...`,
+    original: `Start your journey with this accessible introduction to fundamental principles...`,
+    prompt1: `From novice to practitioner: a carefully structured learning experience...`,
+    prompt2: `An engaging introduction that transforms complex topics into digestible lessons...`,
+  },
+  {
+    messages: `{"role": "system", "content": "Get...`,
+    original: `A comprehensive beginner's guide featuring step-by-step instruction and exercises...`,
+    prompt1: `Progress through carefully crafted lessons designed for optimal learning...`,
+    prompt2: `Experience a thoughtfully designed curriculum that builds lasting knowledge...`,
+  },
+  {
+    messages: `{"role": "system", "content": "Get...`,
+    original: `Begin your learning journey with this foundational course packed with examples...`,
+    prompt1: `A beginner-focused approach that ensures steady progress through key concepts...`,
+    prompt2: `Master essential skills through this methodically structured learning path...`,
+  },
+  {
+    messages: `{"role": "system", "content": "Get...`,
+    original: `Perfect for newcomers: a gentle introduction to core principles and practices...`,
+    prompt1: `Build confidence through structured learning and hands-on practice sessions...`,
+    prompt2: `Transform your understanding with this carefully paced learning experience...`,
+  },
+  {
+    messages: `{"role": "system", "content": "Get...`,
+    original: `Start strong with this beginner-oriented course featuring practical exercises...`,
+    prompt1: `An accessible approach to mastering fundamentals through guided practice...`,
+    prompt2: `Develop your skills progressively with this well-structured learning path...`,
+  },
+  {
+    messages: `{"role": "system", "content": "Get...`,
+    original: `A foundation-building course designed to make complex concepts approachable...`,
+    prompt1: `Learn at your pace with this methodically structured beginner's guide...`,
+    prompt2: `A comprehensive introduction focusing on practical skill development...`,
+  },
+  {
+    messages: `{"role": "system", "content": "Get...`,
+    original: `Begin your learning adventure with this accessible, example-rich course...`,
+    prompt1: `A carefully crafted journey from basic concepts to practical mastery...`,
+    prompt2: `Gain confidence through this structured approach to essential skills...`,
+  },
+  {
+    messages: `{"role": "system", "content": "Get...`,
+    original: `An entry-level course that breaks down complex topics into manageable steps...`,
+    prompt1: `Master the basics through this engaging, practice-oriented curriculum...`,
+    prompt2: `A systematic approach to building fundamental knowledge and skills...`,
+  },
+];
 
 const ExperimentTable = () => {
   const tableRef = useRef<HTMLDivElement>(null);
@@ -196,7 +196,7 @@ const ExperimentTable = () => {
     if (state === 0) {
       return (
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-yellow-700 rounded-full animate-pulse"></div>
+          <div className="h-2 w-2 animate-pulse rounded-full bg-yellow-700"></div>
           <div className="text-sm text-slate-700">Queued...</div>
         </div>
       );
@@ -204,7 +204,7 @@ const ExperimentTable = () => {
     if (state === 1) {
       return (
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-green-700 rounded-full animate-pulse"></div>
+          <div className="h-2 w-2 animate-pulse rounded-full bg-green-700"></div>
           <div className="text-sm text-slate-700">Generating...</div>
         </div>
       );
@@ -213,39 +213,39 @@ const ExperimentTable = () => {
   };
 
   return (
-    <div ref={tableRef} className="relative w-full h-full z-[1]">
-      <div className="absolute inset-0 h-full w-1/6 pointer-events-none bg-gradient-to-r from-white to-transparent z-[2]"></div>
-      <div className="absolute h-[100px] w-full bottom-0 right-0 pointer-events-none bg-gradient-to-t from-white to-transparent z-[2]"></div>
-      <div className="w-full h-full p-2 border border-slate-200 rounded-2xl overflow-hidden">
+    <div ref={tableRef} className="relative z-[1] h-full w-full">
+      <div className="pointer-events-none absolute inset-0 z-[2] h-full w-1/6 bg-gradient-to-r from-white to-transparent"></div>
+      <div className="pointer-events-none absolute bottom-0 right-0 z-[2] h-[100px] w-full bg-gradient-to-t from-white to-transparent"></div>
+      <div className="h-full w-full overflow-hidden rounded-2xl border border-slate-200 p-2">
         <Table className="divide w-full table-fixed">
-          <TableHeader className="bg-slate-100 rounded-t-2xl">
+          <TableHeader className="rounded-t-2xl bg-slate-100">
             <TableRow>
-              <TableHead className="border-r border-slate-200 w-[25%]">
+              <TableHead className="w-[25%] border-r border-slate-200">
                 Messages
               </TableHead>
-              <TableHead className="border-r border-slate-200 w-[25%]">
+              <TableHead className="w-[25%] border-r border-slate-200">
                 Original
               </TableHead>
-              <TableHead className="border-r border-slate-200 w-[25%]">
+              <TableHead className="w-[25%] border-r border-slate-200">
                 Prompt 1
               </TableHead>
-              <TableHead className="border-r border-slate-200 w-[25%]">
+              <TableHead className="w-[25%] border-r border-slate-200">
                 Prompt 2
               </TableHead>
-              <TableHead className="text-center rounded-tr-2xl w-[40px]">
-                <PlusIcon className="w-4 h-4" />
+              <TableHead className="w-[40px] rounded-tr-2xl text-center">
+                <PlusIcon className="h-4 w-4" />
               </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {data.map((row, index) => (
               <TableRow key={index}>
-                <TableCell className="border-r border-slate-200 whitespace-nowrap overflow-hidden text-ellipsis">
+                <TableCell className="overflow-hidden text-ellipsis whitespace-nowrap border-r border-slate-200">
                   {row.messages}
                 </TableCell>
                 <TableCell
                   className={cn(
-                    "border-r border-slate-200 whitespace-nowrap overflow-hidden text-ellipsis",
+                    "overflow-hidden text-ellipsis whitespace-nowrap border-r border-slate-200",
                     highlightState[index][1] && "bg-slate-100"
                   )}
                 >
@@ -253,7 +253,7 @@ const ExperimentTable = () => {
                 </TableCell>
                 <TableCell
                   className={cn(
-                    "border-r border-slate-200 whitespace-nowrap overflow-hidden text-ellipsis",
+                    "overflow-hidden text-ellipsis whitespace-nowrap border-r border-slate-200",
                     highlightState[index][2] && "bg-slate-100"
                   )}
                 >
@@ -261,7 +261,7 @@ const ExperimentTable = () => {
                 </TableCell>
                 <TableCell
                   className={cn(
-                    "border-r border-slate-200 whitespace-nowrap overflow-hidden text-ellipsis",
+                    "overflow-hidden text-ellipsis whitespace-nowrap border-r border-slate-200",
                     highlightState[index][3] && "bg-slate-100"
                   )}
                 >
@@ -309,37 +309,40 @@ const Experiment = () => {
   return (
     <div className={cn(ISLAND_WIDTH, "pt-28")}>
       <div className="flex flex-col gap-14">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-y-8">
-          <div className="flex flex-col gap-9 z-[10]">
+        <div className="grid grid-cols-1 gap-y-8 md:grid-cols-2">
+          <div className="z-[10] flex flex-col gap-9">
             <div className="flex items-center gap-2.5">
               <p className="text-base sm:text-xl">03</p>
-              <div className="text-base sm:text-lg font-medium text-slate-700">
+              <div className="text-base font-medium text-slate-700 sm:text-lg">
                 Prompt & Experimentation
               </div>
             </div>
             <div className="flex flex-col gap-6">
-              <h2 className="font-semibold text-4xl sm:text-5xl leading-[120%] max-w-[600px] text-wrap text-black">
+              <h2 className="max-w-[600px] text-wrap text-4xl font-semibold leading-[120%] text-black sm:text-5xl">
                 Push <span className="text-brand">high-quality</span> prompt
                 changes to production
               </h2>
-              <p className="text-lg max-w-[520px] text-landing-description font-light leading-relaxed">
+              <p className="text-landing-description max-w-[520px] text-lg font-light leading-relaxed">
                 Tune your prompts and justify your iterations with quantifiable
                 data, not just “vibes”.
               </p>
             </div>
-            <div className="flex gap-3 items-center">
-              <Link href="https://docs.helicone.ai/features/prompts/editor" target="_blank" rel="noopener">
-                <Button
-                  variant="landing_primary"
-                  size="landing_page">
+            <div className="flex items-center gap-3">
+              <Link
+                href="https://docs.helicone.ai/features/prompts/editor"
+                target="_blank"
+                rel="noopener"
+              >
+                <Button variant="landing_primary" size="landing_page">
                   Try Prompt Editor
                 </Button>
               </Link>
-              <Link href="https://docs.helicone.ai/features/experiments" target="_blank" rel="noopener">
-                <Button
-                  variant="ghost"
-                  size="landing_page"
-                >
+              <Link
+                href="https://docs.helicone.ai/features/experiments"
+                target="_blank"
+                rel="noopener"
+              >
+                <Button variant="ghost" size="landing_page">
                   Experiments
                   <ArrowUpRight className="size-5" />
                 </Button>
@@ -349,22 +352,22 @@ const Experiment = () => {
           <ExperimentTable />
           {/* <img src="/static/home/experiment.png" alt="Experiment" />   */}
         </div>
-        <div className="flex flex-wrap justify-center md:justify-end gap-5 w-full">
+        <div className="flex w-full flex-wrap justify-center gap-5 md:justify-end">
           {evals.map((evaluation) => (
             <div
               key={evaluation.name}
-              className="bg-[#f8fafc] p-3 flex flex-col gap-1 w-full max-w-[170px] rounded-lg border border-slate-200 shadow-sm"
+              className="flex w-full max-w-[170px] flex-col gap-1 rounded-lg border border-slate-200 bg-[#f8fafc] p-3 shadow-sm"
             >
-              <div className="bg-[#e0f2fe] py-1 px-2 rounded-full border border-[#c3e4fa] self-start">
-                <p className="text-[#0ea5e9] text-[11px] font-medium">
+              <div className="self-start rounded-full border border-[#c3e4fa] bg-[#e0f2fe] px-2 py-1">
+                <p className="text-[11px] font-medium text-[#0ea5e9]">
                   {evaluation.category}
                 </p>
               </div>
-              <div className="flex justify-between items-center">
-                <p className="font-medium text-xs text-slate-500">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-medium text-slate-500">
                   {evaluation.name}
                 </p>
-                <p className="text-[#0DA5E9] font-semibold text-sm">
+                <p className="text-sm font-semibold text-[#0DA5E9]">
                   {evaluation.value}%
                 </p>
               </div>

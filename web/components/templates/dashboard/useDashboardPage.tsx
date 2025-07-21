@@ -32,7 +32,7 @@ export async function fetchDataOverTime<T>(
   },
   userFilters: FilterLeaf[],
   dbIncrement: TimeIncrement,
-  path: string
+  path: string,
 ) {
   const body: OverTimeRequestQueryParams = {
     timeFilter: {
@@ -75,11 +75,11 @@ export const useDashboardPage = ({
   const { isLoading: isModelsLoading, models } = useModels(
     timeFilter,
     1000,
-    filter
+    filter,
   );
   const topModels =
     models?.data?.sort((a, b) =>
-      a.total_requests > b.total_requests ? -1 : 1
+      a.total_requests > b.total_requests ? -1 : 1,
     ) ?? [];
 
   const params: BackendMetricsCall<any>["params"] = {
@@ -103,7 +103,7 @@ export const useDashboardPage = ({
             prompt_tokens: +d.prompt_tokens,
             completion_tokens: +d.completion_tokens,
             time: new Date(d.time),
-          }))
+          })),
         );
       },
     }),
@@ -114,7 +114,7 @@ export const useDashboardPage = ({
       isLive,
       postProcess: (data) => {
         return resultMap(data, (d) =>
-          d.map((d) => ({ count: +d.count, time: new Date(d.time) }))
+          d.map((d) => ({ count: +d.count, time: new Date(d.time) })),
         );
       },
     }),
@@ -125,7 +125,7 @@ export const useDashboardPage = ({
       isLive,
       postProcess: (data) => {
         return resultMap(data, (d) =>
-          d.map((d) => ({ count: +d.count, time: new Date(d.time) }))
+          d.map((d) => ({ count: +d.count, time: new Date(d.time) })),
         );
       },
     }),
@@ -142,7 +142,7 @@ export const useDashboardPage = ({
             count: +d.count,
             time: new Date(d.time),
             status: d.status,
-          }))
+          })),
         );
       },
     }),
@@ -153,7 +153,7 @@ export const useDashboardPage = ({
       isLive,
       postProcess: (data) => {
         return resultMap(data, (d) =>
-          d.map((d) => ({ cost: +d.cost, time: new Date(d.time) }))
+          d.map((d) => ({ cost: +d.cost, time: new Date(d.time) })),
         );
       },
     }),
@@ -164,7 +164,7 @@ export const useDashboardPage = ({
       isLive,
       postProcess: (data) => {
         return resultMap(data, (d) =>
-          d.map((d) => ({ duration: +d.duration, time: new Date(d.time) }))
+          d.map((d) => ({ duration: +d.duration, time: new Date(d.time) })),
         );
       },
     }),
@@ -175,7 +175,7 @@ export const useDashboardPage = ({
       isLive,
       postProcess: (data) => {
         return resultMap(data, (d) =>
-          d.map((d) => ({ count: +d.count, time: new Date(d.time) }))
+          d.map((d) => ({ count: +d.count, time: new Date(d.time) })),
         );
       },
     }),
@@ -186,7 +186,7 @@ export const useDashboardPage = ({
       isLive,
       postProcess: (data) => {
         return resultMap(data, (d) =>
-          d.map((d) => ({ ttft: +d.ttft, time: new Date(d.time) }))
+          d.map((d) => ({ ttft: +d.ttft, time: new Date(d.time) })),
         );
       },
     }),
@@ -197,7 +197,7 @@ export const useDashboardPage = ({
       isLive,
       postProcess: (data) => {
         return resultMap(data, (d) =>
-          d.map((d) => ({ count: +d.count, time: new Date(d.time) }))
+          d.map((d) => ({ count: +d.count, time: new Date(d.time) })),
         );
       },
     }),
@@ -245,10 +245,10 @@ export const useDashboardPage = ({
 
   const isAnyLoading =
     Object.values(overTimeData).some(
-      ({ isLoading, isFetching }) => isLoading || isFetching
+      ({ isLoading, isFetching }) => isLoading || isFetching,
     ) ||
     Object.values(metrics).some(
-      ({ isLoading, isFetching }) => isLoading || isFetching
+      ({ isLoading, isFetching }) => isLoading || isFetching,
     ) ||
     isModelsLoading;
 

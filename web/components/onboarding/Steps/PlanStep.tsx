@@ -33,7 +33,7 @@ export const PlanStep = ({
         <h2 className="text-[hsl(var(--foreground))]">Plan</h2>
         <Link
           href="https://helicone.ai/pricing"
-          className="text-sm font-light text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] underline"
+          className="text-sm font-light text-[hsl(var(--muted-foreground))] underline hover:text-[hsl(var(--foreground))]"
           target="_blank"
           rel="noopener noreferrer"
         >

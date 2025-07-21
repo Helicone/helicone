@@ -26,24 +26,24 @@ export const ProvidersPage: React.FC = () => {
   const filteredProviders = sortProviders(
     filterProviders(providers, searchQuery),
     sortOption,
-    recentlyUsedProviderIds
+    recentlyUsedProviderIds,
   );
 
   return (
     <AuthLayout>
-      <div className="flex flex-col gap-4 max-w-5xl mx-auto">
+      <div className="mx-auto flex max-w-5xl flex-col gap-4">
         <H1>Provider API Keys</H1>
 
         <Alert
           variant="warning"
-          className="bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800 py-2"
+          className="border-amber-200 bg-amber-50 py-2 dark:border-amber-800 dark:bg-amber-950"
         >
           <AlertDescription>
             <strong>Important:</strong> These keys are not for proxying
             requests. See{" "}
             <Link
               href="https://docs.helicone.ai/getting-started/integration-methods"
-              className="text-primary font-medium"
+              className="font-medium text-primary"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -53,7 +53,7 @@ export const ProvidersPage: React.FC = () => {
           </AlertDescription>
         </Alert>
 
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -69,15 +69,15 @@ export const ProvidersPage: React.FC = () => {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className="flex items-center gap-1 min-w-[150px] justify-between"
+                className="flex min-w-[150px] items-center justify-between gap-1"
               >
                 <span>
                   Sort:{" "}
                   {sortOption === "relevance"
                     ? "Relevance"
                     : sortOption === "alphabetical"
-                    ? "A-Z"
-                    : "Recently Used"}
+                      ? "A-Z"
+                      : "Recently Used"}
                 </span>
                 <ChevronDown className="h-4 w-4" />
               </Button>
@@ -96,9 +96,9 @@ export const ProvidersPage: React.FC = () => {
           </DropdownMenu>
         </div>
 
-        <div className="grid grid-cols-1 gap-2 ">
+        <div className="grid grid-cols-1 gap-2">
           {filteredProviders.length === 0 ? (
-            <div className="text-center py-6 text-muted-foreground col-span-full">
+            <div className="col-span-full py-6 text-center text-muted-foreground">
               No providers found matching your search.
             </div>
           ) : (

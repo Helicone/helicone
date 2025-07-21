@@ -21,7 +21,7 @@ async function getUser(betterAuthUserId: string): Promise<HeliconeUserResult> {
     FROM public.user
     LEFT JOIN auth.users on public.user.auth_user_id = auth.users.id
     WHERE public.user.id = $1`,
-    [betterAuthUserId]
+    [betterAuthUserId],
   );
   if (!user || !user.data?.[0]) {
     return err("User not found");
@@ -33,7 +33,7 @@ async function getUser(betterAuthUserId: string): Promise<HeliconeUserResult> {
   });
 }
 export async function betterAuthClientFromSSRContext(
-  ctx: SSRContext<any, any, any>
+  ctx: SSRContext<any, any, any>,
 ): Promise<HeliconeAuthClient> {
   if (!ctx.req?.headers) {
     throw new Error("No headers provided");
@@ -69,7 +69,7 @@ export async function betterAuthClientFromSSRContext(
   and organization_member.member = $2
   limit 1
     `,
-    [orgId, userId]
+    [orgId, userId],
   );
 
   if (org?.error) {
@@ -85,6 +85,6 @@ export async function betterAuthClientFromSSRContext(
           role: org.data[0].role ?? "member",
         }
       : undefined,
-    user.data ?? undefined
+    user.data ?? undefined,
   );
 }

@@ -56,7 +56,7 @@ const Slider: React.FC<SliderProps> = ({
         className="w-full"
       />
       {labels && (
-        <div className="relative w-full flex justify-between">
+        <div className="relative flex w-full justify-between">
           {Object.entries(labels).map(([key, text], idx) => (
             <button
               key={key}

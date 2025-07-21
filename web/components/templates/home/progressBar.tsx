@@ -16,20 +16,20 @@ const ProgressBar = (props: ProgressBarProps) => {
         currentStep === step
           ? "current"
           : currentStep > step
-          ? "complete"
-          : "incomplete",
-    })
+            ? "complete"
+            : "incomplete",
+    }),
   );
 
   return (
     <nav aria-label="Progress">
-      <ol role="list" className="flex items-center w-full">
+      <ol role="list" className="flex w-full items-center">
         {steps.map((step, stepIdx) => (
           <li
             key={step.name}
             className={clsx(
               stepIdx !== steps.length - 1 ? "pr-12 sm:pr-20" : "",
-              "relative"
+              "relative",
             )}
           >
             {step.status === "complete" ? (

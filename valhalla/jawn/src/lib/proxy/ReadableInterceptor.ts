@@ -48,7 +48,7 @@ export class ReadableInterceptor {
       }
 
       this.responseBody += this.decoder.decode(chunk, { stream: true });
-    };     
+    };
 
     stream.on("data", onChunk);
     stream.on("end", () => onDone("done"));

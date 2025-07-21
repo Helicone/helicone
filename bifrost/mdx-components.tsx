@@ -8,7 +8,7 @@ import NextImage from "next/image";
 import { HeadingWithCopyLink } from "@/components/blog/HeadingWithCopyLink";
 
 const ResponsiveTable = ({ children }: { children: ReactNode }) => {
-  return <div className="overflow-x-auto w-full">{children}</div>;
+  return <div className="w-full overflow-x-auto">{children}</div>;
 };
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {

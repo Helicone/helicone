@@ -53,7 +53,7 @@ export function getGenericRequestText(requestBody: any): string {
 
 export function getGenericResponseText(
   responseBody: any,
-  statusCode: number
+  statusCode: number,
 ): string {
   if (!responseBody) return "";
 
@@ -93,7 +93,7 @@ export function getGenericResponseText(
   // Check for content array (ClaudeBuilder)
   if (Array.isArray(responseBody.content)) {
     const textContent = responseBody.content.find(
-      (item: any) => item.type === "text"
+      (item: any) => item.type === "text",
     );
     if (textContent) {
       return textContent.text || "";

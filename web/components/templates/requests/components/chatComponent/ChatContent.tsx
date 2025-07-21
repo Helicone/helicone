@@ -34,7 +34,7 @@ export const ChatContent: React.FC<ChatContentProps> = ({
   if (mode === "Debug") {
     return (
       <div
-        className="bg-gray-100 dark:bg-gray-900 items-start px-4 py-4 text-left font-semibold grid grid-cols-10 gap-2 cursor-pointer"
+        className="grid cursor-pointer grid-cols-10 items-start gap-2 bg-gray-100 px-4 py-4 text-left font-semibold dark:bg-gray-900"
         onClick={() => {
           navigator.clipboard.writeText(JSON.stringify(mappedRequest, null, 2));
           setNotification("Copied to clipboard", "success");
@@ -73,7 +73,7 @@ export const ChatContent: React.FC<ChatContentProps> = ({
   }
 
   return (
-    <div className="bg-gray-100 dark:bg-gray-900 items-start px-4 py-4 text-left font-semibold grid grid-cols-10 gap-2">
+    <div className="grid grid-cols-10 items-start gap-2 bg-gray-100 px-4 py-4 text-left font-semibold dark:bg-gray-900">
       n/a
     </div>
   );

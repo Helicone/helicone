@@ -279,9 +279,8 @@ export class ExperimentV2Controller extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<ExtendedExperimentData, string>> {
     const experimentManager = new ExperimentV2Manager(request.authParams);
-    const result = await experimentManager.getExperimentWithRowsById(
-      experimentId
-    );
+    const result =
+      await experimentManager.getExperimentWithRowsById(experimentId);
     if (result.error || !result.data) {
       this.setStatus(500);
     } else {
@@ -330,9 +329,8 @@ export class ExperimentV2Controller extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<ExperimentV2PromptVersion[], string>> {
     const experimentManager = new ExperimentV2Manager(request.authParams);
-    const result = await experimentManager.getPromptVersionsForExperiment(
-      experimentId
-    );
+    const result =
+      await experimentManager.getPromptVersionsForExperiment(experimentId);
 
     if (result.error || !result.data) {
       this.setStatus(500);
@@ -348,9 +346,8 @@ export class ExperimentV2Controller extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<string[], string>> {
     const experimentManager = new ExperimentV2Manager(request.authParams);
-    const result = await experimentManager.getInputKeysForExperiment(
-      experimentId
-    );
+    const result =
+      await experimentManager.getInputKeysForExperiment(experimentId);
 
     if (result.error || !result.data) {
       this.setStatus(500);
@@ -519,9 +516,8 @@ export class ExperimentV2Controller extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<EvaluatorResult[], string>> {
     const evaluatorManager = new EvaluatorManager(request.authParams);
-    const result = await evaluatorManager.getEvaluatorsForExperiment(
-      experimentId
-    );
+    const result =
+      await evaluatorManager.getEvaluatorsForExperiment(experimentId);
     return result;
   }
 

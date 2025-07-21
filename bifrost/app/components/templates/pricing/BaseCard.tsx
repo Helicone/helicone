@@ -24,12 +24,12 @@ const BaseCard: React.FC<BaseCardProps> = ({
   children,
 }) => {
   return (
-    <div className="w-full h-full border border-gray-300 rounded-xl flex flex-col space-y-4 p-8 bg-white">
+    <div className="flex h-full w-full flex-col space-y-4 rounded-xl border border-gray-300 bg-white p-8">
       <h2 className="text-sm font-semibold">{name}</h2>
 
       <div className="flex items-baseline space-x-1">{price}</div>
       {children}
-      <ul className="text-gray-500 text-sm">
+      <ul className="text-sm text-gray-500">
         {features.map((feature) => (
           <li key={feature.name} className="flex items-center gap-4 py-2">
             {feature.included ? (
@@ -45,7 +45,7 @@ const BaseCard: React.FC<BaseCardProps> = ({
         href={ctaLink}
         className={
           ctaClassName ||
-          "bg-white hover:bg-gray-100 ease-in-out duration-500 text-black border-[3px] border-gray-300 rounded-lg px-4 py-2 text-sm font-bold shadow-lg flex w-full justify-center text-center items-center gap-1"
+          "flex w-full items-center justify-center gap-1 rounded-lg border-[3px] border-gray-300 bg-white px-4 py-2 text-center text-sm font-bold text-black shadow-lg duration-500 ease-in-out hover:bg-gray-100"
         }
       >
         {ctaText}

@@ -63,7 +63,7 @@ export class SupabaseServerWrapper<T> {
       WHERE organization.id = $1
       and (organization_member.member = $2 or organization.owner = $2)
       `,
-      [this.ctx.req.cookies[ORG_ID_COOKIE_KEY] ?? "", user.data.user.id]
+      [this.ctx.req.cookies[ORG_ID_COOKIE_KEY] ?? "", user.data.user.id],
     );
 
     if (orgAccessCheck.data?.length === 0) {

@@ -51,10 +51,10 @@ const MobileHeader = (props: {
   return (
     <div
       className={
-        "w-full grid grid-cols-8 max-w-6xl items-center py-3 " + props.className
+        "grid w-full max-w-6xl grid-cols-8 items-center py-3 " + props.className
       }
     >
-      <div className="flex items-center col-span-7 lg:col-span-1 order-1">
+      <div className="order-1 col-span-7 flex items-center lg:col-span-1">
         <Link href="/" className="-m-1.5">
           <span className="sr-only">Helicone</span>
           <Image
@@ -65,7 +65,7 @@ const MobileHeader = (props: {
             height={150}
             width={150}
             priority={true}
-            className="w-auto h-auto lg:block hidden"
+            className="hidden h-auto w-auto lg:block"
           />
           <Image
             src={"/static/logo.svg"}
@@ -80,19 +80,19 @@ const MobileHeader = (props: {
         </Link>
       </div>
       <button
-        className="transform scale-[90%] flex flex-col gap-1 items-end justify-end gap-x-2 col-span-1 order-2 lg:order-3"
+        className="order-2 col-span-1 flex scale-[90%] transform flex-col items-end justify-end gap-1 gap-x-2 lg:order-3"
         onClick={() => {
           setMenuOpen(!menuOpen);
         }}
       >
         {!menuOpen ? (
           <>
-            <div className="w-[1.25rem] h-[.2rem] bg-foreground rounded-full"></div>
-            <div className="w-[1.25rem] h-[.2rem] bg-foreground rounded-full"></div>
-            <div className="w-[.7rem] h-[.2rem] bg-foreground rounded-full"></div>
+            <div className="bg-foreground h-[.2rem] w-[1.25rem] rounded-full"></div>
+            <div className="bg-foreground h-[.2rem] w-[1.25rem] rounded-full"></div>
+            <div className="bg-foreground h-[.2rem] w-[.7rem] rounded-full"></div>
           </>
         ) : (
-          <X className="w-5 h-5 text-foreground stroke-[1.5px] fill-none" />
+          <X className="text-foreground h-5 w-5 fill-none stroke-[1.5px]" />
         )}
       </button>
     </div>
@@ -127,18 +127,18 @@ const MobileNav = () => {
           href={link.link.href}
           target={isExternalLink ? "_blank" : undefined}
           rel={isExternalLink ? "noopener noreferrer" : undefined}
-          className="flex items-center justify-between group my-0.5 text-accent-foreground"
+          className="text-accent-foreground group my-0.5 flex items-center justify-between"
         >
           <div className="flex items-center gap-3">
-            <span className="navbar-icon-size flex items-center justify-center ml-1">
+            <span className="navbar-icon-size ml-1 flex items-center justify-center">
               {link.icon}
             </span>
-            <span className="font-medium text-sm">{link.title}</span>
+            <span className="text-sm font-medium">{link.title}</span>
           </div>
           {isExternalLink ? (
-            <ExternalLink className="size-4 text-slate-400 navbar-icon-style" />
+            <ExternalLink className="navbar-icon-style size-4 text-slate-400" />
           ) : (
-            <ChevronRight className="size-4 text-slate-400 navbar-icon-style" />
+            <ChevronRight className="navbar-icon-style size-4 text-slate-400" />
           )}
         </Link>
       );
@@ -147,18 +147,18 @@ const MobileNav = () => {
 
   return (
     <nav className="lg:hidden" aria-label="Global">
-      <div className="fixed inset-x-0 top-0 z-50 bg-background">
+      <div className="bg-background fixed inset-x-0 top-0 z-50">
         <MobileHeader
           menuDispatch={[menuOpen, setMenuOpen]}
           className="pl-2 pr-4"
         />
       </div>
       {menuOpen && (
-        <div className="fixed inset-0 top-[57px] z-50 bg-background">
-          <div className="h-full pb-10 overflow-y-auto">
-            <div className="flex flex-col gap-4 pt-3 px-4">
+        <div className="bg-background fixed inset-0 top-[57px] z-50">
+          <div className="h-full overflow-y-auto pb-10">
+            <div className="flex flex-col gap-4 px-4 pt-3">
               {/* Login and Contact Buttons */}
-              <div className="flex flex-col w-full items-center gap-4 pb-4">
+              <div className="flex w-full flex-col items-center gap-4 pb-4">
                 <Link href="/signup" className="w-full">
                   <Button variant="default" className="bg-brand w-full">
                     Sign up
@@ -175,14 +175,14 @@ const MobileNav = () => {
 
               <Separator />
 
-              <p className="text-[10px] uppercase text-slate-400 font-medium mx-1">
+              <p className="mx-1 text-[10px] font-medium uppercase text-slate-400">
                 Resources
               </p>
               {renderLinks(resourcesComponents)}
 
               <Separator />
 
-              <p className="text-[10px] uppercase text-slate-400 font-medium  mx-1">
+              <p className="mx-1 text-[10px] font-medium uppercase text-slate-400">
                 Tools
               </p>
               {renderLinks(toolsComponents)}
@@ -207,9 +207,8 @@ const resourcesComponents: LinkItem[] = [
       href: "/customers",
       isExternal: false,
     },
-    description:
-      "Built for scale, security, and control",
-    icon: <Gem className="size-5 navbar-icon-style" />,
+    description: "Built for scale, security, and control",
+    icon: <Gem className="navbar-icon-style size-5" />,
   },
   {
     title: "Changelog",
@@ -218,7 +217,7 @@ const resourcesComponents: LinkItem[] = [
       isExternal: false,
     },
     description: "Latest updates and improvements",
-    icon: <GitMerge className="size-5 navbar-icon-style" />,
+    icon: <GitMerge className="navbar-icon-style size-5" />,
   },
   {
     title: "Blog",
@@ -227,7 +226,7 @@ const resourcesComponents: LinkItem[] = [
       isExternal: false,
     },
     description: "Insights on AI development and best practices",
-    icon: <Newspaper className="size-5 navbar-icon-style" />,
+    icon: <Newspaper className="navbar-icon-style size-5" />,
   },
 ];
 
@@ -239,7 +238,7 @@ const toolsComponents: LinkItem[] = [
       isExternal: false,
     },
     description: "Real-time LLM usage analytics",
-    icon: <Earth className="size-5 navbar-icon-style" />,
+    icon: <Earth className="navbar-icon-style size-5" />,
   },
   {
     title: "Model Comparison",
@@ -248,7 +247,7 @@ const toolsComponents: LinkItem[] = [
       isExternal: false,
     },
     description: "Compare LLM models and providers",
-    icon: <Scale className="size-5 navbar-icon-style" />,
+    icon: <Scale className="navbar-icon-style size-5" />,
   },
   {
     title: "Provider Status",
@@ -257,7 +256,7 @@ const toolsComponents: LinkItem[] = [
       isExternal: false,
     },
     description: "Check LLM provider service status",
-    icon: <TrendingUp className="size-5 navbar-icon-style" />,
+    icon: <TrendingUp className="navbar-icon-style size-5" />,
   },
   {
     title: "LLM API Pricing Calculator",
@@ -266,7 +265,7 @@ const toolsComponents: LinkItem[] = [
       isExternal: false,
     },
     description: "Calculate and compare API costs",
-    icon: <HandCoins className="size-5 navbar-icon-style" />,
+    icon: <HandCoins className="navbar-icon-style size-5" />,
   },
 ];
 
@@ -278,7 +277,7 @@ const mainComponents: LinkItem[] = [
       isExternal: true,
     },
     description: "Integrate Helicone into your AI application",
-    icon: <BookHeart className="size-5 navbar-icon-style" />,
+    icon: <BookHeart className="navbar-icon-style size-5" />,
   },
   {
     title: "Pricing",
@@ -287,7 +286,7 @@ const mainComponents: LinkItem[] = [
       isExternal: false,
     },
     description: "Simple, transparent pricing",
-    icon: <HandCoins className="size-5 navbar-icon-style" />,
+    icon: <HandCoins className="navbar-icon-style size-5" />,
   },
 ];
 
@@ -299,7 +298,7 @@ const additionalComponents: LinkItem[] = [
       isExternal: false,
     },
     description: "Get in touch with us",
-    icon: <Mail className="size-5 navbar-icon-style" />,
+    icon: <Mail className="navbar-icon-style size-5" />,
   },
   {
     title: "Careers",
@@ -308,7 +307,7 @@ const additionalComponents: LinkItem[] = [
       isExternal: true,
     },
     description: "Join our team",
-    icon: <Briefcase className="size-5 navbar-icon-style" />,
+    icon: <Briefcase className="navbar-icon-style size-5" />,
   },
   {
     title: "GitHub",
@@ -317,7 +316,7 @@ const additionalComponents: LinkItem[] = [
       isExternal: true,
     },
     description: "Contribute to our project",
-    icon: <Github className="size-5 navbar-icon-style" />,
+    icon: <Github className="navbar-icon-style size-5" />,
   },
 ];
 
@@ -337,16 +336,16 @@ const NavBar = (props: NavBarProps) => {
   return (
     <div
       ref={headerRef}
-      className="bg-background top-0 sticky z-30 border-b border-border mb-10"
+      className="bg-background border-border sticky top-0 z-30 mb-10 border-b"
     >
       <MobileNav />
 
       <nav
-        className="gap-x-3 mx-auto lg:flex sm:px-16 lg:px-24 2xl:px-40 max-w-[2000px] items-center py-2 hidden justify-between"
+        className="mx-auto hidden max-w-[2000px] items-center justify-between gap-x-3 py-2 sm:px-16 lg:flex lg:px-24 2xl:px-40"
         aria-label="Global"
       >
         {/* Logo */}
-        <div className="flex items-center lg:col-span-1 order-1">
+        <div className="order-1 flex items-center lg:col-span-1">
           <Link href="/" className="-m-1.5 w-[154px]">
             <span className="sr-only">Helicone</span>
             <Image
@@ -357,7 +356,7 @@ const NavBar = (props: NavBarProps) => {
               height={150}
               width={150}
               priority={true}
-              className="w-auto h-auto lg:block hidden"
+              className="hidden h-auto w-auto lg:block"
             />
             <Image
               src={"/static/logo.svg"}
@@ -373,7 +372,7 @@ const NavBar = (props: NavBarProps) => {
         </div>
 
         {/* Nav Links */}
-        <div className="w-full mt-4 lg:mt-0 flex gap-x-1 items-center text-sm col-span-8 lg:col-span-6 order-3 lg:order-2 justify-between">
+        <div className="order-3 col-span-8 mt-4 flex w-full items-center justify-between gap-x-1 text-sm lg:order-2 lg:col-span-6 lg:mt-0">
           <NavigationMenu>
             <NavigationMenuList>
               {/* Docs */}
@@ -414,7 +413,7 @@ const NavBar = (props: NavBarProps) => {
                     <li className="row-span-3">
                       <NavigationMenuLink asChild>
                         <Link
-                          className="flex h-full w-full select-none flex-col justify-between rounded-md bg-gradient-to-b from-sky-50 to-muted/70 p-6 no-underline outline-none focus:shadow-md hover:bg-sky-100"
+                          className="to-muted/70 flex h-full w-full select-none flex-col justify-between rounded-md bg-gradient-to-b from-sky-50 p-6 no-underline outline-none hover:bg-sky-100 focus:shadow-md"
                           href={
                             props.featuredBlogFolderName
                               ? `/blog/${props.featuredBlogFolderName}`
@@ -432,7 +431,7 @@ const NavBar = (props: NavBarProps) => {
                             <div className="mb-2 mt-4 line-clamp-2 text-lg font-medium">
                               {props.featuredBlogMetadata.title}
                             </div>
-                            <p className="text-sm leading-5 text-muted-foreground line-clamp-3">
+                            <p className="text-muted-foreground line-clamp-3 text-sm leading-5">
                               {props.featuredBlogMetadata.description}
                             </p>
                           </div>
@@ -491,7 +490,7 @@ const NavBar = (props: NavBarProps) => {
                 <svg
                   fill="currentColor"
                   viewBox="0 0 24 24"
-                  className="w-5 h-5 text-accent-foreground"
+                  className="text-accent-foreground h-5 w-5"
                 >
                   <path
                     fillRule="evenodd"
@@ -499,12 +498,12 @@ const NavBar = (props: NavBarProps) => {
                     clipRule="evenodd"
                   />
                 </svg>
-                <p className="text-sm text-accent-foreground">
+                <p className="text-accent-foreground text-sm">
                   {props.stars
                     ? props.stars.toLocaleString("en-US", {
-                      notation: "compact",
-                      compactDisplay: "short",
-                    })
+                        notation: "compact",
+                        compactDisplay: "short",
+                      })
                     : "0"}
                 </p>
               </Button>
@@ -512,13 +511,13 @@ const NavBar = (props: NavBarProps) => {
             <Link href="/contact">
               <Button
                 variant="secondary"
-                className="text-sm text-secondary-foreground rounded-lg"
+                className="text-secondary-foreground rounded-lg text-sm"
               >
                 Contact us
               </Button>
             </Link>
             <Link href="https://us.helicone.ai/signin">
-              <Button className="text-sm text-primary-foreground rounded-lg bg-brand">
+              <Button className="text-primary-foreground bg-brand rounded-lg text-sm">
                 Log In
               </Button>
             </Link>
@@ -540,16 +539,16 @@ const ListItem = React.forwardRef<
         <a
           ref={ref}
           className={cn(
-            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+            "hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors",
             className
           )}
           {...props}
         >
           <div className="flex gap-3">
             <span className="navbar-icon-size">{icon}</span>
-            <div className="flex flex-col items-start text-sm font-medium leading-none gap-1">
+            <div className="flex flex-col items-start gap-1 text-sm font-medium leading-none">
               {title}
-              <p className="text-sm font-light leading-snug text-muted-foreground">
+              <p className="text-muted-foreground text-sm font-light leading-snug">
                 {children}
               </p>
             </div>

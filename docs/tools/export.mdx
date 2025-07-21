@@ -4,9 +4,8 @@ description: "Use Helicone's GraphQL API to export all your data"
 ---
 
 <Warning>
-This exporting script is not well tested. Please use with caution
+  This exporting script is not well tested. Please use with caution
 </Warning>
-
 
 ```python
 import requests
@@ -117,7 +116,7 @@ with open("output_data.json", "w") as f, open("output_data.jsonl", "w") as jsonl
 
         for record in fetched_data:
             jsonl_file.write(json.dumps(record) + '\n')
-        
+
         # Break if less than PAGE_SIZE data is fetched, indicating no more data
         if len(fetched_data) < PAGE_SIZE:
             break

@@ -7,14 +7,17 @@ description: "GCRA-based rate limiting with burst capacity and smooth request th
 The AI Gateway provides flexible rate limiting using GCRA (Generic Cell Rate Algorithm) to help you manage request frequency and prevent abuse. Rate limiting works **per-API-key**, which requires authentication to identify users.
 
 **Benefits:**
+
 - **Prevent abuse** by limiting request rates per API key
-- **Manage costs** by controlling request frequency  
+- **Manage costs** by controlling request frequency
 - **Ensure stability** by preventing traffic spikes from overwhelming your system
 - **Fair usage** by distributing capacity across different API keys
 - **Control your own traffic** based on your business requirements
 
 <Info>
-  **Provider rate limits are handled automatically** by the load balancing system. This rate limiting feature is for controlling your own API traffic based on your business requirements.
+  **Provider rate limits are handled automatically** by the load balancing
+  system. This rate limiting feature is for controlling your own API traffic
+  based on your business requirements.
 </Info>
 
 ## Quick Start
@@ -31,6 +34,7 @@ The AI Gateway provides flexible rate limiting using GCRA (Generic Cell Rate Alg
     ```bash
     export HELICONE_CONTROL_PLANE_API_KEY="sk-helicone-your-api-key"
     ```
+
   </Step>
 
   <Step title="Create your configuration">
@@ -48,13 +52,12 @@ The AI Gateway provides flexible rate limiting using GCRA (Generic Cell Rate Alg
           capacity: 1000
           refill-frequency: 1m
     ```
+
   </Step>
 
-  <Step title="Start the gateway">
-    ```bash
-    npx @helicone/ai-gateway@latest --config ai-gateway-config.yaml
-    ```
-  </Step>
+<Step title="Start the gateway">
+  ```bash npx @helicone/ai-gateway@latest --config ai-gateway-config.yaml ```
+</Step>
 
   <Step title="Test rate limiting">
     ```bash
@@ -72,38 +75,30 @@ The AI Gateway provides flexible rate limiting using GCRA (Generic Cell Rate Alg
 </Steps>
 
 <Note>
-  For complete configuration options and syntax, see the [Configuration Reference](/ai-gateway/config#rate-limiting).
+  For complete configuration options and syntax, see the [Configuration
+  Reference](/ai-gateway/config#rate-limiting).
 </Note>
 
 ## Available Strategies
 
 <AccordionGroup>
   <Accordion title="Per-API-Key Rate Limiting - Default" icon="key">
-    **GCRA-based token bucket with burst capacity**
-    
-    Each API key gets a virtual token bucket with specified capacity. Requests consume tokens, which refill at the specified rate. Uses GCRA (Generic Cell Rate Algorithm) for smooth sustained rates with burst allowance.
-    
-    **Best for:** Preventing API key abuse while allowing reasonable burst traffic
-    
-    **How it works:**
-    1. Each API key gets a token bucket with specified capacity
-    2. Requests consume tokens from the bucket
-    3. Tokens refill at the specified rate (capacity / refill-frequency)
-    4. Requests are allowed if tokens are available, rejected otherwise
-    
-    **Example:**
-    ```yaml
-    global:
-      rate-limit:
-        per-api-key:
-          capacity: 500
-          refill-frequency: 1m  # 500 requests per minute sustained
-    ```
+    **GCRA-based token bucket with burst capacity** Each API key gets a virtual
+    token bucket with specified capacity. Requests consume tokens, which refill
+    at the specified rate. Uses GCRA (Generic Cell Rate Algorithm) for smooth
+    sustained rates with burst allowance. **Best for:** Preventing API key abuse
+    while allowing reasonable burst traffic **How it works:** 1. Each API key
+    gets a token bucket with specified capacity 2. Requests consume tokens from
+    the bucket 3. Tokens refill at the specified rate (capacity /
+    refill-frequency) 4. Requests are allowed if tokens are available, rejected
+    otherwise **Example:** ```yaml global: rate-limit: per-api-key: capacity:
+    500 refill-frequency: 1m # 500 requests per minute sustained ```
   </Accordion>
 </AccordionGroup>
 
 <Note>
-  Additional rate limiting strategies (Per-End-User, Per-Team, Spend Limits, Usage Limits) are [coming soon](#coming-soon) for more granular control.
+  Additional rate limiting strategies (Per-End-User, Per-Team, Spend Limits,
+  Usage Limits) are [coming soon](#coming-soon) for more granular control.
 </Note>
 
 ## Use Cases
@@ -127,6 +122,7 @@ The AI Gateway provides flexible rate limiting using GCRA (Generic Cell Rate Alg
           refill-frequency: 1m  # 1000 requests per minute
         cleanup-interval: 5m
     ```
+
   </Tab>
 
   <Tab title="Multi-Tier Service">
@@ -143,20 +139,21 @@ The AI Gateway provides flexible rate limiting using GCRA (Generic Cell Rate Alg
     global:
       rate-limit:
         cleanup-interval: 5m
-    
+
     routers:
       premium:
         rate-limit:
           per-api-key:
             capacity: 5000
             refill-frequency: 1m  # 5000 requests per minute
-      
+
       basic:
         rate-limit:
           per-api-key:
             capacity: 100
             refill-frequency: 1m  # 100 requests per minute
     ```
+
   </Tab>
 
   <Tab title="Cost Control by Environment">
@@ -177,7 +174,7 @@ The AI Gateway provides flexible rate limiting using GCRA (Generic Cell Rate Alg
           chat:
             strategy: latency
             providers: [openai, anthropic]
-      
+
       development:
         rate-limit:
           per-api-key:
@@ -188,6 +185,7 @@ The AI Gateway provides flexible rate limiting using GCRA (Generic Cell Rate Alg
             strategy: latency
             providers: [openai, anthropic]
     ```
+
   </Tab>
 </Tabs>
 
@@ -199,22 +197,21 @@ The AI Gateway provides flexible rate limiting using GCRA (Generic Cell Rate Alg
   <Step title="Request Arrives">
     A request comes in with an API key via Authorization header
   </Step>
-  
-  <Step title="Rate Limit Check">
-    The gateway checks rate limits in precedence order:
-    
-    - **Global rate limits**: Application-wide limits checked first
-    - **Router-specific rate limits**: Individual router limits checked second
-  </Step>
-  
-  <Step title="Token Consumption">
-    If limits allow, the request consumes a token from the API key's bucket
-  </Step>
-  
-  <Step title="Request Processing">
-    The request proceeds to load balancing and provider routing
-  </Step>
-  
+
+<Step title="Rate Limit Check">
+  The gateway checks rate limits in precedence order: - **Global rate limits**:
+  Application-wide limits checked first - **Router-specific rate limits**:
+  Individual router limits checked second
+</Step>
+
+<Step title="Token Consumption">
+  If limits allow, the request consumes a token from the API key's bucket
+</Step>
+
+<Step title="Request Processing">
+  The request proceeds to load balancing and provider routing
+</Step>
+
   <Step title="Token Refill">
     Tokens continuously refill at the configured rate for future requests
   </Step>
@@ -224,10 +221,10 @@ The AI Gateway provides flexible rate limiting using GCRA (Generic Cell Rate Alg
 
 Rate limits are applied at different levels with clear precedence:
 
-| Level | Description | When Applied |
-|-------|-------------|--------------|
-| **Global Rate Limits** | Application-wide limits across all routers | Checked first as safety net |
-| **Router-Specific Rate Limits** | Individual router limits or opt-out | Checked after global limits pass |
+| Level                           | Description                                | When Applied                     |
+| ------------------------------- | ------------------------------------------ | -------------------------------- |
+| **Global Rate Limits**          | Application-wide limits across all routers | Checked first as safety net      |
+| **Router-Specific Rate Limits** | Individual router limits or opt-out        | Checked after global limits pass |
 
 ## Storage Backend Options
 
@@ -243,11 +240,12 @@ Rate limiting counters can be stored in different backends depending on your dep
     rate-limit-store:
       type: in-memory
     ```
-    
+
     **Best for:**
     - Single instance deployments
     - Development environments
     - High-performance scenarios where cross-instance coordination isn't needed
+
   </Accordion>
 
   <Accordion title="Redis Storage" icon="database">
@@ -269,6 +267,7 @@ Rate limiting counters can be stored in different backends depending on your dep
     - `host-url`: Redis connection string
       - Supports standard Redis URL format: `redis://[username:password@]host[:port][/database]`
     - `connection-timeout`: Connection timeout in seconds (default: 5)
+
   </Accordion>
 
   <Accordion title="Mixed Storage" icon="flask-vial">
@@ -298,22 +297,24 @@ Rate limiting counters can be stored in different backends depending on your dep
             capacity: 100
             refill-frequency: 1m
     ```
+
   </Accordion>
 </AccordionGroup>
 
 <Note>
-  For complete configuration options and syntax, see the [Configuration Reference](/ai-gateway/config#rate-limiting).
+  For complete configuration options and syntax, see the [Configuration
+  Reference](/ai-gateway/config#rate-limiting).
 </Note>
 
 ## Coming Soon
 
 The following rate limiting features are planned for future releases:
 
-| Feature | Description | Version |
-|---------|-------------|---------|
-| **Database Storage** | Persistent rate limiting state with advanced querying capabilities for analytics and compliance | v2 |
-| **Per-End-User Limits** | Rate limits applied to end users via `Helicone-User-Id` header for SaaS user quotas | v1 |
-| **Per-Team Limits** | Rate limits applied to teams for budget and governance controls | v2 |
-| **Per-Team-Member Limits** | Rate limits applied to individual team members for governance | v2 |
-| **Spend Limits** | Cost-based limits that restrict usage based on dollar amounts spent per time period | v2 |
-| **Usage Limits** | Token-based limits that restrict usage based on input/output tokens consumed | v2 |
+| Feature                    | Description                                                                                     | Version |
+| -------------------------- | ----------------------------------------------------------------------------------------------- | ------- |
+| **Database Storage**       | Persistent rate limiting state with advanced querying capabilities for analytics and compliance | v2      |
+| **Per-End-User Limits**    | Rate limits applied to end users via `Helicone-User-Id` header for SaaS user quotas             | v1      |
+| **Per-Team Limits**        | Rate limits applied to teams for budget and governance controls                                 | v2      |
+| **Per-Team-Member Limits** | Rate limits applied to individual team members for governance                                   | v2      |
+| **Spend Limits**           | Cost-based limits that restrict usage based on dollar amounts spent per time period             | v2      |
+| **Usage Limits**           | Token-based limits that restrict usage based on input/output tokens consumed                    | v2      |

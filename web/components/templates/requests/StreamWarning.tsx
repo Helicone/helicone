@@ -13,7 +13,7 @@ const StreamWarning: React.FC<StreamWarningProps> = ({
 }) => {
   const [isWarningHidden, setIsWarningHidden] = useLocalStorage(
     "isStreamWarningHiddenx",
-    requestWithStreamUsage
+    requestWithStreamUsage,
   );
 
   if (!requestWithStreamUsage || isWarningHidden) {
@@ -22,7 +22,7 @@ const StreamWarning: React.FC<StreamWarningProps> = ({
 
   return (
     <Alert variant="warning" className="w-full">
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <AlertDescription className="text-muted-foreground">
           We are unable to calculate your cost accurately because the
           &apos;stream_usage&apos; option is not included in your message.
@@ -39,7 +39,7 @@ const StreamWarning: React.FC<StreamWarningProps> = ({
           onClick={() => setIsWarningHidden(true)}
           variant="ghost"
           size="icon"
-          className="h-6 w-6 mx-5"
+          className="mx-5 h-6 w-6"
         >
           <X className="h-4 w-4" />
           <span className="sr-only">Close</span>

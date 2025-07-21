@@ -15,10 +15,9 @@ Follow the [dataset documentation](https://docs.helicone.ai/features/fine-tuning
 
 [https://youtu.be/Dsy1kdSOJ1k](https://youtu.be/Dsy1kdSOJ1k)
 
-
 # Human Labeling
 
-Add a column  to the CSV exported from Helicone with `mock_data` which includes [gold answers](https://stackoverflow.com/questions/69515119/what-does-gold-mean-in-nlp).
+Add a column to the CSV exported from Helicone with `mock_data` which includes [gold answers](https://stackoverflow.com/questions/69515119/what-does-gold-mean-in-nlp).
 Below is an example script which augments the CSV exported from Helicone with an additional column. It will copy the LLM's response into the golden answer column as a placeholder. Then, replace each of the column's cells with the correct output corresponding to the user input.
 
 Adding gold answer column to the CSV:
@@ -240,19 +239,19 @@ def post_scores(request_id: str, scores: dict):
 def main():
     # 1. Load your Ragas evaluation results
     df = pd.read_csv("evaluation_results.csv")
-    
+
     # 2. Validate presence of requestId
     if 'requestId' not in df.columns:
         raise KeyError("CSV must contain a 'requestId' column")
-    
+
     # 3. Determine which columns are your metric scores
     #    (everything except requestId and any other metadata)
     skip = {'requestId', 'user_input', 'response', 'reference'}
     score_cols = [c for c in df.columns if c not in skip]
-    
+
     if not score_cols:
         raise ValueError("No metric columns found to send as scores")
-    
+
     # 4. Iterate and post
     for _, row in df.iterrows():
         rid = row['requestId']

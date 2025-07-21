@@ -97,7 +97,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
 
   const reducer = (
     state: ProviderCardState,
-    action: ProviderCardAction
+    action: ProviderCardAction,
   ): ProviderCardState => {
     switch (action.type) {
       case "SET_KEY_VALUE":
@@ -351,11 +351,11 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
     }
 
     return (
-      <div className="mt-3 border-t pt-3 flex flex-col gap-2">
+      <div className="mt-3 flex flex-col gap-2 border-t pt-3">
         <Small className="font-medium">Advanced Configuration</Small>
         <Muted>Required fields for this provider</Muted>
 
-        <div className="flex flex-col gap-3 mt-2">
+        <div className="mt-2 flex flex-col gap-3">
           {configFields.map((field) => (
             <div key={field.key} className="flex flex-col gap-1">
               <Small className="text-xs">{field.label}</Small>
@@ -376,13 +376,13 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
   };
 
   return (
-    <div className="border rounded-md overflow-hidden bg-card hover:border-primary/40 transition-colors">
+    <div className="overflow-hidden rounded-md border bg-card transition-colors hover:border-primary/40">
       <div className="px-3 py-2">
         <div className="flex flex-col gap-1.5">
           {/* Provider info and key status */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="h-6 w-6 flex items-center justify-center bg-muted rounded-md overflow-hidden">
+              <div className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-md bg-muted">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={provider.logoUrl}
@@ -394,9 +394,9 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
                   }}
                 />
               </div>
-              <div className="font-medium text-sm">{provider.name}</div>
+              <div className="text-sm font-medium">{provider.name}</div>
               {isEditMode && (
-                <div className="text-xs text-muted-foreground border border-muted-foreground/30 rounded px-1.5 py-0.5">
+                <div className="rounded border border-muted-foreground/30 px-1.5 py-0.5 text-xs text-muted-foreground">
                   Key set
                 </div>
               )}
@@ -408,7 +408,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
           </div>
 
           {/* Key input row */}
-          <div className="flex gap-1 items-center">
+          <div className="flex items-center gap-1">
             <div className="relative flex-1">
               <Input
                 type={isViewingKey ? "text" : "password"}
@@ -423,7 +423,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
                 onChange={(e) =>
                   dispatch({ type: "SET_KEY_VALUE", payload: e.target.value })
                 }
-                className="flex-1 text-sm h-8 py-1"
+                className="h-8 flex-1 py-1 text-sm"
               />
             </div>
 
@@ -464,7 +464,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
                       disabled={isLoadingKey}
                     >
                       {isLoadingKey ? (
-                        <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-t-transparent border-current" />
+                        <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
                       ) : isViewingKey ? (
                         <EyeOff className="h-3.5 w-3.5" />
                       ) : (
@@ -482,7 +482,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
                 onClick={handleSaveKey}
                 disabled={(!state.key.value && !isEditMode) || isSavingKey}
                 size="sm"
-                className="flex items-center gap-1 whitespace-nowrap h-8 px-3"
+                className="flex h-8 items-center gap-1 whitespace-nowrap px-3"
               >
                 {isSavingKey ? (
                   "Saving..."
@@ -511,7 +511,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
                 variant="ghost"
                 size="sm"
                 onClick={() => dispatch({ type: "TOGGLE_CONFIG_VISIBILITY" })}
-                className="flex items-center gap-1 text-xs text-muted-foreground h-7 px-2"
+                className="flex h-7 items-center gap-1 px-2 text-xs text-muted-foreground"
               >
                 {state.config.isVisible ? (
                   <>

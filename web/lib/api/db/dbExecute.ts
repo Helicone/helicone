@@ -23,7 +23,7 @@ export function paramsToValues(params: (number | string | boolean | Date)[]) {
 
 export function printRunnableQuery(
   query: string,
-  parameters: (number | string | boolean | Date)[]
+  parameters: (number | string | boolean | Date)[],
 ) {
   const queryParams = paramsToValues(parameters);
   const setParams = Object.entries(queryParams)
@@ -35,7 +35,7 @@ export function printRunnableQuery(
 
 export async function dbQueryClickhouse<T>(
   query: string,
-  parameters: (number | string | boolean | Date)[]
+  parameters: (number | string | boolean | Date)[],
 ): Promise<Result<T[], string>> {
   try {
     const query_params = paramsToValues(parameters);
@@ -77,7 +77,7 @@ export async function dbQueryClickhouse<T>(
  */
 export async function dbExecute<T>(
   query: string,
-  parameters: any[]
+  parameters: any[],
 ): Promise<Result<T[], string>> {
   const ssl =
     process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "development"

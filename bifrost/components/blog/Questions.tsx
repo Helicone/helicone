@@ -5,9 +5,9 @@ interface QuestionsProps {}
 export function Questions({}: QuestionsProps) {
   return (
     <>
-      <hr className="w-full max-w-4xl mx-auto border-t border-slate-200" />
-      <section className="w-full max-w-4xl mx-auto mt-6 mb-2">
-        <h3 className="font-bold text-2xl text-gray-700">
+      <hr className="mx-auto w-full max-w-4xl border-t border-slate-200" />
+      <section className="mx-auto mb-2 mt-6 w-full max-w-4xl">
+        <h3 className="text-2xl font-bold text-gray-700">
           Questions or feedback?
         </h3>
         <p className="text-base text-gray-500">

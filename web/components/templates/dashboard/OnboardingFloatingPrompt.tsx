@@ -19,7 +19,7 @@ export default function OnboardingFloatingPrompt({
   const router = useRouter();
   const orgContext = useOrg();
   const { onboardingState } = useOrgOnboarding(
-    orgContext?.currentOrg?.id || ""
+    orgContext?.currentOrg?.id || "",
   );
 
   if (!open) return null;
@@ -43,19 +43,19 @@ export default function OnboardingFloatingPrompt({
   };
 
   return (
-    <div className="fixed bottom-4 right-4 w-[400px] p-6 border border-slate-200 bg-white dark:bg-black dark:border-slate-800 rounded-lg shadow-lg">
+    <div className="fixed bottom-4 right-4 w-[400px] rounded-lg border border-slate-200 bg-white p-6 shadow-lg dark:border-slate-800 dark:bg-black">
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
           <h2 className="text-lg font-semibold leading-7 text-foreground">
             Hey! Ready to integrate?
           </h2>
-          <p className="text-sm text-muted-foreground leading-5">
+          <p className="text-sm leading-5 text-muted-foreground">
             Integrate your LLM app to start logging, evaluating and improving
             your app. It&apos;ll take a few seconds!
           </p>
         </div>
 
-        <div className="flex justify-end items-center gap-2">
+        <div className="flex items-center justify-end gap-2">
           <Button variant="outline" onClick={handleDemoClick}>
             Try demo
           </Button>

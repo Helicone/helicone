@@ -12,7 +12,10 @@ const kvCache = new KVCache(CACHE_TTL);
 
 class TempHeliconeAPIKey implements BaseTempKey {
   private keyUsed = false;
-  constructor(private apiKey: string, private heliconeApiKeyId: string) {}
+  constructor(
+    private apiKey: string,
+    private heliconeApiKeyId: string
+  ) {}
 
   async cleanup() {
     if (this.keyUsed) {

@@ -1,4 +1,4 @@
-import {  MessageData, MessageProducer } from "./types";
+import { MessageData, MessageProducer } from "./types";
 
 export class DualWriteProducer implements MessageProducer {
   private primary: MessageProducer;

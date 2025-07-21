@@ -6,7 +6,7 @@ import { Evaluator } from "./types";
 
 export function useEvaluatorDetails(
   evaluator: Evaluator,
-  onSuccess: () => void
+  onSuccess: () => void,
 ) {
   const org = useOrg();
   const { setNotification } = useNotification();
@@ -43,7 +43,7 @@ export function useEvaluatorDetails(
         {
           params: { path: { evaluatorId: evaluator.id } },
           body: data,
-        }
+        },
       );
 
       if (result.error) {
@@ -76,7 +76,7 @@ export function useEvaluatorDetails(
               onlineEvaluatorId: onlineEvaluatorId,
             },
           },
-        }
+        },
       );
 
       if (result.error) {

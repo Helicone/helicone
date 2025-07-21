@@ -5,7 +5,7 @@ import { Provider, SortOption } from "@/types/provider";
  */
 export const getProviderNameById = (
   providerId: string,
-  providers: Provider[]
+  providers: Provider[],
 ): string => {
   const provider = providers.find((p) => p.id === providerId);
   return provider?.name || providerId;
@@ -16,12 +16,12 @@ export const getProviderNameById = (
  */
 export const filterProviders = (
   providers: Provider[],
-  searchQuery: string
+  searchQuery: string,
 ): Provider[] => {
   return providers.filter(
     (provider) =>
       provider.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      provider.description.toLowerCase().includes(searchQuery.toLowerCase())
+      provider.description.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 };
 
@@ -31,7 +31,7 @@ export const filterProviders = (
 export const sortProviders = (
   providers: Provider[],
   sortOption: SortOption,
-  recentlyUsedProviderIds: string[]
+  recentlyUsedProviderIds: string[],
 ): Provider[] => {
   if (sortOption === "relevance") {
     return [...providers].sort((a, b) => b.relevanceScore - a.relevanceScore);

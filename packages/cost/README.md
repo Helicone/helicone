@@ -14,6 +14,7 @@ The Cost package provides pricing calculations for LLM providers supported by He
 ### Provider Structure
 
 Each provider has its own directory under `providers/` containing:
+
 - `index.ts` - Main cost definitions for the provider
 - Additional files for specific model categories (e.g., `chat/`, `completion/`)
 
@@ -26,6 +27,7 @@ Each provider has its own directory under `providers/` containing:
 3. **Add to mappings**: Update `providers/mappings.ts`
 
 Example provider structure:
+
 ```typescript
 // providers/your-provider/index.ts
 import { ModelRow } from "../../interfaces/Cost";
@@ -51,6 +53,7 @@ export const costs: ModelRow[] = [
 3. **Use correct pricing**: Convert per-million-token pricing to per-token
 
 Example model addition:
+
 ```typescript
 {
   model: {
@@ -73,6 +76,7 @@ Example model addition:
 ### Cost Structure
 
 The `cost` object supports:
+
 - `prompt_token` - Cost per input token (required)
 - `completion_token` - Cost per output token (required)
 - `per_image` - Cost per image (optional)
@@ -85,6 +89,7 @@ The `cost` object supports:
 ### Pricing Conversion
 
 TogetherAI pricing example:
+
 - Website: "$0.27 per 1M input tokens"
 - Code: `prompt_token: 0.00027`
 
@@ -97,11 +102,13 @@ Formula: `website_price_per_million / 1_000_000`
 In `providers/mappings.ts`:
 
 1. **Add pattern**: Create regex for provider URLs
+
 ```typescript
 const yourProvider = /^https:\/\/api\.yourprovider\.com/;
 ```
 
 2. **Add to providers array**:
+
 ```typescript
 {
   pattern: yourProvider,
@@ -111,6 +118,7 @@ const yourProvider = /^https:\/\/api\.yourprovider\.com/;
 ```
 
 3. **Add provider name**:
+
 ```typescript
 export const providersNames = [
   // ... existing providers
@@ -121,6 +129,7 @@ export const providersNames = [
 ### Import Costs
 
 Import your cost definitions:
+
 ```typescript
 import { costs as yourProviderCosts } from "./your-provider";
 ```
@@ -140,12 +149,12 @@ Recent update adding Llama 4 and DeepSeek models:
   },
   cost: {
     prompt_token: 0.00027,  // $0.27/1M tokens
-    completion_token: 0.00085, // $0.85/1M tokens  
+    completion_token: 0.00085, // $0.85/1M tokens
   },
 },
 {
   model: {
-    operator: "equals", 
+    operator: "equals",
     value: "deepseek-ai/DeepSeek-V3",
   },
   cost: {
@@ -158,6 +167,7 @@ Recent update adding Llama 4 and DeepSeek models:
 ### Complex Cost Structure
 
 Example with multiple cost types:
+
 ```typescript
 {
   model: {
@@ -175,6 +185,7 @@ Example with multiple cost types:
 ## Testing
 
 After adding costs:
+
 1. Test cost calculation with sample data
 2. Verify provider pattern matching
 3. Check model name matching (case sensitivity)
@@ -187,19 +198,20 @@ The package provides two main functions:
 - **`costOfPrompt({...})`** - Calculate total cost for a request
 
 Usage:
+
 ```typescript
 import { costOf, costOfPrompt } from "@helicone/cost";
 
 // Get cost structure
 const cost = costOf({
   model: "gpt-4",
-  provider: "https://api.openai.com"
+  provider: "https://api.openai.com",
 });
 
 // Calculate prompt cost
 const totalCost = costOfPrompt({
   provider: "https://api.openai.com",
-  model: "gpt-4", 
+  model: "gpt-4",
   promptTokens: 100,
   completionTokens: 50,
   // ... other parameters
@@ -209,6 +221,7 @@ const totalCost = costOfPrompt({
 ## File Header
 
 All provider files include this header:
+
 ```typescript
 /**
  *

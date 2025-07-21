@@ -29,7 +29,11 @@ interface PromptFormProps {
   isScrolled: boolean;
   saveAndVersion: boolean;
   onCreatePrompt: (tags: string[], promptName: string) => void;
-  onSavePrompt: (newMajorVersion: boolean, setAsProduction: boolean, commitMessage: string) => void;
+  onSavePrompt: (
+    newMajorVersion: boolean,
+    setAsProduction: boolean,
+    commitMessage: string,
+  ) => void;
 }
 
 export default function PromptForm({
@@ -47,7 +51,8 @@ export default function PromptForm({
   const [customTags, setCustomTags] = useState("");
   const [saveAsNewPrompt, setSaveAsNewPrompt] = useState(!saveAndVersion);
 
-  const { data: existingTags = [], isLoading: isLoadingTags } = useGetPromptTags();
+  const { data: existingTags = [], isLoading: isLoadingTags } =
+    useGetPromptTags();
 
   const handleTagsChange = (tags: string[]) => {
     setSelectedTags(tags);
@@ -56,8 +61,8 @@ export default function PromptForm({
   const getAllTags = () => {
     const customTagsList = customTags
       .split(",")
-      .map(tag => tag.trim())
-      .filter(tag => tag.length > 0);
+      .map((tag) => tag.trim())
+      .filter((tag) => tag.length > 0);
     return Array.from(new Set([...selectedTags, ...customTagsList]));
   };
 
@@ -72,17 +77,17 @@ export default function PromptForm({
           className={cn(
             "border-none",
             isScrolled &&
-              "bg-slate-100 dark:bg-slate-950 hover:bg-slate-200 dark:hover:bg-slate-900"
+              "bg-slate-100 hover:bg-slate-200 dark:bg-slate-950 dark:hover:bg-slate-900",
           )}
         >
           Save Prompt
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-96 mr-2">
-        <div className="flex flex-col gap-4 py-4 w-full">
+      <PopoverContent className="mr-2 w-96">
+        <div className="flex w-full flex-col gap-4 py-4">
           {saveAndVersion && (
             <div className="flex justify-end">
-              <div className="flex gap-2 items-center">
+              <div className="flex items-center gap-2">
                 <Tooltip>
                   <TooltipTrigger>
                     <InfoIcon className="h-3 w-3 text-muted-foreground" />
@@ -140,7 +145,7 @@ export default function PromptForm({
                   selectedTags={selectedTags}
                   onTagsChange={handleTagsChange}
                 />
-                <div className="flex flex-col gap-2 mt-2">
+                <div className="mt-2 flex flex-col gap-2">
                   <Input
                     id="customTags"
                     value={customTags}
@@ -170,13 +175,14 @@ export default function PromptForm({
           {saveAndVersion && !saveAsNewPrompt && (
             <>
               <div className="flex justify-end">
-                <div className="flex gap-2 items-center">
+                <div className="flex items-center gap-2">
                   <Tooltip>
                     <TooltipTrigger>
                       <InfoIcon className="h-3 w-3 text-muted-foreground" />
                     </TooltipTrigger>
                     <TooltipContent align="start">
-                      Create a new major version instead of incrementing the minor version.
+                      Create a new major version instead of incrementing the
+                      minor version.
                     </TooltipContent>
                   </Tooltip>
                   <Label htmlFor="upgrade-major-version" className="text-sm">
@@ -193,13 +199,14 @@ export default function PromptForm({
                 </div>
               </div>
               <div className="flex justify-end">
-                <div className="flex gap-2 items-center">
+                <div className="flex items-center gap-2">
                   <Tooltip>
                     <TooltipTrigger>
                       <InfoIcon className="h-3 w-3 text-muted-foreground" />
                     </TooltipTrigger>
                     <TooltipContent align="start">
-                      Mark this version as the production version for this prompt.
+                      Mark this version as the production version for this
+                      prompt.
                     </TooltipContent>
                   </Tooltip>
                   <Label htmlFor="set-as-production" className="text-sm">
@@ -221,17 +228,23 @@ export default function PromptForm({
           <Button
             variant="outline"
             size="sm"
-            className="w-full mt-2"
+            className="mt-2 w-full"
             onClick={() => {
               if (!saveAndVersion || saveAsNewPrompt) {
                 onCreatePrompt(getAllTags(), promptName);
               } else {
-                onSavePrompt(upgradeMajorVersion, setAsProduction, commitMessage);
+                onSavePrompt(
+                  upgradeMajorVersion,
+                  setAsProduction,
+                  commitMessage,
+                );
               }
               setIsPromptFormPopoverOpen(false);
             }}
           >
-            {(!saveAndVersion || saveAsNewPrompt) ? "Create Prompt" : "Save Prompt"}
+            {!saveAndVersion || saveAsNewPrompt
+              ? "Create Prompt"
+              : "Save Prompt"}
           </Button>
         </div>
       </PopoverContent>

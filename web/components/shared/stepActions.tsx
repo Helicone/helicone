@@ -20,7 +20,7 @@ export default function StepActions(props: StepActionsProps) {
     allowStepSelection = "true",
   } = props;
   return (
-    <div className="border border-gray-300 rounded-lg bg-white dark:border-gray-700 dark:bg-black">
+    <div className="rounded-lg border border-gray-300 bg-white dark:border-gray-700 dark:bg-black">
       <nav className="w-full" aria-label="Progress">
         <ol
           role="list"
@@ -29,13 +29,13 @@ export default function StepActions(props: StepActionsProps) {
           {steps.map((step, stepIdx) => (
             <li
               key={step.id}
-              className="relative overflow-hidden lg:flex-1 text-black dark:text-white"
+              className="relative overflow-hidden text-black dark:text-white lg:flex-1"
             >
               <div
                 className={clsx(
                   stepIdx === 0 ? "rounded-t-md border-b-0" : "",
                   stepIdx === steps.length - 1 ? "rounded-b-md border-t-0" : "",
-                  "overflow-hidden border border-gray-200 dark:border-gray-800 lg:border-0"
+                  "overflow-hidden border border-gray-200 dark:border-gray-800 lg:border-0",
                 )}
               >
                 {step.id < currentStep ? (
@@ -53,7 +53,7 @@ export default function StepActions(props: StepActionsProps) {
                     <span
                       className={clsx(
                         stepIdx !== 0 ? "lg:pl-9" : "",
-                        "flex items-center px-6 py-5 text-sm font-medium"
+                        "flex items-center px-6 py-5 text-sm font-medium",
                       )}
                     >
                       <span className="flex-shrink-0">
@@ -89,7 +89,7 @@ export default function StepActions(props: StepActionsProps) {
                     <span
                       className={clsx(
                         stepIdx !== 0 ? "lg:pl-9" : "",
-                        "flex items-center px-6 py-5 text-sm font-medium"
+                        "flex items-center px-6 py-5 text-sm font-medium",
                       )}
                     >
                       <span className="flex-shrink-0">
@@ -122,7 +122,7 @@ export default function StepActions(props: StepActionsProps) {
                     <span
                       className={clsx(
                         stepIdx !== 0 ? "lg:pl-9" : "",
-                        "flex items-center px-6 py-5 text-sm font-medium"
+                        "flex items-center px-6 py-5 text-sm font-medium",
                       )}
                     >
                       <span className="flex-shrink-0">

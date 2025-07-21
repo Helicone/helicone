@@ -1,4 +1,4 @@
-Selecting the right framework to power your agents is crucial for efficiency and scalability. Two notable open-source frameworks are **CrewAI** and **AutoGen**. 
+Selecting the right framework to power your agents is crucial for efficiency and scalability. Two notable open-source frameworks are **CrewAI** and **AutoGen**.
 
 CrewAI offers collaborative and team-oriented workflows, while AutoGen offers finely tuned control for more intricate, iterative problem-solving. Both are part of the growing ecosystem of <a href="https://www.helicone.ai/blog/ai-agent-builders" target="_blank" rel="noopener">AI agent frameworks</a> that are transforming how developers build AI applications.
 
@@ -12,28 +12,45 @@ We will cover the key differences, example implementations, and share our recomm
 
 ## How are CrewAI and AutoGen different?
 
-| Feature             | CrewAI                                                                                 | AutoGen                                                                                    |
-| ------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| Ease of use         | More intuitive with structured, templatized approach. Better for beginners.           | Requires learning specific terminology and concepts but offers greater flexibility.         |
-| Getting Started     | Documentation can be inconsistent with complex initial examples.                       | Cleaner onboarding with simpler examples but could be more structured.                     |
-| LLM Support    | Has dependencies on OpenAI, limiting for other LLMs.                           | More reliant on OpenAI's GPT models, which can be limiting.                                     |
-| Workflow Structure  | Excels at sequential and hierarchical predetermined workflows with defined roles.      | Better for dynamic, conversational problem-solving where solutions emerge through discussion. |
-| Code Execution      | Cannot execute code natively. Can write code but lacks execution capabilities.         | Robust code execution with Docker isolation. Can debug, fix errors, and generate artifacts. |
-| Tool Integration    | Relies on LangChain for tools, requiring decorators and specific formatting.           | More flexible tool registration with straightforward integration patterns.                  |
-| Performance         | May have scaling issues with concurrent requests in production environments.           | Generally faster with better handling of concurrent operations.                             |
-| Use Case Fit        | Ideal for known, structured processes that need regular execution.                     | Better for complex, one-time tasks that require dynamic problem-solving.                   |
-| Verbosity           | More structured logging with better terminal output to understand process flow.        | More raw output that may require additional interpretation.                                 |
+| Feature            | CrewAI                                                                            | AutoGen                                                                                       |
+| ------------------ | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Ease of use        | More intuitive with structured, templatized approach. Better for beginners.       | Requires learning specific terminology and concepts but offers greater flexibility.           |
+| Getting Started    | Documentation can be inconsistent with complex initial examples.                  | Cleaner onboarding with simpler examples but could be more structured.                        |
+| LLM Support        | Has dependencies on OpenAI, limiting for other LLMs.                              | More reliant on OpenAI's GPT models, which can be limiting.                                   |
+| Workflow Structure | Excels at sequential and hierarchical predetermined workflows with defined roles. | Better for dynamic, conversational problem-solving where solutions emerge through discussion. |
+| Code Execution     | Cannot execute code natively. Can write code but lacks execution capabilities.    | Robust code execution with Docker isolation. Can debug, fix errors, and generate artifacts.   |
+| Tool Integration   | Relies on LangChain for tools, requiring decorators and specific formatting.      | More flexible tool registration with straightforward integration patterns.                    |
+| Performance        | May have scaling issues with concurrent requests in production environments.      | Generally faster with better handling of concurrent operations.                               |
+| Use Case Fit       | Ideal for known, structured processes that need regular execution.                | Better for complex, one-time tasks that require dynamic problem-solving.                      |
+| Verbosity          | More structured logging with better terminal output to understand process flow.   | More raw output that may require additional interpretation.                                   |
 
 ### Other comparisons you might like:
 
-- <a href="https://www.helicone.ai/blog/crewai-vs-dify-ai" target="_blank" rel="noopener">Deep Dive: CrewAI vs. Dify AI</a>
-- <a href="https://www.helicone.ai/blog/llamaindex-vs-langchain" target="_blank" rel="noopener">Deep Dive: LlamaIndex vs. LangChain</a>
+- <a
+    href="https://www.helicone.ai/blog/crewai-vs-dify-ai"
+    target="_blank"
+    rel="noopener"
+  >
+    Deep Dive: CrewAI vs. Dify AI
+  </a>
+- <a
+    href="https://www.helicone.ai/blog/llamaindex-vs-langchain"
+    target="_blank"
+    rel="noopener"
+  >
+    Deep Dive: LlamaIndex vs. LangChain
+  </a>
 
 ## What is CrewAI?
 
-`free` `open-source`  
+`free` `open-source`
 
-<a href="https://www.crewai.com/" target="_blank" rel="noopener">CrewAI</a> is a Python-based framework that implements a hierarchical, role-based architecture for multi-agent systems. It follows the principle of separation of concerns, where each agent has:
+<a href="https://www.crewai.com/" target="_blank" rel="noopener">
+  CrewAI
+</a>
+is a Python-based framework that implements a hierarchical, role-based
+architecture for multi-agent systems. It follows the principle of separation of
+concerns, where each agent has:
 
 - Defined role specifications
 - Explicit skill mappings
@@ -192,7 +209,7 @@ Many developers find that the choice between AutoGen or CrewAI depends on the sp
 
 ## CrewAI vs AutoGen: Real-world Reviews
 
-AutoGen and CrewAI are frequently compared in developer communities. 
+AutoGen and CrewAI are frequently compared in developer communities.
 
 One user explains the distinction perfectly:
 
@@ -204,27 +221,27 @@ Another user remarked:
 
 > I am going with AutoGen for my own projects and experiments. CrewAI can be plugged in though probably into the AI agents systems you are building if you need a specific sequential process to be met. They don't seem to be either or.
 
-These perspectives highlight an important realization: **the choice isn't binary**. 
+These perspectives highlight an important realization: **the choice isn't binary**.
 
 Many production environments leverage aspects of both frameworks depending on the specific requirements of different components within their AI systems—so feel free to experiment, they're both free anyway!
 
 ## Which one Should You Choose: CrewAI or AutoGen?
 
-| Choose **CrewAI** if you need: | Choose **AutoGen** if you need: |
-| --- | --- |
-| ⬥ A structured framework for agents with predefined roles and workflows | ⬥ Code execution capabilities with debugging and artifact generation |
-| ⬥ Intuitive, beginner-friendly design that's easy to understand and implement | ⬥ More flexibility for customization and complex problem-solving |
-| ⬥ Sequential or hierarchical agent orchestration for known processes | ⬥ Dynamic, conversational problem-solving where solutions emerge through discussion |
-| ⬥ Seamless integration with LangChain ecosystem | ⬥ Better performance with concurrent operations in production environments |
-| ⬥ Rapid prototyping of agent interactions with minimal setup | ⬥ Advanced capabilities for autonomous coding tasks and technical workflows |
+| Choose **CrewAI** if you need:                                                | Choose **AutoGen** if you need:                                                     |
+| ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| ⬥ A structured framework for agents with predefined roles and workflows       | ⬥ Code execution capabilities with debugging and artifact generation                |
+| ⬥ Intuitive, beginner-friendly design that's easy to understand and implement | ⬥ More flexibility for customization and complex problem-solving                    |
+| ⬥ Sequential or hierarchical agent orchestration for known processes          | ⬥ Dynamic, conversational problem-solving where solutions emerge through discussion |
+| ⬥ Seamless integration with LangChain ecosystem                               | ⬥ Better performance with concurrent operations in production environments          |
+| ⬥ Rapid prototyping of agent interactions with minimal setup                  | ⬥ Advanced capabilities for autonomous coding tasks and technical workflows         |
 
-<CallToAction 
-title="Debug your LLM workflows 10x Faster with Helicone 💡" 
-description="Helicone's Sessions feature allows you to trace and visualize your agentic workflows, making debugging and optimization much faster."
-primaryButtonText="Get Started for Free"
-primaryButtonLink="https://helicone.ai/signup"
-secondaryButtonText="Read our Docs"
-secondaryButtonLink="https://docs.helicone.ai/features/sessions"
+<CallToAction
+  title="Debug your LLM workflows 10x Faster with Helicone 💡"
+  description="Helicone's Sessions feature allows you to trace and visualize your agentic workflows, making debugging and optimization much faster."
+  primaryButtonText="Get Started for Free"
+  primaryButtonLink="https://helicone.ai/signup"
+  secondaryButtonText="Read our Docs"
+  secondaryButtonLink="https://docs.helicone.ai/features/sessions"
 />
 
 ## Bottom Line
@@ -235,34 +252,64 @@ CrewAI excels when you have **clearly defined workflows** that need consistent e
 
 No matter which framework you choose, consider using Helicone's <a href="https://docs.helicone.ai/features/advanced-usage/evaluation/overview" target="_blank" rel="noopener">evaluation tools</a> to monitor and evaluate your agents' performance in real-world scenarios.
 
-It's also worth noting that there are many other awesome and rapidly evolving <a href="https://www.helicone.ai/blog/ai-agent-builders" target="_blank" rel="noopener">AI agent frameworks</a> out there for you to try. 
+It's also worth noting that there are many other awesome and rapidly evolving <a href="https://www.helicone.ai/blog/ai-agent-builders" target="_blank" rel="noopener">AI agent frameworks</a> out there for you to try.
 
 So, we encourage you to explore multiple options (even beyond CrewAI and AutoGen) to find the best fit for your use case!
 
 ### Related Readings
 
-- <a href="https://docs.helicone.ai/getting-started/integration-method/crewai" target="_blank" rel="noopener">Monitor your CrewAI agents with Helicone</a> 
-- <a href="https://docs.helicone.ai/features/sessions" target="_blank" rel="noopener">Sessions: Track Your AI Agent Workflows</a>
-- <a href="https://www.helicone.ai/blog/crewai-vs-dify-ai" target="_blank" rel="noopener">Comparing CrewAI vs. Dify AI, A No-Code Alternative</a>
-- <a href="https://www.helicone.ai/blog/ai-agent-builders" target="_blank" rel="noopener">7 Awesome Open-Source AI Agent Builders</a>
+- <a
+    href="https://docs.helicone.ai/getting-started/integration-method/crewai"
+    target="_blank"
+    rel="noopener"
+  >
+    Monitor your CrewAI agents with Helicone
+  </a>
+- <a
+    href="https://docs.helicone.ai/features/sessions"
+    target="_blank"
+    rel="noopener"
+  >
+    Sessions: Track Your AI Agent Workflows
+  </a>
+- <a
+    href="https://www.helicone.ai/blog/crewai-vs-dify-ai"
+    target="_blank"
+    rel="noopener"
+  >
+    Comparing CrewAI vs. Dify AI, A No-Code Alternative
+  </a>
+- <a
+    href="https://www.helicone.ai/blog/ai-agent-builders"
+    target="_blank"
+    rel="noopener"
+  >
+    7 Awesome Open-Source AI Agent Builders
+  </a>
 
-<FAQ items={[
-  {
-    question: "What are the main differences between CrewAI and AutoGen?",
-    answer: "CrewAI excels at structured, role-based agent systems with predefined workflows, while AutoGen offers more flexibility for open-ended problem-solving with better code execution capabilities."
-  },
-  {
-    question: "Can I use either framework with local LLMs?",
-    answer: "Yes, both frameworks support local LLMs, though they have some dependencies on OpenAI models for optimal performance."
-  },
-  {
-    question: "How does AutoGen handle code execution as compared to CrewAI?",
-    answer: "AutoGen executes code in Docker containers, providing better isolation and security, while CrewAI uses LangChain's tools for code execution."
-  },
-  {
-    question: "Which framework is better for building a multi-agent system?",
-    answer: "It depends on your needs. CrewAI is better for systems with predefined workflows and roles, while AutoGen is better for systems that need to dynamically solve problems through agent collaboration."
-  }
-]} />
+<FAQ
+  items={[
+    {
+      question: "What are the main differences between CrewAI and AutoGen?",
+      answer:
+        "CrewAI excels at structured, role-based agent systems with predefined workflows, while AutoGen offers more flexibility for open-ended problem-solving with better code execution capabilities.",
+    },
+    {
+      question: "Can I use either framework with local LLMs?",
+      answer:
+        "Yes, both frameworks support local LLMs, though they have some dependencies on OpenAI models for optimal performance.",
+    },
+    {
+      question: "How does AutoGen handle code execution as compared to CrewAI?",
+      answer:
+        "AutoGen executes code in Docker containers, providing better isolation and security, while CrewAI uses LangChain's tools for code execution.",
+    },
+    {
+      question: "Which framework is better for building a multi-agent system?",
+      answer:
+        "It depends on your needs. CrewAI is better for systems with predefined workflows and roles, while AutoGen is better for systems that need to dynamically solve problems through agent collaboration.",
+    },
+  ]}
+/>
 
 <Questions />

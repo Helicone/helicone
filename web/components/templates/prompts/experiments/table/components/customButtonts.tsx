@@ -33,7 +33,7 @@ const ColumnsDropdown: React.FC<{
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
-          className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1"
+          className="flex h-8 items-center justify-center space-x-1 border border-slate-200 px-2 py-0"
         >
           <AdjustmentsHorizontalIcon className="h-4 w-4 text-slate-700" />
           <ChevronDownIcon className="h-4 w-4 text-slate-400" />
@@ -50,7 +50,7 @@ const ColumnsDropdown: React.FC<{
               setColumnView("all");
             }}
           >
-            {columnView === "all" && <Check className="h-4 w-4 mr-2" />}
+            {columnView === "all" && <Check className="mr-2 h-4 w-4" />}
             <span className="flex-1">Show all</span>
           </DropdownMenuItem>
           <DropdownMenuItem
@@ -60,7 +60,7 @@ const ColumnsDropdown: React.FC<{
               setColumnView("inputs");
             }}
           >
-            {columnView === "inputs" && <Check className="h-4 w-4 mr-2" />}
+            {columnView === "inputs" && <Check className="mr-2 h-4 w-4" />}
             <span className="flex-1">Show inputs only</span>
           </DropdownMenuItem>
           <DropdownMenuItem
@@ -70,7 +70,7 @@ const ColumnsDropdown: React.FC<{
               setColumnView("outputs");
             }}
           >
-            {columnView === "outputs" && <Check className="h-4 w-4 mr-2" />}
+            {columnView === "outputs" && <Check className="mr-2 h-4 w-4" />}
             <span className="flex-1">Show outputs only</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
@@ -112,9 +112,9 @@ const ProviderKeyDropdown: React.FC<{
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
-          className="py-0 px-2 border border-slate-200 h-8 flex items-center justify-center space-x-1"
+          className="flex h-8 items-center justify-center space-x-1 border border-slate-200 px-2 py-0"
         >
-          <Cog6ToothIcon className="h-4 w-4 mr-2 text-slate-700" />
+          <Cog6ToothIcon className="mr-2 h-4 w-4 text-slate-700" />
           {!providerKey && (
             <ExclamationTriangleIcon className="h-4 w-4 text-yellow-700" />
           )}
@@ -129,12 +129,12 @@ const ProviderKeyDropdown: React.FC<{
         align="end"
       >
         <DropdownMenuLabel className="flex items-center space-x-2">
-          <Cog6ToothIcon className="h-6 w-6 mr-2" />
+          <Cog6ToothIcon className="mr-2 h-6 w-6" />
           <span className="text-base font-medium">Settings</span>
         </DropdownMenuLabel>
         {!providerKey && (
-          <InfoBox variant="warning" className="p-2 ml-2">
-            <p className="text-sm font-medium flex gap-2">
+          <InfoBox variant="warning" className="ml-2 p-2">
+            <p className="flex gap-2 text-sm font-medium">
               <b>
                 Please select a provider key to run experiments. You can change
                 your mind at any time.

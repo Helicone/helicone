@@ -7,13 +7,13 @@ const DeveloperCard = () => {
   return (
     <div className="h-[250px] w-full">
       <Col className="h-full">
-        <Col className="py-[36px] px-[24px] justify-between h-full">
+        <Col className="h-full justify-between px-[24px] py-[36px]">
           <h1>
             <b>386 hours</b> saved by using cached responses.
           </h1>
-          <div className="bg-blue-100 h-[43px] w-[175px]">LOGO</div>
+          <div className="h-[43px] w-[175px] bg-blue-100">LOGO</div>
         </Col>
-        <Row className="w-full h-[72px] px-[24px] items-center justify-between border-t">
+        <Row className="h-[72px] w-full items-center justify-between border-t px-[24px]">
           <span>Developer</span>
           <Button variant={"outline"} asChild>
             <Link href="https://us.helicone.ai/signin">Start for Free</Link>

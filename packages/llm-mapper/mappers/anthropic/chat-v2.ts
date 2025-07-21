@@ -115,12 +115,12 @@ const convertRequestMessages = (
         typeof msg.content === "string"
           ? msg.content
           : Array.isArray(msg.content)
-          ? msg.content
-              .map((c: any) =>
-                typeof c === "string" ? c : c.type === "text" ? c.text : ""
-              )
-              .join(" ")
-          : "",
+            ? msg.content
+                .map((c: any) =>
+                  typeof c === "string" ? c : c.type === "text" ? c.text : ""
+                )
+                .join(" ")
+            : "",
       id: `req-msg-${idx}`,
     };
   });

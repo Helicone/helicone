@@ -12,13 +12,13 @@ import {
 
 export function StatusCardSkeleton() {
   return (
-    <Card className="shadow-none border h-[120px]">
+    <Card className="h-[120px] border shadow-none">
       <CardContent className="pt-6">
-        <div className="flex items-center justify-between mb-2">
-          <div className="h-8 w-2/3 bg-gray-200 rounded animate-pulse"></div>
-          <div className="h-6 w-24 bg-gray-200 rounded-full animate-pulse"></div>
+        <div className="mb-2 flex items-center justify-between">
+          <div className="h-8 w-2/3 animate-pulse rounded bg-gray-200"></div>
+          <div className="h-6 w-24 animate-pulse rounded-full bg-gray-200"></div>
         </div>
-        <div className="h-6 w-1/2 bg-gray-200 rounded animate-pulse"></div>
+        <div className="h-6 w-1/2 animate-pulse rounded bg-gray-200"></div>
       </CardContent>
     </Card>
   );
@@ -26,21 +26,21 @@ export function StatusCardSkeleton() {
 
 export function ChartSkeleton() {
   return (
-    <Card className="shadow-none border">
+    <Card className="border shadow-none">
       <CardHeader>
-        <div className="h-7 w-2/3 bg-gray-200 rounded animate-pulse"></div>
+        <div className="h-7 w-2/3 animate-pulse rounded bg-gray-200"></div>
       </CardHeader>
       <CardContent>
-        <div className="h-[200px] w-full bg-gray-100 rounded-md animate-pulse">
-          <div className="h-full w-full flex items-center justify-center">
-            <div className="h-1/2 w-3/4 bg-gray-200 rounded opacity-50"></div>
+        <div className="h-[200px] w-full animate-pulse rounded-md bg-gray-100">
+          <div className="flex h-full w-full items-center justify-center">
+            <div className="h-1/2 w-3/4 rounded bg-gray-200 opacity-50"></div>
           </div>
         </div>
         <div className="mt-4 flex w-full">
-          <div className="h-5 w-3/4 bg-gray-200 rounded animate-pulse"></div>
+          <div className="h-5 w-3/4 animate-pulse rounded bg-gray-200"></div>
         </div>
         <div className="mt-2">
-          <div className="h-4 w-1/2 bg-gray-200 rounded animate-pulse"></div>
+          <div className="h-4 w-1/2 animate-pulse rounded bg-gray-200"></div>
         </div>
       </CardContent>
     </Card>
@@ -49,13 +49,13 @@ export function ChartSkeleton() {
 
 export function MetricCardSkeleton() {
   return (
-    <Card className="shadow-none border h-[120px]">
+    <Card className="h-[120px] border shadow-none">
       <CardHeader className="pb-2">
-        <div className="h-5 w-2/3 bg-gray-200 rounded animate-pulse"></div>
+        <div className="h-5 w-2/3 animate-pulse rounded bg-gray-200"></div>
       </CardHeader>
       <CardContent>
-        <div className="h-10 w-1/3 bg-gray-200 rounded animate-pulse"></div>
-        <div className="mt-2 h-5 w-1/2 bg-gray-200 rounded animate-pulse"></div>
+        <div className="h-10 w-1/3 animate-pulse rounded bg-gray-200"></div>
+        <div className="mt-2 h-5 w-1/2 animate-pulse rounded bg-gray-200"></div>
       </CardContent>
     </Card>
   );
@@ -63,21 +63,21 @@ export function MetricCardSkeleton() {
 
 export function LatencyChartSkeleton() {
   return (
-    <Card className="shadow-none border">
+    <Card className="border shadow-none">
       <CardHeader>
-        <div className="h-7 w-2/3 bg-gray-200 rounded animate-pulse"></div>
+        <div className="h-7 w-2/3 animate-pulse rounded bg-gray-200"></div>
       </CardHeader>
       <CardContent>
-        <div className="h-[200px] w-full bg-gray-100 rounded-md animate-pulse">
-          <div className="h-full w-full flex items-center justify-center">
-            <div className="h-1/2 w-3/4 bg-gray-200 rounded opacity-50"></div>
+        <div className="h-[200px] w-full animate-pulse rounded-md bg-gray-100">
+          <div className="flex h-full w-full items-center justify-center">
+            <div className="h-1/2 w-3/4 rounded bg-gray-200 opacity-50"></div>
           </div>
         </div>
         <div className="mt-4 flex w-full">
-          <div className="h-5 w-3/4 bg-gray-200 rounded animate-pulse"></div>
+          <div className="h-5 w-3/4 animate-pulse rounded bg-gray-200"></div>
         </div>
         <div className="mt-2">
-          <div className="h-4 w-1/2 bg-gray-200 rounded animate-pulse"></div>
+          <div className="h-4 w-1/2 animate-pulse rounded bg-gray-200"></div>
         </div>
       </CardContent>
     </Card>
@@ -86,11 +86,11 @@ export function LatencyChartSkeleton() {
 
 export function TimeFrameButtonsSkeleton() {
   return (
-    <div className="flex justify-end gap-2 mb-4">
+    <div className="mb-4 flex justify-end gap-2">
       {[1, 2, 3].map((i) => (
         <div
           key={i}
-          className="h-8 w-12 bg-gray-200 rounded-md animate-pulse"
+          className="h-8 w-12 animate-pulse rounded-md bg-gray-200"
         ></div>
       ))}
     </div>
@@ -99,27 +99,27 @@ export function TimeFrameButtonsSkeleton() {
 
 export function ProvidersTableSkeleton() {
   return (
-    <div className="border rounded-lg overflow-hidden">
+    <div className="overflow-hidden rounded-lg border">
       <Table>
         <TableHeader>
           <TableRow className="bg-gray-50 hover:bg-gray-50">
             <TableHead className="font-semibold">
-              <div className="h-5 w-20 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-5 w-20 animate-pulse rounded bg-gray-200"></div>
             </TableHead>
             <TableHead className="font-semibold">
-              <div className="h-5 w-16 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-5 w-16 animate-pulse rounded bg-gray-200"></div>
             </TableHead>
             <TableHead className="font-semibold">
-              <div className="h-5 w-28 bg-gray-200 rounded animate-pulse"></div>
-              <div className="h-3 w-20 bg-gray-200 rounded animate-pulse mt-1"></div>
+              <div className="h-5 w-28 animate-pulse rounded bg-gray-200"></div>
+              <div className="mt-1 h-3 w-20 animate-pulse rounded bg-gray-200"></div>
             </TableHead>
             <TableHead className="font-semibold">
-              <div className="h-5 w-24 bg-gray-200 rounded animate-pulse"></div>
-              <div className="h-3 w-20 bg-gray-200 rounded animate-pulse mt-1"></div>
+              <div className="h-5 w-24 animate-pulse rounded bg-gray-200"></div>
+              <div className="mt-1 h-3 w-20 animate-pulse rounded bg-gray-200"></div>
             </TableHead>
             <TableHead className="font-semibold">
-              <div className="h-5 w-24 bg-gray-200 rounded animate-pulse"></div>
-              <div className="h-3 w-20 bg-gray-200 rounded animate-pulse mt-1"></div>
+              <div className="h-5 w-24 animate-pulse rounded bg-gray-200"></div>
+              <div className="mt-1 h-3 w-20 animate-pulse rounded bg-gray-200"></div>
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -127,22 +127,22 @@ export function ProvidersTableSkeleton() {
           {Array.from({ length: 5 }).map((_, i) => (
             <TableRow
               key={i}
-              className="bg-white hover:bg-gray-50/50 transition-colors"
+              className="bg-white transition-colors hover:bg-gray-50/50"
             >
               <TableCell className="p-4">
-                <div className="h-5 w-24 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-5 w-24 animate-pulse rounded bg-gray-200"></div>
               </TableCell>
               <TableCell className="p-4">
-                <div className="h-6 w-20 bg-gray-200 rounded-full animate-pulse"></div>
+                <div className="h-6 w-20 animate-pulse rounded-full bg-gray-200"></div>
               </TableCell>
               <TableCell className="p-4">
-                <div className="h-5 w-16 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-5 w-16 animate-pulse rounded bg-gray-200"></div>
               </TableCell>
               <TableCell className="p-4">
-                <div className="h-5 w-16 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-5 w-16 animate-pulse rounded bg-gray-200"></div>
               </TableCell>
               <TableCell className="p-4">
-                <div className="h-5 w-16 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-5 w-16 animate-pulse rounded bg-gray-200"></div>
               </TableCell>
             </TableRow>
           ))}
@@ -154,17 +154,17 @@ export function ProvidersTableSkeleton() {
 
 export function ProviderStatusInfoSkeleton() {
   return (
-    <div className="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-5 gap-4">
+    <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-4 lg:grid-cols-5">
       <div className="lg:col-span-5">
         <TimeFrameButtonsSkeleton />
       </div>
 
-      <div className="lg:col-span-3 space-y-4">
+      <div className="space-y-4 lg:col-span-3">
         <StatusCardSkeleton />
         <ChartSkeleton />
       </div>
 
-      <div className="lg:col-span-2 space-y-4">
+      <div className="space-y-4 lg:col-span-2">
         <MetricCardSkeleton />
         <LatencyChartSkeleton />
       </div>

@@ -7,7 +7,9 @@ description: "Deploy Helicone AI Gateway to Fly.io in 5 minutes"
 Deploy the AI Gateway to Fly.io for a simple, scalable cloud deployment with automatic scaling and global distribution.
 
 <Warning>
-  **Security Notice**: Fly.io deployments are publicly accessible. You **must** enable authentication to prevent unauthorized access to your provider API keys. This guide includes authentication setup as a required step.
+  **Security Notice**: Fly.io deployments are publicly accessible. You **must**
+  enable authentication to prevent unauthorized access to your provider API
+  keys. This guide includes authentication setup as a required step.
 </Warning>
 
 ## Quick Start
@@ -30,6 +32,7 @@ Deploy the AI Gateway to Fly.io for a simple, scalable cloud deployment with aut
     <Note>
       If you encounter any issues with installation, refer to the [official Fly.io installation guide](https://fly.io/docs/flyctl/install/).
     </Note>
+
   </Step>
 
   <Step title="Get your Helicone API key">
@@ -41,6 +44,7 @@ Deploy the AI Gateway to Fly.io for a simple, scalable cloud deployment with aut
     2. Click **"Generate New Key"**
     3. Copy the key (starts with `sk-helicone-`)
     4. Save it securely - you'll need it for deployment
+
   </Step>
 
   <Step title="Get the fly.toml configuration">
@@ -53,6 +57,7 @@ Deploy the AI Gateway to Fly.io for a simple, scalable cloud deployment with aut
     <Note>
       This configuration file contains all the necessary settings for deploying the AI Gateway to Fly.io.
     </Note>
+
   </Step>
 
   <Step title="Launch and deploy">
@@ -69,6 +74,7 @@ Deploy the AI Gateway to Fly.io for a simple, scalable cloud deployment with aut
     - Deploy your AI Gateway
 
     The deployment will complete, but you'll need to add your API keys next.
+
   </Step>
 
   <Step title="Configure authentication & API keys">
@@ -96,6 +102,7 @@ Deploy the AI Gateway to Fly.io for a simple, scalable cloud deployment with aut
       3. Navigate to the **Secrets** tab
       4. Add your environment variables there
     </Accordion>
+
   </Step>
 
   <Step title="Redeploy with secrets">
@@ -106,6 +113,7 @@ Deploy the AI Gateway to Fly.io for a simple, scalable cloud deployment with aut
     ```
 
     Your AI Gateway is now fully configured and ready to use!
+
   </Step>
 </Steps>
 
@@ -118,17 +126,18 @@ Once deployed, test your AI Gateway with authentication:
 import { OpenAI } from "openai";
 
 const openai = new OpenAI({
-  baseURL: "https://your-app-name.fly.dev/ai",
-  apiKey: "sk-helicone-your-api-key", // Your Helicone API key
+baseURL: "https://your-app-name.fly.dev/ai",
+apiKey: "sk-helicone-your-api-key", // Your Helicone API key
 });
 
 const response = await openai.chat.completions.create({
-  model: "openai/gpt-4o-mini",
-  messages: [{ role: "user", content: "Hello from Fly.io!" }],
+model: "openai/gpt-4o-mini",
+messages: [{ role: "user", content: "Hello from Fly.io!" }],
 });
 
 console.log(response);
-```
+
+````
 ```python Python
 import openai
 
@@ -143,7 +152,8 @@ response = client.chat.completions.create(
 )
 
 print(response)
-```
+````
+
 ```bash cURL
 curl https://your-app-name.fly.dev/ai/chat/completions \
   -H "Authorization: Bearer sk-helicone-your-api-key" \
@@ -155,12 +165,13 @@ curl https://your-app-name.fly.dev/ai/chat/completions \
     ]
   }'
 ```
+
 </CodeGroup>
 
 <Note>
-  Replace `sk-helicone-your-api-key` with your actual Helicone API key for secure access to your gateway.
+  Replace `sk-helicone-your-api-key` with your actual Helicone API key for
+  secure access to your gateway.
 </Note>
-
 
 ## Using a Configuration File
 
@@ -188,6 +199,7 @@ The default fly.toml includes a basic router configuration, but you can customiz
       # Set to `features: observability` to enable observability
       features: auth
     ```
+
   </Step>
 
   <Step title="Update fly.toml">
@@ -200,6 +212,7 @@ The default fly.toml includes a basic router configuration, but you can customiz
     ```
 
     Replace the existing `raw_value` line with `local_path` pointing to your config file.
+
   </Step>
 
   <Step title="Redeploy">
@@ -208,11 +221,13 @@ The default fly.toml includes a basic router configuration, but you can customiz
     ```bash
     fly deploy
     ```
+
   </Step>
 </Steps>
 
 <Note>
-  For advanced routing options, learn about [routers](/ai-gateway/router-quickstart).
+  For advanced routing options, learn about
+  [routers](/ai-gateway/router-quickstart).
 </Note>
 
 ## Next Steps
@@ -224,4 +239,4 @@ The default fly.toml includes a basic router configuration, but you can customiz
   <Card title="Custom Configuration" href="/ai-gateway/config">
     Learn about advanced routing and caching options
   </Card>
-</CardGroup> 
+</CardGroup>

@@ -27,7 +27,7 @@ const AccordionTrigger = React.forwardRef<
 >(
   (
     { className, children, iconPosition = "end", iconClassName, ...props },
-    ref
+    ref,
   ) => (
     <AccordionPrimitive.Header className="flex">
       <AccordionPrimitive.Trigger
@@ -37,7 +37,7 @@ const AccordionTrigger = React.forwardRef<
           iconPosition === "start"
             ? "justify-start gap-0.5"
             : "justify-between",
-          className
+          className,
         )}
         {...props}
       >
@@ -45,7 +45,7 @@ const AccordionTrigger = React.forwardRef<
           <ChevronDown
             className={cn(
               "h-4 w-4 shrink-0 transition-transform duration-200",
-              iconClassName
+              iconClassName,
             )}
           />
         )}
@@ -54,13 +54,13 @@ const AccordionTrigger = React.forwardRef<
           <ChevronDown
             className={cn(
               "h-4 w-4 shrink-0 transition-transform duration-200",
-              iconClassName
+              iconClassName,
             )}
           />
         )}
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>
-  )
+  ),
 );
 AccordionTrigger.displayName = AccordionPrimitive.Trigger.displayName;
 

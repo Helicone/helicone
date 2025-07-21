@@ -1,6 +1,6 @@
 In December 2024, OpenAI announced o3 and o3-mini, with o3 set to launch in early 2025. However, plans have changed.
 
-On April 4, 2025, OpenAI CEO Sam Altman <a href="https://x.com/sama/status/1908167621624856998" target="_blank" rel="noopener">announced</a> that the company will **release both o3 and a new model o4-mini in "a couple of weeks,"** while delaying GPT-5 until "a few months" later. 
+On April 4, 2025, OpenAI CEO Sam Altman <a href="https://x.com/sama/status/1908167621624856998" target="_blank" rel="noopener">announced</a> that the company will **release both o3 and a new model o4-mini in "a couple of weeks,"** while delaying GPT-5 until "a few months" later.
 
 ![OpenAI o3 released](/static/blog/openai-o3/o3-cover.webp)
 
@@ -8,10 +8,9 @@ On April 4, 2025, OpenAI CEO Sam Altman <a href="https://x.com/sama/status/19081
 
 Originally, o3's reasoning capabilities were expected to be integrated into GPT-5, but OpenAI has pivoted to releasing both models separately. The delay in GPT-5 is reportedly to make it "much better than originally thought" while addressing integration challenges.
 
-Building on the foundation of OpenAI's o1 models, the o3 family introduces several notable improvements in performance, deeper reasoning capabilities, and better test results. 
+Building on the foundation of OpenAI's o1 models, the o3 family introduces several notable improvements in performance, deeper reasoning capabilities, and better test results.
 
 Let's dive into how o3 compares to top models in the market!
-
 
 <CallToAction
   title="Track your o3 usage before costs spiral 🌀"
@@ -91,7 +90,7 @@ OpenAI reports that o3 also achieved remarkable results in subjects like mathema
 
 ### o3 Coding Benchmark Results
 
-In terms of coding, is o3 better than o1? The benchmarks suggest yes. 
+In terms of coding, is o3 better than o1? The benchmarks suggest yes.
 
 o3 outperforms o1 on the Codeforces benchmark, which tests the model's ability to solve programming problems. This demonstrates that o3 is more adept at tasks requiring logical thinking and problem-solving.
 
@@ -147,7 +146,7 @@ Integrate LLM observability with a few lines of code. See <a href="https://docs.
 ```js
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-  baseURL: `https://oai.helicone.ai/v1/${HELICONE_API_KEY}/`
+  baseURL: `https://oai.helicone.ai/v1/${HELICONE_API_KEY}/`,
 });
 ```
 
@@ -162,7 +161,7 @@ const openai = new OpenAI({
 
 ## Bottom Line
 
-The o3 family represents a major milestone for OpenAI towards models that can reason and tackle problems in a more human-like way, with o3-mini being one of the most competent models around, especially with complex tasks like Math and Coding. 
+The o3 family represents a major milestone for OpenAI towards models that can reason and tackle problems in a more human-like way, with o3-mini being one of the most competent models around, especially with complex tasks like Math and Coding.
 
 With the upcoming separate releases of o3 and o4-mini—rather than an integrated release as originally planned—OpenAI is signaling that it might have quite a lot to offer in both o3 and the much-awaited GPT-5.
 
@@ -170,35 +169,61 @@ We, for one, are quite excited to see what's in store!
 
 ### Other models you might be interested in:
 
-- <a href="https://www.helicone.ai/blog/openai-o1-and-chatgpt-pro" target="_blank" rel="noopener">OpenAI's o1 and ChatGPT Pro: Everything You Need to Know</a>
-- <a href="https://www.helicone.ai/blog/meta-llama-3-3-70-b-instruct" target="_blank" rel="noopener">Llama 3.3 Benchmarks & How it Compares to GPT-4 or Claude-Sonnet-3.5</a>
-- <a href="https://www.helicone.ai/blog/openai-gpt-5" target="_blank" rel="noopener">GPT-5: Release Date, Features & What to Expect</a>
+- <a
+    href="https://www.helicone.ai/blog/openai-o1-and-chatgpt-pro"
+    target="_blank"
+    rel="noopener"
+  >
+    OpenAI's o1 and ChatGPT Pro: Everything You Need to Know
+  </a>
+- <a
+    href="https://www.helicone.ai/blog/meta-llama-3-3-70-b-instruct"
+    target="_blank"
+    rel="noopener"
+  >
+    Llama 3.3 Benchmarks & How it Compares to GPT-4 or Claude-Sonnet-3.5
+  </a>
+- <a
+    href="https://www.helicone.ai/blog/openai-gpt-5"
+    target="_blank"
+    rel="noopener"
+  >
+    GPT-5: Release Date, Features & What to Expect
+  </a>
 
-<FAQ items={[
-  {
-    question: "What is OpenAI o4-mini?",
-    answer: "OpenAI o4-mini is the next-generation reasoning model being released alongside o3. It builds upon o3's foundation with enhanced reasoning capabilities and represents the latest advancement in OpenAI's reasoning-focused model lineup, though OpenAI hasn't yet revealed much details about its technical specifications."
-  },
-  {
-    question: "What's the difference between o3 and o4-mini?",
-    answer: "o4-mini is a newer, more advanced reasoning model that will be released alongside o3. While both utilize simulated reasoning, o4-mini represents the next generation in OpenAI's reasoning model family, though specific technical differences haven't been fully revealed yet."
-  },
-  {
-    question: "What is OpenAI o3's pricing like?",
-    answer: "While there's no official information on OpenAI o3's token cost and pricing yet, estimates suggest it could cost as high as $30,000 per task."
-  },
-  {
-    question: "How does o3-mini-high differ from regular o3-mini?",
-    answer: "o3-mini high is a more powerful version of o3-mini with enhanced reasoning capabilities designed for more complex tasks."
-  },
-  {
-    question: "Why was GPT-5 delayed again?",
-    answer: "According to Sam Altman, GPT-5 was delayed to make it 'much better than originally thought' while addressing integration challenges with the various reasoning capabilities. OpenAI also wants to ensure they have enough capacity to support 'unprecedented demand.'"
-  },
-  {
-    question: "How do o3's reasoning capabilities compare to human thinking?",
-    answer: "While o3's simulated reasoning is impressive, scoring near human-level on some benchmarks (87.5% on ARC-AGI vs. 85% for humans), it's still an approximation of human reasoning rather than truly human-like thought. It excels in structured domains like mathematics but may struggle with nuanced real-world contexts."
-  }
-]} />
+<FAQ
+  items={[
+    {
+      question: "What is OpenAI o4-mini?",
+      answer:
+        "OpenAI o4-mini is the next-generation reasoning model being released alongside o3. It builds upon o3's foundation with enhanced reasoning capabilities and represents the latest advancement in OpenAI's reasoning-focused model lineup, though OpenAI hasn't yet revealed much details about its technical specifications.",
+    },
+    {
+      question: "What's the difference between o3 and o4-mini?",
+      answer:
+        "o4-mini is a newer, more advanced reasoning model that will be released alongside o3. While both utilize simulated reasoning, o4-mini represents the next generation in OpenAI's reasoning model family, though specific technical differences haven't been fully revealed yet.",
+    },
+    {
+      question: "What is OpenAI o3's pricing like?",
+      answer:
+        "While there's no official information on OpenAI o3's token cost and pricing yet, estimates suggest it could cost as high as $30,000 per task.",
+    },
+    {
+      question: "How does o3-mini-high differ from regular o3-mini?",
+      answer:
+        "o3-mini high is a more powerful version of o3-mini with enhanced reasoning capabilities designed for more complex tasks.",
+    },
+    {
+      question: "Why was GPT-5 delayed again?",
+      answer:
+        "According to Sam Altman, GPT-5 was delayed to make it 'much better than originally thought' while addressing integration challenges with the various reasoning capabilities. OpenAI also wants to ensure they have enough capacity to support 'unprecedented demand.'",
+    },
+    {
+      question: "How do o3's reasoning capabilities compare to human thinking?",
+      answer:
+        "While o3's simulated reasoning is impressive, scoring near human-level on some benchmarks (87.5% on ARC-AGI vs. 85% for humans), it's still an approximation of human reasoning rather than truly human-like thought. It excels in structured domains like mathematics but may struggle with nuanced real-world contexts.",
+    },
+  ]}
+/>
 
 <Questions />

@@ -80,14 +80,14 @@ h6[id] {
     @apply bg-background text-foreground;
   }
 }
-  
+
 @layer components {
   .accordion-content-style {
     @apply text-muted-foreground text-sm leading-6;
   }
 
   .navbar-icon-style {
-    @apply h-full w-full stroke-[1.5px] fill-none text-brand;
+    @apply text-brand h-full w-full fill-none stroke-[1.5px];
   }
 }
 
@@ -104,15 +104,15 @@ h6[id] {
 
 /* Custom blockquote styling for blog content */
 .prose blockquote {
-  @apply text-center text-xl font-sans not-italic; /* Center, large text, medium weight, normal style */
-  @apply border-none p-0 mx-auto max-w-lg mt-16; /* Center block, remove border/padding, set max width */
+  @apply text-center font-sans text-xl not-italic; /* Center, large text, medium weight, normal style */
+  @apply mx-auto mt-16 max-w-lg border-none p-0; /* Center block, remove border/padding, set max width */
   color: inherit; /* Inherit text color */
 }
 
 /* Style for the citation (assuming it's the last paragraph inside or a paragraph directly following the blockquote) */
 .prose blockquote p:last-child:not(:first-child),
 .prose blockquote + p {
-    @apply block text-center text-base font-normal mt-2 mb-14 text-muted-foreground; /* Smaller, centered, muted */
+  @apply text-muted-foreground mb-14 mt-2 block text-center text-base font-normal; /* Smaller, centered, muted */
 }
 
 @keyframes floating {

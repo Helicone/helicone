@@ -79,32 +79,32 @@ export default function ComparisonContent() {
   };
 
   return (
-    <div className="min-h-screen bg-white px-4 py-4 flex flex-col items-center">
+    <div className="flex min-h-screen flex-col items-center bg-white px-4 py-4">
       {/* LLM Leaderboard Image */}
       <div className="container mx-auto max-w-4xl pb-2 text-center">
         <img
           src="/static/llmleaderboard.webp"
           alt="LLM Leaderboard"
-          className="mx-auto max-w-[150px] h-auto"
+          className="mx-auto h-auto max-w-[150px]"
         />
       </div>
 
       {/* Main heading - match Hero.tsx style */}
-      <div className="text-center max-w-3xl mx-auto">
-        <h1 className="text-4xl font-semibold mb-4">
+      <div className="mx-auto max-w-3xl text-center">
+        <h1 className="mb-4 text-4xl font-semibold">
           LLM Leaderboard <span className="text-brand">2025</span>
         </h1>
 
-        <p className="text-lg text-landing-secondary font-light mb-6 px-4">
+        <p className="text-landing-secondary mb-6 px-4 text-lg font-light">
           Make data-driven decisions with real-world performance metrics from
           thousands of applications.
         </p>
 
         {/* Simple model selector right here */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6 max-w-2xl mx-auto">
+        <div className="mx-auto mb-6 flex max-w-2xl flex-col items-center justify-center gap-4 sm:flex-row">
           <div className="w-full sm:w-[44%]">
             <Select value={firstModel} onValueChange={setFirstModel}>
-              <SelectTrigger className="w-full h-10 text-sm">
+              <SelectTrigger className="h-10 w-full text-sm">
                 <SelectValue placeholder="Select first model" />
               </SelectTrigger>
               <SelectContent>
@@ -118,7 +118,7 @@ export default function ComparisonContent() {
                       <img
                         src={model.logo}
                         alt={`${model.provider} logo`}
-                        className="w-5 h-5 rounded-full object-cover"
+                        className="h-5 w-5 rounded-full object-cover"
                       />
                       <span>{model.name}</span>
                     </div>
@@ -128,11 +128,11 @@ export default function ComparisonContent() {
             </Select>
           </div>
 
-          <div className="flex-shrink-0 text-md px-2 font-bold">VS</div>
+          <div className="text-md flex-shrink-0 px-2 font-bold">VS</div>
 
           <div className="w-full sm:w-[44%]">
             <Select value={secondModel} onValueChange={handleSecondModelSelect}>
-              <SelectTrigger className="w-full h-10 text-sm">
+              <SelectTrigger className="h-10 w-full text-sm">
                 <SelectValue placeholder="Select second model" />
               </SelectTrigger>
               <SelectContent>
@@ -146,7 +146,7 @@ export default function ComparisonContent() {
                       <img
                         src={model.logo}
                         alt={`${model.provider} logo`}
-                        className="w-5 h-5 rounded-full object-cover"
+                        className="h-5 w-5 rounded-full object-cover"
                       />
                       <span>{model.name}</span>
                     </div>
@@ -164,12 +164,12 @@ export default function ComparisonContent() {
               ? createComparisonPath(firstModel, secondModel)
               : "#"
           }
-          className="inline-block mb-6"
+          className="mb-6 inline-block"
         >
           <button
             disabled={isCompareDisabled}
-            className={`bg-brand py-2 px-6 text-sm font-medium flex gap-2 rounded-md items-center text-white ${
-              isCompareDisabled ? "opacity-50 cursor-not-allowed" : ""
+            className={`bg-brand flex items-center gap-2 rounded-md px-6 py-2 text-sm font-medium text-white ${
+              isCompareDisabled ? "cursor-not-allowed opacity-50" : ""
             }`}
           >
             Compare Models <ArrowRightIcon size={16} strokeWidth={2.33} />
@@ -178,28 +178,28 @@ export default function ComparisonContent() {
       </div>
 
       {/* Full model selector card */}
-      <div id="comparison" className="max-w-4xl mx-auto mt-12">
-        <Card className="p-6 md:p-8 border border-gray-200 rounded-lg">
-          <h2 className="text-xl font-semibold mb-6">Browse all models</h2>
+      <div id="comparison" className="mx-auto mt-12 max-w-4xl">
+        <Card className="rounded-lg border border-gray-200 p-6 md:p-8">
+          <h2 className="mb-6 text-xl font-semibold">Browse all models</h2>
 
-          <div className="flex items-center justify-between mb-4">
+          <div className="mb-4 flex items-center justify-between">
             <div className="relative">
               <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
               <Input
                 type="text"
                 placeholder="Search models..."
-                className="pl-8 w-[200px]"
+                className="w-[200px] pl-8"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             {filteredModels.map((model) => (
               <div
                 key={model.id}
-                className="border rounded-lg p-3 cursor-pointer hover:bg-gray-50 transition-colors"
+                className="cursor-pointer rounded-lg border p-3 transition-colors hover:bg-gray-50"
                 onClick={() => handleModelCardClick(model.id)}
               >
                 <div
@@ -212,10 +212,10 @@ export default function ComparisonContent() {
                   <img
                     src={model.logo}
                     alt={`${model.provider} logo`}
-                    className="w-8 h-8 rounded-full object-cover"
+                    className="h-8 w-8 rounded-full object-cover"
                   />
                   <div>
-                    <div className="text-sm font-medium truncate">
+                    <div className="truncate text-sm font-medium">
                       {model.name}
                     </div>
                     <div className="text-xs text-gray-500">

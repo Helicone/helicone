@@ -158,9 +158,9 @@ export class PromptController extends Controller {
     const promptManager = new PromptManager(request.authParams);
 
     const result = await promptManager.getPrompts({
-      filter: "all"
+      filter: "all",
     });
-    
+
     if (result.error) {
       this.setStatus(500);
       return result;
@@ -170,9 +170,9 @@ export class PromptController extends Controller {
     this.setStatus(200);
     return {
       data: {
-        hasPrompts: hasPrompts
+        hasPrompts: hasPrompts,
       },
-      error: null
+      error: null,
     };
   }
 

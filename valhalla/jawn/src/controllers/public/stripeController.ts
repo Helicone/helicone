@@ -236,9 +236,8 @@ export class StripeController extends Controller {
     @Path() productType: "alerts" | "prompts" | "experiments" | "evals"
   ) {
     const stripeManager = new StripeManager(request.authParams);
-    const result = await stripeManager.deleteProductFromSubscription(
-      productType
-    );
+    const result =
+      await stripeManager.deleteProductFromSubscription(productType);
 
     if (result.error) {
       this.setStatus(400);

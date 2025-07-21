@@ -30,18 +30,18 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <div className="w-full h-full flex flex-col antialiased relative gap-2">
-      <div className="flex flex-col gap-4 w-full h-full justify-center pt-8 items-center text-center px-2 sm:px-2 lg:px-0">
+    <div className="relative flex h-full w-full flex-col gap-2 antialiased">
+      <div className="flex h-full w-full flex-col items-center justify-center gap-4 px-2 pt-8 text-center sm:px-2 lg:px-0">
         <Image
           src={"/static/customers/shiny-cube.webp"}
           alt={"shiny-cube"}
           width={200}
           height={200}
         />
-        <h1 className="text-3xl sm:text-5xl font-bold tracking-tight max-w-4xl">
+        <h1 className="max-w-4xl text-3xl font-bold tracking-tight sm:text-5xl">
           Customer Stories
         </h1>
-        <p className="mt-[12px] text-sm sm:text-lg text-gray-700">
+        <p className="mt-[12px] text-sm text-gray-700 sm:text-lg">
           Leading companies using Helicone to optimize and
           <br />
           scale their AI applications.

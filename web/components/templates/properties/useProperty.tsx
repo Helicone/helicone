@@ -73,7 +73,7 @@ export const usePropertyCard = (props: PropertyPageData) => {
             ...d,
             active_since: new Date(d.active_since).toLocaleDateString(),
             total_cost: +d.total_cost.toPrecision(5),
-          }))
+          })),
         );
       },
     }),

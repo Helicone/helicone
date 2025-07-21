@@ -10,7 +10,9 @@ To deploy a secure AI Gateway, you have two options:
 2. **Public Network with Authentication** - Deploy on a public network and use Helicone authentication to secure your gateway
 
 <Note>
-  **If you're deploying in a secure network with proper access controls, you can skip the rest of this guide.** Authentication is only required for public deployments or when you need user-level access control.
+  **If you're deploying in a secure network with proper access controls, you can
+  skip the rest of this guide.** Authentication is only required for public
+  deployments or when you need user-level access control.
 </Note>
 
 The AI Gateway integrates with Helicone to provide secure authentication for your AI requests. When enabled, the gateway requires valid Helicone API keys for all requests, ensuring only authorized users can access your provider API keys.
@@ -24,6 +26,7 @@ The AI Gateway integrates with Helicone to provide secure authentication for you
     ```bash
     export HELICONE_CONTROL_PLANE_API_KEY=sk-helicone-your-api-key
     ```
+
   </Step>
   
   <Step title="Enable Helicone authentication">
@@ -33,7 +36,7 @@ The AI Gateway integrates with Helicone to provide secure authentication for you
     helicone:
       # Set to `features: observability` to enable both auth and observability
       features: auth
-    
+
     routers:
       my-router:
         load-balance:
@@ -43,6 +46,7 @@ The AI Gateway integrates with Helicone to provide secure authentication for you
               - openai
               - anthropic
     ```
+
   </Step>
   
   <Step title="Start the gateway">
@@ -63,13 +67,16 @@ The AI Gateway integrates with Helicone to provide secure authentication for you
         "messages": [{"role": "user", "content": "Hello!"}]
       }'
     ```
-    
+
     ✅ Your request is authenticated and routed to the provider!
+
   </Step>
 </Steps>
 
 <Warning>
-  **Security Warning**: Without authentication enabled or limited network access, anyone with access to your AI Gateway can use your provider API keys. Enable Helicone authentication to secure your deployment.
+  **Security Warning**: Without authentication enabled or limited network
+  access, anyone with access to your AI Gateway can use your provider API keys.
+  Enable Helicone authentication to secure your deployment.
 </Warning>
 
 ## Authentication Usage
@@ -95,7 +102,8 @@ curl -X POST http://localhost:8080/router/my-router/chat/completions \
 The gateway validates keys in real-time through a persistent WebSocket connection to Helicone's control plane. Keys are cached locally for resilience during network issues.
 
 <Note>
-  For complete configuration options, see the [Configuration Reference](/ai-gateway/config#helicone-add-ons).
+  For complete configuration options, see the [Configuration
+  Reference](/ai-gateway/config#helicone-add-ons).
 </Note>
 
 ## Use Cases
@@ -109,13 +117,14 @@ The gateway validates keys in real-time through a persistent WebSocket connectio
       # Set to `features: observability` to enable observability and auth
       features: auth
     ```
-    
+
     **Environment variables:**
     ```bash
     HELICONE_CONTROL_PLANE_API_KEY=sk-helicone-your-api-key
     ```
 
     **Result:** All requests require valid Helicone API keys for access.
+
   </Tab>
 
   <Tab title="Self-Hosted Helicone">
@@ -128,11 +137,12 @@ The gateway validates keys in real-time through a persistent WebSocket connectio
       base-url: "https://helicone.your-domain.com"
       websocket-url: "wss://helicone.your-domain.com/ws/v1/router/control-plane"
     ```
-    
+
     **Environment variables:**
     ```bash
     HELICONE_CONTROL_PLANE_API_KEY=sk-helicone-your-api-key
     ```
+
   </Tab>
 
   <Tab title="Secure Network - Auth Disabled">
@@ -143,8 +153,9 @@ The gateway validates keys in real-time through a persistent WebSocket connectio
       authentication: false
       observability: false
     ```
-    
+
     **Result:** No authentication required. Network security controls access.
+
   </Tab>
 
 </Tabs>
@@ -155,19 +166,23 @@ When enabled, the AI Gateway connects to Helicone's control plane for real-time 
 
 <Steps>
   <Step title="WebSocket Connection">
-    Gateway establishes persistent connection to Helicone control plane with automatic reconnection and exponential backoff
+    Gateway establishes persistent connection to Helicone control plane with
+    automatic reconnection and exponential backoff
   </Step>
-  
-  <Step title="API Key Sync">
-    Authorized API keys and user data are cached locally for fast validation and resilience during network issues
-  </Step>
-  
-  <Step title="Request Validation">
-    Incoming requests are validated against cached keys with graceful degradation - cached keys continue working during temporary connectivity issues
-  </Step>
-  
+
+<Step title="API Key Sync">
+  Authorized API keys and user data are cached locally for fast validation and
+  resilience during network issues
+</Step>
+
+<Step title="Request Validation">
+  Incoming requests are validated against cached keys with graceful degradation
+  - cached keys continue working during temporary connectivity issues
+</Step>
+
   <Step title="Access Control">
-    Only requests with valid Helicone API keys are allowed through to your provider APIs
+    Only requests with valid Helicone API keys are allowed through to your
+    provider APIs
   </Step>
 </Steps>
 
@@ -181,9 +196,9 @@ When enabled, the AI Gateway connects to Helicone's control plane for real-time 
 
 The following authentication integrations are planned for future releases:
 
-| Provider | Description | Version |
-|----------|-------------|---------|
-| **AWS Secrets Manager** | Secure API key storage and rotation with AWS IAM integration | v1 |
-| **Azure Key Vault** | Microsoft Azure's cloud key management service | v1 |
-| **Google Secret Manager** | Google Cloud's secure secret storage solution | v1 |
-| **Kubernetes Secrets** | Native Kubernetes secret integration for containerized deployments | v1 |
+| Provider                  | Description                                                        | Version |
+| ------------------------- | ------------------------------------------------------------------ | ------- |
+| **AWS Secrets Manager**   | Secure API key storage and rotation with AWS IAM integration       | v1      |
+| **Azure Key Vault**       | Microsoft Azure's cloud key management service                     | v1      |
+| **Google Secret Manager** | Google Cloud's secure secret storage solution                      | v1      |
+| **Kubernetes Secrets**    | Native Kubernetes secret integration for containerized deployments | v1      |

@@ -5,6 +5,7 @@ This guide explains how to add a new trusted domain/provider to Helicone's cost 
 ## Overview
 
 Trusted domains are API providers that Helicone recognizes and can track costs for. Each provider needs:
+
 1. A URL pattern to match their API endpoints
 2. A provider name constant
 3. Provider configuration with optional cost data

@@ -32,7 +32,7 @@ const AlertsPage = (props: AlertsPageProps) => {
   const orgContext = useOrg();
 
   const { alertHistory, alerts, isLoading, refetch } = useAlertsPage(
-    orgContext?.currentOrg?.id || ""
+    orgContext?.currentOrg?.id || "",
   );
 
   const { data: slackChannelsData, isLoading: isLoadingSlackChannels } =
@@ -70,8 +70,8 @@ const AlertsPage = (props: AlertsPageProps) => {
 
   if (!isPageLoading && alertCount === 0) {
     return (
-      <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">
-        <div className="flex flex-1 h-full">
+      <div className="flex h-screen w-full flex-col bg-background dark:bg-sidebar-background">
+        <div className="flex h-full flex-1">
           <EmptyStateCard feature="alerts" onPrimaryClick={handleCreateAlert} />
         </div>
         <CreateAlertModal
@@ -85,7 +85,7 @@ const AlertsPage = (props: AlertsPageProps) => {
 
   if (isPageLoading) {
     return (
-      <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
+      <div className="flex min-h-[calc(100vh-200px)] items-center justify-center">
         <LoadingAnimation height={175} width={175} title="Loading alerts..." />
       </div>
     );
@@ -108,7 +108,7 @@ const AlertsPage = (props: AlertsPageProps) => {
         {/* Active Alerts Section */}
         <section className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
               <div className="flex flex-col gap-1">
                 <H3>Active Alerts</H3>
                 <Muted>
@@ -198,8 +198,8 @@ const AlertsPage = (props: AlertsPageProps) => {
                       .map(
                         (channel) =>
                           slackChannels?.find(
-                            (slackChannel) => slackChannel.id === channel
-                          )?.name
+                            (slackChannel) => slackChannel.id === channel,
+                          )?.name,
                       )
                       .join(", ")}
                   </div>
@@ -231,7 +231,7 @@ const AlertsPage = (props: AlertsPageProps) => {
           {alertHistory.length === 0 ? (
             <Card className="border-2 border-dashed border-border">
               <CardContent className="flex flex-col items-center justify-center py-12">
-                <FileText size={24} className="text-foreground mb-2" />
+                <FileText size={24} className="mb-2 text-foreground" />
                 <P className="font-medium">No alerts have been triggered yet</P>
               </CardContent>
             </Card>

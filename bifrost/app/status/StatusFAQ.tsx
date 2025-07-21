@@ -13,22 +13,22 @@ function FAQItem({ question, children, isOpen, onClick }: FAQItemProps) {
   return (
     <div className="border-b border-gray-200 last:border-0">
       <button
-        className="w-full py-6 flex justify-between items-center text-left hover:bg-gray-50 transition-colors duration-150 rounded-lg"
+        className="flex w-full items-center justify-between rounded-lg py-6 text-left transition-colors duration-150 hover:bg-gray-50"
         onClick={onClick}
       >
-        <h3 className="text-lg font-semibold pr-8 text-gray-800">{question}</h3>
+        <h3 className="pr-8 text-lg font-semibold text-gray-800">{question}</h3>
         <ChevronDownIcon
-          className={`w-5 h-5 text-gray-500 transition-transform duration-200 flex-shrink-0 ${
-            isOpen ? "transform rotate-180" : ""
+          className={`h-5 w-5 flex-shrink-0 text-gray-500 transition-transform duration-200 ${
+            isOpen ? "rotate-180 transform" : ""
           }`}
         />
       </button>
       <div
         className={`overflow-hidden transition-all duration-300 ease-in-out ${
-          isOpen ? "max-h-[500px] opacity-100 mb-6" : "max-h-0 opacity-0"
+          isOpen ? "mb-6 max-h-[500px] opacity-100" : "max-h-0 opacity-0"
         }`}
       >
-        <div className="text-gray-600 space-y-3 leading-relaxed pr-8">
+        <div className="space-y-3 pr-8 leading-relaxed text-gray-600">
           {children}
         </div>
       </div>
@@ -145,7 +145,7 @@ export function StatusFAQ({ provider = "default" }: { provider?: string }) {
           <p>
             Beyond status monitoring, Helicone provides comprehensive tools for:
           </p>
-          <ul className="list-disc ml-6 mt-2">
+          <ul className="ml-6 mt-2 list-disc">
             <li>Real-time monitoring of your LLM requests and responses</li>
             <li>Advanced request tracing and debugging capabilities</li>
             <li>Comprehensive cost, usage, and performance analytics</li>
@@ -169,8 +169,8 @@ export function StatusFAQ({ provider = "default" }: { provider?: string }) {
   ];
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 mt-8">
-      <h2 className="text-2xl font-bold mb-8 text-gray-900">
+    <div className="mt-8 rounded-xl border border-gray-100 bg-white p-8 shadow-sm">
+      <h2 className="mb-8 text-2xl font-bold text-gray-900">
         Frequently Asked Questions
       </h2>
       <div className="divide-y divide-gray-200">

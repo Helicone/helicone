@@ -66,12 +66,12 @@ export default function RelatedComparisons({
 
   return (
     <Card className="p-6">
-      <h2 className="text-xl font-semibold mb-4">Related Comparisons</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <h2 className="mb-4 text-xl font-semibold">Related Comparisons</h2>
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {/* Model A Family Comparisons */}
         {modelAFamily && (
           <div>
-            <h3 className="text-lg font-medium mb-3">
+            <h3 className="mb-3 text-lg font-medium">
               Other {modelAFamily.parent} Comparisons
             </h3>
             <div className="space-y-2">
@@ -113,7 +113,7 @@ export default function RelatedComparisons({
         {/* Model B Family Comparisons */}
         {modelBFamily && (
           <div>
-            <h3 className="text-lg font-medium mb-3">
+            <h3 className="mb-3 text-lg font-medium">
               Other {modelBFamily.parent} Comparisons
             </h3>
             <div className="space-y-2">

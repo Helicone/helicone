@@ -44,13 +44,13 @@ const PortalIdPage = (props: PortalIdPageProps) => {
     new Date(new Date().setDate(new Date().getDate() - 28)),
     {
       representation: "date",
-    }
+    },
   );
 
   const tomorrow = new Date(
     formatISO(new Date(), {
       representation: "date",
-    })
+    }),
   );
   tomorrow.setDate(tomorrow.getDate() + 2);
 
@@ -89,11 +89,11 @@ const PortalIdPage = (props: PortalIdPageProps) => {
   const [deleteOpen, setDeleteOpen] = useState(false);
 
   const currentIcon = ORGANIZATION_ICONS.find(
-    (icon) => icon.name === org?.icon
+    (icon) => icon.name === org?.icon,
   );
 
   const currentColor = ORGANIZATION_COLORS.find(
-    (icon) => icon.name === org?.color
+    (icon) => icon.name === org?.color,
   );
 
   const orgLimits = org?.limits as OrgLimits;
@@ -113,19 +113,19 @@ const PortalIdPage = (props: PortalIdPageProps) => {
           },
         ]}
       />
-      <div className="flex flex-row py-2 space-x-8 w-full">
+      <div className="flex w-full flex-row space-x-8 py-2">
         {isLoading ? (
           <LoadingAnimation />
         ) : (
           <>
-            <div className="flex flex-col items-start space-y-4 w-full max-w-[20rem]">
+            <div className="flex w-full max-w-[20rem] flex-col items-start space-y-4">
               <div className="flex items-center space-x-4">
-                <div className="h-8 w-8 flex-none rounded-md bg-gray-100 dark:bg-gray-900 object-cover border border-gray-300 dark:border-gray-700 flex flex-col items-center justify-center">
+                <div className="flex h-8 w-8 flex-none flex-col items-center justify-center rounded-md border border-gray-300 bg-gray-100 object-cover dark:border-gray-700 dark:bg-gray-900">
                   {currentIcon && (
                     <currentIcon.icon
                       className={clsx(
                         `text-${currentColor?.name}-500`,
-                        "h-6 w-6"
+                        "h-6 w-6",
                       )}
                     />
                   )}
@@ -134,7 +134,7 @@ const PortalIdPage = (props: PortalIdPageProps) => {
                   {org?.name}
                 </h1>
               </div>
-              <div className="flex flex-row w-full items-center space-x-2 pt-4">
+              <div className="flex w-full flex-row items-center space-x-2 pt-4">
                 <button
                   onClick={() => {
                     // set the org id and then redirect the user to the dashboard page
@@ -143,7 +143,7 @@ const PortalIdPage = (props: PortalIdPageProps) => {
                       router.push("/dashboard");
                     }
                   }}
-                  className="flex w-full items-center justify-center px-4 py-2 bg-white dark:bg-black text-black dark:text-white border border-gray-500 text-xs font-semibold rounded-lg"
+                  className="flex w-full items-center justify-center rounded-lg border border-gray-500 bg-white px-4 py-2 text-xs font-semibold text-black dark:bg-black dark:text-white"
                 >
                   View
                 </button>{" "}
@@ -151,7 +151,7 @@ const PortalIdPage = (props: PortalIdPageProps) => {
                   onClick={() => {
                     setEditOpen(true);
                   }}
-                  className="flex w-full items-center justify-center px-4 py-2 bg-white dark:bg-black text-black dark:text-white border border-gray-500 text-xs font-semibold rounded-lg"
+                  className="flex w-full items-center justify-center rounded-lg border border-gray-500 bg-white px-4 py-2 text-xs font-semibold text-black dark:bg-black dark:text-white"
                 >
                   Edit
                 </button>
@@ -159,14 +159,14 @@ const PortalIdPage = (props: PortalIdPageProps) => {
                   onClick={() => {
                     setDeleteOpen(true);
                   }}
-                  className="flex w-full items-center justify-center px-4 py-2 bg-white dark:bg-black text-black dark:text-white border border-gray-500 text-xs font-semibold rounded-lg"
+                  className="flex w-full items-center justify-center rounded-lg border border-gray-500 bg-white px-4 py-2 text-xs font-semibold text-black dark:bg-black dark:text-white"
                 >
                   Delete
                 </button>
               </div>
-              <div className="flex flex-col space-y-4 divide-y divide-gray-200 dark:divide-gray-800 w-full pt-4 text-black dark:text-white">
-                <p className="font-semibold text-md">Limits</p>
-                <div className="flex flex-row items-center w-full justify-between space-x-2 pt-4 pr-4">
+              <div className="flex w-full flex-col space-y-4 divide-y divide-gray-200 pt-4 text-black dark:divide-gray-800 dark:text-white">
+                <p className="text-md font-semibold">Limits</p>
+                <div className="flex w-full flex-row items-center justify-between space-x-2 pr-4 pt-4">
                   <div className="flex flex-col items-start space-y-1">
                     <p className="text-sm font-semibold">Costs</p>
                     <p className="text-sm text-gray-500">{`${
@@ -184,7 +184,7 @@ const PortalIdPage = (props: PortalIdPageProps) => {
                       {orgLimits?.requests === -1
                         ? "unlimited"
                         : new Intl.NumberFormat("en-US").format(
-                            orgLimits?.requests || 0
+                            orgLimits?.requests || 0,
                           )}
                     </p>
                   </div>
@@ -194,9 +194,9 @@ const PortalIdPage = (props: PortalIdPageProps) => {
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col space-y-4 divide-y divide-gray-200 dark:divide-gray-800 w-full pt-8 text-black dark:text-white">
-                <p className="font-semibold text-md">Details</p>
-                <div className="flex flex-col pt-4 pr-4 space-y-4">
+              <div className="flex w-full flex-col space-y-4 divide-y divide-gray-200 pt-8 text-black dark:divide-gray-800 dark:text-white">
+                <p className="text-md font-semibold">Details</p>
+                <div className="flex flex-col space-y-4 pr-4 pt-4">
                   <div className="flex flex-col items-start space-y-1">
                     <p className="text-sm font-semibold">Created At</p>
                     <p className="text-sm text-gray-500">
@@ -222,7 +222,7 @@ const PortalIdPage = (props: PortalIdPageProps) => {
                 </div>
               </div>
             </div>
-            <div className="flex flex-col w-full h-full">
+            <div className="flex h-full w-full flex-col">
               <Tabs defaultValue="usage" className="w-full">
                 <TabsList>
                   <TabsTrigger value="usage">Usage</TabsTrigger>

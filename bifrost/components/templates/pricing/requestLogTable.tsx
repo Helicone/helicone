@@ -48,22 +48,22 @@ const RequestLogTable = (props: RequestLogTableProps) => {
   const {} = props;
 
   return (
-    <div className="border border-gray-300 p-2 rounded-lg mt-2 mb-8 w-full bg-white">
+    <div className="mb-8 mt-2 w-full rounded-lg border border-gray-300 bg-white p-2">
       <table className="w-full border-collapse">
         <thead>
           <tr className="border-b border-gray-300">
-            <th className="text-left text-black p-2">Lower Band</th>
-            <th className="text-left text-black p-2">Upper Band</th>
-            <th className="text-left text-black p-2">Rate per log</th>
+            <th className="p-2 text-left text-black">Lower Band</th>
+            <th className="p-2 text-left text-black">Upper Band</th>
+            <th className="p-2 text-left text-black">Rate per log</th>
           </tr>
         </thead>
         <tbody>
           {HELICONE_LOG_PRICING.map((pricing, index) => (
             <tr key={index}>
-              <td className="text-left text-gray-600 p-2">
+              <td className="p-2 text-left text-gray-600">
                 {new Intl.NumberFormat("us").format(pricing.lower).toString()}
               </td>
-              <td className="text-left text-gray-600 p-2">
+              <td className="p-2 text-left text-gray-600">
                 {pricing.upper === Number.MAX_SAFE_INTEGER
                   ? "∞"
                   : new Intl.NumberFormat("us")

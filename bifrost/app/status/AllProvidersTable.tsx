@@ -21,7 +21,7 @@ function TrendIndicator({ change }: { change: number }) {
   const isPositive = change > 0;
   return (
     <span
-      className={`inline-flex items-center ml-2 ${
+      className={`ml-2 inline-flex items-center ${
         isPositive ? "text-red-500" : "text-green-500"
       }`}
     >
@@ -30,7 +30,7 @@ function TrendIndicator({ change }: { change: number }) {
       ) : (
         <ArrowDownIcon className="h-3.5 w-3.5" />
       )}
-      <span className="text-xs ml-0.5">{Math.abs(change).toFixed(1)}%</span>
+      <span className="ml-0.5 text-xs">{Math.abs(change).toFixed(1)}%</span>
     </span>
   );
 }
@@ -41,7 +41,7 @@ interface AllProvidersTableProps {
 
 export function AllProvidersTable({ providers }: AllProvidersTableProps) {
   return (
-    <div className="border rounded-lg overflow-hidden">
+    <div className="overflow-hidden rounded-lg border">
       <Table>
         <TableHeader>
           <TableRow className="bg-gray-50 hover:bg-gray-50">
@@ -92,14 +92,14 @@ export function AllProvidersTable({ providers }: AllProvidersTableProps) {
             return (
               <TableRow
                 key={providerName || `provider-${Math.random()}`}
-                className="bg-white hover:bg-gray-50/50 transition-colors"
+                className="bg-white transition-colors hover:bg-gray-50/50"
               >
                 <TableCell className="p-0 font-medium">
                   <Link
                     href={`/status/provider/${encodeURIComponent(
                       providerName
                     )}`}
-                    className="block w-full h-full px-4 py-3 hover:text-blue-600 transition-colors"
+                    className="block h-full w-full px-4 py-3 transition-colors hover:text-blue-600"
                   >
                     {providerName}
                   </Link>
@@ -109,13 +109,13 @@ export function AllProvidersTable({ providers }: AllProvidersTableProps) {
                     href={`/status/provider/${encodeURIComponent(
                       providerName
                     )}`}
-                    className="block w-full h-full px-4 py-3"
+                    className="block h-full w-full px-4 py-3"
                   >
                     <Badge
                       variant="secondary"
                       className={`${status.bgColor} ${status.color} hover:${status.bgColor} px-3 py-1 text-sm font-medium`}
                     >
-                      <StatusIcon className="w-4 h-4 mr-1.5" />
+                      <StatusIcon className="mr-1.5 h-4 w-4" />
                       {status.status}
                     </Badge>
                   </Link>
@@ -125,7 +125,7 @@ export function AllProvidersTable({ providers }: AllProvidersTableProps) {
                     href={`/status/provider/${encodeURIComponent(
                       providerName
                     )}`}
-                    className="block w-full h-full px-6 py-2"
+                    className="block h-full w-full px-6 py-2"
                   >
                     {averageLatencyPerToken.toFixed(0)}ms
                     <TrendIndicator change={latencyPerTokenChange} />
@@ -136,7 +136,7 @@ export function AllProvidersTable({ providers }: AllProvidersTableProps) {
                     href={`/status/provider/${encodeURIComponent(
                       providerName
                     )}`}
-                    className="block w-full h-full px-6 py-2"
+                    className="block h-full w-full px-6 py-2"
                   >
                     {recentErrorRate.toFixed(4)}%
                   </Link>
@@ -146,7 +146,7 @@ export function AllProvidersTable({ providers }: AllProvidersTableProps) {
                     href={`/status/provider/${encodeURIComponent(
                       providerName
                     )}`}
-                    className="block w-full h-full px-6 py-2"
+                    className="block h-full w-full px-6 py-2"
                   >
                     {errorRate24h.toFixed(4)}%
                     <TrendIndicator change={errorRateChange} />

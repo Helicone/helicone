@@ -13,6 +13,7 @@ Provider configuration becomes necessary when you need custom endpoints, enterpr
 ### What is Provider Configuration?
 
 Provider configuration defines how the AI Gateway connects to and communicates with LLM providers. Each provider has specific requirements for:
+
 - **Base URLs** - The API endpoint to send requests to
 - **API Versions** - Some providers require specific version headers
 - **Supported Models** - Which models are available through each provider
@@ -22,13 +23,16 @@ The gateway includes [comprehensive defaults](https://github.com/Helicone/helico
 ### Why Configure Providers?
 
 You'll need to configure providers when you have:
+
 - **Custom endpoints** - Self-hosted models, Amazon Bedrock, or enterprise deployments
 - **Regional requirements** - Specific geographic endpoints for compliance
 - **API version control** - Need to lock to specific provider API versions
 - **Limit available models** - Override default provider config to restrict which models are accessible
 
 <Note>
-  Provider configuration only defines endpoints and models. API key management is handled separately in [Secret Management](/ai-gateway/concepts/secret-management).
+  Provider configuration only defines endpoints and models. API key management
+  is handled separately in [Secret
+  Management](/ai-gateway/concepts/secret-management).
 </Note>
 
 ### How to Enable Providers?
@@ -44,11 +48,11 @@ Providers are enabled by simply setting their API keys as environment variables.
     ```yaml
     providers:
       anthropic:
-        base-url: "https://api.anthropic.com" 
+        base-url: "https://api.anthropic.com"
         version: "2023-06-01"
         models:
           - claude-3-5-haiku  # Only allow cheaper, faster model
-    
+
     routers:
       production:
         load-balance:
@@ -57,6 +61,7 @@ Providers are enabled by simply setting their API keys as environment variables.
             providers:
               - anthropic
     ```
+
   </Tab>
 
   <Tab title="Local Ollama - Custom Endpoint">
@@ -70,7 +75,7 @@ Providers are enabled by simply setting their API keys as environment variables.
           - llama3.2
           - deepseek-r1
           - custom-fine-tuned-model
-    
+
     routers:
       development:
         load-balance:
@@ -79,6 +84,7 @@ Providers are enabled by simply setting their API keys as environment variables.
             providers:
               - ollama
     ```
+
   </Tab>
 
   <Tab title="AWS Bedrock - Regional Endpoint">
@@ -91,7 +97,7 @@ Providers are enabled by simply setting their API keys as environment variables.
         models:
           - anthropic.claude-3-5-sonnet-20241022-v2:0
           - anthropic.claude-3-haiku-20240307-v1:0
-    
+
     routers:
       production:
         load-balance:
@@ -100,11 +106,13 @@ Providers are enabled by simply setting their API keys as environment variables.
             providers:
               - bedrock
     ```
+
   </Tab>
 </Tabs>
 
 <Note>
-  For complete configuration options and syntax, see the [Configuration Reference](/ai-gateway/config#provider-configuration).
+  For complete configuration options and syntax, see the [Configuration
+  Reference](/ai-gateway/config#provider-configuration).
 </Note>
 
 ## Reference
@@ -113,20 +121,21 @@ Providers are enabled by simply setting their API keys as environment variables.
 
 The AI Gateway supports the following LLM providers with built-in configurations:
 
-| Provider         | Default Endpoint                          | Custom Endpoint Support |
-| ---------------- | ----------------------------------------- | ----------------------- |
-| **OpenAI**       | `https://api.openai.com`                 | ✅ (regional variants)      |
-| **Anthropic**    | `https://api.anthropic.com`              | ✅ (regional variants)  |
-| **Gemini**       | `https://generativelanguage.googleapis.com` | ✅ (Gemini)   |
-| **AWS Bedrock**  | Regional AWS endpoints                    | ✅ (cross-region)       |
-| **VertexAI**     | Regional GCP endpoints                    | ✅ (cross-region)       |
-| **Ollama**       | `http://localhost:11434`                 | ✅ (any host/port)      |
+| Provider        | Default Endpoint                            | Custom Endpoint Support |
+| --------------- | ------------------------------------------- | ----------------------- |
+| **OpenAI**      | `https://api.openai.com`                    | ✅ (regional variants)  |
+| **Anthropic**   | `https://api.anthropic.com`                 | ✅ (regional variants)  |
+| **Gemini**      | `https://generativelanguage.googleapis.com` | ✅ (Gemini)             |
+| **AWS Bedrock** | Regional AWS endpoints                      | ✅ (cross-region)       |
+| **VertexAI**    | Regional GCP endpoints                      | ✅ (cross-region)       |
+| **Ollama**      | `http://localhost:11434`                    | ✅ (any host/port)      |
 
 ### Supported Models
 
 For current model support by provider, see the [embedded provider configuration](https://github.com/Helicone/helicone-router/blob/main/ai-gateway/config/embedded/providers.yaml) which is automatically updated as new models are released.
 
 **Model categories supported:**
+
 - **Chat/Completion models** - GPT-4, Claude, Gemini, etc.
 - **Embedding models** - text-embedding-ada-002, etc.
 - **Vision models** - GPT-4 Vision, Claude 3 Vision

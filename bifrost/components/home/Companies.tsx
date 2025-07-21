@@ -8,11 +8,11 @@ interface CompaniesProps {
 const Companies = ({ className }: CompaniesProps) => {
   return (
     <div className={cn("py-16", className)}>
-      <div className="max-w-6xl mx-auto px-4">
-        <p className="text-center text-md mb-8">
+      <div className="mx-auto max-w-6xl px-4">
+        <p className="text-md mb-8 text-center">
           1000+ AI teams use Helicone to build reliable products
         </p>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-8 items-center justify-items-center">
+        <div className="grid grid-cols-2 items-center justify-items-center gap-8 md:grid-cols-4 lg:grid-cols-8">
           {(
             [
               ["/static/togetherai.webp", "togetherai", 169, 53],
@@ -27,14 +27,14 @@ const Companies = ({ className }: CompaniesProps) => {
           ).map((src, index) => (
             <div
               key={index}
-              className="flex items-center justify-center grayscale opacity-50 hover:opacity-70 transition-opacity duration-300"
+              className="flex items-center justify-center opacity-50 grayscale transition-opacity duration-300 hover:opacity-70"
             >
               <Image
                 src={src[0]}
                 alt={src[1]}
                 width={src[2]}
                 height={src[3]}
-                className="max-w-full h-auto object-contain"
+                className="h-auto max-w-full object-contain"
               />
             </div>
           ))}

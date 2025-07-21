@@ -51,10 +51,13 @@ export class RequestBodyHandler extends AbstractLogHandler {
       try {
         context.processedLog.request.properties = Object.entries(
           context.message.log.request.properties
-        ).reduce((acc, [key, value]) => {
-          acc[key] = this.cleanRequestBody(value);
-          return acc;
-        }, {} as Record<string, string>);
+        ).reduce(
+          (acc, [key, value]) => {
+            acc[key] = this.cleanRequestBody(value);
+            return acc;
+          },
+          {} as Record<string, string>
+        );
       } catch (error: any) {
         context.processedLog.request.properties =
           context.message.log.request.properties;

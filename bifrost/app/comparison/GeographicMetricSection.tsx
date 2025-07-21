@@ -30,7 +30,7 @@ const GeographicMetricSection = ({
   return (
     <div className="border-t">
       <div
-        className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50"
+        className="flex cursor-pointer items-center justify-between p-4 hover:bg-gray-50"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <h2 className="text-xl font-semibold">{metricTitles[metric]}</h2>
@@ -45,20 +45,20 @@ const GeographicMetricSection = ({
         className={`transition-all duration-300 ease-in-out ${
           isExpanded
             ? "max-h-[800px] opacity-100"
-            : "max-h-0 opacity-0 overflow-hidden"
+            : "max-h-0 overflow-hidden opacity-0"
         }`}
       >
         <div className="p-4">
-          <div className="inline-flex rounded-md bg-gray-50 p-1 w-full sm:w-auto">
+          <div className="inline-flex w-full rounded-md bg-gray-50 p-1 sm:w-auto">
             {models.map((model, index) => (
               <Button
                 key={model.model}
                 variant="ghost"
                 onClick={() => onModelSelect(index)}
-                className={`rounded-sm text-sm px-4 flex-1 sm:flex-initial whitespace-normal h-auto py-2 ${
+                className={`h-auto flex-1 whitespace-normal rounded-sm px-4 py-2 text-sm sm:flex-initial ${
                   selectedModelIndex === index
                     ? "bg-white text-black shadow-sm"
-                    : "hover:bg-gray-100 text-gray-600"
+                    : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
                 {model.model}
@@ -70,7 +70,7 @@ const GeographicMetricSection = ({
           <GeoMetricMap
             model={models[selectedModelIndex] ?? null}
             metric={metric}
-            className="w-full h-full"
+            className="h-full w-full"
           />
         </div>
       </div>

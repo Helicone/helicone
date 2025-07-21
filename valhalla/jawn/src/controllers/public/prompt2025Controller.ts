@@ -50,7 +50,6 @@ export interface PromptVersionCounts {
   majorVersions: number;
 }
 
-
 // TODO: Delete old promptController and rename this to promptController
 @Route("v1/prompt-2025")
 @Tags("Prompt2025")
@@ -60,7 +59,7 @@ export class Prompt2025Controller extends Controller {
   @Get("id/{promptId}")
   public async getPrompt2025(
     @Path() promptId: string,
-    @Request() request: JawnAuthenticatedRequest,
+    @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<Prompt2025, string>> {
     const promptManager = new Prompt2025Manager(request.authParams);
     const result = await promptManager.getPrompt(promptId);
@@ -94,7 +93,10 @@ export class Prompt2025Controller extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
     const promptManager = new Prompt2025Manager(request.authParams);
-    const result = await promptManager.deletePromptVersion({ promptId, promptVersionId: versionId });
+    const result = await promptManager.deletePromptVersion({
+      promptId,
+      promptVersionId: versionId,
+    });
     if (result.error) {
       this.setStatus(500);
     } else {
@@ -183,7 +185,7 @@ export class Prompt2025Controller extends Controller {
     }
     return result;
   }
-  
+
   @Get("count")
   public async getPrompt2025Count(
     @Request() request: JawnAuthenticatedRequest
@@ -283,7 +285,6 @@ export class Prompt2025Controller extends Controller {
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<PromptVersionCounts, string>> {
-
     const promptManager = new Prompt2025Manager(request.authParams);
 
     const result = await promptManager.getPromptVersionCounts(requestBody);

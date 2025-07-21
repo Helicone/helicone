@@ -318,7 +318,8 @@ async function mapLLMCalls(
             orgId,
             heliconeRequest.cache_reference_id === DEFAULT_UUID
               ? heliconeRequest.request_id
-              : heliconeRequest.cache_reference_id ?? heliconeRequest.request_id
+              : (heliconeRequest.cache_reference_id ??
+                  heliconeRequest.request_id)
           );
 
         if (signedBodyUrlErr || !signedBodyUrl) {

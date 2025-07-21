@@ -167,7 +167,8 @@ export async function proxyForwarder(
   }
 
   if (
-    proxyRequest.requestWrapper.heliconeHeaders.promptSecurityEnabled === true &&
+    proxyRequest.requestWrapper.heliconeHeaders.promptSecurityEnabled ===
+      true &&
     provider === "OPENAI"
   ) {
     const { data: latestMsg, error: latestMsgErr } =
@@ -311,7 +312,8 @@ export async function proxyForwarder(
                   responseBody: responseBody.body,
                   cacheControl: cacheSettings.cacheControl,
                   settings: cacheSettings.bucketSettings,
-                  responseLatencyMs: responseBody.endTime.getTime() - loggable.getTimingStart(),
+                  responseLatencyMs:
+                    responseBody.endTime.getTime() - loggable.getTimingStart(),
                   cacheKv: env.CACHE_KV,
                   cacheSeed: cacheSettings.cacheSeed ?? null,
                 });
@@ -326,7 +328,9 @@ export async function proxyForwarder(
                 const sentryManager = new SentryManager(env);
                 await sentryManager.sendError(
                   "Failed to save to cache",
-                  error instanceof Error ? error.stack ?? error.message : String(error)
+                  error instanceof Error
+                    ? (error.stack ?? error.message)
+                    : String(error)
                 );
                 console.error("Failed to save to cache:", error);
               }

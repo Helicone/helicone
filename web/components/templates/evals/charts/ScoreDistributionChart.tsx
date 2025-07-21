@@ -7,7 +7,7 @@ interface ScoreDistributionChartProps {
 export const ScoreDistributionChart: React.FC<ScoreDistributionChartProps> = ({
   distribution,
 }) => (
-  <div className="w-full h-16">
+  <div className="h-16 w-full">
     <BarChart
       className="h-full"
       data={distribution.map((d) => ({

@@ -50,10 +50,10 @@ const TotalCost = () => {
 
   return (
     <div
-      className={`w-full flex flex-col justify-center items-center h-[100vh] p-5 gap-4 ${jetbrainsMono.className}`}
+      className={`flex h-[100vh] w-full flex-col items-center justify-center gap-4 p-5 ${jetbrainsMono.className}`}
     >
-      <div className="w-full h-[360px] bg-white relative border-2 border-black">
-        <div className="p-2.5 bg-white border-2 border-black border-r-4 border-b-4 flex flex-col gap-[3px] absolute top-[22px] left-[18px]">
+      <div className="relative h-[360px] w-full border-2 border-black bg-white">
+        <div className="absolute left-[18px] top-[22px] flex flex-col gap-[3px] border-2 border-b-4 border-r-4 border-black bg-white p-2.5">
           <div className="text-[14px] font-medium">Total Cost</div>
           <div className="text-[21px] font-extrabold">
             $
@@ -62,11 +62,11 @@ const TotalCost = () => {
               ?.toFixed(2) ?? "0.00"}
           </div>
         </div>
-        <div className="px-3 py-1 bg-white border-2 border-black border-r-4 border-b-4 absolute top-[22px] right-[18px] flex gap-3 z-10 items-center">
-          <div className="bg-[#E5E5E5] w-[9.14px] h-[9.14px] border-2 border-black border-r-4 border-b-4"></div>
+        <div className="absolute right-[18px] top-[22px] z-10 flex items-center gap-3 border-2 border-b-4 border-r-4 border-black bg-white px-3 py-1">
+          <div className="h-[9.14px] w-[9.14px] border-2 border-b-4 border-r-4 border-black bg-[#E5E5E5]"></div>
           <div className="text-[14px] font-medium leading-tight">costs</div>
         </div>
-        <ResponsiveContainer width="100%" height="100%" className=" m-0 p-0">
+        <ResponsiveContainer width="100%" height="100%" className="m-0 p-0">
           <BarChart data={costsOverTimeData ?? []} className="m-0 p-0">
             <CartesianGrid
               vertical={false}
@@ -103,13 +103,13 @@ const TotalCost = () => {
           </BarChart>
         </ResponsiveContainer>
       </div>
-      <div className="flex justify-between items-center w-full">
+      <div className="flex w-full items-center justify-between">
         <Link href="/pi/total-requests">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/static/pi/arrow-left.webp"
             alt="arrow-left"
-            className="w-16 h-16"
+            className="h-16 w-16"
           />
         </Link>
 
@@ -118,7 +118,7 @@ const TotalCost = () => {
           <img
             src="/static/pi/arrow-right.webp"
             alt="arrow-right"
-            className="w-16 h-16"
+            className="h-16 w-16"
           />
         </Link>
       </div>

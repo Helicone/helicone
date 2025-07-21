@@ -6,7 +6,7 @@ A streamlined guide for creating consistent, high-quality feature documentation.
 
 All feature documentation must follow this exact structure:
 
-```markdown
+````markdown
 ---
 title: "[Feature Name]"
 sidebarTitle: "[Feature Name]"
@@ -17,7 +17,7 @@ When [developer context/situation], [common pattern]. [Feature name] [solves thi
 ## Why use [Feature Name]
 
 - **[Benefit 1]**: Specific, actionable benefit
-- **[Benefit 2]**: Another key advantage  
+- **[Benefit 2]**: Another key advantage
 - **[Benefit 3]**: Third compelling reason
 
 ## Quick Start
@@ -27,21 +27,24 @@ When [developer context/situation], [common pattern]. [Feature name] [solves thi
 Description with code example.
 ```language
 // Working code
-```
+````
+
 </Step>
 </Steps>
 
 ## Configuration Options
 
 ### Basic Settings
-| Setting | Type | Description | Default | Example |
-|---------|------|-------------|---------|---------|
-| `name` | `string` | What it does | `"default"` | `"example"` |
+
+| Setting | Type     | Description  | Default     | Example     |
+| ------- | -------- | ------------ | ----------- | ----------- |
+| `name`  | `string` | What it does | `"default"` | `"example"` |
 
 ### Advanced Settings
-| Setting | Type | Description | Default | Example |
-|---------|------|-------------|---------|---------|
-| `advanced` | `object` | Complex config | `{}` | `{"key": "value"}` |
+
+| Setting    | Type     | Description    | Default | Example            |
+| ---------- | -------- | -------------- | ------- | ------------------ |
+| `advanced` | `object` | Complex config | `{}`    | `{"key": "value"}` |
 
 ## Use Cases
 
@@ -63,13 +66,14 @@ Real-world scenario description.
 ## Understanding [Feature Name]
 
 ### [Core Concept]
+
 Deep explanation of key concepts developers need to understand.
 
 ```typescript
 // ✅ Good example
 // Correct usage
 
-// ❌ Bad example  
+// ❌ Bad example
 // What not to do
 ```
 
@@ -87,6 +91,7 @@ How they work together
 ### Required Components
 
 **Steps** - For procedures:
+
 ```markdown
 <Steps>
   <Step title="Action">Content and code</Step>
@@ -94,6 +99,7 @@ How they work together
 ```
 
 **Tabs** - For use cases:
+
 ```markdown
 <Tabs>
   <Tab title="Scenario">Content</Tab>
@@ -101,18 +107,22 @@ How they work together
 ```
 
 **CodeGroup** - Multiple languages:
-```markdown
+
+````markdown
 <CodeGroup>
 ```typescript Node.js
 // Code
-```
+````
+
 ```python Python
-# Code  
+# Code
 ```
+
 </CodeGroup>
 ```
 
 **CardGroup** - Related features:
+
 ```markdown
 <CardGroup cols={2}>
   <Card title="Feature" icon="icon" href="/path">Description</Card>
@@ -150,18 +160,21 @@ How they work together
 ## Workflow
 
 ### 1. Apply Template
+
 - Follow the structure exactly
 - Use required components properly
 - Focus on developer-first content
 - Remove unnecessary UI descriptions
 
 ### 2. Validate Against Code
+
 - Verify all API endpoints exist
 - Check authentication requirements
 - Confirm configuration options and defaults
 - Find any undocumented features
 
 ### 3. Test Examples
+
 - Create test scripts for all code examples
 - Use real API keys to verify functionality
 - Test error conditions and edge cases
@@ -183,6 +196,7 @@ Before publishing:
 ## Common Mistakes
 
 **Avoid:**
+
 - Generic introductions ("This feature allows...")
 - Incomplete code examples missing imports
 - Untested code snippets
@@ -191,6 +205,7 @@ Before publishing:
 - Outdated syntax or dependencies
 
 **Instead:**
+
 - Start with developer context
 - Provide complete, tested examples
 - Focus on implementation details

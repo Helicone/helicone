@@ -84,13 +84,13 @@ export class RouterControlPlaneController extends Controller {
   > {
     const controlPlaneManager = new ControlPlaneManager(request.authParams);
     const { promptId, versionId } = body;
-    
+
     let signedUrl = await controlPlaneManager.signS3GetUrlForPrompt(
       promptId,
       versionId,
       request.authParams
     );
-    
+
     if (signedUrl.error) {
       this.setStatus(500);
       return err(signedUrl.error);

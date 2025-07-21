@@ -28,7 +28,7 @@ interface GroupedSettingsType {
 const AdminSettings = () => {
   const { data: settingsData, refetch } = $JAWN_API.useQuery(
     "get",
-    "/v1/admin/settings"
+    "/v1/admin/settings",
   );
   const [editableSetting, setEditableSetting] = useState<{
     name: string;
@@ -47,7 +47,7 @@ const AdminSettings = () => {
   >({});
   const [searchQuery, setSearchQuery] = useState("");
   const [visibleSecrets, setVisibleSecrets] = useState<Record<string, boolean>>(
-    {}
+    {},
   );
 
   // Helper to check if a setting should be treated as a secret/password
@@ -234,14 +234,14 @@ const AdminSettings = () => {
   }, [filteredGroupedSettings]);
 
   return (
-    <div className="flex flex-col w-full max-w-5xl mx-auto p-4">
+    <div className="mx-auto flex w-full max-w-5xl flex-col p-4">
       <div className="mb-6">
         <H1>Admin Settings</H1>
         <Lead>Manage system-wide configuration settings</Lead>
       </div>
 
-      <div className="flex flex-col gap-4 mb-6">
-        <div className="flex justify-between items-center">
+      <div className="mb-6 flex flex-col gap-4">
+        <div className="flex items-center justify-between">
           <P className="text-muted-foreground">
             {totalSettings} settings configured in{" "}
             {Object.keys(groupedSettings).length} groups
@@ -252,13 +252,13 @@ const AdminSettings = () => {
               size="sm"
               variant="outline"
             >
-              <PlusIcon className="h-4 w-4 mr-1" /> Add Setting
+              <PlusIcon className="mr-1 h-4 w-4" /> Add Setting
             </Button>
           )}
         </div>
 
         <div className="relative w-full">
-          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
             <SearchIcon className="h-4 w-4 text-muted-foreground" />
           </div>
           <Input
@@ -268,7 +268,7 @@ const AdminSettings = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
           {searchQuery && (
-            <div className="text-sm text-muted-foreground mt-1">
+            <div className="mt-1 text-sm text-muted-foreground">
               Found {filteredSettingsCount} setting
               {filteredSettingsCount !== 1 ? "s" : ""} in{" "}
               {Object.keys(filteredGroupedSettings).length} group
@@ -279,8 +279,8 @@ const AdminSettings = () => {
       </div>
 
       {showNewSettingForm && (
-        <div className="mb-6 border rounded-md p-4 bg-slate-50 dark:bg-slate-900">
-          <div className="flex justify-between items-center mb-4">
+        <div className="mb-6 rounded-md border bg-slate-50 p-4 dark:bg-slate-900">
+          <div className="mb-4 flex items-center justify-between">
             <P className="font-medium">Add New Setting</P>
             <Button
               variant="ghost"
@@ -295,7 +295,7 @@ const AdminSettings = () => {
           </div>
           <div className="flex flex-col gap-3">
             <div>
-              <Small className="block mb-1">Setting Name</Small>
+              <Small className="mb-1 block">Setting Name</Small>
               <Input
                 value={newSetting.name}
                 onChange={(e) =>
@@ -312,8 +312,8 @@ const AdminSettings = () => {
               )}
             </div>
             <div>
-              <Small className="block mb-1">Settings Value (JSON)</Small>
-              <div className="h-48 border rounded-md">
+              <Small className="mb-1 block">Settings Value (JSON)</Small>
+              <div className="h-48 rounded-md border">
                 <MarkdownEditor
                   text={newSetting.settings}
                   setText={(text) =>
@@ -327,7 +327,7 @@ const AdminSettings = () => {
             {!isJsonValid(newSetting.settings) && (
               <InfoBox variant="error">Invalid JSON format</InfoBox>
             )}
-            <div className="flex justify-end gap-2 mt-2">
+            <div className="mt-2 flex justify-end gap-2">
               <Button
                 variant="action"
                 size="sm"
@@ -336,7 +336,7 @@ const AdminSettings = () => {
                   !newSetting.name.trim() || !isJsonValid(newSetting.settings)
                 }
               >
-                <SaveIcon className="h-3 w-3 mr-1" /> Save
+                <SaveIcon className="mr-1 h-3 w-3" /> Save
               </Button>
             </div>
           </div>
@@ -355,15 +355,15 @@ const AdminSettings = () => {
 
       <div className="space-y-4">
         {Object.entries(filteredGroupedSettings).map(([group, settings]) => (
-          <div key={group} className="border rounded-md overflow-hidden">
+          <div key={group} className="overflow-hidden rounded-md border">
             <div
-              className="flex items-center bg-slate-200 dark:bg-slate-700 px-4 py-2 cursor-pointer"
+              className="flex cursor-pointer items-center bg-slate-200 px-4 py-2 dark:bg-slate-700"
               onClick={() => toggleGroupCollapse(group)}
             >
               {collapsedGroups[group] ? (
-                <ChevronRight className="h-4 w-4 mr-2" />
+                <ChevronRight className="mr-2 h-4 w-4" />
               ) : (
-                <ChevronDown className="h-4 w-4 mr-2" />
+                <ChevronDown className="mr-2 h-4 w-4" />
               )}
               <P className="font-medium capitalize">{group}</P>
               <Small className="ml-2 text-muted-foreground">
@@ -380,7 +380,7 @@ const AdminSettings = () => {
                     const regex = new RegExp(`(${searchQuery})`, "gi");
                     displayName = setting.name.replace(
                       regex,
-                      '<mark class="bg-yellow-200 dark:bg-yellow-800 px-1 rounded">$1</mark>'
+                      '<mark class="bg-yellow-200 dark:bg-yellow-800 px-1 rounded">$1</mark>',
                     );
                   }
 
@@ -389,14 +389,14 @@ const AdminSettings = () => {
 
                   return (
                     <div key={setting.name} className="px-4 py-3">
-                      <div className="flex items-center justify-between mb-2">
+                      <div className="mb-2 flex items-center justify-between">
                         <div className="flex items-center">
                           <p
-                            className="font-medium text-base leading-7 font-sans m-0 text-[hsl(var(--foreground))]"
+                            className="font-sans m-0 text-base font-medium leading-7 text-[hsl(var(--foreground))]"
                             dangerouslySetInnerHTML={{ __html: displayName }}
                           />
                           {isSensitive && (
-                            <span className="ml-2 px-2 py-0.5 text-xs bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-100 rounded-full">
+                            <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-800 dark:bg-amber-900 dark:text-amber-100">
                               secret
                             </span>
                           )}
@@ -425,7 +425,7 @@ const AdminSettings = () => {
                               onClick={() =>
                                 handleSelectSetting(
                                   setting.name,
-                                  setting.settings
+                                  setting.settings,
                                 )
                               }
                             >
@@ -437,7 +437,7 @@ const AdminSettings = () => {
 
                       {editableSetting?.name === setting.name ? (
                         <div className="flex flex-col gap-3">
-                          <div className="h-48 border rounded-md">
+                          <div className="h-48 rounded-md border">
                             <MarkdownEditor
                               text={editableSetting.settings}
                               setText={(text) =>
@@ -469,12 +469,12 @@ const AdminSettings = () => {
                               onClick={handleUpdateSettings}
                               disabled={!isJsonValid(editableSetting.settings)}
                             >
-                              <SaveIcon className="h-3 w-3 mr-1" /> Save
+                              <SaveIcon className="mr-1 h-3 w-3" /> Save
                             </Button>
                           </div>
                         </div>
                       ) : (
-                        <pre className="bg-slate-50 dark:bg-slate-900 p-3 rounded-md text-xs max-h-48 overflow-auto">
+                        <pre className="max-h-48 overflow-auto rounded-md bg-slate-50 p-3 text-xs dark:bg-slate-900">
                           <code>
                             {isSensitive && !isVisible
                               ? renderMaskedJson(setting.settings)

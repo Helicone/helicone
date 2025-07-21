@@ -107,9 +107,8 @@ export const consume = async ({
         let i = 0;
 
         while (i < batch.messages.length) {
-          const messagesPerMiniBatchSetting = await settingsManager.getSetting(
-            "kafka:log"
-          );
+          const messagesPerMiniBatchSetting =
+            await settingsManager.getSetting("kafka:log");
 
           const miniBatchSize =
             miniBatchSizeOverride ??
@@ -241,9 +240,8 @@ export const consumeDlq = async () => {
         `DLQ: Received batch with ${batch.messages.length} messages.`
       );
 
-      const messagesPerMiniBatchSetting = await settingsManager.getSetting(
-        "kafka:dlq"
-      );
+      const messagesPerMiniBatchSetting =
+        await settingsManager.getSetting("kafka:dlq");
 
       const miniBatchSize =
         messagesPerMiniBatchSetting?.miniBatchSize ??
@@ -346,9 +344,8 @@ export const consumeScores = async () => {
         let i = 0;
 
         while (i < batch.messages.length) {
-          const messagesPerMiniBatchSetting = await settingsManager.getSetting(
-            "kafka:score"
-          );
+          const messagesPerMiniBatchSetting =
+            await settingsManager.getSetting("kafka:score");
 
           const miniBatchSize =
             messagesPerMiniBatchSetting?.miniBatchSize ??
@@ -453,9 +450,8 @@ export const consumeScoresDlq = async () => {
         let i = 0;
 
         while (i < batch.messages.length) {
-          const messagesPerMiniBatchSetting = await settingsManager.getSetting(
-            "kafka:dlq:score"
-          );
+          const messagesPerMiniBatchSetting =
+            await settingsManager.getSetting("kafka:dlq:score");
 
           const miniBatchSize =
             messagesPerMiniBatchSetting?.miniBatchSize ??

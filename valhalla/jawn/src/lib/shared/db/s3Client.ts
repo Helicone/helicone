@@ -351,7 +351,7 @@ export class S3Client {
 
   getPromptKey = (promptId: string, promptVersionId: string, orgId: string) => {
     return `organizations/${orgId}/prompts/${promptId}/versions/${promptVersionId}/prompt_body`;
-  }
+  };
 
   getRequestResponseImageKey = (
     requestId: string,

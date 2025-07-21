@@ -361,9 +361,8 @@ export class RequestWrapper {
 
     // If using proxy key, get the real key from vault
     if (authKey?.startsWith("Bearer sk-helicone-cp")) {
-      const { data, error } = await this.getProviderKeyFromCustomerPortalKey(
-        authKey
-      );
+      const { data, error } =
+        await this.getProviderKeyFromCustomerPortalKey(authKey);
 
       if (error || !data || !data.providerKey) {
         return err(

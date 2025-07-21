@@ -22,7 +22,10 @@ const Prompts: NextPageWithLayout<
   return forceOldVersion ? (
     <OldPromptsPage defaultIndex={props.defaultIndex} />
   ) : (
-    <NewPromptsPage defaultIndex={props.defaultIndex} showLegacyBanner={hasOldPrompts} />
+    <NewPromptsPage
+      defaultIndex={props.defaultIndex}
+      showLegacyBanner={hasOldPrompts}
+    />
   );
 };
 

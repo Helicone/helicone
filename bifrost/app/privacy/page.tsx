@@ -30,7 +30,7 @@ const Privacy = () => {
     title: string,
     description: string
   ) => (
-    <div className="text-lg flex flex-col space-y-4">
+    <div className="flex flex-col space-y-4 text-lg">
       <p className="text-xl font-semibold">{`${index}. ${title}`}</p>
       <p className="whitespace-pre-wrap text-left">{description}</p>
     </div>
@@ -38,10 +38,10 @@ const Privacy = () => {
 
   return (
     <div className="mx-auto flex max-w-7xl items-center justify-between p-6 md:justify-start md:space-x-10 lg:px-8">
-      <div className="py-24 max-w-3xl font-serif space-y-16">
+      <div className="max-w-3xl space-y-16 py-24 font-serif">
         <div className="flex flex-col space-y-4">
-          <p className="text-5xl font-sans">Privacy Policy</p>
-          <p className="text-lg font-sans">Last updated February 28, 2023</p>
+          <p className="font-sans text-5xl">Privacy Policy</p>
+          <p className="font-sans text-lg">Last updated February 28, 2023</p>
         </div>
 
         {pageContent.map((page, index) =>

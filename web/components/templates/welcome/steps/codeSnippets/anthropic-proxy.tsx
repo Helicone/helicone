@@ -69,7 +69,7 @@ const AnthropicProxy = (props: AnthropicProxyProps) => {
   const [lang, setLang] = useState<SupportedLanguages>("python");
 
   return (
-    <div className="w-full flex flex-col">
+    <div className="flex w-full flex-col">
       <Tab.Group defaultIndex={1}>
         <Tab.List
           className={clsx("bg-gray-500", "flex space-x-1 rounded-xl p-1")}
@@ -84,7 +84,7 @@ const AnthropicProxy = (props: AnthropicProxyProps) => {
                   "ring-offset-gray-700",
                   selected
                     ? "bg-gray-900 text-white"
-                    : "text-gray-100 hover:bg-gray-700 hover:text-white"
+                    : "text-gray-100 hover:bg-gray-700 hover:text-white",
                 )
               }
               onClick={() => setLang(key as keyof typeof NAMES)}

@@ -151,18 +151,21 @@ export class ScoreStore extends BaseStore {
           .join(", ")}`
       );
     }
-    const uniqueRequestResponseLogs = rowContents.data.reduce((acc, row) => {
-      const key = `${row.request_id}-${row.organization_id}`;
-      if (
-        !acc[key] ||
-        (row.updated_at &&
-          (!acc[key].updated_at ||
-            new Date(row.updated_at) > new Date(acc[key].updated_at)))
-      ) {
-        acc[key] = row;
-      }
-      return acc;
-    }, {} as Record<string, RequestResponseRMT>);
+    const uniqueRequestResponseLogs = rowContents.data.reduce(
+      (acc, row) => {
+        const key = `${row.request_id}-${row.organization_id}`;
+        if (
+          !acc[key] ||
+          (row.updated_at &&
+            (!acc[key].updated_at ||
+              new Date(row.updated_at) > new Date(acc[key].updated_at)))
+        ) {
+          acc[key] = row;
+        }
+        return acc;
+      },
+      {} as Record<string, RequestResponseRMT>
+    );
 
     const filteredRequestResponseLogs = Object.values(
       uniqueRequestResponseLogs
@@ -176,16 +179,19 @@ export class ScoreStore extends BaseStore {
         // Merge existing scores with new scores
         const combinedScores = {
           ...(row.scores || {}),
-          ...newVersion.mappedScores.reduce((acc, score) => {
-            if (!Number.isInteger(score.score_attribute_value)) {
-              console.log(
-                `Skipping score ${score.score_attribute_key} with value ${score.score_attribute_value}`
-              );
-            } else {
-              acc[score.score_attribute_key] = score.score_attribute_value;
-            }
-            return acc;
-          }, {} as Record<string, number>),
+          ...newVersion.mappedScores.reduce(
+            (acc, score) => {
+              if (!Number.isInteger(score.score_attribute_value)) {
+                console.log(
+                  `Skipping score ${score.score_attribute_key} with value ${score.score_attribute_value}`
+                );
+              } else {
+                acc[score.score_attribute_key] = score.score_attribute_value;
+              }
+              return acc;
+            },
+            {} as Record<string, number>
+          ),
         };
 
         // Validate and ensure the scores are in the correct format

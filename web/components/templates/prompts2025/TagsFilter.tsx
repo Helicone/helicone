@@ -60,9 +60,7 @@ const TagsFilter = ({ tags, selectedTags, onTagsChange }: TagsFilterProps) => {
                   <CheckIcon
                     className={cn(
                       "mr-2 h-4 w-4",
-                      selectedTags.length === 0
-                        ? "opacity-100"
-                        : "opacity-0"
+                      selectedTags.length === 0 ? "opacity-100" : "opacity-0",
                     )}
                   />
                   All Tags
@@ -73,7 +71,7 @@ const TagsFilter = ({ tags, selectedTags, onTagsChange }: TagsFilterProps) => {
                     key={tag}
                     onSelect={() => {
                       if (selectedTags.includes(tag)) {
-                        onTagsChange(selectedTags.filter(t => t !== tag));
+                        onTagsChange(selectedTags.filter((t) => t !== tag));
                       } else {
                         onTagsChange([...selectedTags, tag]);
                       }
@@ -81,10 +79,10 @@ const TagsFilter = ({ tags, selectedTags, onTagsChange }: TagsFilterProps) => {
                   >
                     <CheckIcon
                       className={cn(
-                        "mr-2 min-w-4 min-h-4 max-h-4 max-w-4 max-w-4 max-w-4",
+                        "mr-2 max-h-4 min-h-4 min-w-4 max-w-4",
                         selectedTags.includes(tag)
                           ? "opacity-100"
-                          : "opacity-0"
+                          : "opacity-0",
                       )}
                     />
                     <span className="truncate">{tag}</span>
@@ -99,4 +97,4 @@ const TagsFilter = ({ tags, selectedTags, onTagsChange }: TagsFilterProps) => {
   );
 };
 
-export default TagsFilter; 
+export default TagsFilter;

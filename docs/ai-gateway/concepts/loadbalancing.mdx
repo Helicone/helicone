@@ -4,11 +4,12 @@ sidebarTitle: "Load Balancing"
 description: "Intelligent request routing across providers with latency-based P2C and weighted algorithms"
 ---
 
-The AI Gateway automatically distributes requests across multiple providers using sophisticated algorithms that consider latency, provider health, and your custom preferences. 
+The AI Gateway automatically distributes requests across multiple providers using sophisticated algorithms that consider latency, provider health, and your custom preferences.
 
 All strategies are **rate-limit aware** and **health-monitored**—unhealthy providers are automatically removed and re-added when they recover.
 
 **Benefits:**
+
 - **Optimize latency** by routing to the fastest available providers
 - **Improve reliability** with automatic failover when providers fail
 - **Handle rate limits** by temporarily removing rate-limited providers
@@ -32,6 +33,7 @@ All strategies are **rate-limit aware** and **health-monitored**—unhealthy pro
               - anthropic
               - gemini
     ```
+
   </Step>
 
   <Step title="Ensure your provider API keys are set">
@@ -42,13 +44,12 @@ All strategies are **rate-limit aware** and **health-monitored**—unhealthy pro
     ANTHROPIC_API_KEY=your_anthropic_key
     GEMINI_API_KEY=your_gemini_key
     ```
+
   </Step>
 
-  <Step title="Start the gateway">
-    ```bash
-    npx @helicone/ai-gateway@latest --config ai-gateway-config.yaml
-    ```
-  </Step>
+<Step title="Start the gateway">
+  ```bash npx @helicone/ai-gateway@latest --config ai-gateway-config.yaml ```
+</Step>
 
   <Step title="Test load balancing">
     ```bash
@@ -94,37 +95,26 @@ All strategies are **rate-limit aware** and **health-monitored**—unhealthy pro
     ```
   </Accordion>
 
-  <Accordion title="Weighted Strategy" icon="chart-pie">
-    **Custom traffic percentages across providers**
-    
-    Routes traffic based on arbitrary weights you specify. For example, if you have providers [A, B, C] with weights [0.80, 0.15, 0.05], then A gets 80% of traffic, B gets 15%, and C gets 5%.
-    
-    **Best for:** Cost optimization, gradual provider migrations, or compliance requirements
-    
-    **Example:**
-    ```yaml
-    routers:
-      my-router:
-        load-balance:
-          chat:
-            strategy: weighted
-            providers:
-              - provider: anthropic
-                weight: 0.75
-              - provider: openai
-                weight: 0.25
-    ```
-    
-    <Callout type="warning">
-      Weights must sum to exactly 1.0, or the AI Gateway will reject the configuration.
-    </Callout>
-  </Accordion>
-
+<Accordion title="Weighted Strategy" icon="chart-pie">
+  **Custom traffic percentages across providers** Routes traffic based on
+  arbitrary weights you specify. For example, if you have providers [A, B, C]
+  with weights [0.80, 0.15, 0.05], then A gets 80% of traffic, B gets 15%, and C
+  gets 5%. **Best for:** Cost optimization, gradual provider migrations, or
+  compliance requirements **Example:** ```yaml routers: my-router: load-balance:
+  chat: strategy: weighted providers: - provider: anthropic weight: 0.75 -
+  provider: openai weight: 0.25 ```
+  <Callout type="warning">
+    Weights must sum to exactly 1.0, or the AI Gateway will reject the
+    configuration.
+  </Callout>
+</Accordion>
 
   </AccordionGroup>
 
 <Note>
-  Additional load balancing strategies (Cost-Optimized, Model-Level Weighted, Tag-based Routing) are [coming soon](#coming-soon) for advanced routing scenarios.
+  Additional load balancing strategies (Cost-Optimized, Model-Level Weighted,
+  Tag-based Routing) are [coming soon](#coming-soon) for advanced routing
+  scenarios.
 </Note>
 
 ## Use Cases
@@ -144,6 +134,7 @@ All strategies are **rate-limit aware** and **health-monitored**—unhealthy pro
               - anthropic
               - gemini
     ```
+
   </Tab>
   
   <Tab title="A/B Testing New Provider">
@@ -161,6 +152,7 @@ All strategies are **rate-limit aware** and **health-monitored**—unhealthy pro
               - provider: gemini       # Testing new provider
                 weight: 0.10
     ```
+
   </Tab>
 
   <Tab title="Safe Provider Migration">
@@ -178,6 +170,7 @@ All strategies are **rate-limit aware** and **health-monitored**—unhealthy pro
               - provider: openai       # Migrating FROM this provider
                 weight: 0.30
     ```
+
   </Tab>
 
   <Tab title="Multi-Environment Setup">
@@ -192,7 +185,7 @@ All strategies are **rate-limit aware** and **health-monitored**—unhealthy pro
             providers:
               - provider: ollama       # Local models for dev
                 weight: 1.0
-      
+
       production:
         load-balance:
           chat:
@@ -201,6 +194,7 @@ All strategies are **rate-limit aware** and **health-monitored**—unhealthy pro
               - openai
               - anthropic
     ```
+
   </Tab>
 </Tabs>
 
@@ -212,24 +206,26 @@ All strategies are **rate-limit aware** and **health-monitored**—unhealthy pro
   <Step title="Request Arrives">
     A request comes in for a specific model (e.g., `gpt-4o-mini`)
   </Step>
-  
-  <Step title="Provider Selection">
-    The load balancer identifies which providers can handle this model and applies your chosen strategy:
-    
-    - **Latency strategy**: Picks 2 random healthy providers, routes to the one with lower load
-    - **Weighted strategy**: Routes based on your configured percentages
-  </Step>
-  
-  <Step title="Health Check">
-    Before routing, the gateway ensures the selected provider is healthy (not rate-limited, not failing)
-  </Step>
-  
-  <Step title="Request Forwarded">
-    The request is sent to the selected provider with the original model name
-  </Step>
-  
+
+<Step title="Provider Selection">
+  The load balancer identifies which providers can handle this model and applies
+  your chosen strategy: - **Latency strategy**: Picks 2 random healthy
+  providers, routes to the one with lower load - **Weighted strategy**: Routes
+  based on your configured percentages
+</Step>
+
+<Step title="Health Check">
+  Before routing, the gateway ensures the selected provider is healthy (not
+  rate-limited, not failing)
+</Step>
+
+<Step title="Request Forwarded">
+  The request is sent to the selected provider with the original model name
+</Step>
+
   <Step title="Response & Learning">
-    The response is returned to you, and the gateway updates its latency/health metrics for future routing decisions
+    The response is returned to you, and the gateway updates its latency/health
+    metrics for future routing decisions
   </Step>
 </Steps>
 
@@ -238,11 +234,13 @@ All strategies are **rate-limit aware** and **health-monitored**—unhealthy pro
 The AI Gateway distributes requests across **providers** (OpenAI, Anthropic, Google, etc.) that support the requested model.
 
 **Example**: When you request `gpt-4o-mini`:
+
 - ✅ **OpenAI** - Native support for `gpt-4o-mini`
-- ✅ **Anthropic** - Via model mapping to `claude-3-5-haiku` 
+- ✅ **Anthropic** - Via model mapping to `claude-3-5-haiku`
 - ✅ **Ollama** - Via model mapping to `llama3.2`
 
 **Example**: When you request a model not in any mappings:
+
 - ✅ **OpenAI** - If OpenAI natively supports it
 - ❌ **Anthropic** - No mapping available
 - ❌ **Ollama** - No mapping available
@@ -258,10 +256,12 @@ All load balancing strategies automatically handle provider failures through int
     Providers with high error rates (default: >10%) are automatically removed
   </Card>
   <Card title="Rate limit detection">
-    Rate-limited providers are temporarily removed and re-added when limits reset
+    Rate-limited providers are temporarily removed and re-added when limits
+    reset
   </Card>
-  <Card title="Grace period handling">  
-    Providers need minimum requests (default: 20) before being considered for removal
+  <Card title="Grace period handling">
+    Providers need minimum requests (default: 20) before being considered for
+    removal
   </Card>
   <Card title="Automatic recovery">
     Unhealthy providers are periodically retested and re-added when healthy
@@ -269,18 +269,19 @@ All load balancing strategies automatically handle provider failures through int
 </CardGroup>
 
 <Note>
-  The AI Gateway monitors provider health every 5 seconds by default. The health check uses a rolling 60-second window with configurable error thresholds.
+  The AI Gateway monitors provider health every 5 seconds by default. The health
+  check uses a rolling 60-second window with configurable error thresholds.
 </Note>
 
 ### Strategy Selection Guide
 
-| Use Case                 | Recommended Strategy       | 
-| ------------------------ | -------------------------- |
-| **Production APIs**      | Latency-based - Automatically optimizes for speed |
-| **Provider migration**   | Weighted - Gradual traffic shifting with instant rollback |
-| **A/B testing**          | Weighted - Controlled traffic splits for comparison |
-| **Cost optimization**    | Weighted - Route more traffic to cheaper providers |
-| **Compliance routing**   | [Multiple AI Gateways](#compliance-based-routing) - Better isolation |
+| Use Case               | Recommended Strategy                                                 |
+| ---------------------- | -------------------------------------------------------------------- |
+| **Production APIs**    | Latency-based - Automatically optimizes for speed                    |
+| **Provider migration** | Weighted - Gradual traffic shifting with instant rollback            |
+| **A/B testing**        | Weighted - Controlled traffic splits for comparison                  |
+| **Cost optimization**  | Weighted - Route more traffic to cheaper providers                   |
+| **Compliance routing** | [Multiple AI Gateways](#compliance-based-routing) - Better isolation |
 
 ## Compliance-Based Routing
 
@@ -305,6 +306,7 @@ For compliance requirements, deploy **multiple AI Gateway instances** rather tha
             strategy: latency
             providers: [anthropic-eu, openai-eu]
     ```
+
   </Tab>
 
   <Tab title="Healthcare - HIPAA">
@@ -324,10 +326,11 @@ For compliance requirements, deploy **multiple AI Gateway instances** rather tha
             providers:
               - provider: anthropic-baa
                 weight: 1.0
-    
+
     helicone:
       enable: true  # Enhanced audit logging
     ```
+
   </Tab>
 
   <Tab title="Government/Defense">
@@ -348,21 +351,23 @@ For compliance requirements, deploy **multiple AI Gateway instances** rather tha
               - provider: ollama
                 weight: 1.0
     ```
+
   </Tab>
 </Tabs>
 
 **Benefits:** Separate networks, authentication, audit trails, and certification scope per deployment.
 
 <Note>
-  For complete configuration options and syntax, see the [Configuration Reference](/ai-gateway/config#load-balancing).
+  For complete configuration options and syntax, see the [Configuration
+  Reference](/ai-gateway/config#load-balancing).
 </Note>
 
 ## Coming Soon
 
 The following load balancing features are planned for future releases:
 
-| Feature | Description | Version |
-|---------|-------------|---------|
-| **Cost-Optimized Strategy** | Route to the cheapest equivalent model - picks the provider that offers the same model or configured equivalent models for the lowest price | v2 |
-| **Model-Level Weighted Strategy** | Provider + model specific weighting - configure weights for provider+model pairs (e.g., openai/o1 vs bedrock/claude-3-5-sonnet) | v2 |
-| **Tag-based Routing** | Header-driven routing decisions - route requests to specific providers and models based on tags passed via request headers | v3 |
+| Feature                           | Description                                                                                                                                 | Version |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| **Cost-Optimized Strategy**       | Route to the cheapest equivalent model - picks the provider that offers the same model or configured equivalent models for the lowest price | v2      |
+| **Model-Level Weighted Strategy** | Provider + model specific weighting - configure weights for provider+model pairs (e.g., openai/o1 vs bedrock/claude-3-5-sonnet)             | v2      |
+| **Tag-based Routing**             | Header-driven routing decisions - route requests to specific providers and models based on tags passed via request headers                  | v3      |

@@ -140,11 +140,7 @@ export const getMapperType = ({
   }
 
   // Check for any Llama API model
-  if (
-    /^Llama/.test(model) ||
-    model.includes("Llama") ||
-    provider === "LLAMA"
-  ) {
+  if (/^Llama/.test(model) || model.includes("Llama") || provider === "LLAMA") {
     return "llama-chat";
   }
 

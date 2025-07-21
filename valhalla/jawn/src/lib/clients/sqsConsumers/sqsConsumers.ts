@@ -60,9 +60,8 @@ async function withMessages({
     | "sqs:request-response-logs-dlq"
     | "sqs:helicone-scores-dlq";
 }): Promise<void> {
-  const messagesPerMiniBatchSetting = await settingsManager.getSetting(
-    sizeSetting
-  );
+  const messagesPerMiniBatchSetting =
+    await settingsManager.getSetting(sizeSetting);
   const count =
     messagesPerMiniBatchSetting?.messagesPerMiniBatch ?? MAX_NUMBER_OF_MESSAGES;
 

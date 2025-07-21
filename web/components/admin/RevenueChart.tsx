@@ -61,7 +61,7 @@ export function RevenueChart({
   const chartData = transformInvoiceData(
     billedInvoices,
     upcomingInvoices,
-    months
+    months,
   );
 
   // Calculate trend
@@ -69,7 +69,7 @@ export function RevenueChart({
 
   return (
     <Card className="overflow-hidden border-border bg-card text-card-foreground">
-      <CardHeader className="pb-3 space-y-1.5">
+      <CardHeader className="space-y-1.5 pb-3">
         <CardTitle>
           <H3>{title} Revenue</H3>
         </CardTitle>
@@ -120,7 +120,7 @@ export function RevenueChart({
           </ChartContainer>
         </div>
       </CardContent>
-      <CardFooter className="flex-col items-start gap-2 pt-4 pb-4 border-t">
+      <CardFooter className="flex-col items-start gap-2 border-t pb-4 pt-4">
         {trend && (
           <div className="flex items-center gap-2">
             {trend.direction === "up" ? (
@@ -151,7 +151,7 @@ function getTotalRevenue(chartData: ChartDataItem[]): number {
 function transformInvoiceData(
   billedInvoices: InvoiceData[],
   upcomingInvoices: InvoiceData[],
-  months: number
+  months: number,
 ): ChartDataItem[] {
   // Get date range
   const endDate = new Date();
@@ -166,7 +166,7 @@ function transformInvoiceData(
     const date = new Date(startDate);
     date.setMonth(startDate.getMonth() + i);
     const monthKey = `${date.getFullYear()}-${String(
-      date.getMonth() + 1
+      date.getMonth() + 1,
     ).padStart(2, "0")}`;
     const monthName = date.toLocaleString("default", {
       month: "long",
@@ -189,7 +189,7 @@ function transformInvoiceData(
   billedInvoices.forEach((invoice) => {
     const date = invoice.created;
     const monthKey = `${date.getFullYear()}-${String(
-      date.getMonth() + 1
+      date.getMonth() + 1,
     ).padStart(2, "0")}`;
 
     // Only include if in our date range
@@ -201,7 +201,7 @@ function transformInvoiceData(
 
   // Process upcoming invoices - only add to current month
   const currentMonthKey = `${endDate.getFullYear()}-${String(
-    endDate.getMonth() + 1
+    endDate.getMonth() + 1,
   ).padStart(2, "0")}`;
   upcomingInvoices.forEach((invoice) => {
     if (monthBuckets[currentMonthKey]) {
@@ -219,7 +219,7 @@ function transformInvoiceData(
 
   // Convert to array and sort by month
   return Object.values(monthBuckets).sort((a, b) =>
-    a.monthKey.localeCompare(b.monthKey)
+    a.monthKey.localeCompare(b.monthKey),
   );
 }
 
@@ -251,22 +251,22 @@ function CustomTooltip({ active, payload, label }: any) {
   const hasUpcoming = monthData.upcoming > 0;
 
   return (
-    <div className="min-w-[8rem] rounded-lg border border-border bg-popover px-3 py-2 text-xs shadow-xl text-popover-foreground">
+    <div className="min-w-[8rem] rounded-lg border border-border bg-popover px-3 py-2 text-xs text-popover-foreground shadow-xl">
       {/* Month heading */}
-      <div className="font-medium mb-1.5 border-b border-border pb-1.5">
+      <div className="mb-1.5 border-b border-border pb-1.5 font-medium">
         {label}
       </div>
 
       {/* Total (always show) */}
-      <div className="flex items-center justify-between mb-1.5">
+      <div className="mb-1.5 flex items-center justify-between">
         <span className="font-medium">Total Revenue:</span>
-        <span className="font-mono font-medium ml-4">
+        <span className="font-mono ml-4 font-medium">
           {monthData.total_original}
         </span>
       </div>
 
       {/* Breakdown */}
-      <div className="text-xs space-y-1">
+      <div className="space-y-1 text-xs">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <div

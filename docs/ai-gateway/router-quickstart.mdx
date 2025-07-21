@@ -7,7 +7,9 @@ description: "Build your first custom router with load balancing, caching, and r
 Ready to unlock the full power of the AI Gateway? This guide will walk you through creating custom routers with load balancing, caching, and rate limiting. You'll go from basic routing to production-ready configurations.
 
 <Note>
-  **Prerequisites:** Make sure you've completed the [main quickstart](/ai-gateway/quickstart) and have the gateway running with your API keys configured.
+  **Prerequisites:** Make sure you've completed the [main
+  quickstart](/ai-gateway/quickstart) and have the gateway running with your API
+  keys configured.
 </Note>
 
 ## What Are Routers?
@@ -39,7 +41,8 @@ routers:
 ```
 
 **What this does:**
-- Creates a router named `my-router` 
+
+- Creates a router named `my-router`
 - Available at `http://localhost:8080/router/my-router`
 - Uses [latency-based load balancing](/ai-gateway/concepts/loadbalancing#latency-based-p2c-peakewma-default) between OpenAI and Anthropic
 - Automatically routes to whichever provider responds fastest
@@ -94,6 +97,7 @@ routers:
       }'
     ```
     </CodeGroup>
+
   </Step>
 </Steps>
 
@@ -120,6 +124,7 @@ routers:
 ```
 
 **What this adds:**
+
 - Caches identical requests for 1 hour
 - Subsequent identical requests return instantly from cache
 - Can reduce costs by 90%+ for repeated requests
@@ -157,7 +162,9 @@ routers:
 Real applications need different rate limits for different environments. Rate limiting in the AI Gateway works **per-API-key**, which requires authentication to identify users. Let's set up Helicone authentication and create production and development routers with appropriate protections.
 
 <Note>
-  **Authentication Required**: Rate limiting is applied per-API-key, so you need Helicone authentication enabled to track and limit requests for different users.
+  **Authentication Required**: Rate limiting is applied per-API-key, so you need
+  Helicone authentication enabled to track and limit requests for different
+  users.
 </Note>
 
 First, get your Helicone API key:
@@ -176,8 +183,8 @@ Now create the configuration with authentication and rate limits:
 ```yaml
 helicone:
   # Set to `features: observability` to enable observability
-  features: auth 
-  
+  features: auth
+
 cache-store:
   type: in-memory
 
@@ -216,10 +223,10 @@ routers:
 
 **What this creates:**
 
-| Router | Endpoint | Rate Limit | Use Case |
-|--------|----------|------------|----------|
-| **production** | `/router/production...` | 1000/min | High-traffic customer requests |
-| **development** | `/router/development...` | 100/hour | Cost-controlled development |
+| Router          | Endpoint                 | Rate Limit | Use Case                       |
+| --------------- | ------------------------ | ---------- | ------------------------------ |
+| **production**  | `/router/production...`  | 1000/min   | High-traffic customer requests |
+| **development** | `/router/development...` | 100/hour   | Cost-controlled development    |
 
 <Steps>
   <Step title="Update configuration">
@@ -260,21 +267,22 @@ Just change the base URL to use different routers. Remember to use your Helicone
 import openai
 
 client = openai.OpenAI(
-    base_url="http://localhost:8080/router/production",
-    api_key="sk-helicone-..."  # Your Helicone API key
+base_url="http://localhost:8080/router/production",
+api_key="sk-helicone-..." # Your Helicone API key
 )
 
 response = client.chat.completions.create(
-    model="openai/gpt-4o-mini",
-    messages=[{"role": "user", "content": "Hello!"}]
+model="openai/gpt-4o-mini",
+messages=[{"role": "user", "content": "Hello!"}]
 )
-```
+
+````
 
 ```python Development
 import openai
 
 client = openai.OpenAI(
-    base_url="http://localhost:8080/router/development", 
+    base_url="http://localhost:8080/router/development",
     api_key="sk-helicone-..."  # Your Helicone API key
 )
 
@@ -282,23 +290,24 @@ response = client.chat.completions.create(
     model="openai/gpt-4o-mini",
     messages=[{"role": "user", "content": "Hello!"}]
 )
-```
+````
 
 ```javascript Node.js
-import OpenAI from 'openai';
+import OpenAI from "openai";
 
 // Production
 const prodClient = new OpenAI({
-  baseURL: 'http://localhost:8080/router/production',
-  apiKey: 'sk-helicone-...'  // Your Helicone API key
+  baseURL: "http://localhost:8080/router/production",
+  apiKey: "sk-helicone-...", // Your Helicone API key
 });
 
 // Development
 const devClient = new OpenAI({
-  baseURL: 'http://localhost:8080/router/development',
-  apiKey: 'sk-helicone-...'  // Your Helicone API key
+  baseURL: "http://localhost:8080/router/development",
+  apiKey: "sk-helicone-...", // Your Helicone API key
 });
 ```
+
 </CodeGroup>
 
 ## Key Concepts You've Learned
@@ -306,16 +315,37 @@ const devClient = new OpenAI({
 Click on these if you'd like to dive deeper:
 
 <CardGroup cols={2}>
-  <Card title="Load Balancing Strategies" icon="scale-balanced" href="/ai-gateway/concepts/loadbalancing" />
-  <Card title="Intelligent Caching" icon="database" href="/ai-gateway/concepts/cache" />
-  <Card title="Multiple Routers" icon="server" href="/ai-gateway/concepts/routers" />
-  <Card title="Rate Limiting" icon="gauge-high" href="/ai-gateway/concepts/rate-limiting" />
+  <Card
+    title="Load Balancing Strategies"
+    icon="scale-balanced"
+    href="/ai-gateway/concepts/loadbalancing"
+  />
+  <Card
+    title="Intelligent Caching"
+    icon="database"
+    href="/ai-gateway/concepts/cache"
+  />
+  <Card
+    title="Multiple Routers"
+    icon="server"
+    href="/ai-gateway/concepts/routers"
+  />
+  <Card
+    title="Rate Limiting"
+    icon="gauge-high"
+    href="/ai-gateway/concepts/rate-limiting"
+  />
 </CardGroup>
 
 ## What's Next?
 
 You now have a solid foundation with custom routers! Here are the next steps to explore:
 
-<Card title="Deploy Your Router" icon="rocket" href="/ai-gateway/deployment/overview" horizontal>
+<Card
+  title="Deploy Your Router"
+  icon="rocket"
+  href="/ai-gateway/deployment/overview"
+  horizontal
+>
   Learn how to deploy your router to production
 </Card>

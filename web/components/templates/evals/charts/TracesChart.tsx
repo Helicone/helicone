@@ -5,7 +5,7 @@ interface TracesChartProps {
 }
 
 export const TracesChart: React.FC<TracesChartProps> = ({ overTime }) => (
-  <div className="w-full h-16">
+  <div className="h-16 w-full">
     <AreaChart
       className="h-full"
       data={overTime}

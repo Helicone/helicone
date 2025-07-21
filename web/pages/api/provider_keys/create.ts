@@ -42,7 +42,7 @@ async function handler({
 
   const { error } = await dbExecute(
     `INSERT INTO provider_keys (id, org_id, provider_name, provider_key_name, provider_key) VALUES ($1, $2, $3, $4, $5)`,
-    [keyId, userData.orgId, providerName, providerKeyName, providerKey]
+    [keyId, userData.orgId, providerName, providerKeyName, providerKey],
   );
 
   if (error) {

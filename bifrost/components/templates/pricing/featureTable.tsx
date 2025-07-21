@@ -203,7 +203,7 @@ export default function FeatureTable() {
                       <tier.icon
                         className={clsx(
                           tier.featured ? "text-sky-500" : "text-gray-900",
-                          "w-4 h-4"
+                          "h-4 w-4"
                         )}
                       />
                       <p
@@ -330,7 +330,7 @@ export default function FeatureTable() {
                       <tier.icon
                         className={clsx(
                           tier.featured ? "text-sky-500" : "text-gray-900",
-                          "w-4 h-4"
+                          "h-4 w-4"
                         )}
                       />
                       <p

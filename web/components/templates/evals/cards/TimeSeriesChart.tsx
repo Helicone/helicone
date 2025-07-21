@@ -37,7 +37,7 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
   // If no data, show a message instead of chart
   if (!hasData) {
     return (
-      <div className={`h-32 flex items-center justify-center ${className}`}>
+      <div className={`flex h-32 items-center justify-center ${className}`}>
         <Small className="text-muted-foreground">No data available</Small>
       </div>
     );
@@ -58,9 +58,9 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
   const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-background p-2 border rounded-md shadow-sm">
+        <div className="rounded-md border bg-background p-2 shadow-sm">
           <p className="text-xs font-medium">{`Score: ${payload[0].value?.toFixed(
-            1
+            1,
           )}%`}</p>
           <p className="text-xs text-muted-foreground">{`Date: ${payload[0].payload.date}`}</p>
         </div>
@@ -78,7 +78,7 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
   };
 
   return (
-    <div className={`h-32 flex flex-col ${className}`}>
+    <div className={`flex h-32 flex-col ${className}`}>
       {/* Chart area */}
       <div className="flex-grow">
         <ResponsiveContainer width="100%" height="100%">
@@ -117,7 +117,7 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
       </div>
 
       {/* Stats */}
-      <div className="flex justify-between text-xs pt-2">
+      <div className="flex justify-between pt-2 text-xs">
         <Small className="text-muted-foreground">
           Min: {minScore.toFixed(1)}%
         </Small>

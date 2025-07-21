@@ -17,24 +17,24 @@ export default function PhHeader() {
   }, []);
 
   return (
-    <div className="bg-[#FF6154]/10 rounded-lg w-full border-l-4 border-l-[#FF6154] text-[#FF6154] flex flex-col md:flex-row md:gap-2 gap-4 justify-between md:items-center items-start p-4 mt-2 mb-8">
-      <div className="flex flex-row gap-1 items-baseline">
+    <div className="mb-8 mt-2 flex w-full flex-col items-start justify-between gap-4 rounded-lg border-l-4 border-l-[#FF6154] bg-[#FF6154]/10 p-4 text-[#FF6154] md:flex-row md:items-center md:gap-2">
+      <div className="flex flex-row items-baseline gap-1">
         <div className="space-y-2">
-          <p className="text-xl font-mono px-[10px] py-[3px] text-[#FF6154] bg-white border-2 border-[#FF6154]/50 rounded-full">
+          <p className="rounded-full border-2 border-[#FF6154]/50 bg-white px-[10px] py-[3px] font-mono text-xl text-[#FF6154]">
             {Math.trunc(time / (1000 * 60 * 60))}
           </p>
           <p className="text-xs font-bold">HOURS</p>
         </div>
-        <p className="font-bold text-2xl">:</p>
+        <p className="text-2xl font-bold">:</p>
         <div className="space-y-2">
-          <p className="text-xl font-mono px-[10px] py-[3px] text-[#FF6154] bg-white border-2 border-[#FF6154]/50 rounded-full">
+          <p className="rounded-full border-2 border-[#FF6154]/50 bg-white px-[10px] py-[3px] font-mono text-xl text-[#FF6154]">
             {Math.trunc((time % (1000 * 60 * 60)) / (1000 * 60))}
           </p>
           <p className="text-xs font-bold">MINS</p>
         </div>
-        <p className="font-bold text-2xl">:</p>
+        <p className="text-2xl font-bold">:</p>
         <div className="space-y-2">
-          <p className="text-xl font-mono px-[10px] py-[3px] text-[#FF6154] bg-white border-2 border-[#FF6154]/50 rounded-full">
+          <p className="rounded-full border-2 border-[#FF6154]/50 bg-white px-[10px] py-[3px] font-mono text-xl text-[#FF6154]">
             {Math.trunc((time % (1000 * 60)) / 1000)
               .toString()
               .padStart(2, "0")}
@@ -44,10 +44,10 @@ export default function PhHeader() {
       </div>
 
       <div>
-        <h1 className="text-lg text-start font-semibold">
+        <h1 className="text-start text-lg font-semibold">
           We launched on Product Hunt today!
         </h1>
-        <p className="text-sm text-start font-light">
+        <p className="text-start text-sm font-light">
           Sign up / upgrade to Growth today and get $500 in credit. Here&apos;s
           how to{" "}
           <a
@@ -59,7 +59,7 @@ export default function PhHeader() {
         </p>
       </div>
 
-      <div className="flex md:flex-row gap-2 md:items-center h-full flex-col-reverse">
+      <div className="flex h-full flex-col-reverse gap-2 md:flex-row md:items-center">
         <a
           href="https://www.producthunt.com/leaderboard/daily/2024/8/22?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-helicone&#0045;ai"
           target="_blank"
@@ -75,7 +75,7 @@ export default function PhHeader() {
         </a>
         <a
           href="https://us.helicone.ai/signup"
-          className="text-white p-1.5 px-3 rounded-lg bg-[#FF6154] w-fit whitespace-nowrap"
+          className="w-fit whitespace-nowrap rounded-lg bg-[#FF6154] p-1.5 px-3 text-white"
         >
           Sign up
         </a>

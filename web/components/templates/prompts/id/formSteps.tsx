@@ -44,7 +44,7 @@ export default function FormSteps(props: {
                 onClick={() => {
                   setCurrentStep(steps.indexOf(step));
                 }}
-                className="w-full group flex flex-col border-l-4 border-sky-500 py-2 pl-4 hover:border-sky-800 md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4"
+                className="group flex w-full flex-col border-l-4 border-sky-500 py-2 pl-4 hover:border-sky-800 md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4"
               >
                 <span className="text-sm font-medium text-sky-500 group-hover:text-sky-800">
                   {step.id}
@@ -56,7 +56,7 @@ export default function FormSteps(props: {
                 onClick={() => {
                   setCurrentStep(steps.indexOf(step));
                 }}
-                className="w-full flex flex-col border-l-4 border-sky-500 py-2 pl-4 md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4"
+                className="flex w-full flex-col border-l-4 border-sky-500 py-2 pl-4 md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4"
                 aria-current="step"
               >
                 <span className="text-sm font-medium text-sky-500">
@@ -69,7 +69,7 @@ export default function FormSteps(props: {
                 onClick={() => {
                   setCurrentStep(steps.indexOf(step));
                 }}
-                className="w-full group flex flex-col border-l-4 border-gray-200 py-2 pl-4 hover:border-gray-300 md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4"
+                className="group flex w-full flex-col border-l-4 border-gray-200 py-2 pl-4 hover:border-gray-300 md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4"
               >
                 <span className="text-sm font-medium text-gray-500 group-hover:text-gray-700">
                   {step.id}

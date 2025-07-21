@@ -8,11 +8,11 @@ import { Badge } from "@/components/ui/badge";
 
 const ScaleCard: React.FC = () => {
   return (
-    <Card className="w-full h-full p-6 bg-sky-50 rounded-xl border-2 border-brand mx-auto">
+    <Card className="border-brand mx-auto h-full w-full rounded-xl border-2 bg-sky-50 p-6">
       <Col className="h-full justify-between gap-4">
         <Col className="gap-6">
           <Col className="h-full gap-2">
-            <Row className="justify-between items-center">
+            <Row className="items-center justify-between">
               <div className="text-accent-foreground text-md font-semibold leading-tight">
                 Pro
               </div>
@@ -20,7 +20,7 @@ const ScaleCard: React.FC = () => {
             </Row>
             <Row className="items-center gap-0.5">
               <div className="text-brand text-3xl font-bold">$20</div>
-              <Row className="py-1 items-center gap-1">
+              <Row className="items-center gap-1 py-1">
                 <div className="text-brand text-lg font-bold">/seat</div>
                 <div className="text-accent-foreground text-lg font-semibold">
                   per month
@@ -39,9 +39,9 @@ const ScaleCard: React.FC = () => {
               "Core observability features",
               "Standard support",
             ].map((feature, index) => (
-              <div key={index} className="py-1.5 flex items-center gap-2">
-                <div className="w-4 h-4 relative overflow-hidden">
-                  <Check className="w-full h-full" />
+              <div key={index} className="flex items-center gap-2 py-1.5">
+                <div className="relative h-4 w-4 overflow-hidden">
+                  <Check className="h-full w-full" />
                 </div>
                 <div className="text-sidebar-foreground text-sm font-normal">
                   {feature}
@@ -51,12 +51,12 @@ const ScaleCard: React.FC = () => {
           </Col>
         </Col>
 
-        <div className="text-xs text-muted-foreground mt-2">
+        <div className="text-muted-foreground mt-2 text-xs">
           * Usage-based pricing applies
         </div>
 
         <Link href="https://us.helicone.ai/settings/billing">
-          <Button className="w-full text-base py-5 bg-brand">
+          <Button className="bg-brand w-full py-5 text-base">
             7-day free trial
           </Button>
         </Link>

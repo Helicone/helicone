@@ -26,8 +26,8 @@ import Companies from "@/components/home/Companies";
 export default function PricingPage() {
   return (
     <div className="bg-background text-slate-700">
-      <div className=" mx-auto antialiased">
-        <div className="flex flex-col max-w-6xl mx-auto p-4 pb-24 pt-8 sm:pb-32 lg:flex gap-8 md:gap-16">
+      <div className="mx-auto antialiased">
+        <div className="mx-auto flex max-w-6xl flex-col gap-8 p-4 pb-24 pt-8 sm:pb-32 md:gap-16 lg:flex">
           <Col className="items-center gap-4">
             <span className="block sm:hidden">
               <Image
@@ -45,16 +45,16 @@ export default function PricingPage() {
                 height={100}
               />
             </span>
-            <h1 className="text-3xl sm:text-5xl font-bold tracking-tight max-w-2xl md:pt-8 text-center text-accent-foreground">
+            <h1 className="text-accent-foreground max-w-2xl text-center text-3xl font-bold tracking-tight sm:text-5xl md:pt-8">
               Simple, predictable pricing
             </h1>
-            <p className="md:mt-4 w-full text-md sm:text-lg leading-7 max-w-xl text-center text-muted-foreground">
+            <p className="text-md text-muted-foreground w-full max-w-xl text-center leading-7 sm:text-lg md:mt-4">
               Built to scale with you. Only pay for what you use.
             </p>
           </Col>
 
           <div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full"
+            className="grid w-full grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4"
             id="plans"
           >
             <FreeCard />
@@ -63,8 +63,8 @@ export default function PricingPage() {
             <EnterpriseCard />
           </div>
 
-          <div className="flex mt-4 justify-center flex-col items-center gap-4">
-            <h2 className="text-xl font-semibold text-sidebar-foreground text-center leading-8">
+          <div className="mt-4 flex flex-col items-center justify-center gap-4">
+            <h2 className="text-sidebar-foreground text-center text-xl font-semibold leading-8">
               Powering leading companies
               <br />
               <span className="text-muted-foreground">
@@ -80,17 +80,17 @@ export default function PricingPage() {
           <AvailableDiscounts />
           <ProductComparisonTable />
 
-          <div className="py-16 sm:p-8 flex flex-col sm:flex-row sm:justify-between">
+          <div className="flex flex-col py-16 sm:flex-row sm:justify-between sm:p-8">
             <div className="w-full sm:w-1/2">
               <h3 className="text-[36px] font-bold text-slate-900">
                 Frequently asked <br />
                 questions
               </h3>
             </div>
-            <div className="w-full sm:w-1/2 text-accent-foreground">
+            <div className="text-accent-foreground w-full sm:w-1/2">
               <Accordion type="single" collapsible className="w-full">
                 <AccordionItem value="item-1">
-                  <AccordionTrigger className="font-medium text-left">
+                  <AccordionTrigger className="text-left font-medium">
                     What do I get with the free plan?
                   </AccordionTrigger>
                   <AccordionContent className="accordion-content-style">
@@ -104,7 +104,7 @@ export default function PricingPage() {
                 </AccordionItem>
 
                 <AccordionItem value="item-2">
-                  <AccordionTrigger className="font-medium text-left">
+                  <AccordionTrigger className="text-left font-medium">
                     How is Helicone&apos;s usage-based pricing calculated?
                   </AccordionTrigger>
                   <AccordionContent className="accordion-content-style">
@@ -117,7 +117,7 @@ export default function PricingPage() {
                     You can also find your monthly usage in the{" "}
                     <Link
                       href="https://us.helicone.ai/settings/billing"
-                      className="underline hover:text-brand"
+                      className="hover:text-brand underline"
                     >
                       Billing
                     </Link>{" "}
@@ -126,7 +126,7 @@ export default function PricingPage() {
                 </AccordionItem>
 
                 <AccordionItem value="item-3">
-                  <AccordionTrigger className="font-medium text-left">
+                  <AccordionTrigger className="text-left font-medium">
                     What happens if I exceed my request limit?
                   </AccordionTrigger>
                   <AccordionContent className="accordion-content-style">
@@ -142,7 +142,7 @@ export default function PricingPage() {
                 </AccordionItem>
 
                 <AccordionItem value="item-4">
-                  <AccordionTrigger className="font-medium text-left">
+                  <AccordionTrigger className="text-left font-medium">
                     Can I switch plans or cancel anytime?
                   </AccordionTrigger>
                   <AccordionContent className="accordion-content-style">
@@ -151,7 +151,7 @@ export default function PricingPage() {
                     the{" "}
                     <Link
                       href="https://us.helicone.ai/settings/billing"
-                      className="underline hover:text-brand"
+                      className="hover:text-brand underline"
                     >
                       Billing
                     </Link>{" "}
@@ -162,7 +162,7 @@ export default function PricingPage() {
                     additional security requriements,{" "}
                     <Link
                       href="/contact"
-                      className="underline hover:text-brand"
+                      className="hover:text-brand underline"
                     >
                       contact us
                     </Link>{" "}
@@ -171,7 +171,7 @@ export default function PricingPage() {
                 </AccordionItem>
 
                 <AccordionItem value="item-5">
-                  <AccordionTrigger className="font-medium text-left">
+                  <AccordionTrigger className="text-left font-medium">
                     Does Helicone work with my LLM provider?
                   </AccordionTrigger>
                   <AccordionContent className="accordion-content-style">
@@ -187,7 +187,7 @@ export default function PricingPage() {
                     our{" "}
                     <Link
                       href="https://docs.helicone.ai/getting-started/integration-method/gateway"
-                      className="underline hover:text-brand"
+                      className="hover:text-brand underline"
                     >
                       Integration docs
                     </Link>{" "}
@@ -197,7 +197,7 @@ export default function PricingPage() {
                 </AccordionItem>
 
                 <AccordionItem value="item-6">
-                  <AccordionTrigger className="font-medium text-left">
+                  <AccordionTrigger className="text-left font-medium">
                     Is there a plan for teams or enterprise use?
                   </AccordionTrigger>
                   <AccordionContent className="accordion-content-style">
@@ -208,7 +208,7 @@ export default function PricingPage() {
                     <br />
                     For advanced needs like on-prem deployment, custom SLAs, or
                     security reviews, we also offer custom Enterprise plans.{" "}
-                    <Link href="/signup" className="underline hover:text-brand">
+                    <Link href="/signup" className="hover:text-brand underline">
                       Contact us
                     </Link>{" "}
                     to learn more or get a quote tailored to your team.
@@ -216,7 +216,7 @@ export default function PricingPage() {
                 </AccordionItem>
 
                 <AccordionItem value="item-7">
-                  <AccordionTrigger className="font-medium text-left">
+                  <AccordionTrigger className="text-left font-medium">
                     Do you offer discounts for startups, students, or open
                     source projects?
                   </AccordionTrigger>
@@ -229,7 +229,7 @@ export default function PricingPage() {
                     open-source project,{" "}
                     <Link
                       href="/contact"
-                      className="underline hover:text-brand"
+                      className="hover:text-brand underline"
                     >
                       reach out
                     </Link>{" "}
@@ -243,11 +243,11 @@ export default function PricingPage() {
 
           <div className="md:py-16">
             <div className="">
-              <div className="lg:grid lg:grid-cols-3 lg:gap-8 items-center">
-                <div className="bg-gray-50 rounded-lg p-8 col-span-1 lg:col-span-2">
+              <div className="items-center lg:grid lg:grid-cols-3 lg:gap-8">
+                <div className="col-span-1 rounded-lg bg-gray-50 p-8 lg:col-span-2">
                   <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl">
                     Understand your
-                    <span className="block text-brand">
+                    <span className="text-brand block">
                       AI performance bottleneck
                     </span>
                     with Helicone.
@@ -260,8 +260,8 @@ export default function PricingPage() {
                     </div>
                   </div>
                 </div>
-                <div className="mt-10 lg:mt-0 h-full">
-                  <Col className="bg-white p-6 rounded-lg shadow h-full">
+                <div className="mt-10 h-full lg:mt-0">
+                  <Col className="h-full rounded-lg bg-white p-6 shadow">
                     <h3 className="text-lg font-medium text-slate-900">
                       Helicone or LangSmith?
                     </h3>
@@ -273,7 +273,7 @@ export default function PricingPage() {
                     <div className="mt-4 lg:mt-auto">
                       <Button asChild variant="outline">
                         <Link href="/blog/langsmith-vs-helicone">
-                          <BookOpenIcon className="size-4 mr-2" />
+                          <BookOpenIcon className="mr-2 size-4" />
                           Read more
                         </Link>
                       </Button>

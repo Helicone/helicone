@@ -8,9 +8,9 @@ export default function LoadingCard() {
       </CardHeader>
       <CardContent>
         <div className="animate-pulse">
-          <div className="h-4 bg-gray-200 rounded mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded"></div>
+          <div className="mb-4 h-4 rounded bg-gray-200"></div>
+          <div className="mb-4 h-4 rounded bg-gray-200"></div>
+          <div className="h-4 rounded bg-gray-200"></div>
         </div>
       </CardContent>
     </Card>

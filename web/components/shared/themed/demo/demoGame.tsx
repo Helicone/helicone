@@ -37,7 +37,7 @@ export const DemoGame = ({
         }));
       }
     },
-    [isDragging]
+    [isDragging],
   );
 
   const onMouseUp = () => {
@@ -83,17 +83,17 @@ export const DemoGame = ({
           width: `${size.width}px`,
           height: `${size.height}px`,
         }}
-        className="bg-white shadow-2xl rounded-lg overflow-hidden flex flex-col relative"
+        className="relative flex flex-col overflow-hidden rounded-lg bg-white shadow-2xl"
       >
         <div
           ref={dragRef}
           onMouseDown={onMouseDown}
-          className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-4 flex justify-between items-center cursor-move"
+          className="flex cursor-move items-center justify-between bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-4 text-white"
         >
           <h1 className="text-xl font-bold">Helicone Demos</h1>
           <button
             onClick={() => setOpenDemo(false)}
-            className="text-white hover:text-gray-200 transition-colors"
+            className="text-white transition-colors hover:text-gray-200"
           >
             <XMarkIcon className="h-6 w-6" />
           </button>
