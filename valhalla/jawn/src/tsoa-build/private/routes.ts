@@ -13980,6 +13980,32 @@ const models: TsoaRoute.Models = {
         "type": {"ref":"Omit_stripe.Stripe.Invoice.id_","validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "TextOperator": {
+        "dataType": "refObject",
+        "properties": {
+            "operator": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["equals"]},{"dataType":"enum","enums":["startsWith"]},{"dataType":"enum","enums":["includes"]}],"required":true},
+            "value": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ModelRow": {
+        "dataType": "refObject",
+        "properties": {
+            "model": {"ref":"TextOperator","required":true},
+            "cost": {"dataType":"nestedObjectLiteral","nestedProperties":{"completion_audio_token":{"dataType":"double"},"prompt_audio_token":{"dataType":"double"},"prompt_cache_read_token":{"dataType":"double"},"prompt_cache_write_token":{"dataType":"double"},"per_call":{"dataType":"double"},"per_image":{"dataType":"double"},"completion_token":{"dataType":"double","required":true},"prompt_token":{"dataType":"double","required":true}},"required":true},
+            "showInPlayground": {"dataType":"boolean"},
+            "targetUrl": {"dataType":"string"},
+            "dateRange": {"dataType":"nestedObjectLiteral","nestedProperties":{"end":{"dataType":"string","required":true},"start":{"dataType":"string","required":true}}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ModelWithProvider": {
+        "dataType": "refAlias",
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"modelRow":{"ref":"ModelRow","required":true},"provider":{"dataType":"string","required":true}},"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ConvertToWavResponse": {
         "dataType": "refObject",
         "properties": {
@@ -19035,9 +19061,73 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAdminController_backfillCostsPreview: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"toDate":{"dataType":"string"},"fromDate":{"dataType":"string"},"hasCosts":{"dataType":"boolean","required":true},"models":{"dataType":"array","array":{"dataType":"refAlias","ref":"ModelWithProvider"},"required":true}}},
+        };
+        app.post('/v1/admin/backfill-costs-preview',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(AdminController)),
+            ...(fetchMiddlewares<RequestHandler>(AdminController.prototype.backfillCostsPreview)),
+
+            async function AdminController_backfillCostsPreview(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAdminController_backfillCostsPreview, request, response });
+
+                const controller = new AdminController();
+
+              await templateService.apiHandler({
+                methodName: 'backfillCostsPreview',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAdminController_deduplicateRequestResponseRmt: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{}},
+        };
+        app.post('/v1/admin/deduplicate-request-response-rmt',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(AdminController)),
+            ...(fetchMiddlewares<RequestHandler>(AdminController.prototype.deduplicateRequestResponseRmt)),
+
+            async function AdminController_deduplicateRequestResponseRmt(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAdminController_deduplicateRequestResponseRmt, request, response });
+
+                const controller = new AdminController();
+
+              await templateService.apiHandler({
+                methodName: 'deduplicateRequestResponseRmt',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsAdminController_backfillCosts: Record<string, TsoaRoute.ParameterSchema> = {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
-                body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"chunkNumber":{"dataType":"double","required":true},"totalChunks":{"dataType":"double","required":true},"modelId":{"dataType":"string","required":true},"specifyModel":{"dataType":"boolean","required":true},"timeExpression":{"dataType":"string","required":true}}},
+                body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"toDate":{"dataType":"string"},"fromDate":{"dataType":"string"},"confirmed":{"dataType":"boolean","required":true},"models":{"dataType":"array","array":{"dataType":"refAlias","ref":"ModelWithProvider"},"required":true}}},
         };
         app.post('/v1/admin/backfill-costs',
             authenticateMiddleware([{"api_key":[]}]),
