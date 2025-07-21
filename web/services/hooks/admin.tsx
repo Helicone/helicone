@@ -4,10 +4,21 @@ import { $JAWN_API, getJawnClient } from "../../lib/clients/jawn";
 import { components } from "../../lib/clients/jawnTypes/private";
 
 const useCreateAlertBanner = (onSuccess?: () => void) => {
-  const { mutate: createBanner, isPending: isCreatingBanner } =
-    $JAWN_API.useMutation("post", "/v1/admin/alert_banners", {
-      onSuccess,
-    });
+  const { mutate: createBanner, isPending: isCreatingBanner } = useMutation({
+    mutationKey: ["create-alert-banner"],
+    mutationFn: async (req: { title: string; message: string }) => {
+      const jawnClient = getJawnClient();
+      const { data, error } = await jawnClient.POST("/v1/admin/alert_banners", {
+        body: req,
+      });
+
+      if (!error) {
+        onSuccess && onSuccess();
+      }
+
+      return { data, error };
+    },
+  });
   return {
     createBanner,
     isCreatingBanner,
@@ -187,7 +198,7 @@ const useFeatureFlag = (feature: string, orgId: string) => {
     }
   );
   return {
-    data: data?.data ?? false,
+    data,
     isLoading,
     error,
   };
