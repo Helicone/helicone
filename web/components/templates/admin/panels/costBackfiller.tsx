@@ -625,7 +625,8 @@ const CostBackfiller = () => {
           <div className="flex items-center gap-2 p-3 rounded-md bg-amber-50 border border-amber-200 mb-4">
             <AlertTriangle size={16} className="text-amber-600" />
             <Small className="text-amber-800">
-              <strong>Note:</strong> Deduplication is a long-running operation that may take several minutes to complete. 
+              <strong>Note:</strong> Deduplication is a long-running operation that may take several minutes to even hours to complete.
+              If backfilling hundreds of thousands of rows, (which may occur for popular models), expect to wait a while. 
               The process will continue running in the background even after you see the success message.
             </Small>
           </div>
