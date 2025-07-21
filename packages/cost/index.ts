@@ -7,6 +7,14 @@ import { ModelRow } from "./interfaces/Cost";
 import { allCosts, defaultProvider, providers } from "./providers/mappings";
 import { COST_PRECISION_MULTIPLIER } from "./costCalc";
 
+export type { ModelRow } from "./interfaces/Cost";
+export { providers } from "./providers/mappings";
+
+export type ModelWithProvider = {
+  provider: string;
+  modelRow: ModelRow;
+}
+
 export function costOf({
   model,
   provider,
@@ -214,62 +222,49 @@ END
 `;
 }
 
+
+// Current only used for backfilling costs via admin.
+export function clickhouseModelFilter(
+  rows: ModelWithProvider[],
+  table = "request_response_rmt",
+) {
+  return `
+  (
+    (${rows.map((row) => {
+      if (row.modelRow.model.operator === "equals") {
+        return `${table}.model = '${row.modelRow.model.value}'`
+      } else if (row.modelRow.model.operator === "startsWith") {
+        return `${table}.model LIKE '${row.modelRow.model.value}%'`
+      } else if (row.modelRow.model.operator === "includes") {
+        return `${table}.model ILIKE '%${row.modelRow.model.value}%'`
+      } else {
+        throw new Error("Unknown operator");
+      }
+    }).join(" OR ")})
+    AND
+    (${table}.provider IN (${rows.map((row) => `'${row.provider}'`).join(",")}))
+  )
+  `
+}
+
 // Currently only used for backfilling costs via admin.
 // If not chunked, the query will be too large for Clickhouse.
 export function clickhousePriceCalcNonAggregated(
-  table: string,
-  inDollars: boolean = true,
-  chunkProviders: boolean = false,
-  totalChunks: number = 1,
-  chunk: number = 0,
-  useDefaultCost: boolean = true,
-  optimized: boolean = false,
+  models: ModelWithProvider[],
+  table = "request_response_rmt",
 ) {
-  const providersWithCosts = providers.filter(
-    (p) => p.costs && defaultProvider.provider !== p.provider
-  );
-  if (!defaultProvider.costs) {
-    throw new Error("Default provider does not have costs");
-  }
-
-  const cappedTotalChunks = Math.max(1, Math.min(totalChunks, providersWithCosts.length));
-  const cappedChunk = Math.min(chunk, cappedTotalChunks - 1);
-
-  let providersToProcess = providersWithCosts;
-  if (chunkProviders) {
-    const chunkSize = Math.ceil(providersWithCosts.length / cappedTotalChunks);
-    const start = cappedChunk * chunkSize;
-    const end = Math.min(start + chunkSize, providersWithCosts.length);
-    providersToProcess = providersWithCosts.slice(start, end);
-  }
-
-  if (providersToProcess.length === 0) {
-    return `
-  (
-  CASE
-    ${caseForCost(defaultProvider.costs, table, COST_PRECISION_MULTIPLIER, useDefaultCost, optimized)}
-  END
-  ) ${inDollars ? `/ ${COST_PRECISION_MULTIPLIER}` : ""}
-`;
-  }
-
   return `
   (
-  CASE
-  ${providersToProcess
-    .map((provider) => {
-      if (!provider.costs) {
-        throw new Error("Provider does not have costs");
-      }
-
-      return `WHEN (${table}.provider = '${
-        provider.provider
-      }') THEN (${caseForCost(provider.costs, table, COST_PRECISION_MULTIPLIER, useDefaultCost, optimized)})`;
-    })
-    .join("\n")}
-    ELSE ${caseForCost(defaultProvider.costs, table, COST_PRECISION_MULTIPLIER, useDefaultCost, optimized)}
-  END
-  ) ${inDollars ? `/ ${COST_PRECISION_MULTIPLIER}` : ""}
+    CASE
+    ${models
+      .map((row) => {
+        return `WHEN (${table}.provider = '${row.provider}') 
+      THEN (${caseForCost([row.modelRow], table, COST_PRECISION_MULTIPLIER, false, false)})`;
+      })
+      .join("\n    ")}
+    ELSE 0
+    END
+  )
 `;
 }
 
