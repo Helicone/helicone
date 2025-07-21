@@ -76,8 +76,6 @@ const RouterUseDialog = ({
   open: boolean;
   setOpen: (open: boolean) => void;
 }) => {
-  console.log("routerHash", routerHash);
-
   const baseUrl = `${process.env.NEXT_PUBLIC_CLOUD_GATEWAY_BASE_URL}/router/${routerHash}`;
 
   if (!routerHash) {
@@ -85,7 +83,7 @@ const RouterUseDialog = ({
   }
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger className={cn(hideTrigger && "hidden")} asChild>
+      <DialogTrigger asChild>
         <Button
           variant="ghost"
           size="sm_sleek"

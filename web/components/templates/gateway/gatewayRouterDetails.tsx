@@ -39,7 +39,6 @@ import { getInitialColumns } from "./initialColumns";
 import { useGetRequests } from "@/services/hooks/requests";
 import { CostOverTimeChart } from "./costOverTimeChart";
 import { LatencyOverTimeChart } from "./latencyOverTimeChart";
-import { DiffHighlight } from "@/components/templates/welcome/diffHighlight";
 import RouterUseDialog from "./routerUseDialog";
 
 // Hook to fetch requests for a specific gateway router
@@ -168,8 +167,6 @@ const GatewayRouterPage = () => {
     pageSize: 50,
   });
 
-  console.log(requests);
-
   useEffect(() => {
     if (gatewayRouter) {
       const yamlString = yaml.dump(gatewayRouter.data?.config);
@@ -209,11 +206,20 @@ const GatewayRouterPage = () => {
     "ai_gateway",
     org?.currentOrg?.id ?? "",
   );
-  const [routerUseDialogOpen, setRouterUseDialogOpen] = useState(false);
+  const [routerUseDialogOpen, setRouterUseDialogOpen] = useState(
+    searchParams?.get("new-router") === "true",
+  );
 
   if (!hasFeatureFlag) {
     return <div>You do not have access to the AI Gateway</div>;
   }
+
+  const handleRouterUseDialogOpen = (open: boolean) => {
+    setRouterUseDialogOpen(open);
+    if (!open) {
+      router.replace(`/gateway/${router_id}`, undefined, { shallow: true });
+    }
+  };
 
   return (
     <main className="flex h-screen w-full animate-fade-in flex-col">
@@ -264,7 +270,7 @@ const GatewayRouterPage = () => {
             <RouterUseDialog
               routerHash={gatewayRouter?.data?.hash ?? ""}
               open={routerUseDialogOpen}
-              setOpen={setRouterUseDialogOpen}
+              setOpen={handleRouterUseDialogOpen}
             />
             <Dialog open={configModalOpen} onOpenChange={setConfigModalOpen}>
               <DialogTrigger asChild>

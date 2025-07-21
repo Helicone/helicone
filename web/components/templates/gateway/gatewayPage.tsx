@@ -6,16 +6,16 @@ import {
 } from "@/components/shared/table/simpleTable";
 import { Input } from "@/components/ui/input";
 import { Small } from "@/components/ui/typography";
+import { Button } from "@/components/ui/button";
 import { $JAWN_API } from "@/lib/clients/jawn";
 import { components } from "@/lib/clients/jawnTypes/public";
 import { Search } from "lucide-react";
 import { useState } from "react";
 import { formatTime } from "../prompts2025/timeUtils";
 import { useRouter } from "next/router";
-import CreateRouterDialog from "./createRouterDialog";
 import { useFeatureFlag } from "@/services/hooks/admin";
 import { useOrg } from "@/components/layout/org/organizationContext";
-import RouterUseDialog from "./routerUseDialog";
+import { PlusIcon } from "lucide-react";
 
 type Router = components["schemas"]["Router"];
 
@@ -53,8 +53,6 @@ const columns: ColumnConfig<Router>[] = [
 
 const GatewayPage = () => {
   const [search, setSearch] = useState("");
-  const [isCreateRouterDialogOpen, setIsCreateRouterDialogOpen] =
-    useState(false);
   const router = useRouter();
   const { data: routers, isLoading } = $JAWN_API.useQuery("get", "/v1/gateway");
   const org = useOrg();
@@ -62,10 +60,6 @@ const GatewayPage = () => {
     "ai_gateway",
     org?.currentOrg?.id ?? "",
   );
-  const [routerUseDialogOpen, setRouterUseDialogOpen] = useState(false);
-  const [justCreatedRouterHash, setJustCreatedRouterHash] = useState<
-    string | null
-  >(null);
 
   if (!hasFeatureFlag) {
     return <div>You do not have access to the AI Gateway</div>;
@@ -96,15 +90,10 @@ const GatewayPage = () => {
                 className="pl-9"
               />
             </div>
-            <CreateRouterDialog
-              open={isCreateRouterDialogOpen}
-              setOpen={setIsCreateRouterDialogOpen}
-              onSuccess={(routerHash) => {
-                console.log("sucessfull dearrrsss", routerHash);
-                setJustCreatedRouterHash(routerHash);
-                setRouterUseDialogOpen(true);
-              }}
-            />
+            <Button onClick={() => router.push("/gateway/create")}>
+              <PlusIcon className="h-4 w-4" />
+              Create Router
+            </Button>
           </div>
         </div>
         <div className="flex-1 overflow-hidden">
@@ -129,13 +118,6 @@ const GatewayPage = () => {
           )}
         </div>
       </div>
-
-      <RouterUseDialog
-        hideTrigger
-        routerHash={justCreatedRouterHash ?? ""}
-        open={routerUseDialogOpen}
-        setOpen={setRouterUseDialogOpen}
-      />
     </main>
   );
 };
