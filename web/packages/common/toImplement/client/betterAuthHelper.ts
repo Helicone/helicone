@@ -41,7 +41,8 @@ async function ensureUserInBetterAuth(email: string, password: string): Promise<
 export const heliconeAuthClientFromSession = (
   session: ReturnType<typeof authClient.useSession>["data"],
   refetch: () => void,
-  org?: { org: HeliconeOrg; role: string }
+  org?: { org: HeliconeOrg; role: string },
+  dbUser?: HeliconeUser,
 ): HeliconeAuthClient => {
   const sessionData = session ?? null;
   const betterAuthUser = sessionData?.user ?? null;
@@ -65,6 +66,9 @@ export const heliconeAuthClientFromSession = (
     },
 
     async getUser(): Promise<Result<HeliconeUser, string>> {
+      if (dbUser) {
+        return ok(dbUser);
+      }
       if (!user) {
         return err("User not found");
       }
