@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { fromNodeHeaders } from "better-auth/node";
 import { SSRContext } from "../../auth/client/getSSRHeliconeAuthClient";
 import { HeliconeAuthClient } from "../../auth/client/HeliconeAuthClient";
-import { heliconeAuthClientFromSession } from "../client/betterAuthHelper";
+import { authClient, heliconeAuthClientFromSession } from "../client/betterAuthHelper";
 import { ORG_ID_COOKIE_KEY } from "@/lib/constants";
 import { dbExecute } from "@/lib/api/db/dbExecute";
 import { HeliconeOrg, HeliconeUserResult, Role } from "../../auth/types";
@@ -10,7 +10,7 @@ import { Database } from "@/db/database.types";
 import { err, ok } from "../../result";
 
 export type GenericHeaders = Record<string, string | string[] | undefined>;
-async function getUser(betterAuthUserId: string): Promise<HeliconeUserResult> {
+export async function getUser(betterAuthUserId: string): Promise<HeliconeUserResult> {
   const user = await dbExecute<{
     user_id: string;
     email: string;
@@ -77,7 +77,7 @@ export async function betterAuthClientFromSSRContext(
   }
 
   return heliconeAuthClientFromSession(
-    session,
+    session as ReturnType<typeof authClient.getSession> & { user?: { authUserId: string } },
     () => {},
     org?.data?.[0]
       ? {
@@ -85,6 +85,5 @@ export async function betterAuthClientFromSSRContext(
           role: org.data[0].role ?? "member",
         }
       : undefined,
-    user.data ?? undefined
   );
 }
