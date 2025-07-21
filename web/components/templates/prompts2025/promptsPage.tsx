@@ -221,7 +221,7 @@ const PromptsPage = (props: PromptsPageProps) => {
         }
         rightSection={
           <section className="flex flex-row items-center gap-2">
-            <Button
+            {/* <Button
               onClick={() => {
                 // TODO: Add docs link
               }}
@@ -229,7 +229,7 @@ const PromptsPage = (props: PromptsPageProps) => {
               size="sm"
             >
               <BookOpenIcon className="h-4 w-4" />
-            </Button>
+            </Button> */}
           </section>
         }
       />
