@@ -34,25 +34,6 @@ export const ProvidersPage: React.FC = () => {
       <div className="flex flex-col gap-4 max-w-5xl mx-auto">
         <H1>Provider API Keys</H1>
 
-        <Alert
-          variant="warning"
-          className="bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800 py-2"
-        >
-          <AlertDescription>
-            <strong>Important:</strong> These keys are not for proxying
-            requests. See{" "}
-            <Link
-              href="https://docs.helicone.ai/getting-started/integration-methods"
-              className="text-primary font-medium"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              integration docs
-            </Link>
-            .
-          </AlertDescription>
-        </Alert>
-
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

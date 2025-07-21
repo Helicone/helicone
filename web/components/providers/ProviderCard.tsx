@@ -252,14 +252,8 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
       dispatch({ type: "SET_KEY_LOADING" });
 
       try {
-        const key = await viewDecryptedProviderKey(existingKey.id);
-
-        if (key) {
-          dispatch({ type: "SET_DECRYPTED_KEY", payload: key });
-        } else {
-          setNotification("Failed to retrieve key", "error");
-          dispatch({ type: "HIDE_KEY" });
-        }
+        const key = await viewDecryptedProviderKey(existingKey.id) ?? "";
+        dispatch({ type: "SET_DECRYPTED_KEY", payload: key });
       } catch (error) {
         console.error("Error viewing key:", error);
         setNotification("Failed to retrieve key", "error");

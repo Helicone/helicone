@@ -281,9 +281,11 @@ export class KeyManager extends BaseManager {
       const values = [];
       let paramIndex = 1;
 
-      if (providerKey !== undefined) {
-        updateParts.push(`provider_key = $${paramIndex++}`);
+      updateParts.push(`provider_key = $${paramIndex++}`);
+      if (providerKey !== "" && providerKey !== undefined) {
         values.push(providerKey);
+      } else {
+        values.push(null);
       }
 
       if (config !== undefined) {
