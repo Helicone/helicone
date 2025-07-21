@@ -1,4 +1,4 @@
-FROM clickhouse/clickhouse-server:24.3.13.40 AS database-stage
+FROM --platform=linux/amd64 clickhouse/clickhouse-server:24.3.13.40 AS database-stage
 
 # Install PostgreSQL and other dependencies
 RUN apt-get update && apt-get install -y \
@@ -46,6 +46,7 @@ ENV FLYWAY_SQL_MIGRATION_SUFFIXES=.sql
 COPY ./supabase/migrations /app/supabase/migrations
 COPY ./supabase/migrations_without_supabase /app/supabase/migrations_without_supabase
 COPY ./clickhouse/migrations /app/clickhouse/migrations
+COPY ./clickhouse/seeds /app/clickhouse/seeds
 COPY ./clickhouse/ch_hcone.py /app/clickhouse/ch_hcone.py
 RUN chmod +x /app/clickhouse/ch_hcone.py
 
@@ -66,37 +67,51 @@ RUN apt-get update && apt-get install -y curl \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy package files and source code
+# Copy only package files first for better caching
 WORKDIR /app
-COPY package.json package.json
-COPY yarn.lock yarn.lock
-COPY web/package.json web/package.json
+COPY package.json yarn.lock ./
+COPY web/package.json ./web/package.json
+COPY valhalla/jawn/package.json ./valhalla/jawn/package.json
+
+# Copy packages directory structure and package.json files
+COPY packages ./packages
+RUN find packages -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" -o -name "*.json" ! -name "package.json" | xargs rm -f 2>/dev/null || true
+
+# Install root dependencies first with cache mount
+RUN --mount=type=cache,target=/root/.yarn \
+    yarn install --frozen-lockfile
+
+# Install jawn dependencies
+WORKDIR /app/valhalla/jawn
+RUN --mount=type=cache,target=/root/.yarn \
+    yarn install --frozen-lockfile
+
+# Now copy source code after dependencies are cached
+WORKDIR /app
 COPY packages ./packages
 COPY shared ./shared
 COPY valhalla ./valhalla
 RUN find /app -name ".env.*" -exec rm {} \;
 
-# Install dependencies and build jawn
-RUN yarn install \
-    && cd valhalla/jawn \
-    && yarn install \
-    && yarn build
+# Build jawn (dependencies already installed)
+RUN cd valhalla/jawn && yarn build
 
 
 # --------------------------------------------------------------------------------------------------------------------
 
 FROM jawn-stage AS web-stage
 
-# Copy package files and source code
+# Web dependencies are already installed in jawn-stage, just copy source and build
 WORKDIR /app
 COPY web ./web
 RUN find /app -name ".env.*" -exec rm {} \;
 
-# Install dependencies and build web
-RUN yarn install \
-    && cd web \
-    && yarn install \
-    && yarn build
+# Install web-specific dependencies and build
+WORKDIR /app/web
+RUN --mount=type=cache,target=/root/.yarn \
+    yarn install --frozen-lockfile \
+    && yarn add --dev @types/js-yaml \
+    && DISABLE_ESLINT=true yarn build
 
 # --------------------------------------------------------------------------------------------------------------------
 
@@ -126,4 +141,23 @@ ENV MINIO_ROOT_PASSWORD=minioadmin
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 
 # --------------------------------------------------------------------------------------------------------------------
-FROM helicone/ai-gateway:latest AS gateway-stage
+
+# Copy AI Gateway from existing image
+COPY --from=helicone/ai-gateway:latest /app /app/gateway
+
+# Update supervisord configuration to include all services
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Copy monitoring and debugging scripts
+COPY monitor_logs.sh /usr/local/bin/monitor_logs
+COPY debug_jawn.sh /usr/local/bin/debug_jawn
+COPY health_check.sh /usr/local/bin/health_check.sh
+RUN chmod +x /usr/local/bin/monitor_logs /usr/local/bin/debug_jawn /usr/local/bin/health_check.sh
+
+# Create a volume for logs
+VOLUME ["/var/log/supervisor"]
+
+# Expose all service ports
+# 3000: Web frontend, 8585: Jawn backend, 8123: ClickHouse
+# 8788: AI Gateway, 9080: MinIO API, 9001: MinIO Console, 5432: PostgreSQL
+EXPOSE 3000 8585 8123 8788 9080 9001 5432
