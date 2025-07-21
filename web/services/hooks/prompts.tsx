@@ -214,7 +214,7 @@ export const useGetPromptsWithVersions = (
     prompts: PromptWithVersions[];
     totalCount: number;
   }>({
-    queryKey: ["promptsWithVersions"],
+    queryKey: ["promptsWithVersions", { search, tagsFilter, page, pageSize }],
     refetchOnWindowFocus: false,
     queryFn: async () => {
       const promptsResult = await $JAWN_API.POST("/v1/prompt-2025/query", {

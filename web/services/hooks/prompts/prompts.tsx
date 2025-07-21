@@ -225,3 +225,26 @@ export const useCreatePrompt = () => {
     error: mutation.error,
   };
 };
+
+export const useHasPrompts = () => {
+  const org = useOrg();
+
+  const { data, isPending, refetch, isRefetching } = useQuery({
+    queryKey: ["hasPrompts", org?.currentOrg?.id],
+    queryFn: async (query) => {
+      const orgId = query.queryKey[1] as string;
+      const jawn = getJawnClient(orgId);
+      
+      return jawn.GET("/v1/prompt/has-prompts");
+    },
+    enabled: !!org?.currentOrg?.id,
+    refetchOnWindowFocus: false,
+  });
+
+  return {
+    isLoading: isPending,
+    refetch,
+    isRefetching,
+    hasPrompts: data?.data?.data?.hasPrompts ?? false,
+  };
+};

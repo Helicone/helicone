@@ -36,7 +36,7 @@ import {
 } from "@/services/hooks/prompts";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { useOrg } from "@/components/layout/org/organizationContext";
-import { useFeatureFlag } from "@/services/hooks/admin";
+
 import { HeliconeTemplateManager } from "@helicone-package/prompts/templates";
 import { TemplateVariable } from "@helicone-package/prompts/types";
 import { Message } from "@helicone-package/llm-mapper/types";
@@ -209,10 +209,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { setNotification } = useNotification();
   const router = useRouter();
   const organization = useOrg();
-  const { data: hasAccessToPrompts } = useFeatureFlag(
-    "prompts_2025",
-    organization?.currentOrg?.id ?? "",
-  );
   const { initializeColorMap } = useVariableColorMapStore();
 
   useEffect(() => {
@@ -834,25 +830,23 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
             <Small className="font-bold text-gray-500 dark:text-slate-300">
               Playground
             </Small>
-            {hasAccessToPrompts &&
-              promptVersionData?.prompt &&
-              promptVersionData?.promptVersion && (
-                <>
-                  <div className="h-4 w-px bg-border" />
-                  <div className="flex items-center gap-2">
-                    <Small className="font-bold text-gray-500 dark:text-slate-300">
-                      {promptVersionData.prompt.name.length > 30
-                        ? promptVersionData.prompt.name.substring(0, 27) + "..."
-                        : promptVersionData.prompt.name}
-                    </Small>
-                    <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20">
-                      {promptVersionData.promptVersion.minor_version === 0
-                        ? `v${promptVersionData.promptVersion.major_version}`
-                        : `v${promptVersionData.promptVersion.major_version}.${promptVersionData.promptVersion.minor_version}`}
-                    </span>
-                  </div>
-                </>
-              )}
+            {promptVersionData?.prompt && promptVersionData?.promptVersion && (
+              <>
+                <div className="w-px h-4 bg-border" />
+                <div className="flex items-center gap-2">
+                  <Small className="font-bold text-gray-500 dark:text-slate-300">
+                    {promptVersionData.prompt.name.length > 30
+                      ? promptVersionData.prompt.name.substring(0, 27) + "..."
+                      : promptVersionData.prompt.name}
+                  </Small>
+                  <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20">
+                    {promptVersionData.promptVersion.minor_version === 0
+                      ? `v${promptVersionData.promptVersion.major_version}`
+                      : `v${promptVersionData.promptVersion.major_version}.${promptVersionData.promptVersion.minor_version}`}
+                  </span>
+                </div>
+              </>
+            )}
           </div>
         }
       />
@@ -900,23 +894,16 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                   isStreaming={isStreaming}
                 />
               </ResizablePanel>
-              {hasAccessToPrompts && (
-                <>
-                  <ResizableHandle />
-                  <ResizablePanel defaultSize={40} minSize={20}>
-                    <PlaygroundVariablesPanel
-                      variables={templateVariables}
-                      onUpdateValue={(name, { isObject, value }) => {
-                        setVariableInputs({
-                          ...variableInputs,
-                          [name]: { isObject, value },
-                        });
-                      }}
-                      values={variableInputs}
-                    />
-                  </ResizablePanel>
-                </>
-              )}
+              <ResizableHandle />
+              <ResizablePanel defaultSize={40} minSize={20}>
+                <PlaygroundVariablesPanel 
+                  variables={templateVariables}
+                  onUpdateValue={(name, { isObject, value }) => {
+                    setVariableInputs({ ...variableInputs, [name]: { isObject, value } });
+                  }}
+                  values={variableInputs}
+                />
+              </ResizablePanel>
             </ResizablePanelGroup>
           </ResizablePanel>
         </ResizablePanelGroup>

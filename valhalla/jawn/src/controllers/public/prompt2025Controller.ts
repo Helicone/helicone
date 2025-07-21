@@ -16,7 +16,6 @@ import { err, Result } from "../../packages/common/result";
 import { Prompt2025Manager } from "../../managers/prompt/PromptManager";
 import type { JawnAuthenticatedRequest } from "../../types/request";
 import { type OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
-import { PROMPTS_FEATURE_FLAG, checkFeatureFlag } from "../../lib/utils/featureFlags";
 
 export interface Prompt2025Version {
   id: string;
@@ -63,13 +62,6 @@ export class Prompt2025Controller extends Controller {
     @Path() promptId: string,
     @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<Prompt2025, string>> {
-    const featureFlagResult = await checkFeatureFlag(
-      request.authParams.organizationId,
-      PROMPTS_FEATURE_FLAG
-    );
-    if (featureFlagResult.error) {
-      return err(featureFlagResult.error);
-    }
     const promptManager = new Prompt2025Manager(request.authParams);
     const result = await promptManager.getPrompt(promptId);
     if (result.error || !result.data) {
@@ -85,13 +77,6 @@ export class Prompt2025Controller extends Controller {
     @Path() promptId: string,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
-    const featureFlagResult = await checkFeatureFlag(
-      request.authParams.organizationId,
-      PROMPTS_FEATURE_FLAG
-    );
-    if (featureFlagResult.error) {
-      return err(featureFlagResult.error);
-    }
     const promptManager = new Prompt2025Manager(request.authParams);
     const result = await promptManager.deletePrompt({ promptId });
     if (result.error) {
@@ -108,13 +93,6 @@ export class Prompt2025Controller extends Controller {
     @Path() versionId: string,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
-    const featureFlagResult = await checkFeatureFlag(
-      request.authParams.organizationId,
-      PROMPTS_FEATURE_FLAG
-    );
-    if (featureFlagResult.error) {
-      return err(featureFlagResult.error);
-    }
     const promptManager = new Prompt2025Manager(request.authParams);
     const result = await promptManager.deletePromptVersion({ promptId, promptVersionId: versionId });
     if (result.error) {
@@ -129,13 +107,6 @@ export class Prompt2025Controller extends Controller {
   public async getPrompt2025Tags(
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<string[], string>> {
-    const featureFlagResult = await checkFeatureFlag(
-      request.authParams.organizationId,
-      PROMPTS_FEATURE_FLAG
-    );
-    if (featureFlagResult.error) {
-      return err(featureFlagResult.error);
-    }
     const promptManager = new Prompt2025Manager(request.authParams);
     const result = await promptManager.getPromptTags();
     if (result.error || !result.data) {
@@ -156,13 +127,6 @@ export class Prompt2025Controller extends Controller {
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<PromptCreateResponse, string>> {
-    const featureFlagResult = await checkFeatureFlag(
-      request.authParams.organizationId,
-      PROMPTS_FEATURE_FLAG
-    );
-    if (featureFlagResult.error) {
-      return err(featureFlagResult.error);
-    }
     const promptManager = new Prompt2025Manager(request.authParams);
 
     const result = await promptManager.createPrompt(requestBody);
@@ -187,13 +151,6 @@ export class Prompt2025Controller extends Controller {
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<{ id: string }, string>> {
-    const featureFlagResult = await checkFeatureFlag(
-      request.authParams.organizationId,
-      PROMPTS_FEATURE_FLAG
-    );
-    if (featureFlagResult.error) {
-      return err(featureFlagResult.error);
-    }
     const promptManager = new Prompt2025Manager(request.authParams);
 
     const result = await promptManager.newPromptVersion(requestBody);
@@ -231,13 +188,6 @@ export class Prompt2025Controller extends Controller {
   public async getPrompt2025Count(
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<number, string>> {
-    const featureFlagResult = await checkFeatureFlag(
-      request.authParams.organizationId,
-      PROMPTS_FEATURE_FLAG
-    );
-    if (featureFlagResult.error) {
-      return err(featureFlagResult.error);
-    }
     const promptManager = new Prompt2025Manager(request.authParams);
     const result = await promptManager.totalPrompts();
     if (result.error || !result.data) {
@@ -259,13 +209,6 @@ export class Prompt2025Controller extends Controller {
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<Prompt2025[], string>> {
-    const featureFlagResult = await checkFeatureFlag(
-      request.authParams.organizationId,
-      PROMPTS_FEATURE_FLAG
-    );
-    if (featureFlagResult.error) {
-      return err(featureFlagResult.error);
-    }
     const promptManager = new Prompt2025Manager(request.authParams);
     const result = await promptManager.getPrompts(requestBody);
     if (result.error || !result.data) {
@@ -284,13 +227,6 @@ export class Prompt2025Controller extends Controller {
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<Prompt2025Version, string>> {
-    const featureFlagResult = await checkFeatureFlag(
-      request.authParams.organizationId,
-      PROMPTS_FEATURE_FLAG
-    );
-    if (featureFlagResult.error) {
-      return err(featureFlagResult.error);
-    }
     const promptManager = new Prompt2025Manager(request.authParams);
     const result = await promptManager.getPromptVersionWithBody(requestBody);
     if (result.error || !result.data) {
@@ -310,13 +246,6 @@ export class Prompt2025Controller extends Controller {
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<Prompt2025Version[], string>> {
-    const featureFlagResult = await checkFeatureFlag(
-      request.authParams.organizationId,
-      PROMPTS_FEATURE_FLAG
-    );
-    if (featureFlagResult.error) {
-      return err(featureFlagResult.error);
-    }
     const promptManager = new Prompt2025Manager(request.authParams);
 
     const result = await promptManager.getPromptVersions(requestBody);
@@ -336,13 +265,6 @@ export class Prompt2025Controller extends Controller {
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<Prompt2025Version, string>> {
-    const featureFlagResult = await checkFeatureFlag(
-      request.authParams.organizationId,
-      PROMPTS_FEATURE_FLAG
-    );
-    if (featureFlagResult.error) {
-      return err(featureFlagResult.error);
-    }
     const promptManager = new Prompt2025Manager(request.authParams);
     const result = await promptManager.getPromptProductionVersion(requestBody);
     if (result.error || !result.data) {
@@ -361,13 +283,7 @@ export class Prompt2025Controller extends Controller {
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<PromptVersionCounts, string>> {
-    const featureFlagResult = await checkFeatureFlag(
-      request.authParams.organizationId,
-      PROMPTS_FEATURE_FLAG
-    );
-    if (featureFlagResult.error) {
-      return err(featureFlagResult.error);
-    }
+
     const promptManager = new Prompt2025Manager(request.authParams);
 
     const result = await promptManager.getPromptVersionCounts(requestBody);

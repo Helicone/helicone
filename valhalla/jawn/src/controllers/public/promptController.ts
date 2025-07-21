@@ -151,6 +151,31 @@ export interface CreatePromptResponse {
 @Tags("Prompt")
 @Security("api_key")
 export class PromptController extends Controller {
+  @Get("has-prompts")
+  public async hasPrompts(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<{ hasPrompts: boolean }, string>> {
+    const promptManager = new PromptManager(request.authParams);
+
+    const result = await promptManager.getPrompts({
+      filter: "all"
+    });
+    
+    if (result.error) {
+      this.setStatus(500);
+      return result;
+    }
+
+    const hasPrompts = (result.data?.length ?? 0) > 0;
+    this.setStatus(200);
+    return {
+      data: {
+        hasPrompts: hasPrompts
+      },
+      error: null
+    };
+  }
+
   @Post("query")
   public async getPrompts(
     @Body()
