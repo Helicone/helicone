@@ -37,11 +37,16 @@ interface PlaygroundHeaderProps {
   setMappedContent: (_mappedContent: MappedLLMRequest) => void;
   promptVersionId: string | undefined;
   onCreatePrompt: (tags: string[], promptName: string) => void;
-  onSavePrompt: (newMajorVersion: boolean, setAsProduction: boolean, commitMessage: string) => void;
+  onSavePrompt: (
+    newMajorVersion: boolean,
+    setAsProduction: boolean,
+    commitMessage: string,
+  ) => void;
   onRun: () => void;
   isScrolled: boolean;
   useAIGateway: boolean;
   setUseAIGateway: (_useAIGateway: boolean) => void;
+  error: string | null;
 }
 
 const PlaygroundHeader = ({
@@ -63,19 +68,20 @@ const PlaygroundHeader = ({
   isScrolled,
   useAIGateway,
   setUseAIGateway,
+  error,
 }: PlaygroundHeaderProps) => {
   const [modelListOpen, setModelListOpen] = useState<boolean>(false);
   return (
     <div
       className={cn(
-        "flex justify-between items-center px-4 py-2 w-full",
+        "flex w-full items-center justify-between px-4 py-2",
         isScrolled
           ? "rounded-lg bg-background"
-          : "border-t border-border bg-sidebar-background"
+          : "border-t border-border bg-sidebar-background",
       )}
     >
-      <div className="flex justify-between items-center gap-2 w-full">
-        <div className="flex items-center gap-2 w-full cursor-pointer">
+      <div className="flex w-full items-center justify-between gap-2">
+        <div className="flex w-full cursor-pointer items-center gap-2">
           <Popover open={modelListOpen} onOpenChange={setModelListOpen}>
             <PopoverTrigger
               asChild
@@ -91,13 +97,13 @@ const PlaygroundHeader = ({
                 className={cn(
                   "w-[200px] justify-between border-none",
                   isScrolled &&
-                    "bg-slate-100 dark:bg-slate-950 hover:bg-slate-200 dark:hover:bg-slate-900"
+                    "bg-slate-100 hover:bg-slate-200 dark:bg-slate-950 dark:hover:bg-slate-900",
                 )}
               >
-                <span className="truncate max-w-[150px]">
+                <span className="max-w-[150px] truncate">
                   {selectedModel || "Select model..."}
                 </span>
-                <ChevronsUpDownIcon className="opacity-50 w-4 h-4" />
+                <ChevronsUpDownIcon className="h-4 w-4 opacity-50" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[200px] p-0">
@@ -112,7 +118,7 @@ const PlaygroundHeader = ({
                         value={model}
                         onSelect={(currentValue) => {
                           setSelectedModel(
-                            currentValue === selectedModel ? "" : currentValue
+                            currentValue === selectedModel ? "" : currentValue,
                           );
                           setModelListOpen(false);
                         }}
@@ -123,7 +129,7 @@ const PlaygroundHeader = ({
                             "ml-auto",
                             model === selectedModel
                               ? "opacity-100"
-                              : "opacity-0"
+                              : "opacity-0",
                           )}
                         />
                       </CommandItem>
@@ -148,6 +154,7 @@ const PlaygroundHeader = ({
               onParametersChange={setModelParameters}
               useAIGateway={useAIGateway}
               setUseAIGateway={setUseAIGateway}
+              error={error}
             />
           </div>
         </div>

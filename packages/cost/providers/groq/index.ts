@@ -6,6 +6,139 @@
 import { ModelRow } from "../../interfaces/Cost";
 
 export const costs: ModelRow[] = [
+  // Production Models
+  {
+    model: {
+      operator: "equals",
+      value: "gemma2-9b-it",
+    },
+    cost: {
+      prompt_token: 0.0000002,
+      completion_token: 0.0000002,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "llama-3.1-8b-instant",
+    },
+    cost: {
+      prompt_token: 0.00000005,
+      completion_token: 0.00000008,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "llama-3.3-70b-versatile",
+    },
+    cost: {
+      prompt_token: 0.00000059,
+      completion_token: 0.00000079,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "meta-llama/llama-guard-4-12b",
+    },
+    cost: {
+      prompt_token: 0.0000002,
+      completion_token: 0.0000002,
+    },
+  },
+  // Preview Models
+  {
+    model: {
+      operator: "equals",
+      value: "deepseek-r1-distill-llama-70b",
+    },
+    cost: {
+      prompt_token: 0.00000075,
+      completion_token: 0.00000099,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "meta-llama/llama-4-scout-17b-16e-instruct",
+    },
+    cost: {
+      prompt_token: 0.00000011,
+      completion_token: 0.00000034,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "meta-llama/llama-4-maverick-17b-128e-instruct",
+    },
+    cost: {
+      prompt_token: 0.0000002,
+      completion_token: 0.0000006,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "mistral-saba-24b",
+    },
+    cost: {
+      prompt_token: 0.00000079,
+      completion_token: 0.00000079,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "moonshotai/kimi-k2-instruct",
+    },
+    cost: {
+      prompt_token: 0.000001,
+      completion_token: 0.000003,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "qwen/qwen3-32b",
+    },
+    cost: {
+      prompt_token: 0.00000029,
+      completion_token: 0.00000059,
+    },
+  },
+  // Legacy models (keeping for backward compatibility)
+  {
+    model: {
+      operator: "equals",
+      value: "llama3-70b-8192",
+    },
+    cost: {
+      prompt_token: 0.00000059,
+      completion_token: 0.00000079,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "llama3-8b-8192",
+    },
+    cost: {
+      prompt_token: 0.00000005,
+      completion_token: 0.00000008,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "llama-guard-3-8b",
+    },
+    cost: {
+      prompt_token: 0.0000002,
+      completion_token: 0.0000002,
+    },
+  },
   {
     model: {
       operator: "equals",
@@ -34,36 +167,6 @@ export const costs: ModelRow[] = [
     cost: {
       prompt_token: 0.00000007,
       completion_token: 0.00000007,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
-      value: "gemma2-9b-it",
-    },
-    cost: {
-      prompt_token: 0.0000002,
-      completion_token: 0.0000002,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
-      value: "llama3-70b-8192",
-    },
-    cost: {
-      prompt_token: 0.00000059,
-      completion_token: 0.00000079,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
-      value: "llama3-8b-8192",
-    },
-    cost: {
-      prompt_token: 0.00000005,
-      completion_token: 0.00000008,
     },
   },
   {
