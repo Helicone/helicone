@@ -31,13 +31,7 @@ export function costOf({
     return null;
   }
 
-  // We need to concat allCosts because we need to check the provider costs first and if it is not founder then fall back to make the best guess.
-  // This is because we did not backfill the provider on db yet, and we do not plan to
-  // This is really for legacy
-  // TODO: after 07/2024 we can probably remove this
-  const costs = providerCost.costs.concat(allCosts);
-
-  const cost = costs.find((cost) => {
+  const cost = providerCost.costs.find((cost) => {
     const valueLower = cost.model.value.toLowerCase();
     if (cost.model.operator === "equals") {
       return valueLower === modelLower;
