@@ -11,18 +11,18 @@ import { useRouter } from "next/router";
 const Prompts: NextPageWithLayout<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = (props) => {
-  const { hasPrompts, isLoading } = useHasPrompts();
+  const { hasPrompts: hasOldPrompts, isLoading } = useHasPrompts();
   const router = useRouter();
-  const forceNewVersion = router.query.v2 === "true";
+  const forceOldVersion = router.query.legacy === "true";
 
   if (isLoading) {
     return <LoadingAnimation />;
   }
 
-  return forceNewVersion || !hasPrompts ? (
-    <NewPromptsPage defaultIndex={props.defaultIndex} />
-  ) : (
+  return forceOldVersion ? (
     <OldPromptsPage defaultIndex={props.defaultIndex} />
+  ) : (
+    <NewPromptsPage defaultIndex={props.defaultIndex} showLegacyBanner={hasOldPrompts} />
   );
 };
 

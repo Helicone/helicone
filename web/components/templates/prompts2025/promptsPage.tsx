@@ -33,6 +33,7 @@ import { Button } from "@/components/ui/button";
 
 interface PromptsPageProps {
   defaultIndex: number;
+  showLegacyBanner?: boolean;
 }
 
 const PromptsPage = (props: PromptsPageProps) => {
@@ -233,6 +234,23 @@ const PromptsPage = (props: PromptsPageProps) => {
           </section>
         }
       />
+      
+      {/* Banner */}
+      {props.showLegacyBanner && (
+        <section className="w-full p-4">
+          <div className="w-full border border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-950 p-4 text-sm rounded-lg text-blue-800 dark:text-blue-200">
+            🎉 You are viewing our revamped Prompts experience, offering prompt versioning and composability with the Playground and AI Gateway!{" "}
+            <br />
+            <span className="font-medium">The legacy prompts will be deprecated on <i>August 20th, 2025</i>.</span>{" "}
+            <a 
+              href="/prompts?legacy=true" 
+              className="font-medium underline hover:no-underline"
+            >
+              See the old prompts here →
+            </a>
+          </div>
+        </section>
+      )}
       <div className="flex flex-col w-full h-full min-h-[80vh] border-t border-border">
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel>

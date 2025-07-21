@@ -183,20 +183,6 @@ const chatCompletion = await openai.chat.completions.create(
         </div>
       ) : (
         <>
-          {/* Banner */}
-          <section className="w-full px-8">
-            <div className="w-full border border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-950 p-4 text-sm rounded-lg text-blue-800 dark:text-blue-200">
-              🎉 We've just launched a revamped Prompts experience, offering prompt versioning and composability with the Playground and AI Gateway!{" "}
-              <span className="font-medium">The legacy prompts will be deprecated on <i>August 20th, 2025</i>.</span>{" "}
-              <br />
-              <a 
-                href="/prompts?v2=true" 
-                className="font-medium underline hover:no-underline"
-              >
-                Check out the new prompts here →
-              </a>
-            </div>
-          </section>
 
           {/* Search & Card/Table View Toggle */}
           {promptCount > 0 && (
