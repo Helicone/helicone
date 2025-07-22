@@ -1,6 +1,5 @@
 import { TemplateVariable, ValidationError, SubstitutionResult } from './types';
-
-export const TEMPLATE_REGEX = /\{\{\s*hc\s*:\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\}\}/g;
+export const TEMPLATE_REGEX = /\{\{\s*hc\s*:\s*([a-zA-Z_-][a-zA-Z0-9_-]*)\s*:\s*([a-zA-Z_-][a-zA-Z0-9_-]*)\s*\}\}/g;
 export const BOOLEAN_VALUES = ['true', 'false', 'yes', 'no'];
 export class HeliconeTemplateManager {
   /**
