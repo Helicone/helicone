@@ -136,7 +136,7 @@ const GatewayPage = () => {
               columns={columns}
               emptyMessage="No routers found"
               onSelect={(gatewayRouter) => {
-                router.push(`/gateway/${gatewayRouter.id}`);
+                router.push(`/gateway/${gatewayRouter.hash}`);
               }}
             />
           )}

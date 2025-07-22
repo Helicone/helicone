@@ -80,10 +80,10 @@ export class GatewayController extends Controller {
     return ok(result.data);
   }
 
-  @Get("/:id")
+  @Get("/:routerHash")
   public async getLatestRouterConfig(
     @Request() request: JawnAuthenticatedRequest,
-    @Path() id: string
+    @Path() routerHash: string
   ): Promise<Result<LatestRouterConfig, string>> {
     const featureFlagResult = await checkFeatureFlag(
       request.authParams.organizationId,
@@ -93,7 +93,7 @@ export class GatewayController extends Controller {
       return err(featureFlagResult.error);
     }
     const gatewayManager = new GatewayManager(request.authParams);
-    const result = await gatewayManager.getLatestRouterConfig(id);
+    const result = await gatewayManager.getLatestRouterConfig(routerHash);
     if (result.error || !result.data) {
       return err(result.error ?? "Failed to get router config");
     }
@@ -222,10 +222,10 @@ export class GatewayController extends Controller {
     }
   }
 
-  @Put("/:id")
+  @Put("/:routerHash")
   public async updateRouter(
     @Request() request: JawnAuthenticatedRequest,
-    @Path() id: string,
+    @Path() routerHash: string,
     @Body() body: { name: string; config: string }
   ): Promise<Result<null, string>> {
     const featureFlagResult = await checkFeatureFlag(
@@ -237,7 +237,7 @@ export class GatewayController extends Controller {
     }
     const gatewayManager = new GatewayManager(request.authParams);
     const result = await gatewayManager.updateRouter({
-      id,
+      hash: routerHash,
       name: body.name,
       config: body.config,
     });

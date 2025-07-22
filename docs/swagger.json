@@ -18291,7 +18291,7 @@
 				}
 			}
 		},
-		"/v1/gateway/{id}": {
+		"/v1/gateway/{routerHash}": {
 			"get": {
 				"operationId": "GetLatestRouterConfig",
 				"responses": {
@@ -18317,7 +18317,7 @@
 				"parameters": [
 					{
 						"in": "path",
-						"name": "id",
+						"name": "routerHash",
 						"required": true,
 						"schema": {
 							"type": "string"
@@ -18350,7 +18350,7 @@
 				"parameters": [
 					{
 						"in": "path",
-						"name": "id",
+						"name": "routerHash",
 						"required": true,
 						"schema": {
 							"type": "string"

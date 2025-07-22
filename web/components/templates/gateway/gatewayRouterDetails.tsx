@@ -105,7 +105,8 @@ const getGatewayRequestColumns = (): ColumnDef<MappedLLMRequest>[] => {
 
 const GatewayRouterPage = () => {
   const router = useRouter();
-  const { router_id } = router.query;
+  const { router_hash } = router.query;
+  console.log("router_hash", router_hash);
   const searchParams = useSearchParams();
   const {
     gatewayRouter,
@@ -113,7 +114,7 @@ const GatewayRouterPage = () => {
     updateGatewayRouter,
     isUpdatingGatewayRouter,
     validateRouterConfig,
-  } = useGatewayRouter({ routerId: router_id as string });
+  } = useGatewayRouter({ routerHash: router_hash as string });
 
   const [config, setConfig] = useState<string>("");
   const [configModalOpen, setConfigModalOpen] = useState(false);
@@ -188,7 +189,7 @@ const GatewayRouterPage = () => {
     updateGatewayRouter({
       params: {
         path: {
-          id: router_id as string,
+          routerHash: router_hash as string,
         },
       },
       body: {
@@ -217,7 +218,7 @@ const GatewayRouterPage = () => {
   const handleRouterUseDialogOpen = (open: boolean) => {
     setRouterUseDialogOpen(open);
     if (!open) {
-      router.replace(`/gateway/${router_id}`, undefined, { shallow: true });
+      router.replace(`/gateway/${router_hash}`, undefined, { shallow: true });
     }
   };
 
@@ -232,7 +233,7 @@ const GatewayRouterPage = () => {
                 <Small className="font-semibold">AI Gateway</Small>
               </Link>
               <Small className="font-semibold">/</Small>
-              <Link href={`/gateway/${router_id}`} className="no-underline">
+              <Link href={`/gateway/${router_hash}`} className="no-underline">
                 <Muted className="text-sm">
                   {gatewayRouter?.data?.name || gatewayRouter?.data?.hash}
                 </Muted>
