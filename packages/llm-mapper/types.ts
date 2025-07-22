@@ -238,6 +238,8 @@ type HeliconeMetadata = {
   provider: Provider;
   timeToFirstToken?: number | null;
   scores?: Record<string, { value: number; valueType: string } | number> | null;
+  gatewayRouterId?: string | null;
+  gatewayDeploymentTarget?: string | null;
 };
 
 // UNORGANZIED
