@@ -599,7 +599,7 @@ export default function RequestDrawer(props: RequestDivProps) {
                   displayText={specialProperties.gatewayRouterId}
                   icon={<ShuffleIcon className="h-4 w-4" />}
                   copyText={specialProperties.gatewayRouterId}
-                  href={`/gateway-routers/${specialProperties.gatewayRouterId}`}
+                  href={`/gateway/${specialProperties.gatewayRouterId}`}
                   truncateLength={dynamicTruncateLength}
                 />
               )}
