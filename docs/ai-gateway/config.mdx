@@ -487,28 +487,44 @@ The following fields are available for both global and router-level retry config
 
 ## Helicone Add-ons
 
-Configure integration with the Helicone platform for authentication and observability.
+Configure integration with the Helicone platform for authentication, observability, and prompt management.
 
-[Learn more about Authentication](/ai-gateway/authentication) | [Learn more about Observability](/ai-gateway/observability)
+[Learn more about Authentication](/ai-gateway/authentication) | [Learn more about Observability](/ai-gateway/observability) | [Learn more about Prompts](/features/advanced-usage/prompts)
 
 <ParamField path="helicone.features" type="string" default="none" optional>
-  Enable Helicone features such as LLM observability and authentication for secure API access.
+  Enable Helicone features for your AI Gateway.
 
+  **Authentication only:**
   ```yaml
   helicone:
-    # Set to `features: observability` to enable observability and auth
     features: auth
   ```
-
-  Enable authentication (required) and request logging to your Helicone dashboard.
-
+  
+  **Authentication and observability:**
   ```yaml
   helicone:
     features: observability
   ```
 
-  **When enabled:** Must set the `HELICONE_CONTROL_PLANE_API_KEY` environment variable with your Helicone API key when deploying
-  the AI Gateway when using Helicone add ons.
+  **Authentication and prompt management:**
+  ```yaml
+  helicone:
+    features: prompts
+  ```
+
+  **All features (authentication, observability, and prompts):**
+  ```yaml
+  helicone:
+    features: all
+  ```
+
+  **Available options:**
+  - `auth` - Enable authentication for secure API access
+  - `observability` - Enable authentication and request logging to your Helicone dashboard
+  - `prompts` - Enable authentication and prompt management with `prompt_id` support
+  - `all` - Enable all Helicone features (authentication, observability, and prompts)
+
+  **When enabled:** Must set the `HELICONE_CONTROL_PLANE_API_KEY` environment variable with your Helicone API key when deploying the AI Gateway.
 </ParamField>
 
 <ParamField path="helicone.base-url" type="string" default="https://api.helicone.ai">

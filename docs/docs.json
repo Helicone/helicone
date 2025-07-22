@@ -197,17 +197,9 @@
           {
             "group": "Prompts & Evals",
             "pages": [
-              {
-                "group": "Prompt Management",
-                "pages": [
-                  "features/prompts/editor",
-                  "features/prompts/generate",
-                  "features/prompts/import"
-                ]
-              },
+              "features/advanced-usage/prompts",
               "features/advanced-usage/scores",
               "features/advanced-usage/feedback",
-              "features/fine-tuning",
               {
                 "group": "Webhooks",
                 "pages": ["features/webhooks", "features/webhooks-testing"]
@@ -256,6 +248,14 @@
             "group": "References",
             "pages": [
               {
+                "group": "Prompts (Legacy)",
+                "pages": [
+                  "features/prompts-legacy/editor",
+                  "features/prompts-legacy/generate",
+                  "features/prompts-legacy/import"
+                ]
+              },
+              {
                 "group": "Cloud AI Gateway (Legacy)",
                 "pages": [
                   "features/advanced-usage/cloud-ai-gateway-overview",
@@ -289,6 +289,26 @@
                 "group": "Generic Gateway",
                 "pages": ["getting-started/integration-method/gateway"]
               },
+              {
+                "group": "Prompts (Legacy)",
+                "pages": [
+                  "rest/prompt/post-v1promptquery",
+                  "rest/prompt/post-v1prompt-query",
+                  "rest/prompt/delete-v1prompt",
+                  "rest/prompt/post-v1promptcreate",
+                  "rest/prompt/post-v1promptversion-edit-label",
+                  "rest/prompt/post-v1promptversion-edit-template",
+                  "rest/prompt/post-v1promptversion-subversion",
+                  "rest/prompt/post-v1promptversion-promote",
+                  "rest/prompt/post-v1promptversion-inputsquery",
+                  "rest/prompt/get-v1prompt-experiments",
+                  "rest/prompt/post-v1prompt-versionsquery",
+                  "rest/prompt/get-v1promptversion",
+                  "rest/prompt/delete-v1promptversion",
+                  "rest/prompt/post-v1prompt-compile",
+                  "rest/prompt/post-v1prompt-template"
+                ]
+              },
               "helicone-headers/header-directory",
               "references/latency-affect",
               "references/open-source",
@@ -315,26 +335,7 @@
               "rest/request/post-v1request-score"
             ]
           },
-          {
-            "group": "Prompt",
-            "pages": [
-              "rest/prompt/post-v1promptquery",
-              "rest/prompt/post-v1prompt-query",
-              "rest/prompt/delete-v1prompt",
-              "rest/prompt/post-v1promptcreate",
-              "rest/prompt/post-v1promptversion-edit-label",
-              "rest/prompt/post-v1promptversion-edit-template",
-              "rest/prompt/post-v1promptversion-subversion",
-              "rest/prompt/post-v1promptversion-promote",
-              "rest/prompt/post-v1promptversion-inputsquery",
-              "rest/prompt/get-v1prompt-experiments",
-              "rest/prompt/post-v1prompt-versionsquery",
-              "rest/prompt/get-v1promptversion",
-              "rest/prompt/delete-v1promptversion",
-              "rest/prompt/post-v1prompt-compile",
-              "rest/prompt/post-v1prompt-template"
-            ]
-          },
+
           {
             "group": "User",
             "pages": [
