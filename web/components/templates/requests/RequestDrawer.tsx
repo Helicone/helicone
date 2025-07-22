@@ -17,6 +17,7 @@ import {
   FlaskConicalIcon,
   ListTreeIcon,
   ScrollTextIcon,
+  ShuffleIcon,
   UserIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -59,7 +60,7 @@ const RequestDescTooltip = (props: {
     <TooltipProvider>
       <Tooltip delayDuration={150}>
         <TooltipTrigger asChild>
-          <div className="text-secondary px-2 py-1 -ml-1 hover:bg-accent flex items-center gap-2 rounded-md cursor-pointer">
+          <div className="-ml-1 flex cursor-pointer items-center gap-2 rounded-md px-2 py-1 text-secondary hover:bg-accent">
             {icon}
             <XSmall>
               <span className="truncate">
@@ -70,11 +71,11 @@ const RequestDescTooltip = (props: {
             </XSmall>
           </div>
         </TooltipTrigger>
-        <TooltipContent side="bottom" align="start" className="p-0 ml-2">
-          <div className="flex flex-col w-full">
+        <TooltipContent side="bottom" align="start" className="ml-2 p-0">
+          <div className="flex w-full flex-col">
             {copyText && (
               <button
-                className="flex items-center justify-between gap-2 p-2 hover:bg-accent text-left"
+                className="flex items-center justify-between gap-2 p-2 text-left hover:bg-accent"
                 onClick={() => {
                   navigator.clipboard.writeText(copyText);
                   setNotification("Copied to clipboard", "success");
@@ -87,7 +88,7 @@ const RequestDescTooltip = (props: {
             {href && (
               <Link
                 href={href}
-                className="flex items-center justify-between gap-2 p-2 hover:bg-accent text-left"
+                className="flex items-center justify-between gap-2 p-2 text-left hover:bg-accent"
               >
                 <span className="text-xs">View</span>
                 <Eye className="h-3 w-3" />
@@ -123,7 +124,7 @@ export default function RequestDrawer(props: RequestDivProps) {
 
   const [showDetails, setShowDetails] = useLocalStorage(
     "request-drawer-details",
-    false
+    false,
   );
   const [showNewDatasetModal, setShowNewDatasetModal] = useState(false);
 
@@ -132,7 +133,7 @@ export default function RequestDrawer(props: RequestDivProps) {
     () =>
       request?.heliconeMetadata.customProperties?.["Helicone-Prompt-Id"] ??
       null,
-    [request?.heliconeMetadata.customProperties]
+    [request?.heliconeMetadata.customProperties],
   );
   const promptDataQuery = useQuery({
     queryKey: ["prompt", promptId, org?.currentOrg?.id],
@@ -162,7 +163,7 @@ export default function RequestDrawer(props: RequestDivProps) {
       request?._type === "openai-chat" ||
       request?._type === "anthropic-chat" ||
       request?._type === "gemini-chat",
-    [request]
+    [request],
   );
 
   // TODO: Maybe these go in the Chat component?
@@ -197,7 +198,10 @@ export default function RequestDrawer(props: RequestDivProps) {
       {
         label: "Created At",
         value: formatDate(request.heliconeMetadata.createdAt),
-        fullValue: getUSDateFromString(request.heliconeMetadata.createdAt, true),
+        fullValue: getUSDateFromString(
+          request.heliconeMetadata.createdAt,
+          true,
+        ),
       },
       { label: "Request ID", value: request.id },
       { label: "User", value: request.heliconeMetadata.user || "Unknown" },
@@ -312,6 +316,9 @@ export default function RequestDrawer(props: RequestDivProps) {
       sessionPath:
         request?.heliconeMetadata.customProperties?.["Helicone-Session-Path"] ??
         undefined,
+      gatewayRouterId: request?.heliconeMetadata.gatewayRouterId ?? undefined,
+      gatewayDeploymentTarget:
+        request?.heliconeMetadata.gatewayDeploymentTarget ?? undefined,
     };
   }, [request?.heliconeMetadata.customProperties]);
 
@@ -330,13 +337,13 @@ export default function RequestDrawer(props: RequestDivProps) {
             "Helicone-Session-Path",
             "Helicone-Prompt-Id",
             "Helicone-User-Id",
-          ].includes(key)
-      )
+          ].includes(key),
+      ),
     );
   }, [request?.heliconeMetadata.customProperties]);
   const currentScores = useMemo(
     () => (request?.heliconeMetadata.scores as Record<string, number>) || {},
-    [request?.heliconeMetadata.scores]
+    [request?.heliconeMetadata.scores],
   );
   // Handlers for adding properties and scores
   const onAddPropertyHandler = useCallback(
@@ -351,7 +358,7 @@ export default function RequestDrawer(props: RequestDivProps) {
           request.id,
           org.currentOrg.id,
           key,
-          value
+          value,
         );
 
         if (res?.status === 200) {
@@ -364,7 +371,7 @@ export default function RequestDrawer(props: RequestDivProps) {
         setNotification(`Error adding label: ${err}`, "error");
       }
     },
-    [org?.currentOrg?.id, request, setNotification]
+    [org?.currentOrg?.id, request, setNotification],
   );
   const onAddScoreHandler = useCallback(
     async (key: string, value: string) => {
@@ -391,7 +398,7 @@ export default function RequestDrawer(props: RequestDivProps) {
           request.id,
           org.currentOrg.id,
           key,
-          numValue
+          numValue,
         );
 
         if (res?.status === 201) {
@@ -404,7 +411,7 @@ export default function RequestDrawer(props: RequestDivProps) {
         setNotification(`Error adding score: ${err}`, "error");
       }
     },
-    [org?.currentOrg?.id, request, setNotification]
+    [org?.currentOrg?.id, request, setNotification],
   );
 
   // Tracking the width of the container holding the 3 RequestDescTooltips to dynamically truncate length
@@ -435,11 +442,11 @@ export default function RequestDrawer(props: RequestDivProps) {
   const dynamicTruncateLength = useMemo(() => {
     const availableWidth = descContainerWidth - RESERVED_WIDTH;
     const approximateCharsPerItem = Math.floor(
-      availableWidth / (ITEM_COUNT * CHARACTER_WIDTH)
+      availableWidth / (ITEM_COUNT * CHARACTER_WIDTH),
     );
     return Math.max(
       MINIMUM_TRUNCATE_LENGTH,
-      Math.min(approximateCharsPerItem, MAXIMUM_TRUNCATE_LENGTH)
+      Math.min(approximateCharsPerItem, MAXIMUM_TRUNCATE_LENGTH),
     );
   }, [descContainerWidth]);
 
@@ -447,11 +454,11 @@ export default function RequestDrawer(props: RequestDivProps) {
     return null;
   } else
     return (
-      <section className="h-full min-h-full w-full flex flex-col">
+      <section className="flex h-full min-h-full w-full flex-col">
         {/* Header */}
-        <header className="h-fit w-full flex flex-col pt-2 border-b border-border bg-card">
+        <header className="flex h-fit w-full flex-col border-b border-border bg-card pt-2">
           {/* First Top Row */}
-          <div className="h-8 w-full shrink-0 flex flex-row justify-between items-center gap-2 px-2">
+          <div className="flex h-8 w-full shrink-0 flex-row items-center justify-between gap-2 px-2">
             {/* Left Side */}
             <div className="flex flex-row items-center gap-3 overflow-hidden">
               {/* Hide Drawer */}
@@ -462,10 +469,10 @@ export default function RequestDrawer(props: RequestDivProps) {
                       <Button
                         variant={"none"}
                         size={"square_icon"}
-                        className="w-fit text-muted-foreground hover:text-primary pl-2"
+                        className="w-fit pl-2 text-muted-foreground hover:text-primary"
                         onClick={onCollapse}
                       >
-                        <LuPanelRightClose className="w-4 h-4" />
+                        <LuPanelRightClose className="h-4 w-4" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent side="bottom" className="text-xs">
@@ -475,7 +482,7 @@ export default function RequestDrawer(props: RequestDivProps) {
                 </TooltipProvider>
               )}
               {/* Model Name */}
-              <P className="font-medium text-secondary text-nowrap truncate">
+              <P className="truncate text-nowrap font-medium text-secondary">
                 {request.model}
               </P>
             </div>
@@ -528,9 +535,9 @@ export default function RequestDrawer(props: RequestDivProps) {
                       onClick={() => setShowDetails(!showDetails)}
                     >
                       {showDetails ? (
-                        <LuChevronUp className="w-4 h-4" />
+                        <LuChevronUp className="h-4 w-4" />
                       ) : (
-                        <LuChevronDown className="w-4 h-4" />
+                        <LuChevronDown className="h-4 w-4" />
                       )}
                     </Button>
                   </TooltipTrigger>
@@ -546,7 +553,7 @@ export default function RequestDrawer(props: RequestDivProps) {
           {Object.values(specialProperties).some((value) => value) && (
             <div
               ref={containerRef}
-              className="h-8 w-full flex flex-row gap-2 items-center px-2.5 shrink-0"
+              className="flex h-8 w-full shrink-0 flex-row items-center gap-2 px-2.5"
             >
               {/* User */}
               {specialProperties.userId && (
@@ -569,7 +576,7 @@ export default function RequestDrawer(props: RequestDivProps) {
                   icon={<ListTreeIcon className="h-4 w-4" />}
                   copyText={specialProperties.sessionId}
                   href={`/sessions/${encodeURIComponent(
-                    specialProperties.sessionName
+                    specialProperties.sessionName,
                   )}/${specialProperties.sessionId}`}
                   truncateLength={dynamicTruncateLength}
                 />
@@ -585,21 +592,32 @@ export default function RequestDrawer(props: RequestDivProps) {
                   truncateLength={dynamicTruncateLength}
                 />
               )}
+
+              {/* Gateway Router ID */}
+              {specialProperties.gatewayRouterId && (
+                <RequestDescTooltip
+                  displayText={specialProperties.gatewayRouterId}
+                  icon={<ShuffleIcon className="h-4 w-4" />}
+                  copyText={specialProperties.gatewayRouterId}
+                  href={`/gateway/${specialProperties.gatewayRouterId}`}
+                  truncateLength={dynamicTruncateLength}
+                />
+              )}
             </div>
           )}
 
           {/* Expandable Details Section */}
           {showDetails && (
-            <div className="h-full w-full flex flex-col gap-4 border-b border-border pb-4 pt-2">
-              <div className="w-full flex flex-row gap-8 justify-between px-4">
+            <div className="flex h-full w-full flex-col gap-4 border-b border-border pb-4 pt-2">
+              <div className="flex w-full flex-row justify-between gap-8 px-4">
                 {/* Request Information */}
-                <div className="w-full flex flex-col gap-2">
+                <div className="flex w-full flex-col gap-2">
                   {requestDetails.requestInfo.map((item) => (
                     <div
                       key={item.label}
-                      className="grid grid-cols-[auto,1fr] gap-x-4 items-center"
+                      className="grid grid-cols-[auto,1fr] items-center gap-x-4"
                     >
-                      <XSmall className="text-muted-foreground text-nowrap">
+                      <XSmall className="text-nowrap text-muted-foreground">
                         {item.label}
                       </XSmall>
 
@@ -608,12 +626,12 @@ export default function RequestDrawer(props: RequestDivProps) {
                           <Tooltip delayDuration={100}>
                             <TooltipTrigger asChild>
                               <p
-                                className="text-xs truncate min-w-0 text-right cursor-pointer"
+                                className="min-w-0 cursor-pointer truncate text-right text-xs"
                                 onClick={() => {
                                   navigator.clipboard.writeText(item.value);
                                   setNotification(
                                     "Request ID copied",
-                                    "success"
+                                    "success",
                                   );
                                 }}
                               >
@@ -629,7 +647,7 @@ export default function RequestDrawer(props: RequestDivProps) {
                         <TooltipProvider>
                           <Tooltip delayDuration={100}>
                             <TooltipTrigger asChild>
-                              <p className="text-xs truncate min-w-0 text-right cursor-pointer">
+                              <p className="min-w-0 cursor-pointer truncate text-right text-xs">
                                 {item.value}
                               </p>
                             </TooltipTrigger>
@@ -639,7 +657,7 @@ export default function RequestDrawer(props: RequestDivProps) {
                           </Tooltip>
                         </TooltipProvider>
                       ) : (
-                        <p className="text-xs truncate min-w-0 text-right">
+                        <p className="min-w-0 truncate text-right text-xs">
                           {item.value}
                         </p>
                       )}
@@ -648,16 +666,16 @@ export default function RequestDrawer(props: RequestDivProps) {
                 </div>
 
                 {/* Token Information */}
-                <div className="w-full flex flex-col gap-2">
+                <div className="flex w-full flex-col gap-2">
                   {requestDetails.tokenInfo.map((item) => (
                     <div
                       key={item.label}
-                      className="grid grid-cols-[auto,1fr] gap-x-4 items-center"
+                      className="grid grid-cols-[auto,1fr] items-center gap-x-4"
                     >
-                      <XSmall className="text-muted-foreground text-nowrap">
+                      <XSmall className="text-nowrap text-muted-foreground">
                         {item.label}
                       </XSmall>
-                      <XSmall className="truncate min-w-0 text-right">
+                      <XSmall className="min-w-0 truncate text-right">
                         {item.value}
                       </XSmall>
                     </div>
@@ -671,16 +689,16 @@ export default function RequestDrawer(props: RequestDivProps) {
         <div className="h-full w-full overflow-auto">
           {/* Request Parameters - Moved out of header */}
           {showDetails && requestDetails.parameterInfo.length > 0 && (
-            <div className="w-full flex flex-col gap-2 px-4 py-3 bg-card border-b border-border">
+            <div className="flex w-full flex-col gap-2 border-b border-border bg-card px-4 py-3">
               {requestDetails.parameterInfo.map((item) => (
                 <div
                   key={item.label}
-                  className="grid grid-cols-[auto,1fr] gap-x-4 items-start"
+                  className="grid grid-cols-[auto,1fr] items-start gap-x-4"
                 >
-                  <XSmall className="text-muted-foreground text-nowrap">
+                  <XSmall className="text-nowrap text-muted-foreground">
                     {item.label}
                   </XSmall>
-                  <XSmall className="truncate min-w-0 text-right">
+                  <XSmall className="min-w-0 truncate text-right">
                     {item.value}
                   </XSmall>
                 </div>
@@ -689,7 +707,7 @@ export default function RequestDrawer(props: RequestDivProps) {
           )}
 
           {/* Properties and Scores */}
-          <div className="w-full flex flex-col divide-y divide-border bg-card border-b border-border">
+          <div className="flex w-full flex-col divide-y divide-border border-b border-border bg-card">
             {/* Properties */}
             <ScrollableBadges
               className="px-4"
@@ -725,7 +743,7 @@ export default function RequestDrawer(props: RequestDivProps) {
             />
           </div>
 
-          <div className="p-3 h-full w-full overflow-auto bg-card">
+          <div className="h-full w-full overflow-auto bg-card p-3">
             {/* Mapped Request */}
             <RenderMappedRequest
               mappedRequest={request}
@@ -735,22 +753,20 @@ export default function RequestDrawer(props: RequestDivProps) {
         </div>
 
         {/* Footer */}
-        <footer className="w-full flex flex-col gap-2 py-3 border-t border-border bg-card">
+        <footer className="flex w-full flex-col gap-2 border-t border-border bg-card py-3">
           {/* Actions Row */}
-          <div className="flex flex-row justify-between items-center gap-2 px-3">
+          <div className="flex flex-row items-center justify-between gap-2 px-3">
             <div className="flex flex-row items-center gap-2">
               {isChatRequest && (
-                <Link
-                  href={`/playground?requestId=${request.id}`}
-                >
-                <Button
-                  variant="action"
-                  size="sm"
-                  className="flex flex-row items-center gap-1.5"
-                >
-                  <PiPlayBold className="h-4 w-4" />
-                  Test Prompt
-                </Button>
+                <Link href={`/playground?requestId=${request.id}`}>
+                  <Button
+                    variant="action"
+                    size="sm"
+                    className="flex flex-row items-center gap-1.5"
+                  >
+                    <PiPlayBold className="h-4 w-4" />
+                    Test Prompt
+                  </Button>
                 </Link>
               )}
 
@@ -784,7 +800,9 @@ export default function RequestDrawer(props: RequestDivProps) {
                 request.heliconeMetadata.scores &&
                 request.heliconeMetadata.scores["helicone-score-feedback"]
                   ? Number(
-                      request.heliconeMetadata.scores["helicone-score-feedback"]
+                      request.heliconeMetadata.scores[
+                        "helicone-score-feedback"
+                      ],
                     ) === 1
                     ? true
                     : false
