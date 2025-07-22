@@ -10,6 +10,13 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { $JAWN_API } from "@/lib/clients/jawn";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -47,6 +54,18 @@ const CreateRouterPage = () => {
   const [rateLimitCapacity, setRateLimitCapacity] = useState("1000");
   const [rateLimitRefillFrequency, setRateLimitFrequency] = useState("10s");
 
+  // Retries configuration
+  const [enableRetries, setEnableRetries] = useState(false);
+  const [retryStrategy, setRetryStrategy] = useState<
+    "constant" | "exponential"
+  >("constant");
+  const [constantDelay, setConstantDelay] = useState("100ms");
+  const [constantMaxRetries, setConstantMaxRetries] = useState("2");
+  const [exponentialMinDelay, setExponentialMinDelay] = useState("100ms");
+  const [exponentialMaxDelay, setExponentialMaxDelay] = useState("30s");
+  const [exponentialMaxRetries, setExponentialMaxRetries] = useState("2");
+  const [exponentialFactor, setExponentialFactor] = useState("2.0");
+
   // Generated configuration visibility
   const [showGeneratedConfig, setShowGeneratedConfig] = useState(false);
 
@@ -75,13 +94,13 @@ const CreateRouterPage = () => {
         },
       });
 
-      console.log("router", JSON.stringify(routerResponse, null, 2));
-
       queryClient.invalidateQueries({ queryKey: ["get", "/v1/gateway"] });
       setNotification("Router created successfully", "success");
 
       // Redirect to the new router page
-      router.push(`/gateway/${routerResponse?.data?.routerId}?new-router=true`);
+      router.push(
+        `/gateway/${routerResponse?.data?.routerHash}?new-router=true`,
+      );
     } catch (error) {
       setNotification("Failed to create router", "error");
       console.error("Error creating router:", error);
@@ -118,6 +137,28 @@ const CreateRouterPage = () => {
       };
     }
 
+    // Retries configuration
+    if (enableRetries) {
+      const retryConfig: Record<string, unknown> = {
+        strategy: retryStrategy,
+      };
+
+      if (retryStrategy === "constant") {
+        if (constantDelay) retryConfig.delay = constantDelay;
+        if (constantMaxRetries)
+          retryConfig["max-retries"] = parseInt(constantMaxRetries);
+      } else if (retryStrategy === "exponential") {
+        if (exponentialMinDelay) retryConfig["min-delay"] = exponentialMinDelay;
+        if (exponentialMaxDelay) retryConfig["max-delay"] = exponentialMaxDelay;
+        if (exponentialMaxRetries)
+          retryConfig["max-retries"] = parseInt(exponentialMaxRetries);
+        if (exponentialFactor)
+          retryConfig.factor = parseFloat(exponentialFactor);
+      }
+
+      configObj.retries = retryConfig;
+    }
+
     return yaml.dump(configObj);
   };
 
@@ -134,6 +175,15 @@ const CreateRouterPage = () => {
   const getRateLimitSummary = () => {
     if (!enableRateLimit) return "Disabled";
     return `Per API Key • ${rateLimitCapacity}/${rateLimitRefillFrequency}`;
+  };
+
+  const getRetriesSummary = () => {
+    if (!enableRetries) return "Disabled";
+    if (retryStrategy === "constant") {
+      return `Constant • ${constantDelay} • ${constantMaxRetries} retries`;
+    } else {
+      return `Exponential • ${exponentialMinDelay}-${exponentialMaxDelay} • ${exponentialMaxRetries} retries`;
+    }
   };
 
   if (!hasFeatureFlag) {
@@ -188,7 +238,7 @@ const CreateRouterPage = () => {
           <Accordion
             type="multiple"
             className="w-full"
-            defaultValue={["load-balance", "cache", "rate-limit"]}
+            defaultValue={["load-balance", "cache", "rate-limit", "retries"]}
           >
             <AccordionItem value="load-balance">
               <AccordionTrigger className="flex items-center justify-between rounded-md transition-colors hover:bg-muted/50 hover:no-underline">
@@ -354,6 +404,164 @@ const CreateRouterPage = () => {
                           placeholder="10s"
                         />
                       </div>
+                    </>
+                  )}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="retries">
+              <AccordionTrigger className="flex items-center justify-between rounded-md transition-colors hover:bg-muted/50 hover:no-underline">
+                <div className="flex items-center gap-2">
+                  <span>Retries</span>
+                  <Badge variant="secondary" className="text-xs">
+                    {getRetriesSummary()}
+                  </Badge>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="justify-start">Enable Retries</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Configure automatic retry behavior for failed requests
+                      </p>
+                    </div>
+                    <Switch
+                      checked={enableRetries}
+                      onCheckedChange={setEnableRetries}
+                    />
+                  </div>
+
+                  {enableRetries && (
+                    <>
+                      <div className="grid items-start gap-1.5">
+                        <Label className="justify-start">Strategy</Label>
+                        <Select
+                          value={retryStrategy}
+                          onValueChange={(value: "constant" | "exponential") =>
+                            setRetryStrategy(value)
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select strategy" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="constant">Constant</SelectItem>
+                            <SelectItem value="exponential">
+                              Exponential
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {retryStrategy === "constant" && (
+                        <>
+                          <div className="grid items-start gap-1.5">
+                            <Label className="justify-start">
+                              Delay (optional)
+                            </Label>
+                            <Input
+                              value={constantDelay}
+                              onChange={(e) => setConstantDelay(e.target.value)}
+                              placeholder="1s"
+                            />
+                            <p className="text-xs text-muted-foreground">
+                              Default: 1s
+                            </p>
+                          </div>
+
+                          <div className="grid items-start gap-1.5">
+                            <Label className="justify-start">
+                              Max Retries (optional)
+                            </Label>
+                            <Input
+                              type="number"
+                              value={constantMaxRetries}
+                              onChange={(e) =>
+                                setConstantMaxRetries(e.target.value)
+                              }
+                              placeholder="2"
+                            />
+                            <p className="text-xs text-muted-foreground">
+                              Default: 2
+                            </p>
+                          </div>
+                        </>
+                      )}
+
+                      {retryStrategy === "exponential" && (
+                        <>
+                          <div className="grid items-start gap-1.5">
+                            <Label className="justify-start">
+                              Min Delay (optional)
+                            </Label>
+                            <Input
+                              value={exponentialMinDelay}
+                              onChange={(e) =>
+                                setExponentialMinDelay(e.target.value)
+                              }
+                              placeholder="1s"
+                            />
+                            <p className="text-xs text-muted-foreground">
+                              Default: 1s
+                            </p>
+                          </div>
+
+                          <div className="grid items-start gap-1.5">
+                            <Label className="justify-start">
+                              Max Delay (optional)
+                            </Label>
+                            <Input
+                              value={exponentialMaxDelay}
+                              onChange={(e) =>
+                                setExponentialMaxDelay(e.target.value)
+                              }
+                              placeholder="30s"
+                            />
+                            <p className="text-xs text-muted-foreground">
+                              Default: 30s
+                            </p>
+                          </div>
+
+                          <div className="grid items-start gap-1.5">
+                            <Label className="justify-start">
+                              Max Retries (optional)
+                            </Label>
+                            <Input
+                              type="number"
+                              value={exponentialMaxRetries}
+                              onChange={(e) =>
+                                setExponentialMaxRetries(e.target.value)
+                              }
+                              placeholder="2"
+                            />
+                            <p className="text-xs text-muted-foreground">
+                              Default: 2
+                            </p>
+                          </div>
+
+                          <div className="grid items-start gap-1.5">
+                            <Label className="justify-start">
+                              Factor (optional)
+                            </Label>
+                            <Input
+                              type="number"
+                              step="0.1"
+                              value={exponentialFactor}
+                              onChange={(e) =>
+                                setExponentialFactor(e.target.value)
+                              }
+                              placeholder="2.0"
+                            />
+                            <p className="text-xs text-muted-foreground">
+                              Default: 2.0 (each retry delay is multiplied by
+                              this factor)
+                            </p>
+                          </div>
+                        </>
+                      )}
                     </>
                   )}
                 </div>
