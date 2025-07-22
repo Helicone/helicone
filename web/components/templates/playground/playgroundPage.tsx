@@ -43,6 +43,7 @@ import { Message } from "@helicone-package/llm-mapper/types";
 import { useVariableColorMapStore } from "@/store/features/playground/variableColorMap";
 import { ResponseFormat, ResponseFormatType, VariableInput } from "./types";
 import { useLocalStorage } from "@/services/hooks/localStorage";
+import Link from "next/link";
 
 export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
   _type: "openai-chat",
@@ -827,9 +828,11 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         showFold={false}
         leftSection={
           <div className="flex items-center gap-3">
-            <Small className="font-bold text-gray-500 dark:text-slate-300">
-              Playground
-            </Small>
+            <Link href="/playground">
+              <Small className="font-bold text-gray-500 dark:text-slate-300">
+                Playground
+              </Small>
+            </Link>
             {promptVersionData?.prompt && promptVersionData?.promptVersion && (
               <>
                 <div className="w-px h-4 bg-border" />
