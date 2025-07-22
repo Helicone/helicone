@@ -31,7 +31,7 @@ export const ProvidersPage: React.FC = () => {
   );
 
   return (
-    <main className="flex h-screen w-full animate-fade-in flex-col">
+    <main className="flex w-full animate-fade-in flex-col">
       <FoldedHeader
         showFold={false}
         leftSection={
