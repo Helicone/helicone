@@ -503,6 +503,7 @@
                   "guides/cookbooks/prompt-thinking-models",
                   "guides/cookbooks/replay-session",
                   "guides/cookbooks/segmentation",
+                  "guides/cookbooks/vercel-ai-gateway",
                   "guides/cookbooks/ai-agents"
                 ]
               },
