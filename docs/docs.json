@@ -164,7 +164,13 @@
                       "other-integrations/upstash-qstash"
                     ]
                   },
-                  "getting-started/integration-method/vercelai"
+                  {
+                    "group": "Vercel",
+                    "pages": [
+                      "getting-started/integration-method/vercelai",
+                      "getting-started/integration-method/vercel-ai-gateway"
+                    ]
+                  }
                 ]
               },
               {
