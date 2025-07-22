@@ -111,8 +111,10 @@ const CreateRouterPage = () => {
     // Rate limiting configuration
     if (enableRateLimit) {
       configObj["rate-limit"] = {
-        capacity: parseInt(rateLimitCapacity),
-        "refill-frequency": rateLimitRefillFrequency,
+        "per-api-key": {
+          capacity: parseInt(rateLimitCapacity),
+          "refill-frequency": rateLimitRefillFrequency,
+        },
       };
     }
 
@@ -166,6 +168,7 @@ const CreateRouterPage = () => {
               placeholder="My Router"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              className="max-w-lg"
             />
             <div className="flex w-full items-center justify-end gap-1 text-xs text-muted-foreground">
               <InfoIcon className="h-3 w-3" />
@@ -182,7 +185,11 @@ const CreateRouterPage = () => {
           </div>
 
           {/* Configuration Accordion */}
-          <Accordion type="single" collapsible className="w-full">
+          <Accordion
+            type="multiple"
+            className="w-full"
+            defaultValue={["load-balance", "cache", "rate-limit"]}
+          >
             <AccordionItem value="load-balance">
               <AccordionTrigger className="flex items-center justify-between rounded-md transition-colors hover:bg-muted/50 hover:no-underline">
                 <div className="flex flex-col">
