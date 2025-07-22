@@ -9347,9 +9347,9 @@ export function RegisterRoutes(app: Router) {
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsGatewayController_getLatestRouterConfig: Record<string, TsoaRoute.ParameterSchema> = {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
-                id: {"in":"path","name":"id","required":true,"dataType":"string"},
+                routerHash: {"in":"path","name":"routerHash","required":true,"dataType":"string"},
         };
-        app.get('/v1/gateway/:id',
+        app.get('/v1/gateway/:routerHash',
             authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(GatewayController)),
             ...(fetchMiddlewares<RequestHandler>(GatewayController.prototype.getLatestRouterConfig)),
@@ -9507,10 +9507,10 @@ export function RegisterRoutes(app: Router) {
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsGatewayController_updateRouter: Record<string, TsoaRoute.ParameterSchema> = {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
-                id: {"in":"path","name":"id","required":true,"dataType":"string"},
+                routerHash: {"in":"path","name":"routerHash","required":true,"dataType":"string"},
                 body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"config":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}}},
         };
-        app.put('/v1/gateway/:id',
+        app.put('/v1/gateway/:routerHash',
             authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(GatewayController)),
             ...(fetchMiddlewares<RequestHandler>(GatewayController.prototype.updateRouter)),

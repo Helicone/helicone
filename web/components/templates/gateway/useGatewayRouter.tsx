@@ -1,21 +1,21 @@
 import { $JAWN_API } from "@/lib/clients/jawn";
 import { useMutation } from "@tanstack/react-query";
 
-const useGatewayRouter = ({ routerId }: { routerId: string }) => {
+const useGatewayRouter = ({ routerHash }: { routerHash: string }) => {
   const { data: gatewayRouter, isLoading } = $JAWN_API.useQuery(
     "get",
-    `/v1/gateway/{id}`,
+    `/v1/gateway/{routerHash}`,
     {
       params: {
         path: {
-          id: routerId,
+          routerHash,
         },
       },
     },
   );
 
   const { mutate: updateGatewayRouter, isPending: isUpdatingGatewayRouter } =
-    $JAWN_API.useMutation("put", `/v1/gateway/{id}`);
+    $JAWN_API.useMutation("put", `/v1/gateway/{routerHash}`);
   const { mutateAsync: validateRouterConfig } = useMutation({
     mutationFn: async (config: unknown) => {
       try {

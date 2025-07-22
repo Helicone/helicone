@@ -57,16 +57,16 @@ export class GatewayManager extends BaseManager {
   }
 
   async getLatestRouterConfig(
-    id: string
+    hash: string
   ): Promise<Result<LatestRouterConfig, string>> {
     const result = await dbExecute<LatestRouterConfig>(
       `SELECT routers.id, routers.hash, routers.name, router_config_versions.version, router_config_versions.config
       FROM routers
       INNER JOIN router_config_versions ON routers.id = router_config_versions.router_id
-      WHERE routers.id = $1 AND routers.organization_id = $2
+      WHERE routers.hash = $1 AND routers.organization_id = $2
       ORDER BY router_config_versions.created_at DESC
       LIMIT 1`,
-      [id, this.authParams.organizationId]
+      [hash, this.authParams.organizationId]
     );
 
     if (result.error || !result.data) {
@@ -279,15 +279,15 @@ export class GatewayManager extends BaseManager {
   }
 
   async updateRouter(params: {
-    id: string;
+    hash: string;
     name?: string;
     config?: string;
   }): Promise<Result<null, string>> {
-    const { id, name, config } = params;
+    const { hash, name, config } = params;
 
     const routerConfigResult = await dbExecute<{ id: string }>(
-      `SELECT id FROM routers WHERE id = $1 AND organization_id = $2`,
-      [id, this.authParams.organizationId]
+      `SELECT id FROM routers WHERE hash = $1 AND organization_id = $2`,
+      [hash, this.authParams.organizationId]
     );
     if (routerConfigResult.error || !routerConfigResult.data) {
       return err(`Failed to get router: ${routerConfigResult.error}`);
@@ -296,7 +296,7 @@ export class GatewayManager extends BaseManager {
     if (name) {
       const nameResult = await dbExecute(
         `UPDATE routers SET name = $1 WHERE id = $2`,
-        [name, id]
+        [name, routerConfigResult.data[0].id]
       );
       if (nameResult.error) {
         return err(`Failed to update router name: ${nameResult.error}`);

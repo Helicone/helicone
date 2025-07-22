@@ -528,7 +528,7 @@ export interface paths {
     get: operations["GetRouters"];
     post: operations["CreateRouter"];
   };
-  "/v1/gateway/{id}": {
+  "/v1/gateway/{routerHash}": {
     get: operations["GetLatestRouterConfig"];
     put: operations["UpdateRouter"];
   };
@@ -6482,7 +6482,7 @@ export interface operations {
   GetLatestRouterConfig: {
     parameters: {
       path: {
-        id: string;
+        routerHash: string;
       };
     };
     responses: {
@@ -6497,7 +6497,7 @@ export interface operations {
   UpdateRouter: {
     parameters: {
       path: {
-        id: string;
+        routerHash: string;
       };
     };
     requestBody: {
