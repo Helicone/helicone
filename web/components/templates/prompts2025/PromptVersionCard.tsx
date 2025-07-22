@@ -2,6 +2,17 @@ import ModelPill from "@/components/templates/requests/modelPill";
 import type { components } from "../../../lib/clients/jawnTypes/public";
 import { formatTime } from "./timeUtils";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { TestTube2, Crown, Clock, Trash2 } from "lucide-react";
 import {
   Tooltip,
@@ -69,24 +80,41 @@ const PromptVersionCard = ({
             </TooltipContent>
           </Tooltip>
           {!isProductionVersion && (
-            <Tooltip delayDuration={100}>
-              <TooltipTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-8 w-8" 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onSetProductionVersion(version.prompt_id, version.id);
-                  }}
-                >
-                  <Crown className="h-4 w-4 text-muted-foreground" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Set as Production</p>
-              </TooltipContent>
-            </Tooltip>
+            <AlertDialog>
+              <Tooltip delayDuration={100}>
+                <TooltipTrigger asChild>
+                  <AlertDialogTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                    >
+                      <Crown className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                  </AlertDialogTrigger>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Set as Production</p>
+                </TooltipContent>
+              </Tooltip>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Set as Production Version</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to set {versionDisplay} as the production version? This will replace the current production version and affect all future API calls using this prompt.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => onSetProductionVersion(version.prompt_id, version.id)}>
+                    Set as Production
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           )}
           <Tooltip delayDuration={100}>
             <TooltipTrigger asChild>
