@@ -185,11 +185,23 @@ const CreateRouterPage = () => {
           <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="load-balance">
               <AccordionTrigger className="flex items-center justify-between rounded-md transition-colors hover:bg-muted/50 hover:no-underline">
-                <div className="flex items-center gap-2">
-                  <span>Load Balancing</span>
-                  <Badge variant="secondary" className="text-xs">
-                    {getLoadBalanceSummary()}
-                  </Badge>
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2">
+                    <span>Load Balancing</span>
+                    <Badge variant="secondary" className="text-xs">
+                      {getLoadBalanceSummary()}
+                    </Badge>
+                  </div>
+                  <div className="mt-0.5 text-xs text-muted-foreground">
+                    Make sure you've set up your provider keys in the{" "}
+                    <Link
+                      href="/providers"
+                      className="text-blue-500 hover:underline"
+                    >
+                      providers
+                    </Link>{" "}
+                    section.
+                  </div>
                 </div>
               </AccordionTrigger>
               <AccordionContent>

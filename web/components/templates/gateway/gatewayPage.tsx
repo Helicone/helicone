@@ -9,13 +9,16 @@ import { Small } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
 import { $JAWN_API } from "@/lib/clients/jawn";
 import { components } from "@/lib/clients/jawnTypes/public";
-import { Search } from "lucide-react";
+import { TriangleAlertIcon, Search } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { formatTime } from "../prompts2025/timeUtils";
 import { useRouter } from "next/router";
 import { useFeatureFlag } from "@/services/hooks/admin";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { PlusIcon } from "lucide-react";
+import { useProvider } from "@/hooks/useProvider";
+import Link from "next/link";
 
 type Router = components["schemas"]["Router"];
 
@@ -61,6 +64,8 @@ const GatewayPage = () => {
     org?.currentOrg?.id ?? "",
   );
 
+  const { providerKeys } = useProvider();
+
   if (!hasFeatureFlag) {
     return <div>You do not have access to the AI Gateway</div>;
   }
@@ -70,9 +75,28 @@ const GatewayPage = () => {
       <FoldedHeader
         showFold={false}
         leftSection={
-          <Small className="font-bold text-gray-500 dark:text-slate-300">
-            AI Gateway
-          </Small>
+          <div className="flex items-center gap-1">
+            <Small className="font-bold text-gray-500 dark:text-slate-300">
+              AI Gateway
+            </Small>
+          </div>
+        }
+        rightSection={
+          providerKeys.length === 0 && (
+            <Badge
+              variant="helicone"
+              className="gap-2 bg-yellow-200/70 text-yellow-500 hover:bg-yellow-200/70"
+            >
+              <TriangleAlertIcon className="h-3 w-3" />
+              <span>
+                You have no provider keys set. Set them in the{" "}
+                <Link href="/providers" className="underline">
+                  providers
+                </Link>{" "}
+                page.
+              </span>
+            </Badge>
+          )
         }
       />
       <div className="flex h-full min-h-[calc(100vh-57px)] w-full flex-col border-t border-border">
