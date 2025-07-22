@@ -7,7 +7,7 @@ description: "Deploy Helicone using Kubernetes and Helm. Quick setup guide for r
 
 The Helm chart deploys the complete Helicone stack on Kubernetes. Terraform creates AWS S3, Aurora,
 and EKS resources to run the Helicone project on.
-The Helm chart is available in the [Helicone Helm repository](https://github.com/Helicone/helicone-helm-v3).
+The Helm charts are available in the [Helicone Helm repository](https://github.com/Helicone/helicone-helm-v3).
 Previous version: [v2](https://github.com/Helicone/helicone-helm-v2)
 
 ## AWS Setup Guide
@@ -21,21 +21,86 @@ Previous version: [v2](https://github.com/Helicone/helicone-helm-v2)
 3. Install **[Helm](https://helm.sh/docs/intro/install/)** - For chart deployment
 4. Install **[Terraform](https://developer.hashicorp.com/terraform/install)** - For infrastructure
    as code deployment
-5. Copy all values.example.yaml files to values.yaml for each of the charts in `charts/` and
-   customize as needed for your configuration.
+5. Ensure you have access to a Kubernetes cluster (EKS, GKE, AKS, or local cluster)
 
 ## Cluster Creation on EKS with Terraform
 
+The helm-v3 repository includes comprehensive Terraform modules for AWS infrastructure deployment.
+
+### Module Structure
+
+- `terraform/eks/` - Core EKS cluster infrastructure (cluster, nodes, networking)
+- `terraform/route53-acm/` - SSL certificates and Route53 DNS management
+- `terraform/cloudflare/` - External DNS management via Cloudflare (optional)
+- `terraform/s3/` - S3 storage buckets (optional)
+- `terraform/aurora/` - Aurora PostgreSQL database (optional)
+
+### Deployment Order
+
+Deploy the modules in this specific order due to dependencies:
+
+1. **Deploy EKS Infrastructure (required)**:
+
+   ```bash
+   cd terraform/eks
+   terraform init
+   terraform validate
+   terraform apply
+   ```
+
+2. **Deploy Route53/ACM Module (required for SSL and DNS)**:
+
+   ```bash
+   cd terraform/route53-acm
+   terraform init
+   terraform validate
+   terraform apply
+   ```
+
+   Note: You can also deploy the Cloudflare module as a DNS provider instead of Route53.
+
+### Alternative: Using Local Terraform
+
+If you prefer to use the terraform configuration from this repository:
+
 1. Set up [Terraform](https://developer.hashicorp.com/terraform/install)
-2. Go to terraform/eks, then `terraform init`, followed by `terrform validate` followed by
+2. Go to valhalla/terraform, then `terraform init`, followed by `terraform validate` followed by
    `terraform apply`
 
 ## Deploy Helm Charts
 
+The Helicone Helm charts are maintained in a separate repository. You need to clone the repository locally to deploy the charts.
+
+### Prerequisites
+
+- Kubernetes cluster (EKS, GKE, or other)
+- Helm 3.x installed
+- kubectl configured to access your cluster
+
+### Setup Helm Charts
+
+1. Clone the Helicone Helm repository:
+
+   ```bash
+   git clone https://github.com/Helicone/helicone-helm-v3.git
+   cd helicone-helm-v3
+   ```
+
+2. Copy and customize configuration files:
+
+   ```bash
+   # Copy example values files to values.yaml for each chart
+   cp charts/helicone-core/values.example.yaml charts/helicone-core/values.yaml
+   cp charts/helicone-monitoring/values.example.yaml charts/helicone-monitoring/values.yaml
+   cp charts/helicone-argocd/values.example.yaml charts/helicone-argocd/values.yaml
+   # ... repeat for other charts as needed
+   ```
+
+3. Edit the `values.yaml` files according to your configuration needs.
+
 ### Option 1: Using Helm Compose (Recommended)
 
-You can now deploy all Helicone components with a single command using the provided
-`helm-compose.yaml` configuration:
+Deploy all Helicone components with a single command using the provided `helm-compose.yaml` configuration:
 
 ```bash
 helm compose up
@@ -43,8 +108,9 @@ helm compose up
 
 This will deploy the complete Helicone stack including:
 
-- **helicone-core** - Main application components (web, jawn, worker, etc.)
-- **helicone-infrastructure** - Infrastructure services (PostgreSQL, Redis, ClickHouse, etc.)
+- **helicone-core** - Main application components (web, jawn, worker, AI gateway, etc.)
+- **helicone-ai-gateway** - Helicone's AI Gateway
+- **helicone-infrastructure** - Infrastructure services (eBPF)
 - **helicone-monitoring** - Monitoring stack (Grafana, Prometheus)
 - **helicone-argocd** - ArgoCD for GitOps workflows
 
@@ -58,69 +124,46 @@ helm compose down
 
 Alternatively, you can install components individually:
 
-1. Install necessary helm dependencies:
+1. Install necessary helm dependencies. For example, for helicone-core:
 
    ```bash
-   cd helicone && helm dependency build
+   cd charts/helicone-core && helm dependency build
    ```
 
-2. Use `values.example.yaml` as a starting point, and copy into `values.yaml`
-
-3. Copy `secrets.example.yaml` into `secrets.yaml`, and change the secrets according to your setup.
-
-4. Install/upgrade each Helm chart individually:
+2. Install/upgrade each Helm chart individually:
 
    ```bash
    # Install core Helicone application components
-   helm upgrade --install helicone-core ./helicone-core -f values.yaml
+   helm upgrade --install helicone-core ./charts/helicone-core -f charts/helicone-core/values.yaml
 
-   # Install infrastructure services (autoscaling, [Beyla](https://grafana.com/docs/beyla/latest/))
-   helm upgrade --install helicone-infrastructure ./helicone-infrastructure -f values.yaml
+   # Install AI Gateway component
+   helm upgrade --install helicone-ai-gateway ./charts/helicone-ai-gateway -f charts/helicone-ai-gateway/values.yaml
+
+   # Install infrastructure services
+   helm upgrade --install helicone-infrastructure ./charts/helicone-infrastructure -f charts/helicone-infrastructure/values.yaml
 
    # Install monitoring stack (Grafana, Prometheus)
-   helm upgrade --install helicone-monitoring ./helicone-monitoring -f values.yaml
+   helm upgrade --install helicone-monitoring ./charts/helicone-monitoring -f charts/helicone-monitoring/values.yaml
 
    # Install ArgoCD for GitOps workflows
-   helm upgrade --install helicone-argocd ./helicone-argocd -f values.yaml
+   helm upgrade --install helicone-argocd ./charts/helicone-argocd -f charts/helicone-argocd/values.yaml
    ```
 
-5. Verify the deployment:
+3. Verify the deployment:
 
    ```bash
    kubectl get pods
    ```
 
+For detailed configuration options, refer to the values.yaml files in each chart directory.
+
 ## Accessing Deployed Services
 
-### ArgoCD
-
-ArgoCD is deployed as part of the **helicone-argocd** component and provides GitOps capabilities for
-continuous deployment. It monitors your Git repositories and automatically synchronizes your
-Kubernetes cluster state with the desired state defined in your Git repos.
-
-#### Accessing ArgoCD UI
-
-1. Port-forward to access the ArgoCD server:
-
-   ```bash
-   kubectl port-forward svc/argocd-server -n argocd 8080:443
-   ```
-
-2. Access the ArgoCD UI at: `https://localhost:8080`
-
-3. Get the initial admin password:
-
-   ```bash
-   kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
-   ```
-
-4. Login with username `admin` and the password retrieved above.
+Once deployed using the Helicone Helm charts, you can access various services in your cluster.
 
 ### Grafana
 
-Grafana is deployed as part of the **helicone-monitoring** component and provides observability
-dashboards for monitoring your Helicone deployment. It works alongside Prometheus to collect and
-visualize metrics from all your services.
+Grafana is deployed as part of the **helicone-monitoring** component and provides observability dashboards for monitoring your Helicone deployment. It works alongside Prometheus to collect and visualize metrics from all your services.
 
 #### Accessing Grafana UI
 
@@ -142,13 +185,78 @@ visualize metrics from all your services.
 
 5. Pre-configured dashboards for Helicone services should be available under the Dashboards section.
 
+### ArgoCD
+
+ArgoCD is deployed as part of the **helicone-argocd** component and provides GitOps capabilities for continuous deployment. It monitors your Git repositories and automatically synchronizes your Kubernetes cluster state with the desired state defined in your Git repos.
+
+#### Accessing ArgoCD UI
+
+1. Port-forward to access the ArgoCD server:
+
+   ```bash
+   kubectl port-forward svc/argocd-server -n argocd 8080:443
+   ```
+
+2. Access the ArgoCD UI at: `https://localhost:8080`
+
+3. Get the initial admin password:
+
+   ```bash
+   kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+   ```
+
+4. Login with username `admin` and the password retrieved above.
+
+For more detailed configuration options and advanced setup, refer to the [Helicone Helm Charts repository](https://github.com/Helicone/helicone-helm-v3).
+
 ## Configuring S3 (Optional)
 
-### Terraform Setup
+### Terraform Setup with Service Account Access (Recommended)
 
-Go to terraform/s3, then `terraform validate` followed by `terraform apply`
+For secure S3 access using IAM roles for service accounts (IRSA):
 
-### Manual Setup
+1. Navigate to terraform/s3 and configure your variables:
+
+   ```bash
+   cd terraform/s3
+   cp terraform.tfvars.example terraform.tfvars
+   ```
+
+2. Edit `terraform.tfvars` and set:
+
+   ```bash
+   enable_service_account_access = true
+   eks_oidc_provider = "oidc.eks.us-west-2.amazonaws.com/id/YOUR_CLUSTER_OIDC_ID"
+   kubernetes_namespace = "helicone"
+   ```
+
+3. Get your EKS OIDC provider URL:
+
+   ```bash
+   aws eks describe-cluster --name YOUR_CLUSTER_NAME --query "cluster.identity.oidc.issuer" --output text | sed 's|https://||'
+   ```
+
+4. Apply the Terraform configuration:
+
+   ```bash
+   terraform validate && terraform apply
+   ```
+
+5. Configure the Helm chart in `charts/helicone-core/values.yaml`:
+
+   ```yaml
+   helicone:
+     minio:
+       enabled: false # Disable MinIO when using real S3
+     s3:
+       serviceAccount:
+         enabled: true
+         roleArn: "arn:aws:iam::123456789012:role/helm-request-response-storage-service-account-role" # From terraform output
+       bucketName: "helm-request-response-storage"
+       endpoint: "https://s3.amazonaws.com"
+   ```
+
+### Alternative: Access Key Setup
 
 If minio is enabled, then it will take the place of S3. Minio is a storage solution similar to AWS
 S3, which can be used for local testing. If minio is disabled by setting the enabled flag under that
@@ -159,27 +267,29 @@ service to false, then the following parameters are used to configure the bucket
 - s3AccessKey (secret)
 - s3SecretKey (secret)
 
+### CORS Configuration
+
 Make sure to enable the following CORS policy on the S3 bucket, such that the web service can fetch
 URL's from the bucket. To do so in AWS, in the bucket settings, set the following under Permissions
 -> Cross-origin resource sharing (CORS):
 
-```yaml
+```json
 [
   {
-    'AllowedHeaders': ['*'],
-    'AllowedMethods': ['GET'],
-    'AllowedOrigins': ['https://heliconetest.com'],
-    'ExposeHeaders': ['ETag'],
-    'MaxAgeSeconds': 3000,
-  },
+    "AllowedHeaders": ["*"],
+    "AllowedMethods": ["GET"],
+    "AllowedOrigins": ["https://heliconetest.com"],
+    "ExposeHeaders": ["ETag"],
+    "MaxAgeSeconds": 3000
+  }
 ]
 ```
 
 ## Aurora Setup via Terraform
 
-To set up an Aurora postgresql database using Terraform, follow these steps:
+AWS Aurora is supported as an alternative to a vanilla postgres deployment. To set up an Aurora postgresql database using Terraform, follow these steps:
 
-1. Navigate to the terraform/aurora directory:
+1. Navigate to the terraform/aurora directory (in the helm-v3 repository):
 
    ```bash
    cd terraform/aurora
@@ -203,5 +313,16 @@ To set up an Aurora postgresql database using Terraform, follow these steps:
    terraform apply
    ```
 
-After the aurora resource is created, make sure to set enabled to false for postgresql. This will
-allow the aurora cluster to be used in its place.
+After the aurora resource is created, make sure to set enabled to false for postgresql in your Helm chart values. This will allow the aurora cluster to be used in its place.
+
+### Alternative: Using Local Repository Aurora Configuration
+
+If you prefer to use the Aurora configuration from this repository:
+
+1. Navigate to the valhalla/terraform directory:
+
+   ```bash
+   cd valhalla/terraform
+   ```
+
+2. Follow the same terraform init, validate, and apply steps as above.
