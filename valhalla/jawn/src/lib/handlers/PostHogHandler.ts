@@ -51,11 +51,16 @@ export class PostHogHandler extends AbstractLogHandler {
       try {
         const posthogClient = new PosthogUserClient(event.apiKey, event.host);
 
+        // Use Helicone-User-Id as distinct_id if available, else fallback to random UUID
+        const distinctId = event.properties.userId && event.properties.userId.trim() !== ""
+          ? event.properties.userId
+          : crypto.randomUUID();
+
         posthogClient.captureEvent(
           "helicone_request_response",
           event.properties,
           event.createdAt,
-          crypto.randomUUID()
+          distinctId
         );
       } catch (error: any) {
         Sentry.captureException(new Error(JSON.stringify(error)), {
