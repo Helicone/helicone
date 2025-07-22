@@ -14,6 +14,7 @@ import {
   useGetPromptTags,
   useDeletePrompt,
   useDeletePromptVersion,
+  useRenamePrompt,
 } from "@/services/hooks/prompts";
 import { useState, useEffect, useRef } from "react";
 import PromptDetails from "./PromptDetails";
@@ -93,7 +94,29 @@ const PromptsPage = (props: PromptsPageProps) => {
   const setProductionVersion = useSetProductionVersion();
   const deletePrompt = useDeletePrompt();
   const deletePromptVersion = useDeletePromptVersion();
+  const renamePrompt = useRenamePrompt();
 
+  const handleRenamePrompt = async (promptId: string, newName: string) => {
+    console.log("renaming prompt", promptId, newName);
+    const result = await renamePrompt.mutateAsync({
+      params: {
+        path: {
+          promptId,
+        }
+      },
+      body: {
+        name: newName,
+      }
+    });
+
+    if (result.error) {
+      setNotification("Error renaming prompt", "error");
+      console.error("Error renaming prompt", result.error);
+    } else {
+      setNotification("Prompt renamed successfully", "success");
+    }
+  }
+  
   const handleSetProductionVersion = async (promptId: string, promptVersionId: string) => {
     const result = await setProductionVersion.mutateAsync({
       body: {
@@ -328,6 +351,7 @@ const PromptsPage = (props: PromptsPageProps) => {
             collapsible={true}
           >
             <PromptDetails
+              onRenamePrompt={handleRenamePrompt}
               onSetProductionVersion={handleSetProductionVersion}
               onOpenPromptVersion={handleOpenPromptVersion}
               onDeletePrompt={handleDeletePrompt}

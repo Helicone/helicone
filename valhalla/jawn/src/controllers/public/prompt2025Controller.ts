@@ -72,6 +72,24 @@ export class Prompt2025Controller extends Controller {
     return result;
   }
 
+  @Post("id/{promptId}/rename")
+  public async renamePrompt2025(
+    @Path() promptId: string,
+    @Body() requestBody: {
+      name: string;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const promptManager = new Prompt2025Manager(request.authParams);
+    const result = await promptManager.renamePrompt({ promptId, name: requestBody.name });
+    if (result.error) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
   @Delete("{promptId}")
   public async deletePrompt2025(
     @Path() promptId: string,

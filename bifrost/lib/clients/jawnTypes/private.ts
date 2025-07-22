@@ -162,6 +162,9 @@ export interface paths {
   "/v1/prompt-2025/id/{promptId}": {
     get: operations["GetPrompt2025"];
   };
+  "/v1/prompt-2025/id/{promptId}/rename": {
+    post: operations["RenamePrompt2025"];
+  };
   "/v1/prompt-2025/{promptId}": {
     delete: operations["DeletePrompt2025"];
   };
@@ -16358,6 +16361,28 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Prompt2025.string_"];
+        };
+      };
+    };
+  };
+  RenamePrompt2025: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };

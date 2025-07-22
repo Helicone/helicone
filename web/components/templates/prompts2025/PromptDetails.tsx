@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Tooltip,
   TooltipContent,
@@ -24,6 +25,7 @@ import useNotification from "@/components/shared/notification/useNotification";
 
 interface PromptDetailsProps {
   promptWithVersions: PromptWithVersions | null;
+  onRenamePrompt: (promptId: string, newName: string) => void;
   onSetProductionVersion: (promptId: string, promptVersionId: string) => void;
   onOpenPromptVersion: (promptVersionId: string) => void;
   onDeletePrompt: (promptId: string) => void;
@@ -34,6 +36,7 @@ interface PromptDetailsProps {
 
 const PromptDetails = ({
   promptWithVersions,
+  onRenamePrompt,
   onSetProductionVersion,
   onOpenPromptVersion,
   onDeletePrompt,
@@ -45,6 +48,8 @@ const PromptDetails = ({
   const [selectedVersion, setSelectedVersion] = useState<string>(
     "All (last 50 versions)"
   );
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState("");
 
   useEffect(() => {
     if (promptWithVersions) {
@@ -111,9 +116,39 @@ const PromptDetails = ({
               </TooltipProvider>
 
               <div className="flex items-center gap-2 truncate">
-                <span className="font-semibold text-foreground truncate">
-                  {prompt.name}
-                </span>
+                {isEditing ? (
+                  <Input
+                    className="font-semibold text-foreground truncate bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-primary ml-1 px-1 rounded h-auto py-0"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    onBlur={() => {
+                      setIsEditing(false);
+                      if (editName !== prompt.name) {
+                        onRenamePrompt(prompt.id, editName);
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.currentTarget.blur();
+                      }
+                      if (e.key === 'Escape') {
+                        setEditName(prompt.name);
+                        setIsEditing(false);
+                      }
+                    }}
+                    autoFocus
+                  />
+                ) : (
+                  <span 
+                    className="font-semibold text-foreground truncate cursor-pointer"
+                    onClick={() => {
+                      setIsEditing(true);
+                      setEditName(prompt.name);
+                    }}
+                  >
+                    {prompt.name}
+                  </span>
+                )}
                 <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20">
                   {versionDisplay}
                 </span>
