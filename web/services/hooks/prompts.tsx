@@ -30,7 +30,25 @@ export const useCreatePrompt = () => {
   );
 };
 
-export const useUpdatePrompt = () => {
+export const useRenamePrompt = () => {
+  const queryClient = useQueryClient();
+
+  return $JAWN_API.useMutation(
+    "post",
+    "/v1/prompt-2025/id/{promptId}/rename",
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["prompts"] });
+        queryClient.invalidateQueries({ queryKey: ["promptsWithVersions"] });
+        queryClient.invalidateQueries({ queryKey: ["promptTags"] });
+        queryClient.invalidateQueries({ queryKey: ["promptVersions"] });
+        queryClient.invalidateQueries({ queryKey: ["promptVersionWithBody"] });
+      },
+    }
+  );
+};
+
+export const usePushPromptVersion = () => {
   const queryClient = useQueryClient();
 
   return $JAWN_API.useMutation(
@@ -66,7 +84,6 @@ export const useSetProductionVersion = () => {
     "/v1/prompt-2025/update/production-version",
     {
       onSuccess: () => {
-        console.log("set production version success");
         queryClient.invalidateQueries({ queryKey: ["prompts"] });
         queryClient.invalidateQueries({ queryKey: ["promptsWithVersions"] });
         queryClient.invalidateQueries({ queryKey: ["promptVersions"] });
@@ -84,7 +101,6 @@ export const useDeletePrompt = () => {
     "/v1/prompt-2025/{promptId}",
     {
       onSuccess: () => {
-        console.log("deleted prompt")
         queryClient.invalidateQueries({ queryKey: ["prompts"] });
         queryClient.invalidateQueries({ queryKey: ["promptsWithVersions"] });
         queryClient.invalidateQueries({ queryKey: ["promptTags"] });
@@ -255,10 +271,6 @@ export const useGetPromptsWithVersions = (
               promptId: prompt.id,
             },
           });
-
-          if (prompt.id === "kHbjNB") {
-            console.log("productionVersionResult", productionVersionResult.data?.data);
-          }
 
           if (
             versionsResult.error ||

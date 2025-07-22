@@ -122,6 +122,22 @@ export class Prompt2025Manager extends BaseManager {
     return ok(result.data[0]);
   }
 
+  async renamePrompt(params: {
+    promptId: string;
+    name: string;
+  }): Promise<Result<null, string>> {
+    const result = await dbExecute<null>(
+      `UPDATE prompts_2025 SET name = $1 WHERE id = $2 AND organization = $3 AND soft_delete is false`,
+      [params.name, params.promptId, this.authParams.organizationId]
+    );
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    return ok(null);
+  }
+
   async getPrompts(params: {
     search: string;
     tagsFilter: string[];

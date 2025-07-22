@@ -31,7 +31,7 @@ import { Small } from "@/components/ui/typography";
 import { ModelParameters } from "@/lib/api/llm/generate";
 import {
   useCreatePrompt,
-  useUpdatePrompt,
+  usePushPromptVersion,
   useGetPromptVersionWithBody,
 } from "@/services/hooks/prompts";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
@@ -447,7 +447,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   }, [response]);
 
   const createPromptMutation = useCreatePrompt();
-  const updatePromptMutation = useUpdatePrompt();
+  const pushPromptVersionMutation = usePushPromptVersion();
 
   const onCreatePrompt = async (tags: string[], promptName: string) => {
     if (!mappedContent) {
@@ -504,7 +504,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     );
 
     try {
-      const result = await updatePromptMutation.mutateAsync({
+      const result = await pushPromptVersionMutation.mutateAsync({
         body: {
           promptId: promptVersionData.prompt.id,
           promptVersionId: promptVersionData.promptVersion.id,
