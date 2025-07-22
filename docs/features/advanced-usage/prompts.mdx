@@ -15,99 +15,99 @@ Our Prompts offers a better approach!
 - **Easy deployment**: Reference prompts by ID and let our AI Gateway handle the rest
 - **Real-time testing**: Test prompts instantly with different models and parameters
 
-## Quick Start
+## Quickstart
 
 <Steps>
-<Step title="Create a Prompt">
-Build a prompt in the Playground. Save any prompt with clear commit histories and tags.
+  <Step title="Create a Prompt">
+    Build a prompt in the Playground. Save any prompt with clear commit histories and tags.
 
-<Frame>
-  <video width="100%" autoPlay loop muted playsInline>
-    <source
-      src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/Prompts2025-A.mp4"
-      type="video/mp4"
-    />
-    <img
-      src="/static/features/prompts/create_prompt_placeholder.png"
-      alt="Creating a prompt in Helicone dashboard"
-    />
-  </video>
-</Frame>
-</Step>
+    <Frame>
+      <video width="100%" autoPlay loop muted playsInline>
+        <source
+          src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/Prompts2025-A.mp4"
+          type="video/mp4"
+        />
+        <img
+          src="/static/features/prompts/create_prompt_placeholder.png"
+          alt="Creating a prompt in Helicone dashboard"
+        />
+      </video>
+    </Frame>
+  </Step>
 
-<Step title="Test and Iterate">
-Experiment with different variables, inputs, and models until you reach desired output. Variables can be used anywhere, even in tool schemas.
+  <Step title="Test and Iterate">
+    Experiment with different variables, inputs, and models until you reach desired output. Variables can be used anywhere, even in tool schemas.
 
-<Frame>
-  <video width="100%" autoPlay loop muted playsInline>
-    <source
-      src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/Prompts2025-B.mp4"
-      type="video/mp4"
-    />
-    <img
-      src="/static/features/prompts/test_prompt_placeholder.png"
-      alt="Testing prompts with variables and different models"
-    />
-  </video>
-</Frame>
-</Step>
+    <Frame>
+      <video width="100%" autoPlay loop muted playsInline>
+        <source
+          src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/Prompts2025-B.mp4"
+          type="video/mp4"
+        />
+        <img
+          src="/static/features/prompts/test_prompt_placeholder.png"
+          alt="Testing prompts with variables and different models"
+        />
+      </video>
+    </Frame>
+  </Step>
 
-<Step title="Run Prompt with AI Gateway">
-Use your prompt instantly by referencing its ID in your [configured AI Gateway](/ai-gateway/config#helicone-add-ons). No code changes, no rebuilds.
+  <Step title="Run Prompt with AI Gateway">
+    Use your prompt instantly by referencing its ID in your [configured AI Gateway](/ai-gateway/config#helicone-add-ons). No code changes, no rebuilds.
 
-<CodeGroup>
-```typescript TypeScript
-import { OpenAI } from "openai";
+    <CodeGroup>
+      ```typescript TypeScript
+      import { OpenAI } from "openai";
 
-const openai = new OpenAI({
-  baseURL: "http://localhost:8080/ai",
-  apiKey: "fake-api-key",
-});
+      const openai = new OpenAI({
+        baseURL: "http://localhost:8080/ai",
+        apiKey: "fake-api-key",
+      });
 
-const response = await openai.chat.completions.create({
-  model: "openai/gpt-4o-mini",
-  prompt_id: "abc123", // Reference your saved prompt
-  inputs: {
-    customer_name: "John Doe",
-    product: "AI Gateway"
-  }
-});
-```
+      const response = await openai.chat.completions.create({
+        model: "openai/gpt-4o-mini",
+        prompt_id: "abc123", // Reference your saved prompt
+        inputs: {
+          customer_name: "John Doe",
+          product: "AI Gateway"
+        }
+      });
+      ```
 
-```python Python
-import openai
+      ```python Python
+      import openai
 
-openai.api_base = "http://localhost:8080/ai"
-openai.api_key = "fake-api-key"
+      openai.api_base = "http://localhost:8080/ai"
+      openai.api_key = "fake-api-key"
 
-response = openai.chat.completions.create(
-    model="openai/gpt-4o-mini",
-    prompt_id="abc123",  # Reference your saved prompt
-    inputs={
-        "customer_name": "John Doe",
-        "product": "AI Gateway"
-    }
-)
-```
+      response = openai.chat.completions.create(
+          model="openai/gpt-4o-mini",
+          prompt_id="abc123",  # Reference your saved prompt
+          inputs={
+              "customer_name": "John Doe",
+              "product": "AI Gateway"
+          }
+      )
+      ```
 
-```bash cURL
-curl http://localhost:8080/ai/chat/completions \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "openai/gpt-4o-mini",
-    "prompt_id": "abc123",
-    "inputs": {
-      "customer_name": "John Doe",
-      "product": "AI Gateway"
-    }
-  }'
-```
-</CodeGroup>
-</Step>
+      ```bash cURL
+      curl http://localhost:8080/ai/chat/completions \
+        -H "Content-Type: application/json" \
+        -d '{
+          "model": "openai/gpt-4o-mini",
+          "prompt_id": "abc123",
+          "inputs": {
+            "customer_name": "John Doe",
+            "product": "AI Gateway"
+          }
+        }'
+      ```
+    </CodeGroup>
+  </Step>
 </Steps>
 
 <Tip>
-Your prompt is automatically compiled with the provided inputs and sent to your chosen model. Update prompts in the dashboard and changes take effect immediately!
+  Your prompt is automatically compiled with the provided inputs and sent to your chosen model. Update prompts in the dashboard and changes take effect immediately!
 </Tip>
 
 ## Prompt Assembly Process
@@ -119,61 +119,61 @@ When you make an LLM call with a prompt ID, the AI Gateway will compile your sav
 Saved prompts store all the configuration you set in the playground - temperature, max tokens, response format, system messages, and more. At runtime, these saved parameters are used as defaults, but any parameters you specify in your API call will override them.
 
 <CodeGroup>
-```json Saved Prompt Configuration
-{
-  "model": "gpt-4o-mini",
-  "temperature": 0.6,
-  "max_tokens": 1000,
-  "messages": [
-    {
-      "role": "system", 
-      "content": "You are a helpful customer support agent for {{hc:company:string}}."
-    },
-    {
-      "role": "user",
-      "content": "Hello, I need help with my account."
-    }
-  ]
-}
-```
+  ```json Saved Prompt Configuration
+  {
+    "model": "gpt-4o-mini",
+    "temperature": 0.6,
+    "max_tokens": 1000,
+    "messages": [
+      {
+        "role": "system", 
+        "content": "You are a helpful customer support agent for {{hc:company:string}}."
+      },
+      {
+        "role": "user",
+        "content": "Hello, I need help with my account."
+      }
+    ]
+  }
+  ```
 
-```typescript Runtime API Call
-const response = await openai.chat.completions.create({
-  prompt_id: "abc123",
-  temperature: 0.4, // Overrides saved temperature of 0.6
-  inputs: {
-    company: "Acme Corp"
-  },
-  messages: [
-    {
-      "role": "user",
-      "content": "Actually, I want to cancel my subscription."
-    }
-  ]
-});
-```
+  ```typescript Runtime API Call
+  const response = await openai.chat.completions.create({
+    prompt_id: "abc123",
+    temperature: 0.4, // Overrides saved temperature of 0.6
+    inputs: {
+      company: "Acme Corp"
+    },
+    messages: [
+      {
+        "role": "user",
+        "content": "Actually, I want to cancel my subscription."
+      }
+    ]
+  });
+  ```
 
-```json Final Compiled Request
-{
-  "model": "gpt-4o-mini",
-  "temperature": 0.4, // Runtime value used
-  "max_tokens": 1000, // Saved value used
-  "messages": [
-    {
-      "role": "system",
-      "content": "You are a helpful customer support agent for Acme Corp."
-    },
-    {
-      "role": "user", 
-      "content": "Hello, I need help with my account."
-    },
-    {
-      "role": "user",
-      "content": "Actually, I want to cancel my subscription."
-    }
-  ]
-}
-```
+  ```json Final Compiled Request
+  {
+    "model": "gpt-4o-mini",
+    "temperature": 0.4, // Runtime value used
+    "max_tokens": 1000, // Saved value used
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a helpful customer support agent for Acme Corp."
+      },
+      {
+        "role": "user", 
+        "content": "Hello, I need help with my account."
+      },
+      {
+        "role": "user",
+        "content": "Actually, I want to cancel my subscription."
+      }
+    ]
+  }
+  ```
 </CodeGroup>
 
 ### Message Handling
@@ -185,48 +185,48 @@ Messages work differently than other parameters. Instead of overriding, runtime 
 - Build multi-turn conversations that maintain context
 
 <Warning>
-Runtime messages are always appended to the end of your saved prompt messages. Make sure your saved prompt structure accounts for this behavior.
+  Runtime messages are always appended to the end of your saved prompt messages. Make sure your saved prompt structure accounts for this behavior.
 </Warning>
 
 ### Override Examples
 
 <Tabs>
-<Tab title="Temperature Override">
-```typescript
-// Saved prompt has temperature: 0.8
-const response = await openai.chat.completions.create({
-  prompt_id: "abc123",
-  temperature: 0.2, // Uses 0.2, not 0.8
-  inputs: { topic: "AI safety" }
-});
-```
-</Tab>
+  <Tab title="Temperature Override">
+    ```typescript
+    // Saved prompt has temperature: 0.8
+    const response = await openai.chat.completions.create({
+      prompt_id: "abc123",
+      temperature: 0.2, // Uses 0.2, not 0.8
+      inputs: { topic: "AI safety" }
+    });
+    ```
+  </Tab>
 
-<Tab title="Max Tokens Override">
-```typescript
-// Saved prompt has max_tokens: 500
-const response = await openai.chat.completions.create({
-  prompt_id: "abc123", 
-  max_tokens: 1500, // Uses 1500, not 500
-  inputs: { complexity: "detailed" }
-});
-```
-</Tab>
+  <Tab title="Max Tokens Override">
+    ```typescript
+    // Saved prompt has max_tokens: 500
+    const response = await openai.chat.completions.create({
+      prompt_id: "abc123", 
+      max_tokens: 1500, // Uses 1500, not 500
+      inputs: { complexity: "detailed" }
+    });
+    ```
+  </Tab>
 
-<Tab title="Response Format Override">
-```typescript
-// Saved prompt has no response format
-const response = await openai.chat.completions.create({
-  prompt_id: "abc123",
-  response_format: { type: "json_object" }, // Adds JSON formatting
-  inputs: { data_type: "user_preferences" }
-});
-```
-</Tab>
+  <Tab title="Response Format Override">
+    ```typescript
+    // Saved prompt has no response format
+    const response = await openai.chat.completions.create({
+      prompt_id: "abc123",
+      response_format: { type: "json_object" }, // Adds JSON formatting
+      inputs: { data_type: "user_preferences" }
+    });
+    ```
+  </Tab>
 </Tabs>
 
 <Note>
-This compilation approach gives you the flexibility to have consistent prompt templates while still allowing runtime customization for specific use cases.
+  This compilation approach gives you the flexibility to have consistent prompt templates while still allowing runtime customization for specific use cases.
 </Note>
 
 ## Variables
@@ -240,21 +240,21 @@ Variables use the format `{{hc:name:type}}` where:
 - `type` defines the expected data type
 
 <CodeGroup>
-```text Basic Examples
-{{hc:customer_name:string}}
-{{hc:age:number}}
-{{hc:is_premium:boolean}}
-{{hc:context:any}}
-```
+  ```text Basic Examples
+  {{hc:customer_name:string}}
+  {{hc:age:number}}
+  {{hc:is_premium:boolean}}
+  {{hc:context:any}}
+  ```
 
-```text In Prompt Templates
-You are a helpful assistant for {{hc:company:string}}.
+  ```text In Prompt Templates
+  You are a helpful assistant for {{hc:company:string}}.
 
-The customer {{hc:customer_name:string}} is {{hc:age:number}} years old.
-Premium status: {{hc:is_premium:boolean}}
+  The customer {{hc:customer_name:string}} is {{hc:age:number}} years old.
+  Premium status: {{hc:is_premium:boolean}}
 
-Additional context: {{hc:context:any}}
-```
+  Additional context: {{hc:context:any}}
+  ```
 </CodeGroup>
 
 ### Supported Types
@@ -267,7 +267,7 @@ Additional context: {{hc:context:any}}
 | `your_type_name` | Any data type | Objects, arrays, strings | None |
 
 <Warning>
-Only `number` and `boolean` types are validated by the Helicone AI Gateway, which will accept strings for any input as long as they can be converted to valid values.
+  Only `number` and `boolean` types are validated by the Helicone AI Gateway, which will accept strings for any input as long as they can be converted to valid values.
 </Warning>
 
 Boolean variables accept multiple formats:
@@ -280,76 +280,76 @@ Boolean variables accept multiple formats:
 Variables can be used within JSON schemas for tools and response formatting. This enables dynamic schema generation based on runtime inputs.
 
 <CodeGroup>
-```json Response Schema Example
-{
-  "name": "moviebot_response",
-  "strict": true,
-  "schema": {
-    "type": "object",
-    "properties": {
-      "markdown_response": {
-        "type": "string"
-      },
-      "tools_used": {
-        "type": "array",
-        "items": {
+  ```json Response Schema Example
+  {
+    "name": "moviebot_response",
+    "strict": true,
+    "schema": {
+      "type": "object",
+      "properties": {
+        "markdown_response": {
+          "type": "string"
+        },
+        "tools_used": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": "{{hc:tools:array}}"
+          }
+        },
+        "user_tier": {
           "type": "string",
-          "enum": "{{hc:tools:array}}"
+          "enum": "{{hc:tiers:array}}"
         }
       },
-      "user_tier": {
-        "type": "string",
-        "enum": "{{hc:tiers:array}}"
-      }
-    },
-    "required": [
-      "markdown_response",
-      "tools_used",
-      "user_tier"
-    ],
-    "additionalProperties": false
+      "required": [
+        "markdown_response",
+        "tools_used",
+        "user_tier"
+      ],
+      "additionalProperties": false
+    }
   }
-}
-```
+  ```
 
-```json Runtime Input
-{
-  "tools": ["search", "calculator", "weather"],
-  "tiers": ["basic", "premium", "enterprise"]
-}
-```
+  ```json Runtime Input
+  {
+    "tools": ["search", "calculator", "weather"],
+    "tiers": ["basic", "premium", "enterprise"]
+  }
+  ```
 
-```json Compiled Schema
-{
-  "name": "moviebot_response",
-  "strict": true,
-  "schema": {
-    "type": "object",
-    "properties": {
-      "markdown_response": {
-        "type": "string"
-      },
-      "tools_used": {
-        "type": "array",
-        "items": {
+  ```json Compiled Schema
+  {
+    "name": "moviebot_response",
+    "strict": true,
+    "schema": {
+      "type": "object",
+      "properties": {
+        "markdown_response": {
+          "type": "string"
+        },
+        "tools_used": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["search", "calculator", "weather"]
+          }
+        },
+        "user_tier": {
           "type": "string",
-          "enum": ["search", "calculator", "weather"]
+          "enum": ["basic", "premium", "enterprise"]
         }
       },
-      "user_tier": {
-        "type": "string",
-        "enum": ["basic", "premium", "enterprise"]
-      }
-    },
-    "required": [
-      "markdown_response",
-      "tools_used",
-      "user_tier"
-    ],
-    "additionalProperties": false
+      "required": [
+        "markdown_response",
+        "tools_used",
+        "user_tier"
+      ],
+      "additionalProperties": false
+    }
   }
-}
-```
+  ```
 </CodeGroup>
 
 #### Replacement Behavior
@@ -387,82 +387,82 @@ Both types extend the OpenAI SDK's chat completion parameters and add:
 ### Usage Examples
 
 <CodeGroup>
-```typescript Non-Streaming
-import OpenAI from 'openai';
-import { HeliconeChatCreateParams } from '@helicone/helpers';
+  ```typescript Non-Streaming
+  import OpenAI from 'openai';
+  import { HeliconeChatCreateParams } from '@helicone/helpers';
 
-const openai = new OpenAI({
-  baseURL: "http://localhost:8080/ai",
-  apiKey: "fake-api-key",
-});
+  const openai = new OpenAI({
+    baseURL: "http://localhost:8080/ai",
+    apiKey: "fake-api-key",
+  });
 
-async function generateResponse() {
-  const response = await openai.chat.completions.create({
-    prompt_id: "abc123",
-    model: "openai/gpt-4o-mini",
-    inputs: {
-      customer_name: "Alice Johnson",
-      product: "AI Gateway",
-      tier: "premium"
-    }
-  } as HeliconeChatCreateParams);
-  
-  console.log(response.choices[0].message.content);
-}
-```
-
-```typescript Streaming
-import OpenAI from 'openai';
-import { HeliconeChatCreateParamsStreaming } from '@helicone/helpers';
-
-const openai = new OpenAI({
-  baseURL: "http://localhost:8080/ai", 
-  apiKey: "fake-api-key",
-});
-
-async function streamResponse() {
-  const stream = await openai.chat.completions.create({
-    prompt_id: "abc123",
-    model: "openai/gpt-4o-mini",
-    stream: true,
-    inputs: {
-      topic: "artificial intelligence",
-      audience: "beginners",
-      length: "short"
-    }
-  } as HeliconeChatCreateParamsStreaming);
-
-  for await (const chunk of stream) {
-    process.stdout.write(chunk.choices[0].delta.content || '');
+  async function generateResponse() {
+    const response = await openai.chat.completions.create({
+      prompt_id: "abc123",
+      model: "openai/gpt-4o-mini",
+      inputs: {
+        customer_name: "Alice Johnson",
+        product: "AI Gateway",
+        tier: "premium"
+      }
+    } as HeliconeChatCreateParams);
+    
+    console.log(response.choices[0].message.content);
   }
-}
-```
+  ```
 
-```typescript With Version Control
-import OpenAI from 'openai';
-import { HeliconeChatCreateParams } from '@helicone/helpers';
+  ```typescript Streaming
+  import OpenAI from 'openai';
+  import { HeliconeChatCreateParamsStreaming } from '@helicone/helpers';
 
-const openai = new OpenAI({
-  baseURL: "http://localhost:8080/ai",
-  apiKey: "fake-api-key",
-});
+  const openai = new OpenAI({
+    baseURL: "http://localhost:8080/ai", 
+    apiKey: "fake-api-key",
+  });
 
-async function useSpecificVersion() {
-  const response = await openai.chat.completions.create({
-    prompt_id: "abc123",
-    version_id: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx", // Use specific version
-    model: "openai/gpt-4o-mini",
-    inputs: {
-      user_query: "How does caching work?",
-      context: "technical documentation"
+  async function streamResponse() {
+    const stream = await openai.chat.completions.create({
+      prompt_id: "abc123",
+      model: "openai/gpt-4o-mini",
+      stream: true,
+      inputs: {
+        topic: "artificial intelligence",
+        audience: "beginners",
+        length: "short"
+      }
+    } as HeliconeChatCreateParamsStreaming);
+
+    for await (const chunk of stream) {
+      process.stdout.write(chunk.choices[0].delta.content || '');
     }
-  } as HeliconeChatCreateParams);
-  
-  return response.choices[0].message.content;
-}
-```
+  }
+  ```
+
+  ```typescript With Version Control
+  import OpenAI from 'openai';
+  import { HeliconeChatCreateParams } from '@helicone/helpers';
+
+  const openai = new OpenAI({
+    baseURL: "http://localhost:8080/ai",
+    apiKey: "fake-api-key",
+  });
+
+  async function useSpecificVersion() {
+    const response = await openai.chat.completions.create({
+      prompt_id: "abc123",
+      version_id: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx", // Use specific version
+      model: "openai/gpt-4o-mini",
+      inputs: {
+        user_query: "How does caching work?",
+        context: "technical documentation"
+      }
+    } as HeliconeChatCreateParams);
+    
+    return response.choices[0].message.content;
+  }
+  ```
 </CodeGroup>
 
 <Note>
-The helper types are fully compatible with all OpenAI SDK features including function calling, response formats, and advanced parameters.
+  The helper types are fully compatible with all OpenAI SDK features including function calling, response formats, and advanced parameters.
 </Note>
