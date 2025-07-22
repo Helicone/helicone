@@ -61,7 +61,7 @@ Our Prompts offers a better approach!
 
       const openai = new OpenAI({
         baseURL: "http://localhost:8080/ai",
-        apiKey: "fake-api-key",
+        apiKey: "api-key",
       });
 
       const response = await openai.chat.completions.create({
@@ -78,7 +78,7 @@ Our Prompts offers a better approach!
       import openai
 
       openai.api_base = "http://localhost:8080/ai"
-      openai.api_key = "fake-api-key"
+      openai.api_key = "api-key"
 
       response = openai.chat.completions.create(
           model="openai/gpt-4o-mini",
@@ -393,7 +393,7 @@ Both types extend the OpenAI SDK's chat completion parameters and add:
 
   const openai = new OpenAI({
     baseURL: "http://localhost:8080/ai",
-    apiKey: "fake-api-key",
+    apiKey: "api-key",
   });
 
   async function generateResponse() {
@@ -417,7 +417,7 @@ Both types extend the OpenAI SDK's chat completion parameters and add:
 
   const openai = new OpenAI({
     baseURL: "http://localhost:8080/ai", 
-    apiKey: "fake-api-key",
+    apiKey: "api-key",
   });
 
   async function streamResponse() {
@@ -444,7 +444,7 @@ Both types extend the OpenAI SDK's chat completion parameters and add:
 
   const openai = new OpenAI({
     baseURL: "http://localhost:8080/ai",
-    apiKey: "fake-api-key",
+    apiKey: "api-key",
   });
 
   async function useSpecificVersion() {
