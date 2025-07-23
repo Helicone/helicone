@@ -1,0 +1,38 @@
+Iterate on prompts without code deployments. Our new Prompt Management system brings powerful composability, version control, and instant deployment to your LLM workflows.
+
+## Features
+
+- **Powerful Composability**: Use typed variables anywhere - system prompts, messages, even tool schemas
+- **Version Control**: Track, compare, and rollback prompt versions without code changes
+- **Instant Deployment**: Reference prompts by ID through our AI Gateway - no rebuilds required
+- **Real-time Testing**: Experiment with different models and parameters in the Playground
+- **Dynamic Schemas**: Variables work within JSON schemas for tools and response formatting
+- **TypeScript Support**: Full type safety with our helper types
+
+## How It Works
+
+Save prompts in our Playground with variables like `{{hc:customer_name:string}}`. Test them with different inputs and models. When ready, reference the prompt ID in your API calls through the AI Gateway:
+
+```typescript
+const response = await openai.chat.completions.create({
+  model: "openai/gpt-4o-mini",
+  prompt_id: "abc123",
+  inputs: {
+    customer_name: "John Doe",
+    product: "AI Gateway"
+  }
+});
+```
+
+The AI Gateway compiles your saved prompt with runtime inputs and sends it to your chosen model. Update prompts in the dashboard and changes take effect immediately - no code changes or deployments needed.
+
+## Get Started
+
+<video width="100%" autoPlay loop muted playsInline>
+  <source
+    src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/Prompts2025-A.mp4"
+    type="video/mp4"
+  />
+</video>
+
+Visit the [Prompts page](https://helicone.ai/prompts) in your dashboard to create your first prompt, or check out our [documentation](https://docs.helicone.ai/features/advanced-usage/prompts) for detailed examples and best practices.
