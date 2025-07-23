@@ -11,6 +11,10 @@ Integrate Helicone with [Vercel AI Gateway](https://vercel.com/docs/ai-gateway) 
 Vercel AI Gateway provides a unified endpoint to access multiple AI providers, automatic retries, and spend monitoring. By integrating with Helicone, you add comprehensive logging, analytics, and monitoring on top of these features.
 </Info>
 
+<Note>
+The `@ai-sdk/gateway` integration (recommended) supports all Vercel AI Gateway features including provider failover ordering. Use this SDK if you need gateway-specific functionality.
+</Note>
+
 ## Quick Start
 
 <Steps>
@@ -23,6 +27,10 @@ Vercel AI Gateway provides a unified endpoint to access multiple AI providers, a
 
   <Step title="Install SDK">
     <CodeGroup>
+      ```bash AI Gateway SDK
+      npm install @ai-sdk/gateway ai
+      ```
+      
       ```bash Vercel AI SDK
       npm install @ai-sdk/openai ai
       ```
@@ -35,6 +43,32 @@ Vercel AI Gateway provides a unified endpoint to access multiple AI providers, a
 
   <Step title="Route requests through Helicone">
     <CodeGroup>
+      ```typescript AI Gateway SDK
+      import { createGateway } from '@ai-sdk/gateway';
+      import { generateText } from 'ai';
+
+      const gateway = createGateway({
+        apiKey: process.env.VERCEL_API_KEY,
+        baseURL: 'https://gateway.helicone.ai/v1/ai',
+        headers: {
+          'Helicone-Auth': `Bearer ${process.env.HELICONE_API_KEY}`,
+          'Helicone-Target-URL': 'https://ai-gateway.vercel.sh',
+          'Helicone-Target-Provider': 'VERCEL'
+        }
+      });
+
+      const result = await generateText({
+        model: gateway('openai/gpt-4o-mini'),
+        prompt: 'Explain quantum computing',
+        // Gateway-specific features
+        providerOptions: {
+          gateway: {
+            order: ['openai', 'anthropic', 'bedrock'] // Failover order
+          }
+        }
+      });
+      ```
+      
       ```typescript Vercel AI SDK
       import { createOpenAI } from '@ai-sdk/openai';
       import { generateText } from 'ai';
@@ -125,6 +159,32 @@ Vercel AI Gateway provides a unified endpoint to access multiple AI providers, a
 ## Complete Example
 
 <CodeGroup>
+  ```typescript AI Gateway SDK
+  import { createGateway } from '@ai-sdk/gateway';
+  import { generateText } from 'ai';
+
+  const gateway = createGateway({
+    apiKey: process.env.VERCEL_API_KEY,
+    baseURL: 'https://gateway.helicone.ai/v1/ai',
+    headers: {
+      'Helicone-Auth': `Bearer ${process.env.HELICONE_API_KEY}`,
+      'Helicone-Target-URL': 'https://ai-gateway.vercel.sh',
+      'Helicone-Target-Provider': 'VERCEL'
+    }
+  });
+
+  async function main() {
+    const result = await generateText({
+      model: gateway('openai/gpt-4o-mini'),
+      prompt: 'What is the meaning of life?',
+      temperature: 0.7,
+      maxTokens: 100
+    });
+    
+    return result.text;
+  }
+  ```
+  
   ```typescript Vercel AI SDK
   import { createOpenAI } from '@ai-sdk/openai';
   import { generateText } from 'ai';
