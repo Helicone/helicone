@@ -184,6 +184,7 @@ export class IntercomSlackService {
         attachmentMessage = `\n*Attachments:* ${messages.join(", ")}`;
       }
     }
+    const messageText = `${message}${attachmentMessage}`;
 
     const slackPayload: any = {
       channel: slackChannelId,
@@ -196,8 +197,8 @@ export class IntercomSlackService {
           text: {
             type: "mrkdwn",
             text: threadTs
-              ? `*Reply from ${authorName}:*\n${message}${attachmentMessage}`
-              : `*New Intercom Message*\n*From:* ${authorName}${authorEmail ? ` (${authorEmail})` : ""}\n*Source:* ${sourceUrl}\n*Message:* ${message}${attachmentMessage}`,
+              ? `*Reply from ${authorName}:*\n${messageText}`
+              : `${authorName}${authorEmail ? ` (${authorEmail})` : ""}:${messageText.slice(20)}\n*Message:* ${messageText}*Source:* ${sourceUrl}\n`,
           },
         },
         ...(threadTs
