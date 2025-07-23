@@ -13,7 +13,7 @@ const CTA = () => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <div className="bg-[#F2F9FC] h-[80vh] relative overflow-hidden flex flex-col">
+    <div className="bg-muted/30 h-[80vh] relative overflow-hidden flex flex-col">
       <div
         className="hidden md:block absolute inset-0 w-full h-full z-[0]"
         style={{
@@ -43,11 +43,11 @@ const CTA = () => {
             backgroundRepeat: "no-repeat",
           }}
         ></div>
-        <div className="flex flex-col items-center text-wrap text-4xl md:text-5xl font-semibold text-slate-500 leading-snug z-[10]">
+        <div className="flex flex-col items-center text-wrap text-4xl md:text-5xl font-semibold text-muted-foreground leading-snug z-[10]">
           <div className="flex flex-wrap gap-x-3 gap-y-1 items-center justify-center ">
             <div
               className={cn(
-                "bg-[#E7F6FD] border-[3px] border-brand rounded-xl py-2 xl:py-4 px-7 text-brand transition-transform duration-1000",
+                "bg-brand/10 border-[3px] border-brand rounded-xl py-2 xl:py-4 px-7 text-brand transition-transform duration-1000",
                 "rotate-[-3deg]"
               )}
             >

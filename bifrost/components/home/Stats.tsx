@@ -52,19 +52,19 @@ const Stats = ({
   }, []);
 
   return (
-    <div className="bg-[#f2f9fc]">
+    <div className="bg-muted/30">
       <div
         className={cn(
           ISLAND_WIDTH,
           "flex justify-between items-start pt-0 pb-32"
         )}
       >
-        <h1 className="gap-y-4 text-3xl md:text-6xl font-semibold !leading-[150%] text-black max-w-[1100px] text-wrap">
+        <h1 className="gap-y-4 text-3xl md:text-6xl font-semibold !leading-[150%] text-foreground max-w-[1100px] text-wrap">
           Today,{" "}
           <span
             ref={elementRef}
             className={cn(
-              "inline-block bg-[#E7F6FD] border-[3px] border-brand rounded-xl py-1 px-5 text-brand translate-y-[-10px] transition-transform duration-500 text-nowrap",
+              "inline-block bg-brand/10 border-[3px] border-brand rounded-xl py-1 px-5 text-brand translate-y-[-10px] transition-transform duration-500 text-nowrap",
               isVisible ? "rotate-[-3deg]" : "rotate-[0  deg]"
             )}
           >

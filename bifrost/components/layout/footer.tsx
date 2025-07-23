@@ -55,8 +55,8 @@ const Footer = () => {
     <footer
       className={`grid grid-cols-2 md:grid-cols-5 gap-y-8 pl-8 md:pl-0 md:justify-items-center items-start ${
         path === "/"
-          ? " bg-white text-slate-700 fill-slate-700 stroke-slate-700 py-16"
-          : "bg-inherit text-black/60 fill-[#5D6673] stroke-[#5D6673] py-6"
+          ? " bg-background text-muted-foreground fill-muted-foreground stroke-muted-foreground py-16"
+          : "bg-inherit text-muted-foreground fill-muted-foreground stroke-muted-foreground py-6"
       }`}
     >
       <div className="flex flex-col items-start font-light text-sm tracking-wide gap-1 col-span-2 md:col-span-1 justify-self-start md:justify-self-center">

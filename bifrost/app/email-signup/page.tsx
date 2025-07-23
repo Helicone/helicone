@@ -34,7 +34,7 @@ const bullets: string[] = [
 
 const EmailSignup = () => {
   return (
-    <div className="w-full h-full antialiased text-black">
+    <div className="w-full h-full antialiased text-foreground">
       <div className="h-full">
         <div className="flex flex-col mx-auto w-full gap-8 max-w-5xl p-4 md:px-8 pb-24 pt-10 sm:pb-32 lg:flex lg:py-24 antialiased">
           <div className="flex flex-col w-2/3">
@@ -42,7 +42,7 @@ const EmailSignup = () => {
               Subscribe to Helicone 💌
             </h1>
             <br />
-            <p className="text-gray-700 text-sm">
+            <p className="text-muted-foreground text-sm">
               The difference between good and great AI engineers? Visibility
               into what&apos;s actually happening.
             </p>
@@ -50,7 +50,7 @@ const EmailSignup = () => {
             <ul className="py-8 flex flex-col space-y-4">
               {bullets.map((bullet, idx) => (
                 <li
-                  className="flex items-center text-gray-700 gap-2 text-sm sm:text-md"
+                  className="flex items-center text-muted-foreground gap-2 text-sm sm:text-md"
                   key={idx}
                 >
                   <CheckCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 text-sky-500" />
@@ -59,7 +59,7 @@ const EmailSignup = () => {
               ))}
             </ul>
 
-            <p className="text-black text-sm mt-4">
+            <p className="text-foreground text-sm mt-4">
               Building better AI systems starts with better insights.
             </p>
             <br />

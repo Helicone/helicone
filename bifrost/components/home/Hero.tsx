@@ -35,12 +35,12 @@ const Hero = () => {
           priority
         />
       </div>
-      <h1 className="text-xl sm:text-7xl md:text-[84px] font-semibold mb-3 w-full max-w-4xl text-wrap text-black z-[10]">
+      <h1 className="text-xl sm:text-7xl md:text-[84px] font-semibold mb-3 w-full max-w-4xl text-wrap text-foreground z-[10]">
         Build Reliable
         <br />
         <span className="text-brand">AI Apps</span>
       </h1>
-      <p className="text-lg sm:text-xl 2xl:text-2xl text-landing-secondary font-light mb-6 lg:mb-12 z-[10]">
+      <p className="text-lg sm:text-xl 2xl:text-2xl text-muted-foreground font-light mb-6 lg:mb-12 z-[10]">
         The world&apos;s fastest-growing AI companies rely on Helicone
         <br />
         to route, debug, and analyze their applications.
@@ -53,7 +53,7 @@ const Hero = () => {
               <ChevronRight className="size-5 md:size-6" />
             </Button>
           </Link>
-          <p className="text-sm text-landing-secondary">
+          <p className="text-sm text-muted-foreground">
             No credit card required, 7-day free trial
           </p>
         </div>

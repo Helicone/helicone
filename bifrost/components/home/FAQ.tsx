@@ -12,7 +12,7 @@ const FAQ = () => {
   return (
     <div className={cn(ISLAND_WIDTH, "pt-14 sm:pt-20 pb-12 md:pb-14")}>
       <div className="flex flex-col md:flex-row justify-between w-full gap-6 md:gap-10">
-        <h2 className="text-4xl sm:text-5xl font-semibold text-black">
+        <h2 className="text-4xl sm:text-5xl font-semibold text-foreground">
           Questions &amp; Answers
         </h2>
         <Accordion type="multiple" className="w-full">

@@ -2385,7 +2385,7 @@ const SVG = () => (
 
 const LLMLifecycle = () => {
   return (
-    <div className="bg-[#f1f5f9] relative">
+    <div className="bg-muted/20 relative">
       <div
         className="absolute inset-0 w-full h-full z-[1]"
         style={{
@@ -2409,11 +2409,11 @@ const LLMLifecycle = () => {
         )}
       >
         <div className="flex flex-col flex-1 gap-6">
-          <h2 className="text-4xl sm:text-5xl font-semibold text-black max-w-[520px] text-wrap sm:leading-[57.6px]">
+          <h2 className="text-4xl sm:text-5xl font-semibold text-foreground max-w-[520px] text-wrap sm:leading-[57.6px]">
             The LLMOps platform behind the{" "}
             <span className="text-brand">fastest-growing AI companies</span>
           </h2>
-          <p className="text-lg sm:text-xl max-w-[440px] text-wrap font-light leading-relaxed text-landing-description">
+          <p className="text-lg sm:text-xl max-w-[440px] text-wrap font-light leading-relaxed text-muted-foreground">
             Route intelligently, monitor comprehensively, optimize continuously.
             The platform for every stage of your AI development lifecycle.
           </p>
