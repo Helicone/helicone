@@ -152,6 +152,13 @@ async function modifyEnvBasedOnPath(
     };
   }
 
+
+  return {
+    ...env,
+    WORKER_TYPE: "GATEWAY_API",
+    GATEWAY_TARGET: "https://integrate.api.nvidia.com",
+  };
+
   if (env.WORKER_TYPE) {
     return env;
   }
@@ -226,6 +233,12 @@ async function modifyEnvBasedOnPath(
         ...env,
         WORKER_TYPE: "GATEWAY_API",
         GATEWAY_TARGET: "https://api.llama.com",
+      };
+    } else if (hostParts[0] === "nvidia") {
+      return {
+        ...env,
+        WORKER_TYPE: "GATEWAY_API",
+        GATEWAY_TARGET: "https://integrate.api.nvidia.com",
       };
     } else if (hostParts[0].includes("openrouter")) {
       if (isRootPath(url) && request.getMethod() === "GET") {

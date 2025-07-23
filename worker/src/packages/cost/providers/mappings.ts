@@ -4,6 +4,7 @@ import { costs as avianCosts } from "./avian";
 import { costs as awsBedrockCosts } from "./awsBedrock";
 import { costs as azureCosts } from "./azure";
 import { costs as llamaCosts } from "./llama";
+import { costs as nvidiaCosts } from "./nvidia";
 import { costs as cohereCosts } from "./cohere";
 import { costs as deepseekCosts } from "./deepseek";
 import { costs as fireworksAICosts } from "./fireworks";
@@ -30,6 +31,7 @@ const anthropicPattern = /^https:\/\/api\.anthropic\.com/;
 const azurePattern =
   /^(https?:\/\/)?([^.]*\.)?(openai\.azure\.com|azure-api\.net|cognitiveservices\.azure\.com)(\/.*)?$/;
 const llamaApiPattern = /^https:\/\/api\.llama\.com/;
+const nvidiaApiPattern = /^https:\/\/integrate\.api\.nvidia\.com/;
 const localProxyPattern = /^http:\/\/127\.0\.0\.1:\d+\/v\d+\/?$/;
 const heliconeProxyPattern = /^https:\/\/oai\.hconeai\.com/;
 const amdbartekPattern = /^https:\/\/.*\.amdbartek\.dev/;
@@ -109,6 +111,7 @@ export const providersNames = [
   "OPENPIPE",
   "CHUTES",
   "LLAMA",
+  "NVIDIA",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -137,6 +140,11 @@ export const providers: {
     pattern: llamaApiPattern,
     provider: "LLAMA",
     costs: llamaCosts,
+  },
+  {
+    pattern: nvidiaApiPattern,
+    provider: "NVIDIA",
+    costs: nvidiaCosts,
   },
   {
     pattern: azurePattern,
