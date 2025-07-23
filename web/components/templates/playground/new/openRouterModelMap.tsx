@@ -72,6 +72,7 @@ export const OPENROUTER_MODEL_MAP: Record<string, string> = {
   "deepseek/deepseek-chat": "deepseek/deepseek-chat",
   "deepseek/deepseek-r1": "deepseek/deepseek-r1",
   "o3-mini": "openai/o3-mini",
+  "o3": "openai/o3",
   "o1-mini": "openai/o1-mini",
   "gpt-4.1-2025-04-14": "openai/gpt-4.1",
   "gpt-4.1": "openai/gpt-4.1",
