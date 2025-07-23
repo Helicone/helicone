@@ -40,4 +40,4 @@ CREATE VIEW decrypted_provider_keys AS
     provider_keys.nonce,
     provider_keys.config
   FROM provider_keys
-)
+);
