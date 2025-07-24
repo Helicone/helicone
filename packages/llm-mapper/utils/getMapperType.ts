@@ -139,6 +139,10 @@ export const getMapperType = ({
     return "anthropic-chat";
   }
 
+  if (provider === "NVIDIA") {
+    return "openai-chat";
+  }
+
   // Check for any Llama API model
   if (
     /^Llama/.test(model) ||
