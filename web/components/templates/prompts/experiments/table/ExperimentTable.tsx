@@ -59,7 +59,6 @@ import ExperimentDatasetSelector from "../experimentDatasetSelector";
 import ImportCSVDialog from "./ImportCSVDialog";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
-import { Deprecated } from "@/components/shared/Deprecated";
 
 type TableDataType = {
   index: number;
