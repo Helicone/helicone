@@ -366,13 +366,20 @@ Variables can be used within JSON schemas for tools and response formatting. Thi
 
 **Keys and Values**: Variables work in both JSON keys and values throughout tool schemas and response schemas.
 
-## TypeScript SDK Helpers
+## TypeScript SDK
 
-For TypeScript users, we provide helper types that extend the OpenAI SDK with full type safety at compile-time.
+For TypeScript users, we provide two ways to use Helicone prompts:
+
+1. **AI Gateway Integration** - Use prompts through the Helicone AI Gateway
+2. **Direct SDK Integration** - Pull prompts directly via SDK.
+
+### Usage
 
 ```bash
 npm install @helicone/helpers
 ```
+
+The SDK provides types for both integration methods when using the OpenAI SDK:
 
 | Type | Description | Use Case |
 |------|-------------|----------|
@@ -384,85 +391,141 @@ Both types extend the OpenAI SDK's chat completion parameters and add:
 - `version_id` - Optional specific version (defaults to production version)
 - `inputs` - Variable values.
 
+### Without AI Gateway
+
+For cases where you need to access the prompt body directly, the helpers SDK provides the `HeliconePromptManager`:
+
+```typescript
+import { HeliconePromptManager } from '@helicone/helpers';
+
+const promptManager = new HeliconePromptManager({
+  apiKey: "your-helicone-api-key"
+});
+```
+
+The `HeliconePromptManager` provides two main methods:
+
+| Method | Description | Returns |
+|--------|-------------|---------|
+| `pullPromptBody()` | Fetch raw prompt from storage | `ChatCompletionCreateParams` |
+| `getPromptBody()` | Compile prompt with inputs and validation | `{ body: ChatCompletionCreateParams, errors: ValidationError[] }` |
+
 ### Usage Examples
 
-<CodeGroup>
-  ```typescript Non-Streaming
-  import OpenAI from 'openai';
-  import { HeliconeChatCreateParams } from '@helicone/helpers';
+<Tabs>
+  <Tab title="Basic Usage">
+    ```typescript
+    import OpenAI from 'openai';
+    import { HeliconePromptManager } from '@helicone/helpers';
 
-  const openai = new OpenAI({
-    baseURL: "http://localhost:8080/ai",
-    apiKey: "api-key",
-  });
+    const openai = new OpenAI({
+      apiKey: "your-openai-api-key",
+    });
 
-  async function generateResponse() {
-    const response = await openai.chat.completions.create({
-      prompt_id: "abc123",
-      model: "openai/gpt-4o-mini",
-      inputs: {
-        customer_name: "Alice Johnson",
-        product: "AI Gateway",
-        tier: "premium"
+    const promptManager = new HeliconePromptManager({
+      apiKey: "your-helicone-api-key"
+    });
+
+    async function generateWithPrompt() {
+      // Get compiled prompt with variable substitution
+      const { body, errors } = await promptManager.getPromptBody({
+        prompt_id: "abc123",
+        model: "gpt-4o-mini",
+        inputs: {
+          customer_name: "Alice Johnson",
+          product: "AI Gateway"
+        }
+      });
+
+      // Check for validation errors
+      if (errors.length > 0) {
+        console.warn("Validation errors:", errors);
       }
-    } as HeliconeChatCreateParams);
-    
-    console.log(response.choices[0].message.content);
-  }
-  ```
 
-  ```typescript Streaming
-  import OpenAI from 'openai';
-  import { HeliconeChatCreateParamsStreaming } from '@helicone/helpers';
-
-  const openai = new OpenAI({
-    baseURL: "http://localhost:8080/ai", 
-    apiKey: "api-key",
-  });
-
-  async function streamResponse() {
-    const stream = await openai.chat.completions.create({
-      prompt_id: "abc123",
-      model: "openai/gpt-4o-mini",
-      stream: true,
-      inputs: {
-        topic: "artificial intelligence",
-        audience: "beginners",
-        length: "short"
-      }
-    } as HeliconeChatCreateParamsStreaming);
-
-    for await (const chunk of stream) {
-      process.stdout.write(chunk.choices[0].delta.content || '');
+      // Use compiled prompt with OpenAI SDK
+      const response = await openai.chat.completions.create(body);
+      console.log(response.choices[0].message.content);
     }
-  }
-  ```
+    ```
+  </Tab>
 
-  ```typescript With Version Control
-  import OpenAI from 'openai';
-  import { HeliconeChatCreateParams } from '@helicone/helpers';
+  <Tab title="With Version Control">
+    ```typescript
+    import OpenAI from 'openai';
+    import { HeliconePromptManager } from '@helicone/helpers';
 
-  const openai = new OpenAI({
-    baseURL: "http://localhost:8080/ai",
-    apiKey: "api-key",
-  });
+    const openai = new OpenAI({
+      apiKey: "your-openai-api-key",
+    });
 
-  async function useSpecificVersion() {
-    const response = await openai.chat.completions.create({
-      prompt_id: "abc123",
-      version_id: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx", // Use specific version
-      model: "openai/gpt-4o-mini",
-      inputs: {
-        user_query: "How does caching work?",
-        context: "technical documentation"
+    const promptManager = new HeliconePromptManager({
+      apiKey: "your-helicone-api-key"
+    });
+
+    async function useSpecificVersion() {
+      const { body, errors } = await promptManager.getPromptBody({
+        prompt_id: "abc123",
+        version_id: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+        model: "gpt-4o-mini",
+        inputs: {
+          user_query: "How does caching work?",
+          context: "technical documentation"
+        },
+        messages: [
+          { role: "user", content: "Follow up question..." }
+        ]
+      });
+
+      if (errors.length > 0) {
+        console.warn("Variable validation failed:", errors);
       }
-    } as HeliconeChatCreateParams);
-    
-    return response.choices[0].message.content;
-  }
-  ```
-</CodeGroup>
+
+      return await openai.chat.completions.create(body);
+    }
+    ```
+  </Tab>
+
+  <Tab title="Error Handling">
+    ```typescript
+    import OpenAI from 'openai';
+    import { HeliconePromptManager } from '@helicone/helpers';
+
+    const promptManager = new HeliconePromptManager({
+      apiKey: "your-helicone-api-key"
+    });
+
+    async function handleValidationErrors() {
+      const { body, errors } = await promptManager.getPromptBody({
+        prompt_id: "abc123",
+        model: "gpt-4o-mini",
+        inputs: {
+          age: "not-a-number", // This will cause a validation error
+          is_premium: "maybe"   // This will cause a validation error
+        }
+      });
+
+      // Handle validation errors
+      if (errors.length > 0) {
+        errors.forEach(error => {
+          console.error(`Variable "${error.variable}" validation failed:`);
+          console.error(`  Expected: ${error.expected}`);
+          console.error(`  Received: ${JSON.stringify(error.value)}`);
+        });
+        
+        // Decide how to handle: throw error, use defaults, prompt user, etc.
+        throw new Error(`Prompt validation failed: ${errors.length} errors`);
+      }
+
+      // Proceed with valid prompt
+      const openai = new OpenAI({ apiKey: "your-openai-api-key" });
+      return await openai.chat.completions.create(body);
+    }
+    ```
+  </Tab>
+</Tabs>
+
+The Helicone AI Gateway is the recommended way to interact with prompts, as it offers a fully OpenAI-compatible router, caching, rate limits, and more alongside prompts usage. However, the SDK is a great option for users that need direct interaction with compiled prompt bodies.
 
 <Note>
-  The helper types are fully compatible with all OpenAI SDK features including function calling, response formats, and advanced parameters.
+  Both approaches are fully compatible with all OpenAI SDK features including function calling, response formats, and advanced parameters. The `HeliconePromptManager` gives you the additional benefit of validation error handling.
 </Note>
