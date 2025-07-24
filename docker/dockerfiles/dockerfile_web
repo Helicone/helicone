@@ -9,7 +9,8 @@ COPY package.json yarn.lock ./
 COPY packages/ ./packages/
 COPY web/ ./web/
 
-RUN chmod o+w /app/web/public
+RUN chmod -R o+w /app/web/public
+
 RUN yarn install --frozen-lockfile
 RUN cd web && yarn build
 
