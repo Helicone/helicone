@@ -2,9 +2,7 @@
 import {
   ArchiveIcon,
   BellIcon,
-  ChartLineIcon,
   DatabaseIcon,
-  FlaskConicalIcon,
   Home,
   ListTreeIcon,
   ScrollTextIcon,
@@ -92,18 +90,6 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
             href: "/prompts",
             icon: ScrollTextIcon,
             current: pathname.includes("/prompts"),
-          },
-          {
-            name: "Experiments",
-            href: "/experiments",
-            icon: FlaskConicalIcon,
-            current: pathname.includes("/experiments"),
-          },
-          {
-            name: "Evaluators",
-            href: "/evaluators",
-            icon: ChartLineIcon,
-            current: pathname.includes("/evaluators"),
           },
           {
             name: "Datasets",
