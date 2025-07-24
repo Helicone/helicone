@@ -25,14 +25,12 @@ export class HeliconePromptManager {
    */
   async pullPromptBody(promptId: string, versionId?: string): Promise<ChatCompletionCreateParams> {
     try {
-      let actualVersionId = "";
-      if (versionId) {
-        actualVersionId = versionId;
-      } else {
+      let versionId = "";
+      if (!versionId) {
         const productionVersion = await this.getProductionVersion(promptId);
-        actualVersionId = productionVersion.id;
+        versionId = productionVersion.id;
       }
-      const promptVersion = await this.getPromptVersion(actualVersionId);
+      const promptVersion = await this.getPromptVersion(versionId);
 
       const promptBody = await this.fetchPromptBodyFromS3(promptVersion?.s3_url);
       return promptBody as ChatCompletionCreateParams;
