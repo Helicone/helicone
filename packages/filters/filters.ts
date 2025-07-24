@@ -424,7 +424,6 @@ export function buildFilterLeaf(
   filters: string[];
   argsAcc: any[];
 } {
-  console.log("buildFilterLeaf", filter);
   const placeValueSafely = (value: string) => {
     argsAcc.push(value);
     return argPlaceHolder(argsAcc.length - 1, value);
@@ -432,18 +431,15 @@ export function buildFilterLeaf(
 
   const filters = Object.keys(filter).reduce<string[]>((acc, _tableKey) => {
     const tableKey = _tableKey as keyof typeof filter;
-    console.log("tableKey", tableKey);
     const table = filter[tableKey];
     // table is {session_tag: { equals: "test" }} tableKey is sessions_request_response_rmt
     const mapper = keyMappings[tableKey] as KeyMapper<typeof table>;
-    console.log("mapper", mapper);
 
     const {
       column,
       operator: operatorKey,
       value,
     } = mapper(table, placeValueSafely);
-    console.log("column", column, operatorKey, value);
 
     if (!column) {
       return acc;
