@@ -54,7 +54,7 @@ export function LatencyOverTimeChart({
   timeIncrement,
   totalRequests,
 }: {
-  routerHash: string;
+  routerHash?: string;
   timeFilter: TimeFilter;
   timeIncrement: TimeIncrement;
   totalRequests: number;

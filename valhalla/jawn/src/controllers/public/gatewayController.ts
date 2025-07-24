@@ -116,15 +116,16 @@ export class GatewayController extends Controller {
       return err("Start and end are required");
     }
     const gatewayManager = new GatewayManager(request.authParams);
-    const result = await gatewayManager.getRouterRequestsOverTime(
-      routerHash,
-      {
+    const result = await gatewayManager.getRouterRequestsOverTime({
+      routerHash:
+        routerHash === "default-ai-gateway" ? "__empty__" : routerHash,
+      timeFilter: {
         start: request.query.start as string,
         end: request.query.end as string,
       },
-      (request.query?.dbIncrement ?? "hour") as TimeIncrement,
-      Number(request.query?.timeZoneDifference ?? 0)
-    );
+      dbIncrement: (request.query?.dbIncrement ?? "hour") as TimeIncrement,
+      timeZoneDifference: Number(request.query?.timeZoneDifference ?? 0),
+    });
     if (result.error || !result.data) {
       return err(result.error ?? "Failed to get router requests");
     }
@@ -147,15 +148,16 @@ export class GatewayController extends Controller {
       return err("Start and end are required");
     }
     const gatewayManager = new GatewayManager(request.authParams);
-    const result = await gatewayManager.getRouterCostOverTime(
-      routerHash,
-      {
+    const result = await gatewayManager.getRouterCostOverTime({
+      routerHash:
+        routerHash === "default-ai-gateway" ? "__empty__" : routerHash,
+      timeFilter: {
         start: request.query.start as string,
         end: request.query.end as string,
       },
-      (request.query?.dbIncrement ?? "hour") as TimeIncrement,
-      Number(request.query?.timeZoneDifference ?? 0)
-    );
+      dbIncrement: (request.query?.dbIncrement ?? "hour") as TimeIncrement,
+      timeZoneDifference: Number(request.query?.timeZoneDifference ?? 0),
+    });
     if (result.error || !result.data) {
       return err(result.error ?? "Failed to get router cost");
     }
@@ -178,15 +180,16 @@ export class GatewayController extends Controller {
       return err("Start and end are required");
     }
     const gatewayManager = new GatewayManager(request.authParams);
-    const result = await gatewayManager.getRouterLatencyOverTime(
-      routerHash,
-      {
+    const result = await gatewayManager.getRouterLatencyOverTime({
+      routerHash:
+        routerHash === "default-ai-gateway" ? "__empty__" : routerHash,
+      timeFilter: {
         start: request.query.start as string,
         end: request.query.end as string,
       },
-      (request.query?.dbIncrement ?? "hour") as TimeIncrement,
-      Number(request.query?.timeZoneDifference ?? 0)
-    );
+      dbIncrement: (request.query?.dbIncrement ?? "hour") as TimeIncrement,
+      timeZoneDifference: Number(request.query?.timeZoneDifference ?? 0),
+    });
     if (result.error || !result.data) {
       return err(result.error ?? "Failed to get router latency");
     }

@@ -53,7 +53,7 @@ export function CostOverTimeChart({
   timeFilter,
   timeIncrement,
 }: {
-  routerHash: string;
+  routerHash?: string;
   timeFilter: TimeFilter;
   timeIncrement: TimeIncrement;
 }) {

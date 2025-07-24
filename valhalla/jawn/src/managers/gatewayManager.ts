@@ -76,15 +76,20 @@ export class GatewayManager extends BaseManager {
     return ok(result.data[0]);
   }
 
-  async getRouterRequestsOverTime(
-    routerHash: string,
+  async getRouterRequestsOverTime({
+    routerHash,
+    timeFilter,
+    dbIncrement,
+    timeZoneDifference,
+  }: {
+    routerHash?: string;
     timeFilter: {
       start: string;
       end: string;
-    },
-    dbIncrement: TimeIncrement,
-    timeZoneDifference: number
-  ): Promise<Result<RouterRequestsOverTime[], string>> {
+    };
+    dbIncrement: TimeIncrement;
+    timeZoneDifference: number;
+  }): Promise<Result<RouterRequestsOverTime[], string>> {
     const res = await getXOverTime<{
       count: number;
       status: number;
@@ -131,15 +136,20 @@ export class GatewayManager extends BaseManager {
     );
   }
 
-  async getRouterCostOverTime(
-    routerHash: string,
+  async getRouterCostOverTime({
+    routerHash,
+    timeFilter,
+    dbIncrement,
+    timeZoneDifference,
+  }: {
+    routerHash?: string;
     timeFilter: {
       start: string;
       end: string;
-    },
-    dbIncrement: TimeIncrement,
-    timeZoneDifference: number
-  ): Promise<Result<RouterCostOverTime[], string>> {
+    };
+    dbIncrement: TimeIncrement;
+    timeZoneDifference: number;
+  }): Promise<Result<RouterCostOverTime[], string>> {
     const res = await getXOverTime<{
       cost: number;
     }>(
@@ -184,15 +194,20 @@ export class GatewayManager extends BaseManager {
     );
   }
 
-  async getRouterLatencyOverTime(
-    routerHash: string,
+  async getRouterLatencyOverTime({
+    routerHash,
+    timeFilter,
+    dbIncrement,
+    timeZoneDifference,
+  }: {
+    routerHash: string;
     timeFilter: {
       start: string;
       end: string;
-    },
-    dbIncrement: TimeIncrement,
-    timeZoneDifference: number
-  ): Promise<Result<RouterLatencyOverTime[], string>> {
+    };
+    dbIncrement: TimeIncrement;
+    timeZoneDifference: number;
+  }): Promise<Result<RouterLatencyOverTime[], string>> {
     const res = await getXOverTime<{
       latency: number;
     }>(

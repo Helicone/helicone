@@ -59,7 +59,7 @@ function easyKeyMappings<T extends keyof TablesAndViews>(
       }
     }
 
-    if (value === "null") {
+    if (value === "null" || value === "__empty__") {
       return {
         column: columnToUse,
         operator: operator,
@@ -424,6 +424,7 @@ export function buildFilterLeaf(
   filters: string[];
   argsAcc: any[];
 } {
+  console.log("buildFilterLeaf", filter);
   const placeValueSafely = (value: string) => {
     argsAcc.push(value);
     return argPlaceHolder(argsAcc.length - 1, value);
@@ -431,15 +432,18 @@ export function buildFilterLeaf(
 
   const filters = Object.keys(filter).reduce<string[]>((acc, _tableKey) => {
     const tableKey = _tableKey as keyof typeof filter;
+    console.log("tableKey", tableKey);
     const table = filter[tableKey];
     // table is {session_tag: { equals: "test" }} tableKey is sessions_request_response_rmt
     const mapper = keyMappings[tableKey] as KeyMapper<typeof table>;
+    console.log("mapper", mapper);
 
     const {
       column,
       operator: operatorKey,
       value,
     } = mapper(table, placeValueSafely);
+    console.log("column", column, operatorKey, value);
 
     if (!column) {
       return acc;
@@ -463,6 +467,7 @@ export function buildFilterLeaf(
     }
 
     const filterClause = (() => {
+      console.log("filterClause", operatorKey, value);
       switch (true) {
         case operatorKey === "not-equals" && value === "null":
           return `${column} is not null`;
@@ -472,6 +477,8 @@ export function buildFilterLeaf(
           return `${column} ${sqlOperator} '%' || ${value}::text || '%'`;
         case operatorKey === "vector-contains":
           return `${column} ${sqlOperator} plainto_tsquery('helicone_search_config', ${value}::text)`;
+        case operatorKey === "equals" && value === "__empty__": // having __ wrap it in case someone searches for "empty"
+          return `empty(${column})`;
         default:
           return `${column} ${sqlOperator} ${value}`;
       }
