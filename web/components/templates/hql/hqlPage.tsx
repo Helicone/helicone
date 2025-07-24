@@ -22,7 +22,7 @@ import {
   getTableNames,
   getTableNamesSet,
   parseSqlAndFindTableNameAndAliases,
-  createSaveQueryMutation,
+  useSaveQueryMutation,
   createExecuteQueryMutation,
 } from "./constants";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
@@ -66,7 +66,7 @@ function HQLPage() {
   // a hack to get the latest query in the editor
   const latestQueryRef = useRef(currentQuery);
   const { mutate: handleSaveQuery } = useMutation(
-    createSaveQueryMutation(setCurrentQuery, setNotification),
+    useSaveQueryMutation(setCurrentQuery, setNotification),
   );
 
   const { data: savedQueryDetails, isLoading: savedQueryDetailsLoading } =

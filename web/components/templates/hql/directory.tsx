@@ -14,8 +14,8 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import useNotification from "@/components/shared/notification/useNotification";
 import {
-  createDeleteQueryMutation,
-  createSaveQueryMutation,
+  useDeleteQueryMutation,
+  useSaveQueryMutation,
 } from "./constants";
 import { Button } from "@/components/ui/button";
 import {
@@ -59,7 +59,7 @@ export function Directory({
   const { setNotification } = useNotification();
 
   const { mutateAsync: handleSaveQueryAsync } = useMutation(
-    createSaveQueryMutation(setCurrentQuery, setNotification),
+    useSaveQueryMutation(setCurrentQuery, setNotification),
   );
 
   const filteredTables = useMemo(
@@ -258,7 +258,7 @@ function QueryList({
   const { setNotification } = useNotification();
 
   const deleteQueryMutation = useMutation(
-    createDeleteQueryMutation(setNotification),
+    useDeleteQueryMutation(setNotification),
   );
 
   const handleDeleteQuery = (queryId: string, queryName: string) => {
