@@ -80,7 +80,7 @@ export function CodeIntegrationPage({
   );
   const [provider, setProvider] = useState<Provider>(defaultProvider);
   const [language, setLanguage] = useState<Language>(defaultLanguage);
-  const [highlightedCode, setHighlightedCode] = useState("");
+  const [highlightedCode, setHighlightedCode] = useState<string>("");
   const [apiKey, setApiKey] = useState<string>("");
   const [copied, setCopied] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);

@@ -71,7 +71,7 @@ const TextbookCourse: React.FC<TextbookCourseProps> = ({
   };
 
   const renderMarkdown = (content: string): JSX.Element => {
-    const html = marked(content);
+    const html = marked.parse(content) as string;
     return (
       <div
         dangerouslySetInnerHTML={{ __html: html }}
