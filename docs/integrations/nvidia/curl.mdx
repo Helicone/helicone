@@ -1,0 +1,39 @@
+---
+title: "Nvidia NIM cURL Integration"
+sidebarTitle: "cURL Integration"
+description: "Use cURL to integrate Nvidia NIM with Helicone to log your Nvidia LLM usage."
+"twitter:title": "Nvidia NIM cURL Integration - Helicone OSS LLM Observability"
+---
+
+This integration is used to log usage with the [Nvidia NIM](https://build.nvidia.com/) API. For other Nvidia inference providers that are OpenAI-compatible, such as Dynamo, see [here](/integrations/nvidia/dynamo).
+
+<Steps>
+  <Step title="Create an account + Generate an API Key">
+    Log into [Helicone](https://www.helicone.ai) or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+  </Step>
+  <Step title="Modify the API base and add the `Helicone-Auth` header">
+
+    ```bash
+    curl -X POST https://nvidia.helicone.ai/v1/chat/completions \
+      -H "Content-Type: application/json" \
+      -H "Authorization: Bearer $NVIDIA_API_KEY" \
+      -H "Helicone-Auth: Bearer $HELICONE_API_KEY" \
+      -d '{
+        "model": "nvidia/llama-3.1-nemotron-70b-instruct",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Hello, how are you?"
+          }
+        ],
+        "max_tokens": 1024,
+        "temperature": 0.7
+      }'
+    ```
+
+  </Step>
+  <Step title="Verify your requests in Helicone">
+    With the above setup, any calls to the Nvidia API will automatically be logged and monitored by Helicone. Review them in your Helicone dashboard.
+  </Step>
+</Steps> 
