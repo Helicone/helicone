@@ -34,6 +34,8 @@ RUN chmod +x /app/clickhouse/ch_hcone.py
 # Create a script to run migrations
 RUN echo '#!/bin/sh \n\
     echo "Running PostgreSQL migrations..." \n\
+    echo "Repairing migration checksums..." \n\
+    flyway repair -configFiles=/app/supabase/flyway.conf \n\
     flyway migrate -configFiles=/app/supabase/flyway.conf \n\
     echo "PostgreSQL migrations completed" \n\
     \n\
