@@ -37,7 +37,11 @@ RUN echo '#!/bin/sh \n\
     echo "PostgreSQL migrations completed" \n\
     \n\
     echo "Running ClickHouse migrations..." \n\
-    python3 /app/clickhouse/ch_hcone.py --upgrade --host ${CLICKHOUSE_HOST:-helicone-core-clickhouse} --port ${CLICKHOUSE_PORT:-8123} --user ${CLICKHOUSE_USER:-default} --no-password \n\
+    if [ -n "${CLICKHOUSE_PASSWORD}" ]; then \n\
+        python3 /app/clickhouse/ch_hcone.py --upgrade --host ${CLICKHOUSE_HOST:-helicone-core-clickhouse} --port ${CLICKHOUSE_PORT:-8123} --user ${CLICKHOUSE_USER:-default} --password "${CLICKHOUSE_PASSWORD}" \n\
+    else \n\
+        python3 /app/clickhouse/ch_hcone.py --upgrade --host ${CLICKHOUSE_HOST:-helicone-core-clickhouse} --port ${CLICKHOUSE_PORT:-8123} --user ${CLICKHOUSE_USER:-default} --no-password \n\
+    fi \n\
     echo "ClickHouse migrations completed" \n\
     \n\
     echo "All migrations completed successfully!" \n\
