@@ -35,7 +35,6 @@ import AuthHeader from "../../../../shared/authHeader";
 import useNotification from "../../../../shared/notification/useNotification";
 import ThemedTable from "../../../../shared/themed/table/themedTableOld";
 import { StartFromPromptDialog } from "./components/startFromPromptDialog";
-import { Deprecated } from "@/components/shared/Deprecated";
 
 const ExperimentsPage = () => {
   const jawn = useJawnClient();
@@ -145,7 +144,6 @@ const ExperimentsPage = () => {
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-4rem)]">
-      <Deprecated feature="Experiments" />
       <AuthHeader
         title="Experiments"
         actions={

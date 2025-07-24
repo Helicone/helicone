@@ -22,7 +22,6 @@ import { useOrg } from "@/components/layout/org/organizationContext";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { Deprecated } from "@/components/shared/Deprecated";
 
 export default function EvaluatorsList() {
   const { evaluators, deleteEvaluator } = useEvaluators();
@@ -157,7 +156,6 @@ export default function EvaluatorsList() {
   if (evaluatorsList.length === 0) {
     return (
       <>
-        <Deprecated feature="Evaluators" />
         <div>
           <AuthHeader
             title="Evaluators"

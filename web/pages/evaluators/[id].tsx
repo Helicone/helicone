@@ -338,12 +338,6 @@ const EvaluatorDetail = () => {
 
   return (
     <div>
-      <div className="w-full py-2 bg-heliblue font-medium flex items-center justify-center">
-        <p className="text-white text-sm">
-          We are deprecating the Helicone Evaluators feature by{" "}
-          <span className="font-bold">September 1st, 2025</span>.
-        </p>
-      </div>
       <AuthHeader
         title="Edit Evaluator"
         breadcrumb={{
