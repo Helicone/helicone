@@ -49,13 +49,11 @@ class HeliconePromptManager:
             Exception: If API call fails or prompt not found
         """
         try:
-            if version_id:
-                actual_version_id = version_id
-            else:
+            if not version_id:
                 production_version = self._get_production_version(prompt_id)
-                actual_version_id = production_version.id
+                version_id = production_version.id
             
-            prompt_version = self._get_prompt_version(actual_version_id)
+            prompt_version = self._get_prompt_version(version_id)
             prompt_body = self._fetch_prompt_body_from_s3(prompt_version.s3_url)
             
             return prompt_body
