@@ -401,14 +401,14 @@ export type OnboardingContextType = {
 };
 
 const OnboardingContext = createContext<OnboardingContextType | undefined>(
-  undefined
+  undefined,
 );
 
 const useOnboardingContext = () => {
   const context = useContext(OnboardingContext);
   if (!context) {
     throw new Error(
-      "useOnboardingContext must be used within an OnboardingProvider"
+      "useOnboardingContext must be used within an OnboardingProvider",
     );
   }
   return context;
@@ -493,7 +493,7 @@ export const OnboardingProvider = ({
       let timeout: NodeJS.Timeout;
       const observer = new MutationObserver(() => {
         const element = document.querySelector(
-          `[data-onboarding-step="${currentStep}"]`
+          `[data-onboarding-step="${currentStep}"]`,
         );
         if (element) {
           const position = getElementPosition(element);
@@ -529,7 +529,7 @@ export const OnboardingProvider = ({
   const updatePointerPosition = () => {
     if (isOnboardingVisible) {
       const element = document.querySelector(
-        `[data-onboarding-step="${currentStep}"]`
+        `[data-onboarding-step="${currentStep}"]`,
       );
       if (element) {
         const position = getElementPosition(element);

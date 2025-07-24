@@ -30,10 +30,10 @@ const HeliconeKeyTable = ({
     return (
       <button
         onClick={onAddKey}
-        className="mt-8 relative block w-full rounded-lg border-2 border-dashed bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 hover:cursor-pointer border-gray-500 p-12 text-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+        className="relative mt-8 block w-full rounded-lg border-2 border-dashed border-gray-500 bg-gray-200 p-12 text-center hover:cursor-pointer hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:bg-gray-800 dark:hover:bg-gray-700"
       >
-        <div className="w-full justify-center align-middle items-center">
-          <KeyIcon className="h-10 w-10 mx-auto text-gray-900 dark:text-gray-100" />
+        <div className="w-full items-center justify-center align-middle">
+          <KeyIcon className="mx-auto h-10 w-10 text-gray-900 dark:text-gray-100" />
         </div>
         <span className="mt-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
           Click here to generate a Helicone key

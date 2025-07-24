@@ -22,7 +22,7 @@ export class PosthogClient {
     eventName: string,
     properties: Record<string, any> = {},
     userId?: string,
-    organizationId?: string
+    organizationId?: string,
   ): Promise<boolean> {
     if (!this.isEnabled || !this.apiKey) {
       console.log(`[PostHog Disabled] Would have sent: ${eventName}`);
@@ -51,7 +51,7 @@ export class PosthogClient {
       const success = response.status === 200;
       if (!success) {
         console.error(
-          `PostHog Error (${response.status}): ${await response.text()}`
+          `PostHog Error (${response.status}): ${await response.text()}`,
         );
       }
       return success;

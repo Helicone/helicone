@@ -51,7 +51,7 @@ export const useEvaluatorStats = (evaluatorId: string) => {
         // Check for error response
         if (responseData?.error) {
           console.warn(
-            `API error for evaluator ${evaluatorId}: ${responseData.error}`
+            `API error for evaluator ${evaluatorId}: ${responseData.error}`,
           );
           return DEFAULT_STATS;
         }
@@ -76,7 +76,7 @@ export const useEvaluatorStats = (evaluatorId: string) => {
                 (item: { date: string; value: number | string }) => ({
                   date: item.date,
                   value: Number(item.value) || 0,
-                })
+                }),
               )
             : [],
         };
@@ -85,7 +85,7 @@ export const useEvaluatorStats = (evaluatorId: string) => {
       } catch (error) {
         console.error(
           `Exception fetching stats for evaluator ${evaluatorId}:`,
-          error
+          error,
         );
         return DEFAULT_STATS;
       }

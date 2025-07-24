@@ -20,7 +20,7 @@ export default function AdminLayout(props: { children: React.ReactNode }) {
 
   // Start with undefined to indicate "not loaded yet"
   const [sidebarOpen, setSidebarOpen] = useState<boolean | undefined>(
-    undefined
+    undefined,
   );
 
   // Load state from localStorage on mount (client-side only)
@@ -86,16 +86,16 @@ export default function AdminLayout(props: { children: React.ReactNode }) {
         <div className="flex h-screen w-full">
           <AdminSidebar />
 
-          <div className="flex-1 flex flex-col min-w-0">
+          <div className="flex min-w-0 flex-1 flex-col">
             {/* Top navigation bar - visible on all screens */}
             <div className="sticky top-0 z-40 flex h-14 items-center gap-4 border-b border-sidebar-border bg-sidebar-background px-4">
               {/* Sidebar trigger - visible on all screens */}
-              <SidebarTrigger className="flex h-9 w-9 items-center justify-center rounded-md hover:bg-sidebar-accent transition-colors" />
+              <SidebarTrigger className="flex h-9 w-9 items-center justify-center rounded-md transition-colors hover:bg-sidebar-accent" />
 
               <H4>{getPageName()}</H4>
             </div>
 
-            <main className="flex-1 w-full bg-background p-6 overflow-auto">
+            <main className="w-full flex-1 overflow-auto bg-background p-6">
               {children}
             </main>
           </div>

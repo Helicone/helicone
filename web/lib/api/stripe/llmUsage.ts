@@ -11,7 +11,7 @@ interface ModelUsage {
 export async function getExperimentUsage(
   organizationId: string,
   startTime: Date,
-  endTime: Date
+  endTime: Date,
 ) {
   const query = `
     SELECT 
@@ -43,7 +43,7 @@ export async function getExperimentUsage(
 export async function getEvaluatorUsage(
   organizationId: string,
   startTime: Date,
-  endTime: Date
+  endTime: Date,
 ) {
   const query = `
     SELECT 

@@ -33,11 +33,11 @@ const StyledAreaChart = (props: StyledAreaChartProps) => {
   };
 
   return (
-    <Card className="border border-slate-200 bg-white text-slate-950 !shadow-sm dark:border-slate-800 dark:bg-black dark:text-slate-50 rounded-lg ring-0">
+    <Card className="rounded-lg border border-slate-200 bg-white text-slate-950 !shadow-sm ring-0 dark:border-slate-800 dark:bg-black dark:text-slate-50">
       <div className="flex flex-col space-y-0.5">
-        <p className="text-slate-500 text-sm">{title}</p>
+        <p className="text-sm text-slate-500">{title}</p>
         {value !== undefined && (
-          <p className="text-black dark:text-white text-xl font-semibold">
+          <p className="text-xl font-semibold text-black dark:text-white">
             {value}
           </p>
         )}
@@ -49,7 +49,7 @@ const StyledAreaChart = (props: StyledAreaChartProps) => {
         }}
       >
         {isDataOverTimeLoading ? (
-          <div className="h-full w-full bg-slate-200 dark:bg-slate-800 rounded-md pt-4">
+          <div className="h-full w-full rounded-md bg-slate-200 pt-4 dark:bg-slate-800">
             {withAnimation && <LoadingAnimation height={175} width={175} />}
           </div>
         ) : (

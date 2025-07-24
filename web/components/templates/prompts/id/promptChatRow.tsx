@@ -50,14 +50,14 @@ interface PromptChatRowProps {
   callback: (
     userText: string,
     role: string,
-    image: File | string | null
+    image: File | string | null,
   ) => void;
   deleteRow: (rowId: string) => void;
   editMode?: boolean;
   playgroundMode?: "prompt" | "experiment" | "experiment-compact";
   selectedProperties: Record<string, string> | undefined;
   onExtractVariables?: (
-    variables: Array<{ original: string; heliconeTag: string }>
+    variables: Array<{ original: string; heliconeTag: string }>,
   ) => void;
 }
 
@@ -66,7 +66,7 @@ export const hasImage = (content: string | ContentItem[] | null): boolean => {
   if (Array.isArray(content)) {
     return content.some(
       (element): element is ContentItem & { type: "image" | "image_url" } =>
-        element.type === "image" || element.type === "image_url"
+        element.type === "image" || element.type === "image_url",
     );
   }
   return false;
@@ -107,22 +107,22 @@ export const PrettyInput = ({
             onClick={() => setOpen(!open)}
             className={clsx(
               selectedProperties
-                ? "bg-sky-100 border-sky-300 dark:bg-sky-950 dark:border-sky-700"
-                : "bg-yellow-100 border-yellow-300 dark:bg-yellow-950 dark:border-yellow-700",
-              "relative text-sm text-slate-900 dark:text-slate-100 border rounded-lg py-0.5 px-1 text-left"
+                ? "border-sky-300 bg-sky-100 dark:border-sky-700 dark:bg-sky-950"
+                : "border-yellow-300 bg-yellow-100 dark:border-yellow-700 dark:bg-yellow-950",
+              "relative rounded-lg border px-1 py-0.5 text-left text-sm text-slate-900 dark:text-slate-100",
             )}
             title={renderText}
           >
-            <ArrowsPointingOutIcon className="h-4 w-4 text-sky-500 absolute right-2 top-1.5 transform" />
+            <ArrowsPointingOutIcon className="absolute right-2 top-1.5 h-4 w-4 transform text-sky-500" />
             <p className="pr-8">{renderText.slice(0, TEXT_LIMIT)}...</p>
           </button>
         ) : (
           <span
             className={clsx(
               selectedProperties
-                ? "bg-sky-100 border-sky-300 dark:bg-sky-950 dark:border-sky-700"
-                : "bg-yellow-100 border-yellow-300 dark:bg-yellow-950 dark:border-yellow-700",
-              "inline-block border text-slate-900 dark:text-slate-100 rounded-lg py-0.5 px-1 text-sm"
+                ? "border-sky-300 bg-sky-100 dark:border-sky-700 dark:bg-sky-950"
+                : "border-yellow-300 bg-yellow-100 dark:border-yellow-700 dark:bg-yellow-950",
+              "inline-block rounded-lg border px-1 py-0.5 text-sm text-slate-900 dark:text-slate-100",
             )}
           >
             {renderText}
@@ -131,15 +131,15 @@ export const PrettyInput = ({
       </Tooltip>
 
       <ThemedModal open={open} setOpen={setOpen}>
-        <div className="w-[66vw] h-full flex flex-col space-y-4">
-          <div className="flex items-center w-full justify-center">
+        <div className="flex h-full w-[66vw] flex-col space-y-4">
+          <div className="flex w-full items-center justify-center">
             <h3 className="text-2xl font-semibold">{keyName}</h3>
             <button onClick={() => setOpen(false)} className="ml-auto">
               <XMarkIcon className="h-6 w-6 text-slate-500" />
             </button>
           </div>
 
-          <div className="bg-white border-slate-300 dark:bg-black dark:border-slate-700 p-4 border rounded-lg flex flex-col space-y-4">
+          <div className="flex flex-col space-y-4 rounded-lg border border-slate-300 bg-white p-4 dark:border-slate-700 dark:bg-black">
             <MarkdownEditor
               text={selectedProperties?.[keyName] || ""}
               setText={(text) => {
@@ -188,7 +188,7 @@ const RenderWithPrettyInputKeys = (props: {
           key={offset}
           selectedProperties={selectedProperties}
           playgroundMode={playgroundMode}
-        />
+        />,
       );
 
       // Update lastIndex to the end of the current match
@@ -208,11 +208,11 @@ const RenderWithPrettyInputKeys = (props: {
   return (
     <div
       className={cn(
-        "text-sm leading-7 text-slate-900 dark:text-slate-100 whitespace-pre-wrap",
+        "whitespace-pre-wrap text-sm leading-7 text-slate-900 dark:text-slate-100",
         playgroundMode === "experiment" ||
           playgroundMode === "experiment-compact"
-          ? "text-slate-700 dark:text-slate-300 text-xs leading-[140%]"
-          : ""
+          ? "text-xs leading-[140%] text-slate-700 dark:text-slate-300"
+          : "",
       )}
     >
       {replaceInputKeysWithComponents(text)}
@@ -248,12 +248,12 @@ const PromptChatRow = (props: PromptChatRowProps) => {
   }, [editMode]);
 
   const searchAndGetImage = (
-    message: ExtendedMessage
+    message: ExtendedMessage,
   ): string | File | null => {
     if (Array.isArray(message.content) && hasImage(message.content)) {
       const image = message.content.find(
         (element): element is ContentItem & { type: "image" | "image_url" } =>
-          element.type === "image_url" || element.type === "image"
+          element.type === "image_url" || element.type === "image",
       );
       if (image?.image_url?.url) {
         return image.image_url.url;
@@ -266,7 +266,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
   };
 
   const [fileObj, setFileObj] = useState<File | string | null>(
-    searchAndGetImage(message)
+    searchAndGetImage(message),
   );
 
   const { setNotification } = useNotification();
@@ -276,7 +276,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
     if (Array.isArray(rawMessage.content)) {
       const textMessage = rawMessage.content.find(
         (element): element is ContentItem & { type: "text" } =>
-          element.type === "text"
+          element.type === "text",
       );
       return textMessage?.text || "";
     } else {
@@ -338,14 +338,14 @@ const PromptChatRow = (props: PromptChatRowProps) => {
   const getContent = (
     message: ExtendedMessage,
     minimize: boolean,
-    playgroundMode?: "prompt" | "experiment" | "experiment-compact"
+    playgroundMode?: "prompt" | "experiment" | "experiment-compact",
   ) => {
     const content = message.content;
 
     if (Array.isArray(content)) {
       const textMessage = content.find(
         (element): element is ContentItem & { type: "text" } =>
-          element.type === "text"
+          element.type === "text",
       );
       const text = textMessage?.text || "";
       const isMinimized = minimize && text.length > 100;
@@ -359,27 +359,27 @@ const PromptChatRow = (props: PromptChatRowProps) => {
               isStatic
                 ? displayText.replace(
                     /<helicone-prompt-static>(.*?)<\/helicone-prompt-static>/g,
-                    "$1"
+                    "$1",
                   )
-                : displayText
+                : displayText,
             )}
             selectedProperties={selectedProperties}
             playgroundMode={playgroundMode}
           />
           {hasImage(content) && (
-            <div className="flex flex-wrap items-center pt-4 border-t border-slate-300 dark:border-slate-700">
+            <div className="flex flex-wrap items-center border-t border-slate-300 pt-4 dark:border-slate-700">
               {content
                 .filter(
                   (
-                    item
+                    item,
                   ): item is ContentItem & { type: "image" | "image_url" } =>
-                    item.type === "image_url" || item.type === "image"
+                    item.type === "image_url" || item.type === "image",
                 )
                 .map((item, index) => (
                   <div key={index} className="relative">
                     {item.image_url?.url ? (
                       item.image_url.url.includes("helicone-prompt-input") ? (
-                        <div className="p-5 border">
+                        <div className="border p-5">
                           {extractKey(item.image_url.url)}
                         </div>
                       ) : (
@@ -398,7 +398,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                         height={256}
                       />
                     ) : (
-                      <div className="h-[150px] w-[200px] bg-white border border-slate-300 text-center items-center flex justify-center text-xs italic text-slate-500">
+                      <div className="flex h-[150px] w-[200px] items-center justify-center border border-slate-300 bg-white text-center text-xs italic text-slate-500">
                         Unsupported Image Type
                       </div>
                     )}
@@ -414,7 +414,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                           Array.isArray(newMessage.content)
                         ) {
                           const textContent = newMessage.content.find(
-                            (element) => element.type === "text"
+                            (element) => element.type === "text",
                           );
                           newMessage.content = textContent?.text || "";
                         }
@@ -423,7 +423,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                         callback(contentAsString || "", role, null);
                       }}
                     >
-                      <XMarkIcon className="absolute -top-2 -right-2 h-4 w-4 text-white bg-red-500 rounded-full p-0.5" />
+                      <XMarkIcon className="absolute -right-2 -top-2 h-4 w-4 rounded-full bg-red-500 p-0.5 text-white" />
                     </button>
                   </div>
                 ))}
@@ -436,14 +436,14 @@ const PromptChatRow = (props: PromptChatRowProps) => {
       return (
         <div className="flex flex-col space-y-2">
           {typeof message.content === "string" && message.content !== "" && (
-            <code className="text-xs whitespace-pre-wrap font-semibold">
+            <code className="whitespace-pre-wrap text-xs font-semibold">
               {message.content}
             </code>
           )}
           {tools.map((tool, index) => (
             <pre
               key={index}
-              className="text-xs whitespace-pre-wrap rounded-lg overflow-auto"
+              className="overflow-auto whitespace-pre-wrap rounded-lg text-xs"
             >
               {`${tool.name}(${JSON.stringify(tool.arguments)})`}
             </pre>
@@ -489,7 +489,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
   const replaceVariablesWithTags = useCallback(
     (
       content: string,
-      variables: Array<{ original: string; heliconeTag: string }>
+      variables: Array<{ original: string; heliconeTag: string }>,
     ) => {
       let newContent = content;
       variables.forEach(({ original, heliconeTag }) => {
@@ -497,7 +497,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
       });
       return newContent;
     },
-    []
+    [],
   );
 
   useEffect(() => {
@@ -510,7 +510,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
             original: item.original.match(/key="([^"]+)"/)?.[1] || "",
             heliconeTag: item.heliconeTag,
           };
-        })
+        }),
       );
     }
   }, [isEditing, contentAsString, extractVariables, onExtractVariables]);
@@ -534,7 +534,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
   const handleCallback = (
     content: string | undefined,
     newRole: "system" | "user" | "assistant" | "function",
-    file: File | null
+    file: File | null,
   ) => {
     callback(content || "", newRole, file);
   };
@@ -548,7 +548,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
     if (Array.isArray(messageContent)) {
       const textMessage = messageContent.find(
         (element): element is ContentItem & { type: "text"; text: string } =>
-          element.type === "text" && typeof element.text === "string"
+          element.type === "text" && typeof element.text === "string",
       );
       if (textMessage) {
         textMessage.text = replacedText;
@@ -572,16 +572,16 @@ const PromptChatRow = (props: PromptChatRowProps) => {
 
   if (playgroundMode === "experiment-compact") {
     return (
-      <li className="flex flex-col gap-1 items-start">
-        <div className="flex w-full justify-between items-center">
+      <li className="flex flex-col items-start gap-1">
+        <div className="flex w-full items-center justify-between">
           <Badge
             variant="helicone"
-            className="bg-slate-100 hover:bg-slate-100 border-slate-100 dark:border-slate-800 dark:bg-slate-800 cursor-default"
+            className="cursor-default border-slate-100 bg-slate-100 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-800"
           >
             {(role ?? "")?.slice(0, 1).toUpperCase() + (role ?? "").slice(1)}
           </Badge>
           {isStatic && (
-            <Badge className="border border-[#3C82F6] dark:border-[#3C82F6] text-[#3C82F6] dark:text-[#3C82F6] text-[10px] py-[3px] px-2 leading-tight hover:border-[#3C82F6] !bg-blue-50 dark:!bg-blue-950">
+            <Badge className="border border-[#3C82F6] !bg-blue-50 px-2 py-[3px] text-[10px] leading-tight text-[#3C82F6] hover:border-[#3C82F6] dark:border-[#3C82F6] dark:!bg-blue-950 dark:text-[#3C82F6]">
               Static
             </Badge>
           )}
@@ -590,7 +590,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
           {isStatic
             ? contentAsString?.replace(
                 /<helicone-prompt-static>(.*?)<\/helicone-prompt-static>/g,
-                "$1"
+                "$1",
               )
             : getContent(currentMessage, minimize, playgroundMode)}
         </div>
@@ -605,18 +605,18 @@ const PromptChatRow = (props: PromptChatRowProps) => {
         playgroundMode === "experiment"
           ? "bg-slate-50 dark:bg-slate-950"
           : "bg-white dark:bg-black",
-        "flex flex-row justify-between gap-8 border-slate-300 dark:border-slate-700"
+        "flex flex-row justify-between gap-8 border-slate-300 dark:border-slate-700",
       )}
     >
-      <div className="flex flex-col gap-4 w-full rounded-t-lg">
-        <div className="flex flex-col w-full h-full relative space-y-2 rounded-t-lg">
-          <div className="flex w-full justify-between px-4 pt-3 rounded-t-lg">
+      <div className="flex w-full flex-col gap-4 rounded-t-lg">
+        <div className="relative flex h-full w-full flex-col space-y-2 rounded-t-lg">
+          <div className="flex w-full justify-between rounded-t-lg px-4 pt-3">
             {playgroundMode === "prompt" ? (
               <RoleButton
                 size="small"
                 role={role}
                 onRoleChange={(
-                  newRole: "system" | "user" | "assistant" | "function"
+                  newRole: "system" | "user" | "assistant" | "function",
                 ) => {
                   setRole(newRole);
                   const newMessage = {
@@ -636,9 +636,9 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                 {(role ?? "").slice(0, 1).toUpperCase() + (role ?? "").slice(1)}
               </Badge>
             )}
-            <div className="flex justify-end items-center space-x-2 w-full">
+            <div className="flex w-full items-center justify-end space-x-2">
               {!editMode && isStatic && (
-                <Badge className="bg-[#3C82F6] dark:bg-[#3C82F6] text-white dark:text-white text-[10px] py-[3px] px-2 leading-tight hover:bg-[#3C82F6]">
+                <Badge className="bg-[#3C82F6] px-2 py-[3px] text-[10px] leading-tight text-white hover:bg-[#3C82F6] dark:bg-[#3C82F6] dark:text-white">
                   Static
                 </Badge>
               )}
@@ -648,7 +648,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                     onClick={() => {
                       setMinimize(!minimize);
                     }}
-                    className="text-slate-500 font-semibold"
+                    className="font-semibold text-slate-500"
                   >
                     {minimize ? (
                       <EyeIcon className="h-3 w-3" />
@@ -685,7 +685,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                       onClick={() => {
                         deleteRow(currentMessage.id || "");
                       }}
-                      className="text-red-500 font-semibold"
+                      className="font-semibold text-red-500"
                     >
                       <TrashIcon className="h-4 w-4" />
                     </button>
@@ -704,13 +704,13 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                       const newVariables = extractVariables(text);
                       const replacedText = replaceVariablesWithTags(
                         text,
-                        newVariables
+                        newVariables,
                       );
                       const newMessages = { ...currentMessage };
                       const messageContent = newMessages.content;
                       if (Array.isArray(messageContent)) {
                         const textMessage = messageContent.find(
-                          (element) => element.type === "text"
+                          (element) => element.type === "text",
                         );
                         if (textMessage) {
                           textMessage.text = replacedText;
@@ -741,7 +741,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                           return (
                             <span
                               key={index}
-                              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                              className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800"
                             >
                               {key}
                             </span>

@@ -36,15 +36,15 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
 
   const { count, isLoading: isCountLoading } = useGetRequestCountClickhouse(
     startOfMonthFormatted,
-    endOfMonthFormatted
+    endOfMonthFormatted,
   );
 
   const currentIcon = ORGANIZATION_ICONS.find(
-    (icon) => icon.name === orgContext?.currentOrg?.icon
+    (icon) => icon.name === orgContext?.currentOrg?.icon,
   );
 
   const currentColor = ORGANIZATION_COLORS.find(
-    (icon) => icon.name === orgContext?.currentOrg?.color
+    (icon) => icon.name === orgContext?.currentOrg?.color,
   );
 
   const getProgress = (count: number) => {
@@ -83,7 +83,7 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
 
   return (
     <ThemedModal open={open} setOpen={setOpen}>
-      <div className="flex flex-col w-[512px] space-y-8">
+      <div className="flex w-[512px] flex-col space-y-8">
         <div className="flex flex-col space-y-6">
           <div className="flex flex-row items-center gap-2">
             {currentIcon && (
@@ -95,27 +95,27 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
               {orgContext?.currentOrg?.name}
             </h1>
           </div>
-          <div className="border-2 p-4 text-sm rounded-lg flex flex-col text-gray-600 border-gray-300 dark:text-gray-200 dark:border-gray-700 w-full gap-4">
+          <div className="flex w-full flex-col gap-4 rounded-lg border-2 border-gray-300 p-4 text-sm text-gray-600 dark:border-gray-700 dark:text-gray-200">
             <div>
               <p className="text-gray-900 dark:text-gray-100">
                 Your Free Plan Limit
               </p>
             </div>
-            <div className="flex flex-row gap-2 w-full h-4 items-center">
-              <div className="relative h-full w-full flex-auto bg-gray-300 rounded-md">
+            <div className="flex h-4 w-full flex-row items-center gap-2">
+              <div className="relative h-full w-full flex-auto rounded-md bg-gray-300">
                 <div
-                  className="aboslute h-full bg-purple-500 rounded-md"
+                  className="aboslute h-full rounded-md bg-purple-500"
                   style={{
                     width: `${getProgress(count?.data || 0)}%`,
                   }}
                 ></div>
               </div>
-              <div className="flex-1 w-full whitespace-nowrap">
-                <div className="flex flex-row gap-1.5 items-center text-gray-900 dark:text-gray-100">
+              <div className="w-full flex-1 whitespace-nowrap">
+                <div className="flex flex-row items-center gap-1.5 text-gray-900 dark:text-gray-100">
                   <span>{`${Number(count?.data).toLocaleString()}`}</span>
-                  <span className="text-gray-400 text-sm">/</span>
+                  <span className="text-sm text-gray-400">/</span>
                   <span className="text-sm text-gray-400">{`${Number(
-                    100_000
+                    100_000,
                   ).toLocaleString()}`}</span>
                 </div>
               </div>
@@ -144,22 +144,22 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
             "Priority support",
             "Lower rate limits on all features",
           ].map((item, i) => (
-            <div key={i} className="text-sm flex flex-row items-center">
-              <SparklesIcon className="h-4 w-4 mr-2 text-yellow-500" />
+            <div key={i} className="flex flex-row items-center text-sm">
+              <SparklesIcon className="mr-2 h-4 w-4 text-yellow-500" />
               <span className="dark:text-gray-100">{item}</span>
             </div>
           ))}
         </div>
-        <div className="border-t border-gray-300 flex justify-end gap-2 pt-4">
+        <div className="flex justify-end gap-2 border-t border-gray-300 pt-4">
           <button
             onClick={() => setOpen(false)}
-            className="flex flex-row items-center rounded-md bg-white dark:bg-black px-4 py-2 text-sm font-semibold border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm hover:text-gray-700 dark:hover:text-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+            className="flex flex-row items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500 dark:border-gray-700 dark:bg-black dark:text-gray-100 dark:hover:bg-gray-900 dark:hover:text-gray-300"
           >
             Cancel
           </button>
           <button
             onClick={() => handleGrowthCheckout()}
-            className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="flex items-center rounded-md bg-black px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:bg-white dark:text-black dark:hover:bg-gray-200"
           >
             Upgrade to Growth
           </button>

@@ -44,8 +44,8 @@ const CreatePromptDialog: React.FC<CreatePromptDialogProps> = ({
           </Button>
         </ProFeatureWrapper>
       </DialogTrigger>
-      <DialogContent className="w-[900px] ">
-        <DialogHeader className="flex flex-row justify-between items-center">
+      <DialogContent className="w-[900px]">
+        <DialogHeader className="flex flex-row items-center justify-between">
           <DialogTitle>Create a new prompt</DialogTitle>
           <div className="flex items-center space-x-2">
             <Switch
@@ -56,12 +56,12 @@ const CreatePromptDialog: React.FC<CreatePromptDialogProps> = ({
             <Label htmlFor="im-not-technical">I&apos;m not technical</Label>
           </div>
         </DialogHeader>
-        <div className="flex flex-col space-y-4 h-[570px] justify-between">
+        <div className="flex h-[570px] flex-col justify-between space-y-4">
           {imNotTechnical ? (
             <>{/* ... (rest of the non-technical UI) ... */}</>
           ) : (
             <>
-              <p className="text-gray-500 mb-2">TS/JS Quick Start</p>
+              <p className="mb-2 text-gray-500">TS/JS Quick Start</p>
               <DiffHighlight
                 code={`
 // 1. Add this line

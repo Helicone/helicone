@@ -33,7 +33,7 @@ const PlaygroundResponsePanel = ({
     if (!response) return;
 
     const newMessageMappedResponse = openAIMessageToHeliconeMessage(
-      JSON.parse(response)
+      JSON.parse(response),
     );
 
     if (mappedContent) {
@@ -61,16 +61,16 @@ const PlaygroundResponsePanel = ({
   const isShiftPressed = useShiftKeyPress();
 
   return (
-    <ScrollArea className="w-full h-full">
-      <div className="flex flex-col h-full">
+    <ScrollArea className="h-full w-full">
+      <div className="flex h-full flex-col">
         {error ? (
-          <div className="p-4 text-red-500 dark:text-red-400 text-sm">
+          <div className="p-4 text-sm text-red-500 dark:text-red-400">
             {error}
           </div>
         ) : !response ? (
-          <div className="flex flex-col items-center justify-center h-full p-8 text-center">
+          <div className="flex h-full flex-col items-center justify-center p-8 text-center">
             <div className="flex flex-col items-center gap-2">
-              <FlaskConicalIcon className="w-8 h-8 text-slate-400" />
+              <FlaskConicalIcon className="h-8 w-8 text-slate-400" />
               <p className="text-sm text-slate-500">No response yet</p>
               <p className="text-xs text-slate-400">
                 Click Run to generate a response
@@ -78,25 +78,25 @@ const PlaygroundResponsePanel = ({
             </div>
           </div>
         ) : isStreaming ? (
-          <div className="flex flex-col items-center justify-center h-full p-8 text-center">
+          <div className="flex h-full flex-col items-center justify-center p-8 text-center">
             <div className="flex flex-col items-center gap-2">
-              <Loader2 className="w-8 h-8 text-slate-400 animate-spin" />
+              <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
               <p className="text-sm text-slate-500">Generating response...</p>
             </div>
           </div>
         ) : (
           <>
-            <div className="flex justify-between p-2 border-b border-border">
+            <div className="flex justify-between border-b border-border p-2">
               <Button variant="outline" size="sm" onClick={handleAddToChat}>
                 Add to Chat
               </Button>
               <Button
                 variant={"outline"}
                 size={"sm"}
-                className="flex flex-row gap-1 absolute top-2 right-2 z-20"
+                className="absolute right-2 top-2 z-20 flex flex-row gap-1"
                 onClick={() => toggleMode(isShiftPressed)}
               >
-                <XSmall className="text-secondary font-medium">
+                <XSmall className="font-medium text-secondary">
                   {MODE_LABELS[mode]}
                 </XSmall>
                 <LuChevronsLeftRight className="h-4 w-4 text-secondary" />
@@ -113,8 +113,8 @@ const PlaygroundResponsePanel = ({
                 </pre>
               </div>
             ) : mode === "json" ? (
-              <div className="w-full h-full flex flex-col text-sm">
-                <div className="p-4 pb-4 border-b border-border">
+              <div className="flex h-full w-full flex-col text-sm">
+                <div className="border-b border-border p-4 pb-4">
                   <JsonRenderer
                     data={JSON.parse(JSON.stringify(response))}
                     copyButtonPosition="top-left"

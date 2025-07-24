@@ -18,25 +18,25 @@ const OnboardingDemoModal = ({
   return (
     <Dialog open={open}>
       <DialogContent
-        className="w-11/12 sm:max-w-2xl gap-8 rounded-md"
+        className="w-11/12 gap-8 rounded-md sm:max-w-2xl"
         closeButton={false}
       >
         <DialogHeader className="space-y-2">
-          <div className="flex justify-between items-center">
+          <div className="flex items-center justify-between">
             <DialogTitle>Welcome to Helicone!</DialogTitle>
           </div>
         </DialogHeader>
         <div className="grid grid-cols-2 gap-4">
           <div
-            className="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="cursor-pointer rounded-lg border border-slate-200 bg-white p-4 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800"
             onClick={quickStart}
           >
             <div className="flex flex-col gap-4">
-              <div className="flex justify-between items-center">
-                <TurtleIcon className="w-6 h-6 text-slate-400 dark:text-slate-500" />
+              <div className="flex items-center justify-between">
+                <TurtleIcon className="h-6 w-6 text-slate-400 dark:text-slate-500" />
               </div>
               <div className="flex flex-col gap-2">
-                <h3 className="text-sm font-medium text-slate-900 dark:text-slate-50 leading-4">
+                <h3 className="text-sm font-medium leading-4 text-slate-900 dark:text-slate-50">
                   Get integrated
                 </h3>
                 <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -46,18 +46,18 @@ const OnboardingDemoModal = ({
             </div>
           </div>
           <div
-            className="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="cursor-pointer rounded-lg border border-slate-200 bg-white p-4 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800"
             onClick={quickTour}
           >
             <div className="flex flex-col gap-4">
-              <div className="flex justify-between items-center">
-                <RabbitIcon className="w-6 h-6 text-blue-500" />
-                <div className="px-3 py-1 rounded-md bg-blue-100 text-blue-700 text-xs font-semibold uppercase">
+              <div className="flex items-center justify-between">
+                <RabbitIcon className="h-6 w-6 text-blue-500" />
+                <div className="rounded-md bg-blue-100 px-3 py-1 text-xs font-semibold uppercase text-blue-700">
                   2 Min Tour
                 </div>
               </div>
               <div className="flex flex-col gap-2">
-                <h3 className="text-sm font-medium text-slate-900 dark:text-slate-50 leading-4">
+                <h3 className="text-sm font-medium leading-4 text-slate-900 dark:text-slate-50">
                   Watch how it works
                 </h3>
                 <p className="text-sm text-slate-500 dark:text-slate-400">

@@ -22,7 +22,7 @@ export const TypeBadge = ({ type }: { type: string }) => {
 
   return (
     <span
-      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${color}`}
+      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${color}`}
     >
       {type}
     </span>

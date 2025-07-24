@@ -6,7 +6,13 @@ import {
   useGetOrgSlackIntegration,
 } from "../../../services/hooks/organizations";
 import useNotification from "../../shared/notification/useNotification";
-import { Select, SelectContent, SelectItem, SelectValue, SelectTrigger } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+  SelectTrigger,
+} from "@/components/ui/select";
 import {
   CodeBracketSquareIcon,
   CurrencyDollarIcon,
@@ -19,8 +25,19 @@ import { Database } from "../../../db/database.types";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { Check, ChevronsUpDown, X } from "lucide-react";
 
 export type AlertRequest = {
@@ -53,28 +70,28 @@ const AlertForm = (props: AlertFormProps) => {
   }, []);
 
   const [selectedMetric, setSelectedMetric] = useState<string>(
-    initialValues?.metric || "response.status"
+    initialValues?.metric || "response.status",
   );
   const [selectedEmails, setSelectedEmails] = useState<string[]>(
-    initialValues?.emails || []
+    initialValues?.emails || [],
   );
   const [selectedSlackChannels, setSelectedSlackChannels] = useState<string[]>(
-    initialValues?.slack_channels || []
+    initialValues?.slack_channels || [],
   );
   const [selectedTimeWindow, setSelectedTimeWindow] = useState<string>(
-    initialValues?.time_window.toString() || ""
+    initialValues?.time_window.toString() || "",
   );
   const [showEmails, setShowEmails] = useState<boolean>(
-    initialValues ? initialValues.emails.length > 0 : true
+    initialValues ? initialValues.emails.length > 0 : true,
   );
   const [showSlackChannels, setShowSlackChannels] = useState<boolean>(
-    initialValues ? initialValues.slack_channels.length > 0 : false
+    initialValues ? initialValues.slack_channels.length > 0 : false,
   );
 
   const orgContext = useOrg();
 
   const { data, isLoading, refetch } = useGetOrgMembers(
-    orgContext?.currentOrg?.id || ""
+    orgContext?.currentOrg?.id || "",
   );
 
   const { setNotification } = useNotification();
@@ -128,7 +145,7 @@ const AlertForm = (props: AlertFormProps) => {
     ) {
       setNotification(
         "Please select at least one email or slack channel",
-        "error"
+        "error",
       );
       return;
     }
@@ -160,9 +177,9 @@ const AlertForm = (props: AlertFormProps) => {
   return (
     <form
       onSubmit={handleCreateAlert}
-      className="grid grid-cols-4 gap-8 w-full sm:w-[450px] max-w-[450px] h-full"
+      className="grid h-full w-full max-w-[450px] grid-cols-4 gap-8 sm:w-[450px]"
     >
-      <h1 className="col-span-4 font-semibold text-xl text-gray-900 dark:text-gray-100">
+      <h1 className="col-span-4 text-xl font-semibold text-gray-900 dark:text-gray-100">
         {initialValues ? "Edit Alert" : "Create Alert"}
       </h1>
       <div className="col-span-4 w-full space-y-1.5 text-sm">
@@ -200,30 +217,31 @@ const AlertForm = (props: AlertFormProps) => {
             <SelectValue placeholder="Select a metric" />
           </SelectTrigger>
           <SelectContent>
-          {[
-            {
-              icon: CodeBracketSquareIcon,
-              label: "status",
-              value: "response.status",
-            },
-            {
-              icon: CurrencyDollarIcon,
-              label: "cost",
-              value: "cost",
-            },
-          ].map((option, idx) => {
-            return (
-              <SelectItem value={option.value} key={idx}>
-                {option.label}
-              </SelectItem>
-            );
-          })}</SelectContent>
+            {[
+              {
+                icon: CodeBracketSquareIcon,
+                label: "status",
+                value: "response.status",
+              },
+              {
+                icon: CurrencyDollarIcon,
+                label: "cost",
+                value: "cost",
+              },
+            ].map((option, idx) => {
+              return (
+                <SelectItem value={option.value} key={idx}>
+                  {option.label}
+                </SelectItem>
+              );
+            })}
+          </SelectContent>
         </Select>
       </div>
-      <div className="col-span-2 w-full space-y-1.5 text-sm ">
+      <div className="col-span-2 w-full space-y-1.5 text-sm">
         <label
           htmlFor="alert-threshold"
-          className="text-gray-500 dark:text-gray-200 items-center flex gap-1"
+          className="flex items-center gap-1 text-gray-500 dark:text-gray-200"
         >
           Threshold
           <Tooltip
@@ -233,7 +251,7 @@ const AlertForm = (props: AlertFormProps) => {
                 : "Specify the amount at which the alert should be triggered. For instance, entering '10' will trigger an alert when the metric exceeds $10."
             }
           >
-            <InformationCircleIcon className="h-4 w-4 text-gray-500 inline" />
+            <InformationCircleIcon className="inline h-4 w-4 text-gray-500" />
           </Tooltip>
         </label>
         <div className="relative">
@@ -250,7 +268,7 @@ const AlertForm = (props: AlertFormProps) => {
             id="alert-threshold"
             className={clsx(
               selectedMetric === "response.status" && "pr-8",
-              selectedMetric === "cost" && "pl-8"
+              selectedMetric === "cost" && "pl-8",
             )}
             min={selectedMetric === "response.status" ? 1 : 0.01}
             defaultValue={initialValues?.threshold.toString()}
@@ -269,11 +287,11 @@ const AlertForm = (props: AlertFormProps) => {
       <div className="col-span-2 w-full space-y-1.5 text-sm">
         <label
           htmlFor="time-frame"
-          className="text-gray-500 dark:text-gray-200 items-center flex gap-1"
+          className="flex items-center gap-1 text-gray-500 dark:text-gray-200"
         >
           Time Frame{" "}
           <Tooltip title="Define the time frame over which the metric is evaluated. An alert will be triggered if the threshold is exceeded within this period.">
-            <InformationCircleIcon className="h-4 w-4 text-gray-500 inline" />
+            <InformationCircleIcon className="inline h-4 w-4 text-gray-500" />
           </Tooltip>
         </label>
         <Select
@@ -286,23 +304,24 @@ const AlertForm = (props: AlertFormProps) => {
             <SelectValue placeholder="Select a time frame" />
           </SelectTrigger>
           <SelectContent>
-          {Object.entries(alertTimeWindows).map(([key, value], idx) => {
-            return (
-              <SelectItem value={value.toString()} key={idx}>
-                {key}
-              </SelectItem>
-            );
-          })}</SelectContent>
+            {Object.entries(alertTimeWindows).map(([key, value], idx) => {
+              return (
+                <SelectItem value={value.toString()} key={idx}>
+                  {key}
+                </SelectItem>
+              );
+            })}
+          </SelectContent>
         </Select>
       </div>
       <div className="col-span-2 w-full space-y-1.5 text-sm">
         <label
           htmlFor="min-requests"
-          className="text-gray-500 dark:text-gray-200 items-center flex gap-1"
+          className="flex items-center gap-1 text-gray-500 dark:text-gray-200"
         >
           Min Requests (optional){" "}
           <Tooltip title="Define this to set a minimum number of requests for this alert to be triggered.">
-            <InformationCircleIcon className="h-4 w-4 text-gray-500 inline" />
+            <InformationCircleIcon className="inline h-4 w-4 text-gray-500" />
           </Tooltip>
         </label>
         <Input
@@ -315,8 +334,8 @@ const AlertForm = (props: AlertFormProps) => {
         />
       </div>
 
-      <div className="col-span-4 w-full p-6 bg-gray-100 dark:bg-gray-900 rounded-md space-y-1.5">
-        <h3 className="text-gray-500 font-semibold">Notify By</h3>
+      <div className="col-span-4 w-full space-y-1.5 rounded-md bg-gray-100 p-6 dark:bg-gray-900">
+        <h3 className="font-semibold text-gray-500">Notify By</h3>
         <div className="col-span-4 w-full space-y-1.5 text-sm">
           <div className="flex items-center justify-between">
             <label
@@ -343,7 +362,7 @@ const AlertForm = (props: AlertFormProps) => {
                   >
                     <span className="truncate">
                       {selectedEmails.length > 0
-                        ? `${selectedEmails.length} email${selectedEmails.length > 1 ? 's' : ''} selected`
+                        ? `${selectedEmails.length} email${selectedEmails.length > 1 ? "s" : ""} selected`
                         : "Select emails to send alerts to"}
                     </span>
                     <ChevronsUpDown className="ml-2 h-3.5 w-3.5 shrink-0 opacity-50" />
@@ -363,7 +382,7 @@ const AlertForm = (props: AlertFormProps) => {
                               setSelectedEmails((prev) =>
                                 prev.includes(email)
                                   ? prev.filter((e) => e !== email)
-                                  : [...prev, email]
+                                  : [...prev, email],
                               );
                             }}
                             value={member.email}
@@ -373,7 +392,7 @@ const AlertForm = (props: AlertFormProps) => {
                                 "mr-2 h-4 w-4",
                                 selectedEmails.includes(member.email)
                                   ? "opacity-100"
-                                  : "opacity-0"
+                                  : "opacity-0",
                               )}
                             />
                             {member.email}
@@ -389,17 +408,17 @@ const AlertForm = (props: AlertFormProps) => {
                   {selectedEmails.map((email) => (
                     <div
                       key={email}
-                      className="flex items-center gap-1 bg-muted px-2 py-1 rounded-md text-sm"
+                      className="flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-sm"
                     >
-                      <span className="truncate max-w-[200px]">{email}</span>
+                      <span className="max-w-[200px] truncate">{email}</span>
                       <button
                         type="button"
                         onClick={() =>
                           setSelectedEmails((prev) =>
-                            prev.filter((e) => e !== email)
+                            prev.filter((e) => e !== email),
                           )
                         }
-                        className="ml-1 hover:bg-muted-foreground/20 rounded-sm"
+                        className="ml-1 rounded-sm hover:bg-muted-foreground/20"
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -438,7 +457,7 @@ const AlertForm = (props: AlertFormProps) => {
                       >
                         <span className="truncate">
                           {selectedSlackChannels.length > 0
-                            ? `${selectedSlackChannels.length} channel${selectedSlackChannels.length > 1 ? 's' : ''} selected`
+                            ? `${selectedSlackChannels.length} channel${selectedSlackChannels.length > 1 ? "s" : ""} selected`
                             : "Select slack channels to send alerts to"}
                         </span>
                         <ChevronsUpDown className="ml-2 h-3.5 w-3.5 shrink-0 opacity-50" />
@@ -458,7 +477,7 @@ const AlertForm = (props: AlertFormProps) => {
                                   setSelectedSlackChannels((prev) =>
                                     prev.includes(channelId)
                                       ? prev.filter((c) => c !== channelId)
-                                      : [...prev, channelId]
+                                      : [...prev, channelId],
                                   );
                                 }}
                                 value={channel.name}
@@ -468,7 +487,7 @@ const AlertForm = (props: AlertFormProps) => {
                                     "mr-2 h-4 w-4",
                                     selectedSlackChannels.includes(channel.id)
                                       ? "opacity-100"
-                                      : "opacity-0"
+                                      : "opacity-0",
                                   )}
                                 />
                                 {channel.name}
@@ -482,21 +501,25 @@ const AlertForm = (props: AlertFormProps) => {
                   {selectedSlackChannels.length > 0 && (
                     <div className="flex flex-wrap gap-1">
                       {selectedSlackChannels.map((channelId) => {
-                        const channel = slackChannels.find(c => c.id === channelId);
+                        const channel = slackChannels.find(
+                          (c) => c.id === channelId,
+                        );
                         return channel ? (
                           <div
                             key={channelId}
-                            className="flex items-center gap-1 bg-muted px-2 py-1 rounded-md text-sm"
+                            className="flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-sm"
                           >
-                            <span className="truncate max-w-[200px]">{channel.name}</span>
+                            <span className="max-w-[200px] truncate">
+                              {channel.name}
+                            </span>
                             <button
                               type="button"
                               onClick={() =>
                                 setSelectedSlackChannels((prev) =>
-                                  prev.filter((c) => c !== channelId)
+                                  prev.filter((c) => c !== channelId),
                                 )
                               }
-                              className="ml-1 hover:bg-muted-foreground/20 rounded-sm"
+                              className="ml-1 rounded-sm hover:bg-muted-foreground/20"
                             >
                               <X className="h-3 w-3" />
                             </button>
@@ -532,13 +555,13 @@ const AlertForm = (props: AlertFormProps) => {
         <button
           onClick={onCancel}
           type="button"
-          className="flex flex-row items-center rounded-md bg-white dark:bg-black px-4 py-2 text-sm font-semibold border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm hover:text-gray-700 dark:hover:text-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+          className="flex flex-row items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500 dark:border-gray-700 dark:bg-black dark:text-gray-100 dark:hover:bg-gray-900 dark:hover:text-gray-300"
         >
           Cancel
         </button>
         <button
           type="submit"
-          className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          className="flex items-center rounded-md bg-black px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:bg-white dark:text-black dark:hover:bg-gray-200"
         >
           {initialValues ? "Save" : "Create Alert"}
         </button>

@@ -37,7 +37,7 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
   const { setNotification } = useNotification();
 
   const [providerKey, setProviderKey] = useState(
-    defaultProviderKey || orgProviderKey
+    defaultProviderKey || orgProviderKey,
   );
 
   const [isProviderOpen, setIsProviderOpen] = useState(false);
@@ -55,7 +55,7 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
         return;
       }
     },
-    [setProviderKeyCallback, orgId, setNotification, setProviderKey]
+    [setProviderKeyCallback, orgId, setNotification, setProviderKey],
   );
 
   const deleteProviderKey = async (id: string) => {
@@ -78,12 +78,12 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
         <div className="mx-auto w-full space-y-2">
           {defaultProviderKey}
           {providerKey}
-          <div className="flex flex-row justify-between items-center">
+          <div className="flex flex-row items-center justify-between">
             <div className="flex items-center space-x-1">
               <Tooltip title="Provider Keys are used to authenticate your requests to the API. This key is securely stored using our vault technologies, with the state of the art encryption.">
                 <label
                   htmlFor="alert-metric"
-                  className="text-gray-900 dark:text-gray-100 text-xs font-semibold"
+                  className="text-xs font-semibold text-gray-900 dark:text-gray-100"
                 >
                   Provider Keys
                 </label>
@@ -97,13 +97,13 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
                 e.stopPropagation();
                 setIsProviderOpen(true);
               }}
-              className="p-6 flex flex-col w-full h-full justify-center items-center border border-gray-300 dark:border-gay-700 rounded-md"
+              className="dark:border-gay-700 flex h-full w-full flex-col items-center justify-center rounded-md border border-gray-300 p-6"
             >
               <KeyIcon className="h-4 w-4 text-black dark:text-white" />
-              <p className="text-xs text-gray-500 font-semibold pt-2">
+              <p className="pt-2 text-xs font-semibold text-gray-500">
                 Please create a provider key.{" "}
                 <Tooltip title="Provider Keys are used to authenticate your requests to the API. This key is securely stored using our vault technologies, with the state of the art encryption.">
-                  <span className="underline cursor-pointer">Learn more.</span>
+                  <span className="cursor-pointer underline">Learn more.</span>
                 </Tooltip>
               </p>
             </button>
@@ -132,7 +132,7 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
                         checked
                           ? "bg-sky-100 ring-sky-300 dark:bg-sky-900 dark:ring-sky-700"
                           : "bg-white ring-gray-300 dark:bg-black dark:ring-gray-700",
-                        "ring-1 relative flex cursor-pointer rounded-lg py-1 px-2 shadow-sm focus:outline-none"
+                        "relative flex cursor-pointer rounded-lg px-2 py-1 shadow-sm ring-1 focus:outline-none",
                       )
                     }
                   >
@@ -140,10 +140,10 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
                       <>
                         <div className="flex w-full items-center justify-between">
                           <div className="flex items-center">
-                            <div className="text-sm flex space-x-2 items-center">
+                            <div className="flex items-center space-x-2 text-sm">
                               <div
                                 className={clsx(
-                                  "rounded-full border border-gray-300 dark:border-gray-700 h-4 w-4 mr-2 flex items-center"
+                                  "mr-2 flex h-4 w-4 items-center rounded-full border border-gray-300 dark:border-gray-700",
                                 )}
                               >
                                 {checked && (
@@ -158,7 +158,7 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
                               </RadioGroup.Label>
                               <RadioGroup.Description
                                 as="span"
-                                className={`inline text-gray-500 text-xs pl-2`}
+                                className={`inline pl-2 text-xs text-gray-500`}
                               >
                                 <SecretInput
                                   value={key.provider_key || ""}
@@ -175,7 +175,7 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
                             }}
                             type="button"
                           >
-                            <TrashIcon className="h-6 w-6 text-red-500 hover:bg-red-100 p-1 rounded-md" />
+                            <TrashIcon className="h-6 w-6 rounded-md p-1 text-red-500 hover:bg-red-100" />
                           </button>
                         </div>
                       </>
@@ -203,11 +203,11 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
         onSuccess={() => refetchProviderKeys()}
       />
       <ThemedModal open={deleteProviderOpen} setOpen={setDeleteProviderOpen}>
-        <div className="flex flex-col gap-4 w-full">
-          <p className="font-semibold text-lg text-gray-900 dark:text-gray-100">
+        <div className="flex w-full flex-col gap-4">
+          <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
             Delete Provider Key
           </p>
-          <p className="text-gray-700 dark:text-gray-300 w-[400px] whitespace-pre-wrap text-sm">
+          <p className="w-[400px] whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">
             This Provider Key will be deleted from your account. All proxy keys
             that are mapped to this provider key will be deleted as well. Are
             you sure you want to delete this provider key?
@@ -216,7 +216,7 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
             <button
               onClick={() => setDeleteProviderOpen(false)}
               type="button"
-              className="flex flex-row items-center rounded-md bg-white dark:bg-black px-4 py-2 text-sm font-semibold border border-gray-300 dark:border-gray-700 hover:bg-gray-50 text-gray-900 dark:hover:bg-gray-900 dark:text-gray-100 shadow-sm hover:text-gray-700 dark:hover:text-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+              className="flex flex-row items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500 dark:border-gray-700 dark:bg-black dark:text-gray-100 dark:hover:bg-gray-900 dark:hover:text-gray-300"
             >
               Cancel
             </button>
@@ -226,7 +226,7 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
                   await deleteProviderKey(selectedProviderKey.id!);
                 }
               }}
-              className="items-center rounded-md bg-red-500 px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-red-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="flex items-center rounded-md bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:text-black"
             >
               Delete
             </button>

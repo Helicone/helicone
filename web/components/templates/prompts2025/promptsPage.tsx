@@ -1,7 +1,7 @@
 import { Small } from "@/components/ui/typography";
+import Link from "next/link";
 
 import FoldedHeader from "@/components/shared/FoldedHeader";
-import { BookOpenIcon } from "@heroicons/react/24/outline";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -23,14 +23,12 @@ import { Search } from "lucide-react";
 import type { PromptWithVersions } from "@/services/hooks/prompts";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import TableFooter from "../requests/tableFooter";
-import { useOrg } from "@/components/layout/org/organizationContext";
 import router from "next/router";
 import useNotification from "@/components/shared/notification/useNotification";
 import { SimpleTable } from "@/components/shared/table/simpleTable";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import { getInitialColumns } from "./initialColumns";
 import TagsFilter from "./TagsFilter";
-import { Button } from "@/components/ui/button";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -54,29 +52,31 @@ const PromptsPage = (props: PromptsPageProps) => {
   const drawerRef = useRef<any>(null);
   const [drawerSize, setDrawerSize] = useLocalStorage("prompt-drawer-size", 40);
 
-  const { data: tags = [], isLoading: isLoadingTags } = useGetPromptTags(); 
+  const { data: tags = [], isLoading: isLoadingTags } = useGetPromptTags();
   const { data, isLoading } = useGetPromptsWithVersions(
     search,
     selectedTags,
     currentPage - 1,
-    pageSize
+    pageSize,
   );
   const prompts = data?.prompts || [];
   const totalCount = data?.totalCount || 0;
 
   useEffect(() => {
     if (selectedPrompt && prompts.length > 0) {
-      const updatedPrompt = prompts.find(p => p.prompt.id === selectedPrompt.prompt.id);
+      const updatedPrompt = prompts.find(
+        (p) => p.prompt.id === selectedPrompt.prompt.id,
+      );
       if (updatedPrompt) {
         setSelectedPrompt(updatedPrompt);
       }
     }
   }, [prompts, selectedPrompt?.prompt.id]);
-  
+
   const { data: filteredVersions, isLoading: isLoadingFilteredVersions } =
     useGetPromptVersions(
       selectedPrompt?.prompt.id || "",
-      filteredMajorVersion !== null ? filteredMajorVersion : undefined
+      filteredMajorVersion !== null ? filteredMajorVersion : undefined,
     );
 
   const displayPrompt =
@@ -102,11 +102,11 @@ const PromptsPage = (props: PromptsPageProps) => {
       params: {
         path: {
           promptId,
-        }
+        },
       },
       body: {
         name: newName,
-      }
+      },
     });
 
     if (result.error) {
@@ -115,9 +115,12 @@ const PromptsPage = (props: PromptsPageProps) => {
     } else {
       setNotification("Prompt renamed successfully", "success");
     }
-  }
-  
-  const handleSetProductionVersion = async (promptId: string, promptVersionId: string) => {
+  };
+
+  const handleSetProductionVersion = async (
+    promptId: string,
+    promptVersionId: string,
+  ) => {
     const result = await setProductionVersion.mutateAsync({
       body: {
         promptId,
@@ -131,7 +134,7 @@ const PromptsPage = (props: PromptsPageProps) => {
     } else {
       setNotification("Production version set successfully", "success");
     }
-  }
+  };
 
   const handleDeletePrompt = async (promptId: string) => {
     try {
@@ -211,8 +214,12 @@ const PromptsPage = (props: PromptsPageProps) => {
         bValue = b.prompt.name;
         break;
       case "version":
-        aValue = parseFloat(`${a.productionVersion.major_version}.${a.productionVersion.minor_version}`);
-        bValue = parseFloat(`${b.productionVersion.major_version}.${b.productionVersion.minor_version}`);
+        aValue = parseFloat(
+          `${a.productionVersion.major_version}.${a.productionVersion.minor_version}`,
+        );
+        bValue = parseFloat(
+          `${b.productionVersion.major_version}.${b.productionVersion.minor_version}`,
+        );
         break;
       case "totalVersions":
         aValue = a.totalVersions;
@@ -235,7 +242,7 @@ const PromptsPage = (props: PromptsPageProps) => {
   const columns = getInitialColumns();
 
   return (
-    <main className="h-screen flex flex-col w-full animate-fade-in">
+    <main className="flex h-screen w-full animate-fade-in flex-col">
       <FoldedHeader
         showFold={false}
         leftSection={
@@ -257,28 +264,31 @@ const PromptsPage = (props: PromptsPageProps) => {
           </section>
         }
       />
-      
+
       {/* Banner */}
       {props.showLegacyBanner && (
         <section className="w-full p-4">
-          <div className="w-full border border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-950 p-4 text-sm rounded-lg text-blue-800 dark:text-blue-200">
-            🎉 You are viewing our revamped Prompts experience, offering prompt versioning and composability with the Playground and AI Gateway!{" "}
+          <div className="w-full rounded-lg border border-blue-300 bg-blue-50 p-4 text-sm text-blue-800 dark:border-blue-700 dark:bg-blue-950 dark:text-blue-200">
+            🎉 You are viewing our revamped Prompts experience, offering prompt
+            versioning and composability with the Playground and AI Gateway!{" "}
             <br />
-            <span className="font-medium">The legacy prompts will be deprecated on <i>August 20th, 2025</i>.</span>{" "}
-            <a 
-              href="/prompts?legacy=true" 
+            <span className="font-medium">
+              The legacy prompts will be deprecated on <i>August 20th, 2025</i>.
+            </span>{" "}
+            <Link
+              href="/prompts?legacy=true"
               className="font-medium underline hover:no-underline"
             >
               See the old prompts here →
-            </a>
+            </Link>
           </div>
         </section>
       )}
-      <div className="flex flex-col w-full h-full min-h-[80vh] border-t border-border">
+      <div className="flex h-full min-h-[80vh] w-full flex-col border-t border-border">
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel>
-            <div className="w-full h-full flex flex-col">
-              <div className="p-3 border-b border-border bg-background">
+            <div className="flex h-full w-full flex-col">
+              <div className="border-b border-border bg-background p-3">
                 <div className="flex items-center gap-2">
                   <div className="relative flex-1">
                     <Search

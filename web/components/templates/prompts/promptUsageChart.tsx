@@ -58,7 +58,7 @@ const PromptUsageChart = (props: PromptUsageChartProps) => {
   return (
     <>
       {isPromptRequestsLoading ? (
-        <div className="bg-gray-300 dark:bg-gray-700 h-6 w-16 animate-pulse" />
+        <div className="h-6 w-16 animate-pulse bg-gray-300 dark:bg-gray-700" />
       ) : (
         <SparkAreaChart
           data={
@@ -70,7 +70,7 @@ const PromptUsageChart = (props: PromptUsageChartProps) => {
           index="date"
           categories={["count"]}
           colors={["cyan"]}
-          className="h-8 -mb-2"
+          className="-mb-2 h-8"
           curveType="monotone"
         />
       )}

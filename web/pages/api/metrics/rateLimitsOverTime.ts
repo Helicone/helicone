@@ -10,7 +10,7 @@ import { Result } from "@/packages/common/result";
 import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";
 
 async function handler(
-  options: HandlerWrapperOptions<Result<RateLimitOverTime[], string>>
+  options: HandlerWrapperOptions<Result<RateLimitOverTime[], string>>,
 ) {
   const {
     res,
@@ -30,7 +30,7 @@ async function handler(
       orgId,
       dbIncrement: dbIncrement ?? "hour",
       timeZoneDifference,
-    })
+    }),
   );
 }
 

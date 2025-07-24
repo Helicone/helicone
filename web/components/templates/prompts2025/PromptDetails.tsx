@@ -46,7 +46,7 @@ const PromptDetails = ({
 }: PromptDetailsProps) => {
   const { setNotification } = useNotification();
   const [selectedVersion, setSelectedVersion] = useState<string>(
-    "All (last 50 versions)"
+    "All (last 50 versions)",
   );
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState("");
@@ -59,7 +59,7 @@ const PromptDetails = ({
 
   if (!promptWithVersions) {
     return (
-      <div className="w-full h-full flex items-center justify-center">
+      <div className="flex h-full w-full items-center justify-center">
         <Small className="text-muted-foreground">
           Select a prompt to view details
         </Small>
@@ -92,11 +92,11 @@ const PromptDetails = ({
   };
 
   return (
-    <div className="w-full h-full flex flex-col">
-      <div className="p-4 border-b border-border bg-background">
-        <div className="flex flex-col h-full gap-4">
+    <div className="flex h-full w-full flex-col">
+      <div className="border-b border-border bg-background p-4">
+        <div className="flex h-full flex-col gap-4">
           <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 min-w-0">
+            <div className="flex min-w-0 items-center gap-2">
               <TooltipProvider>
                 <Tooltip delayDuration={100}>
                   <TooltipTrigger asChild>
@@ -106,7 +106,7 @@ const PromptDetails = ({
                       className="w-fit text-muted-foreground hover:text-primary"
                       onClick={onCollapse}
                     >
-                      <LuPanelRightClose className="w-4 h-4" />
+                      <LuPanelRightClose className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="text-xs">
@@ -118,7 +118,7 @@ const PromptDetails = ({
               <div className="flex items-center gap-2 truncate">
                 {isEditing ? (
                   <Input
-                    className="font-semibold text-foreground truncate bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-primary ml-1 px-1 rounded h-auto py-0"
+                    className="ml-1 h-auto truncate rounded border-none bg-transparent px-1 py-0 font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
                     onBlur={() => {
@@ -128,10 +128,10 @@ const PromptDetails = ({
                       }
                     }}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
+                      if (e.key === "Enter") {
                         e.currentTarget.blur();
                       }
-                      if (e.key === 'Escape') {
+                      if (e.key === "Escape") {
                         setEditName(prompt.name);
                         setIsEditing(false);
                       }
@@ -139,8 +139,8 @@ const PromptDetails = ({
                     autoFocus
                   />
                 ) : (
-                  <span 
-                    className="font-semibold text-foreground truncate cursor-pointer"
+                  <span
+                    className="cursor-pointer truncate font-semibold text-foreground"
                     onClick={() => {
                       setIsEditing(true);
                       setEditName(prompt.name);
@@ -156,14 +156,14 @@ const PromptDetails = ({
             </div>
 
             <div className="flex items-center gap-2">
-              <ModelPill model={productionVersion.model}/>
+              <ModelPill model={productionVersion.model} />
               <TooltipProvider>
                 <Tooltip delayDuration={100}>
                   <TooltipTrigger asChild>
                     <Button
                       variant="none"
                       size="square_icon"
-                      className="w-fit text-muted-foreground hover:text-destructive ml-1"
+                      className="ml-1 w-fit text-muted-foreground hover:text-destructive"
                       onClick={() => onDeletePrompt(prompt.id)}
                     >
                       <Trash2 size={16} />
@@ -177,15 +177,15 @@ const PromptDetails = ({
             </div>
           </div>
 
-          <div 
-            className="flex items-center group cursor-pointer text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
+          <div
+            className="group flex cursor-pointer items-center text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground"
             onClick={() => {
               navigator.clipboard.writeText(prompt.id);
               setNotification("ID copied to clipboard", "success");
             }}
           >
             <span>ID: {prompt.id}</span>
-            <LuCopy className="h-4 w-4 ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+            <LuCopy className="ml-2 h-4 w-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
           </div>
 
           <div className="flex items-end">
@@ -194,7 +194,7 @@ const PromptDetails = ({
         </div>
       </div>
 
-      <div className="p-4 border-b border-border bg-background">
+      <div className="border-b border-border bg-background p-4">
         <div className="flex flex-col gap-2">
           <Small className="font-medium text-foreground">Version</Small>
           <Select value={selectedVersion} onValueChange={handleVersionChange}>

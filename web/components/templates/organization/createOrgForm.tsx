@@ -63,26 +63,26 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
             cost: 1_000,
             requests: 1_000,
           }
-      : null
+      : null,
   );
   const [selectedColor, setSelectedColor] = useState(
     initialValues?.color
       ? ORGANIZATION_COLORS.find((c) => c.name === initialValues.color) ||
           ORGANIZATION_COLORS[0]
-      : ORGANIZATION_COLORS[0]
+      : ORGANIZATION_COLORS[0],
   );
   const [selectedIcon, setSelectedIcon] = useState(
     initialValues?.icon
       ? ORGANIZATION_ICONS.find((i) => i.name === initialValues.icon) ||
           ORGANIZATION_ICONS[0]
-      : ORGANIZATION_ICONS[0]
+      : ORGANIZATION_ICONS[0],
   );
 
   const { user } = useHeliconeAuthClient();
   const orgContext = useOrg();
   const { setNotification } = useNotification();
   const [providerKey, setProviderKey] = useState(
-    initialValues?.providerKey || ""
+    initialValues?.providerKey || "",
   );
 
   const { refetchProviderKeys } = useVaultPage();
@@ -106,7 +106,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
             </DialogHeader>
           </>
         )}
-        <div className="flex flex-col w-full space-y-6 mt-6">
+        <div className="mt-6 flex w-full flex-col space-y-6">
           <div className="space-y-1.5 text-sm">
             <Input
               type="text"
@@ -128,11 +128,11 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                 >
                   Limits
                 </label>
-                <div className="flex flex-row mx-auto gap-4">
+                <div className="mx-auto flex flex-row gap-4">
                   <div className="space-y-1 text-sm">
                     <label
                       htmlFor="org-costs"
-                      className="block text-xs leading-6 text-slate-500 "
+                      className="block text-xs leading-6 text-slate-500"
                     >
                       Costs (USD)
                     </label>
@@ -143,24 +143,24 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                         id="org-costs"
                         disabled={limits?.cost !== -1}
                         value={
-                          limits?.cost === -1 ? 9999999 : limits?.cost ?? 0
+                          limits?.cost === -1 ? 9999999 : (limits?.cost ?? 0)
                         }
                         className={clsx(
                           "max-w-[10em] bg-slate-50 dark:bg-slate-950",
-                          " block w-full rounded-md border-0 py-1.5",
+                          "block w-full rounded-md border-0 py-1.5",
                           "shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2",
-                          "focus:ring-inset focus:ring-slate-600 text-sm lg:text-md lg:leading-6",
+                          "lg:text-md text-sm focus:ring-inset focus:ring-slate-600 lg:leading-6",
                           limits?.cost === -1
                             ? "text-slate-400"
-                            : "text-black dark:text-white"
+                            : "text-black dark:text-white",
                         )}
                         onChange={(e) =>
                           setLimits((prev) =>
-                            prev ? { ...prev, cost: +e.target.value } : null
+                            prev ? { ...prev, cost: +e.target.value } : null,
                           )
                         }
                       />
-                      <div className="flex gap-2 items-center">
+                      <div className="flex items-center gap-2">
                         <div>Unlimited</div>
                         <input
                           type="checkbox"
@@ -171,11 +171,11 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                           onChange={(e) => {
                             if (limits?.cost === -1) {
                               setLimits((prev) =>
-                                prev ? { ...prev, cost: 1000 } : null
+                                prev ? { ...prev, cost: 1000 } : null,
                               );
                             } else {
                               setLimits((prev) =>
-                                prev ? { ...prev, cost: -1 } : null
+                                prev ? { ...prev, cost: -1 } : null,
                               );
                             }
                           }}
@@ -186,7 +186,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                   <div className="space-y-1 text-sm">
                     <label
                       htmlFor="org-costs"
-                      className="block text-xs leading-6 text-slate-500 "
+                      className="block text-xs leading-6 text-slate-500"
                     >
                       Request
                     </label>
@@ -199,24 +199,26 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                         value={
                           limits?.requests === -1
                             ? 9999999
-                            : limits?.requests ?? 0
+                            : (limits?.requests ?? 0)
                         }
                         className={clsx(
                           "max-w-[10em] bg-slate-50 dark:bg-slate-950",
-                          " block w-full rounded-md border-0 py-1.5",
+                          "block w-full rounded-md border-0 py-1.5",
                           "shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2",
-                          "focus:ring-inset focus:ring-slate-600 text-sm lg:text-md lg:leading-6",
+                          "lg:text-md text-sm focus:ring-inset focus:ring-slate-600 lg:leading-6",
                           limits?.requests === -1
                             ? "text-slate-400"
-                            : "text-black dark:text-white"
+                            : "text-black dark:text-white",
                         )}
                         onChange={(e) =>
                           setLimits((prev) =>
-                            prev ? { ...prev, requests: +e.target.value } : null
+                            prev
+                              ? { ...prev, requests: +e.target.value }
+                              : null,
                           )
                         }
                       />
-                      <div className="flex gap-2 items-center">
+                      <div className="flex items-center gap-2">
                         <div>Unlimited</div>
                         <input
                           type="checkbox"
@@ -227,11 +229,11 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                           onChange={(e) => {
                             if (limits?.requests === -1) {
                               setLimits((prev) =>
-                                prev ? { ...prev, requests: 1000 } : null
+                                prev ? { ...prev, requests: 1000 } : null,
                               );
                             } else {
                               setLimits((prev) =>
-                                prev ? { ...prev, requests: -1 } : null
+                                prev ? { ...prev, requests: -1 } : null,
                               );
                             }
                           }}
@@ -250,7 +252,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                     <select
                       id="org-size"
                       name="org-size"
-                      className="max-w-[10em] bg-slate-50 dark:bg-slate-950 text-black dark:text-white block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-slate-600 text-sm lg:text-md lg:leading-6"
+                      className="lg:text-md block w-full max-w-[10em] rounded-md border-0 bg-slate-50 py-1.5 text-sm text-black shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-slate-600 dark:bg-slate-950 dark:text-white lg:leading-6"
                       required
                     >
                       <option value="word">monthly</option>
@@ -273,14 +275,14 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                 if ((user?.email ?? "") === DEMO_EMAIL) {
                   setNotification(
                     "Cannot create organization in demo mode",
-                    "error"
+                    "error",
                   );
                   return;
                 }
                 if (!orgName || orgName === "") {
                   setNotification(
                     "Please provide an organization name",
-                    "error"
+                    "error",
                   );
                   return;
                 }
@@ -304,7 +306,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                         icon: selectedIcon.name,
                         variant,
                       },
-                    }
+                    },
                   );
 
                   if (updateOrgError) {
@@ -312,7 +314,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                   } else {
                     setNotification(
                       "Organization updated successfully",
-                      "success"
+                      "success",
                     );
                     onSuccess && onSuccess();
                   }
@@ -330,17 +332,17 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                         has_onboarded: false,
                         tier: "free",
                       },
-                    }
+                    },
                   );
                   if (createOrgError) {
                     setNotification(
                       "Failed to create organization" + createOrgError,
-                      "error"
+                      "error",
                     );
                   } else {
                     setNotification(
                       "Organization created successfully",
-                      "success"
+                      "success",
                     );
                     orgContext?.refetchOrgs();
                     onSuccess && onSuccess(data?.data ?? "");
@@ -355,9 +357,9 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                   ? "Updating..."
                   : "Update"
                 : loading
-                ? "Loading..."
-                : "Continue"}
-              {loading && <Loader2 className="w-4 h-4 ml-2 animate-spin" />}
+                  ? "Loading..."
+                  : "Continue"}
+              {loading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
             </Button>
           </DialogFooter>
         </div>

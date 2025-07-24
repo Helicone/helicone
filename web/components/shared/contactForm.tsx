@@ -36,19 +36,19 @@ const ContactForm = (props: ContactFormProps) => {
 
     setIsLoading(true);
     const firstName = event.currentTarget.elements.namedItem(
-      "first-name"
+      "first-name",
     ) as HTMLInputElement;
     const lastName = event.currentTarget.elements.namedItem(
-      "last-name"
+      "last-name",
     ) as HTMLInputElement;
     const email = event.currentTarget.elements.namedItem(
-      "email"
+      "email",
     ) as HTMLInputElement;
     const companyName = event.currentTarget.elements.namedItem(
-      "company-name"
+      "company-name",
     ) as HTMLInputElement;
     const companyDescription = event.currentTarget.elements.namedItem(
-      "company-description"
+      "company-description",
     ) as HTMLInputElement;
 
     fetch("/api/contact", {
@@ -70,7 +70,7 @@ const ContactForm = (props: ContactFormProps) => {
         if (data.error) {
           setNotification(
             "Error submitting form. Please try again later.",
-            "error"
+            "error",
           );
         } else {
           // if the contact tag is mfs, take them to the sign up page
@@ -97,12 +97,12 @@ const ContactForm = (props: ContactFormProps) => {
       action="#"
       method="POST"
       onSubmit={formSubmitHandler}
-      className="border-2 border-gray-300 bg-sky-100 rounded-xl p-8 h-full space-y-4 w-full mt-16 lg:mt-0"
+      className="mt-16 h-full w-full space-y-4 rounded-xl border-2 border-gray-300 bg-sky-100 p-8 lg:mt-0"
     >
       <div>
         <label
           htmlFor="first-name"
-          className="block text-sm lg:text-md font-medium leading-6 text-gray-900"
+          className="lg:text-md block text-sm font-medium leading-6 text-gray-900"
         >
           First Name
         </label>
@@ -112,14 +112,14 @@ const ContactForm = (props: ContactFormProps) => {
             name="first-name"
             type="text"
             required
-            className="bg-sky-50 block w-full rounded-md border border-gray-300 py-1.5 shadow-sm  text-sm lg:text-md lg:leading-6"
+            className="lg:text-md block w-full rounded-md border border-gray-300 bg-sky-50 py-1.5 text-sm shadow-sm lg:leading-6"
           />
         </div>
       </div>
       <div>
         <label
           htmlFor="last-name"
-          className="block text-sm lg:text-md font-medium leading-6 text-gray-900"
+          className="lg:text-md block text-sm font-medium leading-6 text-gray-900"
         >
           Last Name
         </label>
@@ -129,14 +129,14 @@ const ContactForm = (props: ContactFormProps) => {
             name="last-name"
             type="text"
             required
-            className="bg-sky-50 block w-full rounded-md border border-gray-300 py-1.5 shadow-sm  text-sm lg:text-md lg:leading-6"
+            className="lg:text-md block w-full rounded-md border border-gray-300 bg-sky-50 py-1.5 text-sm shadow-sm lg:leading-6"
           />
         </div>
       </div>
       <div>
         <label
           htmlFor="email"
-          className="block text-sm lg:text-md font-medium leading-6 text-gray-900"
+          className="lg:text-md block text-sm font-medium leading-6 text-gray-900"
         >
           Email address
         </label>
@@ -147,14 +147,14 @@ const ContactForm = (props: ContactFormProps) => {
             type="email"
             autoComplete="email"
             required
-            className="bg-sky-50 block w-full rounded-md border border-gray-300 py-1.5 shadow-sm  text-sm lg:text-md lg:leading-6"
+            className="lg:text-md block w-full rounded-md border border-gray-300 bg-sky-50 py-1.5 text-sm shadow-sm lg:leading-6"
           />
         </div>
       </div>
       <div>
         <label
           htmlFor="company-name"
-          className="block text-sm lg:text-md font-medium leading-6 text-gray-900"
+          className="lg:text-md block text-sm font-medium leading-6 text-gray-900"
         >
           Company Name
         </label>
@@ -164,14 +164,14 @@ const ContactForm = (props: ContactFormProps) => {
             name="company-name"
             type="text"
             required
-            className="bg-sky-50 block w-full rounded-md border border-gray-300 py-1.5 shadow-sm  text-sm lg:text-md lg:leading-6"
+            className="lg:text-md block w-full rounded-md border border-gray-300 bg-sky-50 py-1.5 text-sm shadow-sm lg:leading-6"
           />
         </div>
       </div>
       <div>
         <label
           htmlFor="company-description"
-          className="block text-sm lg:text-md font-medium leading-6 text-gray-900"
+          className="lg:text-md block text-sm font-medium leading-6 text-gray-900"
         >
           What does your company do and how you plan to use Helicone.
         </label>
@@ -182,11 +182,11 @@ const ContactForm = (props: ContactFormProps) => {
             required
             rows={4}
             placeholder={defaultPlaceholder}
-            className="bg-sky-50 block w-full rounded-md border border-gray-300 py-1.5 shadow-sm  text-sm lg:text-md lg:leading-6"
+            className="lg:text-md block w-full rounded-md border border-gray-300 bg-sky-50 py-1.5 text-sm shadow-sm lg:leading-6"
           />
         </div>
       </div>
-      <div className="border-t border-gray-300 flex items-center justify-end gap-2 pt-4">
+      <div className="flex items-center justify-end gap-2 border-t border-gray-300 pt-4">
         {showCoupon ? (
           <p>
             Use coupon code: <span className="font-semibold">MSFTHELI</span>
@@ -198,16 +198,16 @@ const ContactForm = (props: ContactFormProps) => {
           href="https://cal.com/team/helicone/helicone-discovery"
           target="_blank"
           rel="noopener noreferrer"
-          className="bg-sky-100 whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-semibold text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+          className="whitespace-nowrap rounded-md bg-sky-100 px-4 py-1.5 text-sm font-semibold text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
         >
           Schedule a call
         </Link>
         <button
           type="submit"
-          className="bg-sky-500 hover:bg-sky-600 border-2 border-sky-700 whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+          className="whitespace-nowrap rounded-md border-2 border-sky-700 bg-sky-500 px-4 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-sky-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
         >
           {isLoading && (
-            <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
+            <ArrowPathIcon className="mr-1.5 h-4 w-4 animate-spin" />
           )}
           {contactTag === "mfs"
             ? showCoupon

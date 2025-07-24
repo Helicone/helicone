@@ -65,7 +65,7 @@ const RateLimitPage = () => {
   const { setNotification } = useNotification();
 
   return (
-    <div className="container mx-auto py-10 space-y-8">
+    <div className="container mx-auto space-y-8 py-10">
       <Card>
         <CardHeader>
           <div className="flex items-center space-x-4">
@@ -97,7 +97,7 @@ const RateLimitPage = () => {
             limit, please feel free to reach out to us at{" "}
             <Button
               variant="link"
-              className="p-0 h-auto"
+              className="h-auto p-0"
               onClick={() => {
                 navigator.clipboard.writeText("sales@helicone.ai");
                 setNotification("Email copied to clipboard", "success");

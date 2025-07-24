@@ -9,7 +9,7 @@ import { UnPromise } from "../../../lib/tsxHelpers";
 async function handler(
   options: HandlerWrapperOptions<
     UnPromise<ReturnType<typeof getTokensPerRequest>>
-  >
+  >,
 ) {
   const { req, res, userData } = options;
   const { data: filterData, error: filterError } = resultsAll([

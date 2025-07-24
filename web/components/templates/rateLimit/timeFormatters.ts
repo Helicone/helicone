@@ -27,7 +27,7 @@ export function getSmartTickFormatter(start: Date, end: Date) {
 export function calculateOptimalTickCount(
   chartWidth: number,
   start: Date,
-  end: Date
+  end: Date,
 ): number {
   const timeRange = end.getTime() - start.getTime();
 
@@ -100,7 +100,7 @@ export function getTooltipTimeFormatter(start: Date, end: Date) {
         {
           hour: "2-digit",
           minute: "2-digit",
-        }
+        },
       )}`;
     } else if (timeRange < 1000 * 60 * 60 * 24 * 7) {
       // For less than a week, show date and hour
@@ -108,7 +108,7 @@ export function getTooltipTimeFormatter(start: Date, end: Date) {
         undefined,
         {
           hour: "2-digit",
-        }
+        },
       )}`;
     } else if (timeRange < 1000 * 60 * 60 * 24 * 90) {
       // For less than 90 days, show date with month, day

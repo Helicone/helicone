@@ -9,14 +9,14 @@ export interface FeedbackOverTime {
 }
 
 export async function getFeedbackOverTime(
-  data: DataOverTimeRequest
+  data: DataOverTimeRequest,
 ): Promise<Result<FeedbackOverTime[], string>> {
   const res = await getXOverTime<{
     positiveFeedback: number;
     negativeFeedback: number;
   }>(
     data,
-    "SUM(CASE WHEN rating = 1 THEN 1 ELSE 0 END) as positiveFeedback, SUM(CASE WHEN rating = 0 THEN 1 ELSE 0 END) as negativeFeedback"
+    "SUM(CASE WHEN rating = 1 THEN 1 ELSE 0 END) as positiveFeedback, SUM(CASE WHEN rating = 0 THEN 1 ELSE 0 END) as negativeFeedback",
   );
 
   return resultMap(res, (resData) =>
@@ -24,6 +24,6 @@ export async function getFeedbackOverTime(
       time: new Date(new Date(d.created_at_trunc).getTime()),
       positiveCount: Number(d.positiveFeedback),
       negativeCount: Number(d.negativeFeedback),
-    }))
+    })),
   );
 }

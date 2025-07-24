@@ -11,7 +11,7 @@ interface FeedbackMetric {
 }
 
 async function getFeedbackMetrics(
-  org_id: string
+  org_id: string,
 ): Promise<Result<FeedbackMetric[], string>> {
   const query = `
     SELECT f.name, f.data_type

@@ -34,17 +34,17 @@ const EditDataset: React.FC<EditDatasetProps> = ({
 }) => {
   return (
     <div className="flex flex-col space-y-4">
-      <Row className="justify-start items-center space-x-2">
+      <Row className="items-center justify-start space-x-2">
         <h2 className="text-2xl font-semibold">{selectedRow?.id}</h2>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger>
               <ArrowUpRightIcon
-                className="h-5 w-5 text-gray-500 cursor-pointer"
+                className="h-5 w-5 cursor-pointer text-gray-500"
                 onClick={() => {
                   window.open(
                     `/requests?requestId=${selectedRow?.origin_request_id}`,
-                    "_blank"
+                    "_blank",
                   );
                 }}
               />

@@ -16,8 +16,8 @@ export const GenericButton = forwardRef<HTMLButtonElement, GenericButtonProps>(
     <button
       ref={ref}
       className={clsx(
-        "bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2",
-        className
+        "flex flex-row items-center gap-2 rounded-lg border border-gray-300 bg-white px-2.5 py-1.5 hover:bg-sky-50 dark:border-gray-700 dark:bg-black dark:hover:bg-sky-900",
+        className,
       )}
       onClick={onClick}
       disabled={disabled}
@@ -25,8 +25,8 @@ export const GenericButton = forwardRef<HTMLButtonElement, GenericButtonProps>(
       {icon && icon}
       <div
         className={clsx(
-          "text-sm font-medium items-center text-gray-900 dark:text-gray-100 hidden sm:flex gap-1",
-          textClassName
+          "hidden items-center gap-1 text-sm font-medium text-gray-900 dark:text-gray-100 sm:flex",
+          textClassName,
         )}
       >
         {text}
@@ -37,7 +37,7 @@ export const GenericButton = forwardRef<HTMLButtonElement, GenericButtonProps>(
         </code>
       )}
     </button>
-  )
+  ),
 );
 
 GenericButton.displayName = "GenericButton";

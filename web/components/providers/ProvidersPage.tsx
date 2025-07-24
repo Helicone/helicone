@@ -1,9 +1,6 @@
 import React, { useState } from "react";
-import AuthLayout from "@/components/layout/auth/authLayout";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { H1, Small } from "@/components/ui/typography";
+import { Small } from "@/components/ui/typography";
 import { Input } from "@/components/ui/input";
 import { ChevronDown, Search } from "lucide-react";
 import {

@@ -10,7 +10,7 @@ export async function getErrorCodes(
     start: Date;
     end: Date;
   },
-  org_id: string
+  org_id: string,
 ) {
   const { filter: filterString, argsAcc } = await buildFilterWithAuthClickHouse(
     {
@@ -21,7 +21,7 @@ export async function getErrorCodes(
         operator: "and",
       },
       argsAcc: [],
-    }
+    },
   );
   const query = `
   SELECT
@@ -43,6 +43,6 @@ export async function getErrorCodes(
       x.map((y) => ({
         error_code: +y.error_code,
         count: +y.count,
-      }))
+      })),
   );
 }

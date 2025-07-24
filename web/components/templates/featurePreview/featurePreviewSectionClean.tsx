@@ -16,8 +16,8 @@ export const FeaturePreviewSectionClean = ({
     .map(([_, feature]) => feature);
 
   return (
-    <div className="bg-[hsl(var(--background))] rounded-3xl mt-4">
-      <div className="w-full flex-col justify-start items-start gap-20 inline-flex mx-auto">
+    <div className="mt-4 rounded-3xl bg-[hsl(var(--background))]">
+      <div className="mx-auto inline-flex w-full flex-col items-start justify-start gap-20">
         {remainingFeatures.map((feature, index) => (
           <PreviewCard
             key={index}

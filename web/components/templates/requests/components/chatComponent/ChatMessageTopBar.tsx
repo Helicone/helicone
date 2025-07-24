@@ -50,7 +50,7 @@ const getDropdownItems = (
     addToolCall: () => void;
     onAddText?: () => void;
     onAddImage?: () => void;
-  }
+  },
 ) => {
   return [
     ...(messageRole === "assistant" && handlers.addToolCall
@@ -97,7 +97,7 @@ export default function ChatMessageTopBar({
   onCopyContent,
 }: ChatMessageTopBarProps) {
   const [copied, setCopied] = useState(false);
-  
+
   const handleCopy = () => {
     onCopyContent?.();
     setCopied(true);
@@ -111,7 +111,7 @@ export default function ChatMessageTopBar({
   });
 
   return (
-    <header className="h-12 w-full flex flex-row items-center justify-between px-4 sticky top-0 bg-sidebar-background dark:bg-black z-10 group">
+    <header className="group sticky top-0 z-10 flex h-12 w-full flex-row items-center justify-between bg-sidebar-background px-4 dark:bg-black">
       <div className="flex items-center gap-2">
         {dragHandle && (
           <div {...attributes} {...listeners}>
@@ -123,7 +123,7 @@ export default function ChatMessageTopBar({
             value={message.role}
             onValueChange={(value) => changeMessageRole(messageIndex, value)}
           >
-            <SelectTrigger className="h-6 inline-flex items-center px-2.5 py-0.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-2 text-nowrap border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))] hover:bg-[hsl(var(--accent))] rounded-md">
+            <SelectTrigger className="inline-flex h-6 items-center text-nowrap rounded-md border-[hsl(var(--border))] bg-[hsl(var(--background))] px-2.5 py-0.5 text-xs font-medium text-[hsl(var(--foreground))] transition-colors hover:bg-[hsl(var(--accent))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-2">
               <SelectValue placeholder="Select role" />
             </SelectTrigger>
             <SelectContent className="min-w-[140px]">
@@ -136,7 +136,7 @@ export default function ChatMessageTopBar({
           </Select>
         ) : (
           <div className="flex items-center gap-2">
-            <h2 className="text-secondary font-medium capitalize text-sm">
+            <h2 className="text-sm font-medium capitalize text-secondary">
               {message.role}
             </h2>
             {onCopyContent && (
@@ -157,7 +157,7 @@ export default function ChatMessageTopBar({
         )}
       </div>
       {chatMode === "PLAYGROUND_INPUT" && (
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity [&:has([data-state=open])]:opacity-100">
+        <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 [&:has([data-state=open])]:opacity-100">
           {message.role !== "system" && dropdownItems.length > 0 && (
             <DropdownMenu open={popoverOpen} onOpenChange={setPopoverOpen}>
               <DropdownMenuTrigger asChild>

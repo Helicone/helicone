@@ -76,7 +76,7 @@ export function CodeIntegrationPage({
   const router = useRouter();
   const queryClient = useQueryClient();
   const { updateCurrentStep, completeOnboarding } = useOrgOnboarding(
-    org?.currentOrg?.id ?? ""
+    org?.currentOrg?.id ?? "",
   );
   const [provider, setProvider] = useState<Provider>(defaultProvider);
   const [language, setLanguage] = useState<Language>(defaultLanguage);
@@ -129,7 +129,7 @@ export function CodeIntegrationPage({
         org?.currentOrg?.organization_type ?? "",
         "Main",
         window.location.hostname.includes("eu."),
-        false
+        false,
       );
 
       const res = await promiseRes;
@@ -161,8 +161,8 @@ export function CodeIntegrationPage({
           language === "typescript"
             ? "javascript"
             : language === "curl"
-            ? "bash"
-            : "python",
+              ? "bash"
+              : "python",
         theme: "github-dark",
       });
       setHighlightedCode(html);
@@ -203,7 +203,7 @@ export function CodeIntegrationPage({
         await queryClient.invalidateQueries({
           queryKey: ["topRequests"],
         });
-        
+
         await completeOnboarding();
         router.push("/dashboard");
       }, 1500);
@@ -213,7 +213,7 @@ export function CodeIntegrationPage({
   }, [hasEvent?.data, router, completeOnboarding, queryClient]);
 
   const availableLanguages = Object.keys(codeSnippets[provider]).filter(
-    (key) => typeof codeSnippets[provider][key] === "function"
+    (key) => typeof codeSnippets[provider][key] === "function",
   );
 
   // If current language is not available for this provider, switch to first available
@@ -234,7 +234,7 @@ export function CodeIntegrationPage({
 
   return (
     <OnboardingHeader>
-      <div className="flex flex-col gap-6 mx-auto max-w-4xl py-12">
+      <div className="mx-auto flex max-w-4xl flex-col gap-6 py-12">
         <main className="w-full">
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-2">
@@ -271,36 +271,36 @@ export function CodeIntegrationPage({
                 </Link>
               </div>
 
-              <div className="rounded-lg border border-[hsl(var(--border))] overflow-hidden">
+              <div className="overflow-hidden rounded-lg border border-[hsl(var(--border))]">
                 {availableLanguages.length > 1 && (
-                  <div className="flex gap-4 p-3 bg-[#24292e] border-b border-[hsl(var(--border))]">
+                  <div className="flex gap-4 border-b border-[hsl(var(--border))] bg-[#24292e] p-3">
                     {availableLanguages.map((lang) => (
                       <button
                         key={lang}
                         onClick={() => setLanguage(lang)}
-                        className={`text-sm font-medium relative px-1 ${
+                        className={`relative px-1 text-sm font-medium ${
                           language === lang
-                            ? "text-white after:absolute after:bottom-[-12px] after:left-0 after:w-full after:h-[2px] after:bg-white"
+                            ? "text-white after:absolute after:bottom-[-12px] after:left-0 after:h-[2px] after:w-full after:bg-white"
                             : "text-[hsl(var(--muted-foreground))] hover:text-white"
                         }`}
                       >
                         {lang === "typescript"
                           ? "node.js"
                           : lang === "curl"
-                          ? "curl"
-                          : "python"}
+                            ? "curl"
+                            : "python"}
                       </button>
                     ))}
                   </div>
                 )}
-                <div className="relative group">
+                <div className="group relative">
                   <div
-                    className="p-4 bg-[#24292e] overflow-x-auto"
+                    className="overflow-x-auto bg-[#24292e] p-4"
                     dangerouslySetInnerHTML={{ __html: highlightedCode }}
                   />
-                  <div className="absolute top-3 right-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-100">
+                  <div className="absolute right-3 top-3 flex items-center gap-2 opacity-0 transition-opacity duration-100 group-hover:opacity-100">
                     {copied && (
-                      <span className="text-sm text-[hsl(var(--muted-foreground))] bg-[hsl(var(--muted))] px-2 h-8 flex items-center rounded">
+                      <span className="flex h-8 items-center rounded bg-[hsl(var(--muted))] px-2 text-sm text-[hsl(var(--muted-foreground))]">
                         Copied!
                       </span>
                     )}
@@ -314,7 +314,7 @@ export function CodeIntegrationPage({
                         setCopied(true);
                         setTimeout(() => setCopied(false), 2000);
                       }}
-                      className="bg-[hsl(var(--muted))] hover:bg-[hsl(var(--muted-foreground))] text-[hsl(var(--muted-foreground))] rounded p-2"
+                      className="rounded bg-[hsl(var(--muted))] p-2 text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted-foreground))]"
                     >
                       {copied ? <Check size={16} /> : <Copy size={16} />}
                     </button>
@@ -324,7 +324,7 @@ export function CodeIntegrationPage({
             </div>
 
             {hasEvent?.data ? (
-              <Alert className="bg-[hsl(var(--confirmative))]/10 border-[hsl(var(--confirmative))]/20 p-4">
+              <Alert className="border-[hsl(var(--confirmative))]/20 bg-[hsl(var(--confirmative))]/10 p-4">
                 <div className="flex items-start gap-4">
                   <Check
                     size={20}
@@ -341,11 +341,11 @@ export function CodeIntegrationPage({
                 </div>
               </Alert>
             ) : (
-              <Card className="bg-[hsl(var(--primary))]/10 border-[hsl(var(--primary))]/20 p-4">
+              <Card className="border-[hsl(var(--primary))]/20 bg-[hsl(var(--primary))]/10 p-4">
                 <div className="flex items-start gap-4">
                   <Loader
                     size={20}
-                    className="text-[hsl(var(--primary))] animate-spin"
+                    className="animate-spin text-[hsl(var(--primary))]"
                   />
                   <div className="flex flex-col gap-1">
                     <Small className="text-[hsl(var(--primary))]">
@@ -363,7 +363,7 @@ export function CodeIntegrationPage({
             <div className="flex flex-col gap-4">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="link" className="w-fit group">
+                  <Button variant="link" className="group w-fit">
                     Need some help?
                     <ChevronDown
                       size={16}

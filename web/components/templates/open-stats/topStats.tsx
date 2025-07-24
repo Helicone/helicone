@@ -6,7 +6,7 @@ import { clsx } from "../../shared/clsx";
 import { humanReadableNumber } from "./humanReadableNumber";
 import { colors } from "./colors";
 const transformAllProviderData = (
-  data: { date: string; provider: string; tokens: number }[]
+  data: { date: string; provider: string; tokens: number }[],
 ) => {
   const result: { [key: string]: any }[] = [];
   const providers = new Set<string>();
@@ -25,7 +25,7 @@ const transformAllProviderData = (
 };
 
 const transformAllModelData = (
-  data: { date: string; model: string; tokens: number }[]
+  data: { date: string; model: string; tokens: number }[],
 ) => {
   const result: { [key: string]: any }[] = [];
   const models = new Set<string>();
@@ -46,7 +46,7 @@ export function TopStats() {
     queryFn: async () => {
       const jawn = getJawnClient("none");
       const response = await jawn.POST(
-        "/v1/public/dataisbeautiful/model/usage/overtime"
+        "/v1/public/dataisbeautiful/model/usage/overtime",
       );
       return response.data?.data ?? [];
     },
@@ -57,7 +57,7 @@ export function TopStats() {
     queryFn: async () => {
       const jawn = getJawnClient("none");
       const response = await jawn.POST(
-        "/v1/public/dataisbeautiful/provider/usage/overtime"
+        "/v1/public/dataisbeautiful/provider/usage/overtime",
       );
       return response.data?.data ?? [];
     },
@@ -68,7 +68,7 @@ export function TopStats() {
     queryFn: async () => {
       const jawn = getJawnClient("none");
       const response = await jawn.POST(
-        "/v1/public/dataisbeautiful/total-values"
+        "/v1/public/dataisbeautiful/total-values",
       );
       return response.data?.data;
     },
@@ -78,11 +78,11 @@ export function TopStats() {
     <>
       <Grid
         className={clsx(
-          "grid-cols-3 lg:grid-cols-9 w-full gap-[24px] ",
-          isLoadingTotalValues ? "animate-pulse" : ""
+          "w-full grid-cols-3 gap-[24px] lg:grid-cols-9",
+          isLoadingTotalValues ? "animate-pulse" : "",
         )}
       >
-        <Card className="col-span-3 bg-[#0B173980] bg-opacity-50 border-[#63758933] border-opacity-20">
+        <Card className="col-span-3 border-[#63758933] border-opacity-20 bg-[#0B173980] bg-opacity-50">
           <h2 className="whitespace-nowrap text-[18px] font-bold text-[#DFE4EB]">
             Total Requests
           </h2>
@@ -90,7 +90,7 @@ export function TopStats() {
             {humanReadableNumber(totalValuesData?.total_requests ?? 0)}
           </div>
         </Card>
-        <Card className="col-span-3 bg-[#0B173980] bg-opacity-50 border-[#63758933] border-opacity-20">
+        <Card className="col-span-3 border-[#63758933] border-opacity-20 bg-[#0B173980] bg-opacity-50">
           <h2 className="whitespace-nowrap text-[18px] font-bold text-[#DFE4EB]">
             Total Tokens
           </h2>
@@ -98,7 +98,7 @@ export function TopStats() {
             {humanReadableNumber(totalValuesData?.total_tokens ?? 0)}
           </div>
         </Card>
-        <Card className="col-span-3 bg-[#0B173980] bg-opacity-50 border-[#63758933] border-opacity-20">
+        <Card className="col-span-3 border-[#63758933] border-opacity-20 bg-[#0B173980] bg-opacity-50">
           <>
             <h2 className="whitespace-nowrap text-[18px] font-bold text-[#DFE4EB]">
               Total Spent
@@ -109,7 +109,7 @@ export function TopStats() {
           </>
         </Card>
       </Grid>
-      <div className="w-full border col-span-1 md:col-span-6 flex flex-col items-center gap-5 py-3 rounded-lg px-10  bg-[#0B173980] bg-opacity-50 border-[#63758933] border-opacity-20">
+      <div className="col-span-1 flex w-full flex-col items-center gap-5 rounded-lg border border-[#63758933] border-opacity-20 bg-[#0B173980] bg-opacity-50 px-10 py-3 md:col-span-6">
         <h2>
           Tokens / Provider
           <i className="text-gray-400">
@@ -126,7 +126,7 @@ export function TopStats() {
           stack
         />
       </div>
-      <div className="w-full border col-span-1 md:col-span-6 flex flex-col items-center gap-5 py-3 rounded-lg px-10  bg-[#0B173980] bg-opacity-50 border-[#63758933] border-opacity-20">
+      <div className="col-span-1 flex w-full flex-col items-center gap-5 rounded-lg border border-[#63758933] border-opacity-20 bg-[#0B173980] bg-opacity-50 px-10 py-3 md:col-span-6">
         <h2>
           Tokens / Model{" "}
           <i className="text-gray-400">

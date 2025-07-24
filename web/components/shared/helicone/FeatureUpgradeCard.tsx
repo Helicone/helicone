@@ -297,7 +297,7 @@ export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
   };
 
   const pricingCards = (
-    <div className="w-full flex md:flex-row gap-6 flex-col">
+    <div className="flex w-full flex-col gap-6 md:flex-row">
       <PricingCard title="Hobby" price="Free" isCurrentPlan={true} />
       <PricingCard
         title="Pro"
@@ -320,14 +320,14 @@ export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
   );
 
   return (
-    <div className="w-full max-w-7xl md:px-24 px-4 mx-auto py-10 bg-[hsl(var(--background))] flex flex-col gap-16">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-16 bg-[hsl(var(--background))] px-4 py-10 md:px-24">
       {/* Header Section */}
-      <div className="flex flex-col gap-4 w-full">
-        <div className="flex flex-col md:flex-row justify-between w-full">
+      <div className="flex w-full flex-col gap-4">
+        <div className="flex w-full flex-col justify-between md:flex-row">
           <div className="flex items-center gap-2.5">
-            <div className="w-5 h-5 flex items-center justify-center">
+            <div className="flex h-5 w-5 items-center justify-center">
               {icon || (
-                <CircleHelpIcon className="w-4 h-4 text-[hsl(var(--muted-foreground))]" />
+                <CircleHelpIcon className="h-4 w-4 text-[hsl(var(--muted-foreground))]" />
               )}
             </div>
             <Small className="text-[hsl(var(--muted-foreground))]">
@@ -335,7 +335,7 @@ export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
             </Small>
           </div>
           <div className="flex flex-row">
-            <div className="h-full justify-center items-center gap-2.5 inline-flex">
+            <div className="inline-flex h-full items-center justify-center gap-2.5">
               <P className="text-[hsl(var(--muted-foreground))]">Included in</P>
               <Badge
                 className="bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))]"
@@ -359,7 +359,7 @@ export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
             <img
               src={featureImage.content as string}
               alt="Feature preview"
-              className="w-full h-auto"
+              className="h-auto w-full"
             />
           ) : (
             <div className="w-full">
@@ -380,17 +380,17 @@ export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
         />
       )}
 
-      <div className="w-full flex flex-col items-center gap-6">
+      <div className="flex w-full flex-col items-center gap-6">
         <div className="flex items-center gap-2">
           <H2>Everything else in</H2>
-          <div className="px-[18px] py-2 -translate-y-1 rotate-2 bg-[hsl(var(--accent))] rounded-xl border-2 border-[hsl(var(--primary))] inline-flex items-center">
+          <div className="inline-flex -translate-y-1 rotate-2 items-center rounded-xl border-2 border-[hsl(var(--primary))] bg-[hsl(var(--accent))] px-[18px] py-2">
             <div className="text-[hsl(var(--primary))]">Pro</div>
           </div>
         </div>
 
         <Button
           onClick={() => setIsUpgradeDialogOpen(true)}
-          className="h-[52px] px-6 py-1.5 bg-[hsl(var(--primary))] rounded-xl flex justify-center items-center gap-2.5"
+          className="flex h-[52px] items-center justify-center gap-2.5 rounded-xl bg-[hsl(var(--primary))] px-6 py-1.5"
         >
           <div className="text-[hsl(var(--primary-foreground))]">
             Start 7-day free trial

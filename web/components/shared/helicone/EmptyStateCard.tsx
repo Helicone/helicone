@@ -261,7 +261,7 @@ const ShikiHighlightedCode: React.FC<{
       // Apply custom CSS to override any center alignment and add rounded corners
       const formattedHtml = html.replace(
         /<pre class="shiki"/,
-        '<pre class="shiki rounded-lg" style="text-align: left;"'
+        '<pre class="shiki rounded-lg" style="text-align: left;"',
       );
       setHighlightedCode(formattedHtml);
     };
@@ -270,9 +270,9 @@ const ShikiHighlightedCode: React.FC<{
   }, [code, language]);
 
   return (
-    <div className="rounded-lg overflow-hidden w-full">
+    <div className="w-full overflow-hidden rounded-lg">
       <div
-        className={`rounded-lg p-4 bg-[#24292e] overflow-x-auto text-left max-w-${maxWidth} mx-auto`}
+        className={`overflow-x-auto rounded-lg bg-[#24292e] p-4 text-left max-w-${maxWidth} mx-auto`}
         dangerouslySetInnerHTML={{ __html: highlightedCode }}
       />
     </div>
@@ -315,13 +315,13 @@ export const EmptyStateCard = ({
         {cta.primary &&
           (cta.primary.onClick ? (
             <Button variant="default" onClick={onPrimaryClick}>
-              {cta.primary.showPlusIcon && <Plus className="h-4 w-4 mr-2" />}
+              {cta.primary.showPlusIcon && <Plus className="mr-2 h-4 w-4" />}
               {cta.primary.text}
             </Button>
           ) : cta.primary.link ? (
             <Link href={cta.primary.link} target="_blank">
               <Button variant="default">
-                {cta.primary.showPlusIcon && <Plus className="h-4 w-4 mr-2" />}
+                {cta.primary.showPlusIcon && <Plus className="mr-2 h-4 w-4" />}
                 {cta.primary.text}
               </Button>
             </Link>
@@ -340,11 +340,11 @@ export const EmptyStateCard = ({
 
   // Standard layout for all empty states based on the properties format
   return (
-    <div className="w-full min-h-screen flex items-center justify-center bg-background dark:bg-sidebar-background py-16">
-      <div className="flex flex-col items-center text-center max-w-3xl mx-auto gap-8 px-4">
+    <div className="flex min-h-screen w-full items-center justify-center bg-background py-16 dark:bg-sidebar-background">
+      <div className="mx-auto flex max-w-3xl flex-col items-center gap-8 px-4 text-center">
         {/* Icon - Square shape */}
         {featureDefaults.icon && (
-          <div className="w-16 h-16 rounded-lg bg-accent flex items-center justify-center border border-border">
+          <div className="flex h-16 w-16 items-center justify-center rounded-lg border border-border bg-accent">
             {React.createElement(featureDefaults.icon, {
               size: 28,
               className: "text-accent-foreground",
@@ -355,7 +355,7 @@ export const EmptyStateCard = ({
         <div className="flex flex-col gap-2">
           <H2>{featureDefaults.title}</H2>
 
-          <P className="text-muted-foreground max-w-3xl">
+          <P className="max-w-3xl text-muted-foreground">
             {featureDefaults.description}
           </P>
         </div>
@@ -371,12 +371,12 @@ export const EmptyStateCard = ({
               />
             ) : featureDefaults.featureImage.type === "video" ? (
               <div
-                className={`overflow-hidden relative rounded-lg border border-border max-w-${
+                className={`relative overflow-hidden rounded-lg border border-border max-w-${
                   featureDefaults.featureImage.maxWidth || "xl"
                 } mx-auto`}
               >
                 <video
-                  className="w-full max-h-[500px] object-contain"
+                  className="max-h-[500px] w-full object-contain"
                   src={featureDefaults.featureImage.content}
                   autoPlay
                   loop
@@ -391,7 +391,7 @@ export const EmptyStateCard = ({
                 <img
                   src={featureDefaults.featureImage.content}
                   alt={featureDefaults.title}
-                  className={`w-full h-auto rounded-lg border border-border max-w-${
+                  className={`h-auto w-full rounded-lg border border-border max-w-${
                     featureDefaults.featureImage.maxWidth || "xl"
                   } mx-auto`}
                 />

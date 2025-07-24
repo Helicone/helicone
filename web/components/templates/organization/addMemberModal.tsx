@@ -35,7 +35,7 @@ const AddMemberModal = (props: AddMemberModalProps) => {
     setIsLoading(true);
 
     const email = e.currentTarget.elements.namedItem(
-      "email"
+      "email",
     ) as HTMLInputElement;
 
     if (!email || !email.value) {
@@ -55,16 +55,16 @@ const AddMemberModal = (props: AddMemberModalProps) => {
         body: {
           email: email.value,
         },
-      }
+      },
     );
     if (data?.error || addMemberError) {
       const errorMessage = data?.error || addMemberError;
       setNotification(
         errorMessage ? JSON.stringify(errorMessage) : "error adding memeber",
-        "error"
+        "error",
       );
       setErrorMessage(
-        errorMessage ? JSON.stringify(errorMessage) : "error adding memeber"
+        errorMessage ? JSON.stringify(errorMessage) : "error adding memeber",
       );
       console.error(addMemberError);
     } else {
@@ -86,9 +86,9 @@ const AddMemberModal = (props: AddMemberModalProps) => {
           action="#"
           method="POST"
           onSubmit={onSubmitHandler}
-          className="flex flex-col gap-4 w-full"
+          className="flex w-full flex-col gap-4"
         >
-          <div className="space-y-1.5 text-sm w-full">
+          <div className="w-full space-y-1.5 text-sm">
             <label
               htmlFor="email"
               className="text-sm font-medium text-foreground"
@@ -115,7 +115,7 @@ const AddMemberModal = (props: AddMemberModalProps) => {
                     </Small>
                     <div>
                       <Small className="font-medium">Tips:</Small>
-                      <ul className="list-disc pl-5 mt-1">
+                      <ul className="mt-1 list-disc pl-5">
                         <li>
                           <Muted>
                             Try adding user with all lowercase letters
@@ -140,7 +140,7 @@ const AddMemberModal = (props: AddMemberModalProps) => {
               Cancel
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Add Member
             </Button>
           </div>

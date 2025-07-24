@@ -57,19 +57,19 @@ const RateLimitRequestsView = ({
   // Get smart formatters based on time range
   const tickFormatter = useMemo(
     () => getSmartTickFormatter(start, end),
-    [start, end]
+    [start, end],
   );
 
   const tooltipFormatter = useMemo(
     () => getTooltipTimeFormatter(start, end),
-    [start, end]
+    [start, end],
   );
 
   return (
     <Col>
-      <div className="h-full w-full bg-card text-card-foreground rounded-md pt-6 pr-6 pl-6">
+      <div className="h-full w-full rounded-md bg-card pl-6 pr-6 pt-6 text-card-foreground">
         {isLoading ? (
-          <div className="h-[14rem] flex items-center justify-center">
+          <div className="flex h-[14rem] items-center justify-center">
             <LoadingAnimation height={100} width={100} />
           </div>
         ) : (
@@ -104,7 +104,7 @@ const RateLimitRequestsView = ({
           </ChartContainer>
         )}
       </div>
-      <div className="text-sm text-gray-500 dark:text-gray-400 border-t">
+      <div className="border-t text-sm text-gray-500 dark:text-gray-400">
         <RequestsPage
           currentPage={1}
           pageSize={25}

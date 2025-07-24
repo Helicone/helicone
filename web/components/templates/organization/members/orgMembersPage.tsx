@@ -25,7 +25,7 @@ const OrgMembersPage = (props: OrgMembersPageProps) => {
 
   const onLeaveSuccess = () => {
     const ownedOrgs = orgContext?.allOrgs.filter(
-      (org) => org.owner === user?.id
+      (org) => org.owner === user?.id,
     );
     if (orgContext && ownedOrgs && ownedOrgs.length > 0) {
       orgContext.refetchOrgs();
@@ -61,12 +61,12 @@ const OrgMembersPage = (props: OrgMembersPageProps) => {
     <>
       <div
         className={cn(
-          "flex flex-col text-foreground space-y-8",
-          wFull ? "w-full" : "max-w-2xl"
+          "flex flex-col space-y-8 text-foreground",
+          wFull ? "w-full" : "max-w-2xl",
         )}
       >
-        <div className="flex flex-col h-full space-y-4 w-full mt-8">
-          <div className="flex flex-row justify-between items-center">
+        <div className="mt-8 flex h-full w-full flex-col space-y-4">
+          <div className="flex flex-row items-center justify-between">
             <h3 className="font-semibold">Members</h3>
 
             <div className="flex flex-row space-x-4">
@@ -86,7 +86,7 @@ const OrgMembersPage = (props: OrgMembersPageProps) => {
               {Array.from({ length: 3 }).map((_, index) => (
                 <li
                   key={index}
-                  className="h-6 flex flex-row justify-between gap-2 bg-muted animate-pulse rounded-md"
+                  className="flex h-6 animate-pulse flex-row justify-between gap-2 rounded-md bg-muted"
                 ></li>
               ))}
             </ul>

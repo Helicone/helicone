@@ -40,9 +40,9 @@ const InvoiceModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-background rounded-lg shadow-lg w-full max-w-4xl max-h-[80vh] flex flex-col">
-        <div className="flex justify-between items-center p-4 border-b border-border">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="flex max-h-[80vh] w-full max-w-4xl flex-col rounded-lg bg-background shadow-lg">
+        <div className="flex items-center justify-between border-b border-border p-4">
           <h2 className="text-lg font-semibold">Raw Invoice Data</h2>
           <button
             onClick={onClose}
@@ -51,8 +51,8 @@ const InvoiceModal = ({
             ✕
           </button>
         </div>
-        <div className="overflow-auto p-4 flex-grow">
-          <pre className="text-xs whitespace-pre-wrap bg-slate-50 p-4 rounded">
+        <div className="flex-grow overflow-auto p-4">
+          <pre className="whitespace-pre-wrap rounded bg-slate-50 p-4 text-xs">
             {JSON.stringify(invoice, null, 2)}
           </pre>
         </div>
@@ -76,7 +76,7 @@ const AdminProjections = () => {
     Record<string, boolean>
   >({});
   const [selectedMonths, setSelectedMonths] = useState<Record<string, string>>(
-    {}
+    {},
   );
   const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -115,7 +115,7 @@ const AdminProjections = () => {
   // Handle sorting logic
   const handleSort = (
     tableType: "billed" | "upcoming",
-    key: keyof InvoiceData
+    key: keyof InvoiceData,
   ) => {
     const currentConfig =
       tableType === "billed" ? billedSortConfig : upcomingSortConfig;
@@ -211,18 +211,21 @@ const AdminProjections = () => {
   const productRevenueData = useMemo(() => {
     if (!revenueCalculator) return {};
 
-    return productConfigs.reduce((acc, config) => {
-      const productId =
-        config.productName === "All Products"
-          ? config.productIds
-          : config.productIds[0] || "";
+    return productConfigs.reduce(
+      (acc, config) => {
+        const productId =
+          config.productName === "All Products"
+            ? config.productIds
+            : config.productIds[0] || "";
 
-      acc[config.productName] = revenueCalculator.getProductRevenue(
-        productId,
-        6
-      );
-      return acc;
-    }, {} as Record<string, MonthlyRevenueData>);
+        acc[config.productName] = revenueCalculator.getProductRevenue(
+          productId,
+          6,
+        );
+        return acc;
+      },
+      {} as Record<string, MonthlyRevenueData>,
+    );
   }, [revenueCalculator, productConfigs]);
 
   // Prepare chart data from the memoized revenue data
@@ -232,11 +235,11 @@ const AdminProjections = () => {
 
       // Collect all invoices across all months for the chart
       const allBilledInvoices = Object.values(monthlyData).flatMap(
-        (data) => data.billedInvoices || []
+        (data) => data.billedInvoices || [],
       );
 
       const allUpcomingInvoices = Object.values(monthlyData).flatMap(
-        (data) => data.upcomingInvoices || []
+        (data) => data.upcomingInvoices || [],
       );
 
       return {
@@ -255,7 +258,7 @@ const AdminProjections = () => {
   return (
     <div className="flex flex-col gap-8">
       {error && (
-        <div className="rounded-md bg-red-50 p-4 mb-4">
+        <div className="mb-4 rounded-md bg-red-50 p-4">
           <div className="flex">
             <div className="flex-shrink-0">
               <svg
@@ -278,11 +281,11 @@ const AdminProjections = () => {
         </div>
       )}
 
-      <div className="flex justify-between items-center mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Subscription Management</h1>
         <button
           onClick={handleRefresh}
-          className="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+          className="rounded bg-blue-500 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-600"
           disabled={isLoading}
         >
           {isLoading ? "Loading..." : "Refresh Data"}
@@ -291,8 +294,8 @@ const AdminProjections = () => {
 
       {/* Revenue Charts Grid */}
       <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Revenue Overview</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <h2 className="mb-4 text-xl font-semibold">Revenue Overview</h2>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {productChartData.map(
             ({ productName, billedInvoices, upcomingInvoices }) => (
               <RevenueChart
@@ -302,7 +305,7 @@ const AdminProjections = () => {
                 title={productName}
                 months={6}
               />
-            )
+            ),
           )}
         </div>
       </div>
@@ -340,15 +343,15 @@ const AdminProjections = () => {
           const invoicesSectionKey = `${config.productName}-invoices`;
 
           return (
-            <div key={config.productName} className="border rounded-lg p-4">
-              <h2 className="text-xl font-semibold mb-4">
+            <div key={config.productName} className="rounded-lg border p-4">
+              <h2 className="mb-4 text-xl font-semibold">
                 {config.productName} Details
               </h2>
 
               {/* Month selector */}
               {availableMonths.length > 0 && (
                 <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="mb-1 block text-sm font-medium text-gray-700">
                     Select Month:
                   </label>
                   <div className="flex flex-wrap gap-2">
@@ -358,7 +361,7 @@ const AdminProjections = () => {
                         onClick={() =>
                           selectMonth(config.productName, monthKey)
                         }
-                        className={`px-3 py-1 text-sm rounded ${
+                        className={`rounded px-3 py-1 text-sm ${
                           selectedMonth === monthKey
                             ? "bg-blue-500 text-white"
                             : "bg-gray-200 text-gray-700 hover:bg-gray-300"
@@ -375,12 +378,12 @@ const AdminProjections = () => {
                 <>
                   {/* Monthly revenue summary */}
                   <div className="mb-4">
-                    <h3 className="text-lg font-medium mb-2">
+                    <h3 className="mb-2 text-lg font-medium">
                       Summary for{" "}
                       {selectedMonth ? formatMonthKey(selectedMonth) : ""}
                     </h3>
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-slate-50 p-3 rounded">
+                      <div className="rounded bg-slate-50 p-3">
                         <p className="text-sm text-slate-500">
                           Current Revenue
                         </p>
@@ -388,7 +391,7 @@ const AdminProjections = () => {
                           ${revenueData.current.toFixed(2)}
                         </p>
                       </div>
-                      <div className="bg-slate-50 p-3 rounded">
+                      <div className="rounded bg-slate-50 p-3">
                         <p className="text-sm text-slate-500">
                           Projected Revenue
                         </p>
@@ -402,7 +405,7 @@ const AdminProjections = () => {
                   {/* Billed invoices section */}
                   <div className="mb-4">
                     <div
-                      className="flex justify-between items-center cursor-pointer py-2 border-b"
+                      className="flex cursor-pointer items-center justify-between border-b py-2"
                       onClick={() => toggleSection(invoicesSectionKey)}
                     >
                       <h3 className="text-lg font-medium">Billed Invoices</h3>
@@ -424,13 +427,13 @@ const AdminProjections = () => {
                     )}
 
                     {!expandedSections[invoicesSectionKey] && (
-                      <p className="text-sm text-gray-500 mt-2">
+                      <p className="mt-2 text-sm text-gray-500">
                         {revenueData.billedInvoices.length} invoices (
                         {revenueData.billedInvoices.length > 0
                           ? `$${revenueData.billedInvoices
                               .reduce(
                                 (sum, inv) => sum + inv.amountAfterProcessing,
-                                0
+                                0,
                               )
                               .toFixed(2)} total`
                           : "No revenue"}
@@ -442,7 +445,7 @@ const AdminProjections = () => {
                   {/* Upcoming invoices section */}
                   <div>
                     <div
-                      className="flex justify-between items-center cursor-pointer py-2 border-b"
+                      className="flex cursor-pointer items-center justify-between border-b py-2"
                       onClick={() =>
                         toggleSection(`${config.productName}-upcoming`)
                       }
@@ -468,13 +471,13 @@ const AdminProjections = () => {
                     )}
 
                     {!expandedSections[`${config.productName}-upcoming`] && (
-                      <p className="text-sm text-gray-500 mt-2">
+                      <p className="mt-2 text-sm text-gray-500">
                         {revenueData.upcomingInvoices.length} invoices (
                         {revenueData.upcomingInvoices.length > 0
                           ? `$${revenueData.upcomingInvoices
                               .reduce(
                                 (sum, inv) => sum + inv.amountAfterProcessing,
-                                0
+                                0,
                               )
                               .toFixed(2)} projected`
                           : "No projected revenue"}
@@ -484,7 +487,7 @@ const AdminProjections = () => {
                   </div>
                 </>
               ) : (
-                <p className="text-gray-500 italic">
+                <p className="italic text-gray-500">
                   No revenue data available
                 </p>
               )}

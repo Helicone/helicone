@@ -22,31 +22,31 @@ export default function ThemedTabs(props: ThemedTabsProps) {
   return (
     <div className="inline-flex px-2 sm:px-0">
       <Tab.Group defaultIndex={initialIndex}>
-        <Tab.List className="flex space-x-1 rounded-lg bg-gray-200 dark:bg-gray-800 shadow-sm p-0.5">
+        <Tab.List className="flex space-x-1 rounded-lg bg-gray-200 p-0.5 shadow-sm dark:bg-gray-800">
           {options.map((option, idx) => (
             <Tab
               key={idx}
               className={({ selected }) =>
                 clsx(
-                  "w-full flex flex-row rounded-md px-2.5 py-1.5 text-sm font-medium leading-5",
+                  "flex w-full flex-row rounded-md px-2.5 py-1.5 text-sm font-medium leading-5",
                   selected
-                    ? "bg-white shadow text-gray-900 dark:bg-black dark:text-gray-100"
-                    : " hover:cursor-pointer text-gray-500"
+                    ? "bg-white text-gray-900 shadow dark:bg-black dark:text-gray-100"
+                    : "text-gray-500 hover:cursor-pointer",
                 )
               }
               onClick={() => onOptionSelect(option.label)}
             >
               {({ selected }) => (
-                <div className="flex flex-row space-x-2 items-center w-fit">
+                <div className="flex w-fit flex-row items-center space-x-2">
                   <option.icon
                     className={clsx(
                       selected
                         ? "text-blue-500 dark:text-blue-500"
                         : "text-gray-500",
-                      "w-5 h-5 inline-block"
+                      "inline-block h-5 w-5",
                     )}
                   />
-                  <p className={`w-max hidden ${breakpoint}:inline`}>
+                  <p className={`hidden w-max ${breakpoint}:inline`}>
                     {option.label}
                   </p>
                 </div>

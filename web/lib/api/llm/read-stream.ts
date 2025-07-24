@@ -1,7 +1,7 @@
 export async function readStream(
   stream: ReadableStream<Uint8Array>,
   onChunk: (chunk: string) => void,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<string> {
   const reader = stream.getReader();
   let fullResponse = "";

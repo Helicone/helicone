@@ -2,7 +2,7 @@ import { generate, GenerateParams } from "./generate";
 
 export async function generateStream(
   params: GenerateParams,
-  options?: { headers?: { "x-cancel": string } }
+  options?: { headers?: { "x-cancel": string } },
 ): Promise<ReadableStream<Uint8Array>> {
   const stream = new TransformStream();
   const writer = stream.writable.getWriter();

@@ -1,7 +1,7 @@
 import { components } from "@/lib/clients/jawnTypes/public";
 import { $JAWN_API } from "@/lib/clients/jawn";
 import React from "react";
-import { queryOptions, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const SQL_KEYWORDS = [
   "SELECT",

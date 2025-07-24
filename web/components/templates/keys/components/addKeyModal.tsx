@@ -31,15 +31,15 @@ const AddKeyModal = (props: AddKeyModalProps) => {
     event.preventDefault();
 
     const keyName = event.currentTarget.elements.namedItem(
-      "key-name"
+      "key-name",
     ) as HTMLInputElement;
 
     const keyPermissions = event.currentTarget.elements.namedItem(
-      "key-read"
+      "key-read",
     ) as HTMLInputElement;
 
     const rateLimit = event.currentTarget.elements.namedItem(
-      "rate-limit"
+      "rate-limit",
     ) as HTMLInputElement;
 
     if (!keyName || keyName.value === "") {
@@ -68,7 +68,7 @@ const AddKeyModal = (props: AddKeyModalProps) => {
           action="#"
           method="POST"
           onSubmit={handleSubmitHandler}
-          className="flex flex-col space-y-8 w-[400px]"
+          className="flex w-[400px] flex-col space-y-8"
         >
           <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
             Create Key
@@ -81,7 +81,7 @@ const AddKeyModal = (props: AddKeyModalProps) => {
               type="text"
               name="key-name"
               id="key-name"
-              className="block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm p-2 text-sm"
+              className="block w-full rounded-md border border-gray-300 bg-gray-100 p-2 text-sm text-gray-900 shadow-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
               required
               placeholder="Key Name"
             />
@@ -131,12 +131,12 @@ const AddKeyModal = (props: AddKeyModalProps) => {
               Rate Limiting
             </label>
             <div className="flex items-start">
-              <div className="flex items-center h-5">
+              <div className="flex h-5 items-center">
                 <input
                   id="rate-limit"
                   name="rate-limit"
                   type="checkbox"
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
               </div>
               <div className="ml-3 text-sm">
@@ -150,7 +150,7 @@ const AddKeyModal = (props: AddKeyModalProps) => {
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <InfoIcon className="h-4 w-4 text-gray-500 cursor-help" />
+                        <InfoIcon className="h-4 w-4 cursor-help text-gray-500" />
                       </TooltipTrigger>
                       <TooltipContent className="max-w-xs">
                         <p>
@@ -169,7 +169,7 @@ const AddKeyModal = (props: AddKeyModalProps) => {
                     </Tooltip>
                   </TooltipProvider>
                 </div>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
                   May affect request latency.{" "}
                   <a
                     href="/docs/rate-limiting#performance"
@@ -188,23 +188,23 @@ const AddKeyModal = (props: AddKeyModalProps) => {
             <button
               onClick={() => setOpen(false)}
               type="button"
-              className="flex flex-row items-center rounded-md bg-white dark:bg-black px-4 py-2 text-sm font-semibold border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm hover:text-gray-700 dark:hover:text-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+              className="flex flex-row items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500 dark:border-gray-700 dark:bg-black dark:text-gray-100 dark:hover:bg-gray-900 dark:hover:text-gray-300"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="flex items-center rounded-md bg-black px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:bg-white dark:text-black dark:hover:bg-gray-200"
             >
               {addKey.isPending && (
-                <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
+                <ArrowPathIcon className="mr-1.5 h-4 w-4 animate-spin" />
               )}
               Create Key
             </button>
           </div>
         </form>
       ) : (
-        <div className="flex flex-col space-y-4 w-[400px]">
+        <div className="flex w-[400px] flex-col space-y-4">
           <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
             Your Helicone Key
           </h1>
@@ -213,17 +213,17 @@ const AddKeyModal = (props: AddKeyModalProps) => {
             able to see it again.
           </p>
           <div className="w-full space-y-1.5 text-sm">
-            <div className="flex flex-row items-center w-full gap-4">
+            <div className="flex w-full flex-row items-center gap-4">
               <input
                 type="text"
                 name="proxy-key-name"
                 id="proxy-key-name"
                 disabled
-                className="block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm p-2 text-sm"
+                className="block w-full rounded-md border border-gray-300 bg-gray-100 p-2 text-sm text-gray-900 shadow-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
                 value={returnedKey}
               />
               <button
-                className="items-center rounded-md bg-black dark:bg-white p-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                className="flex items-center rounded-md bg-black p-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:bg-white dark:text-black dark:hover:bg-gray-200"
                 onClick={() => {
                   navigator.clipboard.writeText(returnedKey);
                   setNotification("Copied to clipboard!", "success");
@@ -241,7 +241,7 @@ const AddKeyModal = (props: AddKeyModalProps) => {
                 setReturnedKey(null);
               }}
               type="button"
-              className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="flex items-center rounded-md bg-black px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:bg-white dark:text-black dark:hover:bg-gray-200"
             >
               Close
             </button>

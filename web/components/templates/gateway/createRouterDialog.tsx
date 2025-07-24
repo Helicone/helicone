@@ -13,20 +13,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { $JAWN_API } from "@/lib/clients/jawn";
 import { useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2Icon, PlusIcon } from "lucide-react";
+import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 import yaml from "js-yaml";
 import useNotification from "@/components/shared/notification/useNotification";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+
 import {
   Accordion,
   AccordionContent,

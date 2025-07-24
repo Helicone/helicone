@@ -49,13 +49,13 @@ const Details = () => {
   return (
     <div className="overflow-hidden bg-gray-50 py-24 sm:py-32">
       <div className="mx-auto max-w-7xl md:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-y-16 gap-x-8 sm:gap-y-20 lg:grid-cols-2 lg:items-start">
-          <div className="px-6 lg:px-0 lg:pt-4 lg:pr-4">
-            <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-lg space-y-4 sm:space-y-8">
+        <div className="grid grid-cols-1 gap-x-8 gap-y-16 sm:gap-y-20 lg:grid-cols-2 lg:items-start">
+          <div className="px-6 lg:px-0 lg:pr-4 lg:pt-4">
+            <div className="mx-auto max-w-2xl space-y-4 sm:space-y-8 lg:mx-0 lg:max-w-lg">
               <p className="text-2xl font-bold tracking-tight text-gray-900 sm:text-4xl">
                 Stay on top of your costs, usage, and latency
               </p>
-              <p className="text-lg sm:text-xl leading-8 text-gray-600">
+              <p className="text-lg leading-8 text-gray-600 sm:text-xl">
                 Integrate models like GPT-4 with Helicone to track API requests
                 and visualize results.
               </p>
@@ -69,7 +69,7 @@ const Details = () => {
                         selected.name === feature.name
                           ? "border border-gray-500 shadow-sm"
                           : "border border-dashed border-gray-300 shadow-sm",
-                        "hidden sm:block text-left align-left relative rounded-md p-4 hover:scale-105 transition ease-in-out delay-150 duration-300 hover:cursor-pointer"
+                        "align-left relative hidden rounded-md p-4 text-left transition delay-150 duration-300 ease-in-out hover:scale-105 hover:cursor-pointer sm:block",
                       )}
                     >
                       <dt className="inline font-semibold text-gray-900">
@@ -81,7 +81,7 @@ const Details = () => {
                       key={`mobile-${feature.name}`}
                       onClick={() => setSelected(feature)}
                       className={clsx(
-                        "block sm:hidden border border-gray-500 shadow-sm text-left align-left relative rounded-md p-4 hover:scale-105 transition ease-in-out delay-150 duration-300 hover:cursor-pointer"
+                        "align-left relative block rounded-md border border-gray-500 p-4 text-left shadow-sm transition delay-150 duration-300 ease-in-out hover:scale-105 hover:cursor-pointer sm:hidden",
                       )}
                     >
                       <dt className="inline font-semibold text-gray-900">
@@ -94,8 +94,8 @@ const Details = () => {
               </dl>
             </div>
           </div>
-          <div className="sm:px-6 lg:px-0 hidden sm:flex">
-            <div className="relative isolate overflow-hidden bg-gradient-to-r from-sky-600 to-indigo-500 px-6 pt-8 sm:mx-auto sm:max-w-2xl sm:rounded-3xl sm:pt-16 sm:pl-16 sm:pr-0 lg:mx-0 lg:max-w-none">
+          <div className="hidden sm:flex sm:px-6 lg:px-0">
+            <div className="relative isolate overflow-hidden bg-gradient-to-r from-sky-600 to-indigo-500 px-6 pt-8 sm:mx-auto sm:max-w-2xl sm:rounded-3xl sm:pl-16 sm:pr-0 sm:pt-16 lg:mx-0 lg:max-w-none">
               <div
                 className="absolute -inset-y-px -left-3 -z-10 w-full origin-bottom-left skew-x-[-30deg] bg-indigo-100 opacity-20 ring-1 ring-inset ring-white"
                 aria-hidden="true"

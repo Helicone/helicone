@@ -13,7 +13,7 @@ interface RenderOrgPlanProps {
 
 function formatNumberString(
   numString: string,
-  minimumFractionDigits?: boolean
+  minimumFractionDigits?: boolean,
 ) {
   const num = parseFloat(numString);
   if (minimumFractionDigits) {
@@ -73,7 +73,7 @@ const RenderOrgPlan = (props: RenderOrgPlanProps) => {
       isDataOverTimeLoading={isLoading}
     >
       <AreaChart
-        className="h-[14rem] -ml-4"
+        className="-ml-4 h-[14rem]"
         data={chartData}
         index="date"
         categories={["requests"]}

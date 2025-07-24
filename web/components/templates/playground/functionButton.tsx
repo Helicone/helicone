@@ -16,7 +16,7 @@ const FunctionButton = (props: FunctionButtonProps) => {
 
   const [open, setOpen] = useState(false);
   const [functionText, setFunctionText] = useState(
-    tool.function ? JSON.stringify(tool.function, null, 2) : "{}"
+    tool.function ? JSON.stringify(tool.function, null, 2) : "{}",
   );
 
   const isValidJson = (jsonString: string) => {
@@ -30,10 +30,10 @@ const FunctionButton = (props: FunctionButtonProps) => {
 
   return (
     <>
-      <div className="w-full justify-between flex items-center gap-2">
+      <div className="flex w-full items-center justify-between gap-2">
         <button
           onClick={() => setOpen(true)}
-          className="text-xs flex items-center space-x-1 bg-white border border-gray-300 dark:bg-black dark:border-gray-700 rounded-lg py-1 px-2 w-fit hover:cursor-pointer"
+          className="flex w-fit items-center space-x-1 rounded-lg border border-gray-300 bg-white px-2 py-1 text-xs hover:cursor-pointer dark:border-gray-700 dark:bg-black"
         >
           <i className="text-gray-500">function</i>
           <p
@@ -41,7 +41,7 @@ const FunctionButton = (props: FunctionButtonProps) => {
               // mono
               fontFamily: "monospace",
             }}
-            className="text-black dark:text-white font-semibold truncate w-40"
+            className="w-40 truncate font-semibold text-black dark:text-white"
           >
             {tool?.function?.name || "n/a"}
           </p>
@@ -55,7 +55,7 @@ const FunctionButton = (props: FunctionButtonProps) => {
       </div>
 
       <ThemedModal open={open} setOpen={setOpen}>
-        <div className="w-[600px] h-full flex flex-col space-y-4">
+        <div className="flex h-full w-[600px] flex-col space-y-4">
           <h3 className="text-xl font-semibold">Function Details</h3>
 
           <MarkdownEditor
@@ -63,9 +63,9 @@ const FunctionButton = (props: FunctionButtonProps) => {
             setText={setFunctionText}
             language="json"
           />
-          <div className="flex w-full justify-end items-center gap-2">
+          <div className="flex w-full items-center justify-end gap-2">
             {!isValidJson(functionText) && (
-              <p className="text-red-500 text-sm">Invalid JSON</p>
+              <p className="text-sm text-red-500">Invalid JSON</p>
             )}
             <Button
               size={"sm"}

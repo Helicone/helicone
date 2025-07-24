@@ -48,7 +48,7 @@ export const NewExperimentPopover = () => {
   const handleInputChange = (
     index: number,
     field: "variable" | "value",
-    newValue: string
+    newValue: string,
   ) => {
     const newInputs = [...inputs];
     newInputs[index][field] = newValue;
@@ -67,7 +67,7 @@ export const NewExperimentPopover = () => {
     if (!promptName || !basePrompt) {
       notification.setNotification(
         "Please enter a prompt name and content",
-        "error"
+        "error",
       );
       return;
     }
@@ -135,19 +135,19 @@ export const NewExperimentPopover = () => {
     }
 
     await router.push(
-      `/experiments/${experimentTableResult.data?.data?.tableId}`
+      `/experiments/${experimentTableResult.data?.data?.tableId}`,
     );
   };
 
   return (
     <PopoverContent
-      className="w-[600px] p-4 bg-white shadow-lg rounded-md"
+      className="w-[600px] rounded-md bg-white p-4 shadow-lg"
       side="bottom"
       align="start"
     >
-      <ScrollArea className="flex flex-col overflow-y-auto max-h-[700px] ">
+      <ScrollArea className="flex max-h-[700px] flex-col overflow-y-auto">
         <div className="space-y-4">
-          <div className="flex flex-row space-x-2 ">
+          <div className="flex flex-row space-x-2">
             <BeakerIcon className="h-6 w-6" />
             <h3 className="text-md font-semibold">Original Prompt</h3>
           </div>
@@ -171,7 +171,7 @@ export const NewExperimentPopover = () => {
                   original: variable.original,
                   heliconeTag: variable.heliconeTag,
                   value: variable.value,
-                }))
+                })),
               )
             }
             onPromptChange={handlePromptChange}

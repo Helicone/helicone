@@ -80,7 +80,7 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
               filterType: layoutPage,
               filters: updatedFilters,
             },
-          }
+          },
         );
         if (error) {
           setNotification(error, "error");
@@ -105,7 +105,7 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
               filters: [saveFilter],
               filterType: layoutPage,
             },
-          }
+          },
         );
         if (createFilterError) {
           setNotification("Error creating filter", "error");
@@ -139,7 +139,7 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
   };
 
   const renderFilterRow = (filter: UIFilterRow) => (
-    <div className="flex flex-row gap-2 items-center">
+    <div className="flex flex-row items-center gap-2">
       <FunnelIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
       <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
         {filterMap[filter.filterMapIdx].label}
@@ -164,7 +164,7 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
         variant="ghost"
       >
         <SaveIcon className="h-4 w-4 text-slate-500 dark:text-slate-400" />
-        <p className="text-sm font-medium text-slate-700 dark:text-slate-300 hidden sm:block text-xs">
+        <p className="hidden text-sm text-xs font-medium text-slate-700 dark:text-slate-300 sm:block">
           Save as...
         </p>
       </Button>
@@ -172,15 +172,15 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
         open={isSaveFiltersModalOpen}
         setOpen={() => setIsSaveFiltersModalOpen(false)}
       >
-        <div className="flex flex-col gap-8 inset-0 bg-opacity-50 w-full sm:w-[450px] max-w-[450px] h-full rounded-3xl">
-          <h1 className="col-span-4 font-semibold text-xl text-gray-900 dark:text-gray-100">
+        <div className="inset-0 flex h-full w-full max-w-[450px] flex-col gap-8 rounded-3xl bg-opacity-50 sm:w-[450px]">
+          <h1 className="col-span-4 text-xl font-semibold text-gray-900 dark:text-gray-100">
             Save Filter
           </h1>
 
           <div className="flex flex-col space-y-2">
             <label
               htmlFor="alert-metric"
-              className="text-gray-900 dark:text-gray-100 text-xs font-semibold"
+              className="text-xs font-semibold text-gray-900 dark:text-gray-100"
             >
               Filter Name
             </label>
@@ -197,7 +197,7 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
             <button
               type="button"
               onClick={() => setIsSaveFiltersModalOpen(false)}
-              className="flex flex-row items-center rounded-md bg-white dark:bg-black px-4 py-2 text-sm font-semibold border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm hover:text-gray-700 dark:hover:text-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+              className="flex flex-row items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500 dark:border-gray-700 dark:bg-black dark:text-gray-100 dark:hover:bg-gray-900 dark:hover:text-gray-300"
             >
               Close
             </button>
@@ -206,7 +206,7 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
               onClick={() => {
                 onSaveFilter(filterName);
               }}
-              className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="flex items-center rounded-md bg-black px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:bg-white dark:text-black dark:hover:bg-gray-200"
             >
               Create New Filter
             </button>

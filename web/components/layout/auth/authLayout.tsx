@@ -51,7 +51,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const { data: alertBanners } = $JAWN_API.useQuery(
     "get",
     "/v1/alert-banner",
-    {}
+    {},
   );
   const orgContext = useOrg();
 
@@ -100,7 +100,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
         <DemoModal />
 
         <Row className="flex-col md:flex-row">
-          <div className=" w-full md:w-min ">
+          <div className="w-full md:w-min">
             <Sidebar
               sidebarRef={sidebarRef}
               changelog={
@@ -124,7 +124,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
             />
           </div>
           <div
-            className="flex-grow max-w-full overflow-hidden relative"
+            className="relative max-w-full flex-grow overflow-hidden"
             key={orgContext?.currentOrg?.id}
           >
             <MainContent banner={banner} pathname={pathname}>

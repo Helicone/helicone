@@ -25,7 +25,7 @@ const ResizeTextArea = (props: ResizeTextAreaProps) => {
       value={value}
       placeholder={placeholder}
       onChange={onChange}
-      className="text-md bg-transparent text-gray-900 dark:text-gray-100 w-full h-full flex-1 p-3 rounded-md whitespace-pre-wrap border-gray-300 dark:border-gray-700 resize-none"
+      className="text-md h-full w-full flex-1 resize-none whitespace-pre-wrap rounded-md border-gray-300 bg-transparent p-3 text-gray-900 dark:border-gray-700 dark:text-gray-100"
       style={{
         resize: "none",
         overflow: "hidden",

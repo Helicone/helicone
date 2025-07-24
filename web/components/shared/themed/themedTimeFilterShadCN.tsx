@@ -55,7 +55,7 @@ export function ThemedTimeFilterShadCN({
         initialDateRange || {
           from: new Date(),
           to: new Date(),
-        }
+        },
       );
     }
   }, [initialDateRange]);
@@ -109,7 +109,7 @@ export function ThemedTimeFilterShadCN({
 
       const daysDifference = differenceInDays(
         newDate.from > newDate.to ? newDate.from : newDate.to,
-        newDate.from > newDate.to ? newDate.to : newDate.from
+        newDate.from > newDate.to ? newDate.to : newDate.from,
       );
 
       if (daysDifference > 31 && !hasAccess) {
@@ -146,13 +146,13 @@ export function ThemedTimeFilterShadCN({
       // Same day
       return `${format(from, "LLL d, yyyy")} ${format(
         from,
-        "HH:mm"
+        "HH:mm",
       )} - ${format(to, "HH:mm")}`;
     } else {
       // Different days
       return `${format(from, "LLL d, yyyy HH:mm")} - ${format(
         to,
-        "LLL d, yyyy HH:mm"
+        "LLL d, yyyy HH:mm",
       )}`;
     }
   };
@@ -165,19 +165,21 @@ export function ThemedTimeFilterShadCN({
   const [date1Value, setDate1Value] = useState<string | undefined>(
     date?.from && isValidDate(date.from)
       ? format(date.from, "yyyy-MM-dd")
-      : undefined
+      : undefined,
   );
   const [date2Value, setDate2Value] = useState<string | undefined>(
-    date?.to && isValidDate(date.to) ? format(date.to, "yyyy-MM-dd") : undefined
+    date?.to && isValidDate(date.to)
+      ? format(date.to, "yyyy-MM-dd")
+      : undefined,
   );
 
   const [time1Value, setTime1Value] = useState<string | undefined>(
     date?.from && isValidDate(date.from)
       ? format(date.from, "HH:mm")
-      : undefined
+      : undefined,
   );
   const [time2Value, setTime2Value] = useState<string | undefined>(
-    date?.to && isValidDate(date.to) ? format(date.to, "HH:mm") : undefined
+    date?.to && isValidDate(date.to) ? format(date.to, "HH:mm") : undefined,
   );
 
   const [isDateTimeSet, setIsDateTimeSet] = useState(false);
@@ -205,9 +207,9 @@ export function ThemedTimeFilterShadCN({
             id="date"
             variant={"outline"}
             className={cn(
-              " dark:text-slate-400",
+              "dark:text-slate-400",
               "justify-start text-left font-normal",
-              isInvertedRange ? "border-amber-500" : ""
+              isInvertedRange ? "border-amber-500" : "",
             )}
             size="md_sleek"
           >
@@ -228,12 +230,12 @@ export function ThemedTimeFilterShadCN({
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="w-auto p-4 flex flex-col gap-2"
+          className="flex w-auto flex-col gap-2 p-4"
           align="start"
         >
           {/* Predefined ranges */}
-          <span className="font-semibold text-sm pt-4">Quick Select:</span>
-          <div className="grid gap-2 grid-cols-6">
+          <span className="pt-4 text-sm font-semibold">Quick Select:</span>
+          <div className="grid grid-cols-6 gap-2">
             {predefinedRanges.map((range) => (
               <Button
                 key={range.label}
@@ -247,15 +249,15 @@ export function ThemedTimeFilterShadCN({
           </div>
 
           {/* Custom time range selector */}
-          <span className="font-semibold text-sm  pt-4">Custom Range:</span>
-          <div className="grid gap-2 ">
+          <span className="pt-4 text-sm font-semibold">Custom Range:</span>
+          <div className="grid gap-2">
             <div className="flex items-center gap-2">
               <Input
                 type="number"
                 min="1"
                 value={customNumber}
                 onChange={(e) => setCustomNumber(parseInt(e.target.value) || 1)}
-                className="w-16 px-2 py-1 border rounded text-xs"
+                className="w-16 rounded border px-2 py-1 text-xs"
               />
               <Select
                 value={customUnit}
@@ -288,7 +290,7 @@ export function ThemedTimeFilterShadCN({
             </div>
           </div>
 
-          <span className="font-semibold text-sm pt-4">Date Picker:</span>
+          <span className="pt-4 text-sm font-semibold">Date Picker:</span>
           <div className="grid gap-4">
             <Calendar
               initialFocus
@@ -304,7 +306,7 @@ export function ThemedTimeFilterShadCN({
                           newDate.from.getMonth(),
                           newDate.from.getDate(),
                           date?.from?.getHours() ?? 0,
-                          date?.from?.getMinutes() ?? 0
+                          date?.from?.getMinutes() ?? 0,
                         )
                       : date?.from,
                     to: newDate?.to
@@ -313,7 +315,7 @@ export function ThemedTimeFilterShadCN({
                           newDate.to.getMonth(),
                           newDate.to.getDate(),
                           date?.to?.getHours() ?? 23,
-                          date?.to?.getMinutes() ?? 59
+                          date?.to?.getMinutes() ?? 59,
                         )
                       : date?.to,
                   };
@@ -334,7 +336,7 @@ export function ThemedTimeFilterShadCN({
               <div className="flex justify-between gap-2">
                 <Input
                   type="date"
-                  className="text-xs w-min ml-auto border-gray-300 rounded-md"
+                  className="ml-auto w-min rounded-md border-gray-300 text-xs"
                   value={date1Value}
                   onChange={(e) => {
                     setDate1Value(e.target.value);
@@ -346,7 +348,7 @@ export function ThemedTimeFilterShadCN({
                 />
                 <Input
                   type="time"
-                  className="text-xs w-min ml-auto border-gray-300 rounded-md"
+                  className="ml-auto w-min rounded-md border-gray-300 text-xs"
                   value={time1Value}
                   onChange={(e) => {
                     setTime1Value(e.target.value);
@@ -365,7 +367,7 @@ export function ThemedTimeFilterShadCN({
               <div className="flex justify-between gap-2">
                 <Input
                   type="date"
-                  className="text-xs w-min ml-auto border-gray-300 rounded-md"
+                  className="ml-auto w-min rounded-md border-gray-300 text-xs"
                   value={date2Value}
                   onChange={(e) => {
                     setDate2Value(e.target.value);
@@ -377,7 +379,7 @@ export function ThemedTimeFilterShadCN({
                 />
                 <Input
                   type="time"
-                  className="text-xs w-min ml-auto border-gray-300 rounded-md"
+                  className="ml-auto w-min rounded-md border-gray-300 text-xs"
                   value={time2Value}
                   onChange={(e) => {
                     setTime2Value(e.target.value);

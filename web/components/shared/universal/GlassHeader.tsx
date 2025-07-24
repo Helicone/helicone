@@ -9,7 +9,7 @@ export default function GlassHeader({
 }) {
   return (
     <header
-      className={`z-10 min-w-full sticky top-0 glass flex flex-row gap-2 items-center justify-between ${className}`}
+      className={`glass sticky top-0 z-10 flex min-w-full flex-row items-center justify-between gap-2 ${className}`}
     >
       {children}
     </header>

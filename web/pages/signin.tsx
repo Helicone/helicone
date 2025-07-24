@@ -33,7 +33,7 @@ const SignIn = ({
     // Prevent infinite loops by limiting redirects
     if (redirectCount >= 3) {
       console.error(
-        "Too many redirects detected. Stopping to prevent infinite loop."
+        "Too many redirects detected. Stopping to prevent infinite loop.",
       );
       return;
     }
@@ -90,7 +90,7 @@ const SignIn = ({
     >
       <div>
         {heliconeAuthClient.user?.id ? (
-          <div className="flex items-center justify-center h-screen flex-col">
+          <div className="flex h-screen flex-col items-center justify-center">
             <LoadingAnimation />
             <h1 className="text-4xl font-semibold">Getting your dashboard</h1>
           </div>
@@ -143,7 +143,7 @@ const SignIn = ({
 };
 
 export const getServerSideProps = async (
-  context: GetServerSidePropsContext
+  context: GetServerSidePropsContext,
 ) => {
   if (env("NEXT_PUBLIC_IS_ON_PREM") === "true") {
     return {

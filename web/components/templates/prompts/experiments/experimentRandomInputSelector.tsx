@@ -17,12 +17,12 @@ interface ExperimentInputSelectorProps {
       inputRecordId: string;
       inputs: Record<string, string>;
       autoInputs: any[];
-    }[]
+    }[],
   ) => void;
 }
 
 export const ExperimentRandomInputSelector = (
-  props: ExperimentInputSelectorProps
+  props: ExperimentInputSelectorProps,
 ) => {
   const { open, setOpen, promptVersionId, onSuccess } = props;
   const jawn = useJawnClient();
@@ -50,7 +50,7 @@ export const ExperimentRandomInputSelector = (
             limit: 100,
             random: true,
           },
-        }
+        },
       );
       return res.data?.data ?? [];
     },
@@ -63,7 +63,7 @@ export const ExperimentRandomInputSelector = (
 
     // Shuffle the records
     const shuffled = [...randomInputRecordsData].sort(
-      () => Math.random() - 0.5
+      () => Math.random() - 0.5,
     );
 
     // Select the number of inputs specified by numberInput
@@ -80,23 +80,23 @@ export const ExperimentRandomInputSelector = (
 
   return (
     <ThemedDrawer open={open} setOpen={setOpen}>
-      <div className="h-full flex flex-col space-y-4 justify-between w-full">
-        <div className="flex flex-col w-full">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-xl">
+      <div className="flex h-full w-full flex-col justify-between space-y-4">
+        <div className="flex w-full flex-col">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-semibold">
               Randomized Inputs ({selectedRandomInputs.length})
             </h2>
           </div>
-          <p className="text-gray-500 text-sm pb-4">
+          <p className="pb-4 text-sm text-gray-500">
             Select the inputs you want to include in the dataset.
           </p>
 
-          <div className="flex items-center mb-4">
+          <div className="mb-4 flex items-center">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setNumberInput((prev) => Math.max(prev - 1, 1))}
-              className="border p-2 mr-2"
+              className="mr-2 border p-2"
             >
               -
             </Button>
@@ -107,13 +107,13 @@ export const ExperimentRandomInputSelector = (
                 const value = e.target.value.replace(/^0+/, ""); // Remove leading zeros
                 setNumberInput(Number(value) || 1);
               }}
-              className="border p-2 mr-2 w-10 h-full"
+              className="mr-2 h-full w-10 border p-2"
             />
             <Button
               variant="outline"
               size="sm"
               onClick={() => setNumberInput((prev) => prev + 1)}
-              className="border p-2 mr-2"
+              className="mr-2 border p-2"
             >
               +
             </Button>
@@ -122,13 +122,13 @@ export const ExperimentRandomInputSelector = (
             </span>
           </div>
 
-          <ul className="flex flex-col items-center space-y-4 w-full pt-4 overflow-y-auto">
+          <ul className="flex w-full flex-col items-center space-y-4 overflow-y-auto pt-4">
             {isLoading && <div>Loading inputs...</div>}
             {isError && <div>Error loading inputs.</div>}
             {!isLoading &&
               !isError &&
               selectedRandomInputs.map((request) => (
-                <li key={request.id} className="w-full flex items-start">
+                <li key={request.id} className="flex w-full items-start">
                   <PromptPropertyCard
                     autoInputs={request.autoInputs}
                     isSelected={true}
@@ -141,7 +141,7 @@ export const ExperimentRandomInputSelector = (
           </ul>
         </div>
 
-        <div className="flex justify-end space-x-4 sticky bottom-0 py-4 bg-white dark:bg-black pb-20">
+        <div className="sticky bottom-0 flex justify-end space-x-4 bg-white py-4 pb-20 dark:bg-black">
           <Button
             variant={"secondary"}
             size={"sm"}
@@ -159,7 +159,7 @@ export const ExperimentRandomInputSelector = (
                   inputRecordId: request.id,
                   inputs: request.inputs,
                   autoInputs: request.autoInputs,
-                }))
+                })),
               );
 
               if (onSuccess) {

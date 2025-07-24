@@ -57,7 +57,7 @@ const RequestLogTable = (props: RequestLogTableProps) => {
   const {} = props;
 
   return (
-    <div className="border border-gray-300 p-2 rounded-lg mt-2 mb-8">
+    <div className="mb-8 mt-2 rounded-lg border border-gray-300 p-2">
       <Table>
         <TableHead>
           <TableRow className="border-b border-gray-300">

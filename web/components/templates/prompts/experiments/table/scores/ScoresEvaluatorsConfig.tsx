@@ -54,7 +54,7 @@ const ScoresEvaluatorsConfig = memo(
     const [selectOpen, setSelectOpen] = useState(false);
 
     return (
-      <Row className={cn("gap-2 items-center w-full", "mx-6")}>
+      <Row className={cn("w-full items-center gap-2", "mx-6")}>
         <Select
           open={selectOpen}
           onOpenChange={setSelectOpen}
@@ -69,7 +69,7 @@ const ScoresEvaluatorsConfig = memo(
           }}
         >
           <SelectTrigger
-            className="w-[200px] relative"
+            className="relative w-[200px]"
             data-onboarding-step={
               ONBOARDING_STEPS.EXPERIMENTS_CLICK_ADD_EVAL.stepNumber
             }
@@ -91,10 +91,10 @@ const ScoresEvaluatorsConfig = memo(
                 allEvaluators.data.data.filter(
                   (evaluator) =>
                     !evaluators?.data?.data?.filter(
-                      (e) => e.id === evaluator.id
-                    ).length
+                      (e) => e.id === evaluator.id,
+                    ).length,
                 )?.length > 0 && (
-                  <SelectLabel className="text-xs font-medium text-slate-500 px-2 py-1">
+                  <SelectLabel className="px-2 py-1 text-xs font-medium text-slate-500">
                     Existing Evaluators
                   </SelectLabel>
                 )}
@@ -103,8 +103,8 @@ const ScoresEvaluatorsConfig = memo(
                 ?.filter(
                   (evaluator) =>
                     !evaluators?.data?.data?.filter(
-                      (e) => e.id === evaluator.id
-                    ).length
+                      (e) => e.id === evaluator.id,
+                    ).length,
                 )
                 .map((evaluator, i) => (
                   <SelectItemRawNotText
@@ -121,19 +121,19 @@ const ScoresEvaluatorsConfig = memo(
         </Select>
 
         <ScrollArea className="flex-1">
-          <div className="flex gap-2 justify-start items-start">
+          <div className="flex items-start justify-start gap-2">
             {evaluators?.data?.data?.map((evaluator, index) => {
               return (
                 <Badge
                   key={`evaluator-${evaluator.id}-${index}`}
                   variant="helicone"
-                  className="gap-1 text-xs text-nowrap whitespace-nowrap items-center cursor-pointer"
+                  className="cursor-pointer items-center gap-1 whitespace-nowrap text-nowrap text-xs"
                   onClick={() => {
                     removeEvaluator.mutate(evaluator.id);
                   }}
                 >
                   <XIcon
-                    className="w-3 h-3 cursor-pointer"
+                    className="h-3 w-3 cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation();
                       removeEvaluator.mutate(evaluator.id);
@@ -151,27 +151,27 @@ const ScoresEvaluatorsConfig = memo(
             {shouldRunEvaluators.data && (
               <Badge
                 variant="helicone"
-                className="gap-2 bg-yellow-50 dark:bg-yellow-950 border-yellow-200 dark:border-yellow-800 text-yellow-500 text-xs"
+                className="gap-2 border-yellow-200 bg-yellow-50 text-xs text-yellow-500 dark:border-yellow-800 dark:bg-yellow-950"
               >
-                <TriangleAlertIcon className="w-3 h-3" />
+                <TriangleAlertIcon className="h-3 w-3" />
                 <span>For latest scores, re-run evaluators</span>
               </Badge>
             )}
             {showSuccess && (
               <Badge
                 variant="helicone"
-                className="gap-2 bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 text-green-500 text-xs"
+                className="gap-2 border-green-200 bg-green-50 text-xs text-green-500 dark:border-green-800 dark:bg-green-950"
               >
-                <CheckIcon className="w-3 h-3" />
+                <CheckIcon className="h-3 w-3" />
                 <span>Evaluators ran successfully</span>
               </Badge>
             )}
             {showError && (
               <Badge
                 variant="helicone"
-                className="gap-2 bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800 text-red-500 text-xs"
+                className="gap-2 border-red-200 bg-red-50 text-xs text-red-500 dark:border-red-800 dark:bg-red-950"
               >
-                <TriangleAlertIcon className="w-3 h-3" />
+                <TriangleAlertIcon className="h-3 w-3" />
                 <span>Error running evaluators</span>
               </Badge>
             )}
@@ -184,14 +184,14 @@ const ScoresEvaluatorsConfig = memo(
             >
               {runEvaluators.isPending ? "Running..." : "Run Evaluators"}
               {runEvaluators.isPending && (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
               )}
             </Button>
           </div>
         </Col>
       </Row>
     );
-  }
+  },
 );
 
 ScoresEvaluatorsConfig.displayName = "ScoresEvaluatorsConfig";

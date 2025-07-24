@@ -66,7 +66,7 @@ const Notification = () => {
       case "info":
         return (
           <InformationCircleIcon
-            className="h-5 w-5 text-yelow-400"
+            className="text-yelow-400 h-5 w-5"
             aria-hidden="true"
           />
         );
@@ -97,15 +97,15 @@ const Notification = () => {
       leave="transition-opacity duration-150"
       leaveFrom="opacity-100"
       leaveTo="opacity-0"
-      className="pointer-events-none fixed inset-x-0 bottom-0 pb-8 pt-0 sm:pb-0 sm:top-0 sm:pt-6 z-[1000]"
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-[1000] pb-8 pt-0 sm:top-0 sm:pb-0 sm:pt-6"
     >
-      <div className="pointer-events-none fixed inset-x-0 bottom-0 pb-8 pt-0 sm:pb-0 sm:top-0 sm:pt-6 z-50">
-        <div className="mx-auto w-full sm:max-w-[33vw] px-2 sm:px-6 lg:px-8">
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 pb-8 pt-0 sm:top-0 sm:pb-0 sm:pt-6">
+        <div className="mx-auto w-full px-2 sm:max-w-[33vw] sm:px-6 lg:px-8">
           <div
             className={clsx(
               variantBgColor(),
               variantBorderColor(),
-              "rounded-lg px-2 py-1 shadow-xl border"
+              "rounded-lg border px-2 py-1 shadow-xl",
             )}
           >
             <div className="flex flex-wrap items-center justify-between">
@@ -114,7 +114,7 @@ const Notification = () => {
                 <p
                   className={clsx(
                     variantTextColor(),
-                    "ml-3 font-medium text-sm py-1"
+                    "ml-3 py-1 text-sm font-medium",
                   )}
                 >
                   <span>{title}</span>
@@ -129,7 +129,7 @@ const Notification = () => {
                     className={clsx(
                       variantBgColor(),
                       variantTextColor(),
-                      "inline-flex rounded-md p-1.5 hover:cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-green-50"
+                      "inline-flex rounded-md p-1.5 hover:cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-green-50",
                     )}
                   >
                     <span className="sr-only">Dismiss</span>

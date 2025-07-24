@@ -20,7 +20,7 @@ export async function getRequests(
   filter: FilterNode,
   offset: number,
   limit: number,
-  sort: SortLeafRequest
+  sort: SortLeafRequest,
 ): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
@@ -94,7 +94,7 @@ export async function getRequests(
 
 export async function getRequestsDateRange(
   orgId: string,
-  filter: FilterNode
+  filter: FilterNode,
 ): Promise<Result<{ min: Date; max: Date }, string>> {
   const builtFilter = await buildFilterWithAuth({
     org_id: orgId,
@@ -111,7 +111,7 @@ export async function getRequestsDateRange(
 
   const res = await dbExecute<{ min: Date; max: Date }>(
     query,
-    builtFilter.argsAcc
+    builtFilter.argsAcc,
   );
 
   return resultMap(res, (data) => {
@@ -124,7 +124,7 @@ export async function getRequestsDateRange(
 
 export async function getRequestCount(
   org_id: string,
-  filter: FilterNode
+  filter: FilterNode,
 ): Promise<Result<number, string>> {
   const builtFilter = await buildFilterWithAuth({
     org_id,
@@ -144,7 +144,7 @@ export async function getRequestCount(
   `;
   const { data, error } = await dbExecute<{ count: number }>(
     query,
-    builtFilter.argsAcc
+    builtFilter.argsAcc,
   );
   if (error !== null) {
     return { data: null, error: error };
@@ -155,7 +155,7 @@ export async function getRequestCount(
 export async function getRequestCountClickhouse(
   org_id: string,
   filter: FilterNode,
-  isCached = false
+  isCached = false,
 ): Promise<Result<number, string>> {
   const builtFilter = await buildFilterWithAuthClickHouse({
     org_id,
@@ -172,7 +172,7 @@ ${isCached ? "AND cache_enabled = 1" : ""}
 `;
   const { data, error } = await dbQueryClickhouse<{ count: number }>(
     query,
-    builtFilter.argsAcc
+    builtFilter.argsAcc,
   );
   if (error !== null) {
     return { data: null, error: error };

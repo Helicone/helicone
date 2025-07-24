@@ -28,7 +28,7 @@ export const INITIAL_COLUMNS: ColumnDef<EvalMetric>[] = [
     accessorKey: "name",
     header: "Name",
     cell: (info) => (
-      <span className="text-gray-900 dark:text-gray-100 font-medium">
+      <span className="font-medium text-gray-900 dark:text-gray-100">
         {info.getValue()
           ? `${info.getValue()}`.replaceAll("-hcone-bool", " ")
           : "No Eval Name"}

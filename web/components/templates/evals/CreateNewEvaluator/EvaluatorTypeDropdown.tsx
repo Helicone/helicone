@@ -83,11 +83,11 @@ export const EvaluatorTypeDropdown: React.FC<{
       <TabsList>
         <TabsTrigger value="llm-as-a-judge">LLM-as-a-judge</TabsTrigger>
         <TabsTrigger value="python">
-          Python <span className="text-xs text-gray-500 px-3"></span>
+          Python <span className="px-3 text-xs text-gray-500"></span>
         </TabsTrigger>
         <TabsTrigger value="typescript">LastMile AutoEval </TabsTrigger>
         <TabsTrigger value="typescript" disabled>
-          Typescript <span className="text-xs text-gray-500 px-3">(soon)</span>
+          Typescript <span className="px-3 text-xs text-gray-500">(soon)</span>
         </TabsTrigger>
       </TabsList>
     </>

@@ -49,10 +49,10 @@ const CreateProviderKeyModal = (props: CreateProviderKeyModalProps) => {
     setIsLoading(true);
 
     const keyName = event.currentTarget.elements.namedItem(
-      "key-name"
+      "key-name",
     ) as HTMLInputElement;
     const providerKey = event.currentTarget.elements.namedItem(
-      "provider-key"
+      "provider-key",
     ) as HTMLInputElement;
 
     if ((!keyName || keyName.value === "") && variant !== "portal") {
@@ -69,7 +69,7 @@ const CreateProviderKeyModal = (props: CreateProviderKeyModalProps) => {
     if (currentUserRole === "member") {
       setNotification(
         "Members are not allowed to create provider keys",
-        "error"
+        "error",
       );
       setIsLoading(false);
       return;
@@ -87,7 +87,7 @@ const CreateProviderKeyModal = (props: CreateProviderKeyModalProps) => {
       }),
     })
       .then(
-        (res) => res.json() as Promise<Result<DecryptedProviderKey, string>>
+        (res) => res.json() as Promise<Result<DecryptedProviderKey, string>>,
       )
       .then(({ data }) => {
         if (data !== null) {
@@ -97,7 +97,7 @@ const CreateProviderKeyModal = (props: CreateProviderKeyModalProps) => {
         } else {
           setNotification(
             "Failed to create provider key, you are only allowed 1 provider key",
-            "error"
+            "error",
           );
         }
       })
@@ -113,7 +113,7 @@ const CreateProviderKeyModal = (props: CreateProviderKeyModalProps) => {
         action="#"
         method="POST"
         onSubmit={handleSubmitHandler}
-        className="flex flex-col space-y-8 w-[400px] text-gray-900 dark:text-gray-100"
+        className="flex w-[400px] flex-col space-y-8 text-gray-900 dark:text-gray-100"
       >
         <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
           Create Provider Key
@@ -141,11 +141,11 @@ const CreateProviderKeyModal = (props: CreateProviderKeyModalProps) => {
               }
             >
               <InformationCircleIcon
-                className={clsx("w-4 h-4 text-gray-500")}
+                className={clsx("h-4 w-4 text-gray-500")}
               />
             </Tooltip>
           </label>
-          <div className="text-gray-500 text-xs italic">
+          <div className="text-xs italic text-gray-500">
             This will be placed in the{" "}
             <code className="not-italic">authorization</code> header with the{" "}
             <code className="not-italic">Bearer</code> prefix.
@@ -171,16 +171,16 @@ const CreateProviderKeyModal = (props: CreateProviderKeyModalProps) => {
           <button
             onClick={() => setOpen(false)}
             type="button"
-            className="flex flex-row items-center rounded-md bg-white dark:bg-black px-4 py-2 text-sm font-semibold border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm hover:text-gray-700 dark:hover:text-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+            className="flex flex-row items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500 dark:border-gray-700 dark:bg-black dark:text-gray-100 dark:hover:bg-gray-900 dark:hover:text-gray-300"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="flex items-center rounded-md bg-black px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:bg-white dark:text-black dark:hover:bg-gray-200"
           >
             {isLoading && (
-              <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
+              <ArrowPathIcon className="mr-1.5 h-4 w-4 animate-spin" />
             )}
             Create Provider Key
           </button>

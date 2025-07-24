@@ -11,8 +11,19 @@ import {
 } from "@/services/hooks/organizations";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import useNotification from "../../shared/notification/useNotification";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { Check, ChevronsUpDown, X } from "lucide-react";
 import { clsx } from "../../shared/clsx";
 
@@ -39,7 +50,7 @@ const ReportsPage = () => {
   const { setNotification } = useNotification();
 
   const { data, isLoading, refetch } = useGetOrgMembers(
-    orgContext?.currentOrg?.id || ""
+    orgContext?.currentOrg?.id || "",
   );
 
   const members: {
@@ -60,23 +71,23 @@ const ReportsPage = () => {
   }[] = [...(slackChannelsData?.data || [])];
 
   const [reportEnabled, setReportEnabled] = useState<boolean>(
-    report?.active ? report?.active : false
+    report?.active ? report?.active : false,
   );
   const [selectedEmails, setSelectedEmails] = useState<string[]>(
-    (report?.settings?.emails as string[]) || []
+    (report?.settings?.emails as string[]) || [],
   );
   const [selectedSlackChannels, setSelectedSlackChannels] = useState<string[]>(
-    (report?.settings?.slack_channels as string[]) || []
+    (report?.settings?.slack_channels as string[]) || [],
   );
 
   const [showEmails, setShowEmails] = useState<boolean>(
-    report?.active ? (report?.settings?.emails as string[]).length > 0 : true
+    report?.active ? (report?.settings?.emails as string[]).length > 0 : true,
   );
 
   const [showSlackChannels, setShowSlackChannels] = useState<boolean>(
     report?.active
       ? (report?.settings?.slack_channels as string[]).length > 0
-      : false
+      : false,
   );
 
   useEffect(() => {
@@ -84,18 +95,18 @@ const ReportsPage = () => {
       setShowEmails(
         report?.active
           ? (report?.settings?.emails as string[]).length > 0
-          : true
+          : true,
       );
       setShowSlackChannels(
         report?.active
           ? (report?.settings?.slack_channels as string[]).length > 0
-          : false
+          : false,
       );
       setSelectedEmails(
-        report?.active ? (report?.settings?.emails as string[]) : []
+        report?.active ? (report?.settings?.emails as string[]) : [],
       );
       setSelectedSlackChannels(
-        report?.active ? (report?.settings?.slack_channels as string[]) : []
+        report?.active ? (report?.settings?.slack_channels as string[]) : [],
       );
       setReportEnabled(report?.active ?? false);
     }
@@ -138,7 +149,7 @@ const ReportsPage = () => {
     ) {
       setNotification(
         "Please select at least one email or slack channel",
-        "error"
+        "error",
       );
       return;
     }
@@ -157,8 +168,8 @@ const ReportsPage = () => {
             slack_channels: showSlackChannels ? selectedSlackChannels : [],
           }
         : report?.settings
-        ? report?.settings
-        : {},
+          ? report?.settings
+          : {},
       active: reportEnabled,
     };
 
@@ -197,9 +208,9 @@ const ReportsPage = () => {
 
   return (
     <div className="max-w-2xl">
-      <form onSubmit={handleCustomizeReports} className="w-full h-full">
-        <div className="col-span-4 flex flex-row justify-between items-center">
-          <h1 className="font-semibold text-xl text-gray-900 dark:text-gray-100">
+      <form onSubmit={handleCustomizeReports} className="h-full w-full">
+        <div className="col-span-4 flex flex-row items-center justify-between">
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
             Reports
           </h1>
 
@@ -214,10 +225,8 @@ const ReportsPage = () => {
           <strong>10am UTC</strong>.
         </small>
         {reportEnabled && (
-          <div className="col-span-4 w-full p-6 bg-gray-100 rounded-md space-y-1.5">
-            <h3 className="font-semibold">
-              Notify By
-            </h3>
+          <div className="col-span-4 w-full space-y-1.5 rounded-md bg-gray-100 p-6">
+            <h3 className="font-semibold">Notify By</h3>
             <div className="col-span-4 w-full space-y-1.5 text-sm">
               <div className="flex items-center justify-between">
                 <label htmlFor="alert-emails" className="text-gray-500">
@@ -243,7 +252,7 @@ const ReportsPage = () => {
                       >
                         <span className="truncate">
                           {selectedEmails.length > 0
-                            ? `${selectedEmails.length} email${selectedEmails.length > 1 ? 's' : ''} selected`
+                            ? `${selectedEmails.length} email${selectedEmails.length > 1 ? "s" : ""} selected`
                             : "Select emails to send alerts to"}
                         </span>
                         <ChevronsUpDown className="ml-2 h-3.5 w-3.5 shrink-0 opacity-50" />
@@ -263,7 +272,7 @@ const ReportsPage = () => {
                                   setSelectedEmails((prev) =>
                                     prev.includes(email)
                                       ? prev.filter((e) => e !== email)
-                                      : [...prev, email]
+                                      : [...prev, email],
                                   );
                                 }}
                                 value={member.email}
@@ -273,7 +282,7 @@ const ReportsPage = () => {
                                     "mr-2 h-4 w-4",
                                     selectedEmails.includes(member.email)
                                       ? "opacity-100"
-                                      : "opacity-0"
+                                      : "opacity-0",
                                   )}
                                 />
                                 {member.email}
@@ -289,17 +298,19 @@ const ReportsPage = () => {
                       {selectedEmails.map((email) => (
                         <div
                           key={email}
-                          className="flex items-center gap-1 bg-muted px-2 py-1 rounded-md text-sm"
+                          className="flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-sm"
                         >
-                          <span className="truncate max-w-[200px]">{email}</span>
+                          <span className="max-w-[200px] truncate">
+                            {email}
+                          </span>
                           <button
                             type="button"
                             onClick={() =>
                               setSelectedEmails((prev) =>
-                                prev.filter((e) => e !== email)
+                                prev.filter((e) => e !== email),
                               )
                             }
-                            className="ml-1 hover:bg-muted-foreground/20 rounded-sm"
+                            className="ml-1 rounded-sm hover:bg-muted-foreground/20"
                           >
                             <X className="h-3 w-3" />
                           </button>
@@ -337,7 +348,7 @@ const ReportsPage = () => {
                           >
                             <span className="truncate">
                               {selectedSlackChannels.length > 0
-                                ? `${selectedSlackChannels.length} channel${selectedSlackChannels.length > 1 ? 's' : ''} selected`
+                                ? `${selectedSlackChannels.length} channel${selectedSlackChannels.length > 1 ? "s" : ""} selected`
                                 : "Select slack channels to send alerts to"}
                             </span>
                             <ChevronsUpDown className="ml-2 h-3.5 w-3.5 shrink-0 opacity-50" />
@@ -357,7 +368,7 @@ const ReportsPage = () => {
                                       setSelectedSlackChannels((prev) =>
                                         prev.includes(channelId)
                                           ? prev.filter((c) => c !== channelId)
-                                          : [...prev, channelId]
+                                          : [...prev, channelId],
                                       );
                                     }}
                                     value={channel.name}
@@ -365,9 +376,11 @@ const ReportsPage = () => {
                                     <Check
                                       className={clsx(
                                         "mr-2 h-4 w-4",
-                                        selectedSlackChannels.includes(channel.id)
+                                        selectedSlackChannels.includes(
+                                          channel.id,
+                                        )
                                           ? "opacity-100"
-                                          : "opacity-0"
+                                          : "opacity-0",
                                       )}
                                     />
                                     {channel.name}
@@ -381,21 +394,25 @@ const ReportsPage = () => {
                       {selectedSlackChannels.length > 0 && (
                         <div className="flex flex-wrap gap-1">
                           {selectedSlackChannels.map((channelId) => {
-                            const channel = slackChannels.find(c => c.id === channelId);
+                            const channel = slackChannels.find(
+                              (c) => c.id === channelId,
+                            );
                             return channel ? (
                               <div
                                 key={channelId}
-                                className="flex items-center gap-1 bg-muted px-2 py-1 rounded-md text-sm"
+                                className="flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-sm"
                               >
-                                <span className="truncate max-w-[200px]">{channel.name}</span>
+                                <span className="max-w-[200px] truncate">
+                                  {channel.name}
+                                </span>
                                 <button
                                   type="button"
                                   onClick={() =>
                                     setSelectedSlackChannels((prev) =>
-                                      prev.filter((c) => c !== channelId)
+                                      prev.filter((c) => c !== channelId),
                                     )
                                   }
-                                  className="ml-1 hover:bg-muted-foreground/20 rounded-sm"
+                                  className="ml-1 rounded-sm hover:bg-muted-foreground/20"
                                 >
                                   <X className="h-3 w-3" />
                                 </button>
@@ -438,11 +455,7 @@ const ReportsPage = () => {
           >
             Cancel
           </Button>
-          <Button
-            type="submit"
-          >
-            Save
-          </Button>
+          <Button type="submit">Save</Button>
         </div>
       </form>
     </div>

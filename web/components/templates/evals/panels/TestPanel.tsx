@@ -9,8 +9,8 @@ export const TestPanel = () => {
   const { closeTestPanel } = useEvalPanelStore();
 
   return (
-    <Col className="h-full flex flex-col overflow-hidden bg-background">
-      <Row className="justify-between items-center px-4 py-2 border-b shrink-0 bg-muted/30">
+    <Col className="flex h-full flex-col overflow-hidden bg-background">
+      <Row className="shrink-0 items-center justify-between border-b bg-muted/30 px-4 py-2">
         <H3 className="text-lg font-medium">Test Evaluator</H3>
         <Button
           variant="ghost"
@@ -19,7 +19,7 @@ export const TestPanel = () => {
             closeTestPanel();
           }}
         >
-          <XIcon className="w-4 h-4" />
+          <XIcon className="h-4 w-4" />
         </Button>
       </Row>
       <div className="w-full flex-grow overflow-hidden">

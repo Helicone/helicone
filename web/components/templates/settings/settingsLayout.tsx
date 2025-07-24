@@ -86,8 +86,8 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
     <IslandContainer>
       <AuthHeader isWithinIsland={true} title={""} />
       {org?.currentOrg?.tier !== "demo" && (
-        <div className="flex flex-col space-y-8 items-start">
-          <div className="flex flex-col space-y-2 items-start">
+        <div className="flex flex-col items-start space-y-8">
+          <div className="flex flex-col items-start space-y-2">
             <Tabs
               defaultValue={
                 tabs.find((tab) => tab.href === currentPath)?.id || "general"
@@ -106,7 +106,7 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
                   >
                     <TabsTrigger
                       value={tab.id}
-                      className="px-4 py-2 text-sm gap-2"
+                      className="gap-2 px-4 py-2 text-sm"
                       asChild
                     >
                       <a href={tab.href} className="cursor-pointer">
@@ -120,7 +120,7 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
             </Tabs>
           </div>
 
-          <div className="flex-1 w-full">{children}</div>
+          <div className="w-full flex-1">{children}</div>
         </div>
       )}
     </IslandContainer>

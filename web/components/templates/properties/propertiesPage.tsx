@@ -40,7 +40,7 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
 
   const { hasAccess, freeLimit, canCreate } = useFeatureLimit(
     "properties",
-    properties.length
+    properties.length,
   );
 
   // Redirect to root if property not found
@@ -57,23 +57,23 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
 
   if (isPropertiesLoading) {
     return (
-      <div className="flex flex-col h-full min-h-screen bg-background dark:bg-sidebar-background">
+      <div className="flex h-full min-h-screen flex-col bg-background dark:bg-sidebar-background">
         <AuthHeader title="Properties" />
 
-        <div className="flex flex-col lg:flex-row flex-1 h-full bg-background dark:bg-sidebar-background">
-          <Card className="w-full lg:w-[350px] lg:min-w-[350px] lg:max-w-[350px] lg:flex-shrink-0 h-full rounded-none border-0 shadow-none bg-background dark:bg-sidebar-background">
+        <div className="flex h-full flex-1 flex-col bg-background dark:bg-sidebar-background lg:flex-row">
+          <Card className="h-full w-full rounded-none border-0 bg-background shadow-none dark:bg-sidebar-background lg:w-[350px] lg:min-w-[350px] lg:max-w-[350px] lg:flex-shrink-0">
             <CardContent className="p-0">
-              <div className="bg-background dark:bg-sidebar-background border-b border-border dark:border-sidebar-border">
-                <CardHeader className="py-3 px-4">
+              <div className="border-b border-border bg-background dark:border-sidebar-border dark:bg-sidebar-background">
+                <CardHeader className="px-4 py-3">
                   <H3>Your Properties</H3>
                 </CardHeader>
               </div>
 
               <ScrollArea className="h-full">
-                <div className="p-4 space-y-3">
+                <div className="space-y-3 p-4">
                   {Array.from({ length: 8 }).map((_, i) => (
                     <div key={i} className="flex items-center">
-                      <Skeleton className="h-4 w-4 mr-2 bg-slate-200 dark:bg-slate-700" />
+                      <Skeleton className="mr-2 h-4 w-4 bg-slate-200 dark:bg-slate-700" />
                       <Skeleton className="h-6 w-full bg-slate-200 dark:bg-slate-700" />
                     </div>
                   ))}
@@ -82,10 +82,10 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
             </CardContent>
           </Card>
 
-          <div className="w-full flex flex-col pt-2">
+          <div className="flex w-full flex-col pt-2">
             <Card className="rounded-none border-0 shadow-none">
               <CardContent className="flex flex-col items-center justify-center py-16">
-                <Skeleton className="h-8 w-48 mb-6 bg-slate-200 dark:bg-slate-700" />
+                <Skeleton className="mb-6 h-8 w-48 bg-slate-200 dark:bg-slate-700" />
                 <Skeleton className="h-4 w-64 bg-slate-200 dark:bg-slate-700" />
               </CardContent>
             </Card>
@@ -97,8 +97,8 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
 
   if (properties.length === 0) {
     return (
-      <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">
-        <div className="flex flex-1 h-full">
+      <div className="flex h-screen w-full flex-col bg-background dark:bg-sidebar-background">
+        <div className="flex h-full flex-1">
           <EmptyStateCard feature="properties" />
         </div>
       </div>
@@ -106,7 +106,7 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
   }
 
   return (
-    <div className="flex flex-col h-full min-h-screen bg-background dark:bg-sidebar-background">
+    <div className="flex h-full min-h-screen flex-col bg-background dark:bg-sidebar-background">
       <AuthHeader title="Properties" />
 
       {!canCreate && (
@@ -118,10 +118,10 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
         />
       )}
 
-      <div className="flex flex-col lg:flex-row h-full bg-background dark:bg-sidebar-background">
-        <Card className="w-full lg:w-[300px] lg:min-w-[300px] lg:max-w-[300px] lg:flex-shrink-0 h-full rounded-none border-0 border-r border-border dark:border-sidebar-border shadow-none bg-background dark:bg-sidebar-background">
+      <div className="flex h-full flex-col bg-background dark:bg-sidebar-background lg:flex-row">
+        <Card className="h-full w-full rounded-none border-0 border-r border-border bg-background shadow-none dark:border-sidebar-border dark:bg-sidebar-background lg:w-[300px] lg:min-w-[300px] lg:max-w-[300px] lg:flex-shrink-0">
           <CardContent>
-            <ScrollArea className="h-full dark:bg-sidebar-background bg-background">
+            <ScrollArea className="h-full bg-background dark:bg-sidebar-background">
               {properties.map((property, i) => {
                 const requiresPremium = !hasAccess && i >= freeLimit;
 
@@ -134,10 +134,10 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
                       >
                         <Button
                           variant="ghost"
-                          className="w-full justify-start font-medium h-auto py-3 rounded-none text-muted-foreground dark:text-sidebar-foreground hover:text-foreground dark:hover:text-sidebar-foreground"
+                          className="h-auto w-full justify-start rounded-none py-3 font-medium text-muted-foreground hover:text-foreground dark:text-sidebar-foreground dark:hover:text-sidebar-foreground"
                         >
-                          <LockIcon className="h-3 w-3 mr-2 text-muted-foreground dark:text-sidebar-foreground" />
-                          <span className="truncate max-w-[250px]">
+                          <LockIcon className="mr-2 h-3 w-3 text-muted-foreground dark:text-sidebar-foreground" />
+                          <span className="max-w-[250px] truncate">
                             {property}
                           </span>
                         </Button>
@@ -147,11 +147,11 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
                         variant={
                           selectedProperty === property ? "default" : "ghost"
                         }
-                        className="w-full justify-start font-medium h-auto py-3 rounded-none"
+                        className="h-auto w-full justify-start rounded-none py-3 font-medium"
                         onClick={() => handlePropertySelect(property)}
                       >
-                        <Tag className="h-4 w-4 mr-2" />
-                        <span className="truncate max-w-[250px]">
+                        <Tag className="mr-2 h-4 w-4" />
+                        <span className="max-w-[250px] truncate">
                           {property}
                         </span>
                       </Button>
@@ -163,8 +163,8 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
           </CardContent>
         </Card>
 
-        <div className="pt-2 w-full h-full flex-1 overflow-auto bg-background dark:bg-sidebar-background">
-          <div className="min-w-0 h-full">
+        <div className="h-full w-full flex-1 overflow-auto bg-background pt-2 dark:bg-sidebar-background">
+          <div className="h-full min-w-0">
             <PropertyPanel property={selectedProperty} />
           </div>
         </div>

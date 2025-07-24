@@ -24,7 +24,7 @@ async function handler({
 
   const { error } = await dbExecute(
     `UPDATE helicone_proxy_keys SET soft_delete = true WHERE org_id = $1 AND id = $2`,
-    [userData.orgId, id]
+    [userData.orgId, id],
   );
 
   if (error) {

@@ -41,7 +41,7 @@ const TextbookCourse: React.FC<TextbookCourseProps> = ({
       const highlightedCode = highlight(
         text,
         languages[language] || languages.markdown,
-        language
+        language,
       );
       return `<pre><code class="language-${language}">${highlightedCode}</code></pre>`;
     };
@@ -56,7 +56,7 @@ const TextbookCourse: React.FC<TextbookCourseProps> = ({
   const handleQuizAnswer = (
     sectionIndex: number,
     questionIndex: number,
-    answerIndex: number
+    answerIndex: number,
   ): void => {
     setQuizAnswers((prev) => ({
       ...prev,
@@ -89,18 +89,18 @@ const TextbookCourse: React.FC<TextbookCourseProps> = ({
   };
 
   return (
-    <div className="w-full h-full flex flex-col overflow-hidden bg-gray-50">
-      <div className="p-3 bg-white border-b">
-        <h1 className="text-lg font-bold text-indigo-900 mb-2">
+    <div className="flex h-full w-full flex-col overflow-hidden bg-gray-50">
+      <div className="border-b bg-white p-3">
+        <h1 className="mb-2 text-lg font-bold text-indigo-900">
           {course.overview?.title || "Generating course..."}
         </h1>
-        <div className="flex flex-wrap gap-2 items-center">
+        <div className="flex flex-wrap items-center gap-2">
           {sessionId && (
             <Link
               href={`https://us.helicone.ai/sessions/${encodeURIComponent(
-                SESSION_NAME
+                SESSION_NAME,
               )}/${encodeURIComponent(sessionId)}`}
-              className="text-xs px-2 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+              className="rounded bg-indigo-600 px-2 py-1 text-xs text-white hover:bg-indigo-700"
             >
               View Session
             </Link>
@@ -108,13 +108,13 @@ const TextbookCourse: React.FC<TextbookCourseProps> = ({
 
           <Link
             href="https://us.helicone.ai/prompts"
-            className="text-xs px-2 py-1 bg-purple-600 text-white rounded hover:bg-purple-700"
+            className="rounded bg-purple-600 px-2 py-1 text-xs text-white hover:bg-purple-700"
           >
             View Prompts
           </Link>
           <button
             onClick={toggleOverview}
-            className="text-xs px-2 py-1 border border-gray-300 rounded text-gray-700 bg-white hover:bg-gray-50 flex items-center"
+            className="flex items-center rounded border border-gray-300 bg-white px-2 py-1 text-xs text-gray-700 hover:bg-gray-50"
           >
             {isOverviewExpanded ? "Hide" : "Show"} Description
             {isOverviewExpanded ? (
@@ -125,7 +125,7 @@ const TextbookCourse: React.FC<TextbookCourseProps> = ({
           </button>
         </div>
         {isOverviewExpanded && (
-          <p className="text-xs text-gray-600 mt-2">
+          <p className="mt-2 text-xs text-gray-600">
             {course.overview?.description ||
               "Please wait while we create your course."}
           </p>
@@ -133,19 +133,19 @@ const TextbookCourse: React.FC<TextbookCourseProps> = ({
       </div>
 
       {isGenerating && (
-        <div className="p-2 bg-blue-100 text-blue-700 text-xs">
+        <div className="bg-blue-100 p-2 text-xs text-blue-700">
           <p>{currentStep}</p>
         </div>
       )}
 
-      <div className="flex-grow overflow-y-auto p-3 space-y-3">
+      <div className="flex-grow space-y-3 overflow-y-auto p-3">
         {course.sections?.map((section, index) => (
           <div
             key={index}
-            className="bg-white rounded shadow-sm overflow-hidden"
+            className="overflow-hidden rounded bg-white shadow-sm"
           >
             <button
-              className="w-full text-left p-2 bg-indigo-50 hover:bg-indigo-100 transition-colors duration-200"
+              className="w-full bg-indigo-50 p-2 text-left transition-colors duration-200 hover:bg-indigo-100"
               onClick={() =>
                 setActiveSection(activeSection === index ? null : index)
               }
@@ -159,15 +159,15 @@ const TextbookCourse: React.FC<TextbookCourseProps> = ({
                 {renderMarkdown(section.content)}
 
                 {course.quizzes && course.quizzes[index] && (
-                  <div className="mt-3 p-2 bg-gray-50 rounded">
-                    <h3 className="text-sm font-medium mb-2 text-indigo-900">
+                  <div className="mt-3 rounded bg-gray-50 p-2">
+                    <h3 className="mb-2 text-sm font-medium text-indigo-900">
                       Quiz
                     </h3>
                     {course.quizzes[index].questions.map((q, qIndex) => (
                       <div key={qIndex} className="mb-3">
-                        <p className="font-medium mb-1">{q.question}</p>
+                        <p className="mb-1 font-medium">{q.question}</p>
                         {q.options.map((option, oIndex) => (
-                          <div key={oIndex} className="flex items-center mb-1">
+                          <div key={oIndex} className="mb-1 flex items-center">
                             <input
                               type="radio"
                               id={`q${qIndex}-o${oIndex}`}
@@ -208,7 +208,7 @@ const TextbookCourse: React.FC<TextbookCourseProps> = ({
                     {!quizSubmitted[index] && (
                       <button
                         onClick={() => submitQuiz(index)}
-                        className="mt-2 px-3 py-1 text-xs bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors duration-200"
+                        className="mt-2 rounded bg-indigo-600 px-3 py-1 text-xs text-white transition-colors duration-200 hover:bg-indigo-700"
                       >
                         Submit Quiz
                       </button>

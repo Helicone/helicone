@@ -17,7 +17,7 @@ const PromptVersionHistory = ({
   const { versions, productionVersion } = promptWithVersions;
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="flex h-full w-full flex-col">
       {versions.map((version) => (
         <PromptVersionCard
           key={version.id}

@@ -70,18 +70,18 @@ const ExperimentDatasetSelector = (props: ExperimentDatasetSelectorProps) => {
 
   return (
     <ThemedDrawer open={open} setOpen={setOpen}>
-      <div className="h-full flex flex-col space-y-4 justify-between w-full">
-        <div className="flex flex-col w-full">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-xl">
+      <div className="flex h-full w-full flex-col justify-between space-y-4">
+        <div className="flex w-full flex-col">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-semibold">
               Select Datasets ({datasets.length})
             </h2>
           </div>
-          <p className="text-gray-500 text-sm pb-4">
+          <p className="pb-4 text-sm text-gray-500">
             Select the inputs you want to include in the dataset.
           </p>
 
-          <ul className="flex flex-col items-center space-y-4 w-full pt-4 px-1 overflow-y-auto">
+          <ul className="flex w-full flex-col items-center space-y-4 overflow-y-auto px-1 pt-4">
             {isLoading && <div>Loading inputs...</div>}
             {isError && <div>Error loading inputs.</div>}
             {!isLoading &&
@@ -89,24 +89,24 @@ const ExperimentDatasetSelector = (props: ExperimentDatasetSelectorProps) => {
               datasets.map((dataset) => (
                 <li
                   key={dataset.id}
-                  className={clsx("w-full flex items-start")}
+                  className={clsx("flex w-full items-start")}
                   onClick={() => {}}
                 >
                   <input
                     type="radio"
-                    className="mt-2 mr-2 rounded border-slate-300 dark:border-slate-700"
+                    className="mr-2 mt-2 rounded border-slate-300 dark:border-slate-700"
                     checked={selectedDatasetId === dataset.id}
                     onChange={() => setSelectedDatasetId(dataset.id)}
                   />
                   <Card
                     className={clsx(
                       selectedDatasetId === dataset.id
-                        ? "bg-sky-100 border-sky-500 dark:bg-sky-950"
-                        : "bg-white border-slate-300 dark:bg-black dark:border-slate-700",
-                      "w-full border-t px-4 py-2 "
+                        ? "border-sky-500 bg-sky-100 dark:bg-sky-950"
+                        : "border-slate-300 bg-white dark:border-slate-700 dark:bg-black",
+                      "w-full border-t px-4 py-2",
                     )}
                   >
-                    <CardContent className="p-0 relative">
+                    <CardContent className="relative p-0">
                       <p className="text-sm font-semibold">{dataset.name}</p>
                       <p className="text-xs text-slate-500">
                         {dataset.requestsCount} requests
@@ -118,7 +118,7 @@ const ExperimentDatasetSelector = (props: ExperimentDatasetSelectorProps) => {
           </ul>
         </div>
 
-        <div className="flex justify-end space-x-4 sticky bottom-0 py-4 bg-white">
+        <div className="sticky bottom-0 flex justify-end space-x-4 bg-white py-4">
           <Button
             variant={"secondary"}
             size={"sm"}

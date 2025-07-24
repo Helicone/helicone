@@ -22,20 +22,20 @@ const MfsCoupon = (props: MfsCouponProps) => {
         `transition-all duration-700 ease-in-out ${
           loaded ? "opacity-100" : "opacity-0"
         }`,
-        "flex flex-col items-center text-center w-full px-2"
+        "flex w-full flex-col items-center px-2 text-center",
       )}
     >
-      <p className="text-2xl md:text-5xl font-semibold mt-8">
+      <p className="mt-8 text-2xl font-semibold md:text-5xl">
         Microsoft for Startups Founders Hup
       </p>
-      <p className="text-md md:text-lg text-gray-700 font-light mt-5">
+      <p className="text-md mt-5 font-light text-gray-700 md:text-lg">
         Please use the following coupon code to get 9 months free of Helicone
         Pro.
       </p>
-      <p className="text-2xl md:text-5xl font-semibold mt-8">MSFTHELI</p>
+      <p className="mt-8 text-2xl font-semibold md:text-5xl">MSFTHELI</p>
       <button
         onClick={nextStep}
-        className="px-28 py-3 bg-gray-900 hover:bg-gray-700 font-medium text-white rounded-xl mt-8"
+        className="mt-8 rounded-xl bg-gray-900 px-28 py-3 font-medium text-white hover:bg-gray-700"
       >
         Finish Onboarding
       </button>

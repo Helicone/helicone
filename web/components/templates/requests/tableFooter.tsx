@@ -50,17 +50,17 @@ export default function TableFooter(props: TableFooterProps) {
     }
   }, [debouncedPage, currentPage, onPageChange]);
   return (
-    <footer className="flex flex-row gap-4 items-center w-full justify-between text-xs px-4 py-3.5 bg-slate-100 dark:bg-slate-900 border-t border-border">
+    <footer className="flex w-full flex-row items-center justify-between gap-4 border-t border-border bg-slate-100 px-4 py-3.5 text-xs dark:bg-slate-900">
       {/* Left Actions */}
-      <div className="flex flex-row gap-1 items-center">
-        <p className="text-muted-foreground font-medium hidden sm:block">
+      <div className="flex flex-row items-center gap-1">
+        <p className="hidden font-medium text-muted-foreground sm:block">
           Rows
         </p>
         <Select
           defaultValue={pageSize.toString()}
           onValueChange={(value) => onPageSizeChange(parseInt(value, 10))}
         >
-          <SelectTrigger className="w-[4.5rem] h-7">
+          <SelectTrigger className="h-7 w-[4.5rem]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -74,11 +74,11 @@ export default function TableFooter(props: TableFooterProps) {
       </div>
 
       {/* Center Actions */}
-      <div className="flex gap-1 items-center">
+      <div className="flex items-center gap-1">
         <Button
           variant="outline"
           size="icon"
-          className="h-7 w-7 hidden sm:inline-flex"
+          className="hidden h-7 w-7 sm:inline-flex"
           disabled={!isCountLoading && currentPage <= 1}
           onClick={() => setPage(1)}
         >
@@ -93,14 +93,14 @@ export default function TableFooter(props: TableFooterProps) {
         >
           <ChevronLeft className="h-3 w-3" />
         </Button>
-        <div className="flex flex-row space-x-1 items-center">
+        <div className="flex flex-row items-center space-x-1">
           {isCountLoading ? (
-            <p className="text-muted-foreground font-medium">Loading...</p>
+            <p className="font-medium text-muted-foreground">Loading...</p>
           ) : count > 0 ? (
             <div className="flex items-center gap-1">
               <Input
                 type="number"
-                className="w-12 h-7 text-xs"
+                className="h-7 w-12 text-xs"
                 value={page}
                 onChange={(e) => {
                   const value = parseInt(e.target.value, 10);
@@ -115,11 +115,11 @@ export default function TableFooter(props: TableFooterProps) {
                 min={1}
                 max={totalPages}
               />
-              <p className="text-muted-foreground font-medium whitespace-nowrap">
+              <p className="whitespace-nowrap font-medium text-muted-foreground">
                 of {totalPages}
               </p>
               {showCount && (
-                <p className="text-muted-foreground font-medium text-[10px]">{`(${count} total)`}</p>
+                <p className="text-[10px] font-medium text-muted-foreground">{`(${count} total)`}</p>
               )}
             </div>
           ) : (
@@ -138,7 +138,7 @@ export default function TableFooter(props: TableFooterProps) {
         <Button
           variant="outline"
           size="icon"
-          className="h-7 w-7 hidden sm:inline-flex"
+          className="hidden h-7 w-7 sm:inline-flex"
           disabled={!isCountLoading && currentPage >= totalPages}
           onClick={() => setPage(totalPages)}
         >

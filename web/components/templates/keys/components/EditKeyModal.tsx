@@ -16,20 +16,20 @@ const EditKeyModal = ({ open, setOpen, selectedKey }: EditKeyModalProps) => {
   useEffect(() => {
     setEditName(
       keys?.data?.data?.data?.find((key) => key.id.toString() === selectedKey)
-        ?.api_key_name ?? ""
+        ?.api_key_name ?? "",
     );
   }, [keys?.data?.data?.data, open, selectedKey]);
 
   const selectKeyData = useMemo(() => {
     return keys?.data?.data?.data?.find(
-      (key) => key.id.toString() === selectedKey
+      (key) => key.id.toString() === selectedKey,
     );
   }, [keys?.data?.data?.data, selectedKey]);
 
   return (
     <ThemedModal open={open} setOpen={setOpen}>
-      <div className="flex flex-col gap-4 w-[400px]">
-        <p className="font-semibold text-lg text-gray-900 dark:text-gray-100">
+      <div className="flex w-[400px] flex-col gap-4">
+        <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
           Edit Helicone Key
         </p>
         <div className="w-full space-y-1.5 text-sm">
@@ -42,7 +42,7 @@ const EditKeyModal = ({ open, setOpen, selectedKey }: EditKeyModalProps) => {
             id="api-key"
             value={editName}
             className={clsx(
-              "block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm p-2 text-sm"
+              "block w-full rounded-md border border-gray-300 bg-gray-100 p-2 text-sm text-gray-900 shadow-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100",
             )}
             placeholder={selectKeyData?.api_key_name}
             onChange={(e) => setEditName(e.target.value)}
@@ -51,7 +51,7 @@ const EditKeyModal = ({ open, setOpen, selectedKey }: EditKeyModalProps) => {
         <div className="flex justify-end gap-2 pt-4">
           <button
             onClick={() => setOpen(false)}
-            className="flex flex-row items-center rounded-md bg-white dark:bg-black px-4 py-2 text-sm font-semibold border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm hover:text-gray-700 dark:hover:text-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+            className="flex flex-row items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500 dark:border-gray-700 dark:bg-black dark:text-gray-100 dark:hover:bg-gray-900 dark:hover:text-gray-300"
           >
             Cancel
           </button>
@@ -63,7 +63,7 @@ const EditKeyModal = ({ open, setOpen, selectedKey }: EditKeyModalProps) => {
               });
               setOpen(false);
             }}
-            className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="flex items-center rounded-md bg-black px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:bg-white dark:text-black dark:hover:bg-gray-200"
           >
             Update
           </button>

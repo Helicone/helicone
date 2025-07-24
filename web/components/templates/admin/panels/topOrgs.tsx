@@ -83,7 +83,7 @@ const TopOrgs = (props: TopOrgsProps) => {
 
   return (
     <>
-      <h1 className="text-4xl font-semibold text-gray-200 mb-4 border-t-2 pt-2">
+      <h1 className="mb-4 border-t-2 pt-2 text-4xl font-semibold text-gray-200">
         Top Organizations
       </h1>
       <div className="flex flex-col space-y-2">
@@ -145,12 +145,12 @@ const TopOrgs = (props: TopOrgsProps) => {
           onClick={() => {
             setTimeRange({
               startDate: new Date(
-                new Date().getTime() - 30 * 24 * 60 * 60 * 1000
+                new Date().getTime() - 30 * 24 * 60 * 60 * 1000,
               ),
               endDate: new Date(),
             });
           }}
-          className="m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          className="m-2 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
         >
           LAST 30 days
         </button>
@@ -159,12 +159,12 @@ const TopOrgs = (props: TopOrgsProps) => {
           onClick={() => {
             setTimeRange({
               startDate: new Date(
-                new Date().getTime() - 7 * 24 * 60 * 60 * 1000
+                new Date().getTime() - 7 * 24 * 60 * 60 * 1000,
               ),
               endDate: new Date(),
             });
           }}
-          className="m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          className="m-2 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
         >
           LAST 7 days
         </button>
@@ -173,12 +173,12 @@ const TopOrgs = (props: TopOrgsProps) => {
           onClick={() => {
             setTimeRange({
               startDate: new Date(
-                new Date().getTime() - 1 * 24 * 60 * 60 * 1000
+                new Date().getTime() - 1 * 24 * 60 * 60 * 1000,
               ),
               endDate: new Date(),
             });
           }}
-          className="m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          className="m-2 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
         >
           LAST 24 hours
         </button>
@@ -190,7 +190,7 @@ const TopOrgs = (props: TopOrgsProps) => {
               endDate: new Date(),
             });
           }}
-          className="m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          className="m-2 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
         >
           LAST 1 hour
         </button>
@@ -202,7 +202,7 @@ const TopOrgs = (props: TopOrgsProps) => {
             onClick={() => {
               setTier(t as any);
             }}
-            className={`m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ${
+            className={`m-2 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 ${
               tier === t ? "bg-blue-700" : ""
             }`}
           >

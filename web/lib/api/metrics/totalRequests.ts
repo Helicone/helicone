@@ -10,7 +10,7 @@ export async function getTotalRequests(
     start: Date;
     end: Date;
   },
-  org_id: string
+  org_id: string,
 ): Promise<Result<number, string>> {
   const { filter: filterString, argsAcc } = await buildFilterWithAuthClickHouse(
     {
@@ -21,7 +21,7 @@ export async function getTotalRequests(
         operator: "and",
       },
       argsAcc: [],
-    }
+    },
   );
   const query = `
   WITH total_count AS (
@@ -39,6 +39,6 @@ export async function getTotalRequests(
     await dbQueryClickhouse<{
       count: number;
     }>(query, argsAcc),
-    (d) => +d[0].count
+    (d) => +d[0].count,
   );
 }

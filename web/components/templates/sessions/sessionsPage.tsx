@@ -98,7 +98,7 @@ const SessionsPage = (props: SessionsPageProps) => {
 
   // State for active columns
   const [activeColumns, setActiveColumns] = useState<DragColumnItem[]>(
-    columnDefsToDragColumnItems(getColumns())
+    columnDefsToDragColumnItems(getColumns()),
   );
 
   const [timeFilter, setTimeFilter] = useState<TimeFilter>({
@@ -108,7 +108,7 @@ const SessionsPage = (props: SessionsPageProps) => {
 
   const [sessionIdSearch] = useURLParams<string | undefined>(
     "session-search",
-    undefined
+    undefined,
   );
 
   const [open, setOpen] = useState(false);
@@ -124,7 +124,7 @@ const SessionsPage = (props: SessionsPageProps) => {
     ...names.sessions
       .sort(
         (a, b) =>
-          new Date(b.last_used).getTime() - new Date(a.last_used).getTime()
+          new Date(b.last_used).getTime() - new Date(a.last_used).getTime(),
       )
       .map((name) => name.name),
   ];
@@ -132,7 +132,7 @@ const SessionsPage = (props: SessionsPageProps) => {
 
   const debouncedSessionIdSearch = useDebounce(sessionIdSearch, 500); // 0.5 seconds
   const [selectedName, setSelectedName] = useState<string | undefined>(
-    props.selectedName
+    props.selectedName,
   );
 
   const { sessions, isLoading, hasSessions } = useSessions({
@@ -150,7 +150,7 @@ const SessionsPage = (props: SessionsPageProps) => {
 
   const { canCreate, freeLimit } = useFeatureLimit(
     "sessions",
-    allNames.sessions.length
+    allNames.sessions.length,
   );
 
   const [currentTab, setCurrentTab] = useLocalStorage<
@@ -204,7 +204,7 @@ const SessionsPage = (props: SessionsPageProps) => {
     }
 
     const filteredSessions = sessionsWithId.filter((session) =>
-      selectedIds.includes(session.id)
+      selectedIds.includes(session.id),
     );
 
     return await getRequestsByIdsWithBodies(filteredSessions);
@@ -221,7 +221,7 @@ const SessionsPage = (props: SessionsPageProps) => {
         toggleSelection(row);
       }
     },
-    [isShiftPressed, toggleSelection]
+    [isShiftPressed, toggleSelection],
   );
 
   // Calculate aggregated stats
@@ -241,11 +241,11 @@ const SessionsPage = (props: SessionsPageProps) => {
     const avgCost = totalCost / sessions.length;
     const lastUsed = new Date(
       Math.max(
-        ...sessions.map((s) => new Date(s.latest_request_created_at).getTime())
-      )
+        ...sessions.map((s) => new Date(s.latest_request_created_at).getTime()),
+      ),
     ).toLocaleString();
     const createdOn = new Date(
-      Math.min(...sessions.map((s) => new Date(s.created_at).getTime()))
+      Math.min(...sessions.map((s) => new Date(s.created_at).getTime())),
     ).toLocaleDateString();
 
     // Calculate simple average of session average latencies
@@ -275,11 +275,11 @@ const SessionsPage = (props: SessionsPageProps) => {
   ];
 
   return hasSessions || isSessionsLoading ? (
-    <main className="h-screen flex flex-col w-full animate-fade-in">
+    <main className="flex h-screen w-full animate-fade-in flex-col">
       <Tabs
         value={currentTab}
         onValueChange={(value) => setCurrentTab(value)}
-        className="w-full h-full flex flex-col"
+        className="flex h-full w-full flex-col"
       >
         <FoldedHeader
           leftSection={
@@ -294,7 +294,7 @@ const SessionsPage = (props: SessionsPageProps) => {
                   asChild
                   className={cn(
                     "flex h-8 w-[280px] items-center justify-between rounded-md border border-sky-200 bg-white px-3 py-2 text-xs ring-offset-white placeholder:text-slate-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:bg-sidebar-background",
-                    "focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 dark:focus:ring-slate-300"
+                    "focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 dark:focus:ring-slate-300",
                   )}
                 >
                   <Button
@@ -304,8 +304,8 @@ const SessionsPage = (props: SessionsPageProps) => {
                   >
                     {selectedName === ""
                       ? EMPTY_SESSION_NAME
-                      : selectedName ?? "All"}
-                    <ChevronDown className="ml-2 h-3 w-3 shrink-0 opacity-50 " />
+                      : (selectedName ?? "All")}
+                    <ChevronDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[280px] p-0">
@@ -313,7 +313,7 @@ const SessionsPage = (props: SessionsPageProps) => {
                     <CommandInput
                       placeholder="Search sessions..."
                       onChangeCapture={(
-                        e: React.ChangeEvent<HTMLInputElement>
+                        e: React.ChangeEvent<HTMLInputElement>,
                       ) => {
                         setSessionNameSearch(e.target.value);
                       }}
@@ -335,7 +335,7 @@ const SessionsPage = (props: SessionsPageProps) => {
                               "mr-2 h-3 w-3",
                               selectedName === name
                                 ? "opacity-100"
-                                : "opacity-0"
+                                : "opacity-0",
                             )}
                           />
                           {name === "" ? EMPTY_SESSION_NAME : name}
@@ -349,7 +349,7 @@ const SessionsPage = (props: SessionsPageProps) => {
               <ThemedTimeFilter
                 currentTimeFilter={getTimeFilterObject(
                   timeFilter.start,
-                  timeFilter.end
+                  timeFilter.end,
                 )}
                 timeFilterOptions={[]}
                 onSelect={onTimeSelectHandler}
@@ -363,7 +363,7 @@ const SessionsPage = (props: SessionsPageProps) => {
           }
           rightSection={
             <section className="flex flex-row items-center gap-2">
-              <div className="flex flex-row items-center gap-2 bg-sky-200 rounded-lg">
+              <div className="flex flex-row items-center gap-2 rounded-lg bg-sky-200">
                 {selectedIds.length > 0 && (
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -374,8 +374,8 @@ const SessionsPage = (props: SessionsPageProps) => {
                 )}
               </div>
 
-              <div className="h-8 flex flex-row items-center border border-border rounded-lg divide-x divide-border overflow-hidden shadow-sm">
-                <label className="text-xs px-2 py-1">Views</label>
+              <div className="flex h-8 flex-row items-center divide-x divide-border overflow-hidden rounded-lg border border-border shadow-sm">
+                <label className="px-2 py-1 text-xs">Views</label>
 
                 <TabsList
                   size={"sm"}
@@ -405,11 +405,11 @@ const SessionsPage = (props: SessionsPageProps) => {
             </section>
           }
           foldContent={
-            <div className="h-full flex flex-row items-center divide-x divide-border">
+            <div className="flex h-full flex-row items-center divide-x divide-border">
               {statsToDisplay.map((stat) => (
                 <div
                   key={stat.label}
-                  className="flex flex-row gap-1 items-center px-4"
+                  className="flex flex-row items-center gap-1 px-4"
                 >
                   <XSmall className="font-medium">{stat.label}</XSmall>
                   <Muted className="text-xs">{stat.value}</Muted>
@@ -455,7 +455,7 @@ const SessionsPage = (props: SessionsPageProps) => {
           <SessionMetrics
             selectedSession={
               allNames.sessions.find(
-                (session) => session.name === selectedName
+                (session) => session.name === selectedName,
               ) ?? null
             }
             timeFilter={timeFilter}
@@ -464,8 +464,8 @@ const SessionsPage = (props: SessionsPageProps) => {
       </Tabs>
     </main>
   ) : (
-    <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">
-      <div className="flex flex-1 h-full">
+    <div className="flex h-screen w-full flex-col bg-background dark:bg-sidebar-background">
+      <div className="flex h-full flex-1">
         <EmptyStateCard feature="sessions" />
       </div>
     </div>

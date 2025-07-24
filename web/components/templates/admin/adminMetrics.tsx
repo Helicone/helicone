@@ -25,7 +25,7 @@ const AdminMetrics = (props: AdminStatsProps) => {
   >("admin-metrics-time-filter", "24 months");
   const [groupBy, setGroupBy] = useLocalStorage<(typeof groupBys)[number]>(
     "admin-metrics-group-by",
-    "month"
+    "month",
   );
 
   const metricsOverTime = useQuery({
@@ -42,7 +42,7 @@ const AdminMetrics = (props: AdminStatsProps) => {
             timeFilter: timeFilter as any,
             groupBy: groupBy as any,
           },
-        }
+        },
       );
       return data;
     },
@@ -78,8 +78,8 @@ const AdminMetrics = (props: AdminStatsProps) => {
           </Select>
         </div>
       </div>
-      <ul className="flex flex-col space-y-8 max-w-6xl">
-        <li className="w-full h-full rounded-lg flex flex-col bg-gray-5000 p-4 space-y-4">
+      <ul className="flex max-w-6xl flex-col space-y-8">
+        <li className="bg-gray-5000 flex h-full w-full flex-col space-y-4 rounded-lg p-4">
           <h2 className="text-xl font-semibold">Orgs Over Time</h2>
           <BarChart
             data={
@@ -93,7 +93,7 @@ const AdminMetrics = (props: AdminStatsProps) => {
             showYAxis={true}
           />
         </li>
-        <li className="w-full h-full rounded-lg flex flex-col bg-gray-5000 p-4 space-y-4">
+        <li className="bg-gray-5000 flex h-full w-full flex-col space-y-4 rounded-lg p-4">
           <h2 className="text-xl font-semibold">
             New Users/{groupBy} (Since {timeFilter} ago)
           </h2>
@@ -109,7 +109,7 @@ const AdminMetrics = (props: AdminStatsProps) => {
             showYAxis={true}
           />
         </li>
-        <li className="w-full h-full rounded-lg flex flex-col bg-gray-5000 p-4 space-y-4">
+        <li className="bg-gray-5000 flex h-full w-full flex-col space-y-4 rounded-lg p-4">
           <h2 className="text-xl font-semibold">Users Over Time</h2>
           <BarChart
             data={

@@ -23,7 +23,7 @@ interface ToolPanelProps {
 export default function ToolPanel({ tools, onToolsChange }: ToolPanelProps) {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [toolJson, setToolJson] = useState(
-    '{\n  "name": "",\n  "description": "",\n  "parameters": {\n    "type": "object",\n    "properties": {},\n    "required": []\n  }\n}'
+    '{\n  "name": "",\n  "description": "",\n  "parameters": {\n    "type": "object",\n    "properties": {},\n    "required": []\n  }\n}',
   );
 
   const getParameters = (tool: Tool): string[] => {
@@ -74,7 +74,7 @@ export default function ToolPanel({ tools, onToolsChange }: ToolPanelProps) {
                   asPill
                   onClick={() => setIsPopupOpen(true)}
                 >
-                  <PiPlusBold className="w-4 h-4 text-secondary" />
+                  <PiPlusBold className="h-4 w-4 text-secondary" />
                 </Button>
               </div>
             </TooltipTrigger>
@@ -84,18 +84,18 @@ export default function ToolPanel({ tools, onToolsChange }: ToolPanelProps) {
           </Tooltip>
         </TooltipProvider>
       </GlassHeader>
-      <div className="divide-y divide-slate-100 dark:divide-slate-900 px-4">
+      <div className="divide-y divide-slate-100 px-4 dark:divide-slate-900">
         {tools.map((tool, index) => (
           <div key={index} className="flex flex-col gap-1 py-2 first:pt-0">
-            <div className="flex flex-row gap-2 items-center justify-between">
+            <div className="flex flex-row items-center justify-between gap-2">
               <div className="flex items-start gap-2">
                 <div className="flex flex-col gap-1">
                   <ParameterLabel
-                    icon={<PiToolboxBold className="text-secondary mt-1" />}
+                    icon={<PiToolboxBold className="mt-1 text-secondary" />}
                   >
                     {tool.name}({getParameters(tool).join(", ")})
                   </ParameterLabel>
-                  <span className="text-xs text-tertiary">
+                  <span className="text-tertiary text-xs">
                     {tool.description}
                   </span>
                 </div>
@@ -109,7 +109,7 @@ export default function ToolPanel({ tools, onToolsChange }: ToolPanelProps) {
                       onClick={() => handleDeleteTool(index)}
                       className="text-muted-foreground hover:text-destructive"
                     >
-                      <PiTrashBold className="w-4 h-4" />
+                      <PiTrashBold className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -121,7 +121,7 @@ export default function ToolPanel({ tools, onToolsChange }: ToolPanelProps) {
           </div>
         ))}
         {tools.length === 0 && (
-          <div className="py-2 text-sm text-tertiary text-center">
+          <div className="text-tertiary py-2 text-center text-sm">
             No <span className="font-semibold">Tools</span> configured.
           </div>
         )}
@@ -140,12 +140,12 @@ export default function ToolPanel({ tools, onToolsChange }: ToolPanelProps) {
               text={toolJson}
               setText={setToolJson}
               language="json"
-              className="h-full bg-white rounded-lg"
+              className="h-full rounded-lg bg-white"
             />
           </div>
-          <div className="flex flex-row justify-end items-center gap-2">
+          <div className="flex flex-row items-center justify-end gap-2">
             {!isValidJson(toolJson) && (
-              <p className="text-red-500 text-sm">Invalid JSON</p>
+              <p className="text-sm text-red-500">Invalid JSON</p>
             )}
             <Button variant="outline" onClick={() => setIsPopupOpen(false)}>
               Cancel

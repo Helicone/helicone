@@ -32,7 +32,7 @@ export const ThemedScatterPlot = ({
     if (selectItems.length === 0) {
       const multiSelectItems = new Set<string>();
       chart.data.forEach((d) =>
-        d.default ? multiSelectItems.add(d.grain) : null
+        d.default ? multiSelectItems.add(d.grain) : null,
       );
 
       const multiSelectItemsArray = Array.from(multiSelectItems);
@@ -43,12 +43,12 @@ export const ThemedScatterPlot = ({
   const dataToViz = chart.data.filter((d) => selectItems.includes(d.grain));
 
   return (
-    <div className=" border w-full  col-span-1 md:col-span-6  flex flex-col items-center gap-5 p-3 rounded-lg bg-[#0B173980] bg-opacity-50 border-[#63758933] border-opacity-20">
-      <div className="flex flex-col sm:flex-row justify-between items-center w-full gap-3">
+    <div className="col-span-1 flex w-full flex-col items-center gap-5 rounded-lg border border-[#63758933] border-opacity-20 bg-[#0B173980] bg-opacity-50 p-3 md:col-span-6">
+      <div className="flex w-full flex-col items-center justify-between gap-3 sm:flex-row">
         <h2 className="whitespace-nowrap">{chart.name}</h2>
         <MultiSelect
           // label="Select Grain"
-          className=" w-12"
+          className="w-12"
           // selected={selectItems}
           defaultChecked={true}
           onValueChange={(v) => {

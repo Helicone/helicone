@@ -21,7 +21,7 @@ export interface DragColumnItem {
 }
 
 export function columnDefToDragColumnItem(
-  column: ColumnDef<any, any>
+  column: ColumnDef<any, any>,
 ): DragColumnItem {
   return {
     name: column.id ?? "",
@@ -32,7 +32,7 @@ export function columnDefToDragColumnItem(
 }
 
 export function columnDefsToDragColumnItems(
-  columns: ColumnDef<any, any>[]
+  columns: ColumnDef<any, any>[],
 ): DragColumnItem[] {
   return columns.map(columnDefToDragColumnItem);
 }
@@ -132,17 +132,17 @@ const DraggableItem = ({
       style={{ opacity: isDragging ? 0.5 : 1 }}
       data-handler-id={handlerId}
       className={clsx(
-        "p-2 mb-1",
+        "mb-1 p-2",
         isDragging ? "bg-blue-100 dark:bg-slate-900" : "bg-white dark:bg-black",
-        "border border-gray-200 dark:border-gray-800 rounded-md cursor-move",
-        item.shown ? "block" : "hidden"
+        "cursor-move rounded-md border border-gray-200 dark:border-gray-800",
+        item.shown ? "block" : "hidden",
       )}
     >
       <Row className="items-center justify-between">
         <Row className="items-center gap-2 text-xs">
           <Row>
-            <EllipsisVerticalIcon className="h-3 w-3 " />
-            <EllipsisVerticalIcon className="h-3 w-3 -ml-2" />
+            <EllipsisVerticalIcon className="h-3 w-3" />
+            <EllipsisVerticalIcon className="-ml-2 h-3 w-3" />
           </Row>
           {item.name}
         </Row>
@@ -153,7 +153,7 @@ const DraggableItem = ({
               removeItem(index);
             }}
           >
-            <TrashIcon className="w-4 h-4 text-red-500" />
+            <TrashIcon className="h-4 w-4 text-red-500" />
           </button>
         </Col>
       </Row>
@@ -176,7 +176,7 @@ export const DragList = ({
       newItems.splice(hoverIndex, 0, dragItem);
       setItems(newItems);
     },
-    [items, setItems]
+    [items, setItems],
   );
 
   const removeItem = useCallback(
@@ -184,11 +184,11 @@ export const DragList = ({
       const newItems = items.filter((_, i) => i !== index);
       setItems(newItems);
     },
-    [items, setItems]
+    [items, setItems],
   );
 
   return (
-    <div className="p-1 w-full">
+    <div className="w-full p-1">
       {items.map((item, index) => (
         <DraggableItem
           key={item.id}

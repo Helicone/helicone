@@ -39,21 +39,21 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
   const jawn = useJawnClient();
 
   const [memberRole, setMemberRole] = useState<string>(
-    orgMember.org_role || "member"
+    orgMember.org_role || "member",
   );
 
   const isUser = orgMember.member === user?.id;
 
   return (
     <>
-      <li key={index} className="py-3 grid grid-cols-12 gap-2 items-center">
-        <div className="col-span-8 flex flex-row justify-start items-center gap-2">
+      <li key={index} className="grid grid-cols-12 items-center gap-2 py-3">
+        <div className="col-span-8 flex flex-row items-center justify-start gap-2">
           <p className="truncate overflow-ellipsis text-sm">
             {orgMember.email}
           </p>
           {isUser && (
             <div className="flex justify-end gap-2">
-              <span className="inline-flex items-center rounded-full bg-sky-50 dark:bg-sky-900/20 px-2 py-1 text-xs font-medium text-sky-700 dark:text-sky-300 ring-1 ring-inset ring-sky-700/10 dark:ring-sky-300/20">
+              <span className="inline-flex items-center rounded-full bg-sky-50 px-2 py-1 text-xs font-medium text-sky-700 ring-1 ring-inset ring-sky-700/10 dark:bg-sky-900/20 dark:text-sky-300 dark:ring-sky-300/20">
                 Current User
               </span>
             </div>
@@ -88,7 +88,7 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
                       role: role,
                       memberId: orgMember.member!,
                     },
-                  }
+                  },
                 );
                 if (error) {
                   setNotification("Error updating member", "error");
@@ -103,7 +103,7 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
             <Tooltip title="Requires admin privileges">
               <div
                 className={clsx(
-                  "bg-gray-50 dark:bg-gray-900 hover:cursor-not-allowed relative w-full cursor-default rounded-md border border-gray-300 dark:border-gray-700 py-2 pl-3 pr-10 text-left shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm"
+                  "relative w-full cursor-default rounded-md border border-gray-300 bg-gray-50 py-2 pl-3 pr-10 text-left shadow-sm hover:cursor-not-allowed focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 dark:border-gray-700 dark:bg-gray-900 sm:text-sm",
                 )}
               >
                 <span className="block truncate">{orgMember.org_role}</span>
@@ -119,8 +119,8 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
         </div>
         <div className="col-span-2 flex justify-end gap-2">
           {orgMember.isOwner ? (
-            <span className="inline-flex items-center rounded-full bg-white dark:bg-black px-2 py-1 text-xs font-medium text-gray-500 ring-1 ring-inset ring-gray-300 dark:ring-gray-700">
-              <AcademicCapIcon className="h-4 w-4 mr-1" />
+            <span className="inline-flex items-center rounded-full bg-white px-2 py-1 text-xs font-medium text-gray-500 ring-1 ring-inset ring-gray-300 dark:bg-black dark:ring-gray-700">
+              <AcademicCapIcon className="mr-1 h-4 w-4" />
               Owner
             </span>
           ) : isUserAdmin ? (
@@ -147,7 +147,7 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
                         memberId: orgMember.member!,
                       },
                     },
-                  }
+                  },
                 );
                 if (error) {
                   setNotification("Error leaving organization", "error");
@@ -159,7 +159,7 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
                 router.push("/dashboard");
               }}
             >
-              <p className="hover:bg-gray-200 dark:hover:bg-gray-800 inline-flex items-center rounded-full bg-white dark:bg-black px-2 py-1 text-xs font-medium text-gray-500 ring-1 ring-inset ring-gray-300 dark:ring-gray-700">
+              <p className="inline-flex items-center rounded-full bg-white px-2 py-1 text-xs font-medium text-gray-500 ring-1 ring-inset ring-gray-300 hover:bg-gray-200 dark:bg-black dark:ring-gray-700 dark:hover:bg-gray-800">
                 Leave
               </p>
             </button>
@@ -170,26 +170,26 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
       </li>
 
       <ThemedModal open={openDelete} setOpen={setOpenDelete}>
-        <div className="flex flex-col space-y-4 sm:space-y-8 min-w-[25rem]">
+        <div className="flex min-w-[25rem] flex-col space-y-4 sm:space-y-8">
           <div className="flex flex-col space-y-2">
-            <p className="text-sm sm:text-md font-semibold text-gray-900 dark:text-gray-100">
+            <p className="sm:text-md text-sm font-semibold text-gray-900 dark:text-gray-100">
               Remove Member
             </p>
-            <p className="text-sm sm:text-md text-gray-500">
+            <p className="sm:text-md text-sm text-gray-500">
               {`Are you sure you want to remove member: ${orgMember.email}?`}
             </p>
           </div>
 
-          <div className="w-full flex justify-end text-sm space-x-2">
+          <div className="flex w-full justify-end space-x-2 text-sm">
             <button
               type="button"
               onClick={() => setOpenDelete(false)}
-              className="flex flex-row items-center rounded-md bg-white dark:bg-black px-4 py-2 text-sm font-semibold border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm hover:text-gray-700 dark:hover:text-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+              className="flex flex-row items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500 dark:border-gray-700 dark:bg-black dark:text-gray-100 dark:hover:bg-gray-900 dark:hover:text-gray-300"
             >
               Cancel
             </button>
             <button
-              className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="flex items-center rounded-md bg-black px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:bg-white dark:text-black dark:hover:bg-gray-200"
               onClick={async () => {
                 const { data, error } = await jawn.DELETE(
                   `/v1/organization/{organizationId}/remove_member`,
@@ -202,7 +202,7 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
                         memberId: orgMember.member!,
                       },
                     },
-                  }
+                  },
                 );
                 if (error) {
                   setNotification("Error removing member", "error");

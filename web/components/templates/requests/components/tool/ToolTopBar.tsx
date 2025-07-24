@@ -10,7 +10,7 @@ import { PROMPT_MODES } from "../chatComponent/chatTopBar";
 
 function cycleMode(
   mode: (typeof PROMPT_MODES)[number],
-  isShiftKeyPressed: boolean
+  isShiftKeyPressed: boolean,
 ): (typeof PROMPT_MODES)[number] {
   if (isShiftKeyPressed) {
     return "Debug";
@@ -39,11 +39,11 @@ export const ToolTopBar: React.FC<ToolTopBarProps> = ({
   isModal = false,
 }) => {
   return (
-    <div className="h-10 px-2 rounded-md flex flex-row items-center justify-between w-full bg-slate-50 dark:bg-black text-slate-900 dark:text-slate-100">
+    <div className="flex h-10 w-full flex-row items-center justify-between rounded-md bg-slate-50 px-2 text-slate-900 dark:bg-black dark:text-slate-100">
       <div className="flex flex-row items-center space-x-2">
         <button
           onClick={toggleAllExpanded}
-          className="flex flex-row space-x-1 items-center hover:bg-slate-200 dark:hover:bg-slate-800 py-1 px-2 rounded-lg"
+          className="flex flex-row items-center space-x-1 rounded-lg px-2 py-1 hover:bg-slate-200 dark:hover:bg-slate-800"
         >
           {allExpanded ? (
             <EyeSlashIcon className="h-4 w-4" />
@@ -59,7 +59,7 @@ export const ToolTopBar: React.FC<ToolTopBarProps> = ({
         {!isModal && (
           <button
             onClick={() => setOpen(true)}
-            className="flex flex-row space-x-1 items-center hover:bg-slate-200 dark:hover:bg-slate-800 py-1 px-2 rounded-lg"
+            className="flex flex-row items-center space-x-1 rounded-lg px-2 py-1 hover:bg-slate-200 dark:hover:bg-slate-800"
           >
             <ArrowsPointingOutIcon className="h-4 w-4" />
             <p className="text-xs font-semibold">Expand</p>
@@ -69,7 +69,7 @@ export const ToolTopBar: React.FC<ToolTopBarProps> = ({
           onClick={(e) => {
             setMode(cycleMode(mode, e.shiftKey));
           }}
-          className="flex flex-row space-x-1 items-center hover:bg-slate-200 dark:hover:bg-slate-800 py-1 px-2 rounded-lg"
+          className="flex flex-row items-center space-x-1 rounded-lg px-2 py-1 hover:bg-slate-200 dark:hover:bg-slate-800"
         >
           <ChevronUpDownIcon className="h-4 w-4" />
           <p className="text-xs font-semibold">{mode}</p>

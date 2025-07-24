@@ -30,9 +30,9 @@ export default function PlaygroundToolAttributes({
   }, [isEditingCallId]);
 
   return (
-    <div className="flex items-center gap-2 w-full">
+    <div className="flex w-full items-center gap-2">
       <Input
-        className="text-xs h-auto py-1 px-2 w-auto"
+        className="h-auto w-auto px-2 py-1 text-xs"
         value={toolName}
         onChange={(e) => updateToolName(e.target.value)}
         placeholder="Function Name"
@@ -40,7 +40,7 @@ export default function PlaygroundToolAttributes({
       {isEditingCallId ? (
         <Input
           ref={callIdInputRef}
-          className="text-xs !bg-transparent border-none focus:ring-slate-300 rounded px-[5px] py-0 w-full h-auto border-0 outline-none focus:border-0 focus:ring-0 focus:shadow-none focus:outline-none"
+          className="h-auto w-full rounded border-0 border-none !bg-transparent px-[5px] py-0 text-xs outline-none focus:border-0 focus:shadow-none focus:outline-none focus:ring-0 focus:ring-slate-300"
           value={toolCallId}
           onBlur={() => setIsEditingCallId(false)}
           onKeyDown={(e) => {
@@ -56,7 +56,7 @@ export default function PlaygroundToolAttributes({
           <TooltipTrigger>
             <XSmall
               onClick={() => setIsEditingCallId(true)}
-              className="italic font-medium cursor-pointer px-1 rounded transition-colors duration-150 border border-dashed border-transparent hover:border-slate-300 dark:hover:border-slate-600 w-full max-w-fit"
+              className="w-full max-w-fit cursor-pointer rounded border border-dashed border-transparent px-1 font-medium italic transition-colors duration-150 hover:border-slate-300 dark:hover:border-slate-600"
             >
               {toolCallId}
             </XSmall>

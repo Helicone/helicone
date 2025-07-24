@@ -29,7 +29,7 @@ const ScoresGraphContainer = ({
             };
           }
           return null;
-        })
+        }),
       );
 
       // Process results after Promise.all completes
@@ -53,7 +53,7 @@ const ScoresGraphContainer = ({
       Object.entries(scores).forEach(([promptVersionId, score]) => {
         queryClient.setQueryData(
           ["experimentScores", experimentId, promptVersionId],
-          score ?? ""
+          score ?? "",
         );
       });
     }

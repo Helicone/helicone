@@ -45,7 +45,7 @@ const MessageInput = (props: MessageInputProps) => {
   } = props;
 
   const [message, setMessage] = useState<MessageInputItem>(
-    initialValues || EMPTY_MESSAGE
+    initialValues || EMPTY_MESSAGE,
   );
 
   const { setNotification } = useNotification();
@@ -70,7 +70,7 @@ const MessageInput = (props: MessageInputProps) => {
       id="message-input"
       className={clsx(
         editable ? "border border-gray-300 bg-gray-50" : "bg-transparent",
-        "rounded-lg p-2 w-full flex flex-col space-y-2"
+        "flex w-full flex-col space-y-2 rounded-lg p-2",
       )}
     >
       {/* <RoleButton
@@ -157,8 +157,8 @@ const MessageInput = (props: MessageInputProps) => {
         }} */}
       {/* /> */}
       {message.role === "user" && editable && (
-        <button className="flex items-center px-2 py-1 text-xs hover:bg-gray-300 w-fit rounded-md">
-          <PlusIcon className="h-4 w-4 mr-1" />
+        <button className="flex w-fit items-center rounded-md px-2 py-1 text-xs hover:bg-gray-300">
+          <PlusIcon className="mr-1 h-4 w-4" />
           Add Image
         </button>
       )}

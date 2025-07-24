@@ -25,7 +25,7 @@ export async function modelMetrics(
   timeFilter: {
     start: Date;
     end: Date;
-  }
+  },
 ): Promise<Result<ModelMetric[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
@@ -81,7 +81,7 @@ OFFSET ${offset}
 
   const { data, error } = await dbQueryClickhouse<ModelMetric>(
     query,
-    havingFilter.argsAcc
+    havingFilter.argsAcc,
   );
   if (error !== null) {
     return { data: null, error: error };

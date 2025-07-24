@@ -71,7 +71,7 @@ const RateLimitPage = (props: {}) => {
   const searchParams = useSearchParams();
   const [currentTab, setCurrentTab] = useLocalStorage<string>(
     "rateLimitPageActiveTab",
-    "requests"
+    "requests",
   );
   const [triggerOpenCreateRuleModal, setTriggerOpenCreateRuleModal] =
     useState(0);
@@ -94,7 +94,7 @@ const RateLimitPage = (props: {}) => {
 
   const timeIncrement = useMemo(
     () => getTimeInterval(urlTimeFilter),
-    [urlTimeFilter]
+    [urlTimeFilter],
   );
 
   const timeZoneDifference = useMemo(() => new Date().getTimezoneOffset(), []);
@@ -116,7 +116,7 @@ const RateLimitPage = (props: {}) => {
       timeZoneDifference,
       dbIncrement: timeIncrement,
     }),
-    [urlTimeFilter, timeIncrement, timeZoneDifference]
+    [urlTimeFilter, timeIncrement, timeZoneDifference],
   );
 
   const memoizedMockData = useMemo(() => {
@@ -138,7 +138,7 @@ const RateLimitPage = (props: {}) => {
     key: "requestOverTime",
     postProcess: (data) => {
       return resultMap(data, (d) =>
-        d.map((item) => ({ count: +item.count, time: new Date(item.time) }))
+        d.map((item) => ({ count: +item.count, time: new Date(item.time) })),
       );
     },
   });
@@ -159,7 +159,7 @@ const RateLimitPage = (props: {}) => {
   const rulesCount = rulesQuery.data?.data?.data?.length ?? 0;
   const totalRateLimitedRequests = rateLimitOverTime.data?.data?.reduce(
     (sum, d) => sum + d.count,
-    0
+    0,
   );
   const shouldShowEmptyState =
     rulesCount === 0 && totalRateLimitedRequests === 0;
@@ -168,7 +168,7 @@ const RateLimitPage = (props: {}) => {
 
   const chartData = showMockData
     ? memoizedMockData
-    : rateLimitOverTime.data?.data ?? [];
+    : (rateLimitOverTime.data?.data ?? []);
   const isChartLoading = showMockData ? false : rateLimitOverTime.isLoading;
 
   const hasRateLimitData = false;
@@ -202,24 +202,24 @@ const RateLimitPage = (props: {}) => {
           title="Rate Limits"
           leftActions={
             currentTab === "rules" ? (
-              <div className="flex items-center gap-1.5 ml-4">
+              <div className="ml-4 flex items-center gap-1.5">
                 <TooltipProvider key="rules-tooltip">
                   <Tooltip delayDuration={100}>
                     <TooltipTrigger asChild className="flex items-center">
-                      <InfoIcon className="h-4 w-4 text-muted-foreground cursor-help" />
+                      <InfoIcon className="h-4 w-4 cursor-help text-muted-foreground" />
                     </TooltipTrigger>
                     <TooltipContent className="max-w-xs text-sm" side="bottom">
                       <p className="mb-2">
                         Only one rate limit rule applies per request, based on
                         the following priority:
                       </p>
-                      <p className="font-medium mb-1">
+                      <p className="mb-1 font-medium">
                         Rule Priority & Sorting
                       </p>
                       <p>
                         Rules are automatically sorted by application priority:
                       </p>
-                      <ul className="list-disc pl-4 mt-1 text-xs space-y-0.5">
+                      <ul className="mt-1 list-disc space-y-0.5 pl-4 text-xs">
                         <li>
                           <span className="font-semibold">Segment:</span>{" "}
                           Property rules apply first, then User, then Global.
@@ -244,7 +244,7 @@ const RateLimitPage = (props: {}) => {
           rightActions={[
             <div
               key="header-right-wrapper"
-              className="flex items-center justify-end w-full gap-4"
+              className="flex w-full items-center justify-end gap-4"
             >
               <TabsList>
                 {TABS.map((tab) => (

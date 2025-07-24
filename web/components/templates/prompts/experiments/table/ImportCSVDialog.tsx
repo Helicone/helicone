@@ -62,7 +62,7 @@ const ImportCSVDialog = ({
 
       const limitedRows = (parsed.data as Record<string, string>[]).slice(
         0,
-        100
+        100,
       );
       setFile(file);
       setRows(limitedRows);
@@ -106,7 +106,7 @@ const ImportCSVDialog = ({
           body: {
             inputs: rows,
           },
-        }
+        },
       );
 
       if (result.error || !result.data) {
@@ -148,11 +148,11 @@ const ImportCSVDialog = ({
         <label
           htmlFor="file-upload"
           className={cn(
-            "group relative h-full flex flex-col items-center justify-center w-full aspect-video border-2 border-slate-300 border-dashed rounded-lg dark:border-slate-600 transition",
+            "group relative flex aspect-video h-full w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-300 transition dark:border-slate-600",
             { "dark:border-slate-400 dark:bg-slate-800": dragActive },
-            { "h-fit aspect-auto": file },
+            { "aspect-auto h-fit": file },
             { "items-start justify-start": file },
-            { "dark:hover:border-slate-500 dark:hover:bg-slate-800": file }
+            { "dark:hover:border-slate-500 dark:hover:bg-slate-800": file },
           )}
         >
           {!file ? (
@@ -166,7 +166,7 @@ const ImportCSVDialog = ({
               />
               <svg
                 aria-hidden="true"
-                className="w-10 h-10 mb-3 text-slate-400"
+                className="mb-3 h-10 w-10 text-slate-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -198,10 +198,10 @@ const ImportCSVDialog = ({
               />
             </>
           ) : (
-            <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800 w-full rounded-md">
-              <div className="flex items-center gap-2 flex-1 min-w-0">
+            <div className="flex w-full items-center gap-3 rounded-md bg-slate-50 p-4 dark:bg-slate-800">
+              <div className="flex min-w-0 flex-1 items-center gap-2">
                 <svg
-                  className="w-4 h-4 text-slate-400 shrink-0"
+                  className="h-4 w-4 shrink-0 text-slate-400"
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
                   fill="none"
@@ -229,7 +229,7 @@ const ImportCSVDialog = ({
                 }}
                 variant="outline"
                 size="icon"
-                className="bg-red-500 hover:bg-red-600 dark:bg-red-800 dark:hover:bg-red-900 text-white hover:text-white dark:text-white"
+                className="bg-red-500 text-white hover:bg-red-600 hover:text-white dark:bg-red-800 dark:text-white dark:hover:bg-red-900"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -240,25 +240,25 @@ const ImportCSVDialog = ({
           <Accordion
             type="single"
             collapsible
-            className="w-full mt-4 overflow-x-auto"
+            className="mt-4 w-full overflow-x-auto"
           >
             <AccordionItem value="preview">
               <AccordionTrigger>
                 Preview Data ({rows.length} rows)
               </AccordionTrigger>
               <AccordionContent>
-                <div className="max-h-[300px] overflow-auto border rounded-md">
+                <div className="max-h-[300px] overflow-auto rounded-md border">
                   <table className="w-full border-collapse text-sm">
-                    <thead className="bg-slate-100 dark:bg-slate-800 sticky top-0">
+                    <thead className="sticky top-0 bg-slate-100 dark:bg-slate-800">
                       <tr>
                         {Object.keys(rows[0] || {})
                           .filter((header) =>
-                            experimentPromptInputKeys.includes(header)
+                            experimentPromptInputKeys.includes(header),
                           )
                           .map((header) => (
                             <th
                               key={header}
-                              className="border border-slate-200 dark:border-slate-700 p-2 text-left"
+                              className="border border-slate-200 p-2 text-left dark:border-slate-700"
                             >
                               {header}
                             </th>
@@ -270,12 +270,12 @@ const ImportCSVDialog = ({
                         <tr key={index}>
                           {Object.entries(row)
                             .filter(([key]) =>
-                              experimentPromptInputKeys.includes(key)
+                              experimentPromptInputKeys.includes(key),
                             )
                             .map(([key, value], cellIndex) => (
                               <td
                                 key={cellIndex}
-                                className="border border-slate-200 dark:border-slate-700 p-2 max-w-[200px] max-h-[100px]"
+                                className="max-h-[100px] max-w-[200px] border border-slate-200 p-2 dark:border-slate-700"
                               >
                                 <div className="truncate">{value}</div>
                               </td>
@@ -289,9 +289,9 @@ const ImportCSVDialog = ({
             </AccordionItem>
           </Accordion>
         )}
-        <DialogFooter className="flex items-end sm:justify-between sm:items-center gap-y-1 w-full">
+        <DialogFooter className="flex w-full items-end gap-y-1 sm:items-center sm:justify-between">
           <div className="flex items-center gap-1">
-            <InfoIcon className="w-4 h-4 text-slate-500" />
+            <InfoIcon className="h-4 w-4 text-slate-500" />
             <p className="text-sm text-slate-500">
               Currently, we only support importing up to 100 rows.
             </p>

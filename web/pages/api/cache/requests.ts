@@ -22,7 +22,7 @@ async function handler({
   res
     .status(200)
     .json(
-      await getTopCachedRequestsClickhouse(orgId, parsedBody.data.timeFilter)
+      await getTopCachedRequestsClickhouse(orgId, parsedBody.data.timeFilter),
     );
 }
 

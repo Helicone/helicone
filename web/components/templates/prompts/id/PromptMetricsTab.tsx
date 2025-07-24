@@ -69,7 +69,7 @@ const PromptMetricsTab = ({
   };
 
   const [interval, setInterval] = useState<TimeInterval>(
-    getInterval() as TimeInterval
+    getInterval() as TimeInterval,
   );
   const timeIncrement = getTimeInterval(timeFilter);
 
@@ -105,7 +105,7 @@ const PromptMetricsTab = ({
       page: 1,
       pageSize: 10,
     },
-    id
+    id,
   );
 
   const { datasets } = useGetDataSets();
@@ -151,10 +151,10 @@ const PromptMetricsTab = ({
   };
 
   return (
-    <div className="flex flex-col space-y-16 py-4 px-4">
-      <div className="w-full h-full flex flex-col space-y-4">
+    <div className="flex flex-col space-y-16 px-4 py-4">
+      <div className="flex h-full w-full flex-col space-y-4">
         <h2 className="text-2xl font-semibold text-secondary">Usage Metrics</h2>
-        <div className="flex items-center justify-between w-full">
+        <div className="flex w-full items-center justify-between">
           <ThemedTimeFilter
             timeFilterOptions={[
               { key: "24h", value: "24H" },
@@ -199,12 +199,12 @@ const PromptMetricsTab = ({
           </StyledAreaChart>
         </div>
       </div>
-      <div className="flex flex-col space-y-4 h-full w-full">
+      <div className="flex h-full w-full flex-col space-y-4">
         <h2 className="text-2xl font-semibold text-secondary">
           Experiment Logs
         </h2>
-        <div className="flex items-center justify-between w-full">
-          <div className="flex flex-wrap items-center space-x-2 w-full">
+        <div className="flex w-full items-center justify-between">
+          <div className="flex w-full flex-wrap items-center space-x-2">
             <div className="w-full max-w-[16rem]">
               <MultiSelect
                 placeholder="Dataset"
@@ -250,7 +250,7 @@ const PromptMetricsTab = ({
           </div>
         </div>
         {isExperimentsLoading ? (
-          <div className="h-48 flex justify-center items-center">
+          <div className="flex h-48 items-center justify-center">
             <LoadingAnimation title="Loading Experiments..." />
           </div>
         ) : (
@@ -261,7 +261,7 @@ const PromptMetricsTab = ({
                 key: "id",
                 header: "ID",
                 render: (item) => (
-                  <span className="underline text-black dark:text-white">
+                  <span className="text-black underline dark:text-white">
                     {item.id}
                   </span>
                 ),
