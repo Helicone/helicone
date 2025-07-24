@@ -230,14 +230,18 @@ export const getRequestMessages = (request: any): Message[] => {
 
 export const getLLMSchemaResponse = (response: any) => {
   if ("error" in response) {
-    return {
-      error: {
-        heliconeMessage:
-          "heliconeMessage" in response.error
-            ? response.error.heliconeMessage
-            : JSON.stringify(response.error),
-      },
-    };
+    try {
+      return {
+        error: {
+          heliconeMessage:
+            "heliconeMessage" in response.error
+              ? response.error.heliconeMessage
+              : JSON.stringify(response.error),
+        },
+      };
+    } catch (error) {
+      return response;
+    }
   }
 
   return {
