@@ -12,33 +12,11 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { err, Result } from "../../packages/common/result";
+import { Result } from "../../packages/common/result";
 import { Prompt2025Manager } from "../../managers/prompt/PromptManager";
 import type { JawnAuthenticatedRequest } from "../../types/request";
 import { type OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
-
-export interface Prompt2025Version {
-  id: string;
-  model: string;
-  prompt_id: string;
-  major_version: number;
-  minor_version: number;
-  commit_message: string;
-
-  created_at: string;
-
-  s3_url?: string;
-
-  // TODO: add another type for the user that created
-  // it and union with this one for the info.
-}
-
-export interface Prompt2025 {
-  id: string;
-  name: string;
-  tags: string[];
-  created_at: string;
-}
+import { Prompt2025Version, Prompt2025 } from "@helicone-package/prompts/types";
 
 export interface PromptCreateResponse {
   id: string;

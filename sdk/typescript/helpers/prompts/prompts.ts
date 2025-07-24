@@ -1,5 +1,7 @@
 import { ChatCompletionCreateParamsNonStreaming, ChatCompletionCreateParamsStreaming } from "openai/resources/chat/completions";
 
+export { HeliconePromptManager } from "./HeliconePromptManager";
+
 /**
  * Parameters for using Helicone prompt templates.
  * 
