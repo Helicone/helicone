@@ -135,15 +135,15 @@ export function ExperimentTable({
         id: "index__outer",
         header: () =>
           table.getIsSomeRowsSelected() || table.getIsAllRowsSelected() ? (
-            <div className="flex justify-center items-center text-slate-400 dark:text-slate-600 group relative">
+            <div className="group relative flex items-center justify-center text-slate-400 dark:text-slate-600">
               <input
                 type="checkbox"
-                className="appearance-none relative peer shrink-0 border-slate-200 dark:border-slate-800 bg-slate-200 dark:bg-slate-800 checked:bg-slate-800 dark:checked:bg-slate-300 checked:border-0 h-4 w-4 self-center rounded-sm text-white dark:text-slate-900 cursor-pointer"
+                className="peer relative h-4 w-4 shrink-0 cursor-pointer appearance-none self-center rounded-sm border-slate-200 bg-slate-200 text-white checked:border-0 checked:bg-slate-800 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-900 dark:checked:bg-slate-300"
                 checked={!!table.getIsAllRowsSelected()}
                 onChange={table.getToggleAllRowsSelectedHandler()}
               />
               <svg
-                className="absolute w-4 h-4  hidden peer-checked:block pointer-events-none text-white dark:text-slate-900"
+                className="pointer-events-none absolute hidden h-4 w-4 text-white peer-checked:block dark:text-slate-900"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="none"
@@ -156,17 +156,17 @@ export function ExperimentTable({
               </svg>
             </div>
           ) : (
-            <div className="flex justify-center items-center text-slate-400 dark:text-slate-600 group relative">
-              <span className="group-hover:invisible transition-opacity duration-200">
-                <ListIcon className="w-4 h-4" />
+            <div className="group relative flex items-center justify-center text-slate-400 dark:text-slate-600">
+              <span className="transition-opacity duration-200 group-hover:invisible">
+                <ListIcon className="h-4 w-4" />
               </span>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="ml-2 p-0 border rounded-md h-[22px] w-[24px] items-center justify-center absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    className="invisible absolute ml-2 h-[22px] w-[24px] items-center justify-center rounded-md border p-0 opacity-0 transition-opacity duration-200 group-hover:visible group-hover:opacity-100"
                   >
-                    <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                    <PlayIcon className="h-4 w-4 text-gray-600 dark:text-gray-300" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start">
@@ -182,9 +182,9 @@ export function ExperimentTable({
                               if (cellRef) {
                                 await cellRef.runHypothesis();
                               }
-                            })
+                            }),
                           );
-                        })
+                        }),
                       );
                     }}
                   >
@@ -202,9 +202,9 @@ export function ExperimentTable({
                               if (cellRef) {
                                 await cellRef.runHypothesisIfRequired();
                               }
-                            })
+                            }),
                           );
-                        })
+                        }),
                       );
                     }}
                   >
@@ -230,7 +230,7 @@ export function ExperimentTable({
                       if (cellRef) {
                         cellRef.runHypothesis();
                       }
-                    })
+                    }),
                   );
                 }}
               />
@@ -304,7 +304,7 @@ export function ExperimentTable({
                     if (cellRef) {
                       await cellRef.runHypothesis();
                     }
-                  })
+                  }),
                 );
               }}
             />
@@ -325,7 +325,7 @@ export function ExperimentTable({
                   }
                   onForkPromptVersion={(promptVersionId: string) => {
                     setExternallySelectedForkFromPromptVersionId(
-                      promptVersionId
+                      promptVersionId,
                     );
                     setIsAddColumnDialogOpen(true);
                   }}
@@ -350,7 +350,7 @@ export function ExperimentTable({
               size: 400,
             }),
           ],
-        })
+        }),
       ),
       columnHelper.group({
         id: "add_prompt__outer",
@@ -395,7 +395,7 @@ export function ExperimentTable({
       promptVersionTemplateData,
       setExternallySelectedForkFromPromptVersionId,
       setIsAddColumnDialogOpen,
-    ]
+    ],
   );
 
   const tableData = useMemo<TableDataType[]>(() => {
@@ -409,10 +409,10 @@ export function ExperimentTable({
         (acc, pv) => ({
           ...acc,
           [`prompt_version_${pv.id}`]: row.requests.find(
-            (r) => r.prompt_version_id === pv.id
+            (r) => r.prompt_version_id === pv.id,
           ),
         }),
-        {}
+        {},
       ),
       add_prompt: "",
       autoInputs: row.auto_prompt_inputs,
@@ -420,7 +420,7 @@ export function ExperimentTable({
         row.requests.find(
           (r) =>
             r.prompt_version_id ===
-            experimentTableQuery?.copied_original_prompt_version
+            experimentTableQuery?.copied_original_prompt_version,
         )?.input_record_id ?? "",
     }));
   }, [
@@ -448,7 +448,7 @@ export function ExperimentTable({
       enableRowSelection: true,
       columnResizeMode: "onChange" as const,
     }),
-    [tableData, columnDef, rowSelection]
+    [tableData, columnDef, rowSelection],
   );
 
   const table = useReactTable(tableConfig);
@@ -459,7 +459,7 @@ export function ExperimentTable({
         inputRecordId: string;
         inputs: Record<string, string>;
         autoInputs: any[];
-      }[]
+      }[],
     ) => {
       const newRows = rows.map((row) => ({
         inputRecordId: row.inputRecordId,
@@ -473,7 +473,7 @@ export function ExperimentTable({
         rows: newRows,
       });
     },
-    [addExperimentTableRowInsertBatch]
+    [addExperimentTableRowInsertBatch],
   );
 
   const handleAddRowInsertBatchFromDataset = useCallback(
@@ -482,7 +482,7 @@ export function ExperimentTable({
         datasetId,
       });
     },
-    [addExperimentTableRowInsertFromDatasetBatch]
+    [addExperimentTableRowInsertFromDatasetBatch],
   );
 
   const queryClient = useQueryClient();
@@ -496,20 +496,19 @@ export function ExperimentTable({
         for (const promptVersion of promptVersionsData ?? []) {
           queryClient.setQueryData(
             ["experimentScores", experimentTableId, promptVersion.id],
-            {}
+            {},
           );
         }
       }
       setShowScores(checked);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [queryClient, experimentTableId]
+    [queryClient, experimentTableId],
   );
 
   return (
     <>
-      <Deprecated feature="Experiments" />
-      <div className="flex justify-between items-center py-4 pr-4">
+      <div className="flex items-center justify-between py-4 pr-4">
         <IslandContainer>
           <HcBreadcrumb
             pages={[
@@ -534,7 +533,7 @@ export function ExperimentTable({
                 checked={showScores}
                 onCheckedChange={handleShowScoresChange}
               />
-              <span className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-4">
+              <span className="ml-4 text-sm font-medium text-slate-700 dark:text-slate-300">
                 Wrap text
               </span>
               <Switch
@@ -542,7 +541,7 @@ export function ExperimentTable({
                 onCheckedChange={(checked) => {
                   queryClient.setQueryData(
                     ["wrapText", experimentTableId],
-                    checked
+                    checked,
                   );
                 }}
               />
@@ -558,7 +557,7 @@ export function ExperimentTable({
                 });
               }}
             >
-              <Trash2Icon className="h-4 w-4 text-red-500 mr-2" />
+              <Trash2Icon className="mr-2 h-4 w-4 text-red-500" />
               Delete {table.getSelectedRowModel().rows.length} rows
             </Button>
           )}
@@ -578,9 +577,9 @@ export function ExperimentTable({
       <div className="h-[calc(100vh-50px)]">
         <ResizablePanelGroup direction="horizontal" className="h-full">
           <ResizablePanel defaultSize={75}>
-            <div className="flex flex-col w-full">
+            <div className="flex w-full flex-col">
               {showScores && (
-                <div className="flex flex-col w-full bg-white dark:bg-neutral-950 border-y border-r border-slate-200 dark:border-slate-800">
+                <div className="flex w-full flex-col border-y border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-neutral-950">
                   {promptVersionsData && (
                     <ScoresGraphContainer
                       promptVersions={(promptVersionsData ?? []).map((pv) => ({
@@ -590,31 +589,31 @@ export function ExperimentTable({
                       experimentId={experimentTableId}
                     />
                   )}
-                  <div className="flex justify-between items-center bg-white dark:bg-neutral-950 p-2">
+                  <div className="flex items-center justify-between bg-white p-2 dark:bg-neutral-950">
                     <ScoresEvaluatorsConfig experimentId={experimentTableId} />
                   </div>
                 </div>
               )}
               <div
                 className={clsx(
-                  "bg-white dark:bg-neutral-950 w-full overflow-x-auto",
+                  "w-full overflow-x-auto bg-white dark:bg-neutral-950",
                   showScores
                     ? "h-[calc(100vh-90px-300px-50px)]"
-                    : "h-[calc(100vh-90px)]"
+                    : "h-[calc(100vh-90px)]",
                 )}
               >
                 <div
-                  className="bg-white dark:bg-black rounded-sm inline-block min-w-0 w-max h-auto"
+                  className="inline-block h-auto w-max min-w-0 rounded-sm bg-white dark:bg-black"
                   // style={{ width: "fit-content" }}
                 >
-                  <Table className="border-collapse border-t border-r border-b border-slate-200 dark:border-slate-800 h-[1px]">
+                  <Table className="h-[1px] border-collapse border-b border-r border-t border-slate-200 dark:border-slate-800">
                     <TableHeader>
                       {table.getHeaderGroups().map((headerGroup, i) => (
                         <TableRow
                           key={headerGroup.id}
                           className={clsx(
-                            "sticky top-0 bg-slate-50 dark:bg-slate-900 shadow-sm border-b border-slate-200 dark:border-slate-800",
-                            i === 1 && "h-[225px]"
+                            "sticky top-0 border-b border-slate-200 bg-slate-50 shadow-sm dark:border-slate-800 dark:bg-slate-900",
+                            i === 1 && "h-[225px]",
                           )}
                         >
                           {headerGroup.headers.map((header, index) => (
@@ -622,16 +621,16 @@ export function ExperimentTable({
                               key={header.id}
                               style={{ width: header.getSize() }}
                               className={cn(
-                                "bg-white dark:bg-neutral-950 relative p-0",
+                                "relative bg-white p-0 dark:bg-neutral-950",
                                 index < headerGroup.headers.length - 1 &&
-                                  "border-r border-slate-200 dark:border-slate-800"
+                                  "border-r border-slate-200 dark:border-slate-800",
                               )}
                             >
                               {header.isPlaceholder
                                 ? null
                                 : flexRender(
                                     header.column.columnDef.header,
-                                    header.getContext()
+                                    header.getContext(),
                                   )}
                               <div
                                 className="resizer absolute right-0 top-0 h-full w-4 cursor-col-resize"
@@ -645,7 +644,7 @@ export function ExperimentTable({
                                     "h-full w-1",
                                     header.column.getIsResizing()
                                       ? "bg-blue-700 dark:bg-blue-300"
-                                      : "bg-gray-500"
+                                      : "bg-gray-500",
                                   )}
                                 />
                               </div>
@@ -654,7 +653,7 @@ export function ExperimentTable({
                         </TableRow>
                       ))}
                     </TableHeader>
-                    <TableBody className="text-[13px] bg-white dark:bg-neutral-950">
+                    <TableBody className="bg-white text-[13px] dark:bg-neutral-950">
                       {table.getRowModel().rows?.length ? (
                         table.getRowModel().rows.map((row) => (
                           <TableRow
@@ -681,21 +680,21 @@ export function ExperimentTable({
                             key={row.id}
                             data-state={row.getIsSelected() && "selected"}
                             className={cn(
-                              "border-b border-slate-200 dark:border-slate-800 hover:bg-white dark:hover:bg-neutral-950 dark:data-[state=selected]:bg-slate-900",
+                              "border-b border-slate-200 hover:bg-white dark:border-slate-800 dark:hover:bg-neutral-950 dark:data-[state=selected]:bg-slate-900",
                               (table.getIsSomeRowsSelected() ||
                                 table.getIsAllRowsSelected()) &&
-                                "cursor-pointer pointer-events-auto"
+                                "pointer-events-auto cursor-pointer",
                             )}
                           >
                             {row.getVisibleCells().map((cell) => (
                               <TableCell
                                 className={cn(
-                                  "p-0 border-r border-slate-200 dark:border-slate-800 h-full relative group",
+                                  "group relative h-full border-r border-slate-200 p-0 dark:border-slate-800",
                                   "w-full max-w-0",
                                   cell.column.getIsLastColumn() && "border-r-0",
                                   (table.getIsSomeRowsSelected() ||
                                     table.getIsAllRowsSelected()) &&
-                                    "[&_*]:pointer-events-none"
+                                    "[&_*]:pointer-events-none",
                                 )}
                                 style={{
                                   width: cell.column.getSize(),
@@ -705,7 +704,7 @@ export function ExperimentTable({
                               >
                                 {flexRender(
                                   cell.column.columnDef.cell,
-                                  cell.getContext()
+                                  cell.getContext(),
                                 )}
                               </TableCell>
                             ))}
@@ -729,7 +728,7 @@ export function ExperimentTable({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="self-start flex flex-row space-x-2 text-slate-800 mt-0 shadow-none"
+                      className="mt-0 flex flex-row space-x-2 self-start text-slate-800 shadow-none"
                     >
                       <PlusIcon className="h-4 w-4" />
                       Add row
@@ -790,7 +789,7 @@ export function ExperimentTable({
             <>
               <ResizableHandle withHandle />
               <ResizablePanel minSize={25} maxSize={75}>
-                <div className="h-full flex-shrink-0 flex flex-col">
+                <div className="flex h-full flex-shrink-0 flex-col">
                   {rightPanel === "edit_inputs" && (
                     <EditInputsPanel
                       experimentId={experimentTableId}

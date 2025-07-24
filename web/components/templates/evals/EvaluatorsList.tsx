@@ -69,7 +69,7 @@ export default function EvaluatorsList() {
                       evaluatorId: evaluator.id,
                     },
                   },
-                }
+                },
               );
 
               // Safely check for data with proper type checking
@@ -87,7 +87,7 @@ export default function EvaluatorsList() {
             } catch (error) {
               console.error(
                 `Error fetching online evaluators for ${evaluator.id}:`,
-                error
+                error,
               );
             }
           });
@@ -122,7 +122,7 @@ export default function EvaluatorsList() {
         await deleteEvaluator.mutateAsync(id);
         notification.setNotification(
           `Successfully deleted "${name}"`,
-          "success"
+          "success",
         );
       } catch (error) {
         notification.setNotification("Failed to delete evaluator", "error");
@@ -134,15 +134,15 @@ export default function EvaluatorsList() {
   if (evaluators.isLoading) {
     return (
       <div className="w-full p-6">
-        <div className="flex justify-between items-center mb-6">
+        <div className="mb-6 flex items-center justify-between">
           <H2>Evaluators</H2>
         </div>
         <Card className="w-full p-6">
           <div className="animate-pulse space-y-4">
-            <div className="h-4 bg-muted rounded w-3/4"></div>
-            <div className="h-4 bg-muted rounded w-1/2"></div>
-            <div className="h-4 bg-muted rounded w-5/6"></div>
-            <div className="h-4 bg-muted rounded w-2/3"></div>
+            <div className="h-4 w-3/4 rounded bg-muted"></div>
+            <div className="h-4 w-1/2 rounded bg-muted"></div>
+            <div className="h-4 w-5/6 rounded bg-muted"></div>
+            <div className="h-4 w-2/3 rounded bg-muted"></div>
           </div>
         </Card>
       </div>
@@ -164,7 +164,7 @@ export default function EvaluatorsList() {
                 <Button
                   variant="action"
                   size="sm"
-                  className="gap-1 items-center"
+                  className="items-center gap-1"
                 >
                   <PiPlusBold className="h-3.5 w-3.5" />
                   Create Evaluator
@@ -182,7 +182,7 @@ export default function EvaluatorsList() {
                 <Link href="/evaluators/new">
                   <Button variant="default">
                     Create Evaluator
-                    <PiPlusBold className="h-4 w-4 ml-2" />
+                    <PiPlusBold className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
               }
@@ -195,12 +195,11 @@ export default function EvaluatorsList() {
 
   return (
     <div>
-      <Deprecated feature="Evaluators" />
       <AuthHeader
         title="Evaluators"
         actions={[
           <Link href="/evaluators/new" key="create-evaluator">
-            <Button variant="action" size="sm" className="gap-1 items-center">
+            <Button variant="action" size="sm" className="items-center gap-1">
               <PiPlusBold className="h-3.5 w-3.5" />
               Create Evaluator
             </Button>
@@ -208,27 +207,27 @@ export default function EvaluatorsList() {
         ]}
       />
       <div className="p-6">
-        <div className="bg-card border border-border rounded-lg shadow-sm overflow-hidden dark:border-slate-800">
+        <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm dark:border-slate-800">
           <div className="overflow-x-auto">
             <Table>
               <TableHeader className="bg-muted/30">
-                <TableRow className="hover:bg-transparent border-b border-border dark:border-slate-800">
-                  <TableHead className="font-semibold text-sm py-2.5 px-4">
+                <TableRow className="border-b border-border hover:bg-transparent dark:border-slate-800">
+                  <TableHead className="px-4 py-2.5 text-sm font-semibold">
                     Name
                   </TableHead>
-                  <TableHead className="font-semibold text-sm py-2.5 px-4">
+                  <TableHead className="px-4 py-2.5 text-sm font-semibold">
                     Type
                   </TableHead>
-                  <TableHead className="font-semibold text-sm py-2.5 px-4">
+                  <TableHead className="px-4 py-2.5 text-sm font-semibold">
                     Scoring
                   </TableHead>
-                  <TableHead className="font-semibold text-sm w-28 py-2.5 px-4">
+                  <TableHead className="w-28 px-4 py-2.5 text-sm font-semibold">
                     Status
                   </TableHead>
-                  <TableHead className="font-semibold text-sm py-2.5 px-4">
+                  <TableHead className="px-4 py-2.5 text-sm font-semibold">
                     Created
                   </TableHead>
-                  <TableHead className="font-semibold text-sm text-right py-2.5 px-4">
+                  <TableHead className="px-4 py-2.5 text-right text-sm font-semibold">
                     Actions
                   </TableHead>
                 </TableRow>
@@ -252,69 +251,70 @@ export default function EvaluatorsList() {
                   return (
                     <TableRow
                       key={evaluator.id}
-                      className="hover:bg-muted/25 transition-colors border-b border-border/40 dark:border-slate-800/40 last:border-0 cursor-pointer"
+                      className="cursor-pointer border-b border-border/40 transition-colors last:border-0 hover:bg-muted/25 dark:border-slate-800/40"
                       onClick={() => router.push(`/evaluators/${evaluator.id}`)}
                     >
-                      <TableCell className="font-medium py-3 px-4">
+                      <TableCell className="px-4 py-3 font-medium">
                         {evaluator.name}
                       </TableCell>
-                      <TableCell className="py-3 px-4">
+                      <TableCell className="px-4 py-3">
                         <Badge
                           variant="outline"
                           className={cn(
-                            "inline-flex items-center h-6 px-3 py-1 text-xs whitespace-nowrap",
+                            "inline-flex h-6 items-center whitespace-nowrap px-3 py-1 text-xs",
                             type === "LLM"
-                              ? "bg-blue-50/50 text-blue-600 border-blue-100"
+                              ? "border-blue-100 bg-blue-50/50 text-blue-600"
                               : type === "Python"
-                              ? "bg-purple-50/50 text-purple-600 border-purple-100"
-                              : type === "LastMile"
-                              ? "bg-amber-50/50 text-amber-600 border-amber-100"
-                              : "bg-slate-50/50 text-slate-600 border-slate-100",
-                            "dark:bg-transparent dark:border-opacity-20 dark:text-opacity-80"
+                                ? "border-purple-100 bg-purple-50/50 text-purple-600"
+                                : type === "LastMile"
+                                  ? "border-amber-100 bg-amber-50/50 text-amber-600"
+                                  : "border-slate-100 bg-slate-50/50 text-slate-600",
+                            "dark:border-opacity-20 dark:bg-transparent dark:text-opacity-80",
                           )}
                         >
                           {type}
                         </Badge>
                       </TableCell>
-                      <TableCell className="py-3 px-4">
+                      <TableCell className="px-4 py-3">
                         <Badge
                           variant="outline"
                           className={cn(
-                            "inline-flex items-center h-6 px-3 py-1 text-xs whitespace-nowrap truncate max-w-[120px]",
+                            "inline-flex h-6 max-w-[120px] items-center truncate whitespace-nowrap px-3 py-1 text-xs",
                             (
                               evaluator.scoring_type?.toLowerCase() || ""
                             ).includes("boolean")
-                              ? "bg-cyan-50/50 text-cyan-600 border-cyan-100"
+                              ? "border-cyan-100 bg-cyan-50/50 text-cyan-600"
                               : (
-                                  evaluator.scoring_type?.toLowerCase() || ""
-                                ).includes("choice")
-                              ? "bg-violet-50/50 text-violet-600 border-violet-100"
-                              : (
-                                  evaluator.scoring_type?.toLowerCase() || ""
-                                ).includes("range")
-                              ? "bg-rose-50/50 text-rose-600 border-rose-100"
-                              : "bg-slate-50/50 text-slate-600 border-slate-100",
-                            "dark:bg-transparent dark:border-opacity-20 dark:text-opacity-80"
+                                    evaluator.scoring_type?.toLowerCase() || ""
+                                  ).includes("choice")
+                                ? "border-violet-100 bg-violet-50/50 text-violet-600"
+                                : (
+                                      evaluator.scoring_type?.toLowerCase() ||
+                                      ""
+                                    ).includes("range")
+                                  ? "border-rose-100 bg-rose-50/50 text-rose-600"
+                                  : "border-slate-100 bg-slate-50/50 text-slate-600",
+                            "dark:border-opacity-20 dark:bg-transparent dark:text-opacity-80",
                           )}
                         >
                           {evaluator.scoring_type || "Unknown"}
                         </Badge>
                       </TableCell>
-                      <TableCell className="py-3 px-4">
+                      <TableCell className="px-4 py-3">
                         {isLoadingCounts ? (
-                          <div className="animate-pulse h-4 bg-muted rounded w-8"></div>
+                          <div className="h-4 w-8 animate-pulse rounded bg-muted"></div>
                         ) : onlineCount > 0 ? (
                           <Badge
                             variant="outline"
                             className={cn(
-                              "bg-green-50/50 text-green-600 border-green-100",
-                              "dark:bg-transparent dark:border-green-800/20 dark:text-green-400",
-                              "inline-flex items-center h-6 gap-1.5 px-3 py-1 text-xs whitespace-nowrap"
+                              "border-green-100 bg-green-50/50 text-green-600",
+                              "dark:border-green-800/20 dark:bg-transparent dark:text-green-400",
+                              "inline-flex h-6 items-center gap-1.5 whitespace-nowrap px-3 py-1 text-xs",
                             )}
                           >
                             <span className="relative flex h-2 w-2">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
+                              <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500"></span>
                             </span>
                             {onlineCount} online
                           </Badge>
@@ -322,20 +322,20 @@ export default function EvaluatorsList() {
                           <Badge
                             variant="outline"
                             className={cn(
-                              "bg-muted/10 border-muted/50 text-muted-foreground",
-                              "inline-flex items-center h-6 px-3 py-1 text-xs whitespace-nowrap"
+                              "border-muted/50 bg-muted/10 text-muted-foreground",
+                              "inline-flex h-6 items-center whitespace-nowrap px-3 py-1 text-xs",
                             )}
                           >
                             Offline
                           </Badge>
                         )}
                       </TableCell>
-                      <TableCell className="py-3 px-4 text-muted-foreground text-sm">
+                      <TableCell className="px-4 py-3 text-sm text-muted-foreground">
                         {evaluator.created_at
                           ? formatDate(evaluator.created_at)
                           : "N/A"}
                       </TableCell>
-                      <TableCell className="text-right py-3 px-4">
+                      <TableCell className="px-4 py-3 text-right">
                         <div className="flex justify-end">
                           <Button
                             size="icon"
