@@ -1,0 +1,91 @@
+# Sample AI Gateway configuration for NVIDIA Dynamo
+# This demonstrates how to add NVIDIA Dynamo as a provider for localhost/internal deployments
+
+routers:
+  # Production router with NVIDIA Dynamo + fallbacks
+  production:
+    load-balance:
+      chat:
+        strategy: latency
+        providers:
+          - nvidia-dynamo  # Primary: Internal NVIDIA models
+          - openai         # Fallback: Cloud OpenAI
+          - anthropic      # Fallback: Cloud Anthropic
+    cache:
+      directive: "max-age=3600"  # Cache responses for 1 hour
+    rate-limit:
+      requests_per_minute: 1000
+
+  # Development router with local models only
+  development:
+    load-balance:
+      chat:
+        strategy: latency
+        providers:
+          - nvidia-dynamo  # Internal NVIDIA models
+          - ollama         # Local Ollama models
+
+  # Load testing router with weighted distribution
+  load-test:
+    load-balance:
+      chat:
+        strategy: weighted
+        providers:
+          - provider: nvidia-dynamo
+            weight: '0.8'  # 80% to internal NVIDIA
+          - provider: openai
+            weight: '0.2'  # 20% to OpenAI
+
+# Provider configuration
+providers:
+  nvidia-dynamo:
+    # Point to your internal NVIDIA Dynamo endpoint
+    # This could be internal.company.kube, an internal IP, or localhost
+    base-url: "http://internal.company.kube"
+    models:
+      - "nvidia/llama3-70b"
+      - "nvidia/llama3-8b"
+      - "nvidia/mixtral-8x7b"
+      - "nvidia/mistral-7b"
+      - "nvidia/gemma-7b"
+      - "nvidia/codellama-34b"
+      - "nvidia/starcoder2-15b"
+      - "nvidia/nemotron-4-340b"
+      - "nvidia/llama3.1-8b"
+      - "nvidia/llama3.1-70b"
+      - "nvidia/llama3.1-405b"
+
+  # Override OpenAI to use a specific region or deployment
+  openai:
+    base-url: "https://api.openai.com"
+    models:
+      - "gpt-4o"
+      - "gpt-4o-mini"
+      - "gpt-4-turbo"
+
+  # Override Anthropic for specific regional deployment
+  anthropic:
+    base-url: "https://api.anthropic.com"
+    models:
+      - "claude-3-5-sonnet"
+      - "claude-3-5-haiku"
+
+  # Local Ollama for development
+  ollama:
+    base-url: "http://localhost:11434"
+    models:
+      - "llama3.2"
+      - "deepseek-r1"
+      - "phi4"
+
+# Optional: Helicone integration for observability
+helicone:
+  features: observability  # Enable request logging
+  
+# Optional: Cache configuration
+cache-store:
+  type: "in-memory"  # or "redis" for production
+
+# Optional: Global rate limiting
+rate-limit:
+  requests_per_minute: 5000

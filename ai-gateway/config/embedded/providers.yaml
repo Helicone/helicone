@@ -1,0 +1,119 @@
+openai:
+  models:
+    - "gpt-3.5-turbo"
+    - "gpt-3.5-turbo-16k"
+    - "gpt-3.5-turbo-instruct"
+    - "gpt-4"
+    - "gpt-4-turbo"
+    - "gpt-4o"
+    - "gpt-4o-mini"
+    - "gpt-4.1"
+    - "gpt-4.1-mini"
+    - "gpt-4.1-nano"
+    - "gpt-4.5"
+    - "o1"
+    - "o1-mini"
+    - "o1-pro"
+    - "o3"
+    - "o3-mini"
+    - "o4-mini"
+    - "codex-mini"
+    - "gpt-4o-mini-search"
+    - "gpt-4o-search"
+  base-url: https://api.openai.com
+
+anthropic:
+  models:
+    - "claude-opus-4-0"
+    - "claude-sonnet-4-0"
+    - "claude-3-7-sonnet"
+    - "claude-3-5-haiku"
+    - "claude-3-5-sonnet"
+    - "claude-3-opus"
+  base-url: https://api.anthropic.com
+
+gemini:
+  models:
+    - "gemini-2.5-flash"
+    - "gemini-2.5-pro"
+    - "gemini-2.0-flash"
+    - "gemini-2.0-flash-lite"
+    - "gemini-1.5-flash"
+    - "gemini-1.5-flash-8b"
+    - "gemini-1.5-pro"
+  base-url: https://generativelanguage.googleapis.com
+
+mistral:
+  models:
+    - "ministral-8b"
+    - "ministral-3b"
+    - "mistral-small"
+    - "mistral-medium"
+    - "mistral-large"
+    - "mistral-saba"
+    - "magistral-small"
+    - "magistral-medium"
+    - "ministral-small"
+    - "devstral-small"
+    - "codestral"
+    - "open-mistral-nemo"
+    - "mistral-ocr"
+  base-url: https://api.mistral.ai
+
+nvidia-dynamo:
+  models:
+    - "nvidia/llama3-70b"
+    - "nvidia/llama3-8b"
+    - "nvidia/mixtral-8x7b"
+    - "nvidia/mistral-7b"
+    - "nvidia/gemma-7b"
+    - "nvidia/codellama-34b"
+    - "nvidia/starcoder2-15b"
+    - "nvidia/nemotron-4-340b"
+    - "nvidia/llama3.1-8b"
+    - "nvidia/llama3.1-70b"
+    - "nvidia/llama3.1-405b"
+  base-url: http://internal.company.kube
+
+ollama:
+  models:
+    - "deepseek-r1"
+    - "llama4"
+    - "llama3.3"
+    - "llama3"
+    - "gemma3"
+    - "qwen3"
+    - "phi4"
+    - "llava"
+  base-url: http://localhost:11434
+
+bedrock:
+  models:
+    - "us.anthropic.claude-3-5-haiku-20241022-v1:0"
+    - "anthropic.claude-3-5-sonnet-20240620-v1:0"
+    - "us.anthropic.claude-3-opus-20240229-v1:0"
+    - "us.anthropic.claude-3-7-sonnet-20250219-v1:0"
+    - "us.anthropic.claude-opus-4-20250514-v1:0"
+    - "us.anthropic.claude-sonnet-4-20250514-v1:0"
+    - "us.deepseek.r1-v1:0"
+    - "amazon.nova-micro-v1:0"
+    - "amazon.nova-lite-v1:0"
+    - "amazon.nova-sonic-v1:0"
+    - "meta.llama3-8b-instruct-v1:0"
+    - "cohere.command-r-v1:0"
+    - "cohere.command-r-plus-v1:0"
+    - "cohere.command-text-v14"
+    - "ai21.jamba-instruct-v1:0"
+    - "ai21.j2-mid-v1"
+    - "ai21.j2-ultra-v1"
+    - "amazon.titan-text-express-v1"
+    - "amazon.titan-text-lite-v1"
+    - "amazon.titan-embed-text-v1"
+    - "amazon.titan-embed-text-v2:0"
+    - "amazon.titan-embed-image-v1"
+    - "mistral.mistral-7b-instruct-v0:2"
+    - "mistral.mistral-large-2402-v1:0"
+    - "mistral.mistral-small-2402-v1:0"
+    - "mistral.mixtral-8x7b-instruct-v0:1"
+    - "us.mistral.pixtral-large-2502-v1:0"
+  base-url: https://bedrock-runtime.us-east-1.amazonaws.com
