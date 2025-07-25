@@ -63,7 +63,7 @@ export function timeBackfill<T, K>(
   data: (T & { created_at_trunc: Date })[],
   start: Date,
   end: Date,
-  reducer: (acc: K, d: T) => K,
+  reducer: (_acc: K, _d: T) => K,
   initial: K,
 ): (K & { time: Date })[] {
   const result: (K & { time: Date })[] = [];

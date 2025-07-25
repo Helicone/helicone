@@ -83,7 +83,7 @@ function createSimulatedRequestStep(
   originalRequest: HeliconeRequest,
   message: Message, // The specific message this step represents
   stepIndex: number, // The chronological index of this message/step
-  previousStepResponseTimestampMs: number, // The end time (in ms) of the preceding step
+  _previousStepResponseTimestampMs: number, // The end time (in ms) of the preceding step
 ): HeliconeRequest {
   // Use the message timestamp as the base request time
   const baseRequestTimestampMs = new Date(

@@ -13,10 +13,7 @@ import {
 } from "@/components/ui/context-menu";
 import { useMutation } from "@tanstack/react-query";
 import useNotification from "@/components/shared/notification/useNotification";
-import {
-  useDeleteQueryMutation,
-  useSaveQueryMutation,
-} from "./constants";
+import { useDeleteQueryMutation, useSaveQueryMutation } from "./constants";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,

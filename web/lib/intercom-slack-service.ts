@@ -23,7 +23,7 @@ export class IntercomSlackService {
     slackThreadTs: string,
     slackMessageTs: string,
   ): Promise<void> {
-    console.log("Storing message mapping with dbExecute...");
+    console.error("Storing message mapping with dbExecute...");
     const result = await dbExecute(
       `INSERT INTO intercom_slack_mappings 
        (intercom_conversation_id, intercom_message_id, slack_channel_id, slack_thread_ts, slack_message_ts) 
@@ -42,7 +42,7 @@ export class IntercomSlackService {
       throw new Error(`Failed to store message mapping: ${result.error}`);
     }
 
-    console.log("Message mapping stored successfully");
+    console.error("Message mapping stored successfully");
   }
 
   async getMessageMappingBySlackThread(
@@ -252,7 +252,7 @@ export class IntercomSlackService {
       }
     }
 
-    console.log("Slack payload:", JSON.stringify(slackPayload, null, 2));
+    console.error("Slack payload:", JSON.stringify(slackPayload, null, 2));
 
     const response = await fetch("https://slack.com/api/chat.postMessage", {
       method: "POST",
@@ -263,7 +263,7 @@ export class IntercomSlackService {
       body: JSON.stringify(slackPayload),
     });
 
-    console.log("Slack response status:", response.status);
+    console.error("Slack response status:", response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -329,9 +329,9 @@ export class IntercomSlackService {
     if (adminResponse.ok) {
       const adminData = await adminResponse.json();
       adminId = adminData.id;
-      console.log("Found admin ID:", adminId);
+      console.error("Found admin ID:", adminId);
     } else {
-      console.log("Could not get admin ID, trying without it");
+      console.error("Could not get admin ID, trying without it");
     }
 
     const payload: any = {
@@ -344,8 +344,8 @@ export class IntercomSlackService {
       payload.admin_id = adminId;
     }
 
-    console.log("Intercom API URL:", intercomApiUrl);
-    console.log("Payload:", JSON.stringify(payload, null, 2));
+    console.error("Intercom API URL:", intercomApiUrl);
+    console.error("Payload:", JSON.stringify(payload, null, 2));
 
     const response = await fetch(intercomApiUrl, {
       method: "POST",
@@ -357,7 +357,7 @@ export class IntercomSlackService {
       body: JSON.stringify(payload),
     });
 
-    console.log("Intercom response status:", response.status);
+    console.error("Intercom response status:", response.status);
 
     if (!response.ok) {
       const errorData = await response.text();
@@ -368,7 +368,7 @@ export class IntercomSlackService {
     }
 
     const responseData = await response.json();
-    console.log("Intercom response:", JSON.stringify(responseData, null, 2));
-    console.log("=== INTERCOM REPLY SUCCESS ===");
+    console.error("Intercom response:", JSON.stringify(responseData, null, 2));
+    console.error("=== INTERCOM REPLY SUCCESS ===");
   }
 }
