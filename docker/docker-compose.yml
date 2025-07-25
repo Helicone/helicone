@@ -126,9 +126,7 @@ services:
   # =============================================================================
 
   aigateway:
-    build:
-      context: ../aigateway
-      dockerfile: Dockerfile
+    image: helicone/ai-gateway:latest
     restart: unless-stopped
     ports:
       - "5678:5678"

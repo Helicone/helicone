@@ -241,7 +241,7 @@ export default function RequestDrawer(props: RequestDivProps) {
             value: request.heliconeMetadata.promptCacheWriteTokens || 0,
           }
         : null,
-    ].filter((item) => item !== null);
+    ].filter((item): item is NonNullable<typeof item> => item !== null);
 
     // Parameter Information (only include defined parameters)
     const parameterInfo = Object.entries(requestParameters)
