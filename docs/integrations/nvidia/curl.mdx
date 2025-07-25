@@ -9,10 +9,13 @@ iconType: "solid"
 
 This integration is used to log usage with the [Nvidia NIM](https://build.nvidia.com/) API. For other Nvidia inference providers that are OpenAI-compatible, such as Dynamo, see [here](/integrations/nvidia/dynamo).
 
+import { strings } from "/snippets/strings.mdx";
+
+## {strings.howToIntegrate}
+
 <Steps>
-  <Step title="Create an account + Generate an API Key">
-    Log into [Helicone](https://www.helicone.ai) or create an account. Once you have an account, you
-    can generate an [API key](https://helicone.ai/developer).
+  <Step title={strings.generateKey}>
+      <div dangerouslySetInnerHTML={{ __html: strings.generateKeyInstructions }} />
   </Step>
 <Step title={strings.modifyBasePath}>
 
