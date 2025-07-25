@@ -74,8 +74,8 @@ const avianPattern = /^https:\/\/api\.avian\.io/;
 //https://api.studio.nebius.ai
 const nebius = /^https:\/\/api\.studio\.nebius\.ai/;
 
-// https://gateway.ai.vercel.com or https://ai-gateway.vercel.sh
-const vercelGateway = /^https:\/\/(gateway\.ai(\.vercel)?\.com|ai-gateway\.vercel\.sh)/;
+// https://ai-gateway.vercel.sh
+const vercelGateway = /^https:\/\/ai-gateway\.vercel\.sh/;
 
 // https://api.novita.ai
 const novita = /^https:\/\/api\.novita\.ai/;
@@ -115,7 +115,7 @@ export const providersNames = [
   "OPENPIPE",
   "LLAMA",
   "NVIDIA",
-  "VERCEL"
+  "VERCEL",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];

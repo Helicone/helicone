@@ -1,5 +1,5 @@
 import { Usage } from "../../handlers/HandlerContext";
-import { PromiseGenericResult, ok } from "../../../packages/common/result";
+import { PromiseGenericResult, ok, err } from "../../../packages/common/result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 
 export class VercelBodyProcessor implements IBodyProcessor {
@@ -7,7 +7,14 @@ export class VercelBodyProcessor implements IBodyProcessor {
     parseInput: ParseInput
   ): PromiseGenericResult<ParseOutput> {
     const { responseBody } = parseInput;
-    const parsedResponseBody = JSON.parse(responseBody);
+
+    let parsedResponseBody: any;
+    try {
+      parsedResponseBody = JSON.parse(responseBody);
+    } catch (e) {
+      console.error("Error parsing Vercel response body as JSON:", e);
+      return err(`Failed to parse Vercel response body: ${e}`);
+    }
 
     return ok({
       processedBody: parsedResponseBody,

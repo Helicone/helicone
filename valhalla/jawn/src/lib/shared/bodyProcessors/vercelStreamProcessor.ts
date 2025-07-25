@@ -21,7 +21,9 @@ export class VercelStreamProcessor implements IBodyProcessor {
 
     const { responseBody, requestBody, requestModel, modelOverride } =
       parseInput;
-    const eventLines = responseBody.split("\n").filter(line => line.trim() !== "");
+    const eventLines = responseBody
+      .split("\n")
+      .filter((line) => line.trim() !== "");
     let completionText = "";
     let usage: any = undefined;
     let finishReason: string | undefined = undefined;
@@ -86,7 +88,8 @@ export class VercelStreamProcessor implements IBodyProcessor {
           if (chunk.providerMetadata) {
             providerMetadata = chunk.providerMetadata;
             if (chunk.providerMetadata.gateway?.routing?.originalModelId) {
-              originalModelId = chunk.providerMetadata.gateway.routing.originalModelId;
+              originalModelId =
+                chunk.providerMetadata.gateway.routing.originalModelId;
             }
           }
         }
@@ -98,7 +101,9 @@ export class VercelStreamProcessor implements IBodyProcessor {
     // Determine the model to use - prefer originalModelId over modelId
     const detectedModel = originalModelId || modelId;
     const model =
-      calculateModel(requestModel, detectedModel, modelOverride) || "gpt-4o-mini";
+      calculateModel(requestModel, detectedModel, modelOverride) ||
+      requestModel ||
+      "unknown";
 
     // If usage is all zeros or undefined, calculate tokens as fallback
     if (

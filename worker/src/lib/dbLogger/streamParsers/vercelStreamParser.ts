@@ -24,8 +24,8 @@ export function parseVercelStream(result: string): Result<any, string> {
         if (chunk.finishReason) {
           finishReason = chunk.finishReason;
         }
-        if (chunk.fullText) {
-          // Use fullText as it's the complete response
+        if (chunk.fullText && !completionText) {
+          // Use fullText only if we haven't accumulated text yet
           completionText = chunk.fullText;
         }
         if (chunk.usage) {

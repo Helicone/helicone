@@ -9,7 +9,6 @@ const randomId = () => {
 };
 
 const getRequestText = (requestBody: any) => {
-  console.log("getRequestText", JSON.stringify(requestBody));
   if (requestBody.tooLarge) {
     return "Helicone Message: Input too large";
   }
@@ -82,10 +81,12 @@ const vercelMessageToMessage = (message: any): Message => {
       .filter((c: any) => c.type === "text")
       .map((c: any) => c.text || "")
       .join("");
-    
+
     // Check if there are any images
-    const imageContent = message.content.find((c: any) => c.type === "image" || c.type === "image_url");
-    
+    const imageContent = message.content.find(
+      (c: any) => c.type === "image" || c.type === "image_url"
+    );
+
     if (imageContent) {
       return {
         content: textContent,
@@ -95,7 +96,7 @@ const vercelMessageToMessage = (message: any): Message => {
         id: randomId(),
       };
     }
-    
+
     return {
       content: textContent,
       role: messageRole,
@@ -176,14 +177,24 @@ const getResponseMessages = (response: any): Message[] => {
             role: "assistant",
             content: "",
             _type: "functionCall",
-            tool_calls: choice.message.tool_calls.map((toolCall: any) => ({
-              id: toolCall.id,
-              name: toolCall.function?.name || "",
-              arguments:
-                typeof toolCall.function?.arguments === "string"
-                  ? JSON.parse(toolCall.function.arguments)
-                  : toolCall.function?.arguments || {},
-            })),
+            tool_calls: choice.message.tool_calls.map((toolCall: any) => {
+              let parsedArguments = toolCall.function?.arguments || {};
+
+              if (typeof toolCall.function?.arguments === "string") {
+                try {
+                  parsedArguments = JSON.parse(toolCall.function.arguments);
+                } catch (e) {
+                  console.error("Error parsing tool call arguments:", e);
+                  parsedArguments = {};
+                }
+              }
+
+              return {
+                id: toolCall.id,
+                name: toolCall.function?.name || "",
+                arguments: parsedArguments,
+              };
+            }),
           });
         } else if (choice.message.content) {
           messages.push({
