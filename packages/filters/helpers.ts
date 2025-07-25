@@ -126,7 +126,6 @@ export function uiFilterRowToFilterLeaf(
   }
 
   if (
-    filterDef?.column === "helicone-score-feedback" &&
     filterDef?.table === "request_response_rmt" &&
     filterDef?.category === "feedback"
   ) {

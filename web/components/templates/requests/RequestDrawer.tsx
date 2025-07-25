@@ -41,7 +41,6 @@ import ThemedModal from "../../shared/themed/themedModal";
 import { formatNumber } from "../../shared/utils/formatNumber";
 import { Badge } from "../../ui/badge";
 import NewDataset from "../datasets/NewDataset";
-import FeedbackAction from "../feedback/thumbsUpThumbsDown";
 import { RenderMappedRequest } from "./RenderHeliconeRequest";
 import ScrollableBadges from "./ScrollableBadges";
 import StatusBadge from "./statusBadge";
@@ -730,9 +729,10 @@ export default function RequestDrawer(props: RequestDivProps) {
               className="px-4"
               title="Scores"
               placeholder="No Scores"
-              items={Object.entries(currentScores)
-                .filter(([key]) => key !== "helicone-score-feedback")
-                .map(([key, value]) => ({ key, value }))}
+              items={Object.entries(currentScores).map(([key, value]) => ({
+                key,
+                value,
+              }))}
               onAdd={onAddScoreHandler}
               valueType="number"
               tooltipText="Add a Score to this request"
@@ -785,30 +785,12 @@ export default function RequestDrawer(props: RequestDivProps) {
               <Button
                 variant="outline"
                 size="sm"
-                className="flex flex-row items-center gap-1.5"
                 onClick={() => setShowNewDatasetModal(true)}
               >
                 <LuPlus className="h-4 w-4" />
                 Dataset
               </Button>
             </div>
-
-            <FeedbackAction
-              id={request.id}
-              type="request"
-              defaultValue={
-                request.heliconeMetadata.scores &&
-                request.heliconeMetadata.scores["helicone-score-feedback"]
-                  ? Number(
-                      request.heliconeMetadata.scores[
-                        "helicone-score-feedback"
-                      ],
-                    ) === 1
-                    ? true
-                    : false
-                  : null
-              }
-            />
           </div>
         </footer>
 

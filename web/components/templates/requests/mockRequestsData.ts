@@ -196,7 +196,6 @@ const generateMockRequest = (
   const hasScores = Math.random() > 0.6;
   const scores = hasScores
     ? {
-        "helicone-score-feedback": Math.random() > 0.5 ? 1 : 0,
         "factual-accuracy": {
           value: Math.floor(Math.random() * 10) + 1,
           valueType: "number",

@@ -1,6 +1,5 @@
 import { AnthropicProxyHeartBeat } from "./heartbeats/anthropicProxy";
 import { AsyncHeartBeat } from "./heartbeats/async";
-import { FeedbackHeartBeat } from "./heartbeats/feedback";
 import { GraphQLHeartBeat } from "./heartbeats/graphQL";
 import { OpenAIProxyHeartBeat } from "./heartbeats/oaiProxy";
 import { UsageManager } from "./managers/UsageManager";
@@ -39,7 +38,6 @@ export interface Env {
 
 const constructorMapping: Record<string, any> = {
   AsyncHeartBeat: new AsyncHeartBeat(),
-  FeedbackHeartBeat: new FeedbackHeartBeat(),
   GraphQLHeartBeat: new GraphQLHeartBeat(),
   OpenAIProxyHeartBeat: new OpenAIProxyHeartBeat(),
   AnthropicProxyHeartBeat: new AnthropicProxyHeartBeat(),

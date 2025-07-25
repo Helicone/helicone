@@ -28,12 +28,6 @@ interface ModelMetricsQueryResult {
   total_requests: number;
   success_rate: number;
   error_rate: number;
-  positive_percentage: number;
-  negative_percentage: number;
-  positive_feedback_count: number;
-  negative_feedback_count: number;
-  total_feedback: number;
-  unique_feedback_values: number[];
 }
 
 interface GeographicLatencyQueryResult {
@@ -172,10 +166,6 @@ export class ModelComparisonManager {
         p95: metrics.p95_ttft,
         p99: metrics.p99_ttft,
       },
-      feedback: {
-        positivePercentage: metrics.positive_percentage ?? 0,
-        negativePercentage: metrics.negative_percentage ?? 0,
-      },
       geographicLatency: (geoResult.data ?? []).map((geo) => ({
         countryCode: geo.country_code,
         median: geo.median_latency_per_1000_tokens,
@@ -242,14 +232,7 @@ export class ModelComparisonManager {
         countIf(status < 500) as successful_requests,
         countIf(status >= 500) as error_requests,
         (successful_requests / total_requests) as success_rate,
-        (error_requests / total_requests) as error_rate,
-
-        -- Feedback counts
-        countIf(has(scores, 'helicone-score-feedback')) as total_feedback,
-        coalesce(countIf(has(scores, 'helicone-score-feedback') AND scores['helicone-score-feedback'] = 1) / 
-          nullIf(total_feedback, 0), 0) as positive_percentage,
-        coalesce(countIf(has(scores, 'helicone-score-feedback') AND scores['helicone-score-feedback'] = 0) / 
-          nullIf(total_feedback, 0), 0) as negative_percentage
+        (error_requests / total_requests) as error_rate
       FROM request_response_rmt
       WHERE model IN ${formattedModelNames}
         AND upper(provider) = '${provider}'

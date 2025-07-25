@@ -127,11 +127,8 @@ export interface paths {
   "/v1/request/{requestId}": {
     get: operations["GetRequestById"];
   };
-  "/v1/request/query-ids": {
+  "/v1/request/ids": {
     post: operations["GetRequestsByIds"];
-  };
-  "/v1/request/{requestId}/feedback": {
-    post: operations["FeedbackRequest"];
   };
   "/v1/request/{requestId}/property": {
     put: operations["PutProperty"];
@@ -335,8 +332,8 @@ export interface paths {
   "/v1/session/metrics/query": {
     post: operations["GetMetrics"];
   };
-  "/v1/session/{sessionId}/feedback": {
-    post: operations["UpdateSessionFeedback"];
+  "/v1/session/{sessionId}/copy": {
+    put: operations["CopySession"];
   };
   "/v1/session/{sessionId}/tag": {
     get: operations["GetSessionTag"];
@@ -814,7 +811,6 @@ export interface components {
       cache_enabled?: components["schemas"]["Partial_BooleanOperators_"];
       cache_reference_id?: components["schemas"]["Partial_TextOperators_"];
       assets?: components["schemas"]["Partial_TextOperators_"];
-      "helicone-score-feedback"?: components["schemas"]["Partial_BooleanOperators_"];
       gateway_router_id?: components["schemas"]["Partial_TextOperators_"];
       gateway_deployment_target?: components["schemas"]["Partial_TextOperators_"];
     };
@@ -1284,13 +1280,6 @@ export interface components {
       prompt_id?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description Make all properties in T optional */
-    Partial_FeedbackTableToOperators_: {
-      id?: components["schemas"]["Partial_NumberOperators_"];
-      created_at?: components["schemas"]["Partial_TimestampOperators_"];
-      rating?: components["schemas"]["Partial_BooleanOperators_"];
-      response_id?: components["schemas"]["Partial_TextOperators_"];
-    };
-    /** @description Make all properties in T optional */
     Partial_SessionsRequestResponseRMTToOperators_: {
       session_session_id?: components["schemas"]["Partial_TextOperators_"];
       session_session_name?: components["schemas"]["Partial_TextOperators_"];
@@ -1304,11 +1293,10 @@ export interface components {
       session_tag?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_": {
+    "Pick_FilterLeaf.request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_": {
       request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
       response?: components["schemas"]["Partial_ResponseTableToOperators_"];
       request?: components["schemas"]["Partial_RequestTableToOperators_"];
-      feedback?: components["schemas"]["Partial_FeedbackTableToOperators_"];
       sessions_request_response_rmt?: components["schemas"]["Partial_SessionsRequestResponseRMTToOperators_"];
       properties?: {
         [key: string]: components["schemas"]["Partial_TextOperators_"];
@@ -1317,8 +1305,8 @@ export interface components {
         [key: string]: components["schemas"]["Partial_TextOperators_"];
       };
     };
-    "FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_"];
-    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_"] | components["schemas"]["RequestFilterBranch"] | "all";
+    "FilterLeafSubset_request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_": components["schemas"]["Pick_FilterLeaf.request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_"];
+    RequestFilterNode: components["schemas"]["FilterLeafSubset_request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_"] | components["schemas"]["RequestFilterBranch"] | "all";
     RequestFilterBranch: {
       right: components["schemas"]["RequestFilterNode"];
       /** @enum {string} */
@@ -2155,12 +2143,22 @@ Json: JsonObject;
       timeFilter?: components["schemas"]["TimeFilterMs"];
       filter?: components["schemas"]["SessionFilterNode"];
     };
-    "ResultSuccess_string-or-null_": {
-      data: string | null;
+    "ResultSuccess__sessionId-string__": {
+      data: {
+        sessionId: string;
+      };
       /** @enum {number|null} */
       error: null;
     };
-    "Result_string-or-null.string_": components["schemas"]["ResultSuccess_string-or-null_"] | components["schemas"]["ResultError_string_"];
+    "Result__sessionId-string_.string_": components["schemas"]["ResultSuccess__sessionId-string__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__tag-string__": {
+      data: {
+        tag: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__tag-string_.string_": components["schemas"]["ResultSuccess__tag-string__"] | components["schemas"]["ResultError_string_"];
     MetricsData: {
       /** Format: double */
       totalRequests: number;
@@ -2642,12 +2640,6 @@ Json: JsonObject;
           median: number;
           countryCode: string;
         }[];
-      feedback: {
-        /** Format: double */
-        negativePercentage: number;
-        /** Format: double */
-        positivePercentage: number;
-      };
       costs: {
         /** Format: double */
         completion_token: number;
@@ -4167,28 +4159,6 @@ export interface operations {
       };
     };
   };
-  FeedbackRequest: {
-    parameters: {
-      path: {
-        requestId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          rating: boolean;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
   PutProperty: {
     parameters: {
       path: {
@@ -5338,7 +5308,7 @@ export interface operations {
       };
     };
   };
-  UpdateSessionFeedback: {
+  CopySession: {
     parameters: {
       path: {
         sessionId: string;
@@ -5347,7 +5317,7 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
-          rating: boolean;
+          name: string;
         };
       };
     };
@@ -5355,7 +5325,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_null.string_"];
+          "application/json": components["schemas"]["Result__sessionId-string_.string_"];
         };
       };
     };
@@ -5370,7 +5340,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_string-or-null.string_"];
+          "application/json": components["schemas"]["Result__tag-string_.string_"];
         };
       };
     };

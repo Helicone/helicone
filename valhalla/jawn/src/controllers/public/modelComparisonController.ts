@@ -43,10 +43,6 @@ export type Model = {
     prompt_token: number;
     completion_token: number;
   };
-  feedback: {
-    positivePercentage: number;
-    negativePercentage: number;
-  };
   geographicLatency: {
     countryCode: string;
     median: number;

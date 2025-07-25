@@ -371,10 +371,10 @@ export class SessionManager {
     );
   }
 
-  async updateSessionFeedback(
+  async copySession(
     sessionId: string,
-    rating: boolean
-  ): Promise<Result<null, string>> {
+    newName: string
+  ): Promise<Result<{ sessionId: string }, string>> {
     try {
       const result = await dbExecute<{ id: string }>(
         `SELECT id
@@ -393,16 +393,16 @@ export class SessionManager {
       const requestManager = new RequestManager(this.authParams);
       const res = await requestManager.addPropertyToRequest(
         result.data[0].id,
-        "Helicone-Session-Feedback",
-        rating ? "1" : "0"
+        "Helicone-Session-Name",
+        newName
       );
 
       if (res.error) {
         return err(res.error);
       }
-      return ok(null);
+      return ok({ sessionId: sessionId });
     } catch (error) {
-      console.error("Error updating session feedback:", error);
+      console.error("Error copying session:", error);
       return err(String(error));
     }
   }

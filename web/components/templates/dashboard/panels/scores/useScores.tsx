@@ -46,9 +46,6 @@ export function useScores({
   });
 
   function scoreKeyToName(key: string) {
-    if (key === "helicone-score-feedback") {
-      return "Feedback";
-    }
     return key.replace(/-hcone-bool$/, "");
   }
 
@@ -59,8 +56,7 @@ export function useScores({
 
     return keys
       .filter((s) => {
-        const isBoolean =
-          s.endsWith("-hcone-bool") || s === "helicone-score-feedback";
+        const isBoolean = s.endsWith("-hcone-bool");
         return filterBool ? isBoolean : !isBoolean;
       })
       .map(scoreKeyToName);

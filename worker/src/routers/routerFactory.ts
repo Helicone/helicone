@@ -9,9 +9,10 @@ import { RequestWrapper } from "../lib/RequestWrapper";
 import { getAnthropicProxyRouter } from "./anthropicProxyRouter";
 import { getAPIRouter } from "./api/apiRouter";
 import { getOpenAIProxyRouter } from "./openaiProxyRouter";
-import { handleFeedback } from "../lib/managers/FeedbackManager";
 import { getGatewayAPIRouter } from "./gatewayRouter";
 import { handleLoggingEndpoint } from "../lib/managers/PropertiesManager";
+import { handleDataset } from "../lib/managers/DatasetManager";
+import { handleTheme } from "../lib/managers/ThemeManager";
 import { getGenerateRouter } from "./generateRouter";
 
 export type BaseRouter = RouterType<
@@ -89,36 +90,6 @@ function addBaseRoutes(router: BaseRouter | BaseOpenAPIRouter): void {
         status: 200,
         headers: {
           "Content-Type": "application/json",
-        },
-      });
-    }
-  );
-
-  router.post(
-    "/v1/feedback",
-    async (
-      _: unknown,
-      requestWrapper: RequestWrapper,
-      _env: Env,
-      _ctx: ExecutionContext
-    ) => {
-      return await handleFeedback(requestWrapper);
-    }
-  );
-
-  router.options(
-    "/v1/feedback",
-    async (
-      _: unknown,
-      _requestWrapper: RequestWrapper,
-      _env: Env,
-      _ctx: ExecutionContext
-    ) => {
-      return new Response(null, {
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "POST",
-          "Access-Control-Allow-Headers": "Content-Type, helicone-jwt",
         },
       });
     }

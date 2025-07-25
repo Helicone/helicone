@@ -125,95 +125,95 @@ services:
   # HELICONE CORE SERVICES (include-helicone profile)
   # =============================================================================
 
-  aigateway:
-    build:
-      context: ../aigateway
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    ports:
-      - "5678:5678"
-    profiles: ["include-helicone"]
-    depends_on:
-      redis:
-        condition: service_healthy
-    env_file: "../aigateway/.env"
-    environment:
-      # Configure server to bind to all interfaces (0.0.0.0) instead of localhost (127.0.0.1)
-      - PROXY__SERVER__ADDRESS=0.0.0.0
-    networks:
-      - traces
-      - default
-    extra_hosts:
-      - host.docker.internal:host-gateway
+  # aigateway:
+  #   build:
+  #     context: ../aigateway
+  #     dockerfile: Dockerfile
+  #   restart: unless-stopped
+  #   ports:
+  #     - "5678:5678"
+  #   profiles: ["include-helicone"]
+  #   depends_on:
+  #     redis:
+  #       condition: service_healthy
+  #   env_file: "../aigateway/.env"
+  #   environment:
+  #     # Configure server to bind to all interfaces (0.0.0.0) instead of localhost (127.0.0.1)
+  #     - PROXY__SERVER__ADDRESS=0.0.0.0
+  #   networks:
+  #     - traces
+  #     - default
+  #   extra_hosts:
+  #     - host.docker.internal:host-gateway
 
-  jawn:
-    container_name: helicone-jawn
-    build:
-      context: ../
-      dockerfile: valhalla/dockerfile
-    restart: unless-stopped
-    ports:
-      - ${JAWN_PORT:-8585}:${JAWN_PORT:-8585}
-    profiles: ["include-helicone"]
-    depends_on:
-      db:
-        condition: service_healthy
-      clickhouse:
-        condition: service_healthy
-      minio:
-        condition: service_healthy
-      migrations:
-        condition: service_completed_successfully
-    environment:
-      PORT: ${JAWN_PORT:-8585}
-      NEXT_PUBLIC_BETTER_AUTH: "true"
-      S3_ENDPOINT: http://minio:9000
-      S3_ACCESS_KEY: minioadmin
-      S3_SECRET_KEY: minioadmin
-      S3_BUCKET_NAME: "request-response-storage"
-      S3_ENDPOINT_PUBLIC: http://localhost:9000
-      CLICKHOUSE_CREDS: |
-        {
-          "CLICKHOUSE_HOST": "http://clickhouse:8123",
-          "CLICKHOUSE_USER": "default",
-          "CLICKHOUSE_PASSWORD": "",
-          "CLICKHOUSE_HQL_USER": "hql_user",
-          "CLICKHOUSE_HQL_PASSWORD": ""
-        }
-      VERCEL_ENV: ${VERCEL_ENV:-development}
-      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-your-secret-key}
-      SUPABASE_DATABASE_URL: postgres://postgres:testpassword@db:5432/helicone_test
+  # jawn:
+  #   container_name: helicone-jawn
+  #   build:
+  #     context: ../
+  #     dockerfile: valhalla/dockerfile
+  #   restart: unless-stopped
+  #   ports:
+  #     - ${JAWN_PORT:-8585}:${JAWN_PORT:-8585}
+  #   profiles: ["include-helicone"]
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #     clickhouse:
+  #       condition: service_healthy
+  #     minio:
+  #       condition: service_healthy
+  #     migrations:
+  #       condition: service_completed_successfully
+  #   environment:
+  #     PORT: ${JAWN_PORT:-8585}
+  #     NEXT_PUBLIC_BETTER_AUTH: "true"
+  #     S3_ENDPOINT: http://minio:9000
+  #     S3_ACCESS_KEY: minioadmin
+  #     S3_SECRET_KEY: minioadmin
+  #     S3_BUCKET_NAME: "request-response-storage"
+  #     S3_ENDPOINT_PUBLIC: http://localhost:9000
+  #     CLICKHOUSE_CREDS: |
+  #       {
+  #         "CLICKHOUSE_HOST": "http://clickhouse:8123",
+  #         "CLICKHOUSE_USER": "default",
+  #         "CLICKHOUSE_PASSWORD": "",
+  #         "CLICKHOUSE_HQL_USER": "hql_user",
+  #         "CLICKHOUSE_HQL_PASSWORD": ""
+  #       }
+  #     VERCEL_ENV: ${VERCEL_ENV:-development}
+  #     BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-your-secret-key}
+  #     SUPABASE_DATABASE_URL: postgres://postgres:testpassword@db:5432/helicone_test
 
-  web:
-    container_name: helicone-web
-    build:
-      context: ../
-      dockerfile: docker/dockerfiles/dockerfile_web
-      args:
-        NEXT_PUBLIC_HELICONE_JAWN_SERVICE: ${JAWN_PUBLIC_URL:-http://localhost:8585}
-        NEXT_PUBLIC_BETTER_AUTH: "true"
-        NODE_ENV: development
-    ports:
-      - "3000:3000"
-    profiles: ["include-helicone"]
-    depends_on:
-      jawn:
-        condition: service_started
-      db:
-        condition: service_healthy
-    environment:
-      NEXT_PUBLIC_HELICONE_JAWN_SERVICE: ${JAWN_PUBLIC_URL:-http://localhost:8585}
-      DATABASE_URL: postgres://postgres:testpassword@db:5432/helicone_test
-      CLICKHOUSE_HOST: http://clickhouse:8123
-      CLICKHOUSE_USER: default
-      CLICKHOUSE_PASSWORD: ""
-      VERCEL_ENV: ${VERCEL_ENV:-development}
-      SMTP_HOST: mailhog
-      SMTP_PORT: 1025
-      NEXT_PUBLIC_BETTER_AUTH: "true"
-      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-your-secret-key}
-      SMTP_SECURE: false
-      NODE_ENV: development
+  # web:
+  #   container_name: helicone-web
+  #   build:
+  #     context: ../
+  #     dockerfile: docker/dockerfiles/dockerfile_web
+  #     args:
+  #       NEXT_PUBLIC_HELICONE_JAWN_SERVICE: ${JAWN_PUBLIC_URL:-http://localhost:8585}
+  #       NEXT_PUBLIC_BETTER_AUTH: "true"
+  #       NODE_ENV: development
+  #   ports:
+  #     - "3000:3000"
+  #   profiles: ["include-helicone"]
+  #   depends_on:
+  #     jawn:
+  #       condition: service_started
+  #     db:
+  #       condition: service_healthy
+  #   environment:
+  #     NEXT_PUBLIC_HELICONE_JAWN_SERVICE: ${JAWN_PUBLIC_URL:-http://localhost:8585}
+  #     DATABASE_URL: postgres://postgres:testpassword@db:5432/helicone_test
+  #     CLICKHOUSE_HOST: http://clickhouse:8123
+  #     CLICKHOUSE_USER: default
+  #     CLICKHOUSE_PASSWORD: ""
+  #     VERCEL_ENV: ${VERCEL_ENV:-development}
+  #     SMTP_HOST: mailhog
+  #     SMTP_PORT: 1025
+  #     NEXT_PUBLIC_BETTER_AUTH: "true"
+  #     BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-your-secret-key}
+  #     SMTP_SECURE: false
+  #     NODE_ENV: development
 
   # =============================================================================
   # DEVELOPMENT SERVICES (dev profile)

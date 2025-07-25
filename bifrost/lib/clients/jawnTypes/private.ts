@@ -213,11 +213,8 @@ export interface paths {
   "/v1/request/{requestId}": {
     get: operations["GetRequestById"];
   };
-  "/v1/request/query-ids": {
+  "/v1/request/ids": {
     post: operations["GetRequestsByIds"];
-  };
-  "/v1/request/{requestId}/feedback": {
-    post: operations["FeedbackRequest"];
   };
   "/v1/request/{requestId}/property": {
     put: operations["PutProperty"];
@@ -1201,17 +1198,6 @@ Json: JsonObject;
       gt?: number;
     };
     /** @description Make all properties in T optional */
-    Partial_BooleanOperators_: {
-      equals?: boolean;
-    };
-    /** @description Make all properties in T optional */
-    Partial_FeedbackTableToOperators_: {
-      id?: components["schemas"]["Partial_NumberOperators_"];
-      created_at?: components["schemas"]["Partial_TimestampOperators_"];
-      rating?: components["schemas"]["Partial_BooleanOperators_"];
-      response_id?: components["schemas"]["Partial_TextOperators_"];
-    };
-    /** @description Make all properties in T optional */
     Partial_ResponseTableToOperators_: {
       body_tokens?: components["schemas"]["Partial_NumberOperators_"];
       body_model?: components["schemas"]["Partial_TextOperators_"];
@@ -1231,6 +1217,10 @@ Json: JsonObject;
       lt?: string;
       /** Format: date-time */
       gt?: string;
+    };
+    /** @description Make all properties in T optional */
+    Partial_BooleanOperators_: {
+      equals?: boolean;
     };
     /** @description Make all properties in T optional */
     Partial_VectorOperators_: {
@@ -1272,7 +1262,6 @@ Json: JsonObject;
       cache_enabled?: components["schemas"]["Partial_BooleanOperators_"];
       cache_reference_id?: components["schemas"]["Partial_TextOperators_"];
       assets?: components["schemas"]["Partial_TextOperators_"];
-      "helicone-score-feedback"?: components["schemas"]["Partial_BooleanOperators_"];
       gateway_router_id?: components["schemas"]["Partial_TextOperators_"];
       gateway_deployment_target?: components["schemas"]["Partial_TextOperators_"];
     };
@@ -1290,9 +1279,8 @@ Json: JsonObject;
       session_tag?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_": {
+    "Pick_FilterLeaf.request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_": {
       request?: components["schemas"]["Partial_RequestTableToOperators_"];
-      feedback?: components["schemas"]["Partial_FeedbackTableToOperators_"];
       response?: components["schemas"]["Partial_ResponseTableToOperators_"];
       properties?: {
         [key: string]: components["schemas"]["Partial_TextOperators_"];
@@ -1303,8 +1291,8 @@ Json: JsonObject;
       request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
       sessions_request_response_rmt?: components["schemas"]["Partial_SessionsRequestResponseRMTToOperators_"];
     };
-    "FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_"];
-    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_"] | components["schemas"]["RequestFilterBranch"] | "all";
+    "FilterLeafSubset_request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_": components["schemas"]["Pick_FilterLeaf.request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_"];
+    RequestFilterNode: components["schemas"]["FilterLeafSubset_request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_"] | components["schemas"]["RequestFilterBranch"] | "all";
     RequestFilterBranch: {
       right: components["schemas"]["RequestFilterNode"];
       /** @enum {string} */
@@ -16665,28 +16653,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
-        };
-      };
-    };
-  };
-  FeedbackRequest: {
-    parameters: {
-      path: {
-        requestId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          rating: boolean;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };

@@ -289,7 +289,6 @@ export const REQUEST_TABLE_FILTERS: [
   SingleFilterDef<"request_response_rmt">,
   SingleFilterDef<"request_response_rmt">,
   SingleFilterDef<"request_response_rmt">,
-  SingleFilterDef<"request_response_rmt">,
   SingleFilterDef<"request_response_rmt">
 ] = [
   {
@@ -361,12 +360,5 @@ export const REQUEST_TABLE_FILTERS: [
     table: "request_response_rmt",
     column: "target_url",
     category: "request",
-  },
-  {
-    label: "Feedback",
-    operators: booleanOperators,
-    table: "request_response_rmt",
-    column: "helicone-score-feedback",
-    category: "feedback",
   },
 ];

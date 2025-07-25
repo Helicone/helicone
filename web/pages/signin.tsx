@@ -52,7 +52,9 @@ const SignIn = ({
             query: cleanQuery,
           })
           .then(() => {
-            heliconeAuthClient.refreshSession();
+            if (heliconeAuthClient) {
+              heliconeAuthClient.refreshSession();
+            }
             setRefreshed(true);
             setRedirectCount((prev) => prev + 1);
           });
@@ -97,6 +99,11 @@ const SignIn = ({
         ) : (
           <AuthForm
             handleEmailSubmit={async (email: string, password: string) => {
+              if (!heliconeAuthClient) {
+                setNotification("Authentication client not available", "error");
+                return;
+              }
+
               const { data, error } =
                 await heliconeAuthClient.signInWithPassword({
                   email: email,
@@ -112,6 +119,11 @@ const SignIn = ({
               router.push("/dashboard");
             }}
             handleGoogleSubmit={async () => {
+              if (!heliconeAuthClient) {
+                setNotification("Authentication client not available", "error");
+                return;
+              }
+
               const { error } = await heliconeAuthClient.signInWithOAuth({
                 provider: "google",
               });
@@ -123,6 +135,11 @@ const SignIn = ({
               setNotification("Successfully signed in.", "success");
             }}
             handleGithubSubmit={async () => {
+              if (!heliconeAuthClient) {
+                setNotification("Authentication client not available", "error");
+                return;
+              }
+
               const { error } = await heliconeAuthClient.signInWithOAuth({
                 provider: "github",
               });

@@ -261,31 +261,6 @@ export class RequestManager extends BaseManager {
 
     return { error: "Request not found.", data: null };
   }
-  async feedbackRequest(
-    requestId: string,
-    feedback: boolean
-  ): Promise<Result<null, string>> {
-    if (!this.isUUID(requestId)) {
-      return err("Invalid requestId: must be a valid UUID");
-    }
-    const feedbackMessage: HeliconeScoresMessage = {
-      requestId: requestId,
-      organizationId: this.authParams.organizationId,
-      scores: [
-        {
-          score_attribute_key: "helicone-score-feedback",
-          score_attribute_type: "number",
-          score_attribute_value: feedback ? 1 : 0,
-        },
-      ],
-      createdAt: new Date(),
-    };
-    const scoreManager = new ScoreManager({
-      organizationId: this.authParams.organizationId,
-    });
-
-    return await scoreManager.addBatchScores([feedbackMessage]);
-  }
 
   private addScoreFilter(isScored: boolean, filter: FilterNode): FilterNode {
     if (isScored) {

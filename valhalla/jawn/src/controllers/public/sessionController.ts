@@ -4,6 +4,7 @@ import {
   Get,
   Path,
   Post,
+  Put,
   Request,
   Route,
   Security,
@@ -159,18 +160,15 @@ export class SessionController extends Controller {
     return result;
   }
 
-  @Post("/{sessionId}/feedback")
-  public async updateSessionFeedback(
+  @Put("/{sessionId}/copy")
+  public async copySession(
     @Path() sessionId: string,
-    @Body() requestBody: { rating: boolean },
+    @Body() requestBody: { name: string },
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<null, string>> {
+  ): Promise<Result<{ sessionId: string }, string>> {
     const sessionManager = new SessionManager(request.authParams);
 
-    const result = await sessionManager.updateSessionFeedback(
-      sessionId,
-      requestBody.rating
-    );
+    const result = await sessionManager.copySession(sessionId, requestBody.name);
     if (result.error) {
       this.setStatus(500);
     } else {
@@ -183,7 +181,7 @@ export class SessionController extends Controller {
   public async getSessionTag(
     @Path() sessionId: string,
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<string | null, string>> {
+  ): Promise<Result<{ tag: string }, string>> {
     const sessionManager = new SessionManager(request.authParams);
 
     const result = await sessionManager.getSessionTag(sessionId);

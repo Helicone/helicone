@@ -2905,33 +2905,6 @@
 				"type": "object",
 				"description": "Make all properties in T optional"
 			},
-			"Partial_BooleanOperators_": {
-				"properties": {
-					"equals": {
-						"type": "boolean"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
-			"Partial_FeedbackTableToOperators_": {
-				"properties": {
-					"id": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"created_at": {
-						"$ref": "#/components/schemas/Partial_TimestampOperators_"
-					},
-					"rating": {
-						"$ref": "#/components/schemas/Partial_BooleanOperators_"
-					},
-					"response_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
 			"Partial_ResponseTableToOperators_": {
 				"properties": {
 					"body_tokens": {
@@ -2974,6 +2947,15 @@
 					"gt": {
 						"type": "string",
 						"format": "date-time"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_BooleanOperators_": {
+				"properties": {
+					"equals": {
+						"type": "boolean"
 					}
 				},
 				"type": "object",
@@ -3086,9 +3068,6 @@
 					"assets": {
 						"$ref": "#/components/schemas/Partial_TextOperators_"
 					},
-					"helicone-score-feedback": {
-						"$ref": "#/components/schemas/Partial_BooleanOperators_"
-					},
 					"gateway_router_id": {
 						"$ref": "#/components/schemas/Partial_TextOperators_"
 					},
@@ -3135,13 +3114,10 @@
 				"type": "object",
 				"description": "Make all properties in T optional"
 			},
-			"Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_": {
+			"Pick_FilterLeaf.request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_": {
 				"properties": {
 					"request": {
 						"$ref": "#/components/schemas/Partial_RequestTableToOperators_"
-					},
-					"feedback": {
-						"$ref": "#/components/schemas/Partial_FeedbackTableToOperators_"
 					},
 					"response": {
 						"$ref": "#/components/schemas/Partial_ResponseTableToOperators_"
@@ -3170,13 +3146,13 @@
 				"type": "object",
 				"description": "From T, pick a set of properties whose keys are in the union K"
 			},
-			"FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_": {
-				"$ref": "#/components/schemas/Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_"
+			"FilterLeafSubset_request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_": {
+				"$ref": "#/components/schemas/Pick_FilterLeaf.request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_"
 			},
 			"RequestFilterNode": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_"
+						"$ref": "#/components/schemas/FilterLeafSubset_request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_"
 					},
 					{
 						"$ref": "#/components/schemas/RequestFilterBranch"
@@ -49201,7 +49177,7 @@
 				]
 			}
 		},
-		"/v1/request/query-ids": {
+		"/v1/request/ids": {
 			"post": {
 				"operationId": "GetRequestsByIds",
 				"responses": {
@@ -49240,59 +49216,6 @@
 								},
 								"required": [
 									"requestIds"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/request/{requestId}/feedback": {
-			"post": {
-				"operationId": "FeedbackRequest",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_null.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Request"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "requestId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"rating": {
-										"type": "boolean"
-									}
-								},
-								"required": [
-									"rating"
 								],
 								"type": "object"
 							}

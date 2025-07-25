@@ -42,7 +42,6 @@ export type RequestFilterBranch = {
 
 export type RequestFilterNode =
   | FilterLeafSubset<
-      | "feedback"
       | "request"
       | "response"
       | "properties"
@@ -182,34 +181,14 @@ export class RequestController extends Controller {
     return returnRequest;
   }
 
-  @Post("/query-ids")
+  @Post("/ids")
   public async getRequestsByIds(
-    @Body() requestBody: { requestIds: string[] },
+    @Body()
+    requestBody: { requestIds: string[] },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<HeliconeRequest[], string>> {
     const reqManager = new RequestManager(request.authParams);
     return reqManager.getRequestByIds(requestBody.requestIds);
-  }
-
-  @Post("/{requestId}/feedback")
-  public async feedbackRequest(
-    @Body()
-    requestBody: { rating: boolean },
-    @Request() request: JawnAuthenticatedRequest,
-    @Path() requestId: string
-  ): Promise<Result<null, string>> {
-    const reqManager = new RequestManager(request.authParams);
-
-    const requestFeedback = await reqManager.feedbackRequest(
-      requestId,
-      requestBody.rating
-    );
-    if (requestFeedback.error) {
-      this.setStatus(500);
-    } else {
-      this.setStatus(201);
-    }
-    return requestFeedback;
   }
 
   @Put("/{requestId}/property")

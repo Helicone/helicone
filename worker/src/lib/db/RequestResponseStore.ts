@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../../../supabase/database.types";
-import { getResponse } from "../managers/FeedbackManager";
 import {
   DBQueryTimer,
   FREQUENT_PRECENT_LOGGING,
@@ -212,6 +211,7 @@ export class RequestResponseStore {
   }
 
   async waitForResponse(requestId: string) {
-    await getResponse(this.database, this.queryTimer, requestId);
+    // This method is deprecated - previously used for feedback functionality
+    return;
   }
 }

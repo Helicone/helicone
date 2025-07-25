@@ -130,23 +130,6 @@ const useSessionMetrics = (
   };
 };
 
-const updateSessionFeedback = async (sessionId: string, rating: boolean) => {
-  const jawn = getJawnClient();
-  return (
-    await jawn.POST("/v1/session/{sessionId}/feedback", {
-      params: {
-        path: { sessionId },
-      },
-      body: {
-        rating,
-      },
-    })
-  ).response;
-};
-
 export {
-  updateSessionFeedback,
-  useSessionMetrics,
-  useSessionNames,
   useUserMetrics,
 };

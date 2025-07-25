@@ -50,7 +50,7 @@ const Login = (props: LoginProps) => {
       email,
       password,
       options: {
-        emailRedirectTo: `https://${origin}/welcome`,
+        emailRedirectTo: `https://${window.location.origin}/welcome`,
       },
     });
 
