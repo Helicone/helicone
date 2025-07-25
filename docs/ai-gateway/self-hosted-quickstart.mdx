@@ -1,12 +1,12 @@
 ---
-title: "Quickstart"
-sidebarTitle: "Quickstart"
-description: "Get started with Helicone AI Gateway in 1 minute"
+title: "Self-Hosted Quickstart"
+sidebarTitle: "Self-Hosted Quickstart"
+description: "Deploy Helicone AI Gateway on your own infrastructure"
 ---
 
-<Warning>
-  Helicone AI Gateway is currently only available as a self-hosted solution. Our cloud-based solution is coming soon. 
-  </Warning>
+<Info>
+  **Looking for the managed solution?** Our cloud-hosted AI Gateway gets you started in 30 seconds with zero infrastructure. [Try Cloud →](/ai-gateway/cloud-quickstart)
+</Info>
 
 <Accordion title="Still using our legacy cloud AI Gateway?">
       If you're using our existing cloud AI Gateway, find the legacy documentation [here](/features/advanced-usage/cloud-ai-gateway-overview).
@@ -36,7 +36,7 @@ description: "Get started with Helicone AI Gateway in 1 minute"
     The Gateway will be running on `http://localhost:8080` and has three routes:
 
     - `/ai` for a standard OpenAI-compatible Unified API that works out of the box
-    - `/router/{router-name}` for advanced Unified API with custom routing logic and load balancing
+    - `/router/{router-id}` for advanced Unified API with custom routing logic and load balancing
     - `/{provider-name}` for direct access to a specific provider without routing
   </Step>
 
@@ -101,12 +101,21 @@ description: "Get started with Helicone AI Gateway in 1 minute"
     </Step>
 </Steps>
 
-## Next step:
+## Next steps:
 
-Great job getting your Gateway started! The next step is making it work exactly how you want.
+Great job getting your self-hosted Gateway running! Here are some important next steps:
 
-Interested in adding new providers, balancing request loads, or caching responses for efficiency?
-
-<Card title="Router Quickstart" icon="rocket" href="/ai-gateway/router-quickstart" horizontal>
-    Build custom routers with load balancing, caching, and multiple environments in 5 minutes
+<CardGroup cols={2}>
+<Card title="Secure Your Gateway" icon="shield" href="/ai-gateway/authentication" horizontal>
+    Set up authentication to protect your provider API keys
 </Card>
+<Card title="Deploy to Production" icon="server" href="/ai-gateway/deployment/overview" horizontal>
+    Platform-specific guides for Docker, Kubernetes, AWS, and more
+</Card>
+<Card title="Advanced Configuration" icon="gear" href="/ai-gateway/config" horizontal>
+    Configure routers, load balancing, caching, and rate limiting
+</Card>
+<Card title="Enable Observability" icon="chart-line" href="/ai-gateway/observability" horizontal>
+    Track usage, costs, and performance with Helicone integration
+</Card>
+</CardGroup>
