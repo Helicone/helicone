@@ -18,6 +18,8 @@ import { GoogleStreamBodyProcessor } from "../shared/bodyProcessors/googleStream
 import { GroqStreamProcessor } from "../shared/bodyProcessors/groqStreamProcessor";
 import { OpenAIStreamProcessor } from "../shared/bodyProcessors/openAIStreamProcessor";
 import { TogetherAIStreamProcessor } from "../shared/bodyProcessors/togetherAIStreamProcessor";
+import { VercelBodyProcessor } from "../shared/bodyProcessors/vercelBodyProcessor";
+import { VercelStreamProcessor } from "../shared/bodyProcessors/vercelStreamProcessor";
 import { ImageModelParsingResponse } from "../shared/imageParsers/core/parsingResponse";
 import { getResponseImageModelParser } from "../shared/imageParsers/parserMapper";
 import {
@@ -194,14 +196,14 @@ export class ResponseBodyHandler extends AbstractLogHandler {
           ? {
               model: responseModel, // Put response model here, not calculated model
             }
-          : processedResponseBody.data?.processedBody ?? undefined,
+          : (processedResponseBody.data?.processedBody ?? undefined),
       };
     } else {
       return omitResponseLog
         ? {
             model: responseModel, // Put response model here, not calculated model
           }
-        : processedResponseBody.data.processedBody ?? undefined;
+        : (processedResponseBody.data.processedBody ?? undefined);
     }
   }
 
@@ -332,6 +334,16 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       return new LlamaBodyProcessor();
     } else if (!isStream && provider === "GOOGLE") {
       return new GoogleBodyProcessor();
+    } else if (!isStream && provider === "VERCEL") {
+      // Check if it's actually a stream by content
+      if (
+        typeof responseBody === "string" &&
+        responseBody.includes("data: {") &&
+        responseBody.includes('"type":')
+      ) {
+        return new VercelStreamProcessor();
+      }
+      return new VercelBodyProcessor();
     } else if (
       isStream &&
       (provider === "ANTHROPIC" || model?.includes("claude"))
@@ -345,6 +357,8 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       return new TogetherAIStreamProcessor();
     } else if (isStream && provider === "GROQ") {
       return new GroqStreamProcessor();
+    } else if (isStream && provider === "VERCEL") {
+      return new VercelStreamProcessor();
     } else if (isStream) {
       return new OpenAIStreamProcessor();
     } else {

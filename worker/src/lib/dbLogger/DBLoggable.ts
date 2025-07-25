@@ -22,6 +22,7 @@ import {
   getModel,
 } from "./streamParsers/anthropicStreamParser";
 import { parseOpenAIStream } from "./streamParsers/openAIStreamParser";
+import { parseVercelStream } from "./streamParsers/vercelStreamParser";
 
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 import { costOfPrompt } from "../../packages/cost";
@@ -331,6 +332,13 @@ export class DBLoggable {
         return anthropicAIStream(result, tokenCounter, requestBody);
       } else if (isStream) {
         return parseOpenAIStream(result, tokenCounter, requestBody);
+      } else if (
+        this.provider === "VERCEL" &&
+        result.includes("data: {") &&
+        result.includes('"type":')
+      ) {
+        // Vercel streams detected by response body pattern
+        return parseVercelStream(result);
       } else {
         return ok(JSON.parse(result));
       }
@@ -375,13 +383,17 @@ export class DBLoggable {
         completion_tokens?: number;
         input_tokens?: number;
         output_tokens?: number;
+        inputTokens?: number;
+        outputTokens?: number;
       };
     };
     const usage = response.usage;
 
     return {
-      prompt_tokens: usage?.prompt_tokens ?? usage?.input_tokens,
-      completion_tokens: usage?.completion_tokens ?? usage?.output_tokens,
+      prompt_tokens:
+        usage?.prompt_tokens ?? usage?.input_tokens ?? usage?.inputTokens,
+      completion_tokens:
+        usage?.completion_tokens ?? usage?.output_tokens ?? usage?.outputTokens,
     };
   }
 
@@ -451,14 +463,21 @@ export class DBLoggable {
             body: this.response.omitLog // TODO: Remove in favor of S3 storage
               ? {
                   usage: parsedResponse.data?.usage,
-                  model: parsedResponse.data?.model,
+                  model:
+                    parsedResponse.data?.model ??
+                    parsedResponse.data?.providerMetadata?.gateway?.routing
+                      ?.originalModelId,
                 }
               : parsedResponse.data,
             status: await this.response.status(),
             completion_tokens: usage.completion_tokens,
             prompt_tokens: usage.prompt_tokens,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            model: (parsedResponse.data as any)?.model ?? undefined,
+            model:
+              (parsedResponse.data as any)?.model ??
+              (parsedResponse.data as any)?.providerMetadata?.gateway?.routing
+                ?.originalModelId ??
+              undefined,
             delay_ms,
             time_to_first_token: timeToFirstToken,
           },
@@ -481,7 +500,11 @@ export class DBLoggable {
               body: parsedResponse.data,
             },
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            model: (parsedResponse.data as any)?.model ?? undefined,
+            model:
+              (parsedResponse.data as any)?.model ??
+              (parsedResponse.data as any)?.providerMetadata?.gateway?.routing
+                ?.originalModelId ??
+              undefined,
             status: await this.response.status(),
           },
           body: {

@@ -1349,7 +1349,7 @@ Json: JsonObject;
       isScored?: boolean;
     };
     /** @enum {string} */
-    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "LLAMA" | "NVIDIA";
+    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "LLAMA" | "NVIDIA" | "VERCEL";
     Provider: components["schemas"]["ProviderName"] | "CUSTOM";
     /** @enum {string} */
     LlmType: "chat" | "completion";
