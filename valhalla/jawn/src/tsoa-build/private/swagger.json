@@ -5789,6 +5789,15 @@
 					"heliconeManualAccessKey": {
 						"type": "string"
 					},
+					"promptInputs": {
+						"$ref": "#/components/schemas/Record_string.any_"
+					},
+					"promptVersionId": {
+						"type": "string"
+					},
+					"promptId": {
+						"type": "string"
+					},
 					"lytixHost": {
 						"type": "string"
 					},
