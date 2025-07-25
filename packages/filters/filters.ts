@@ -463,7 +463,6 @@ export function buildFilterLeaf(
     }
 
     const filterClause = (() => {
-      console.log("filterClause", operatorKey, value);
       switch (true) {
         case operatorKey === "not-equals" && value === "null":
           return `${column} is not null`;
