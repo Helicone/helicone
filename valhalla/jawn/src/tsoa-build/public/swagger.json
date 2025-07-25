@@ -3544,6 +3544,10 @@
 						"type": "string",
 						"nullable": true
 					},
+					"prompt_version": {
+						"type": "string",
+						"nullable": true
+					},
 					"feedback_created_at": {
 						"type": "string",
 						"nullable": true
@@ -3660,6 +3664,7 @@
 					"completion_audio_tokens",
 					"cost",
 					"prompt_id",
+					"prompt_version",
 					"llmSchema",
 					"country_code",
 					"asset_ids",

@@ -1567,6 +1567,7 @@ Json: JsonObject;
       /** Format: double */
       cost: number | null;
       prompt_id: string | null;
+      prompt_version: string | null;
       feedback_created_at?: string | null;
       feedback_id?: string | null;
       feedback_rating?: boolean | null;
