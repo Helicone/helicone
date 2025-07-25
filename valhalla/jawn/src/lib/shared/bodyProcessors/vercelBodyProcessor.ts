@@ -46,12 +46,13 @@ export class VercelBodyProcessor implements IBodyProcessor {
       };
     }
 
+    // Handle both Vercel's native format and OpenAI-compatible format
     return {
-      promptTokens: usage.inputTokens,
+      promptTokens: usage.inputTokens || usage.prompt_tokens,
       promptCacheWriteTokens: undefined,
       promptCacheReadTokens: undefined,
-      completionTokens: usage.outputTokens,
-      totalTokens: usage.totalTokens,
+      completionTokens: usage.outputTokens || usage.completion_tokens,
+      totalTokens: usage.totalTokens || usage.total_tokens,
       heliconeCalculated: false,
     };
   }
