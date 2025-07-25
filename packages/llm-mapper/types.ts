@@ -8,6 +8,7 @@ export type MapperType =
   | "anthropic-chat"
   | "gemini-chat"
   | "llama-chat"
+  | "vercel-chat"
   | "black-forest-labs-image"
   | "openai-assistant"
   | "openai-image"
