@@ -16,7 +16,7 @@ const PostHogPageView = dynamic(() => import("./PostHogPageView"), {
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Helicone / AI Gateway with Observability",
+  title: "Helicone / AI Gateway & LLM Observability",
   description:
     "Routing and monitoring for reliable AI apps - the LLMOps platform behind the fastest-growing AI companies.",
   icons: "https://www.helicone.ai/static/logo.webp",
@@ -25,13 +25,13 @@ export const metadata: Metadata = {
     siteName: "Helicone.ai",
     title: "Helicone",
     url: "https://www.helicone.ai",
-    description: "AI Gateway with Observability",
+    description: "AI Gateway & LLM Observability",
     images: "https://www.helicone.ai/static/new-open-graph.png",
     locale: "en_US",
   },
   twitter: {
     title: "Helicone",
-    description: "AI Gateway with Observability",
+    description: "AI Gateway & LLM Observability",
     card: "summary_large_image",
     images: "https://www.helicone.ai/static/new-open-graph.png",
   },
