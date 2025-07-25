@@ -107,6 +107,9 @@ export type HeliconeMeta = {
   posthogHost?: string;
   lytixKey?: string;
   lytixHost?: string;
+  promptId?: string;
+  promptVersionId?: string;
+  promptInputs?: Record<string, any>;
   heliconeManualAccessKey?: string;
   gatewayRouterId?: string;
   gatewayDeploymentTarget?: string;
