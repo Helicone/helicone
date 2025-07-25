@@ -698,6 +698,13 @@ export type Database = {
             foreignKeyName: "public_experiment_v2_hypothesis_provider_key_fkey"
             columns: ["provider_key"]
             isOneToOne: false
+            referencedRelation: "decrypted_provider_keys_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_experiment_v2_hypothesis_provider_key_fkey"
+            columns: ["provider_key"]
+            isOneToOne: false
             referencedRelation: "provider_keys"
             referencedColumns: ["id"]
           },
@@ -1012,6 +1019,13 @@ export type Database = {
             foreignKeyName: "finetune_job_provider_key_id_fkey"
             columns: ["provider_key_id"]
             isOneToOne: false
+            referencedRelation: "decrypted_provider_keys_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finetune_job_provider_key_id_fkey"
+            columns: ["provider_key_id"]
+            isOneToOne: false
             referencedRelation: "provider_keys"
             referencedColumns: ["id"]
           },
@@ -1237,6 +1251,13 @@ export type Database = {
             columns: ["provider_key_id"]
             isOneToOne: false
             referencedRelation: "decrypted_provider_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helicone_proxy_keys_provider_key_id_fkey"
+            columns: ["provider_key_id"]
+            isOneToOne: false
+            referencedRelation: "decrypted_provider_keys_v2"
             referencedColumns: ["id"]
           },
           {
@@ -1778,6 +1799,13 @@ export type Database = {
             columns: ["org_provider_key"]
             isOneToOne: false
             referencedRelation: "decrypted_provider_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_org_provider_key_fkey"
+            columns: ["org_provider_key"]
+            isOneToOne: false
+            referencedRelation: "decrypted_provider_keys_v2"
             referencedColumns: ["id"]
           },
           {
@@ -2358,41 +2386,47 @@ export type Database = {
       }
       provider_keys: {
         Row: {
+          auth_type: string
           config: Json | null
           created_at: string | null
           id: string
           key_id: string | null
           nonce: string | null
           org_id: string
-          provider_key: string
+          provider_key: string | null
           provider_key_name: string
           provider_name: string
+          provider_secret_key: string | null
           soft_delete: boolean
           vault_key_id: string | null
         }
         Insert: {
+          auth_type?: string
           config?: Json | null
           created_at?: string | null
           id?: string
           key_id?: string | null
           nonce?: string | null
           org_id: string
-          provider_key: string
+          provider_key?: string | null
           provider_key_name: string
           provider_name: string
+          provider_secret_key?: string | null
           soft_delete?: boolean
           vault_key_id?: string | null
         }
         Update: {
+          auth_type?: string
           config?: Json | null
           created_at?: string | null
           id?: string
           key_id?: string | null
           nonce?: string | null
           org_id?: string
-          provider_key?: string
+          provider_key?: string | null
           provider_key_name?: string
           provider_name?: string
+          provider_secret_key?: string | null
           soft_delete?: boolean
           vault_key_id?: string | null
         }
@@ -3135,6 +3169,68 @@ export type Database = {
           provider_key?: string | null
           provider_key_name?: string | null
           provider_name?: string | null
+          soft_delete?: boolean | null
+          vault_key_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_keys_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      decrypted_provider_keys_v2: {
+        Row: {
+          auth_type: string | null
+          config: Json | null
+          created_at: string | null
+          decrypted_provider_key: string | null
+          decrypted_provider_secret_key: string | null
+          id: string | null
+          key_id: string | null
+          nonce: string | null
+          org_id: string | null
+          provider_key: string | null
+          provider_key_name: string | null
+          provider_name: string | null
+          provider_secret_key: string | null
+          soft_delete: boolean | null
+          vault_key_id: string | null
+        }
+        Insert: {
+          auth_type?: string | null
+          config?: Json | null
+          created_at?: string | null
+          decrypted_provider_key?: never
+          decrypted_provider_secret_key?: never
+          id?: string | null
+          key_id?: string | null
+          nonce?: string | null
+          org_id?: string | null
+          provider_key?: string | null
+          provider_key_name?: string | null
+          provider_name?: string | null
+          provider_secret_key?: string | null
+          soft_delete?: boolean | null
+          vault_key_id?: string | null
+        }
+        Update: {
+          auth_type?: string | null
+          config?: Json | null
+          created_at?: string | null
+          decrypted_provider_key?: never
+          decrypted_provider_secret_key?: never
+          id?: string | null
+          key_id?: string | null
+          nonce?: string | null
+          org_id?: string | null
+          provider_key?: string | null
+          provider_key_name?: string | null
+          provider_name?: string | null
+          provider_secret_key?: string | null
           soft_delete?: boolean | null
           vault_key_id?: string | null
         }
