@@ -132,12 +132,9 @@ export class LoggingHandler extends AbstractLogHandler {
           );
       }
 
-      const logPrompts =
-        context.message.heliconeMeta.promptId &&
-        context.message.heliconeMeta.promptVersionId &&
-        context.message.heliconeMeta.promptInputs;
-      if (logPrompts) {
-        this.batchPayload.promptInputs.push(this.mapPromptInputs(context));
+      const promptInput = this.mapPromptInput(context);
+      if (context.message.heliconeMeta.promptId && promptInput) {
+        this.batchPayload.promptInputs.push(promptInput);
       }
 
       const loggingCacheHit =
@@ -479,10 +476,14 @@ export class LoggingHandler extends AbstractLogHandler {
     return promptRecord;
   }
 
-  mapPromptInputs(context: HandlerContext): Prompt2025Input {
+  mapPromptInput(context: HandlerContext): Prompt2025Input | null {
     const request_id = context.message.log.request.id;
-    const version_id = context.message.heliconeMeta.promptVersionId!;
-    const inputs = context.message.heliconeMeta.promptInputs!;
+    const version_id = context.message.heliconeMeta.promptVersionId;
+    const inputs = context.message.heliconeMeta.promptInputs;
+
+    if (!version_id || !inputs) {
+      return null;
+    }
 
     const promptInputsLog: Prompt2025Input = {
       request_id,
@@ -753,8 +754,6 @@ export class LoggingHandler extends AbstractLogHandler {
       target_url: request.targetUrl,
       country_code: request?.countryCode ?? null,
       created_at: request.requestCreatedAt.toISOString(),
-      gateway_router_id: heliconeMeta.gatewayRouterId ?? null,
-      gateway_deployment_target: heliconeMeta.gatewayDeploymentTarget ?? null,
     };
 
     return requestInsert;
