@@ -610,7 +610,7 @@ const CostBackfiller = () => {
         </div>
         <P className="text-muted-foreground">
           Generate a preview of the SQL query that will be executed to ensure
-          it's correct.
+          it&apos;s correct.
         </P>
 
         <div className="mt-4">

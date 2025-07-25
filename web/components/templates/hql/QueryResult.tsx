@@ -43,16 +43,16 @@ function QueryResult({
   error,
   queryStats,
 }: QueryResultProps) {
-  if (error) {
-    return <div className="p-4 text-center text-muted-foreground">{error}</div>;
-  }
-
   const columns = useMemo(() => {
     if (!result || result.length === 0) {
       return [];
     }
     return Object.keys(result[0]);
   }, [result]);
+
+  if (error) {
+    return <div className="p-4 text-center text-muted-foreground">{error}</div>;
+  }
 
   if (!result || result.length === 0) {
     return (
