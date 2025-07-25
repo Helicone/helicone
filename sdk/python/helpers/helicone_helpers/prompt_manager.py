@@ -5,9 +5,8 @@ from .types import (
     Prompt2025Version, 
     ValidationError, 
     PromptCompilationResult,
-    ChatCompletionParams,
     HeliconeChatParams,
-    ChatMessage
+    ChatCompletionParams
 )
 from .template_manager import HeliconeTemplateManager
 

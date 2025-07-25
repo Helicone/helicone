@@ -1,13 +1,13 @@
-from typing import Any, Dict, List, Optional, TypedDict, Union
+from typing import Any, Dict, List, Optional, TypedDict
 from dataclasses import dataclass
 
 try:
     from openai.types.chat import ChatCompletionMessageParam
-    from openai.types.chat.completion_create_params import CompletionCreateParams
+    from openai.types.chat.completion_create_params import CompletionCreateParamsBase
     OPENAI_AVAILABLE = True
 except ImportError:
     ChatCompletionMessageParam = Dict[str, Any]
-    CompletionCreateParams = Dict[str, Any]
+    CompletionCreateParamsBase = Dict[str, Any]
     OPENAI_AVAILABLE = False
 
 
@@ -58,37 +58,14 @@ class PromptCompilationResult(TypedDict):
 
 
 if OPENAI_AVAILABLE:
-    class HeliconeChatParams(CompletionCreateParams, total=False):
+    class HeliconeChatParams(CompletionCreateParamsBase, total=False):
         prompt_id: str
         version_id: Optional[str]
         inputs: Optional[Dict[str, Any]]
     
     ChatMessage = ChatCompletionMessageParam
-    ChatCompletionParams = CompletionCreateParams
+    ChatCompletionParams = CompletionCreateParamsBase
 else:
-    class ChatMessage(TypedDict, total=False):
-        role: str
-        content: Union[str, List[Dict[str, Any]]]
-        name: Optional[str]
-        tool_call_id: Optional[str]
-        tool_calls: Optional[List[Dict[str, Any]]]
-
-    class ChatCompletionParams(TypedDict, total=False):
-        model: str
-        messages: List[ChatMessage]
-        temperature: Optional[float]
-        max_tokens: Optional[int]
-        top_p: Optional[float]
-        frequency_penalty: Optional[float]
-        presence_penalty: Optional[float]
-        response_format: Optional[Dict[str, Any]]
-        tools: Optional[List[Dict[str, Any]]]
-        tool_choice: Optional[Union[str, Dict[str, Any]]]
-        stream: Optional[bool]
-        stop: Optional[Union[str, List[str]]]
-        seed: Optional[int]
-
-    class HeliconeChatParams(ChatCompletionParams, total=False):
-        prompt_id: str
-        version_id: Optional[str]
-        inputs: Optional[Dict[str, Any]] 
+    ChatMessage = Dict[str, Any]
+    ChatCompletionParams = Dict[str, Any]
+    HeliconeChatParams = Dict[str, Any] 
