@@ -104,6 +104,15 @@
                   "getting-started/integration-method/nebius",
                   "getting-started/integration-method/novita",
                   {
+                    "group": "Nvidia",
+                    "pages": [
+                      "integrations/nvidia/curl",
+                      "integrations/nvidia/javascript", 
+                      "integrations/nvidia/python",
+                      "integrations/nvidia/dynamo"
+                    ]
+                  },
+                  {
                     "group": "Ollama",
                     "pages": ["integrations/ollama/javascript"]
                   },

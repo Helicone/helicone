@@ -3,6 +3,7 @@ import {
   CacheMetricSMT,
   formatTimeString,
   RequestResponseRMT,
+  Prompt2025Input,
 } from "../db/ClickhouseWrapper";
 import { Database } from "../db/database.types";
 import { S3Client } from "../shared/db/s3Client";
@@ -43,6 +44,7 @@ export type BatchPayload = {
   s3Records: S3Record[];
   requestResponseVersionedCH: RequestResponseRMT[];
   cacheMetricCH: CacheMetricSMT[];
+  promptInputs: Prompt2025Input[];
   experimentCellValues: ExperimentCellValue[];
   scores: {
     organizationId: string;
@@ -77,7 +79,8 @@ export class LoggingHandler extends AbstractLogHandler {
     this.batchPayload = {
       responses: [],
       requests: [],
-      prompts: [],
+      prompts: [], // LEGACY PROMPT RECORDS
+      promptInputs: [],
       assets: [],
       s3Records: [],
       requestResponseVersionedCH: [],
@@ -98,6 +101,7 @@ export class LoggingHandler extends AbstractLogHandler {
 
       const s3RecordMapped = this.mapS3Records(context);
 
+      // MAP LEGACY PROMPT RECORDS
       const promptMapped =
         context.message.log.request.promptId &&
         context.processedLog.request.heliconeTemplate
@@ -126,6 +130,14 @@ export class LoggingHandler extends AbstractLogHandler {
             /[\uD800-\uDFFF]/g,
             "\uFFFD"
           );
+      }
+
+      const logPrompts =
+        context.message.heliconeMeta.promptId &&
+        context.message.heliconeMeta.promptVersionId &&
+        context.message.heliconeMeta.promptInputs;
+      if (logPrompts) {
+        this.batchPayload.promptInputs.push(this.mapPromptInputs(context));
       }
 
       const loggingCacheHit =
@@ -437,6 +449,7 @@ export class LoggingHandler extends AbstractLogHandler {
     };
   }
 
+  // USED TO MAP LEGACY PROMPT RECORDS
   mapPrompt(context: HandlerContext): PromptRecord | null {
     if (
       !context.message.log.request.promptId ||
@@ -464,6 +477,20 @@ export class LoggingHandler extends AbstractLogHandler {
     };
 
     return promptRecord;
+  }
+
+  mapPromptInputs(context: HandlerContext): Prompt2025Input {
+    const request_id = context.message.log.request.id;
+    const version_id = context.message.heliconeMeta.promptVersionId!;
+    const inputs = context.message.heliconeMeta.promptInputs!;
+
+    const promptInputsLog: Prompt2025Input = {
+      request_id,
+      version_id,
+      inputs,
+    };
+
+    return promptInputsLog;
   }
 
   mapRequestResponseVersionedCH(context: HandlerContext): RequestResponseRMT {
@@ -547,6 +574,8 @@ export class LoggingHandler extends AbstractLogHandler {
         context.message.heliconeMeta.gatewayRouterId ?? undefined,
       gateway_deployment_target:
         context.message.heliconeMeta.gatewayDeploymentTarget ?? undefined,
+      prompt_id: context.message.heliconeMeta.promptId ?? "",
+      prompt_version: context.message.heliconeMeta.promptVersionId ?? "",
     };
 
     return requestResponseLog;

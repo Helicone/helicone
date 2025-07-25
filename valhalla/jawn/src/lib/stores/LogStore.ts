@@ -9,6 +9,7 @@ import { mapScores } from "../../managers/score/ScoreManager";
 import { safeJSONStringify, sanitizeObject } from "../../utils/sanitize";
 
 import { HELICONE_DB as db, HELICONE_PGP as pgp } from "../shared/db/pgpClient";
+import { Prompt2025Input } from "../db/ClickhouseWrapper";
 
 process.on("exit", () => {
   pgp.end();
@@ -164,6 +165,12 @@ export class LogStore {
           }
         }
 
+        if (payload.promptInputs && payload.promptInputs.length > 0) {
+          for (const promptInput of payload.promptInputs) {
+            await this.processPromptInputs(promptInput, t);
+          }
+        }
+
         if (payload.scores && payload.scores.length > 0) {
           for (const score of payload.scores) {
             await this.processScore({
@@ -181,6 +188,35 @@ export class LogStore {
     } catch (error: any) {
       return err("Failed to insert log batch: " + error);
     }
+  }
+
+  async processPromptInputs(
+    promptInput: Prompt2025Input,
+    t: pgPromise.ITask<{}>
+  ): PromiseGenericResult<string> {
+    // Check prompt version exists
+    let existingPrompt = await t.oneOrNone<{
+      id: string;
+    }>(
+      `SELECT id FROM prompts_2025_versions WHERE id = $1`,
+      [promptInput.version_id]
+    );
+
+    if (!existingPrompt) {
+      return err("Prompt version does not exist");
+    }
+
+    try {
+      await t.none(
+        `INSERT INTO prompts_2025_inputs (request_id, version_id, inputs) VALUES ($1, $2, $3)`,
+        [promptInput.request_id, promptInput.version_id, promptInput.inputs]
+      );
+    } catch (error) {
+      console.error("Error inserting prompt inputs", error);
+      throw error;
+    }
+
+    return ok("Prompt inputs processed successfully");
   }
 
   async processPrompt(
