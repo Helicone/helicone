@@ -38,7 +38,8 @@ import { strings } from "/snippets/strings.mdx";
     ```
 
   </Step>
-  <Step title="Verify your requests in Helicone">
-    With the above setup, any calls to the Nvidia API will automatically be logged and monitored by Helicone. Review them in your Helicone dashboard.
+  
+  <Step title={strings.verifyInHelicone}>
+    <div dangerouslySetInnerHTML={{ __html: strings.verifyInHeliconeDesciption("Nvidia NIM") }} />
   </Step>
 </Steps> 

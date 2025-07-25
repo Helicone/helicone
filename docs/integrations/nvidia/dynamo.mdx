@@ -3,9 +3,29 @@ title: "Nvidia Dynamo Integration"
 sidebarTitle: "Dynamo"
 description: "Use Nvidia Dynamo with Helicone for comprehensive logging and monitoring."
 "twitter:title": "Nvidia Dynamo Integration - Helicone OSS LLM Observability"
+icon: "server"
+iconType: "solid"
 ---
 
+import { strings } from "/snippets/strings.mdx";
+
 Use Nvidia Dynamo or other OpenAI-compatible Nvidia inference providers with Helicone by routing through our gateway with custom headers.
+
+## {strings.howToIntegrate}
+
+<Steps>
+  <Step title={strings.generateKey}>
+    <div dangerouslySetInnerHTML={{ __html: strings.generateKeyInstructions }} />
+  </Step>
+
+  <Step title={strings.setApiKey}>
+    ```bash
+    HELICONE_API_KEY=<your-helicone-api-key>
+    NVIDIA_API_KEY=<your-nvidia-api-key>
+    ```
+  </Step>
+
+  <Step title={strings.modifyBasePath}>
 
 <CodeGroup>
 ```bash cURL
@@ -72,3 +92,13 @@ chat_completion = client.chat.completions.create(
 print(chat_completion)
 ```
 </CodeGroup>
+<<<<<<< Updated upstream
+=======
+
+  </Step>
+
+  <Step title={strings.verifyInHelicone}>
+    <div dangerouslySetInnerHTML={{ __html: strings.verifyInHeliconeDesciption("Dynamo") }} />
+  </Step>
+</Steps>
+>>>>>>> Stashed changes

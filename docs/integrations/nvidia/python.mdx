@@ -27,33 +27,33 @@ This integration is used to log usage with the [Nvidia NIM](https://build.nvidia
 
   <Step title={strings.modifyBasePath}>
 
-```python OpenAI SDK
-from openai import OpenAI
-from dotenv import load_dotenv
-import os
+    ```python OpenAI SDK
+    from openai import OpenAI
+    from dotenv import load_dotenv
+    import os
 
-load_dotenv()
+    load_dotenv()
 
-helicone_api_key = os.getenv("HELICONE_API_KEY")
-nvidia_api_key = os.getenv("NVIDIA_API_KEY")
+    helicone_api_key = os.getenv("HELICONE_API_KEY")
+    nvidia_api_key = os.getenv("NVIDIA_API_KEY")
 
-client = OpenAI(
-  api_key=nvidia_api_key,
-  base_url="https://nvidia.helicone.ai/v1",
-  default_headers={
-    "Helicone-Auth": f"Bearer {helicone_api_key}"
-  }
-)
+    client = OpenAI(
+      api_key=nvidia_api_key,
+      base_url="https://nvidia.helicone.ai/v1",
+      default_headers={
+        "Helicone-Auth": f"Bearer {helicone_api_key}"
+      }
+    )
 
-chat_completion = client.chat.completions.create(
-  model="nvidia/llama-3.1-nemotron-70b-instruct",
-  messages=[{"role": "user", "content": "Hello, how are you?"}],
-  max_tokens=1024,
-  temperature=0.7
-)
+    chat_completion = client.chat.completions.create(
+      model="nvidia/llama-3.1-nemotron-70b-instruct",
+      messages=[{"role": "user", "content": "Hello, how are you?"}],
+      max_tokens=1024,
+      temperature=0.7
+    )
 
-print(chat_completion)
-```
+    print(chat_completion)
+    ```
 
   </Step>
 

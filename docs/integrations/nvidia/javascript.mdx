@@ -28,26 +28,26 @@ This integration is used to log usage with the [Nvidia NIM](https://build.nvidia
 
   <Step title={strings.modifyBasePath}>
 
-```javascript OpenAI SDK
-import OpenAI from "openai";
+    ```javascript OpenAI SDK
+    import OpenAI from "openai";
 
-const openai = new OpenAI({
-  apiKey: process.env.NVIDIA_API_KEY,
-  baseURL: "https://nvidia.helicone.ai/v1",
-  defaultHeaders: {
-    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`
-  }
-});
+    const openai = new OpenAI({
+      apiKey: process.env.NVIDIA_API_KEY,
+      baseURL: "https://nvidia.helicone.ai/v1",
+      defaultHeaders: {
+        "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`
+      }
+    });
 
-const response = await openai.chat.completions.create({
-  model: "nvidia/llama-3.1-nemotron-70b-instruct",
-  messages: [{ role: "user", content: "Hello, how are you?" }],
-  max_tokens: 1024,
-  temperature: 0.7
-});
+    const response = await openai.chat.completions.create({
+      model: "nvidia/llama-3.1-nemotron-70b-instruct",
+      messages: [{ role: "user", content: "Hello, how are you?" }],
+      max_tokens: 1024,
+      temperature: 0.7
+    });
 
-console.log(response);
-```
+    console.log(response);
+    ```
 
   </Step>
 
