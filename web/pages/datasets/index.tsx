@@ -36,7 +36,7 @@ Datasets.getLayout = function getLayout(page: ReactElement) {
 export default Datasets;
 
 export const getServerSideProps = async (
-  context: GetServerSidePropsContext
+  context: GetServerSidePropsContext,
 ) => {
   const { page, page_size, sortKey, sortDirection, isCustomProperty, tab } =
     context.query;

@@ -84,24 +84,24 @@ export const BreadCrumb = ({
             <InfoIcon
               width={16}
               height={16}
-              className="text-slate-500 cursor-pointer"
+              className="cursor-pointer text-slate-500"
             />
           </HoverCardTrigger>
           <HoverCardContent
             align="start"
-            className="w-[220px] p-0 z-[1000] bg-white"
+            className="z-[1000] w-[220px] bg-white p-0"
           >
-            <div className="p-3 gap-3 flex flex-col border-b border-slate-200">
+            <div className="flex flex-col gap-3 border-b border-slate-200 p-3">
               <div className="flex flex-col gap-1">
                 <h3 className="text-base font-semibold text-slate-700">
                   Session ID
                 </h3>
                 <div className="flex flex-row items-center gap-2">
-                  <p className="text-sm text-slate-500 truncate">{sessionId}</p>
+                  <p className="truncate text-sm text-slate-500">{sessionId}</p>
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="p-0 w-[14px] h-[14px] text-slate-500"
+                    className="h-[14px] w-[14px] p-0 text-slate-500"
                     onClick={() => {
                       navigator.clipboard.writeText(sessionId);
                       setNotification("Copied to clipboard", "success");
@@ -112,16 +112,16 @@ export const BreadCrumb = ({
                 </div>
               </div>
             </div>
-            <div className="p-3 gap-3 flex flex-col border-b border-slate-200">
+            <div className="flex flex-col gap-3 border-b border-slate-200 p-3">
               <div className="flex flex-col gap-1">
                 <h3 className="text-sm font-semibold text-slate-700">Traces</h3>
-                <p className="text-sm text-slate-500 truncate">{numTraces}</p>
+                <p className="truncate text-sm text-slate-500">{numTraces}</p>
               </div>
               <div className="flex flex-col gap-1">
                 <h3 className="text-sm font-semibold text-slate-700">
                   Total cost
                 </h3>
-                <p className="text-sm text-slate-500 truncate">
+                <p className="truncate text-sm text-slate-500">
                   ${formatLargeNumber(sessionCost)}
                 </p>
               </div>
@@ -129,7 +129,7 @@ export const BreadCrumb = ({
                 <h3 className="text-sm font-semibold text-slate-700">
                   Total latency
                 </h3>
-                <p className="text-sm text-slate-500 truncate">
+                <p className="truncate text-sm text-slate-500">
                   {startTime && endTime ? timeDiff(startTime, endTime) : ""}
                 </p>
               </div>
@@ -142,7 +142,7 @@ export const BreadCrumb = ({
                     {Array.from(new Set(models)).map((model, idx) => (
                       <Badge
                         key={idx}
-                        className="font-normal text-sm text-slate-500 bg-slate-50 border-slate-200 text-nowrap rounded-md"
+                        className="text-nowrap rounded-md border-slate-200 bg-slate-50 text-sm font-normal text-slate-500"
                         variant="secondary"
                       >
                         {model}
@@ -154,12 +154,12 @@ export const BreadCrumb = ({
               </div>
             </div>
 
-            <div className="p-3 gap-3 flex flex-col border-b border-slate-200">
+            <div className="flex flex-col gap-3 border-b border-slate-200 p-3">
               <div className="flex flex-col gap-1">
                 <h3 className="text-sm font-semibold text-slate-700">
                   Total tokens
                 </h3>
-                <p className="text-sm text-slate-500 truncate">
+                <p className="truncate text-sm text-slate-500">
                   {promptTokens + completionTokens}
                 </p>
               </div>
@@ -167,7 +167,7 @@ export const BreadCrumb = ({
                 <h3 className="text-sm font-semibold text-slate-700">
                   Prompt tokens
                 </h3>
-                <p className="text-sm text-slate-500 truncate">
+                <p className="truncate text-sm text-slate-500">
                   {promptTokens}
                 </p>
               </div>
@@ -175,17 +175,17 @@ export const BreadCrumb = ({
                 <h3 className="text-sm font-semibold text-slate-700">
                   Completion tokens
                 </h3>
-                <p className="text-sm text-slate-500 truncate">
+                <p className="truncate text-sm text-slate-500">
                   {completionTokens}
                 </p>
               </div>
             </div>
-            <div className="p-3 gap-3 flex flex-col border-b border-slate-200">
+            <div className="flex flex-col gap-3 border-b border-slate-200 p-3">
               <div className="flex flex-col gap-1">
                 <h3 className="text-sm font-semibold text-slate-700">
                   Last used
                 </h3>
-                <p className="text-sm text-slate-500 truncate">
+                <p className="truncate text-sm text-slate-500">
                   {getTimeAgo(endTime)}
                 </p>
               </div>
@@ -193,7 +193,7 @@ export const BreadCrumb = ({
                 <h3 className="text-sm font-semibold text-slate-700">
                   Created on
                 </h3>
-                <p className="text-sm text-slate-500 truncate">
+                <p className="truncate text-sm text-slate-500">
                   {startTime ? startTime.toLocaleDateString() : ""}
                 </p>
               </div>
@@ -204,8 +204,8 @@ export const BreadCrumb = ({
         <Button
           variant="ghost"
           className={clsx(
-            "flex flex-row gap-2 items-center",
-            isLive ? "text-green-500 animate-pulse" : "text-slate-500"
+            "flex flex-row items-center gap-2",
+            isLive ? "animate-pulse text-green-500" : "text-slate-500",
           )}
           size="sm_sleek"
           onClick={() => setIsLive(!isLive)}
@@ -213,10 +213,10 @@ export const BreadCrumb = ({
           <div
             className={clsx(
               isLive ? "bg-green-500" : "bg-slate-500",
-              "h-2 w-2 rounded-full"
+              "h-2 w-2 rounded-full",
             )}
           ></div>
-          <span className="text-xs italic font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
+          <span className="whitespace-nowrap text-xs font-medium italic text-slate-900 dark:text-slate-100">
             {isLive ? "Live" : "Start Live"}
           </span>
         </Button>

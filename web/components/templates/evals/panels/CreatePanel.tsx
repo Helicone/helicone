@@ -33,9 +33,9 @@ export const useCreatePanelTabs = create<{
       }),
       {
         name: "create-panel-tabs",
-      }
-    )
-  )
+      },
+    ),
+  ),
 );
 
 export const CreatePanel = () => {
@@ -156,8 +156,8 @@ export const CreatePanel = () => {
   };
 
   return (
-    <Col className="h-full flex flex-col overflow-hidden bg-background">
-      <Row className="justify-between items-center px-4 py-2 border-b shrink-0 bg-muted/30">
+    <Col className="flex h-full flex-col overflow-hidden bg-background">
+      <Row className="shrink-0 items-center justify-between border-b bg-muted/30 px-4 py-2">
         <H3 className="text-lg font-medium">Create new evaluator</H3>
         <Button
           variant="ghost"
@@ -166,15 +166,15 @@ export const CreatePanel = () => {
             resetPanels();
           }}
         >
-          <XIcon className="w-4 h-4" />
+          <XIcon className="h-4 w-4" />
         </Button>
       </Row>
       <Tabs
         value={selectedTab}
         onValueChange={setSelectedTab}
-        className="flex-grow flex flex-col overflow-hidden"
+        className="flex flex-grow flex-col overflow-hidden"
       >
-        <TabsList className="px-4 py-2 flex w-full justify-start space-x-2 bg-muted/30">
+        <TabsList className="flex w-full justify-start space-x-2 bg-muted/30 px-4 py-2">
           <TabsTrigger value="llm-as-a-judge" className="text-xs">
             LLM-as-a-judge
           </TabsTrigger>
@@ -185,10 +185,10 @@ export const CreatePanel = () => {
             LastMile AutoEval
           </TabsTrigger>
         </TabsList>
-        <div className="flex-grow flex flex-col overflow-hidden">
+        <div className="flex flex-grow flex-col overflow-hidden">
           <TabsContent
             value="llm-as-a-judge"
-            className="h-full m-0 p-0 data-[state=active]:flex data-[state=active]:flex-col"
+            className="m-0 h-full p-0 data-[state=active]:flex data-[state=active]:flex-col"
           >
             <LLMEvaluatorConfigForm
               onSubmit={() => {
@@ -201,7 +201,7 @@ export const CreatePanel = () => {
           </TabsContent>
           <TabsContent
             value="python"
-            className="h-full m-0 p-0 data-[state=active]:flex data-[state=active]:flex-col"
+            className="m-0 h-full p-0 data-[state=active]:flex data-[state=active]:flex-col"
           >
             <PythonEvaluatorConfigForm
               onSubmit={() => {
@@ -217,7 +217,7 @@ export const CreatePanel = () => {
           </TabsContent>
           <TabsContent
             value="lastmile"
-            className="h-full m-0 p-0 data-[state=active]:flex data-[state=active]:flex-col"
+            className="m-0 h-full p-0 data-[state=active]:flex data-[state=active]:flex-col"
           >
             <LastMileDevConfigForm
               onSubmit={() => {
@@ -232,7 +232,7 @@ export const CreatePanel = () => {
       </Tabs>
 
       {/* Sticky Footer */}
-      <div className="shrink-0 border-t bg-muted/10 p-4 flex items-center justify-between">
+      <div className="flex shrink-0 items-center justify-between border-t bg-muted/10 p-4">
         <div>
           {/* Left side empty or could include form validation indicators */}
         </div>
@@ -257,7 +257,7 @@ export const CreatePanel = () => {
             lastMileSubmit.isPending ? (
               <span className="flex items-center gap-2">
                 <svg
-                  className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                  className="-ml-1 mr-2 h-4 w-4 animate-spin text-white"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"

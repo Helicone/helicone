@@ -54,7 +54,7 @@ interface ThemedTableV5Props<T extends { id?: string }> {
     setAdvancedFilters: (filters: UIFilterRowTree) => void;
     searchPropertyFilters: (
       property: string,
-      search: string
+      search: string,
     ) => Promise<Result<void, string>>;
     show?: boolean;
   };
@@ -114,7 +114,7 @@ interface ThemedTableV5Props<T extends { id?: string }> {
 }
 
 export default function ThemedTable<T extends { id?: string }>(
-  props: ThemedTableV5Props<T>
+  props: ThemedTableV5Props<T>,
 ) {
   const {
     id,
@@ -154,7 +154,7 @@ export default function ThemedTable<T extends { id?: string }>(
 
   const [activeColumns, setActiveColumns] = useLocalStorage<DragColumnItem[]>(
     `${id}-activeColumns`,
-    defaultColumns?.map(columnDefToDragColumnItem)
+    defaultColumns?.map(columnDefToDragColumnItem),
   );
 
   const table = useReactTable({
@@ -225,9 +225,9 @@ export default function ThemedTable<T extends { id?: string }>(
   }, [rows]);
 
   return (
-    <div className="h-full flex flex-col border-slate-300 dark:border-slate-700 divide-y divide-slate-300 dark:divide-slate-700">
+    <div className="flex h-full flex-col divide-y divide-slate-300 border-slate-300 dark:divide-slate-700 dark:border-slate-700">
       {!hideHeader && (
-        <div className="p-1 flex-shrink-0">
+        <div className="flex-shrink-0 p-1">
           <ThemedTableHeader
             search={search}
             onDataSet={onDataSet}
@@ -281,11 +281,11 @@ export default function ThemedTable<T extends { id?: string }>(
         className="flex-grow overflow-hidden"
       >
         <ResizablePanel defaultSize={100} className="flex-grow">
-          <div className="h-full overflow-auto ">
+          <div className="h-full overflow-auto">
             {skeletonLoading ? (
               <LoadingAnimation title="Loading Data..." />
             ) : rows.length === 0 ? (
-              <div className="bg-white dark:bg-black h-48 w-full  border-slate-300 dark:border-slate-700 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
+              <div className="flex h-48 w-full flex-col items-center justify-center space-y-3 border-slate-300 bg-white px-4 py-2 dark:border-slate-700 dark:bg-black">
                 <TableCellsIcon className="h-12 w-12 text-slate-900 dark:text-slate-100" />
                 <p className="text-xl font-semibold text-slate-900 dark:text-slate-100">
                   No Data Found
@@ -293,14 +293,14 @@ export default function ThemedTable<T extends { id?: string }>(
                 {noDataCTA}
               </div>
             ) : table.getVisibleFlatColumns().length === 0 ? (
-              <div className="bg-white dark:bg-black h-48 w-full  border-slate-300 dark:border-slate-700 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
+              <div className="flex h-48 w-full flex-col items-center justify-center space-y-3 border-slate-300 bg-white px-4 py-2 dark:border-slate-700 dark:bg-black">
                 <AdjustmentsHorizontalIcon className="h-12 w-12 text-slate-900 dark:text-slate-100" />
                 <p className="text-xl font-semibold text-slate-900 dark:text-slate-100">
                   No Columns Selected
                 </p>
               </div>
             ) : makeCard && view === "card" ? (
-              <ul className="flex flex-col space-y-8 divide-y divide-slate-300 dark:divide-slate-700 bg-white dark:bg-black rounded-lg border border-slate-300 dark:border-slate-700">
+              <ul className="flex flex-col space-y-8 divide-y divide-slate-300 rounded-lg border border-slate-300 bg-white dark:divide-slate-700 dark:border-slate-700 dark:bg-black">
                 {rows.map((row, i) => (
                   <li key={"expanded-row" + i}>{makeCard(row.original)}</li>
                 ))}
@@ -308,12 +308,12 @@ export default function ThemedTable<T extends { id?: string }>(
             ) : makeRow && view === "row" ? (
               <RequestRowView
                 rows={rows.map(
-                  (row) => row.original as unknown as MappedLLMRequest
+                  (row) => row.original as unknown as MappedLLMRequest,
                 )}
                 properties={makeRow.properties}
               />
             ) : (
-              <div className="bg-slate-50 dark:bg-black rounded-sm h-full">
+              <div className="h-full rounded-sm bg-slate-50 dark:bg-black">
                 <div
                   className=""
                   style={{
@@ -329,22 +329,22 @@ export default function ThemedTable<T extends { id?: string }>(
                       },
                     }}
                   >
-                    <thead className="text-[12px] z-[2] h-11">
+                    <thead className="z-[2] h-11 text-[12px]">
                       {table.getHeaderGroups().map((headerGroup) => (
                         <tr
                           key={headerGroup.id}
-                          className="sticky top-0  bg-slate-50 dark:bg-slate-900 shadow-sm"
+                          className="sticky top-0 bg-slate-50 shadow-sm dark:bg-slate-900"
                         >
                           <th
                             className={clsx(
-                              "w-8 px-2 sticky left-0 z-20 bg-slate-50 dark:bg-slate-900",
-                              checkboxMode === "never" && "hidden"
+                              "sticky left-0 z-20 w-8 bg-slate-50 px-2 dark:bg-slate-900",
+                              checkboxMode === "never" && "hidden",
                             )}
                           >
                             <div
                               className={clsx(
                                 checkboxMode === "on_hover" &&
-                                  "opacity-40 hover:opacity-100 transition-opacity duration-150"
+                                  "opacity-40 transition-opacity duration-150 hover:opacity-100",
                               )}
                             >
                               <Checkbox
@@ -372,7 +372,7 @@ export default function ThemedTable<T extends { id?: string }>(
                               className={clsx(
                                 "relative",
                                 index === headerGroup.headers.length - 1 &&
-                                  "border-r border-slate-300 dark:border-slate-700"
+                                  "border-r border-slate-300 dark:border-slate-700",
                               )}
                             >
                               <DraggableColumnHeader
@@ -382,7 +382,7 @@ export default function ThemedTable<T extends { id?: string }>(
                                 totalColumns={headerGroup.headers.length}
                               />
                               {index < headerGroup.headers.length - 1 && (
-                                <div className="absolute top-0 right-0 h-full w-px bg-slate-300 dark:bg-slate-700" />
+                                <div className="absolute right-0 top-0 h-full w-px bg-slate-300 dark:bg-slate-700" />
                               )}
                               <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-300 dark:bg-slate-700" />
                             </th>
@@ -390,7 +390,7 @@ export default function ThemedTable<T extends { id?: string }>(
                         </tr>
                       ))}
                     </thead>
-                    <tbody className="text-[13px] ">
+                    <tbody className="text-[13px]">
                       {rows.map((row, index) => (
                         <tr
                           key={row.original?.id}
@@ -404,28 +404,28 @@ export default function ThemedTable<T extends { id?: string }>(
                               selectedIds?.includes(row.original?.id ?? "")) &&
                               "bg-sky-50 dark:bg-sky-950",
                             checkboxMode === "on_hover"
-                              ? "cursor-pointer group"
-                              : "cursor-default"
+                              ? "group cursor-pointer"
+                              : "cursor-default",
                           )}
                         >
                           <td
                             className={clsx(
-                              "w-8 px-2 border-t border-slate-300 dark:border-slate-700",
+                              "w-8 border-t border-slate-300 px-2 dark:border-slate-700",
                               checkboxMode === "on_hover"
                                 ? clsx(
-                                    "opacity-0 group-hover:opacity-100 transition-opacity duration-150",
+                                    "opacity-0 transition-opacity duration-150 group-hover:opacity-100",
                                     selectedIds?.includes(
-                                      row.original?.id ?? ""
-                                    ) && "!opacity-100"
+                                      row.original?.id ?? "",
+                                    ) && "!opacity-100",
                                   )
                                 : "",
-                              checkboxMode === "never" && "hidden"
+                              checkboxMode === "never" && "hidden",
                             )}
                           >
                             <Checkbox
                               variant="blue"
                               checked={selectedIds?.includes(
-                                row.original?.id ?? ""
+                                row.original?.id ?? "",
                               )}
                               onChange={() => {}}
                               className="text-slate-700 dark:text-slate-400"
@@ -435,7 +435,7 @@ export default function ThemedTable<T extends { id?: string }>(
                             <td
                               key={i}
                               className={clsx(
-                                "py-3 border-t border-slate-300 dark:border-slate-700 px-2 text-slate-700 dark:text-slate-300",
+                                "border-t border-slate-300 px-2 py-3 text-slate-700 dark:border-slate-700 dark:text-slate-300",
                                 i === 0 &&
                                   checkboxMode === "always_visible" &&
                                   "pl-2",
@@ -447,11 +447,11 @@ export default function ThemedTable<T extends { id?: string }>(
                                 i === 0 &&
                                   checkboxMode === "on_hover" &&
                                   selectedIds?.includes(
-                                    row.original?.id ?? ""
+                                    row.original?.id ?? "",
                                   ) &&
                                   "!pl-2",
                                 i === row.getVisibleCells().length - 1 &&
-                                  "pr-10 border-r border-slate-300 dark:border-slate-700"
+                                  "border-r border-slate-300 pr-10 dark:border-slate-700",
                               )}
                               style={{
                                 maxWidth: cell.column.getSize(),
@@ -465,12 +465,12 @@ export default function ThemedTable<T extends { id?: string }>(
                                 cell.column.id == "responseText") ? (
                                 <span
                                   className={clsx(
-                                    "w-full flex flex-grow",
+                                    "flex w-full flex-grow",
                                     (cell.column.id == "requestText" ||
                                       cell.column.id == "responseText") &&
                                       dataLoading
-                                      ? "animate-pulse bg-slate-200 rounded-md"
-                                      : "hidden"
+                                      ? "animate-pulse rounded-md bg-slate-200"
+                                      : "hidden",
                                   )}
                                 >
                                   &nbsp;
@@ -478,14 +478,14 @@ export default function ThemedTable<T extends { id?: string }>(
                               ) : (
                                 flexRender(
                                   cell.column.columnDef.cell,
-                                  cell.getContext()
+                                  cell.getContext(),
                                 )
                               )}
                             </td>
                           ))}
                           {rowLink && (
                             <td
-                              className="p-0 m-0 border-0"
+                              className="m-0 border-0 p-0"
                               style={{
                                 position: "absolute",
                                 top: 0,
@@ -532,7 +532,7 @@ export default function ThemedTable<T extends { id?: string }>(
             <>
               <ResizableHandle withHandle />
               <ResizablePanel minSize={25} maxSize={75} defaultSize={75}>
-                <div className="h-full flex-shrink-0 flex flex-col">
+                <div className="flex h-full flex-shrink-0 flex-col">
                   {rightPanel}
                 </div>
               </ResizablePanel>

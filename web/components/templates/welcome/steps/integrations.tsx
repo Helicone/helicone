@@ -27,22 +27,22 @@ const Integrations = (props: IntegrationsProps) => {
   };
 
   return (
-    <div id="content" className="w-full flex flex-col">
-      <div className="flex flex-col p-4 w-full">
-        <h2 className="text-2xl font-semibold pb-8">
+    <div id="content" className="flex w-full flex-col">
+      <div className="flex w-full flex-col p-4">
+        <h2 className="pb-8 text-2xl font-semibold">
           Integrate your application
         </h2>
-        <label className="font-semibold text-sm">Select your provider</label>
-        <div className="flex flex-wrap gap-4 pt-2 w-full">
+        <label className="text-sm font-semibold">Select your provider</label>
+        <div className="flex w-full flex-wrap gap-4 pt-2">
           <button
             className={clsx(
               selectedProvider === "openai" ? "bg-sky-100" : "bg-white",
-              "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
+              "flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2",
             )}
             onClick={() => setSelectedProvider("openai")}
           >
             <svg
-              className="w-[1.60625rem] m:w-[1.375rem] h-auto"
+              className="m:w-[1.375rem] h-auto w-[1.60625rem]"
               width="28"
               viewBox="0 0 28 28"
               fill="none"
@@ -58,7 +58,7 @@ const Integrations = (props: IntegrationsProps) => {
           <button
             className={clsx(
               selectedProvider === "azure" ? "bg-sky-100" : "bg-white",
-              "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
+              "flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2",
             )}
             onClick={() => setSelectedProvider("azure")}
           >
@@ -68,7 +68,7 @@ const Integrations = (props: IntegrationsProps) => {
               width={28}
               height={28}
               quality={100}
-              className="bg-transparent rounded-lg"
+              className="rounded-lg bg-transparent"
             />
             <h2 className="font-semibold">Azure</h2>
           </button>
@@ -76,7 +76,7 @@ const Integrations = (props: IntegrationsProps) => {
           <button
             className={clsx(
               selectedProvider === "anthropic" ? "bg-sky-100" : "bg-white",
-              "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
+              "flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2",
             )}
             onClick={() => setSelectedProvider("anthropic")}
           >
@@ -86,28 +86,28 @@ const Integrations = (props: IntegrationsProps) => {
               width={28}
               height={28}
               quality={100}
-              className="bg-transparent rounded-xl"
+              className="rounded-xl bg-transparent"
             />
             <h2 className="font-semibold">Anthropic</h2>
           </button>
           <Link
             className={clsx(
               "bg-white",
-              "flex items-center gap-2 border border-gray-300 rounded-lg py-2 px-4"
+              "flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2",
             )}
             href="https://docs.helicone.ai/getting-started/integration-method/gateway"
             target="_blank"
             rel="noreferrer noopener"
           >
             <div className="flex w-full">
-              <div className="relative flex items-center w-16 h-4">
+              <div className="relative flex h-4 w-16 items-center">
                 <Image
                   src="/assets/home/providers/lemonfox.png"
                   alt={"Anthropic"}
                   width={28}
                   height={28}
                   quality={100}
-                  className="bg-transparent absolute left-0 z-40 rounded-xl"
+                  className="absolute left-0 z-40 rounded-xl bg-transparent"
                 />
                 <Image
                   src="/assets/home/providers/llama2.png"
@@ -115,7 +115,7 @@ const Integrations = (props: IntegrationsProps) => {
                   width={28}
                   height={28}
                   quality={100}
-                  className="bg-transparent absolute left-4 z-30 rounded-xl"
+                  className="absolute left-4 z-30 rounded-xl bg-transparent"
                 />
                 <Image
                   src="/assets/home/providers/anyscale.jpeg"
@@ -123,18 +123,18 @@ const Integrations = (props: IntegrationsProps) => {
                   width={28}
                   height={28}
                   quality={100}
-                  className="bg-transparent absolute left-8 z-20 rounded-xl"
+                  className="absolute left-8 z-20 rounded-xl bg-transparent"
                 />
               </div>
             </div>
-            <h2 className="font-semibold w-fit text-nowrap">
+            <h2 className="w-fit text-nowrap font-semibold">
               Explore our docs
             </h2>
           </Link>
         </div>
         <div className="mt-8">{renderProviderObject[selectedProvider]}</div>
       </div>
-      <div className="flex items-center justify-between p-4 sticky bottom-0 bg-gray-50 z-10">
+      <div className="sticky bottom-0 z-10 flex items-center justify-between bg-gray-50 p-4">
         <Button variant={"secondary"} size={"sm"} onClick={previousStep}>
           Back
         </Button>

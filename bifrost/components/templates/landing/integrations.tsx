@@ -191,7 +191,7 @@ client = OpenAI(
   const [currentLanguage, setCurrentLanguage] = useState<
     "typescript" | "python" | "curl"
   >("typescript");
-  const [highlightedCode, setHighlightedCode] = useState("");
+  const [highlightedCode, setHighlightedCode] = useState<string>("");
 
   const languages: Array<"typescript" | "python" | "curl"> = [
     "typescript",

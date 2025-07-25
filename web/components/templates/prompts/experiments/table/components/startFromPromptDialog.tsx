@@ -55,7 +55,7 @@ export const NewExperimentDialog = () => {
   const handleInputChange = (
     index: number,
     field: "variable" | "value",
-    newValue: string
+    newValue: string,
   ) => {
     const newInputs = [...inputs];
     newInputs[index][field] = newValue;
@@ -75,7 +75,7 @@ export const NewExperimentDialog = () => {
     if (!promptName || !basePrompt) {
       notification.setNotification(
         "Please enter a prompt name and content",
-        "error"
+        "error",
       );
       setIsLoading(false);
       return;
@@ -150,7 +150,7 @@ export const NewExperimentDialog = () => {
             experimentAssigned: true,
           },
         },
-      }
+      },
     );
 
     if (result.error || !result.data) {
@@ -162,20 +162,20 @@ export const NewExperimentDialog = () => {
     notification.setNotification("Prompt created successfully", "success");
     setIsLoading(false);
     await router.push(
-      `/prompts/${res.data?.data?.id}/subversion/${res.data?.data?.prompt_version_id}/experiment/${experiment.data?.data?.experimentId}`
+      `/prompts/${res.data?.data?.id}/subversion/${res.data?.data?.prompt_version_id}/experiment/${experiment.data?.data?.experimentId}`,
     );
   };
 
   return (
     <DialogContent className="max-h-[80vh] w-full overflow-y-auto">
       {isLoading ? (
-        <div className="flex flex-col items-center justify-center h-full w-full">
+        <div className="flex h-full w-full flex-col items-center justify-center">
           <LoadingAnimation />
           <h1 className="text-2xl font-semibold">Getting your experiments</h1>
         </div>
       ) : (
         <div className="space-y-4 pr-8">
-          <div className="flex flex-row space-x-2 ">
+          <div className="flex flex-row space-x-2">
             <BeakerIcon className="h-6 w-6" />
             <h3 className="text-md font-semibold">Original Prompt</h3>
           </div>
@@ -201,7 +201,7 @@ export const NewExperimentDialog = () => {
                   original: variable.original,
                   heliconeTag: variable.heliconeTag,
                   value: variable.value,
-                }))
+                })),
               )
             }
             onPromptChange={handlePromptChange}
@@ -233,7 +233,7 @@ export const StartFromPromptDialog = ({
   const [selectedPromptId, setSelectedPromptId] = useState<string | null>(null);
   const notification = useNotification();
   const [selectedVersionId, setSelectedVersionId] = useState<string | null>(
-    null
+    null,
   );
   const jawn = useJawnClient();
 
@@ -249,12 +249,12 @@ export const StartFromPromptDialog = ({
     if (!selectedPromptId || !selectedVersionId) {
       notification.setNotification(
         "Please select a prompt and version",
-        "error"
+        "error",
       );
       return;
     }
     const promptVersion = promptVersions?.find(
-      (p) => p.id === selectedVersionId
+      (p) => p.id === selectedVersionId,
     );
     const prompt = prompts?.find((p) => p.id === selectedPromptId);
 
@@ -271,30 +271,30 @@ export const StartFromPromptDialog = ({
     }
 
     router.push(
-      `/experiments/${experimentTableResult.data?.data?.experimentId}`
+      `/experiments/${experimentTableResult.data?.data?.experimentId}`,
     );
   };
 
   return (
-    <DialogContent className="w-[500px] p-4 shadow-lg rounded-md">
+    <DialogContent className="w-[500px] rounded-md p-4 shadow-lg">
       <div>
         <div className="flex flex-row items-center space-x-2 text-center">
-          <BeakerIcon className="w-4 h-4 " />
-          <h3 className="font-medium mb-2 text-lg">Start with a prompt</h3>
+          <BeakerIcon className="h-4 w-4" />
+          <h3 className="mb-2 text-lg font-medium">Start with a prompt</h3>
         </div>
 
-        <p className="text-sm text-slate-500 mb-2">
+        <p className="mb-2 text-sm text-slate-500">
           Choose an existing prompt and select the version you want to
           experiment on.
         </p>
-        <div className="border border-slate-200 dark:border-slate-700 rounded-md">
-          <ScrollArea className="flex flex-col overflow-y-auto max-h-[30vh]  py-2  px-1 pt-0">
+        <div className="rounded-md border border-slate-200 dark:border-slate-700">
+          <ScrollArea className="flex max-h-[30vh] flex-col overflow-y-auto px-1 py-2 pt-0">
             {prompts &&
               prompts?.map((prompt) => (
                 <Button
                   key={prompt.id}
                   variant="ghost"
-                  className={`w-full justify-start mt-2 ${
+                  className={`mt-2 w-full justify-start ${
                     selectedPromptId === prompt.id
                       ? "bg-slate-200 dark:bg-slate-800"
                       : "hover:bg-accent"
@@ -306,7 +306,7 @@ export const StartFromPromptDialog = ({
                 </Button>
               ))}
           </ScrollArea>
-          <div className="flex flex-row border-t border-slate-200 dark:border-slate-700 items-center space-x-2 py-4 px-4 cursor-pointer">
+          <div className="flex cursor-pointer flex-row items-center space-x-2 border-t border-slate-200 px-4 py-4 dark:border-slate-700">
             <PlusIcon className="h-6 w-6 text-slate-700 dark:text-slate-300" />
             <Dialog>
               <DialogTrigger asChild>
@@ -319,8 +319,8 @@ export const StartFromPromptDialog = ({
           </div>
         </div>
 
-        <div className="mt-4 flex flex-row space-x-2 items-center justify-center">
-          <h4 className="font-semibold ">Version</h4>
+        <div className="mt-4 flex flex-row items-center justify-center space-x-2">
+          <h4 className="font-semibold">Version</h4>
           <Select
             value={selectedVersionId ?? ""}
             onValueChange={setSelectedVersionId}
@@ -357,7 +357,7 @@ export const StartFromPromptDialog = ({
           </Select>
         </div>
 
-        <div className="mt-4 flex flex-row space-x-2 items-center justify-center">
+        <div className="mt-4 flex flex-row items-center justify-center space-x-2">
           <Button
             variant="outline"
             onClick={() => onDialogClose(false)}

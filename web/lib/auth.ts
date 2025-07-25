@@ -100,22 +100,22 @@ export const auth = betterAuth({
   },
   plugins: [
     customSession(async ({ user, session }) => {
-        const dbUser = await getUser(user.id);
-        if (dbUser.error || !dbUser.data) {
-          console.warn("could not fetch authUserId from db");
-          return {
-            user,
-            session,
-          };
-        }
-        
+      const dbUser = await getUser(user.id);
+      if (dbUser.error || !dbUser.data) {
+        console.warn("could not fetch authUserId from db");
         return {
-            user: {
-              authUserId: dbUser.data.id,
-              ...user,
-            },
-            session
+          user,
+          session,
         };
+      }
+
+      return {
+        user: {
+          authUserId: dbUser.data.id,
+          ...user,
+        },
+        session,
+      };
     }),
   ],
 });

@@ -9,7 +9,7 @@ const steps = [
     href: "#",
     status: "complete",
     codeBlock: (
-      <div className="w-full flex flex-col">
+      <div className="flex w-full flex-col">
         <DiffHighlight
           code={`
 from openai import OpenAI
@@ -28,7 +28,7 @@ client = OpenAI(
           minHeight={false}
           textSize="md"
         />
-        <i className="text-gray-500 text-xs text-center pt-2">
+        <i className="pt-2 text-center text-xs text-gray-500">
           Example Python integration with OpenAI
         </i>
       </div>
@@ -52,19 +52,19 @@ const Steps = () => {
             key={step.name}
             className={clsx(
               stepIdx !== steps.length - 1 ? "pb-8" : "",
-              "relative"
+              "relative",
             )}
           >
             <>
               {stepIdx !== steps.length - 1 ? (
                 <div
-                  className="absolute left-2 sm:left-4 top-4 -ml-px mt-0.5 h-full w-0.5 bg-cyan-500"
+                  className="absolute left-2 top-4 -ml-px mt-0.5 h-full w-0.5 bg-cyan-500 sm:left-4"
                   aria-hidden="true"
                 />
               ) : null}
               <div className="group relative flex items-start">
                 <span className="flex h-8 items-center">
-                  <span className="relative z-10 flex h-4 w-4 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-cyan-500">
+                  <span className="relative z-10 flex h-4 w-4 items-center justify-center rounded-lg bg-cyan-500 sm:h-8 sm:w-8">
                     <CheckIcon
                       className="h-4 w-4 text-white"
                       aria-hidden="true"
@@ -75,7 +75,7 @@ const Steps = () => {
                   <span className="text-md font-medium text-cyan-300">
                     {step.name}
                   </span>
-                  <span className="text-xl text-white font-semibold">
+                  <span className="text-xl font-semibold text-white">
                     {step.description}
                   </span>
                   <span className="mt-1">{step.codeBlock}</span>

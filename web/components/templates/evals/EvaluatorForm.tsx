@@ -74,27 +74,27 @@ export const EvaluatorForm = ({
   // State for form values with defaults
   const [name, setName] = useState(initialValues.name || "");
   const [scoringType, setScoringType] = useState<ScoringType>(
-    initialValues.scoringType || "boolean"
+    initialValues.scoringType || "boolean",
   );
   const [description, setDescription] = useState(
-    initialValues.description || ""
+    initialValues.description || "",
   );
   const [model, setModel] = useState(initialValues.model || modelOptions[0]);
   const [advancedOpen, setAdvancedOpen] = useState(false);
 
   // Additional state for scoring type configurations
   const [choiceScores, setChoiceScores] = useState<ChoiceScore[]>(
-    initialValues.choiceScores || [...DEFAULT_CHOICE_SCORES]
+    initialValues.choiceScores || [...DEFAULT_CHOICE_SCORES],
   );
   const [rangeMin, setRangeMin] = useState(
     initialValues.rangeMin !== undefined
       ? initialValues.rangeMin
-      : DEFAULT_RANGE_MIN
+      : DEFAULT_RANGE_MIN,
   );
   const [rangeMax, setRangeMax] = useState(
     initialValues.rangeMax !== undefined
       ? initialValues.rangeMax
-      : DEFAULT_RANGE_MAX
+      : DEFAULT_RANGE_MAX,
   );
 
   // Included variables state
@@ -122,7 +122,7 @@ export const EvaluatorForm = ({
   const updateChoiceScore = (
     index: number,
     field: keyof ChoiceScore,
-    value: string | number
+    value: string | number,
   ) => {
     const newScores = [...choiceScores];
     newScores[index] = {
@@ -181,7 +181,7 @@ export const EvaluatorForm = ({
     <form
       id="evaluator-form"
       onSubmit={handleSubmit}
-      className="max-w-4xl mx-auto space-y-6"
+      className="mx-auto max-w-4xl space-y-6"
     >
       {/* Basic Info card - only shown when creating */}
       {isCreating && (
@@ -196,7 +196,7 @@ export const EvaluatorForm = ({
               <div>
                 <label
                   htmlFor="name"
-                  className="block text-sm font-medium mb-1"
+                  className="mb-1 block text-sm font-medium"
                 >
                   Name
                 </label>
@@ -268,9 +268,9 @@ export const EvaluatorForm = ({
                     &ldquo;bad&rdquo;, &ldquo;excellent&rdquo;. Best for
                     qualitative assessments.
                   </P>
-                  <div className="p-4 border rounded-md bg-muted/10">
-                    <div className="flex justify-between items-center mb-3">
-                      <h4 className="font-medium text-sm">Choice Values</h4>
+                  <div className="rounded-md border bg-muted/10 p-4">
+                    <div className="mb-3 flex items-center justify-between">
+                      <h4 className="text-sm font-medium">Choice Values</h4>
                       <Button
                         type="button"
                         variant="outline"
@@ -299,7 +299,7 @@ export const EvaluatorForm = ({
                               updateChoiceScore(
                                 index,
                                 "description",
-                                e.target.value
+                                e.target.value,
                               )
                             }
                             className="flex-1"
@@ -328,8 +328,8 @@ export const EvaluatorForm = ({
                     Numeric scoring returns a value between 0-100. Suitable for
                     granular quality evaluations.
                   </P>
-                  <div className="p-4 border rounded-md bg-muted/10">
-                    <h4 className="font-medium text-sm mb-3">Range Values</h4>
+                  <div className="rounded-md border bg-muted/10 p-4">
+                    <h4 className="mb-3 text-sm font-medium">Range Values</h4>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label
@@ -388,7 +388,7 @@ export const EvaluatorForm = ({
           </CardHeader>
         </div>
         {advancedOpen && (
-          <CardContent className="pt-0 space-y-6">
+          <CardContent className="space-y-6 pt-0">
             {/* Model Selection */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
@@ -420,9 +420,9 @@ export const EvaluatorForm = ({
                 Select which variables to include in the evaluation
               </P>
 
-              <div className="grid grid-cols-2 gap-2 mt-3">
+              <div className="mt-3 grid grid-cols-2 gap-2">
                 {/* Inputs checkbox */}
-                <div className="flex items-start space-x-2 p-1 hover:bg-muted/20 rounded-md">
+                <div className="flex items-start space-x-2 rounded-md p-1 hover:bg-muted/20">
                   <Checkbox
                     id="inputs"
                     checked={includedVariables.inputs}
@@ -445,7 +445,7 @@ export const EvaluatorForm = ({
                 </div>
 
                 {/* Prompt Template checkbox */}
-                <div className="flex items-start space-x-2 p-1 hover:bg-muted/20 rounded-md">
+                <div className="flex items-start space-x-2 rounded-md p-1 hover:bg-muted/20">
                   <Checkbox
                     id="promptTemplate"
                     checked={includedVariables.promptTemplate}
@@ -471,7 +471,7 @@ export const EvaluatorForm = ({
                 </div>
 
                 {/* Input Body checkbox */}
-                <div className="flex items-start space-x-2 p-1 hover:bg-muted/20 rounded-md">
+                <div className="flex items-start space-x-2 rounded-md p-1 hover:bg-muted/20">
                   <Checkbox
                     id="inputBody"
                     checked={includedVariables.inputBody}
@@ -494,7 +494,7 @@ export const EvaluatorForm = ({
                 </div>
 
                 {/* Output Body checkbox */}
-                <div className="flex items-start space-x-2 p-1 hover:bg-muted/20 rounded-md">
+                <div className="flex items-start space-x-2 rounded-md p-1 hover:bg-muted/20">
                   <Checkbox
                     id="outputBody"
                     checked={includedVariables.outputBody}
@@ -522,13 +522,13 @@ export const EvaluatorForm = ({
       </Card>
 
       {/* Footer */}
-      <div className="pt-6 mt-10">
+      <div className="mt-10 pt-6">
         {/* This div gives space for the fixed footer */}
       </div>
 
       {/* Sticky footer */}
-      <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background p-4 shadow-md z-10">
-        <div className="max-w-4xl mx-auto flex justify-end gap-3">
+      <div className="fixed bottom-0 left-0 right-0 z-10 border-t border-border bg-background p-4 shadow-md">
+        <div className="mx-auto flex max-w-4xl justify-end gap-3">
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
           </Button>
@@ -538,8 +538,8 @@ export const EvaluatorForm = ({
                 ? "Creating..."
                 : "Saving..."
               : isCreating
-              ? "Create Evaluator"
-              : "Save Changes"}
+                ? "Create Evaluator"
+                : "Save Changes"}
           </Button>
         </div>
       </div>

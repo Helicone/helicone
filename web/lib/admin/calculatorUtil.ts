@@ -27,7 +27,7 @@ export function getProductIdsFromInvoice(invoice: Stripe.Invoice): string[] {
  * Extracts all unique product IDs from a Stripe upcoming invoice
  */
 export function getProductIdsFromUpcomingInvoice(
-  invoice: Stripe.UpcomingInvoice
+  invoice: Stripe.UpcomingInvoice,
 ): string[] {
   const productIds: string[] = [];
 
@@ -50,7 +50,7 @@ export function getProductIdsFromUpcomingInvoice(
 export function calculateInvoiceAmounts(
   invoice: Stripe.Invoice | Stripe.UpcomingInvoice,
   discounts?: Record<string, Stripe.Discount>,
-  productId?: string
+  productId?: string,
 ): {
   amount: number;
   amountAfterProcessing: number;

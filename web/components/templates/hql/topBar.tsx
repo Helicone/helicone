@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { Save } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Play } from "lucide-react";
-import { components } from "@/lib/clients/jawnTypes/public";
 import { Badge } from "@/components/ui/badge";
 
 interface TopBarProps {

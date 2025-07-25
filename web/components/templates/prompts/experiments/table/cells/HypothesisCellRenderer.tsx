@@ -43,7 +43,7 @@ export const HypothesisCellRenderer = forwardRef<
 >(
   (
     { requestId, prompt, experimentTableId, inputRecordId, promptVersionId },
-    ref
+    ref,
   ) => {
     const [running, setRunning] = useState(false);
     const initialModel = prompt?.model || "";
@@ -54,7 +54,7 @@ export const HypothesisCellRenderer = forwardRef<
     const [playgroundPrompt, setPlaygroundPrompt] = useState<any>(null);
 
     const { requestsData, isRequestsLoading } = useExperimentRequestData(
-      hypothesisRequestId ?? ""
+      hypothesisRequestId ?? "",
     );
     const jawnClient = useJawnClient();
 
@@ -78,7 +78,7 @@ export const HypothesisCellRenderer = forwardRef<
                 promptVersionId: promptVersionId,
               },
             },
-          }
+          },
         );
 
         const parentPromptVersion = await jawnClient.GET(
@@ -89,7 +89,7 @@ export const HypothesisCellRenderer = forwardRef<
                 promptVersionId: res.data?.data?.parent_prompt_version ?? "",
               },
             },
-          }
+          },
         );
 
         return {
@@ -125,7 +125,7 @@ export const HypothesisCellRenderer = forwardRef<
                 scoreKey: selectedScoreKey,
               },
             },
-          }
+          },
         );
 
         const promptVersionIdScores = queryClient.getQueryData<{
@@ -154,7 +154,7 @@ export const HypothesisCellRenderer = forwardRef<
         requestsData?.responseBody?.response?.choices?.[0]?.message?.content
       ) {
         setContent(
-          requestsData.responseBody.response.choices[0].message.content
+          requestsData.responseBody.response.choices[0].message.content,
         );
         setRunning(false);
       } else if (
@@ -215,8 +215,8 @@ export const HypothesisCellRenderer = forwardRef<
 
     if (running) {
       return (
-        <div className="flex items-center gap-2 py-2 px-4">
-          <div className="w-2 h-2 bg-yellow-700 rounded-full animate-pulse"></div>
+        <div className="flex items-center gap-2 px-4 py-2">
+          <div className="h-2 w-2 animate-pulse rounded-full bg-yellow-700"></div>
           <div className="text-sm text-slate-700 dark:text-slate-400">
             Generating...
           </div>
@@ -226,8 +226,8 @@ export const HypothesisCellRenderer = forwardRef<
 
     if (isRequestsLoading) {
       return (
-        <div className="flex items-center gap-2 py-2 px-4">
-          <div className="w-2 h-2 bg-green-700 rounded-full animate-pulse"></div>
+        <div className="flex items-center gap-2 px-4 py-2">
+          <div className="h-2 w-2 animate-pulse rounded-full bg-green-700"></div>
           <div className="text-sm text-slate-700 dark:text-slate-400">
             Loading...
           </div>
@@ -239,27 +239,27 @@ export const HypothesisCellRenderer = forwardRef<
       return (
         <Popover modal={true}>
           <PopoverTrigger asChild>
-            <div className="group relative w-full h-full flex flex-col">
+            <div className="group relative flex h-full w-full flex-col">
               <Button
                 variant="outline"
-                className="absolute top-2 right-2 w-[22px] h-[22px] p-0 border-slate-200 dark:border-slate-800 border rounded-md text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity z-[1] "
+                className="absolute right-2 top-2 z-[1] h-[22px] w-[22px] rounded-md border border-slate-200 p-0 text-slate-500 opacity-0 transition-opacity group-hover:opacity-100 dark:border-slate-800"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleRunHypothesis(e);
                 }}
               >
-                <PlayIcon className="w-4 h-4" />
+                <PlayIcon className="h-4 w-4" />
               </Button>
-              <div className="w-full h-full flex flex-col justify-start cursor-pointer py-2 px-4 text-slate-700 dark:text-slate-300">
+              <div className="flex h-full w-full cursor-pointer flex-col justify-start px-4 py-2 text-slate-700 dark:text-slate-300">
                 {selectedScoreKey && score && (
-                  <div className="flex items-center gap-2 mb-3">
+                  <div className="mb-3 flex items-center gap-2">
                     <div
                       className={clsx(
                         "h-2.5 w-2.5 rounded-sm",
                         score.cellValue?.value &&
                           score.cellValue?.value > score.avg
                           ? "bg-green-500"
-                          : "bg-red-500"
+                          : "bg-red-500",
                       )}
                     ></div>
                     <p className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
@@ -270,26 +270,26 @@ export const HypothesisCellRenderer = forwardRef<
                 )}
                 <div
                   className={clsx(
-                    "break-words whitespace-normal",
+                    "whitespace-normal break-words",
                     wrapText.data &&
-                      "max-h-[100px] overflow-y-hidden line-clamp-4 truncate text-ellipsis"
+                      "line-clamp-4 max-h-[100px] overflow-y-hidden truncate text-ellipsis",
                   )}
                 >
                   {content}
                 </div>
               </div>
-              <div className="absolute bottom-2 right-2 text-xs text-slate-500 z-[20]">
+              <div className="absolute bottom-2 right-2 z-[20] text-xs text-slate-500">
                 {new Date(promptTemplate?.updated_at ?? "").getTime() >
                   new Date(
-                    requestsData?.request_created_at ?? ""
+                    requestsData?.request_created_at ?? "",
                   ).getTime() && (
                   <Tooltip>
                     <TooltipTrigger>
-                      <TriangleAlertIcon className="w-4 h-4 text-yellow-500" />
+                      <TriangleAlertIcon className="h-4 w-4 text-yellow-500" />
                     </TooltipTrigger>
                     <TooltipContent
                       side="left"
-                      className="text-[11px] py-px px-1 border-0 text-yellow-500 dark:text-yellow-500 shadow-none rounded-none bg-yellow-50 dark:bg-yellow-950"
+                      className="rounded-none border-0 bg-yellow-50 px-1 py-px text-[11px] text-yellow-500 shadow-none dark:bg-yellow-950 dark:text-yellow-500"
                     >
                       Prompt has changed since this cell was last run
                     </TooltipContent>
@@ -307,7 +307,7 @@ export const HypothesisCellRenderer = forwardRef<
             side="bottom"
             align="start"
           >
-            <ScrollArea className="flex flex-col overflow-y-auto max-h-[50vh]">
+            <ScrollArea className="flex max-h-[50vh] flex-col overflow-y-auto">
               <PromptPlayground
                 prompt={playgroundPrompt}
                 selectedInput={undefined}
@@ -327,14 +327,14 @@ export const HypothesisCellRenderer = forwardRef<
       return (
         <Button
           variant="ghost"
-          className="p-0 border border-slate-200 dark:border-slate-800 rounded-md h-[22px] w-[22px] flex items-center justify-center shrink-0 absolute top-2 right-2 text-slate-500 bg-white dark:bg-transparent"
+          className="absolute right-2 top-2 flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-md border border-slate-200 bg-white p-0 text-slate-500 dark:border-slate-800 dark:bg-transparent"
           onClick={handleRunHypothesis}
         >
-          <PlayIcon className="w-4 h-4" />
+          <PlayIcon className="h-4 w-4" />
         </Button>
       );
     }
-  }
+  },
 );
 
 HypothesisCellRenderer.displayName = "HypothesisCellRenderer";

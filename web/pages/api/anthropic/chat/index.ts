@@ -17,7 +17,7 @@ export interface ChatParams {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Result<Anthropic.Messages.Message, string>>
+  res: NextApiResponse<Result<Anthropic.Messages.Message, string>>,
 ) {
   const client = await getSSRHeliconeAuthClient({ ctx: { req, res } });
   const user = await client.getUser();

@@ -39,7 +39,7 @@ export default function NewDataset({
   isCopyMode = false,
 }: NewDatasetProps) {
   const [selectedOption, setSelectedOption] = useState<string | "new" | null>(
-    null
+    null,
   );
   const [newDatasetName, setNewDatasetName] = useState("");
   const { setNotification } = useNotification();
@@ -52,7 +52,7 @@ export default function NewDataset({
   const [addingRequests, setAddingRequests] = useState(false);
   const [openDatasetOnAdd, setOpenDatasetOnAdd] = useLocalStorage(
     "openDatasetOnAdd",
-    false
+    false,
   );
   const router = useRouter();
   const newDatasetInputRef = useRef<HTMLInputElement>(null);
@@ -66,13 +66,13 @@ export default function NewDataset({
 
   const { hasAccess, freeLimit: FREE_TIER_DATASET_LIMIT } = useFeatureLimit(
     "datasets",
-    datasetCount
+    datasetCount,
   );
 
   const { freeLimit: FREE_TIER_REQUEST_LIMIT } = useFeatureLimit(
     "datasets",
     requestCount,
-    "requests"
+    "requests",
   );
 
   // State to track which limit is enforcing restrictions
@@ -103,23 +103,23 @@ export default function NewDataset({
           if (hasAccess) {
             const newLimitedRequestIds = request_ids.slice(
               0,
-              hardLimitRemaining
+              hardLimitRemaining,
             );
             setLimitedRequestIds(newLimitedRequestIds);
             setLimitType(
               newLimitedRequestIds.length < request_ids.length
                 ? "hard_limit"
-                : "none"
+                : "none",
             );
           } else {
             // For free tier users, apply the more restrictive of the two limits
             const freeTierRemaining = Math.max(
               0,
-              FREE_TIER_REQUEST_LIMIT - dataset.requests_count
+              FREE_TIER_REQUEST_LIMIT - dataset.requests_count,
             );
             const effectiveLimit = Math.min(
               hardLimitRemaining,
-              freeTierRemaining
+              freeTierRemaining,
             );
             const newLimitedRequestIds = request_ids.slice(0, effectiveLimit);
             setLimitedRequestIds(newLimitedRequestIds);
@@ -128,7 +128,7 @@ export default function NewDataset({
               setLimitType(
                 effectiveLimit === freeTierRemaining
                   ? "free_tier_request_limit"
-                  : "hard_limit"
+                  : "hard_limit",
               );
             } else {
               setLimitType("none");
@@ -141,7 +141,7 @@ export default function NewDataset({
       // For new datasets
       const hardLimitRequestIds = request_ids.slice(
         0,
-        MAX_REQUESTS_PER_DATASET
+        MAX_REQUESTS_PER_DATASET,
       );
 
       // For paid users, only apply hard limit
@@ -150,7 +150,7 @@ export default function NewDataset({
         setLimitType(
           hardLimitRequestIds.length < request_ids.length
             ? "hard_limit"
-            : "none"
+            : "none",
         );
       } else if (datasetCount >= FREE_TIER_DATASET_LIMIT) {
         setLimitedRequestIds([]);
@@ -166,7 +166,7 @@ export default function NewDataset({
         setLimitType(
           hardLimitRequestIds.length < request_ids.length
             ? "hard_limit"
-            : "none"
+            : "none",
         );
       }
     }
@@ -250,15 +250,15 @@ export default function NewDataset({
   };
 
   return (
-    <Card className="w-[450px] border-none shadow-none p-0 m-0 space-y-4">
+    <Card className="m-0 w-[450px] space-y-4 border-none p-0 shadow-none">
       <CardHeader className="p-0 pb-4">
         <CardTitle className="text-2xl font-semibold">
           {isCopyMode ? "Copy to dataset" : "Add to dataset"}{" "}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4 p-2 rounded-xl border border-[#E2E8F0] dark:border-slate-700">
+      <CardContent className="space-y-4 rounded-xl border border-[#E2E8F0] p-2 dark:border-slate-700">
         {isDatasetsLoading ? (
-          <div className="h-[115px] flex items-center justify-center">
+          <div className="flex h-[115px] items-center justify-center">
             <p className="text-sm text-slate-700 dark:text-slate-100">
               Loading...
             </p>
@@ -268,24 +268,24 @@ export default function NewDataset({
             {datasets.map((dataset) => (
               <div
                 key={dataset.id}
-                className={`flex items-center space-x-2 p-2 cursor-pointer rounded-lg ${
+                className={`flex cursor-pointer items-center space-x-2 rounded-lg p-2 ${
                   selectedOption === dataset.id
                     ? "bg-[#F1F5F9] dark:bg-slate-700/50"
                     : "hover:bg-accent dark:hover:bg-slate-700/50"
                 }`}
                 onClick={() => handleSelection(dataset.id)}
               >
-                <div className="w-5 h-5 flex items-center justify-center">
+                <div className="flex h-5 w-5 items-center justify-center">
                   {selectedOption === dataset.id && (
                     <Check className="h-4 w-4 text-primary" />
                   )}
                 </div>
-                <div className="flex-1 flex items-center justify-between text-md font-normal leading-none">
+                <div className="text-md flex flex-1 items-center justify-between font-normal leading-none">
                   <span className="text-[#334155]">
                     {dataset.name || "Untitled"}
                   </span>
-                  <span className="text-muted-foreground text-[#6B7280] items-center flex">
-                    <TableCellsIcon className="inline mr-1 h-4 w-4" />
+                  <span className="flex items-center text-[#6B7280] text-muted-foreground">
+                    <TableCellsIcon className="mr-1 inline h-4 w-4" />
                     {dataset.requests_count || 0}
                   </span>
                 </div>
@@ -293,26 +293,26 @@ export default function NewDataset({
             ))}
           </ScrollArea>
         ) : (
-          <div className="h-[115px] flex flex-col items-center justify-center">
+          <div className="flex h-[115px] flex-col items-center justify-center">
             <DatabaseIcon className="h-12 w-12 text-slate-700 dark:text-slate-300" />
-            <p className="text-sm text-slate-700 dark:text-slate-300 mt-2">
+            <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">
               No Datasets
             </p>
-            <p className="text-xs text-slate-700 dark:text-slate-300 mt-1">
+            <p className="mt-1 text-xs text-slate-700 dark:text-slate-300">
               Create your first dataset below
             </p>
           </div>
         )}
         <div className="border-t border-[#E2E8F0] pt-1">
           <div
-            className={`flex items-center space-x-2 p-2 cursor-pointer rounded-lg ${
+            className={`flex cursor-pointer items-center space-x-2 rounded-lg p-2 ${
               selectedOption === "new"
-                ? "bg-[#F1F5F9] dark:bg-slate-700/50 text-slate-700 dark:text-slate-300"
-                : "hover:bg-accent dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300"
+                ? "bg-[#F1F5F9] text-slate-700 dark:bg-slate-700/50 dark:text-slate-300"
+                : "text-slate-700 hover:bg-accent dark:text-slate-300 dark:hover:bg-slate-700/50"
             }`}
             onClick={() => handleSelection("new")}
           >
-            <div className="w-5 h-5 flex items-center justify-center">
+            <div className="flex h-5 w-5 items-center justify-center">
               {selectedOption === "new" && (
                 <Check className="h-4 w-4 text-primary dark:text-slate-700" />
               )}
@@ -334,12 +334,12 @@ export default function NewDataset({
           </div>
         )}
       </CardContent>
-      <CardFooter className="flex-col items-stretch space-y-4 py-2 px-0">
+      <CardFooter className="flex-col items-stretch space-y-4 px-0 py-2">
         {renderLimitWarning()}
-        <div className="flex justify-end items-center space-x-2">
+        <div className="flex items-center justify-end space-x-2">
           <label
             htmlFor="open-after"
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-slate-700 dark:text-slate-300"
+            className="text-sm font-medium leading-none text-slate-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 dark:text-slate-300"
           >
             Open dataset after
           </label>
@@ -349,7 +349,7 @@ export default function NewDataset({
             onCheckedChange={setOpenDatasetOnAdd}
           />
         </div>
-        <div className="flex justify-between w-full p-0">
+        <div className="flex w-full justify-between p-0">
           <Button variant="outline" onClick={onComplete}>
             Cancel
           </Button>
@@ -384,7 +384,7 @@ export default function NewDataset({
                       addRequests: limitedRequestIds,
                       removeRequests: [],
                     },
-                  }
+                  },
                 );
 
                 if (res.data && !res.data.error) {
@@ -404,8 +404,8 @@ export default function NewDataset({
                   ? "Copying..."
                   : "Adding..."
                 : isCopyMode
-                ? `Copy ${limitedRequestIds.length} requests`
-                : `Add ${limitedRequestIds.length} requests`}{" "}
+                  ? `Copy ${limitedRequestIds.length} requests`
+                  : `Add ${limitedRequestIds.length} requests`}{" "}
             </Button>
           </FreeTierLimitWrapper>
         </div>

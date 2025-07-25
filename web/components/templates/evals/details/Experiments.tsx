@@ -25,11 +25,11 @@ export const ExperimentsForEvaluator = ({
                   href={`/experiments/${experiment.experiment_id}`}
                   className="hover:underline"
                 >
-                  <Row className="justify-between w-full">
+                  <Row className="w-full justify-between">
                     <span>{experiment.experiment_name}</span>
                     <span>
                       {new Date(
-                        experiment.experiment_created_at
+                        experiment.experiment_created_at,
                       ).toLocaleString()}
                     </span>
                   </Row>

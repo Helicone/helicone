@@ -93,12 +93,12 @@ const ExperimentTable = () => {
   const [animationState, setAnimationState] = useState(() =>
     Array(data.length)
       .fill(0)
-      .map(() => Array(4).fill(0))
+      .map(() => Array(4).fill(0)),
   );
   const [highlightState, setHighlightState] = useState(() =>
     Array(data.length)
       .fill(0)
-      .map(() => Array(4).fill(false))
+      .map(() => Array(4).fill(false)),
   );
 
   // Set up intersection observer
@@ -111,7 +111,7 @@ const ExperimentTable = () => {
         root: null,
         rootMargin: "0px",
         threshold: 0.1, // Trigger when at least 10% of the element is visible
-      }
+      },
     );
 
     if (tableRef.current) {
@@ -157,12 +157,12 @@ const ExperimentTable = () => {
     setAnimationState(
       Array(data.length)
         .fill(0)
-        .map(() => Array(4).fill(0))
+        .map(() => Array(4).fill(0)),
     );
     setHighlightState(
       Array(data.length)
         .fill(0)
-        .map(() => Array(4).fill(false))
+        .map(() => Array(4).fill(false)),
     );
 
     data.forEach((_, rowIndex) => {
@@ -185,7 +185,7 @@ const ExperimentTable = () => {
     if (state === 0) {
       return (
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-yellow-700 rounded-full animate-pulse"></div>
+          <div className="h-2 w-2 animate-pulse rounded-full bg-yellow-700"></div>
           <div className="text-sm text-slate-700">Queued...</div>
         </div>
       );
@@ -193,7 +193,7 @@ const ExperimentTable = () => {
     if (state === 1) {
       return (
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-green-700 rounded-full animate-pulse"></div>
+          <div className="h-2 w-2 animate-pulse rounded-full bg-green-700"></div>
           <div className="text-sm text-slate-700">Generating...</div>
         </div>
       );
@@ -209,56 +209,56 @@ const ExperimentTable = () => {
   }, [hasStarted, isVisible, startAnimation]);
 
   return (
-    <div ref={tableRef} className="relative w-full h-[400px] z-[1]">
-      <div className="absolute inset-0 h-full w-1/6 pointer-events-none bg-gradient-to-r from-white to-transparent z-[2]"></div>
-      <div className="absolute h-[100px] w-full bottom-0 right-0 pointer-events-none bg-gradient-to-t from-white to-transparent z-[2]"></div>
-      <div className="w-full h-full border border-slate-200 rounded-2xl overflow-hidden">
+    <div ref={tableRef} className="relative z-[1] h-[400px] w-full">
+      <div className="pointer-events-none absolute inset-0 z-[2] h-full w-1/6 bg-gradient-to-r from-white to-transparent"></div>
+      <div className="pointer-events-none absolute bottom-0 right-0 z-[2] h-[100px] w-full bg-gradient-to-t from-white to-transparent"></div>
+      <div className="h-full w-full overflow-hidden rounded-2xl border border-slate-200">
         <Table className="divide w-full table-fixed">
-          <TableHeader className="bg-slate-100 rounded-t-2xl">
+          <TableHeader className="rounded-t-2xl bg-slate-100">
             <TableRow>
-              <TableHead className="border-r border-slate-200 w-[25%]">
+              <TableHead className="w-[25%] border-r border-slate-200">
                 Messages
               </TableHead>
-              <TableHead className="border-r border-slate-200 w-[25%]">
+              <TableHead className="w-[25%] border-r border-slate-200">
                 Original
               </TableHead>
-              <TableHead className="border-r border-slate-200 w-[25%]">
+              <TableHead className="w-[25%] border-r border-slate-200">
                 Prompt 1
               </TableHead>
-              <TableHead className="border-r border-slate-200 w-[25%]">
+              <TableHead className="w-[25%] border-r border-slate-200">
                 Prompt 2
               </TableHead>
-              <TableHead className="text-center rounded-tr-2xl w-[40px]">
-                <PlusIcon className="w-4 h-4" />
+              <TableHead className="w-[40px] rounded-tr-2xl text-center">
+                <PlusIcon className="h-4 w-4" />
               </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {data.map((row, index) => (
               <TableRow key={index}>
-                <TableCell className="border-r border-slate-200 whitespace-nowrap overflow-hidden text-ellipsis">
+                <TableCell className="overflow-hidden text-ellipsis whitespace-nowrap border-r border-slate-200">
                   {row.messages}
                 </TableCell>
                 <TableCell
                   className={cn(
-                    "border-r border-slate-200 whitespace-nowrap overflow-hidden text-ellipsis",
-                    highlightState[index][1] && "bg-slate-100"
+                    "overflow-hidden text-ellipsis whitespace-nowrap border-r border-slate-200",
+                    highlightState[index][1] && "bg-slate-100",
                   )}
                 >
                   {getCellContent(row.original, animationState[index][1])}
                 </TableCell>
                 <TableCell
                   className={cn(
-                    "border-r border-slate-200 whitespace-nowrap overflow-hidden text-ellipsis",
-                    highlightState[index][2] && "bg-slate-100"
+                    "overflow-hidden text-ellipsis whitespace-nowrap border-r border-slate-200",
+                    highlightState[index][2] && "bg-slate-100",
                   )}
                 >
                   {getCellContent(row.prompt1, animationState[index][2])}
                 </TableCell>
                 <TableCell
                   className={cn(
-                    "border-r border-slate-200 whitespace-nowrap overflow-hidden text-ellipsis",
-                    highlightState[index][3] && "bg-slate-100"
+                    "overflow-hidden text-ellipsis whitespace-nowrap border-r border-slate-200",
+                    highlightState[index][3] && "bg-slate-100",
                   )}
                 >
                   {getCellContent(row.prompt2, animationState[index][3])}

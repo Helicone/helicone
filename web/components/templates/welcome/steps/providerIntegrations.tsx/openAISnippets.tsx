@@ -135,7 +135,7 @@ export default function OpenAISnippets(props: OpenAISnippetsProps) {
   const [lang, setLang] = useState<SupportedLanguages>("typescript");
 
   return (
-    <div className="w-full flex flex-col">
+    <div className="flex w-full flex-col">
       <DiffHighlight
         code={CODE_CONVERTS[lang](apiKey)}
         language={lang}
@@ -145,14 +145,14 @@ export default function OpenAISnippets(props: OpenAISnippetsProps) {
       />
 
       <div className="mt-2">
-        <div className="flex overflow-x-auto py-2 w-full no-scrollbar">
+        <div className="no-scrollbar flex w-full overflow-x-auto py-2">
           <div className="flex gap-2">
             <Button
               variant={"outline"}
               size="sm"
               className={
                 lang === "typescript"
-                  ? "bg-slate-200 border-slate-200 dark:bg-slate-800 dark:border-slate-800"
+                  ? "border-slate-200 bg-slate-200 dark:border-slate-800 dark:bg-slate-800"
                   : ""
               }
               onClick={() => setLang("typescript")}
@@ -164,7 +164,7 @@ export default function OpenAISnippets(props: OpenAISnippetsProps) {
               size="sm"
               className={
                 lang === "python"
-                  ? "bg-slate-200 border-slate-200 dark:bg-slate-800 dark:border-slate-800"
+                  ? "border-slate-200 bg-slate-200 dark:border-slate-800 dark:bg-slate-800"
                   : ""
               }
               onClick={() => setLang("python")}
@@ -176,7 +176,7 @@ export default function OpenAISnippets(props: OpenAISnippetsProps) {
               size="sm"
               className={
                 lang === "curl"
-                  ? "bg-slate-200 border-slate-200 dark:bg-slate-800 dark:border-slate-800"
+                  ? "border-slate-200 bg-slate-200 dark:border-slate-800 dark:bg-slate-800"
                   : ""
               }
               onClick={() => setLang("curl")}

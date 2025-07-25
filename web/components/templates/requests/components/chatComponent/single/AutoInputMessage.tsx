@@ -12,7 +12,7 @@ export const AutoInputMessage: React.FC<AutoInputMessageProps> = ({
 
   return (
     <div
-      className={`border border-indigo-500 text-indigo-900 dark:text-indigo-300 font-semibold rounded-md bg-indigo-100 dark:bg-indigo-900  px-2 py-1 w-fit flex items-center`}
+      className={`flex w-fit items-center rounded-md border border-indigo-500 bg-indigo-100 px-2 py-1 font-semibold text-indigo-900 dark:bg-indigo-900 dark:text-indigo-300`}
     >
       Message Index: {index}
     </div>

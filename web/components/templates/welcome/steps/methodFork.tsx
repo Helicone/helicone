@@ -14,7 +14,7 @@ export interface IntegrationMethods {
 interface MethodForkProps {
   nextStep: (
     provider: keyof Providers,
-    integration: keyof IntegrationMethods
+    integration: keyof IntegrationMethods,
   ) => void;
   currentProvider?: keyof Providers;
   currentIntegration?: keyof IntegrationMethods;
@@ -33,10 +33,10 @@ const MethodFork = (props: MethodForkProps) => {
   const { nextStep, currentProvider, currentIntegration } = props;
 
   const [provider, setProvider] = useState<keyof Providers | undefined>(
-    currentProvider || undefined
+    currentProvider || undefined,
   ); // ["openai", "anthropic"
   const [method, setMethod] = useState<keyof IntegrationMethods | undefined>(
-    currentIntegration || undefined
+    currentIntegration || undefined,
   ); // ["proxy", "async"]
   const [loaded, setLoaded] = useState(false);
 
@@ -59,22 +59,22 @@ const MethodFork = (props: MethodForkProps) => {
         `transition-all duration-700 ease-in-out ${
           loaded ? "opacity-100" : "opacity-0"
         }`,
-        "flex flex-col items-center text-center w-full px-2 justify-center"
+        "flex w-full flex-col items-center justify-center px-2 text-center",
       )}
     >
       <div className="w-full">
-        <p className="text-xl md:text-4xl font-semibold">Choose Provider</p>
-        <div className="flex flex-col w-full md:flex-row gap-8 mt-8 justify-center">
+        <p className="text-xl font-semibold md:text-4xl">Choose Provider</p>
+        <div className="mt-8 flex w-full flex-col justify-center gap-8 md:flex-row">
           <button
             onClick={() => {
               setProvider("openai");
             }}
             className={clsx(
               provider === "openai" && "bg-gray-300",
-              "hover:bg-gray-300 hover:cursor-pointer h-full w-full md:w-64 items-center rounded-lg border border-gray-500 shadow-lg p-4 flex flex-col gap-2"
+              "flex h-full w-full flex-col items-center gap-2 rounded-lg border border-gray-500 p-4 shadow-lg hover:cursor-pointer hover:bg-gray-300 md:w-64",
             )}
           >
-            <p className="text-gray-900 font-semibold text-xl text-center">
+            <p className="text-center text-xl font-semibold text-gray-900">
               OpenAI
             </p>
           </button>
@@ -84,23 +84,23 @@ const MethodFork = (props: MethodForkProps) => {
             }}
             className={clsx(
               provider === "anthropic" && "bg-gray-300",
-              "hover:bg-gray-300 hover:cursor-pointer h-full w-full md:w-64 items-center rounded-lg border border-gray-500 shadow-lg p-4 flex flex-col gap-2"
+              "flex h-full w-full flex-col items-center gap-2 rounded-lg border border-gray-500 p-4 shadow-lg hover:cursor-pointer hover:bg-gray-300 md:w-64",
             )}
           >
-            <p className="text-gray-900 font-semibold text-xl">Anthropic</p>
+            <p className="text-xl font-semibold text-gray-900">Anthropic</p>
           </button>
         </div>
       </div>
 
       <div
-        className={`flex flex-col w-full transition-all ease-in-out duration-1000 ${
+        className={`flex w-full flex-col transition-all duration-1000 ease-in-out ${
           provider !== undefined ? "opacity-100" : "opacity-0"
         }`}
       >
-        <p className="text-xl md:text-4xl font-semibold mt-16">
+        <p className="mt-16 text-xl font-semibold md:text-4xl">
           Integration Method
         </p>
-        <div className="flex flex-col md:flex-row items-center justify-center gap-8 mt-8">
+        <div className="mt-8 flex flex-col items-center justify-center gap-8 md:flex-row">
           <button
             onClick={() => {
               if (provider === undefined) {
@@ -110,17 +110,17 @@ const MethodFork = (props: MethodForkProps) => {
             }}
             className={clsx(
               method === "proxy" && "bg-gray-300",
-              "relative hover:bg-gray-300 hover:cursor-pointer h-full md:min-h-[15rem] pb-4 md:pb-16 w-full md:w-64 rounded-lg border border-gray-500 shadow-lg p-4 flex flex-col gap-2"
+              "relative flex h-full w-full flex-col gap-2 rounded-lg border border-gray-500 p-4 pb-4 shadow-lg hover:cursor-pointer hover:bg-gray-300 md:min-h-[15rem] md:w-64 md:pb-16",
             )}
           >
-            <p className="text-gray-900 font-semibold text-xl w-full">
+            <p className="w-full text-xl font-semibold text-gray-900">
               Proxy <span className="text-sm text-gray-600">(Recommended)</span>
             </p>
-            <ul className="hidden md:block text-left text-md leading-6 text-gray-600">
+            <ul className="text-md hidden text-left leading-6 text-gray-600 md:block">
               {PROXY_FEATURES.map((feature, idx) => (
                 <li
                   key={idx}
-                  className="text-gray-700 mt-3 flex gap-x-3 items-center"
+                  className="mt-3 flex items-center gap-x-3 text-gray-700"
                 >
                   <CheckCircleIcon
                     className={clsx("text-green-600", "h-6 w-5 flex-none")}
@@ -141,17 +141,17 @@ const MethodFork = (props: MethodForkProps) => {
               }}
               className={clsx(
                 method === "async" && "bg-gray-300",
-                "relative hover:bg-gray-300 hover:cursor-pointer h-full md:min-h-[15rem] pb-4 md:pb-16 w-full md:w-64 rounded-lg border border-gray-500 shadow-lg p-4 flex flex-col gap-2"
+                "relative flex h-full w-full flex-col gap-2 rounded-lg border border-gray-500 p-4 pb-4 shadow-lg hover:cursor-pointer hover:bg-gray-300 md:min-h-[15rem] md:w-64 md:pb-16",
               )}
             >
-              <p className="text-gray-900 font-semibold text-xl w-full">
+              <p className="w-full text-xl font-semibold text-gray-900">
                 Async
               </p>
-              <ul className="hidden md:block text-left text-md leading-6 text-gray-600">
+              <ul className="text-md hidden text-left leading-6 text-gray-600 md:block">
                 {ASYNC_FEATURES.map((feature, idx) => (
                   <li
                     key={idx}
-                    className="text-gray-700 mt-3 flex gap-x-3 items-center"
+                    className="mt-3 flex items-center gap-x-3 text-gray-700"
                   >
                     <CheckCircleIcon
                       className={clsx("text-green-600", "h-6 w-5 flex-none")}
@@ -160,7 +160,7 @@ const MethodFork = (props: MethodForkProps) => {
                     {feature}
                   </li>
                 ))}
-                <li className="text-gray-700 mt-3 flex gap-x-3 items-center">
+                <li className="mt-3 flex items-center gap-x-3 text-gray-700">
                   <MinusCircleIcon
                     className={clsx("text-gray-600", "h-6 w-5 flex-none")}
                     aria-hidden="true"

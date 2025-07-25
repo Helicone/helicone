@@ -15,7 +15,7 @@ const Separator = React.forwardRef<
       children,
       ...props
     },
-    ref
+    ref,
   ) =>
     children ? (
       <div className="flex items-center gap-4">
@@ -24,9 +24,9 @@ const Separator = React.forwardRef<
           decorative={decorative}
           orientation={orientation}
           className={cn(
-            "shrink-0 bg-slate-200 dark:bg-slate-800 flex-1",
+            "flex-1 shrink-0 bg-slate-200 dark:bg-slate-800",
             orientation === "horizontal" ? "h-[1px] w-full" : "h-full w-[1px]",
-            className
+            className,
           )}
           {...props}
         />
@@ -36,9 +36,9 @@ const Separator = React.forwardRef<
           decorative={decorative}
           orientation={orientation}
           className={cn(
-            "shrink-0 bg-slate-200 dark:bg-slate-800 flex-1",
+            "flex-1 shrink-0 bg-slate-200 dark:bg-slate-800",
             orientation === "horizontal" ? "h-[1px] w-full" : "h-full w-[1px]",
-            className
+            className,
           )}
           {...props}
         />
@@ -51,11 +51,11 @@ const Separator = React.forwardRef<
         className={cn(
           "shrink-0 bg-slate-200 dark:bg-slate-800",
           orientation === "horizontal" ? "h-[1px] w-full" : "h-full w-[1px]",
-          className
+          className,
         )}
         {...props}
       />
-    )
+    ),
 );
 Separator.displayName = SeparatorPrimitive.Root.displayName;
 

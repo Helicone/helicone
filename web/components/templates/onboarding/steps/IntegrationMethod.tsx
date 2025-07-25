@@ -1,3 +1,4 @@
+import React from "react";
 import { ArrowLeftRightIcon, CheckIcon, RouteIcon } from "lucide-react";
 import { ArrowUpRightIcon } from "lucide-react";
 import { BookOpenIcon } from "lucide-react";
@@ -7,7 +8,7 @@ export const INTEGRATION_METHODS = [
   {
     id: "async",
     icon: (
-      <ArrowLeftRightIcon className="w-6 h-6 text-slate-400 dark:text-slate-500" />
+      <ArrowLeftRightIcon className="h-6 w-6 text-slate-400 dark:text-slate-500" />
     ),
     title: "Async",
     description: "Flexible, not on the critical path.",
@@ -20,7 +21,7 @@ export const INTEGRATION_METHODS = [
   {
     id: "proxy",
     recommended: true,
-    icon: <RouteIcon className="w-6 h-6 text-slate-400 dark:text-slate-500" />,
+    icon: <RouteIcon className="h-6 w-6 text-slate-400 dark:text-slate-500" />,
     title: "Proxy",
     description: "Simplest and fastest integration.",
     features: [
@@ -60,13 +61,13 @@ const IntegrationMethod = ({
         target="_blank"
         rel="noreferrer"
       >
-        <div className="w-full rounded-md p-2 flex justify-between items-center">
-          <div className="flex gap-2 items-center">
-            <BookOpenIcon className="w-4 h-4 text-slate-500" />
-            <p className="text-sm text-slate-500 dark:text-slate-300 font-medium">
+        <div className="flex w-full items-center justify-between rounded-md p-2">
+          <div className="flex items-center gap-2">
+            <BookOpenIcon className="h-4 w-4 text-slate-500" />
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-300">
               Read more about Proxy vs Async integration.
             </p>
-            <ArrowUpRightIcon className="w-4 h-4 text-slate-500" />
+            <ArrowUpRightIcon className="h-4 w-4 text-slate-500" />
           </div>
         </div>
       </a>
@@ -96,21 +97,21 @@ const IntegrationMethodCard = ({
 }) => {
   return (
     <div
-      className="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800"
+      className="cursor-pointer rounded-lg border border-slate-200 bg-white p-4 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800"
       key={id}
       onClick={onClick}
     >
       <div className="flex flex-col gap-4">
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between">
           {icon}
           {recommended && (
-            <div className="px-3 py-1 rounded-md bg-blue-100 text-blue-700 text-xs font-semibold uppercase">
+            <div className="rounded-md bg-blue-100 px-3 py-1 text-xs font-semibold uppercase text-blue-700">
               RECOMMENDED
             </div>
           )}
         </div>
         <div className="flex flex-col gap-2">
-          <h3 className="text-sm font-medium text-slate-900 dark:text-slate-50 leading-4">
+          <h3 className="text-sm font-medium leading-4 text-slate-900 dark:text-slate-50">
             {title}
           </h3>
           <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -120,18 +121,18 @@ const IntegrationMethodCard = ({
         <div className="flex flex-col gap-2">
           {features.map((feature) => (
             <div
-              className="flex gap-2.5 items-center"
+              className="flex items-center gap-2.5"
               key={feature.description}
             >
               <div
                 className={cn(
-                  "w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0",
+                  "flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full",
                   feature.good
                     ? "bg-blue-500"
-                    : "bg-slate-400 dark:bg-slate-600"
+                    : "bg-slate-400 dark:bg-slate-600",
                 )}
               >
-                <CheckIcon className="w-2 h-2 text-white" />
+                <CheckIcon className="h-2 w-2 text-white" />
               </div>
               <p className="text-sm text-slate-500">{feature.description}</p>
             </div>

@@ -83,8 +83,8 @@ export const MembersTable = ({
             <div className="flex items-center gap-2.5">
               <span>{email}</span>
               {email === ownerEmail ? (
-                <div className="px-1.5 bg-[hsl(var(--muted))] rounded">
-                  <span className="text-[hsl(var(--foreground))] text-xs font-medium">
+                <div className="rounded bg-[hsl(var(--muted))] px-1.5">
+                  <span className="text-xs font-medium text-[hsl(var(--foreground))]">
                     YOU
                   </span>
                 </div>
@@ -122,13 +122,13 @@ export const MembersTable = ({
         },
       },
     ],
-    [ownerEmail, onRemoveMember]
+    [ownerEmail, onRemoveMember],
   );
 
   // Memoize table data
   const tableData = useMemo(
     () => [{ email: ownerEmail, role: "owner" as MemberRole }, ...members],
-    [members, ownerEmail]
+    [members, ownerEmail],
   );
 
   const table = useReactTable({
@@ -180,12 +180,12 @@ export const MembersTable = ({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <h2 className="text-sm font-medium text-[hsl(var(--foreground))]">
           Members
         </h2>
         <Button variant="outline" size="xs" onClick={() => setIsOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="mr-2 h-4 w-4" />
           Invite
         </Button>
       </div>
@@ -201,7 +201,7 @@ export const MembersTable = ({
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                   </TableHead>
                 ))}
@@ -216,7 +216,7 @@ export const MembersTable = ({
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}
@@ -237,7 +237,7 @@ export const MembersTable = ({
       </div>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="p-6 gap-2 w-62">
+        <DialogContent className="w-62 gap-2 p-6">
           <div className="flex flex-col gap-4">
             <DialogHeader>
               <DialogTitle className="text-lg font-semibold text-[hsl(var(--foreground))]">
@@ -250,10 +250,10 @@ export const MembersTable = ({
 
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-2">
-                <label className="w-20 text-[hsl(var(--foreground))] text-sm font-normal">
+                <label className="w-20 text-sm font-normal text-[hsl(var(--foreground))]">
                   Email
                 </label>
-                <div className="flex-1 flex flex-col gap-1">
+                <div className="flex flex-1 flex-col gap-1">
                   <Input
                     type="email"
                     value={newMemberForm.email}
@@ -266,12 +266,12 @@ export const MembersTable = ({
                     className={cn(
                       "flex-1",
                       emailError &&
-                        "border-[hsl(var(--destructive))] focus-visible:ring-[hsl(var(--destructive))]"
+                        "border-[hsl(var(--destructive))] focus-visible:ring-[hsl(var(--destructive))]",
                     )}
                     placeholder="Email"
                   />
                   {emailError && (
-                    <span className="text-[hsl(var(--destructive))] text-xs">
+                    <span className="text-xs text-[hsl(var(--destructive))]">
                       {emailError}
                     </span>
                   )}
@@ -279,7 +279,7 @@ export const MembersTable = ({
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="w-20 text-[hsl(var(--foreground))] text-sm font-normal">
+                <label className="w-20 text-sm font-normal text-[hsl(var(--foreground))]">
                   Role
                 </label>
                 <Select
@@ -299,13 +299,13 @@ export const MembersTable = ({
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 mt-2">
+            <div className="mt-2 flex justify-end gap-2">
               <Button
                 variant="default"
                 onClick={handleInvite}
                 disabled={!newMemberForm.email}
               >
-                <Mail className="h-4 w-4 mr-2" />
+                <Mail className="mr-2 h-4 w-4" />
                 Send invitation
               </Button>
             </div>

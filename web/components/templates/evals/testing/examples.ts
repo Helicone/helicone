@@ -22,7 +22,7 @@ export const exTestInput: TestInput = {
       ],
     },
     null,
-    4
+    4,
   ),
   outputBody: JSON.stringify(
     {
@@ -60,7 +60,7 @@ export const exTestInput: TestInput = {
       system_fingerprint: null,
     },
     null,
-    4
+    4,
   ),
   inputs: {
     inputs: {
@@ -84,7 +84,7 @@ export const exTestInput: TestInput = {
       ],
     },
     null,
-    4
+    4,
   ),
 };
 

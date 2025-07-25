@@ -91,7 +91,7 @@ const ScoresTable = ({ scores }: ScoresProps) => {
   const renderComparisonCell = (
     field: string,
     scores: ExperimentScores,
-    changeInfo: any
+    changeInfo: any,
   ) => {
     switch (field) {
       case "dateCreated":
@@ -102,7 +102,7 @@ const ScoresTable = ({ scores }: ScoresProps) => {
                 scores.hypothesis.scores.dateCreated
                 ? "bg-gray-50 text-gray-700 ring-gray-200"
                 : "bg-gray-50 text-gray-700 ring-gray-200",
-              "w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
+              "-my-1 w-max items-center rounded-lg px-2 py-1 text-xs font-medium ring-1 ring-inset",
             )}
           >
             {formatDate(scores.dataset.scores.dateCreated.value as string) ===
@@ -116,13 +116,13 @@ const ScoresTable = ({ scores }: ScoresProps) => {
           changeInfo.change < 0
             ? "bg-green-50 text-green-700 ring-green-200"
             : changeInfo.change > 0
-            ? "bg-red-50 text-red-700 ring-red-200"
-            : "bg-gray-50 text-gray-700 ring-gray-200";
+              ? "bg-red-50 text-red-700 ring-red-200"
+              : "bg-gray-50 text-gray-700 ring-gray-200";
         return (
           <span
             className={clsx(
               changeClass,
-              "w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
+              "-my-1 w-max items-center rounded-lg px-2 py-1 text-xs font-medium ring-1 ring-inset",
             )}
           >
             {`${changeInfo.change > 0 ? "+" : ""}${changeInfo.change} (${
@@ -135,13 +135,13 @@ const ScoresTable = ({ scores }: ScoresProps) => {
           changeInfo.change < 0
             ? "bg-green-50 text-green-700 ring-green-200"
             : changeInfo.change > 0
-            ? "bg-red-50 text-red-700 ring-red-200"
-            : "bg-gray-50 text-gray-700 ring-gray-200";
+              ? "bg-red-50 text-red-700 ring-red-200"
+              : "bg-gray-50 text-gray-700 ring-gray-200";
         return (
           <span
             className={clsx(
               changeLatencyClass,
-              "w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
+              "-my-1 w-max items-center rounded-lg px-2 py-1 text-xs font-medium ring-1 ring-inset",
             )}
           >
             {`${changeInfo.change > 0 ? "+" : ""}${(
@@ -156,7 +156,7 @@ const ScoresTable = ({ scores }: ScoresProps) => {
               scores.dataset.scores.model === scores.hypothesis.scores.model
                 ? "bg-gray-50 text-gray-700 ring-gray-200"
                 : "bg-gray-50 text-gray-700 ring-gray-200",
-              "w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
+              "-my-1 w-max items-center rounded-lg px-2 py-1 text-xs font-medium ring-1 ring-inset",
             )}
           >
             {scores.dataset.scores.model === scores.hypothesis.scores.model
@@ -169,7 +169,7 @@ const ScoresTable = ({ scores }: ScoresProps) => {
           <span
             className={clsx(
               "bg-gray-50 text-gray-700 ring-gray-200",
-              "w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
+              "-my-1 w-max items-center rounded-lg px-2 py-1 text-xs font-medium ring-1 ring-inset",
             )}
           >
             {scores.dataset.scores[field].value ===
@@ -181,7 +181,7 @@ const ScoresTable = ({ scores }: ScoresProps) => {
           <span
             className={clsx(
               "bg-gray-50 text-gray-700 ring-gray-200",
-              "w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset"
+              "-my-1 w-max items-center rounded-lg px-2 py-1 text-xs font-medium ring-1 ring-inset",
             )}
           >
             {`${changeInfo.change > 0 ? "+" : ""}${changeInfo.change} (${
@@ -221,8 +221,8 @@ const ScoresTable = ({ scores }: ScoresProps) => {
                 scores,
                 calculateChange(
                   datasetScore.value as number,
-                  hypothesisScore.value as number
-                )
+                  hypothesisScore.value as number,
+                ),
               )
             : "N/A"
           : renderComparisonCell(field, scores, null);
@@ -240,7 +240,7 @@ const ScoresTable = ({ scores }: ScoresProps) => {
   return (
     <>
       <div className="flex items-center space-x-4">
-        <h1 className="font-semibold text-2xl text-black dark:text-white">
+        <h1 className="text-2xl font-semibold text-black dark:text-white">
           Overview
         </h1>
       </div>
@@ -251,7 +251,7 @@ const ScoresTable = ({ scores }: ScoresProps) => {
             key: "score_key",
             header: "",
             render: (score) => (
-              <div className="text-gray-500 dark:text-white font-semibold  flex items-center">
+              <div className="flex items-center font-semibold text-gray-500 dark:text-white">
                 {score.score_key}
               </div>
             ),

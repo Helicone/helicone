@@ -32,10 +32,10 @@ const LoadingAnimation = ({
   const animation = defaultAnimation || Cube;
 
   return (
-    <div className="flex flex-col items-center justify-center align-middle w-full space-y-4">
+    <div className="flex w-full flex-col items-center justify-center space-y-4 align-middle">
       <Lottie animationData={animation} style={{ height, width }} loop={true} />
       {title && (
-        <p className="font-medium text-lg text-gray-900 dark:text-gray-100">
+        <p className="text-lg font-medium text-gray-900 dark:text-gray-100">
           {title}
         </p>
       )}

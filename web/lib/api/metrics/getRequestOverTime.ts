@@ -6,7 +6,7 @@ import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
 export async function getTotalRequestsOverTime(
   data: DataOverTimeRequest,
   groupByColumns: string[] = [],
-  printQuery = false
+  printQuery = false,
 ): Promise<Result<RequestsOverTime[], string>> {
   const res = await getXOverTime<{
     count: number;
@@ -17,6 +17,6 @@ export async function getTotalRequestsOverTime(
       time: new Date(new Date(d.created_at_trunc).getTime()),
       count: Number(d.count),
       status: Number(d.status),
-    }))
+    })),
   );
 }

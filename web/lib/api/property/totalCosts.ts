@@ -12,7 +12,7 @@ export interface TotalCost {
 
 export async function getTotalCostRaw(
   filter: FilterNode,
-  org_id: string
+  org_id: string,
 ): Promise<Result<number, string>> {
   const { filter: filterString, argsAcc } =
     await buildFilterWithAuthClickHousePropertiesV2({
@@ -45,7 +45,7 @@ export async function getTotalCost(
     start: Date;
     end: Date;
   },
-  org_id: string
+  org_id: string,
 ): Promise<Result<number, string>> {
   return getTotalCostRaw(
     {
@@ -53,6 +53,6 @@ export async function getTotalCost(
       right: filter,
       operator: "and",
     },
-    org_id
+    org_id,
   );
 }

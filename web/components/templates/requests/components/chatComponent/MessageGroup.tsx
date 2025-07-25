@@ -55,7 +55,7 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({
             autoInputs={autoInputs}
             mode={mode}
           />
-        )
+        ),
       )}
     </>
   );

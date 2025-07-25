@@ -97,7 +97,7 @@ export const OnlineEvaluatorsSection = ({
   const handleEditSubmit = (itemId: string, data: any) => {
     // Create new array with same order, updating just the one item
     const updatedEvaluators = localEvaluators.map((item) =>
-      item.id === itemId ? { id: itemId, config: data.config } : item
+      item.id === itemId ? { id: itemId, config: data.config } : item,
     );
 
     // Update local state to maintain order
@@ -133,7 +133,7 @@ export const OnlineEvaluatorsSection = ({
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <InfoIcon className="w-4 h-4 text-muted-foreground inline-block ml-1 cursor-help" />
+                    <InfoIcon className="ml-1 inline-block h-4 w-4 cursor-help text-muted-foreground" />
                   </TooltipTrigger>
                   <TooltipContent side="right">
                     <p className="max-w-xs">
@@ -148,31 +148,31 @@ export const OnlineEvaluatorsSection = ({
 
           <div className="py-2">
             {emptyState ? (
-              <Card className="p-8 flex flex-col items-center justify-center space-y-4 border-dashed bg-muted/5">
-                <div className="w-12 h-12 rounded-full bg-muted/30 flex items-center justify-center">
-                  <TagIcon className="w-6 h-6 text-muted-foreground" />
+              <Card className="flex flex-col items-center justify-center space-y-4 border-dashed bg-muted/5 p-8">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted/30">
+                  <TagIcon className="h-6 w-6 text-muted-foreground" />
                 </div>
                 <div className="text-center">
                   <H4>No online evaluators yet</H4>
-                  <P className="text-muted-foreground mt-1 max-w-md mx-auto">
+                  <P className="mx-auto mt-1 max-w-md text-muted-foreground">
                     Create your first online evaluator to automatically evaluate
                     your API requests in production.
                   </P>
                 </div>
                 <Button onClick={() => setShowCreateForm(true)}>
-                  <PlusIcon className="w-4 h-4 mr-2" /> Create Online Evaluator
+                  <PlusIcon className="mr-2 h-4 w-4" /> Create Online Evaluator
                 </Button>
               </Card>
             ) : (
               <>
                 <div
                   className={cn(
-                    "grid gap-4 pr-2 pb-2",
+                    "grid gap-4 pb-2 pr-2",
                     "max-h-[60vh] overflow-y-auto",
-                    "[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full",
+                    "[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar]:w-2",
                     "[&::-webkit-scrollbar-track]:bg-transparent",
                     "[&::-webkit-scrollbar-thumb]:bg-slate-200 dark:[&::-webkit-scrollbar-thumb]:bg-slate-700",
-                    "scrollbar-gutter-stable"
+                    "scrollbar-gutter-stable",
                   )}
                 >
                   {localEvaluators.map((item) => {
@@ -187,13 +187,13 @@ export const OnlineEvaluatorsSection = ({
                     return (
                       <Card
                         key={item.id}
-                        className="p-0 hover:shadow-sm transition-shadow overflow-hidden"
+                        className="overflow-hidden p-0 transition-shadow hover:shadow-sm"
                       >
                         <div className="flex flex-col">
                           {/* Card Header with sample rate and delete button */}
-                          <div className="flex justify-between items-center p-3 border-b bg-muted/5">
+                          <div className="flex items-center justify-between border-b bg-muted/5 p-3">
                             <div className="flex items-center">
-                              <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center mr-2">
+                              <div className="mr-2 flex h-6 w-6 items-center justify-center rounded-full bg-primary/10">
                                 <PercentIcon className="h-3 w-3 text-primary" />
                               </div>
                               <p className="text-sm font-medium">
@@ -208,11 +208,11 @@ export const OnlineEvaluatorsSection = ({
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-6 w-6 text-muted-foreground hover:text-primary hover:bg-primary/5"
+                                className="h-6 w-6 text-muted-foreground hover:bg-primary/5 hover:text-primary"
                                 onClick={() => setEditingEvaluator(item.id)}
                                 title="Edit evaluator"
                               >
-                                <PencilIcon className="w-3 h-3" />
+                                <PencilIcon className="h-3 w-3" />
                                 <span className="sr-only">Edit</span>
                               </Button>
                               <AlertDialog>
@@ -220,9 +220,9 @@ export const OnlineEvaluatorsSection = ({
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/5"
+                                    className="h-6 w-6 text-muted-foreground hover:bg-destructive/5 hover:text-destructive"
                                   >
-                                    <TrashIcon className="w-3 h-3" />
+                                    <TrashIcon className="h-3 w-3" />
                                   </Button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
@@ -277,8 +277,8 @@ export const OnlineEvaluatorsSection = ({
                               <>
                                 {propertyFilters.length > 0 ? (
                                   <div>
-                                    <p className="text-xs font-medium mb-1.5 flex items-center text-muted-foreground">
-                                      <TagIcon className="h-3 w-3 mr-1" />
+                                    <p className="mb-1.5 flex items-center text-xs font-medium text-muted-foreground">
+                                      <TagIcon className="mr-1 h-3 w-3" />
                                       Property Filters
                                     </p>
                                     <div className="flex flex-wrap gap-1.5">
@@ -286,7 +286,7 @@ export const OnlineEvaluatorsSection = ({
                                         <Badge
                                           key={property.key}
                                           variant="outline"
-                                          className="bg-muted/20 py-0.5 px-1.5 text-xs rounded"
+                                          className="rounded bg-muted/20 px-1.5 py-0.5 text-xs"
                                         >
                                           <span className="font-medium text-foreground">
                                             {property.key}
@@ -303,7 +303,7 @@ export const OnlineEvaluatorsSection = ({
                                   </div>
                                 ) : (
                                   <div className="flex items-center text-muted-foreground">
-                                    <InfoIcon className="h-3 w-3 mr-1" />
+                                    <InfoIcon className="mr-1 h-3 w-3" />
                                     <span className="text-xs">
                                       No filters - all requests within sample
                                       rate
@@ -322,10 +322,10 @@ export const OnlineEvaluatorsSection = ({
                 <div className="mt-4 pt-2">
                   <Button
                     variant="outline"
-                    className="border-dashed hover:border-dashed justify-center py-6 w-full text-muted-foreground hover:text-foreground hover:bg-muted/10"
+                    className="w-full justify-center border-dashed py-6 text-muted-foreground hover:border-dashed hover:bg-muted/10 hover:text-foreground"
                     onClick={() => setShowCreateForm(true)}
                   >
-                    <PlusIcon className="w-4 h-4 mr-2" /> Add Another Evaluator
+                    <PlusIcon className="mr-2 h-4 w-4" /> Add Another Evaluator
                   </Button>
                 </div>
               </>

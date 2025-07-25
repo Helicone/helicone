@@ -39,7 +39,7 @@ const ArrayDiffViewer = (props: ArrayDiffViewerProps) => {
               return message.content;
             } else if (Array.isArray(message.content)) {
               const text = message.content.find(
-                (part: any) => part.type === "text"
+                (part: any) => part.type === "text",
               )?.text;
               if (typeof text === "string") {
                 return text;
@@ -60,14 +60,14 @@ const ArrayDiffViewer = (props: ArrayDiffViewerProps) => {
             value={index.toString()}
             className="relative"
           >
-            <AccordionTrigger className="hover:no-underline py-3 px-4 border-t border-slate-200 dark:border-slate-800">
+            <AccordionTrigger className="border-t border-slate-200 px-4 py-3 hover:no-underline dark:border-slate-800">
               <div className="flex items-center space-x-4">
                 {!isSameRole && (
                   <>
                     <RoleButton
                       role={originItem.role}
                       onRoleChange={function (
-                        role: "function" | "assistant" | "user" | "system"
+                        role: "function" | "assistant" | "user" | "system",
                       ): void {}}
                       disabled={true}
                     />
@@ -79,17 +79,17 @@ const ArrayDiffViewer = (props: ArrayDiffViewerProps) => {
                 <RoleButton
                   role={targetItem.role}
                   onRoleChange={function (
-                    role: "function" | "assistant" | "user" | "system"
+                    role: "function" | "assistant" | "user" | "system",
                   ): void {}}
                   disabled={true}
                 />
                 {originContent !== targetContent && (
                   <div
                     className={
-                      "text-xs border border-yellow-500 text-yellow-900 dark:text-yellow-300 font-semibold bg-yellow-100 dark:bg-yellow-900 px-2 py-1 w-fit flex items-center"
+                      "flex w-fit items-center border border-yellow-500 bg-yellow-100 px-2 py-1 text-xs font-semibold text-yellow-900 dark:bg-yellow-900 dark:text-yellow-300"
                     }
                   >
-                    <EyeIcon className="h-4 w-4 mr-1" />
+                    <EyeIcon className="mr-1 h-4 w-4" />
                     Changes
                   </div>
                 )}
@@ -99,7 +99,7 @@ const ArrayDiffViewer = (props: ArrayDiffViewerProps) => {
               {originContent === targetContent ? (
                 <p className="text-xs text-slate-500">No changes</p>
               ) : (
-                <div className="flex flex-col mt-4 space-y-2 w-full">
+                <div className="mt-4 flex w-full flex-col space-y-2">
                   <ReactDiffViewer
                     oldValue={originContent}
                     newValue={targetContent}

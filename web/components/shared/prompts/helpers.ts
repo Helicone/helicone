@@ -22,7 +22,7 @@ export const populateVariables = ({
   // First handle regular inputs
   for (const [key, value] of Object.entries(inputsFromBackend ?? {})) {
     const originalIndex = validVariablesWithIndices.find(
-      ({ variable }) => variable.name === key
+      ({ variable }) => variable.name === key,
     )?.originalIndex;
 
     if (originalIndex !== undefined && originalIndex !== -1) {

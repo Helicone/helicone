@@ -33,7 +33,7 @@ export const UnknownTierCard: React.FC<UnknownTierCardProps> = ({ tier }) => {
               <Link href="mailto:support@helicone.ai">
                 <Button>Email Support</Button>
               </Link>
-              <p className="text-xs text-gray-500 text-center">
+              <p className="text-center text-xs text-gray-500">
                 If you&apos;re still having trouble, please email our support
                 team at {"support@helicone.ai"} for assistance.
               </p>

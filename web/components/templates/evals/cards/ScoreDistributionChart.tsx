@@ -30,7 +30,7 @@ export const ScoreDistributionChart: React.FC<ScoreDistributionChartProps> = ({
   // If no data, show a message instead of chart
   if (!hasData) {
     return (
-      <div className={`h-24 flex items-center justify-center ${className}`}>
+      <div className={`flex h-24 items-center justify-center ${className}`}>
         <Small className="text-muted-foreground">No data available</Small>
       </div>
     );
@@ -46,7 +46,7 @@ export const ScoreDistributionChart: React.FC<ScoreDistributionChartProps> = ({
   const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-background p-2 border rounded-md shadow-sm">
+        <div className="rounded-md border bg-background p-2 shadow-sm">
           <p className="text-xs font-medium">{`Score range: ${payload[0].payload.range}`}</p>
           <p className="text-xs text-muted-foreground">{`Count: ${payload[0].value}`}</p>
         </div>

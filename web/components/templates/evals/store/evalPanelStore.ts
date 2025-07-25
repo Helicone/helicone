@@ -7,7 +7,7 @@ import { useTestDataStore } from "../testing/testingStore";
 interface EvalPanelState {
   panels: PanelType[];
   setPanels: (
-    panels: PanelType[] | ((prev: PanelType[]) => PanelType[])
+    panels: PanelType[] | ((prev: PanelType[]) => PanelType[]),
   ) => void;
   addPanel: (panel: PanelType) => void;
   removePanel: (panelType: string) => void;
@@ -88,13 +88,13 @@ export const useEvalPanelStore = create<EvalPanelState>()(
 
             // Check if create panel already exists
             const hasCreatePanel = state.panels.some(
-              (p) => p._type === "create"
+              (p) => p._type === "create",
             );
             if (hasCreatePanel) return { panels: state.panels };
 
             // Remove any edit panels before adding the create panel
             const filteredPanels = state.panels.filter(
-              (p) => p._type !== "edit"
+              (p) => p._type !== "edit",
             );
             return { panels: [...filteredPanels, { _type: "create" }] };
           });
@@ -108,7 +108,7 @@ export const useEvalPanelStore = create<EvalPanelState>()(
           set((state) => {
             // Remove any existing edit panels and create panels
             const filteredPanels = state.panels.filter(
-              (p) => p._type !== "edit" && p._type !== "create"
+              (p) => p._type !== "edit" && p._type !== "create",
             );
             return {
               panels: [
@@ -134,7 +134,7 @@ export const useEvalPanelStore = create<EvalPanelState>()(
           // Check for any problematic panel configurations and reset if needed
           if (state) {
             const editPanel = state.panels.find(
-              (panel) => panel._type === "edit"
+              (panel) => panel._type === "edit",
             ) as
               | { _type: "edit"; selectedEvaluatorId: string | null }
               | undefined;
@@ -152,7 +152,7 @@ export const useEvalPanelStore = create<EvalPanelState>()(
             }
           }
         },
-      }
-    )
-  )
+      },
+    ),
+  ),
 );

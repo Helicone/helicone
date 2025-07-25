@@ -48,8 +48,8 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   return (
     <div
       className={clsx(
-        level === 0 ? "p-0 m-0" : "relative flex flex-col",
-        "bg-white dark:bg-slate-950"
+        level === 0 ? "m-0 p-0" : "relative flex flex-col",
+        "bg-white dark:bg-slate-950",
       )}
       key={`${node.subPathName}-${node.trace?.request_id}`}
     >
@@ -59,18 +59,18 @@ const TreeNode: React.FC<TreeNodeProps> = ({
         node.children.filter((c) => c.trace).length === 0 ||
         node.children.filter((c) => c.trace).length > 1) ? (
         <Col className="overflow-x-auto overflow-y-hidden">
-          <Row className="w-full group">
+          <Row className="group w-full">
             {new Array(level).fill(null).map((_, index) => (
               <div
                 key={index}
-                className="h-9 bg-slate-50 dark:bg-slate-950 w-[24px] relative shrink-0 group-hover:bg-slate-100 dark:group-hover:bg-slate-900 group-hover:cursor-pointer"
+                className="relative h-9 w-[24px] shrink-0 bg-slate-50 group-hover:cursor-pointer group-hover:bg-slate-100 dark:bg-slate-950 dark:group-hover:bg-slate-900"
                 onClick={() =>
                   node.children
                     ? setCloseChildren(!closeChildren)
                     : setSelectedRequestId(node.trace?.request_id ?? "")
                 }
               >
-                <div className="absolute top-0 right-[0px] w-[1px] h-9 bg-slate-200 dark:bg-slate-700 z-[2]" />
+                <div className="absolute right-[0px] top-0 z-[2] h-9 w-[1px] bg-slate-200 dark:bg-slate-700" />
               </div>
             ))}
             <PathNode
@@ -100,16 +100,16 @@ const TreeNode: React.FC<TreeNodeProps> = ({
             ))}
         </Col>
       ) : (
-        <Row className="w-full group">
+        <Row className="group w-full">
           <div
             className={clsx(
-              "h-[42px] w-[24px]  shrink-0 group-hover:cursor-pointer sticky top-1/2 left-0 z-[2]",
+              "sticky left-0 top-1/2 z-[2] h-[42px] w-[24px] shrink-0 group-hover:cursor-pointer",
               selectedRequestId ===
                 (node.children
                   ? node.children[0].trace?.request_id
                   : node.trace?.request_id)
                 ? "bg-sky-100 dark:bg-slate-900"
-                : "bg-white dark:bg-slate-950 group-hover:bg-sky-50 dark:group-hover:bg-slate-800"
+                : "bg-white group-hover:bg-sky-50 dark:bg-slate-950 dark:group-hover:bg-slate-800",
             )}
             onClick={() =>
               node.children
@@ -117,25 +117,25 @@ const TreeNode: React.FC<TreeNodeProps> = ({
                 : setSelectedRequestId(node.trace?.request_id ?? "")
             }
           >
-            <div className="absolute top-0 right-[0px] w-[1px] h-[42px] bg-slate-200 dark:bg-slate-700 z-[2]" />
+            <div className="absolute right-[0px] top-0 z-[2] h-[42px] w-[1px] bg-slate-200 dark:bg-slate-700" />
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
                   <Button
                     variant="ghost"
                     className={clsx(
-                      "p-1 m-0 items-center hidden group-hover:flex z-[20]"
+                      "z-[20] m-0 hidden items-center p-1 group-hover:flex",
                     )}
                     onClick={(e) => {
                       e.stopPropagation();
                       setSelectedRequestId(
                         node.children
-                          ? node.children[0].trace?.request_id ?? ""
-                          : node.trace?.request_id ?? ""
+                          ? (node.children[0].trace?.request_id ?? "")
+                          : (node.trace?.request_id ?? ""),
                       );
                     }}
                   >
-                    <SidebarCloseIcon className="w-4 h-4 text-slate-500" />
+                    <SidebarCloseIcon className="h-4 w-4 text-slate-500" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent side="right">
@@ -150,23 +150,23 @@ const TreeNode: React.FC<TreeNodeProps> = ({
               <div
                 key={index}
                 className={clsx(
-                  "h-[42px] w-[24px] relative shrink-0 group-hover:cursor-pointer",
+                  "relative h-[42px] w-[24px] shrink-0 group-hover:cursor-pointer",
                   selectedRequestId ===
                     (node.children
                       ? node.children[0].trace?.request_id
                       : node.trace?.request_id)
                     ? "bg-sky-100 dark:bg-slate-900"
-                    : "bg-white dark:bg-slate-950 group-hover:bg-sky-50 dark:group-hover:bg-slate-900"
+                    : "bg-white group-hover:bg-sky-50 dark:bg-slate-950 dark:group-hover:bg-slate-900",
                 )}
                 onClick={() =>
                   node.children
                     ? setSelectedRequestId(
-                        node.children[0].trace?.request_id ?? ""
+                        node.children[0].trace?.request_id ?? "",
                       )
                     : setSelectedRequestId(node.trace?.request_id ?? "")
                 }
               >
-                <div className="absolute top-0 right-[0px] w-[1px] h-[42px] bg-slate-200 dark:bg-slate-700 z-[2]" />
+                <div className="absolute right-[0px] top-0 z-[2] h-[42px] w-[1px] bg-slate-200 dark:bg-slate-700" />
               </div>
             ))}
 
@@ -197,7 +197,7 @@ function countAllLeavesInNode(node: TreeNodeData): number {
   }
   return node.children.reduce(
     (acc, child) => acc + countAllLeavesInNode(child),
-    0
+    0,
   );
 }
 
@@ -229,8 +229,8 @@ export const Tree: React.FC<TreeProps> = ({
   return (
     <div
       className={clsx(
-        "font-sans bg-slate-50 dark:bg-black border-t border-slate-200 dark:border-slate-700",
-        className
+        "font-sans border-t border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-black",
+        className,
       )}
     >
       {data.children &&

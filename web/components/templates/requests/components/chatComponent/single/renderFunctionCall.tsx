@@ -5,19 +5,19 @@ import { JsonRenderer } from "./JsonRenderer";
 export const renderFunctionCall = (
   name: string,
   args: string,
-  key?: number
+  key?: number,
 ) => {
   const parsedArgs = isJSON(args) ? JSON.parse(args) : args;
 
   return (
     <div
       key={key}
-      className="text-xs rounded-lg overflow-auto bg-gray-50 dark:bg-gray-800 p-3 my-2 border border-gray-200 dark:border-gray-700"
+      className="my-2 overflow-auto rounded-lg border border-gray-200 bg-gray-50 p-3 text-xs dark:border-gray-700 dark:bg-gray-800"
     >
-      <div className="font-semibold text-sm text-blue-600 dark:text-blue-400 mb-1">
+      <div className="mb-1 text-sm font-semibold text-blue-600 dark:text-blue-400">
         {name}
       </div>
-      <div className="pl-4 border-l-2 border-gray-300 dark:border-gray-600">
+      <div className="border-l-2 border-gray-300 pl-4 dark:border-gray-600">
         {isJSON(args) ? (
           <JsonRenderer data={parsedArgs} />
         ) : (

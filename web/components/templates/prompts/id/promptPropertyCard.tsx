@@ -57,20 +57,20 @@ const PromptPropertyCard = (props: PromptPropertyCardProps) => {
       <Card
         className={clsx(
           isSelected
-            ? "bg-sky-100 border-sky-500 dark:bg-sky-950"
-            : "bg-white border-slate-300 dark:bg-black dark:border-slate-700",
-          "w-full border-t px-4 py-2 "
+            ? "border-sky-500 bg-sky-100 dark:bg-sky-950"
+            : "border-slate-300 bg-white dark:border-slate-700 dark:bg-black",
+          "w-full border-t px-4 py-2",
         )}
       >
-        <CardContent className="p-0 relative">
-          <div className={clsx("flex flex-col w-full")}>
-            <div className="flex flex-col space-y-1 items-start w-full">
-              <div className="flex items-center w-full justify-between text-left">
+        <CardContent className="relative p-0">
+          <div className={clsx("flex w-full flex-col")}>
+            <div className="flex w-full flex-col items-start space-y-1">
+              <div className="flex w-full items-center justify-between text-left">
                 {onSelect ? (
                   <button onClick={onSelect}>
-                    <div className="border rounded-full border-slate-500 bg-white dark:bg-black h-6 w-6 flex items-center justify-center">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full border border-slate-500 bg-white dark:bg-black">
                       {isSelected && index === undefined && (
-                        <div className="bg-sky-500 rounded-full h-4 w-4" />
+                        <div className="h-4 w-4 rounded-full bg-sky-500" />
                       )}
                       {index && (
                         <p className="text-xs font-bold text-slate-500 dark:text-slate-400">
@@ -82,9 +82,9 @@ const PromptPropertyCard = (props: PromptPropertyCardProps) => {
                 ) : (
                   <div />
                 )}
-                <div className="flex items-center space-x-2 absolute right-1 top-1">
+                <div className="absolute right-1 top-1 flex items-center space-x-2">
                   <button
-                    className="p-1 hover:bg-slate-100 rounded-lg"
+                    className="rounded-lg p-1 hover:bg-slate-100"
                     onClick={(e) => {
                       e.stopPropagation();
                       setExpanded(true);
@@ -98,7 +98,7 @@ const PromptPropertyCard = (props: PromptPropertyCardProps) => {
                   </button>
                   {onRemove && (
                     <button
-                      className="p-1 hover:bg-slate-100 rounded-lg"
+                      className="rounded-lg p-1 hover:bg-slate-100"
                       onClick={(e) => {
                         e.stopPropagation();
                         onRemove();
@@ -109,7 +109,7 @@ const PromptPropertyCard = (props: PromptPropertyCardProps) => {
                   )}
                 </div>
               </div>
-              <div className="flex items-center w-full justify-between text-left">
+              <div className="flex w-full items-center justify-between text-left">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
@@ -120,13 +120,13 @@ const PromptPropertyCard = (props: PromptPropertyCardProps) => {
                       }}
                       className={clsx(
                         size === "large" ? "text-md" : "text-sm",
-                        "underline font-semibold text-slate-900 dark:text-slate-100 truncate"
+                        "truncate font-semibold text-slate-900 underline dark:text-slate-100",
                       )}
                     >
                       {requestId}
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent className="text-xs z-[1001]">
+                  <TooltipContent className="z-[1001] text-xs">
                     <p>Copy</p>
                   </TooltipContent>
                 </Tooltip>
@@ -137,17 +137,17 @@ const PromptPropertyCard = (props: PromptPropertyCardProps) => {
             </div>
           </div>
           <Col>
-            <label className="text-xs text-slate-500 mt-2">User Inputs</label>
-            <ul className="divide-y divide-slate-300 dark:divide-slate-700 flex flex-col w-full">
+            <label className="mt-2 text-xs text-slate-500">User Inputs</label>
+            <ul className="flex w-full flex-col divide-y divide-slate-300 dark:divide-slate-700">
               {Object.entries(properties).map(([key, value]) => (
                 <li
                   key={key}
-                  className="flex items-center py-2 justify-between gap-8"
+                  className="flex items-center justify-between gap-8 py-2"
                 >
-                  <p className="font-semibold text-slate-900 dark:text-slate-100 text-xs">
+                  <p className="text-xs font-semibold text-slate-900 dark:text-slate-100">
                     {key}
                   </p>
-                  <p className="text-xs text-slate-700 dark:text-slate-300 max-w-[22.5vw] truncate">
+                  <p className="max-w-[22.5vw] truncate text-xs text-slate-700 dark:text-slate-300">
                     {JSON.stringify(value).slice(0, 100)}
                   </p>
                 </li>
@@ -157,12 +157,12 @@ const PromptPropertyCard = (props: PromptPropertyCardProps) => {
               {Object.entries(autoInputs).map(([key, value]) => (
                 <li
                   key={key}
-                  className="flex items-center py-2 justify-between gap-8"
+                  className="flex items-center justify-between gap-8 py-2"
                 >
-                  <p className="font-semibold text-slate-900 dark:text-slate-100 text-xs">
+                  <p className="text-xs font-semibold text-slate-900 dark:text-slate-100">
                     {key}
                   </p>
-                  <p className="text-xs text-slate-700 dark:text-slate-300 max-w-[22.5vw] truncate">
+                  <p className="max-w-[22.5vw] truncate text-xs text-slate-700 dark:text-slate-300">
                     {JSON.stringify(value).slice(0, 100)}
                   </p>
                 </li>
@@ -172,8 +172,8 @@ const PromptPropertyCard = (props: PromptPropertyCardProps) => {
         </CardContent>
       </Card>
       <Dialog open={expanded} onOpenChange={setExpanded}>
-        <DialogContent className="max-w-[80vw] max-h-[85vh] overflow-y-auto z-[1000]">
-          <DialogHeader className="sticky -top-6 bg-white -mt-4 py-4 border-b">
+        <DialogContent className="z-[1000] max-h-[85vh] max-w-[80vw] overflow-y-auto">
+          <DialogHeader className="sticky -top-6 -mt-4 border-b bg-white py-4">
             <DialogTitle>
               <TooltipProvider>
                 <Tooltip>
@@ -186,13 +186,13 @@ const PromptPropertyCard = (props: PromptPropertyCardProps) => {
                       }}
                       className={clsx(
                         size === "large" ? "text-lg" : "text-sm",
-                        "underline font-semibold text-slate-950 dark:text-slate-50 truncate"
+                        "truncate font-semibold text-slate-950 underline dark:text-slate-50",
                       )}
                     >
                       {requestId}
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent side="bottom" className="text-xs z-[1001]">
+                  <TooltipContent side="bottom" className="z-[1001] text-xs">
                     <p>Copy</p>
                   </TooltipContent>
                 </Tooltip>
@@ -201,7 +201,7 @@ const PromptPropertyCard = (props: PromptPropertyCardProps) => {
             <p
               className={clsx(
                 size === "large" ? "text-sm" : "text-xs",
-                "text-slate-500"
+                "text-slate-500",
               )}
             >
               {getUSDateFromString(createdAt)}
@@ -222,13 +222,13 @@ const PromptPropertyCard = (props: PromptPropertyCardProps) => {
             </ul>
           </DialogHeader>
 
-          <ul className="divide-y divide-slate-300 dark:divide-slate-700 flex flex-col w-full">
+          <ul className="flex w-full flex-col divide-y divide-slate-300 dark:divide-slate-700">
             {Object.entries(properties).map(([key, value]) => (
-              <li key={key} className="flex flex-col py-4 space-y-2">
+              <li key={key} className="flex flex-col space-y-2 py-4">
                 <p className={"font-medium text-black dark:text-white"}>
                   {key}
                 </p>
-                <p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap text-sm">
+                <p className="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300">
                   {value}
                 </p>
               </li>

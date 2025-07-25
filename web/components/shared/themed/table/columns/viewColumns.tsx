@@ -43,7 +43,7 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
       }
       return acc;
     },
-    ["All columns", "Default"] as string[]
+    ["All columns", "Default"] as string[],
   );
 
   const [selectedCategory, setSelectedCategory] = useState<
@@ -61,7 +61,7 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
               <Button
                 variant="none"
                 size="none"
-                className="h-9 w-9 shrink-0 flex items-center justify-center text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800"
+                className="flex h-9 w-9 shrink-0 items-center justify-center text-slate-700 hover:bg-slate-200 dark:text-slate-300 dark:hover:bg-slate-800"
               >
                 <LuColumns3 className="h-4 w-4" />
               </Button>
@@ -70,15 +70,15 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
           <TooltipContent>Manage columns</TooltipContent>
         </Tooltip>
         <DropdownMenuContent
-          className="border border-slate-300 dark:border-slate-700 w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:w-[calc(100vw-8rem)] max-w-4xl rounded-lg bg-white dark:bg-black shadow-xl h-[66vh] overflow-hidden p-0"
+          className="h-[66vh] w-[calc(100vw-2rem)] max-w-4xl overflow-hidden rounded-lg border border-slate-300 bg-white p-0 shadow-xl dark:border-slate-700 dark:bg-black sm:w-[calc(100vw-4rem)] md:w-[calc(100vw-8rem)]"
           align="center"
           sideOffset={8}
         >
           <DndProvider backend={HTML5Backend}>
             <Row className="h-full">
-              <Col className="relative flex-1 h-full p-4">
-                <div className="flex flex-row items-center justify-start space-x-2 mb-4">
-                  <h3 className="text-xs text-foreground font-medium">
+              <Col className="relative h-full flex-1 p-4">
+                <div className="mb-4 flex flex-row items-center justify-start space-x-2">
+                  <h3 className="text-xs font-medium text-foreground">
                     Column Reorder
                   </h3>
                   <Tooltip>
@@ -103,16 +103,16 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
                   bottom left of the right panel
                 </i>
 
-                <div className="overflow-y-auto h-[calc(100%-6rem)]">
+                <div className="h-[calc(100%-6rem)] overflow-y-auto">
                   <DragList items={activeColumns} setItems={setActiveColumns} />
                 </div>
-                <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-white dark:from-black to-transparent pointer-events-none"></div>
+                <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-white to-transparent dark:from-black"></div>
               </Col>
               <Separator
                 className="dark:border-slate-800"
                 orientation="vertical"
               />
-              <Col className="flex-1 flex flex-col h-full">
+              <Col className="flex h-full flex-1 flex-col">
                 <div className="flex-grow overflow-hidden p-4">
                   <ColumnOptions
                     categories={categories}
@@ -124,7 +124,7 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
                   />
                 </div>
                 <div className="border-t border-border p-4">
-                  <Row className="flex justify-between items-center gap-2">
+                  <Row className="flex items-center justify-between gap-2">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -144,7 +144,7 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
                             activeColumns.map((c) => ({
                               ...c,
                               shown: false,
-                            }))
+                            })),
                           );
                         }}
                         className="text-xs"
@@ -156,7 +156,7 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
                         size="sm"
                         onClick={() => {
                           setActiveColumns(
-                            activeColumns.map((c) => ({ ...c, shown: true }))
+                            activeColumns.map((c) => ({ ...c, shown: true })),
                           );
                         }}
                         className="text-xs"

@@ -57,20 +57,20 @@ export function DiffHighlight(props: DiffHighlightProps) {
                 textSize === "md" && "text-xs md:text-sm",
                 textSize === "lg" && "text-md md:text-lg",
                 minHeight ? "min-h-[300px] md:min-h-[300px]" : "",
-                "p-6 rounded-xl overflow-auto relative space-y-0.5",
+                "relative space-y-0.5 overflow-auto rounded-xl p-6",
                 maxHeight ? "max-h-[240px]" : "",
-                marginTop && "mt-3"
+                marginTop && "mt-3",
               )}
               style={style}
             >
               <button
-                className="absolute top-4 right-4 z-50"
+                className="absolute right-4 top-4 z-50"
                 onClick={() => {
                   setNotification("Copied to clipboard", "success");
                   navigator.clipboard.writeText(props.code);
                 }}
               >
-                <ClipboardIcon className="w-5 h-5 text-gray-500" />
+                <ClipboardIcon className="h-5 w-5 text-gray-500" />
               </button>
               {tokens.map((line, i) => {
                 const { key: _, ...lineProps } = getLineProps({ line, key: i });

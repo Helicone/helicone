@@ -38,7 +38,7 @@ export default function Tooltip({
         style={{ "--tooltip-margin": marginValue } as React.CSSProperties}
         className={`${
           glass ? "glass" : "bg-slate-50"
-        } z-50 text-slate-700 select-none text-nowrap pointer-events-none invisible absolute rounded border border-slate-100 px-2 py-1 text-sm shadow-sm group-four-hover:visible ${
+        } pointer-events-none invisible absolute z-50 select-none text-nowrap rounded border border-slate-100 px-2 py-1 text-sm text-slate-700 shadow-sm group-four-hover:visible ${
           positionClasses[position]
         }`}
       >

@@ -46,7 +46,7 @@ const ConnectionsPage: React.FC = () => {
         type: "fine-tuning",
         enabled:
           integrations?.find(
-            (integration) => integration.integration_name === "open_pipe"
+            (integration) => integration.integration_name === "open_pipe",
           )?.active ?? false,
       },
       // { title: "PostHog", type: "destination", enabled: false },
@@ -55,7 +55,7 @@ const ConnectionsPage: React.FC = () => {
         type: "destination",
         enabled:
           integrations?.find(
-            (integration) => integration.integration_name === "segment"
+            (integration) => integration.integration_name === "segment",
           )?.active ?? false,
       },
       // { title: "Datadog", type: "destination", enabled: false },
@@ -64,12 +64,12 @@ const ConnectionsPage: React.FC = () => {
       // { title: "Diffy", type: "other-provider", enabled: false },
       // { title: "Lytix", type: "destination", enabled: false },
     ],
-    [integrations]
+    [integrations],
   );
 
   const fuse = useMemo(
     () => new Fuse(allItems, { keys: ["title"], threshold: 0.4 }),
-    [allItems]
+    [allItems],
   );
 
   const filteredItems = useMemo(() => {
@@ -87,7 +87,7 @@ const ConnectionsPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col space-y-8 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="mx-auto flex max-w-6xl flex-col space-y-8 px-4 sm:px-6 lg:px-8">
       <div className="flex flex-col space-y-2">
         <h1 className="text-3xl font-bold">Connections</h1>
         <p className="text-gray-500">

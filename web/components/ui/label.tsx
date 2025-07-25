@@ -25,7 +25,7 @@ const labelVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  }
+  },
 );
 
 const Label = React.forwardRef<

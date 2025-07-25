@@ -194,8 +194,8 @@ export default function SimplePricingComparisonTable() {
       <div className="rounded-xl">
         <Table>
           <TableHeader>
-            <TableRow className="bg-[hsl(var(--muted))] hover:bg-[hsl(var(--muted))] border-none align-top">
-              <TableHead className="min-w-[180px] p-6 bg-[hsl(var(--background))] rounded-tl-xl" />
+            <TableRow className="border-none bg-[hsl(var(--muted))] align-top hover:bg-[hsl(var(--muted))]">
+              <TableHead className="min-w-[180px] rounded-tl-xl bg-[hsl(var(--background))] p-6" />
               {tiers.map((tier, index) => (
                 <TableHead
                   key={tier.name}
@@ -203,14 +203,13 @@ export default function SimplePricingComparisonTable() {
                     tier.isPrimary
                       ? "bg-[hsl(var(--accent))]"
                       : "bg-[hsl(var(--background))]"
-                  } 
-                    ${index === tiers.length - 1 ? "rounded-tr-xl" : ""}`}
+                  } ${index === tiers.length - 1 ? "rounded-tr-xl" : ""}`}
                 >
-                  <div className="flex md:flex-col flex-col gap-5">
-                    <div className="text-[hsl(var(--foreground))] text-xl font-semibold">
+                  <div className="flex flex-col gap-5 md:flex-col">
+                    <div className="text-xl font-semibold text-[hsl(var(--foreground))]">
                       {tier.name}
                     </div>
-                    <div className="flex md:justify-between md:items-center md:gap-12 gap-4 md:flex-row flex-col">
+                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-12">
                       <div className={tier.priceDetail ? "w-[116px]" : ""}>
                         <span
                           className={`${
@@ -222,13 +221,13 @@ export default function SimplePricingComparisonTable() {
                           {tier.price}
                         </span>
                         {tier.priceDetail && (
-                          <span className="text-[hsl(var(--muted-foreground))] text-base font-normal">
+                          <span className="text-base font-normal text-[hsl(var(--muted-foreground))]">
                             {tier.priceDetail}
                           </span>
                         )}
                       </div>
-                      <div className={cn("px-3 shrink-0", tier.badgeClass)}>
-                        <Small className="text-center whitespace-nowrap">
+                      <div className={cn("shrink-0 px-3", tier.badgeClass)}>
+                        <Small className="whitespace-nowrap text-center">
                           {tier.badge}
                         </Small>
                       </div>
@@ -267,16 +266,16 @@ export default function SimplePricingComparisonTable() {
                     >
                       <div className="flex flex-col">
                         <div className="flex items-center gap-2">
-                          <span className="text-[hsl(var(--muted-foreground))] text-sm font-normal">
+                          <span className="text-sm font-normal text-[hsl(var(--muted-foreground))]">
                             {feature.name}
                           </span>
                           {feature.tooltip === "usage" && (
                             <button
                               onClick={() => setShowUsageTiers(!showUsageTiers)}
-                              className="p-1 hover:bg-[hsl(var(--muted))] rounded-full transition-colors"
+                              className="rounded-full p-1 transition-colors hover:bg-[hsl(var(--muted))]"
                             >
                               <ChevronDownIcon
-                                className={`w-4 h-4 text-[hsl(var(--muted-foreground))] transition-transform ${
+                                className={`h-4 w-4 text-[hsl(var(--muted-foreground))] transition-transform ${
                                   showUsageTiers ? "rotate-180" : ""
                                 }`}
                               />
@@ -284,14 +283,14 @@ export default function SimplePricingComparisonTable() {
                           )}
                         </div>
                         {feature.tooltip === "usage" && showUsageTiers && (
-                          <div className="pl-2 pt-4 w-full min-w-[250px]">
+                          <div className="w-full min-w-[250px] pl-2 pt-4">
                             <Table className="w-full">
                               <TableHeader>
                                 <TableRow className="hover:bg-transparent">
-                                  <TableHead className="text-[hsl(var(--muted-foreground))] font-medium px-0 py-1">
+                                  <TableHead className="px-0 py-1 font-medium text-[hsl(var(--muted-foreground))]">
                                     Logs per month
                                   </TableHead>
-                                  <TableHead className="text-[hsl(var(--muted-foreground))] font-medium px-0 py-1 text-right">
+                                  <TableHead className="px-0 py-1 text-right font-medium text-[hsl(var(--muted-foreground))]">
                                     Rate per log
                                   </TableHead>
                                 </TableRow>
@@ -336,11 +335,11 @@ export default function SimplePricingComparisonTable() {
                         }`}
                       >
                         {typeof value === "string" ? (
-                          <div className="text-[hsl(var(--muted-foreground))] text-sm font-normal">
+                          <div className="text-sm font-normal text-[hsl(var(--muted-foreground))]">
                             {value}
                           </div>
                         ) : value === true ? (
-                          <CheckIcon className="w-5 h-5 text-[hsl(var(--muted-foreground))]" />
+                          <CheckIcon className="h-5 w-5 text-[hsl(var(--muted-foreground))]" />
                         ) : null}
                       </TableCell>
                     ))}

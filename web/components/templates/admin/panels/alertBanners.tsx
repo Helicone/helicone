@@ -22,7 +22,7 @@ const AlertBanners = (props: AlertBannersProps) => {
   const { data: alertBanners, refetch } = $JAWN_API.useQuery(
     "get",
     "/v1/alert-banner",
-    {}
+    {},
   );
 
   const { createBanner, isCreatingBanner } = useCreateAlertBanner(() => {
@@ -43,7 +43,7 @@ const AlertBanners = (props: AlertBannersProps) => {
 
   return (
     <>
-      <h2 className="text-lg text-white font-semibold">Alert Banners</h2>
+      <h2 className="text-lg font-semibold text-white">Alert Banners</h2>
       <div className="grid grid-cols-4 gap-4">
         <div className="col-span-1">
           <TextInput
@@ -75,7 +75,7 @@ const AlertBanners = (props: AlertBannersProps) => {
           </Button>
         </div>
       </div>
-      <div className="text-black flex flex-col space-y-2">
+      <div className="flex flex-col space-y-2 text-black">
         <SimpleTable
           data={alertBanners?.data || []}
           columns={[

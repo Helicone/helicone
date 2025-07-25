@@ -79,8 +79,8 @@ const Home = (props: HomeProps) => {
         time: getTimeMap("day")(
           new Date(
             v.time_step.getTime() +
-              new Date(v.time_step).getDate() * 24 * 60 * 60 * 1000 // add the number of days in the month
-          )
+              new Date(v.time_step).getDate() * 24 * 60 * 60 * 1000, // add the number of days in the month
+          ),
         ),
         value: v.count_step,
       })) ?? [];
@@ -144,8 +144,8 @@ const Home = (props: HomeProps) => {
         time: getTimeMap("day")(
           new Date(
             v.time_step.getTime() +
-              new Date(v.time_step).getDate() * 24 * 60 * 60 * 1000 // add the number of days in the month
-          )
+              new Date(v.time_step).getDate() * 24 * 60 * 60 * 1000, // add the number of days in the month
+          ),
         ),
         value: v.rate,
       })) ?? [];
@@ -168,8 +168,8 @@ const Home = (props: HomeProps) => {
         {isLoading ? (
           <div>Loading...</div>
         ) : (
-          <div className="max-w-3xl mx-auto w-full">
-            <h1 className="text-3xl font-bold text-center">
+          <div className="mx-auto w-full max-w-3xl">
+            <h1 className="text-center text-3xl font-bold">
               Active Orgs/Month
             </h1>
             <div className="h-96">
@@ -179,7 +179,7 @@ const Home = (props: HomeProps) => {
                 index={"time"}
               />
             </div>
-            <h1 className="text-3xl font-bold text-center">Active Orgs/week</h1>
+            <h1 className="text-center text-3xl font-bold">Active Orgs/week</h1>
             <div className="h-96">
               <BarChart
                 data={activeOrgWeek}
@@ -187,7 +187,7 @@ const Home = (props: HomeProps) => {
                 index={"time"}
               />
             </div>
-            <h1 className="text-3xl font-bold text-center">Active Orgs/day</h1>
+            <h1 className="text-center text-3xl font-bold">Active Orgs/day</h1>
             <div className="h-96">
               <BarChart
                 data={activeOrgDay}
@@ -195,7 +195,7 @@ const Home = (props: HomeProps) => {
                 index={"time"}
               />
             </div>
-            <h1 className="text-3xl font-bold text-center">Total Users</h1>
+            <h1 className="text-center text-3xl font-bold">Total Users</h1>
             <div className="h-96">
               <BarChart
                 data={totalUsers}
@@ -203,7 +203,7 @@ const Home = (props: HomeProps) => {
                 index={"time"}
               />
             </div>
-            <h1 className="text-3xl font-bold text-center">
+            <h1 className="text-center text-3xl font-bold">
               User Growth Per Month
             </h1>
             <div className="h-96">
@@ -212,7 +212,7 @@ const Home = (props: HomeProps) => {
                 categories={["value"]}
                 index={"time"}
               />
-              <h1 className="text-3xl font-bold text-center">
+              <h1 className="text-center text-3xl font-bold">
                 User Growth Per Week
               </h1>
               <div className="h-96">
@@ -223,7 +223,7 @@ const Home = (props: HomeProps) => {
                 />
               </div>
 
-              <h1 className="text-3xl font-bold text-center">
+              <h1 className="text-center text-3xl font-bold">
                 User Growth Per Day
               </h1>
               <div className="h-96">
@@ -234,7 +234,7 @@ const Home = (props: HomeProps) => {
                 />
               </div>
 
-              <h1 className="text-3xl font-bold text-center">
+              <h1 className="text-center text-3xl font-bold">
                 Requests week over week
               </h1>
               <div className="h-96">
@@ -244,7 +244,7 @@ const Home = (props: HomeProps) => {
                   index={"time"}
                 />
               </div>
-              <h1 className="text-3xl font-bold text-center">
+              <h1 className="text-center text-3xl font-bold">
                 Requests day by day
               </h1>
               <div className="h-96">
@@ -254,7 +254,7 @@ const Home = (props: HomeProps) => {
                   index={"time"}
                 />
               </div>
-              <h1 className="text-3xl font-bold text-center">
+              <h1 className="text-center text-3xl font-bold">
                 Monthly Retention Rate (1 day of activity)
               </h1>
               <div className="h-96">
@@ -265,7 +265,7 @@ const Home = (props: HomeProps) => {
                 />
               </div>
 
-              <h1 className="text-3xl font-bold text-center">
+              <h1 className="text-center text-3xl font-bold">
                 Weekly Retention Rate (Active for more than 1 day)
               </h1>
               <div className="h-96">

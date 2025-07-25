@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Accordion,
   AccordionContent,
@@ -26,9 +27,9 @@ export const OnboardingPopoverAccordion = ({
     <Accordion type="single" collapsible>
       <AccordionItem
         value="item-1"
-        className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-800 rounded-md px-4 max-h-[calc(100vh-20rem)] overflow-y-auto"
+        className="max-h-[calc(100vh-20rem)] overflow-y-auto rounded-md border border-slate-200 bg-slate-100 px-4 dark:border-slate-800 dark:bg-slate-800"
       >
-        <AccordionTrigger className="hover:no-underline text-[13px] text-slate-700 dark:text-slate-300 font-medium">
+        <AccordionTrigger className="text-[13px] font-medium text-slate-700 hover:no-underline dark:text-slate-300">
           <div className="flex items-center gap-2">
             {icon}
             {title}
@@ -40,7 +41,7 @@ export const OnboardingPopoverAccordion = ({
             <Link href={button.link} target="_blank">
               <Button
                 variant="secondary"
-                className="text-slate-900 dark:text-slate-100 w-full mt-4 gap-2.5"
+                className="mt-4 w-full gap-2.5 text-slate-900 dark:text-slate-100"
               >
                 {button.text}
                 <ArrowUpRightIcon className="h-4 w-4 text-slate-500" />

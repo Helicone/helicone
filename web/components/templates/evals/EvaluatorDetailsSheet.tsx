@@ -13,7 +13,7 @@ import PythonEvaluatorDetails from "./details/PythonEvaluatorDetails";
 
 export function getEvaluatorScoreName(
   evaluatorName: string,
-  scoringType: string
+  scoringType: string,
 ) {
   return (
     evaluatorName
@@ -39,7 +39,7 @@ const EvaluatorDetailsSheet: React.FC<EvaluatorDetailsSheetProps> = ({
     return evaluators.data?.data?.data?.find(
       (e) =>
         getEvaluatorScoreName(e.name, e.scoring_type) === selectedEvaluatorId ||
-        e.name === selectedEvaluatorId
+        e.name === selectedEvaluatorId,
     );
   }, [evaluators, selectedEvaluatorId]);
 
@@ -51,7 +51,7 @@ const EvaluatorDetailsSheet: React.FC<EvaluatorDetailsSheetProps> = ({
       <SheetTrigger asChild>
         <span style={{ display: "none" }}></span>
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto ">
+      <SheetContent className="w-full overflow-y-auto sm:max-w-2xl">
         <SheetHeader>
           <SheetTitle>{evaluator?.name}</SheetTitle>
         </SheetHeader>

@@ -39,7 +39,7 @@ export default function DeployDialog({
   const examples = getPromptDeploymentExample(
     userDefinedId || "my-prompt-id",
     inputs,
-    state?.parameters
+    state?.parameters,
   );
 
   return (
@@ -50,15 +50,15 @@ export default function DeployDialog({
           size="sm"
           disabled={isImportedFromCode === true}
         >
-          <PiRocketLaunchBold className="h-4 w-4 mr-2" />
+          <PiRocketLaunchBold className="mr-2 h-4 w-4" />
           <span>Deploy</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[90vh] w-full max-w-4xl flex flex-col gap-4 items-center overflow-hidden bg-slate-100 dark:bg-slate-900">
+      <DialogContent className="flex max-h-[90vh] w-full max-w-4xl flex-col items-center gap-4 overflow-hidden bg-slate-100 dark:bg-slate-900">
         {/* Installation */}
-        <div className="w-full flex flex-col">
-          <div className="w-full flex flex-row justify-between items-center">
-            <P className="font-semibold text-slate-700 dark:slate-300">
+        <div className="flex w-full flex-col">
+          <div className="flex w-full flex-row items-center justify-between">
+            <P className="dark:slate-300 font-semibold text-slate-700">
               Install
             </P>
           </div>
@@ -104,12 +104,12 @@ export default function DeployDialog({
         )}
 
         {/* Toggle between chat and non-chat examples */}
-        <div className="w-full flex flex-col">
-          <div className="w-full flex flex-row justify-between items-center">
-            <P className="font-semibold text-slate-700 dark:slate-300">
+        <div className="flex w-full flex-col">
+          <div className="flex w-full flex-row items-center justify-between">
+            <P className="dark:slate-300 font-semibold text-slate-700">
               Deploy
             </P>
-            <div className="w-full flex flex-row justify-end items-center gap-2">
+            <div className="flex w-full flex-row items-center justify-end gap-2">
               <Tabs
                 defaultValue={showChatExample ? "chat" : "single"}
                 onValueChange={(value) => setShowChatExample(value === "chat")}
@@ -165,12 +165,12 @@ export default function DeployDialog({
           href="https://docs.helicone.ai/features/prompts/generate"
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-2 flex flex-row gap-0.5 items-center text-heliblue hover:underline"
+          className="mt-2 flex flex-row items-center gap-0.5 text-heliblue hover:underline"
         >
           <Small className="font-semibold text-heliblue">
             Read Full Documentation
           </Small>
-          <PiArrowUpRightBold className=" h-4 w-4" />
+          <PiArrowUpRightBold className="h-4 w-4" />
         </Link>
       </DialogContent>
     </Dialog>

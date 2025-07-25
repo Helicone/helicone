@@ -90,7 +90,7 @@ const OrgAnalytics = () => {
       name: string;
       role: string;
       last_sign_in_at: string | null;
-    }[]
+    }[],
   ): { name: string; email: string } => {
     return (
       members.find((member) => member?.role?.toLowerCase() === "owner") || {
@@ -126,26 +126,26 @@ const OrgAnalytics = () => {
   });
 
   return (
-    <div className="flex flex-col space-y-8 text-gray-200 bg-gray-800 p-6 rounded-lg max-w-7xl mx-auto">
+    <div className="mx-auto flex max-w-7xl flex-col space-y-8 rounded-lg bg-gray-800 p-6 text-gray-200">
       <header className="border-b border-gray-700 pb-4">
         <h1 className="text-3xl font-bold">Org Analytics</h1>
-        <p className="text-gray-400 mt-2">
+        <p className="mt-2 text-gray-400">
           Organization analytics and administration
         </p>
       </header>
 
       {/* Top Organizations Section */}
-      <section className="bg-gray-900 p-6 rounded-xl shadow-lg">
-        <div className="flex items-center justify-between mb-6">
+      <section className="rounded-xl bg-gray-900 p-6 shadow-lg">
+        <div className="mb-6 flex items-center justify-between">
           <h2 className="text-xl font-semibold">Top Organizations by Usage</h2>
-          <div className="flex gap-4 items-center">
+          <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <label className="text-sm text-gray-300">Min Requests:</label>
               <input
                 type="number"
                 value={minRequests}
                 onChange={(e) => setMinRequests(Number(e.target.value))}
-                className="w-32 px-3 py-1.5 rounded-md bg-gray-800 border border-gray-600 focus:ring-2 focus:ring-blue-500"
+                className="w-32 rounded-md border border-gray-600 bg-gray-800 px-3 py-1.5 focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div className="flex items-center gap-2">
@@ -155,12 +155,12 @@ const OrgAnalytics = () => {
                 value={limit}
                 min={1}
                 onChange={(e) => setLimit(Number(e.target.value))}
-                className="w-24 px-3 py-1.5 rounded-md bg-gray-800 border border-gray-600 focus:ring-2 focus:ring-blue-500"
+                className="w-24 rounded-md border border-gray-600 bg-gray-800 px-3 py-1.5 focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <button
               onClick={handleTopOrgsUpdate}
-              className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md font-medium transition-colors duration-200"
+              className="rounded-md bg-blue-600 px-4 py-2 font-medium transition-colors duration-200 hover:bg-blue-700"
             >
               Refresh List
             </button>
@@ -168,23 +168,23 @@ const OrgAnalytics = () => {
         </div>
 
         {!hasAttemptedTopOrgsFetch ? (
-          <div className="text-center py-8 border-2 border-dashed border-gray-800 rounded-lg">
-            <div className="text-6xl mb-4">📊</div>
+          <div className="rounded-lg border-2 border-dashed border-gray-800 py-8 text-center">
+            <div className="mb-4 text-6xl">📊</div>
             <h3 className="text-lg font-medium text-gray-300">
               No data loaded
             </h3>
-            <p className="text-gray-500 mt-2">
+            <p className="mt-2 text-gray-500">
               Click &quot;Refresh List&quot; to load organizations
             </p>
           </div>
         ) : topOrgsLoading ? (
-          <div className="space-y-4 animate-pulse">
+          <div className="animate-pulse space-y-4">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-12 bg-gray-800 rounded-lg" />
+              <div key={i} className="h-12 rounded-lg bg-gray-800" />
             ))}
           </div>
         ) : (
-          <div className="border border-gray-700 rounded-lg overflow-hidden">
+          <div className="overflow-hidden rounded-lg border border-gray-700">
             <table className="w-full">
               <thead className="bg-gray-800">
                 <tr>
@@ -197,7 +197,7 @@ const OrgAnalytics = () => {
                   ].map((header) => (
                     <th
                       key={header}
-                      className="px-4 py-3 text-left text-sm font-semibold text-gray-300 border-b border-gray-700"
+                      className="border-b border-gray-700 px-4 py-3 text-left text-sm font-semibold text-gray-300"
                     >
                       {header}
                     </th>
@@ -209,17 +209,17 @@ const OrgAnalytics = () => {
                   const owner = getOwnerFromMembers(org.organization.members);
                   return (
                     <React.Fragment key={org.organization.id}>
-                      <tr className="hover:bg-gray-850 transition-colors border-b border-gray-800">
-                        <td className="px-4 py-3 whitespace-nowrap overflow-hidden text-ellipsis max-w-xs">
+                      <tr className="hover:bg-gray-850 border-b border-gray-800 transition-colors">
+                        <td className="max-w-xs overflow-hidden text-ellipsis whitespace-nowrap px-4 py-3">
                           {org.organization.name}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap">
+                        <td className="whitespace-nowrap px-4 py-3">
                           {owner.name} ({owner.email})
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap">
+                        <td className="whitespace-nowrap px-4 py-3">
                           {formatLargeNumber(org.usage.total_requests)}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap">
+                        <td className="whitespace-nowrap px-4 py-3">
                           {formatLargeNumber(org.usage.requests_last_30_days)}
                         </td>
                         <td className="px-4 py-3">
@@ -228,20 +228,20 @@ const OrgAnalytics = () => {
                               setExpandedOrg(
                                 expandedOrg === org.organization.id
                                   ? null
-                                  : org.organization.id
+                                  : org.organization.id,
                               )
                             }
-                            className="text-blue-400 hover:text-blue-300 font-medium flex items-center gap-1"
+                            className="flex items-center gap-1 font-medium text-blue-400 hover:text-blue-300"
                           >
                             {expandedOrg === org.organization.id ? (
                               <>
                                 <span>Collapse</span>
-                                <ChevronUpIcon className="w-4 h-4" />
+                                <ChevronUpIcon className="h-4 w-4" />
                               </>
                             ) : (
                               <>
                                 <span>Expand</span>
-                                <ChevronDownIcon className="w-4 h-4" />
+                                <ChevronDownIcon className="h-4 w-4" />
                               </>
                             )}
                           </button>
@@ -250,13 +250,13 @@ const OrgAnalytics = () => {
                       {expandedOrg === org.organization.id && (
                         <tr>
                           <td colSpan={5}>
-                            <div className="p-4 bg-gray-700 rounded-lg mt-2 mb-2">
+                            <div className="mb-2 mt-2 rounded-lg bg-gray-700 p-4">
                               <div className="grid grid-cols-2 gap-4">
                                 <p>ID: {org.organization.id}</p>
                                 <p>
                                   Created:{" "}
                                   {new Date(
-                                    org.organization.created_at
+                                    org.organization.created_at,
                                   ).toLocaleString()}
                                 </p>
                                 <p>Tier: {org.organization.tier}</p>
@@ -270,45 +270,45 @@ const OrgAnalytics = () => {
                                   {formatLargeNumber(org.usage.all_time_count)}
                                 </p>
                               </div>
-                              <h4 className="text-lg font-semibold mt-4 mb-2">
+                              <h4 className="mb-2 mt-4 text-lg font-semibold">
                                 Monthly Usage
                               </h4>
                               <BarChart
                                 data={sortAndFormatMonthlyUsage(
-                                  org.usage.monthly_usage
+                                  org.usage.monthly_usage,
                                 )}
                                 categories={["requestCount"]}
                                 index="month"
                                 showYAxis={true}
                                 className="h-60"
                               />
-                              <h4 className="text-lg font-semibold mt-4 mb-2">
+                              <h4 className="mb-2 mt-4 text-lg font-semibold">
                                 Organization Members
                               </h4>
                               <table className="min-w-full divide-y divide-gray-600">
                                 <thead className="bg-gray-800">
                                   <tr>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                    <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
                                       Name
                                     </th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                    <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
                                       Email
                                     </th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                    <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
                                       Role
                                     </th>
                                   </tr>
                                 </thead>
-                                <tbody className="bg-gray-700 divide-y divide-gray-600">
+                                <tbody className="divide-y divide-gray-600 bg-gray-700">
                                   {org.organization.members.map((member) => (
                                     <tr key={member.id}>
-                                      <td className="px-4 py-2 whitespace-nowrap">
+                                      <td className="whitespace-nowrap px-4 py-2">
                                         {member.name || "N/A"}
                                       </td>
-                                      <td className="px-4 py-2 whitespace-nowrap">
+                                      <td className="whitespace-nowrap px-4 py-2">
                                         {member.email}
                                       </td>
-                                      <td className="px-4 py-2 whitespace-nowrap">
+                                      <td className="whitespace-nowrap px-4 py-2">
                                         {member.role}
                                       </td>
                                     </tr>
@@ -329,19 +329,19 @@ const OrgAnalytics = () => {
       </section>
 
       {/* Search Section */}
-      <section className="bg-gray-900 p-6 rounded-xl shadow-lg">
-        <div className="border-b border-gray-700 pb-4 mb-6">
+      <section className="rounded-xl bg-gray-900 p-6 shadow-lg">
+        <div className="mb-6 border-b border-gray-700 pb-4">
           <h2 className="text-xl font-semibold text-gray-100">
             Organization Lookup
           </h2>
-          <p className="text-gray-400 mt-1">
+          <p className="mt-1 text-gray-400">
             Search by organization ID, user ID, or email address
           </p>
         </div>
 
         <form
           onSubmit={handleSubmit}
-          className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"
+          className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3"
         >
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-300">
@@ -352,7 +352,7 @@ const OrgAnalytics = () => {
               id="organizationId"
               value={organizationId}
               onChange={(e) => setOrganizationId(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-100 placeholder-gray-500"
+              className="w-full rounded-lg border border-gray-600 bg-gray-800 px-3 py-2 text-gray-100 placeholder-gray-500 focus:border-transparent focus:ring-2 focus:ring-blue-500"
               placeholder="Enter organization ID"
             />
           </div>
@@ -365,7 +365,7 @@ const OrgAnalytics = () => {
               id="userId"
               value={userId}
               onChange={(e) => setUserId(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-100 placeholder-gray-500"
+              className="w-full rounded-lg border border-gray-600 bg-gray-800 px-3 py-2 text-gray-100 placeholder-gray-500 focus:border-transparent focus:ring-2 focus:ring-blue-500"
               placeholder="Enter user ID"
             />
           </div>
@@ -378,24 +378,24 @@ const OrgAnalytics = () => {
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-100 placeholder-gray-500"
+              className="w-full rounded-lg border border-gray-600 bg-gray-800 px-3 py-2 text-gray-100 placeholder-gray-500 focus:border-transparent focus:ring-2 focus:ring-blue-500"
               placeholder="Enter email address"
             />
           </div>
           <div className="md:col-span-3">
             <button
               type="submit"
-              className="w-full px-4 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 font-medium text-white transition-colors duration-200 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={isSearching}
             >
               {isSearching ? (
                 <>
-                  <PiSpinnerGapBold className="w-5 h-5 animate-spin" />
+                  <PiSpinnerGapBold className="h-5 w-5 animate-spin" />
                   Searching...
                 </>
               ) : (
                 <>
-                  <SearchIcon className="w-5 h-5" />
+                  <SearchIcon className="h-5 w-5" />
                   Search Organizations
                 </>
               )}
@@ -404,7 +404,7 @@ const OrgAnalytics = () => {
         </form>
 
         {(error as Error) && (
-          <div className="mb-4 p-4 rounded-lg bg-red-900/30 border border-red-800 text-red-200">
+          <div className="mb-4 rounded-lg border border-red-800 bg-red-900/30 p-4 text-red-200">
             <h3 className="font-medium">Search Error</h3>
             <p className="mt-1 text-sm">
               {(error instanceof Error ? error.message : String(error)) ||
@@ -414,28 +414,28 @@ const OrgAnalytics = () => {
         )}
 
         {!hasSearched ? (
-          <div className="text-center py-8 border-2 border-dashed border-gray-800 rounded-lg">
-            <div className="text-6xl mb-4">🔍</div>
+          <div className="rounded-lg border-2 border-dashed border-gray-800 py-8 text-center">
+            <div className="mb-4 text-6xl">🔍</div>
             <h3 className="text-lg font-medium text-gray-300">
               Enter search criteria
             </h3>
-            <p className="text-gray-500 mt-2">
+            <p className="mt-2 text-gray-500">
               Use the form above to search for organizations
             </p>
           </div>
         ) : isSearching ? (
-          <div className="space-y-4 animate-pulse">
+          <div className="animate-pulse space-y-4">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-12 bg-gray-800 rounded-lg" />
+              <div key={i} className="h-12 rounded-lg bg-gray-800" />
             ))}
           </div>
         ) : !data?.organizations?.length ? (
-          <div className="text-center py-8 border-2 border-dashed border-gray-800 rounded-lg">
-            <div className="text-6xl mb-4">🕵️</div>
+          <div className="rounded-lg border-2 border-dashed border-gray-800 py-8 text-center">
+            <div className="mb-4 text-6xl">🕵️</div>
             <h3 className="text-lg font-medium text-gray-300">
               No organizations found
             </h3>
-            <p className="text-gray-500 mt-2">Try different search criteria</p>
+            <p className="mt-2 text-gray-500">Try different search criteria</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -443,47 +443,47 @@ const OrgAnalytics = () => {
               <table className="min-w-full divide-y divide-gray-700">
                 <thead className="bg-gray-900">
                   <tr>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-1/4 max-w-xs">
+                    <th className="w-1/4 max-w-xs px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
                       Name
                     </th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
                       Owner
                     </th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
                       Total Requests
                     </th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
                       Last 30 Days
                     </th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
                       Details
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-gray-800 divide-y divide-gray-700">
+                <tbody className="divide-y divide-gray-700 bg-gray-800">
                   {data.organizations.map((org) => {
                     const owner = getOwnerFromMembers(org.organization.members);
                     return [
                       <tr key={`${org.organization.id}-main`}>
-                        <td className="px-4 py-2 whitespace-nowrap overflow-hidden text-ellipsis max-w-xs">
+                        <td className="max-w-xs overflow-hidden text-ellipsis whitespace-nowrap px-4 py-2">
                           {org.organization.name}
                         </td>
-                        <td className="px-4 py-2 whitespace-nowrap">
+                        <td className="whitespace-nowrap px-4 py-2">
                           {owner.name} ({owner.email})
                         </td>
-                        <td className="px-4 py-2 whitespace-nowrap">
+                        <td className="whitespace-nowrap px-4 py-2">
                           {formatLargeNumber(org.usage.total_requests)}
                         </td>
-                        <td className="px-4 py-2 whitespace-nowrap">
+                        <td className="whitespace-nowrap px-4 py-2">
                           {formatLargeNumber(org.usage.requests_last_30_days)}
                         </td>
-                        <td className="px-4 py-2 whitespace-nowrap">
+                        <td className="whitespace-nowrap px-4 py-2">
                           <button
                             onClick={() =>
                               setExpandedOrg(
                                 expandedOrg === org.organization.id
                                   ? null
-                                  : org.organization.id
+                                  : org.organization.id,
                               )
                             }
                             className="text-blue-500 hover:text-blue-400"
@@ -497,7 +497,7 @@ const OrgAnalytics = () => {
                       expandedOrg === org.organization.id && (
                         <tr key={`${org.organization.id}-expanded`}>
                           <td colSpan={5}>
-                            <div className="p-4 bg-gray-700 rounded-lg mt-2 mb-2">
+                            <div className="mb-2 mt-2 rounded-lg bg-gray-700 p-4">
                               <div className="grid grid-cols-2 gap-4">
                                 <p>ID: {org.organization.id}</p>
                                 <p>
@@ -516,7 +516,7 @@ const OrgAnalytics = () => {
                                 <p>
                                   Created:{" "}
                                   {new Date(
-                                    org.organization.created_at
+                                    org.organization.created_at,
                                   ).toLocaleString()}
                                 </p>
                                 <p>Tier: {org.organization.tier}</p>
@@ -530,45 +530,45 @@ const OrgAnalytics = () => {
                                   {formatLargeNumber(org.usage.all_time_count)}
                                 </p>
                               </div>
-                              <h4 className="text-lg font-semibold mt-4 mb-2">
+                              <h4 className="mb-2 mt-4 text-lg font-semibold">
                                 Monthly Usage
                               </h4>
                               <BarChart
                                 data={sortAndFormatMonthlyUsage(
-                                  org.usage.monthly_usage
+                                  org.usage.monthly_usage,
                                 )}
                                 categories={["requestCount"]}
                                 index="month"
                                 showYAxis={true}
                                 className="h-60"
                               />
-                              <h4 className="text-lg font-semibold mt-4 mb-2">
+                              <h4 className="mb-2 mt-4 text-lg font-semibold">
                                 Organization Members
                               </h4>
                               <table className="min-w-full divide-y divide-gray-600">
                                 <thead className="bg-gray-800">
                                   <tr>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                    <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
                                       Name
                                     </th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                    <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
                                       Email
                                     </th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                    <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
                                       Role
                                     </th>
                                   </tr>
                                 </thead>
-                                <tbody className="bg-gray-700 divide-y divide-gray-600">
+                                <tbody className="divide-y divide-gray-600 bg-gray-700">
                                   {org.organization.members.map((member) => (
                                     <tr key={member.id}>
-                                      <td className="px-4 py-2 whitespace-nowrap">
+                                      <td className="whitespace-nowrap px-4 py-2">
                                         {member.name || "N/A"}
                                       </td>
-                                      <td className="px-4 py-2 whitespace-nowrap">
+                                      <td className="whitespace-nowrap px-4 py-2">
                                         {member.email}
                                       </td>
-                                      <td className="px-4 py-2 whitespace-nowrap">
+                                      <td className="whitespace-nowrap px-4 py-2">
                                         {member.role}
                                       </td>
                                     </tr>

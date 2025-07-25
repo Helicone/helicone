@@ -9,9 +9,9 @@ export type ResponseFormatType = "text" | "json_schema";
 export type ResponseFormat = {
   type: ResponseFormatType;
   json_schema?: any;
-}
+};
 
 export type VariableInput = {
   isObject: boolean;
   value: string;
-}
+};

@@ -10,19 +10,18 @@ export const Toggle = ({
   label?: React.ReactNode;
 }) => {
   return (
-    <div className="flex flex-row items-center bg-white border border-gray-300 rounded-lg px-2.5 py-1.5 gap-2">
+    <div className="flex flex-row items-center gap-2 rounded-lg border border-gray-300 bg-white px-2.5 py-1.5">
       {label}
       <button
         onClick={() => {
           onChange(!value);
         }}
-        className={`relative w-8 h-5 bg-gray-300 rounded-full shadow-inner focus:outline-none transition-all duration-300 ${
+        className={`relative h-5 w-8 rounded-full bg-gray-300 shadow-inner transition-all duration-300 focus:outline-none ${
           value ? "bg-sky-600" : ""
         }`}
       >
         <span
-          className={`absolute w-3 h-3 bg-white rounded-full shadow transform transition-transform duration-300 left-0 bottom-1
-           ${value ? "translate-x-4" : "translate-x-1"}`}
+          className={`absolute bottom-1 left-0 h-3 w-3 transform rounded-full bg-white shadow transition-transform duration-300 ${value ? "translate-x-4" : "translate-x-1"}`}
         ></span>
       </button>
     </div>
@@ -39,19 +38,18 @@ export const ToggleButton = ({
   label?: React.ReactNode;
 }) => {
   return (
-    <div className="flex flex-row items-center bg-white border border-gray-300 rounded-lg px-2.5 py-1.5 gap-2 hover:bg-sky-50">
+    <div className="flex flex-row items-center gap-2 rounded-lg border border-gray-300 bg-white px-2.5 py-1.5 hover:bg-sky-50">
       {label}
       <button
         onClick={() => {
           onChange(!value);
         }}
-        className={`relative w-8 h-5 bg-gray-300 rounded-full shadow-inner focus:outline-none transition-all duration-300 ${
+        className={`relative h-5 w-8 rounded-full bg-gray-300 shadow-inner transition-all duration-300 focus:outline-none ${
           value ? "bg-sky-600" : ""
         }`}
       >
         <span
-          className={`absolute w-3 h-3 bg-white rounded-full shadow transform transition-transform duration-300 left-0 bottom-1
-           ${value ? "translate-x-4" : "translate-x-1"}`}
+          className={`absolute bottom-1 left-0 h-3 w-3 transform rounded-full bg-white shadow transition-transform duration-300 ${value ? "translate-x-4" : "translate-x-1"}`}
         ></span>
       </button>
     </div>

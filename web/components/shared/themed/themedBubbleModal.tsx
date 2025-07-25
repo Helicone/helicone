@@ -29,14 +29,14 @@ const ThemedBubbleModal: React.FC<ThemedBubbleModalProps> = ({
           {showButton && (
             <>
               <button
-                className="z-50 w-8 h-8 rounded-full bg-red-500 shadow-lg cursor-pointer flex items-center justify-center text-white hover:bg-red-600 transition-colors"
+                className="z-50 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-red-500 text-white shadow-lg transition-colors hover:bg-red-600"
                 onClick={() => setRemoved(true)}
                 aria-label="Remove demo"
               >
-                <XMarkIcon className="w-4 h-4" />
+                <XMarkIcon className="h-4 w-4" />
               </button>
               <button
-                className="px-5 font-light h-12 rounded-full bg-blue-500 shadow-lg cursor-pointer flex items-center justify-center text-white hover:bg-blue-600 transition-colors"
+                className="flex h-12 cursor-pointer items-center justify-center rounded-full bg-blue-500 px-5 font-light text-white shadow-lg transition-colors hover:bg-blue-600"
                 onClick={() => setOpen(true)}
               >
                 {buttonText}

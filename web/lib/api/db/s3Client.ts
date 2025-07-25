@@ -33,7 +33,7 @@ export class S3Client {
     accessKey: string,
     secretKey: string,
     endpoint: string,
-    private bucketName: string
+    private bucketName: string,
   ) {
     this.awsClient = new AwsS3Client({
       credentials: {
@@ -48,7 +48,7 @@ export class S3Client {
 
   async getRequestResponseBodySignedUrl(
     orgId: string,
-    requestId: string
+    requestId: string,
   ): Promise<Result<string, string>> {
     const key = this.getRequestResponseKey(requestId, orgId);
     return await this.getSignedUrl(key);
@@ -57,7 +57,7 @@ export class S3Client {
   async getRequestResponseImageSignedUrl(
     orgId: string,
     requestId: string,
-    assetId: string
+    assetId: string,
   ): Promise<Result<string, string>> {
     const key = this.getRequestResponseImageKey(requestId, orgId, assetId);
     return await this.getSignedUrl(key);
@@ -88,7 +88,7 @@ export class S3Client {
   getRequestResponseImageKey = (
     requestId: string,
     orgId: string,
-    assetId: string
+    assetId: string,
   ) => {
     return `organizations/${orgId}/requests/${requestId}/assets/${assetId}`;
   };

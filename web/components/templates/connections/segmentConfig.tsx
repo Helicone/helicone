@@ -56,7 +56,7 @@ const SegmentConfig: React.FC<SegmentConfigProps> = ({ onClose }) => {
   const isLoading = isLoadingVault || isLoadingIntegration;
 
   const [testEventResponse, setTestEventResponse] = useState<string | null>(
-    null
+    null,
   );
 
   const handleTestEvent = () => {
@@ -136,7 +136,7 @@ const SegmentConfig: React.FC<SegmentConfigProps> = ({ onClose }) => {
           }}
           disabled={isSaving || isLoading}
         >
-          {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+          {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
           Save Configuration
         </Button>
       </div>

@@ -28,8 +28,8 @@ export function FreeTierLimitWrapper({
     "featureConfig" in limitData
       ? limitData.featureConfig
       : "subfeatureConfig" in limitData
-      ? limitData.subfeatureConfig
-      : null;
+        ? limitData.subfeatureConfig
+        : null;
 
   const handleClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();

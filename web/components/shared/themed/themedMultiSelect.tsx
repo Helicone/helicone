@@ -30,9 +30,9 @@ export const ThemedMultiSelect = ({
     <Popover className="relative text-sm">
       {({ open }) => (
         <>
-          <Popover.Button className="border border-gray-300 rounded-lg px-2.5 py-1.5 bg-white hover:bg-sky-50 flex flex-row items-center gap-2">
+          <Popover.Button className="flex flex-row items-center gap-2 rounded-lg border border-gray-300 bg-white px-2.5 py-1.5 hover:bg-sky-50">
             <TagIcon className="h-5 w-5 text-gray-900" />
-            <p className="text-sm font-medium text-gray-900 hidden sm:block">
+            <p className="hidden text-sm font-medium text-gray-900 sm:block">
               {`${buttonLabel} (${
                 columns.filter((col) => col.active).length
               } / ${columns.length})`}
@@ -51,15 +51,15 @@ export const ThemedMultiSelect = ({
             <Popover.Panel
               className={clsx(
                 align === "left" ? "left-0" : "right-0",
-                "absolute z-10 mt-2.5 flex"
+                "absolute z-10 mt-2.5 flex",
               )}
             >
               {({ close }) => (
                 <div className="flex-auto rounded-lg bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5">
-                  <div className="grid grid-cols-2 divide-x divide-gray-900/5 bg-gray-50 rounded-t-lg">
+                  <div className="grid grid-cols-2 divide-x divide-gray-900/5 rounded-t-lg bg-gray-50">
                     <button
                       onClick={deselectAll}
-                      className="text-xs flex items-center justify-center gap-x-2.5 p-3 font-semibold text-gray-900 hover:bg-gray-100 rounded-t-lg border-b border-gray-900/5"
+                      className="flex items-center justify-center gap-x-2.5 rounded-t-lg border-b border-gray-900/5 p-3 text-xs font-semibold text-gray-900 hover:bg-gray-100"
                     >
                       <MinusCircleIcon
                         className="h-4 w-4 flex-none text-gray-400"
@@ -69,7 +69,7 @@ export const ThemedMultiSelect = ({
                     </button>
                     <button
                       onClick={selectAll}
-                      className="text-xs flex items-center justify-center gap-x-2.5 p-3 font-semibold text-gray-900 hover:bg-gray-100 border-b border-gray-900/5"
+                      className="flex items-center justify-center gap-x-2.5 border-b border-gray-900/5 p-3 text-xs font-semibold text-gray-900 hover:bg-gray-100"
                     >
                       <PlusCircleIcon
                         className="h-4 w-4 flex-none text-gray-400"
@@ -78,13 +78,13 @@ export const ThemedMultiSelect = ({
                       Select All
                     </button>
                   </div>
-                  <fieldset className="w-[250px] h-[350px] overflow-auto flex-auto bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5 rounded-b-lg">
+                  <fieldset className="h-[350px] w-[250px] flex-auto overflow-auto rounded-b-lg bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5">
                     <div className="divide-y divide-gray-200 border-gray-200">
                       {columns.map((col, idx) => (
                         <label
                           key={idx}
                           htmlFor={`person-${col.label}`}
-                          className="relative p-4 select-none font-medium text-gray-900 w-full justify-between items-center flex hover:bg-gray-50 hover:cursor-pointer"
+                          className="relative flex w-full select-none items-center justify-between p-4 font-medium text-gray-900 hover:cursor-pointer hover:bg-gray-50"
                         >
                           <span>{col.label}</span>
                           <input

@@ -43,13 +43,13 @@ export const ToolContent: React.FC<ToolContentProps> = ({
   if (mode === "Debug") {
     return (
       <div
-        className="bg-gray-100 dark:bg-gray-900 items-start px-4 py-4 text-left font-semibold grid grid-cols-10 gap-2 cursor-pointer"
+        className="grid cursor-pointer grid-cols-10 items-start gap-2 bg-gray-100 px-4 py-4 text-left font-semibold dark:bg-gray-900"
         onClick={() => {
           navigator.clipboard.writeText(JSON.stringify(mappedRequest, null, 2));
           setNotification("Copied to clipboard", "success");
         }}
       >
-        <pre className="col-span-10 font-mono text-sm">
+        <pre className="font-mono col-span-10 text-sm">
           {JSON.stringify(mappedRequest, null, 2)}
         </pre>
       </div>
@@ -70,10 +70,10 @@ export const ToolContent: React.FC<ToolContentProps> = ({
     if (value === undefined || value === null || value === "") return null;
 
     return (
-      <div className="flex items-start mb-2">
+      <div className="mb-2 flex items-start">
         {icon && <div className="mr-2 mt-0.5">{icon}</div>}
-        <span className="font-semibold min-w-[120px]">{key}:</span>
-        <span className="ml-2 text-gray-700 dark:text-gray-300 break-words">
+        <span className="min-w-[120px] font-semibold">{key}:</span>
+        <span className="ml-2 break-words text-gray-700 dark:text-gray-300">
           {typeof value === "object" ? JSON.stringify(value) : String(value)}
         </span>
       </div>
@@ -81,52 +81,52 @@ export const ToolContent: React.FC<ToolContentProps> = ({
   };
 
   return (
-    <div className="w-full flex flex-col text-left space-y-6 text-sm p-4">
+    <div className="flex w-full flex-col space-y-6 p-4 text-left text-sm">
       {renderKeyValue(
         "Tool",
         requestData.toolName,
-        <TagIcon className="h-5 w-5 text-blue-500" />
+        <TagIcon className="h-5 w-5 text-blue-500" />,
       )}
-      <div className="w-full flex flex-col text-left">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+      <div className="flex w-full flex-col text-left">
+        <h2 className="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
           Request Parameters
         </h2>
-        <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-md border border-gray-200 dark:border-gray-700">
+        <div className="rounded-md border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
           {Object.entries(requestData.input).map(([key, value]) => {
             // Default rendering for other fields
             return renderKeyValue(
               key
                 .replace(/([A-Z])/g, " $1")
                 .replace(/^./, (str) => str.toUpperCase()),
-              value
+              value,
             );
           })}
         </div>
       </div>
       {/* Response Status */}
-      <div className="w-full flex flex-col text-left">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+      <div className="flex w-full flex-col text-left">
+        <h2 className="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
           Response
         </h2>
         <div
-          className={`p-4 rounded-md border ${
+          className={`rounded-md border p-4 ${
             responseDetails?.status === "success"
-              ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
-              : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
+              ? "border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20"
+              : "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20"
           }`}
         >
           {/* Status indicator */}
-          <div className="flex items-center mb-3">
+          <div className="mb-3 flex items-center">
             {responseDetails?.status === "success" ? (
               <>
-                <CheckCircleIcon className="h-5 w-5 text-green-500 mr-2" />
+                <CheckCircleIcon className="mr-2 h-5 w-5 text-green-500" />
                 <span className="font-semibold text-green-600 dark:text-green-400">
                   Success
                 </span>
               </>
             ) : (
               <>
-                <XCircleIcon className="h-5 w-5 text-red-500 mr-2" />
+                <XCircleIcon className="mr-2 h-5 w-5 text-red-500" />
                 <span className="font-semibold text-red-600 dark:text-red-400">
                   {responseDetails?.status === "error" ? "Error" : "Failed"}
                 </span>
@@ -137,18 +137,18 @@ export const ToolContent: React.FC<ToolContentProps> = ({
           {Object.keys(responseDetails ?? {}).map((key) => {
             return renderKeyValue(
               key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
-              responseDetails?.[key as keyof typeof responseDetails]
+              responseDetails?.[key as keyof typeof responseDetails],
             );
           })}
         </div>
       </div>
       {/* Additional Metadata Section - Only show if there's relevant metadata */}
       {Object.keys(responseDetails?.metadata ?? {}).length > 0 && (
-        <div className="w-full flex flex-col text-left">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+        <div className="flex w-full flex-col text-left">
+          <h2 className="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
             Additional Metadata
           </h2>
-          <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-md border border-gray-200 dark:border-gray-700">
+          <div className="rounded-md border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
             {Object.entries(responseDetails?.metadata ?? {}).map(
               ([key, value]) => {
                 // Skip certain metadata fields that are already displayed elsewhere
@@ -157,9 +157,9 @@ export const ToolContent: React.FC<ToolContentProps> = ({
                   key
                     .replace(/_/g, " ")
                     .replace(/\b\w/g, (l) => l.toUpperCase()),
-                  value
+                  value,
                 );
-              }
+              },
             )}
           </div>
         </div>

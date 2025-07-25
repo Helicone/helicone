@@ -18,7 +18,7 @@ RateLimit.getLayout = function getLayout(page: ReactElement) {
 export default RateLimit;
 
 export const getServerSideProps = async (
-  context: GetServerSidePropsContext
+  context: GetServerSidePropsContext,
 ) => {
   return {
     props: {},

@@ -24,32 +24,32 @@ export const LLMUsageItem: React.FC<LLMUsageItemProps> = ({
   formatCurrency,
 }) => {
   return (
-    <div className="flex justify-between items-center text-sm">
-      <div className="flex gap-1 items-center">
+    <div className="flex items-center justify-between text-sm">
+      <div className="flex items-center gap-1">
         <span>{item.model}</span>
         <Tooltip>
           <TooltipTrigger>
-            <InfoIcon className="w-3 h-3 text-slate-500" />
+            <InfoIcon className="h-3 w-3 text-slate-500" />
           </TooltipTrigger>
-          <TooltipContent className="flex flex-col gap-2 w-full">
-            <div className="flex justify-between items-center">
-              <span className="font-medium mr-3">Completion Tokens:</span>
+          <TooltipContent className="flex w-full flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <span className="mr-3 font-medium">Completion Tokens:</span>
               <span>{item.completion_tokens.toLocaleString()}</span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="font-medium mr-3">Prompt Tokens:</span>
+            <div className="flex items-center justify-between">
+              <span className="mr-3 font-medium">Prompt Tokens:</span>
               <span>{item.prompt_tokens.toLocaleString()}</span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="font-medium mr-3">
+            <div className="flex items-center justify-between">
+              <span className="mr-3 font-medium">
                 Cost/1K Completion Tokens:
               </span>
               <span>
                 {formatCurrency(item.totalCost.completion_token * 1000)}
               </span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="font-medium mr-3">Cost/1K Prompt Tokens:</span>
+            <div className="flex items-center justify-between">
+              <span className="mr-3 font-medium">Cost/1K Prompt Tokens:</span>
               <span>{formatCurrency(item.totalCost.prompt_token * 1000)}</span>
             </div>
           </TooltipContent>

@@ -83,7 +83,7 @@ export default function MessagesPanel({
   console.log(messages);
 
   return (
-    <div ref={containerRef} className="h-full flex flex-col gap-4">
+    <div ref={containerRef} className="flex h-full flex-col gap-4">
       {/* Messages */}
       {messages.map((msg, index) => {
         const isRemovable = isRemovableMessage(index);
@@ -98,9 +98,9 @@ export default function MessagesPanel({
             }`}
           >
             {/* Header */}
-            <GlassHeader className="h-14 px-4 flex-shrink-0">
+            <GlassHeader className="h-14 flex-shrink-0 px-4">
               {/* Message Role */}
-              <h2 className="font-semibold items-center">
+              <h2 className="items-center font-semibold">
                 <h2 className="capitalize text-secondary">{msg.role}</h2>
                 {msg.idx !== undefined && (
                   <h2 className="text-tertiary"> - message_{msg.idx}</h2>
@@ -129,7 +129,7 @@ export default function MessagesPanel({
                     }
                   }}
                 >
-                  <PiTrashBold className="w-4 h-4 text-secondary" />
+                  <PiTrashBold className="h-4 w-4 text-secondary" />
                 </Button>
               )}
             </GlassHeader>
@@ -209,11 +209,11 @@ export default function MessagesPanel({
       {/* Error comunication */}
       {messages.length === 0 && (
         <div className="flex flex-col gap-4 p-4">
-          <div className="flex flex-col gap-4 bg-red-500 rounded-lg p-4 border border-red-100 dark:border-red-900">
-            <h2 className="text-white font-semibold text-lg">
+          <div className="flex flex-col gap-4 rounded-lg border border-red-100 bg-red-500 p-4 dark:border-red-900">
+            <h2 className="text-lg font-semibold text-white">
               Unable to load prompt version...
             </h2>
-            <div className="bg-slate-200 dark:bg-slate-800 rounded p-4 font-mono text-xs overflow-auto">
+            <div className="font-mono overflow-auto rounded bg-slate-200 p-4 text-xs dark:bg-slate-800">
               <pre>
                 {`{
   "error": "Invalid template",
@@ -221,13 +221,13 @@ export default function MessagesPanel({
 }`}
               </pre>
             </div>
-            <p className="text-white text-sm">
+            <p className="text-sm text-white">
               Please load or import a different version to try again.{" "}
               <Link
                 href="https://docs.helicone.ai/features/prompts/import"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="underline font-medium text-white hover:text-blue-300"
+                className="font-medium text-white underline hover:text-blue-300"
               >
                 Learn more about importing from code.
               </Link>
@@ -247,7 +247,7 @@ export default function MessagesPanel({
           className={`flex flex-row items-center gap-2 text-sm ${
             canAddMessagePair
               ? "text-heliblue hover:underline"
-              : "cursor-not-allowed text-tertiary"
+              : "text-tertiary cursor-not-allowed"
           }`}
         >
           <PiChatsBold />
@@ -264,7 +264,7 @@ export default function MessagesPanel({
             className={`flex flex-row items-center gap-2 text-sm ${
               canAddMessagePair
                 ? "text-emerald-400 hover:underline"
-                : "cursor-not-allowed text-tertiary"
+                : "text-tertiary cursor-not-allowed"
             }`}
           >
             <PiChatFill />

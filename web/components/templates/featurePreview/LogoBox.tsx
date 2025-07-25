@@ -14,25 +14,25 @@ const LogoBox = ({
   return (
     <div
       className={cn(
-        "bg-[#ECF6FC] rounded-3xl shadow-xl hidden lg:block border border-white",
+        "hidden rounded-3xl border border-white bg-[#ECF6FC] shadow-xl lg:block",
         {
           "p-2": size === "small",
           "p-2.5": size === "medium",
           "p-3": size === "large",
         },
-        className
+        className,
       )}
     >
       <div
         className={cn(
-          "w-full h-full flex items-center justify-center rounded-2xl",
-          innerClassName
+          "flex h-full w-full items-center justify-center rounded-2xl",
+          innerClassName,
         )}
       >
         <img
           src={imgSrc}
           alt="Logo"
-          className="w-full h-full object-contain rounded-2xl"
+          className="h-full w-full rounded-2xl object-contain"
         />
       </div>
     </div>

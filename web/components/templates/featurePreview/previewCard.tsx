@@ -69,16 +69,16 @@ export const PreviewCard = ({
   isHighlighted = false,
 }: PreviewCardProps) => {
   return (
-    <div className="w-full flex xl:flex-row items-center gap-8 flex-col md:gap-8">
+    <div className="flex w-full flex-col items-center gap-8 md:gap-8 xl:flex-row">
       <div
-        className={`flex-1 order-1 ${
+        className={`order-1 flex-1 ${
           position === "left" ? "xl:order-2" : "xl:order-1"
         }`}
       >
         <FeatureText feature={feature} isHighlighted={isHighlighted} />
       </div>
       <div
-        className={`flex-1 order-2 ${
+        className={`order-2 flex-1 ${
           position === "left" ? "xl:order-1" : "xl:order-2"
         }`}
       >
@@ -116,10 +116,10 @@ const FeatureMedia = ({
 
   if (media.type === "video") {
     return (
-      <div className="max-w-[563px] h-full aspect-video rounded-[18px]">
+      <div className="aspect-video h-full max-w-[563px] rounded-[18px]">
         <video
           ref={videoRef}
-          className="w-full h-full"
+          className="h-full w-full"
           src={media.src}
           poster={media.fallbackImage}
           muted
@@ -134,7 +134,7 @@ const FeatureMedia = ({
     // eslint-disable-next-line @next/next/no-img-element
     <img
       loading="lazy"
-      className="flex-1 xl:max-w-[563px] max-w-full w-full rounded-2xl object-contain"
+      className="w-full max-w-full flex-1 rounded-2xl object-contain xl:max-w-[563px]"
       src={media.src}
       alt={imageAlt}
     />
@@ -199,8 +199,8 @@ const FeatureText = ({
 }) => {
   if (feature.variant === "preview-sections") {
     return (
-      <div className="w-full flex-col flex gap-4 md:gap-8 max-w-xl flex-1">
-        <div className="h-full flex-col justify-start items-start gap-1 flex">
+      <div className="flex w-full max-w-xl flex-1 flex-col gap-4 md:gap-8">
+        <div className="flex h-full flex-col items-start justify-start gap-1">
           {feature.title && (
             <H2 className="whitespace-pre-line">{feature.title}</H2>
           )}
@@ -209,10 +209,10 @@ const FeatureText = ({
 
         <div className="flex flex-row gap-4 md:gap-16">
           {feature.sections.map((section, index) => (
-            <div key={index} className="flex-col w-full gap-4 flex">
-              <div className="w-full flex-col gap-1 flex">
+            <div key={index} className="flex w-full flex-col gap-4">
+              <div className="flex w-full flex-col gap-1">
                 <H4>{section.title}</H4>
-                <Small className="text-[hsl(var(--muted-foreground))] leading-relaxed">
+                <Small className="leading-relaxed text-[hsl(var(--muted-foreground))]">
                   {section.description}
                 </Small>
               </div>
@@ -241,7 +241,7 @@ const FeatureText = ({
               key={index}
               className="flex gap-3 text-[hsl(var(--muted-foreground))]"
             >
-              <CheckIcon className="w-4 h-4 text-[hsl(var(--confirmative))] flex-shrink-0 translate-y-[0.25em]" />
+              <CheckIcon className="h-4 w-4 flex-shrink-0 translate-y-[0.25em] text-[hsl(var(--confirmative))]" />
               <span>{text}</span>
             </li>
           ))}

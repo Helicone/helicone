@@ -8,7 +8,7 @@ interface ScoreDistributionChartProps {
 export const ScoreDistributionChartPie: React.FC<
   ScoreDistributionChartProps
 > = ({ distribution }) => (
-  <div className="w-full h-16 p-2">
+  <div className="h-16 w-full p-2">
     <DonutChart
       className="h-full"
       data={distribution.map((d) => ({

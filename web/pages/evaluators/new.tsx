@@ -23,7 +23,7 @@ const CreateEvaluator = () => {
       router.push("/evaluators");
       notification.setNotification(
         "Evaluator created successfully, but couldn't navigate to edit page. Check console for details.",
-        "info"
+        "info",
       );
     }
   });
@@ -59,7 +59,7 @@ const CreateEvaluator = () => {
           href: "/evaluators",
         }}
       />
-      <div className="p-6 pb-24 bg-background min-h-screen">
+      <div className="min-h-screen bg-background p-6 pb-24">
         <EvaluatorForm
           initialValues={defaultValues}
           isCreating={true}

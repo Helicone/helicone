@@ -107,7 +107,7 @@ export const modelNames = [
 const MODELS = Array.from(new Set(modelNames.map((m) => m.model)));
 
 function transformData(
-  data: { date: string; matched_model: string; percent: number }[]
+  data: { date: string; matched_model: string; percent: number }[],
 ) {
   const result: { [key: string]: any }[] = [];
   const models = new Set<string>();
@@ -129,14 +129,14 @@ function addOther<T>(
   data: T[],
   key: keyof T,
   limit: number,
-  other: (accumulatedValue: number) => T
+  other: (accumulatedValue: number) => T,
 ) {
   const sorted = [...data].sort((a, b) => (b[key] as any) + (a[key] as any));
   const selectedData = sorted.slice(0, limit);
 
   const accumulatedValue = selectedData.reduce(
     (acc, d) => acc + (d[key] as number),
-    0
+    0,
   );
 
   return [...sorted.slice(0, limit), other(accumulatedValue)];
@@ -147,7 +147,7 @@ const fetchModelUsageOverTime = async (body: any) => {
   const jawn = getJawnClient("none");
   const response = await jawn.POST(
     "/v1/public/dataisbeautiful/model/percentage/overtime",
-    { body }
+    { body },
   );
   return response.data?.data ?? [];
 };
@@ -156,7 +156,7 @@ const fetchModelPercentage = async (body: any) => {
   const jawn = getJawnClient("none");
   const response = await jawn.POST(
     "/v1/public/dataisbeautiful/model/percentage",
-    { body }
+    { body },
   );
   return addOther(
     response.data?.data ?? [],
@@ -165,7 +165,7 @@ const fetchModelPercentage = async (body: any) => {
     (accumulatedValue) => ({
       matched_model: "other",
       percent: 100 - accumulatedValue,
-    })
+    }),
   );
 };
 
@@ -173,7 +173,7 @@ const fetchProviderPercentage = async (body: any) => {
   const jawn = getJawnClient("none");
   const response = await jawn.POST(
     "/v1/public/dataisbeautiful/provider/percentage",
-    { body }
+    { body },
   );
   return addOther(
     response.data?.data ?? [],
@@ -182,7 +182,7 @@ const fetchProviderPercentage = async (body: any) => {
     (accumulatedValue) => ({
       provider: "other",
       percent: 100 - accumulatedValue,
-    })
+    }),
   );
 };
 
@@ -198,7 +198,7 @@ const fetchTtftVsPromptLength = async (body: any) => {
   const jawn = getJawnClient("none");
   const response = await jawn.POST(
     "/v1/public/dataisbeautiful/ttft-vs-prompt-length",
-    { body }
+    { body },
   );
   return response.data?.data ?? [];
 };
@@ -207,13 +207,13 @@ const fetchTotalCount = async (body: any) => {
   const jawn = getJawnClient("none");
   const response = await jawn.POST(
     "/v1/public/dataisbeautiful/total-requests",
-    { body }
+    { body },
   );
   return response.data;
 };
 
 function useStats(
-  queryParams: ReturnType<typeof useQueryParams>["queryParams"]
+  queryParams: ReturnType<typeof useQueryParams>["queryParams"],
 ) {
   const { timeSpan, models, provider } = queryParams;
   const body = {
@@ -386,7 +386,7 @@ export function OtherStats({
         x: d.prompt_length,
         y: d.ttft_normalized,
         default: true,
-      }
+      },
     );
   });
 
@@ -418,15 +418,15 @@ export function OtherStats({
   ];
   return (
     <>
-      <Grid className="grid-cols-3 lg:grid-cols-12 w-full gap-[24px]">
-        <Card className="col-span-3 bg-[#0B173980] bg-opacity-50 border-[#63758933] border-opacity-20">
-          <Col className="justify-between items-center gap-[16px] h-full">
+      <Grid className="w-full grid-cols-3 gap-[24px] lg:grid-cols-12">
+        <Card className="col-span-3 border-[#63758933] border-opacity-20 bg-[#0B173980] bg-opacity-50">
+          <Col className="h-full items-center justify-between gap-[16px]">
             <div>
-              <Row className="gap-[16px] bg-black p-[4px] font-bold rounded-lg">
+              <Row className="gap-[16px] rounded-lg bg-black p-[4px] font-bold">
                 {timeSpans.map((x, i) => (
                   <button
-                    className={`py-[8px] px-[16px] rounded-lg ${
-                      timeSpan === x ? "bg-sky-800 shadow-lg" : " bg-black"
+                    className={`rounded-lg px-[16px] py-[8px] ${
+                      timeSpan === x ? "bg-sky-800 shadow-lg" : "bg-black"
                     }`}
                     key={`${x}-${i}`}
                     onClick={() =>
@@ -438,7 +438,7 @@ export function OtherStats({
                 ))}
               </Row>
             </div>
-            <Col className="w-full gap-3 ">
+            <Col className="w-full gap-3">
               <div className="text-[14px] font-semibold text-white">
                 Provider
               </div>
@@ -456,9 +456,9 @@ export function OtherStats({
             </Col>
           </Col>
         </Card>
-        <Card className="col-span-3 lg:col-span-9 bg-[#0B173980] bg-opacity-50 border-[#63758933] border-opacity-20">
-          <Col className="justify-between items-center gap-[18px]">
-            <Row className="justify-between items-center gap-[16px] w-full">
+        <Card className="col-span-3 border-[#63758933] border-opacity-20 bg-[#0B173980] bg-opacity-50 lg:col-span-9">
+          <Col className="items-center justify-between gap-[18px]">
+            <Row className="w-full items-center justify-between gap-[16px]">
               <div>Top Models</div>
               <Row className="gap-[16px] text-gray-500">
                 <button
@@ -483,7 +483,7 @@ export function OtherStats({
               {[...MODELS].map((item) => (
                 <Row
                   key={item}
-                  className={`items-center border border-[#63758933] border-opacity-20 p-[12px] rounded-lg gap-[10px] hover:cursor-pointer ${
+                  className={`items-center gap-[10px] rounded-lg border border-[#63758933] border-opacity-20 p-[12px] hover:cursor-pointer ${
                     models.includes(item) ? "bg-[#00C2FF] bg-opacity-10" : ""
                   }`}
                   onClick={() => {
@@ -518,11 +518,11 @@ export function OtherStats({
 
       <Grid
         className={clsx(
-          "grid-cols-1 lg:grid-cols-12 w-full gap-[24px]",
-          isLoading && "animate-pulse"
+          "w-full grid-cols-1 gap-[24px] lg:grid-cols-12",
+          isLoading && "animate-pulse",
         )}
       >
-        <Col className="p-10 border w-full col-span-1 md:col-span-3 flex justify-between flex-col items-center gap-5 py-3 rounded-lg bg-[#0B173980] bg-opacity-50 border-[#63758933] border-opacity-20">
+        <Col className="col-span-1 flex w-full flex-col items-center justify-between gap-5 rounded-lg border border-[#63758933] border-opacity-20 bg-[#0B173980] bg-opacity-50 p-10 py-3 md:col-span-3">
           <h2 className="whitespace-nowrap text-[18px] font-bold text-white">
             Total Requests
           </h2>
@@ -532,7 +532,7 @@ export function OtherStats({
         </Col>
         {pieCharts.map((chart, i) => (
           <div
-            className="p-10 border w-full col-span-1 md:col-span-3 flex justify-between flex-col items-center gap-5 py-3 rounded-lg bg-[#0B173980] bg-opacity-50 border-[#63758933] border-opacity-20"
+            className="col-span-1 flex w-full flex-col items-center justify-between gap-5 rounded-lg border border-[#63758933] border-opacity-20 bg-[#0B173980] bg-opacity-50 p-10 py-3 md:col-span-3"
             key={`${chart.name}-${i}`}
           >
             <h2 className="whitespace-nowrap text-[18px] font-bold text-white">
@@ -544,7 +544,7 @@ export function OtherStats({
               index="name"
               colors={colors}
               onValueChange={(v) => console.log(v)}
-              className="min-w-[10em] min-h-[10em] "
+              className="min-h-[10em] min-w-[10em]"
               valueFormatter={(v) => `${v === 0 ? "0" : v.toFixed(2)}%`}
             />
 
@@ -555,7 +555,7 @@ export function OtherStats({
             />
           </div>
         ))}
-        <div className="w-full border col-span-1 md:col-span-6 flex flex-col items-center gap-5 py-3 rounded-lg px-10 bg-[#0B173980] bg-opacity-50 border-[#63758933] border-opacity-20">
+        <div className="col-span-1 flex w-full flex-col items-center gap-5 rounded-lg border border-[#63758933] border-opacity-20 bg-[#0B173980] bg-opacity-50 px-10 py-3 md:col-span-6">
           <h2>Model market share %</h2>
           <AreaChart
             data={transformData(data?.modelUsageOverTime ?? []).transformedData}
@@ -568,7 +568,7 @@ export function OtherStats({
         {scatterCharts.map((chart, i) => (
           <ThemedScatterPlot chart={chart} key={`${chart.name}-${i}`} />
         ))}
-        <div className="w-full border col-span-1 md:col-span-6 flex flex-col items-center gap-5 p-3 rounded-lg bg-[#0B173980] bg-opacity-50 border-[#63758933] border-opacity-20">
+        <div className="col-span-1 flex w-full flex-col items-center gap-5 rounded-lg border border-[#63758933] border-opacity-20 bg-[#0B173980] bg-opacity-50 p-3 md:col-span-6">
           <h2>TTFT Per model (soon)</h2>
           <BarChart
             data={

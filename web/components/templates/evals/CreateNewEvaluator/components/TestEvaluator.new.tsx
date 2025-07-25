@@ -25,7 +25,7 @@ export function TestEvaluator() {
     useTestDataStore();
 
   const [promptTemplate, setPromptTemplate] = useState<string | undefined>(
-    testInput?.promptTemplate ?? ""
+    testInput?.promptTemplate ?? "",
   );
   const [result, setResult] = useState<EvaluatorTestResult>(null);
   const [activeTab, setActiveTab] = useState("inputBody");
@@ -69,7 +69,7 @@ export function TestEvaluator() {
         inputBody: JSON.stringify(
           request.data?.data?.request_body ?? {},
           undefined,
-          4
+          4,
         ),
         inputs: {
           inputs: {},
@@ -78,7 +78,7 @@ export function TestEvaluator() {
         outputBody: JSON.stringify(
           request.data?.data?.response_body ?? {},
           undefined,
-          4
+          4,
         ),
         promptTemplate: "",
       });
@@ -86,10 +86,10 @@ export function TestEvaluator() {
   });
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="flex h-full flex-col">
       {/* Scrollable Input Area */}
       <ScrollArea className="flex-grow">
-        <div className="p-4 space-y-4">
+        <div className="space-y-4 p-4">
           {/* Request ID Input */}
           <div className="flex items-center gap-2">
             <Label className="whitespace-nowrap text-sm font-medium">
@@ -117,7 +117,7 @@ export function TestEvaluator() {
               onValueChange={setActiveTab}
               className="w-full"
             >
-              <TabsList className="w-full grid grid-cols-4 bg-muted/30 p-0 h-9">
+              <TabsList className="grid h-9 w-full grid-cols-4 bg-muted/30 p-0">
                 <TabsTrigger value="inputBody" className="text-xs">
                   Input Body
                 </TabsTrigger>
@@ -136,11 +136,11 @@ export function TestEvaluator() {
 
               <TabsContent
                 value="inputs"
-                className="mt-2 space-y-2 border rounded-md p-3 bg-background"
+                className="mt-2 space-y-2 rounded-md border bg-background p-3"
               >
                 {Object.entries(testInput?.inputs?.inputs ?? []).length ===
                 0 ? (
-                  <div className="text-center py-2">
+                  <div className="py-2 text-center">
                     <Muted>No input variables defined</Muted>
                     <Button
                       variant="outline"
@@ -239,7 +239,7 @@ export function TestEvaluator() {
                             <XCircle className="h-4 w-4" />
                           </Button>
                         </div>
-                      )
+                      ),
                     )}
                     <Button
                       variant="outline"
@@ -267,10 +267,10 @@ export function TestEvaluator() {
               {promptTemplate !== undefined && (
                 <TabsContent
                   value="prompt"
-                  className="mt-2 border rounded-md bg-background"
+                  className="mt-2 rounded-md border bg-background"
                 >
                   <MarkdownEditor
-                    className="text-sm min-h-[300px] border-0"
+                    className="min-h-[300px] border-0 text-sm"
                     text={promptTemplate}
                     setText={setPromptTemplate}
                     language="json"
@@ -281,10 +281,10 @@ export function TestEvaluator() {
 
               <TabsContent
                 value="inputBody"
-                className="mt-2 border rounded-md bg-background"
+                className="mt-2 rounded-md border bg-background"
               >
                 <MarkdownEditor
-                  className="text-sm min-h-[300px] border-0"
+                  className="min-h-[300px] border-0 text-sm"
                   text={testInput?.inputBody ?? ""}
                   setText={(text) => {
                     setTestInput((prev) => {
@@ -302,10 +302,10 @@ export function TestEvaluator() {
 
               <TabsContent
                 value="outputBody"
-                className="mt-2 border rounded-md bg-background"
+                className="mt-2 rounded-md border bg-background"
               >
                 <MarkdownEditor
-                  className="text-sm min-h-[300px] border-0"
+                  className="min-h-[300px] border-0 text-sm"
                   text={testInput?.outputBody ?? ""}
                   setText={(text) => {
                     setTestInput((prev) => {
@@ -327,7 +327,7 @@ export function TestEvaluator() {
 
       {/* Fixed Results Section */}
       <div className="shrink-0 border-t bg-muted/10">
-        <div className="p-4 space-y-3">
+        <div className="space-y-3 p-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium">Test Results</h3>
             <Button
@@ -356,29 +356,29 @@ export function TestEvaluator() {
             </Button>
           </div>
 
-          <div className="max-h-[180px] overflow-y-auto border rounded-md bg-background p-3">
+          <div className="max-h-[180px] overflow-y-auto rounded-md border bg-background p-3">
             {result === null ? (
-              <div className="text-center py-4">
+              <div className="py-4 text-center">
                 <Muted>Run a test to see results</Muted>
               </div>
             ) : result._type === "running" ? (
-              <div className="text-center py-4">
+              <div className="py-4 text-center">
                 <Muted>Running test...</Muted>
               </div>
             ) : result._type === "error" ? (
-              <div className="bg-destructive/10 p-3 rounded-md border border-destructive/20 flex items-start gap-2">
-                <AlertCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+              <div className="flex items-start gap-2 rounded-md border border-destructive/20 bg-destructive/10 p-3">
+                <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
                 <div>
                   <H4 className="text-sm text-destructive">Error</H4>
-                  <pre className="text-xs mt-1 whitespace-pre-wrap">
+                  <pre className="mt-1 whitespace-pre-wrap text-xs">
                     {result.error}
                   </pre>
                 </div>
               </div>
             ) : (
               <div className="space-y-3">
-                <div className="bg-muted p-3 rounded-md flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
+                <div className="flex items-center gap-2 rounded-md bg-muted p-3">
+                  <CheckCircle2 className="h-5 w-5 shrink-0 text-primary" />
                   <div>
                     <H4 className="text-sm">Score</H4>
                     <div className="text-lg font-semibold">{result.output}</div>
@@ -394,7 +394,7 @@ export function TestEvaluator() {
                     <CollapsibleContent className="mt-2 space-y-2">
                       {result.traces.map((trace, i) => (
                         <div key={i} className="rounded-md border p-2">
-                          <pre className="text-xs whitespace-pre-wrap">
+                          <pre className="whitespace-pre-wrap text-xs">
                             {trace}
                           </pre>
                         </div>

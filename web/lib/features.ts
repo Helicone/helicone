@@ -42,7 +42,7 @@ export function isSubfeature(subfeature: string): subfeature is SubfeatureId {
 
 // Get subfeatures for a specific feature
 export function getSubfeaturesForFeature(
-  feature: FeatureId
+  feature: FeatureId,
 ): readonly string[] {
   return (SUBFEATURES as any)[feature] || [];
 }

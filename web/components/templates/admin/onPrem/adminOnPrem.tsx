@@ -16,7 +16,7 @@ export const AdminOnPremPage = (props: AdminOnPremPageProps) => {
   return (
     <div className="flex flex-col space-y-4 p-6">
       <h1 className="text-2xl font-semibold">On Prem Settings</h1>
-      <div className="flex flex-col space-y-8 max-w-4xl">
+      <div className="flex max-w-4xl flex-col space-y-8">
         <Tabs defaultValue="azure" className="w-full">
           <TabsList>
             <TabsTrigger value="azure">Azure</TabsTrigger>

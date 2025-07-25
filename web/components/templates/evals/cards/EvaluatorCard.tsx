@@ -108,22 +108,22 @@ export const EvaluatorCard: React.FC<EvaluatorCardProps> = ({
   return (
     <Card
       key={evaluator.id}
-      className="rounded-xl border shadow-sm hover:shadow-md transition-shadow cursor-pointer bg-white"
+      className="cursor-pointer rounded-xl border bg-white shadow-sm transition-shadow hover:shadow-md"
       onClick={() => onEdit(evaluator.scoreName || evaluator.id)}
     >
-      <CardHeader className="pb-2 flex flex-row justify-between items-start">
+      <CardHeader className="flex flex-row items-start justify-between pb-2">
         <div>
           <CardTitle className="text-xl font-medium">
             {evaluator.name}
           </CardTitle>
-          <CardDescription className="text-xs text-slate-500 mt-1">
+          <CardDescription className="mt-1 text-xs text-slate-500">
             {evaluator.scoring_type}
           </CardDescription>
         </div>
         <TypeBadge type={evaluator.type} />
       </CardHeader>
 
-      <CardContent className="pt-2 space-y-4">
+      <CardContent className="space-y-4 pt-2">
         {/* Chart visualization */}
         {renderChart()}
 
@@ -133,20 +133,20 @@ export const EvaluatorCard: React.FC<EvaluatorCardProps> = ({
           onValueChange={(value) => setChartView(value as ChartView)}
           className="w-full"
         >
-          <TabsList className="w-full grid grid-cols-2">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="time" className="text-xs">
-              <LineChartIcon className="h-3 w-3 mr-1" />
+              <LineChartIcon className="mr-1 h-3 w-3" />
               Trend
             </TabsTrigger>
             <TabsTrigger value="distribution" className="text-xs">
-              <BarChart2Icon className="h-3 w-3 mr-1" />
+              <BarChart2Icon className="mr-1 h-3 w-3" />
               Distribution
             </TabsTrigger>
           </TabsList>
         </Tabs>
 
         {/* Stats summary */}
-        <div className="flex justify-between items-center text-sm">
+        <div className="flex items-center justify-between text-sm">
           {isLoading ? (
             <>
               <Skeleton className="h-4 w-24" />
@@ -154,7 +154,7 @@ export const EvaluatorCard: React.FC<EvaluatorCardProps> = ({
             </>
           ) : hasRealData ? (
             <>
-              <span className="font-medium flex items-center gap-1">
+              <span className="flex items-center gap-1 font-medium">
                 Avg Score: {displayStats.averageScore.toFixed(1)}%
                 {renderTrendIcon()}
               </span>
@@ -171,11 +171,11 @@ export const EvaluatorCard: React.FC<EvaluatorCardProps> = ({
         </div>
       </CardContent>
 
-      <CardFooter className="flex justify-between pt-4 pb-4">
+      <CardFooter className="flex justify-between pb-4 pt-4">
         <Button
           variant="ghost"
           size="sm"
-          className="flex items-center gap-1 h-8 px-3"
+          className="flex h-8 items-center gap-1 px-3"
           onClick={(e) => {
             e.stopPropagation();
             onEdit(evaluator.scoreName || evaluator.id);
@@ -187,7 +187,7 @@ export const EvaluatorCard: React.FC<EvaluatorCardProps> = ({
         <Button
           variant="outline"
           size="sm"
-          className="flex items-center gap-1 h-8 px-3"
+          className="flex h-8 items-center gap-1 px-3"
           onClick={(e) => {
             e.stopPropagation();
             onTest();

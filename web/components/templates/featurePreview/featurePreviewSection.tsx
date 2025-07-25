@@ -41,16 +41,16 @@ const FeaturePreviewSection = ({
   onStartTrial,
 }: FeaturePreviewSectionProps) => {
   return (
-    <div className=" rounded-[35.22px] p-[18px]">
-      <div className=" rounded-3xl relative">
-        <div className="w-[500px] mx-auto pt-10 mb-20">
-          <H2 className="text-center text-[hsl(var(--foreground))] text-3xl font-medium leading-[48px] tracking-tight">
+    <div className="rounded-[35.22px] p-[18px]">
+      <div className="relative rounded-3xl">
+        <div className="mx-auto mb-20 w-[500px] pt-10">
+          <H2 className="text-center text-3xl font-medium leading-[48px] tracking-tight text-[hsl(var(--foreground))]">
             {pageTitle}
           </H2>
         </div>
 
         {/* Features List */}
-        <div className="w-[1092px] flex-col justify-start items-start gap-24 inline-flex mx-auto px-12">
+        <div className="mx-auto inline-flex w-[1092px] flex-col items-start justify-start gap-24 px-12">
           {features.map((feature, index) => (
             <div key={index} className="flex flex-row items-center gap-16">
               {feature.isImageLeft ? (
@@ -85,11 +85,11 @@ const FeaturePreviewSection = ({
 
           {/* Bottom CTA Section */}
           {showCTA && (
-            <div className="mb-24 py-10 bg-[hsl(var(--primary)/0.05)] rounded-2xl flex-col justify-start items-center gap-6 flex">
+            <div className="mb-24 flex flex-col items-center justify-start gap-6 rounded-2xl bg-[hsl(var(--primary)/0.05)] py-10">
               {quote && (
-                <Lead className="mx-24 text-3xl tracking-tight leading-relaxed md:leading-relaxed font-medium text-[hsl(var(--muted-foreground))]">
+                <Lead className="mx-24 text-3xl font-medium leading-relaxed tracking-tight text-[hsl(var(--muted-foreground))] md:leading-relaxed">
                   {quote.prefix}{" "}
-                  <span className="text-[hsl(var(--foreground))] font-semibold">
+                  <span className="font-semibold text-[hsl(var(--foreground))]">
                     {quote.highlight}
                   </span>{" "}
                   {quote.suffix}
@@ -97,7 +97,7 @@ const FeaturePreviewSection = ({
               )}
               <Button
                 onClick={onStartTrial}
-                className="text-[hsl(var(--primary-foreground))] text-lg font-medium leading-normal tracking-normal h-[52px] px-6 py-1 bg-[hsl(var(--primary))] rounded-xl justify-center items-center gap-2.5"
+                className="h-[52px] items-center justify-center gap-2.5 rounded-xl bg-[hsl(var(--primary))] px-6 py-1 text-lg font-medium leading-normal tracking-normal text-[hsl(var(--primary-foreground))]"
                 variant="action"
               >
                 Start 7-day free trial
@@ -142,10 +142,10 @@ const FeatureMedia = ({
 
   if (media.type === "video") {
     return (
-      <div className="max-w-[563px] h-full aspect-video rounded-[18px]">
+      <div className="aspect-video h-full max-w-[563px] rounded-[18px]">
         <video
           ref={videoRef}
-          className="w-full h-full"
+          className="h-full w-full"
           src={media.src}
           poster={media.fallbackImage}
           muted
@@ -160,7 +160,7 @@ const FeatureMedia = ({
     // eslint-disable-next-line @next/next/no-img-element
     <img
       loading="lazy"
-      className="max-w-[563px] w-full aspect-[1.81/1] rounded-[18px] border border-[hsl(var(--border))] object-cover"
+      className="aspect-[1.81/1] w-full max-w-[563px] rounded-[18px] border border-[hsl(var(--border))] object-cover"
       src={media.src}
       alt={imageAlt}
     />
@@ -185,13 +185,13 @@ const FeatureText = ({
   return (
     <div className="flex flex-col justify-between gap-8">
       <div className="flex flex-col">
-        <H2 className="text-[hsl(var(--foreground))] text-2xl font-medium whitespace-pre-line">
+        <H2 className="whitespace-pre-line text-2xl font-medium text-[hsl(var(--foreground))]">
           {title}
         </H2>
         <BulletList>
           {description.map((text, index) => (
             <BulletListItem
-              className="text-[hsl(var(--muted-foreground))] font-normal"
+              className="font-normal text-[hsl(var(--muted-foreground))]"
               key={index}
             >
               {text}
@@ -204,7 +204,7 @@ const FeatureText = ({
           {ctaLink ? (
             <a href={ctaLink}>
               <Button
-                className="text-[hsl(var(--primary-foreground))] text-md font-medium h-[40px] px-6 py-1.5 bg-[hsl(var(--primary))] rounded-lg justify-center items-center gap-2.5"
+                className="text-md h-[40px] items-center justify-center gap-2.5 rounded-lg bg-[hsl(var(--primary))] px-6 py-1.5 font-medium text-[hsl(var(--primary-foreground))]"
                 variant="action"
               >
                 {ctaText}
@@ -213,7 +213,7 @@ const FeatureText = ({
           ) : (
             <Button
               onClick={scrollToTop}
-              className="text-[hsl(var(--primary-foreground))] text-md font-medium h-[40px] px-6 py-1.5 bg-[hsl(var(--primary))] rounded-lg justify-center items-center gap-2.5"
+              className="text-md h-[40px] items-center justify-center gap-2.5 rounded-lg bg-[hsl(var(--primary))] px-6 py-1.5 font-medium text-[hsl(var(--primary-foreground))]"
               variant="action"
             >
               {ctaText}

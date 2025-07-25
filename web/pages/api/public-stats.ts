@@ -78,7 +78,7 @@ export type PublicHeliconeStatsResult = Awaited<
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<PublicHeliconeStatsResult>
+  res: NextApiResponse<PublicHeliconeStatsResult>,
 ) {
   res.setHeader("Cache-Control", `s-maxage=${60 * 60 * 24 * 2}, public`); // 2 days
 

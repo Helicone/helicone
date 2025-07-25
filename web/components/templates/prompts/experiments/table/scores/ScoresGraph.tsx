@@ -39,7 +39,7 @@ const ScoresGraph = ({
       const promptVersionScores = scores[promptVersion?.id]?.data;
       if (promptVersionScores) {
         acc.scores = Array.from(
-          new Set([...acc.scores, ...Object.keys(promptVersionScores)])
+          new Set([...acc.scores, ...Object.keys(promptVersionScores)]),
         ).filter((key) => !key.includes("dateCreated")); // Exclude dateCreated from scores
       }
       return acc;
@@ -47,7 +47,7 @@ const ScoresGraph = ({
     {
       outputColumns: promptVersions,
       scores: [] as string[],
-    }
+    },
   );
 
   const { getScoreColorMapping } = useExperimentScores(experimentId);
@@ -103,7 +103,7 @@ const ScoresGraph = ({
               [score, normalizedValue],
               [`${score}_original`, value],
             ];
-          })
+          }),
         ),
       };
     });
@@ -114,7 +114,7 @@ const ScoresGraph = ({
   const { selectedScoreKey } = useExperimentTable(experimentId);
 
   return (
-    <div className={cn("w-full h-[300px] overflow-auto px-8")}>
+    <div className={cn("h-[300px] w-full overflow-auto px-8")}>
       <ChartContainer config={chartConfig} className="h-full w-full">
         <LineChart
           accessibilityLayer
@@ -186,7 +186,7 @@ const ScoresGraph = ({
                 event.stopPropagation();
                 queryClient.setQueryData(
                   ["selectedScoreKey", experimentId],
-                  score
+                  score,
                 );
               }}
               name={score.replace("-hcone-bool", "")}

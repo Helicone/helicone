@@ -24,7 +24,7 @@ const IntegrationSection: React.FC<IntegrationSectionProps> = ({
 
   return (
     <>
-      <h2 className="text-2xl font-semibold mb-4">{title}</h2>
+      <h2 className="mb-4 text-2xl font-semibold">{title}</h2>
       <Carousel>
         <CarouselContent className="gap-4">
           {items.map((item, index) => (

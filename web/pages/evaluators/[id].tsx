@@ -131,7 +131,7 @@ const EvaluatorDetail = () => {
           // Use the helper to extract all parameters from the template
           const params = openAITemplateToOpenAIFunctionParams(
             template,
-            formattedScoringType
+            formattedScoringType,
           );
 
           // Extract includedVariables directly from the template since
@@ -149,16 +149,16 @@ const EvaluatorDetail = () => {
             // Check which sections are included in the template text
             extractedIncludedVariables = {
               inputs: templateText.includes(
-                '<helicone-prompt-input key="inputs" />'
+                '<helicone-prompt-input key="inputs" />',
               ),
               promptTemplate: templateText.includes(
-                '<helicone-prompt-input key="promptTemplate" />'
+                '<helicone-prompt-input key="promptTemplate" />',
               ),
               inputBody: templateText.includes(
-                '<helicone-prompt-input key="inputBody" />'
+                '<helicone-prompt-input key="inputBody" />',
               ),
               outputBody: templateText.includes(
-                '<helicone-prompt-input key="outputBody" />'
+                '<helicone-prompt-input key="outputBody" />',
               ),
             };
           } else if (params.includedVariables) {
@@ -251,7 +251,7 @@ const EvaluatorDetail = () => {
     setEvaluatorFormValues({
       ...evaluatorFormValues,
       choiceScores: evaluatorFormValues.choiceScores.filter(
-        (_: any, i: number) => i !== index
+        (_: any, i: number) => i !== index,
       ),
     });
   };
@@ -260,7 +260,7 @@ const EvaluatorDetail = () => {
   const updateChoiceScore = (
     index: number,
     field: "score" | "description",
-    value: string | number
+    value: string | number,
   ) => {
     if (!evaluatorFormValues) return;
 
@@ -302,8 +302,8 @@ const EvaluatorDetail = () => {
     >
       <div className="flex items-center gap-2">
         <span className="relative flex h-2 w-2">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500"></span>
         </span>
         <span>{onlineEvaluatorCount} Online</span>
       </div>
@@ -313,22 +313,22 @@ const EvaluatorDetail = () => {
 
   if (evaluators.isLoading || isLoading) {
     return (
-      <div className="p-6 max-w-4xl mx-auto">
+      <div className="mx-auto max-w-4xl p-6">
         <div className="space-y-6">
           <div className="animate-pulse space-y-4">
-            <div className="h-6 bg-muted rounded w-1/4"></div>
-            <div className="h-4 bg-muted rounded w-1/2"></div>
+            <div className="h-6 w-1/4 rounded bg-muted"></div>
+            <div className="h-4 w-1/2 rounded bg-muted"></div>
           </div>
           <Card className="w-full p-6">
             <div className="animate-pulse space-y-4">
-              <div className="h-6 bg-muted rounded w-1/4"></div>
-              <div className="h-24 bg-muted rounded w-full"></div>
+              <div className="h-6 w-1/4 rounded bg-muted"></div>
+              <div className="h-24 w-full rounded bg-muted"></div>
             </div>
           </Card>
           <Card className="w-full p-6">
             <div className="animate-pulse space-y-4">
-              <div className="h-6 bg-muted rounded w-1/4"></div>
-              <div className="h-12 bg-muted rounded w-full"></div>
+              <div className="h-6 w-1/4 rounded bg-muted"></div>
+              <div className="h-12 w-full rounded bg-muted"></div>
             </div>
           </Card>
         </div>
@@ -345,10 +345,10 @@ const EvaluatorDetail = () => {
           href: "/evaluators",
         }}
       />
-      <div className="p-6 pb-24 bg-background min-h-screen">
+      <div className="min-h-screen bg-background p-6 pb-24">
         {/* Evaluator name heading */}
-        <div className="mb-4 max-w-4xl mx-auto">
-          <div className="flex items-center justify-between w-full">
+        <div className="mx-auto mb-4 max-w-4xl">
+          <div className="flex w-full items-center justify-between">
             <div className="flex items-center gap-2">
               <H3>{name || "Unnamed Evaluator"}</H3>
             </div>
@@ -363,7 +363,7 @@ const EvaluatorDetail = () => {
                   } else {
                     notification.setNotification(
                       "Please save the evaluator first",
-                      "info"
+                      "info",
                     );
                   }
                 }}
@@ -386,7 +386,7 @@ const EvaluatorDetail = () => {
                     } else {
                       notification.setNotification(
                         "Please save the evaluator first",
-                        "info"
+                        "info",
                       );
                     }
                   }}

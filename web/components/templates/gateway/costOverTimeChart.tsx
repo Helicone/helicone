@@ -1,14 +1,13 @@
 "use client";
 
-import { TrendingUp, ChevronDown, ChevronUp } from "lucide-react";
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, XAxis } from "recharts";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 import { useState } from "react";
 
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -28,7 +27,6 @@ import { TimeIncrement } from "@/lib/timeCalculations/fetchTimeData";
 import { TimeFilter } from "@/types/timeFilter";
 import { useMemo } from "react";
 import { getTimeMap } from "@/lib/timeCalculations/constants";
-import { formatNumberString } from "../dashboard/dashboardPage";
 
 export const description = "A stacked area chart";
 

@@ -13,7 +13,7 @@ export interface CostOverTime {
 }
 
 async function handler(
-  options: HandlerWrapperOptions<Result<CostOverTime[], string>>
+  options: HandlerWrapperOptions<Result<CostOverTime[], string>>,
 ) {
   const {
     res,
@@ -33,7 +33,7 @@ async function handler(
       orgId,
       dbIncrement: dbIncrement ?? "hour",
       timeZoneDifference,
-    })
+    }),
   );
 }
 export default withAuth(handler);

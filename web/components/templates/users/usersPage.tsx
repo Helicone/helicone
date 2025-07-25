@@ -59,7 +59,7 @@ const TABS = [
 
 function useQueryParam(
   paramName: string,
-  defaultValue: string
+  defaultValue: string,
 ): [queryParam: string, setQueryParam: (value: string) => void] {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -74,10 +74,10 @@ function useQueryParam(
           query: currentQuery,
         },
         undefined,
-        { shallow: true }
+        { shallow: true },
       );
     },
-    [router, paramName]
+    [router, paramName],
   );
 
   const queryParam = searchParams?.get(paramName) || defaultValue;
@@ -103,15 +103,15 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
 
   const [currentPage, setCurrentPage] = useQueryParam(
     "page",
-    currentPageProp.toString()
+    currentPageProp.toString(),
   );
   const [pageSize, setPageSize] = useQueryParam(
     "pageSize",
-    pageSizeProp.toString()
+    pageSizeProp.toString(),
   );
   const [sortDirection, setSortDirection] = useQueryParam(
     "sortDirection",
-    sortProp.sortDirection ?? "desc"
+    sortProp.sortDirection ?? "desc",
   );
   const [sortKey, setSortKey] = useQueryParam("sortKey", "last_active");
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
@@ -132,12 +132,12 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
     parseInt(currentPage, 10),
     parseInt(pageSize, 10),
     sortLeaf,
-    timeFilter
+    timeFilter,
   );
 
   const { hasAccess, freeLimit, upgradeMessage, canCreate } = useFeatureLimit(
     "users",
-    userMetrics.data?.count ?? 0
+    userMetrics.data?.count ?? 0,
   );
 
   const onTimeSelectHandler = (key: string, value: string) => {
@@ -168,18 +168,18 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
             const user = info.row.original;
             const userIndex =
               userMetrics.data?.users?.findIndex(
-                (u: { user_id: string }) => u.user_id === user.user_id
+                (u: { user_id: string }) => u.user_id === user.user_id,
               ) ?? 0;
             const isPremium = userIndex >= freeLimit;
 
             return (
               <span
-                className={`text-gray-900 dark:text-gray-100 font-medium ${
+                className={`font-medium text-gray-900 dark:text-gray-100 ${
                   isPremium ? "opacity-70" : ""
                 }`}
               >
                 {isPremium && (
-                  <LockIcon className="h-3 w-3 inline mr-1 text-muted-foreground" />
+                  <LockIcon className="mr-1 inline h-3 w-3 text-muted-foreground" />
                 )}
                 {user.user_id ? `${user.user_id}` : "No User ID"}
               </span>
@@ -194,13 +194,13 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
             const user = info.row.original;
             const userIndex =
               userMetrics.data?.users?.findIndex(
-                (u: { user_id: string }) => u.user_id === user.user_id
+                (u: { user_id: string }) => u.user_id === user.user_id,
               ) ?? 0;
             const isPremium = userIndex >= freeLimit;
 
             if (isPremium) {
               return (
-                <span className="blur-sm select-none opacity-70">••••••••</span>
+                <span className="select-none opacity-70 blur-sm">••••••••</span>
               );
             }
 
@@ -218,7 +218,7 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
   }, [hasAccess, freeLimit, userMetrics]);
 
   const [activeColumns, setActiveColumns] = useState<DragColumnItem[]>(
-    columnDefsToDragColumnItems(columns)
+    columnDefsToDragColumnItems(columns),
   );
 
   const handleRowSelect = (row: UserMetric) => {
@@ -229,7 +229,7 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
 
     const userIndex =
       userMetrics.data?.users?.findIndex(
-        (u: { user_id: string }) => u.user_id === row.user_id
+        (u: { user_id: string }) => u.user_id === row.user_id,
       ) ?? 0;
     const isPremiumUser = userIndex >= freeLimit;
 
@@ -247,8 +247,8 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
 
   if (hasNoUsers && !userMetrics.isLoading) {
     return (
-      <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">
-        <div className="flex flex-1 h-full">
+      <div className="flex h-screen w-full flex-col bg-background dark:bg-sidebar-background">
+        <div className="flex h-full flex-1">
           <EmptyStateCard feature="users" />
         </div>
       </div>
@@ -256,11 +256,11 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
   }
 
   return (
-    <main className="h-screen flex flex-col w-full animate-fade-in">
+    <main className="flex h-screen w-full animate-fade-in flex-col">
       <Tabs
         value={currentTab}
         onValueChange={(value) => setCurrentTab(value)}
-        className="flex flex-col flex-1 overflow-hidden"
+        className="flex flex-1 flex-col overflow-hidden"
       >
         <FoldedHeader
           leftSection={
@@ -284,8 +284,8 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
           }
           rightSection={
             <section className="flex flex-row items-center gap-2">
-              <div className="h-8 flex flex-row items-center border border-border rounded-lg divide-x divide-border overflow-hidden shadow-sm">
-                <label className="text-xs px-2 py-1">Views</label>
+              <div className="flex h-8 flex-row items-center divide-x divide-border overflow-hidden rounded-lg border border-border shadow-sm">
+                <label className="px-2 py-1 text-xs">Views</label>
 
                 <TabsList
                   size={"sm"}
@@ -326,7 +326,7 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
           />
         )}
 
-        <TabsContent value="users" className="flex-1 flex flex-col min-h-0">
+        <TabsContent value="users" className="flex min-h-0 flex-1 flex-col">
           <div className="flex-1 overflow-auto">
             <ThemedTable
               id="users-table"

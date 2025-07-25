@@ -10,7 +10,7 @@ export async function getTotalRequests(
     start: Date;
     end: Date;
   },
-  org_id: string
+  org_id: string,
 ): Promise<Result<number, string>> {
   const { filter: filterString, argsAcc } =
     await buildFilterWithAuthClickHousePropertiesV2({

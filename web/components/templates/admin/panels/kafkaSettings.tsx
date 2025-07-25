@@ -51,7 +51,7 @@ const KafkaSettings = () => {
 
   return (
     <>
-      <h2 className="text-lg text-white font-semibold">Kafka Settings</h2>
+      <h2 className="text-lg font-semibold text-white">Kafka Settings</h2>
       <div className="flex flex-col space-y-2">
         <div className="grid grid-cols-2 gap-4">
           <div className="col-span-1">
@@ -60,10 +60,10 @@ const KafkaSettings = () => {
               value={selectedSetting}
               onChange={(e) =>
                 setSelectedSetting(
-                  e.target.value as components["schemas"]["SettingName"]
+                  e.target.value as components["schemas"]["SettingName"],
                 )
               }
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-black" // Added text-black to ensure text color is visible
+              className="mt-1 block w-full rounded-md border-gray-300 text-black shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" // Added text-black to ensure text color is visible
             >
               {settingNames.map((key) => (
                 <option key={key} value={key}>

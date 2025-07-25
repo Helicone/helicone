@@ -4,11 +4,9 @@ import MarkdownEditor from "@/components/shared/markdownEditor";
 import useNotification from "@/components/shared/notification/useNotification";
 import { Button } from "@/components/ui/button";
 import { Muted, Small, XSmall } from "@/components/ui/typography";
-import { $JAWN_API } from "@/lib/clients/jawn";
 import { useFeatureFlag } from "@/services/hooks/admin";
-import { useMutation } from "@tanstack/react-query";
 import yaml from "js-yaml";
-import { CopyIcon, Loader2, Settings, HelpCircle } from "lucide-react";
+import { CopyIcon, Loader2, Settings } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
@@ -29,7 +27,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ThemedTable from "@/components/shared/themed/table/themedTable";
 import { FilterNode } from "@helicone-package/filters/filterDefs";
 import { ColumnDef } from "@tanstack/react-table";

@@ -14,7 +14,7 @@ export async function getTotalRateLimit(
     start: Date;
     end: Date;
   },
-  org_id: string
+  org_id: string,
 ): Promise<Result<number, string>> {
   const { filter: filterString, argsAcc } =
     await buildFilterWithAuthClickHouseRateLimits({
@@ -43,6 +43,6 @@ export async function getTotalRateLimit(
     await dbQueryClickhouse<{
       count: number;
     }>(query, argsAcc),
-    (d) => +d[0].count
+    (d) => +d[0].count,
   );
 }

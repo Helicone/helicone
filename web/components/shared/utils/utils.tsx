@@ -40,7 +40,10 @@ const getUSDate = (date: Date, includeTimeZone: boolean = false) => {
   return formattedDate;
 };
 
-const getUSDateFromString = (value: string, includeTimeZone: boolean = false) => {
+const getUSDateFromString = (
+  value: string,
+  includeTimeZone: boolean = false,
+) => {
   const date = new Date(value);
   return getUSDate(date, includeTimeZone);
 };
@@ -90,7 +93,7 @@ const capitalizeWords = (str: string) => {
 
   // map over each word and capitalize the first letter
   const capitalizedWords = words.map(
-    (word) => word.charAt(0).toUpperCase() + word.slice(1)
+    (word) => word.charAt(0).toUpperCase() + word.slice(1),
   );
 
   // join the capitalized words back into a single string

@@ -60,7 +60,7 @@ export const CourseGenerator: React.FC = () => {
       const sectionTitles = await generatePart(
         "sectionTitles",
         { ...params, overview },
-        sessionId
+        sessionId,
       );
 
       const sectionCount = Math.min(sectionTitles.titles.length, 5);
@@ -70,7 +70,7 @@ export const CourseGenerator: React.FC = () => {
       // Generate content for each section
       for (let i = 0; i < sectionCount; i++) {
         setCurrentStep(
-          `Creating content for section ${i + 1} of ${sectionCount}...`
+          `Creating content for section ${i + 1} of ${sectionCount}...`,
         );
         const sectionContent = await generatePart(
           "sectionContent",
@@ -79,7 +79,7 @@ export const CourseGenerator: React.FC = () => {
             sectionTitle: sectionTitles.titles[i],
             sectionNumber: i + 1,
           },
-          sessionId
+          sessionId,
         );
         sections.push({
           title: sectionTitles.titles[i],
@@ -101,7 +101,7 @@ export const CourseGenerator: React.FC = () => {
             sectionTitle: sectionTitles.titles[i],
             sectionContent: sectionContent.content,
           },
-          sessionId
+          sessionId,
         );
         quizzes.push(quiz);
         setCourse((prev) => ({
@@ -131,7 +131,7 @@ export const CourseGenerator: React.FC = () => {
   const generatePart = async (
     part: CourseParts,
     args: any,
-    sessionId: string
+    sessionId: string,
   ) => {
     let messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
       { role: "system", content: hpstatic`You are an expert course creator.` },
@@ -289,7 +289,7 @@ export const CourseGenerator: React.FC = () => {
           `generate${part.charAt(0).toUpperCase() + part.slice(1)}`
       ) {
         throw new Error(
-          `Unexpected tool call for ${part}: ${JSON.stringify(toolCall)}`
+          `Unexpected tool call for ${part}: ${JSON.stringify(toolCall)}`,
         );
       }
 
@@ -299,10 +299,10 @@ export const CourseGenerator: React.FC = () => {
       } catch (parseError: any) {
         console.error(
           `Error parsing arguments for ${part}:`,
-          toolCall.function.arguments
+          toolCall.function.arguments,
         );
         throw new Error(
-          `Failed to parse arguments for ${part}: ${JSON.stringify(parseError)}`
+          `Failed to parse arguments for ${part}: ${JSON.stringify(parseError)}`,
         );
       }
     } catch (error) {
@@ -325,9 +325,9 @@ export const CourseGenerator: React.FC = () => {
         <>
           <h2 className="text-xl font-semibold">Course Sections</h2>
           {course.sections.map((section, index) => (
-            <div key={index} className="border p-4 rounded-md">
+            <div key={index} className="rounded-md border p-4">
               <h3
-                className="text-lg font-semibold cursor-pointer"
+                className="cursor-pointer text-lg font-semibold"
                 onClick={() => toggleSection(index)}
               >
                 {section.title}
@@ -341,7 +341,7 @@ export const CourseGenerator: React.FC = () => {
 
                   {course.quizzes && course.quizzes[index] && (
                     <>
-                      <h4 className="font-semibold mt-4">Quiz</h4>
+                      <h4 className="mt-4 font-semibold">Quiz</h4>
                       {course.quizzes[index].questions.map((q, qIndex) => (
                         <div key={qIndex} className="mt-2">
                           <p>
@@ -373,25 +373,25 @@ export const CourseGenerator: React.FC = () => {
   );
 
   return (
-    <div className="w-full h-full flex flex-col bg-white overflow-y-auto">
-      <h1 className="text-3xl font-bold text-center my-6 text-indigo-900">
+    <div className="flex h-full w-full flex-col overflow-y-auto bg-white">
+      <h1 className="my-6 text-center text-3xl font-bold text-indigo-900">
         Course Generator
       </h1>
 
-      <div className="w-full max-w-sm mx-auto px-4 pb-6">
+      <div className="mx-auto w-full max-w-sm px-4 pb-6">
         <div className="space-y-4">
           <div className="relative">
             <label
               htmlFor="topic"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="mb-1 block text-sm font-medium text-gray-700"
             >
               Course Topic
             </label>
             <div className="relative">
-              <BookOpenIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-indigo-400" />
+              <BookOpenIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-indigo-400" />
               <TextInput
                 id="topic"
-                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-md focus:ring-1 focus:ring-indigo-400"
+                className="w-full rounded-md border border-gray-200 py-2 pl-9 pr-3 text-sm focus:ring-1 focus:ring-indigo-400"
                 placeholder="e.g. Helicone.ai Best Practices"
                 value={params.topic}
                 onChange={(e) =>
@@ -404,15 +404,15 @@ export const CourseGenerator: React.FC = () => {
           <div className="relative">
             <label
               htmlFor="difficulty"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="mb-1 block text-sm font-medium text-gray-700"
             >
               Difficulty Level
             </label>
             <div className="relative">
-              <AcademicCapIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-indigo-400" />
+              <AcademicCapIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-indigo-400" />
               <Select
                 id="difficulty"
-                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-md focus:ring-1 focus:ring-indigo-400"
+                className="w-full rounded-md border border-gray-200 py-2 pl-9 pr-3 text-sm focus:ring-1 focus:ring-indigo-400"
                 value={params.difficulty}
                 onValueChange={(value) =>
                   setParams({
@@ -431,15 +431,15 @@ export const CourseGenerator: React.FC = () => {
           <div className="relative">
             <label
               htmlFor="audience"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="mb-1 block text-sm font-medium text-gray-700"
             >
               Target Audience
             </label>
             <div className="relative">
-              <UserGroupIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-indigo-400" />
+              <UserGroupIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-indigo-400" />
               <TextInput
                 id="audience"
-                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-md focus:ring-1 focus:ring-indigo-400"
+                className="w-full rounded-md border border-gray-200 py-2 pl-9 pr-3 text-sm focus:ring-1 focus:ring-indigo-400"
                 placeholder="e.g. Developers"
                 value={params.audience}
                 onChange={(e) =>
@@ -453,8 +453,8 @@ export const CourseGenerator: React.FC = () => {
         <Button
           onClick={generateCourse}
           disabled={isGenerating}
-          className={`w-full mt-6 bg-indigo-600 text-white px-4 py-2 rounded-md font-medium text-sm hover:bg-indigo-700 transition-colors duration-300 ${
-            isGenerating ? "opacity-50 cursor-not-allowed" : ""
+          className={`mt-6 w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-300 hover:bg-indigo-700 ${
+            isGenerating ? "cursor-not-allowed opacity-50" : ""
           }`}
         >
           {isGenerating ? currentStep : "Generate Course"}
@@ -462,8 +462,8 @@ export const CourseGenerator: React.FC = () => {
       </div>
 
       {Object.keys(course).length > 0 && (
-        <div className="mt-8 p-6 bg-white bg-opacity-20 rounded-xl overflow-y-auto max-h-[calc(100vh-400px)] w-full">
-          <h2 className="text-2xl font-semibold mb-4">
+        <div className="mt-8 max-h-[calc(100vh-400px)] w-full overflow-y-auto rounded-xl bg-white bg-opacity-20 p-6">
+          <h2 className="mb-4 text-2xl font-semibold">
             Generated Course Outline:
           </h2>
           {renderCourse(course)}

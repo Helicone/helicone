@@ -58,9 +58,9 @@ const Chart: React.FC<ChartProps> = ({
   subtitle,
 }) => (
   <Card>
-    <p className="text-slate-500 text-sm">{title}</p>
+    <p className="text-sm text-slate-500">{title}</p>
     {subtitle && (
-      <p className="text-slate-950 dark:text-slate-50 text-xl font-semibold">
+      <p className="text-xl font-semibold text-slate-950 dark:text-slate-50">
         {subtitle}
       </p>
     )}
@@ -79,7 +79,7 @@ const Chart: React.FC<ChartProps> = ({
         showLegend={false}
         showXAxis={true}
         xAxisLabel={xAxisLabel}
-        className="p-5 h-80"
+        className="h-80 p-5"
       />
     )}
   </Card>
@@ -98,12 +98,12 @@ const SessionMetrics = ({
     selectedSession?.name ?? "",
     pSize,
     useInterquartile,
-    timeFilter
+    timeFilter,
   );
 
   return (
     <Col className="space-y-4">
-      <div className="space-y-2 px-4 pb-4 border-b border-slate-200 dark:border-slate-800">
+      <div className="space-y-2 border-b border-slate-200 px-4 pb-4 dark:border-slate-800">
         <Label
           htmlFor="percentile-select"
           className="text-slate-500 dark:text-slate-500"
@@ -134,10 +134,10 @@ const SessionMetrics = ({
               onCheckedChange={(checked) =>
                 setUseInterquartile(checked as boolean)
               }
-              className="w-3 h-3 text-slate-500 dark:text-slate-500 border-slate-500 dark:border-slate-500 data-[state=checked]:bg-[#0ca5ea] data-[state=checked]:border-[#0ca5ea] flex items-center justify-center"
+              className="flex h-3 w-3 items-center justify-center border-slate-500 text-slate-500 data-[state=checked]:border-[#0ca5ea] data-[state=checked]:bg-[#0ca5ea] dark:border-slate-500 dark:text-slate-500"
               iconClassName="w-2 h-2"
             />
-            <Label className="text-xs text-slate-500 dark:text-slate-500 font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            <Label className="text-xs font-medium leading-none text-slate-500 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 dark:text-slate-500">
               Interquartile
             </Label>
           </Row>
@@ -168,7 +168,7 @@ const SessionMetrics = ({
               isLoading,
               metrics?.average.session_count[0]?.average,
               "requests / session",
-              2
+              2,
             )}
             data={(metrics?.session_count || []).map((sessionCount) => {
               const start = Math.ceil(Number(sessionCount.range_start ?? 0));
@@ -195,7 +195,7 @@ const SessionMetrics = ({
               metrics?.average.session_cost[0]?.average,
               " / session",
               5,
-              "$"
+              "$",
             )}
             data={(metrics?.session_cost || []).map((sessionCost) => {
               const start = Number(sessionCost.range_start ?? 0);
@@ -224,11 +224,11 @@ const SessionMetrics = ({
               isLoading,
               metrics?.average.session_duration[0]?.average,
               "seconds / session",
-              3
+              3,
             )}
             data={(metrics?.session_duration || []).map((sessionDuration) => {
               const start = Math.round(
-                Number(sessionDuration.range_start ?? 0)
+                Number(sessionDuration.range_start ?? 0),
               );
               const end = Math.round(Number(sessionDuration.range_end ?? 0));
               return {
@@ -260,7 +260,7 @@ const getSubtitle = (
   averageMetric: number | undefined,
   unit: string,
   toFixedValue: number,
-  prefix: string = ""
+  prefix: string = "",
 ) => {
   if (isLoading) {
     return "Loading...";

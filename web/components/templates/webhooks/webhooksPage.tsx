@@ -45,7 +45,7 @@ const WebhooksPage = (props: WebhooksPageProps) => {
   const [viewWebhookOpen, setViewWebhookOpen] = useState(false);
   const [addWebhookOpen, setAddWebhookOpen] = useState(false);
   const [webhookError, setWebhookError] = useState<string | undefined>(
-    undefined
+    undefined,
   );
   const [showChangelogBanner, setShowChangelogBanner] = useState(true);
 
@@ -178,8 +178,8 @@ const WebhooksPage = (props: WebhooksPageProps) => {
 
   if (!isLoading && webhookCount === 0) {
     return (
-      <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">
-        <div className="flex flex-1 h-full">
+      <div className="flex h-screen w-full flex-col bg-background dark:bg-sidebar-background">
+        <div className="flex h-full flex-1">
           <EmptyStateCard
             feature="webhooks"
             onPrimaryClick={handleAddWebhook}
@@ -207,7 +207,7 @@ const WebhooksPage = (props: WebhooksPageProps) => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
+      <div className="flex min-h-[calc(100vh-200px)] items-center justify-center">
         <div className="space-y-2">
           <Skeleton className="h-4 w-[250px]" />
           <Skeleton className="h-4 w-[200px]" />
@@ -222,7 +222,7 @@ const WebhooksPage = (props: WebhooksPageProps) => {
       <div className="flex flex-col space-y-4">
         <AuthHeader
           isWithinIsland={true}
-          title={<div className="flex items-center gap-2 ml-8">Webhooks</div>}
+          title={<div className="ml-8 flex items-center gap-2">Webhooks</div>}
         />
 
         {!canCreate && (
@@ -233,11 +233,11 @@ const WebhooksPage = (props: WebhooksPageProps) => {
           />
         )}
 
-        <div className="flex justify-between items-center mx-8 mb-2">
+        <div className="mx-8 mb-2 flex items-center justify-between">
           <Button
             variant="ghost"
             size="sm"
-            className="text-muted-foreground hover:text-foreground transition-colors"
+            className="text-muted-foreground transition-colors hover:text-foreground"
             asChild
           >
             <a
@@ -297,7 +297,7 @@ const WebhooksPage = (props: WebhooksPageProps) => {
         </div>
 
         <div className="mx-8">
-          <Table className="w-full bg-white border rounded-md shadow-sm">
+          <Table className="w-full rounded-md border bg-white shadow-sm">
             <TableHeader className="bg-gray-50">
               <TableRow>
                 <TableHead className="font-medium">Destination</TableHead>
@@ -316,7 +316,7 @@ const WebhooksPage = (props: WebhooksPageProps) => {
                   <TableCell className="max-w-[200px] truncate">
                     <TooltipProvider>
                       <Tooltip>
-                        <TooltipTrigger className="text-left truncate">
+                        <TooltipTrigger className="truncate text-left">
                           {webhook.destination}
                         </TooltipTrigger>
                         <TooltipContent>
@@ -366,11 +366,11 @@ const WebhooksPage = (props: WebhooksPageProps) => {
                   </TableCell>
                   <TableCell>
                     {(webhook.config as any)?.["includeData"] !== false ? (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
                         Enabled
                       </span>
                     ) : (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                      <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
                         Disabled
                       </span>
                     )}
@@ -379,7 +379,7 @@ const WebhooksPage = (props: WebhooksPageProps) => {
                     <div className="flex items-center space-x-2">
                       {visibleHmacKeys[webhook.id] ? (
                         <>
-                          <span className="text-xs font-mono">
+                          <span className="font-mono text-xs">
                             {webhook.hmac_key}
                           </span>
                           <button

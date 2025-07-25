@@ -25,19 +25,19 @@ const MainContent = ({ children, banner, pathname }: MainContentProps) => {
           <div className="bg-slate-50">
             <div
               className={clsx(
-                "w-full bg-sky-500 p-2 text-white flex items-center justify-center gap-2",
+                "flex w-full items-center justify-center gap-2 bg-sky-500 p-2 text-white",
                 banner.onClick &&
-                  "cursor-pointer hover:bg-sky-600 transition-colors"
+                  "cursor-pointer transition-colors hover:bg-sky-600",
               )}
               onClick={banner.onClick}
               role={banner.onClick ? "button" : undefined}
             >
               {banner.updated_at && (
                 <>
-                  <span className="text-sky-100 text-xs font-normal">
+                  <span className="text-xs font-normal text-sky-100">
                     {getUSDate(new Date(banner.updated_at))}
                   </span>
-                  <p className="text-sky-100 font-normal">|</p>
+                  <p className="font-normal text-sky-100">|</p>
                 </>
               )}
 
@@ -53,8 +53,8 @@ const MainContent = ({ children, banner, pathname }: MainContentProps) => {
             </div>
           </div>
         )}
-        <div className={clsx("bg-background h-full min-h-screen")}>
-          <div className="mr-auto w-full min-h-screen" key={`${pathname}`}>
+        <div className={clsx("h-full min-h-screen bg-background")}>
+          <div className="mr-auto min-h-screen w-full" key={`${pathname}`}>
             {children}
           </div>
         </div>

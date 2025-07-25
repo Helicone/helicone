@@ -77,7 +77,7 @@ const GenerateAPIKey = ({
         org?.currentOrg?.organization_type ?? "",
         "Main",
         window.location.hostname.includes("eu."),
-        false
+        false,
       );
 
       const res = await promiseRes;
@@ -100,8 +100,8 @@ const GenerateAPIKey = ({
   ]);
 
   return (
-    <div className="flex flex-col p-4 pt-0 h-full max-h-[calc(100vh-20rem)] overflow-y-auto">
-      <div className="flex flex-col space-y-4 w-full">
+    <div className="flex h-full max-h-[calc(100vh-20rem)] flex-col overflow-y-auto p-4 pt-0">
+      <div className="flex w-full flex-col space-y-4">
         {selectedIntegrationMethod === "proxy" ? (
           <div className="flex flex-col space-y-2">
             <div>{renderProviderObject[selectedProvider]}</div>
@@ -121,14 +121,14 @@ const GenerateAPIKey = ({
                 </div>
 
                 <div className="mt-2">
-                  <div className="flex overflow-x-auto py-2 w-full no-scrollbar">
+                  <div className="no-scrollbar flex w-full overflow-x-auto py-2">
                     <div className="flex gap-2">
                       <Button
                         variant={"outline"}
                         size="sm"
                         className={
                           asyncLang === "node.js"
-                            ? "bg-slate-200 border-slate-200 dark:bg-slate-800 dark:border-slate-800"
+                            ? "border-slate-200 bg-slate-200 dark:border-slate-800 dark:bg-slate-800"
                             : ""
                         }
                         onClick={() => setAsyncLang("node.js")}
@@ -140,7 +140,7 @@ const GenerateAPIKey = ({
                         size="sm"
                         className={
                           asyncLang === "python"
-                            ? "bg-slate-200 border-slate-200 dark:bg-slate-800 dark:border-slate-800"
+                            ? "border-slate-200 bg-slate-200 dark:border-slate-800 dark:bg-slate-800"
                             : ""
                         }
                         onClick={() => setAsyncLang("python")}
@@ -153,14 +153,14 @@ const GenerateAPIKey = ({
                         rel="noreferrer noopener"
                       >
                         <Button variant="outline">
-                          <div className="relative flex items-center w-12 h-4">
+                          <div className="relative flex h-4 w-12 items-center">
                             <Image
                               src="/assets/home/providers/lemonfox.png"
                               alt={"Anthropic"}
                               width={24}
                               height={24}
                               quality={100}
-                              className="bg-transparent absolute left-0 z-40 rounded-full"
+                              className="absolute left-0 z-40 rounded-full bg-transparent"
                             />
                             <Image
                               src="/assets/home/providers/llama2.png"
@@ -168,7 +168,7 @@ const GenerateAPIKey = ({
                               width={24}
                               height={24}
                               quality={100}
-                              className="bg-transparent absolute left-2 z-30 rounded-xl"
+                              className="absolute left-2 z-30 rounded-xl bg-transparent"
                             />
                             <Image
                               src="/assets/home/providers/anyscale.jpeg"
@@ -176,12 +176,12 @@ const GenerateAPIKey = ({
                               width={24}
                               height={24}
                               quality={100}
-                              className="bg-transparent absolute left-4 z-20 rounded-xl"
+                              className="absolute left-4 z-20 rounded-xl bg-transparent"
                             />
                           </div>
                           <span className="inline-flex items-center gap-1 text-sm text-slate-900 dark:text-slate-100">
                             More{" "}
-                            <ArrowUpRightIcon className="w-3 h-3 text-slate-500" />
+                            <ArrowUpRightIcon className="h-3 w-3 text-slate-500" />
                           </span>
                         </Button>
                       </Link>
@@ -194,19 +194,19 @@ const GenerateAPIKey = ({
         )}
 
         {selectedIntegrationMethod === "proxy" && (
-          <div className="flex flex-wrap gap-4 w-full">
+          <div className="flex w-full flex-wrap gap-4">
             <Button
               variant="outline"
               className={clsx(
                 selectedProvider === "openai"
-                  ? "bg-slate-200 border-slate-200 dark:bg-slate-800 dark:border-slate-800"
+                  ? "border-slate-200 bg-slate-200 dark:border-slate-800 dark:bg-slate-800"
                   : "hover:bg-gray-50 dark:hover:bg-slate-800",
-                "gap-2"
+                "gap-2",
               )}
               onClick={() => setSelectedProvider("openai")}
             >
               <svg
-                className="w-5 h-5"
+                className="h-5 w-5"
                 viewBox="0 0 28 28"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -224,9 +224,9 @@ const GenerateAPIKey = ({
               variant="outline"
               className={clsx(
                 selectedProvider === "azure"
-                  ? "bg-slate-200 border-slate-200 dark:bg-slate-800 dark:border-slate-800"
+                  ? "border-slate-200 bg-slate-200 dark:border-slate-800 dark:bg-slate-800"
                   : "hover:bg-gray-50 dark:hover:bg-slate-800",
-                "gap-2"
+                "gap-2",
               )}
               onClick={() => setSelectedProvider("azure")}
             >
@@ -236,7 +236,7 @@ const GenerateAPIKey = ({
                 width={20}
                 height={20}
                 quality={100}
-                className="bg-transparent rounded-lg"
+                className="rounded-lg bg-transparent"
               />
               <span className="text-sm text-slate-900 dark:text-slate-100">
                 Azure
@@ -247,9 +247,9 @@ const GenerateAPIKey = ({
               variant="outline"
               className={clsx(
                 selectedProvider === "anthropic"
-                  ? "bg-slate-200 border-slate-200 dark:bg-slate-800 dark:border-slate-800"
+                  ? "border-slate-200 bg-slate-200 dark:border-slate-800 dark:bg-slate-800"
                   : "hover:bg-gray-50 dark:hover:bg-slate-800",
-                "gap-2"
+                "gap-2",
               )}
               onClick={() => setSelectedProvider("anthropic")}
             >
@@ -259,7 +259,7 @@ const GenerateAPIKey = ({
                 width={20}
                 height={20}
                 quality={100}
-                className="bg-transparent rounded-xl"
+                className="rounded-xl bg-transparent"
               />
               <span className="text-sm text-slate-900 dark:text-slate-100">
                 Anthropic
@@ -271,14 +271,14 @@ const GenerateAPIKey = ({
               rel="noreferrer noopener"
             >
               <Button variant="outline">
-                <div className="relative flex items-center w-12 h-4">
+                <div className="relative flex h-4 w-12 items-center">
                   <Image
                     src="/assets/home/providers/lemonfox.png"
                     alt={"Anthropic"}
                     width={24}
                     height={24}
                     quality={100}
-                    className="bg-transparent absolute left-0 z-40 rounded-full"
+                    className="absolute left-0 z-40 rounded-full bg-transparent"
                   />
                   <Image
                     src="/assets/home/providers/llama2.png"
@@ -286,7 +286,7 @@ const GenerateAPIKey = ({
                     width={24}
                     height={24}
                     quality={100}
-                    className="bg-transparent absolute left-2 z-30 rounded-xl"
+                    className="absolute left-2 z-30 rounded-xl bg-transparent"
                   />
                   <Image
                     src="/assets/home/providers/anyscale.jpeg"
@@ -294,11 +294,11 @@ const GenerateAPIKey = ({
                     width={24}
                     height={24}
                     quality={100}
-                    className="bg-transparent absolute left-4 z-20 rounded-xl"
+                    className="absolute left-4 z-20 rounded-xl bg-transparent"
                   />
                 </div>
                 <span className="inline-flex items-center gap-1 text-sm text-slate-900 dark:text-slate-100">
-                  More <ArrowUpRightIcon className="w-3 h-3 text-slate-500" />
+                  More <ArrowUpRightIcon className="h-3 w-3 text-slate-500" />
                 </span>
               </Button>
             </Link>

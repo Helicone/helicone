@@ -19,7 +19,7 @@ async function handler({
   }
 
   const { data: keys, error } = await getDecryptedProviderKeysByOrgId(
-    userData.orgId
+    userData.orgId,
   );
 
   if (error || keys === null) {

@@ -65,7 +65,7 @@ export const useLLMConfigStore = create<{
           if (typeof by === "function") {
             set((state) => ({
               LLMEvaluatorConfigFormPreset: by(
-                state.LLMEvaluatorConfigFormPreset
+                state.LLMEvaluatorConfigFormPreset,
               ),
             }));
           } else {
@@ -77,9 +77,9 @@ export const useLLMConfigStore = create<{
       }),
       {
         name: "llm-config-store",
-      }
-    )
-  )
+      },
+    ),
+  ),
 );
 
 // Component for section headers - more compact version
@@ -90,7 +90,7 @@ const SectionHeader = ({
   title: string;
   description: string;
 }) => (
-  <div className="border-b pb-1 mb-3">
+  <div className="mb-3 border-b pb-1">
     <div className="flex items-baseline gap-2">
       <H3 className="text-lg">{title}</H3>
       <Muted className="text-sm">{description}</Muted>
@@ -114,7 +114,7 @@ const FormField = ({
 }) => (
   <div className={`space-y-1 ${className}`}>
     <div className="flex items-center gap-2">
-      <Label htmlFor={id} className="text-foreground font-medium text-sm">
+      <Label htmlFor={id} className="text-sm font-medium text-foreground">
         {label}
       </Label>
       {tooltip && (
@@ -139,7 +139,7 @@ const BasicInformationSection = ({
 }: {
   configFormParams: LLMEvaluatorConfigFormPreset;
   updateConfigFormParams: (
-    updates: Partial<LLMEvaluatorConfigFormPreset>
+    updates: Partial<LLMEvaluatorConfigFormPreset>,
   ) => void;
   notification: ReturnType<typeof useNotification>;
   existingEvaluator?: boolean;
@@ -166,7 +166,7 @@ const BasicInformationSection = ({
           }}
         />
         {existingEvaluator && (
-          <div className="text-xs text-muted-foreground mt-1">
+          <div className="mt-1 text-xs text-muted-foreground">
             Evaluator names cannot be changed after creation
           </div>
         )}
@@ -174,7 +174,7 @@ const BasicInformationSection = ({
 
       <FormField id="description" label="Description">
         <>
-          <Muted className="block text-xs mb-1">
+          <Muted className="mb-1 block text-xs">
             Descriptions are used by the LLM to understand what the evaluator
             does.
           </Muted>
@@ -182,7 +182,7 @@ const BasicInformationSection = ({
             id="description"
             placeholder="Check if the response is appropriate"
             value={configFormParams.description}
-            className="border-input h-32"
+            className="h-32 border-input"
             onChange={(e) =>
               updateConfigFormParams({ description: e.target.value })
             }
@@ -200,11 +200,11 @@ const ChoiceScoresSection = ({
 }: {
   configFormParams: LLMEvaluatorConfigFormPreset;
   updateConfigFormParams: (
-    updates: Partial<LLMEvaluatorConfigFormPreset>
+    updates: Partial<LLMEvaluatorConfigFormPreset>,
   ) => void;
 }) => (
-  <div className="p-3 bg-muted/10 rounded-md">
-    <div className="flex justify-between items-center mb-2">
+  <div className="rounded-md bg-muted/10 p-3">
+    <div className="mb-2 flex items-center justify-between">
       <Label>Choice Scores</Label>
       <Tooltip>
         <TooltipTrigger>
@@ -232,7 +232,7 @@ const ChoiceScoresSection = ({
         }
         className="w-full"
       >
-        <PlusIcon className="h-4 w-4 mr-2" />
+        <PlusIcon className="mr-2 h-4 w-4" />
         Add Choice Scores
       </Button>
     ) : (
@@ -279,7 +279,7 @@ const ChoiceScoresSection = ({
                   onClick={() =>
                     updateConfigFormParams({
                       choiceScores: configFormParams.choiceScores?.filter(
-                        (_, i) => i !== index
+                        (_, i) => i !== index,
                       ),
                     })
                   }
@@ -322,10 +322,10 @@ const RangeConfigSection = ({
 }: {
   configFormParams: LLMEvaluatorConfigFormPreset;
   updateConfigFormParams: (
-    updates: Partial<LLMEvaluatorConfigFormPreset>
+    updates: Partial<LLMEvaluatorConfigFormPreset>,
   ) => void;
 }) => (
-  <div className="p-2 bg-muted/10 rounded-md">
+  <div className="rounded-md bg-muted/10 p-2">
     <Label className="mb-1 block text-sm">Range Configuration</Label>
     <div className="grid grid-cols-2 gap-3">
       <div>
@@ -371,7 +371,7 @@ const ScoringTypeSection = ({
 }: {
   configFormParams: LLMEvaluatorConfigFormPreset;
   updateConfigFormParams: (
-    updates: Partial<LLMEvaluatorConfigFormPreset>
+    updates: Partial<LLMEvaluatorConfigFormPreset>,
   ) => void;
 }) => {
   const scoringTypeTooltip = {
@@ -443,7 +443,7 @@ const ScoringTypeSection = ({
 
         {/* Configuration based on selected type */}
         {configFormParams.expectedValueType === "boolean" && (
-          <div className="p-2 bg-muted/10 rounded-md">
+          <div className="rounded-md bg-muted/10 p-2">
             <Muted className="text-xs">
               The LLM will return true (1) or false (0) based on your
               description. Make sure your description clearly explains the
@@ -477,7 +477,7 @@ const VariablesSection = ({
 }: {
   configFormParams: LLMEvaluatorConfigFormPreset;
   updateConfigFormParams: (
-    updates: Partial<LLMEvaluatorConfigFormPreset>
+    updates: Partial<LLMEvaluatorConfigFormPreset>,
   ) => void;
 }) => {
   const variableOptions = [
@@ -518,7 +518,7 @@ const VariablesSection = ({
         {variableOptions.map((option) => (
           <div
             key={option.id}
-            className="flex items-start space-x-2 p-1 hover:bg-muted/20 rounded-md"
+            className="flex items-start space-x-2 rounded-md p-1 hover:bg-muted/20"
           >
             <Checkbox
               id={option.id}
@@ -556,7 +556,7 @@ const ModelTestingSection = ({
 }: {
   configFormParams: LLMEvaluatorConfigFormPreset;
   updateConfigFormParams: (
-    updates: Partial<LLMEvaluatorConfigFormPreset>
+    updates: Partial<LLMEvaluatorConfigFormPreset>,
   ) => void;
   openTestPanel?: () => void;
   evalPanelStore: {
@@ -629,7 +629,7 @@ export const LLMEvaluatorConfigForm: React.FC<{
 
   // This function is called by child components to update the config
   const updateConfigFormParams = (
-    updates: Partial<LLMEvaluatorConfigFormPreset>
+    updates: Partial<LLMEvaluatorConfigFormPreset>,
   ) => {
     // Update the store
     setLLMConfig(updates);
@@ -655,7 +655,7 @@ export const LLMEvaluatorConfigForm: React.FC<{
   };
 
   return (
-    <Col className="h-full flex flex-col overflow-hidden">
+    <Col className="flex h-full flex-col overflow-hidden">
       <ScrollArea
         className="flex-grow overflow-y-auto"
         type="always"

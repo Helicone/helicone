@@ -49,7 +49,7 @@ const AddOnlineEvaluatorForm = ({
   };
 }) => {
   const [sampleRate, setSampleRate] = useState(
-    initialValues?.sampleRate || 100
+    initialValues?.sampleRate || 100,
   );
   const [propertyFilters, setPropertyFilters] = useState<
     { key: string; value: string }[]
@@ -88,7 +88,7 @@ const AddOnlineEvaluatorForm = ({
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="space-y-2 max-w-xl">
+          <div className="max-w-xl space-y-2">
             <Label htmlFor="sample-rate" className="flex items-center gap-2">
               Sample Rate:{" "}
               <Input
@@ -170,7 +170,7 @@ const AddOnlineEvaluatorForm = ({
                                   updatePropertyFilter(
                                     index,
                                     property,
-                                    filter.value
+                                    filter.value,
                                   );
                                 }}
                               >
@@ -183,7 +183,7 @@ const AddOnlineEvaluatorForm = ({
                     </PopoverContent>
                   </Popover>
                 </div>
-                <div className="flex items-center space-x-2 col-span-2">
+                <div className="col-span-2 flex items-center space-x-2">
                   <Input
                     placeholder="Value"
                     value={filter.value}

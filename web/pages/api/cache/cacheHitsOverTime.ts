@@ -11,7 +11,7 @@ import {
 } from "./getCacheHitsOverTime";
 
 async function handler(
-  options: HandlerWrapperOptions<Result<CacheHitsOverTime[], string>>
+  options: HandlerWrapperOptions<Result<CacheHitsOverTime[], string>>,
 ) {
   const {
     res,
@@ -30,7 +30,7 @@ async function handler(
       orgId,
       dbIncrement: dbIncrement ?? "day",
       timeZoneDifference,
-    })
+    }),
   );
 }
 export default withAuth(handler);

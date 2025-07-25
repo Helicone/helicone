@@ -43,7 +43,7 @@ export const TeamPlanCard = () => {
     mutationFn: async () => {
       const jawn = getJawnClient(org?.currentOrg?.id);
       const result = await jawn.POST(
-        "/v1/stripe/subscription/manage-subscription"
+        "/v1/stripe/subscription/manage-subscription",
       );
       return result;
     },
@@ -53,7 +53,7 @@ export const TeamPlanCard = () => {
     mutationFn: async () => {
       const jawn = getJawnClient(org?.currentOrg?.id);
       const result = await jawn.POST(
-        "/v1/stripe/subscription/undo-cancel-subscription"
+        "/v1/stripe/subscription/undo-cancel-subscription",
       );
       return result;
     },
@@ -69,12 +69,12 @@ export const TeamPlanCard = () => {
   const isSubscriptionEnding = subscription.data?.data?.cancel_at_period_end;
 
   return (
-    <div className="flex gap-6 lg:flex-row flex-col">
-      <Card className="max-w-3xl w-full h-fit">
+    <div className="flex flex-col gap-6 lg:flex-row">
+      <Card className="h-fit w-full max-w-3xl">
         <CardHeader>
-          <CardTitle className="text-lg font-medium flex items-end">
+          <CardTitle className="flex items-end text-lg font-medium">
             Team Bundle
-            <span className="text-sm bg-[#DBE9FE] text-blue-700 px-2 py-1 rounded-md ml-2 font-medium">
+            <span className="ml-2 rounded-md bg-[#DBE9FE] px-2 py-1 text-sm font-medium text-blue-700">
               Current plan
             </span>
           </CardTitle>
@@ -88,7 +88,7 @@ export const TeamPlanCard = () => {
               <p>
                 Your trial ends on:{" "}
                 {new Date(
-                  subscription.data!.data!.trial_end! * 1000
+                  subscription.data!.data!.trial_end! * 1000,
                 ).toLocaleDateString()}
               </p>
             </InfoBox>
@@ -100,18 +100,18 @@ export const TeamPlanCard = () => {
                 <p>
                   Current billing period:{" "}
                   {new Date(
-                    subscription.data.data.current_period_start * 1000
+                    subscription.data.data.current_period_start * 1000,
                   ).toLocaleDateString()}
                   {" - "}
                   {new Date(
-                    subscription.data.data.current_period_end * 1000
+                    subscription.data.data.current_period_end * 1000,
                   ).toLocaleDateString()}
                 </p>
                 {isSubscriptionEnding && (
-                  <p className="text-red-500 font-semibold mt-1">
+                  <p className="mt-1 font-semibold text-red-500">
                     Subscription ends{" "}
                     {new Date(
-                      subscription.data.data.current_period_end * 1000
+                      subscription.data.data.current_period_end * 1000,
                     ).toLocaleDateString()}
                   </p>
                 )}
@@ -128,7 +128,7 @@ export const TeamPlanCard = () => {
               "Priority Support via Slack (email cole@helicone.ai for access)",
             ].map((feature) => (
               <div key={feature} className="flex items-start gap-2 text-sm">
-                <CheckIcon className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                <CheckIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-green-500" />
                 <span>{feature}</span>
               </div>
             ))}
@@ -160,7 +160,7 @@ export const TeamPlanCard = () => {
                     window.open(result.data, "_blank");
                   } else {
                     console.error(
-                      "No URL returned from manage subscription mutation"
+                      "No URL returned from manage subscription mutation",
                     );
                   }
                 }}
@@ -182,7 +182,7 @@ export const TeamPlanCard = () => {
         </CardContent>
       </Card>
 
-      <div className="space-y-6 w-full lg:w-[450px]">
+      <div className="w-full space-y-6 lg:w-[450px]">
         <PlanFeatureCard
           title="Learn about our Enterprise plan"
           description="Built for companies looking to scale. Includes everything in Team, plus dedicated support and custom SLAs."

@@ -22,8 +22,8 @@ const ModelResponseGroup: React.FC<ModelResponseGroupProps> = ({
   setCurrentChat,
 }) => {
   return (
-    <div className="flex flex-col px-8 py-4 space-y-8 bg-white dark:bg-black border-t border-gray-300 dark:border-gray-700">
-      <div className="w-full flex justify-between">
+    <div className="flex flex-col space-y-8 border-t border-gray-300 bg-white px-8 py-4 dark:border-gray-700 dark:bg-black">
+      <div className="flex w-full justify-between">
         <RoleButton
           role={"assistant"}
           onRoleChange={() => {}}
@@ -33,10 +33,10 @@ const ModelResponseGroup: React.FC<ModelResponseGroupProps> = ({
           <button
             onClick={() => {
               setCurrentChat((prevChat) =>
-                prevChat.filter((message) => message.model === undefined)
+                prevChat.filter((message) => message.model === undefined),
               );
             }}
-            className="text-red-500 font-semibold"
+            className="font-semibold text-red-500"
           >
             <TrashIcon className="h-5 w-5" />
           </button>
@@ -48,7 +48,7 @@ const ModelResponseGroup: React.FC<ModelResponseGroupProps> = ({
           modelMessage.length > 3
             ? `grid-cols-3`
             : `grid-cols-${modelMessage.length}`,
-          "w-full justify-between grid gap-4"
+          "grid w-full justify-between gap-4",
         )}
       >
         {modelMessage.map((message, idx) => (
@@ -57,11 +57,11 @@ const ModelResponseGroup: React.FC<ModelResponseGroupProps> = ({
             className={clsx(
               idx % 3 === 0
                 ? ""
-                : "pl-4 border-l border-gray-300 dark:border-gray-700",
-              "w-full h-auto flex flex-col space-y-2 col-span-1 relative"
+                : "border-l border-gray-300 pl-4 dark:border-gray-700",
+              "relative col-span-1 flex h-auto w-full flex-col space-y-2",
             )}
           >
-            <div className="flex justify-center items-center">
+            <div className="flex items-center justify-center">
               <ModelPill model={message.model ?? ""} />
             </div>
             <div className="p-4 text-gray-900 dark:text-gray-100">

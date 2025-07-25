@@ -84,19 +84,19 @@ export const DatasetVisual = ({
   }
 
   return (
-    <div className="w-full w-full bg-[hsl(var(--card))] rounded-xl border border-[hsl(var(--border))] flex flex-col">
+    <div className="flex w-full flex-col rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))]">
       <div className="p-2">
-        <div className="border border-[hsl(var(--border))] rounded-lg overflow-hidden">
-          <Table className="table-auto [&_tr:last-child_td]:border-b-0 [&_th:first-child]:rounded-tl-lg [&_th:last-child]:rounded-tr-lg border-collapse">
+        <div className="overflow-hidden rounded-lg border border-[hsl(var(--border))]">
+          <Table className="table-auto border-collapse [&_th:first-child]:rounded-tl-lg [&_th:last-child]:rounded-tr-lg [&_tr:last-child_td]:border-b-0">
             <TableHeader>
               <TableRow>
-                <TableHead className="h-8 px-4 py-2 bg-[hsl(var(--muted))] text-md font-semibold text-[hsl(var(--foreground))] border-b border-r border-[hsl(var(--border))]">
+                <TableHead className="text-md h-8 border-b border-r border-[hsl(var(--border))] bg-[hsl(var(--muted))] px-4 py-2 font-semibold text-[hsl(var(--foreground))]">
                   Name
                 </TableHead>
-                <TableHead className="h-8 px-4 py-2 bg-[hsl(var(--muted))] text-md font-semibold text-[hsl(var(--foreground))] border-b border-r border-[hsl(var(--border))]">
+                <TableHead className="text-md h-8 border-b border-r border-[hsl(var(--border))] bg-[hsl(var(--muted))] px-4 py-2 font-semibold text-[hsl(var(--foreground))]">
                   Created At
                 </TableHead>
-                <TableHead className="h-8 px-4 py-2 bg-[hsl(var(--muted))] text-md font-semibold text-[hsl(var(--foreground))] border-b border-[hsl(var(--border))]">
+                <TableHead className="text-md h-8 border-b border-[hsl(var(--border))] bg-[hsl(var(--muted))] px-4 py-2 font-semibold text-[hsl(var(--foreground))]">
                   Rows
                 </TableHead>
               </TableRow>
@@ -104,13 +104,13 @@ export const DatasetVisual = ({
             <TableBody>
               {displayData.map((row, index) => (
                 <TableRow key={index}>
-                  <TableCell className="p-2 px-4 h-8 text-[hsl(var(--muted-foreground))] font-light text-md border-r border-[hsl(var(--border))]">
+                  <TableCell className="text-md h-8 border-r border-[hsl(var(--border))] p-2 px-4 font-light text-[hsl(var(--muted-foreground))]">
                     {row.name}
                   </TableCell>
-                  <TableCell className="p-2 px-4 h-8 text-[hsl(var(--muted-foreground))] font-light text-md border-r border-[hsl(var(--border))]">
+                  <TableCell className="text-md h-8 border-r border-[hsl(var(--border))] p-2 px-4 font-light text-[hsl(var(--muted-foreground))]">
                     {row.createdAt}
                   </TableCell>
-                  <TableCell className="p-2 px-4 h-8 text-[hsl(var(--muted-foreground))] font-light text-md">
+                  <TableCell className="text-md h-8 p-2 px-4 font-light text-[hsl(var(--muted-foreground))]">
                     {row.rows}
                   </TableCell>
                 </TableRow>
@@ -118,36 +118,36 @@ export const DatasetVisual = ({
             </TableBody>
           </Table>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-[hsl(var(--background))] to-transparent pointer-events-none" />
+        <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-[hsl(var(--background))] to-transparent" />
       </div>
 
       {/* Action Buttons */}
       {!hideButtons && (
-        <div className="w-full h-full pb-2 px-2 -mt-6 z-10">
-          <div className="w-full h-full py-2 bg-[hsl(var(--primary))] rounded-2xl px-2">
+        <div className="z-10 -mt-6 h-full w-full px-2 pb-2">
+          <div className="h-full w-full rounded-2xl bg-[hsl(var(--primary))] px-2 py-2">
             <div className="grid grid-cols-3 gap-2">
               <Button
                 variant="ghost"
                 size="lg"
-                className="flex-1 basis-0 text-[hsl(var(--primary-foreground))] bg-[hsl(var(--primary))]/80 font-semibold text-sm rounded-xl p-6 md:text-lg pointer-events-none"
+                className="pointer-events-none flex-1 basis-0 rounded-xl bg-[hsl(var(--primary))]/80 p-6 text-sm font-semibold text-[hsl(var(--primary-foreground))] md:text-lg"
               >
-                <BeakerIcon className="w-5 h-5 mr-2 shrink-0" />
+                <BeakerIcon className="mr-2 h-5 w-5 shrink-0" />
                 Experiment
               </Button>
               <Button
                 variant="ghost"
                 size="lg"
-                className="flex-1 basis-0 text-[hsl(var(--primary-foreground))] font-semibold text-sm bg-[hsl(var(--primary))]/80 rounded-xl p-6 md:text-lg pointer-events-none"
+                className="pointer-events-none flex-1 basis-0 rounded-xl bg-[hsl(var(--primary))]/80 p-6 text-sm font-semibold text-[hsl(var(--primary-foreground))] md:text-lg"
               >
-                <SparklesIcon className="w-5 h-5 mr-2 shrink-0" />
+                <SparklesIcon className="mr-2 h-5 w-5 shrink-0" />
                 Fine-tune
               </Button>
               <Button
                 variant="secondary"
                 size="lg"
-                className="flex-1 basis-0 bg-[hsl(var(--background))] text-[hsl(var(--primary))] font-semibold text-sm rounded-xl p-6 md:text-lg pointer-events-none"
+                className="pointer-events-none flex-1 basis-0 rounded-xl bg-[hsl(var(--background))] p-6 text-sm font-semibold text-[hsl(var(--primary))] md:text-lg"
               >
-                <DownloadIcon className="w-5 h-5 mr-2 shrink-0" />
+                <DownloadIcon className="mr-2 h-5 w-5 shrink-0" />
                 Export
               </Button>
             </div>

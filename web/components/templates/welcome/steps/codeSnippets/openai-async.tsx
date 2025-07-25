@@ -18,7 +18,7 @@ const OpenAIAsync = (props: OpenAIAsyncProps) => {
   const [lang, setLang] = useState<keyof typeof NAMES>("typescript");
 
   return (
-    <div className="w-full flex flex-col">
+    <div className="flex w-full flex-col">
       <Tab.Group defaultIndex={0}>
         <Tab.List
           className={clsx("bg-gray-500", "flex space-x-1 rounded-xl p-1")}
@@ -33,7 +33,7 @@ const OpenAIAsync = (props: OpenAIAsyncProps) => {
                   "ring-offset-gray-700",
                   selected
                     ? "bg-gray-900 text-white"
-                    : "text-gray-100 hover:bg-gray-700 hover:text-white"
+                    : "text-gray-100 hover:bg-gray-700 hover:text-white",
                 )
               }
               onClick={() => setLang(key as keyof typeof NAMES)}
@@ -43,9 +43,9 @@ const OpenAIAsync = (props: OpenAIAsyncProps) => {
           ))}
         </Tab.List>
         {lang === "typescript" && (
-          <div className="flex flex-col space-y-6 pt-8 overflow-auto max-h-[50vh]">
+          <div className="flex max-h-[50vh] flex-col space-y-6 overflow-auto pt-8">
             <div className="flex flex-col">
-              <p className="text-sm text-gray-700 font-light">
+              <p className="text-sm font-light text-gray-700">
                 Step 1: Install the Helicone package
               </p>
               <DiffHighlight
@@ -57,7 +57,7 @@ const OpenAIAsync = (props: OpenAIAsyncProps) => {
               />
             </div>
             <div className="flex flex-col">
-              <p className="text-sm text-gray-700 font-light">
+              <p className="text-sm font-light text-gray-700">
                 Step 2: Add HELICONE_API_KEY to your environment variables.
               </p>
               <DiffHighlight
@@ -69,7 +69,7 @@ const OpenAIAsync = (props: OpenAIAsyncProps) => {
               />
             </div>
             <div className="flex flex-col">
-              <p className="text-sm text-gray-700 font-light">
+              <p className="text-sm font-light text-gray-700">
                 Step 3: Replace the import and use openai you would normally
               </p>
               <DiffHighlight
@@ -87,9 +87,9 @@ const OpenAIAsync = (props: OpenAIAsyncProps) => {
           </div>
         )}
         {lang === "python" && (
-          <div className="flex flex-col space-y-6 pt-8 overflow-auto max-h-[50vh]">
+          <div className="flex max-h-[50vh] flex-col space-y-6 overflow-auto pt-8">
             <div className="flex flex-col">
-              <p className="text-sm text-gray-700 font-light">
+              <p className="text-sm font-light text-gray-700">
                 Step 1: Install the Helicone package
               </p>
               <DiffHighlight
@@ -101,7 +101,7 @@ const OpenAIAsync = (props: OpenAIAsyncProps) => {
               />
             </div>
             <div className="flex flex-col">
-              <p className="text-sm text-gray-700 font-light">
+              <p className="text-sm font-light text-gray-700">
                 Step 2: Add HELICONE_API_KEY to your environment variables.
               </p>
               <DiffHighlight
@@ -113,7 +113,7 @@ const OpenAIAsync = (props: OpenAIAsyncProps) => {
               />
             </div>
             <div className="flex flex-col">
-              <p className="text-sm text-gray-700 font-light">
+              <p className="text-sm font-light text-gray-700">
                 Step 3: Replace the import and use openai you would normally
               </p>
               <DiffHighlight

@@ -5,9 +5,9 @@ const Terms = () => {
   const privacyPageSection = (
     index: number,
     title: string,
-    description: string
+    description: string,
   ) => (
-    <div className="text-lg flex flex-col space-y-4">
+    <div className="flex flex-col space-y-4 text-lg">
       <p className="text-xl font-semibold">{`${index}. ${title}`}</p>
       <p className="whitespace-pre-wrap text-left">{description}</p>
     </div>
@@ -17,14 +17,14 @@ const Terms = () => {
     <MetaData title="Terms of Service">
       <BasePageV2>
         <div className="mx-auto flex max-w-7xl items-center justify-between p-6 md:justify-start md:space-x-10 lg:px-8">
-          <div className="py-24 max-w-3xl font-serif space-y-16">
+          <div className="font-serif max-w-3xl space-y-16 py-24">
             <div className="flex flex-col space-y-4">
-              <p className="text-5xl font-sans">Terms of Service</p>
-              <p className="text-lg font-sans">Last updated February 5, 2023</p>
+              <p className="font-sans text-5xl">Terms of Service</p>
+              <p className="font-sans text-lg">Last updated February 5, 2023</p>
             </div>
 
             {pageContent.map((page, index) =>
-              privacyPageSection(index + 1, page.title, page.description)
+              privacyPageSection(index + 1, page.title, page.description),
             )}
           </div>
         </div>

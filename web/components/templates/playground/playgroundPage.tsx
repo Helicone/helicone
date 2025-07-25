@@ -832,7 +832,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
             </Small>
             {promptVersionData?.prompt && promptVersionData?.promptVersion && (
               <>
-                <div className="w-px h-4 bg-border" />
+                <div className="h-4 w-px bg-border" />
                 <div className="flex items-center gap-2">
                   <Small className="font-bold text-gray-500 dark:text-slate-300">
                     {promptVersionData.prompt.name.length > 30
@@ -896,10 +896,13 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               </ResizablePanel>
               <ResizableHandle />
               <ResizablePanel defaultSize={40} minSize={20}>
-                <PlaygroundVariablesPanel 
+                <PlaygroundVariablesPanel
                   variables={templateVariables}
                   onUpdateValue={(name, { isObject, value }) => {
-                    setVariableInputs({ ...variableInputs, [name]: { isObject, value } });
+                    setVariableInputs({
+                      ...variableInputs,
+                      [name]: { isObject, value },
+                    });
                   }}
                   values={variableInputs}
                 />

@@ -21,7 +21,7 @@ export default function EvalsPanel() {
   return (
     <div className="flex flex-col gap-2">
       {/* Header */}
-      <div className="h-8 flex items-center justify-between">
+      <div className="flex h-8 items-center justify-between">
         <h2 className="font-semibold text-secondary">Evals</h2>
         <div className="flex flex-row gap-2">
           <TooltipProvider delayDuration={100}>
@@ -34,7 +34,7 @@ export default function EvalsPanel() {
                     asPill
                     onClick={() => setOpenSelector(true)}
                   >
-                    <PiPlusBold className="w-4 h-4 text-secondary" />
+                    <PiPlusBold className="h-4 w-4 text-secondary" />
                   </Button>
                 </div>
               </TooltipTrigger>
@@ -48,7 +48,7 @@ export default function EvalsPanel() {
 
       {/* No Evaluators */}
       {!evaluatorsList?.length ? (
-        <p className="text-sm text-slate-400 text-center text-balance">
+        <p className="text-balance text-center text-sm text-slate-400">
           Measure the performance of your prompt with{" "}
           <span className="font-semibold">Evals</span>. Press the{" "}
           <span className="text-heliblue">
@@ -62,9 +62,9 @@ export default function EvalsPanel() {
           {/* Evaluators */}
           {evaluatorsList?.map((evaluator: Evaluator) => (
             <div key={evaluator.id} className="flex flex-col py-1 first:pt-0">
-              <div className="flex flex-d items-center justify-between gap-2 text-sm">
+              <div className="flex-d flex items-center justify-between gap-2 text-sm">
                 <div className="flex items-center gap-2">
-                  <div className="font-medium flex flex-row items-center gap-1 text-heliblue">
+                  <div className="flex flex-row items-center gap-1 font-medium text-heliblue">
                     <span>{evaluator.name}</span>
                   </div>
                 </div>
@@ -73,7 +73,7 @@ export default function EvalsPanel() {
                     ({evaluator.scoring_type})
                   </span>
                   <XIcon
-                    className="w-3 h-3 cursor-pointer text-slate-500 hover:text-red-500"
+                    className="h-3 w-3 cursor-pointer text-slate-500 hover:text-red-500"
                     onClick={() => deleteEvaluator.mutate(evaluator.id)}
                   />
                 </div>
@@ -85,28 +85,28 @@ export default function EvalsPanel() {
 
       {/* Evaluator Selector Drawer */}
       <ThemedDrawer open={openSelector} setOpen={setOpenSelector}>
-        <div className="h-full flex flex-col space-y-4 justify-between w-full">
-          <div className="flex flex-col w-full">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-xl">
+        <div className="flex h-full w-full flex-col justify-between space-y-4">
+          <div className="flex w-full flex-col">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-xl font-semibold">
                 Select Evaluators ({evaluatorsList?.length ?? 0})
               </h2>
             </div>
-            <p className="text-gray-500 text-sm pb-4">
+            <p className="pb-4 text-sm text-gray-500">
               Select evaluators to add or create a new custom evaluator.
             </p>
 
-            <ul className="flex flex-col items-center space-y-4 w-full pt-4 px-1 overflow-y-auto">
+            <ul className="flex w-full flex-col items-center space-y-4 overflow-y-auto px-1 pt-4">
               {evaluatorsList?.map((evaluator: Evaluator) => (
                 <li
                   key={evaluator.id}
-                  className="w-full flex items-start cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900 p-3 rounded-lg"
+                  className="flex w-full cursor-pointer items-start rounded-lg p-3 hover:bg-slate-50 dark:hover:bg-slate-900"
                   onClick={() => {
                     setOpenSelector(false);
                   }}
                 >
-                  <div className="flex flex-col w-full">
-                    <div className="flex justify-between items-center">
+                  <div className="flex w-full flex-col">
+                    <div className="flex items-center justify-between">
                       <span className="font-medium text-heliblue">
                         {evaluator.name}
                       </span>
@@ -118,14 +118,14 @@ export default function EvalsPanel() {
                 </li>
               ))}
               <li
-                className="w-full flex items-start cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900 p-3 rounded-lg"
+                className="flex w-full cursor-pointer items-start rounded-lg p-3 hover:bg-slate-50 dark:hover:bg-slate-900"
                 onClick={() => {
                   window.open("/evaluators", "_blank");
                   setOpenSelector(false);
                 }}
               >
-                <div className="flex flex-col w-full">
-                  <div className="flex justify-between items-center">
+                <div className="flex w-full flex-col">
+                  <div className="flex items-center justify-between">
                     <span className="font-medium text-heliblue">
                       Create New Custom Evaluator
                     </span>
@@ -138,7 +138,7 @@ export default function EvalsPanel() {
             </ul>
           </div>
 
-          <div className="flex justify-end space-x-4 sticky bottom-0 py-4 bg-white dark:bg-slate-950">
+          <div className="sticky bottom-0 flex justify-end space-x-4 bg-white py-4 dark:bg-slate-950">
             <Button
               variant={"secondary"}
               size={"sm"}

@@ -20,8 +20,8 @@ const BulletListItem = React.forwardRef<
   <li
     ref={ref}
     className={cn(
-      "mt-2 first:mt-3 text-base font-medium leading-normal",
-      className
+      "mt-2 text-base font-medium leading-normal first:mt-3",
+      className,
     )}
     {...props}
   />

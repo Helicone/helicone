@@ -10,7 +10,7 @@ import { Permission } from "../../../../services/lib/user";
 import { LimitUsageResult } from "./LimitUsageResult";
 const generateSubquery = (
   limit: DecryptedProviderKeyMapping["limits"][number],
-  index: number
+  index: number,
 ) => {
   const secondsVal = `val_${index * 3}`;
   const orgIdVal = `val_${index * 3 + 1}`;
@@ -60,11 +60,11 @@ async function handler({
       limit.timewindow_seconds!,
       org_id,
       limit.helicone_proxy_key,
-    ])
+    ]),
   );
   const limitResults = Object.values(keyMappings?.[0])?.[0] as [
     number,
-    number
+    number,
   ][];
 
   const remappedResults = limitResults.map(([count, cost], index) => {
