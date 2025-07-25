@@ -152,13 +152,6 @@ async function modifyEnvBasedOnPath(
     };
   }
 
-
-  return {
-    ...env,
-    WORKER_TYPE: "GATEWAY_API",
-    GATEWAY_TARGET: "https://integrate.api.nvidia.com",
-  };
-
   if (env.WORKER_TYPE) {
     return env;
   }
