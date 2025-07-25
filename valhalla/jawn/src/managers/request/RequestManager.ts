@@ -498,7 +498,9 @@ export class RequestManager extends BaseManager {
       const reqs = req.map((r) => {
         return {
           ...r,
-          updated_at: r.updated_at ? toISOStringClickhousePatch(r.updated_at) : new Date().toISOString(),
+          updated_at: r.updated_at
+            ? toISOStringClickhousePatch(r.updated_at)
+            : new Date().toISOString(),
           request_created_at: toISOStringClickhousePatch(r.request_created_at),
           feedback_created_at: r.feedback_created_at
             ? toISOStringClickhousePatch(r.feedback_created_at)
@@ -519,7 +521,11 @@ export class RequestManager extends BaseManager {
       for (const r of reqs) {
         if (seen.has(r.request_id)) {
           const existing = seen.get(r.request_id);
-          if (existing?.updated_at && r.updated_at && r.updated_at > existing.updated_at) {
+          if (
+            existing?.updated_at &&
+            r.updated_at &&
+            r.updated_at > existing.updated_at
+          ) {
             seen.set(r.request_id, r);
           }
         }

@@ -8,7 +8,7 @@ const useGatewayRouterStats = ({
   timeZoneDifference,
   dbIncrement,
 }: {
-  routerHash: string;
+  routerHash?: string;
   timeFilter: TimeFilter;
   timeZoneDifference: number;
   dbIncrement: TimeIncrement;
@@ -22,7 +22,7 @@ const useGatewayRouterStats = ({
     {
       params: {
         path: {
-          routerHash,
+          routerHash: routerHash || "default-ai-gateway",
         },
         query: {
           start: timeFilter.start.toISOString(),
@@ -41,7 +41,7 @@ const useGatewayRouterStats = ({
     $JAWN_API.useQuery("get", `/v1/gateway/{routerHash}/cost-over-time`, {
       params: {
         path: {
-          routerHash,
+          routerHash: routerHash || "default-ai-gateway",
         },
         query: {
           start: timeFilter.start.toISOString(),
@@ -58,7 +58,7 @@ const useGatewayRouterStats = ({
   } = $JAWN_API.useQuery("get", `/v1/gateway/{routerHash}/latency-over-time`, {
     params: {
       path: {
-        routerHash,
+        routerHash: routerHash || "default-ai-gateway",
       },
       query: {
         start: timeFilter.start.toISOString(),

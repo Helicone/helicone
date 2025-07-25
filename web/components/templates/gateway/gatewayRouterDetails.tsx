@@ -28,72 +28,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import ThemedTable from "@/components/shared/themed/table/themedTable";
-import { FilterNode } from "@helicone-package/filters/filterDefs";
 import { ColumnDef } from "@tanstack/react-table";
-import { heliconeRequestToMappedContent } from "@helicone-package/llm-mapper/utils/getMappedContent";
 import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
 import { getInitialColumns } from "./initialColumns";
-import { useGetRequests } from "@/services/hooks/requests";
 import { CostOverTimeChart } from "./costOverTimeChart";
 import { LatencyOverTimeChart } from "./latencyOverTimeChart";
 import RouterUseDialog from "./routerUseDialog";
-
-// Hook to fetch requests for a specific gateway router
-const useGatewayRouterRequests = ({
-  routerHash,
-  timeFilter,
-  page = 1,
-  pageSize = 50,
-}: {
-  routerHash: string;
-  timeFilter: TimeFilter;
-  page?: number;
-  pageSize?: number;
-}) => {
-  const filter: FilterNode = {
-    left: {
-      request_response_rmt: {
-        gateway_router_id: {
-          equals: routerHash,
-        },
-      },
-    },
-    operator: "and",
-    right: {
-      left: {
-        request_response_rmt: {
-          request_created_at: {
-            gte: timeFilter.start,
-          },
-        },
-      },
-      operator: "and",
-      right: {
-        request_response_rmt: {
-          request_created_at: {
-            lte: timeFilter.end,
-          },
-        },
-      },
-    },
-  };
-
-  const { requests, count } = useGetRequests(
-    page,
-    pageSize,
-    filter,
-    { created_at: "desc" },
-    false,
-  );
-
-  const isLoading = requests.isLoading;
-
-  return {
-    requests: requests?.requests?.map(heliconeRequestToMappedContent) ?? [],
-    count: count?.data?.data ?? 0,
-    isLoading,
-  };
-};
+import useGatewayRouterRequests from "./useGatewayRouterRequests";
 
 // Table columns for gateway router requests
 const getGatewayRequestColumns = (): ColumnDef<MappedLLMRequest>[] => {
@@ -103,7 +44,6 @@ const getGatewayRequestColumns = (): ColumnDef<MappedLLMRequest>[] => {
 const GatewayRouterPage = () => {
   const router = useRouter();
   const { router_hash } = router.query;
-  console.log("router_hash", router_hash);
   const searchParams = useSearchParams();
   const {
     gatewayRouter,

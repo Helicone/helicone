@@ -11,7 +11,7 @@ import { Small } from "@/components/ui/typography";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { DiffHighlight } from "@/components/templates/welcome/diffHighlight";
 
-const getRouterCode = (baseUrl: string, language: string) => {
+export const getRouterCode = (baseUrl: string, language: string) => {
   if (language === "curl") {
     return `curl ${baseUrl}/chat/completions \\
   -H "Content-Type: application/json" \\
