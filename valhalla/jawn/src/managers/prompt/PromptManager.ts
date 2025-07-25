@@ -14,11 +14,10 @@ import {
   PromptsResult,
 } from "../../controllers/public/promptController";
 import {
-  Prompt2025,
-  Prompt2025Version,
   PromptCreateResponse,
   PromptVersionCounts,
 } from "../../controllers/public/prompt2025Controller";
+import { Prompt2025, Prompt2025Version } from "@helicone-package/prompts/types";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { FilterNode } from "@helicone-package/filters/filterDefs";
 import { buildFilterPostgres } from "@helicone-package/filters/filters";
@@ -30,6 +29,7 @@ import { S3Client } from "../../lib/shared/db/s3Client";
 import type { OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
 import { AuthParams } from "../../packages/common/auth/types";
 import { StringChain } from "lodash";
+import { Prompt2025Input } from "../../lib/db/ClickhouseWrapper";
 
 
 const PROMPT_ID_LENGTH = 6;
@@ -173,6 +173,44 @@ export class Prompt2025Manager extends BaseManager {
 
     return ok(result.data ?? []);
   }
+
+  async getPromptInputs(params: {
+    promptId: string;
+    versionId: string;
+  }): Promise<Result<Prompt2025Input[], string>> {
+    const existsResult = await dbExecute<{exists: boolean}>(
+      `SELECT EXISTS (
+        SELECT 1 FROM prompts_2025_versions 
+        WHERE prompt_id = $1 AND id = $2 AND organization = $3 AND soft_delete is false
+      )`,
+      [params.promptId, params.versionId, this.authParams.organizationId]
+    );
+
+    if (existsResult.error) {
+      return err(existsResult.error);
+    }
+
+    if (!existsResult.data?.[0]?.exists) {
+      return err("Prompt version not found");
+    }
+
+    const result = await dbExecute<Prompt2025Input>(
+      `SELECT 
+        request_id,
+        version_id,
+        inputs
+      FROM prompts_2025_inputs
+      WHERE version_id = $1`,
+      [params.versionId]
+    );
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    return ok(result.data ?? []);
+  }
+
 
   async getPromptVersionCounts(params: {
     promptId: string;

@@ -85,6 +85,9 @@ export interface paths {
   "/v1/prompt-2025/{promptId}/{versionId}": {
     delete: operations["DeletePrompt2025Version"];
   };
+  "/v1/prompt-2025/id/{promptId}/{versionId}/inputs": {
+    get: operations["GetPrompt2025Inputs"];
+  };
   "/v1/prompt-2025/tags": {
     get: operations["GetPrompt2025Tags"];
   };
@@ -1100,6 +1103,17 @@ export interface components {
       error: null;
     };
     "Result_Prompt2025.string_": components["schemas"]["ResultSuccess_Prompt2025_"] | components["schemas"]["ResultError_string_"];
+    Prompt2025Input: {
+      request_id: string;
+      version_id: string;
+      inputs: components["schemas"]["Record_string.any_"];
+    };
+    "ResultSuccess_Prompt2025Input-Array_": {
+      data: components["schemas"]["Prompt2025Input"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Prompt2025Input-Array.string_": components["schemas"]["ResultSuccess_Prompt2025Input-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess_string-Array_": {
       data: string[];
       /** @enum {number|null} */
@@ -3912,6 +3926,22 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025Inputs: {
+    parameters: {
+      path: {
+        promptId: string;
+        versionId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025Input-Array.string_"];
         };
       };
     };

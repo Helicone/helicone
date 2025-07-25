@@ -619,6 +619,30 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_Prompt2025_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Prompt2025Input": {
+        "dataType": "refObject",
+        "properties": {
+            "request_id": {"dataType":"string","required":true},
+            "version_id": {"dataType":"string","required":true},
+            "inputs": {"ref":"Record_string.any_","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_Prompt2025Input-Array_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"dataType":"array","array":{"dataType":"refObject","ref":"Prompt2025Input"},"required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result_Prompt2025Input-Array.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_Prompt2025Input-Array_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ResultSuccess_string-Array_": {
         "dataType": "refObject",
         "properties": {
@@ -15896,6 +15920,39 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'deletePrompt2025Version',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsPrompt2025Controller_getPrompt2025Inputs: Record<string, TsoaRoute.ParameterSchema> = {
+                promptId: {"in":"path","name":"promptId","required":true,"dataType":"string"},
+                versionId: {"in":"path","name":"versionId","required":true,"dataType":"string"},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.get('/v1/prompt-2025/id/:promptId/:versionId/inputs',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(Prompt2025Controller)),
+            ...(fetchMiddlewares<RequestHandler>(Prompt2025Controller.prototype.getPrompt2025Inputs)),
+
+            async function Prompt2025Controller_getPrompt2025Inputs(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsPrompt2025Controller_getPrompt2025Inputs, request, response });
+
+                const controller = new Prompt2025Controller();
+
+              await templateService.apiHandler({
+                methodName: 'getPrompt2025Inputs',
                 controller,
                 response,
                 next,

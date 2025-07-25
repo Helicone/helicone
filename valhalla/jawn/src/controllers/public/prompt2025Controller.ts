@@ -16,7 +16,7 @@ import { Result } from "../../packages/common/result";
 import { Prompt2025Manager } from "../../managers/prompt/PromptManager";
 import type { JawnAuthenticatedRequest } from "../../types/request";
 import { type OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
-import { Prompt2025Version, Prompt2025 } from "@helicone-package/prompts/types";
+import { Prompt2025Version, Prompt2025, Prompt2025Input } from "@helicone-package/prompts/types";
 
 export interface PromptCreateResponse {
   id: string;
@@ -92,6 +92,22 @@ export class Prompt2025Controller extends Controller {
     const promptManager = new Prompt2025Manager(request.authParams);
     const result = await promptManager.deletePromptVersion({ promptId, promptVersionId: versionId });
     if (result.error) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
+  @Get("id/{promptId}/{versionId}/inputs")
+  public async getPrompt2025Inputs(
+    @Path() promptId: string,
+    @Path() versionId: string,
+    @Request() request: JawnAuthenticatedRequest,
+  ): Promise<Result<Prompt2025Input[], string>> {
+    const promptManager = new Prompt2025Manager(request.authParams);
+    const result = await promptManager.getPromptInputs({ promptId, versionId });
+    if (result.error || !result.data) {
       this.setStatus(500);
     } else {
       this.setStatus(200);

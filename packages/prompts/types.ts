@@ -39,3 +39,9 @@ export interface Prompt2025 {
   tags: string[];
   created_at: string;
 }
+
+export interface Prompt2025Input {
+  request_id: string;
+  version_id: string;
+  inputs: Record<string, any>;
+}
