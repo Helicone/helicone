@@ -1108,12 +1108,12 @@ export interface components {
       version_id: string;
       inputs: components["schemas"]["Record_string.any_"];
     };
-    "ResultSuccess_Prompt2025Input-Array_": {
-      data: components["schemas"]["Prompt2025Input"][];
+    ResultSuccess_Prompt2025Input_: {
+      data: components["schemas"]["Prompt2025Input"];
       /** @enum {number|null} */
       error: null;
     };
-    "Result_Prompt2025Input-Array.string_": components["schemas"]["ResultSuccess_Prompt2025Input-Array_"] | components["schemas"]["ResultError_string_"];
+    "Result_Prompt2025Input.string_": components["schemas"]["ResultSuccess_Prompt2025Input_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess_string-Array_": {
       data: string[];
       /** @enum {number|null} */
@@ -3933,6 +3933,9 @@ export interface operations {
   };
   GetPrompt2025Inputs: {
     parameters: {
+      query: {
+        requestId: string;
+      };
       path: {
         promptId: string;
         versionId: string;
@@ -3942,7 +3945,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_Prompt2025Input-Array.string_"];
+          "application/json": components["schemas"]["Result_Prompt2025Input.string_"];
         };
       };
     };

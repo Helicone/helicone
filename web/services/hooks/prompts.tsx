@@ -77,11 +77,11 @@ export const useGetPromptTags = () => {
   });
 };
 
-export const useGetPromptInputs = (promptId: string, versionId: string) => {
-  return useQuery<Prompt2025Input[]>({
-    queryKey: ["promptInputs", promptId, versionId],
+export const useGetPromptInputs = (promptId: string, versionId: string, requestId: string) => {
+  return useQuery<Prompt2025Input | null>({
+    queryKey: ["promptInputs", promptId, versionId, requestId],
     refetchOnWindowFocus: false,
-    enabled: !!promptId && !!versionId,
+    enabled: !!promptId && !!versionId && !!requestId,
     queryFn: async () => {
       const result = await $JAWN_API.GET("/v1/prompt-2025/id/{promptId}/{versionId}/inputs", {
         params: {
@@ -89,12 +89,15 @@ export const useGetPromptInputs = (promptId: string, versionId: string) => {
             promptId: promptId,
             versionId: versionId,
           },
+          query: {
+            requestId: requestId,
+          },
         },
       });
 
       if (result.error || !result.data?.data) {
         console.error("Error fetching prompt inputs:", result.error);
-        return [];
+        return null;
       }
 
       return result.data.data;

@@ -7,6 +7,7 @@ import {
   Patch,
   Path,
   Post,
+  Query,
   Request,
   Route,
   Security,
@@ -103,16 +104,21 @@ export class Prompt2025Controller extends Controller {
   public async getPrompt2025Inputs(
     @Path() promptId: string,
     @Path() versionId: string,
+    @Query() requestId: string,
     @Request() request: JawnAuthenticatedRequest,
-  ): Promise<Result<Prompt2025Input[], string>> {
+  ): Promise<Result<Prompt2025Input, string>> {
     const promptManager = new Prompt2025Manager(request.authParams);
-    const result = await promptManager.getPromptInputs({ promptId, versionId });
-    if (result.error || !result.data) {
+    const result = await promptManager.getPromptInputs({ promptId, versionId, requestId });
+    if (result.error) {
       this.setStatus(500);
-    } else {
-      this.setStatus(200);
+      return result;
     }
-    return result;
+    if (!result.data) {
+      this.setStatus(404);
+      return { error: "Prompt inputs not found", data: null };
+    }
+    this.setStatus(200);
+    return { error: null, data: result.data };
   }
 
   @Get("tags")

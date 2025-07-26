@@ -5,10 +5,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { P, XSmall } from "@/components/ui/typography";
+import { P, Small, XSmall } from "@/components/ui/typography";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
+import { useGetPromptInputs } from "@/services/hooks/prompts";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import { formatDate } from "@/utils/date";
 import { useQuery } from "@tanstack/react-query";
@@ -46,6 +47,7 @@ import { RenderMappedRequest } from "./RenderHeliconeRequest";
 import ScrollableBadges from "./ScrollableBadges";
 import StatusBadge from "./statusBadge";
 import { getUSDateFromString } from "@/components/shared/utils/utils";
+import { JsonRenderer } from "./components/chatComponent/single/JsonRenderer";
 
 const RequestDescTooltip = (props: {
   displayText: string;
@@ -128,16 +130,32 @@ export default function RequestDrawer(props: RequestDivProps) {
   );
   const [showNewDatasetModal, setShowNewDatasetModal] = useState(false);
 
-  // Prompt Data
-  const promptId = useMemo(
+  // NEW PROMPTS SYSTEM (2025)
+  const newPromptId = useMemo(
+    () => request?.heliconeMetadata.promptId ?? null,
+    [request?.heliconeMetadata.promptId],
+  );
+  const newPromptVersionId = useMemo(
+    () => request?.heliconeMetadata.promptVersion ?? null,
+    [request?.heliconeMetadata.promptVersion],
+  );
+
+  const promptInputsQuery = useGetPromptInputs(
+    newPromptId || "",
+    newPromptVersionId || "",
+    request?.id || ""
+  );
+
+  // BACKWARDS COMPATABILITY FOR OLD PROMPTS
+  const legacyPromptId = useMemo(
     () =>
       request?.heliconeMetadata.customProperties?.["Helicone-Prompt-Id"] ??
       null,
     [request?.heliconeMetadata.customProperties],
   );
   const promptDataQuery = useQuery({
-    queryKey: ["prompt", promptId, org?.currentOrg?.id],
-    enabled: !!promptId && !!org?.currentOrg?.id,
+    queryKey: ["prompt", legacyPromptId, org?.currentOrg?.id],
+    enabled: !!legacyPromptId && !!org?.currentOrg?.id,
     queryFn: async (query) => {
       const jawn = getJawnClient(query.queryKey[2]);
       const prompt = await jawn.POST("/v1/prompt/query", {
@@ -307,6 +325,17 @@ export default function RequestDrawer(props: RequestDivProps) {
     }
   }, [promptDataQuery.data?.id, request, router]);
 
+  
+  // TODO: Delete legacy prompts code
+  const hasNewPromptData = useMemo(
+    () => newPromptId && newPromptVersionId && promptInputsQuery.data && promptInputsQuery.data !== null,
+    [newPromptId, newPromptVersionId, promptInputsQuery.data],
+  );
+  const hasLegacyPromptData = useMemo(
+    () => legacyPromptId && promptDataQuery.data?.id,
+    [legacyPromptId, promptDataQuery.data?.id],
+  );
+
   // Update keyboard event handler
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -331,6 +360,8 @@ export default function RequestDrawer(props: RequestDivProps) {
     return {
       userId: request?.heliconeMetadata.user ?? undefined,
       promptId:
+        // prioritize new prompt system over legacy
+        newPromptId ??
         request?.heliconeMetadata.customProperties?.["Helicone-Prompt-Id"] ??
         undefined,
       sessionId:
@@ -346,7 +377,7 @@ export default function RequestDrawer(props: RequestDivProps) {
       gatewayDeploymentTarget:
         request?.heliconeMetadata.gatewayDeploymentTarget ?? undefined,
     };
-  }, [request?.heliconeMetadata.customProperties]);
+  }, [request?.heliconeMetadata.customProperties, newPromptId]);
 
   // Get current request Properties and Scores
   const currentProperties = useMemo(() => {
@@ -614,7 +645,11 @@ export default function RequestDrawer(props: RequestDivProps) {
                   displayText={specialProperties.promptId}
                   icon={<ScrollTextIcon className="h-4 w-4" />}
                   copyText={specialProperties.promptId}
-                  href={`/prompts/${promptDataQuery.data?.id}`}
+                  href={
+                    newPromptId 
+                      ? `/prompts` 
+                      : `/prompts/${promptDataQuery.data?.id}`
+                  }
                   truncateLength={dynamicTruncateLength}
                 />
               )}
@@ -770,6 +805,19 @@ export default function RequestDrawer(props: RequestDivProps) {
           </div>
 
           <div className="h-full w-full overflow-auto bg-card p-3">
+            {hasNewPromptData && promptInputsQuery.data && (
+              <div className="rounded-lg border border-border bg-sidebar-background mb-4">
+                <div className="rounded-t-lg flex h-12 bg-white p-4 flex-row items-center justify-between shadow-sm dark:bg-black">
+                  <h2 className="font-medium text-sm">Prompt Input</h2>
+                </div>
+                <div className="p-4 text-sm border-t border-border bg-sidebar-background overflow-auto max-h-60">
+                  <JsonRenderer
+                    data={JSON.parse(JSON.stringify(promptInputsQuery.data?.inputs))}
+                  />
+                </div>
+              </div>
+            )}
+
             {/* Mapped Request */}
             <RenderMappedRequest
               mappedRequest={request}
@@ -791,7 +839,7 @@ export default function RequestDrawer(props: RequestDivProps) {
                     className="flex flex-row items-center gap-1.5"
                   >
                     <PiPlayBold className="h-4 w-4" />
-                    Test Prompt
+                    {hasNewPromptData || hasLegacyPromptData ? "Test Prompt" : "Playground"}
                   </Button>
                 </Link>
               )}

@@ -629,18 +629,18 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ResultSuccess_Prompt2025Input-Array_": {
+    "ResultSuccess_Prompt2025Input_": {
         "dataType": "refObject",
         "properties": {
-            "data": {"dataType":"array","array":{"dataType":"refObject","ref":"Prompt2025Input"},"required":true},
+            "data": {"ref":"Prompt2025Input","required":true},
             "error": {"dataType":"enum","enums":[null],"required":true},
         },
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Result_Prompt2025Input-Array.string_": {
+    "Result_Prompt2025Input.string_": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_Prompt2025Input-Array_"},{"ref":"ResultError_string_"}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_Prompt2025Input_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ResultSuccess_string-Array_": {
@@ -15935,6 +15935,7 @@ export function RegisterRoutes(app: Router) {
         const argsPrompt2025Controller_getPrompt2025Inputs: Record<string, TsoaRoute.ParameterSchema> = {
                 promptId: {"in":"path","name":"promptId","required":true,"dataType":"string"},
                 versionId: {"in":"path","name":"versionId","required":true,"dataType":"string"},
+                requestId: {"in":"query","name":"requestId","required":true,"dataType":"string"},
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
         app.get('/v1/prompt-2025/id/:promptId/:versionId/inputs',

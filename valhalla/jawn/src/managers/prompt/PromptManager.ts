@@ -177,7 +177,8 @@ export class Prompt2025Manager extends BaseManager {
   async getPromptInputs(params: {
     promptId: string;
     versionId: string;
-  }): Promise<Result<Prompt2025Input[], string>> {
+    requestId: string;
+  }): Promise<Result<Prompt2025Input | null, string>> {
     const existsResult = await dbExecute<{exists: boolean}>(
       `SELECT EXISTS (
         SELECT 1 FROM prompts_2025_versions 
@@ -200,15 +201,17 @@ export class Prompt2025Manager extends BaseManager {
         version_id,
         inputs
       FROM prompts_2025_inputs
-      WHERE version_id = $1`,
-      [params.versionId]
+      WHERE version_id = $1 AND request_id = $2
+      LIMIT 1
+      `,
+      [params.versionId, params.requestId]
     );
 
     if (result.error) {
       return err(result.error);
     }
 
-    return ok(result.data ?? []);
+    return ok(result.data?.[0] ?? null);
   }
 
 

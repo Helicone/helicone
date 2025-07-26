@@ -1799,13 +1799,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ResultSuccess_Prompt2025Input-Array_": {
+			"ResultSuccess_Prompt2025Input_": {
 				"properties": {
 					"data": {
-						"items": {
-							"$ref": "#/components/schemas/Prompt2025Input"
-						},
-						"type": "array"
+						"$ref": "#/components/schemas/Prompt2025Input"
 					},
 					"error": {
 						"type": "number",
@@ -1822,10 +1819,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result_Prompt2025Input-Array.string_": {
+			"Result_Prompt2025Input.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess_Prompt2025Input-Array_"
+						"$ref": "#/components/schemas/ResultSuccess_Prompt2025Input_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -11816,7 +11813,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_Prompt2025Input-Array.string_"
+									"$ref": "#/components/schemas/Result_Prompt2025Input.string_"
 								}
 							}
 						}
@@ -11842,6 +11839,14 @@
 					{
 						"in": "path",
 						"name": "versionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "requestId",
 						"required": true,
 						"schema": {
 							"type": "string"
