@@ -218,11 +218,6 @@
             "pages": [
               "ai-gateway/introduction",
               "ai-gateway/cloud-quickstart",
-              "ai-gateway/self-hosted-quickstart",
-              "ai-gateway/router-quickstart",
-              "ai-gateway/deployment/overview",
-              "ai-gateway/authentication",
-              "ai-gateway/observability",
               "ai-gateway/config",
               {
                 "group": "Concepts",
@@ -238,16 +233,23 @@
                 ]
               },
               {
-                "group": "Deployment",
+                "group": "Self-Hosted",
                 "pages": [
-                  "ai-gateway/deployment/docker",
-                  "ai-gateway/deployment/fly",
-                  "ai-gateway/deployment/porter"
+                  "ai-gateway/self-hosted-quickstart",
+                  "ai-gateway/self-hosted/router-quickstart",
+                  "ai-gateway/self-hosted/authentication",
+                  "ai-gateway/self-hosted/observability",
+                  "ai-gateway/self-hosted/deployment/overview",
+                  {
+                    "group": "Deployment Options",
+                    "pages": [
+                      "ai-gateway/self-hosted/deployment/docker",
+                      "ai-gateway/self-hosted/deployment/fly",
+                      "ai-gateway/self-hosted/deployment/porter"
+                    ]
+                  },
+                  "ai-gateway/self-hosted/debugging/telemetry"
                 ]
-              },
-              {
-                "group": "Debugging",
-                "pages": ["ai-gateway/debugging/telemetry"]
               }
             ]
           },
