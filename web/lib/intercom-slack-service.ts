@@ -190,7 +190,7 @@ export class IntercomSlackService {
       channel: slackChannelId,
       text: threadTs
         ? `Reply from ${authorName}`
-        : `New Intercom message from ${authorName}`,
+        : `"${messageText.slice(0, 20)}" from ${authorName}`,
       blocks: [
         {
           type: "section",
@@ -198,7 +198,7 @@ export class IntercomSlackService {
             type: "mrkdwn",
             text: threadTs
               ? `*Reply from ${authorName}:*\n${messageText}`
-              : `${authorName}${authorEmail ? ` (${authorEmail})` : ""}:${messageText.slice(20)}\n*Message:* ${messageText}*Source:* ${sourceUrl}\n`,
+              : `${authorName}${authorEmail ? ` (${authorEmail})` : ""}: ${messageText.slice(0, 20)}\n*Message:* ${messageText}\n*Source:* ${sourceUrl}\n`,
           },
         },
         ...(threadTs
