@@ -217,7 +217,8 @@
             "tag": "BETA",
             "pages": [
               "ai-gateway/introduction",
-              "ai-gateway/quickstart",
+              "ai-gateway/cloud-quickstart",
+              "ai-gateway/self-hosted-quickstart",
               "ai-gateway/router-quickstart",
               "ai-gateway/deployment/overview",
               "ai-gateway/authentication",
