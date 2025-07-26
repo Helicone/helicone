@@ -11,6 +11,14 @@ import { formatTime } from "../prompts2025/timeUtils";
 import { $JAWN_API } from "@/lib/clients/jawn";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import {
+  Dialog,
+  DialogHeader,
+  DialogContent,
+  DialogTrigger,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 type Router = components["schemas"]["Router"];
 
@@ -67,6 +75,35 @@ const MyRouters = () => {
               className="pl-9"
             />
           </div>
+
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="icon" className="text-md">
+                ?
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>What is a router?</DialogTitle>
+              </DialogHeader>
+              <DialogDescription>
+                You can create multiple independent routers with their own rate
+                limiting, caching, load-balancing and retries configurations.{" "}
+                <br />
+                To know more about creating your own routers and the different
+                configurations, refer to the{" "}
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href="https://docs.helicone.ai/ai-gateway/router-quickstart"
+                  className="text-primary underline"
+                >
+                  documentation
+                </a>
+                .
+              </DialogDescription>
+            </DialogContent>
+          </Dialog>
           <Button onClick={() => router.push("/gateway/create")}>
             <PlusIcon className="h-4 w-4" />
             Create Router
