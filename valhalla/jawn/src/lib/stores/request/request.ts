@@ -196,6 +196,8 @@ export async function getRequestsClickhouseNoSort(
       gateway_router_id,
       gateway_deployment_target,
       cost / ${COST_PRECISION_MULTIPLIER} as cost,
+      prompt_id,
+      prompt_version,
       updated_at
     FROM request_response_rmt
     WHERE (
@@ -275,6 +277,8 @@ export async function getRequestsClickhouse(
       gateway_router_id,
       gateway_deployment_target,
       cost / ${COST_PRECISION_MULTIPLIER} as cost,
+      prompt_id,
+      prompt_version,
       updated_at
     FROM request_response_rmt
     WHERE (

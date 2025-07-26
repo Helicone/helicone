@@ -7,6 +7,7 @@ import {
   Patch,
   Path,
   Post,
+  Query,
   Request,
   Route,
   Security,
@@ -16,7 +17,7 @@ import { Result } from "../../packages/common/result";
 import { Prompt2025Manager } from "../../managers/prompt/PromptManager";
 import type { JawnAuthenticatedRequest } from "../../types/request";
 import { type OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
-import { Prompt2025Version, Prompt2025 } from "@helicone-package/prompts/types";
+import { Prompt2025Version, Prompt2025, Prompt2025Input } from "@helicone-package/prompts/types";
 
 export interface PromptCreateResponse {
   id: string;
@@ -97,6 +98,27 @@ export class Prompt2025Controller extends Controller {
       this.setStatus(200);
     }
     return result;
+  }
+
+  @Get("id/{promptId}/{versionId}/inputs")
+  public async getPrompt2025Inputs(
+    @Path() promptId: string,
+    @Path() versionId: string,
+    @Query() requestId: string,
+    @Request() request: JawnAuthenticatedRequest,
+  ): Promise<Result<Prompt2025Input, string>> {
+    const promptManager = new Prompt2025Manager(request.authParams);
+    const result = await promptManager.getPromptInputs({ promptId, versionId, requestId });
+    if (result.error) {
+      this.setStatus(500);
+      return result;
+    }
+    if (!result.data) {
+      this.setStatus(404);
+      return { error: "Prompt inputs not found", data: null };
+    }
+    this.setStatus(200);
+    return { error: null, data: result.data };
   }
 
   @Get("tags")

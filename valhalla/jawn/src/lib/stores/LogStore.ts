@@ -166,8 +166,9 @@ export class LogStore {
         }
 
         if (payload.promptInputs && payload.promptInputs.length > 0) {
-          for (const promptInput of payload.promptInputs) {
-            await this.processPromptInputs(promptInput, t);
+          const result = await this.processPromptInputsBatch(payload.promptInputs, t);
+          if (result.error) {
+            console.error("Error processing prompt inputs batch:", result.error);
           }
         }
 
@@ -190,33 +191,56 @@ export class LogStore {
     }
   }
 
-  async processPromptInputs(
-    promptInput: Prompt2025Input,
+  async processPromptInputsBatch(
+    promptInputs: Prompt2025Input[],
     t: pgPromise.ITask<{}>
   ): PromiseGenericResult<string> {
-    // Check prompt version exists
-    let existingPrompt = await t.oneOrNone<{
-      id: string;
-    }>(
-      `SELECT id FROM prompts_2025_versions WHERE id = $1`,
-      [promptInput.version_id]
+    if (promptInputs.length === 0) {
+      return ok("No prompt inputs to process");
+    }
+
+    const versionIds = [...new Set(promptInputs.map(input => input.version_id))];
+    
+    const existingVersions = await t.manyOrNone<{ id: string }>(
+      `SELECT id FROM prompts_2025_versions WHERE id = ANY($1::uuid[])`,
+      [versionIds]
+    );
+    
+    const existingVersionIds = new Set(existingVersions.map(v => v.id));
+    const validInputs = promptInputs.filter(input =>
+      existingVersionIds.has(input.version_id)
+    );
+    const invalidInputs = promptInputs.filter(input =>
+      !existingVersionIds.has(input.version_id)
     );
 
-    if (!existingPrompt) {
-      return err("Prompt version does not exist");
+    if (validInputs.length === 0) {
+      return err("No valid prompt versions found");
     }
 
     try {
-      await t.none(
-        `INSERT INTO prompts_2025_inputs (request_id, version_id, inputs) VALUES ($1, $2, $3)`,
-        [promptInput.request_id, promptInput.version_id, promptInput.inputs]
+      const cs = new pgp.helpers.ColumnSet(
+        ['request_id', 'version_id', 'inputs'],
+        { table: 'prompts_2025_inputs' }
       );
+      
+      const query = pgp.helpers.insert(validInputs, cs);
+      await t.none(query);
+      
+      if (invalidInputs.length > 0) {
+        console.warn(`Skipped ${invalidInputs.length} prompt inputs due to invalid version IDs:`, 
+          invalidInputs.map(input => input.version_id));
+      }
+      
+      const message = invalidInputs.length > 0
+        ? `Processed ${validInputs.length} inputs successfully. ${invalidInputs.length} inputs skipped due to invalid version IDs.`
+        : `All ${validInputs.length} inputs processed successfully`;
+        
+      return ok(message);
     } catch (error) {
-      console.error("Error inserting prompt inputs", error);
-      return err("Failed to insert prompt inputs");
+      console.error("Error batch inserting prompt inputs", error);
+      return err("Failed to batch insert prompt inputs");
     }
-
-    return ok("Prompt inputs processed successfully");
   }
 
   async processPrompt(

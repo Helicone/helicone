@@ -262,6 +262,7 @@ export class EvaluatorManager extends BaseManager {
           prompt_cache_read_tokens: null,
           completion_tokens: null,
           prompt_id: null,
+          prompt_version: null, // SEE NOTE IN jawn/.../HandlerContext.ts
           llmSchema: null,
           country_code: null,
           asset_ids: null,
@@ -276,6 +277,7 @@ export class EvaluatorManager extends BaseManager {
           completion_audio_tokens: null,
           cache_enabled: false,
           cache_reference_id: null,
+          cost: null,
         },
       });
       if (scoreResult.error) {

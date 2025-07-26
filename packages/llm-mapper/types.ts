@@ -241,6 +241,8 @@ type HeliconeMetadata = {
   scores?: Record<string, { value: number; valueType: string } | number> | null;
   gatewayRouterId?: string | null;
   gatewayDeploymentTarget?: string | null;
+  promptId?: string | null;
+  promptVersion?: string | null;
 };
 
 // UNORGANZIED
@@ -334,6 +336,7 @@ export interface HeliconeRequest {
   completion_audio_tokens: number | null;
   cost: number | null;
   prompt_id: string | null;
+  prompt_version: string | null;
   feedback_created_at?: string | null;
   feedback_id?: string | null;
   feedback_rating?: boolean | null;
