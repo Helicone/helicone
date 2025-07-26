@@ -15,11 +15,11 @@ const Production = () => {
           </div>
         </div>
         <div className="flex flex-col items-start md:items-end gap-6 text-left md:text-right">
-          <h2 className="font-semibold text-4xl sm:text-5xl leading-[120%] max-w-[800px] text-wrap text-black">
+                      <h2 className="font-semibold text-4xl sm:text-5xl leading-[120%] max-w-[800px] text-wrap text-foreground">
             Get complete visibility
             <br /> <span className="text-brand">into your AI apps</span>
           </h2>
-          <p className="text-lg max-w-[520px] text-landing-description font-light leading-relaxed">
+                      <p className="text-lg max-w-[520px] text-muted-foreground font-light leading-relaxed">
             Unified insights across all providers to quickly detect
             hallucinations, abuse and performance issues.
           </p>
