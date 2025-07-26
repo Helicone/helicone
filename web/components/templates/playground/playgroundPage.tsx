@@ -33,6 +33,7 @@ import {
   useCreatePrompt,
   usePushPromptVersion,
   useGetPromptVersionWithBody,
+  useGetPromptInputs,
 } from "@/services/hooks/prompts";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { useOrg } from "@/components/layout/org/organizationContext";
@@ -225,8 +226,23 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { data: requestData, isLoading: isRequestLoading } =
     useGetRequestWithBodies(requestId ?? "");
 
+  const requestPromptId = useMemo(
+    () => requestData?.data?.prompt_id ?? null,
+    [requestData?.data?.prompt_id],
+  );
+  const requestPromptVersionId = useMemo(
+    () => requestData?.data?.prompt_version ?? null,
+    [requestData?.data?.prompt_version],
+  );
+
   const { data: promptVersionData, isLoading: isPromptVersionLoading } =
-    useGetPromptVersionWithBody(promptVersionId);
+    useGetPromptVersionWithBody(promptVersionId || requestPromptVersionId || undefined);
+
+  const promptInputsQuery = useGetPromptInputs(
+    requestPromptId || "",
+    requestPromptVersionId || "",
+    requestId || ""
+  );
 
   const [selectedModel, setSelectedModel] = useState<string>(
     "openai/gpt-4.1-mini",
