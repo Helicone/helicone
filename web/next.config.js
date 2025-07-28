@@ -22,6 +22,21 @@ const nextConfig = {
     "@helicone-package/cost",
     "@helicone-package/llm-mapper",
   ],
+  // Automatically rewrite import paths so that only the specific modules
+  // actually used are bundled. This drastically reduces the size of
+  // libraries like lucide-react, react-icons and date-fns which would
+  // otherwise ship the entire package to the client.
+  modularizeImports: {
+    "lucide-react": {
+      transform: "lucide-react/dist/esm/icons/{{member}}",
+    },
+    "react-icons": {
+      transform: "react-icons/{{member}}",
+    },
+    "date-fns": {
+      transform: "date-fns/{{member}}",
+    },
+  },
   webpack: (config) => {
     config.module.rules.push({
       test: /\.(graphql|gql)$/,
