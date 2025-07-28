@@ -9,6 +9,15 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "google/gemini-2.5-flash-lite-preview-06-17"
+    },
+    cost: {
+      prompt_token: 0.1e-6,
+      completion_token: 0.4e-6
+  },
+  {
+    model: {
+      operator: "equals",
       value: "google/gemini-2.5-pro-preview-03-25",
     },
     cost: {
