@@ -379,7 +379,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     promptInputsQuery.data,
     promptInputsQuery.isLoading,
     router,
-    setVariableInputs,
   ]);
 
   useMemo(() => {
