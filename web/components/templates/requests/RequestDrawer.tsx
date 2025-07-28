@@ -5,7 +5,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { P, Small, XSmall } from "@/components/ui/typography";
+import { P, XSmall } from "@/components/ui/typography";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
@@ -143,7 +143,7 @@ export default function RequestDrawer(props: RequestDivProps) {
   const promptInputsQuery = useGetPromptInputs(
     newPromptId || "",
     newPromptVersionId || "",
-    request?.id || ""
+    request?.id || "",
   );
 
   // BACKWARDS COMPATABILITY FOR OLD PROMPTS
@@ -325,10 +325,13 @@ export default function RequestDrawer(props: RequestDivProps) {
     }
   }, [promptDataQuery.data?.id, request, router]);
 
-  
   // TODO: Delete legacy prompts code
   const hasNewPromptData = useMemo(
-    () => newPromptId && newPromptVersionId && promptInputsQuery.data && promptInputsQuery.data !== null,
+    () =>
+      newPromptId &&
+      newPromptVersionId &&
+      promptInputsQuery.data &&
+      promptInputsQuery.data !== null,
     [newPromptId, newPromptVersionId, promptInputsQuery.data],
   );
   const hasLegacyPromptData = useMemo(
@@ -646,8 +649,8 @@ export default function RequestDrawer(props: RequestDivProps) {
                   icon={<ScrollTextIcon className="h-4 w-4" />}
                   copyText={specialProperties.promptId}
                   href={
-                    newPromptId 
-                      ? `/prompts` 
+                    newPromptId
+                      ? `/prompts`
                       : `/prompts/${promptDataQuery.data?.id}`
                   }
                   truncateLength={dynamicTruncateLength}
@@ -806,13 +809,15 @@ export default function RequestDrawer(props: RequestDivProps) {
 
           <div className="h-full w-full overflow-auto bg-card p-3">
             {hasNewPromptData && promptInputsQuery.data && (
-              <div className="rounded-lg border border-border bg-sidebar-background mb-4">
-                <div className="rounded-t-lg flex h-12 bg-white p-4 flex-row items-center justify-between shadow-sm dark:bg-black">
-                  <h2 className="font-medium text-sm">Prompt Input</h2>
+              <div className="mb-4 rounded-lg border border-border bg-sidebar-background">
+                <div className="flex h-12 flex-row items-center justify-between rounded-t-lg bg-white p-4 shadow-sm dark:bg-black">
+                  <h2 className="text-sm font-medium">Prompt Input</h2>
                 </div>
-                <div className="p-4 text-sm border-t border-border bg-sidebar-background overflow-auto max-h-60">
+                <div className="max-h-60 overflow-auto border-t border-border bg-sidebar-background p-4 text-sm">
                   <JsonRenderer
-                    data={JSON.parse(JSON.stringify(promptInputsQuery.data?.inputs))}
+                    data={JSON.parse(
+                      JSON.stringify(promptInputsQuery.data?.inputs),
+                    )}
                   />
                 </div>
               </div>
@@ -839,7 +844,9 @@ export default function RequestDrawer(props: RequestDivProps) {
                     className="flex flex-row items-center gap-1.5"
                   >
                     <PiPlayBold className="h-4 w-4" />
-                    {hasNewPromptData || hasLegacyPromptData ? "Test Prompt" : "Playground"}
+                    {hasNewPromptData || hasLegacyPromptData
+                      ? "Test Prompt"
+                      : "Playground"}
                   </Button>
                 </Link>
               )}

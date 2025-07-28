@@ -236,12 +236,14 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   );
 
   const { data: promptVersionData, isLoading: isPromptVersionLoading } =
-    useGetPromptVersionWithBody(promptVersionId || requestPromptVersionId || undefined);
+    useGetPromptVersionWithBody(
+      promptVersionId || requestPromptVersionId || undefined,
+    );
 
   const promptInputsQuery = useGetPromptInputs(
     requestPromptId || "",
     requestPromptVersionId || "",
-    requestId || ""
+    requestId || "",
   );
 
   const [selectedModel, setSelectedModel] = useState<string>(
