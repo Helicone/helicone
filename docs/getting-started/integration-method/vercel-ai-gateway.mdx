@@ -20,7 +20,7 @@ The `@ai-sdk/gateway` integration (recommended) supports all Vercel AI Gateway f
 <Steps>
   <Step title="Set up environment variables">
     ```bash
-    VERCEL_API_KEY=your-vercel-api-key
+    VERCEL_AI_GATEWAY_API_KEY=your-vercel-ai-gateway-api-key
     HELICONE_API_KEY=your-helicone-api-key
     ```
   </Step>
@@ -48,12 +48,10 @@ The `@ai-sdk/gateway` integration (recommended) supports all Vercel AI Gateway f
       import { generateText } from 'ai';
 
       const gateway = createGateway({
-        apiKey: process.env.VERCEL_API_KEY,
-        baseURL: 'https://gateway.helicone.ai/v1/ai',
+        apiKey: process.env.VERCEL_AI_GATEWAY_API_KEY,
+        baseURL: 'https://vercel.helicone.ai/v1/ai',
         headers: {
           'Helicone-Auth': `Bearer ${process.env.HELICONE_API_KEY}`,
-          'Helicone-Target-URL': 'https://ai-gateway.vercel.sh',
-          'Helicone-Target-Provider': 'VERCEL'
         }
       });
 
@@ -69,36 +67,15 @@ The `@ai-sdk/gateway` integration (recommended) supports all Vercel AI Gateway f
       });
       ```
       
-      ```typescript Vercel AI SDK
-      import { createOpenAI } from '@ai-sdk/openai';
-      import { generateText } from 'ai';
 
-      const vercelWithHelicone = createOpenAI({
-        apiKey: process.env.VERCEL_API_KEY,
-        baseURL: 'https://gateway.helicone.ai/v1',
-        headers: {
-          'Helicone-Auth': `Bearer ${process.env.HELICONE_API_KEY}`,
-          'Helicone-Target-URL': 'https://ai-gateway.vercel.sh/v1/ai',
-          'Helicone-Target-Provider': 'VERCEL'
-        }
-      });
-
-      const result = await generateText({
-        model: vercelWithHelicone('openai/gpt-4o-mini'),
-        prompt: 'Explain quantum computing'
-      });
-      ```
-
-      ```typescript OpenAI SDK
+      ```typescript OpenAI TS SDK
       import OpenAI from 'openai';
 
       const openai = new OpenAI({
-        apiKey: process.env.VERCEL_API_KEY,
-        baseURL: 'https://gateway.helicone.ai/v1',
+        apiKey: process.env.VERCEL_AI_GATEWAY_API_KEY,
+        baseURL: 'https://vercel.helicone.ai/v1',
         defaultHeaders: {
           'Helicone-Auth': `Bearer ${process.env.HELICONE_API_KEY}`,
-          'Helicone-Target-URL': 'https://ai-gateway.vercel.sh/v1',
-          'Helicone-Target-Provider': 'VERCEL'
         }
       });
 
@@ -108,41 +85,37 @@ The `@ai-sdk/gateway` integration (recommended) supports all Vercel AI Gateway f
       });
       ```
 
+      ```python OpenAI Python SDK
+      from openai import OpenAI
+      import os
+
+      client = OpenAI(
+        api_key=os.environ["VERCEL_AI_GATEWAY_API_KEY"],
+        base_url="https://vercel.helicone.ai/v1",
+        default_headers={
+          "Helicone-Auth": f"Bearer {os.environ['HELICONE_API_KEY']}",
+        }
+      )
+
+      response = client.chat.completions.create(
+        model="openai/gpt-4o-mini",
+        messages=[{"role": "user", "content": "Hello!"}]
+      )
+      ```
+
       ```typescript Fetch
-      const response = await fetch('https://gateway.helicone.ai/v1/chat/completions', {
+      const response = await fetch('https://vercel.helicone.ai/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Helicone-Auth': `Bearer ${process.env.HELICONE_API_KEY}`,
-          'Helicone-Target-URL': 'https://ai-gateway.vercel.sh',
-          'Authorization': `Bearer ${process.env.VERCEL_API_KEY}`,
-          'Helicone-Target-Provider': 'VERCEL'
+          'Authorization': `Bearer ${process.env.VERCEL_AI_GATEWAY_API_KEY}`,
         },
         body: JSON.stringify({
           model: 'openai/gpt-4o-mini',
           messages: [{ role: 'user', content: 'Hello!' }]
         })
       });
-      ```
-
-      ```python Python
-      import requests
-      import os
-
-      response = requests.post(
-        'https://gateway.helicone.ai/v1/chat/completions',
-        headers={
-          'Content-Type': 'application/json',
-          'Helicone-Auth': f'Bearer {os.environ["HELICONE_API_KEY"]}',
-          'Helicone-Target-URL': 'https://ai-gateway.vercel.sh',
-          'Authorization': f'Bearer {os.environ["VERCEL_API_KEY"]}',
-          'Helicone-Target-Provider': 'VERCEL'
-        },
-        json={
-          'model': 'openai/gpt-3.5-turbo',
-          'messages': [{'role': 'user', 'content': 'Hello!'}]
-        }
-      )
       ```
     </CodeGroup>
   </Step>
@@ -164,12 +137,10 @@ The `@ai-sdk/gateway` integration (recommended) supports all Vercel AI Gateway f
   import { generateText } from 'ai';
 
   const gateway = createGateway({
-    apiKey: process.env.VERCEL_API_KEY,
-    baseURL: 'https://gateway.helicone.ai/v1/ai',
+    apiKey: process.env.VERCEL_AI_GATEWAY_API_KEY,
+    baseURL: 'https://vercel.helicone.ai/v1/ai',
     headers: {
       'Helicone-Auth': `Bearer ${process.env.HELICONE_API_KEY}`,
-      'Helicone-Target-URL': 'https://ai-gateway.vercel.sh',
-      'Helicone-Target-Provider': 'VERCEL'
     }
   });
 
@@ -185,42 +156,15 @@ The `@ai-sdk/gateway` integration (recommended) supports all Vercel AI Gateway f
   }
   ```
   
-  ```typescript Vercel AI SDK
-  import { createOpenAI } from '@ai-sdk/openai';
-  import { generateText } from 'ai';
 
-  const vercelWithHelicone = createOpenAI({
-    apiKey: process.env.VERCEL_API_KEY,
-    baseURL: 'https://gateway.helicone.ai/v1',
-    headers: {
-      'Helicone-Auth': `Bearer ${process.env.HELICONE_API_KEY}`,
-      'Helicone-Target-URL': 'https://ai-gateway.vercel.sh/v1/ai',
-      'Helicone-Target-Provider': 'VERCEL'
-    }
-  });
-
-  async function main() {
-    const result = await generateText({
-      model: vercelWithHelicone('openai/gpt-4o-mini'),
-      prompt: 'What is the meaning of life?',
-      temperature: 0.7,
-      maxTokens: 100
-    });
-    
-    return result.text;
-  }
-  ```
-
-  ```typescript OpenAI SDK
+  ```typescript OpenAI TS SDK
   import OpenAI from 'openai';
 
   const openai = new OpenAI({
-    apiKey: process.env.VERCEL_API_KEY,
-    baseURL: 'https://gateway.helicone.ai/v1',
+    apiKey: process.env.VERCEL_AI_GATEWAY_API_KEY,
+    baseURL: 'https://vercel.helicone.ai/v1',
     defaultHeaders: {
       'Helicone-Auth': `Bearer ${process.env.HELICONE_API_KEY}`,
-      'Helicone-Target-URL': 'https://ai-gateway.vercel.sh/v1',
-      'Helicone-Target-Provider': 'VERCEL'
     }
   });
 
@@ -238,16 +182,39 @@ The `@ai-sdk/gateway` integration (recommended) supports all Vercel AI Gateway f
   }
   ```
 
+  ```python OpenAI Python SDK
+  from openai import OpenAI
+  import os
+
+  client = OpenAI(
+    api_key=os.environ["VERCEL_AI_GATEWAY_API_KEY"],
+    base_url="https://vercel.helicone.ai/v1",
+    default_headers={
+      "Helicone-Auth": f"Bearer {os.environ['HELICONE_API_KEY']}",
+    }
+  )
+
+  def main():
+      response = client.chat.completions.create(
+          model="openai/gpt-4o-mini",
+          messages=[
+              {"role": "user", "content": "What is the meaning of life?"}
+          ],
+          temperature=0.7,
+          max_tokens=100
+      )
+      
+      return response.choices[0].message.content
+  ```
+
   ```typescript Fetch
   async function callVercelGateway() {
-    const response = await fetch('https://gateway.helicone.ai/v1/chat/completions', {
+    const response = await fetch('https://vercel.helicone.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Helicone-Auth': `Bearer ${process.env.HELICONE_API_KEY}`,
-        'Helicone-Target-URL': 'https://ai-gateway.vercel.sh',
-        'Authorization': `Bearer ${process.env.VERCEL_API_KEY}`,
-        'Helicone-Target-Provider': 'VERCEL'
+        'Authorization': `Bearer ${process.env.VERCEL_AI_GATEWAY_API_KEY}`,
       },
       body: JSON.stringify({
         model: 'openai/gpt-3.5-turbo',
@@ -261,33 +228,6 @@ The `@ai-sdk/gateway` integration (recommended) supports all Vercel AI Gateway f
     const data = await response.json();
     return data.choices[0].message.content;
   }
-  ```
-
-  ```python Python
-  import os
-  import requests
-
-  def call_vercel_gateway():
-      response = requests.post(
-          'https://gateway.helicone.ai/v1/chat/completions',
-          headers={
-              'Content-Type': 'application/json',
-              'Helicone-Auth': f'Bearer {os.environ["HELICONE_API_KEY"]}',
-              'Helicone-Target-URL': 'https://ai-gateway.vercel.sh',
-              'Authorization': f'Bearer {os.environ["VERCEL_API_KEY"]}',
-              'Helicone-Target-Provider': 'VERCEL'
-          },
-          json={
-              'model': 'openai/gpt-3.5-turbo',
-              'messages': [
-                  {'role': 'user', 'content': 'What is the meaning of life?'}
-              ],
-              'temperature': 0.7
-          }
-      )
-      
-      data = response.json()
-      return data['choices'][0]['message']['content']
   ```
 </CodeGroup>
 

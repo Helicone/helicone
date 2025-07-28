@@ -11,7 +11,7 @@ This guide shows you how to build a customer support assistant that intelligentl
 
 ## Prerequisites
 
-- Vercel API key from your [Vercel dashboard](https://vercel.com/dashboard)
+- Vercel AI Gateway API key from your [Vercel dashboard](https://vercel.com/dashboard)
 - Helicone API key from [Helicone](https://helicone.ai)
 - Node.js project
 
@@ -20,7 +20,7 @@ This guide shows you how to build a customer support assistant that intelligentl
 Install the required packages:
 
 ```bash
-npm install @ai-sdk/openai ai
+npm install @ai-sdk/gateway ai
 ```
 
 ## Create the AI Client
@@ -28,17 +28,15 @@ npm install @ai-sdk/openai ai
 Set up a client that routes through Helicone for monitoring:
 
 ```typescript
-import { createOpenAI } from '@ai-sdk/openai';
+import { createGateway } from '@ai-sdk/gateway';
 import { generateText, tool } from 'ai';
 import { z } from 'zod';
 
-const ai = createOpenAI({
-  apiKey: process.env.VERCEL_API_KEY,
-  baseURL: 'https://gateway.helicone.ai/v1',
+const gateway = createGateway({
+  apiKey: process.env.VERCEL_AI_GATEWAY_API_KEY,
+  baseURL: 'https://vercel.helicone.ai/v1/ai',
   headers: {
     'Helicone-Auth': `Bearer ${process.env.HELICONE_API_KEY}`,
-    'Helicone-Target-URL': 'https://ai-gateway.vercel.sh/v1/ai',
-    'Helicone-Target-Provider': 'VERCEL'
   }
 });
 ```
@@ -65,7 +63,7 @@ const classifyTool = tool({
 
 async function classifyQueryComplexity(query: string): Promise<'simple' | 'complex' | 'technical'> {
   const result = await generateText({
-    model: ai('openai/gpt-4o-nano'),
+    model: gateway('openai/gpt-4o-nano'),
     tools: {
       classify: classifyTool
     },
@@ -97,13 +95,13 @@ async function handleCustomerQuery(query: string, customerId: string) {
   let model;
   switch (complexity) {
     case 'simple':
-      model = ai('openai/gpt-4o-mini'); // Cheapest, handles basic queries
+      model = gateway('openai/gpt-4o-mini'); // Cheapest, handles basic queries
       break;
     case 'complex':
-      model = ai('openai/gpt-4o'); // Better reasoning for complex issues
+      model = gateway('openai/gpt-4o'); // Better reasoning for complex issues
       break;
     case 'technical':
-      model = ai('anthropic/claude-3-5-sonnet'); // Excellent for technical support
+      model = gateway('anthropic/claude-3-5-sonnet'); // Excellent for technical support
       break;
   }
   
@@ -153,13 +151,13 @@ async function handleQueryWithCache(query: string, customerId: string) {
   let model;
   switch (complexity) {
     case 'simple':
-      model = ai('openai/gpt-4o-mini');
+      model = gateway('openai/gpt-4o-mini');
       break;
     case 'complex':
-      model = ai('openai/gpt-4o');
+      model = gateway('openai/gpt-4o');
       break;
     case 'technical':
-      model = ai('anthropic/claude-3-5-sonnet');
+      model = gateway('anthropic/claude-3-5-sonnet');
       break;
   }
   
@@ -180,17 +178,15 @@ async function handleQueryWithCache(query: string, customerId: string) {
 Here's the full implementation:
 
 ```typescript
-import { createOpenAI } from '@ai-sdk/openai';
+import { createGateway } from '@ai-sdk/gateway';
 import { generateText } from 'ai';
 
-// Initialize AI client with Helicone
-const ai = createOpenAI({
-  apiKey: process.env.VERCEL_API_KEY,
-  baseURL: 'https://gateway.helicone.ai/v1',
+// Initialize AI Gateway with Helicone
+const gateway = createGateway({
+  apiKey: process.env.VERCEL_AI_GATEWAY_API_KEY,
+  baseURL: 'https://vercel.helicone.ai/v1/ai',
   headers: {
     'Helicone-Auth': `Bearer ${process.env.HELICONE_API_KEY}`,
-    'Helicone-Target-URL': 'https://ai-gateway.vercel.sh/v1/ai',
-    'Helicone-Target-Provider': 'VERCEL'
   }
 });
 
@@ -207,11 +203,11 @@ async function processSupportTicket(ticket: SupportTicket) {
   // Model selection based on complexity and priority
   let model;
   if (ticket.priority === 'high' || complexity === 'technical') {
-    model = ai('anthropic/claude-3-5-sonnet');
+    model = gateway('anthropic/claude-3-5-sonnet');
   } else if (complexity === 'complex') {
-    model = ai('openai/gpt-4o');
+    model = gateway('openai/gpt-4o');
   } else {
-    model = ai('openai/gpt-4o-mini');
+    model = gateway('openai/gpt-4o-mini');
   }
   
   try {
