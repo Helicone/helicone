@@ -1,0 +1,101 @@
+---
+title: "Nvidia Dynamo Integration"
+sidebarTitle: "Dynamo"
+description: "Use Nvidia Dynamo with Helicone for comprehensive logging and monitoring."
+"twitter:title": "Nvidia Dynamo Integration - Helicone OSS LLM Observability"
+icon: "server"
+iconType: "solid"
+---
+
+import { strings } from "/snippets/strings.mdx";
+
+Use Nvidia Dynamo or other OpenAI-compatible Nvidia inference providers with Helicone by routing through our gateway with custom headers.
+
+## {strings.howToIntegrate}
+
+<Steps>
+  <Step title={strings.generateKey}>
+    <div dangerouslySetInnerHTML={{ __html: strings.generateKeyInstructions }} />
+  </Step>
+
+  <Step title={strings.setApiKey}>
+    ```bash
+    HELICONE_API_KEY=<your-helicone-api-key>
+    NVIDIA_API_KEY=<your-nvidia-api-key>
+    ```
+  </Step>
+
+  <Step title={strings.modifyBasePath}>
+
+<CodeGroup>
+```bash cURL
+curl -X POST https://gateway.helicone.ai/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $NVIDIA_API_KEY" \
+  -H "Helicone-Auth: Bearer $HELICONE_API_KEY" \
+  -H "Helicone-Target-Url: https://your-dynamo-endpoint.com" \
+  -d '{
+    "model": "your-model-name",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Hello, how are you?"
+      }
+    ],
+    "max_tokens": 1024,
+    "temperature": 0.7
+  }'
+```
+
+```javascript JavaScript
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.NVIDIA_API_KEY,
+  baseURL: "https://gateway.helicone.ai/v1",
+  defaultHeaders: {
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+    "Helicone-Target-Url": "https://your-dynamo-endpoint.com"
+  }
+});
+
+const response = await openai.chat.completions.create({
+  model: "your-model-name",
+  messages: [{ role: "user", content: "Hello, how are you?" }],
+  max_tokens: 1024,
+  temperature: 0.7
+});
+
+console.log(response);
+```
+
+```python Python
+from openai import OpenAI
+import os
+
+client = OpenAI(
+  api_key=os.getenv("NVIDIA_API_KEY"),
+  base_url="https://gateway.helicone.ai/v1",
+  default_headers={
+    "Helicone-Auth": f"Bearer {os.getenv('HELICONE_API_KEY')}",
+    "Helicone-Target-Url": "https://your-dynamo-endpoint.com"
+  }
+)
+
+chat_completion = client.chat.completions.create(
+  model="your-model-name",
+  messages=[{"role": "user", "content": "Hello, how are you?"}],
+  max_tokens=1024,
+  temperature=0.7
+)
+
+print(chat_completion)
+```
+</CodeGroup>
+
+  </Step>
+
+  <Step title={strings.verifyInHelicone}>
+    <div dangerouslySetInnerHTML={{ __html: strings.verifyInHeliconeDesciption("Dynamo") }} />
+  </Step>
+</Steps>
