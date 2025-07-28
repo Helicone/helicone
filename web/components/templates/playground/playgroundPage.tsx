@@ -342,6 +342,46 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     Record<string, VariableInput>
   >("variableInputs", {});
 
+  // Initial check for if we are loading a request that is associated with a prompt
+  // then we should be editing that prompt instead.
+  useEffect(() => {
+    if (
+      requestId &&
+      requestData?.data &&
+      !isRequestLoading &&
+      requestPromptVersionId &&
+      !promptInputsQuery.isLoading
+    ) {
+      if (promptInputsQuery.data) {
+        const convertedInputs: Record<string, VariableInput> = {};
+        for (const [key, value] of Object.entries(
+          promptInputsQuery.data.inputs,
+        )) {
+          convertedInputs[key] = {
+            isObject: typeof value === "object" && value !== null,
+            value:
+              typeof value === "object" && value !== null
+                ? JSON.stringify(value)
+                : String(value),
+          };
+        }
+
+        setVariableInputs(convertedInputs);
+      }
+
+      router.push(`/playground?promptVersionId=${requestPromptVersionId}`);
+    }
+  }, [
+    requestId,
+    requestData,
+    isRequestLoading,
+    requestPromptVersionId,
+    promptInputsQuery.data,
+    promptInputsQuery.isLoading,
+    router,
+    setVariableInputs,
+  ]);
+
   useMemo(() => {
     if (!requestId) {
       setTools([]);
@@ -357,7 +397,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       setDefaultContent(DEFAULT_EMPTY_CHAT);
       return;
     }
-    if (requestData?.data && !isRequestLoading) {
+    if (requestData?.data && !isRequestLoading && !requestPromptVersionId) {
       if (requestData.data.model in OPENROUTER_MODEL_MAP) {
         setSelectedModel(OPENROUTER_MODEL_MAP[requestData.data.model]);
       } else {
@@ -425,7 +465,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     }
     return DEFAULT_EMPTY_CHAT;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [requestId, requestData, isRequestLoading]);
+  }, [requestId, requestData, isRequestLoading, requestPromptVersionId]);
 
   const [response, setResponse] = useState<string>("");
   const [error, setError] = useState<string | null>(null);

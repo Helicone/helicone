@@ -315,16 +315,6 @@ export default function RequestDrawer(props: RequestDivProps) {
       });
   }, [jawn, request, router, setNotification]);
 
-  const handleTestPrompt = useCallback(() => {
-    if (!request) return;
-
-    if (promptDataQuery.data?.id) {
-      router.push(`/prompts/${promptDataQuery.data?.id}`);
-    } else {
-      router.push(`/prompts/fromRequest/${request.id}`);
-    }
-  }, [promptDataQuery.data?.id, request, router]);
-
   // TODO: Delete legacy prompts code
   const hasNewPromptData = useMemo(
     () =>
