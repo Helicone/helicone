@@ -745,6 +745,50 @@
     {
       "source": "/getting-started/self-deploy",
       "destination": "/getting-started/self-host/manual"
+    },
+    {
+      "source": "/ai-gateway/quickstart",
+      "destination": "/ai-gateway/self-hosted-quickstart"
+    },
+    {
+      "source": "/ai-gateway/router-quickstart",
+      "destination": "/ai-gateway/self-hosted/router-quickstart"
+    },
+    {
+      "source": "/ai-gateway/authentication",
+      "destination": "/ai-gateway/self-hosted/authentication"
+    },
+    {
+      "source": "/ai-gateway/observability",
+      "destination": "/ai-gateway/self-hosted/observability"
+    },
+    {
+      "source": "/ai-gateway/deployment/overview",
+      "destination": "/ai-gateway/self-hosted/deployment/overview"
+    },
+    {
+      "source": "/ai-gateway/deployment/docker",
+      "destination": "/ai-gateway/self-hosted/deployment/docker"
+    },
+    {
+      "source": "/ai-gateway/deployment/fly",
+      "destination": "/ai-gateway/self-hosted/deployment/fly"
+    },
+    {
+      "source": "/ai-gateway/deployment/porter",
+      "destination": "/ai-gateway/self-hosted/deployment/porter"
+    },
+    {
+      "source": "/ai-gateway/deployment/ecs",
+      "destination": "/ai-gateway/self-hosted/deployment/ecs"
+    },
+    {
+      "source": "/ai-gateway/deployment/k8s",
+      "destination": "/ai-gateway/self-hosted/deployment/k8s"
+    },
+    {
+      "source": "/ai-gateway/debugging/telemetry",
+      "destination": "/ai-gateway/self-hosted/debugging/telemetry"
     }
   ]
 }
