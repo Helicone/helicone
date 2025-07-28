@@ -2791,7 +2791,8 @@
 					"NOVITA",
 					"OPENPIPE",
 					"LLAMA",
-					"NVIDIA"
+					"NVIDIA",
+					"VERCEL"
 				]
 			},
 			"Provider": {

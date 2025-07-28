@@ -56,7 +56,8 @@ export class KeyManager extends BaseManager {
     try {
       const result = await dbExecute(
         `UPDATE helicone_api_keys
-         SET api_key_name = $1
+         SET api_key_name = $1,
+             updated_at = now()
          WHERE id = $2
          AND organization_id = $3`,
         [updateData.api_key_name, apiKeyId, this.authParams.organizationId]
@@ -79,7 +80,8 @@ export class KeyManager extends BaseManager {
     try {
       const result = await dbExecute(
         `UPDATE helicone_api_keys
-         SET soft_delete = true
+         SET soft_delete = true,
+             updated_at = now()
          WHERE id = $1
          AND organization_id = $2`,
         [apiKeyId, this.authParams.organizationId]
