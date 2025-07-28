@@ -14,7 +14,6 @@ export const costs: ModelRow[] = [
     cost: {
       prompt_token: 0.1e-6,
       completion_token: 0.4e-6
-      completion_token: 0.4e-6
     }
   {
     model: {
