@@ -213,7 +213,7 @@ export class LogStore {
       );
     } catch (error) {
       console.error("Error inserting prompt inputs", error);
-      throw error;
+      return err("Failed to insert prompt inputs");
     }
 
     return ok("Prompt inputs processed successfully");

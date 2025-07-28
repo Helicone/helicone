@@ -31,12 +31,12 @@ export const CustomPropertiesCard: React.FC<CustomPropertiesProps> = ({
 }) => {
   return (
     <>
-      <div className="flex flex-wrap gap-4 text-sm items-center pt-2">
+      <div className="flex flex-wrap items-center gap-4 pt-2 text-sm">
         {properties.map((property, i) => {
           if (customProperties && customProperties.hasOwnProperty(property)) {
             return (
               <li
-                className="flex flex-col space-y-1 justify-between text-left p-2.5 shadow-sm border border-gray-300 dark:border-gray-700 rounded-lg min-w-[5rem]"
+                className="flex min-w-[5rem] flex-col justify-between space-y-1 rounded-lg border border-gray-300 p-2.5 text-left shadow-sm dark:border-gray-700"
                 key={i}
               >
                 <p className="font-semibold text-gray-900 dark:text-gray-100">

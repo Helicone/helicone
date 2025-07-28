@@ -23,25 +23,29 @@ interface SlackEventPayload {
 }
 
 // Verify Slack webhook signature
-function verifySlackWebhook(payload: string, signature: string, secret: string): boolean {
-  const timestamp = signature.split(',')[0].replace('t=', '');
-  const hash = signature.split(',')[1].replace('v0=', '');
-  
+function verifySlackWebhook(
+  payload: string,
+  signature: string,
+  secret: string,
+): boolean {
+  const timestamp = signature.split(",")[0].replace("t=", "");
+  const hash = signature.split(",")[1].replace("v0=", "");
+
   const baseString = `v0:${timestamp}:${payload}`;
   const expectedHash = crypto
-    .createHmac('sha256', secret)
+    .createHmac("sha256", secret)
     .update(baseString)
-    .digest('hex');
-  
+    .digest("hex");
+
   return crypto.timingSafeEqual(
-    Buffer.from(hash, 'hex'),
-    Buffer.from(expectedHash, 'hex')
+    Buffer.from(hash, "hex"),
+    Buffer.from(expectedHash, "hex"),
   );
 }
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -60,14 +64,16 @@ export default async function handler(
 
     const signature = req.headers["x-slack-signature"] as string;
     const slackSecret = process.env.SLACK_SIGNING_SECRET;
-    
+
     if (!slackSecret) {
       console.error("SLACK_SIGNING_SECRET not configured");
-      return res.status(500).json({ error: "Slack signing secret not configured" });
+      return res
+        .status(500)
+        .json({ error: "Slack signing secret not configured" });
     }
 
     const payload = JSON.stringify(req.body);
-    
+
     // Verify webhook signature (temporarily disabled for testing)
     // if (signature && !verifySlackWebhook(payload, signature, slackSecret)) {
     //   return res.status(401).json({ error: "Invalid signature" });
@@ -75,9 +81,9 @@ export default async function handler(
 
     const eventData = req.body as SlackEventPayload;
     const service = new IntercomSlackService();
-    
+
     console.log("Event type:", eventData.type);
-    
+
     // Handle different event types
     if (eventData.type === "event_callback") {
       const event = eventData.event;
@@ -86,28 +92,40 @@ export default async function handler(
       console.log("Event text:", event.text);
       console.log("Event thread_ts:", event.thread_ts);
       console.log("Event channel:", event.channel);
-      
+
       // Only handle thread replies (messages with thread_ts)
       if (event.type === "message" && event.thread_ts && event.text) {
         console.log("Processing thread message...");
-        
+
         // Skip bot messages to avoid loops
-        if (event.user === "USLACKBOT" || !event.user || event.user === "U095E802E8M") {
+        if (
+          event.user === "USLACKBOT" ||
+          !event.user ||
+          event.user === "U095E802E8M"
+        ) {
           console.log("Skipping bot message to avoid loops");
           return res.status(200).json({ message: "Bot message ignored" });
         }
-        
+
         console.log("Looking up mapping for thread_ts:", event.thread_ts);
-        
+
         // Get the original message mapping
-        const mapping = await service.getMessageMappingBySlackThread(event.thread_ts);
+        const mapping = await service.getMessageMappingBySlackThread(
+          event.thread_ts,
+        );
         console.log("Found mapping:", mapping);
-        
+
         if (mapping) {
-          console.log("Sending reply to Intercom conversation:", mapping.intercom_conversation_id);
+          console.log(
+            "Sending reply to Intercom conversation:",
+            mapping.intercom_conversation_id,
+          );
           // Send reply to Intercom
-          await service.sendIntercomReply(mapping.intercom_conversation_id, event.text);
-          
+          await service.sendIntercomReply(
+            mapping.intercom_conversation_id,
+            event.text,
+          );
+
           console.log("=== SUCCESS: Reply sent to Intercom ===");
           return res.status(200).json({ message: "Reply sent to Intercom" });
         } else {
@@ -121,10 +139,9 @@ export default async function handler(
         console.log("- Is message type:", event.type === "message");
       }
     }
-    
+
     console.log("Event not processed, returning success");
     return res.status(200).json({ message: "Event processed" });
-    
   } catch (error) {
     console.error("Error processing Slack event:", error);
     return res.status(500).json({ error: "Internal server error" });

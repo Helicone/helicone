@@ -9,7 +9,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   if (req.method !== "POST") {
     return res.status(405).end();
@@ -30,7 +30,7 @@ export default async function handler(
       await dbExecute<{
         stripe_customer_id: string;
       }>("SELECT * FROM organization WHERE id = $1", [orgId]),
-      (d) => d?.[0]
+      (d) => d?.[0],
     );
 
     if (orgError !== null) {
@@ -51,7 +51,7 @@ export default async function handler(
 
       await dbExecute(
         "UPDATE organization SET stripe_customer_id = $1 WHERE id = $2",
-        [customerId, orgId]
+        [customerId, orgId],
       );
     }
     const protocol = req.headers["x-forwarded-proto"] || "http";

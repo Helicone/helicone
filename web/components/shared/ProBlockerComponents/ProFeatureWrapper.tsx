@@ -26,7 +26,7 @@ export const ProFeatureWrapper = forwardRef<
         children.props.onClick(e);
       }
     },
-    [hasAccess, children.props]
+    [hasAccess, children.props],
   );
 
   return (

@@ -44,7 +44,7 @@ const AddFileButton = (props: AddFileButtonProps) => {
         onClick={() => {
           setOpen(!open);
         }}
-        className="w-fit text-black dark:text-white border border-slate-300 dark:border-slate-700 px-2 py-1 h-auto rounded-lg text-xs flex items-center gap-2"
+        className="flex h-auto w-fit items-center gap-2 rounded-lg border border-slate-300 px-2 py-1 text-xs text-black dark:border-slate-700 dark:text-white"
       >
         {file ? (
           <>
@@ -59,7 +59,7 @@ const AddFileButton = (props: AddFileButtonProps) => {
         )}
       </Button>
       <ThemedModal open={open} setOpen={setOpen}>
-        <div className="w-[400px] h-full flex flex-col space-y-4">
+        <div className="flex h-full w-[400px] flex-col space-y-4">
           <h2 className="text-xl font-semibold text-black dark:text-white">
             Chat Image
           </h2>
@@ -78,7 +78,7 @@ const AddFileButton = (props: AddFileButtonProps) => {
           <button
             disabled={true}
             onClick={handleClick}
-            className="hover:cursor-not-allowed bg-slate-100 dark:bg-slate-900 w-full border border-dashed border-slate-300 dark:border-slate-700 px-4 py-8 rounded-lg text-xs flex items-center justify-center gap-2"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-100 px-4 py-8 text-xs hover:cursor-not-allowed dark:border-slate-700 dark:bg-slate-900"
           >
             <PlusIcon className="h-4 w-4" />
             Upload from Computer
@@ -105,10 +105,10 @@ const AddFileButton = (props: AddFileButtonProps) => {
               setCurrentFile(`<helicone-prompt-input key="${key}" />`);
             }}
           /> */}
-          <div className="border-t border-slate-300 flex justify-end gap-2 pt-4">
+          <div className="flex justify-end gap-2 border-t border-slate-300 pt-4">
             <button
               onClick={() => setOpen(false)}
-              className="flex flex-row items-center rounded-md bg-white dark:bg-black px-4 py-2 text-sm font-semibold border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-sm hover:text-slate-700 dark:hover:text-slate-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500"
+              className="flex flex-row items-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-50 hover:text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500 dark:border-slate-700 dark:bg-black dark:text-slate-100 dark:hover:bg-slate-900 dark:hover:text-slate-300"
             >
               Cancel
             </button>
@@ -117,7 +117,7 @@ const AddFileButton = (props: AddFileButtonProps) => {
                 onFileChangeSubmit();
                 setOpen(false);
               }}
-              className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-slate-800 dark:hover:bg-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="flex items-center rounded-md bg-black px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:bg-white dark:text-black dark:hover:bg-slate-200"
             >
               {file ? "Change Image" : "Add Image"}
             </button>

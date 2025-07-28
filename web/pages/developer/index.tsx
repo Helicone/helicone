@@ -13,8 +13,8 @@ const Developer: NextPageWithLayout = () => {
   return (
     <DeveloperPage title="Developer">
       <div className="p-4">
-        <h2 className="text-2xl font-bold mb-4">Developer Tools</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <h2 className="mb-4 text-2xl font-bold">Developer Tools</h2>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <DeveloperCard
             title="Keys"
             description="Manage your API keys"
@@ -58,10 +58,10 @@ const DeveloperCard = ({
 }) => (
   <Link
     href={href}
-    className="block p-6 bg-white rounded-lg shadow-md hover:bg-gray-50"
+    className="block rounded-lg bg-white p-6 shadow-md hover:bg-gray-50"
   >
-    <div className="flex items-center mb-2">
-      <Icon className="h-6 w-6 text-indigo-600 mr-2" />
+    <div className="mb-2 flex items-center">
+      <Icon className="mr-2 h-6 w-6 text-indigo-600" />
       <h3 className="text-lg font-semibold">{title}</h3>
     </div>
     <p className="text-gray-600">{description}</p>
@@ -69,13 +69,13 @@ const DeveloperCard = ({
 );
 
 export const ContactUsSection = ({ feature }: { feature: string }) => (
-  <div className="flex flex-col w-full h-96 justify-center items-center">
-    <div className="flex flex-col w-full">
-      <GlobeAltIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
-      <p className="text-xl text-black dark:text-white font-semibold mt-8">
+  <div className="flex h-96 w-full flex-col items-center justify-center">
+    <div className="flex w-full flex-col">
+      <GlobeAltIcon className="h-12 w-12 rounded-lg border border-gray-300 bg-white p-2 text-black dark:border-gray-700 dark:bg-black dark:text-white" />
+      <p className="mt-8 text-xl font-semibold text-black dark:text-white">
         We&apos;d love to learn more about your use case
       </p>
-      <p className="text-sm text-gray-500 max-w-sm mt-2">
+      <p className="mt-2 max-w-sm text-sm text-gray-500">
         Please get in touch with us to discuss our {feature} feature.
       </p>
       <div className="mt-4">
@@ -83,7 +83,7 @@ export const ContactUsSection = ({ feature }: { feature: string }) => (
           href="https://cal.com/team/helicone/helicone-discovery"
           target="_blank"
           rel="noreferrer"
-          className="w-fit items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          className="flex w-fit items-center gap-2 rounded-lg bg-black px-2.5 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:bg-white dark:text-black dark:hover:bg-gray-200"
         >
           Contact Us
         </Link>

@@ -39,7 +39,7 @@ export default function ToolMessage({
                 };
               }
               return message;
-            }
+            },
           ),
         },
       },
@@ -49,12 +49,12 @@ export default function ToolMessage({
   return (
     <div
       className={cn(
-        "flex flex-col gap-2 px-4 pb-4 bg-muted text-xs",
-        !playgroundMode ? "rounded-lg pt-4" : "dark:bg-black pt-2"
+        "flex flex-col gap-2 bg-muted px-4 pb-4 text-xs",
+        !playgroundMode ? "rounded-lg pt-4" : "pt-2 dark:bg-black",
       )}
     >
       {playgroundMode ? (
-        <div className="flex flex-row items-center justify-between w-full">
+        <div className="flex w-full flex-row items-center justify-between">
           <PlaygroundToolAttributes
             toolName={message.name}
             toolCallId={message.tool_call_id}
@@ -79,36 +79,36 @@ export default function ToolMessage({
         />
       ) : (
         <div className="max-h-[400px] overflow-y-auto">
-        <MarkdownEditor
-          className="w-full rounded-none bg-white dark:bg-slate-950"
-          language="markdown"
-          setText={(text) => {
-            if (!mappedRequest || !onChatChange || !messageIndex) {
-              return;
-            }
-            onChatChange?.({
-              ...mappedRequest,
-              schema: {
-                ...mappedRequest.schema,
-                request: {
-                  ...mappedRequest.schema.request,
-                  messages: mappedRequest.schema.request?.messages?.map(
-                    (message, i) => {
-                      if (i === messageIndex) {
-                        return {
-                          ...message,
-                          content: text,
-                        };
-                      }
-                      return message;
-                    }
-                  ),
+          <MarkdownEditor
+            className="w-full rounded-none bg-white dark:bg-slate-950"
+            language="markdown"
+            setText={(text) => {
+              if (!mappedRequest || !onChatChange || !messageIndex) {
+                return;
+              }
+              onChatChange?.({
+                ...mappedRequest,
+                schema: {
+                  ...mappedRequest.schema,
+                  request: {
+                    ...mappedRequest.schema.request,
+                    messages: mappedRequest.schema.request?.messages?.map(
+                      (message, i) => {
+                        if (i === messageIndex) {
+                          return {
+                            ...message,
+                            content: text,
+                          };
+                        }
+                        return message;
+                      },
+                    ),
+                  },
                 },
-              },
-            });
-          }}
-          text={message.content || ""}
-        />
+              });
+            }}
+            text={message.content || ""}
+          />
         </div>
       )}
     </div>

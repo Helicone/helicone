@@ -96,8 +96,8 @@ export function RequestNode(props: {
   const type = node.trace?.request.model.startsWith("tool:")
     ? "tool"
     : node.trace?.request.model.startsWith("vector_db")
-    ? "vector_db"
-    : "LLM";
+      ? "vector_db"
+      : "LLM";
 
   // Get the actual model name for display
   const getModelName = () => {
@@ -116,10 +116,10 @@ export function RequestNode(props: {
   return (
     <div
       className={clsx(
-        "flex flex-col dark:bg-slate-900 py-[8px] pl-4 px-4 group-hover:cursor-pointer w-full",
+        "flex w-full flex-col px-4 py-[8px] pl-4 group-hover:cursor-pointer dark:bg-slate-900",
         selectedRequestId === node.trace?.request_id
-          ? "bg-sky-100 dark:bg-slate-900 hover:bg-sky-100 dark:hover:bg-slate-800"
-          : "bg-white dark:bg-slate-950 group-hover:bg-sky-50 dark:group-hover:bg-slate-800"
+          ? "bg-sky-100 hover:bg-sky-100 dark:bg-slate-900 dark:hover:bg-slate-800"
+          : "bg-white group-hover:bg-sky-50 dark:bg-slate-950 dark:group-hover:bg-slate-800",
       )}
       onClick={() =>
         node.children
@@ -127,13 +127,13 @@ export function RequestNode(props: {
           : setSelectedRequestId(node.trace?.request_id ?? "")
       }
     >
-      <Row className="w-full gap-2 items-center">
-        <Row className="items-center gap-2 flex-grow min-w-0">
+      <Row className="w-full items-center gap-2">
+        <Row className="min-w-0 flex-grow items-center gap-2">
           <div
             className={clsx(
-              "flex-shrink-0 px-2 py-1 text-xs font-medium rounded-md whitespace-nowrap",
+              "flex-shrink-0 whitespace-nowrap rounded-md px-2 py-1 text-xs font-medium",
               REQUEST_TYPE_CONFIG[type as keyof typeof REQUEST_TYPE_CONFIG]
-                .bgColor
+                .bgColor,
             )}
           >
             {
@@ -145,7 +145,7 @@ export function RequestNode(props: {
             <TooltipTrigger asChild>
               <div
                 ref={modelRef}
-                className="flex-grow flex-shrink-1 max-w-[200px] min-w-[100px] bg-transparent dark:bg-transparent dark:border-slate-700 text-slate-700 dark:text-slate-200 px-2 py-1 text-xs font-medium rounded-md truncate"
+                className="flex-shrink-1 min-w-[100px] max-w-[200px] flex-grow truncate rounded-md bg-transparent px-2 py-1 text-xs font-medium text-slate-700 dark:border-slate-700 dark:bg-transparent dark:text-slate-200"
               >
                 {label ?? getModelName()}
               </div>
@@ -156,7 +156,7 @@ export function RequestNode(props: {
               </TooltipContent>
             )}
           </Tooltip>
-          <span className="text-slate-400 dark:text-slate-600 text-[11px] whitespace-nowrap">
+          <span className="whitespace-nowrap text-[11px] text-slate-400 dark:text-slate-600">
             {isRequestSingleChild ? "" : `(${node.latency})`}
           </span>
         </Row>

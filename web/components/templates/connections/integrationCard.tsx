@@ -20,11 +20,11 @@ const IntegrationCard: React.FC<IntegrationCardProps> = ({
   const Logo = LOGOS[title as keyof typeof LOGOS];
 
   return (
-    <Card className="flex flex-col h-[150px]">
+    <Card className="flex h-[150px] flex-col">
       <CardHeader className="flex-grow">
-        <div className="flex items-center justify-between mb-2">
+        <div className="mb-2 flex items-center justify-between">
           <div className="flex items-center">
-            {Logo && <Logo className="w-[2rem] h-[2rem] mr-2" />}
+            {Logo && <Logo className="mr-2 h-[2rem] w-[2rem]" />}
             <CardTitle className="text-lg">{title}</CardTitle>
           </div>
           {enabled !== undefined && (
@@ -40,7 +40,7 @@ const IntegrationCard: React.FC<IntegrationCardProps> = ({
       <CardFooter className="mt-auto">
         <button
           onClick={onClick}
-          className="text-blue-600 hover:text-blue-800 flex items-center text-sm"
+          className="flex items-center text-sm text-blue-600 hover:text-blue-800"
         >
           Configure
           <ArrowRightIcon className="ml-1 h-4 w-4" />

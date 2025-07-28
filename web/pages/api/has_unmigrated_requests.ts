@@ -24,8 +24,8 @@ async function handler(option: HandlerWrapperOptions<Result<boolean, string>>) {
       await dbExecute<{
         exists: boolean;
       }>(query, [userId]),
-      (data) => (data.length > 0 ? data[0]?.exists : false)
-    )
+      (data) => (data.length > 0 ? data[0]?.exists : false),
+    ),
   );
 }
 

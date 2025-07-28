@@ -9,7 +9,7 @@ import { UnPromise } from "../../../lib/tsxHelpers";
 async function handler(
   options: HandlerWrapperOptions<
     UnPromise<ReturnType<typeof getAggregatedKeyMetrics>>
-  >
+  >,
 ) {
   const { req, res, userData } = options;
   const { data: filterData, error: filterError } = resultsAll([
@@ -28,7 +28,7 @@ async function handler(
     userData.orgId,
     req.body.limit,
     req.body.sortKey,
-    req.body.sortDirection
+    req.body.sortDirection,
   );
   res.status(200).json(metrics);
 }

@@ -24,7 +24,7 @@ export default function ViewButton({
   onViewChange,
 }: ViewButtonProps) {
   return (
-    <div className="hidden md:block text-right">
+    <div className="hidden text-right md:block">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button

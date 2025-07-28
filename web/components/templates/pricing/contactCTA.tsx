@@ -4,10 +4,10 @@ import Link from "next/link";
 
 export const ContactCTA = ({}) => {
   return (
-    <div className="border rounded-lg p-4 mt-2">
+    <div className="mt-2 rounded-lg border p-4">
       <Row className="flex items-center justify-between">
         <Col>
-          <h3 className="font-semibold mb-2">Let&apos;s talk</h3>
+          <h3 className="mb-2 font-semibold">Let&apos;s talk</h3>
           <p className="text-sm">
             Contact us with any questions or to get more features.
           </p>

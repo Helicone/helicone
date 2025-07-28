@@ -9,7 +9,7 @@ import { CountryData, getCountries } from "../../../services/lib/country";
 import { FilterNode } from "@helicone-package/filters/filterDefs";
 
 async function handler(
-  options: HandlerWrapperOptions<Result<CountryData[], string>>
+  options: HandlerWrapperOptions<Result<CountryData[], string>>,
 ) {
   const {
     req,
@@ -30,7 +30,7 @@ async function handler(
     filter,
     offset,
     limit,
-    timeFilter
+    timeFilter,
   );
 
   if (error !== null) {

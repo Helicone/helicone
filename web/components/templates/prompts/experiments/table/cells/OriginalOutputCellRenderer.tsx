@@ -83,7 +83,7 @@ export const OriginalOutputCellRenderer = ({
     <Popover open={showPromptPlayground} onOpenChange={setShowPromptPlayground}>
       <PopoverTrigger asChild>
         <div
-          className={`w-full h-full items-center flex ${
+          className={`flex h-full w-full items-center ${
             content ? "justify-start" : "justify-end"
           }`}
           onClick={handleCellClick}
@@ -96,7 +96,7 @@ export const OriginalOutputCellRenderer = ({
             <div>
               <Button
                 variant="ghost"
-                className="w-6 h-6 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500"
+                className="h-6 w-6 rounded-md border border-slate-200 bg-slate-50 p-0 text-slate-500"
                 onClick={(e) => {
                   e.stopPropagation();
                   // params.handleRunHypothesis("original", [
@@ -107,14 +107,14 @@ export const OriginalOutputCellRenderer = ({
                   // ]);
                 }}
               >
-                <PlayIcon className="w-4 h-4" />
+                <PlayIcon className="h-4 w-4" />
               </Button>
             </div>
           )}
         </div>
       </PopoverTrigger>
       <PopoverContent className="w-[800px] p-0" side="bottom" align="start">
-        <ScrollArea className="flex flex-col overflow-y-auto max-h-[50vh]">
+        <ScrollArea className="flex max-h-[50vh] flex-col overflow-y-auto">
           <PromptPlayground
             prompt={formatPromptForPlayground() || ""}
             selectedInput={undefined}

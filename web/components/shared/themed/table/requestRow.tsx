@@ -31,9 +31,9 @@ const RequestRow = (props: RequestRowProps) => {
         index === 0 && "border-t",
         isSelected ? "bg-gray-200 dark:bg-gray-800" : "bg-white dark:bg-black",
         isSelected
-          ? "sticky top-0 bottom-0 border-gray-500"
+          ? "sticky bottom-0 top-0 border-gray-500"
           : "border-gray-300",
-        "text-gray-900 dark:text-gray-100 flex flex-col space-y-4 w-full p-4 border-l border-r  hover:bg-gray-200 dark:border-gray-800 dark:hover:bg-gray-900 hover:cursor-pointer"
+        "flex w-full flex-col space-y-4 border-l border-r p-4 text-gray-900 hover:cursor-pointer hover:bg-gray-200 dark:border-gray-800 dark:text-gray-100 dark:hover:bg-gray-900",
       )}
       onClick={() => {
         if (isSelected) {
@@ -42,7 +42,7 @@ const RequestRow = (props: RequestRowProps) => {
         onSelectRow(row);
       }}
     >
-      <div className="flex flex-row space-x-4 items-center ">
+      <div className="flex flex-row items-center space-x-4">
         <p className="text-sm font-semibold">
           {getUSDateFromString(row.heliconeMetadata.createdAt)}
         </p>
@@ -51,9 +51,12 @@ const RequestRow = (props: RequestRowProps) => {
           errorCode={row.heliconeMetadata.status.code}
         />
       </div>
-      <div className="flex flex-row justify-between items-center">
-        <div className="flex flex-wrap gap-4 items-center">
-          <ModelPill model={row.model} provider={row.heliconeMetadata.provider} />
+      <div className="flex flex-row items-center justify-between">
+        <div className="flex flex-wrap items-center gap-4">
+          <ModelPill
+            model={row.model}
+            provider={row.heliconeMetadata.provider}
+          />
           <p className="text-xs font-semibold">
             {Number(row.heliconeMetadata.latency) / 1000}s
           </p>
@@ -71,8 +74,8 @@ const RequestRow = (props: RequestRowProps) => {
 
         <ChevronRightIcon
           className={clsx(
-            isSelected && isExpanded && "transform rotate-90",
-            "h-4 w-4 text-gray-500"
+            isSelected && isExpanded && "rotate-90 transform",
+            "h-4 w-4 text-gray-500",
           )}
         />
       </div>
@@ -86,7 +89,7 @@ const RequestRow = (props: RequestRowProps) => {
           <p className="text-sm">
             <span className="font-semibold">Total Tokens:</span>{" "}
             {row.heliconeMetadata.totalTokens}{" "}
-            <span className="text-gray-500 text-xs">
+            <span className="text-xs text-gray-500">
               (Completion: {row.heliconeMetadata.completionTokens} / Prompt:{" "}
               {row.heliconeMetadata.promptTokens})
             </span>
@@ -99,7 +102,7 @@ const RequestRow = (props: RequestRowProps) => {
                   if (
                     row.heliconeMetadata.customProperties &&
                     row.heliconeMetadata.customProperties.hasOwnProperty(
-                      property
+                      property,
                     )
                   ) {
                     return (

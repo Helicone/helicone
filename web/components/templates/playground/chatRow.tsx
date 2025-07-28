@@ -45,7 +45,7 @@ interface ChatRowProps {
   callback: (
     userText: string,
     role: string,
-    image: File | string | null
+    image: File | string | null,
   ) => void;
   deleteRow: (rowId: string) => void;
 }
@@ -53,7 +53,7 @@ interface ChatRowProps {
 export const hasImage = (content: string | ContentItem[] | null): boolean => {
   if (Array.isArray(content)) {
     return content.some(
-      (element) => element.type === "image" || element.type === "image_url"
+      (element) => element.type === "image" || element.type === "image_url",
     );
   }
   return false;
@@ -85,22 +85,22 @@ export const PrettyInput = ({
             onClick={() => setOpen(!open)}
             className={clsx(
               selectedProperties
-                ? "bg-sky-100 border-sky-300 dark:bg-sky-950 dark:border-sky-700"
-                : "bg-yellow-100 border-yellow-300 dark:bg-yellow-950 dark:border-yellow-700",
-              "relative text-sm text-gray-900 dark:text-gray-100 border rounded-lg py-1 px-3 text-left"
+                ? "border-sky-300 bg-sky-100 dark:border-sky-700 dark:bg-sky-950"
+                : "border-yellow-300 bg-yellow-100 dark:border-yellow-700 dark:bg-yellow-950",
+              "relative rounded-lg border px-3 py-1 text-left text-sm text-gray-900 dark:text-gray-100",
             )}
             title={renderText}
           >
-            <ArrowsPointingOutIcon className="h-4 w-4 text-sky-500 absolute right-2 top-1.5 transform" />
+            <ArrowsPointingOutIcon className="absolute right-2 top-1.5 h-4 w-4 transform text-sky-500" />
             <p className="pr-8">{renderText.slice(0, TEXT_LIMIT)}...</p>
           </button>
         ) : (
           <span
             className={clsx(
               selectedProperties
-                ? "bg-sky-100 border-sky-300 dark:bg-sky-950 dark:border-sky-700"
-                : "bg-yellow-100 border-yellow-300 dark:bg-yellow-950 dark:border-yellow-700",
-              "inline-block border text-gray-900 dark:text-gray-100 rounded-lg py-1 px-3 text-sm"
+                ? "border-sky-300 bg-sky-100 dark:border-sky-700 dark:bg-sky-950"
+                : "border-yellow-300 bg-yellow-100 dark:border-yellow-700 dark:bg-yellow-950",
+              "inline-block rounded-lg border px-3 py-1 text-sm text-gray-900 dark:text-gray-100",
             )}
           >
             {renderText}
@@ -109,15 +109,15 @@ export const PrettyInput = ({
       </Tooltip>
 
       <ThemedModal open={open} setOpen={setOpen}>
-        <div className="w-[66vw] h-full flex flex-col space-y-4">
-          <div className="flex items-center w-full justify-center">
+        <div className="flex h-full w-[66vw] flex-col space-y-4">
+          <div className="flex w-full items-center justify-center">
             <h3 className="text-2xl font-semibold">{keyName}</h3>
             <button onClick={() => setOpen(false)} className="ml-auto">
               <XMarkIcon className="h-6 w-6 text-gray-500" />
             </button>
           </div>
 
-          <div className="bg-white border-gray-300 dark:bg-black dark:border-gray-700 p-4 border rounded-lg flex flex-col space-y-4">
+          <div className="flex flex-col space-y-4 rounded-lg border border-gray-300 bg-white p-4 dark:border-gray-700 dark:bg-black">
             <MarkdownEditor
               text={selectedProperties?.[keyName] || ""}
               setText={(text) => {
@@ -164,7 +164,7 @@ export const RenderWithPrettyInputKeys = (props: {
           keyName={keyName}
           key={offset}
           selectedProperties={selectedProperties}
-        />
+        />,
       );
 
       // Update lastIndex to the end of the current match
@@ -182,7 +182,7 @@ export const RenderWithPrettyInputKeys = (props: {
   };
 
   return (
-    <div className="text-md leading-8 text-black dark:text-white whitespace-pre-wrap">
+    <div className="text-md whitespace-pre-wrap leading-8 text-black dark:text-white">
       {replaceInputKeysWithComponents(text)}
     </div>
   );
@@ -211,7 +211,7 @@ const ChatRow = (props: ChatRowProps) => {
   const searchAndGetImage = (message: ExtendedMessage) => {
     if (Array.isArray(message.content) && hasImage(message.content)) {
       const image = message.content.find(
-        (element) => element.type === "image" || element.type === "image_url"
+        (element) => element.type === "image" || element.type === "image_url",
       );
       return image?.image_url?.url || image?.image || null;
     }
@@ -219,7 +219,7 @@ const ChatRow = (props: ChatRowProps) => {
   };
 
   const [file, setFile] = useState<File | string | null>(
-    searchAndGetImage(message)
+    searchAndGetImage(message),
   );
 
   const { setNotification } = useNotification();
@@ -227,7 +227,7 @@ const ChatRow = (props: ChatRowProps) => {
   const getContentAsString = (rawMessage: ExtendedMessage): string => {
     if (Array.isArray(rawMessage.content)) {
       const textMessage = rawMessage.content.find(
-        (element) => element.type === "text"
+        (element) => element.type === "text",
       );
       return textMessage?.text || "";
     } else {
@@ -287,7 +287,7 @@ const ChatRow = (props: ChatRowProps) => {
 
   const getContent = (
     message: ExtendedMessage,
-    minimize: boolean
+    minimize: boolean,
   ): JSX.Element => {
     const content = message.content;
 
@@ -300,13 +300,13 @@ const ChatRow = (props: ChatRowProps) => {
       const imageElements = content
         .filter(
           (item): item is ContentItem =>
-            item.type === "image_url" || item.type === "image"
+            item.type === "image_url" || item.type === "image",
         )
         .map((item, index) => (
           <div key={index} className="relative">
             {item.image_url?.url ? (
               item.image_url.url.includes("helicone-prompt-input") ? (
-                <div className="p-5 border">
+                <div className="border p-5">
                   {extractKey(item.image_url.url)}
                 </div>
               ) : (
@@ -327,7 +327,7 @@ const ChatRow = (props: ChatRowProps) => {
                 height={256}
               />
             ) : (
-              <div className="h-[150px] w-[200px] bg-white border border-gray-300 text-center items-center flex justify-center text-xs italic text-gray-500">
+              <div className="flex h-[150px] w-[200px] items-center justify-center border border-gray-300 bg-white text-center text-xs italic text-gray-500">
                 Unsupported Image Type
               </div>
             )}
@@ -340,7 +340,7 @@ const ChatRow = (props: ChatRowProps) => {
                 };
                 if (newMessage.content && Array.isArray(newMessage.content)) {
                   const textContent = newMessage.content.find(
-                    (element) => element.type === "text"
+                    (element) => element.type === "text",
                   );
                   newMessage.content = textContent?.text || "";
                 }
@@ -349,7 +349,7 @@ const ChatRow = (props: ChatRowProps) => {
                 callback(contentAsString || "", role, null);
               }}
             >
-              <XMarkIcon className="absolute -top-2 -right-2 h-4 w-4 text-white bg-red-500 rounded-full p-0.5" />
+              <XMarkIcon className="absolute -right-2 -top-2 h-4 w-4 rounded-full bg-red-500 p-0.5 text-white" />
             </button>
           </div>
         ));
@@ -367,7 +367,7 @@ const ChatRow = (props: ChatRowProps) => {
             }}
           />
           {hasImage(content) && (
-            <div className="flex flex-wrap items-center pt-4 border-t border-gray-300 dark:border-gray-700">
+            <div className="flex flex-wrap items-center border-t border-gray-300 pt-4 dark:border-gray-700">
               {imageElements}
             </div>
           )}
@@ -378,14 +378,14 @@ const ChatRow = (props: ChatRowProps) => {
       return (
         <div className="flex flex-col space-y-2">
           {message.content !== null && message.content !== "" && (
-            <code className="text-xs whitespace-pre-wrap font-semibold">
+            <code className="whitespace-pre-wrap text-xs font-semibold">
               {JSON.stringify(message.content, null, 2)}
             </code>
           )}
           {tools.map((tool, index) => (
             <pre
               key={index}
-              className="text-xs whitespace-pre-wrap rounded-lg overflow-auto"
+              className="overflow-auto whitespace-pre-wrap rounded-lg text-xs"
             >
               {`${tool.name}(${JSON.stringify(tool.arguments)})`}
             </pre>
@@ -420,12 +420,12 @@ const ChatRow = (props: ChatRowProps) => {
       className={clsx(
         index === 0 ? "rounded-t-lg" : "border-t",
         "bg-white dark:bg-black",
-        "flex flex-row justify-between gap-8 border-gray-300 dark:border-gray-700"
+        "flex flex-row justify-between gap-8 border-gray-300 dark:border-gray-700",
       )}
     >
-      <div className="flex flex-col gap-4 w-full">
-        <div className="flex flex-col w-full h-full relative space-y-4">
-          <div className="flex w-full justify-between px-8 pt-4 rounded-t-lg">
+      <div className="flex w-full flex-col gap-4">
+        <div className="relative flex h-full w-full flex-col space-y-4">
+          <div className="flex w-full justify-between rounded-t-lg px-8 pt-4">
             <RoleButton
               role={role}
               onRoleChange={(newRole) => {
@@ -450,7 +450,7 @@ const ChatRow = (props: ChatRowProps) => {
                       setIsEditing(true);
                     }
                   }}
-                  className="text-gray-500 font-semibold"
+                  className="font-semibold text-gray-500"
                 >
                   <PencilSquareIcon className="h-5 w-5" />
                 </button>
@@ -460,7 +460,7 @@ const ChatRow = (props: ChatRowProps) => {
                   onClick={() => {
                     setMinimize(!minimize);
                   }}
-                  className="text-gray-500 font-semibold"
+                  className="font-semibold text-gray-500"
                 >
                   {minimize ? (
                     <EyeIcon className="h-5 w-5" />
@@ -475,7 +475,7 @@ const ChatRow = (props: ChatRowProps) => {
                     navigator.clipboard.writeText(contentAsString || "");
                     setNotification("Copied to clipboard", "success");
                   }}
-                  className="text-gray-500 font-semibold"
+                  className="font-semibold text-gray-500"
                 >
                   <ClipboardIcon className="h-5 w-5" />
                 </button>
@@ -485,7 +485,7 @@ const ChatRow = (props: ChatRowProps) => {
                   onClick={() => {
                     deleteRow(currentMessage.id || "");
                   }}
-                  className="text-red-500 font-semibold"
+                  className="font-semibold text-red-500"
                 >
                   <TrashIcon className="h-5 w-5" />
                 </button>
@@ -505,7 +505,7 @@ const ChatRow = (props: ChatRowProps) => {
                     const messageContent = newMessages.content;
                     if (Array.isArray(messageContent)) {
                       const textMessage = messageContent.find(
-                        (element) => element.type === "text"
+                        (element) => element.type === "text",
                       );
                       if (textMessage) {
                         textMessage.text = text;

@@ -10,7 +10,7 @@ export interface DateCountDBModel {
 }
 
 export async function getCostOverTime(
-  data: DataOverTimeRequest
+  data: DataOverTimeRequest,
 ): Promise<Result<DateCountDBModel[], string>> {
   const res = await getXOverTime<{
     cost: number;
@@ -19,6 +19,6 @@ export async function getCostOverTime(
     resData.map((d) => ({
       time: new Date(new Date(d.created_at_trunc).getTime()),
       cost: Number(d.cost),
-    }))
+    })),
   );
 }

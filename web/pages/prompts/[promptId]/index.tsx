@@ -13,7 +13,7 @@ Page.getLayout = function getLayout(page: ReactElement) {
   return <AuthLayout>{page}</AuthLayout>;
 };
 export const getServerSideProps = async (
-  context: GetServerSidePropsContext<PageParams>
+  context: GetServerSidePropsContext<PageParams>,
 ) => {
   return {
     props: {

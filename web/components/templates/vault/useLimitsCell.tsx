@@ -24,7 +24,7 @@ const useLimitsCell = (limits?: DecryptedProviderKeyMapping["limits"]) => {
           "Content-Type": "application/json",
         },
       }).then(
-        (res) => res.json() as Promise<Result<LimitUsageResult[], string>>
+        (res) => res.json() as Promise<Result<LimitUsageResult[], string>>,
       );
       return resp;
     },

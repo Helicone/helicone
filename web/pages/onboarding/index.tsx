@@ -52,7 +52,7 @@ export default function OnboardingPage() {
       onboardingState?.name && onboardingState.name !== "My Organization"
         ? "Organization updated!"
         : "Organization created!",
-      "success"
+      "success",
     );
 
     updateCurrentStep("INTEGRATION");
@@ -61,9 +61,9 @@ export default function OnboardingPage() {
 
   if (subscription.isLoading || isLoading) {
     return (
-      <div className="min-h-screen w-full flex flex-col items-center">
+      <div className="flex min-h-screen w-full flex-col items-center">
         <OnboardingHeader />
-        <div className="mx-auto w-full max-w-md px-4 mt-12">
+        <div className="mx-auto mt-12 w-full max-w-md px-4">
           <div className="flex flex-col gap-4">
             <div className="animate-pulse">Loading...</div>
           </div>
@@ -74,7 +74,7 @@ export default function OnboardingPage() {
 
   return (
     <OnboardingHeader>
-      <div className="mx-auto w-full max-w-md px-4 mt-12">
+      <div className="mx-auto mt-12 w-full max-w-md px-4">
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <H1>Welcome to Helicone! 👋</H1>
@@ -88,7 +88,7 @@ export default function OnboardingPage() {
           <OrganizationStep />
 
           {isSubscribed && (
-            <Alert className="bg-[hsl(var(--muted))] border-[hsl(var(--border))]">
+            <Alert className="border-[hsl(var(--border))] bg-[hsl(var(--muted))]">
               <Info size={16} />
               <AlertDescription className="text-[hsl(var(--muted-foreground))]">
                 Already subscribed! You can update your organization name here.

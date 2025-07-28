@@ -53,9 +53,10 @@ export default function ResponseFormatModal({
   const { setNotification } = useNotification();
 
   useEffect(() => {
-    const newValue = typeof responseFormat === 'string' 
-      ? responseFormat 
-      : JSON.stringify(responseFormat, null, 2);
+    const newValue =
+      typeof responseFormat === "string"
+        ? responseFormat
+        : JSON.stringify(responseFormat, null, 2);
     setResponseFormatText(newValue);
   }, [responseFormat]);
 
@@ -68,7 +69,7 @@ export default function ResponseFormatModal({
       </DialogTrigger> */}
       <DialogContent
         className={clsx(
-          "max-w-7xl max-h-[600px] flex flex-col overflow-y-auto"
+          "flex max-h-[600px] max-w-7xl flex-col overflow-y-auto",
         )}
       >
         <DialogHeader>
@@ -80,10 +81,10 @@ export default function ResponseFormatModal({
             language="json"
             text={responseFormatText}
             setText={setResponseFormatText}
-            className="w-full min-h-[350px]"
+            className="min-h-[350px] w-full"
           />
         </div>
-        <DialogFooter className="flex justify-between w-full">
+        <DialogFooter className="flex w-full justify-between">
           <DialogClose asChild>
             <Button variant="outline">Cancel</Button>
           </DialogClose>

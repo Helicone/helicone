@@ -6,7 +6,7 @@ import { Result } from "@/packages/common/result";
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Result<number[], string>>
+  res: NextApiResponse<Result<number[], string>>,
 ) {
   res
     .status(200)

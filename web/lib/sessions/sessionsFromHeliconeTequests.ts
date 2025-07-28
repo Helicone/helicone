@@ -4,7 +4,7 @@ import { HeliconeRequest } from "@helicone-package/llm-mapper/types";
 import { Session, Trace } from "./sessionTypes";
 
 export function sessionFromHeliconeRequests(
-  requests: HeliconeRequest[]
+  requests: HeliconeRequest[],
 ): Session {
   if (requests.length === 0) {
     return {
@@ -34,10 +34,10 @@ export function sessionFromHeliconeRequests(
 
   return {
     start_time_unix_timestamp_ms: new Date(
-      firstRequest.request_created_at
+      firstRequest.request_created_at,
     ).getTime(),
     end_time_unix_timestamp_ms: new Date(
-      lastRequest.response_created_at ?? lastRequest.request_created_at // Fallback to request time if response time is missing
+      lastRequest.response_created_at ?? lastRequest.request_created_at, // Fallback to request time if response time is missing
     ).getTime(),
     session_id: firstRequest.request_properties?.[
       "Helicone-Session-Id"
@@ -55,24 +55,27 @@ export function sessionFromHeliconeRequests(
           sum_tokens: (r.completion_tokens ?? 0) + (r.prompt_tokens ?? 0), // Fixed sum logic
           prompt_audio_tokens: r.prompt_audio_tokens ?? 0,
           completion_audio_tokens: r.completion_audio_tokens ?? 0,
-        })
+        }),
       )
       .reduce((a, b) => a + b, 0),
     traces: sortedRequests // Use sortedRequests here
       .map((request) => {
         const x: Trace = {
           start_unix_timestamp_ms: new Date(
-            request.request_created_at
+            request.request_created_at,
           ).getTime(),
           end_unix_timestamp_ms: new Date(
-            request.response_created_at ?? request.request_created_at // Fallback to request time if response time is missing
+            request.response_created_at ?? request.request_created_at, // Fallback to request time if response time is missing
           ).getTime(),
           properties: Object.entries(request.request_properties ?? {})
             .filter(([key]) => key.startsWith("Helicone-") === false)
-            .reduce((acc, [key, value]) => {
-              acc[key] = value as string;
-              return acc;
-            }, {} as Record<string, string>),
+            .reduce(
+              (acc, [key, value]) => {
+                acc[key] = value as string;
+                return acc;
+              },
+              {} as Record<string, string>,
+            ),
           path:
             (request.request_properties?.["Helicone-Session-Path"] as string) ??
             "/",

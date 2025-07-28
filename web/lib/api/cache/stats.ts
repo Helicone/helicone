@@ -27,7 +27,7 @@ function buildTimeFilter(timeFilter: TimeFilter): FilterNode {
 
 export async function getCacheCountClickhouse(
   orgId: string,
-  timeFilter: TimeFilter
+  timeFilter: TimeFilter,
 ): Promise<Result<number, string>> {
   const builtFilter = await buildFilterWithAuthClickHouseCacheMetrics({
     org_id: orgId,
@@ -48,14 +48,14 @@ export async function getCacheCountClickhouse(
 
   const queryResult = await dbQueryClickhouse<{ count: number }>(
     query,
-    builtFilter.argsAcc
+    builtFilter.argsAcc,
   );
   return resultMap(queryResult, (results) => Number(results[0].count));
 }
 
 export async function getTotalSavingsClickhouse(
   orgId: string,
-  timeFilter: TimeFilter
+  timeFilter: TimeFilter,
 ): Promise<Result<ModelMetrics[], string>> {
   const builtFilter = await buildFilterWithAuthClickHouseCacheMetrics({
     org_id: orgId,
@@ -80,7 +80,7 @@ export async function getTotalSavingsClickhouse(
 
   const rmtResult = await dbQueryClickhouse<ModelMetrics>(
     query,
-    builtFilter.argsAcc
+    builtFilter.argsAcc,
   );
 
   return resultMap(rmtResult, (metrics) =>
@@ -90,15 +90,15 @@ export async function getTotalSavingsClickhouse(
           ...acc,
           [`${metric.model}-${metric.provider}`]: metric,
         }),
-        {} as Record<string, ModelMetrics>
-      )
-    )
+        {} as Record<string, ModelMetrics>,
+      ),
+    ),
   );
 }
 
 export async function getTimeSavedClickhouse(
   orgId: string,
-  timeFilter: TimeFilter
+  timeFilter: TimeFilter,
 ): Promise<Result<number, string>> {
   const builtFilter = await buildFilterWithAuthClickHouseCacheMetrics({
     org_id: orgId,
@@ -112,10 +112,10 @@ export async function getTimeSavedClickhouse(
   `;
   const queryResult = await dbQueryClickhouse<{ total_latency_ms: number }>(
     query,
-    builtFilter.argsAcc
+    builtFilter.argsAcc,
   );
   return resultMap(queryResult, (results) =>
-    Number(results[0]?.total_latency_ms ?? 0)
+    Number(results[0]?.total_latency_ms ?? 0),
   );
 }
 
@@ -131,7 +131,7 @@ export interface TopCachedRequest {
 
 export async function getTopCachedRequestsClickhouse(
   orgId: string,
-  timeFilter: TimeFilter
+  timeFilter: TimeFilter,
 ): Promise<Result<TopCachedRequest[], string>> {
   const builtFilter = await buildFilterWithAuthClickHouseCacheMetrics({
     org_id: orgId,
@@ -157,7 +157,7 @@ export async function getTopCachedRequestsClickhouse(
 
   const rmtResult = await dbQueryClickhouse<TopCachedRequest>(
     query,
-    builtFilter.argsAcc
+    builtFilter.argsAcc,
   );
 
   return resultMap(rmtResult, (requests) =>
@@ -169,6 +169,6 @@ export async function getTopCachedRequestsClickhouse(
         last_used: new Date(request.last_used),
       }))
       .sort((a, b) => b.count - a.count)
-      .slice(0, 10)
+      .slice(0, 10),
   );
 }

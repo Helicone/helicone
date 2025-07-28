@@ -156,15 +156,12 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
 
         let highlighted = highlight(code, lang, ref);
         if (language === "markdown" || language === "json") {
-          highlighted = highlighted.replace(
-            TEMPLATE_REGEX,
-            (match) => {
-              const variable = HeliconeTemplateManager.extractVariables(match)[0];
-              if (!variable) return match;
-              const color = getColor(variable.name);
-              return `<span class="font-bold text-${color}">${match}</span>`;
-            }
-          );
+          highlighted = highlighted.replace(TEMPLATE_REGEX, (match) => {
+            const variable = HeliconeTemplateManager.extractVariables(match)[0];
+            if (!variable) return match;
+            const color = getColor(variable.name);
+            return `<span class="font-bold text-${color}">${match}</span>`;
+          });
         }
 
         return highlighted;

@@ -352,6 +352,25 @@
           },
 
           {
+            "group": "Prompts",
+            "pages": [
+              "rest/prompts/get-v1prompt-2025-id-promptid",
+              "rest/prompts/post-v1prompt-2025-id-promptid-rename",
+              "rest/prompts/delete-v1prompt-2025-promptid",
+              "rest/prompts/delete-v1prompt-2025-promptid-versionid",
+              "rest/prompts/get-v1prompt-2025-tags",
+              "rest/prompts/post-v1prompt-2025",
+              "rest/prompts/post-v1prompt-2025-update",
+              "rest/prompts/post-v1prompt-2025-update-production-version",
+              "rest/prompts/get-v1prompt-2025-count",
+              "rest/prompts/post-v1prompt-2025-query",
+              "rest/prompts/post-v1prompt-2025-query-version",
+              "rest/prompts/post-v1prompt-2025-query-versions",
+              "rest/prompts/post-v1prompt-2025-query-production-version",
+              "rest/prompts/post-v1prompt-2025-query-total-versions"
+            ]
+          },
+          {
             "group": "User",
             "pages": [
               "rest/user/post-v1usermetrics-overviewquery",

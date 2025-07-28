@@ -43,8 +43,8 @@ const UserIdPage = (props: UserIdPageProps) => {
   const router = useRouter();
 
   return (
-    <IslandContainer className=" py-10">
-      <div className="flex flex-col items-start space-y-4 w-full">
+    <IslandContainer className="py-10">
+      <div className="flex w-full flex-col items-start space-y-4">
         <HcBreadcrumb
           pages={[
             {
@@ -58,9 +58,9 @@ const UserIdPage = (props: UserIdPageProps) => {
             // {},
           ]}
         />
-        <div className="flex justify-between w-full">
-          <div className="flex gap-4 items-end">
-            <h1 className="font-semibold text-4xl text-black dark:text-white">
+        <div className="flex w-full justify-between">
+          <div className="flex items-end gap-4">
+            <h1 className="text-4xl font-semibold text-black dark:text-white">
               {userId}
             </h1>
           </div>
@@ -71,17 +71,17 @@ const UserIdPage = (props: UserIdPageProps) => {
         {isLoading ? (
           <LoadingAnimation />
         ) : !user ? (
-          <div className="grid grid-cols-10 gap-8 w-full pt-8">
-            <div className="flex flex-col items-start space-y-4 w-full col-span-12 md:col-span-3 pt-2">
+          <div className="grid w-full grid-cols-10 gap-8 pt-8">
+            <div className="col-span-12 flex w-full flex-col items-start space-y-4 pt-2 md:col-span-3">
               <p className="text-sm text-gray-500">User not found</p>
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-10 gap-8 w-full pt-8">
-            <div className="flex flex-col items-start space-y-4 w-full col-span-12 md:col-span-3 pt-2">
-              <div className="flex flex-col space-y-2 divide-y divide-gray-200 dark:divide-gray-800 w-full text-black dark:text-white">
-                <p className="font-semibold text-md">Overview (Last 30 days)</p>
-                <div className="flex flex-wrap w-full justify-between gap-2 pt-4 pr-4">
+          <div className="grid w-full grid-cols-10 gap-8 pt-8">
+            <div className="col-span-12 flex w-full flex-col items-start space-y-4 pt-2 md:col-span-3">
+              <div className="flex w-full flex-col space-y-2 divide-y divide-gray-200 text-black dark:divide-gray-800 dark:text-white">
+                <p className="text-md font-semibold">Overview (Last 30 days)</p>
+                <div className="flex w-full flex-wrap justify-between gap-2 pr-4 pt-4">
                   <div className="flex flex-col items-start space-y-1">
                     <p className="text-sm font-semibold">Total Cost</p>
                     <p className="text-sm text-gray-500">
@@ -102,9 +102,9 @@ const UserIdPage = (props: UserIdPageProps) => {
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col space-y-2 divide-y divide-gray-200 dark:divide-gray-800 w-full pt-8 text-black dark:text-white">
-                <p className="font-semibold text-md">Details (Last 30 days)</p>
-                <div className="flex flex-col pt-4 pr-4 space-y-4">
+              <div className="flex w-full flex-col space-y-2 divide-y divide-gray-200 pt-8 text-black dark:divide-gray-800 dark:text-white">
+                <p className="text-md font-semibold">Details (Last 30 days)</p>
+                <div className="flex flex-col space-y-4 pr-4 pt-4">
                   <div className="flex flex-col items-start space-y-1">
                     <p className="text-sm font-semibold">First Active</p>
                     <p className="text-sm text-gray-500">
@@ -136,7 +136,7 @@ const UserIdPage = (props: UserIdPageProps) => {
                 </div>
               </div>
             </div>
-            <div className="flex flex-col w-full h-full col-span-12 md:col-span-7">
+            <div className="col-span-12 flex h-full w-full flex-col md:col-span-7">
               <Tabs defaultValue={defaultIndex.toString()} className="w-full">
                 <TabsList>
                   {tabs.map((tab) => (
@@ -151,7 +151,7 @@ const UserIdPage = (props: UserIdPageProps) => {
                             query: { id, page, t, tab: tab.id },
                           },
                           undefined,
-                          { shallow: true }
+                          { shallow: true },
                         );
                       }}
                       className="flex items-center gap-2"
@@ -162,7 +162,7 @@ const UserIdPage = (props: UserIdPageProps) => {
                   ))}
                 </TabsList>
                 <TabsContent value="0">
-                  <div className="py-4 flex flex-col space-y-4">
+                  <div className="flex flex-col space-y-4 py-4">
                     <StyledAreaChart
                       title={"Requests last 30 days"}
                       value={undefined}

@@ -21,7 +21,11 @@ interface PlaygroundActionsProps {
   setTools: (_tools: Tool[]) => void;
   promptVersionId: string | undefined;
   onCreatePrompt: (tags: string[], promptName: string) => void;
-  onSavePrompt: (newMajorVersion: boolean, setAsProduction: boolean, commitMessage: string) => void;
+  onSavePrompt: (
+    newMajorVersion: boolean,
+    setAsProduction: boolean,
+    commitMessage: string,
+  ) => void;
   onRun: () => void;
   requestId?: string;
   isScrolled: boolean;
@@ -85,7 +89,7 @@ const PlaygroundActions = ({
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" onClick={resetToDefault}>
-              <Undo2Icon className="w-4 h-4" />
+              <Undo2Icon className="h-4 w-4" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
@@ -93,7 +97,7 @@ const PlaygroundActions = ({
           </TooltipContent>
         </Tooltip>
       )}
-      
+
       <PromptForm
         isScrolled={isScrolled}
         saveAndVersion={!!promptVersionId}
@@ -106,11 +110,11 @@ const PlaygroundActions = ({
         </TooltipTrigger>
         <TooltipContent>
           <div className="flex items-center gap-1">
-            <div className="p-1 rounded-md bg-muted">
-              <CommandIcon className="w-3 h-3" />
+            <div className="rounded-md bg-muted p-1">
+              <CommandIcon className="h-3 w-3" />
             </div>
             +{" "}
-            <div className="px-1 py rounded-md bg-muted">
+            <div className="py rounded-md bg-muted px-1">
               <kbd className="text-xs">Enter</kbd>
             </div>
           </div>

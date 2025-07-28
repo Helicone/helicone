@@ -50,7 +50,7 @@ export interface BASE_Env {
     | "GATEWAY_API"
     | "CUSTOMER_GATEWAY"
     | "GENERATE_API"
-    | "VAPI_PROXY"
+    | "VAPI_PROXY";
   TOKEN_CALC_URL: string;
   VAULT_ENABLED: string;
   STORAGE_URL: string;
@@ -152,13 +152,6 @@ async function modifyEnvBasedOnPath(
     };
   }
 
-
-  return {
-    ...env,
-    WORKER_TYPE: "GATEWAY_API",
-    GATEWAY_TARGET: "https://integrate.api.nvidia.com",
-  };
-
   if (env.WORKER_TYPE) {
     return env;
   }
@@ -192,6 +185,12 @@ async function modifyEnvBasedOnPath(
       return {
         ...env,
         WORKER_TYPE: "HELICONE_API",
+      };
+    } else if (hostParts[0].includes("vercel")) {
+      return {
+        ...env,
+        WORKER_TYPE: "GATEWAY_API",
+        GATEWAY_TARGET: "https://ai-gateway.vercel.sh",
       };
     } else if (hostParts[0].includes("together")) {
       if (isRootPath(url) && request.getMethod() === "GET") {

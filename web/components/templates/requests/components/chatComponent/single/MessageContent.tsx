@@ -39,7 +39,7 @@ export const MessageContent: React.FC<MessageContentProps> = ({
           {message.tool_call_id && (
             <Badge
               variant="secondary"
-              className="font-mono text-xs bg-muted text-muted-foreground underline py-2"
+              className="font-mono bg-muted py-2 text-xs text-muted-foreground underline"
             >
               {message.tool_call_id}
             </Badge>
@@ -77,13 +77,13 @@ export const MessageContent: React.FC<MessageContentProps> = ({
               mode={mode}
             />
           ) : (
-            <div className="space-y-4 w-full">
+            <div className="w-full space-y-4">
               {message.contentArray?.map((content, index) => (
                 <div
                   key={index}
-                  className="border border-gray-200 dark:border-gray-800 rounded-lg p-4 "
+                  className="rounded-lg border border-gray-200 p-4 dark:border-gray-800"
                 >
-                  <div className="text-xs text-muted-foreground mb-2 underline">
+                  <div className="mb-2 text-xs text-muted-foreground underline">
                     Content {index + 1} of {message.contentArray?.length}
                   </div>
                   <MessageContent

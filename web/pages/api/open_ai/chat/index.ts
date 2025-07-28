@@ -12,7 +12,7 @@ import { Result } from "@/packages/common/result";
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Result<ChatCompletion, string>>
+  res: NextApiResponse<Result<ChatCompletion, string>>,
 ) {
   const client = await getSSRHeliconeAuthClient({ ctx: { req, res } });
   const user = await client.getUser();

@@ -35,7 +35,7 @@ Sessions.getLayout = function getLayout(page: ReactElement) {
 export default Sessions;
 
 export const getServerSideProps = async (
-  context: GetServerSidePropsContext
+  context: GetServerSidePropsContext,
 ) => {
   const {
     page,

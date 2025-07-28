@@ -30,10 +30,10 @@ export const AddRowPopover: React.FC<AddRowPopoverProps> = ({
           setPopoverOpen(false);
           setShowAddManualRow();
         }}
-        className="h-8 w-full flex items-center justify-start"
+        className="flex h-8 w-full items-center justify-start"
         variant="ghost"
       >
-        <PencilIcon className="inline h-4 w-4 mr-2" />
+        <PencilIcon className="mr-2 inline h-4 w-4" />
         Manual input
       </Button>
       <Button
@@ -41,10 +41,10 @@ export const AddRowPopover: React.FC<AddRowPopoverProps> = ({
           setPopoverOpen(false);
           setShowExperimentInputSelector(true);
         }}
-        className="h-8 w-full flex items-center justify-start"
+        className="flex h-8 w-full items-center justify-start"
         variant="ghost"
       >
-        <TableCellsIcon className="inline h-4 w-4 mr-2" />
+        <TableCellsIcon className="mr-2 inline h-4 w-4" />
         Select an input set
       </Button>
       <Button
@@ -52,10 +52,10 @@ export const AddRowPopover: React.FC<AddRowPopoverProps> = ({
           setPopoverOpen(false);
           setShowRandomInputSelector(true);
         }}
-        className="h-8 w-full flex items-center justify-start"
+        className="flex h-8 w-full items-center justify-start"
         variant="ghost"
       >
-        <Dices className="inline h-4 w-4 mr-2" />
+        <Dices className="mr-2 inline h-4 w-4" />
         Random prod
       </Button>
       <Button
@@ -63,10 +63,10 @@ export const AddRowPopover: React.FC<AddRowPopoverProps> = ({
           setPopoverOpen(false);
           setShowExperimentDatasetSelector(true);
         }}
-        className="w-full h-8 flex items-center justify-start"
+        className="flex h-8 w-full items-center justify-start"
         variant="ghost"
       >
-        <FolderIcon className="inline h-4 w-4 mr-2" />
+        <FolderIcon className="mr-2 inline h-4 w-4" />
         Select a dataset
       </Button>
       <Button
@@ -74,10 +74,10 @@ export const AddRowPopover: React.FC<AddRowPopoverProps> = ({
           setPopoverOpen(false);
           setShowImportCsvModal(true);
         }}
-        className="w-full h-8 flex items-center justify-start"
+        className="flex h-8 w-full items-center justify-start"
         variant="ghost"
       >
-        <UploadIcon className="w-4 h-4 mr-2" />
+        <UploadIcon className="mr-2 h-4 w-4" />
         Import from CSV
       </Button>
     </div>

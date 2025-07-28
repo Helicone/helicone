@@ -2,7 +2,7 @@ import { dbExecute } from "../db/dbExecute";
 
 async function _checkAccessToOrg(
   orgId: string,
-  userId: string
+  userId: string,
 ): Promise<boolean> {
   const query = `
   select * from organization_member om
@@ -20,7 +20,7 @@ async function _checkAccessToOrg(
 
 export async function checkAccessToMutateOrg(
   orgId: string,
-  userId: string
+  userId: string,
 ): Promise<boolean> {
   const orgToCheck = await dbExecute<{
     id: string;

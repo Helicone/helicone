@@ -3,7 +3,7 @@ import { getXOverTime } from "./getXOverTime";
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
 
 export async function getTimeToFirstToken(
-  data: DataOverTimeRequest
+  data: DataOverTimeRequest,
 ): Promise<Result<TimeToFirstToken[], string>> {
   const res = await getXOverTime<{
     ttft: number;
@@ -12,7 +12,7 @@ export async function getTimeToFirstToken(
     resData.map((d) => ({
       time: new Date(new Date(d.created_at_trunc).getTime()),
       ttft: Number(d.ttft),
-    }))
+    })),
   );
 }
 export interface TimeToFirstToken {

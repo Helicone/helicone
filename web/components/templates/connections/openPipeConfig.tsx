@@ -102,14 +102,14 @@ const OpenPipeConfig: React.FC<OpenPipeConfigProps> = ({ onClose }) => {
           disabled={true || isLoading}
         />
         <Label htmlFor="autoDatasetSync">Enable Auto Dataset Syncing</Label>
-        <i className="text-muted-foreground text-xs opacity-50">
+        <i className="text-xs text-muted-foreground opacity-50">
           {" "}
           comming soon
         </i>
       </div>
 
       <Button onClick={handleSave} disabled={isSaving || isLoading}>
-        {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+        {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
         Save Configuration
       </Button>
     </div>

@@ -24,7 +24,7 @@ async function handler({
 
   const deleteProxyKeys = await dbExecute(
     `UPDATE provider_keys SET soft_delete = true WHERE id = $1 and org_id = $2`,
-    [id, userData.orgId]
+    [id, userData.orgId],
   );
 
   if (deleteProxyKeys.error) {

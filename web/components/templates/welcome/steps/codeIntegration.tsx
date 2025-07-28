@@ -25,13 +25,13 @@ const CodeIntegration = (props: CodeIntegrationProps) => {
         `transition-all duration-700 ease-in-out ${
           loaded ? "opacity-100" : "opacity-0"
         }`,
-        "flex flex-col items-center w-full px-2"
+        "flex w-full flex-col items-center px-2",
       )}
     >
-      <p className="text-lg md:text-3xl font-semibold">
+      <p className="text-lg font-semibold md:text-3xl">
         OpenAI Proxy Integration
       </p>
-      <div className="text-sm md:text-lg text-gray-500 font-light mt-5 text-center max-w-3xl">
+      <div className="mt-5 max-w-3xl text-center text-sm font-light text-gray-500 md:text-lg">
         We recommend using the proxy, but we also support OpenAI&apos;s packages{" "}
         <Link
           href={
@@ -59,14 +59,14 @@ const CodeIntegration = (props: CodeIntegrationProps) => {
           to integrate.
         </p>
       </div>
-      <div className="flex w-full md:w-[650px] mt-8">
+      <div className="mt-8 flex w-full md:w-[650px]">
         <CodeSnippet apiKey={apiKey === "" ? "<YOUR_API_KEY>" : apiKey} />
       </div>
       <button
         onClick={() => {
           nextStep();
         }}
-        className="px-28 py-3 bg-gray-900 hover:bg-gray-700 dark:bg-gray-100 dark:hover:bg-gray-300 dark:text-black font-medium text-white rounded-xl mt-8"
+        className="mt-8 rounded-xl bg-gray-900 px-28 py-3 font-medium text-white hover:bg-gray-700 dark:bg-gray-100 dark:text-black dark:hover:bg-gray-300"
       >
         Ready to go!
       </button>

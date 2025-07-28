@@ -10,7 +10,7 @@ export interface PropertyParam {
 
 function getFilterSearchFilterNode(
   property: string,
-  search: string
+  search: string,
 ): FilterNode {
   const propertyFilter: FilterLeaf = {
     properties_v3: {
@@ -39,7 +39,7 @@ function getFilterSearchFilterNode(
 export async function getPropertyParams(
   org_id: string,
   property: string,
-  search: string
+  search: string,
 ): Promise<Result<PropertyParam[], string>> {
   const builtFilter = await buildFilterWithAuthClickHouseProperties({
     org_id,
@@ -58,7 +58,7 @@ export async function getPropertyParams(
 
   const { data, error } = await dbQueryClickhouse<PropertyParam>(
     query,
-    builtFilter.argsAcc
+    builtFilter.argsAcc,
   );
 
   if (error !== null) {

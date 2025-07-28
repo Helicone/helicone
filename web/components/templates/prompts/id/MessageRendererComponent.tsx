@@ -18,12 +18,12 @@ interface MessageRendererComponentProps {
   >;
   selectedInput: Input | undefined;
   onExtractVariables: (
-    variables: Array<{ original: string; heliconeTag: string }>
+    variables: Array<{ original: string; heliconeTag: string }>,
   ) => void;
   handleUpdateMessage: (
     index: number,
     newContent: string,
-    newRole: string
+    newRole: string,
   ) => void;
   handleDeleteMessage: (index: number) => void;
   requestMessages: any;
@@ -32,7 +32,7 @@ interface MessageRendererComponentProps {
 //<helicone-auto-prompt-input idx=0 />
 function getAutoPromptIndex(api: string) {
   const autoPromptIndex = api.match(
-    /<helicone-auto-prompt-input idx=["']?(\d+)["']?\s*\/?>/
+    /<helicone-auto-prompt-input idx=["']?(\d+)["']?\s*\/?>/,
   );
   if (autoPromptIndex) {
     return parseInt(autoPromptIndex[1]);
@@ -59,15 +59,15 @@ const MessageRendererComponent: React.FC<MessageRendererComponentProps> = ({
       return (
         <ul
           className={cn(
-            "w-full relative h-fit",
-            playgroundMode === "experiment-compact" && "space-y-2"
+            "relative h-fit w-full",
+            playgroundMode === "experiment-compact" && "space-y-2",
           )}
         >
           {messages.map((message, index) =>
             typeof message === "string" ? (
               message.startsWith("<helicone-auto-prompt") ? (
                 <div className="flex items-center p-2">
-                  <Badge variant="secondary" className="py-2 px-4">
+                  <Badge variant="secondary" className="px-4 py-2">
                     Message {getAutoPromptIndex(message)}
                   </Badge>
                 </div>
@@ -88,7 +88,7 @@ const MessageRendererComponent: React.FC<MessageRendererComponentProps> = ({
                 selectedProperties={selectedInput?.inputs}
                 onExtractVariables={onExtractVariables}
               />
-            )
+            ),
           )}
         </ul>
       );

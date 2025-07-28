@@ -10,7 +10,7 @@ export async function getTotalThreats(
     start: Date;
     end: Date;
   },
-  org_id: string
+  org_id: string,
 ): Promise<Result<number, string>> {
   const { filter: filterString, argsAcc } = await buildFilterWithAuthClickHouse(
     {
@@ -21,7 +21,7 @@ export async function getTotalThreats(
         operator: "and",
       },
       argsAcc: [],
-    }
+    },
   );
   const query = `
     SELECT 

@@ -42,7 +42,7 @@ interface RealtimeProps {
 
 // Helper function to determine the default expansion state for deleted messages
 const calculateDefaultExpandedStates = (
-  messages: any[]
+  messages: any[],
 ): { [key: string]: boolean } => {
   const states: { [key: string]: boolean } = {};
   messages.forEach((message, idx) => {
@@ -101,7 +101,7 @@ export const Realtime: React.FC<RealtimeProps> = ({
   // Get all messages sorted by timestamp
   const sortedMessages = useMemo(
     () => getSortedMessagesFromMappedRequest(mappedRequest),
-    [mappedRequest]
+    [mappedRequest],
   );
 
   // Define getMessageType function before using it
@@ -142,7 +142,7 @@ export const Realtime: React.FC<RealtimeProps> = ({
           console.warn(
             `Message index ${startIndex} is out of range (0-${
               sortedMessages.length - 1
-            })`
+            })`,
           );
           // Fall back to showing all messages if index is out of range
           return sortedMessages;
@@ -161,7 +161,7 @@ export const Realtime: React.FC<RealtimeProps> = ({
 
   const defaultDeletedStates = useMemo(
     () => calculateDefaultExpandedStates(filteredMessages),
-    [filteredMessages]
+    [filteredMessages],
   );
 
   // Effect to update deleted message states when filters change, preserving user interactions
@@ -232,10 +232,10 @@ export const Realtime: React.FC<RealtimeProps> = ({
   }, [filterInfo?.isFiltered, filteredMessages, shouldScroll]);
 
   return (
-    <div className={`w-full flex flex-col gap-4 ${filterInfo ? "" : "pt-4"}`}>
+    <div className={`flex w-full flex-col gap-4 ${filterInfo ? "" : "pt-4"}`}>
       {/* Filter Indicator */}
       {filterInfo && (
-        <GlassHeader className="h-14 px-4 flex-shrink-0">
+        <GlassHeader className="h-14 flex-shrink-0 px-4">
           <h2 className="text-secondary underline">
             {filterInfo.endIndex !== undefined
               ? filterInfo.endIndex - filterInfo.startIndex === 0
@@ -272,14 +272,9 @@ export const Realtime: React.FC<RealtimeProps> = ({
             <div
               key={messageKey}
               ref={shouldScrollToThisMessage ? messageToScrollToRef : null}
-              className={`flex flex-col px-4 pb-4 mb-4 w-full 
-                ${isUser ? "items-end" : "items-start"}
-                ${isFilteredMessage ? "" : "opacity-85 text-sm"}
-                ${
-                  onRequestSelect
-                    ? "hover:cursor-pointer hover:bg-accent/50"
-                    : ""
-                }`}
+              className={`mb-4 flex w-full flex-col px-4 pb-4 ${isUser ? "items-end" : "items-start"} ${isFilteredMessage ? "" : "text-sm opacity-85"} ${
+                onRequestSelect ? "hover:cursor-pointer hover:bg-accent/50" : ""
+              }`}
               onClick={() => {
                 if (
                   filterInfo?.isFiltered &&
@@ -288,20 +283,18 @@ export const Realtime: React.FC<RealtimeProps> = ({
                   onRequestSelect?.(
                     mappedRequest.id.replace(
                       `-step-${filterInfo?.startIndex}`,
-                      `-step-${idx}`
-                    )
+                      `-step-${idx}`,
+                    ),
                   );
                 }
               }}
             >
               {isDeleted ? (
                 // Collapsible structure for deleted messages
-                <div className="flex flex-col gap-1 max-w-[80%] w-full">
+                <div className="flex w-full max-w-[80%] flex-col gap-1">
                   {/* Clickable Header */}
                   <div
-                    className={`flex items-center space-x-2 text-xs text-secondary cursor-pointer select-none 
-                      ${isUser ? "justify-end" : "justify-start"} 
-                      ${isDeletedExpanded ? "" : "opacity-50"}`}
+                    className={`flex cursor-pointer select-none items-center space-x-2 text-xs text-secondary ${isUser ? "justify-end" : "justify-start"} ${isDeletedExpanded ? "" : "opacity-50"}`}
                     onClick={(e) => {
                       e.stopPropagation();
 
@@ -309,7 +302,7 @@ export const Realtime: React.FC<RealtimeProps> = ({
                     }}
                   >
                     <PiCaretDownBold
-                      className={`w-4 h-4 transition-transform duration-200 ${
+                      className={`h-4 w-4 transition-transform duration-200 ${
                         isDeletedExpanded ? "rotate-180" : ""
                       }`}
                     />
@@ -345,10 +338,10 @@ export const Realtime: React.FC<RealtimeProps> = ({
                             ? `${
                                 messageType === "session" ||
                                 messageType === "functionCall"
-                                  ? "bg-blue-500 dark:bg-blue-700 text-white border-4 border-blue-400 dark:border-blue-600"
+                                  ? "border-4 border-blue-400 bg-blue-500 text-white dark:border-blue-600 dark:bg-blue-700"
                                   : messageType === "functionOutput"
-                                  ? "bg-slate-100 dark:bg-slate-900 border-4 border-slate-50 dark:border-slate-950"
-                                  : "bg-blue-500 dark:bg-blue-700 text-white"
+                                    ? "border-4 border-slate-50 bg-slate-100 dark:border-slate-950 dark:bg-slate-900"
+                                    : "bg-blue-500 text-white dark:bg-blue-700"
                               }`
                             : `bg-slate-100 dark:bg-slate-900 ${
                                 messageType === "session" ||
@@ -391,7 +384,7 @@ export const Realtime: React.FC<RealtimeProps> = ({
                 </div>
               ) : (
                 // Original structure for non-deleted messages
-                <div className="flex flex-col gap-1 max-w-[80%]">
+                <div className="flex max-w-[80%] flex-col gap-1">
                   {/* Message Info */}
                   <div
                     className={`flex items-center space-x-2 text-xs text-secondary ${
@@ -424,10 +417,10 @@ export const Realtime: React.FC<RealtimeProps> = ({
                         ? `${
                             messageType === "session" ||
                             messageType === "functionCall"
-                              ? "bg-blue-500 dark:bg-blue-700 text-white border-4 border-blue-400 dark:border-blue-600"
+                              ? "border-4 border-blue-400 bg-blue-500 text-white dark:border-blue-600 dark:bg-blue-700"
                               : messageType === "functionOutput"
-                              ? "bg-slate-100 dark:bg-slate-900 border-4 border-slate-50 dark:border-slate-950"
-                              : "bg-blue-500 dark:bg-blue-700 text-white"
+                                ? "border-4 border-slate-50 bg-slate-100 dark:border-slate-950 dark:bg-slate-900"
+                                : "bg-blue-500 text-white dark:bg-blue-700"
                           }`
                         : `bg-slate-100 dark:bg-slate-900 ${
                             messageType === "session" ||
@@ -498,17 +491,17 @@ const getPillStyle = (type: string, label?: string) => {
     switch (label) {
       case "audio":
         return {
-          icon: <PiMicrophoneBold className="w-3.5 h-3.5" />,
+          icon: <PiMicrophoneBold className="h-3.5 w-3.5" />,
           ...modalityStyle,
         };
       case "text":
         return {
-          icon: <PiTextTBold className="w-3.5 h-3.5" />,
+          icon: <PiTextTBold className="h-3.5 w-3.5" />,
           ...modalityStyle,
         };
       default:
         return {
-          icon: <PiTextTBold className="w-3.5 h-3.5" />,
+          icon: <PiTextTBold className="h-3.5 w-3.5" />,
           ...modalityStyle,
         };
     }
@@ -518,13 +511,13 @@ const getPillStyle = (type: string, label?: string) => {
   switch (type) {
     case "voice":
       return {
-        icon: <PiSpeakerHighBold className="w-3.5 h-3.5" />,
+        icon: <PiSpeakerHighBold className="h-3.5 w-3.5" />,
         className:
           "bg-purple-50 dark:bg-purple-950 border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300",
       };
     case "tool":
       return {
-        icon: <PiFunctionBold className="w-3.5 h-3.5" />,
+        icon: <PiFunctionBold className="h-3.5 w-3.5" />,
         className:
           "bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300",
       };
@@ -556,7 +549,7 @@ type SessionUpdateData = {
   turn_detection?: object | null;
 };
 const parseSessionUpdate = (
-  content: string | undefined
+  content: string | undefined,
 ): SessionUpdateData | null => {
   if (!content) return null;
   try {
@@ -607,13 +600,13 @@ const SessionUpdate: React.FC<SessionUpdateProps> = ({ content }) => {
       {items.map(({ label, pills }) => (
         <div key={label} className="flex flex-row justify-between gap-4 py-2">
           <span className="font-medium">{label}:</span>
-          <div className="flex flex-wrap gap-1.5 justify-end">
+          <div className="flex flex-wrap justify-end gap-1.5">
             {pills.map(({ type, label }, idx) => {
               const { icon, className } = getPillStyle(type, label);
               return (
                 <span
                   key={`${type}-${idx}`}
-                  className={`px-2 py-0.5 rounded-full text-xs font-medium border flex items-center gap-1 ${className}`}
+                  className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium ${className}`}
                 >
                   {icon}
                   {label}
@@ -628,12 +621,12 @@ const SessionUpdate: React.FC<SessionUpdateProps> = ({ content }) => {
       {sessionData.instructions && (
         <div className="flex flex-col gap-2 py-2">
           <div
-            className="flex items-center gap-2 cursor-pointer select-none hover:underline"
+            className="flex cursor-pointer select-none items-center gap-2 hover:underline"
             onClick={() => setIsExpanded(!isExpanded)}
           >
             <span className="font-medium">Instructions:</span>
             <PiCaretDownBold
-              className={`w-4 h-4 transition-transform duration-200 ${
+              className={`h-4 w-4 transition-transform duration-200 ${
                 isExpanded ? "rotate-180" : ""
               }`}
             />
@@ -643,7 +636,7 @@ const SessionUpdate: React.FC<SessionUpdateProps> = ({ content }) => {
               isExpanded ? "max-h-full opacity-100" : "max-h-6 opacity-70"
             }`}
           >
-            <ReactMarkdown className="prose dark:prose-invert prose-sm prose-headings:text-slate-50 prose-p:text-slate-200 prose-strong:text-white prose-em:text-slate-300 prose-li:text-slate-200 prose-ol:text-slate-200 prose-ul:text-slate-200 prose-a:text-cyan-200 hover:prose-a:text-cyan-100 prose-code:text-yellow-200 prose-pre:bg-slate-800/50 prose-pre:text-slate-200 prose-blockquote:text-slate-300 prose-blockquote:border-slate-400 [&_ol>li::marker]:text-white [&_ul>li::marker]:text-white">
+            <ReactMarkdown className="prose prose-sm dark:prose-invert prose-headings:text-slate-50 prose-p:text-slate-200 prose-a:text-cyan-200 hover:prose-a:text-cyan-100 prose-blockquote:border-slate-400 prose-blockquote:text-slate-300 prose-strong:text-white prose-em:text-slate-300 prose-code:text-yellow-200 prose-pre:bg-slate-800/50 prose-pre:text-slate-200 prose-ol:text-slate-200 prose-ul:text-slate-200 prose-li:text-slate-200 [&_ol>li::marker]:text-white [&_ul>li::marker]:text-white">
               {sessionData.instructions}
             </ReactMarkdown>
           </div>
@@ -670,7 +663,7 @@ const FunctionCallContent: React.FC<FunctionCallProps> = ({
   if (!tool_call) return null;
 
   return (
-    <div className="flex flex-col font-mono">
+    <div className="font-mono flex flex-col">
       <div className="flex flex-row items-center gap-2">
         {tool_call_id && (
           <TooltipProvider delayDuration={100}>
@@ -717,7 +710,7 @@ const FunctionOutputContent: React.FC<FunctionOutputProps> = ({
   if (!tool_call) return null;
 
   return (
-    <div className="flex flex-col font-mono">
+    <div className="font-mono flex flex-col">
       <div className="flex flex-row items-center gap-2">
         <span className="text-green-400 dark:text-green-500">
           {tool_call_id ? `${tool_call_id} =>` : ""}
@@ -777,7 +770,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
 
         if (response.data?.error || !response.data?.data) {
           throw new Error(
-            response.data?.error || "Conversion failed: No data returned"
+            response.data?.error || "Conversion failed: No data returned",
           );
         }
         setConvertedWavData(response.data.data);
@@ -928,16 +921,16 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
     <div className="flex flex-col gap-2">
       {/* Status Messages */}
       {conversionStatus === "loading" && (
-        <div className="text-xs text-slate-300 mb-1">Converting audio...</div>
+        <div className="mb-1 text-xs text-slate-300">Converting audio...</div>
       )}
       {conversionStatus === "error" && errorMessage && (
-        <div className="text-xs text-red-500 dark:text-red-400 mb-1">
+        <div className="mb-1 text-xs text-red-500 dark:text-red-400">
           {errorMessage}
         </div>
       )}
 
       {/* Audio Player - Render controls only on success, but keep layout consistent */}
-      <div className="flex flex-row items-center justify-center gap-3 h-8">
+      <div className="flex h-8 flex-row items-center justify-center gap-3">
         {/* Play/Pause Button */}
         <button
           onClick={handlePlayPause}
@@ -945,17 +938,17 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
           {...commonDisabledProps}
         >
           {isPlaying ? (
-            <PiPauseBold className="w-4 h-4" />
+            <PiPauseBold className="h-4 w-4" />
           ) : (
-            <PiPlayBold className="w-4 h-4" />
+            <PiPlayBold className="h-4 w-4" />
           )}
         </button>
 
         {/* Progress Bar */}
         <div
           ref={progressRef}
-          className={`w-24 h-2 rounded-full ${progressBgClass} ${
-            !canPlay ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+          className={`h-2 w-24 rounded-full ${progressBgClass} ${
+            !canPlay ? "cursor-not-allowed opacity-50" : "cursor-pointer"
           }`}
           onClick={handleProgressClick} // Disabled internally by status check
         >
@@ -985,7 +978,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
           title="Download audio"
           {...commonDisabledProps}
         >
-          <PiDownloadBold className="w-4 h-4" />
+          <PiDownloadBold className="h-4 w-4" />
         </button>
       </div>
 

@@ -84,8 +84,8 @@ export default function ThemedHeader({
         <h2 id="filter-heading" className="sr-only">
           Filters
         </h2>
-        <div className="flex flex-col lg:flex-row items-start gap-4 lg:gap-2 lg:items-center">
-          <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-2 sm:items-center">
+        <div className="flex flex-col items-start gap-4 lg:flex-row lg:items-center lg:gap-2">
+          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-2">
             {timeFilter && (
               <ThemedTimeFilter
                 timeFilterOptions={timeFilter.timeFilterOptions}
@@ -99,7 +99,7 @@ export default function ThemedHeader({
               />
             )}
           </div>
-          <div className="flex flex-wrap space-x-2 items-center">
+          <div className="flex flex-wrap items-center space-x-2">
             <FilterASTButton />
             {editColumns && (
               <ThemedMultiSelect
@@ -142,13 +142,13 @@ export default function ThemedHeader({
                 <Menu as="div" className="relative inline-block">
                   <button
                     onClick={() => csvExport.setOpenExport(true)}
-                    className="border border-gray-300 rounded-lg px-2.5 py-1.5 bg-white hover:bg-sky-50 flex flex-row items-center gap-2"
+                    className="flex flex-row items-center gap-2 rounded-lg border border-gray-300 bg-white px-2.5 py-1.5 hover:bg-sky-50"
                   >
                     <ArrowDownTrayIcon
                       className="h-5 w-5 text-gray-900"
                       aria-hidden="true"
                     />
-                    <p className="text-sm font-medium text-gray-900 hidden sm:block">
+                    <p className="hidden text-sm font-medium text-gray-900 sm:block">
                       Export
                     </p>
                   </button>
@@ -163,13 +163,13 @@ export default function ThemedHeader({
           open={csvExport.openExport}
           setOpen={csvExport.setOpenExport}
         >
-          <div className="flex flex-col space-y-4 sm:space-y-8 min-w-[350px] max-w-sm w-full">
+          <div className="flex w-full min-w-[350px] max-w-sm flex-col space-y-4 sm:space-y-8">
             <div className="flex flex-col space-y-8">
               <div className="flex flex-col space-y-4">
-                <p className="text-md sm:text-lg font-semibold text-gray-900">
+                <p className="text-md font-semibold text-gray-900 sm:text-lg">
                   Export CSV
                 </p>
-                <p className="text-sm sm:text-md text-gray-600">
+                <p className="sm:text-md text-sm text-gray-600">
                   Exporting by CSV is limited to 500 rows due to the huge
                   amounts of data in the requests. For larger exports, please
                   use our{" "}
@@ -177,7 +177,7 @@ export default function ThemedHeader({
                     href="https://docs.helicone.ai/helicone-api/getting-started"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="underline font-semibold text-blue-600"
+                    className="font-semibold text-blue-600 underline"
                   >
                     API
                   </Link>
@@ -199,7 +199,7 @@ export default function ThemedHeader({
                         name="notification-method"
                         type="radio"
                         defaultChecked={notificationMethod.id === "filtered"}
-                        className="h-4 w-4 border-gray-300 text-sky-600 focus:ring-sky-600 hover:cursor-pointer"
+                        className="h-4 w-4 border-gray-300 text-sky-600 hover:cursor-pointer focus:ring-sky-600"
                         onClick={() => {
                           setExportFiltered(notificationMethod.filtered);
                         }}
@@ -214,28 +214,28 @@ export default function ThemedHeader({
                   ))}
                 </div>
               </fieldset>
-              <p className="text-sm sm:text-md text-gray-600">
+              <p className="sm:text-md text-sm text-gray-600">
                 Export may take a lot of time. Please do not close this modal
                 once export is started.
               </p>
             </div>
 
-            <div className="w-full flex justify-end text-sm space-x-4">
+            <div className="flex w-full justify-end space-x-4 text-sm">
               <button
                 type="button"
                 onClick={() => csvExport.setOpenExport(false)}
-                className="flex flex-row items-center rounded-md bg-white px-4 py-2 text-sm font-semibold border border-gray-300 hover:bg-gray-50 text-gray-900 shadow-sm hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+                className="flex flex-row items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
               >
                 Cancel
               </button>
               <button
-                className="items-center rounded-md bg-black px-4 py-2 text-md flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                className="text-md flex items-center rounded-md bg-black px-4 py-2 font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                 onClick={() => csvExport.onClick(exportFiltered)}
               >
                 {csvExport.downloadingCSV ? (
                   <>
                     <ArrowPathIcon
-                      className={clsx("h-5 w-5 inline animate-spin mr-2")}
+                      className={clsx("mr-2 inline h-5 w-5 animate-spin")}
                     />
                     Exporting
                   </>

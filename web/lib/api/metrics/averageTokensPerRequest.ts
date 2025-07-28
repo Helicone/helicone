@@ -10,7 +10,7 @@ export async function getTokensPerRequest(
     start: Date;
     end: Date;
   },
-  org_id: string
+  org_id: string,
 ): Promise<
   Result<
     {
@@ -30,7 +30,7 @@ export async function getTokensPerRequest(
         operator: "and",
       },
       argsAcc: [],
-    }
+    },
   );
   const query = `
   WITH total_count AS (

@@ -14,7 +14,7 @@ export default function BillingPage() {
   const org = useOrg();
   const router = useRouter();
   const { draftPlan, draftMembers, draftAddons } = useDraftOnboardingStore(
-    org?.currentOrg?.id ?? ""
+    org?.currentOrg?.id ?? "",
   )();
   const { setNotification } = useNotification();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -123,7 +123,7 @@ export default function BillingPage() {
   if (subscription.isLoading) {
     return (
       <OnboardingHeader>
-        <main className="mx-auto pt-12 px-4 max-w-4xl">
+        <main className="mx-auto max-w-4xl px-4 pt-12">
           <div className="flex items-center justify-center">
             <div className="animate-pulse">Loading...</div>
           </div>
@@ -135,14 +135,14 @@ export default function BillingPage() {
   return (
     <OnboardingHeader>
       <main
-        className={`mx-auto pt-12 px-4 ${
+        className={`mx-auto px-4 pt-12 ${
           draftPlan === "team" ? "max-w-7xl" : "max-w-4xl"
         }`}
       >
-        <div className="max-w-[1000px] mx-auto">
+        <div className="mx-auto max-w-[1000px]">
           <header className="mb-8 ml-0 md:ml-16">
             <h1 className="text-2xl font-semibold">Add billing information</h1>
-            <p className="text-sm text-slate-500 mt-2">
+            <p className="mt-2 text-sm text-slate-500">
               You can add billing information later, but you&apos;ll need to do
               it before you can use Helicone.
             </p>

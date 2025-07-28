@@ -51,11 +51,11 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
 
   return (
     <>
-      <div className="flex flex-col text-gray-900 dark:text-gray-100 w-full max-w-2xl space-y-8">
+      <div className="flex w-full max-w-2xl flex-col space-y-8 text-gray-900 dark:text-gray-100">
         <div className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="org-id">Organization Id</Label>
-            <div className="flex flex-row gap-2 items-center">
+            <div className="flex flex-row items-center gap-2">
               <Input
                 id="org-id"
                 value={org.id}
@@ -85,7 +85,7 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
             />
           </div>
 
-          <div className="flex flex-col gap-8 max-w-[450px]">
+          <div className="flex max-w-[450px] flex-col gap-8">
             <div className="flex flex-col gap-6">
               <Label>Choose a color</Label>
               <RadioGroup
@@ -111,13 +111,13 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
                     <label
                       htmlFor={color.name}
                       className={clsx(
-                        "h-8 w-8 rounded-full cursor-pointer",
+                        "h-8 w-8 cursor-pointer rounded-full",
                         "ring-offset-2 transition-all",
-                        "hover:ring-2 hover:ring-offset-2 hover:ring-sky-300 dark:hover:ring-sky-700",
+                        "hover:ring-2 hover:ring-sky-300 hover:ring-offset-2 dark:hover:ring-sky-700",
                         org.color === color.name &&
-                          "ring-2 ring-offset-2 ring-sky-300 dark:ring-sky-700",
+                          "ring-2 ring-sky-300 ring-offset-2 dark:ring-sky-700",
                         color.bgColor,
-                        "border border-black/10 dark:border-white/10"
+                        "border border-black/10 dark:border-white/10",
                       )}
                     />
                   </div>
@@ -138,7 +138,7 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
                     variant: variant,
                   })
                 }
-                className="flex flex-wrap gap-6 items-start w-fit"
+                className="flex w-fit flex-wrap items-start gap-6"
               >
                 {ORGANIZATION_ICONS.map((icon) => (
                   <div key={icon.name} className="flex items-center space-x-2">
@@ -150,13 +150,13 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
                     <label
                       htmlFor={icon.name}
                       className={clsx(
-                        "p-2 rounded-md cursor-pointer",
+                        "cursor-pointer rounded-md p-2",
                         "flex items-center justify-center",
                         "ring-1 transition-all",
                         org.icon === icon.name
-                          ? "ring-2 ring-offset-1 ring-sky-300 dark:ring-sky-700"
+                          ? "ring-2 ring-sky-300 ring-offset-1 dark:ring-sky-700"
                           : "ring-gray-200 dark:ring-gray-800",
-                        "bg-white dark:bg-black"
+                        "bg-white dark:bg-black",
                       )}
                     >
                       {
@@ -170,12 +170,12 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
           </div>
           <OrgMembersPage org={org} wFull />
 
-          <div className="flex justify-end max-w-[450px]"></div>
+          <div className="flex max-w-[450px] justify-end"></div>
         </div>
 
         <Separator className="my-4" />
 
-        <div className="flex space-y-4 items-center justify-between">
+        <div className="flex items-center justify-between space-y-4">
           {isOwner && (
             <Button variant="destructive" onClick={() => setDeleteOpen(true)}>
               Delete Organization

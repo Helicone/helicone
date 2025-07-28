@@ -106,7 +106,12 @@ export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
     id: "model",
     accessorKey: "model",
     header: "Model",
-    cell: (info) => <ModelPill model={info.row.original.model} provider={info.row.original.heliconeMetadata.provider} />,
+    cell: (info) => (
+      <ModelPill
+        model={info.row.original.model}
+        provider={info.row.original.heliconeMetadata.provider}
+      />
+    ),
     meta: {
       sortKey: "body_model",
     },

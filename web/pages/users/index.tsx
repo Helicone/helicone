@@ -27,7 +27,7 @@ Users.getLayout = function getLayout(page: ReactElement) {
 export default Users;
 
 export const getServerSideProps = async (
-  context: GetServerSidePropsContext
+  context: GetServerSidePropsContext,
 ) => {
   const { page, page_size, sortKey, sortDirection, isCustomProperty } =
     context.query;

@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "",
-  { betas: ["custom_checkout_beta_5"] }
+  { betas: ["custom_checkout_beta_5"] },
 );
 
 export const CheckoutLayout = ({
@@ -53,7 +53,7 @@ export const CheckoutLayout = ({
 
       <div className={`flex flex-col ${fullWidth ? "" : "md:flex-row"} gap-8`}>
         {leftPanel && (
-          <div className="w-full md:w-[400px] md:sticky md:top-6 h-fit">
+          <div className="h-fit w-full md:sticky md:top-6 md:w-[400px]">
             {leftPanel}
           </div>
         )}
@@ -63,9 +63,9 @@ export const CheckoutLayout = ({
           {clientSecret && (
             <>
               {isLoading && (
-                <div className="h-[600px] w-full bg-[hsl(var(--card))] border border-[hsl(var(--border))] rounded-lg flex items-center justify-center">
+                <div className="flex h-[600px] w-full items-center justify-center rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))]">
                   <div className="flex flex-col items-center gap-4">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[hsl(var(--primary))]"></div>
+                    <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-[hsl(var(--primary))]"></div>
                     <p className="text-sm text-[hsl(var(--muted-foreground))]">
                       Initializing checkout...
                     </p>

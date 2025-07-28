@@ -58,6 +58,7 @@ export function getModelFromResponse(responseBody: any) {
     responseBody?.model ??
     responseBody?.body?.model ??
     responseBody?.body?.modelVersion ??
+    responseBody?.providerMetadata?.gateway?.routing?.originalModelId ??
     null
   );
 }

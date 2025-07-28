@@ -1,0 +1,43 @@
+---
+title: "Delete Prompt"
+api: "DELETE https://api.helicone.ai/v1/prompt-2025/{promptId}"
+description: "Delete an entire prompt and all its versions"
+---
+
+Permanently deletes a prompt and all associated versions.
+
+### Path Parameters
+
+<ParamField path="promptId" type="string" required>
+  The unique identifier of the prompt to delete
+</ParamField>
+
+### Response
+
+Returns `null` on successful deletion.
+
+<RequestExample>
+
+```bash cURL
+curl -X DELETE "https://api.helicone.ai/v1/prompt-2025/prompt_123" \
+  -H "Authorization: Bearer $HELICONE_API_KEY"
+```
+
+```typescript TypeScript
+const response = await fetch('https://api.helicone.ai/v1/prompt-2025/prompt_123', {
+  method: 'DELETE',
+  headers: {
+    'Authorization': `Bearer ${HELICONE_API_KEY}`,
+  },
+});
+```
+
+</RequestExample>
+
+<ResponseExample>
+
+```json Response
+null
+```
+
+</ResponseExample> 

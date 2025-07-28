@@ -9,7 +9,7 @@ import { useEvaluators } from "../EvaluatorHook";
 import { Evaluator } from "./types";
 
 const getInitialState = (
-  evaluator: Evaluator
+  evaluator: Evaluator,
 ): LLMEvaluatorConfigFormPreset => {
   const template = evaluator.llm_template as any;
   const property =

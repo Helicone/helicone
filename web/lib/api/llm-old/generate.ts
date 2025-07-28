@@ -32,7 +32,7 @@ export type GenerateResponse = {
 };
 
 export async function generate<T extends object | undefined = undefined>(
-  params: GenerateParams
+  params: GenerateParams,
 ): Promise<GenerateResponse> {
   // Find the OpenRouter model string for the given model
   let openRouterModelString = params.model;
@@ -48,13 +48,13 @@ export async function generate<T extends object | undefined = undefined>(
 
       // Find the provider model that matches our model string
       const providerModel = modelConfig.providers.find(
-        (pm) => pm.modelString === params.model
+        (pm) => pm.modelString === params.model,
       );
 
       if (providerModel) {
         // If we found a match, look for the OpenRouter model string
         const openRouterProvider = modelConfig.providers.find(
-          (pm) => pm.provider === "OPENROUTER"
+          (pm) => pm.provider === "OPENROUTER",
         );
 
         if (openRouterProvider) {
@@ -104,7 +104,7 @@ export async function generate<T extends object | undefined = undefined>(
           if (buffer.trim()) {
             console.warn(
               "[generate] Stream ended with unprocessed buffer content:",
-              buffer
+              buffer,
             );
             // Attempt to process remaining buffer as if it were a complete event
             const potentialEvents = buffer.split("\n\n");
@@ -120,7 +120,7 @@ export async function generate<T extends object | undefined = undefined>(
                       "[generate] Error parsing final buffer JSON:",
                       parseError,
                       "JSON String:",
-                      jsonString
+                      jsonString,
                     );
                   }
                 }
@@ -148,7 +148,7 @@ export async function generate<T extends object | undefined = undefined>(
                   "[generate] Error parsing event JSON:",
                   parseError,
                   "Event:",
-                  event
+                  event,
                 );
                 // Decide how to handle parse errors, e.g., skip or log
               }

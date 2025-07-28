@@ -33,9 +33,9 @@ export interface BackFillParams<T, K> {
 export async function getSomeDataOverTime<T, K>(
   requestParams: DataOverTimeRequest,
   dataExtractor: (
-    d: DataOverTimeRequest
+    d: DataOverTimeRequest,
   ) => Promise<Result<(T & { created_at_trunc: Date })[], string>>,
-  backFillParams: BackFillParams<T, K>
+  backFillParams: BackFillParams<T, K>,
 ): Promise<Result<(K & { time: Date })[], string>> {
   const { data, error } = await dataExtractor(requestParams);
   if (error !== null) {
@@ -48,7 +48,7 @@ export async function getSomeDataOverTime<T, K>(
       new Date(requestParams.timeFilter.start),
       new Date(requestParams.timeFilter.end),
       backFillParams.reducer,
-      backFillParams.initial
+      backFillParams.initial,
     ),
     error: null,
   };
@@ -56,7 +56,7 @@ export async function getSomeDataOverTime<T, K>(
 
 export async function getTimeDataHandler<T>(
   options: HandlerWrapperOptions<Result<T[], string>>,
-  dataExtractor: (d: DataOverTimeRequest) => Promise<Result<T[], string>>
+  dataExtractor: (d: DataOverTimeRequest) => Promise<Result<T[], string>>,
 ) {
   const {
     req,

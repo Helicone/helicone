@@ -221,6 +221,32 @@ export default function RequestDrawer(props: RequestDivProps) {
         label: "Total Tokens",
         value: request.heliconeMetadata.totalTokens || 0,
       },
+      ...(request.heliconeMetadata.path
+        ? [
+            {
+              label: "Path",
+              value: request.heliconeMetadata.path,
+            },
+          ]
+        : []),
+      ...(request.heliconeMetadata.promptCacheReadTokens &&
+      request.heliconeMetadata.promptCacheReadTokens > 0
+        ? [
+            {
+              label: "Prompt Cache Read Tokens",
+              value: request.heliconeMetadata.promptCacheReadTokens || 0,
+            },
+          ]
+        : []),
+      ...(request.heliconeMetadata.promptCacheWriteTokens &&
+      request.heliconeMetadata.promptCacheWriteTokens > 0
+        ? [
+            {
+              label: "Prompt Cache Write Tokens",
+              value: request.heliconeMetadata.promptCacheWriteTokens || 0,
+            },
+          ]
+        : []),
     ];
 
     // Parameter Information (only include defined parameters)

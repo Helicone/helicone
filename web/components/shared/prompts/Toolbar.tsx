@@ -72,7 +72,7 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
       onModeChange,
       editSuggestions,
     },
-    ref
+    ref,
   ) => {
     const [activeInput, setActiveInput] = useState<{
       index: number;
@@ -100,7 +100,7 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
         // Check if cmd/ctrl is pressed
         if (event.metaKey || event.ctrlKey) {
           const tool = tools.find(
-            (t) => t.hotkey?.toLowerCase() === event.key.toLowerCase()
+            (t) => t.hotkey?.toLowerCase() === event.key.toLowerCase(),
           );
           if (tool) {
             event.preventDefault();
@@ -180,19 +180,17 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
                 : undefined,
             zIndex: 2,
           }}
-          className={`!z-50 fixed top-0 left-0 rounded-full glass shadow-md 
-            ${
-              activeInput && !activeInput.showConfirmation
-                ? "border-2 border-heliblue"
-                : "border border-slate-200 dark:border-slate-800"
-            }
-            ${
-              activeInput
-                ? tools[activeInput.index].multiline
-                  ? "rounded-lg"
-                  : "rounded-full"
+          className={`glass fixed left-0 top-0 !z-50 rounded-full shadow-md ${
+            activeInput && !activeInput.showConfirmation
+              ? "border-2 border-heliblue"
+              : "border border-slate-200 dark:border-slate-800"
+          } ${
+            activeInput
+              ? tools[activeInput.index].multiline
+                ? "rounded-lg"
                 : "rounded-full"
-            }`}
+              : "rounded-full"
+          }`}
         >
           {activeInput ? (
             // Input Mode
@@ -204,10 +202,10 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
             >
               {tools[activeInput.index].multiline ? (
                 // Multiline Input
-                <div className="relative w-full h-full">
+                <div className="relative h-full w-full">
                   <textarea
                     ref={textareaRef}
-                    className="w-64 h-full px-2.5 py-1.5 text-sm bg-white dark:bg-slate-900 outline-none resize-none rounded-l-lg hover:shadow-md placeholder-slate-400 dark:placeholder-slate-600"
+                    className="h-full w-64 resize-none rounded-l-lg bg-white px-2.5 py-1.5 text-sm placeholder-slate-400 outline-none hover:shadow-md dark:bg-slate-900 dark:placeholder-slate-600"
                     value={activeInput.value}
                     required
                     placeholder={
@@ -253,14 +251,14 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
                   />
                   {activeInput.value === "" && (
                     // Suggestions (max 2)
-                    <div className="absolute bottom-0 left-0 w-full flex flex-row justify-around pb-3.5">
+                    <div className="absolute bottom-0 left-0 flex w-full flex-row justify-around pb-3.5">
                       {editSuggestions
                         ?.map((suggestion) => ({
                           ...suggestion,
                           weight:
                             suggestion.condition?.(
                               // Use the selected text for conditions
-                              selection?.text || ""
+                              selection?.text || "",
                             ) || 0,
                         }))
                         .sort((a, b) => b.weight - a.weight)
@@ -268,7 +266,7 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
                         .map((suggestion, index) => (
                           <button
                             key={index}
-                            className="text-xs text-tertiary hover:underline"
+                            className="text-tertiary text-xs hover:underline"
                             onClick={(e) => {
                               e.preventDefault();
                               const tool = tools[activeInput.index];
@@ -293,7 +291,7 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
               ) : (
                 // Single Line Input
                 <Input
-                  className="h-full w-32 p-2.5 text-sm bg-white rounded-l-full outline-none hover:shadow-md placeholder-slate-400"
+                  className="h-full w-32 rounded-l-full bg-white p-2.5 text-sm placeholder-slate-400 outline-none hover:shadow-md"
                   type="text"
                   value={activeInput.value}
                   required
@@ -337,22 +335,22 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
                 // B. Confirmation Mode
                 // Loading state
                 pendingEdit?.isPending ? ( // Confirmation buttons
-                  <div className="flex items-center justify-center h-full px-2.5">
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-heliblue border-t-transparent" />
+                  <div className="flex h-full items-center justify-center px-2.5">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-heliblue border-t-transparent" />
                   </div>
                 ) : (
-                  <div className="flex flex-col h-full">
+                  <div className="flex h-full flex-col">
                     <button
                       type="button"
                       onClick={handleAccept}
-                      className={`h-1/2 px-2.5 rounded-tr-lg flex items-center justify-center interactive group-three`}
+                      className={`interactive group-three flex h-1/2 items-center justify-center rounded-tr-lg px-2.5`}
                     >
-                      <PiCheckBold className="text-base group-three-hover:scale-105 text-heliblue" />
+                      <PiCheckBold className="text-base text-heliblue group-three-hover:scale-105" />
                     </button>
                     <button
                       type="button"
                       onClick={handleDeny}
-                      className={`h-1/2 px-2.5 rounded-br-lg flex items-center justify-center interactive group-three`}
+                      className={`interactive group-three flex h-1/2 items-center justify-center rounded-br-lg px-2.5`}
                     >
                       <PiXBold className="text-base group-three-hover:scale-105" />
                     </button>
@@ -362,7 +360,7 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
                 // A. Submit Mode
                 <button
                   type="submit"
-                  className={`flex items-center justify-center h-full px-2.5 ${
+                  className={`flex h-full items-center justify-center px-2.5 ${
                     tools[activeInput.index].multiline
                       ? "rounded-r-lg"
                       : "rounded-r-full"
@@ -374,7 +372,7 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
             </form>
           ) : (
             // Toolbar Mode
-            <div className="h-8 w-full flex flex-row items-center gap-0 font-size-0">
+            <div className="font-size-0 flex h-8 w-full flex-row items-center gap-0">
               {tools.map((tool, index) => {
                 const isFirst = index === 0;
                 const isLast = index === tools.length - 1;
@@ -385,16 +383,15 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
                     <TooltipTrigger asChild>
                       <button
                         onClick={() => handleToolClick(tool, index)}
-                        className={`flex justify-center items-center px-2.5 group-two interactive h-full w-12 text-base
-                          ${
-                            isOnly
-                              ? "rounded-full"
-                              : isFirst
+                        className={`group-two interactive flex h-full w-12 items-center justify-center px-2.5 text-base ${
+                          isOnly
+                            ? "rounded-full"
+                            : isFirst
                               ? "rounded-l-full"
                               : isLast
-                              ? "rounded-r-full"
-                              : ""
-                          }`}
+                                ? "rounded-r-full"
+                                : ""
+                        }`}
                       >
                         <span className="text-base group-two-hover:scale-105">
                           {tool.icon}
@@ -424,13 +421,13 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
         {/* Pending Edit Preview */}
         {pendingEdit && activeInput?.showConfirmation && (
           <div
-            className="fixed z-40 inset-0 mt-[3px] max-w-lg"
+            className="fixed inset-0 z-40 mt-[3px] max-w-lg"
             style={{
               transform: `translate(${position.preview.left}px, ${position.preview.top}px)`,
             }}
           >
             <span
-              className="bg-green-500 text-white py-[3px] whitespace-pre-wrap"
+              className="whitespace-pre-wrap bg-green-500 py-[3px] text-white"
               style={{
                 lineHeight: "24px",
                 fontSize: "16px",
@@ -442,7 +439,7 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
         )}
         {/* Highlight Overlay */}
         {activeInput && (
-          <div className="fixed z-1 inset-0 pointer-events-none">
+          <div className="z-1 pointer-events-none fixed inset-0">
             {position.highlights.map((highlight, index) => (
               <div
                 key={index}
@@ -462,7 +459,7 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
         )}
       </>
     );
-  }
+  },
 );
 Toolbar.displayName = "Toolbar";
 

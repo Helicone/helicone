@@ -63,7 +63,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
 
   const { _, requestId } = router.query;
   const [selectedRequestId, setSelectedRequestId] = useState<string>(
-    (requestId as string) || ""
+    (requestId as string) || "",
   );
 
   // SESSIONS DATA
@@ -72,7 +72,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
       start: getTimeIntervalAgo("3m"), // Use 3 months like in the page component
       end: new Date(),
     }),
-    []
+    [],
   );
 
   const { sessions: relatedSessions, isLoading: isLoadingSessions } =
@@ -85,7 +85,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
   // HANDLERS
   const handleSessionIdChange = (newSessionId: string) => {
     router.push(
-      `/sessions/${session_name}/${encodeURIComponent(newSessionId)}`
+      `/sessions/${session_name}/${encodeURIComponent(newSessionId)}`,
     );
   };
   const handleRequestIdChange = (newRequestId: string) => {
@@ -96,7 +96,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
         query: { ...router.query, requestId: newRequestId },
       },
       undefined,
-      { shallow: true }
+      { shallow: true },
     );
   };
 
@@ -117,9 +117,9 @@ export const SessionContent: React.FC<SessionContentProps> = ({
         (acc, trace) =>
           acc +
           (parseInt(`${trace?.request?.heliconeMetadata?.promptTokens}`) || 0),
-        0
+        0,
       ),
-    [session.traces]
+    [session.traces],
   );
   const completionTokens = useMemo(
     () =>
@@ -128,13 +128,13 @@ export const SessionContent: React.FC<SessionContentProps> = ({
           acc +
           (parseInt(`${trace?.request?.heliconeMetadata?.completionTokens}`) ||
             0),
-        0
+        0,
       ),
-    [session.traces]
+    [session.traces],
   );
   const totalTokens = useMemo(
     () => promptTokens + completionTokens,
-    [promptTokens, completionTokens]
+    [promptTokens, completionTokens],
   );
   const avgLatency = useMemo(() => {
     if (!session || session.traces.length === 0) {
@@ -143,7 +143,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
     const totalLatency = session.traces.reduce(
       (acc, trace) =>
         acc + (trace.end_unix_timestamp_ms - trace.start_unix_timestamp_ms),
-      0
+      0,
     );
     return totalLatency / session.traces.length;
   }, [session]);
@@ -183,12 +183,12 @@ export const SessionContent: React.FC<SessionContentProps> = ({
   }, [session.traces, initializeColorMap]);
 
   return (
-    <Col className="h-screen flex flex-col">
+    <Col className="flex h-screen flex-col">
       <FoldedHeader
         leftSection={
-          <div className="flex flex-row gap-4 items-center">
+          <div className="flex flex-row items-center gap-4">
             {/* Dynamic breadcrumb */}
-            <div className="flex flex-row gap-1 items-center">
+            <div className="flex flex-row items-center gap-1">
               <Link href="/sessions" className="no-underline">
                 <Small className="font-semibold">Sessions</Small>
               </Link>
@@ -212,7 +212,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
                   value={session_id}
                   onValueChange={handleSessionIdChange}
                 >
-                  <SelectTrigger className="w-[280px] h-8 shadow-sm">
+                  <SelectTrigger className="h-8 w-[280px] shadow-sm">
                     <SelectValue placeholder="Select Session ID" />
                   </SelectTrigger>
                   <SelectContent>
@@ -230,7 +230,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
 
             {/* Realtime session reconstruction warning) */}
             {containsRealtime && (
-              <div className="flex flex-row gap-2 items-center text-xs text-blue-500 font-semibold">
+              <div className="flex flex-row items-center gap-2 text-xs font-semibold text-blue-500">
                 <PiBroadcastBold className="h-4 w-4" />
                 Includes reconstructed realtime requests
               </div>
@@ -238,7 +238,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
           </div>
         }
         rightSection={
-          <div className="h-full flex flex-row gap-2 items-center">
+          <div className="flex h-full flex-row items-center gap-2">
             <Tooltip>
               <TooltipTrigger asChild>
                 {/* Export the original, raw request data */}
@@ -253,11 +253,11 @@ export const SessionContent: React.FC<SessionContentProps> = ({
           </div>
         }
         foldContent={
-          <div className="h-full flex flex-row items-center divide-x divide-border">
+          <div className="flex h-full flex-row items-center divide-x divide-border">
             {sessionStatsToDisplay.map((stat) => (
               <div
                 key={stat.label}
-                className="flex flex-row gap-1 items-center px-4"
+                className="flex flex-row items-center gap-1 px-4"
               >
                 <XSmall className="font-medium">{stat.label}</XSmall>
                 <Muted className="text-xs">{stat.value}</Muted>

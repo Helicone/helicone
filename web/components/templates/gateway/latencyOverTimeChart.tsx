@@ -1,6 +1,6 @@
 "use client";
 
-import { TrendingUp, ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 import { useState } from "react";
 
@@ -8,7 +8,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -54,7 +53,7 @@ export function LatencyOverTimeChart({
   timeIncrement,
   totalRequests,
 }: {
-  routerHash: string;
+  routerHash?: string;
   timeFilter: TimeFilter;
   timeIncrement: TimeIncrement;
   totalRequests: number;

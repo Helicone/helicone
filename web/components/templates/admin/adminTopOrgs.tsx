@@ -81,7 +81,7 @@ const AdminTopOrgs = (props: AdminTopOrgsProps) => {
   // State to track selected organizations
   const [selectedOrgs, setSelectedOrgs] = useLocalStorage<string[]>(
     "admin-top-orgs-selected-orgs",
-    []
+    [],
   );
 
   const topOrgsData = useQuery<TopOrgsResponse>({
@@ -101,7 +101,7 @@ const AdminTopOrgs = (props: AdminTopOrgsProps) => {
             limit,
             groupBy,
           },
-        }
+        },
       );
 
       if (error) {
@@ -122,11 +122,11 @@ const AdminTopOrgs = (props: AdminTopOrgsProps) => {
       if (
         selectedOrgs.length === 0 ||
         !topOrgsData.data.organizations.some((org) =>
-          selectedOrgs.includes(org.organization_id)
+          selectedOrgs.includes(org.organization_id),
         )
       ) {
         setSelectedOrgs(
-          topOrgsData.data.organizations.map((org) => org.organization_id)
+          topOrgsData.data.organizations.map((org) => org.organization_id),
         );
       }
     }
@@ -145,7 +145,7 @@ const AdminTopOrgs = (props: AdminTopOrgsProps) => {
   const toggleAllOrgs = (select: boolean) => {
     if (select && topOrgsData.data?.organizations) {
       setSelectedOrgs(
-        topOrgsData.data.organizations.map((org) => org.organization_id)
+        topOrgsData.data.organizations.map((org) => org.organization_id),
       );
     } else {
       setSelectedOrgs([]);
@@ -268,9 +268,9 @@ const AdminTopOrgs = (props: AdminTopOrgsProps) => {
       <H1>Top Organizations Over Time</H1>
       <P>View request counts for the top organizations over time</P>
 
-      <div className="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4 md:items-end">
+      <div className="flex flex-col space-y-4 md:flex-row md:items-end md:space-x-4 md:space-y-0">
         <div className="flex flex-col space-y-2">
-          <div className="flex justify-between items-center">
+          <div className="flex items-center justify-between">
             <H2>Time Range</H2>
             <span className="text-sm text-muted-foreground">
               Grouped by: {getGroupBy(timeRange)}
@@ -305,18 +305,18 @@ const AdminTopOrgs = (props: AdminTopOrgsProps) => {
 
       <Card className="p-6 shadow-md">
         <div className="flex flex-col space-y-4">
-          <div className="flex justify-between items-center">
+          <div className="flex items-center justify-between">
             <Title>Request Counts Over Time</Title>
             <div className="flex space-x-4">
               <button
                 onClick={() => toggleAllOrgs(true)}
-                className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+                className="rounded-md bg-primary px-3 py-1 text-sm text-primary-foreground hover:bg-primary/90"
               >
                 Select All
               </button>
               <button
                 onClick={() => toggleAllOrgs(false)}
-                className="px-3 py-1 text-sm bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/90"
+                className="rounded-md bg-secondary px-3 py-1 text-sm text-secondary-foreground hover:bg-secondary/90"
               >
                 Deselect All
               </button>
@@ -324,31 +324,31 @@ const AdminTopOrgs = (props: AdminTopOrgsProps) => {
           </div>
 
           {topOrgsData.isLoading ? (
-            <div className="flex items-center justify-center h-64">
+            <div className="flex h-64 items-center justify-center">
               <p>Loading data...</p>
             </div>
           ) : topOrgsData.error ? (
-            <div className="flex items-center justify-center h-64">
+            <div className="flex h-64 items-center justify-center">
               <p className="text-red-500">Error loading data</p>
             </div>
           ) : chartData().length === 0 ? (
-            <div className="flex items-center justify-center h-64">
+            <div className="flex h-64 items-center justify-center">
               <p>No data available</p>
             </div>
           ) : (
             <>
-              <div className="flex flex-wrap gap-2 mb-4">
+              <div className="mb-4 flex flex-wrap gap-2">
                 {topOrgsData.data?.organizations.map((org, index) => (
                   <Badge
                     key={org.organization_id}
-                    className={`cursor-pointer px-3 py-1.5 flex items-center gap-2 ${
+                    className={`flex cursor-pointer items-center gap-2 px-3 py-1.5 ${
                       selectedOrgs.includes(org.organization_id)
                         ? "bg-opacity-100"
                         : "bg-opacity-30 text-muted-foreground"
                     }`}
                     style={{
                       backgroundColor: selectedOrgs.includes(
-                        org.organization_id
+                        org.organization_id,
                       )
                         ? chartColors[index % chartColors.length]
                         : `${chartColors[index % chartColors.length]}33`,
@@ -364,7 +364,7 @@ const AdminTopOrgs = (props: AdminTopOrgsProps) => {
                         className="mr-1"
                       />
                     </span>
-                    <span className="truncate max-w-[150px]">
+                    <span className="max-w-[150px] truncate">
                       {org.organization_name}
                     </span>
                   </Badge>
@@ -372,7 +372,7 @@ const AdminTopOrgs = (props: AdminTopOrgsProps) => {
               </div>
 
               <LineChart
-                className="h-96 mt-6"
+                className="mt-6 h-96"
                 data={chartData()}
                 index="time"
                 categories={chartCategories}
@@ -395,7 +395,7 @@ const AdminTopOrgs = (props: AdminTopOrgsProps) => {
       {!topOrgsData.isLoading && topOrgsData.data?.organizations && (
         <div className="flex flex-col space-y-4">
           <H2>Organization Details</H2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {topOrgsData.data.organizations.map((org, index) => (
               <Card
                 key={org.organization_id}
@@ -414,7 +414,7 @@ const AdminTopOrgs = (props: AdminTopOrgsProps) => {
                     className="mr-1"
                   />
                   <div
-                    className="w-4 h-4 rounded-full"
+                    className="h-4 w-4 rounded-full"
                     style={{
                       backgroundColor: chartColors[index % chartColors.length],
                     }}
@@ -426,8 +426,8 @@ const AdminTopOrgs = (props: AdminTopOrgsProps) => {
                   {formatLargeNumber(
                     org.data.reduce(
                       (sum, point) => sum + point.request_count,
-                      0
-                    )
+                      0,
+                    ),
                   )}
                 </P>
                 <P className="text-sm text-muted-foreground">

@@ -75,7 +75,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
   const generatePayload = (history: ExtendedMessage[]) => {
     const cleanMessages = history.filter((message) => !message.model);
     const containsO1orO3 = models.some(
-      (model) => model.name.includes("o1") || model.name.includes("o3")
+      (model) => model.name.includes("o1") || model.name.includes("o3"),
     );
     if (containsO1orO3) {
       return JSON.stringify(
@@ -86,7 +86,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
           tools,
         },
         null,
-        2
+        2,
       );
     }
     return JSON.stringify(
@@ -98,7 +98,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
         tools,
       },
       null,
-      2
+      2,
     );
   };
 
@@ -121,7 +121,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
           return history
             .filter(
               (message) =>
-                message.model === model.name || message.model === undefined
+                message.model === model.name || message.model === undefined,
             )
             .map(({ id, model, latency, ...rest }) => rest); // Remove id, model, and latency fields
         };
@@ -157,7 +157,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
             temperature,
             model.name,
             maxTokens,
-            providerAPIKey
+            providerAPIKey,
           );
 
           // Record the end time and calculate latency
@@ -167,7 +167,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
           // Return the model, data, error, and latency
           return { model, data, error, latency };
         }
-      })
+      }),
     );
 
     responses.forEach(({ model, data, error, latency }) => {
@@ -186,7 +186,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
           const message = data.choices[0].message;
           const tools = message.tool_calls;
           const functionTools = tools.filter(
-            (tool: any) => tool.type === "function"
+            (tool: any) => tool.type === "function",
           );
           return JSON.stringify(functionTools, null, 4);
         }
@@ -256,7 +256,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
             key={i}
             className={clsx(
               i !== 0 && "border-t",
-              "flex flex-col w-full h-full relative space-y-4 bg-white border-gray-300 dark:border-gray-700"
+              "relative flex h-full w-full flex-col space-y-4 border-gray-300 bg-white dark:border-gray-700",
             )}
           >
             <div className="p-4">
@@ -271,7 +271,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                 mode="Pretty"
               />
             </div>
-          </div>
+          </div>,
         );
         return;
       }
@@ -284,14 +284,14 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
               key={i}
               className={clsx(
                 i !== 0 && "border-t",
-                "flex flex-col w-full h-full relative space-y-4 bg-white border-gray-300 dark:border-gray-700"
+                "relative flex h-full w-full flex-col space-y-4 border-gray-300 bg-white dark:border-gray-700",
               )}
             >
-              <div className="w-full flex justify-between px-8 pt-4">
+              <div className="flex w-full justify-between px-8 pt-4">
                 <RoleButton
                   role={"assistant"}
                   onRoleChange={function (
-                    role: "function" | "assistant" | "user" | "system"
+                    role: "function" | "assistant" | "user" | "system",
                   ): void {}}
                   disabled={true}
                 />
@@ -302,37 +302,37 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                       // deleteRowHandler(modelMessage[0].id);
                       setCurrentChat((prevChat) => {
                         return prevChat.filter(
-                          (message) => message.model === undefined
+                          (message) => message.model === undefined,
                         );
                       });
                     }}
-                    className="text-red-500 font-semibold"
+                    className="font-semibold text-red-500"
                   >
                     <TrashIcon className="h-5 w-5" />
                   </button>
                 </Tooltip>
               </div>
               <div className="w-full px-8 pb-4">
-                <div className="w-full h-full flex flex-row justify-between space-x-4 divide-x divide-gray-300 dark:divide-gray-700">
+                <div className="flex h-full w-full flex-row justify-between space-x-4 divide-x divide-gray-300 dark:divide-gray-700">
                   {modelMessage.map((message, idx) => (
                     <div
                       key={idx}
                       className={clsx(
                         idx === 0 ? "" : "pl-4",
-                        "w-full h-auto flex flex-col space-y-2 col-span-1 relative"
+                        "relative col-span-1 flex h-auto w-full flex-col space-y-2",
                       )}
                     >
-                      <div className="flex justify-center items-center">
+                      <div className="flex items-center justify-center">
                         <ModelPill model={message.model ?? ""} />
                       </div>
                       <div className="p-4 text-gray-900 dark:text-gray-100">
                         <p>{message.content}</p>
                       </div>
-                      <div className="flex w-full justify-end bottom-0 absolute text-xs text-gray-900 dark:text-gray-100">
+                      <div className="absolute bottom-0 flex w-full justify-end text-xs text-gray-900 dark:text-gray-100">
                         <p
                           className={clsx(
                             "bg-gray-50 text-gray-700 ring-gray-200",
-                            `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
+                            `-my-1 w-max items-center rounded-lg px-2 py-1 text-xs font-medium ring-1 ring-inset`,
                           )}
                         >{`${message.latency} ms`}</p>
                       </div>
@@ -340,7 +340,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                   ))}
                 </div>
               </div>
-            </div>
+            </div>,
           );
 
           modelMessage = [];
@@ -353,7 +353,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
             callback={(
               userText: string,
               role: string,
-              image: File | string | null
+              image: File | string | null,
             ) => {
               const newChat = [...currentChat];
 
@@ -397,7 +397,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
             deleteRow={(rowId) => {
               deleteRowHandler(rowId);
             }}
-          />
+          />,
         );
       }
     });
@@ -420,19 +420,19 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
             deleteRow={(rowId) => {
               deleteRowHandler(rowId);
             }}
-          />
+          />,
         );
       } else {
         renderRows.push(
           <div
             key={currentChat.length - 1}
-            className="flex flex-col px-8 py-4 space-y-8 bg-white dark:bg-black border-t border-gray-300 dark:border-gray-700"
+            className="flex flex-col space-y-8 border-t border-gray-300 bg-white px-8 py-4 dark:border-gray-700 dark:bg-black"
           >
-            <div className="w-full flex justify-between">
+            <div className="flex w-full justify-between">
               <RoleButton
                 role={"assistant"}
                 onRoleChange={function (
-                  role: "function" | "assistant" | "user" | "system"
+                  role: "function" | "assistant" | "user" | "system",
                 ): void {}}
                 disabled={true}
               />
@@ -443,11 +443,11 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                     // deleteRowHandler(modelMessage[0].id);
                     setCurrentChat((prevChat) => {
                       return prevChat.filter(
-                        (message) => message.model === undefined
+                        (message) => message.model === undefined,
                       );
                     });
                   }}
-                  className="text-red-500 font-semibold"
+                  className="font-semibold text-red-500"
                 >
                   <TrashIcon className="h-5 w-5" />
                 </button>
@@ -459,7 +459,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                 modelMessage.length > 3
                   ? `grid-cols-3`
                   : `grid-cols-${modelMessage.length}`,
-                "w-full justify-between grid gap-4"
+                "grid w-full justify-between gap-4",
               )}
             >
               {modelMessage.map((message, idx) => (
@@ -468,11 +468,11 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                   className={clsx(
                     idx % 3 === 0
                       ? ""
-                      : "pl-4 border-l border-gray-300 dark:border-gray-700",
-                    "w-full h-auto flex flex-col space-y-2 col-span-1 relative"
+                      : "border-l border-gray-300 pl-4 dark:border-gray-700",
+                    "relative col-span-1 flex h-auto w-full flex-col space-y-2",
                   )}
                 >
-                  <div className="flex justify-center items-center">
+                  <div className="flex items-center justify-center">
                     <ModelPill model={message.model ?? ""} />
                   </div>
                   <div className="p-4 text-gray-900 dark:text-gray-100">
@@ -482,14 +482,14 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                     <p
                       className={clsx(
                         "bg-gray-50 text-gray-700 ring-gray-200",
-                        `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
+                        `-my-1 w-max items-center rounded-lg px-2 py-1 text-xs font-medium ring-1 ring-inset`,
                       )}
                     >{`${message.latency} ms`}</p>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
+          </div>,
         );
       }
     }
@@ -505,28 +505,28 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
 
   return (
     <>
-      <ul className="w-full border border-gray-300 dark:border-gray-700 rounded-lg relative h-fit">
+      <ul className="relative h-fit w-full rounded-lg border border-gray-300 dark:border-gray-700">
         {generateChatRows()}
         {isLoading && (
-          <li className="flex flex-row justify-between px-8 py-4 bg-white dark:bg-black border-t border-gray-300 dark:border-gray-700">
-            <div className="flex flex-col gap-4 w-full">
-              <div className="flex flex-col space-y-4 w-full h-full relative">
+          <li className="flex flex-row justify-between border-t border-gray-300 bg-white px-8 py-4 dark:border-gray-700 dark:bg-black">
+            <div className="flex w-full flex-col gap-4">
+              <div className="relative flex h-full w-full flex-col space-y-4">
                 <RoleButton
                   role={"assistant"}
                   onRoleChange={function (
-                    role: "function" | "system" | "user" | "assistant"
+                    role: "function" | "system" | "user" | "assistant",
                   ): void {}}
                   disabled={true}
                 />
-                <span className="flex flex-row space-x-1 items-center">
-                  <ArrowPathIcon className="h-4 w-4 text-gray-500 animate-spin" />
+                <span className="flex flex-row items-center space-x-1">
+                  <ArrowPathIcon className="h-4 w-4 animate-spin text-gray-500" />
                 </span>
               </div>
             </div>
           </li>
         )}
-        <li className="px-8 py-4 border-t border-gray-300 dark:border-gray-700 bg-white dark:bg-black rounded-b-lg justify-between space-x-4 flex">
-          <div className="w-full flex space-x-2">
+        <li className="flex justify-between space-x-4 rounded-b-lg border-t border-gray-300 bg-white px-8 py-4 dark:border-gray-700 dark:bg-black">
+          <div className="flex w-full space-x-2">
             <Button
               onClick={() => {
                 // check to see if the last message was a user
@@ -563,7 +563,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
               variant="outline"
               size="sm"
             >
-              <PlusIcon className="h-4 w-4 mr-2" />
+              <PlusIcon className="mr-2 h-4 w-4" />
               Add Message
             </Button>
             <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
@@ -573,7 +573,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                   variant="outline"
                   size="sm"
                 >
-                  <EyeIcon className="h-4 w-4 mr-2" />
+                  <EyeIcon className="mr-2 h-4 w-4" />
                   Preview Payload
                 </Button>
               </DialogTrigger>
@@ -581,14 +581,14 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                 <DialogHeader>
                   <DialogTitle>Preview Payload</DialogTitle>
                 </DialogHeader>
-                <pre className="bg-gray-100 dark:bg-gray-700 p-4 rounded overflow-auto max-h-96 text-sm">
+                <pre className="max-h-96 overflow-auto rounded bg-gray-100 p-4 text-sm dark:bg-gray-700">
                   {previewPayload}
                 </pre>
               </DialogContent>
             </Dialog>
           </div>
 
-          <div className="flex space-x-4 w-full justify-end">
+          <div className="flex w-full justify-end space-x-4">
             <Button
               onClick={() => {
                 const originalCopy = chat.map((message) => ({
@@ -600,7 +600,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
               variant="outline"
               size="sm"
             >
-              <ArrowPathIcon className="h-4 w-4 mr-2" />
+              <ArrowPathIcon className="mr-2 h-4 w-4" />
               Reset
             </Button>
             {!customNavBar && (
@@ -615,7 +615,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                 variant="default"
                 size="sm"
               >
-                <PaperAirplaneIcon className="h-4 w-4 mr-2" />
+                <PaperAirplaneIcon className="mr-2 h-4 w-4" />
                 {submitText}
               </Button>
             )}
@@ -625,7 +625,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
       {customNavBar && (
         <div
           id="step-inc"
-          className="w-full flex justify-between sticky bottom-0 bg-gray-100 py-4 border-t border-gray-300 dark:border-gray-700 dark:bg-[#17191d]"
+          className="sticky bottom-0 flex w-full justify-between border-t border-gray-300 bg-gray-100 py-4 dark:border-gray-700 dark:bg-[#17191d]"
         >
           <Button variant={"secondary"} onClick={() => customNavBar.onBack()}>
             Back

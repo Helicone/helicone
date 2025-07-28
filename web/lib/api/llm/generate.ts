@@ -49,7 +49,7 @@ export type GenerateResponse = {
 async function handleStreamResponse(
   response: Response,
   onChunk: (_chunk: string) => void,
-  onCompletion: () => void
+  onCompletion: () => void,
 ): Promise<GenerateResponse> {
   if (!response.body) {
     throw new Error("No response body");
@@ -121,7 +121,7 @@ async function handleStreamResponse(
 
 async function handleNonStreamResponse(
   response: Response,
-  schema?: z.ZodType<object>
+  schema?: z.ZodType<object>,
 ): Promise<GenerateResponse> {
   const data = await response.json();
 
@@ -158,7 +158,7 @@ export async function generate<T extends object | undefined = undefined>(
     };
     schema?: z.ZodType<object>;
     useAIGateway?: boolean;
-  }
+  },
 ): Promise<GenerateResponse> {
   const currentOrgId = Cookies.get(ORG_ID_COOKIE_KEY);
   const jwtToken = getHeliconeCookie().data?.jwtToken ?? "";
@@ -189,7 +189,7 @@ export async function generate<T extends object | undefined = undefined>(
         "Content-Type": "application/json",
         Accept: "application/json",
       },
-    }
+    },
   );
 
   if (!response.ok) {
@@ -201,7 +201,7 @@ export async function generate<T extends object | undefined = undefined>(
     return handleStreamResponse(
       response,
       params.stream.onChunk,
-      params.stream.onCompletion
+      params.stream.onCompletion,
     );
   }
 

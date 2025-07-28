@@ -38,7 +38,7 @@ export default function RequestsEmptyState({
   const router = useRouter();
   const orgContext = useOrg();
   const { onboardingState } = useOrgOnboarding(
-    orgContext?.currentOrg?.id || ""
+    orgContext?.currentOrg?.id || "",
   );
 
   if (!isVisible) return null;
@@ -99,24 +99,24 @@ export default function RequestsEmptyState({
 
   return (
     <div
-      className="fixed left-0 right-0 bottom-0 z-40 pointer-events-none"
+      className="pointer-events-none fixed bottom-0 left-0 right-0 z-40"
       style={{ top: "60px" }}
     >
       {/* Gradient overlay that fades from transparent to white/black */}
       <div
-        className="absolute inset-0 pointer-events-none bg-gradient-to-t from-white via-white/80 to-transparent dark:hidden"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent dark:hidden"
         style={{ top: "20%" }}
       />
 
       {/* Dark mode version of the gradient overlay */}
       <div
-        className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black via-black/80 to-transparent hidden dark:block"
+        className="pointer-events-none absolute inset-0 hidden bg-gradient-to-t from-black via-black/80 to-transparent dark:block"
         style={{ top: "20%" }}
       />
 
       {/* CTA Container with gradient top - Light Mode */}
       <div
-        className="absolute left-0 right-0 pointer-events-auto dark:hidden"
+        className="pointer-events-auto absolute left-0 right-0 dark:hidden"
         style={{
           top: `${positionFactor}%`,
           height: `${100 - positionFactor}%`,
@@ -125,18 +125,18 @@ export default function RequestsEmptyState({
         }}
       >
         {/* Content container - centered vertically and horizontally */}
-        <div className="relative w-full h-full flex flex-col justify-center">
-          <div className="w-full px-4 sm:px-6 lg:px-8 py-8 flex justify-center">
+        <div className="relative flex h-full w-full flex-col justify-center">
+          <div className="flex w-full justify-center px-4 py-8 sm:px-6 lg:px-8">
             {/* Sidebar offset container - no transform on small screens, offset on medium+ */}
-            <div className="w-full max-w-3xl flex flex-col gap-6 items-center md:translate-x-[calc(var(--sidebar-width,0px)/2)]">
-              <div className="flex flex-col gap-2 text-center w-full">
+            <div className="flex w-full max-w-3xl flex-col items-center gap-6 md:translate-x-[calc(var(--sidebar-width,0px)/2)]">
+              <div className="flex w-full flex-col gap-2 text-center">
                 <H2>{options.title}</H2>
-                <Large className="max-w-lg lg:max-w-3xl mx-auto">
+                <Large className="mx-auto max-w-lg lg:max-w-3xl">
                   {options.description}
                 </Large>
               </div>
 
-              <div className="flex gap-4 justify-center">
+              <div className="flex justify-center gap-4">
                 {options.cta?.secondary && (
                   <Button variant="outline" onClick={handleSecondaryAction}>
                     {options.cta.secondary.text}
@@ -158,7 +158,7 @@ export default function RequestsEmptyState({
 
       {/* CTA Container with gradient top - Dark Mode */}
       <div
-        className="absolute left-0 right-0 pointer-events-auto hidden dark:block"
+        className="pointer-events-auto absolute left-0 right-0 hidden dark:block"
         style={{
           top: `${positionFactor}%`,
           height: `${100 - positionFactor}%`,
@@ -167,18 +167,18 @@ export default function RequestsEmptyState({
         }}
       >
         {/* Content container - centered vertically and horizontally */}
-        <div className="relative w-full h-full flex flex-col justify-center">
-          <div className="w-full px-4 sm:px-6 lg:px-8 py-8 flex justify-center">
+        <div className="relative flex h-full w-full flex-col justify-center">
+          <div className="flex w-full justify-center px-4 py-8 sm:px-6 lg:px-8">
             {/* Sidebar offset container - no transform on small screens, offset on medium+ */}
-            <div className="w-full max-w-3xl flex flex-col gap-6 items-center md:translate-x-[calc(var(--sidebar-width,0px)/2)]">
-              <div className="flex flex-col gap-2 text-center w-full">
+            <div className="flex w-full max-w-3xl flex-col items-center gap-6 md:translate-x-[calc(var(--sidebar-width,0px)/2)]">
+              <div className="flex w-full flex-col gap-2 text-center">
                 <H2>{options.title}</H2>
-                <Large className="max-w-lg lg:max-w-3xl mx-auto">
+                <Large className="mx-auto max-w-lg lg:max-w-3xl">
                   {options.description}
                 </Large>
               </div>
 
-              <div className="flex gap-4 justify-center">
+              <div className="flex justify-center gap-4">
                 {options.cta?.secondary && (
                   <Button variant="outline" onClick={handleSecondaryAction}>
                     {options.cta.secondary.text}

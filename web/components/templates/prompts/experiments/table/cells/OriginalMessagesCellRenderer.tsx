@@ -31,7 +31,7 @@ export const OriginalMessagesCellRenderer: React.FC<any> = (params) => {
     <Popover open={showPromptPlayground} onOpenChange={setShowPromptPlayground}>
       <PopoverTrigger asChild>
         <div
-          className={`w-full h-full items-center flex ${
+          className={`flex h-full w-full items-center ${
             content ? "justify-start" : "justify-end"
           }`}
           onClick={handleCellClick}
@@ -46,7 +46,7 @@ export const OriginalMessagesCellRenderer: React.FC<any> = (params) => {
         </div>
       </PopoverTrigger>
       <PopoverContent className="w-[800px] p-0" side="bottom" align="start">
-        <ScrollArea className="flex flex-col overflow-y-auto max-h-[50vh]">
+        <ScrollArea className="flex max-h-[50vh] flex-col overflow-y-auto">
           <PromptPlayground
             prompt={formatPromptForPlayground() || ""}
             selectedInput={data}

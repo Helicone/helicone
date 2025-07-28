@@ -24,7 +24,7 @@ const Checkbox = React.forwardRef<
           "border-0 focus-visible:ring-slate-950 data-[state=checked]:bg-transparent dark:ring-offset-slate-950 dark:focus-visible:ring-slate-300",
         variant === "helicone" &&
           "border border-sky-500 focus-visible:ring-sky-600 data-[state=checked]:bg-sky-500 data-[state=checked]:text-sky-50 dark:border-sky-600 dark:ring-offset-slate-950 dark:focus-visible:ring-sky-500 dark:data-[state=checked]:bg-sky-600 dark:data-[state=checked]:text-sky-50",
-        className
+        className,
       )}
       {...props}
     >
@@ -34,10 +34,10 @@ const Checkbox = React.forwardRef<
           variant === "default"
             ? "text-current"
             : variant === "ghost"
-            ? "text-slate-900 dark:text-slate-50"
-            : variant === "helicone"
-            ? "text-sky-50 dark:text-sky-50"
-            : "text-white dark:text-slate-900"
+              ? "text-slate-900 dark:text-slate-50"
+              : variant === "helicone"
+                ? "text-sky-50 dark:text-sky-50"
+                : "text-white dark:text-slate-900",
         )}
       >
         <Check className={cn("h-4 w-4", iconClassName)} />

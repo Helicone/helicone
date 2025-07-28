@@ -85,7 +85,7 @@ const OpenPipe = () => {
         if (data.error) {
           setNotification(
             "Error submitting form. Please try again later.",
-            "error"
+            "error",
           );
         } else {
           const formElement = e.target as HTMLFormElement;
@@ -93,7 +93,7 @@ const OpenPipe = () => {
           setIsLoading(false);
           setNotification(
             "Form submitted successfully! We'll be in touch soon.",
-            "success"
+            "success",
           );
         }
       });
@@ -101,7 +101,7 @@ const OpenPipe = () => {
 
   return (
     <MetaData title="Helicone - OpenPipe | The easiest way to fine-tune your models">
-      <div className="flex-col w-full antialiased bg-white">
+      <div className="w-full flex-col bg-white antialiased">
         <NavBarV2 />
         <div className="relative isolate">
           <svg
@@ -132,12 +132,12 @@ const OpenPipe = () => {
             </defs>
             <rect width="100%" height="100%" strokeWidth={0} fill="url(#abc)" />
           </svg>
-          <div className="mx-auto max-w-5xl px-6 pb-16 pt-10 sm:pb-24 lg:flex lg:px-8 lg:py-24 border-gray-300 flex flex-col">
+          <div className="mx-auto flex max-w-5xl flex-col border-gray-300 px-6 pb-16 pt-10 sm:pb-24 lg:flex lg:px-8 lg:py-24">
             <section
               id="hero"
-              className="flex flex-col items-center w-full space-y-8"
+              className="flex w-full flex-col items-center space-y-8"
             >
-              <div className="flex flex-row sm:hidden items-center justify-center gap-4 mb-16">
+              <div className="mb-16 flex flex-row items-center justify-center gap-4 sm:hidden">
                 <Image
                   src="/assets/landing/helicone.webp"
                   alt="helicone"
@@ -145,7 +145,7 @@ const OpenPipe = () => {
                   height={150}
                   className="rounded-md"
                 />
-                <div className="w-0.5 h-full bg-gray-500" />
+                <div className="h-full w-0.5 bg-gray-500" />
                 <Image
                   src="/assets/landing/openpipe.webp"
                   alt="openpipe"
@@ -154,7 +154,7 @@ const OpenPipe = () => {
                   className="rounded-md"
                 />
               </div>
-              <div className="hidden sm:flex flex-row items-center justify-center gap-8">
+              <div className="hidden flex-row items-center justify-center gap-8 sm:flex">
                 <Image
                   src="/assets/landing/helicone.webp"
                   alt="helicone"
@@ -162,7 +162,7 @@ const OpenPipe = () => {
                   height={200}
                   className="rounded-md"
                 />
-                <div className="w-0.5 h-full bg-gray-500" />
+                <div className="h-full w-0.5 bg-gray-500" />
                 <Image
                   src="/assets/landing/openpipe.webp"
                   alt="openpipe"
@@ -171,21 +171,21 @@ const OpenPipe = () => {
                   className="rounded-md"
                 />
               </div>
-              <h1 className="text-4xl sm:text-5xl font-semibold text-center sm:pt-16">
+              <h1 className="text-center text-4xl font-semibold sm:pt-16 sm:text-5xl">
                 Save up to{" "}
-                <span className="md:border-2 border-pink-700 border-dashed text-pink-700 md:py-2 md:px-4">
+                <span className="border-dashed border-pink-700 text-pink-700 md:border-2 md:px-4 md:py-2">
                   95%
                 </span>{" "}
                 on your OpenAI costs
               </h1>
-              <p className="text-lg sm:text-xl text-gray-600 text-center">
+              <p className="text-center text-lg text-gray-600 sm:text-xl">
                 Helicone is partnering with OpenPipe to provide fine-tuning
                 services using Helicone logs
               </p>
             </section>
             <form
               onSubmit={handleBetaSignup}
-              className="mx-auto w-full max-w-xl border border-gray-300 bg-white shadow-lg rounded-lg p-8 space-y-8 mt-28"
+              className="mx-auto mt-28 w-full max-w-xl space-y-8 rounded-lg border border-gray-300 bg-white p-8 shadow-lg"
             >
               <h2 className="text-2xl font-semibold text-gray-900">
                 Sign up for our beta
@@ -193,7 +193,7 @@ const OpenPipe = () => {
               <div className="flex flex-col space-y-2">
                 <label
                   htmlFor="email"
-                  className="block text-sm lg:text-md font-medium leading-6 text-gray-900"
+                  className="lg:text-md block text-sm font-medium leading-6 text-gray-900"
                 >
                   Email address
                 </label>
@@ -205,14 +205,14 @@ const OpenPipe = () => {
                     autoComplete="email"
                     required
                     // placeholder={mfsEmail !== null ? mfsEmail : ""}
-                    className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
+                    className="lg:text-md block w-full rounded-md border-0 py-1.5 text-sm shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 lg:leading-6"
                   />
                 </div>
               </div>
               <div className="flex flex-col space-y-2">
                 <label
                   htmlFor="org-name"
-                  className="block text-sm lg:text-md font-medium leading-6 text-gray-900"
+                  className="lg:text-md block text-sm font-medium leading-6 text-gray-900"
                 >
                   Organization Name
                 </label>
@@ -222,14 +222,14 @@ const OpenPipe = () => {
                     name="org-name"
                     id="org-name"
                     required
-                    className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
+                    className="lg:text-md block w-full rounded-md border-0 py-1.5 text-sm shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 lg:leading-6"
                   />
                 </div>
               </div>
               <div className="flex flex-col space-y-2 pb-4">
                 <label
                   htmlFor="org-size"
-                  className="block text-sm lg:text-md font-medium leading-6 text-gray-900"
+                  className="lg:text-md block text-sm font-medium leading-6 text-gray-900"
                 >
                   How large is your company?
                 </label>
@@ -237,7 +237,7 @@ const OpenPipe = () => {
                   <select
                     id="org-size"
                     name="org-size"
-                    className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
+                    className="lg:text-md block w-full rounded-md border-0 py-1.5 text-sm shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 lg:leading-6"
                     required
                   >
                     {COMPANY_SIZES.map((o) => (
@@ -248,15 +248,15 @@ const OpenPipe = () => {
               </div>
               <button
                 type="submit"
-                className="mx-auto w-full px-16 py-2 bg-pink-700 hover:bg-pink-900 font-medium text-pink-50 rounded-md"
+                className="mx-auto w-full rounded-md bg-pink-700 px-16 py-2 font-medium text-pink-50 hover:bg-pink-900"
               >
                 {isLoading && (
-                  <ArrowPathIcon className="animate-spin h-5 w-5 mr-2 inline" />
+                  <ArrowPathIcon className="mr-2 inline h-5 w-5 animate-spin" />
                 )}
                 {"Join Beta"}
               </button>
             </form>
-            <section id="description" className="flex flex-col space-y-8 mt-32">
+            <section id="description" className="mt-32 flex flex-col space-y-8">
               <h2 className="text-2xl font-bold leading-10 tracking-tight text-gray-900">
                 Questions and Answers
               </h2>
@@ -289,7 +289,7 @@ const OpenPipe = () => {
 export default OpenPipe;
 
 export const getServerSideProps = async (
-  context: GetServerSidePropsContext
+  context: GetServerSidePropsContext,
 ) => {
   // redirect the user to `/features/customer-portal`
   return {

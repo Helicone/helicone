@@ -85,7 +85,7 @@ export default function VersionSelector({
       setIsEditing(false);
       setEditValue(id);
     },
-    [editValue, id, onIdChange]
+    [editValue, id, onIdChange],
   );
 
   const handleKeyDown = useCallback(
@@ -96,20 +96,19 @@ export default function VersionSelector({
         handleEditComplete(true);
       }
     },
-    [handleEditComplete]
+    [handleEditComplete],
   );
 
   return (
     // "pseudo border"
     <div
       ref={dropdownRef}
-      className={`pr-[1px] py-[1px] bg-gradient-to-r from-transparent to-slate-200 dark:to-slate-800 relative -ml-[calc(2px+0.625rem)] group ${
+      className={`group relative -ml-[calc(2px+0.625rem)] bg-gradient-to-r from-transparent to-slate-200 py-[1px] pr-[1px] dark:to-slate-800 ${
         isDropdownOpen ? "rounded-t-[1.1rem]" : "rounded-full"
       }`}
     >
       <div
-        className={`flex flex-row items-center from-transparent to-slate-200 dark:to-slate-800 bg-gradient-to-r pl-[calc(2px+0.625rem)] p-[2px] gap-2
-            ${isDropdownOpen ? "rounded-t-[1.1rem]" : "rounded-full"}`}
+        className={`flex flex-row items-center gap-2 bg-gradient-to-r from-transparent to-slate-200 p-[2px] pl-[calc(2px+0.625rem)] dark:to-slate-800 ${isDropdownOpen ? "rounded-t-[1.1rem]" : "rounded-full"}`}
       >
         {/* Rename Input OR ID Title + Tools */}
         {isEditing ? (
@@ -120,13 +119,13 @@ export default function VersionSelector({
             onKeyDown={handleKeyDown}
             onBlur={() => handleEditComplete(false)}
             autoFocus
-            className="px-2.5 -ml-[calc(0.625rem-2px)] appearance-none rounded-full text-lg outline-none focus:border-transparent focus:ring-2 focus:ring-heliblue w-fit bg-white dark:bg-slate-950 max-w-56"
+            className="-ml-[calc(0.625rem-2px)] w-fit max-w-56 appearance-none rounded-full bg-white px-2.5 text-lg outline-none focus:border-transparent focus:ring-2 focus:ring-heliblue dark:bg-slate-950"
             aria-label="Edit prompt id"
           />
         ) : (
           <div className="flex flex-row items-center gap-2 [&:has(>div:nth-child(2):hover,>div:nth-child(3):hover)_h1]:text-heliblue">
             {/* ID Title */}
-            <h1 className="text-lg font-semibold text-nowrap">{id}</h1>
+            <h1 className="text-nowrap text-lg font-semibold">{id}</h1>
 
             {/* Copy Button */}
             <Tooltip
@@ -136,7 +135,7 @@ export default function VersionSelector({
               glass={false}
             >
               <button
-                className="text-slate-700 flex items-center justify-center hover:text-heliblue active:scale-95 transition-transform"
+                className="flex items-center justify-center text-slate-700 transition-transform hover:text-heliblue active:scale-95"
                 onClick={() => {
                   navigator.clipboard.writeText(id);
                   setNotification("Copied Prompt ID to clipboard", "success");
@@ -154,7 +153,7 @@ export default function VersionSelector({
               glass={false}
             >
               <button
-                className="text-slate-700 flex items-center justify-center hover:text-heliblue active:scale-95 transition-transform"
+                className="flex items-center justify-center text-slate-700 transition-transform hover:text-heliblue active:scale-95"
                 onClick={() => {
                   setEditValue(id);
                   setIsEditing(true);
@@ -172,11 +171,11 @@ export default function VersionSelector({
               glass={false}
             >
               <button
-                className="text-slate-700 flex items-center justify-center enabled:group-one-hover:text-heliblue disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 transition-transform"
+                className="flex items-center justify-center text-slate-700 transition-transform active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 enabled:group-one-hover:text-heliblue"
                 disabled={currentVersion === masterVersion}
                 onClick={() => {
                   const version = versions.find(
-                    (v) => v.major_version === currentVersion
+                    (v) => v.major_version === currentVersion,
                   );
                   if (version) {
                     onVersionPromote(version);
@@ -192,22 +191,22 @@ export default function VersionSelector({
         {/* Version Pill Button */}
         <button
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          className="w-full group-two justify-end hover:bg-slate-100 dark:hover:bg-slate-900 hover:shadow-md flex flex-row items-center rounded-full px-2.5 py-1 bg-white dark:bg-slate-950 transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="group-two flex w-full flex-row items-center justify-end rounded-full bg-white px-2.5 py-1 transition-transform hover:bg-slate-100 hover:shadow-md active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-slate-950 dark:hover:bg-slate-900"
           disabled={versions.length === 0 || versions.length === 1} // No versions or only version 0
         >
           {/* Master/Dirty Indicator */}
           <div
-            className={`h-2 w-2 rounded-full transition-all mr-2 ${
+            className={`mr-2 h-2 w-2 rounded-full transition-all ${
               isDirty
-                ? "bg-amber-500 animate-pulse"
+                ? "animate-pulse bg-amber-500"
                 : currentVersion === masterVersion
-                ? "bg-heliblue"
-                : "bg-slate-400 dark:bg-slate-600"
+                  ? "bg-heliblue"
+                  : "bg-slate-400 dark:bg-slate-600"
             }`}
           />
 
           {/* Version */}
-          <span className="font-bold mr-[.3125rem]">v{currentVersion}</span>
+          <span className="mr-[.3125rem] font-bold">v{currentVersion}</span>
 
           {/* Chevron */}
           <PiCaretDownBold
@@ -220,11 +219,11 @@ export default function VersionSelector({
         {/* Version Dropdown */}
         {isDropdownOpen && (
           <div
-            className="shadow-lg overflow-hidden absolute w-full top-full left-0 rounded-b-[1.1rem] bg-slate-200 dark:bg-slate-800 border-b border-x border-slate-200 dark:border-slate-800 z-40"
+            className="absolute left-0 top-full z-40 w-full overflow-hidden rounded-b-[1.1rem] border-x border-b border-slate-200 bg-slate-200 shadow-lg dark:border-slate-800 dark:bg-slate-800"
             role="menu"
           >
             <CustomScrollbar
-              className="h-full w-full flex flex-col max-h-[23.5rem]"
+              className="flex h-full max-h-[23.5rem] w-full flex-col"
               withBorder
             >
               {isLoading ? (
@@ -278,30 +277,30 @@ function VersionItem({
 }) {
   if (isLoading) {
     return (
-      <div className="w-full text-left px-2.5 py-1.5 text-sm animate-pulse space-y-2">
-        <div className="h-4 w-20 bg-slate-200 dark:bg-slate-800 rounded" />
+      <div className="w-full animate-pulse space-y-2 px-2.5 py-1.5 text-left text-sm">
+        <div className="h-4 w-20 rounded bg-slate-200 dark:bg-slate-800" />
       </div>
     );
   }
 
   return (
     <button
-      className={`group-three w-full text-left px-2.5 py-1.5 text-sm hover:shadow-md flex flex-row items-center justify-between ${
+      className={`group-three flex w-full flex-row items-center justify-between px-2.5 py-1.5 text-left text-sm hover:shadow-md ${
         isSelected
-          ? "bg-white dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-900"
-          : "bg-transparent text-tertiary hover:bg-slate-100 dark:hover:bg-slate-900"
+          ? "bg-white hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-900"
+          : "text-tertiary bg-transparent hover:bg-slate-100 dark:hover:bg-slate-900"
       } ${isLast ? "rounded-bl-[1rem]" : ""}`}
       onClick={onSelect}
       role="menuitem"
     >
       {/* CreatedAt */}
-      <h3 className="text-slate-500 text-xs">{formatDate(createdAt!)}</h3>
+      <h3 className="text-xs text-slate-500">{formatDate(createdAt!)}</h3>
 
       {/* Master Indicator */}
       {majorVersion === masterVersion && (
         <div className="flex flex-row items-center gap-1">
-          <h3 className="text-slate-500 text-xs">Production</h3>
-          <div className="h-2 w-2 bg-heliblue rounded-full" />
+          <h3 className="text-xs text-slate-500">Production</h3>
+          <div className="h-2 w-2 rounded-full bg-heliblue" />
         </div>
       )}
 

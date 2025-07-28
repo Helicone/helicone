@@ -46,7 +46,7 @@ type CellStatus = "initialized" | "success" | "running";
 
 export const getRequestDataByIds = async (
   orgId: string,
-  requestIds: string[]
+  requestIds: string[],
 ) => {
   const jawnClient = getJawnClient(orgId);
   const res = await jawnClient.POST("/v1/request/query-ids", {
@@ -130,7 +130,7 @@ export const useExperimentTable = (experimentTableId: string) => {
                 experimentId: experimentTableId,
               },
             },
-          }
+          },
         );
         return res.data?.data;
       },
@@ -150,7 +150,7 @@ export const useExperimentTable = (experimentTableId: string) => {
               experimentId: experimentTableId,
             },
           },
-        }
+        },
       );
       return res.data?.data;
     },
@@ -226,7 +226,7 @@ export const useExperimentTable = (experimentTableId: string) => {
         "/v2/experiment/{experimentId}/row/insert/dataset/{datasetId}",
         {
           params: { path: { experimentId: experimentTableId, datasetId } },
-        }
+        },
       );
     },
     onSuccess: () => {
@@ -253,7 +253,7 @@ export const useExperimentTable = (experimentTableId: string) => {
     onMutate: async (variables) => {
       queryClient.setQueryData(
         ["inputs", variables.inputRecordId],
-        variables.inputs
+        variables.inputs,
       );
     },
   });
@@ -272,7 +272,7 @@ export const useExperimentTable = (experimentTableId: string) => {
         {
           params: { path: { experimentId: experimentTableId } },
           body: { promptVersionId, inputRecordId },
-        }
+        },
       );
 
       return res.data?.data;
@@ -319,7 +319,7 @@ export const useExperimentTable = (experimentTableId: string) => {
           params: {
             path: { experimentId: experimentTableId, promptVersionId },
           },
-        }
+        },
       );
     },
     onSuccess: () => {

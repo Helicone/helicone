@@ -11,14 +11,14 @@ export const EvaluatorNotFound: React.FC<EvaluatorNotFoundProps> = ({
   closeEditPanel,
 }) => {
   return (
-    <div className="flex flex-col items-center justify-center h-full p-8">
-      <div className="flex justify-between w-full mb-4">
+    <div className="flex h-full flex-col items-center justify-center p-8">
+      <div className="mb-4 flex w-full justify-between">
         <H3>Evaluator Not Found</H3>
         <Button variant="ghost" size="icon" onClick={closeEditPanel}>
           <XIcon size={18} />
         </Button>
       </div>
-      <P className="text-muted-foreground text-center mb-6">
+      <P className="mb-6 text-center text-muted-foreground">
         The selected evaluator could not be found. It may have been deleted or
         you may need to refresh the page.
       </P>

@@ -7,7 +7,7 @@ import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
 // => Invalid, e.g "session.update" messages, are not renderable steps. (though, I think it should be.)
 // note: We should render session.update messages, its important information.
 export const getSortedMessagesFromMappedRequest = (
-  mappedRequest: MappedLLMRequest
+  mappedRequest: MappedLLMRequest,
 ) => {
   const messages = [
     ...(mappedRequest.schema.request?.messages || []),
@@ -16,7 +16,7 @@ export const getSortedMessagesFromMappedRequest = (
 
   return messages
     .filter(
-      (m) => m.timestamp && m.role && !isNaN(new Date(m.timestamp).getTime())
+      (m) => m.timestamp && m.role && !isNaN(new Date(m.timestamp).getTime()),
     )
     .sort((a, b) => {
       return (
@@ -44,7 +44,7 @@ export const isRealtimeRequest = (request: HeliconeRequest): boolean => {
  * in the realtime conversation. Ensures steps have sequential, non-overlapping timestamps.
  */
 export const convertRealtimeRequestToSteps = (
-  realtimeRequest: HeliconeRequest
+  realtimeRequest: HeliconeRequest,
 ): HeliconeRequest[] => {
   if (!realtimeRequest) {
     return [];
@@ -62,12 +62,12 @@ export const convertRealtimeRequestToSteps = (
       realtimeRequest,
       message,
       index, // Pass the index of the message to highlight
-      previousStepResponseTimestampMs // Pass the end time of the previous step
+      previousStepResponseTimestampMs, // Pass the end time of the previous step
     );
     simulatedSteps.push(step);
     // Update the tracker with the end time of the step we just created
     previousStepResponseTimestampMs = new Date(
-      step.response_created_at!
+      step.response_created_at!,
     ).getTime();
   });
 
@@ -83,11 +83,11 @@ function createSimulatedRequestStep(
   originalRequest: HeliconeRequest,
   message: Message, // The specific message this step represents
   stepIndex: number, // The chronological index of this message/step
-  previousStepResponseTimestampMs: number // The end time (in ms) of the preceding step
+  _previousStepResponseTimestampMs: number, // The end time (in ms) of the preceding step
 ): HeliconeRequest {
   // Use the message timestamp as the base request time
   const baseRequestTimestampMs = new Date(
-    message.start_timestamp ?? message.timestamp!
+    message.start_timestamp ?? message.timestamp!,
   ).getTime();
 
   // Ensure the current step starts at least 1ms after the previous step ended
@@ -97,7 +97,7 @@ function createSimulatedRequestStep(
   // Add a minimum duration of 1ms in case 100ms is too short due to adjustments
   const stepResponseTimestampMs = Math.max(
     stepRequestTimestampMs + 1,
-    new Date(message.timestamp!).getTime()
+    new Date(message.timestamp!).getTime(),
   );
 
   // Create a unique ID for the simulated step based on its index

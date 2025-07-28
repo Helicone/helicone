@@ -61,7 +61,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
   };
 
   const [interval, setInterval] = useState<TimeInterval>(
-    getInterval() as TimeInterval
+    getInterval() as TimeInterval,
   );
   const [timeFilter, setTimeFilter] = useState<{
     start: Date;
@@ -99,7 +99,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
   const jawn = useJawnClient();
 
   const filterMap = (REQUEST_TABLE_FILTERS as SingleFilterDef<any>[]).concat(
-    Array.isArray(propertyFilters) ? propertyFilters : []
+    Array.isArray(propertyFilters) ? propertyFilters : [],
   );
 
   function encodeFilter(filter: UIFilterRow): string {
@@ -130,11 +130,11 @@ const PropertyPanel = (props: PropertyPanelProps) => {
       defaultValue="overview"
       value={activeTab}
       onValueChange={setActiveTab}
-      className="w-full mb-1"
+      className="mb-1 w-full"
     >
       <div className="flex flex-col">
-        <div className="flex flex-col md:flex-row justify-between items-center mx-4">
-          <Row className="gap-2 items-center flex-wrap">
+        <div className="mx-4 flex flex-col items-center justify-between md:flex-row">
+          <Row className="flex-wrap items-center gap-2">
             <TabsList variant={"default"} className="mb-2 sm:mb-0">
               <TabsTrigger value="overview" className="text-sm font-medium">
                 Overview
@@ -187,28 +187,28 @@ const PropertyPanel = (props: PropertyPanelProps) => {
         </div>
 
         {property === "" ? (
-          <Card className="w-full flex items-center justify-center py-16 rounded-none border-0 shadow-none mt-4 bg-background dark:bg-sidebar-background">
+          <Card className="mt-4 flex w-full items-center justify-center rounded-none border-0 bg-background py-16 shadow-none dark:bg-sidebar-background">
             <CardContent className="flex flex-col items-center text-center">
-              <div className="bg-accent dark:bg-sidebar-accent p-4 rounded-full mb-6">
+              <div className="mb-6 rounded-full bg-accent p-4 dark:bg-sidebar-accent">
                 <Tag className="h-8 w-8 text-primary dark:text-sidebar-primary" />
               </div>
               <H3 className="mb-2">No Property Selected</H3>
-              <P className="text-muted-foreground dark:text-sidebar-foreground max-w-sm">
+              <P className="max-w-sm text-muted-foreground dark:text-sidebar-foreground">
                 Please select a property from the sidebar to view its metrics
               </P>
             </CardContent>
           </Card>
         ) : (
-          <div className="flex flex-col gap-6 py-4 w-full">
+          <div className="flex w-full flex-col gap-6 py-4">
             <TabsContent value="overview" className="flex flex-col gap-6">
-              <div className="flex flex-wrap gap-4 mx-4">
-                <Card className="flex-1 min-w-[250px] rounded-lg border border-border dark:border-sidebar-border shadow-sm bg-card dark:bg-sidebar-background">
+              <div className="mx-4 flex flex-wrap gap-4">
+                <Card className="min-w-[250px] flex-1 rounded-lg border border-border bg-card shadow-sm dark:border-sidebar-border dark:bg-sidebar-background">
                   <CardContent className="flex items-center p-4">
-                    <div className="bg-primary/10 dark:bg-primary/10 p-3 rounded-full mr-4">
+                    <div className="mr-4 rounded-full bg-primary/10 p-3 dark:bg-primary/10">
                       <DollarSign className="h-5 w-5 text-primary dark:text-sidebar-primary" />
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground dark:text-sidebar-foreground font-medium">
+                      <p className="text-sm font-medium text-muted-foreground dark:text-sidebar-foreground">
                         Cost
                       </p>
                       {isAnyLoading ? (
@@ -226,13 +226,13 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                   </CardContent>
                 </Card>
 
-                <Card className="flex-1 min-w-[250px] rounded-lg border border-border dark:border-sidebar-border shadow-sm bg-card dark:bg-sidebar-background">
+                <Card className="min-w-[250px] flex-1 rounded-lg border border-border bg-card shadow-sm dark:border-sidebar-border dark:bg-sidebar-background">
                   <CardContent className="flex items-center p-4">
-                    <div className="bg-pink-50/80 dark:bg-pink-900/20 p-3 rounded-full mr-4">
+                    <div className="mr-4 rounded-full bg-pink-50/80 p-3 dark:bg-pink-900/20">
                       <Table2 className="h-5 w-5 text-pink-500 dark:text-pink-400" />
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground font-medium">
+                      <p className="text-sm font-medium text-muted-foreground">
                         Requests
                       </p>
                       {isAnyLoading ? (
@@ -244,7 +244,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                           {
                             +(
                               keyMetrics.totalRequests?.data?.data?.toFixed(
-                                2
+                                2,
                               ) ?? 0
                             )
                           }
@@ -254,13 +254,13 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                   </CardContent>
                 </Card>
 
-                <Card className="flex-1 min-w-[250px] rounded-lg border border-border dark:border-sidebar-border shadow-sm bg-card dark:bg-sidebar-background">
+                <Card className="min-w-[250px] flex-1 rounded-lg border border-border bg-card shadow-sm dark:border-sidebar-border dark:bg-sidebar-background">
                   <CardContent className="flex items-center p-4">
-                    <div className="bg-purple-50/80 dark:bg-purple-900/20 p-3 rounded-full mr-4">
+                    <div className="mr-4 rounded-full bg-purple-50/80 p-3 dark:bg-purple-900/20">
                       <Clock className="h-5 w-5 text-purple-500 dark:text-purple-400" />
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground font-medium">
+                      <p className="text-sm font-medium text-muted-foreground">
                         Average Latency / Req
                       </p>
                       {isAnyLoading ? (
@@ -282,12 +282,12 @@ const PropertyPanel = (props: PropertyPanelProps) => {
               </div>
 
               {isAnyLoading ? (
-                <Card className="w-full rounded-lg border border-border dark:border-sidebar-border shadow-sm bg-background dark:bg-sidebar-background">
-                  <CardContent className="p-0 overflow-auto">
-                    <div className="bg-background dark:bg-sidebar-background min-w-[800px]">
+                <Card className="w-full rounded-lg border border-border bg-background shadow-sm dark:border-sidebar-border dark:bg-sidebar-background">
+                  <CardContent className="overflow-auto p-0">
+                    <div className="min-w-[800px] bg-background dark:bg-sidebar-background">
                       <Table className="w-full bg-background dark:bg-sidebar-background">
                         <TableHeader>
-                          <TableRow className="sticky top-0 bg-background dark:bg-sidebar-background shadow-sm">
+                          <TableRow className="sticky top-0 bg-background shadow-sm dark:bg-sidebar-background">
                             {[
                               "Value",
                               "Requests",
@@ -305,7 +305,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                               >
                                 {header}
                                 {index < 6 && (
-                                  <div className="absolute top-0 right-0 h-full w-px bg-border dark:bg-sidebar-border" />
+                                  <div className="absolute right-0 top-0 h-full w-px bg-border dark:bg-sidebar-border" />
                                 )}
                                 <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-border dark:bg-sidebar-border" />
                               </TableHead>
@@ -318,11 +318,11 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                               {Array.from({ length: 7 }).map((_, colIndex) => (
                                 <TableCell
                                   key={`skeleton-cell-${rowIndex}-${colIndex}`}
-                                  className={`py-3 border-t border-border dark:border-sidebar-border px-2 text-foreground dark:text-sidebar-foreground ${
+                                  className={`border-t border-border px-2 py-3 text-foreground dark:border-sidebar-border dark:text-sidebar-foreground ${
                                     colIndex === 0 ? "pl-10" : ""
                                   } ${
                                     colIndex === 6
-                                      ? "pr-10 border-r border-border dark:border-sidebar-border"
+                                      ? "border-r border-border pr-10 dark:border-sidebar-border"
                                       : ""
                                   }`}
                                 >
@@ -341,8 +341,8 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                   </CardContent>
                 </Card>
               ) : (
-                <Card className="w-full rounded-lg border border-border dark:border-sidebar-border shadow-sm bg-background dark:bg-sidebar-background">
-                  <CardContent className="p-0 overflow-hidden">
+                <Card className="w-full rounded-lg border border-border bg-background shadow-sm dark:border-sidebar-border dark:bg-sidebar-background">
+                  <CardContent className="overflow-hidden p-0">
                     <div className="overflow-x-auto">
                       <SimpleTable
                         className="w-full min-w-[800px]"
@@ -356,12 +356,12 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                               <div className="overflow-hidden">
                                 <Button
                                   variant="link"
-                                  className="p-0 h-auto font-semibold truncate flex items-center"
+                                  className="flex h-auto items-center truncate p-0 font-semibold"
                                   title={propertyValue.property_value}
                                   onClick={() => {
                                     const value = propertyValue.property_value;
                                     const filterMapIndex = filterMap.findIndex(
-                                      (f) => f.label === property
+                                      (f) => f.label === property,
                                     );
                                     const currentAdvancedFilters =
                                       encodeURIComponent(
@@ -375,7 +375,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                                           ]
                                             .map(encodeFilter)
                                             .join("|"),
-                                        })
+                                        }),
                                       );
 
                                     router.push({
@@ -388,7 +388,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                                   }}
                                 >
                                   {propertyValue.property_value}
-                                  <ExternalLink className="h-3 w-3 ml-1 text-muted-foreground flex-shrink-0" />
+                                  <ExternalLink className="ml-1 h-3 w-3 flex-shrink-0 text-muted-foreground" />
                                 </Button>
                               </div>
                             ),
@@ -414,7 +414,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                             render: (propertyValue) =>
                               formatNumber(
                                 propertyValue.avg_prompt_tokens_per_request,
-                                6
+                                6,
                               ),
                           },
                           {
@@ -424,7 +424,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                             render: (propertyValue) =>
                               formatNumber(
                                 propertyValue.avg_completion_tokens_per_request,
-                                6
+                                6,
                               ),
                           },
                           {
@@ -434,7 +434,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                             render: (propertyValue) =>
                               formatNumber(
                                 propertyValue.avg_latency_per_request,
-                                6
+                                6,
                               ),
                           },
                           {
@@ -444,14 +444,14 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                             render: (propertyValue) =>
                               `$${formatNumber(
                                 propertyValue.average_cost_per_request,
-                                6
+                                6,
                               )}`,
                           },
                         ]}
                         emptyMessage="No property data available"
                         onSort={(
                           key: keyof (typeof cleanedValueData)[0] | undefined,
-                          direction: "asc" | "desc"
+                          direction: "asc" | "desc",
                         ) => {
                           setSortConfig({
                             key: key as string,

@@ -45,7 +45,7 @@ export const useLLMEvaluatorSubmit = (onSuccess: (data?: any) => void) => {
 
           notification.setNotification(
             "Evaluator updated successfully",
-            "success"
+            "success",
           );
           return result.data;
         } else {
@@ -64,7 +64,7 @@ export const useLLMEvaluatorSubmit = (onSuccess: (data?: any) => void) => {
 
           notification.setNotification(
             "Evaluator created successfully",
-            "success"
+            "success",
           );
           return result.data;
         }
@@ -121,7 +121,7 @@ export const usePythonEvaluatorSubmit = (onSuccess: () => void) => {
 
           notification.setNotification(
             "Evaluator updated successfully",
-            "success"
+            "success",
           );
           return result.data;
         } else {
@@ -140,7 +140,7 @@ export const usePythonEvaluatorSubmit = (onSuccess: () => void) => {
 
           notification.setNotification(
             "Evaluator created successfully",
-            "success"
+            "success",
           );
           return result.data;
         }
@@ -197,7 +197,7 @@ export const useLastMileEvaluatorSubmit = (onSuccess: () => void) => {
 
           notification.setNotification(
             "Evaluator updated successfully",
-            "success"
+            "success",
           );
           return result.data;
         } else {
@@ -216,7 +216,7 @@ export const useLastMileEvaluatorSubmit = (onSuccess: () => void) => {
 
           notification.setNotification(
             "Evaluator created successfully",
-            "success"
+            "success",
           );
           return result.data;
         }

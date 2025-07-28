@@ -15,8 +15,8 @@ export default function StepList(props: {
         currentStep === 1
           ? "current"
           : currentStep > 1
-          ? "complete"
-          : "upcoming",
+            ? "complete"
+            : "upcoming",
     },
     {
       name: "Integrate with Helicone",
@@ -25,8 +25,8 @@ export default function StepList(props: {
         currentStep === 2
           ? "current"
           : currentStep > 2
-          ? "complete"
-          : "upcoming",
+            ? "complete"
+            : "upcoming",
     },
     {
       name: "Send your first event",
@@ -35,8 +35,8 @@ export default function StepList(props: {
         currentStep === 3
           ? "current"
           : currentStep > 3
-          ? "complete"
-          : "upcoming",
+            ? "complete"
+            : "upcoming",
     },
     {
       name: "Explore features and tooling",
@@ -45,8 +45,8 @@ export default function StepList(props: {
         currentStep === 4
           ? "current"
           : currentStep > 4
-          ? "complete"
-          : "upcoming",
+            ? "complete"
+            : "upcoming",
     },
   ];
 

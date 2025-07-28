@@ -63,8 +63,8 @@ export function timeBackfill<T, K>(
   data: (T & { created_at_trunc: Date })[],
   start: Date,
   end: Date,
-  reducer: (acc: K, d: T) => K,
-  initial: K
+  reducer: (_acc: K, _d: T) => K,
+  initial: K,
 ): (K & { time: Date })[] {
   const result: (K & { time: Date })[] = [];
   let current = start;
@@ -77,7 +77,7 @@ export function timeBackfill<T, K>(
     const initialClone = { ...initial };
     const val = data
       .filter(
-        (d) => d.created_at_trunc >= current && d.created_at_trunc < nextTime
+        (d) => d.created_at_trunc >= current && d.created_at_trunc < nextTime,
       )
       .reduce((acc, d) => reducer(acc, d), initialClone);
 

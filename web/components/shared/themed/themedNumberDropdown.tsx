@@ -35,20 +35,20 @@ const ThemedNumberDropdown = (props: ThemedNumberDropdownProps) => {
   const handleValueChange = (currentValue: string) => {
     setQuery(currentValue);
     onChange(
-      options.find((o) => o.param === currentValue)?.key ?? currentValue
+      options.find((o) => o.param === currentValue)?.key ?? currentValue,
     );
     setOpen(false);
   };
 
   const filteredOptions = Array.from(
-    new Set([...options.map((o) => o.param), query])
+    new Set([...options.map((o) => o.param), query]),
   )
     .filter(Boolean)
     .sort()
     .filter((option) => option.toLowerCase().includes(query.toLowerCase()));
 
   return (
-    <div className="w-full flex flex-col gap-1">
+    <div className="flex w-full flex-col gap-1">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
@@ -71,7 +71,7 @@ const ThemedNumberDropdown = (props: ThemedNumberDropdownProps) => {
               onValueChange={(value) => {
                 setQuery(value);
               }}
-              className="text-xs h-6"
+              className="h-6 text-xs"
             />
             <CommandList>
               {filteredOptions.length === 0 && (

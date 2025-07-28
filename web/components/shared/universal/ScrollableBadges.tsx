@@ -30,11 +30,11 @@ const SPECIAL_KEYS: Record<
   { icon: React.ReactNode; hrefPrefix: string }
 > = {
   "Helicone-Prompt-Id": {
-    icon: <LuScroll className="w-4 h-4" />,
+    icon: <LuScroll className="h-4 w-4" />,
     hrefPrefix: "/prompts/",
   },
   "Helicone-Session-Id": {
-    icon: <LuListTree className="w-4 h-4" />,
+    icon: <LuListTree className="h-4 w-4" />,
     hrefPrefix: "/sessions/",
   },
 };
@@ -103,15 +103,16 @@ export default function ScrollableBadges({
       if (mode === "singleValue") {
         const externalValues = items as SingleValueItem[];
         return (prev as SingleValueItem[]).filter(
-          (pendingValue) => !externalValues.includes(pendingValue)
+          (pendingValue) => !externalValues.includes(pendingValue),
         );
       } else {
         const externalKeyValues = items as KeyValueItem[];
         return (prev as KeyValueItem[]).filter(
           (pending) =>
             !externalKeyValues.some(
-              (item) => item.key === pending.key && item.value === pending.value
-            )
+              (item) =>
+                item.key === pending.key && item.value === pending.value,
+            ),
         );
       }
     });
@@ -166,7 +167,7 @@ export default function ScrollableBadges({
         await (onAdd as (value: string) => Promise<void>)(newValue);
       } catch (error) {
         setPendingItems((prev) =>
-          (prev as SingleValueItem[]).filter((item) => item !== newValue)
+          (prev as SingleValueItem[]).filter((item) => item !== newValue),
         );
         console.error("Error adding item:", error);
       }
@@ -182,13 +183,13 @@ export default function ScrollableBadges({
         setIsAdding(false);
         await (onAdd as (key: string, value: string) => Promise<void>)(
           newKey,
-          newValue
+          newValue,
         );
       } catch (error) {
         setPendingItems((prev) =>
           (prev as KeyValueItem[]).filter(
-            (item) => !(item.key === newKey && item.value === newValue)
-          )
+            (item) => !(item.key === newKey && item.value === newValue),
+          ),
         );
         console.error("Error adding item:", error);
       }
@@ -208,7 +209,7 @@ export default function ScrollableBadges({
 
   return (
     <div
-      className={`h-10 w-full flex flex-row justify-between items-center ${
+      className={`flex h-10 w-full flex-row items-center justify-between ${
         !title ? "pr-4" : ""
       } ${className}`}
     >
@@ -216,14 +217,14 @@ export default function ScrollableBadges({
         <XSmall className="font-semibold text-secondary">{title}</XSmall>
       )}
 
-      <div className="h-full w-full flex items-center relative overflow-x-auto">
+      <div className="relative flex h-full w-full items-center overflow-x-auto">
         <ScrollArea orientation="horizontal" className="w-full">
           <div
             ref={scrollAreaRef}
-            className="h-full w-full flex flex-row items-center gap-2"
+            className="flex h-full w-full flex-row items-center gap-2"
           >
             {allItems.length === 0 && placeholder && !isAdding && (
-              <p className="h-full flex items-center ml-4 text-xs text-muted-foreground/40">
+              <p className="ml-4 flex h-full items-center text-xs text-muted-foreground/40">
                 {placeholder}
               </p>
             )}
@@ -245,7 +246,7 @@ export default function ScrollableBadges({
 
             {isAdding && (
               <div
-                className={`h-full flex flex-row gap-1 items-center ${
+                className={`flex h-full flex-row items-center gap-1 ${
                   allItems.length === 0 ? "ml-4" : ""
                 }`}
               >
@@ -258,7 +259,7 @@ export default function ScrollableBadges({
                     onChange={(e) => setNewKey(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder="Key"
-                    className="h-6 w-20 text-xs px-2"
+                    className="h-6 w-20 px-2 text-xs"
                   />
                 )}
                 <Input
@@ -269,7 +270,7 @@ export default function ScrollableBadges({
                   onChange={(e) => setNewValue(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder={mode === "singleValue" ? "Value" : "Value"}
-                  className="h-6 w-20 text-xs px-2"
+                  className="h-6 w-20 px-2 text-xs"
                   autoFocus={mode === "singleValue"} // Autofocus value input in singleValue mode
                 />
                 <Button
@@ -282,7 +283,7 @@ export default function ScrollableBadges({
                     setNewValue("");
                   }}
                 >
-                  <LuX className="w-4 h-4" />
+                  <LuX className="h-4 w-4" />
                 </Button>
               </div>
             )}
@@ -291,8 +292,8 @@ export default function ScrollableBadges({
           </div>
         </ScrollArea>
         {/* Gradient overlays - positioned at extreme edges */}
-        <div className="absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-card to-transparent pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-4 bg-gradient-to-l from-card to-transparent pointer-events-none" />
+        <div className="pointer-events-none absolute bottom-0 left-0 top-0 w-4 bg-gradient-to-r from-card to-transparent" />
+        <div className="pointer-events-none absolute bottom-0 right-0 top-0 w-4 bg-gradient-to-l from-card to-transparent" />
       </div>
 
       <TooltipProvider>
@@ -313,24 +314,24 @@ export default function ScrollableBadges({
               }}
             >
               {isAdding ? (
-                <LuCheck className="w-4 h-4" />
+                <LuCheck className="h-4 w-4" />
               ) : (
-                <LuPlus className="w-4 h-4" />
+                <LuPlus className="h-4 w-4" />
               )}
             </Button>
           </TooltipTrigger>
           {(tooltipText || tooltipLink) && (
-            <TooltipContent side="left" className="text-xs flex flex-col gap-1">
+            <TooltipContent side="left" className="flex flex-col gap-1 text-xs">
               {tooltipText && <span>{tooltipText}</span>}
               {tooltipLink && (
                 <div className="flex items-center justify-center gap-1">
                   <Link
                     href={tooltipLink.url}
                     target="_blank"
-                    className="text-sky-500 hover:underline flex items-center gap-1 "
+                    className="flex items-center gap-1 text-sky-500 hover:underline"
                   >
                     {tooltipLink.text}
-                    <LuExternalLink className="w-3 h-3" />
+                    <LuExternalLink className="h-3 w-3" />
                   </Link>
                 </div>
               )}
@@ -362,12 +363,12 @@ const ItemBadge = memo(
           <Link href={`${isSpecial.hrefPrefix}${kvItem.value}`} target="_blank">
             <Badge
               variant={"none"}
-              className={`h-6 flex flex-row gap-2 px-2 py-1 rounded-lg text-xs bg-slate-100 dark:bg-slate-900 ${
+              className={`flex h-6 flex-row gap-2 rounded-lg bg-slate-100 px-2 py-1 text-xs dark:bg-slate-900 ${
                 isFirst ? "ml-4" : ""
-              } border border-border hover:bg-slate-200 dark:hover:bg-slate-800 cursor-pointer`}
+              } cursor-pointer border border-border hover:bg-slate-200 dark:hover:bg-slate-800`}
             >
               {isSpecial.icon}
-              <span className="text-primary font-medium text-nowrap">
+              <span className="text-nowrap font-medium text-primary">
                 {kvItem.value}
               </span>
             </Badge>
@@ -378,14 +379,14 @@ const ItemBadge = memo(
       return (
         <Badge
           variant={"none"}
-          className={`h-6 flex flex-row gap-2 px-2 py-1 rounded-lg text-xs bg-slate-100 dark:bg-slate-900 ${
+          className={`flex h-6 flex-row gap-2 rounded-lg bg-slate-100 px-2 py-1 text-xs dark:bg-slate-900 ${
             isFirst ? "ml-4" : ""
           }`}
         >
-          <span className="text-muted-foreground text-nowrap">
+          <span className="text-nowrap text-muted-foreground">
             {kvItem.key}
           </span>{" "}
-          <span className="text-primary font-medium text-nowrap">
+          <span className="text-nowrap font-medium text-primary">
             {kvItem.value}
           </span>
         </Badge>
@@ -396,16 +397,16 @@ const ItemBadge = memo(
       return (
         <Badge
           variant={"none"}
-          className={`h-6 flex flex-row gap-2 px-2 py-1 rounded-lg text-xs bg-slate-100 dark:bg-slate-900 ${
+          className={`flex h-6 flex-row gap-2 rounded-lg bg-slate-100 px-2 py-1 text-xs dark:bg-slate-900 ${
             isFirst ? "ml-4" : ""
           }`}
         >
-          <span className="text-primary font-medium text-nowrap">
+          <span className="text-nowrap font-medium text-primary">
             {valueItem}
           </span>
         </Badge>
       );
     }
-  }
+  },
 );
 ItemBadge.displayName = "ItemBadge";

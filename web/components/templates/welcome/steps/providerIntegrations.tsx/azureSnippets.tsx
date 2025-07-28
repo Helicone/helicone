@@ -103,7 +103,7 @@ console.log(res);
 logger.sendLog(res);
   `,
   curl: (
-    key: string
+    key: string,
   ) => `curl "https://oai.helicone.ai/openai/deployments/{{YOUR_DEPLOYMENT}}/chat/completions?api-version={{API_VERSION}}" \\
   -H "api-key: {{AZURE_API_KEY}}" \\
   -H "Helicone-Auth: Bearer ${key}" \\
@@ -154,7 +154,7 @@ export default function AzureSnippets(props: AzureSnippetsProps) {
   const [lang, setLang] = useState<SupportedLanguages>("typescript");
 
   return (
-    <div className="w-full flex flex-col">
+    <div className="flex w-full flex-col">
       <DiffHighlight
         code={CODE_CONVERTS[lang](apiKey)}
         language={lang}
@@ -164,14 +164,14 @@ export default function AzureSnippets(props: AzureSnippetsProps) {
       />
 
       <div className="mt-2">
-        <div className="flex overflow-x-auto py-2 w-full no-scrollbar">
+        <div className="no-scrollbar flex w-full overflow-x-auto py-2">
           <div className="flex gap-2">
             <Button
               variant={"outline"}
               size="sm"
               className={
                 lang === "typescript"
-                  ? "bg-slate-200 border-slate-200 dark:bg-slate-800 dark:border-slate-800"
+                  ? "border-slate-200 bg-slate-200 dark:border-slate-800 dark:bg-slate-800"
                   : ""
               }
               onClick={() => setLang("typescript")}
@@ -183,7 +183,7 @@ export default function AzureSnippets(props: AzureSnippetsProps) {
               size="sm"
               className={
                 lang === "python"
-                  ? "bg-slate-200 border-slate-200 dark:bg-slate-800 dark:border-slate-800"
+                  ? "border-slate-200 bg-slate-200 dark:border-slate-800 dark:bg-slate-800"
                   : ""
               }
               onClick={() => setLang("python")}
@@ -195,7 +195,7 @@ export default function AzureSnippets(props: AzureSnippetsProps) {
               size="sm"
               className={
                 lang === "curl"
-                  ? "bg-slate-200 border-slate-200 dark:bg-slate-800 dark:border-slate-800"
+                  ? "border-slate-200 bg-slate-200 dark:border-slate-800 dark:bg-slate-800"
                   : ""
               }
               onClick={() => setLang("curl")}

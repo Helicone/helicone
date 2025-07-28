@@ -61,7 +61,7 @@ export const FreePlanCard = () => {
   const [isComparisonOpen, setIsComparisonOpen] = useState(false);
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-5xl px-4 pb-8">
+    <div className="flex w-full max-w-5xl flex-col gap-6 px-4 pb-8">
       <Card className="w-full">
         <CardHeader>
           <div className="flex items-center gap-3">
@@ -92,7 +92,7 @@ export const FreePlanCard = () => {
 
           {/* Plan comparison */}
           <div className="grid gap-6 md:grid-cols-2 lg:max-w-full">
-            <Card className="max-w-[500px] flex flex-col">
+            <Card className="flex max-w-[500px] flex-col">
               <CardHeader>
                 <CardTitle>
                   <div className="space-y-2">
@@ -123,7 +123,7 @@ export const FreePlanCard = () => {
                 <Button
                   size="lg"
                   variant="action"
-                  className="w-full bg-sky-500 hover:bg-sky-600 text-white"
+                  className="w-full bg-sky-500 text-white hover:bg-sky-600"
                   onClick={() => setShowUpgradeDialog(true)}
                 >
                   Start 7-day free trial
@@ -131,7 +131,7 @@ export const FreePlanCard = () => {
               </CardFooter>
             </Card>
 
-            <Card className="max-w-[500px] flex flex-col">
+            <Card className="flex max-w-[500px] flex-col">
               <CardHeader>
                 <CardTitle>
                   <div className="space-y-2">
@@ -182,20 +182,20 @@ export const FreePlanCard = () => {
               <CardTitle>Complete Pro Features</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="rounded-lg p-6 bg-background border">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="rounded-lg border bg-background p-6">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {proFeatures.map((feature, index) => (
                     <div
                       key={index}
-                      className="p-4 rounded-lg hover:bg-muted/5 transition-colors group"
+                      className="group rounded-lg p-4 transition-colors hover:bg-muted/5"
                     >
                       <div className="flex gap-3">
-                        <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                        <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-primary" />
                         <div>
-                          <h4 className="font-medium text-sm group-hover:text-primary transition-colors">
+                          <h4 className="text-sm font-medium transition-colors group-hover:text-primary">
                             {feature.title}
                           </h4>
-                          <p className="text-sm text-slate-500 mt-1">
+                          <p className="mt-1 text-sm text-slate-500">
                             {feature.description}
                           </p>
                         </div>
@@ -208,7 +208,7 @@ export const FreePlanCard = () => {
           </Card>
         </CollapsibleContent>
 
-        <div className="flex justify-center mt-4">
+        <div className="mt-4 flex justify-center">
           <CollapsibleTrigger asChild>
             <Button
               variant="ghost"
@@ -216,12 +216,12 @@ export const FreePlanCard = () => {
             >
               {isComparisonOpen ? (
                 <>
-                  <ChevronUpIcon className="h-4 w-4 mr-2" />
+                  <ChevronUpIcon className="mr-2 h-4 w-4" />
                   Show fewer features
                 </>
               ) : (
                 <>
-                  <ChevronDownIcon className="h-4 w-4 mr-2" />
+                  <ChevronDownIcon className="mr-2 h-4 w-4" />
                   See all Pro features
                 </>
               )}
@@ -232,7 +232,7 @@ export const FreePlanCard = () => {
 
       {/* Additional Options */}
       <div className="grid gap-6 md:grid-cols-2">
-        <Card className="flex flex-col h-full">
+        <Card className="flex h-full flex-col">
           <CardHeader className="space-y-1.5">
             <CardTitle className="text-2xl font-semibold">
               Learn about our Enterprise plan
@@ -255,7 +255,7 @@ export const FreePlanCard = () => {
           </CardFooter>
         </Card>
 
-        <Card className="flex flex-col h-full">
+        <Card className="flex h-full flex-col">
           <CardHeader className="space-y-1.5">
             <CardTitle className="text-2xl font-semibold">
               Looking for something else?

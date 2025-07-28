@@ -52,7 +52,7 @@ const GuessWhoGame = () => {
     (typeof FAMOUS_MOVIES)[number] | null
   >(null);
   const [selectedCharacter, setSelectedCharacter] = useState<string | null>(
-    null
+    null,
   );
 
   useEffect(() => {
@@ -84,7 +84,7 @@ const GuessWhoGame = () => {
   };
 
   return (
-    <div className="flex flex-col h-full w-full">
+    <div className="flex h-full w-full flex-col">
       {gameState === "playing" && selectedMovie && selectedCharacter && (
         <div className="h-full">
           <ChatWindow
@@ -100,7 +100,7 @@ const GuessWhoGame = () => {
       )}
 
       {gameState === "finished" && (
-        <div className="h-full flex flex-col items-center justify-center gap-5 p-6 text-center">
+        <div className="flex h-full flex-col items-center justify-center gap-5 p-6 text-center">
           <h1 className="text-2xl font-bold text-indigo-600">🎉 You won! 🎉</h1>
           <p className="text-md">
             You found the character in{" "}
@@ -113,7 +113,7 @@ const GuessWhoGame = () => {
             movie <span className="font-semibold">{selectedMovie?.title}</span>.
           </p>
           <button
-            className="bg-indigo-500 text-white px-4 py-2 rounded-md hover:bg-indigo-600 transition-colors text-sm mt-4"
+            className="mt-4 rounded-md bg-indigo-500 px-4 py-2 text-sm text-white transition-colors hover:bg-indigo-600"
             onClick={startNewGame}
           >
             Play again

@@ -10,25 +10,25 @@ const ManageHostedButton = () => {
   return (
     <>
       <button
-        className="underline underline-offset-2 font-semibold text-gray-900"
+        className="font-semibold text-gray-900 underline underline-offset-2"
         onClick={() => setOpen(true)}
       >
         Get Started
       </button>
       <ThemedModal open={open} setOpen={setOpen}>
-        <div className="flex flex-col space-y-4 w-[400px]">
+        <div className="flex w-[400px] flex-col space-y-4">
           <h1 className="text-2xl font-semibold text-gray-900">
             Manage Hosted
           </h1>
-          <p className="text-gray-700 text-sm">
+          <p className="text-sm text-gray-700">
             Deploy your own hosted instance of Helicone on your preferred cloud.
           </p>
-          <div className="flex flex-row w-full items-center justify-center gap-8 pt-8 pb-4">
+          <div className="flex w-full flex-row items-center justify-center gap-8 pb-4 pt-8">
             <button
               onClick={() => {
                 router.push("/contact");
               }}
-              className="p-4 rounded-lg shadow-lg border border-gray-300"
+              className="rounded-lg border border-gray-300 p-4 shadow-lg"
             >
               <Image
                 style={{
@@ -39,7 +39,7 @@ const ManageHostedButton = () => {
                 alt=""
               />
             </button>
-            <div className="p-4 rounded-lg shadow-lg border border-gray-300 relative">
+            <div className="relative rounded-lg border border-gray-300 p-4 shadow-lg">
               <Image
                 style={{
                   contain: "fit",
@@ -48,11 +48,11 @@ const ManageHostedButton = () => {
                 src={"/assets/landing/gcp.svg.png"}
                 alt=""
               />
-              <span className="absolute -top-2 -right-4 bg-gray-100 text-gray-900 ring-gray-300 inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset">
+              <span className="absolute -right-4 -top-2 inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-900 ring-1 ring-inset ring-gray-300">
                 Soon
               </span>
             </div>
-            <div className="p-4 rounded-lg shadow-lg border border-gray-300 relative">
+            <div className="relative rounded-lg border border-gray-300 p-4 shadow-lg">
               <Image
                 style={{
                   contain: "fit",
@@ -61,7 +61,7 @@ const ManageHostedButton = () => {
                 src={"/assets/landing/azure.svg.png"}
                 alt=""
               />
-              <span className="absolute -top-2 -right-4 bg-gray-100 text-gray-900 ring-gray-300 inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset">
+              <span className="absolute -right-4 -top-2 inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-900 ring-1 ring-inset ring-gray-300">
                 Soon
               </span>
             </div>

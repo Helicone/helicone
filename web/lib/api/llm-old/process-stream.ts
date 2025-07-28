@@ -67,7 +67,7 @@ function messageReducer(previous: any, item: any): any {
           if (index === undefined) {
             console.error(
               "Reducer: Array element in delta missing index",
-              value[i]
+              value[i],
             );
             // Attempt to append if index missing, might be wrong
             accArray.push(chunkTool);
@@ -88,7 +88,7 @@ function messageReducer(previous: any, item: any): any {
         console.warn(
           `Reducer: Unhandled type mismatch for key '${key}'. Accumulator: ${typeof acc[
             key
-          ]}, Delta: ${typeof value}`
+          ]}, Delta: ${typeof value}`,
         );
         // Default behavior: overwrite accumulator with delta value
         acc[key] = value;
@@ -123,7 +123,7 @@ function messageReducer(previous: any, item: any): any {
 export async function processStream(
   stream: ReadableStream<Uint8Array>,
   options: StreamProcessorOptions,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<{ content: string; reasoning: string; calls: string }> {
   const reader = stream.getReader();
   const { onUpdate, initialState = { content: "", reasoning: "", calls: "" } } =
@@ -174,7 +174,7 @@ export async function processStream(
           callbackState.calls = JSON.stringify(
             accumulatedMessage.tool_calls,
             null,
-            2
+            2,
           );
         } else {
           // Ensure calls is reset if tool_calls disappears during reduction (shouldn't happen often)
@@ -185,7 +185,7 @@ export async function processStream(
           "[processStream] Error parsing JSON chunk or processing delta:",
           error,
           "Chunk:",
-          chunkString
+          chunkString,
         );
         // Optional: Treat parse errors as raw content?
         // state.content += chunkString; // Be cautious with this
@@ -224,7 +224,7 @@ export async function processStream(
     // Return the state as it was when the error occurred, might be incomplete
     console.warn(
       "[processStream] Returning state possibly incomplete due to error:",
-      callbackState
+      callbackState,
     );
     // Attempt to extract final state even on error, might be partial
     // Use the accumulated message directly

@@ -2,7 +2,7 @@ export const replaceVariablesWithTags = (content: string): string => {
   const regex = /\{\{([^}]+)\}\}/g;
   return content.replace(
     regex,
-    (match, p1) => `<helicone-prompt-input key="${p1.trim()}" />`
+    (match, p1) => `<helicone-prompt-input key="${p1.trim()}" />`,
   );
 };
 

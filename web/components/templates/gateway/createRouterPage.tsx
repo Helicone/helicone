@@ -250,7 +250,7 @@ const CreateRouterPage = () => {
                     </Badge>
                   </div>
                   <div className="mt-0.5 text-xs text-muted-foreground">
-                    Make sure you've set up your provider keys in the{" "}
+                    Make sure you&apos;ve set up your provider keys in the{" "}
                     <Link
                       href="/providers"
                       className="text-blue-500 hover:underline"

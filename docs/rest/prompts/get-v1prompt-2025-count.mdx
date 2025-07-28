@@ -1,0 +1,39 @@
+---
+title: "Get Prompt Count"
+api: "GET https://api.helicone.ai/v1/prompt-2025/count"
+description: "Get the total number of prompts"
+---
+
+Retrieves the total count of prompts in the organization.
+
+### Response
+
+Returns the total number of prompts as an integer.
+
+<RequestExample>
+
+```bash cURL
+curl -X GET "https://api.helicone.ai/v1/prompt-2025/count" \
+  -H "Authorization: Bearer $HELICONE_API_KEY"
+```
+
+```typescript TypeScript
+const response = await fetch('https://api.helicone.ai/v1/prompt-2025/count', {
+  method: 'GET',
+  headers: {
+    'Authorization': `Bearer ${HELICONE_API_KEY}`,
+  },
+});
+
+const count = await response.json();
+```
+
+</RequestExample>
+
+<ResponseExample>
+
+```json Response
+42
+```
+
+</ResponseExample> 

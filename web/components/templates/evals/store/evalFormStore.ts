@@ -19,7 +19,7 @@ export const useEvalFormStore = create<EvalFormState>()(
       }),
       {
         name: "eval-form-store",
-      }
-    )
-  )
+      },
+    ),
+  ),
 );

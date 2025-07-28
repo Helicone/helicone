@@ -55,18 +55,18 @@ export default function AdvancedAnalytics() {
         </div>
       </div>
       <div className="mx-auto max-w-4xl px-6 lg:max-w-7xl lg:px-8 xl:grid xl:grid-flow-col-dense xl:grid-cols-2 xl:gap-x-8">
-        <div className="relative pt-12 pb-64 sm:pt-24 sm:pb-64 xl:col-start-1 xl:pb-24">
+        <div className="relative pb-64 pt-12 sm:pb-64 sm:pt-24 xl:col-start-1 xl:pb-24">
           <h2 className="text-lg font-semibold text-sky-400">
             Advanced Analytics
           </h2>
           <p className="mt-3 text-3xl font-bold tracking-tight text-white">
             Helicone helps businesses use large language models in production.
           </p>
-          <div className="mt-16 grid grid-cols-1 gap-y-12 gap-x-6 sm:grid-cols-2">
+          <div className="mt-16 grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2">
             {metrics.map((item) => (
-              <p key={item.id} className="border border-white p-4 rounded-lg">
-                <item.icon className="text-white h-8 w-8" />
-                <span className="mt-1 block text-md text-gray-300">
+              <p key={item.id} className="rounded-lg border border-white p-4">
+                <item.icon className="h-8 w-8 text-white" />
+                <span className="text-md mt-1 block text-gray-300">
                   <span className="font-medium text-white">
                     {item.emphasis}
                   </span>{" "}

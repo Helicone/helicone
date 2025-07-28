@@ -82,7 +82,7 @@ RequestsV2.getLayout = function getLayout(page: ReactElement) {
 export default RequestsV2;
 
 export const getServerSideProps = async (
-  context: GetServerSidePropsContext
+  context: GetServerSidePropsContext,
 ) => {
   const {
     page,

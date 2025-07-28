@@ -43,6 +43,13 @@ function QueryResult({
   error,
   queryStats,
 }: QueryResultProps) {
+  const columns = useMemo(() => {
+    if (!result || result.length === 0) {
+      return [];
+    }
+    return Object.keys(result[0]);
+  }, [result]);
+
   if (error) {
     return <div className="p-4 text-center text-muted-foreground">{error}</div>;
   }
@@ -54,8 +61,6 @@ function QueryResult({
       </div>
     );
   }
-
-  const columns = useMemo(() => Object.keys(result[0]), [result]);
 
   return (
     <div className="flex flex-col">

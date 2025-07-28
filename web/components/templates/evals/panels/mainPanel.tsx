@@ -43,7 +43,7 @@ export const MainPanel = () => {
           name: evaluator.name,
           scoreName: getEvaluatorScoreName(
             evaluator.name,
-            evaluator.scoring_type
+            evaluator.scoring_type,
           ),
           type,
           scoring_type: evaluator.scoring_type,
@@ -67,7 +67,7 @@ export const MainPanel = () => {
       setTestConfig({
         _type: "llm",
         evaluator_llm_template: JSON.stringify(
-          evaluator.evaluator_llm_template
+          evaluator.evaluator_llm_template,
         ),
         evaluator_scoring_type: evaluator.scoring_type,
         evaluator_name: evaluator.name || "evaluator",
@@ -97,8 +97,8 @@ export const MainPanel = () => {
 
   if (!evaluators.isLoading && simpleEvaluators.length === 0) {
     return (
-      <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">
-        <div className="flex flex-1 h-full">
+      <div className="flex h-screen w-full flex-col bg-background dark:bg-sidebar-background">
+        <div className="flex h-full flex-1">
           <GenericEmptyState
             title="Create Your First Evaluator"
             description="Create an evaluator to score your LLM outputs and measure their quality."
@@ -116,7 +116,7 @@ export const MainPanel = () => {
                     disabled={!canCreateEvaluator}
                   >
                     Create Evaluator
-                    <PiPlusBold className="h-4 w-4 ml-2" />
+                    <PiPlusBold className="ml-2 h-4 w-4" />
                   </Button>
                 </FreeTierLimitWrapper>
                 <Link
@@ -137,7 +137,7 @@ export const MainPanel = () => {
   }
 
   return (
-    <div className="flex flex-col w-full h-screen">
+    <div className="flex h-screen w-full flex-col">
       <AuthHeader
         title="Evaluators"
         actions={[
@@ -151,7 +151,7 @@ export const MainPanel = () => {
               onClick={() => openCreatePanel()}
               variant="action"
               size="sm"
-              className="gap-1 items-center"
+              className="items-center gap-1"
             >
               <PiPlusBold className="h-3.5 w-3.5" />
               Create Evaluator
@@ -168,22 +168,22 @@ export const MainPanel = () => {
       )}
       {evaluators.isLoading ? (
         // Loading state
-        <div className="flex flex-col w-full gap-6 p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="flex w-full flex-col gap-6 p-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <Card
                 key={i}
                 className="animate-pulse rounded-xl border shadow-sm"
               >
-                <div className="pb-2 p-6">
-                  <div className="h-6 bg-muted rounded w-3/4"></div>
-                  <div className="h-4 bg-muted rounded w-1/2 mt-2"></div>
+                <div className="p-6 pb-2">
+                  <div className="h-6 w-3/4 rounded bg-muted"></div>
+                  <div className="mt-2 h-4 w-1/2 rounded bg-muted"></div>
                 </div>
                 <div className="px-6 py-4">
-                  <div className="h-10 bg-muted rounded w-full"></div>
+                  <div className="h-10 w-full rounded bg-muted"></div>
                 </div>
                 <div className="px-6 py-4">
-                  <div className="h-8 bg-muted rounded w-full"></div>
+                  <div className="h-8 w-full rounded bg-muted"></div>
                 </div>
               </Card>
             ))}
@@ -191,13 +191,13 @@ export const MainPanel = () => {
         </div>
       ) : (
         // Card grid view
-        <div className="flex flex-col w-full gap-6 p-6">
+        <div className="flex w-full flex-col gap-6 p-6">
           <div
             className={clsx(
               "grid gap-6",
               panels.length > 1
                 ? "grid-cols-1"
-                : "grid-cols-1 lg:grid-cols-2 xl:grid-cols-3"
+                : "grid-cols-1 lg:grid-cols-2 xl:grid-cols-3",
             )}
           >
             {simpleEvaluators.map((evaluator) => (

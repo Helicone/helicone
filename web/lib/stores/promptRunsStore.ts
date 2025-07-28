@@ -22,6 +22,6 @@ export const usePromptRunsStore = create<PromptRunsState>()(
     }),
     {
       name: "prompt-runs-storage",
-    }
-  )
+    },
+  ),
 );

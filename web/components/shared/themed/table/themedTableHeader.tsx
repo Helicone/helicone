@@ -39,7 +39,7 @@ interface ThemedTableHeaderProps<T> {
     setAdvancedFilters: (filters: UIFilterRowTree) => void;
     searchPropertyFilters: (
       property: string,
-      search: string
+      search: string,
     ) => Promise<Result<void, string>>;
     show?: boolean;
   };
@@ -120,8 +120,8 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
   return (
     <TooltipProvider>
       <div className="flex flex-col">
-        <div className="flex flex-col gap-3 lg:flex-row justify-between ">
-          <div className="flex flex-row gap-3 items-center">
+        <div className="flex flex-col justify-between gap-3 lg:flex-row">
+          <div className="flex flex-row items-center gap-3">
             {timeFilter !== undefined ? (
               <ThemedTimeFilter
                 currentTimeFilter={timeFilter.currentTimeFilter}
@@ -141,11 +141,11 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
             </div>
           </div>
 
-          <div className="flex flex-wrap justify-start lg:justify-end items-center">
+          <div className="flex flex-wrap items-center justify-start lg:justify-end">
             {(selectedRows?.count ?? 0) > 0 && (
-              <div className="flex items-center gap-2 mr-2">
-                <div className="flex flex-row gap-2 items-center">
-                  <span className="text-sm p-2 rounded-md font-medium bg-[#F1F5F9] dark:bg-slate-900 text-[#1876D2] dark:text-slate-100 whitespace-nowrap">
+              <div className="mr-2 flex items-center gap-2">
+                <div className="flex flex-row items-center gap-2">
+                  <span className="whitespace-nowrap rounded-md bg-[#F1F5F9] p-2 text-sm font-medium text-[#1876D2] dark:bg-slate-900 dark:text-slate-100">
                     {selectedRows!.count}{" "}
                     {selectedRows!.count === 1 ? "row" : "rows"} selected
                   </span>
@@ -170,10 +170,10 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
                         onChange={(e) => search.onChange(e.target.value)}
                         placeholder={search.placeholder}
                         className={clsx(
-                          "w-40 sm:w-64 text-sm pr-8 transition-transform duration-300 ease-in-out outline-none border-none ring-0",
+                          "w-40 border-none pr-8 text-sm outline-none ring-0 transition-transform duration-300 ease-in-out sm:w-64",
                           isSearchExpanded
                             ? "translate-x-0"
-                            : "translate-x-full"
+                            : "translate-x-full",
                         )}
                       />
                     </div>

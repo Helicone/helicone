@@ -44,12 +44,12 @@ const DesktopSidebar = ({
 
   const [isCollapsed, setIsCollapsed] = useLocalStorage(
     "isSideBarCollapsed",
-    false
+    false,
   );
 
   const [expandedItems, setExpandedItems] = useLocalStorage<string[]>(
     "expandedItems",
-    ["Developer", "Segments", "Improve"]
+    ["Developer", "Segments", "Improve"],
   );
 
   const toggleExpand = (name: string) => {
@@ -57,12 +57,12 @@ const DesktopSidebar = ({
     setExpandedItems(
       prev.includes(name)
         ? prev.filter((item) => item !== name)
-        : [...prev, name]
+        : [...prev, name],
     );
   };
   const largeWith = useMemo(
     () => cn(isCollapsed ? "w-16" : "w-52"),
-    [isCollapsed]
+    [isCollapsed],
   );
 
   const NAVIGATION_ITEMS = useMemo(() => {
@@ -132,7 +132,7 @@ const DesktopSidebar = ({
     const sidebarWidth = isCollapsed ? 64 : 208;
     document.documentElement.style.setProperty(
       "--sidebar-width",
-      `${sidebarWidth}px`
+      `${sidebarWidth}px`,
     );
 
     // Add event listeners
@@ -160,7 +160,7 @@ const DesktopSidebar = ({
 
   const [modalOpen, setModalOpen] = useState(false);
   const [changelogToView, setChangelogToView] = useState<ChangelogItem | null>(
-    null
+    null,
   );
 
   const handleChangelogClick = (changelog: ChangelogItem) => {
@@ -180,7 +180,7 @@ const DesktopSidebar = ({
   return (
     <>
       {/* Mobile hamburger menu */}
-      <div className="sticky top-0 z-20 px-2 py-3 flex md:hidden flex-shrink-0 bg-slate-100 dark:bg-black border-b border-slate-300 dark:border-slate-70">
+      <div className="dark:border-slate-70 sticky top-0 z-20 flex flex-shrink-0 border-b border-slate-300 bg-slate-100 px-2 py-3 dark:bg-black md:hidden">
         <Button
           variant="ghost"
           size="icon"
@@ -197,7 +197,7 @@ const DesktopSidebar = ({
       {/* Mobile drawer overlay */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          className="fixed inset-0 z-40 bg-black bg-opacity-50 md:hidden"
           onClick={() => {
             setIsCollapsed(false);
             setIsMobileMenuOpen(false);
@@ -210,7 +210,7 @@ const DesktopSidebar = ({
         className={cn(
           "hidden md:block",
           largeWith,
-          "transition-all duration-300"
+          "transition-all duration-300",
         )}
       />
 
@@ -218,20 +218,19 @@ const DesktopSidebar = ({
       <div
         ref={sidebarRef}
         className={cn(
-          "flex flex-col z-50 transition-all duration-300 h-screen bg-sidebar-background",
+          "z-50 flex h-screen flex-col bg-sidebar-background transition-all duration-300",
           largeWith,
-          "fixed top-0 left-0",
+          "fixed left-0 top-0",
           "md:translate-x-0", // Always visible on desktop
           isMobileMenuOpen
             ? "translate-x-0"
-            : "-translate-x-full md:translate-x-0"
+            : "-translate-x-full md:translate-x-0",
         )}
       >
-        <div className="w-full flex flex-col h-full border-r border-slate-200 dark:border-slate-800">
+        <div className="flex h-full w-full flex-col border-r border-slate-200 dark:border-slate-800">
           {/* Collapse button and OrgDropdown */}
           <div
-            className={`flex flex-row items-center p-2.5 
-              ${isCollapsed ? "justify-center" : "justify-between"}`}
+            className={`flex flex-row items-center p-2.5 ${isCollapsed ? "justify-center" : "justify-between"}`}
           >
             {/* - OrgDropdown */}
             {!isCollapsed && <OrgDropdown />}
@@ -241,7 +240,7 @@ const DesktopSidebar = ({
               variant="ghost"
               size="icon"
               onClick={handleCollapseToggle}
-              className="flex justify-center items-center hover:bg-slate-200 dark:hover:bg-slate-800 shrink-0"
+              className="flex shrink-0 items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-800"
             >
               {isCollapsed ? (
                 <ChevronRightIcon className="h-4 w-4" />
@@ -252,8 +251,8 @@ const DesktopSidebar = ({
           </div>
 
           {/* Main content area */}
-          <div className="flex-1 min-h-0 flex flex-col">
-            <div className="flex-1 overflow-y-auto flex flex-col justify-between h-full mb-2">
+          <div className="flex min-h-0 flex-1 flex-col">
+            <div className="mb-2 flex h-full flex-1 flex-col justify-between overflow-y-auto">
               {/* Navigation items */}
               <div className="flex flex-col">
                 <div
@@ -288,10 +287,10 @@ const DesktopSidebar = ({
                           });
                         }}
                         className={cn(
-                          "mt-10 gap-1 text-white text-large font-medium leading-normal tracking-normal bg-sky-500 hover:bg-sky-600 transition-colors",
+                          "text-large mt-10 gap-1 bg-sky-500 font-medium leading-normal tracking-normal text-white transition-colors hover:bg-sky-600",
                           isCollapsed
                             ? "h-8 w-8 px-2"
-                            : "h-[46px] w-full px-6 md:px-4"
+                            : "h-[46px] w-full px-6 md:px-4",
                         )}
                         variant="action"
                       >
@@ -320,16 +319,16 @@ const DesktopSidebar = ({
                       <Button
                         variant="action"
                         size="icon"
-                        className="w-full h-8 bg-sky-500 hover:bg-sky-600 text-white"
+                        className="h-8 w-full bg-sky-500 text-white hover:bg-sky-600"
                       >
                         <Rocket className="h-4 w-4" />
                       </Button>
                     </ProFeatureWrapper>
                   </div>
                 ) : (
-                  <div className="bg-slate-50 dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 flex flex-col md:flex-row md:gap-2 gap-4 justify-between md:justify-center md:items-center items-start px-3 py-2 mt-2 mx-2 mb-4 font-medium">
+                  <div className="mx-2 mb-4 mt-2 flex flex-col items-start justify-between gap-4 rounded border border-slate-200 bg-slate-50 px-3 py-2 font-medium text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 md:flex-row md:items-center md:justify-center md:gap-2">
                     <div className="flex flex-col gap-2">
-                      <h1 className="text-xs text-start tracking-tight leading-[1.35rem]">
+                      <h1 className="text-start text-xs leading-[1.35rem] tracking-tight">
                         Unlock more features with{" "}
                         <span className="font-bold text-sky-500">Pro</span>. No
                         usage limits, sessions, user analytics, custom
@@ -338,7 +337,7 @@ const DesktopSidebar = ({
                       <ProFeatureWrapper featureName="pro" enabled={false}>
                         <Button
                           variant="action"
-                          className="w-full text-xs h-8 bg-sky-500 hover:bg-sky-600 text-white"
+                          className="h-8 w-full bg-sky-500 text-xs text-white hover:bg-sky-600"
                         >
                           Start Pro Free Trial
                         </Button>

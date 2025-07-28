@@ -7,7 +7,7 @@ import { resultsAll } from "@/packages/common/result";
 import { UnPromise } from "../../../lib/tsxHelpers";
 
 async function handler(
-  options: HandlerWrapperOptions<UnPromise<ReturnType<typeof getErrorCodes>>>
+  options: HandlerWrapperOptions<UnPromise<ReturnType<typeof getErrorCodes>>>,
 ) {
   const { req, res, userData } = options;
   const { data: filterData, error: filterError } = resultsAll([

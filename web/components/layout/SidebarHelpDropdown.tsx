@@ -61,7 +61,7 @@ const SidebarHelpDropdown = ({
     }
   }, [pathname]);
   return (
-    <div className="w-full flex flex-col items-center gap-2">
+    <div className="flex w-full flex-col items-center gap-2">
       <DropdownMenu
         modal={false}
         onOpenChange={
@@ -75,21 +75,21 @@ const SidebarHelpDropdown = ({
             variant="outline"
             size="none"
             className={clsx(
-              "h-9  flex items-center text-xs text-muted-foreground hover:text-foreground",
-              isCollapsed ? "w-9" : "w-full gap-1"
+              "flex h-9 items-center text-xs text-muted-foreground hover:text-foreground",
+              isCollapsed ? "w-9" : "w-full gap-1",
             )}
           >
             <div className="relative flex items-center">
               <span
                 className={clsx(
-                  "font-medium text-xs",
-                  hasNewChangelog && "text-primary"
+                  "text-xs font-medium",
+                  hasNewChangelog && "text-primary",
                 )}
               >
                 ?
               </span>
               {hasNewChangelog && (
-                <span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-destructive"></span>
+                <span className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-destructive"></span>
               )}
             </div>
             {!isCollapsed && <span>Help</span>}
@@ -98,19 +98,19 @@ const SidebarHelpDropdown = ({
         <DropdownMenuContent className="ml-4 w-64 text-slate-700 dark:text-slate-200">
           <Link href="https://docs.helicone.ai" target="_blank">
             <DropdownMenuItem className="cursor-pointer">
-              <FileTextIcon className="h-4 w-4 mr-2 text-slate-500" />
+              <FileTextIcon className="mr-2 h-4 w-4 text-slate-500" />
               Docs
-              <ArrowUpRightIcon className="h-3.5 w-3.5 ml-2 text-slate-400 dark:text-slate-600" />
+              <ArrowUpRightIcon className="ml-2 h-3.5 w-3.5 text-slate-400 dark:text-slate-600" />
             </DropdownMenuItem>
           </Link>
           <Link href="https://discord.gg/zsSTcH2qhG" target="_blank">
             <DropdownMenuItem className="cursor-pointer">
-              <FaDiscord className="h-4 w-4 mr-2 text-slate-500" />
+              <FaDiscord className="mr-2 h-4 w-4 text-slate-500" />
               Help and Support
-              <ArrowUpRightIcon className="h-3.5 w-3.5 ml-2 text-slate-400 dark:text-slate-600" />
+              <ArrowUpRightIcon className="ml-2 h-3.5 w-3.5 text-slate-400 dark:text-slate-600" />
             </DropdownMenuItem>
           </Link>
-          <DropdownMenuLabel className="text-xs text-slate-400 dark:text-slate-600 font-medium mt-2">
+          <DropdownMenuLabel className="mt-2 text-xs font-medium text-slate-400 dark:text-slate-600">
             What&apos;s new?
           </DropdownMenuLabel>
           {changelog.length === 0
@@ -135,7 +135,7 @@ const SidebarHelpDropdown = ({
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="lucide lucide-calendar-1 w-4 h-4 mr-2 text-slate-500"
+                    className="lucide lucide-calendar-1 mr-2 h-4 w-4 text-slate-500"
                   >
                     <text
                       x="50%"
@@ -159,9 +159,9 @@ const SidebarHelpDropdown = ({
               ))}
           <Link href="https://helicone.ai/changelog" target="_blank">
             <DropdownMenuItem className="cursor-pointer">
-              <CalendarIcon className="h-4 w-4 mr-2 text-slate-500" />
+              <CalendarIcon className="mr-2 h-4 w-4 text-slate-500" />
               Full changelog
-              <ArrowUpRightIcon className="h-3.5 w-3.5 ml-2 text-slate-400 dark:text-slate-600" />
+              <ArrowUpRightIcon className="ml-2 h-3.5 w-3.5 text-slate-400 dark:text-slate-600" />
             </DropdownMenuItem>
           </Link>
         </DropdownMenuContent>
@@ -180,7 +180,7 @@ const SidebarHelpDropdown = ({
         className={clsx(
           "flex items-center text-xs text-muted-foreground hover:text-foreground",
           isCollapsed ? "h-9 w-9" : "h-7 w-full gap-1",
-          chatOpen && "text-primary"
+          chatOpen && "text-primary",
         )}
       >
         <MessageCircleMore
@@ -188,7 +188,7 @@ const SidebarHelpDropdown = ({
           className={clsx(
             chatOpen
               ? "text-primary"
-              : "text-muted-foreground hover:text-primary"
+              : "text-muted-foreground hover:text-primary",
           )}
         />
         {!isCollapsed && <div>Message us</div>}

@@ -51,7 +51,7 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
         },
         {
           all: options,
-        } as { [key: string]: DropdownOption<T>[] }
+        } as { [key: string]: DropdownOption<T>[] },
       )
     : {};
 
@@ -96,14 +96,14 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                 className={clsx(
                   disabled
                     ? "cursor-not-allowed bg-gray-100 dark:bg-gray-900"
-                    : "hover:cursor-pointer bg-white dark:bg-black",
-                  "relative w-full cursor-default rounded-md border border-gray-300 dark:border-gray-700 py-2 pl-3 pr-10 text-left shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm"
+                    : "bg-white hover:cursor-pointer dark:bg-black",
+                  "relative w-full cursor-default rounded-md border border-gray-300 py-2 pl-3 pr-10 text-left shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 dark:border-gray-700 sm:text-sm",
                 )}
               >
                 {label && (
                   <label
                     htmlFor="name"
-                    className="absolute -top-2 sm:-top-2.5 left-2 inline-block bg-white dark:bg-black px-0.5 text-[0.55rem] font-light text-gray-500"
+                    className="absolute -top-2 left-2 inline-block bg-white px-0.5 text-[0.55rem] font-light text-gray-500 dark:bg-black sm:-top-2.5"
                   >
                     {label}
                   </label>
@@ -133,11 +133,11 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                     verticalAlign === "top"
                       ? "bottom-full mb-1.5"
                       : "top-full mt-1.5",
-                    "absolute z-30 max-h-96 w-full min-w-[225px] rounded-md bg-white dark:bg-black py-1 text-base shadow-2xl ring-1 ring-black dark:ring-gray-700 ring-opacity-5 focus:outline-none sm:text-sm"
+                    "absolute z-30 max-h-96 w-full min-w-[225px] rounded-md bg-white py-1 text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-black dark:ring-gray-700 sm:text-sm",
                   )}
                 >
                   {categories && Object.keys(categories).length >= 2 && (
-                    <div className="text-gray-500 px-3 py-2 text-xs border-b-2 border-gray-300 dark:border-gray-700">
+                    <div className="border-b-2 border-gray-300 px-3 py-2 text-xs text-gray-500 dark:border-gray-700">
                       Categories
                       <div className="flex flex-wrap">
                         {Object.entries(categories).map(
@@ -146,9 +146,9 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                               key={index}
                               className={clsx(
                                 category === selectedCategory
-                                  ? "bg-sky-500 text-white dark:text-black px-2 py-1 rounded-md mr-2 mt-2"
-                                  : "bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md mr-2 mt-2 hover:bg-gray-300 dark:hover:bg-gray-700",
-                                "hover:cursor-pointer"
+                                  ? "mr-2 mt-2 rounded-md bg-sky-500 px-2 py-1 text-white dark:text-black"
+                                  : "mr-2 mt-2 rounded-md bg-gray-200 px-2 py-1 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700",
+                                "hover:cursor-pointer",
                               )}
                               onClick={() => {
                                 setSelectedCategory(category);
@@ -157,7 +157,7 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                             >
                               {category} ({items.length})
                             </div>
-                          )
+                          ),
                         )}
                       </div>
                     </div>
@@ -166,7 +166,7 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                   <Listbox.Options
                     className={clsx(
                       align === "left" ? "left-0" : "right-0",
-                      "max-h-[200px] divide-y divide-gray-200 dark:divide-gray-800 overflow-auto"
+                      "max-h-[200px] divide-y divide-gray-200 overflow-auto dark:divide-gray-800",
                     )}
                   >
                     {options?.map((option, i) => (
@@ -175,9 +175,9 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                         className={({ active }) =>
                           clsx(
                             active
-                              ? "text-sky-900 bg-sky-200 dark:text-sky-100 dark:bg-sky-800"
+                              ? "bg-sky-200 text-sky-900 dark:bg-sky-800 dark:text-sky-100"
                               : "text-gray-900 dark:text-gray-100",
-                            "relative cursor-default select-none py-2 pl-3 pr-9 hover:cursor-pointer"
+                            "relative cursor-default select-none py-2 pl-3 pr-9 hover:cursor-pointer",
                           )
                         }
                         value={option.value}
@@ -187,10 +187,10 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                       >
                         {({ selected, active }) => (
                           <>
-                            <span className={clsx("block truncate text-md")}>
+                            <span className={clsx("text-md block truncate")}>
                               {option.label}
                               {option.subtitle && (
-                                <p className="text-gray-500 font-light whitespace-pre-wrap text-sm">
+                                <p className="whitespace-pre-wrap text-sm font-light text-gray-500">
                                   {option.subtitle}
                                 </p>
                               )}
@@ -200,7 +200,7 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                               <span
                                 className={clsx(
                                   "text-sky-800 dark:text-sky-200",
-                                  "absolute inset-y-0 right-0 flex items-center pr-4"
+                                  "absolute inset-y-0 right-0 flex items-center pr-4",
                                 )}
                               >
                                 <CheckIcon

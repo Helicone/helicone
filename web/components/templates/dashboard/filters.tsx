@@ -20,7 +20,7 @@ export function Filters({
     typeof window !== "undefined" ? sessionStorage.getItem("currentKey") : null;
 
   const [currentKey, setCurrentKey] = useState<string>(
-    sessionStorageKey || "all"
+    sessionStorageKey || "all",
   );
 
   const options = keys.map((key) => {
@@ -39,7 +39,7 @@ export function Filters({
     <div className="flex flex-row items-center gap-2">
       <label
         htmlFor="location"
-        className="block text-sm font-medium text-gray-700 whitespace-nowrap"
+        className="block whitespace-nowrap text-sm font-medium text-gray-700"
       >
         API Key:
       </label>

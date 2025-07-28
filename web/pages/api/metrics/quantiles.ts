@@ -23,7 +23,7 @@ type QuantilesBackendBody = {
 };
 
 async function handler(
-  options: HandlerWrapperOptions<Result<Quantiles[], string>>
+  options: HandlerWrapperOptions<Result<Quantiles[], string>>,
 ) {
   const {
     req,
@@ -41,7 +41,7 @@ async function handler(
       dbIncrement: dbIncrement ?? "hour",
       timeZoneDifference,
     },
-    metric
+    metric,
   );
 
   if (quantilesError !== null) {
