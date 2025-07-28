@@ -59,6 +59,16 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "google/gemini-2.5-flash",
+    },
+    cost: {
+      prompt_token: 3e-7,
+      completion_token: 2.5e-6
+    }
+  },
+  {
+    model: {
+      operator: "equals",
       value: "openai/o4-mini-high",
     },
     cost: {
