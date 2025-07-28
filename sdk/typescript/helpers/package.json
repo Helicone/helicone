@@ -1,6 +1,6 @@
 {
   "name": "@helicone/helpers",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "description": "A Node.js wrapper for some of Helicone's common functionalities",
@@ -33,6 +33,9 @@
   ],
   "author": "Helicone, Inc.",
   "license": "Apache-2.0",
+  "files": [
+    "dist"
+  ],
   "peerDependencies": {
     "openai": "^5.10.2"
   },
