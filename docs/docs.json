@@ -42,7 +42,8 @@
                       "integrations/anthropic/curl",
                       "integrations/anthropic/javascript",
                       "integrations/anthropic/langchain",
-                      "integrations/anthropic/python"
+                      "integrations/anthropic/python",
+                      "integrations/anthropic/claude-code"
                     ]
                   },
                   "getting-started/integration-method/anyscale",
