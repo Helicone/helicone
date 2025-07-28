@@ -8,7 +8,39 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "amazon.nova-micro-v1%3A0",
+      value: "amazon.nova-micro-v1:0",
+    },
+    cost: {
+      prompt_token: 0.000035,
+      completion_token: 0.00014,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "amazon.nova-lite-v1:0",
+    },
+    cost: {
+      prompt_token: 0.00006,
+      completion_token: 0.00024,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "amazon.nova-pro-v1:0",
+    },
+    cost: {
+      prompt_token: 0.0008,
+      completion_token: 0.0032,
+    },
+  },
+
+  //bit above was not working, added eu for Europe
+  {
+    model: {
+      operator: "equals",
+      value: "eu.amazon.nova-micro-v1:0",
     },
     cost: {
       prompt_token: 0.000046,
@@ -18,7 +50,7 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "amazon.nova-lite-v1%3A0",
+      value: "eu.amazon.nova-lite-v1:0",
     },
     cost: {
       prompt_token: 0.000078,
@@ -28,7 +60,7 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "amazon.nova-pro-v1%3A0",
+      value: "eu.amazon.nova-pro-v1:0",
     },
     cost: {
       prompt_token: 0.00105,
