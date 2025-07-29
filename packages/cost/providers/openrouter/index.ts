@@ -199,16 +199,6 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "moonshotai/kimi-k2:free",
-    },
-    cost: {
-      prompt_token: 0.0,
-      completion_token: 0.0,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
       value: "x-ai/grok-3-mini-beta",
     },
     cost: {
