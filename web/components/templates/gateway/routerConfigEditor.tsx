@@ -164,7 +164,7 @@ const RouterConfigEditor = ({
                 text={config}
                 setText={(value) => {
                   setConfig(value);
-                  console.log("value", value);
+                  setConfig(value);
                   parseConfigToForm(yaml.load(value));
                 }}
                 disabled={false}
