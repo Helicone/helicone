@@ -108,7 +108,7 @@
                     "group": "Nvidia",
                     "pages": [
                       "integrations/nvidia/curl",
-                      "integrations/nvidia/javascript", 
+                      "integrations/nvidia/javascript",
                       "integrations/nvidia/python",
                       "integrations/nvidia/dynamo"
                     ]
@@ -517,54 +517,52 @@
             "pages": [
               "guides/overview",
               {
-                "group": "Cookbooks",
+                "group": "Tutorials",
+                "pages": [
+                  "guides/cookbooks/ai-agents",
+                  "guides/cookbooks/vercel-ai-gateway",
+                  "guides/cookbooks/vercel-ai-gateway-demo",
+                  "guides/cookbooks/helicone-evals-with-ragas",
+                  "guides/cookbooks/openai-structured-outputs",
+                  "guides/cookbooks/prompt-thinking-models"
+                ]
+              },
+              {
+                "group": "How-to Guides",
                 "pages": [
                   "guides/cookbooks/debugging",
                   "guides/cookbooks/environment-tracking",
                   "guides/cookbooks/etl",
                   "guides/cookbooks/experiments",
-                  "guides/cookbooks/helicone-evals-with-ragas",
                   "guides/cookbooks/fine-tune",
                   "guides/cookbooks/getting-sessions",
                   "guides/cookbooks/getting-user-requests",
                   "guides/cookbooks/github-actions",
                   "guides/cookbooks/labeling-request-data",
                   "guides/cookbooks/manual-logger-streaming",
-                  "guides/cookbooks/openai-structured-outputs",
                   "guides/cookbooks/predefining-request-id",
-                  "guides/cookbooks/prompt-thinking-models",
                   "guides/cookbooks/replay-session",
-                  "guides/cookbooks/segmentation",
-                  "guides/cookbooks/vercel-ai-gateway",
-                  "guides/cookbooks/ai-agents"
+                  "guides/cookbooks/segmentation"
                 ]
               },
               {
-                "group": "Prompt Engineering",
+                "group": "Knowledge Base",
                 "pages": [
-                  "guides/prompt-engineering/overview",
-                  "guides/prompt-engineering/be-specific-and-clear",
-                  "guides/prompt-engineering/implement-few-shot-learning",
-                  "guides/prompt-engineering/leverage-role-playing",
-                  "guides/prompt-engineering/use-chain-of-thought-prompting",
-                  "guides/prompt-engineering/use-constrained-outputs",
-                  "guides/prompt-engineering/use-least-to-most-prompting",
-                  "guides/prompt-engineering/use-meta-prompting",
-                  "guides/prompt-engineering/use-structured-formats",
-                  "guides/prompt-engineering/use-thread-of-thought-prompting"
-                ]
-              }
-            ]
-          },
-          {
-            "group": "Applications",
-            "pages": [
-              "guides/applications/overview",
-              {
-                "group": "Use Cases",
-                "pages": [
-                  "guides/applications/bill-by-usage",
-                  "guides/applications/resell-a-model"
+                  {
+                    "group": "Prompt Engineering",
+                    "pages": [
+                      "guides/prompt-engineering/overview",
+                      "guides/prompt-engineering/be-specific-and-clear",
+                      "guides/prompt-engineering/implement-few-shot-learning",
+                      "guides/prompt-engineering/leverage-role-playing",
+                      "guides/prompt-engineering/use-chain-of-thought-prompting",
+                      "guides/prompt-engineering/use-constrained-outputs",
+                      "guides/prompt-engineering/use-least-to-most-prompting",
+                      "guides/prompt-engineering/use-meta-prompting",
+                      "guides/prompt-engineering/use-structured-formats",
+                      "guides/prompt-engineering/use-thread-of-thought-prompting"
+                    ]
+                  }
                 ]
               }
             ]
@@ -687,14 +685,6 @@
     {
       "source": "/use-cases/data-autonomy",
       "destination": "/references/data-autonomy"
-    },
-    {
-      "source": "/use-cases/bill-by-usage",
-      "destination": "/guides/applications/bill-by-usage"
-    },
-    {
-      "source": "/use-cases/resell-a-model",
-      "destination": "/guides/applications/resell-a-model"
     },
     {
       "source": "/use-cases/debugging",

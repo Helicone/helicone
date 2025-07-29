@@ -12,116 +12,202 @@ sidebarTitle: "Overview"
   />
 </Frame>
 
-## Cookbooks
+## How-to Guides
 
-Practical, hands-on guides for building and optimizing your LLM applications with Helicone.
+Practical, task-oriented guides for solving specific problems with Helicone. These guides assume you already know the basics and need to accomplish a particular task.
 
-### LLM Application Development
+### Data Management & Analytics
 
 <CardGroup cols={2} gap="medium">
   <Card
-    title="How to replay LLM sessions"
-    icon="rotate-right"
-    href="/guides/cookbooks/replay-session"
-    iconType="light"
-    vertical
-  >
-    Optimize your AI agents and improve their performance with Helicone's
-    Session.
-  </Card>
-  <Card
-    title="How to debug your LLM app"
+    title="Debug your LLM app"
     icon="bug"
     href="/guides/cookbooks/debugging"
     vertical
     iconType="light"
   >
-    Identify and debug errors in your LLM app with Helicone.
+    Identify and fix errors in your LLM application using Helicone's debugging tools.
   </Card>
   <Card
-    title="How to build a chatbot with OpenAI structured outputs"
-    icon="robot"
-    href="/guides/cookbooks/openai-structured-outputs"
-    vertical
-    iconType="light"
-  >
-    This step-by-step tutorial covers function calling, response formatting, and
-    monitoring with Helicone.
-  </Card>
-</CardGroup>
-
-### Data Management and Analytics
-
-<CardGroup cols={2} gap="medium">
-  <Card
-    title="ETL / data extraction"
+    title="ETL / Data extraction"
     icon="database"
     href="/guides/cookbooks/etl"
     vertical
     iconType="light"
   >
-    Extract data from your LLM app with Helicone's ETL.
+    Extract and export your LLM data for analysis and reporting.
   </Card>
   <Card
-    title="Segmenting data with Custom Properties"
+    title="Segment data with Custom Properties"
     icon="chart-pie"
     href="/guides/cookbooks/segmentation"
     vertical
     iconType="light"
   >
-    Derive powerful insights into costs and user behaviors, track environments,
-    user types, and more.
+    Track costs and behaviors by environment, user type, and custom dimensions.
   </Card>
   <Card
-    title="Labeling request data"
+    title="Label request data"
     icon="tags"
     href="/guides/cookbooks/labeling-request-data"
     vertical
     iconType="light"
   >
-    Make it easier to search and filter your request data in Helicone.
+    Add labels to requests for easier searching and filtering.
   </Card>
   <Card
-    title="Getting user requests"
+    title="Get user requests"
     icon="user"
     href="/guides/cookbooks/getting-user-requests"
     vertical
     iconType="light"
   >
-    Retrieve user-specific requests to monitor, debug, and track costs for
-    individual users.
+    Retrieve user-specific requests for monitoring and cost tracking.
   </Card>
   <Card
-    title="Getting Sessions"
+    title="Get session data"
     icon="comments"
     href="/guides/cookbooks/getting-sessions"
     vertical
     iconType="light"
   >
-    Retrieve session data to analyze and replay conversation threads.
+    Access conversation threads and session history.
   </Card>
 </CardGroup>
 
-### Integration and Environment Management
+### Advanced Features
 
 <CardGroup cols={2} gap="medium">
   <Card
-    title="Environment tracking"
+    title="Replay LLM sessions"
+    icon="rotate-right"
+    href="/guides/cookbooks/replay-session"
+    iconType="light"
+    vertical
+  >
+    Replay and analyze past LLM sessions for optimization.
+  </Card>
+  <Card
+    title="Run experiments"
+    icon="flask"
+    href="/guides/cookbooks/experiments"
+    vertical
+    iconType="light"
+  >
+    A/B test prompts and model configurations.
+  </Card>
+  <Card
+    title="Fine-tune models"
+    icon="sliders"
+    href="/guides/cookbooks/fine-tune"
+    vertical
+    iconType="light"
+  >
+    Prepare datasets and track fine-tuning workflows.
+  </Card>
+  <Card
+    title="Predefine request IDs"
+    icon="fingerprint"
+    href="/guides/cookbooks/predefining-request-id"
+    vertical
+    iconType="light"
+  >
+    Set custom request IDs for better tracking.
+  </Card>
+</CardGroup>
+
+### Integration & Environment
+
+<CardGroup cols={2} gap="medium">
+  <Card
+    title="Track environments"
     icon="sitemap"
     iconType="light"
     href="/guides/cookbooks/environment-tracking"
     vertical
   >
-    Track and manage your development, staging, and production environments.
+    Separate dev, staging, and production environments.
   </Card>
   <Card
-    title="Integrating Helicone with GitHub Actions"
+    title="GitHub Actions integration"
     icon="github"
     href="/guides/cookbooks/github-actions"
     vertical
     iconType="light"
   >
-    Automate the monitoring and caching of LLM calls in your CI pipelines.
+    Monitor LLM calls in your CI/CD pipelines.
+  </Card>
+  <Card
+    title="Manual logger streaming"
+    icon="waves"
+    href="/guides/cookbooks/manual-logger-streaming"
+    vertical
+    iconType="light"
+  >
+    Implement custom streaming with the logger SDK.
+  </Card>
+</CardGroup>
+
+---
+
+## Tutorials
+
+Step-by-step guides for learning by building complete applications with Helicone. Perfect for understanding how different features work together.
+
+<CardGroup cols={2} gap="medium">
+  <Card
+    title="Build an AI Agent System"
+    icon="robot"
+    href="/guides/cookbooks/ai-agents"
+    vertical
+    iconType="light"
+  >
+    Create a complete AI agent with tool calling, memory, and observability.
+  </Card>
+  <Card
+    title="Customer Support Assistant"
+    icon="headset"
+    href="/guides/cookbooks/vercel-ai-gateway"
+    vertical
+    iconType="light"
+  >
+    Build a multi-model assistant that routes queries based on complexity.
+  </Card>
+  <Card
+    title="AI Debate Simulator"
+    icon="message-circle"
+    href="/guides/cookbooks/vercel-ai-gateway-demo"
+    vertical
+    iconType="light"
+  >
+    Create an interactive debate app showcasing different integration methods.
+  </Card>
+  <Card
+    title="Evaluation System with Ragas"
+    icon="chart-line"
+    href="/guides/cookbooks/helicone-evals-with-ragas"
+    vertical
+    iconType="light"
+  >
+    Implement comprehensive LLM evaluation using Helicone and Ragas.
+  </Card>
+  <Card
+    title="Chatbot with Structured Outputs"
+    icon="message-bot"
+    href="/guides/cookbooks/openai-structured-outputs"
+    vertical
+    iconType="light"
+  >
+    Build a chatbot using OpenAI's structured outputs and function calling.
+  </Card>
+  <Card
+    title="Thinking Models Implementation"
+    icon="brain"
+    href="/guides/cookbooks/prompt-thinking-models"
+    vertical
+    iconType="light"
+  >
+    Work with reasoning models like DeepSeek R1 and OpenAI o1/o3.
   </Card>
 </CardGroup>
 
@@ -129,10 +215,11 @@ Practical, hands-on guides for building and optimizing your LLM applications wit
 
 ## Knowledge Base
 
-Educational resources to deepen your understanding of LLM concepts and best
-practices.
+Educational resources to deepen your understanding of LLM concepts and best practices.
 
 ### Prompt Engineering
+
+Master the art of crafting effective prompts for optimal LLM performance.
 
 <CardGroup cols={1} gap="medium">
   <Card
