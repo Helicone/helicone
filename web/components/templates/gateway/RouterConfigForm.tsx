@@ -69,7 +69,11 @@ const RouterConfigForm = ({
 
   const getCacheSummary = () => {
     if (!state.enableCache) return "Disabled";
-    return `${state.cacheDirective.slice(0, 20)}... • ${state.cacheBuckets} Buckets`;
+    return `${
+      state.cacheDirective && state.cacheDirective.length > 20
+        ? `${state.cacheDirective.slice(0, 20)}...`
+        : state.cacheDirective
+    } • ${state.cacheBuckets} Buckets`;
   };
 
   const getRateLimitSummary = () => {
