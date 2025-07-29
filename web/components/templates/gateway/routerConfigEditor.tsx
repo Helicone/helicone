@@ -43,13 +43,18 @@ const RouterConfigEditor = ({
   const handleConfigSave = async () => {
     let obj;
 
-    if (activeTab === "form") {
-      // Generate config from form values
-      const generatedYaml = generateYaml(false);
-      obj = yaml.load(generatedYaml);
-    } else {
-      // Use the YAML editor content
-      obj = yaml.load(config);
+    try {
+      if (activeTab === "form") {
+        // Generate config from form values
+        const generatedYaml = generateYaml(false);
+        obj = yaml.load(generatedYaml);
+      } else {
+        // Use the YAML editor content
+        obj = yaml.load(config);
+      }
+    } catch (e) {
+      setNotification("Invalid YAML format", "error");
+      return;
     }
 
     const result = await validateRouterConfig(obj);
@@ -164,8 +169,11 @@ const RouterConfigEditor = ({
                 text={config}
                 setText={(value) => {
                   setConfig(value);
-                  setConfig(value);
-                  parseConfigToForm(yaml.load(value));
+                  try {
+                    parseConfigToForm(yaml.load(value));
+                  } catch (e) {
+                    setNotification("Invalid YAML format", "error");
+                  }
                 }}
                 disabled={false}
                 language="yaml"
