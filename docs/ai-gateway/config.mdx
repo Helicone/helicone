@@ -15,7 +15,7 @@ Each Helicone AI Gateway deployment can configure multiple independent routing p
 
   ```yaml
   routers:
-    production:
+    latency:
       load-balance:
         chat:
           strategy: provider-latency
@@ -23,7 +23,7 @@ Each Helicone AI Gateway deployment can configure multiple independent routing p
             - openai
             - anthropic
     
-    development:
+    weighted:
       load-balance:
         chat:
           strategy: provider-weighted
@@ -34,14 +34,14 @@ Each Helicone AI Gateway deployment can configure multiple independent routing p
               weight: '0.1'
   ```
 
-  **Usage:** Set your OpenAI SDK baseURL to `http://localhost:8080/production` or `http://localhost:8080/experimental`
+  **Usage:** Set your OpenAI SDK baseURL to `http://localhost:8080/router/latency` or `http://localhost:8080/router/weighted`
 </ParamField>
 
 ## Load Balancing
 
 Distribute requests across multiple providers to optimize performance, costs, and reliability. The gateway supports latency-based and weighted strategies for different use cases.
 
-[Learn more](/ai-gateway/concepts/load-balancing)
+[Learn more](/ai-gateway/concepts/loadbalancing)
 
 ### Latency Strategy
 
@@ -110,7 +110,7 @@ Distribute requests across multiple providers to optimize performance, costs, an
 
 Store and reuse LLM responses for identical requests to dramatically reduce costs and improve response times. Cache directives control response freshness and staleness tolerance.
 
-[Learn more](/ai-gateway/concepts/caching)
+[Learn more](/ai-gateway/concepts/cache)
 
 ### Cache Store
 
