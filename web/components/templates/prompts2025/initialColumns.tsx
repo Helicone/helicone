@@ -1,11 +1,16 @@
-import { GitBranch, Clock } from "lucide-react";
+import { GitBranch, Clock, TestTube2 } from "lucide-react";
 import { formatTime } from "./timeUtils";
 import ModelPill from "@/components/templates/requests/modelPill";
 import { ColumnConfig } from "@/components/shared/table/simpleTable";
 import { PromptWithVersions } from "@/services/hooks/prompts";
 import TagsSummary from "./TagsSummary";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
-export const getInitialColumns = (): ColumnConfig<PromptWithVersions>[] => [
+export const getInitialColumns = (): ColumnConfig<PromptWithVersions>[] => {
+  const router = useRouter();
+
+  return [
   {
     key: "prompt_id" as keyof PromptWithVersions,
     header: "Prompt ID",
@@ -98,10 +103,32 @@ export const getInitialColumns = (): ColumnConfig<PromptWithVersions>[] => [
   //   }
   // },
   {
+    key: "playground" as keyof PromptWithVersions,
+    header: "Playground",
+    sortable: true,
+    minSize: 100,
+    render: (item) => {
+      return (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            router.push(`/playground?promptVersionId=${item.productionVersion.id}`);
+          }}
+          className="flex items-center gap-1 rounded-lg"
+        >
+          <TestTube2 size={14} className="text-muted-foreground" />
+          <span className="ml-1">Edit</span>
+        </Button>
+      );
+    },
+  },
+  {
     key: "created" as keyof PromptWithVersions,
     header: "Created",
     sortable: true,
-    minSize: 350,
+    minSize: 300,
     render: (item) => (
       <div className="flex items-center gap-1">
         <Clock size={14} className="text-muted-foreground" />
