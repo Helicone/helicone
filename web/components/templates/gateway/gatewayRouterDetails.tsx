@@ -26,6 +26,7 @@ import { LatencyOverTimeChart } from "./latencyOverTimeChart";
 import RouterUseDialog from "./routerUseDialog";
 import useGatewayRouterRequests from "./useGatewayRouterRequests";
 import RouterConfigEditor from "./routerConfigEditor";
+import useNotification from "@/components/shared/notification/useNotification";
 
 // Table columns for gateway router requests
 const getGatewayRequestColumns = (): ColumnDef<MappedLLMRequest>[] => {
@@ -36,6 +37,7 @@ const GatewayRouterPage = () => {
   const router = useRouter();
   const { router_hash } = router.query;
   const searchParams = useSearchParams();
+  const { setNotification } = useNotification();
   const { gatewayRouter, isLoading } = useGatewayRouter({
     routerHash: router_hash as string,
   });
@@ -164,8 +166,15 @@ const GatewayRouterPage = () => {
               variant="ghost"
               size="sm_sleek"
               className="text-muted-foreground"
-              onClick={() => {
-                navigator.clipboard.writeText(gatewayRouter?.data?.hash ?? "");
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(
+                    gatewayRouter?.data?.hash ?? "",
+                  );
+                  setNotification("Router hash copied to clipboard", "success");
+                } catch (error) {
+                  setNotification("Failed to copy router hash", "error");
+                }
               }}
             >
               <CopyIcon className="h-3 w-3" />
