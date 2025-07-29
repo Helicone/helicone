@@ -22,6 +22,7 @@ const RouterConfigEditor = ({
   const [config, setConfig] = useState<string>("");
   const [configModalOpen, setConfigModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"form" | "yaml">("form");
+  const [yamlError, setYamlError] = useState<string | null>(null);
 
   // Use the shared router config hook
   const { state, setState, parseConfigToForm, generateYaml } =
@@ -39,6 +40,23 @@ const RouterConfigEditor = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gatewayRouter]);
+
+  // Debounced YAML parsing
+  useEffect(() => {
+    if (activeTab === "yaml") {
+      const timeoutId = setTimeout(() => {
+        try {
+          const obj = yaml.load(config);
+          parseConfigToForm(obj);
+          setYamlError(null);
+        } catch (e) {
+          setYamlError("Invalid YAML format");
+        }
+      }, 500); // 500ms debounce
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [config, activeTab, parseConfigToForm]);
 
   const handleConfigSave = async () => {
     let obj;
@@ -84,11 +102,13 @@ const RouterConfigEditor = ({
     if (value === "yaml" && activeTab === "form") {
       // Generate YAML from form values
       setConfig(generateYaml(false));
+      setYamlError(null);
     } else if (value === "form" && activeTab === "yaml") {
-      // Parse YAML to form values
+      // Parse YAML to form values immediately when switching to form
       try {
         const obj = yaml.load(config);
         parseConfigToForm(obj);
+        setYamlError(null);
       } catch (e) {
         setNotification("Invalid YAML format", "error");
       }
@@ -164,16 +184,16 @@ const RouterConfigEditor = ({
 
           <TabsContent value="yaml" className="mt-4">
             <div className="h-[400px]">
+              {yamlError && (
+                <div className="mb-2 rounded-md bg-destructive/10 p-2 text-sm text-destructive">
+                  {yamlError}
+                </div>
+              )}
               <MarkdownEditor
                 monaco
                 text={config}
                 setText={(value) => {
                   setConfig(value);
-                  try {
-                    parseConfigToForm(yaml.load(value));
-                  } catch (e) {
-                    setNotification("Invalid YAML format", "error");
-                  }
                 }}
                 disabled={false}
                 language="yaml"
