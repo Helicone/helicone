@@ -1,0 +1,38 @@
+---
+title: "Claude Code"
+sidebarTitle: "Claude Code"
+description: "Integrate Helicone to log your Claude Code interactions."
+"twitter:title": "Claude Code - Helicone OSS LLM Observability"
+icon: "plug"
+iconType: "solid"
+---
+
+import { strings } from "/snippets/strings.mdx";
+
+Claude Code is an agentic coding tool that lives in your terminal, understands your codebase, and helps you code faster by executing routine tasks.
+
+## {strings.howToIntegrate}
+
+<Steps>
+  <Step title={strings.generateKey}>
+    <div dangerouslySetInnerHTML={{ __html: strings.generateKeyInstructions }} />
+  </Step>
+
+  <Step title={strings.exportBaseUrl("Anthropic")}>
+    ```bash
+    export ANTHROPIC_BASE_URL=https://anthropic.helicone.ai/<your-helicone-api-key>
+    ```
+  </Step>
+
+  <Step title={strings.logYourRequest}>
+    In your terminal, replace "what is the meaning of life?" with your own prompt.
+
+    ```bash
+    claude -p 'what is the meaning of life?'
+    ```
+  </Step>
+
+  <Step title={strings.verifyInHelicone}>
+    <div dangerouslySetInnerHTML={{ __html: strings.verifyInHeliconeDesciption("Claude Code") }} />
+  </Step>
+</Steps>
