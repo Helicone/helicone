@@ -33,6 +33,7 @@ import {
   useCreatePrompt,
   usePushPromptVersion,
   useGetPromptVersionWithBody,
+  useGetPromptInputs,
 } from "@/services/hooks/prompts";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { useOrg } from "@/components/layout/org/organizationContext";
@@ -43,6 +44,7 @@ import { Message } from "@helicone-package/llm-mapper/types";
 import { useVariableColorMapStore } from "@/store/features/playground/variableColorMap";
 import { ResponseFormat, ResponseFormatType, VariableInput } from "./types";
 import { useLocalStorage } from "@/services/hooks/localStorage";
+import Link from "next/link";
 
 export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
   _type: "openai-chat",
@@ -225,8 +227,25 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { data: requestData, isLoading: isRequestLoading } =
     useGetRequestWithBodies(requestId ?? "");
 
+  const requestPromptId = useMemo(
+    () => requestData?.data?.prompt_id ?? null,
+    [requestData?.data?.prompt_id],
+  );
+  const requestPromptVersionId = useMemo(
+    () => requestData?.data?.prompt_version ?? null,
+    [requestData?.data?.prompt_version],
+  );
+
   const { data: promptVersionData, isLoading: isPromptVersionLoading } =
-    useGetPromptVersionWithBody(promptVersionId);
+    useGetPromptVersionWithBody(
+      promptVersionId || requestPromptVersionId || undefined,
+    );
+
+  const promptInputsQuery = useGetPromptInputs(
+    requestPromptId || "",
+    requestPromptVersionId || "",
+    requestId || "",
+  );
 
   const [selectedModel, setSelectedModel] = useState<string>(
     "openai/gpt-4.1-mini",
@@ -324,6 +343,45 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     Record<string, VariableInput>
   >("variableInputs", {});
 
+  // Initial check for if we are loading a request that is associated with a prompt
+  // then we should be editing that prompt instead.
+  useEffect(() => {
+    if (
+      requestId &&
+      requestData?.data &&
+      !isRequestLoading &&
+      requestPromptVersionId &&
+      !promptInputsQuery.isLoading
+    ) {
+      if (promptInputsQuery.data) {
+        const convertedInputs: Record<string, VariableInput> = {};
+        for (const [key, value] of Object.entries(
+          promptInputsQuery.data.inputs,
+        )) {
+          convertedInputs[key] = {
+            isObject: typeof value === "object" && value !== null,
+            value:
+              typeof value === "object" && value !== null
+                ? JSON.stringify(value)
+                : String(value),
+          };
+        }
+
+        setVariableInputs(convertedInputs);
+      }
+
+      router.push(`/playground?promptVersionId=${requestPromptVersionId}`);
+    }
+  }, [
+    requestId,
+    requestData,
+    isRequestLoading,
+    requestPromptVersionId,
+    promptInputsQuery.data,
+    promptInputsQuery.isLoading,
+    router,
+  ]);
+
   useMemo(() => {
     if (!requestId) {
       setTools([]);
@@ -339,7 +397,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       setDefaultContent(DEFAULT_EMPTY_CHAT);
       return;
     }
-    if (requestData?.data && !isRequestLoading) {
+    if (requestData?.data && !isRequestLoading && !requestPromptVersionId) {
       if (requestData.data.model in OPENROUTER_MODEL_MAP) {
         setSelectedModel(OPENROUTER_MODEL_MAP[requestData.data.model]);
       } else {
@@ -407,7 +465,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     }
     return DEFAULT_EMPTY_CHAT;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [requestId, requestData, isRequestLoading]);
+  }, [requestId, requestData, isRequestLoading, requestPromptVersionId]);
 
   const [response, setResponse] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
@@ -827,9 +885,11 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         showFold={false}
         leftSection={
           <div className="flex items-center gap-3">
-            <Small className="font-bold text-gray-500 dark:text-slate-300">
-              Playground
-            </Small>
+            <Link href="/playground">
+              <Small className="font-bold text-gray-500 dark:text-slate-300">
+                Playground
+              </Small>
+            </Link>
             {promptVersionData?.prompt && promptVersionData?.promptVersion && (
               <>
                 <div className="h-4 w-px bg-border" />

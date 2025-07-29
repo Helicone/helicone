@@ -35,12 +35,14 @@ const ModelPill = (props: ModelPillProps) => {
     LLAMA: "blue",
     NVIDIA: "green",
     ANTHROPIC: "orange",
+    VERCEL: "purple",
   };
 
   // Default fallback for no provider specified
   const modelMapping: Record<MapperType, keyof typeof colors> = {
     "openai-chat": "purple",
     "gemini-chat": "teal",
+    "vercel-chat": "purple",
     "openai-moderation": "teal",
     "openai-embedding": "blue",
     "anthropic-chat": "orange",

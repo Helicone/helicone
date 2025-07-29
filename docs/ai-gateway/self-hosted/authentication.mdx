@@ -1,10 +1,16 @@
 ---
 title: "Secure Your Gateway"
 sidebarTitle: "Secure Your Gateway"
-description: "Authentication integration with the Helicone platform"
+description: "Authentication setup for self-hosted AI Gateway deployments"
 ---
 
-To deploy a secure AI Gateway, you have two options:
+<Info>
+  **Using Helicone Cloud AI Gateway?** Authentication is automatically handled for you - no setup required! This guide is only for self-hosted deployments.
+  
+  [Get started with Cloud →](/ai-gateway/cloud-quickstart)
+</Info>
+
+To deploy a secure self-hosted AI Gateway, you have two options:
 
 1. **Secure Network Deployment** - Deploy in a secure network (VPN, private cloud) where network-level access control provides security
 2. **Public Network with Authentication** - Deploy on a public network and use Helicone authentication to secure your gateway
@@ -79,6 +85,7 @@ Configure `helicone.features` to control authentication and observability:
 - **`none`** - No authentication or observability
 - **`auth`** - Authentication only
 - **`observability`** - Authentication + observability
+- **`all`** - Authentication + all Helicone features 
 
 When authentication is enabled, include your Helicone API key with every request:
 
@@ -92,7 +99,8 @@ curl -X POST http://localhost:8080/router/my-router/chat/completions \
   }'
 ```
 
-The gateway validates keys in real-time through a persistent WebSocket connection to Helicone's control plane. Keys are cached locally for resilience during network issues.
+The gateway validates keys in real-time through a persistent WebSocket connection to Helicone's control plane. Keys are cached locally for resilience during network issues
+and for performance.
 
 <Note>
   For complete configuration options, see the [Configuration Reference](/ai-gateway/config#helicone-add-ons).
@@ -140,8 +148,7 @@ The gateway validates keys in real-time through a persistent WebSocket connectio
 
     ```yaml
     helicone:
-      authentication: false
-      observability: false
+      features: none
     ```
     
     **Result:** No authentication required. Network security controls access.
@@ -176,14 +183,3 @@ When enabled, the AI Gateway connects to Helicone's control plane for real-time 
 **Access Control:** Requests without valid Helicone API keys are rejected with 401 Unauthorized. Your provider API keys (OpenAI, Anthropic, etc.) remain secure in the gateway environment and are never transmitted to Helicone.
 
 **Secure Communication:** All data transmission to Helicone uses TLS encryption for secure key validation.
-
-## Coming Soon
-
-The following authentication integrations are planned for future releases:
-
-| Provider | Description | Version |
-|----------|-------------|---------|
-| **AWS Secrets Manager** | Secure API key storage and rotation with AWS IAM integration | v1 |
-| **Azure Key Vault** | Microsoft Azure's cloud key management service | v1 |
-| **Google Secret Manager** | Google Cloud's secure secret storage solution | v1 |
-| **Kubernetes Secrets** | Native Kubernetes secret integration for containerized deployments | v1 |

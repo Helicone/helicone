@@ -19,6 +19,7 @@ import { costs as perplexityCosts } from "./perplexity";
 import { costs as qstashCosts } from "./qstash";
 import { costs as togetherAIChatCosts } from "./togetherai/chat";
 import { costs as togetherAIChatLlamaCosts } from "./togetherai/chat/llama";
+import { costs as vercelCosts } from "./vercel";
 import {
   costs as togetherAICompletionCosts,
   costs as togetherAICompletionLlamaCosts,
@@ -70,6 +71,9 @@ const avianPattern = /^https:\/\/api\.avian\.io/;
 //https://api.studio.nebius.ai
 const nebius = /^https:\/\/api\.studio\.nebius\.ai/;
 
+// https://ai-gateway.vercel.sh
+const vercelGateway = /^https:\/\/ai-gateway\.vercel\.sh/;
+
 // https://api.novita.ai
 const novita = /^https:\/\/api\.novita\.ai/;
 
@@ -112,6 +116,7 @@ export const providersNames = [
   "CHUTES",
   "LLAMA",
   "NVIDIA",
+  "VERCEL",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -281,6 +286,11 @@ export const providers: {
     pattern: chutes,
     provider: "CHUTES",
     costs: [],
+  },
+  {
+    pattern: vercelGateway,
+    provider: "VERCEL",
+    costs: vercelCosts,
   },
 ];
 
