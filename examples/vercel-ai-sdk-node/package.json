@@ -1,0 +1,21 @@
+{
+  "name": "vercel-ai-sdk-node",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^24.1.0",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@helicone/helpers": "^1.4.2",
+    "ai": "^4.3.19",
+    "openai": "^5.10.2"
+  }
+}
