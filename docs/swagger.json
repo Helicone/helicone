@@ -9429,7 +9429,7 @@
 			"LatestRouterConfig": {
 				"properties": {
 					"config": {
-						"type": "string"
+						"$ref": "#/components/schemas/Json"
 					},
 					"version": {
 						"type": "string"

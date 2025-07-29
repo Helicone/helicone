@@ -18,13 +18,14 @@ import {
   checkFeatureFlag,
 } from "../../lib/utils/featureFlags";
 import { TimeIncrement } from "../../managers/helpers/getXOverTime";
+import { Json } from "../../lib/db/database.types";
 
 export type LatestRouterConfig = {
   id: string;
   name: string;
   hash: string;
   version: string;
-  config: string;
+  config: Json;
 };
 
 export type Router = {

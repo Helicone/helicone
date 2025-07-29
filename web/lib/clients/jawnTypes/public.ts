@@ -3158,7 +3158,7 @@ Json: JsonObject;
     };
     "Result__routers-Router-Array_.string_": components["schemas"]["ResultSuccess__routers-Router-Array__"] | components["schemas"]["ResultError_string_"];
     LatestRouterConfig: {
-      config: string;
+      config: components["schemas"]["Json"];
       version: string;
       hash: string;
       name: string;
