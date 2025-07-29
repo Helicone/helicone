@@ -1,5 +1,7 @@
 import { Small } from "@/components/ui/typography";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { BookOpen } from "lucide-react";
 
 import FoldedHeader from "@/components/shared/FoldedHeader";
 import {
@@ -252,20 +254,19 @@ const PromptsPage = (props: PromptsPageProps) => {
         }
         rightSection={
           <section className="flex flex-row items-center gap-2">
-            {/* <Button
+            <Button
               onClick={() => {
-                // TODO: Add docs link
+                window.open("https://docs.helicone.ai/features/advanced-usage/prompts", "_blank");
               }}
               variant="secondary"
               size="sm"
             >
-              <BookOpenIcon className="h-4 w-4" />
-            </Button> */}
+              <BookOpen className="h-4 w-4" />
+            </Button>
           </section>
         }
       />
 
-      {/* Banner */}
       {props.showLegacyBanner && (
         <section className="w-full p-4">
           <div className="w-full rounded-lg border border-blue-300 bg-blue-50 p-4 text-sm text-blue-800 dark:border-blue-700 dark:bg-blue-950 dark:text-blue-200">

@@ -7,6 +7,19 @@ import TagsSummary from "./TagsSummary";
 
 export const getInitialColumns = (): ColumnConfig<PromptWithVersions>[] => [
   {
+    key: "prompt_id" as keyof PromptWithVersions,
+    header: "Prompt ID",
+    sortable: false,
+    minSize: 150,
+    render: (item) => {
+      return (
+        <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-black ring-1 ring-inset ring-gray-200">
+          {item.prompt.id}
+        </span>
+      );
+    },
+  },
+  {
     key: "name" as keyof PromptWithVersions,
     header: "Name",
     sortable: true,
