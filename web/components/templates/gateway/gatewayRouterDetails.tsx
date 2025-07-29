@@ -1,15 +1,12 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
 import FoldedHeader from "@/components/shared/FoldedHeader";
-import MarkdownEditor from "@/components/shared/markdownEditor";
-import useNotification from "@/components/shared/notification/useNotification";
 import { Button } from "@/components/ui/button";
 import { Muted, Small, XSmall } from "@/components/ui/typography";
 import { useFeatureFlag } from "@/services/hooks/admin";
-import yaml from "js-yaml";
-import { CopyIcon, Loader2, Settings } from "lucide-react";
+import { CopyIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import useGatewayRouter from "./useGatewayRouter";
 import ThemedTimeFilter from "@/components/shared/themed/themedTimeFilter";
 import { TimeFilter } from "@/types/timeFilter";
@@ -20,13 +17,6 @@ import {
   TimeInterval,
 } from "@/lib/timeCalculations/time";
 import { RequestOverTimeChart } from "./requestOverTimeChart";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import ThemedTable from "@/components/shared/themed/table/themedTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
@@ -35,6 +25,8 @@ import { CostOverTimeChart } from "./costOverTimeChart";
 import { LatencyOverTimeChart } from "./latencyOverTimeChart";
 import RouterUseDialog from "./routerUseDialog";
 import useGatewayRouterRequests from "./useGatewayRouterRequests";
+import RouterConfigEditor from "./routerConfigEditor";
+import useNotification from "@/components/shared/notification/useNotification";
 
 // Table columns for gateway router requests
 const getGatewayRequestColumns = (): ColumnDef<MappedLLMRequest>[] => {
@@ -45,16 +37,11 @@ const GatewayRouterPage = () => {
   const router = useRouter();
   const { router_hash } = router.query;
   const searchParams = useSearchParams();
-  const {
-    gatewayRouter,
-    isLoading,
-    updateGatewayRouter,
-    isUpdatingGatewayRouter,
-    validateRouterConfig,
-  } = useGatewayRouter({ routerHash: router_hash as string });
+  const { setNotification } = useNotification();
+  const { gatewayRouter, isLoading } = useGatewayRouter({
+    routerHash: router_hash as string,
+  });
 
-  const [config, setConfig] = useState<string>("");
-  const [configModalOpen, setConfigModalOpen] = useState(false);
   const [interval, setInterval] = useState<TimeInterval>(
     (() => {
       const currentTimeFilter = searchParams?.get("t") as TimeInterval;
@@ -104,40 +91,6 @@ const GatewayRouterPage = () => {
     page: 1,
     pageSize: 50,
   });
-
-  useEffect(() => {
-    if (gatewayRouter) {
-      const yamlString = yaml.dump(gatewayRouter.data?.config);
-      setConfig(yamlString);
-    }
-  }, [gatewayRouter]);
-
-  const { setNotification } = useNotification();
-
-  const handleConfigSave = async () => {
-    const obj = yaml.load(config);
-
-    const result = await validateRouterConfig(obj);
-    if (!result.valid || result.error) {
-      setNotification("Invalid router config", "error");
-      return;
-    }
-
-    updateGatewayRouter({
-      params: {
-        path: {
-          routerHash: router_hash as string,
-        },
-      },
-      body: {
-        name: gatewayRouter?.data?.name ?? "",
-        config: JSON.stringify(obj),
-      },
-    });
-
-    setConfigModalOpen(false);
-    setNotification("Configuration saved successfully", "success");
-  };
 
   const org = useOrg();
   const { data: hasFeatureFlag } = useFeatureFlag(
@@ -213,9 +166,15 @@ const GatewayRouterPage = () => {
               variant="ghost"
               size="sm_sleek"
               className="text-muted-foreground"
-              onClick={() => {
-                navigator.clipboard.writeText(gatewayRouter?.data?.hash ?? "");
-                setNotification("Copied to clipboard", "success");
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(
+                    gatewayRouter?.data?.hash ?? "",
+                  );
+                  setNotification("Router hash copied to clipboard", "success");
+                } catch (error) {
+                  setNotification("Failed to copy router hash", "error");
+                }
               }}
             >
               <CopyIcon className="h-3 w-3" />
@@ -225,50 +184,10 @@ const GatewayRouterPage = () => {
               open={routerUseDialogOpen}
               setOpen={handleRouterUseDialogOpen}
             />
-            <Dialog open={configModalOpen} onOpenChange={setConfigModalOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <Settings className="mr-2 h-4 w-4" />
-                  Configuration
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-h-[90vh] max-w-4xl">
-                <DialogHeader>
-                  <DialogTitle>Router Configuration</DialogTitle>
-                </DialogHeader>
-                <div className="flex flex-col gap-4">
-                  <MarkdownEditor
-                    monaco
-                    text={config}
-                    setText={(value) => setConfig(value)}
-                    disabled={false}
-                    language="yaml"
-                    monacoOptions={{
-                      lineNumbers: "on",
-                      tabSize: 2,
-                    }}
-                  />
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => setConfigModalOpen(false)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      disabled={!config || isUpdatingGatewayRouter}
-                      onClick={handleConfigSave}
-                    >
-                      {isUpdatingGatewayRouter ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        "Save Configuration"
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
+            <RouterConfigEditor
+              routerHash={router_hash as string}
+              gatewayRouter={gatewayRouter}
+            />
           </div>
         }
       />
