@@ -256,7 +256,10 @@ const PromptsPage = (props: PromptsPageProps) => {
           <section className="flex flex-row items-center gap-2">
             <Button
               onClick={() => {
-                window.open("https://docs.helicone.ai/features/advanced-usage/prompts", "_blank");
+                window.open(
+                  "https://docs.helicone.ai/features/advanced-usage/prompts",
+                  "_blank",
+                );
               }}
               variant="secondary"
               size="sm"
