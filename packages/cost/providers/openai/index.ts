@@ -5,7 +5,7 @@
 
 import { ModelDetailsMap, ModelRow } from "../../interfaces/Cost";
 
-const costs: ModelRow[] = [
+const baseCosts: ModelRow[] = [
   {
     model: {
       operator: "equals",
@@ -742,6 +742,25 @@ const costs: ModelRow[] = [
       completion_token: 0.000015,
     }
   }
+];
+
+// OpenAI Batch API is 50% cheaper than the regular API
+// We add every single one with a equals operator and a -batch suffix.
+const costs: ModelRow[] = [
+  ...baseCosts,
+  ...baseCosts.map(cost => ({
+    model: {
+      operator: "equals" as const,
+      value: `${cost.model.value}-batch`,
+    },
+    cost: {
+      prompt_token: cost.cost.prompt_token / 2,
+      completion_token: cost.cost.completion_token / 2,
+      ...(cost.cost.prompt_cache_read_token && { prompt_cache_read_token: cost.cost.prompt_cache_read_token / 2 }),
+      ...(cost.cost.prompt_audio_token && { prompt_audio_token: cost.cost.prompt_audio_token / 2 }),
+      ...(cost.cost.completion_audio_token && { completion_audio_token: cost.cost.completion_audio_token / 2 }),
+    },
+  }))
 ];
 
 const modelDetails: ModelDetailsMap = {
