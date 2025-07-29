@@ -1289,6 +1289,8 @@ Json: JsonObject;
       "helicone-score-feedback"?: components["schemas"]["Partial_BooleanOperators_"];
       gateway_router_id?: components["schemas"]["Partial_TextOperators_"];
       gateway_deployment_target?: components["schemas"]["Partial_TextOperators_"];
+      prompt_id?: components["schemas"]["Partial_TextOperators_"];
+      prompt_version?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description Make all properties in T optional */
     Partial_SessionsRequestResponseRMTToOperators_: {

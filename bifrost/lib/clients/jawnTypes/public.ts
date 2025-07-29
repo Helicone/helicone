@@ -820,6 +820,8 @@ export interface components {
       "helicone-score-feedback"?: components["schemas"]["Partial_BooleanOperators_"];
       gateway_router_id?: components["schemas"]["Partial_TextOperators_"];
       gateway_deployment_target?: components["schemas"]["Partial_TextOperators_"];
+      prompt_id?: components["schemas"]["Partial_TextOperators_"];
+      prompt_version?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
     "Pick_FilterLeaf.users_view-or-request_response_rmt_": {

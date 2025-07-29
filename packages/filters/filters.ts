@@ -246,6 +246,8 @@ const whereKeyMappings: KeyMappings = {
       gateway_router_id: "request_response_rmt.gateway_router_id",
       gateway_deployment_target:
         "request_response_rmt.gateway_deployment_target",
+      prompt_id: "request_response_rmt.prompt_id",
+      prompt_version: "request_response_rmt.prompt_version",
     })(filter, placeValueSafely);
   },
   users_view: easyKeyMappings<"users_view">({}),
