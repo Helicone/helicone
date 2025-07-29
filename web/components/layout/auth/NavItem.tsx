@@ -93,7 +93,7 @@ const NavItem: React.FC<NavItemProps> = ({
                 }),
                 deep && deep > 1 ? "h-6" : "h-8",
                 "w-full justify-start font-normal",
-                "text-[12px] text-sm text-slate-500",
+                "text-[12px] text-slate-500",
                 link.current && "text-slate-800 dark:text-slate-200",
               ),
           "",
