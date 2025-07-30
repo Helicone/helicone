@@ -222,7 +222,7 @@ const whereKeyMappings: KeyMappings = {
         filter.cached
       );
       if (operator !== "equals") {
-        throw new Error("Cached filter only supports 'is' operator");
+        throw new Error("Cached filter only supports 'equals' operator");
       }
       // If cached = true, we want cache_reference_id != DEFAULT_UUID
       // If cached = false, we want cache_reference_id = DEFAULT_UUID
