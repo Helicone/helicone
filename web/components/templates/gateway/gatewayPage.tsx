@@ -120,7 +120,7 @@ const GatewayPage = () => {
               {providerKeys.length === 0 && (
                 <Badge
                   variant="helicone"
-                  className="gap-2 bg-yellow-200/70 text-yellow-500 hover:bg-yellow-200/70"
+                  className="gap-2 bg-yellow-200/70 text-yellow-500 hover:bg-yellow-200/70 dark:bg-yellow-900/70 dark:text-yellow-500 dark:hover:bg-yellow-900/70"
                 >
                   <TriangleAlertIcon className="h-3 w-3" />
                   <span>
