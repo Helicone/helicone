@@ -5,6 +5,7 @@ import type { OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/ope
 
 type Prompt2025 = components["schemas"]["Prompt2025"];
 type Prompt2025Version = components["schemas"]["Prompt2025Version"];
+type Prompt2025Input = components["schemas"]["Prompt2025Input"];
 
 export interface PromptWithVersions {
   prompt: Prompt2025;
@@ -71,6 +72,34 @@ export const useGetPromptTags = () => {
         console.error("Error fetching prompt tags:", result.error);
         return [];
       }
+      return result.data.data;
+    },
+  });
+};
+
+export const useGetPromptInputs = (promptId: string, versionId: string, requestId: string) => {
+  return useQuery<Prompt2025Input | null>({
+    queryKey: ["promptInputs", promptId, versionId, requestId],
+    refetchOnWindowFocus: false,
+    enabled: !!promptId && !!versionId && !!requestId,
+    queryFn: async () => {
+      const result = await $JAWN_API.GET("/v1/prompt-2025/id/{promptId}/{versionId}/inputs", {
+        params: {
+          path: {
+            promptId: promptId,
+            versionId: versionId,
+          },
+          query: {
+            requestId: requestId,
+          },
+        },
+      });
+
+      if (result.error || !result.data?.data) {
+        console.error("Error fetching prompt inputs:", result.error);
+        return null;
+      }
+
       return result.data.data;
     },
   });

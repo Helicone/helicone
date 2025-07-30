@@ -217,6 +217,22 @@ const whereKeyMappings: KeyMappings = {
         value: `${placeValueSafely(value)}`,
       };
     }
+    if ("cached" in filter && filter.cached) {
+      const { operator, value } = extractOperatorAndValueFromAnOperator(
+        filter.cached
+      );
+      if (operator !== "equals") {
+        throw new Error("Cached filter only supports 'equals' operator");
+      }
+      // If cached = true, we want cache_reference_id != DEFAULT_UUID
+      // If cached = false, we want cache_reference_id = DEFAULT_UUID
+      const cacheOperator = value === true ? "not-equals" : "equals";
+      return {
+        column: "request_response_rmt.cache_reference_id",
+        operator: cacheOperator as AllOperators,
+        value: placeValueSafely("00000000-0000-0000-0000-000000000000"),
+      };
+    }
     return easyKeyMappings<"request_response_rmt">({
       country_code: "request_response_rmt.country_code",
       latency: "request_response_rmt.latency",
@@ -246,6 +262,8 @@ const whereKeyMappings: KeyMappings = {
       gateway_router_id: "request_response_rmt.gateway_router_id",
       gateway_deployment_target:
         "request_response_rmt.gateway_deployment_target",
+      prompt_id: "request_response_rmt.prompt_id",
+      prompt_version: "request_response_rmt.prompt_version",
     })(filter, placeValueSafely);
   },
   users_view: easyKeyMappings<"users_view">({}),

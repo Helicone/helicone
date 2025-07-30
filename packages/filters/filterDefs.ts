@@ -212,10 +212,13 @@ interface RequestResponseRMTToOperators {
   response_body: SingleKey<VectorOperators>;
   cache_enabled: SingleKey<BooleanOperators>;
   cache_reference_id: SingleKey<TextOperators>;
+  cached: SingleKey<BooleanOperators>;
   assets: SingleKey<TextOperators>;
   "helicone-score-feedback": SingleKey<BooleanOperators>; // TODO: make this not a string literal key
   gateway_router_id: SingleKey<TextOperators>;
   gateway_deployment_target: SingleKey<TextOperators>;
+  prompt_id: SingleKey<TextOperators>;
+  prompt_version: SingleKey<TextOperators>;
 }
 export type FilterLeafRequestResponseRMT =
   SingleKey<RequestResponseRMTToOperators>;

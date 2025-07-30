@@ -42,7 +42,8 @@
                       "integrations/anthropic/curl",
                       "integrations/anthropic/javascript",
                       "integrations/anthropic/langchain",
-                      "integrations/anthropic/python"
+                      "integrations/anthropic/python",
+                      "integrations/anthropic/claude-code"
                     ]
                   },
                   "getting-started/integration-method/anyscale",
@@ -107,7 +108,7 @@
                     "group": "Nvidia",
                     "pages": [
                       "integrations/nvidia/curl",
-                      "integrations/nvidia/javascript", 
+                      "integrations/nvidia/javascript",
                       "integrations/nvidia/python",
                       "integrations/nvidia/dynamo"
                     ]
@@ -226,11 +227,7 @@
             "tag": "BETA",
             "pages": [
               "ai-gateway/introduction",
-              "ai-gateway/quickstart",
-              "ai-gateway/router-quickstart",
-              "ai-gateway/deployment/overview",
-              "ai-gateway/authentication",
-              "ai-gateway/observability",
+              "ai-gateway/cloud-quickstart",
               "ai-gateway/config",
               {
                 "group": "Concepts",
@@ -246,16 +243,23 @@
                 ]
               },
               {
-                "group": "Deployment",
+                "group": "Self-Hosted",
                 "pages": [
-                  "ai-gateway/deployment/docker",
-                  "ai-gateway/deployment/fly",
-                  "ai-gateway/deployment/porter"
+                  "ai-gateway/self-hosted-quickstart",
+                  "ai-gateway/self-hosted/router-quickstart",
+                  "ai-gateway/self-hosted/authentication",
+                  "ai-gateway/self-hosted/observability",
+                  "ai-gateway/self-hosted/deployment/overview",
+                  {
+                    "group": "Deployment Options",
+                    "pages": [
+                      "ai-gateway/self-hosted/deployment/docker",
+                      "ai-gateway/self-hosted/deployment/fly",
+                      "ai-gateway/self-hosted/deployment/porter"
+                    ]
+                  },
+                  "ai-gateway/self-hosted/debugging/telemetry"
                 ]
-              },
-              {
-                "group": "Debugging",
-                "pages": ["ai-gateway/debugging/telemetry"]
               }
             ]
           },
@@ -513,13 +517,23 @@
             "pages": [
               "guides/overview",
               {
-                "group": "Cookbooks",
+                "group": "Tutorials",
+                "pages": [
+                  "guides/cookbooks/ai-agents",
+                  "guides/cookbooks/vercel-ai-gateway",
+                  "guides/cookbooks/vercel-ai-gateway-demo",
+                  "guides/cookbooks/helicone-evals-with-ragas",
+                  "guides/cookbooks/openai-structured-outputs",
+                  "guides/cookbooks/prompt-thinking-models"
+                ]
+              },
+              {
+                "group": "How-to Guides",
                 "pages": [
                   "guides/cookbooks/debugging",
                   "guides/cookbooks/environment-tracking",
                   "guides/cookbooks/etl",
                   "guides/cookbooks/experiments",
-                  "guides/cookbooks/helicone-evals-with-ragas",
                   "guides/cookbooks/fine-tune",
                   "guides/cookbooks/getting-sessions",
                   "guides/cookbooks/getting-user-requests",
@@ -529,39 +543,28 @@
                   "guides/cookbooks/openai-batch-api",
                   "guides/cookbooks/openai-structured-outputs",
                   "guides/cookbooks/predefining-request-id",
-                  "guides/cookbooks/prompt-thinking-models",
                   "guides/cookbooks/replay-session",
-                  "guides/cookbooks/segmentation",
-                  "guides/cookbooks/vercel-ai-gateway",
-                  "guides/cookbooks/ai-agents"
+                  "guides/cookbooks/segmentation"
                 ]
               },
               {
-                "group": "Prompt Engineering",
+                "group": "Knowledge Base",
                 "pages": [
-                  "guides/prompt-engineering/overview",
-                  "guides/prompt-engineering/be-specific-and-clear",
-                  "guides/prompt-engineering/implement-few-shot-learning",
-                  "guides/prompt-engineering/leverage-role-playing",
-                  "guides/prompt-engineering/use-chain-of-thought-prompting",
-                  "guides/prompt-engineering/use-constrained-outputs",
-                  "guides/prompt-engineering/use-least-to-most-prompting",
-                  "guides/prompt-engineering/use-meta-prompting",
-                  "guides/prompt-engineering/use-structured-formats",
-                  "guides/prompt-engineering/use-thread-of-thought-prompting"
-                ]
-              }
-            ]
-          },
-          {
-            "group": "Applications",
-            "pages": [
-              "guides/applications/overview",
-              {
-                "group": "Use Cases",
-                "pages": [
-                  "guides/applications/bill-by-usage",
-                  "guides/applications/resell-a-model"
+                  {
+                    "group": "Prompt Engineering",
+                    "pages": [
+                      "guides/prompt-engineering/overview",
+                      "guides/prompt-engineering/be-specific-and-clear",
+                      "guides/prompt-engineering/implement-few-shot-learning",
+                      "guides/prompt-engineering/leverage-role-playing",
+                      "guides/prompt-engineering/use-chain-of-thought-prompting",
+                      "guides/prompt-engineering/use-constrained-outputs",
+                      "guides/prompt-engineering/use-least-to-most-prompting",
+                      "guides/prompt-engineering/use-meta-prompting",
+                      "guides/prompt-engineering/use-structured-formats",
+                      "guides/prompt-engineering/use-thread-of-thought-prompting"
+                    ]
+                  }
                 ]
               }
             ]
@@ -686,14 +689,6 @@
       "destination": "/references/data-autonomy"
     },
     {
-      "source": "/use-cases/bill-by-usage",
-      "destination": "/guides/applications/bill-by-usage"
-    },
-    {
-      "source": "/use-cases/resell-a-model",
-      "destination": "/guides/applications/resell-a-model"
-    },
-    {
       "source": "/use-cases/debugging",
       "destination": "/guides/cookbooks/debugging"
     },
@@ -752,6 +747,50 @@
     {
       "source": "/getting-started/self-deploy",
       "destination": "/getting-started/self-host/manual"
+    },
+    {
+      "source": "/ai-gateway/quickstart",
+      "destination": "/ai-gateway/self-hosted-quickstart"
+    },
+    {
+      "source": "/ai-gateway/router-quickstart",
+      "destination": "/ai-gateway/self-hosted/router-quickstart"
+    },
+    {
+      "source": "/ai-gateway/authentication",
+      "destination": "/ai-gateway/self-hosted/authentication"
+    },
+    {
+      "source": "/ai-gateway/observability",
+      "destination": "/ai-gateway/self-hosted/observability"
+    },
+    {
+      "source": "/ai-gateway/deployment/overview",
+      "destination": "/ai-gateway/self-hosted/deployment/overview"
+    },
+    {
+      "source": "/ai-gateway/deployment/docker",
+      "destination": "/ai-gateway/self-hosted/deployment/docker"
+    },
+    {
+      "source": "/ai-gateway/deployment/fly",
+      "destination": "/ai-gateway/self-hosted/deployment/fly"
+    },
+    {
+      "source": "/ai-gateway/deployment/porter",
+      "destination": "/ai-gateway/self-hosted/deployment/porter"
+    },
+    {
+      "source": "/ai-gateway/deployment/ecs",
+      "destination": "/ai-gateway/self-hosted/deployment/ecs"
+    },
+    {
+      "source": "/ai-gateway/deployment/k8s",
+      "destination": "/ai-gateway/self-hosted/deployment/k8s"
+    },
+    {
+      "source": "/ai-gateway/debugging/telemetry",
+      "destination": "/ai-gateway/self-hosted/debugging/telemetry"
     }
   ]
 }
