@@ -56,6 +56,19 @@ export class GatewayManager extends BaseManager {
     return ok({ routers: result.data });
   }
 
+  async getRoutersCount(): Promise<Result<number, string>> {
+    const result = await dbExecute<{ count: number }>(
+      `SELECT COUNT(*) FROM routers WHERE organization_id = $1`,
+      [this.authParams.organizationId]
+    );
+
+    if (result.error || !result.data) {
+      return err(`Failed to get router count: ${result.error}`);
+    }
+
+    return ok(result.data[0].count);
+  }
+
   async getLatestRouterConfig(
     hash: string
   ): Promise<Result<LatestRouterConfig, string>> {
@@ -260,6 +273,17 @@ export class GatewayManager extends BaseManager {
     const createId = init({ length: 12 });
 
     const routerHash = createId();
+
+    const MAX_ROUTERS = 30;
+    const currentRoutersCount = await this.getRoutersCount();
+    if (currentRoutersCount.error) {
+      return err(currentRoutersCount.error);
+    }
+    if (currentRoutersCount.data && currentRoutersCount.data >= MAX_ROUTERS) {
+      return err(
+        `You have reached the maximum number of routers: ${MAX_ROUTERS}`
+      );
+    }
 
     const result = await dbExecute<{ id: string }>(
       `INSERT INTO routers (name, hash, organization_id) VALUES ($1, $2, $3) RETURNING id`,
