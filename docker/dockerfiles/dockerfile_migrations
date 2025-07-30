@@ -30,6 +30,7 @@ COPY ./clickhouse/migrations /app/clickhouse/migrations
 COPY ./clickhouse/seeds /app/clickhouse/seeds
 COPY ./clickhouse/ch_hcone.py /app/clickhouse/ch_hcone.py
 RUN chmod +x /app/clickhouse/ch_hcone.py
+RUN chmod 755 /opt/flyway/flyway
 
 # Create a script to run migrations
 RUN echo '#!/bin/sh \n\
