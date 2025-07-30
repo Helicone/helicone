@@ -241,7 +241,11 @@ const PromptsPage = (props: PromptsPageProps) => {
     return sortDirection === "asc" ? compareResult : -compareResult;
   });
 
-  const columns = getInitialColumns();
+  const handlePlaygroundActionClick = (promptVersionId: string) => {
+    router.push(`/playground?promptVersionId=${promptVersionId}`);
+  };
+
+  const columns = getInitialColumns(handlePlaygroundActionClick);
 
   return (
     <main className="flex h-screen w-full animate-fade-in flex-col">

@@ -5,11 +5,10 @@ import { ColumnConfig } from "@/components/shared/table/simpleTable";
 import { PromptWithVersions } from "@/services/hooks/prompts";
 import TagsSummary from "./TagsSummary";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 
-export const getInitialColumns = (): ColumnConfig<PromptWithVersions>[] => {
-  const router = useRouter();
-
+export const getInitialColumns = (
+  onPlaygroundActionClick: (promptVersionId: string) => void,
+): ColumnConfig<PromptWithVersions>[] => {
   return [
     {
       key: "prompt_id" as keyof PromptWithVersions,
@@ -114,9 +113,7 @@ export const getInitialColumns = (): ColumnConfig<PromptWithVersions>[] => {
             size="sm"
             onClick={(e) => {
               e.stopPropagation();
-              router.push(
-                `/playground?promptVersionId=${item.productionVersion.id}`,
-              );
+              onPlaygroundActionClick(item.productionVersion.id);
             }}
             className="flex items-center gap-1 rounded-lg"
           >
