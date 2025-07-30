@@ -33,6 +33,7 @@ const useGatewayRouter = ({ routerHash }: { routerHash: string }) => {
         if (response.ok && "valid" in data) {
           return {
             valid: !!data.valid,
+            ...("error" in data ? { error: data.error } : {}),
           };
         }
         return {

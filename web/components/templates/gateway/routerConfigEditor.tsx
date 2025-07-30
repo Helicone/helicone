@@ -86,8 +86,14 @@ const RouterConfigEditor = ({
     }
 
     const result = await validateRouterConfig(obj);
-    if (!result.valid || result.error) {
-      setNotification("Invalid router config", "error");
+    if (
+      ("valid" in result && (!result.valid || result.error)) ||
+      ("error" in result && result.error)
+    ) {
+      setNotification(
+        `Invalid router config: ${result.error || "Unknown error"}`,
+        "error",
+      );
       return;
     }
 
