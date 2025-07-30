@@ -3,7 +3,13 @@ import { Button } from "@/components/ui/button";
 import yaml from "js-yaml";
 import { Loader2, Settings, Code2, FormInput } from "lucide-react";
 import useNotification from "@/components/shared/notification/useNotification";
-import ThemedDrawer from "@/components/shared/themed/themedDrawer";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerFooter,
+} from "@/components/ui/drawer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MarkdownEditor from "@/components/shared/markdownEditor";
 import useGatewayRouter from "./useGatewayRouter";
@@ -59,12 +65,16 @@ const RouterConfigEditor = ({
   }, [config, activeTab, parseConfigToForm]);
 
   const handleConfigSave = async () => {
+    if (!validateLoadBalance()) {
+      return;
+    }
+
     let obj;
 
     try {
       if (activeTab === "form") {
         // Generate config from form values
-        const generatedYaml = generateYaml(false);
+        const generatedYaml = generateYaml();
         obj = yaml.load(generatedYaml);
       } else {
         // Use the YAML editor content
@@ -97,11 +107,41 @@ const RouterConfigEditor = ({
     setNotification("Configuration saved successfully", "success");
   };
 
+  const validateLoadBalance = () => {
+    if (
+      state.loadBalance.type === "model-latency" &&
+      state.loadBalance.inner.some((item) => typeof item !== "string")
+    ) {
+      setNotification("Model latency strategy requires string values", "error");
+      return false;
+    }
+    if (
+      state.loadBalance.type === "model-weighted" &&
+      state.loadBalance.inner.some(
+        (item) =>
+          typeof item !== "object" || !("model" in item && "weight" in item),
+      )
+    ) {
+      setNotification(
+        "Model weighted strategy requires object values",
+        "error",
+      );
+      return false;
+    }
+
+    return true;
+  };
+
   // Sync form values to YAML when switching tabs
   const handleTabChange = (value: string) => {
+    // handle type check for load balance
+    if (!validateLoadBalance()) {
+      return;
+    }
+
     if (value === "yaml" && activeTab === "form") {
       // Generate YAML from form values
-      setConfig(generateYaml(false));
+      setConfig(generateYaml());
       setYamlError(null);
     } else if (value === "form" && activeTab === "yaml") {
       // Parse YAML to form values immediately when switching to form
@@ -126,15 +166,72 @@ const RouterConfigEditor = ({
         <Settings className="mr-2 h-4 w-4" />
         Configuration
       </Button>
-      <ThemedDrawer
+      <Drawer
         open={configModalOpen}
-        setOpen={setConfigModalOpen}
-        defaultWidth="w-[80vw]"
-        defaultExpanded={true}
-        actions={
-          <div className="flex w-full flex-row items-center justify-between">
-            <div className="text-lg font-semibold">Router Configuration</div>
-            <div className="flex h-12 flex-row items-center space-x-2">
+        onOpenChange={setConfigModalOpen}
+        // direction="right"
+      >
+        <DrawerContent
+          // className="fixed bottom-2 right-2 top-2 h-full w-full max-w-lg outline-none"
+          className="h-[90vh]"
+        >
+          <DrawerHeader>
+            <DrawerTitle>Router Configuration</DrawerTitle>
+          </DrawerHeader>
+
+          <div className="flex-1 overflow-y-auto px-4">
+            <Tabs
+              value={activeTab}
+              onValueChange={handleTabChange}
+              className="h-full"
+            >
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="form" className="flex items-center gap-2">
+                  <FormInput className="h-4 w-4" />
+                  Form Editor
+                </TabsTrigger>
+                <TabsTrigger value="yaml" className="flex items-center gap-2">
+                  <Code2 className="h-4 w-4" />
+                  YAML Editor
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent
+                value="form"
+                className="mt-4 max-h-full overflow-y-auto"
+              >
+                <div className="space-y-4">
+                  <RouterConfigForm state={state} onStateChange={setState} />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="yaml" className="mt-4">
+                <div className="h-[400px]">
+                  {yamlError && (
+                    <div className="mb-2 rounded-md bg-destructive/10 p-2 text-sm text-destructive">
+                      {yamlError}
+                    </div>
+                  )}
+                  <MarkdownEditor
+                    monaco
+                    text={config}
+                    setText={(value) => {
+                      setConfig(value);
+                    }}
+                    disabled={false}
+                    language="yaml"
+                    monacoOptions={{
+                      lineNumbers: "on",
+                      tabSize: 2,
+                    }}
+                  />
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+
+          <DrawerFooter>
+            <div className="flex w-full flex-row items-center justify-end space-x-2">
               <Button
                 variant="outline"
                 onClick={() => setConfigModalOpen(false)}
@@ -152,60 +249,9 @@ const RouterConfigEditor = ({
                 )}
               </Button>
             </div>
-          </div>
-        }
-      >
-        <Tabs
-          value={activeTab}
-          onValueChange={handleTabChange}
-          className="h-full"
-        >
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="form" className="flex items-center gap-2">
-              <FormInput className="h-4 w-4" />
-              Form Editor
-            </TabsTrigger>
-            <TabsTrigger value="yaml" className="flex items-center gap-2">
-              <Code2 className="h-4 w-4" />
-              YAML Editor
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="form" className="mt-4 max-h-full overflow-y-auto">
-            <div className="space-y-4">
-              <RouterConfigForm
-                state={state}
-                onStateChange={setState}
-                mode="edit"
-                showLoadBalance={false}
-              />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="yaml" className="mt-4">
-            <div className="h-[400px]">
-              {yamlError && (
-                <div className="mb-2 rounded-md bg-destructive/10 p-2 text-sm text-destructive">
-                  {yamlError}
-                </div>
-              )}
-              <MarkdownEditor
-                monaco
-                text={config}
-                setText={(value) => {
-                  setConfig(value);
-                }}
-                disabled={false}
-                language="yaml"
-                monacoOptions={{
-                  lineNumbers: "on",
-                  tabSize: 2,
-                }}
-              />
-            </div>
-          </TabsContent>
-        </Tabs>
-      </ThemedDrawer>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
     </>
   );
 };

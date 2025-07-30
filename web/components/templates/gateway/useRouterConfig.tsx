@@ -4,6 +4,12 @@ import { RouterConfigFormState } from "./RouterConfigForm";
 
 export const useRouterConfig = (initialConfig?: any) => {
   const [state, setState] = useState<RouterConfigFormState>({
+    // Load balance configuration
+    loadBalance: {
+      type: "model-latency",
+      inner: ["openai/gpt-4o-mini", "anthropic/claude-3-5-sonnet"],
+    },
+
     // Cache configuration
     enableCache: false,
     cacheDirective: "max-age=3600, max-stale=1800",
@@ -25,13 +31,19 @@ export const useRouterConfig = (initialConfig?: any) => {
     exponentialMaxRetries: "2",
     exponentialFactor: "2.0",
 
-    // Load balance configuration
+    // Load balance configuration (for create mode)
     loadBalanceConfig: {},
   });
 
   // Parse config object and set form values
   const parseConfigToForm = (configObj: any) => {
     const newState: RouterConfigFormState = {
+      // Load balance configuration
+      loadBalance: {
+        type: "model-latency",
+        inner: ["openai/gpt-4o-mini", "anthropic/claude-3-5-sonnet"],
+      },
+
       // Cache configuration
       enableCache: false,
       cacheDirective: "max-age=3600, max-stale=1800",
@@ -52,16 +64,50 @@ export const useRouterConfig = (initialConfig?: any) => {
       exponentialMaxDelay: "30s",
       exponentialMaxRetries: "2",
       exponentialFactor: "2.0",
-
-      // Load balance configuration
-      loadBalanceConfig: {},
     };
 
     if (configObj["load-balance"]) {
-      newState.loadBalanceConfig = configObj["load-balance"] as Record<
-        string,
-        unknown
-      >;
+      // newState.loadBalanceConfig = configObj["load-balance"] as Record<
+      //   string,
+      //   unknown
+      // >;
+
+      // Parse load balance configuration
+      const loadBalance = configObj["load-balance"];
+      if ("chat" in loadBalance && loadBalance.chat) {
+        const chatConfig = loadBalance.chat;
+        const strategy = chatConfig.strategy || "model-latency";
+
+        if (strategy === "model-latency") {
+          newState.loadBalance = {
+            type: "model-latency",
+            inner: chatConfig.models || [
+              "openai/gpt-4o-mini",
+              "anthropic/claude-3-5-sonnet",
+            ],
+          };
+        } else if (strategy === "model-weighted") {
+          newState.loadBalance = {
+            type: "model-weighted",
+            inner: chatConfig.models || [],
+          };
+        } else if (strategy === "provider-weighted") {
+          newState.loadBalance = {
+            type: "provider-weighted",
+            inner: chatConfig.providers || [],
+          };
+        } else if (strategy === "provider-latency") {
+          newState.loadBalance = {
+            type: "provider-latency",
+            inner: chatConfig.providers || [],
+          };
+        } else {
+          newState.loadBalance = {
+            type: "model-latency",
+            inner: ["openai/gpt-4o-mini", "anthropic/claude-3-5-sonnet"],
+          };
+        }
+      }
     }
 
     // Cache configuration
@@ -109,23 +155,32 @@ export const useRouterConfig = (initialConfig?: any) => {
   };
 
   // Generate config object from form state
-  const generateConfig = (includeLoadBalance = true) => {
+  const generateConfig = () => {
     const configObj: Record<string, unknown> = {};
 
     // Load balancing configuration (always included for create mode)
-    if (includeLoadBalance) {
-      configObj["load-balance"] = {
-        chat: {
-          strategy: "model-latency",
-          models: ["openai/gpt-4o-mini", "anthropic/claude-3-5-sonnet"],
-        },
-      };
-    } else if (
-      state.loadBalanceConfig &&
-      Object.keys(state.loadBalanceConfig).length > 0
-    ) {
-      configObj["load-balance"] = state.loadBalanceConfig;
+    const chatConfig: Record<string, unknown> = {
+      strategy: state.loadBalance.type, // Use the type as the strategy
+    };
+
+    switch (state.loadBalance.type) {
+      case "model-latency":
+        chatConfig.models = state.loadBalance.inner;
+        break;
+      case "model-weighted":
+        chatConfig.models = state.loadBalance.inner;
+        break;
+      case "provider-weighted":
+        chatConfig.providers = state.loadBalance.inner;
+        break;
+      case "provider-latency":
+        chatConfig.providers = state.loadBalance.inner;
+        break;
     }
+
+    configObj["load-balance"] = {
+      chat: chatConfig,
+    };
 
     // Cache configuration
     if (state.enableCache) {
@@ -174,8 +229,8 @@ export const useRouterConfig = (initialConfig?: any) => {
   };
 
   // Generate YAML string from form state
-  const generateYaml = (includeLoadBalance = true) => {
-    const configObj = generateConfig(includeLoadBalance);
+  const generateYaml = () => {
+    const configObj = generateConfig();
     return yaml.dump(configObj);
   };
 
