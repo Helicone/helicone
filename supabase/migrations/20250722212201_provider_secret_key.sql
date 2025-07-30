@@ -29,7 +29,7 @@ CREATE OR REPLACE FUNCTION provider_keys_encrypt_secret_provider_key() RETURNS t
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE TRIGGER provider_keys_encrypt_secret_trigger_provider_key
-AFTER INSERT OR UPDATE OR DELETE ON provider_keys
+AFTER INSERT OR UPDATE ON provider_keys
 FOR EACH ROW EXECUTE FUNCTION provider_keys_encrypt_secret_provider_key();
 
 create view public.decrypted_provider_keys_v2 as
