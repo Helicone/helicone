@@ -9,7 +9,7 @@ const labelVariants = cva(
   {
     variants: {
       variant: {
-        default: "text-sm font-medium text-slate-800",
+        default: "text-sm font-medium text-muted-foreground",
         badge: [
           "h-5 px-2.5 py-0.5 bg-sky-500 text-xs text-sky-50",
           "shadow shadow-[0px_1px_2px_0px_rgba(0,0,0,0.06)]",

@@ -16,37 +16,37 @@
   */
   :root {
     /* Background Colors */
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --background: 210 40% 98%; /* hsl(210, 40%, 98%) */
+    --foreground: 222 47% 11%; /* hsl(222, 47%, 11%) */
+    --card: 0 0% 100%; /* hsl(0, 0%, 100%) */
+    --card-foreground: 222 47% 11%; /* hsl(222, 47%, 11%) */
+    --popover: 0 0% 100%; /* hsl(0, 0%, 100%) */
+    --popover-foreground: 222 47% 11%; /* hsl(222, 47%, 11%) */
 
     /* Primary Colors */
-    --primary: 199 89% 48%;
-    --primary-foreground: 204 100% 97%;
+    --primary: 199 89% 48%; /* hsl(199, 89%, 48%) */
+    --primary-foreground: 204 100% 97%; /* hsl(204, 100%, 97%) */
 
     /* Secondary Colors */
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
+    --secondary: 210 40% 96%; /* hsl(210, 40%, 96%) */
+    --secondary-foreground: 222 47% 11%; /* hsl(222, 47%, 11%) */
 
     /* Muted Colors */
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 210 40% 96%; /* hsl(210, 40%, 96%) */
+    --muted-foreground: 215 16% 47%; /* hsl(215, 16%, 47%) */
 
     /* Accent Colors */
-    --accent: 210 40% 96%;
-    --accent-foreground: 222 47% 11%;
+    --accent: 210 40% 96%; /* hsl(210, 40%, 96%) */
+    --accent-foreground: 222 47% 11%; /* hsl(222, 47%, 11%) */
 
     /* Destructive Colors */
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 75% 15%;
+    --destructive: 0 72% 51%; /* hsl(0, 72%, 51%) */
+    --destructive-foreground: 0 75% 15%; /* hsl(0, 75%, 15%) */
 
     /* Border Colors */
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 222 47% 11%;
+    --border: 214 32% 91%; /* hsl(214, 32%, 91%) */
+    --input: 214 32% 91%; /* hsl(214, 32%, 91%) */
+    --ring: 222 47% 11%; /* hsl(222, 47%, 11%) */
 
     /* Chart Colors */
     --chart-1: 0.852 0.199 91.936; /* oklch(0.852 0.199 91.936) */
