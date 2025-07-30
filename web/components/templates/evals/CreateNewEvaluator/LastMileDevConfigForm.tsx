@@ -56,8 +56,8 @@ function SelectDataEntryType({
             {label === "Input"
               ? "Select the source of input data for evaluation"
               : label === "Output"
-              ? "Select the source of output data for evaluation"
-              : "Select the source of ground truth data for comparison"}
+                ? "Select the source of output data for evaluation"
+                : "Select the source of ground truth data for comparison"}
           </TooltipContent>
         </Tooltip>
       </div>
@@ -191,10 +191,10 @@ export const LastMileDevConfigForm: React.FC<{
   // Local state for form values
   const [evaluatorName, setEvaluatorName] = useState(lastMileName || "");
   const [evaluatorDescription, setEvaluatorDescription] = useState(
-    lastMileDescription || ""
+    lastMileDescription || "",
   );
   const [evaluatorType, setEvaluatorType] = useState<LastMileConfigForm>(
-    lastMileConfig || preset || DEFAULT_RELEVANCE_TYPE
+    lastMileConfig || preset || DEFAULT_RELEVANCE_TYPE,
   );
 
   // Update the store when local state changes
@@ -212,7 +212,7 @@ export const LastMileDevConfigForm: React.FC<{
   ]);
 
   return (
-    <Col className="h-full flex flex-col overflow-hidden">
+    <Col className="flex h-full flex-col overflow-hidden">
       <ScrollArea
         className="flex-grow overflow-y-auto"
         type="always"
@@ -222,7 +222,7 @@ export const LastMileDevConfigForm: React.FC<{
           <Col className="space-y-4">
             {/* Basic Information Section */}
             <div className="space-y-3">
-              <div className="border-b pb-1 mb-3">
+              <div className="mb-3 border-b pb-1">
                 <div className="flex items-baseline gap-2">
                   <H3 className="text-lg">Basic Information</H3>
                   <Muted className="text-sm">
@@ -241,7 +241,7 @@ export const LastMileDevConfigForm: React.FC<{
                       href="https://docs.lastmileai.dev"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-500 hover:text-blue-600 text-xs"
+                      className="text-xs text-blue-500 hover:text-blue-600"
                     >
                       LastMile AI Documentation
                     </a>
@@ -260,13 +260,13 @@ export const LastMileDevConfigForm: React.FC<{
                       } else {
                         notification.setNotification(
                           "Evaluator name can only contain letters and numbers.",
-                          "error"
+                          "error",
                         );
                       }
                     }}
                   />
                   {existingEvaluatorId && (
-                    <div className="text-xs text-muted-foreground mt-1">
+                    <div className="mt-1 text-xs text-muted-foreground">
                       Evaluator names cannot be changed after creation
                     </div>
                   )}
@@ -326,7 +326,7 @@ export const LastMileDevConfigForm: React.FC<{
 
             {/* Configuration Section */}
             <div className="space-y-3">
-              <div className="border-b pb-1 mb-3">
+              <div className="mb-3 border-b pb-1">
                 <div className="flex items-baseline gap-2">
                   <H3 className="text-lg">Configuration</H3>
                   <Muted className="text-sm">
@@ -335,7 +335,7 @@ export const LastMileDevConfigForm: React.FC<{
                 </div>
               </div>
 
-              <div className="space-y-4 p-3 bg-muted/10 rounded-md">
+              <div className="space-y-4 rounded-md bg-muted/10 p-3">
                 {evaluatorType.input && (
                   <SelectDataEntryType
                     label="Input"

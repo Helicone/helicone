@@ -7,7 +7,7 @@ export function getXMinutesAgoFloored(minutes: number): Date {
     now.getHours(),
     now.getMinutes() - minutes,
     0,
-    0
+    0,
   );
 }
 
@@ -20,7 +20,7 @@ export function getXHoursAgoFloored(hours: number): Date {
     now.getHours() - hours,
     0,
     0,
-    0
+    0,
   );
 }
 
@@ -33,7 +33,7 @@ export function getXDaysAgoFloored(days: number): Date {
     0,
     0,
     0,
-    0
+    0,
   );
 }
 
@@ -46,7 +46,7 @@ export function getXWeeksAgoFloored(weeks: number): Date {
     0,
     0,
     0,
-    0
+    0,
   );
 }
 
@@ -59,7 +59,7 @@ export function getXMonthsAgoFloored(months: number): Date {
     0,
     0,
     0,
-    0
+    0,
   );
 }
 

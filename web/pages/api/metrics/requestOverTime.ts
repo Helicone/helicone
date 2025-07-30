@@ -9,7 +9,7 @@ import { Result } from "@/packages/common/result";
 import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";
 
 async function handler(
-  options: HandlerWrapperOptions<Result<RequestsOverTime[], string>>
+  options: HandlerWrapperOptions<Result<RequestsOverTime[], string>>,
 ) {
   const {
     req,
@@ -28,7 +28,7 @@ async function handler(
 
   const { error, data } = await dbExecute(
     `SELECT member FROM organization_member WHERE organization = $1 AND member = $2`,
-    [organizationId, userId]
+    [organizationId, userId],
   );
 
   if (!data || data.length === 0 || error) {
@@ -43,7 +43,7 @@ async function handler(
       orgId: organizationId ?? orgId,
       dbIncrement: dbIncrement ?? "hour",
       timeZoneDifference,
-    })
+    }),
   );
 }
 

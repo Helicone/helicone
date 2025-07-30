@@ -19,7 +19,7 @@ const LoginButton = (props: LoginButtonProps) => {
     <>
       <button
         onClick={handleClick}
-        className="px-4 py-2 border border-gray-900 font-semibold text-gray-900 rounded-xl"
+        className="rounded-xl border border-gray-900 px-4 py-2 font-semibold text-gray-900"
       >
         Sign In
       </button>

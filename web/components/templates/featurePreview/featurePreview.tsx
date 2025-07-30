@@ -69,93 +69,85 @@ const FeaturePreview = <T extends string>({
   return (
     <div className="min-h-screen">
       <div className="relative">
-        <div className="absolute inset-0 max-w-7xl mx-auto z-[30] pointer-events-none">
+        <div className="pointer-events-none absolute inset-0 z-[30] mx-auto max-w-7xl">
           <LogoBox
             imgSrc="/static/pricing/anthropic.webp"
-            className="w-[130px] h-[130px] absolute 
-            top-[500px] 2xl:top-[500px] left-[150px] translate-x-[30px] rotate-[10deg]"
+            className="absolute left-[150px] top-[500px] h-[130px] w-[130px] translate-x-[30px] rotate-[10deg] 2xl:top-[500px]"
             innerClassName="bg-white p-4"
           />
           <LogoBox
             imgSrc="/static/pricing/gemini.webp"
-            className="w-24 h-24 absolute 
-            top-[200px] 2xl:top-[200px] right-10 translate-x-[-50px] rotate-[-25deg]"
+            className="absolute right-10 top-[200px] h-24 w-24 translate-x-[-50px] rotate-[-25deg] 2xl:top-[200px]"
             innerClassName="bg-white"
           />
           <LogoBox
             imgSrc="/static/pricing/logo2.webp"
-            className="w-[120px] h-[120px] absolute 
-            top-[430px] 2xl:top-[430px] left-0 translate-x-[30px] rotate-[8deg]"
+            className="absolute left-0 top-[430px] h-[120px] w-[120px] translate-x-[30px] rotate-[8deg] 2xl:top-[430px]"
           />
           <LogoBox
             imgSrc="/static/pricing/chatgpt.webp"
-            className="w-[140px] h-[140px] absolute
-            top-[500px] 2xl:top-[500px] right-1/4 translate-x-[150px] rotate-[15deg]"
+            className="absolute right-1/4 top-[500px] h-[140px] w-[140px] translate-x-[150px] rotate-[15deg] 2xl:top-[500px]"
             innerClassName="bg-[#0FA37F] rounded-3xl"
             size="large"
           />
           <LogoBox
             imgSrc="/static/pricing/togetherai.webp"
-            className="w-[80px] h-[80px] absolute 
-            top-[300px] 2xl:top-[300px] left-14 translate-x-[50px] rotate-[6deg]"
+            className="absolute left-14 top-[300px] h-[80px] w-[80px] translate-x-[50px] rotate-[6deg] 2xl:top-[300px]"
             innerClassName="rounded-3xl"
             size="small"
           />
           <LogoBox
             imgSrc="/static/pricing/mistral.webp"
-            className="w-24 h-24 absolute 
-            top-[650px] 2xl:top-[650px] left-0 translate-x-[30px] rotate-[-15deg]"
+            className="absolute left-0 top-[650px] h-24 w-24 translate-x-[30px] rotate-[-15deg] 2xl:top-[650px]"
             innerClassName="bg-white p-2"
             size="medium"
           />
           <LogoBox
             imgSrc="/static/pricing/groq.svg"
-            className="w-[110px] h-[110px] absolute 
-            top-[400px] 2xl:top-[400px] right-10 -translate-y-[50px] rotate-[12deg]"
+            className="absolute right-10 top-[400px] h-[110px] w-[110px] -translate-y-[50px] rotate-[12deg] 2xl:top-[400px]"
             innerClassName="bg-white p-2"
             size="medium"
           />
           <LogoBox
             imgSrc="/static/pricing/logo3.webp"
-            className="w-28 h-28 absolute 
-            top-[700px] 2xl:top-[700px] right-1/4 translate-x-[200px] rotate-[-25deg]"
+            className="absolute right-1/4 top-[700px] h-28 w-28 translate-x-[200px] rotate-[-25deg] 2xl:top-[700px]"
             innerClassName="bg-white p-2"
             size="medium"
           />
           <LogoBox
             imgSrc="/static/pricing/logo4.webp"
-            className="w-20 h-20 absolute 
-            top-[700px] 2xl:top-[700px] left-32 translate-x-[30px] rotate-[-15deg]"
+            className="absolute left-32 top-[700px] h-20 w-20 translate-x-[30px] rotate-[-15deg] 2xl:top-[700px]"
             size="small"
           />
         </div>
 
         {/* Feature Preview */}
-        <div className="flex flex-col items-center mx-auto mb-8">
-          <div className="text-center mb-8 lg:mb-4">
-            <H1 className="text-[40px] lg:text-[32px] leading-[52px]">
+        <div className="mx-auto mb-8 flex flex-col items-center">
+          <div className="mb-8 text-center lg:mb-4">
+            <H1 className="text-[40px] leading-[52px] lg:text-[32px]">
               {title} <br />
               {subtitle}
             </H1>
           </div>
 
-          <div className="max-h-[367px] flex-col justify-start items-start inline-flex gap-6">
+          <div className="inline-flex max-h-[367px] flex-col items-start justify-start gap-6">
             {isOnFreeTier ? (
-              <div className="self-stretch px-3 py-2 bg-[hsl(var(--primary)/0.1)] rounded-lg border border-[hsl(var(--primary))] justify-center items-center gap-2.5 inline-flex">
-                <div className="w-[18px] h-[18px] relative overflow-hidden">
-                  <LightBulbIcon className="w-full h-full text-[hsl(var(--primary))]" />
+              <div className="inline-flex items-center justify-center gap-2.5 self-stretch rounded-lg border border-[hsl(var(--primary))] bg-[hsl(var(--primary)/0.1)] px-3 py-2">
+                <div className="relative h-[18px] w-[18px] overflow-hidden">
+                  <LightBulbIcon className="h-full w-full text-[hsl(var(--primary))]" />
                 </div>
                 <div>
                   <P className="text-[hsl(var(--primary))]">
                     Adding prompt management requires a{" "}
-                    <span className="font-medium underline">Pro plan</span>.{" "}
+                    <span className="font-medium underline">Pro plan</span>
+                    .{" "}
                   </P>
                 </div>
               </div>
             ) : isTrialActive ? (
-              <div className="self-stretch px-3 py-2 bg-[hsl(var(--primary)/0.1)] rounded-lg border border-[hsl(var(--primary))] justify-center items-center gap-2.5 inline-flex">
-                <div className="w-[18px] h-[18px] relative overflow-hidden">
-                  <LightBulbIcon className="w-full h-full text-[hsl(var(--primary))]" />
+              <div className="inline-flex items-center justify-center gap-2.5 self-stretch rounded-lg border border-[hsl(var(--primary))] bg-[hsl(var(--primary)/0.1)] px-3 py-2">
+                <div className="relative h-[18px] w-[18px] overflow-hidden">
+                  <LightBulbIcon className="h-full w-full text-[hsl(var(--primary))]" />
                 </div>
                 <div>
                   <P className="text-[hsl(var(--primary))]">
@@ -165,70 +157,65 @@ const FeaturePreview = <T extends string>({
               </div>
             ) : null}
 
-            <div className="justify-center items-center gap-6 inline-flex">
+            <div className="inline-flex items-center justify-center gap-6">
               {pricingPlans.map((plan) => (
                 <div
                   key={plan.name}
                   onClick={() => setSelectedPlan(plan.name)}
-                  className={`
-                    w-[320px] h-[303px] lg:w-[300px] lg:h-[280px] p-5 rounded-[18px] flex-col justify-start items-start gap-4 inline-flex cursor-pointer
-                    relative overflow-hidden bg-[hsl(var(--card))]
-                    ${
-                      plan.name === selectedPlan
-                        ? "border-2 border-[hsl(var(--primary))]"
-                        : "border border-[hsl(var(--border))]"
-                    }
-                    group hover:bg-[hsl(var(--primary)/0.1)] transition-colors duration-300
-                  `}
+                  className={`relative inline-flex h-[303px] w-[320px] cursor-pointer flex-col items-start justify-start gap-4 overflow-hidden rounded-[18px] bg-[hsl(var(--card))] p-5 lg:h-[280px] lg:w-[300px] ${
+                    plan.name === selectedPlan
+                      ? "border-2 border-[hsl(var(--primary))]"
+                      : "border border-[hsl(var(--border))]"
+                  } group transition-colors duration-300 hover:bg-[hsl(var(--primary)/0.1)]`}
                 >
-                  <div className="relative z-10 self-stretch h-[255px] flex-col justify-start items-start gap-6 lg:gap-2 flex">
-                    <div className="self-stretch h-[87px] flex-col justify-start items-start gap-3 flex">
-                      <div className="self-stretch justify-between items-center inline-flex">
+                  <div className="relative z-10 flex h-[255px] flex-col items-start justify-start gap-6 self-stretch lg:gap-2">
+                    <div className="flex h-[87px] flex-col items-start justify-start gap-3 self-stretch">
+                      <div className="inline-flex items-center justify-between self-stretch">
                         <H4>{plan.name}</H4>
                         <div
-                          className={`w-[24px] h-[24px] rounded-full ${
+                          className={`h-[24px] w-[24px] rounded-full ${
                             plan.name === selectedPlan
                               ? "border-[7px] border-[hsl(var(--primary))]"
                               : "border border-[hsl(var(--muted-foreground))]"
-                          } bg-[hsl(var(--card))] flex items-center justify-center p-0`}
+                          } flex items-center justify-center bg-[hsl(var(--card))] p-0`}
                         ></div>
                       </div>
                       <div className="flex flex-row items-baseline gap-1">
                         <div>
-                          <span className="text-[hsl(var(--foreground))] text-[40px] font-medium">
+                          <span className="text-[40px] font-medium text-[hsl(var(--foreground))]">
                             ${plan.price}
                           </span>
-                          <span className="text-[hsl(var(--muted-foreground))] text-[40px] font-light">
+                          <span className="text-[40px] font-light text-[hsl(var(--muted-foreground))]">
                             /mo
                           </span>
                         </div>
                         {plan.priceSubtext && (
-                          <Small className="text-[hsl(var(--muted-foreground))] mt-1">
+                          <Small className="mt-1 text-[hsl(var(--muted-foreground))]">
                             {plan.priceSubtext}
                           </Small>
                         )}
                       </div>
                     </div>
-                    <div className="self-stretch h-36 flex-col justify-start items-start flex">
+                    <div className="flex h-36 flex-col items-start justify-start self-stretch">
                       {plan.features.map((feature, index) => (
                         <div
                           key={feature.name}
-                          className="self-stretch h-9 flex-col justify-start items-start flex"
+                          className="flex h-9 flex-col items-start justify-start self-stretch"
                         >
-                          <div className="self-stretch p-2 justify-start items-center inline-flex gap-2">
-                            <div className="w-[16px] h-[16px] relative overflow-hidden flex items-center justify-center">
+                          <div className="inline-flex items-center justify-start gap-2 self-stretch p-2">
+                            <div className="relative flex h-[16px] w-[16px] items-center justify-center overflow-hidden">
                               {feature.included ? (
-                                <CheckIcon className="w-full h-full text-[hsl(var(--confirmative))]" />
+                                <CheckIcon className="h-full w-full text-[hsl(var(--confirmative))]" />
                               ) : (
-                                <XMarkIcon className="w-full h-full text-[hsl(var(--destructive))]" />
+                                <XMarkIcon className="h-full w-full text-[hsl(var(--destructive))]" />
                               )}
                             </div>
-                            <P className="grow shrink basis-0">
+                            <P className="shrink grow basis-0">
                               {feature.name} {feature.additionalCost}
                             </P>
                           </div>
                           {index < plan.features.length - 1 && (
-                            <div className="self-stretch h-[0px] border-t border-[hsl(var(--border))]" />
+                            <div className="h-[0px] self-stretch border-t border-[hsl(var(--border))]" />
                           )}
                         </div>
                       ))}
@@ -239,10 +226,10 @@ const FeaturePreview = <T extends string>({
             </div>
           </div>
 
-          <div className="flex flex-col items-center gap-4 mt-8 w-[220px] lg:mt-4">
+          <div className="mt-8 flex w-[220px] flex-col items-center gap-4 lg:mt-4">
             <Button
               onClick={() => onStartTrial?.(selectedPlan)}
-              className="w-full text-[hsl(var(--primary-foreground))] text-lg font-medium leading-normal tracking-normal h-[52px] px-6 py-1.5 bg-[hsl(var(--primary))] rounded-xl justify-center items-center gap-2.5 inline-flex"
+              className="inline-flex h-[52px] w-full items-center justify-center gap-2.5 rounded-xl bg-[hsl(var(--primary))] px-6 py-1.5 text-lg font-medium leading-normal tracking-normal text-[hsl(var(--primary-foreground))]"
               variant="action"
             >
               {isOnFreeTier ? "Start 7-day free trial" : "Upgrade now"}
@@ -255,7 +242,7 @@ const FeaturePreview = <T extends string>({
               rel="noreferrer"
             >
               <Button
-                className="w-full bg-transparent border-none rounded-xl hover:bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))] text-lg font-semibold leading-normal tracking-tight hover:no-underline h-[52px] px-6 py-1.5"
+                className="h-[52px] w-full rounded-xl border-none bg-transparent px-6 py-1.5 text-lg font-semibold leading-normal tracking-tight text-[hsl(var(--accent-foreground))] hover:bg-[hsl(var(--accent))] hover:no-underline"
                 variant="action"
               >
                 Read the docs

@@ -48,7 +48,7 @@ export const EditAlertModal = (props: EditAlertModalProps) => {
     if (deleteError) {
       setNotification(
         "There was an error editing your alert! Refresh your page to try again..",
-        "error"
+        "error",
       );
       return;
     }

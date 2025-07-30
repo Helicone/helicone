@@ -4,4 +4,75 @@
 */
 import { ModelRow } from "../../interfaces/Cost";
 
-export const costs: ModelRow[] = []
+export const costs: ModelRow[] = [
+  {
+    model: {
+      operator: "equals",
+      value: "Llama-4-Maverick-17B-128E-Instruct-FP8",
+    },
+    cost: {
+      prompt_token: 0,
+      completion_token: 0,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "Llama-4-Scout-17B-16E-Instruct-FP8",
+    },
+    cost: {
+      prompt_token: 0,
+      completion_token: 0,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "Llama-3.3-70B-Instruct",
+    },
+    cost: {
+      prompt_token: 0,
+      completion_token: 0,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "Llama-3.3-8B-Instruct",
+    },
+    cost: {
+      prompt_token: 0,
+      completion_token: 0,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "Cerebras-Llama-4-Maverick-17B-128E-Instruct",
+    },
+    cost: {
+      prompt_token: 0,
+      completion_token: 0,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "Cerebras-Llama-4-Scout-17B-16E-Instruct",
+    },
+    cost: {
+      prompt_token: 0,
+      completion_token: 0,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "Groq-Llama-4-Maverick-17B-128E-Instruct",
+    },
+    cost: {
+      prompt_token: 0,
+      completion_token: 0,
+    },
+  },
+]

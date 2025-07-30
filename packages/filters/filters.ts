@@ -59,7 +59,7 @@ function easyKeyMappings<T extends keyof TablesAndViews>(
       }
     }
 
-    if (value === "null") {
+    if (value === "null" || value === "__empty__") {
       return {
         column: columnToUse,
         operator: operator,
@@ -243,6 +243,9 @@ const whereKeyMappings: KeyMappings = {
       prompt_cache_read_tokens: "request_response_rmt.prompt_cache_read_tokens",
       prompt_cache_write_tokens:
         "request_response_rmt.prompt_cache_write_tokens",
+      gateway_router_id: "request_response_rmt.gateway_router_id",
+      gateway_deployment_target:
+        "request_response_rmt.gateway_deployment_target",
     })(filter, placeValueSafely);
   },
   users_view: easyKeyMappings<"users_view">({}),
@@ -469,6 +472,8 @@ export function buildFilterLeaf(
           return `${column} ${sqlOperator} '%' || ${value}::text || '%'`;
         case operatorKey === "vector-contains":
           return `${column} ${sqlOperator} plainto_tsquery('helicone_search_config', ${value}::text)`;
+        case operatorKey === "equals" && value === "__empty__": // having __ wrap it in case someone searches for "empty"
+          return `empty(${column})`;
         default:
           return `${column} ${sqlOperator} ${value}`;
       }

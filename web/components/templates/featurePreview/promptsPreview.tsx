@@ -137,7 +137,7 @@ const PromptsPreview = () => {
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const { handleConfirmTrial, proRequired } = useFeatureTrial(
     "prompts",
-    "Prompts"
+    "Prompts",
   );
   const [selectedPlan, setSelectedPlan] = useState<PromptPricingPlanName>();
 
@@ -147,12 +147,12 @@ const PromptsPreview = () => {
       org?.currentOrg?.tier === "pro-20240913" ||
       org?.currentOrg?.tier === "pro-20250202" ||
       org?.currentOrg?.tier === "team-20250130",
-    [org?.currentOrg?.tier]
+    [org?.currentOrg?.tier],
   );
 
   const pricingPlan = useMemo(
     () => (isPaidPlan ? paidPlan : freePlan),
-    [isPaidPlan]
+    [isPaidPlan],
   );
 
   const handleStartTrial = async (selectedPlan?: PromptPricingPlanName) => {
@@ -170,7 +170,7 @@ const PromptsPreview = () => {
   };
 
   return (
-    <div className="flex flex-col justify-center items-center py-4">
+    <div className="flex flex-col items-center justify-center py-4">
       <FeaturePreview
         title="Prompt Management"
         subtitle="in a Shared Workspace"

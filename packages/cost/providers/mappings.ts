@@ -1,9 +1,11 @@
 import { ModelDetailsMap, ModelRow } from "../interfaces/Cost";
 import { anthropicProvider } from "./anthropic";
 import { costs as avianCosts } from "./avian";
-import { costs as awsBedrockCosts } from "./awsBedrock";
+import { costs as awsBedrockCosts } from "./aws/awsBedrock";
+import { costs as awsNovaCosts } from "./aws/awsNova";
 import { costs as azureCosts } from "./azure";
 import { costs as llamaCosts } from "./llama";
+import { costs as nvidiaCosts } from "./nvidia";
 import { costs as cohereCosts } from "./cohere";
 import { costs as deepseekCosts } from "./deepseek";
 import { costs as fireworksAICosts } from "./fireworks";
@@ -24,12 +26,14 @@ import {
 } from "./togetherai/completion";
 import { costs as xCosts } from "./x";
 import { googleProvider } from "./google";
+import { costs as vercelCosts } from "./vercel";
 
 const openAiPattern = /^https:\/\/api\.openai\.com/;
 const anthropicPattern = /^https:\/\/api\.anthropic\.com/;
 const azurePattern =
   /^(https?:\/\/)?([^.]*\.)?(openai\.azure\.com|azure-api\.net|cognitiveservices\.azure\.com)(\/.*)?$/;
 const llamaApiPattern = /^https:\/\/api\.llama\.com/;
+const nvidiaApiPattern = /^https:\/\/integrate\.api\.nvidia\.com/;
 const localProxyPattern = /^http:\/\/127\.0\.0\.1:\d+\/v\d+\/?$/;
 const heliconeProxyPattern = /^https:\/\/oai\.hconeai\.com/;
 const amdbartekPattern = /^https:\/\/.*\.amdbartek\.dev/;
@@ -59,6 +63,8 @@ const qstash = /^https:\/\/qstash\.upstash\.io/;
 const firecrawl = /^https:\/\/api\.firecrawl\.dev/;
 // https://bedrock-runtime.{some-region}.amazonaws.com/{something-after}
 const awsBedrock = /^https:\/\/bedrock-runtime\.[a-z0-9-]+\.amazonaws\.com\/.*/;
+// https://bedrock-runtime.{some-region}.amazonaws.com/{something-after} same runtime
+const awsNova = /^https:\/\/bedrock-runtime\.[a-z0-9-]+\.amazonaws\.com\/.*/;
 // https://api.deepseek.com
 const deepseek = /^https:\/\/api\.deepseek\.com/;
 // https://api.x.ai
@@ -67,6 +73,9 @@ const avianPattern = /^https:\/\/api\.avian\.io/;
 
 //https://api.studio.nebius.ai
 const nebius = /^https:\/\/api\.studio\.nebius\.ai/;
+
+// https://ai-gateway.vercel.sh
+const vercelGateway = /^https:\/\/ai-gateway\.vercel\.sh/;
 
 // https://api.novita.ai
 const novita = /^https:\/\/api\.novita\.ai/;
@@ -105,6 +114,8 @@ export const providersNames = [
   "NOVITA",
   "OPENPIPE",
   "LLAMA",
+  "NVIDIA",
+  "VERCEL",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -133,6 +144,11 @@ export const providers: {
     pattern: llamaApiPattern,
     provider: "LLAMA",
     costs: llamaCosts,
+  },
+  {
+    pattern: nvidiaApiPattern,
+    provider: "NVIDIA",
+    costs: nvidiaCosts,
   },
   {
     pattern: azurePattern,
@@ -246,6 +262,11 @@ export const providers: {
     costs: awsBedrockCosts,
   },
   {
+    pattern: awsNova,
+    provider: "AWS",
+    costs: awsNovaCosts,
+  },
+  {
     pattern: deepseek,
     provider: "DEEPSEEK",
     costs: deepseekCosts,
@@ -264,6 +285,11 @@ export const providers: {
     pattern: openpipe,
     provider: "OPENPIPE",
     costs: [],
+  },
+  {
+    pattern: vercelGateway,
+    provider: "VERCEL",
+    costs: vercelCosts,
   },
 ];
 

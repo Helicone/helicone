@@ -12,7 +12,7 @@ export interface ErrorOverTime {
 }
 
 async function handler(
-  options: HandlerWrapperOptions<Result<ErrorOverTime[], string>>
+  options: HandlerWrapperOptions<Result<ErrorOverTime[], string>>,
 ) {
   const {
     res,
@@ -42,7 +42,7 @@ async function handler(
       orgId,
       dbIncrement: dbIncrement ?? "hour",
       timeZoneDifference,
-    })
+    }),
   );
 }
 

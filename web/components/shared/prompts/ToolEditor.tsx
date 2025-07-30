@@ -52,7 +52,7 @@ export default function ToolEditor({ onSave, onCancel }: ToolEditorProps) {
 
   const handleParameterDescriptionChange = (
     index: number,
-    description: string
+    description: string,
   ) => {
     const updatedParameters = [...parameters];
     updatedParameters[index].description = description;
@@ -106,7 +106,7 @@ export default function ToolEditor({ onSave, onCancel }: ToolEditorProps) {
   };
 
   return (
-    <div className="flex flex-col gap-6 w-full">
+    <div className="flex w-full flex-col gap-6">
       <div className="flex flex-col gap-2">
         <GlassHeader className="h-14 flex-shrink-0 px-4">
           <h2 className="font-semibold text-secondary">Name</h2>
@@ -130,7 +130,7 @@ export default function ToolEditor({ onSave, onCancel }: ToolEditorProps) {
 
       <ScrollArea className="h-64">
         <GlassHeader className="h-14 flex-shrink-0 px-4">
-          <div className="flex justify-between items-center w-full">
+          <div className="flex w-full items-center justify-between">
             <h2 className="font-semibold text-secondary">
               Parameters ({parameters.length})
             </h2>
@@ -140,14 +140,14 @@ export default function ToolEditor({ onSave, onCancel }: ToolEditorProps) {
               onClick={handleAddParameter}
               className="flex items-center gap-1"
             >
-              <PiPlusBold className="w-4 h-4" />
+              <PiPlusBold className="h-4 w-4" />
               Add Parameter
             </Button>
           </div>
         </GlassHeader>
         <div className="flex flex-col gap-2 px-4">
           {parameters.length === 0 && (
-            <P className="text-muted-foreground text-center py-4">
+            <P className="py-4 text-center text-muted-foreground">
               No parameters added yet.
             </P>
           )}
@@ -155,7 +155,7 @@ export default function ToolEditor({ onSave, onCancel }: ToolEditorProps) {
           {parameters.map((param, index) => (
             <div
               key={index}
-              className="flex flex-col gap-3 p-3 border border-slate-200 dark:border-slate-800 rounded-md"
+              className="flex flex-col gap-3 rounded-md border border-slate-200 p-3 dark:border-slate-800"
             >
               <div className="flex items-center gap-3">
                 <div className="flex-1">
@@ -177,13 +177,13 @@ export default function ToolEditor({ onSave, onCancel }: ToolEditorProps) {
                     className="flex items-center gap-1.5"
                   >
                     {param.type === "string" && (
-                      <PiTextTBold className="w-4 h-4" />
+                      <PiTextTBold className="h-4 w-4" />
                     )}
                     {param.type === "number" && (
-                      <PiNumberCircleOneBold className="w-4 h-4" />
+                      <PiNumberCircleOneBold className="h-4 w-4" />
                     )}
                     {param.type === "boolean" && (
-                      <PiToggleRightBold className="w-4 h-4" />
+                      <PiToggleRightBold className="h-4 w-4" />
                     )}
                     {param.type}
                   </Button>
@@ -204,7 +204,7 @@ export default function ToolEditor({ onSave, onCancel }: ToolEditorProps) {
                     size="square_icon"
                     onClick={() => handleRemoveParameter(index)}
                   >
-                    <PiTrashBold className="w-4 h-4 text-destructive" />
+                    <PiTrashBold className="h-4 w-4 text-destructive" />
                   </Button>
                 </div>
               </div>
@@ -222,7 +222,7 @@ export default function ToolEditor({ onSave, onCancel }: ToolEditorProps) {
         </div>
       </ScrollArea>
 
-      <div className="flex justify-end gap-2 mt-4 p-4">
+      <div className="mt-4 flex justify-end gap-2 p-4">
         <Button variant="outline" onClick={onCancel}>
           Cancel
         </Button>

@@ -19,7 +19,7 @@ export const Tool = ({
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useLocalStorage<(typeof PROMPT_MODES)[number]>(
     "tool-mode",
-    "Pretty"
+    "Pretty",
   );
 
   const chatTopBarProps: ChatTopBarProps = {
@@ -33,7 +33,7 @@ export const Tool = ({
   };
 
   const content = (
-    <div className="w-full border border-slate-200 dark:border-gray-700 divide-y divide-gray-300 dark:divide-gray-700 h-full">
+    <div className="h-full w-full divide-y divide-gray-300 border border-slate-200 dark:divide-gray-700 dark:border-gray-700">
       <ToolContent mode={mode} mappedRequest={mappedRequest} />
     </div>
   );
@@ -42,14 +42,14 @@ export const Tool = ({
     <>
       <div
         className={clsx(
-          "w-full flex flex-col text-left space-y-2 text-sm dark:bg-black",
-          className
+          "flex w-full flex-col space-y-2 text-left text-sm dark:bg-black",
+          className,
         )}
       >
         {content}
       </div>
       <ThemedModal open={open} setOpen={setOpen}>
-        <div className="w-[80vw] rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
+        <div className="h-full w-[80vw] divide-y divide-gray-300 rounded-md dark:divide-gray-700">
           <ToolTopBar {...chatTopBarProps} isModal={true} />
           <ToolContent mode={mode} mappedRequest={mappedRequest} />
         </div>

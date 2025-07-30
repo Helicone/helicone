@@ -47,7 +47,7 @@ const RateLimitRulesView = (props: RateLimitRulesViewProps) => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<RateLimitRuleView | null>(
-    null
+    null,
   );
   const { setNotification } = useNotification();
   const queryClient = useQueryClient();
@@ -97,7 +97,7 @@ const RateLimitRulesView = (props: RateLimitRulesViewProps) => {
 
   // Helper function to determine segment priority level
   const getSegmentPriorityLevel = (
-    segment: string | undefined | null
+    segment: string | undefined | null,
   ): number => {
     if (segment && segment !== "user") {
       return 1; // Property
@@ -157,7 +157,7 @@ const RateLimitRulesView = (props: RateLimitRulesViewProps) => {
       await deleteRuleMutation.mutateAsync(ruleId);
       setNotification(
         `Successfully deleted rate limit rule "${ruleName}"`,
-        "success"
+        "success",
       );
     } catch (error) {
       // Log the actual error object for debugging
@@ -166,7 +166,7 @@ const RateLimitRulesView = (props: RateLimitRulesViewProps) => {
         `Failed to delete rule: ${
           error instanceof Error ? error.message : "Unknown error"
         }`,
-        "error"
+        "error",
       );
     }
   };
@@ -191,7 +191,7 @@ const RateLimitRulesView = (props: RateLimitRulesViewProps) => {
           !isError &&
           !apiError &&
           (!rules || rules.length === 0) && (
-            <div className="p-6 flex flex-col items-center justify-center gap-4 bg-muted dark:bg-muted/50">
+            <div className="flex flex-col items-center justify-center gap-4 bg-muted p-6 dark:bg-muted/50">
               <P className="text-center text-muted-foreground">
                 No rate limits defined yet. Create your first rate limit rule to
                 get started.
@@ -204,30 +204,30 @@ const RateLimitRulesView = (props: RateLimitRulesViewProps) => {
           !apiError &&
           sortedRules &&
           sortedRules.length > 0 && (
-            <div className="bg-card  shadow-sm overflow-hidden dark:border-slate-800">
+            <div className="overflow-hidden bg-card shadow-sm dark:border-slate-800">
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader className="bg-muted/30">
-                    <TableRow className="hover:bg-transparent border-b border-border dark:border-slate-800">
-                      <TableHead className="font-semibold text-sm py-2.5 px-4 border-r border-border">
+                    <TableRow className="border-b border-border hover:bg-transparent dark:border-slate-800">
+                      <TableHead className="border-r border-border px-4 py-2.5 text-sm font-semibold">
                         Name
                       </TableHead>
-                      <TableHead className="font-semibold text-sm py-2.5 px-4 border-r border-border">
+                      <TableHead className="border-r border-border px-4 py-2.5 text-sm font-semibold">
                         Quota
                       </TableHead>
-                      <TableHead className="font-semibold text-sm py-2.5 px-4 border-r border-border">
+                      <TableHead className="border-r border-border px-4 py-2.5 text-sm font-semibold">
                         Unit
                       </TableHead>
-                      <TableHead className="font-semibold text-sm py-2.5 px-4 border-r border-border">
+                      <TableHead className="border-r border-border px-4 py-2.5 text-sm font-semibold">
                         Window (sec)
                       </TableHead>
-                      <TableHead className="font-semibold text-sm py-2.5 px-4 border-r border-border">
+                      <TableHead className="border-r border-border px-4 py-2.5 text-sm font-semibold">
                         Applies To
                       </TableHead>
-                      <TableHead className="font-semibold text-sm py-2.5 px-4 border-r border-border">
+                      <TableHead className="border-r border-border px-4 py-2.5 text-sm font-semibold">
                         Created
                       </TableHead>
-                      <TableHead className="font-semibold text-sm py-2.5 px-4 last:border-r-0">
+                      <TableHead className="px-4 py-2.5 text-sm font-semibold last:border-r-0">
                         Actions
                       </TableHead>
                     </TableRow>
@@ -252,42 +252,42 @@ const RateLimitRulesView = (props: RateLimitRulesViewProps) => {
                           {rule.unit === "request"
                             ? "Requests"
                             : rule.unit === "cents"
-                            ? "Cents"
-                            : rule.unit}
+                              ? "Cents"
+                              : rule.unit}
                         </Badge>
                       );
 
                       return (
                         <TableRow
                           key={rule.id}
-                          className="hover:bg-muted/25 transition-colors border-b border-border/40 dark:border-slate-800/40 last:border-0"
+                          className="border-b border-border/40 transition-colors last:border-0 hover:bg-muted/25 dark:border-slate-800/40"
                         >
-                          <TableCell className="font-medium py-3 px-4">
+                          <TableCell className="px-4 py-3 font-medium">
                             {rule.name}
                           </TableCell>
-                          <TableCell className="py-3 px-4">
+                          <TableCell className="px-4 py-3">
                             {rule.quota.toLocaleString()}
                           </TableCell>
-                          <TableCell className="py-3 px-4">
+                          <TableCell className="px-4 py-3">
                             {unitElement}
                           </TableCell>
-                          <TableCell className="py-3 px-4">
+                          <TableCell className="px-4 py-3">
                             {rule.window_seconds.toLocaleString()}
                           </TableCell>
-                          <TableCell className="py-3 px-4">
+                          <TableCell className="px-4 py-3">
                             {appliesToElement}
                           </TableCell>
-                          <TableCell className="text-muted-foreground text-sm py-3 px-4">
+                          <TableCell className="px-4 py-3 text-sm text-muted-foreground">
                             {new Date(rule.created_at).toLocaleDateString(
                               "en-US",
                               {
                                 year: "numeric",
                                 month: "short",
                                 day: "numeric",
-                              }
+                              },
                             )}
                           </TableCell>
-                          <TableCell className="py-3 px-4">
+                          <TableCell className="px-4 py-3">
                             <div className="flex items-center gap-1">
                               <Button
                                 size="icon"
@@ -360,13 +360,13 @@ const RateLimitRulesView = (props: RateLimitRulesViewProps) => {
               </div>
             </div>
           )}
-        <div className="flex justify-end items-right pr-4">
+        <div className="items-right flex justify-end pr-4">
           <Button
             key="create-rate-limit-rule"
             onClick={() => setIsCreateModalOpen(true)}
             variant="action"
             size="sm"
-            className="gap-1 items-center"
+            className="items-center gap-1"
           >
             <PiPlusBold className="h-3.5 w-3.5" />
             Create Rule

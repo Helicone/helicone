@@ -10,6 +10,7 @@ CUSTOM_TAG=""
 TEST_MODE=false
 DONT_PRUNE=false
 SELECTED_IMAGES=()
+PLATFORMS="linux/amd64,linux/arm64"
 
 # Function to show usage
 show_usage() {
@@ -25,6 +26,7 @@ show_usage() {
   echo "  -c, --custom-tag    Custom tag suffix"
   echo "  -r, --region        AWS region (default: us-east-2, ECR mode only)"
   echo "  -i, --image         Select specific image to build (can be used multiple times)"
+  echo "  -p, --platforms     Target platforms (default: linux/amd64,linux/arm64)"
   echo "  -h, --help          Show this help message"
   echo ""
   echo "Examples:"
@@ -32,6 +34,8 @@ show_usage() {
   echo "  $0 --mode ecr --region us-west-2 --custom-tag hotfix"
   echo "  $0 --mode dockerhub --test"
   echo "  $0 --mode ecr --image web --image jawn"
+  echo "  $0 --mode dockerhub --platforms linux/amd64"
+  echo "  $0 --mode ecr --platforms linux/arm64,linux/amd64"
 }
 
 # Parse command line arguments
@@ -59,6 +63,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     -i|--image)
       SELECTED_IMAGES+=("$2")
+      shift 2
+      ;;
+    -p|--platforms)
+      PLATFORMS="$2"
       shift 2
       ;;
     -h|--help)
@@ -96,6 +104,23 @@ run_command() {
   fi
 }
 
+# Function to setup Docker buildx for multi-platform builds
+setup_buildx() {
+  echo "Setting up Docker buildx for multi-platform builds..."
+  
+  # Create a new builder instance if it doesn't exist
+  if ! docker buildx ls | grep -q "helicone-builder"; then
+    echo "Creating new buildx builder 'helicone-builder'..."
+    run_command docker buildx create --name helicone-builder --use
+  else
+    echo "Using existing buildx builder 'helicone-builder'..."
+    run_command docker buildx use helicone-builder
+  fi
+  
+  # Bootstrap the builder
+  run_command docker buildx inspect --bootstrap
+}
+
 # Function to create ECR repository if it doesn't exist (ECR mode only)
 create_ecr_repo() {
   local repo_name=$1
@@ -127,6 +152,9 @@ get_available_ecr_tag() {
   
   echo "$tag"
 }
+
+# Setup Docker buildx for multi-platform builds
+setup_buildx
 
 # Prune Docker images if not disabled
 if [ "$DONT_PRUNE" = false ]; then
@@ -220,19 +248,17 @@ if [ "$MODE" = "dockerhub" ]; then
       BUILD_CONTEXT="../aigateway"
     fi
 
-    # Build image
+    # Build and push multi-platform image
     FULL_IMAGE_TAG="$IMAGE_NAME:$tag"
-    echo "Building $FULL_IMAGE_TAG..."
-    run_command docker build --platform linux/amd64 -t "$FULL_IMAGE_TAG" -f "$DOCKERFILE_PATH" "$BUILD_CONTEXT"
-    
-    # Push version tag
-    echo "Pushing $FULL_IMAGE_TAG..."
-    run_command docker push "$FULL_IMAGE_TAG"
-    
-    # Tag and push latest
-    echo "Tagging and pushing latest..."
-    run_command docker tag "$FULL_IMAGE_TAG" "$IMAGE_NAME:latest"
-    run_command docker push "$IMAGE_NAME:latest"
+    LATEST_TAG="$IMAGE_NAME:latest"
+    echo "Building and pushing multi-platform image $FULL_IMAGE_TAG for platforms: $PLATFORMS"
+    run_command docker buildx build \
+      --platform "$PLATFORMS" \
+      -t "$FULL_IMAGE_TAG" \
+      -t "$LATEST_TAG" \
+      -f "$DOCKERFILE_PATH" \
+      --push \
+      "$BUILD_CONTEXT"
   done
 
 # ECR mode
@@ -313,20 +339,18 @@ elif [ "$MODE" = "ecr" ]; then
       BUILD_CONTEXT="../aigateway"
     fi
     
-    # Build image
+    # Build and push multi-platform image
     ECR_REPO="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME"
     FULL_IMAGE_TAG="$ECR_REPO:$tag"
-    echo "Building $FULL_IMAGE_TAG..."
-    run_command docker build --platform linux/amd64 -t "$FULL_IMAGE_TAG" -f "$DOCKERFILE_PATH" "$BUILD_CONTEXT"
-    
-    # Push version tag
-    echo "Pushing $FULL_IMAGE_TAG..."
-    run_command docker push "$FULL_IMAGE_TAG"
-    
-    # Tag and push latest
-    echo "Tagging and pushing latest..."
-    run_command docker tag "$FULL_IMAGE_TAG" "$ECR_REPO:latest"
-    run_command docker push "$ECR_REPO:latest"
+    LATEST_TAG="$ECR_REPO:latest"
+    echo "Building and pushing multi-platform image $FULL_IMAGE_TAG for platforms: $PLATFORMS"
+    run_command docker buildx build \
+      --platform "$PLATFORMS" \
+      -t "$FULL_IMAGE_TAG" \
+      -t "$LATEST_TAG" \
+      -f "$DOCKERFILE_PATH" \
+      --push \
+      "$BUILD_CONTEXT"
   done
 fi
 

@@ -2,14 +2,14 @@
 import {
   ArchiveIcon,
   BellIcon,
-  ChartLineIcon,
   DatabaseIcon,
-  FlaskConicalIcon,
   Home,
   ListTreeIcon,
   ScrollTextIcon,
+  ServerIcon,
   SheetIcon,
   ShieldCheckIcon,
+  ShuffleIcon,
   TagIcon,
   TestTube2,
   UsersIcon,
@@ -19,6 +19,8 @@ import { useRouter } from "next/router";
 import { useMemo } from "react";
 import DesktopSidebar from "./DesktopSidebar";
 import { ChangelogItem, NavigationItem } from "./types";
+import { useOrg } from "../org/organizationContext";
+import { useFeatureFlag } from "@/services/hooks/admin";
 
 interface SidebarProps {
   setOpen: (open: boolean) => void;
@@ -29,6 +31,11 @@ interface SidebarProps {
 const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
   const router = useRouter();
   const { pathname } = router;
+  const org = useOrg();
+  const { data: hasFeatureFlag } = useFeatureFlag(
+    "ai_gateway",
+    org?.currentOrg?.id ?? "",
+  );
 
   const NAVIGATION: NavigationItem[] = useMemo(
     () => [
@@ -85,18 +92,6 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
             current: pathname.includes("/prompts"),
           },
           {
-            name: "Experiments",
-            href: "/experiments",
-            icon: FlaskConicalIcon,
-            current: pathname.includes("/experiments"),
-          },
-          {
-            name: "Evaluators",
-            href: "/evaluators",
-            icon: ChartLineIcon,
-            current: pathname.includes("/evaluators"),
-          },
-          {
             name: "Datasets",
             href: "/datasets",
             icon: DatabaseIcon,
@@ -141,12 +136,22 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
             icon: Webhook,
             current: pathname.includes("/webhooks"),
           },
-          // {
-          //   name: "Providers",
-          //   href: "/providers",
-          //   icon: ServerIcon,
-          //   current: pathname.includes("/providers"),
-          // },
+          ...(hasFeatureFlag?.data
+            ? [
+                {
+                  name: "AI Gateway",
+                  href: "/gateway",
+                  icon: ShuffleIcon,
+                  current: pathname.includes("/gateway"),
+                },
+                {
+                  name: "Providers",
+                  href: "/providers",
+                  icon: ServerIcon,
+                  current: pathname.includes("/providers"),
+                },
+              ]
+            : []),
           // {
           //   name: "Vault",
           //   href: "/vault",
@@ -156,7 +161,7 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
         ],
       },
     ],
-    [pathname]
+    [pathname, hasFeatureFlag?.data],
   );
 
   return (

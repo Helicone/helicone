@@ -7,6 +7,14 @@ import { ModelRow } from "./interfaces/Cost";
 import { allCosts, defaultProvider, providers } from "./providers/mappings";
 import { COST_PRECISION_MULTIPLIER } from "./costCalc";
 
+export type { ModelRow } from "./interfaces/Cost";
+export { providers } from "./providers/mappings";
+
+export type ModelWithProvider = {
+  provider: string;
+  modelRow: ModelRow;
+}
+
 export function costOf({
   model,
   provider,
@@ -31,13 +39,7 @@ export function costOf({
     return null;
   }
 
-  // We need to concat allCosts because we need to check the provider costs first and if it is not founder then fall back to make the best guess.
-  // This is because we did not backfill the provider on db yet, and we do not plan to
-  // This is really for legacy
-  // TODO: after 07/2024 we can probably remove this
-  const costs = providerCost.costs.concat(allCosts);
-
-  const cost = costs.find((cost) => {
+  const cost = providerCost.costs.find((cost) => {
     const valueLower = cost.model.value.toLowerCase();
     if (cost.model.operator === "equals") {
       return valueLower === modelLower;
@@ -136,9 +138,7 @@ function caseForCost(
   useDefaultCost: boolean = false,
   optimized: boolean = false,
 ) {
-  return `
-  CASE
-  ${costs
+  const validCases = costs
     .map((cost) => {
       const costPerMultiple = {
         prompt: Math.round(cost.cost.prompt_token * multiple),
@@ -198,84 +198,81 @@ function caseForCost(
         costParts.push(`${costPerMultiple.per_call}`); // Assuming per_call cost is per call
       }
 
-      if (costParts.length > 0) {
-        const costString = costParts.join(" + ");
-        if (cost.model.operator === "equals") {
-          const op = optimized ? "=" : "ILIKE";
-          return `WHEN (${table}.model ${op} '${cost.model.value}') THEN ${costString}`;
-        } else if (cost.model.operator === "startsWith") {
-          return `WHEN (${table}.model LIKE '${cost.model.value}%') THEN ${costString}`;
-        } else if (cost.model.operator === "includes") {
-          return `WHEN (${table}.model ILIKE '%${cost.model.value}%') THEN ${costString}`;
-        } else {
-          throw new Error("Unknown operator");
-        }
+      const costString = costParts.length > 0 ? costParts.join(" + ") : "0";
+      
+      if (cost.model.operator === "equals") {
+        const op = optimized ? "=" : "ILIKE";
+        return `WHEN (${table}.model ${op} '${cost.model.value}') THEN ${costString}`;
+      } else if (cost.model.operator === "startsWith") {
+        return `WHEN (${table}.model LIKE '${cost.model.value}%') THEN ${costString}`;
+      } else if (cost.model.operator === "includes") {
+        return `WHEN (${table}.model ILIKE '%${cost.model.value}%') THEN ${costString}`;
       } else {
-        return ``; // Return empty string if no costs apply for this model
+        throw new Error("Unknown operator");
       }
-    })
-    .join("\n")}
+    });
+
+  return `
+  CASE
+  ${validCases.join("\n")}
   ELSE ${useDefaultCost ? `toInt64(${table}.cost)` : `toInt64(0)`}
 END
 `;
 }
 
+
+// Current only used for backfilling costs via admin.
+export function clickhouseModelFilter(
+  rows: ModelWithProvider[],
+  table = "request_response_rmt",
+) {
+  const uniqueProviders = Array.from(new Set(rows.map(row => row.provider)));
+  
+  return `
+  (
+    (${rows.map((row) => {
+      if (row.modelRow.model.operator === "equals") {
+        return `${table}.model = '${row.modelRow.model.value}'`
+      } else if (row.modelRow.model.operator === "startsWith") {
+        return `${table}.model LIKE '${row.modelRow.model.value}%'`
+      } else if (row.modelRow.model.operator === "includes") {
+        return `${table}.model ILIKE '%${row.modelRow.model.value}%'`
+      } else {
+        throw new Error("Unknown operator");
+      }
+    }).join(" OR ")})
+    AND
+    (${table}.provider IN (${uniqueProviders.map(provider => `'${provider}'`).join(",")}))
+  )
+  `
+}
+
 // Currently only used for backfilling costs via admin.
 // If not chunked, the query will be too large for Clickhouse.
 export function clickhousePriceCalcNonAggregated(
-  table: string,
-  inDollars: boolean = true,
-  chunkProviders: boolean = false,
-  totalChunks: number = 1,
-  chunk: number = 0,
-  useDefaultCost: boolean = true,
-  optimized: boolean = false,
+  models: ModelWithProvider[],
+  table = "request_response_rmt",
 ) {
-  const providersWithCosts = providers.filter(
-    (p) => p.costs && defaultProvider.provider !== p.provider
-  );
-  if (!defaultProvider.costs) {
-    throw new Error("Default provider does not have costs");
-  }
-
-  const cappedTotalChunks = Math.max(1, Math.min(totalChunks, providersWithCosts.length));
-  const cappedChunk = Math.min(chunk, cappedTotalChunks - 1);
-
-  let providersToProcess = providersWithCosts;
-  if (chunkProviders) {
-    const chunkSize = Math.ceil(providersWithCosts.length / cappedTotalChunks);
-    const start = cappedChunk * chunkSize;
-    const end = Math.min(start + chunkSize, providersWithCosts.length);
-    providersToProcess = providersWithCosts.slice(start, end);
-  }
-
-  if (providersToProcess.length === 0) {
-    return `
-  (
-  CASE
-    ${caseForCost(defaultProvider.costs, table, COST_PRECISION_MULTIPLIER, useDefaultCost, optimized)}
-  END
-  ) ${inDollars ? `/ ${COST_PRECISION_MULTIPLIER}` : ""}
-`;
-  }
+  const modelsByProvider = models.reduce((acc, model) => {
+    if (!acc[model.provider]) {
+      acc[model.provider] = [];
+    }
+    acc[model.provider].push(model.modelRow);
+    return acc;
+  }, {} as Record<string, ModelRow[]>);
 
   return `
   (
-  CASE
-  ${providersToProcess
-    .map((provider) => {
-      if (!provider.costs) {
-        throw new Error("Provider does not have costs");
-      }
-
-      return `WHEN (${table}.provider = '${
-        provider.provider
-      }') THEN (${caseForCost(provider.costs, table, COST_PRECISION_MULTIPLIER, useDefaultCost, optimized)})`;
-    })
-    .join("\n")}
-    ELSE ${caseForCost(defaultProvider.costs, table, COST_PRECISION_MULTIPLIER, useDefaultCost, optimized)}
-  END
-  ) ${inDollars ? `/ ${COST_PRECISION_MULTIPLIER}` : ""}
+    CASE
+    ${Object.entries(modelsByProvider)
+      .map(([provider, modelRows]) => {
+        return `WHEN (${table}.provider = '${provider}') 
+      THEN (${caseForCost(modelRows, table, COST_PRECISION_MULTIPLIER)})`;
+      })
+      .join("\n    ")}
+    ELSE 0
+    END
+  )
 `;
 }
 

@@ -61,7 +61,7 @@ const SignUp = () => {
           if (error) {
             setNotification(
               "Error creating your account. Please try again.",
-              "error"
+              "error",
             );
             console.error(error);
             return;
@@ -79,7 +79,7 @@ const SignUp = () => {
           if (error) {
             setNotification(
               "Error creating your account. Please try again.",
-              "error"
+              "error",
             );
             console.error(error);
             return;
@@ -95,7 +95,7 @@ const SignUp = () => {
           if (error) {
             setNotification(
               "Error creating your account. Please try again.",
-              "error"
+              "error",
             );
             console.error(error);
             return;
@@ -107,7 +107,7 @@ const SignUp = () => {
         open={showEmailConfirmation}
         setOpen={setShowEmailConfirmation}
       >
-        <div className="flex flex-col space-y-4 w-full min-w-[300px] justify-center text-center items-center p-2">
+        <div className="flex w-full min-w-[300px] flex-col items-center justify-center space-y-4 p-2 text-center">
           <h1 className="text-2xl font-semibold text-gray-900">
             Confirm your email
           </h1>
@@ -126,7 +126,7 @@ const SignUp = () => {
 export default SignUp;
 
 export const getServerSideProps = async (
-  context: GetServerSidePropsContext
+  context: GetServerSidePropsContext,
 ) => {
   if (env("NEXT_PUBLIC_IS_ON_PREM") === "true") {
     return {

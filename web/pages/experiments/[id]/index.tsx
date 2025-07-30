@@ -18,7 +18,7 @@ ExperimentId.getLayout = function getLayout(page: ReactElement) {
 };
 
 export const getServerSideProps = async (
-  context: GetServerSidePropsContext
+  context: GetServerSidePropsContext,
 ) => {
   const { id } = context.params ?? {};
   return {

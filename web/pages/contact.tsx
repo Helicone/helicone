@@ -23,33 +23,33 @@ const Contact = () => {
       }
       ogImageUrl={"https://www.helicone.ai/static/helicone-og.webp"}
     >
-      <div className="w-full bg-gray-50 h-full antialiased">
+      <div className="h-full w-full bg-gray-50 antialiased">
         <NavBarV2 />
         <div className="h-full">
-          <div className="flex flex-col mx-auto w-full gap-8 max-w-5xl p-4 md:px-8 pb-24 pt-10 sm:pb-32 lg:flex lg:py-24 antialiased">
-            <div className="flex flex-col w-2/3">
-              <h1 className="text-2xl sm:text-4xl font-semibold leading-tight sm:leading-snug max-w-4xl">
+          <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 p-4 pb-24 pt-10 antialiased sm:pb-32 md:px-8 lg:flex lg:py-24">
+            <div className="flex w-2/3 flex-col">
+              <h1 className="max-w-4xl text-2xl font-semibold leading-tight sm:text-4xl sm:leading-snug">
                 Contact Us
               </h1>
 
-              <ul className="py-8 flex flex-col space-y-4">
+              <ul className="flex flex-col space-y-4 py-8">
                 {bullets.map((bullet, idx) => (
                   <li
-                    className="flex items-center text-gray-700 gap-2 text-sm sm:text-md"
+                    className="sm:text-md flex items-center gap-2 text-sm text-gray-700"
                     key={idx}
                   >
-                    <CheckCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 text-sky-500" />
+                    <CheckCircleIcon className="h-4 w-4 text-sky-500 sm:h-5 sm:w-5" />
                     {bullet}
                   </li>
                 ))}
               </ul>
 
-              <p className="text-black text-sm mt-4">
+              <p className="mt-4 text-sm text-black">
                 Want to chat with the founders?
               </p>
               <Link
                 href={"https://cal.com/team/helicone/helicone-discovery"}
-                className="text-gray-500 hover:text-black flex flex-row items-center gap-1 text-sm mt-2 w-fit"
+                className="mt-2 flex w-fit flex-row items-center gap-1 text-sm text-gray-500 hover:text-black"
                 target="_blank"
                 rel="noopener noreferrer"
               >

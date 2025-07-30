@@ -74,7 +74,7 @@ const topRequestsColumns: ColumnDef<CacheRequest>[] = [
     accessorKey: "prompt",
     header: "Request",
     cell: (info) => (
-      <div className="max-w-[300px] truncate text-gray-900 dark:text-gray-100 font-medium">
+      <div className="max-w-[300px] truncate font-medium text-gray-900 dark:text-gray-100">
         {info.getValue() as string}
       </div>
     ),
@@ -129,7 +129,7 @@ const CachePage = (props: CachePageProps) => {
       start: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * timePeriod),
       end: new Date(),
     }),
-    [timePeriod]
+    [timePeriod],
   );
 
   const { store: filterStore, helpers } = useFilterAST();
@@ -178,12 +178,12 @@ const CachePage = (props: CachePageProps) => {
         prompt: request.prompt,
         model: request.model,
         response: request.response,
-      })
+      }),
     );
   }, [chMetrics.topRequests.data?.data]);
 
   const [activeColumns, setActiveColumns] = useState(
-    columnDefsToDragColumnItems(topRequestsColumns)
+    columnDefsToDragColumnItems(topRequestsColumns),
   );
 
   const cacheHitRate = useMemo(() => {
@@ -213,8 +213,8 @@ const CachePage = (props: CachePageProps) => {
 
   if (hasCache === false) {
     return (
-      <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">
-        <div className="flex flex-1 h-full">
+      <div className="flex h-screen w-full flex-col bg-background dark:bg-sidebar-background">
+        <div className="flex h-full flex-1">
           <EmptyStateCard feature="cache" />
         </div>
       </div>
@@ -269,7 +269,7 @@ const CachePage = (props: CachePageProps) => {
               value={timePeriod.toString()}
               onValueChange={(value) => setTimePeriod(Number(value))}
             >
-              <SelectTrigger className="w-[160px] h-8 shadow-sm">
+              <SelectTrigger className="h-8 w-[160px] shadow-sm">
                 <SelectValue placeholder="Select time period" />
               </SelectTrigger>
               <SelectContent>
@@ -287,7 +287,7 @@ const CachePage = (props: CachePageProps) => {
               href="https://docs.helicone.ai/features/advanced-usage/caching"
               target="_blank"
               rel="noreferrer noopener"
-              className="h-8 bg-muted rounded-lg border border-border p-2 flex items-center gap-2 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-900"
+              className="flex h-8 items-center gap-2 rounded-lg border border-border bg-muted p-2 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-900"
             >
               <BookOpenIcon className="h-4 w-4" />
             </Link>
@@ -296,27 +296,27 @@ const CachePage = (props: CachePageProps) => {
       />
 
       <section className="w-full px-4 pt-2">
-        <div className="w-full border border-orange-300 dark:border-orange-700 bg-orange-50 dark:bg-orange-950 p-4 text-sm rounded-lg text-orange-800 dark:text-orange-200">
+        <div className="w-full rounded-lg border border-orange-300 bg-orange-50 p-4 text-sm text-orange-800 dark:border-orange-700 dark:bg-orange-950 dark:text-orange-200">
           We reworked our caching system on May 22nd, 2025 at 4:30PM PST. Reach
           out to us to restore any cache data prior to the change.
         </div>
       </section>
 
-      <section className={`dark:border-border w-full px-4 pb-2`}>
+      <section className={`w-full px-4 pb-2 dark:border-border`}>
         <div className="py-4">
-          <h2 className="text-lg font-semibold text-foreground mb-4">
+          <h2 className="mb-4 text-lg font-semibold text-foreground">
             Overview
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
             {/* Total Cache Hits */}
-            <div className="bg-card border border-border rounded-lg p-4 flex flex-row items-center gap-4">
+            <div className="flex flex-row items-center gap-4 rounded-lg border border-border bg-card p-4">
               <CircleStackIcon className="h-6 w-6 text-sky-500" />
               <div className="flex flex-col">
                 <div className="text-sm text-muted-foreground">
                   Total Cache Hits
                 </div>
                 {loadingStates.totalCacheHits ? (
-                  <div className="animate-pulse h-7 w-16 bg-muted rounded" />
+                  <div className="h-7 w-16 animate-pulse rounded bg-muted" />
                 ) : (
                   <div className="text-xl font-semibold text-foreground">
                     {`${chMetrics.totalCacheHits.data?.data ?? 0} hits`}
@@ -325,14 +325,14 @@ const CachePage = (props: CachePageProps) => {
               </div>
             </div>
 
-            <div className="bg-card border border-border rounded-lg p-4 flex flex-row items-center gap-4">
+            <div className="flex flex-row items-center gap-4 rounded-lg border border-border bg-card p-4">
               <BanknotesIcon className="h-6 w-6 text-sky-500" />
               <div className="flex flex-col">
                 <div className="text-sm text-muted-foreground">
                   Total Cost Savings
                 </div>
                 {loadingStates.totalSavings ? (
-                  <div className="animate-pulse h-7 w-16 bg-muted rounded" />
+                  <div className="h-7 w-16 animate-pulse rounded bg-muted" />
                 ) : (
                   <div className="text-xl font-semibold text-foreground">
                     ${formatNumber(chMetrics.totalSavings.data?.data ?? 0, 3)}
@@ -341,14 +341,14 @@ const CachePage = (props: CachePageProps) => {
               </div>
             </div>
 
-            <div className="bg-card border border-border rounded-lg p-4 flex flex-row items-center gap-4">
+            <div className="flex flex-row items-center gap-4 rounded-lg border border-border bg-card p-4">
               <ClockIcon className="h-6 w-6 text-sky-500" />
               <div className="flex flex-col">
                 <div className="text-sm text-muted-foreground">
                   Total Time Saved
                 </div>
                 {loadingStates.timeSaved ? (
-                  <div className="animate-pulse h-7 w-16 bg-muted rounded" />
+                  <div className="h-7 w-16 animate-pulse rounded bg-muted" />
                 ) : (
                   <div className="text-xl font-semibold text-foreground">
                     {formatTimeSaved(chMetrics.timeSaved.data?.data ?? 0)}
@@ -357,14 +357,14 @@ const CachePage = (props: CachePageProps) => {
               </div>
             </div>
 
-            <div className="bg-card border border-border rounded-lg p-4 flex flex-row items-center gap-4">
+            <div className="flex flex-row items-center gap-4 rounded-lg border border-border bg-card p-4">
               <CircleStackIcon className="h-6 w-6 text-sky-500" />
               <div className="flex flex-col">
                 <div className="text-sm text-muted-foreground">
                   Cache Hit Rate
                 </div>
                 {loadingStates.totalCacheHits || loadingStates.totalRequests ? (
-                  <div className="animate-pulse h-7 w-16 bg-muted rounded" />
+                  <div className="h-7 w-16 animate-pulse rounded bg-muted" />
                 ) : (
                   <div
                     className={`text-xl font-semibold ${
@@ -377,14 +377,14 @@ const CachePage = (props: CachePageProps) => {
               </div>
             </div>
 
-            <div className="bg-card border border-border rounded-lg p-4 flex flex-row items-center gap-4">
+            <div className="flex flex-row items-center gap-4 rounded-lg border border-border bg-card p-4">
               <ClockIcon className="h-6 w-6 text-sky-500" />
               <div className="flex flex-col">
                 <div className="text-sm text-muted-foreground">
                   Time Saved per Hit
                 </div>
                 {loadingStates.avgLatency || loadingStates.avgLatencyCached ? (
-                  <div className="animate-pulse h-7 w-16 bg-muted rounded" />
+                  <div className="h-7 w-16 animate-pulse rounded bg-muted" />
                 ) : (
                   <div className="text-xl font-semibold text-green-600">
                     {/* Calculate time saved per hit: 709ms - 42ms = 667ms */}
@@ -398,14 +398,14 @@ const CachePage = (props: CachePageProps) => {
       </section>
 
       <section
-        className={`dark:border-border w-full border-t px-4 py-2 bg-white`}
+        className={`w-full border-t bg-white px-4 py-2 dark:border-border`}
       >
         <div className="py-4">
-          <h2 className="text-lg font-semibold text-foreground mb-4">{`Cache Hits (Last ${timePeriod} days)`}</h2>
-          <div className="h-72 px-4 ">
+          <h2 className="mb-4 text-lg font-semibold text-foreground">{`Cache Hits (Last ${timePeriod} days)`}</h2>
+          <div className="h-72 px-4">
             {loadingStates.cacheHits ? (
-              <div className="h-full w-full flex-col flex p-8">
-                <div className="h-full w-full rounded-lg bg-gray-300 dark:bg-gray-700 animate-pulse" />
+              <div className="flex h-full w-full flex-col p-8">
+                <div className="h-full w-full animate-pulse rounded-lg bg-gray-300 dark:bg-gray-700" />
               </div>
             ) : (
               <div className="h-full w-full">
@@ -413,7 +413,7 @@ const CachePage = (props: CachePageProps) => {
                   data={chartData}
                   categories={["count"]}
                   index={"date"}
-                  className="h-full -ml-4 pt-4"
+                  className="-ml-4 h-full pt-4"
                   colors={["blue"]}
                   showLegend={false}
                 />
@@ -423,19 +423,19 @@ const CachePage = (props: CachePageProps) => {
         </div>
       </section>
 
-      <section className={`dark:border-border w-full border-t py-2`}>
+      <section className={`w-full border-t py-2 dark:border-border`}>
         <div className="py-4">
-          <div className="flex flex-row items-center justify-between px-4 mb-4">
+          <div className="mb-4 flex flex-row items-center justify-between px-4">
             <h2 className="text-lg font-semibold text-foreground">
               Top Requests
             </h2>
             <button
-              className="px-3 py-1.5 text-sm border border-border rounded-lg hover:bg-muted"
+              className="rounded-lg border border-border px-3 py-1.5 text-sm hover:bg-muted"
               onClick={() => {
                 filterStore.setFilter(
                   FilterAST.and(
-                    FilterAST.condition("cache_enabled", "is", true)
-                  )
+                    FilterAST.condition("cache_enabled", "is", true),
+                  ),
                 );
                 filterStore.setActiveFilterName("Cache Enabled Requests");
                 router.push("/requests");
@@ -457,7 +457,7 @@ const CachePage = (props: CachePageProps) => {
               onRowSelect={(row) => {
                 const sourceRequest =
                   chMetrics.topSourceRequestsWithBodies.requests.requests.find(
-                    (req: any) => req.request_id === row.request_id
+                    (req: any) => req.request_id === row.request_id,
                   );
 
                 if (sourceRequest) {
@@ -480,11 +480,11 @@ const CachePage = (props: CachePageProps) => {
       <ThemedDrawer open={open} setOpen={setOpen}>
         {selectedRequest ? (
           <div className="flex flex-col space-y-2">
-            <p className="text-gray-500 text-sm border p-2 rounded-lg border-red-300 dark:border-red-700">
+            <p className="rounded-lg border border-red-300 p-2 text-sm text-gray-500 dark:border-red-700">
               Cache Bucket response configurable soon...
             </p>
             <dl className="mt-2 grid grid-cols-2">
-              <div className="col-span-2 flex flex-row justify-between py-2 items-center text-sm font-medium border-b border-gray-200 dark:border-gray-800">
+              <div className="col-span-2 flex flex-row items-center justify-between border-b border-gray-200 py-2 text-sm font-medium dark:border-gray-800">
                 <div className="flex flex-col">
                   <dt className="text-gray-500">Request ID</dt>
                   <dd className="text-gray-900 dark:text-gray-100">
@@ -492,25 +492,25 @@ const CachePage = (props: CachePageProps) => {
                   </dd>
                 </div>
               </div>
-              <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200 dark:border-gray-800">
+              <div className="col-span-1 flex flex-col justify-between border-b border-gray-200 py-2 text-sm font-medium dark:border-gray-800">
                 <dt className="text-gray-500">Model</dt>
                 <dd className="text-gray-900 dark:text-gray-100">
                   <ModelPill model={selectedRequest.model} />
                 </dd>
               </div>
-              <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200 dark:border-gray-800">
+              <div className="col-span-1 flex flex-col justify-between border-b border-gray-200 py-2 text-sm font-medium dark:border-gray-800">
                 <dt className="text-gray-500">Cache Hits</dt>
                 <dd className="text-gray-900 dark:text-gray-100">
                   {selectedRequest.count}
                 </dd>
               </div>
-              <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200 dark:border-gray-800">
+              <div className="col-span-1 flex flex-col justify-between border-b border-gray-200 py-2 text-sm font-medium dark:border-gray-800">
                 <dt className="text-gray-500">First Used</dt>
                 <dd className="text-gray-900 dark:text-gray-100">
                   {new Date(selectedRequest?.first_used || "").toLocaleString()}
                 </dd>
               </div>
-              <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200 dark:border-gray-800">
+              <div className="col-span-1 flex flex-col justify-between border-b border-gray-200 py-2 text-sm font-medium dark:border-gray-800">
                 <dt className="text-gray-500">Last Used</dt>
                 <dd className="text-gray-900 dark:text-gray-100">
                   {new Date(selectedRequest?.last_used || "").toLocaleString()}
@@ -518,7 +518,7 @@ const CachePage = (props: CachePageProps) => {
               </div>
             </dl>
 
-            <div className="flex-1 min-h-0">
+            <div className="min-h-0 flex-1">
               <RenderHeliconeRequest
                 heliconeRequest={selectedRequest.sourceRequest}
               />
@@ -526,7 +526,7 @@ const CachePage = (props: CachePageProps) => {
           </div>
         ) : (
           <div className="flex flex-col space-y-2">
-            <p className="text-gray-500 text-sm">No request data available</p>
+            <p className="text-sm text-gray-500">No request data available</p>
           </div>
         )}
       </ThemedDrawer>

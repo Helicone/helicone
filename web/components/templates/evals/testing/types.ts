@@ -10,7 +10,7 @@ import {
 } from "@/components/templates/evals/testing/examples";
 
 export type TestFunction = (
-  testInputs: TestInput
+  testInputs: TestInput,
 ) => Promise<EvaluatorTestResult>;
 
 export type TestConfig =

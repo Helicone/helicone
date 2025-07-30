@@ -16,7 +16,7 @@ export async function getTotalCost(
     start: Date;
     end: Date;
   },
-  org_id: string
+  org_id: string,
 ): Promise<
   Result<
     {
@@ -35,7 +35,7 @@ export async function getTotalCost(
         operator: "and",
       },
       argsAcc: [],
-    }
+    },
   );
   const query = `
 

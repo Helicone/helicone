@@ -26,7 +26,7 @@ const useRequestsPageV2 = (
   sortLeaf: SortLeafRequest,
   isCached: boolean,
   isLive: boolean,
-  rateLimited?: boolean
+  rateLimited?: boolean,
 ) => {
   const filterStore = useFilterAST();
   const [timeFilter] = useState<TimeFilter>({
@@ -44,12 +44,12 @@ const useRequestsPageV2 = (
   const { models, isLoading: isModelsLoading } = useModels(timeFilter, 50);
 
   const filterMap = (REQUEST_TABLE_FILTERS as SingleFilterDef<any>[]).concat(
-    Array.isArray(propertyFilters) ? propertyFilters : []
+    Array.isArray(propertyFilters) ? propertyFilters : [],
   );
 
   // replace the model filter inside of the filterMap with the text suggestion model
   const modelFilterIdx = filterMap.findIndex(
-    (filter) => filter.label === "Model"
+    (filter) => filter.label === "Model",
   );
   if (modelFilterIdx !== -1) {
     filterMap[modelFilterIdx] = {
@@ -59,12 +59,12 @@ const useRequestsPageV2 = (
           new Set(
             models?.data
               ?.filter((model) => model.model)
-              .map((model) => model.model)
-          )
+              .map((model) => model.model),
+          ),
         ).map((modelName) => ({
           key: modelName,
           param: modelName,
-        })) || []
+        })) || [],
       ),
       table: "request_response_rmt",
       column: "model",
@@ -73,7 +73,7 @@ const useRequestsPageV2 = (
   }
 
   const rateLimitFilterMapIndex = filterMap.findIndex(
-    (filter: any) => filter.label?.trim() === "Helicone-Rate-Limit-Status"
+    (filter: any) => filter.label?.trim() === "Helicone-Rate-Limit-Status",
   );
 
   let rateLimitFilterNode: FilterNode = "all";
@@ -114,7 +114,7 @@ const useRequestsPageV2 = (
     filter,
     sortLeaf,
     isCached,
-    isLive
+    isLive,
   );
 
   const isDataLoading = requests.isLoading || isPropertiesLoading;

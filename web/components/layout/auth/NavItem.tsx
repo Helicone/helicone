@@ -51,14 +51,14 @@ const NavItem: React.FC<NavItemProps> = ({
                 size: "icon",
               }),
               "h-9 w-9",
-              link.current && "bg-accent hover:bg-accent"
+              link.current && "bg-accent hover:bg-accent",
             )}
           >
             {link.icon && (
               <link.icon
                 className={cn(
                   "h-4 w-4 text-slate-500",
-                  link.current && "text-slate-800 dark:text-slate-200"
+                  link.current && "text-slate-800 dark:text-slate-200",
                 )}
               />
             )}
@@ -85,18 +85,18 @@ const NavItem: React.FC<NavItemProps> = ({
         onClick={hasSubItems ? () => toggleExpand(link.name) : onClick}
         className={cn(
           hasSubItems
-            ? "flex items-center gap-0.5 text-slate-400 text-xs mt-[14px] text-[11px] font-normal pl-2"
+            ? "mt-[14px] flex items-center gap-0.5 pl-2 text-[11px] text-xs font-normal text-slate-400"
             : cn(
                 buttonVariants({
                   variant: link.current ? "secondary" : "ghost",
                   size: "xs",
                 }),
                 deep && deep > 1 ? "h-6" : "h-8",
-                "justify-start w-full font-normal",
-                "text-sm  text-[12px] text-slate-500",
-                link.current && "text-slate-800 dark:text-slate-200"
+                "w-full justify-start font-normal",
+                "text-[12px] text-slate-500",
+                link.current && "text-slate-800 dark:text-slate-200",
               ),
-          ""
+          "",
         )}
       >
         <div className="flex items-center">
@@ -104,13 +104,13 @@ const NavItem: React.FC<NavItemProps> = ({
             <link.icon
               className={cn(
                 "mr-2 h-3.5 w-3.5 text-slate-500",
-                link.current && "text-slate-800 dark:text-slate-200"
+                link.current && "text-slate-800 dark:text-slate-200",
               )}
             />
           )}
           {link.name}
           {link.isNew && (
-            <div className="uppercase text-[9px] font-semibold border bg-gradient-to-r from-sky-400 via-heliblue to-sky-400 border-sky-500 px-1.5 rounded-full text-white ml-2 animate-shine bg-[length:200%_100%]">
+            <div className="ml-2 animate-shine rounded-full border border-sky-500 bg-gradient-to-r from-sky-400 via-heliblue to-sky-400 bg-[length:200%_100%] px-1.5 text-[9px] font-semibold uppercase text-white">
               New
             </div>
           )}
@@ -118,8 +118,8 @@ const NavItem: React.FC<NavItemProps> = ({
         {hasSubItems && (
           <ChevronDownIcon
             className={cn(
-              "h-3 w-3 transition-transform text-slate-400",
-              !expandedItems.includes(link.name) && "-rotate-90"
+              "h-3 w-3 text-slate-400 transition-transform",
+              !expandedItems.includes(link.name) && "-rotate-90",
             )}
           />
         )}

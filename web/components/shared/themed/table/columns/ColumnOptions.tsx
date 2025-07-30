@@ -23,13 +23,13 @@ export default function ColumnOptions<T>({
   setActiveColumns,
 }: ColumnOptionsProps<T>) {
   return (
-    <Col className="h-full flex flex-col">
+    <Col className="flex h-full flex-col">
       <ColumnSelectButton
         categories={categories}
         currentView={selectedCategory as ColumnViewOptions}
         onViewChange={setSelectedCategory}
       />
-      <Col className="flex-grow overflow-y-auto mt-2">
+      <Col className="mt-2 flex-grow overflow-y-auto">
         {categories
           .filter((category) => category !== "All columns")
           .filter((category) => {
@@ -39,8 +39,8 @@ export default function ColumnOptions<T>({
             return category === selectedCategory;
           })
           .map((category, idx) => (
-            <Col key={`${category}-${idx}`} className="gap-2 mb-4">
-              <p className="text-xs text-slate-500 font-medium">
+            <Col key={`${category}-${idx}`} className="mb-4 gap-2">
+              <p className="text-xs font-medium text-slate-500">
                 {category === "Default" ? "All columns" : category}
               </p>
               <ul className="flex flex-wrap gap-2">
@@ -67,7 +67,7 @@ export default function ColumnOptions<T>({
                                     c.shown = !c.shown;
                                   }
                                   return c;
-                                })
+                                }),
                               );
                             } else {
                               setActiveColumns([
@@ -78,9 +78,9 @@ export default function ColumnOptions<T>({
                           }}
                           className={clsx(
                             activeColumns.find((c) => c.id === column.id)?.shown
-                              ? "bg-sky-100 border-[#73ACCF] dark:bg-sky-900 text-sky-700 font-medium hover:text-sky-900 dark:hover:text-sky-100 dark:text-sky-300"
-                              : "bg-white dark:bg-black text-slate-500 hover:bg-sky-50 dark:hover:bg-sky-900 hover:text-sky-900 dark:hover:text-sky-100",
-                            "text-xs border border-slate-300 dark:border-slate-700 w-fit px-2 py-1 rounded-md whitespace-pre-wrap text-left flex flex-row items-center space-x-2"
+                              ? "border-[#73ACCF] bg-sky-100 font-medium text-sky-700 hover:text-sky-900 dark:bg-sky-900 dark:text-sky-300 dark:hover:text-sky-100"
+                              : "bg-white text-slate-500 hover:bg-sky-50 hover:text-sky-900 dark:bg-black dark:hover:bg-sky-900 dark:hover:text-sky-100",
+                            "flex w-fit flex-row items-center space-x-2 whitespace-pre-wrap rounded-md border border-slate-300 px-2 py-1 text-left text-xs dark:border-slate-700",
                           )}
                         >
                           {header}{" "}

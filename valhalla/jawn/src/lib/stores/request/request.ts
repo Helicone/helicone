@@ -193,7 +193,11 @@ export async function getRequestsClickhouseNoSort(
       target_url,
       cache_reference_id,
       cache_enabled,
+      gateway_router_id,
+      gateway_deployment_target,
       cost / ${COST_PRECISION_MULTIPLIER} as cost,
+      prompt_id,
+      prompt_version,
       updated_at
     FROM request_response_rmt
     WHERE (
@@ -270,7 +274,11 @@ export async function getRequestsClickhouse(
       target_url,
       cache_reference_id,
       cache_enabled,
+      gateway_router_id,
+      gateway_deployment_target,
       cost / ${COST_PRECISION_MULTIPLIER} as cost,
+      prompt_id,
+      prompt_version,
       updated_at
     FROM request_response_rmt
     WHERE (
@@ -318,7 +326,8 @@ async function mapLLMCalls(
             orgId,
             heliconeRequest.cache_reference_id === DEFAULT_UUID
               ? heliconeRequest.request_id
-              : heliconeRequest.cache_reference_id ?? heliconeRequest.request_id
+              : (heliconeRequest.cache_reference_id ??
+                  heliconeRequest.request_id)
           );
 
         if (signedBodyUrlErr || !signedBodyUrl) {

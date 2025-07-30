@@ -12,14 +12,18 @@ export class PosthogClient {
   public async captureEvent(
     event: string,
     properties: Record<string, any>,
-    distinctId: string = crypto.randomUUID()
+    distinctId?: string
   ): Promise<void> {
+    // Use userId from properties if available, otherwise fallback to random UUID
+    const finalDistinctId = distinctId || 
+      (properties.userId && properties.userId.trim() !== "" ? properties.userId : crypto.randomUUID());
+
     const url = `${this.posthogHost}/capture/`;
     const body = JSON.stringify({
       api_key: this.apiKey,
       event: event,
       properties: properties,
-      distinct_id: distinctId,
+      distinct_id: finalDistinctId,
     });
 
     try {

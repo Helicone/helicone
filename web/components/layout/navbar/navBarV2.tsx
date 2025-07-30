@@ -19,10 +19,10 @@ const NavBarV2 = (props: NavBarV2Props) => {
   const heliconeAuthClient = useHeliconeAuthClient();
 
   return (
-    <header className="bg-inherit dark:bg-black top-0 sticky z-30 border-b border-gray-200 dark:border-gray-700 px-4">
+    <header className="sticky top-0 z-30 border-b border-gray-200 bg-inherit px-4 dark:border-gray-700 dark:bg-black">
       {!mobileMenuOpen && (
         <nav
-          className="mx-auto flex max-w-6xl items-center md:gap-x-8 gap-x-16 py-3"
+          className="mx-auto flex max-w-6xl items-center gap-x-16 py-3 md:gap-x-8"
           aria-label="Global"
         >
           <div className="flex items-center">
@@ -46,41 +46,41 @@ const NavBarV2 = (props: NavBarV2Props) => {
               />
             </Link>
           </div>
-          <div className="hidden md:flex gap-x-1 lg:gap-x-2 items-center text-sm">
+          <div className="hidden items-center gap-x-1 text-sm md:flex lg:gap-x-2">
             <SolutionsButton />
 
             <Link
               href="https://docs.helicone.ai/"
-              className="flex flex-row items-center font-medium hover:text-black dark:hover:text-white rounded-md px-3 py-1.5 focus:outline-none text-gray-700 dark:text-gray-300"
+              className="flex flex-row items-center rounded-md px-3 py-1.5 font-medium text-gray-700 hover:text-black focus:outline-none dark:text-gray-300 dark:hover:text-white"
             >
               Docs
             </Link>
             <Link
               href="https://helicone.ai/pricing"
-              className="flex flex-row items-center font-medium hover:text-black dark:hover:text-white rounded-md px-3 py-1.5 focus:outline-none text-gray-700 dark:text-gray-300"
+              className="flex flex-row items-center rounded-md px-3 py-1.5 font-medium text-gray-700 hover:text-black focus:outline-none dark:text-gray-300 dark:hover:text-white"
             >
               Pricing
             </Link>
             <Link
               href="/blog"
               rel="noopener noreferrer"
-              className="flex flex-row items-center font-medium hover:text-black dark:hover:text-white rounded-md px-3 py-1.5 focus:outline-none text-gray-700 dark:text-gray-300"
+              className="flex flex-row items-center rounded-md px-3 py-1.5 font-medium text-gray-700 hover:text-black focus:outline-none dark:text-gray-300 dark:hover:text-white"
             >
               Blog
             </Link>
             <Link
               href="/contact"
-              className="flex flex-row items-center font-medium hover:text-black dark:hover:text-white rounded-md px-3 py-1.5 focus:outline-none text-gray-700 dark:text-gray-300"
+              className="flex flex-row items-center rounded-md px-3 py-1.5 font-medium text-gray-700 hover:text-black focus:outline-none dark:text-gray-300 dark:hover:text-white"
             >
               Contact
             </Link>
           </div>
-          <div className="flex-1 hidden md:flex items-center justify-end gap-x-2">
+          <div className="hidden flex-1 items-center justify-end gap-x-2 md:flex">
             {heliconeAuthClient.user ? (
               <>
                 <Link
                   href="/dashboard"
-                  className="bg-sky-500 hover:bg-sky-600 border-2 border-sky-700 whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                  className="whitespace-nowrap rounded-md border-2 border-sky-700 bg-sky-500 px-4 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-sky-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
                 >
                   Dashboard
                 </Link>
@@ -90,7 +90,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
                     await heliconeAuthClient.signOut();
                     router.push("/");
                   }}
-                  className="bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 ease-in-out duration-500 text-black dark:text-white border-[3px] border-gray-300 dark:border-gray-600 text-sm rounded-lg px-4 py-1.5 font-bold shadow-lg flex w-fit items-center gap-1"
+                  className="flex w-fit items-center gap-1 rounded-lg border-[3px] border-gray-300 bg-white px-4 py-1.5 text-sm font-bold text-black shadow-lg duration-500 ease-in-out hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
                 >
                   Sign Out
                 </button>
@@ -99,13 +99,13 @@ const NavBarV2 = (props: NavBarV2Props) => {
               <>
                 <Link
                   href="/signin"
-                  className="bg-[#f8feff] dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-semibold text-black dark:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                  className="whitespace-nowrap rounded-md bg-[#f8feff] px-4 py-1.5 text-sm font-semibold text-black hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/signup"
-                  className="bg-sky-500 hover:bg-sky-600 border-2 border-sky-700 whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                  className="whitespace-nowrap rounded-md border-2 border-sky-700 bg-sky-500 px-4 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-sky-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
                 >
                   Sign up for free
                 </Link>
@@ -143,10 +143,10 @@ const NavBarV2 = (props: NavBarV2Props) => {
         onClose={setMobileMenuOpen}
       >
         <div className="fixed inset-0 z-10" />
-        <Dialog.Panel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-gray-50 dark:bg-gray-900 px-6 py-6 sm:ring-1 sm:ring-gray-900/10">
-          <div className="flex flex-col gap-10 h-full">
+        <Dialog.Panel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-gray-50 px-6 py-6 dark:bg-gray-900 sm:ring-1 sm:ring-gray-900/10">
+          <div className="flex h-full flex-col gap-10">
             <div>
-              <div className="flex items-center gap-x-6 justify-between">
+              <div className="flex items-center justify-between gap-x-6">
                 <a href="#" className="-m-1.5 p-1.5">
                   <span className="sr-only">Helicone</span>
                   <Image
@@ -169,7 +169,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
               </div>
               <div className="mt-6 flow-root">
                 <div className="-my-6">
-                  <div className="py-6 flex flex-col space-y-8">
+                  <div className="flex flex-col space-y-8 py-6">
                     <Link
                       href="https://helicone.ai/pricing"
                       className="text-md font-semibold text-gray-900 dark:text-gray-300"
@@ -206,7 +206,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
                       Blog
                     </Link>
                   </div>
-                  <div className="pt-16 w-full">
+                  <div className="w-full pt-16">
                     {heliconeAuthClient.user ? (
                       <button
                         onClick={async () => {
@@ -214,14 +214,14 @@ const NavBarV2 = (props: NavBarV2Props) => {
                           await heliconeAuthClient.signOut();
                           router.push("/");
                         }}
-                        className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap flex w-full justify-center rounded-md px-4 py-2 text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                        className="text-md flex w-full justify-center whitespace-nowrap rounded-md bg-gray-900 px-4 py-2 font-semibold text-white shadow-sm hover:bg-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
                       >
                         Sign Out
                       </button>
                     ) : (
                       <Link
                         href="/signin"
-                        className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap flex w-full justify-center rounded-md px-4 py-2 text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                        className="text-md flex w-full justify-center whitespace-nowrap rounded-md bg-gray-900 px-4 py-2 font-semibold text-white shadow-sm hover:bg-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
                       >
                         Sign In
                       </Link>

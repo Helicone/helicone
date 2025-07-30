@@ -68,12 +68,12 @@ const DatasetDrawerV2 = (props: DatasetDrawerV2Props) => {
       const newRequestBody = JSON.stringify(
         selectedRow.request_response_body?.request,
         null,
-        2
+        2,
       );
       const newResponseBody = JSON.stringify(
         selectedRow.request_response_body?.response,
         null,
-        2
+        2,
       );
       setEditedRequestBody(newRequestBody);
       setEditedResponseBody(newResponseBody);
@@ -114,7 +114,7 @@ const DatasetDrawerV2 = (props: DatasetDrawerV2Props) => {
             requestBody: JSON.parse(editedRequestBody),
             responseBody: JSON.parse(editedResponseBody),
           },
-        }
+        },
       );
       if (result.data?.error) {
         setNotification("Error updating dataset request", "error");
@@ -161,19 +161,19 @@ const DatasetDrawerV2 = (props: DatasetDrawerV2Props) => {
         defaultWidth="w-[80vw]"
         defaultExpanded={true}
         actions={
-          <div className="w-full flex flex-row justify-between items-center">
+          <div className="flex w-full flex-row items-center justify-between">
             <div></div>
-            <div className="flex flex-row items-center space-x-2 h-12">
+            <div className="flex h-12 flex-row items-center space-x-2">
               {isEditing ? (
                 <>
-                  <span className="text-sm p-2 rounded-md font-medium bg-[#F1F5F9] text-[#1876D2] dark:text-gray-100 whitespace-nowrap">
+                  <span className="whitespace-nowrap rounded-md bg-[#F1F5F9] p-2 text-sm font-medium text-[#1876D2] dark:text-gray-100">
                     Editing
                   </span>
                   <Button variant="outline" onClick={handleDiscard}>
-                    <X className="w-5 h-5 mr-2" /> Discard
+                    <X className="mr-2 h-5 w-5" /> Discard
                   </Button>
                   <Button variant="default" onClick={handleSave}>
-                    <Check className="w-5 h-5 mr-2" /> Save changes
+                    <Check className="mr-2 h-5 w-5" /> Save changes
                   </Button>
                 </>
               ) : (
@@ -190,7 +190,7 @@ const DatasetDrawerV2 = (props: DatasetDrawerV2Props) => {
                               className={clsx(
                                 !hasPrevious &&
                                   "opacity-50 hover:cursor-not-allowed",
-                                "hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md -m-1 p-1"
+                                "-m-1 rounded-md p-1 hover:bg-gray-200 dark:hover:bg-gray-800",
                               )}
                             >
                               <ArrowUpIcon className="h-5 w-5" />
@@ -211,7 +211,7 @@ const DatasetDrawerV2 = (props: DatasetDrawerV2Props) => {
                               className={clsx(
                                 !hasNext &&
                                   "opacity-50 hover:cursor-not-allowed",
-                                "hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md -m-1 p-1"
+                                "-m-1 rounded-md p-1 hover:bg-gray-200 dark:hover:bg-gray-800",
                               )}
                             >
                               <ArrowDownIcon className="h-5 w-5" />
@@ -231,10 +231,10 @@ const DatasetDrawerV2 = (props: DatasetDrawerV2Props) => {
                           onClick={() => {
                             setNotification("Copied to clipboard", "success");
                             navigator.clipboard.writeText(
-                              JSON.stringify(selectedRow || {}, null, 4)
+                              JSON.stringify(selectedRow || {}, null, 4),
                             );
                           }}
-                          className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md -m-1 p-1"
+                          className="-m-1 rounded-md p-1 hover:bg-gray-200 dark:hover:bg-gray-800"
                         >
                           <ClipboardDocumentIcon className="h-5 w-5" />
                         </button>
@@ -249,7 +249,7 @@ const DatasetDrawerV2 = (props: DatasetDrawerV2Props) => {
                       <TooltipTrigger asChild>
                         <button
                           onClick={() => setIsEditing(!isEditing)}
-                          className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md -m-1 p-1"
+                          className="-m-1 rounded-md p-1 hover:bg-gray-200 dark:hover:bg-gray-800"
                         >
                           <PencilIcon className="h-5 w-5" />
                         </button>
@@ -264,7 +264,7 @@ const DatasetDrawerV2 = (props: DatasetDrawerV2Props) => {
                       <TooltipTrigger asChild>
                         <button
                           onClick={() => setShowDeleteModal(true)}
-                          className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md -m-1 p-1"
+                          className="-m-1 rounded-md p-1 hover:bg-gray-200 dark:hover:bg-gray-800"
                         >
                           <TrashIcon className="h-5 w-5" />
                         </button>

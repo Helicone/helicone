@@ -1,9 +1,6 @@
 import React, { useState } from "react";
-import AuthLayout from "@/components/layout/auth/authLayout";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { H1 } from "@/components/ui/typography";
+import { Small } from "@/components/ui/typography";
 import { Input } from "@/components/ui/input";
 import { ChevronDown, Search } from "lucide-react";
 import {
@@ -16,6 +13,7 @@ import { SortOption } from "@/types/provider";
 import { providers, recentlyUsedProviderIds } from "@/data/providers";
 import { ProviderCard } from "@/components/providers/ProviderCard";
 import { filterProviders, sortProviders } from "@/utils/providerUtils";
+import FoldedHeader from "../shared/FoldedHeader";
 
 export const ProvidersPage: React.FC = () => {
   // Local UI state
@@ -26,34 +24,21 @@ export const ProvidersPage: React.FC = () => {
   const filteredProviders = sortProviders(
     filterProviders(providers, searchQuery),
     sortOption,
-    recentlyUsedProviderIds
+    recentlyUsedProviderIds,
   );
 
   return (
-    <AuthLayout>
-      <div className="flex flex-col gap-4 max-w-5xl mx-auto">
-        <H1>Provider API Keys</H1>
-
-        <Alert
-          variant="warning"
-          className="bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800 py-2"
-        >
-          <AlertDescription>
-            <strong>Important:</strong> These keys are not for proxying
-            requests. See{" "}
-            <Link
-              href="https://docs.helicone.ai/getting-started/integration-methods"
-              className="text-primary font-medium"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              integration docs
-            </Link>
-            .
-          </AlertDescription>
-        </Alert>
-
-        <div className="flex flex-col sm:flex-row gap-3">
+    <main className="flex w-full animate-fade-in flex-col">
+      <FoldedHeader
+        showFold={false}
+        leftSection={
+          <Small className="font-bold text-gray-500 dark:text-slate-300">
+            Providers
+          </Small>
+        }
+      />
+      <div className="flex flex-col gap-4 p-3">
+        <div className="flex flex-col gap-3 sm:flex-row">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -69,15 +54,15 @@ export const ProvidersPage: React.FC = () => {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className="flex items-center gap-1 min-w-[150px] justify-between"
+                className="flex min-w-[150px] items-center justify-between gap-1"
               >
                 <span>
                   Sort:{" "}
                   {sortOption === "relevance"
                     ? "Relevance"
                     : sortOption === "alphabetical"
-                    ? "A-Z"
-                    : "Recently Used"}
+                      ? "A-Z"
+                      : "Recently Used"}
                 </span>
                 <ChevronDown className="h-4 w-4" />
               </Button>
@@ -96,9 +81,9 @@ export const ProvidersPage: React.FC = () => {
           </DropdownMenu>
         </div>
 
-        <div className="grid grid-cols-1 gap-2 ">
+        <div className="grid grid-cols-1 gap-2">
           {filteredProviders.length === 0 ? (
-            <div className="text-center py-6 text-muted-foreground col-span-full">
+            <div className="col-span-full py-6 text-center text-muted-foreground">
               No providers found matching your search.
             </div>
           ) : (
@@ -108,7 +93,7 @@ export const ProvidersPage: React.FC = () => {
           )}
         </div>
       </div>
-    </AuthLayout>
+    </main>
   );
 };
 

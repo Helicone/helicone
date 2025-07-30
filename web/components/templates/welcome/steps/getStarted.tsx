@@ -23,7 +23,7 @@ const GetStarted = (props: GetStartedProps) => {
         `transition-all duration-700 ease-in-out ${
           loaded ? "opacity-100" : "opacity-0"
         }`,
-        "flex flex-col items-center text-center w-full px-2"
+        "flex w-full flex-col items-center px-2 text-center",
       )}
     >
       <Image
@@ -33,15 +33,15 @@ const GetStarted = (props: GetStartedProps) => {
         alt="Helicone Logo"
         className="rounded-xl"
       />
-      <p className="text-2xl md:text-5xl font-semibold mt-4">
+      <p className="mt-4 text-2xl font-semibold md:text-5xl">
         Welcome to Helicone
       </p>
-      <p className="text-md md:text-lg text-gray-500 font-light mt-5">
+      <p className="text-md mt-5 font-light text-gray-500 md:text-lg">
         The easiest way to monitor your LLM-powered applications at scale
       </p>
       <button
         onClick={nextStep}
-        className="px-28 py-3 bg-gray-900 hover:bg-gray-700 dark:bg-gray-100 dark:hover:bg-gray-300 dark:text-black font-medium text-white rounded-xl mt-8"
+        className="mt-8 rounded-xl bg-gray-900 px-28 py-3 font-medium text-white hover:bg-gray-700 dark:bg-gray-100 dark:text-black dark:hover:bg-gray-300"
       >
         Get Started
       </button>

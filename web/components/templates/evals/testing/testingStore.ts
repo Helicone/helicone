@@ -57,7 +57,7 @@ export const useTestDataStore = create<TestDataState>()(
       }),
       {
         name: "test-data-storage",
-      }
-    )
-  )
+      },
+    ),
+  ),
 );

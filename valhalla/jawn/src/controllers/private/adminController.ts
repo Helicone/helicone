@@ -21,7 +21,7 @@ import { Setting } from "../../utils/settings";
 import type { SettingName } from "../../utils/settings";
 import Stripe from "stripe";
 import { AdminManager } from "../../managers/admin/AdminManager";
-import { clickhousePriceCalcNonAggregated } from "@helicone-package/cost";
+import { ModelWithProvider, clickhouseModelFilter, clickhousePriceCalcNonAggregated } from "@helicone-package/cost";
 
 import { err, ok, Result } from "../../packages/common/result";
 
@@ -1341,6 +1341,80 @@ export class AdminController extends Controller {
     return result.data;
   }
 
+  @Post('/backfill-costs-preview')
+  public async backfillCostsPreview(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    body: {
+      models: ModelWithProvider[];
+      hasCosts: boolean;
+      fromDate?: string;
+      toDate?: string;
+    }
+  ): Promise<{
+    query: string;
+    results: Array<{
+      model: string;
+      provider: string;
+      count: string;
+    }>;
+    totalCount: number;
+  }> {
+    await authCheckThrow(request.authParams.userId);
+    const query = `
+    SELECT model, provider, count(*) AS count from request_response_rmt
+    WHERE (
+      response_created_at <= ${body.toDate ? `toDateTime64('${body.toDate}', 3)` : "now()"}
+      ${body.fromDate ? `AND response_created_at >= toDateTime64('${body.fromDate}', 3)` : ""}
+      AND ${clickhouseModelFilter(body.models)}
+      AND ${body.hasCosts ? 'cost > 0' : 'cost = 0'} AND (prompt_tokens > 0 OR completion_tokens > 0)
+    )
+    GROUP BY model, provider
+    ORDER BY count DESC`
+
+    const result = await clickhouseDb.dbQuery<{
+      model: string;
+      provider: string;
+      count: string;
+    }>(query, []);
+
+    if (result.error) {
+      throw new Error(result.error);
+    }
+
+    const results = result.data || [];
+    const totalCount = results.reduce((sum, row) => sum + parseInt(row.count), 0);
+
+    return { 
+      query,
+      results,
+      totalCount
+    };
+  }
+
+  @Post("/deduplicate-request-response-rmt")
+  public async deduplicateRequestResponseRmt(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    body: {}
+  ): Promise<{
+    query: string;
+    message: string;
+  }> {
+    await authCheckThrow(request.authParams.userId);
+    const query = `OPTIMIZE TABLE request_response_rmt DEDUPLICATE`;
+
+    const result = await clickhouseDb.dbQuery<{}>(query, []);
+    if (result.error) {
+      throw new Error(result.error);
+    }
+
+    return { 
+      query,
+      message: "Deduplication completed successfully. This operation may take some time to fully process."
+    };
+  }
+
   /**
    * Backfill costs in Clickhouse with updated cost package data.
    */
@@ -1349,21 +1423,17 @@ export class AdminController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Body()
     body: {
-      timeExpression: string;
-      specifyModel: boolean;
-      modelId: string;
-      totalChunks: number;
-      chunkNumber: number;
+      models: ModelWithProvider[];
+      confirmed: boolean;
+      fromDate?: string;
+      toDate?: string;
     }
   ): Promise<{
-    success: boolean;
+    query: string;
   }> {
     await authCheckThrow(request.authParams.userId);
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    try {
-      const query = `
+    const query = `
     INSERT INTO request_response_rmt
     SELECT
       response_id,
@@ -1373,6 +1443,8 @@ export class AdminController extends Controller {
       completion_tokens,
       completion_audio_tokens,
       cache_reference_id,
+      gateway_router_id,
+      gateway_deployment_target,
       prompt_tokens,
       prompt_cache_write_tokens,
       prompt_cache_read_tokens,
@@ -1393,29 +1465,28 @@ export class AdminController extends Controller {
       scores,
       request_body,
       response_body,
-      ${clickhousePriceCalcNonAggregated(
-        "request_response_rmt",
-        false,
-        true,
-        body.totalChunks,
-        body.chunkNumber,
-        true,
-        true
-      )} as cost,
+      ${clickhousePriceCalcNonAggregated(body.models)} as cost,
+      prompt_id,
+      prompt_version,
       assets,
       now() as updated_at
-    FROM
-      request_response_rmt FINAL
-    WHERE
-      request_created_at >= ${body.timeExpression}
-      ${body.specifyModel ? `AND model = '${body.modelId}'` : ""}
-    `;
-      const { error } = await clickhouseDb.dbQuery(query, []);
-    } catch (e) {
-      console.error("Backfill error:", e);
-      throw e;
+    FROM request_response_rmt
+    WHERE (
+      response_created_at <= ${body.toDate ? `toDateTime64('${body.toDate}', 3)` : "now()"}
+      ${body.fromDate ? `AND response_created_at >= toDateTime64('${body.fromDate}', 3)` : ""}
+      AND ${clickhouseModelFilter(body.models)}
+    )
+    `
+
+    if (!body.confirmed) {
+      return { query };
     }
 
-    return { success: true };
+    const result = await clickhouseDb.dbQuery<{}>(query, []);
+    if (result.error) {
+      throw new Error(result.error);
+    }
+
+    return { query };
   }
 }

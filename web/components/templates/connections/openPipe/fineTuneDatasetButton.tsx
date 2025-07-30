@@ -50,13 +50,13 @@ interface OpenPipeFineTuneButtonProps {
 }
 
 export default function OpenPipeFineTuneButton(
-  props: OpenPipeFineTuneButtonProps
+  props: OpenPipeFineTuneButtonProps,
 ) {
   const { datasetId, rows, datasetName, fetchRows } = props;
   const [isLoading, setIsLoading] = useState(false);
   const [fineTuneName, setFineTuneName] = useState("");
   const [baseModel, setBaseModel] = useState<(typeof SUPPORTED_MODELS)[number]>(
-    SUPPORTED_MODELS[0]
+    SUPPORTED_MODELS[0],
   );
   const [batchSize, setBatchSize] = useState<string>("auto");
   const [learningRateMultiplier, setLearningRateMultiplier] =
@@ -100,7 +100,7 @@ export default function OpenPipeFineTuneButton(
             ...row.request_body.messages,
             row.response_body.choices[0].message,
           ],
-        }))
+        })),
       );
       addLog("Data uploaded successfully.");
 
@@ -124,7 +124,7 @@ export default function OpenPipeFineTuneButton(
       addLog(`Error: ${error}`);
       setNotification(
         "Error in fine-tuning process. Please try again.",
-        "error"
+        "error",
       );
     } finally {
       setIsLoading(false);
@@ -137,7 +137,7 @@ export default function OpenPipeFineTuneButton(
         <GenericButton
           text="OpenPipe"
           onClick={() => setIsSheetOpen(true)}
-          icon={<LOGOS.OpenPipe className="w-4 h-4" />}
+          icon={<LOGOS.OpenPipe className="h-4 w-4" />}
         />
       </SheetTrigger>
       <SheetContent className="w-full sm:max-w-md" size="full">
@@ -229,7 +229,7 @@ export default function OpenPipeFineTuneButton(
                         setLearningRateMultiplier(value[0])
                       }
                     />
-                    <span className="text-sm text-gray-500 block text-right">
+                    <span className="block text-right text-sm text-gray-500">
                       {learningRateMultiplier.toFixed(1)}
                     </span>
                   </div>
@@ -259,7 +259,7 @@ export default function OpenPipeFineTuneButton(
                       value={[numEpochs]}
                       onValueChange={(value) => setNumEpochs(value[0])}
                     />
-                    <span className="text-sm text-gray-500 block text-right">
+                    <span className="block text-right text-sm text-gray-500">
                       {numEpochs}
                     </span>
                   </div>
@@ -276,11 +276,11 @@ export default function OpenPipeFineTuneButton(
           <Button
             onClick={handleFineTune}
             disabled={isLoading}
-            className="w-full mb-4"
+            className="mb-4 w-full"
           >
             {isLoading ? (
               <>
-                <ArrowPathIcon className="h-5 w-5 inline animate-spin mr-2" />
+                <ArrowPathIcon className="mr-2 inline h-5 w-5 animate-spin" />
                 Processing
               </>
             ) : (
@@ -290,8 +290,8 @@ export default function OpenPipeFineTuneButton(
         </div>
         {/* Log display */}
         {logs.length > 0 && (
-          <div className="mt-4 p-2 bg-gray-100 rounded-md max-h-40 overflow-y-auto">
-            <h3 className="text-sm font-semibold mb-2">Process Logs:</h3>
+          <div className="mt-4 max-h-40 overflow-y-auto rounded-md bg-gray-100 p-2">
+            <h3 className="mb-2 text-sm font-semibold">Process Logs:</h3>
             {logs.map((log, index) => (
               <p key={index} className="text-xs text-gray-600">
                 {log}
@@ -310,7 +310,7 @@ export default function OpenPipeFineTuneButton(
                     navigator.clipboard.writeText(logs.join("\n"));
                   }}
                 >
-                  <DocumentDuplicateIcon className="w-4 h-4" />
+                  <DocumentDuplicateIcon className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>

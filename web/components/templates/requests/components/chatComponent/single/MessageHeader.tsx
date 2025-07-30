@@ -7,7 +7,7 @@ interface MessageHeaderProps {
 }
 
 export const MessageHeader: React.FC<MessageHeaderProps> = ({ message }) => (
-  <div className="flex items-center justify-center flex-col">
+  <div className="flex flex-col items-center justify-center">
     <div className="w-20">
       <RoleButton
         role={message?.role as any}

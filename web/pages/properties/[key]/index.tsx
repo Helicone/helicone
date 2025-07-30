@@ -20,7 +20,7 @@ Properties.getLayout = function getLayout(page: ReactElement) {
 export default Properties;
 
 export const getServerSideProps = async (
-  context: GetServerSidePropsContext
+  context: GetServerSidePropsContext,
 ) => {
   const { key } = context.params as { key: string };
   const initialPropertyKey = decodeURIComponent(key);

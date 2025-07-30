@@ -63,7 +63,7 @@ export const FeatureFlagCard: React.FC<FeatureFlagCardProps> = ({
   return (
     <Card key={flag.organization_id}>
       <CardContent className="pt-6">
-        <div className="flex justify-between items-start">
+        <div className="flex items-start justify-between">
           <h3 className="text-lg font-semibold">
             {flag.name}
 
@@ -129,7 +129,7 @@ export const AdminFeatureFlags = () => {
       const jawn = getJawnClient(query.queryKey[1]);
       const { data, error } = await jawn.POST(
         `/v1/admin/feature-flags/query`,
-        {}
+        {},
       );
       return data;
     },
@@ -152,7 +152,7 @@ export const AdminFeatureFlags = () => {
   });
 
   return (
-    <Card className="w-full max-w-4xl mx-auto bg-gray-200">
+    <Card className="mx-auto w-full max-w-4xl bg-gray-200">
       <CardHeader>
         <CardTitle>Admin Feature Flags</CardTitle>
       </CardHeader>

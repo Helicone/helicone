@@ -38,7 +38,7 @@ export default function RenderHeliconeRequest({
   const mapped = useMemo(() => {
     const mapperType = getMapperTypeFromHeliconeRequest(
       heliconeRequest,
-      heliconeRequest.model
+      heliconeRequest.model,
     );
     const content = getMappedContent({
       mapperType,
@@ -79,24 +79,26 @@ export function RenderMappedRequest({
   const isShiftPressed = useShiftKeyPress();
 
   // Check if request had an error first
-  const hasError = !(
-    mappedRequest.heliconeMetadata.status.code >= 200 &&
-    mappedRequest.heliconeMetadata.status.code < 300
-  );
+  const hasError =
+    !(
+      mappedRequest.heliconeMetadata.status.code >= 200 &&
+      mappedRequest.heliconeMetadata.status.code < 300
+    ) ||
+    (mappedRequest.schema.response as any)?.error === "HTML response detected:";
 
   // Use switch statement for rendering different types
   return (
     <ScrollArea
       orientation="vertical"
-      className={`h-full w-full relative ${className} [&>div>div[style]]:!block  border border-border rounded-lg bg-sidebar-background`}
+      className={`relative h-full w-full ${className} rounded-lg border border-border bg-sidebar-background [&>div>div[style]]:!block`}
     >
       <Button
         variant={"outline"}
         size={"sm"}
-        className="flex felx-row gap-1 absolute top-2 right-2 z-20"
+        className="felx-row absolute right-2 top-2 z-20 flex gap-1"
         onClick={() => toggleMode(isShiftPressed)}
       >
-        <XSmall className="text-secondary font-medium">
+        <XSmall className="font-medium text-secondary">
           {MODE_LABELS[mode]}
         </XSmall>
         <LuChevronsLeftRight className="h-4 w-4 text-secondary" />
@@ -114,12 +116,15 @@ export function RenderMappedRequest({
       ) : mode === "json" ? (
         <Json mapperContent={mappedRequest} />
       ) : hasError ? (
-        <ErrorMessage mapperContent={mappedRequest} className="p-4" />
+        <>
+          <ErrorMessage mapperContent={mappedRequest} className="p-4" />
+        </>
       ) : (
         (() => {
           switch (mappedRequest._type) {
             case "openai-chat":
             case "gemini-chat":
+            case "vercel-chat":
             case "anthropic-chat":
             case "llama-chat":
             case "openai-image":
@@ -143,7 +148,7 @@ export function RenderMappedRequest({
               return (
                 <Assistant
                   mappedRequest={mappedRequest}
-                  className="pt-14 px-4"
+                  className="px-4 pt-14"
                 />
               );
 
@@ -159,13 +164,13 @@ export function RenderMappedRequest({
             default:
               return (
                 <div className="flex flex-col gap-2 p-20">
-                  <div className="text-sm text-gray-500 ">
+                  <div className="text-sm text-gray-500">
                     Unable to render this request. Please contact support at
                     (support@helicone.ai) and we can be sure to add support for
                     it. Or if you feel inclined, you can submit a PR to add
                     support for it.
                   </div>
-                  <div className="flex flex-row gap-2 ">
+                  <div className="flex flex-row gap-2">
                     <Button
                       variant={"outline"}
                       size={"sm"}

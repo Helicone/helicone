@@ -35,7 +35,6 @@ import AuthHeader from "../../../../shared/authHeader";
 import useNotification from "../../../../shared/notification/useNotification";
 import ThemedTable from "../../../../shared/themed/table/themedTableOld";
 import { StartFromPromptDialog } from "./components/startFromPromptDialog";
-import { Deprecated } from "@/components/shared/Deprecated";
 
 const ExperimentsPage = () => {
   const jawn = useJawnClient();
@@ -44,7 +43,7 @@ const ExperimentsPage = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [experimentToDelete, setExperimentToDelete] = useState<string | null>(
-    null
+    null,
   );
   const router = useRouter();
   const { experiments, isLoading, deleteExperiment } = useExperimentTables();
@@ -86,8 +85,8 @@ const ExperimentsPage = () => {
 
   if (!hasExperiments && !isLoading) {
     return (
-      <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">
-        <div className="flex flex-1 h-full">
+      <div className="flex h-screen w-full flex-col bg-background dark:bg-sidebar-background">
+        <div className="flex h-full flex-1">
           <GenericEmptyState
             title="Start Your First Experiment"
             description="Create an experiment to compare prompt and model variations side by side."
@@ -107,7 +106,7 @@ const ExperimentsPage = () => {
                       disabled={!canCreateExperiment}
                     >
                       New Experiment
-                      <Plus className="h-4 w-4 ml-2" />
+                      <Plus className="ml-2 h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="center" className="w-[200px]">
@@ -144,8 +143,7 @@ const ExperimentsPage = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-4rem)]">
-      <Deprecated feature="Experiments" />
+    <div className="flex min-h-[calc(100vh-4rem)] flex-col">
       <AuthHeader
         title="Experiments"
         actions={
@@ -156,7 +154,7 @@ const ExperimentsPage = () => {
             >
               <Button variant="action">
                 Start new experiment
-                <ChevronDownIcon className="w-4 h-4 ml-2" />
+                <ChevronDownIcon className="ml-2 h-4 w-4" />
               </Button>
             </FreeTierLimitWrapper>
           ) : (
@@ -168,7 +166,7 @@ const ExperimentsPage = () => {
               <DropdownMenuTrigger asChild>
                 <Button variant="action">
                   Start new experiment
-                  <ChevronDownIcon className="w-4 h-4 ml-2" />
+                  <ChevronDownIcon className="ml-2 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="center" className="w-[200px]">

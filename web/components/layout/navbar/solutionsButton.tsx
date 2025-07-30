@@ -89,11 +89,10 @@ export default function SolutionsButton() {
       <Popover className="relative">
         {({ open }) => (
           <>
-            <Popover.Button className="flex flex-row items-center font-medium hover:text-black rounded-md px-3 py-1.5 focus:outline-none text-gray-700">
+            <Popover.Button className="flex flex-row items-center rounded-md px-3 py-1.5 font-medium text-gray-700 hover:text-black focus:outline-none">
               <span>Solutions</span>
               <ChevronRightIcon
-                className={`${open ? "rotate-90" : "text-opacity-70"}
-                  ml-1 h-4 w-4 transition duration-150  ease-in-out group-hover:text-opacity-80`}
+                className={`${open ? "rotate-90" : "text-opacity-70"} ml-1 h-4 w-4 transition duration-150 ease-in-out group-hover:text-opacity-80`}
                 aria-hidden="true"
               />
             </Popover.Button>
@@ -108,8 +107,8 @@ export default function SolutionsButton() {
             >
               <Popover.Panel className="absolute z-10 mt-2 w-[600px] transform px-4 sm:px-0">
                 <div className="overflow-hidden rounded-lg shadow-2xl ring-1 ring-black ring-opacity-10">
-                  <div className="relative grid gap-8 bg-white p-7 grid-cols-1 lg:grid-cols-2">
-                    <p className="-mb-2 text-sm font-medium text-gray-700 col-span-2">
+                  <div className="relative grid grid-cols-1 gap-8 bg-white p-7 lg:grid-cols-2">
+                    <p className="col-span-2 -mb-2 text-sm font-medium text-gray-700">
                       Use Cases
                     </p>
                     {solutions.map((item) => (
@@ -127,10 +126,10 @@ export default function SolutionsButton() {
                           />
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900 items-center">
+                          <div className="items-center text-sm font-medium text-gray-900">
                             {item.name}
                             {item.new && (
-                              <span className="text-xs font-semibold text-green-500 ml-1">
+                              <span className="ml-1 text-xs font-semibold text-green-500">
                                 New
                               </span>
                             )}
@@ -152,7 +151,7 @@ export default function SolutionsButton() {
                           Checkout our blog
                         </span>
                       </span>
-                      <span className="block text-sm text-gray-500 mt-1">
+                      <span className="mt-1 block text-sm text-gray-500">
                         Learn more about what is possible with our technology
                       </span>
                     </Link>

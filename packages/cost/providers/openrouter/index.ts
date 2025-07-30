@@ -67,6 +67,26 @@ export const costs: ModelRow[] = [
     }
   },
   {
+    "model": { // Note: I'm making this valid JSON by adding quotes
+      "operator": "equals",
+      "value": "google/gemini-2.5-flash"
+    },
+    "cost": {
+      "prompt_token": 3e-7,
+      "completion_token": 2.5e-6
+    }
+  },
+  {
+    "model": { // Note: I'm making this valid JSON by adding quotes
+      "operator": "equals",
+      "value": "openai/o4-mini-high"
+    },
+    "cost": {
+      "prompt_token": 1.1e-6,
+      "completion_token": 4.4e-6
+    }
+  },
+  {
     "model": {
       "operator": "equals",
       "value": "cognitivecomputations/dolphin-mistral-24b-venice-edition:free"

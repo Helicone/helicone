@@ -68,14 +68,14 @@ export function FreeTierLimitBanner({
 
   return (
     <div
-      className={`bg-amber-50 dark:bg-amber-950/30 border-y border-amber-200 dark:border-amber-800 ${
+      className={`border-y border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30 ${
         rounded ? "rounded-md" : ""
       } ${className}`}
     >
-      <div className="px-4 py-1.5 mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+      <div className="mx-auto flex flex-col gap-2 px-4 py-1.5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
-          <span className="text-amber-800 dark:text-amber-200 text-sm font-medium">
+          <AlertCircle className="h-4 w-4 flex-shrink-0 text-amber-600 dark:text-amber-400" />
+          <span className="text-sm font-medium text-amber-800 dark:text-amber-200">
             {message || defaultMessage}
           </span>
         </div>

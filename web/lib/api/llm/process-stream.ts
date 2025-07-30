@@ -16,7 +16,7 @@ interface StreamProcessorOptions {
 /* This is boilerplate code from an OpenAI implementation */
 function messageReducer(
   previous: ChatCompletionMessage,
-  item: ChatCompletionChunk
+  item: ChatCompletionChunk,
 ): ChatCompletionMessage {
   const reduce = (acc: any, delta: ChatCompletionChunk.Choice.Delta) => {
     acc = { ...acc };
@@ -46,7 +46,7 @@ function messageReducer(
           const { index, ...chunkTool } = value[i];
           if (index - accArray.length > 1) {
             throw new Error(
-              `Error: An array has an empty value when tool_calls are constructed. tool_calls: ${accArray}; tool: ${value}`
+              `Error: An array has an empty value when tool_calls are constructed. tool_calls: ${accArray}; tool: ${value}`,
             );
           }
           accArray[index] = reduce(accArray[index], chunkTool);
@@ -77,7 +77,7 @@ function messageReducer(
 export async function processStream(
   stream: ReadableStream<Uint8Array>,
   options: StreamProcessorOptions,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<{
   fullContent: string;
   error?: any;
@@ -115,7 +115,7 @@ export async function processStream(
           "[processStream] Error parsing JSON chunk or processing delta:",
           error,
           "Chunk:",
-          chunkString
+          chunkString,
         );
         // Optional: Treat parse errors as raw content?
         // state.content += chunkString; // Be cautious with this
@@ -144,7 +144,7 @@ export async function processStream(
     // Return the state as it was when the error occurred, might be incomplete
     console.warn(
       "[processStream] Returning state possibly incomplete due to error:",
-      callbackState
+      callbackState,
     );
     return {
       error: error,

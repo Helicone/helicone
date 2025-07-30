@@ -56,22 +56,22 @@ export default function UniversalPopup({
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center backdrop-blur-lg h-screen"
+      className="fixed inset-0 z-[9999] flex h-screen flex-col items-center justify-center backdrop-blur-lg"
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
     >
       <div
-        className={`max-h-[90vh] ${width} -mt-16 md:-mt-8 rounded-xl bg-slate-50 dark:bg-slate-950 border border-border flex flex-col`}
+        className={`max-h-[90vh] ${width} -mt-16 flex flex-col rounded-xl border border-border bg-slate-50 dark:bg-slate-950 md:-mt-8`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="relative flex flex-row items-center justify-center border-b border-border p-2.5 gap-2.5 w-full">
+        <div className="relative flex w-full flex-row items-center justify-center gap-2.5 border-b border-border p-2.5">
           {/* Close Button */}
           {showCloseButton && (
             <Button
               variant="outline"
               size={"square_icon"}
-              className="bg-slate-50 dark:bg-slate-950 rounded-full p-1.5 text-sm border border-border absolute left-2.5 text-secondary"
+              className="absolute left-2.5 rounded-full border border-border bg-slate-50 p-1.5 text-sm text-secondary dark:bg-slate-950"
               asPill
               onClick={onClose}
             >

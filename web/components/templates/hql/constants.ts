@@ -1,7 +1,7 @@
 import { components } from "@/lib/clients/jawnTypes/public";
 import { $JAWN_API } from "@/lib/clients/jawn";
 import React from "react";
-import { queryOptions, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const SQL_KEYWORDS = [
   "SELECT",
@@ -156,11 +156,11 @@ export const createExecuteQueryMutation = (
 };
 
 // Save query mutation
-export const createSaveQueryMutation = (
+export const useSaveQueryMutation = (
   setCurrentQuery: React.Dispatch<
     React.SetStateAction<{ id: string | undefined; name: string; sql: string }>
   >,
-  setNotification: (message: string, type: "success" | "error") => void,
+  setNotification: (_message: string, _type: "success" | "error") => void,
 ) => {
   const queryClient = useQueryClient();
   return {
@@ -210,8 +210,8 @@ export const createSaveQueryMutation = (
 };
 
 // Delete query mutation
-export const createDeleteQueryMutation = (
-  setNotification: (message: string, type: "success" | "error") => void,
+export const useDeleteQueryMutation = (
+  setNotification: (_message: string, _type: "success" | "error") => void,
 ) => {
   const queryClient = useQueryClient();
   return {

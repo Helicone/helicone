@@ -24,7 +24,7 @@ const RemoveRequestsModal: React.FC<RemoveRequestsModalProps> = ({
 }) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-[425px] px-6 py-8 space-y-4">
+      <DialogContent className="space-y-4 px-6 py-8 sm:max-w-[425px]">
         <DialogHeader className="space-y-8">
           <DialogTitle>
             Remove {requestCount} requests from dataset?
@@ -44,7 +44,7 @@ const RemoveRequestsModal: React.FC<RemoveRequestsModalProps> = ({
                 onConfirm();
                 setOpen(false);
               }}
-              className="bg-red-500 hover:bg-red-600 text-white"
+              className="bg-red-500 text-white hover:bg-red-600"
             >
               Confirm remove
             </Button>

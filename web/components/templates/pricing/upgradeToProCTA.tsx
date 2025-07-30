@@ -59,8 +59,8 @@ export const UpgradeToProCTA = ({
   return (
     <div>
       {showAddons && (
-        <div className="mt-4 border rounded-lg p-4">
-          <h3 className="font-semibold mb-2">Add-ons</h3>
+        <div className="mt-4 rounded-lg border p-4">
+          <h3 className="mb-2 font-semibold">Add-ons</h3>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <Switch
@@ -75,7 +75,7 @@ export const UpgradeToProCTA = ({
                 >
                   Prompts & Experiments
                 </Label>
-                <p className="text-sm text-muted-foreground whitespace-nowrap text-slate-500">
+                <p className="whitespace-nowrap text-sm text-muted-foreground text-slate-500">
                   + ${costForPrompts.data?.data ?? "loading..."}/mo
                 </p>
               </div>
@@ -90,7 +90,7 @@ export const UpgradeToProCTA = ({
                 <Label htmlFor="unlimited-alerts" className="whitespace-nowrap">
                   Unlimited Alerts
                 </Label>
-                <p className="text-sm text-muted-foreground whitespace-nowrap text-slate-500">
+                <p className="whitespace-nowrap text-sm text-muted-foreground text-slate-500">
                   + $15/mo
                 </p>
               </div>
@@ -112,14 +112,14 @@ export const UpgradeToProCTA = ({
             }
           }
         }}
-        className="w-full mt-4"
+        className="mt-4 w-full"
         disabled={upgradeToPro.isPending}
       >
         {upgradeToPro.isPending
           ? "Loading..."
           : isPro
-          ? "Upgrade"
-          : "Start 7-day free trial"}
+            ? "Upgrade"
+            : "Start 7-day free trial"}
       </Button>
     </div>
   );

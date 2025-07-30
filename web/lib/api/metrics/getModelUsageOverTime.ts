@@ -53,7 +53,7 @@ GROUP BY response.body ->> 'model'::text, ${dateTrunc}
 `;
   const { data, error } = await dbExecute<ModelUsageOverTime>(
     query,
-    builtFilter.argsAcc
+    builtFilter.argsAcc,
   );
   if (error !== null) {
     return { data: null, error: error };
@@ -62,7 +62,7 @@ GROUP BY response.body ->> 'model'::text, ${dateTrunc}
     data: data.map((d) => ({
       ...d,
       created_at_trunc: new Date(
-        d.created_at_trunc.getTime() - timeZoneDifference * 60 * 1000
+        d.created_at_trunc.getTime() - timeZoneDifference * 60 * 1000,
       ),
       sum_tokens: Number(d.sum_tokens),
       prompt_tokens: Number(d.sum_prompt_tokens),

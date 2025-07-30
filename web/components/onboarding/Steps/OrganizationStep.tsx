@@ -32,7 +32,7 @@ export const OrganizationStep = () => {
           className={cn(
             "text-sm placeholder:text-[hsl(var(--muted-foreground))]",
             error &&
-              "border-[hsl(var(--destructive))] text-[hsl(var(--destructive))]"
+              "border-[hsl(var(--destructive))] text-[hsl(var(--destructive))]",
           )}
         />
         {error ? (

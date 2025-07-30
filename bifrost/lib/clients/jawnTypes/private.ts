@@ -162,11 +162,17 @@ export interface paths {
   "/v1/prompt-2025/id/{promptId}": {
     get: operations["GetPrompt2025"];
   };
+  "/v1/prompt-2025/id/{promptId}/rename": {
+    post: operations["RenamePrompt2025"];
+  };
   "/v1/prompt-2025/{promptId}": {
     delete: operations["DeletePrompt2025"];
   };
   "/v1/prompt-2025/{promptId}/{versionId}": {
     delete: operations["DeletePrompt2025Version"];
+  };
+  "/v1/prompt-2025/id/{promptId}/{versionId}/inputs": {
+    get: operations["GetPrompt2025Inputs"];
   };
   "/v1/prompt-2025/tags": {
     get: operations["GetPrompt2025Tags"];
@@ -224,6 +230,9 @@ export interface paths {
   };
   "/v1/request/{requestId}/score": {
     post: operations["AddScores"];
+  };
+  "/v1/prompt/has-prompts": {
+    get: operations["HasPrompts"];
   };
   "/v1/prompt/query": {
     post: operations["GetPrompts"];
@@ -445,6 +454,12 @@ export interface paths {
      * Uses caching to minimize API calls to Stripe
      */
     get: operations["GetSubscriptionData"];
+  };
+  "/v1/admin/backfill-costs-preview": {
+    post: operations["BackfillCostsPreview"];
+  };
+  "/v1/admin/deduplicate-request-response-rmt": {
+    post: operations["DeduplicateRequestResponseRmt"];
   };
   "/v1/admin/backfill-costs": {
     /** @description Backfill costs in Clickhouse with updated cost package data. */
@@ -981,6 +996,17 @@ Json: JsonObject;
       error: null;
     };
     "Result_Prompt2025.string_": components["schemas"]["ResultSuccess_Prompt2025_"] | components["schemas"]["ResultError_string_"];
+    Prompt2025Input: {
+      request_id: string;
+      version_id: string;
+      inputs: components["schemas"]["Record_string.any_"];
+    };
+    ResultSuccess_Prompt2025Input_: {
+      data: components["schemas"]["Prompt2025Input"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Prompt2025Input.string_": components["schemas"]["ResultSuccess_Prompt2025Input_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess_string-Array_": {
       data: string[];
       /** @enum {number|null} */
@@ -1261,6 +1287,8 @@ Json: JsonObject;
       cache_reference_id?: components["schemas"]["Partial_TextOperators_"];
       assets?: components["schemas"]["Partial_TextOperators_"];
       "helicone-score-feedback"?: components["schemas"]["Partial_BooleanOperators_"];
+      gateway_router_id?: components["schemas"]["Partial_TextOperators_"];
+      gateway_deployment_target?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description Make all properties in T optional */
     Partial_SessionsRequestResponseRMTToOperators_: {
@@ -1335,7 +1363,7 @@ Json: JsonObject;
       isScored?: boolean;
     };
     /** @enum {string} */
-    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "LLAMA";
+    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "LLAMA" | "NVIDIA" | "VERCEL";
     Provider: components["schemas"]["ProviderName"] | "CUSTOM";
     /** @enum {string} */
     LlmType: "chat" | "completion";
@@ -1539,6 +1567,7 @@ Json: JsonObject;
       /** Format: double */
       cost: number | null;
       prompt_id: string | null;
+      prompt_version: string | null;
       feedback_created_at?: string | null;
       feedback_id?: string | null;
       feedback_rating?: boolean | null;
@@ -1589,6 +1618,14 @@ Json: JsonObject;
     ScoreRequest: {
       scores: components["schemas"]["Scores"];
     };
+    "ResultSuccess__hasPrompts-boolean__": {
+      data: {
+        hasPrompts: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__hasPrompts-boolean_.string_": components["schemas"]["ResultSuccess__hasPrompts-boolean__"] | components["schemas"]["ResultError_string_"];
     PromptsResult: {
       id: string;
       user_defined_id: string;
@@ -1915,6 +1952,9 @@ Json: JsonObject;
       gatewayDeploymentTarget?: string;
       gatewayRouterId?: string;
       heliconeManualAccessKey?: string;
+      promptInputs?: components["schemas"]["Record_string.any_"];
+      promptVersionId?: string;
+      promptId?: string;
       lytixHost?: string;
       lytixKey?: string;
       posthogHost?: string;
@@ -15395,6 +15435,46 @@ Json: JsonObject;
     /** @description Construct a type with the properties of T except for those in type K. */
     "Omit_stripe.Stripe.Invoice.id_": components["schemas"]["Pick_stripe.Stripe.Invoice.Exclude_keyofstripe.Stripe.Invoice.id__"];
     "stripe.Stripe.UpcomingInvoice": components["schemas"]["Omit_stripe.Stripe.Invoice.id_"];
+    /**
+     * @description
+     * DO NOT EDIT THIS FILE UNLESS IT IS IN /costs
+     */
+    TextOperator: {
+      /** @enum {string} */
+      operator: "equals" | "startsWith" | "includes";
+      value: string;
+    };
+    ModelRow: {
+      model: components["schemas"]["TextOperator"];
+      cost: {
+        /** Format: double */
+        completion_audio_token?: number;
+        /** Format: double */
+        prompt_audio_token?: number;
+        /** Format: double */
+        prompt_cache_read_token?: number;
+        /** Format: double */
+        prompt_cache_write_token?: number;
+        /** Format: double */
+        per_call?: number;
+        /** Format: double */
+        per_image?: number;
+        /** Format: double */
+        completion_token: number;
+        /** Format: double */
+        prompt_token: number;
+      };
+      showInPlayground?: boolean;
+      targetUrl?: string;
+      dateRange?: {
+        end: string;
+        start: string;
+      };
+    };
+    ModelWithProvider: {
+      modelRow: components["schemas"]["ModelRow"];
+      provider: string;
+    };
     ConvertToWavResponse: {
       data: string | null;
       error: string | null;
@@ -16303,6 +16383,28 @@ export interface operations {
       };
     };
   };
+  RenamePrompt2025: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
   DeletePrompt2025: {
     parameters: {
       path: {
@@ -16330,6 +16432,25 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025Inputs: {
+    parameters: {
+      query: {
+        requestId: string;
+      };
+      path: {
+        promptId: string;
+        versionId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025Input.string_"];
         };
       };
     };
@@ -16662,6 +16783,16 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  HasPrompts: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__hasPrompts-boolean_.string_"];
         };
       };
     };
@@ -18142,18 +18273,14 @@ export interface operations {
       };
     };
   };
-  /** @description Backfill costs in Clickhouse with updated cost package data. */
-  BackfillCosts: {
+  BackfillCostsPreview: {
     requestBody: {
       content: {
         "application/json": {
-          /** Format: double */
-          chunkNumber: number;
-          /** Format: double */
-          totalChunks: number;
-          modelId: string;
-          specifyModel: boolean;
-          timeExpression: string;
+          toDate?: string;
+          fromDate?: string;
+          hasCosts: boolean;
+          models: components["schemas"]["ModelWithProvider"][];
         };
       };
     };
@@ -18162,7 +18289,55 @@ export interface operations {
       200: {
         content: {
           "application/json": {
-            success: boolean;
+            /** Format: double */
+            totalCount: number;
+            results: {
+                count: string;
+                provider: string;
+                model: string;
+              }[];
+            query: string;
+          };
+        };
+      };
+    };
+  };
+  DeduplicateRequestResponseRmt: {
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            message: string;
+            query: string;
+          };
+        };
+      };
+    };
+  };
+  /** @description Backfill costs in Clickhouse with updated cost package data. */
+  BackfillCosts: {
+    requestBody: {
+      content: {
+        "application/json": {
+          toDate?: string;
+          fromDate?: string;
+          confirmed: boolean;
+          models: components["schemas"]["ModelWithProvider"][];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            query: string;
           };
         };
       };

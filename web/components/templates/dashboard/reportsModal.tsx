@@ -39,7 +39,7 @@ const ReportsModal = (props: ReportsModalProps) => {
   const { setNotification } = useNotification();
 
   const { data, isLoading, refetch } = useGetOrgMembers(
-    orgContext?.currentOrg?.id || ""
+    orgContext?.currentOrg?.id || "",
   );
 
   const members: {
@@ -49,39 +49,39 @@ const ReportsModal = (props: ReportsModalProps) => {
   }[] = [...(data || [])];
 
   const [reportEnabled, setReportEnabled] = useState<boolean>(
-    report?.active ? report?.active : false
+    report?.active ? report?.active : false,
   );
   const [selectedEmails, setSelectedEmails] = useState<string[]>(
-    (report?.settings?.emails as string[]) || []
+    (report?.settings?.emails as string[]) || [],
   );
   const [selectedSlackChannels, setSelectedSlackChannels] = useState<string[]>(
-    (report?.settings?.slack_channels as string[]) || []
+    (report?.settings?.slack_channels as string[]) || [],
   );
 
   const [showEmails, setShowEmails] = useState<boolean>(
-    report?.active ? (report?.settings?.emails as string[]).length > 0 : true
+    report?.active ? (report?.settings?.emails as string[]).length > 0 : true,
   );
 
   const [showSlackChannels, setShowSlackChannels] = useState<boolean>(
     report?.active
       ? (report?.settings?.slack_channels as string[]).length > 0
-      : false
+      : false,
   );
 
   useEffect(() => {
     setShowEmails(
-      report?.active ? (report?.settings?.emails as string[]).length > 0 : true
+      report?.active ? (report?.settings?.emails as string[]).length > 0 : true,
     );
     setShowSlackChannels(
       report?.active
         ? (report?.settings?.slack_channels as string[]).length > 0
-        : false
+        : false,
     );
     setSelectedEmails(
-      report?.active ? (report?.settings?.emails as string[]) : []
+      report?.active ? (report?.settings?.emails as string[]) : [],
     );
     setSelectedSlackChannels(
-      report?.active ? (report?.settings?.slack_channels as string[]) : []
+      report?.active ? (report?.settings?.slack_channels as string[]) : [],
     );
   }, [
     open,
@@ -115,7 +115,7 @@ const ReportsModal = (props: ReportsModalProps) => {
     ) {
       setNotification(
         "Please select at least one email or slack channel",
-        "error"
+        "error",
       );
       return;
     }
@@ -134,8 +134,8 @@ const ReportsModal = (props: ReportsModalProps) => {
             slack_channels: showSlackChannels ? selectedSlackChannels : [],
           }
         : report?.settings
-        ? report?.settings
-        : {},
+          ? report?.settings
+          : {},
       active: reportEnabled,
     };
 
@@ -178,10 +178,10 @@ const ReportsModal = (props: ReportsModalProps) => {
     <ThemedModal open={open} setOpen={setOpen}>
       <form
         onSubmit={handleCustomizeReports}
-        className="grid grid-cols-4 gap-2 w-full sm:w-[450px] max-w-[450px] h-full"
+        className="grid h-full w-full max-w-[450px] grid-cols-4 gap-2 sm:w-[450px]"
       >
-        <div className="col-span-4 flex flex-row justify-between items-center">
-          <h1 className="font-semibold text-xl text-gray-900 dark:text-gray-100">
+        <div className="col-span-4 flex flex-row items-center justify-between">
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
             {reportEnabled ? "Customize Reports" : "Enable Reports"}
           </h1>
 
@@ -191,13 +191,13 @@ const ReportsModal = (props: ReportsModalProps) => {
             size="md"
           />
         </div>
-        <small className="text-gray-500 col-span-4">
+        <small className="col-span-4 text-gray-500">
           Receive a weekly summary report every <strong>Monday</strong> at{" "}
           <strong>10am UTC</strong>.
         </small>
         {reportEnabled && (
-          <div className="col-span-4 w-full p-6 bg-gray-100 rounded-md space-y-1.5">
-            <h3 className="text-gray-500 font-semibold">Notify By</h3>
+          <div className="col-span-4 w-full space-y-1.5 rounded-md bg-gray-100 p-6">
+            <h3 className="font-semibold text-gray-500">Notify By</h3>
             <div className="col-span-4 w-full space-y-1.5 text-sm">
               <div className="flex items-center justify-between">
                 <label htmlFor="alert-emails" className="text-gray-500">
@@ -293,13 +293,13 @@ const ReportsModal = (props: ReportsModalProps) => {
               setOpen(false);
             }}
             type="button"
-            className="flex flex-row items-center rounded-md bg-white dark:bg-black px-4 py-2 text-sm font-semibold border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm hover:text-gray-700 dark:hover:text-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+            className="flex flex-row items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500 dark:border-gray-700 dark:bg-black dark:text-gray-100 dark:hover:bg-gray-900 dark:hover:text-gray-300"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="flex items-center rounded-md bg-black px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:bg-white dark:text-black dark:hover:bg-gray-200"
           >
             Save
           </button>

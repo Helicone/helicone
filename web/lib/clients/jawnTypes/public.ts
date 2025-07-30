@@ -76,11 +76,17 @@ export interface paths {
   "/v1/prompt-2025/id/{promptId}": {
     get: operations["GetPrompt2025"];
   };
+  "/v1/prompt-2025/id/{promptId}/rename": {
+    post: operations["RenamePrompt2025"];
+  };
   "/v1/prompt-2025/{promptId}": {
     delete: operations["DeletePrompt2025"];
   };
   "/v1/prompt-2025/{promptId}/{versionId}": {
     delete: operations["DeletePrompt2025Version"];
+  };
+  "/v1/prompt-2025/id/{promptId}/{versionId}/inputs": {
+    get: operations["GetPrompt2025Inputs"];
   };
   "/v1/prompt-2025/tags": {
     get: operations["GetPrompt2025Tags"];
@@ -138,6 +144,9 @@ export interface paths {
   };
   "/v1/request/{requestId}/score": {
     post: operations["AddScores"];
+  };
+  "/v1/prompt/has-prompts": {
+    get: operations["HasPrompts"];
   };
   "/v1/prompt/query": {
     post: operations["GetPrompts"];
@@ -525,9 +534,18 @@ export interface paths {
     get: operations["GetRouters"];
     post: operations["CreateRouter"];
   };
-  "/v1/gateway/{id}": {
+  "/v1/gateway/{routerHash}": {
     get: operations["GetLatestRouterConfig"];
     put: operations["UpdateRouter"];
+  };
+  "/v1/gateway/{routerHash}/requests-over-time": {
+    get: operations["GetRouterRequestsOverTime"];
+  };
+  "/v1/gateway/{routerHash}/cost-over-time": {
+    get: operations["GetRouterCostOverTime"];
+  };
+  "/v1/gateway/{routerHash}/latency-over-time": {
+    get: operations["GetRouterLatencyOverTime"];
   };
   "/v1/evals/query": {
     post: operations["QueryEvals"];
@@ -800,6 +818,8 @@ export interface components {
       cache_reference_id?: components["schemas"]["Partial_TextOperators_"];
       assets?: components["schemas"]["Partial_TextOperators_"];
       "helicone-score-feedback"?: components["schemas"]["Partial_BooleanOperators_"];
+      gateway_router_id?: components["schemas"]["Partial_TextOperators_"];
+      gateway_deployment_target?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
     "Pick_FilterLeaf.users_view-or-request_response_rmt_": {
@@ -1083,6 +1103,17 @@ export interface components {
       error: null;
     };
     "Result_Prompt2025.string_": components["schemas"]["ResultSuccess_Prompt2025_"] | components["schemas"]["ResultError_string_"];
+    Prompt2025Input: {
+      request_id: string;
+      version_id: string;
+      inputs: components["schemas"]["Record_string.any_"];
+    };
+    ResultSuccess_Prompt2025Input_: {
+      data: components["schemas"]["Prompt2025Input"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Prompt2025Input.string_": components["schemas"]["ResultSuccess_Prompt2025Input_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess_string-Array_": {
       data: string[];
       /** @enum {number|null} */
@@ -1344,7 +1375,7 @@ export interface components {
       isScored?: boolean;
     };
     /** @enum {string} */
-    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "LLAMA";
+    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "LLAMA" | "NVIDIA" | "VERCEL";
     Provider: components["schemas"]["ProviderName"] | "CUSTOM";
     /** @enum {string} */
     LlmType: "chat" | "completion";
@@ -1548,6 +1579,7 @@ export interface components {
       /** Format: double */
       cost: number | null;
       prompt_id: string | null;
+      prompt_version: string | null;
       feedback_created_at?: string | null;
       feedback_id?: string | null;
       feedback_rating?: boolean | null;
@@ -1598,6 +1630,14 @@ export interface components {
     ScoreRequest: {
       scores: components["schemas"]["Scores"];
     };
+    "ResultSuccess__hasPrompts-boolean__": {
+      data: {
+        hasPrompts: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__hasPrompts-boolean_.string_": components["schemas"]["ResultSuccess__hasPrompts-boolean__"] | components["schemas"]["ResultError_string_"];
     PromptsResult: {
       id: string;
       user_defined_id: string;
@@ -3118,7 +3158,7 @@ Json: JsonObject;
     };
     "Result__routers-Router-Array_.string_": components["schemas"]["ResultSuccess__routers-Router-Array__"] | components["schemas"]["ResultError_string_"];
     LatestRouterConfig: {
-      config: string;
+      config: components["schemas"]["Json"];
       version: string;
       hash: string;
       name: string;
@@ -3130,6 +3170,44 @@ Json: JsonObject;
       error: null;
     };
     "Result_LatestRouterConfig.string_": components["schemas"]["ResultSuccess_LatestRouterConfig_"] | components["schemas"]["ResultError_string_"];
+    RouterRequestsOverTime: {
+      /** Format: double */
+      status: number;
+      /** Format: double */
+      count: number;
+      /** Format: date-time */
+      time: string;
+    };
+    "ResultSuccess_RouterRequestsOverTime-Array_": {
+      data: components["schemas"]["RouterRequestsOverTime"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_RouterRequestsOverTime-Array.string_": components["schemas"]["ResultSuccess_RouterRequestsOverTime-Array_"] | components["schemas"]["ResultError_string_"];
+    RouterCostOverTime: {
+      /** Format: double */
+      cost: number;
+      /** Format: date-time */
+      time: string;
+    };
+    "ResultSuccess_RouterCostOverTime-Array_": {
+      data: components["schemas"]["RouterCostOverTime"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_RouterCostOverTime-Array.string_": components["schemas"]["ResultSuccess_RouterCostOverTime-Array_"] | components["schemas"]["ResultError_string_"];
+    RouterLatencyOverTime: {
+      /** Format: double */
+      duration: number;
+      /** Format: date-time */
+      time: string;
+    };
+    "ResultSuccess_RouterLatencyOverTime-Array_": {
+      data: components["schemas"]["RouterLatencyOverTime"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_RouterLatencyOverTime-Array.string_": components["schemas"]["ResultSuccess_RouterLatencyOverTime-Array_"] | components["schemas"]["ResultError_string_"];
     CreateRouterResult: {
       routerVersionId: string;
       routerHash: string;
@@ -3800,6 +3878,28 @@ export interface operations {
       };
     };
   };
+  RenamePrompt2025: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
   DeletePrompt2025: {
     parameters: {
       path: {
@@ -3827,6 +3927,25 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025Inputs: {
+    parameters: {
+      query: {
+        requestId: string;
+      };
+      path: {
+        promptId: string;
+        versionId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025Input.string_"];
         };
       };
     };
@@ -4159,6 +4278,16 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  HasPrompts: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__hasPrompts-boolean_.string_"];
         };
       };
     };
@@ -6412,7 +6541,7 @@ export interface operations {
   GetLatestRouterConfig: {
     parameters: {
       path: {
-        id: string;
+        routerHash: string;
       };
     };
     responses: {
@@ -6427,7 +6556,7 @@ export interface operations {
   UpdateRouter: {
     parameters: {
       path: {
-        id: string;
+        routerHash: string;
       };
     };
     requestBody: {
@@ -6443,6 +6572,51 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetRouterRequestsOverTime: {
+    parameters: {
+      path: {
+        routerHash: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_RouterRequestsOverTime-Array.string_"];
+        };
+      };
+    };
+  };
+  GetRouterCostOverTime: {
+    parameters: {
+      path: {
+        routerHash: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_RouterCostOverTime-Array.string_"];
+        };
+      };
+    };
+  };
+  GetRouterLatencyOverTime: {
+    parameters: {
+      path: {
+        routerHash: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_RouterLatencyOverTime-Array.string_"];
         };
       };
     };

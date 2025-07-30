@@ -8,7 +8,7 @@ const ExperimentTablePageEmpty = (props: ExperimentTablePageEmptyProps) => {
   const { experimentTableId } = props;
 
   return (
-    <div className="flex flex-col w-full space-y-4 pt-4">
+    <div className="flex w-full flex-col space-y-4 pt-4">
       <ExperimentTable experimentTableId={experimentTableId ?? ""} />
     </div>
   );

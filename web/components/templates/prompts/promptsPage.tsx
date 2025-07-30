@@ -52,7 +52,7 @@ const PromptsPage = (props: PromptsPageProps) => {
   const promptCount = prompts?.length ?? 0;
   const { canCreate, freeLimit } = useFeatureLimit("prompts", promptCount);
   const filteredPrompts = prompts?.filter((prompt) =>
-    prompt.user_defined_id.toLowerCase().includes(searchName.toLowerCase())
+    prompt.user_defined_id.toLowerCase().includes(searchName.toLowerCase()),
   );
 
   const handleCreatePrompt = async () => {
@@ -88,8 +88,8 @@ const PromptsPage = (props: PromptsPageProps) => {
 
   if (!isLoading && promptCount === 0) {
     return (
-      <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">
-        <div className="flex flex-1 h-full">
+      <div className="flex h-screen w-full flex-col bg-background dark:bg-sidebar-background">
+        <div className="flex h-full flex-1">
           <EmptyStateCard
             feature="prompts"
             onPrimaryClick={handleCreatePrompt}
@@ -100,7 +100,7 @@ const PromptsPage = (props: PromptsPageProps) => {
   }
 
   return (
-    <main className="min-h-screen flex flex-col gap-4">
+    <main className="flex min-h-screen flex-col gap-4">
       <AuthHeader
         className="min-w-full"
         title="Prompts"
@@ -113,9 +113,9 @@ const PromptsPage = (props: PromptsPageProps) => {
                 disabled={isCreating}
               >
                 {isCreating ? (
-                  <PiSpinnerGapBold className="animate-spin h-4 w-4 mr-2" />
+                  <PiSpinnerGapBold className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
-                  <PiPlusBold className="h-4 w-4 mr-2" />
+                  <PiPlusBold className="mr-2 h-4 w-4" />
                 )}
                 {isCreating ? "Creating..." : "New Prompt"}
               </Button>
@@ -127,7 +127,7 @@ const PromptsPage = (props: PromptsPageProps) => {
                   Import from Code
                 </Button>
               </DialogTrigger>
-              <DialogContent className="h-[40rem] w-full max-w-4xl flex flex-col">
+              <DialogContent className="flex h-[40rem] w-full max-w-4xl flex-col">
                 <DialogHeader>
                   <DialogTitle>Import from Code</DialogTitle>
                 </DialogHeader>
@@ -178,7 +178,7 @@ const chatCompletion = await openai.chat.completions.create(
       )}
       {isLoading ? (
         // Loading State
-        <div className="flex flex-col w-full mt-16 justify-center items-center">
+        <div className="mt-16 flex w-full flex-col items-center justify-center">
           <LoadingAnimation title="Loading Prompts..." />
         </div>
       ) : (
@@ -187,10 +187,10 @@ const chatCompletion = await openai.chat.completions.create(
           {promptCount > 0 && (
             <div
               id="util"
-              className="flex flex-row justify-between items-center px-8 shrink-0"
+              className="flex shrink-0 flex-row items-center justify-between px-8"
             >
-              <div className="flex flex-row items-center space-x-2 w-full">
-                <div className="max-w-xs w-full">
+              <div className="flex w-full flex-row items-center space-x-2">
+                <div className="w-full max-w-xs">
                   <Input
                     value={searchName}
                     onChange={(e) => setSearchName(e.target.value)}
@@ -228,7 +228,7 @@ const chatCompletion = await openai.chat.completions.create(
               // Card View
               <ul
                 className={cn(
-                  "w-full h-full grid grid-cols-2 xl:grid-cols-4 gap-4 px-8"
+                  "grid h-full w-full grid-cols-2 gap-4 px-8 xl:grid-cols-4",
                 )}
               >
                 {filteredPrompts.map((prompt, i) => (
@@ -246,8 +246,8 @@ const chatCompletion = await openai.chat.completions.create(
                     key: "user_defined_id",
                     header: "Name",
                     render: (prompt) => (
-                      <div className="text-black dark:text-white font-semibold underline flex items-center">
-                        <DocumentTextIcon className="h-4 w-4 mr-1" />
+                      <div className="flex items-center font-semibold text-black underline dark:text-white">
+                        <DocumentTextIcon className="mr-1 h-4 w-4" />
                         {prompt.user_defined_id}
                       </div>
                     ),
@@ -285,8 +285,8 @@ const chatCompletion = await openai.chat.completions.create(
                         {prompt.metadata?.createdFromUi === true ? (
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <Badge className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs font-medium rounded-lg px-2 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white">
-                                <PencilIcon className="h-4 w-4 mr-1" />
+                              <Badge className="rounded-lg border border-slate-200 bg-slate-100 px-2 text-xs font-medium text-slate-900 hover:bg-slate-100 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-800 dark:hover:text-white">
+                                <PencilIcon className="mr-1 h-4 w-4" />
                                 <p>Editable</p>
                               </Badge>
                             </TooltipTrigger>
@@ -302,8 +302,8 @@ const chatCompletion = await openai.chat.completions.create(
                         ) : (
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <Badge className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs font-medium rounded-lg px-2 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white">
-                                <EyeIcon className="h-4 w-4 mr-1" />
+                              <Badge className="rounded-lg border border-slate-200 bg-slate-100 px-2 text-xs font-medium text-slate-900 hover:bg-slate-100 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-800 dark:hover:text-white">
+                                <EyeIcon className="mr-1 h-4 w-4" />
                                 <p>View only</p>
                               </Badge>
                             </TooltipTrigger>
@@ -340,9 +340,9 @@ const chatCompletion = await openai.chat.completions.create(
             )
           ) : (
             // Fallback for when filtering returns no results
-            <div className="flex items-center justify-center mt-[10rem]">
-              <div className="flex flex-col items-center justify-center gap-6 px-4 text-center max-w-lg">
-                <p className="text-gray-500 text-lg">
+            <div className="mt-[10rem] flex items-center justify-center">
+              <div className="flex max-w-lg flex-col items-center justify-center gap-6 px-4 text-center">
+                <p className="text-lg text-gray-500">
                   No prompts match your search criteria.
                 </p>
                 <Button variant="outline" onClick={() => setSearchName("")}>

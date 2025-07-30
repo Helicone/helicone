@@ -1,0 +1,409 @@
+---
+title: "Build an AI Debate Simulator with Vercel AI Gateway"
+sidebarTitle: "AI Debate Simulator"
+description: "Create an interactive debate app that showcases different ways to integrate Vercel AI Gateway with Helicone observability"
+"twitter:title": "AI Debate Simulator with Vercel AI Gateway + Helicone"
+---
+
+Learn how to create an interactive AI debate application that demonstrates four different integration approaches for Vercel AI Gateway with Helicone observability. This cookbook shows you how to support both streaming and non-streaming responses across different SDKs.
+
+## What You'll Build
+
+An AI debate simulator where:
+- Users can select topics and watch AI-generated debates
+- Four different integration methods showcase flexibility
+- Helicone provides complete observability for all approaches
+- Both streaming and non-streaming responses are supported
+
+## Prerequisites
+
+- Next.js project with TypeScript
+- Vercel AI Gateway API key from your [Vercel dashboard](https://vercel.com/dashboard)
+- Helicone API key from [Helicone](https://helicone.ai)
+
+## Setup
+
+Install the required dependencies:
+
+```bash
+npm install @ai-sdk/openai @ai-sdk/gateway ai openai
+```
+
+Set up your environment variables:
+
+```env
+VERCEL_AI_GATEWAY_API_KEY=your_vercel_gateway_key
+HELICONE_API_KEY=your_helicone_key
+```
+
+## Integration Methods
+
+### 1. Vercel AI SDK (Non-Streaming)
+
+Create a basic debate generation endpoint using the Vercel AI SDK:
+
+```typescript
+// app/api/vercel-ai-debate/route.ts
+import { createGateway } from '@ai-sdk/gateway';
+import { generateText } from 'ai';
+
+// Configure gateway with Helicone
+const gateway = createGateway({
+  apiKey: process.env.VERCEL_AI_GATEWAY_API_KEY,
+  baseURL: "https://vercel.helicone.ai/v1/ai",
+  headers: {
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+  },
+});
+
+export async function POST(request: Request) {
+  const { topic, position } = await request.json();
+
+  try {
+    const result = await generateText({
+      model: gateway('openai/gpt-4o-mini'),
+      messages: [
+        {
+          role: 'system',
+          content: `You are a skilled debater. Argue ${position} the topic with passion and logic.`
+        },
+        {
+          role: 'user',
+          content: `Topic: ${topic}. Present your ${position} argument.`
+        }
+      ],
+      headers: {
+        'Helicone-Property-Topic': topic,
+        'Helicone-Property-Position': position,
+        'Helicone-Property-Method': 'vercel-ai-sdk'
+      },
+      temperature: 0.8,
+      maxTokens: 300
+    });
+
+    return Response.json({ 
+      argument: result.text,
+      usage: result.usage 
+    });
+  } catch (error) {
+    console.error('Debate generation failed:', error);
+    return Response.json({ error: 'Failed to generate debate' }, { status: 500 });
+  }
+}
+```
+
+### 2. Vercel AI SDK (Streaming)
+
+Enable real-time debate streaming for better user experience:
+
+```typescript
+// app/api/vercel-ai-stream/route.ts
+import { createGateway } from '@ai-sdk/gateway';
+import { streamText } from 'ai';
+
+const gateway = createGateway({
+  apiKey: process.env.VERCEL_AI_GATEWAY_API_KEY,
+  baseURL: "https://vercel.helicone.ai/v1/ai",
+  headers: {
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+  },
+});
+
+export async function POST(request: Request) {
+  const { topic, position } = await request.json();
+
+  const result = await streamText({
+    model: gateway('openai/gpt-4o-mini'),
+    messages: [
+      {
+        role: 'system',
+        content: `You are a skilled debater. Argue ${position} the topic.`
+      },
+      {
+        role: 'user',
+        content: `Topic: ${topic}. Present your ${position} argument.`
+      }
+    ],
+    headers: {
+      'Helicone-Property-Topic': topic,
+      'Helicone-Property-Position': position,
+      'Helicone-Property-Method': 'vercel-ai-stream',
+      'Helicone-Property-Stream': 'true'
+    },
+    temperature: 0.8,
+    maxTokens: 300
+  });
+
+  return result.toTextStreamResponse();
+}
+```
+
+### 3. OpenAI SDK (Non-Streaming)
+
+Use the OpenAI SDK directly with Vercel AI Gateway routing:
+
+```typescript
+// app/api/openai-debate/route.ts
+import OpenAI from 'openai';
+
+// Configure OpenAI client with Helicone-enabled Vercel AI Gateway
+const openai = new OpenAI({
+  apiKey: process.env.VERCEL_AI_GATEWAY_API_KEY,
+  baseURL: "https://vercel.helicone.ai/v1",
+  defaultHeaders: {
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+  },
+});
+
+export async function POST(request: Request) {
+  const { topic, position } = await request.json();
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: `You are a skilled debater. Argue ${position} the topic.`
+        },
+        {
+          role: 'user',
+          content: `Topic: ${topic}. Present your ${position} argument.`
+        }
+      ],
+      temperature: 0.8,
+      max_tokens: 300,
+      // Track metadata in Helicone
+      headers: {
+        'Helicone-Property-Topic': topic,
+        'Helicone-Property-Position': position,
+        'Helicone-Property-Method': 'openai-sdk'
+      }
+    });
+
+    return Response.json({ 
+      argument: completion.choices[0].message.content,
+      usage: completion.usage 
+    });
+  } catch (error) {
+    console.error('OpenAI debate generation failed:', error);
+    return Response.json({ error: 'Failed to generate debate' }, { status: 500 });
+  }
+}
+```
+
+### 4. OpenAI SDK (Streaming)
+
+Enable streaming with the OpenAI SDK:
+
+```typescript
+// app/api/openai-stream/route.ts
+import OpenAI from 'openai';
+
+const openai = new OpenAI({
+  apiKey: process.env.VERCEL_AI_GATEWAY_API_KEY,
+  baseURL: "https://vercel.helicone.ai/v1",
+  defaultHeaders: {
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+  },
+});
+
+export async function POST(request: Request) {
+  const { topic, position } = await request.json();
+
+  const stream = await openai.chat.completions.create({
+    model: 'gpt-4o-mini',
+    messages: [
+      {
+        role: 'system',
+        content: `You are a skilled debater. Argue ${position} the topic.`
+      },
+      {
+        role: 'user',
+        content: `Topic: ${topic}. Present your ${position} argument.`
+      }
+    ],
+    temperature: 0.8,
+    max_tokens: 300,
+    stream: true,
+    headers: {
+      'Helicone-Property-Topic': topic,
+      'Helicone-Property-Position': position,
+      'Helicone-Property-Method': 'openai-stream',
+      'Helicone-Property-Stream': 'true'
+    }
+  });
+
+  // Convert OpenAI stream to Response stream
+  const encoder = new TextEncoder();
+  const readableStream = new ReadableStream({
+    async start(controller) {
+      for await (const chunk of stream) {
+        const text = chunk.choices[0]?.delta?.content || '';
+        controller.enqueue(encoder.encode(text));
+      }
+      controller.close();
+    }
+  });
+
+  return new Response(readableStream, {
+    headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+  });
+}
+```
+
+## Frontend Integration
+
+Create a debate interface that supports all integration methods:
+
+```tsx
+// app/debate/page.tsx
+'use client';
+
+import { useState } from 'react';
+
+type IntegrationMethod = 'vercel-ai' | 'vercel-ai-stream' | 'openai' | 'openai-stream';
+
+export default function DebatePage() {
+  const [topic, setTopic] = useState('');
+  const [method, setMethod] = useState<IntegrationMethod>('vercel-ai-stream');
+  const [proArgument, setProArgument] = useState('');
+  const [conArgument, setConArgument] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const generateDebate = async () => {
+    setIsLoading(true);
+    setProArgument('');
+    setConArgument('');
+
+    try {
+      // Generate pro argument
+      const proResponse = await generateArgument(topic, 'for', method);
+      if (method.includes('stream')) {
+        await streamResponse(proResponse, setProArgument);
+      } else {
+        const data = await proResponse.json();
+        setProArgument(data.argument);
+      }
+
+      // Generate con argument
+      const conResponse = await generateArgument(topic, 'against', method);
+      if (method.includes('stream')) {
+        await streamResponse(conResponse, setConArgument);
+      } else {
+        const data = await conResponse.json();
+        setConArgument(data.argument);
+      }
+    } catch (error) {
+      console.error('Debate generation failed:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const generateArgument = async (topic: string, position: string, method: IntegrationMethod) => {
+    const endpoint = `/api/${method.replace('-stream', method.includes('stream') ? '-stream' : '-debate')}`;
+    
+    return fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ topic, position })
+    });
+  };
+
+  const streamResponse = async (response: Response, setter: (text: string) => void) => {
+    const reader = response.body?.getReader();
+    const decoder = new TextDecoder();
+
+    if (!reader) return;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      
+      const chunk = decoder.decode(value);
+      setter(prev => prev + chunk);
+    }
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6">AI Debate Simulator</h1>
+      
+      <div className="mb-6 space-y-4">
+        <input
+          type="text"
+          value={topic}
+          onChange={(e) => setTopic(e.target.value)}
+          placeholder="Enter debate topic..."
+          className="w-full p-3 border rounded-lg"
+        />
+        
+        <select
+          value={method}
+          onChange={(e) => setMethod(e.target.value as IntegrationMethod)}
+          className="w-full p-3 border rounded-lg"
+        >
+          <option value="vercel-ai">Vercel AI SDK</option>
+          <option value="vercel-ai-stream">Vercel AI SDK (Streaming)</option>
+          <option value="openai">OpenAI SDK</option>
+          <option value="openai-stream">OpenAI SDK (Streaming)</option>
+        </select>
+        
+        <button
+          onClick={generateDebate}
+          disabled={!topic || isLoading}
+          className="w-full p-3 bg-blue-600 text-white rounded-lg disabled:opacity-50"
+        >
+          {isLoading ? 'Generating Debate...' : 'Start Debate'}
+        </button>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="bg-green-50 p-6 rounded-lg">
+          <h2 className="text-xl font-semibold mb-3 text-green-800">Pro Argument</h2>
+          <p className="whitespace-pre-wrap">{proArgument || 'Waiting for debate to start...'}</p>
+        </div>
+        
+        <div className="bg-red-50 p-6 rounded-lg">
+          <h2 className="text-xl font-semibold mb-3 text-red-800">Con Argument</h2>
+          <p className="whitespace-pre-wrap">{conArgument || 'Waiting for debate to start...'}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+## Monitoring in Helicone
+
+View comprehensive analytics for your debate simulator:
+
+1. **Method Comparison**: Compare performance across integration methods
+2. **Topic Analytics**: See which debate topics are most popular
+3. **Stream vs Non-Stream**: Analyze latency and user experience differences
+4. **Cost Tracking**: Monitor costs per debate and integration method
+
+### Custom Filters
+
+Use Helicone's property filters to analyze:
+- Performance by integration method: `property:Method = "vercel-ai-stream"`
+- Popular topics: Group by `property:Topic`
+- Streaming usage: Filter by `property:Stream = "true"`
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Sessions" href="/features/sessions" icon="comments">
+    Track multi-turn debates
+  </Card>
+  <Card title="Prompts" href="/features/prompts" icon="file-lines">
+    Manage debate templates
+  </Card>
+  <Card title="Rate Limiting" href="/features/advanced-usage/rate-limiting" icon="gauge">
+    Control debate frequency
+  </Card>
+  <Card title="Custom Properties" href="/features/advanced-usage/custom-properties" icon="tag">
+    Track debate metadata
+  </Card>
+</CardGroup>

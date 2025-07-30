@@ -1,6 +1,6 @@
 ---
 title: "Configuration Reference"
-sidebarTitle: "Configuration"
+sidebarTitle: "Configuration Reference"
 description: "Complete reference for configuring your LLM Gateway"
 ---
 
@@ -15,18 +15,18 @@ Each Helicone AI Gateway deployment can configure multiple independent routing p
 
   ```yaml
   routers:
-    production:
+    latency:
       load-balance:
         chat:
-          strategy: latency
+          strategy: provider-latency
           providers:
             - openai
             - anthropic
     
-    development:
+    weighted:
       load-balance:
         chat:
-          strategy: weighted
+          strategy: provider-weighted
           providers:
             - provider: anthropic
               weight: '0.9'
@@ -34,14 +34,14 @@ Each Helicone AI Gateway deployment can configure multiple independent routing p
               weight: '0.1'
   ```
 
-  **Usage:** Set your OpenAI SDK baseURL to `http://localhost:8080/production` or `http://localhost:8080/experimental`
+  **Usage:** Set your OpenAI SDK baseURL to `http://localhost:8080/router/latency` or `http://localhost:8080/router/weighted`
 </ParamField>
 
 ## Load Balancing
 
 Distribute requests across multiple providers to optimize performance, costs, and reliability. The gateway supports latency-based and weighted strategies for different use cases.
 
-[Learn more](/ai-gateway/concepts/load-balancing)
+[Learn more](/ai-gateway/concepts/loadbalancing)
 
 ### Latency Strategy
 
@@ -53,7 +53,7 @@ Distribute requests across multiple providers to optimize performance, costs, an
     production:
       load-balance:
         chat:
-          strategy: latency
+          strategy: provider-latency
           providers:
             - openai
             - anthropic
@@ -72,7 +72,7 @@ Distribute requests across multiple providers to optimize performance, costs, an
     production:
       load-balance:
         chat:
-          strategy: weighted
+          strategy: provider-weighted
           providers:
             - provider: anthropic
               weight: '0.95'
@@ -110,7 +110,7 @@ Distribute requests across multiple providers to optimize performance, costs, an
 
 Store and reuse LLM responses for identical requests to dramatically reduce costs and improve response times. Cache directives control response freshness and staleness tolerance.
 
-[Learn more](/ai-gateway/concepts/caching)
+[Learn more](/ai-gateway/concepts/cache)
 
 ### Cache Store
 
@@ -214,7 +214,7 @@ Store and reuse LLM responses for identical requests to dramatically reduce cost
 Control request frequency using GCRA (Generic Cell Rate Algorithm) with burst capacity and smooth rate limiting. Global limits are checked first, then router-specific limits are applied.
 
 <Warning>
-  **Authentication Required**: Rate limiting works per-API-key, so you must enable Helicone authentication for rate limiting to function properly. [Set up authentication](/ai-gateway/authentication) first.
+  **Authentication Required**: Rate limiting works per-API-key, so you must enable Helicone authentication for rate limiting to function properly. [Set up authentication](/ai-gateway/self-hosted/authentication) first.
 </Warning>
 
 [Learn more](/ai-gateway/concepts/rate-limiting)
@@ -487,28 +487,44 @@ The following fields are available for both global and router-level retry config
 
 ## Helicone Add-ons
 
-Configure integration with the Helicone platform for authentication and observability.
+Configure integration with the Helicone platform for authentication, observability, and prompt management.
 
-[Learn more about Authentication](/ai-gateway/authentication) | [Learn more about Observability](/ai-gateway/observability)
+[Learn more about Authentication](/ai-gateway/self-hosted/authentication) | [Learn more about Observability](/ai-gateway/self-hosted/observability) | [Learn more about Prompts](/features/advanced-usage/prompts)
 
 <ParamField path="helicone.features" type="string" default="none" optional>
-  Enable Helicone features such as LLM observability and authentication for secure API access.
+  Enable Helicone features for your AI Gateway.
 
+  **Authentication only:**
   ```yaml
   helicone:
-    # Set to `features: observability` to enable observability and auth
     features: auth
   ```
-
-  Enable authentication (required) and request logging to your Helicone dashboard.
-
+  
+  **Authentication and observability:**
   ```yaml
   helicone:
     features: observability
   ```
 
-  **When enabled:** Must set the `HELICONE_CONTROL_PLANE_API_KEY` environment variable with your Helicone API key when deploying
-  the AI Gateway when using Helicone add ons.
+  **Authentication and prompt management:**
+  ```yaml
+  helicone:
+    features: prompts
+  ```
+
+  **All features (authentication, observability, and prompts):**
+  ```yaml
+  helicone:
+    features: all
+  ```
+
+  **Available options:**
+  - `auth` - Enable authentication for secure API access
+  - `observability` - Enable authentication and request logging to your Helicone dashboard
+  - `prompts` - Enable authentication and prompt management with `prompt_id` support
+  - `all` - Enable all Helicone features (authentication, observability, and prompts)
+
+  **When enabled:** Must set the `HELICONE_CONTROL_PLANE_API_KEY` environment variable with your Helicone API key when deploying the AI Gateway.
 </ParamField>
 
 <ParamField path="helicone.base-url" type="string" default="https://api.helicone.ai">
@@ -639,7 +655,7 @@ Configure OpenTelemetry monitoring for the AI Gateway application's health and p
 <Note>
   Monitor the AI Gateway's health and performance with OpenTelemetry. We provide Docker Compose for local testing and Grafana dashboard configs for production. 
   
-  [Learn more](/ai-gateway/debugging/telemetry)
+  [Learn more](/ai-gateway/self-hosted/debugging/telemetry)
 </Note>
 
 <ParamField path="telemetry.level" type="string" default="info">

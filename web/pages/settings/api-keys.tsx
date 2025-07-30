@@ -20,7 +20,7 @@ Connections.getLayout = function getLayout(page: ReactElement) {
 export default Connections;
 
 export const getServerSideProps = async (
-  context: GetServerSidePropsContext
+  context: GetServerSidePropsContext,
 ) => {
   const { page, page_size, sortKey, sortDirection, isCustomProperty, tab } =
     context.query;

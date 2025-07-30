@@ -3,7 +3,7 @@ import { getXOverTime } from "./getXOverTime";
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
 
 export async function getUsersOverTime(
-  data: DataOverTimeRequest
+  data: DataOverTimeRequest,
 ): Promise<Result<UsersOverTime[], string>> {
   const res = await getXOverTime<{
     users: number;
@@ -12,7 +12,7 @@ export async function getUsersOverTime(
     resData.map((d) => ({
       time: new Date(new Date(d.created_at_trunc).getTime()),
       count: Number(d.users),
-    }))
+    })),
   );
 }
 export interface UsersOverTime {

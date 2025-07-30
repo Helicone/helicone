@@ -20,9 +20,9 @@ export const OpenStatsPage = () => {
         backgroundPositionY: "-20px",
       }}
     >
-      <Col className="pb-[80px] w-full justify-center items-center gap-y-[40px] max-w-5xl px-[24px] lg:mx-auto">
-        <Col className="mb-[8px] mt-[180px] justify-center items-center gap-[24px] w-full">
-          <div className="text-gray-500  font-semibold text-[14px]">
+      <Col className="w-full max-w-5xl items-center justify-center gap-y-[40px] px-[24px] pb-[80px] lg:mx-auto">
+        <Col className="mb-[8px] mt-[180px] w-full items-center justify-center gap-[24px]">
+          <div className="text-[14px] font-semibold text-gray-500">
             {new Date().toLocaleDateString("en-US", {
               month: "long",
               day: "numeric",
@@ -30,20 +30,20 @@ export const OpenStatsPage = () => {
             })}
           </div>
 
-          <h1 className="text-[48px] font-bold text-center tracking-[30px]">
+          <h1 className="text-center text-[48px] font-bold tracking-[30px]">
             OPEN STATS
           </h1>
-          <h1 className="text-[18px] font-semibold opacity-80 text-center tracking-[12px]">
+          <h1 className="text-center text-[18px] font-semibold tracking-[12px] opacity-80">
             THE FUTURE IS OPEN
           </h1>
 
-          <Col className="block lg:hidden items-center  gap-[12px] justify-between w-full">
+          <Col className="block w-full items-center justify-between gap-[12px] lg:hidden">
             <button
-              className="text-[18px] flex items-center gap-[8px] font-semibold py-[8px] px-[24px] rounded-lg border-2"
+              className="flex items-center gap-[8px] rounded-lg border-2 px-[24px] py-[8px] text-[18px] font-semibold"
               onClick={() => {
                 const tweetText = `Check out Helicone's Open Stats: ${window.location.href}`;
                 const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-                  tweetText
+                  tweetText,
                 )}`;
                 window.open(tweetUrl, "_blank");
               }}
@@ -51,11 +51,11 @@ export const OpenStatsPage = () => {
               <FaXTwitter />
               <div>Share</div>
             </button>
-            <Row className="gap-[16px] bg-black p-[4px] font-bold rounded-lg border-[#63758933] border-opacity-20 border">
+            <Row className="gap-[16px] rounded-lg border border-[#63758933] border-opacity-20 bg-black p-[4px] font-bold">
               {["Top Stats", "Other Stats"].map((x, i) => (
                 <button
-                  className={`py-[8px] px-[16px] rounded-lg ${
-                    tab === i ? "bg-sky-800 shadow-lg" : " bg-black"
+                  className={`rounded-lg px-[16px] py-[8px] ${
+                    tab === i ? "bg-sky-800 shadow-lg" : "bg-black"
                   }`}
                   key={`${x}-${i}`}
                   onClick={() => setQueryParams({ ...queryParams, tab: i })}
@@ -66,12 +66,12 @@ export const OpenStatsPage = () => {
             </Row>
           </Col>
 
-          <Row className="hidden lg:flex justify-between w-full ">
-            <Row className="gap-[16px] bg-black p-[4px] font-bold rounded-lg border-[#63758933] border-opacity-20 border">
+          <Row className="hidden w-full justify-between lg:flex">
+            <Row className="gap-[16px] rounded-lg border border-[#63758933] border-opacity-20 bg-black p-[4px] font-bold">
               {["Top Stats", "Other Stats"].map((x, i) => (
                 <button
-                  className={`py-[8px] px-[16px] rounded-lg ${
-                    tab === i ? "bg-sky-800 shadow-lg" : " bg-black"
+                  className={`rounded-lg px-[16px] py-[8px] ${
+                    tab === i ? "bg-sky-800 shadow-lg" : "bg-black"
                   }`}
                   key={`${x}-${i}`}
                   onClick={() => setQueryParams({ ...queryParams, tab: i })}
@@ -81,11 +81,11 @@ export const OpenStatsPage = () => {
               ))}
             </Row>
             <button
-              className="text-[18px] flex items-center gap-[8px] font-semibold py-[8px] px-[24px] rounded-lg border-2"
+              className="flex items-center gap-[8px] rounded-lg border-2 px-[24px] py-[8px] text-[18px] font-semibold"
               onClick={() => {
                 const tweetText = `Check out Helicone's Open Stats: ${window.location.href}`;
                 const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-                  tweetText
+                  tweetText,
                 )}`;
                 window.open(tweetUrl, "_blank");
               }}

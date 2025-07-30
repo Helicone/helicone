@@ -42,7 +42,7 @@ export default function InputEditor({
         if (rest.length) {
           const restOfLine = rest.join(":");
           return `<span style="color: #334155; font-weight: 600;">${escapeHTML(
-            key
+            key,
           )}</span>:${escapeHTML(restOfLine)}`;
         }
         return escapeHTML(line);
@@ -127,7 +127,7 @@ export default function InputEditor({
   return (
     <Card
       className={`w-full overflow-hidden p-2 hover:bg-[#F9FAFB] ${
-        isEditing ? "border-none shadow-none bg-[#F9FAFB]" : "border"
+        isEditing ? "border-none bg-[#F9FAFB] shadow-none" : "border"
       }`}
     >
       <Label htmlFor="yaml-editor" className="sr-only">

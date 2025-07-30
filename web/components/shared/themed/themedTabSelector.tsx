@@ -19,15 +19,15 @@ function ThemedTabSelector<T extends string>({
   onTabChange,
 }: TabSelectorProps<T>) {
   return (
-    <div className="border-2 flex flex-row h-[34px] text-gray-500 rounded-lg bg-white w-fit">
+    <div className="flex h-[34px] w-fit flex-row rounded-lg border-2 bg-white text-gray-500">
       {tabs.map((tab) => (
         <button
           key={tab.id}
           className={clsx(
-            "w-full h-full flex justify-items-center items-center text-sm px-[24px] font-semibold shadow-sm text-center my-auto",
+            "my-auto flex h-full w-full items-center justify-items-center px-[24px] text-center text-sm font-semibold shadow-sm",
             currentTab === tab.id
-              ? "bg-[#E0F5FF] border border-[#0CA5E9] text-black rounded-md"
-              : "text-black border border-transparent hover:bg-gray-100 rounded-md"
+              ? "rounded-md border border-[#0CA5E9] bg-[#E0F5FF] text-black"
+              : "rounded-md border border-transparent text-black hover:bg-gray-100",
           )}
           onClick={() => onTabChange(tab.id)}
         >

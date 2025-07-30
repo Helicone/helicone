@@ -326,7 +326,7 @@ ORDER BY
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Result<HeliconeStats, string>>
+  res: NextApiResponse<Result<HeliconeStats, string>>,
 ) {
   res.setHeader("Cache-Control", `s-maxage=${60 * 10}, public`); // 10 minutes
 

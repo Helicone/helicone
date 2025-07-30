@@ -35,7 +35,7 @@ function CopyButton({
   return (
     <button
       onClick={handleCopy}
-      className="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors"
+      className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-700 transition-colors hover:bg-gray-200"
       aria-label={`Copy ${label} to clipboard`}
       disabled={!text}
     >
@@ -86,9 +86,9 @@ Time: ${new Date().toISOString()}
       `.trim();
 
       return (
-        <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
-          <div className="max-w-3xl w-full space-y-8">
-            <div className="bg-white shadow-md rounded-lg p-6">
+        <div className="flex min-h-screen items-center justify-center bg-gray-100 px-4 py-12 sm:px-6 lg:px-8">
+          <div className="w-full max-w-3xl space-y-8">
+            <div className="rounded-lg bg-white p-6 shadow-md">
               <div className="flex items-center justify-center">
                 <XCircleIcon className="h-12 w-12 text-red-500" />
               </div>
@@ -101,7 +101,7 @@ Time: ${new Date().toISOString()}
               </p>
               {this.state.error && (
                 <div className="mt-4">
-                  <div className="flex justify-between items-center">
+                  <div className="flex items-center justify-between">
                     <h3 className="text-lg font-medium text-gray-900">
                       Error details:
                     </h3>
@@ -110,26 +110,26 @@ Time: ${new Date().toISOString()}
                       label="Copy full error report"
                     />
                   </div>
-                  <div className="mt-2 text-sm bg-red-50 border border-red-200 rounded-md overflow-hidden">
-                    <div className="bg-red-100 px-4 py-2 font-medium text-red-800 flex justify-between items-center">
+                  <div className="mt-2 overflow-hidden rounded-md border border-red-200 bg-red-50 text-sm">
+                    <div className="flex items-center justify-between bg-red-100 px-4 py-2 font-medium text-red-800">
                       <span>{this.state.error.name}</span>
-                      <span className="text-xs bg-red-200 px-2 py-1 rounded-full">
+                      <span className="rounded-full bg-red-200 px-2 py-1 text-xs">
                         {process.env.NODE_ENV}
                       </span>
                     </div>
                     <div className="p-4">
-                      <p className="text-red-700 font-medium">
+                      <p className="font-medium text-red-700">
                         {this.state.error.message}
                       </p>
                       {this.state.error.stack && (
-                        <div className="mt-2 relative">
-                          <div className="absolute top-2 right-2 z-10">
+                        <div className="relative mt-2">
+                          <div className="absolute right-2 top-2 z-10">
                             <CopyButton
                               text={this.state.error.stack || ""}
                               label="Copy stack"
                             />
                           </div>
-                          <pre className="text-xs text-red-600 bg-red-50 p-2 rounded border border-red-100 overflow-auto max-h-60 whitespace-pre-wrap">
+                          <pre className="max-h-60 overflow-auto whitespace-pre-wrap rounded border border-red-100 bg-red-50 p-2 text-xs text-red-600">
                             {this.state.error.stack}
                           </pre>
                         </div>
@@ -138,7 +138,7 @@ Time: ${new Date().toISOString()}
                   </div>
                   {this.state.errorInfo && (
                     <div className="mt-4">
-                      <div className="flex justify-between items-center">
+                      <div className="flex items-center justify-between">
                         <h4 className="text-md font-medium text-gray-900">
                           Component Stack:
                         </h4>
@@ -147,7 +147,7 @@ Time: ${new Date().toISOString()}
                           label="Copy component stack"
                         />
                       </div>
-                      <pre className="mt-2 text-xs text-gray-600 bg-gray-50 p-2 rounded border border-gray-200 overflow-auto max-h-60 whitespace-pre-wrap">
+                      <pre className="mt-2 max-h-60 overflow-auto whitespace-pre-wrap rounded border border-gray-200 bg-gray-50 p-2 text-xs text-gray-600">
                         {this.state.errorInfo.componentStack}
                       </pre>
                     </div>
@@ -157,13 +157,13 @@ Time: ${new Date().toISOString()}
               <div className="mt-6 flex flex-col space-y-2">
                 <button
                   onClick={() => window.location.reload()}
-                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  className="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 >
                   Reload Page
                 </button>
                 <button
                   onClick={() => window.history.back()}
-                  className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  className="flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 >
                   Go Back
                 </button>
@@ -207,9 +207,9 @@ Time: ${new Date().toISOString()}
     `.trim();
 
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
-        <div className="max-w-3xl w-full space-y-8">
-          <div className="bg-white shadow-md rounded-lg p-6">
+      <div className="flex min-h-screen items-center justify-center bg-gray-100 px-4 py-12 sm:px-6 lg:px-8">
+        <div className="w-full max-w-3xl space-y-8">
+          <div className="rounded-lg bg-white p-6 shadow-md">
             <div className="flex items-center justify-center">
               <XCircleIcon className="h-12 w-12 text-red-500" />
             </div>
@@ -222,7 +222,7 @@ Time: ${new Date().toISOString()}
             </p>
             {error && (
               <div className="mt-4">
-                <div className="flex justify-between items-center">
+                <div className="flex items-center justify-between">
                   <h3 className="text-lg font-medium text-gray-900">
                     Error details:
                   </h3>
@@ -231,24 +231,24 @@ Time: ${new Date().toISOString()}
                     label="Copy full error report"
                   />
                 </div>
-                <div className="mt-2 text-sm bg-red-50 border border-red-200 rounded-md overflow-hidden">
-                  <div className="bg-red-100 px-4 py-2 font-medium text-red-800 flex justify-between items-center">
+                <div className="mt-2 overflow-hidden rounded-md border border-red-200 bg-red-50 text-sm">
+                  <div className="flex items-center justify-between bg-red-100 px-4 py-2 font-medium text-red-800">
                     <span>{error.name}</span>
-                    <span className="text-xs bg-red-200 px-2 py-1 rounded-full">
+                    <span className="rounded-full bg-red-200 px-2 py-1 text-xs">
                       {process.env.NODE_ENV}
                     </span>
                   </div>
                   <div className="p-4">
-                    <p className="text-red-700 font-medium">{error.message}</p>
+                    <p className="font-medium text-red-700">{error.message}</p>
                     {error.stack && (
-                      <div className="mt-2 relative">
-                        <div className="absolute top-2 right-2 z-10">
+                      <div className="relative mt-2">
+                        <div className="absolute right-2 top-2 z-10">
                           <CopyButton
                             text={error.stack || ""}
                             label="Copy stack"
                           />
                         </div>
-                        <pre className="text-xs text-red-600 bg-red-50 p-2 rounded border border-red-100 overflow-auto max-h-60 whitespace-pre-wrap">
+                        <pre className="max-h-60 overflow-auto whitespace-pre-wrap rounded border border-red-100 bg-red-50 p-2 text-xs text-red-600">
                           {error.stack}
                         </pre>
                       </div>
@@ -260,13 +260,13 @@ Time: ${new Date().toISOString()}
             <div className="mt-6 flex flex-col space-y-2">
               <button
                 onClick={() => window.location.reload()}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               >
                 Reload Page
               </button>
               <button
                 onClick={() => window.history.back()}
-                className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               >
                 Go Back
               </button>

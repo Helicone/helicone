@@ -1,0 +1,145 @@
+
+![What to Do When OpenRouter is Down?](/static/blog/openrouter-down/thumbnail.webp)
+
+When OpenRouter goes down, you loose control of your product's entire AI operation.
+
+You can't fix the issue yourself. You can't switch providers or implement custom failover logic that quickly. You can only wait and hope the service comes back online quickly, while loosing your users' trust.
+
+## Table of Contents
+
+## Set Up Your Own AI Gateway
+
+You no longer need to create your own custom routing logic just to run your AI gateway within your own infrastructure. In less than 5 minutes, you can set up a gateway that is **cheaper (only pay for provider cost vs 5% markup), up to 7x faster, and fully-featured**.
+
+**The Helicone AI Gateway is the lightest and fastest AI gateway on the market.** Built in Rust, it gives you complete control over your AI infrastructure while maintaining all the benefits of multi-provider routing.
+
+Fully open-source, customizable, and built for scale - you can self-host it on your own infrastructure or use our managed service.
+
+{/* <Button variant="primary" href="https://docs.helicone.ai/ai-gateway/quickstart">Get Started</Button> */}
+<CallToAction
+  title="Get Started with the Helicone AI Gateway"
+  description="Start routing your AI traffic to the fastest, cheapest, and most reliable providers through a unified interface."
+  primaryButtonText="Get Started"
+  primaryButtonLink="https://docs.helicone.ai/ai-gateway/quickstart"
+  secondaryButtonText="Learn more"
+  secondaryButtonLink="https://docs.helicone.ai/ai-gateway/introduction"
+/>
+
+## OpenRouter vs. Helicone AI Gateway
+
+| Feature | OpenRouter | Helicone AI Gateway |
+| --- | --- | --- |
+| **Hosting** | Cloud service | Self-hosted & cloud service |
+| **Pricing Model** | Pass-through credits system (5% fee) | Free to use, direct provider costs |
+| **Rate Limits** | Shared infrastructure limits| Based on your configuration & provider keys |
+| **Provider Fallback** | Preconfigured logic and model mappings | Always uptime aware, fully customizable routing strategies |
+| **Load Balancing** | Basic provider fallback | Advanced: uptime and rate-limit aware latency-based, weighted, custom, etc |
+| **Caching** | Available for certain providers | Built-in caching (in-memory, redis, etc) |
+| **Authentication** | You use OpenRouter keys or your own | Key management service for your API keys |
+| **Data Privacy** | Requests go through OpenRouter | Self-host option to manage data through your infrastructure |
+| **Deployment** | N/A (cloud service) | Docker, Kubernetes, Fly.io, cloud service, etc |
+| **Monitoring** | OpenRouter dashboard | OpenTelemetry, Helicone Observability, any monitoring stack |
+| **Cost Control** | Credit limits | Rate limiting per API key you define |
+| **Latency (including provider)** | ~70-150ms | ~10-30ms (less than 1ms overhead) |
+| **Vendor Lock-in** | High (API keys, billing, routing) | None (open source, portable) |
+
+## How to Migrate from OpenRouter to Helicone AI Gateway
+
+Migrating from OpenRouter to the Helicone AI Gateway is surprisingly straightforward. Here's a step-by-step migration guide.
+
+### Step 1: Set Up Your Provider Keys
+
+Unlike OpenRouter where you buy credits, the Helicone AI Gateway uses your direct provider API keys.
+
+```bash
+# Add keys for the providers you use to your project's `.env` file.
+export OPENAI_API_KEY="your-openai-key"
+export ANTHROPIC_API_KEY="your-anthropic-key"
+export GEMINI_API_KEY="your-gemini-key"
+```
+
+**Cost Benefit**: You'll pay providers directly with no markup, typically saving 5-10% compared to OpenRouter's credit system.
+
+### Step 2: Run the AI Gateway
+
+Get started locally by running the following command.
+
+```bash
+npx @helicone/ai-gateway@latest
+```
+
+Your gateway is now running on `http://localhost:8080`.
+
+_To use in production, deploy the AI Gateway using [Docker or any of our quick deployment options here](https://docs.helicone.ai/ai-gateway/deployment)._
+
+### Step 3: Configure Your Routing Strategy
+
+Create an `ai-gateway-config.yaml` file and set up your routing strategy:
+
+```yaml
+# Example setup - equivalent to OpenRouter's auto-routing
+routers:
+  production:
+    # Always uptime & rate-limit aware, choose your prefered routing strategy
+    load-balance:
+      chat:
+        strategy: latency  # Automatically picks fastest provider. Could also be weighted, custom, etc.
+        providers:
+          - openai
+          - anthropic
+          - gemini
+    # Optional: Add caching for cost savings
+    cache:
+      directive: "max-age=3600"  # 1 hour cache
+    # Optional: Add rate limiting for cost control
+    rate-limit:
+      per-api-key:
+        capacity: 1000
+        refill-frequency: 1m
+    helicone: # Optional: for authentication & observability enabled
+      api-key: "your-helicone-key"
+```
+
+You can find more [examples & configuration options here](https://docs.helicone.ai/ai-gateway/config).
+
+### Step 4: Update Your Application Code
+
+Replace `https://openrouter.ai/api/v1` with `http://localhost:8080/router/production` and update your model name.
+
+```python
+import openai
+
+openai.api_base = "http://localhost:8080/router/production"
+openai.api_key = "api-key" # SDK requires a string, but all auth is handled by the gateway
+
+response = openai.chat.completions.create(
+    model="openai/gpt-4o-mini",  # 100+ models available
+    messages=[{"role": "user", "content": "Hello, world!"}]
+)
+```
+
+### Step 5: Test Your Migration
+
+
+```bash
+curl -X POST http://localhost:8080/router/production/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "openai/gpt-4o-mini",
+    "messages": [{"role": "user", "content": "Hello from my self-hosted gateway!"}]
+  }'
+```
+
+## The Bottom Line
+
+The Helicone AI Gateway gives you all the benefits of OpenRouter's multi-provider routing while eliminating the risks of vendor dependency and reducing costs through intelligent caching, self-hosting, and connecting directly to providers. You get better performance, lower costs, and complete control over your AI infrastructure.
+
+Your AI infrastructure is too important to leave in someone else's hands.
+
+**Ready to migrate?**: Start with the [Helicone AI Gateway Quickstart](https://docs.helicone.ai/ai-gateway/quickstart) and have your self-hosted gateway running in under 5 minutes.
+
+**Need help?** Join our [Discord community](https://discord.gg/7aSCGCGUeu) where engineers share deployment strategies and troubleshooting tips.
+
+**Want to contribute?** The Helicone AI Gateway is fully open-source. Check out the [GitHub repository](https://github.com/helicone/ai-gateway) to contribute features or report issues.
+
+The Helicone AI Gateway is fully open-source. Check out the [GitHub repository](https://github.com/helicone/ai-gateway) to contribute features or report issues.

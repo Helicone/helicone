@@ -144,8 +144,8 @@ export class PlaygroundController extends Controller {
             "Helicone-Auth": `Bearer ${secretKey}`,
             "Helicone-User-Id": request.authParams.organizationId,
             ...(!selfKey && {
-              // 10 requests per user per year
-              "Helicone-RateLimit-Policy": "10;w=31536000;s=user",
+              // 5 requests per user per year
+              "Helicone-RateLimit-Policy": "5;w=31536000;s=user",
             }),
           },
         });

@@ -1,0 +1,1 @@
+ALTER TABLE "public"."provider_keys" ALTER COLUMN "provider_key" DROP NOT NULL;

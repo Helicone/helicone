@@ -33,7 +33,7 @@ const useOrgPlanPage = ({
       key: "rateLimitsOverTime",
       postProcess: (data) => {
         return resultMap(data, (d) =>
-          d.map((d) => ({ count: +d.count, time: new Date(d.time) }))
+          d.map((d) => ({ count: +d.count, time: new Date(d.time) })),
         );
       },
     }),

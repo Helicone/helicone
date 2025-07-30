@@ -41,10 +41,10 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
   const [active, setActive] = useState<string>(defaultValue);
 
   const [startDate, setStartDate] = useState<string | undefined>(
-    formatDateToInputString(currentTimeFilter?.start) || undefined
+    formatDateToInputString(currentTimeFilter?.start) || undefined,
   );
   const [endDate, setEndDate] = useState<string | undefined>(
-    formatDateToInputString(currentTimeFilter?.end) || undefined
+    formatDateToInputString(currentTimeFilter?.end) || undefined,
   );
 
   const isActive = (key: string) => {
@@ -74,7 +74,7 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
 
       setStartDate(formatDateToInputString(new Date(startDate)));
       setEndDate(
-        formatDateToInputString(new Date(new Date().getTime() + 1000))
+        formatDateToInputString(new Date(new Date().getTime() + 1000)),
       );
     }
   }, [relative, relativeValue]);
@@ -82,7 +82,7 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
   return (
     <Menu
       as="div"
-      className="relative inline-flex text-left z-10 shadow-sm h-fit w-fit isolate rounded-lg"
+      className="relative isolate z-10 inline-flex h-fit w-fit rounded-lg text-left shadow-sm"
     >
       {custom && (
         <ThemedTimeFilterShadCN
@@ -93,7 +93,7 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
               const end = new Date(newDate.to);
               searchParams.set(
                 "t",
-                `custom_${start.toISOString()}_${end.toISOString()}`
+                `custom_${start.toISOString()}_${end.toISOString()}`,
               );
               setActive("custom");
               onSelect("custom", `${start.toISOString()}_${end.toISOString()}`);
@@ -121,12 +121,12 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
               className={clsx(
                 "text-gray-900 dark:text-gray-100",
                 isActive(option.key)
-                  ? "bg-sky-200 border-sky-300 border dark:bg-sky-800 dark:border-sky-700"
-                  : "bg-white hover:bg-sky-50 border-gray-300 dark:bg-black dark:hover:bg-sky-900 dark:border-gray-700",
+                  ? "border border-sky-300 bg-sky-200 dark:border-sky-700 dark:bg-sky-800"
+                  : "border-gray-300 bg-white hover:bg-sky-50 dark:border-gray-700 dark:bg-black dark:hover:bg-sky-900",
                 idx === timeFilterOptions.length - 1 ? "rounded-r-lg" : "",
                 !custom && idx === 0
                   ? "relative inline-flex items-center rounded-l-lg border px-3 py-1.5 text-sm font-medium focus:z-10 focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400"
-                  : "relative -ml-px inline-flex items-center border px-3 py-1.5 text-sm font-medium focus:z-10 focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400"
+                  : "relative -ml-px inline-flex items-center border px-3 py-1.5 text-sm font-medium focus:z-10 focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400",
               )}
             >
               {option.value}
@@ -145,17 +145,17 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
             className={clsx(
               "text-gray-900 dark:text-gray-100",
               isActive(option.key)
-                ? "bg-sky-200 border-sky-300 border dark:bg-sky-800 dark:border-sky-700"
-                : "bg-white hover:bg-sky-50 border-gray-300 dark:bg-black dark:hover:bg-sky-900 dark:border-gray-700",
+                ? "border border-sky-300 bg-sky-200 dark:border-sky-700 dark:bg-sky-800"
+                : "border-gray-300 bg-white hover:bg-sky-50 dark:border-gray-700 dark:bg-black dark:hover:bg-sky-900",
               idx === timeFilterOptions.length - 1 ? "rounded-r-lg" : "",
               !custom && idx === 0
                 ? "relative inline-flex items-center rounded-l-lg border px-3 py-1.5 text-sm font-medium focus:z-10 focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400"
-                : "relative -ml-px inline-flex items-center border px-3 py-1.5 text-sm font-medium focus:z-10 focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400"
+                : "relative -ml-px inline-flex items-center border px-3 py-1.5 text-sm font-medium focus:z-10 focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400",
             )}
           >
             {option.value}
           </button>
-        )
+        ),
       )}
     </Menu>
   );

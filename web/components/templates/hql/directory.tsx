@@ -13,10 +13,7 @@ import {
 } from "@/components/ui/context-menu";
 import { useMutation } from "@tanstack/react-query";
 import useNotification from "@/components/shared/notification/useNotification";
-import {
-  createDeleteQueryMutation,
-  createSaveQueryMutation,
-} from "./constants";
+import { useDeleteQueryMutation, useSaveQueryMutation } from "./constants";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -59,7 +56,7 @@ export function Directory({
   const { setNotification } = useNotification();
 
   const { mutateAsync: handleSaveQueryAsync } = useMutation(
-    createSaveQueryMutation(setCurrentQuery, setNotification),
+    useSaveQueryMutation(setCurrentQuery, setNotification),
   );
 
   const filteredTables = useMemo(
@@ -258,7 +255,7 @@ function QueryList({
   const { setNotification } = useNotification();
 
   const deleteQueryMutation = useMutation(
-    createDeleteQueryMutation(setNotification),
+    useDeleteQueryMutation(setNotification),
   );
 
   const handleDeleteQuery = (queryId: string, queryName: string) => {

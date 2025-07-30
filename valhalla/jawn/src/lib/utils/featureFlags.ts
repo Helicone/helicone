@@ -2,7 +2,6 @@ import { dbExecute } from "../shared/db/dbExecute";
 import { Result, err, ok } from "../../packages/common/result";
 
 export const HQL_FEATURE_FLAG = "hql";
-export const PROMPTS_FEATURE_FLAG = "prompts_2025";
 export const AI_GATEWAY_FEATURE_FLAG = "ai_gateway";
 
 /**

@@ -27,9 +27,9 @@ async function handler({
         (modelMetrics) =>
           modelMetrics.reduce(
             (acc, modelMetric) => acc + modelCost(modelMetric),
-            0
-          )
-      )
+            0,
+          ),
+      ),
     );
 }
 

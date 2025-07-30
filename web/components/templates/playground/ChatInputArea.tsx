@@ -27,7 +27,7 @@ const ChatInputArea: React.FC<ChatInputAreaProps> = ({
   customNavBar,
 }) => {
   return (
-    <li className="px-8 py-4 border-t border-gray-300 dark:border-gray-700 bg-white dark:bg-black rounded-b-lg justify-between space-x-4 flex">
+    <li className="flex justify-between space-x-4 rounded-b-lg border-t border-gray-300 bg-white px-8 py-4 dark:border-gray-700 dark:bg-black">
       <div className="w-full">
         <button
           onClick={() => {
@@ -42,16 +42,16 @@ const ChatInputArea: React.FC<ChatInputAreaProps> = ({
             ]);
           }}
           className={clsx(
-            "bg-white hover:bg-gray-100 border border-gray-300 text-black dark:bg-black dark:hover:bg-gray-900 dark:border-gray-700 dark:text-white",
-            "items-center rounded-md px-3 py-1.5 text-sm flex flex-row font-semibold text-black dark:text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            "border border-gray-300 bg-white text-black hover:bg-gray-100 dark:border-gray-700 dark:bg-black dark:text-white dark:hover:bg-gray-900",
+            "flex flex-row items-center rounded-md px-3 py-1.5 text-sm font-semibold text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:text-white",
           )}
         >
-          <PlusIcon className="h-4 w-4 inline text-black dark:text-white rounded-lg mr-2" />
+          <PlusIcon className="mr-2 inline h-4 w-4 rounded-lg text-black dark:text-white" />
           Add Message
         </button>
       </div>
 
-      <div className="flex space-x-4 w-full justify-end">
+      <div className="flex w-full justify-end space-x-4">
         <button
           onClick={() => {
             const originalCopy = currentChat.map((message) => ({
@@ -61,11 +61,11 @@ const ChatInputArea: React.FC<ChatInputAreaProps> = ({
             setCurrentChat(originalCopy);
           }}
           className={clsx(
-            "bg-white hover:bg-gray-100 border border-gray-300 text-black dark:bg-black dark:hover:bg-gray-900 dark:border-gray-700 dark:text-white",
-            "items-center rounded-md px-3 py-1.5 text-sm flex flex-row font-semibold text-black dark:text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            "border border-gray-300 bg-white text-black hover:bg-gray-100 dark:border-gray-700 dark:bg-black dark:text-white dark:hover:bg-gray-900",
+            "flex flex-row items-center rounded-md px-3 py-1.5 text-sm font-semibold text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:text-white",
           )}
         >
-          <ArrowPathIcon className="h-4 w-4 inline text-black dark:text-white rounded-lg mr-2" />
+          <ArrowPathIcon className="mr-2 inline h-4 w-4 rounded-lg text-black dark:text-white" />
           Reset
         </button>
         {!customNavBar && (
@@ -73,10 +73,10 @@ const ChatInputArea: React.FC<ChatInputAreaProps> = ({
             onClick={() => onSubmit(currentChat)}
             className={clsx(
               "bg-sky-600 hover:bg-sky-700",
-              "items-center rounded-md px-3 py-1.5 text-sm flex flex-row font-semibold text-white dark:text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              "flex flex-row items-center rounded-md px-3 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:text-black",
             )}
           >
-            <PaperAirplaneIcon className="h-4 w-4 inline text-white dark:text-black rounded-lg mr-2" />
+            <PaperAirplaneIcon className="mr-2 inline h-4 w-4 rounded-lg text-white dark:text-black" />
             {submitText}
           </button>
         )}

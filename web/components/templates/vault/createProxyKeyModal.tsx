@@ -38,9 +38,9 @@ const LimitRowDiv = (props: {
     "seconds" | "minutes" | "hours" | "days"
   >("seconds");
   return (
-    <div className="flex flex-row gap-2 items-center">
+    <div className="flex flex-row items-center gap-2">
       <select
-        className="block w-full rounded-md border border-gray-300  shadow-sm p-2 text-sm"
+        className="block w-full rounded-md border border-gray-300 p-2 text-sm shadow-sm"
         required
         value={_limitType}
         onChange={(e) => {
@@ -61,7 +61,7 @@ const LimitRowDiv = (props: {
 
       <input
         type="number"
-        className="block w-full rounded-md border border-gray-300 shadow-sm p-2 text-sm"
+        className="block w-full rounded-md border border-gray-300 p-2 text-sm shadow-sm"
         placeholder={_limitType === "cost" ? "Cost USD" : "Count"}
         value={_limitType === "cost" ? cost : count}
         onChange={(e) => {
@@ -82,7 +82,7 @@ const LimitRowDiv = (props: {
       {" For "}
       <input
         type="number"
-        className="block w-full rounded-md border border-gray-300 shadow-sm p-2 text-sm"
+        className="block w-full rounded-md border border-gray-300 p-2 text-sm shadow-sm"
         placeholder="Time Window"
         value={(() => {
           if (timeGrain === "seconds") {
@@ -115,7 +115,7 @@ const LimitRowDiv = (props: {
       />
 
       <select
-        className="block w-full rounded-md border border-gray-300  shadow-sm p-2 text-sm"
+        className="block w-full rounded-md border border-gray-300 p-2 text-sm shadow-sm"
         required
         value={timeGrain}
         onChange={(e) => {
@@ -136,7 +136,7 @@ const LimitRowDiv = (props: {
         </option>
       </select>
       <div
-        className="flex flex-row items-center rounded-md bg-white px-4 py-2 text-sm font-semibold border border-gray-300 hover:bg-gray-50 text-gray-900 shadow-sm hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+        className="flex flex-row items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
         onClick={() => {
           onDelete();
         }}
@@ -149,7 +149,7 @@ const LimitRowDiv = (props: {
 
 const LimitsInput = (props: {
   setLimits: (
-    limits: Database["public"]["Tables"]["helicone_proxy_key_limits"]["Insert"][]
+    limits: Database["public"]["Tables"]["helicone_proxy_key_limits"]["Insert"][],
   ) => void;
 }) => {
   const [limits, setLimits] = useState<LimitRow[]>([]);
@@ -172,7 +172,7 @@ const LimitsInput = (props: {
                 id: crypto.randomUUID(),
                 helicone_proxy_key: "null",
                 currency: limit.cost ? "USD" : undefined,
-              }))
+              })),
             );
           }}
           onDelete={() => {
@@ -187,14 +187,14 @@ const LimitsInput = (props: {
                 id: crypto.randomUUID(),
                 helicone_proxy_key: "null",
                 currency: limit.cost ? "USD" : undefined,
-              }))
+              })),
             );
           }}
           key={`limit-${idx}`}
         />
       ))}
       <div
-        className="flex flex-row gap-2 hover:cursor-pointer hover:bg-slate-300 w-fit px-2 py-1 rounded-lg"
+        className="flex w-fit flex-row gap-2 rounded-lg px-2 py-1 hover:cursor-pointer hover:bg-slate-300"
         onClick={() => {
           setLimits([
             ...limits,
@@ -236,10 +236,10 @@ const CreateProxyKeyModal = (props: CreateProxyKeyModalProps) => {
     event.preventDefault();
     setIsLoading(true);
     const proxyKeyName = event.currentTarget.elements.namedItem(
-      "proxy-key-name"
+      "proxy-key-name",
     ) as HTMLInputElement;
     const providerKeyName = event.currentTarget.elements.namedItem(
-      "provider-key-name"
+      "provider-key-name",
     ) as HTMLInputElement;
 
     if (!proxyKeyName || proxyKeyName.value === "") {
@@ -264,7 +264,7 @@ const CreateProxyKeyModal = (props: CreateProxyKeyModalProps) => {
     })
       .then(
         (res) =>
-          res.json() as Promise<Result<DecryptedProviderKeyMapping, string>>
+          res.json() as Promise<Result<DecryptedProviderKeyMapping, string>>,
       )
       .then(({ data }) => {
         if (data) {
@@ -286,7 +286,7 @@ const CreateProxyKeyModal = (props: CreateProxyKeyModalProps) => {
           action="#"
           method="POST"
           onSubmit={handleSubmitHandler}
-          className="flex flex-col space-y-8 w-[400px] text-gray-900 dark:text-gray-100"
+          className="flex w-[400px] flex-col space-y-8 text-gray-900 dark:text-gray-100"
         >
           <h1 className="text-lg font-semibold">Create Proxy Key</h1>
           <div className="w-full space-y-1.5 text-sm">
@@ -296,7 +296,7 @@ const CreateProxyKeyModal = (props: CreateProxyKeyModalProps) => {
               name="proxy-key-name"
               id="proxy-key-name"
               className={clsx(
-                "block w-full rounded-md border border-gray-500 bg-gray-100 dark:bg-gray-900 shadow-sm p-2 text-sm"
+                "block w-full rounded-md border border-gray-500 bg-gray-100 p-2 text-sm shadow-sm dark:bg-gray-900",
               )}
               required
               placeholder="Proxy Key Name"
@@ -307,7 +307,7 @@ const CreateProxyKeyModal = (props: CreateProxyKeyModalProps) => {
             <select
               id="provider-key-name"
               name="provider-key-name"
-              className="block w-full rounded-md border border-gray-500 bg-gray-100 dark:bg-gray-900 shadow-sm p-2 text-sm"
+              className="block w-full rounded-md border border-gray-500 bg-gray-100 p-2 text-sm shadow-sm dark:bg-gray-900"
               required
             >
               {providerKeys.map((key) => (
@@ -323,23 +323,23 @@ const CreateProxyKeyModal = (props: CreateProxyKeyModalProps) => {
             <button
               onClick={() => setOpen(false)}
               type="button"
-              className="flex flex-row items-center rounded-md bg-white dark:bg-black px-4 py-2 text-sm font-semibold border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm hover:text-gray-700 dark:hover:text-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+              className="flex flex-row items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500 dark:border-gray-700 dark:bg-black dark:text-gray-100 dark:hover:bg-gray-900 dark:hover:text-gray-300"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="flex items-center rounded-md bg-black px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:bg-white dark:text-black dark:hover:bg-gray-200"
             >
               {isLoading && (
-                <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
+                <ArrowPathIcon className="mr-1.5 h-4 w-4 animate-spin" />
               )}
               Create Proxy Key
             </button>
           </div>
         </form>
       ) : (
-        <div className="flex flex-col space-y-4 w-[400px]">
+        <div className="flex w-[400px] flex-col space-y-4">
           <h1 className="text-lg font-semibold text-gray-900">
             Your Proxy Key
           </h1>
@@ -348,19 +348,19 @@ const CreateProxyKeyModal = (props: CreateProxyKeyModalProps) => {
             able to see it again.
           </p>
           <div className="w-full space-y-1.5 text-sm">
-            <div className="flex flex-row items-center w-full gap-4">
+            <div className="flex w-full flex-row items-center gap-4">
               <input
                 type="text"
                 name="proxy-key-name"
                 id="proxy-key-name"
                 disabled
                 className={clsx(
-                  "block w-full rounded-md border border-gray-300 shadow-sm p-2 text-sm"
+                  "block w-full rounded-md border border-gray-300 p-2 text-sm shadow-sm",
                 )}
                 value={returnedKey.helicone_proxy_key}
               />
               <button
-                className="items-center rounded-md bg-black p-2 text-sm flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                className="flex items-center rounded-md bg-black p-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                 onClick={() => {
                   navigator.clipboard.writeText(returnedKey.helicone_proxy_key);
                   setNotification("Copied to clipboard!", "success");
@@ -375,7 +375,7 @@ const CreateProxyKeyModal = (props: CreateProxyKeyModalProps) => {
             <button
               onClick={() => setOpen(false)}
               type="button"
-              className="flex flex-row items-center rounded-md bg-white px-4 py-2 text-sm font-semibold border border-gray-300 hover:bg-gray-50 text-gray-900 shadow-sm hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+              className="flex flex-row items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
             >
               Close
             </button>

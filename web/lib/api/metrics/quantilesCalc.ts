@@ -12,7 +12,7 @@ export interface Quantiles {
 
 export default async function quantilesCalc(
   data: DataOverTimeRequest,
-  metric: string
+  metric: string,
 ): Promise<Result<Quantiles[], string>> {
   let query;
 
@@ -43,6 +43,6 @@ export default async function quantilesCalc(
       p90: Number(d.P90),
       p95: Number(d.P95),
       p99: Number(d.P99),
-    }))
+    })),
   );
 }

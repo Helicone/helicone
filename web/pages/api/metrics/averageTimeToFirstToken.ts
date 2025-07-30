@@ -20,7 +20,7 @@ async function handler(options: HandlerWrapperOptions<Result<number, string>>) {
   const metrics = await getAverageTimeToFirstToken(
     filter,
     timeFilter,
-    userData.orgId
+    userData.orgId,
   );
   res.status(200).json(metrics);
 }

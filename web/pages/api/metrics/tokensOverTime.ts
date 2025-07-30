@@ -9,7 +9,7 @@ import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";
 import { TokensOverTime } from "./TokensOverTimeType";
 
 async function getTokensOverTime(
-  data: DataOverTimeRequest
+  data: DataOverTimeRequest,
 ): Promise<Result<TokensOverTime[], string>> {
   const res = await getXOverTime<{
     prompt_tokens: number;
@@ -17,19 +17,19 @@ async function getTokensOverTime(
   }>(
     data,
     `sum(request_response_rmt.prompt_tokens) AS prompt_tokens,
-     sum(request_response_rmt.completion_tokens) AS completion_tokens`
+     sum(request_response_rmt.completion_tokens) AS completion_tokens`,
   );
   return resultMap(res, (resData) =>
     resData.map((d) => ({
       time: new Date(new Date(d.created_at_trunc).getTime()),
       prompt_tokens: Number(d.prompt_tokens),
       completion_tokens: Number(d.completion_tokens),
-    }))
+    })),
   );
 }
 
 async function handler(
-  options: HandlerWrapperOptions<Result<TokensOverTime[], string>>
+  options: HandlerWrapperOptions<Result<TokensOverTime[], string>>,
 ) {
   const {
     res,
@@ -49,7 +49,7 @@ async function handler(
       orgId,
       dbIncrement: dbIncrement ?? "hour",
       timeZoneDifference,
-    })
+    }),
   );
 }
 export default withAuth(handler);

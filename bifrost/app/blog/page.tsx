@@ -226,6 +226,11 @@ export const BLOG_CONTENT: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
+      folderName: "openrouter-down",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "top-llm-gateways-comparison-2025",
     },
   },

@@ -16,7 +16,7 @@ export const ProPlanCheckout = ({
 }) => {
   const org = useOrg();
   const { draftAddons, setDraftAddons } = useDraftOnboardingStore(
-    org?.currentOrg?.id ?? ""
+    org?.currentOrg?.id ?? "",
   )();
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -42,11 +42,11 @@ export const ProPlanCheckout = ({
       clientSecret={clientSecret}
       header={<></>}
       leftPanel={
-        <Card className="w-full rounded-lg overflow-hidden">
+        <Card className="w-full overflow-hidden rounded-lg">
           {/* Header */}
-          <div className="flex items-center gap-2 p-6 bg-[hsl(var(--muted))]">
-            <div className="flex items-center gap-2 w-full h-full">
-              <div className="flex items-center justify-center rounded-md bg-[hsl(var(--card))] shadow border border-[hsl(var(--border))]">
+          <div className="flex items-center gap-2 bg-[hsl(var(--muted))] p-6">
+            <div className="flex h-full w-full items-center gap-2">
+              <div className="flex items-center justify-center rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--card))] shadow">
                 <div className="flex h-12 w-12 items-center justify-center">
                   <Image
                     src="/static/logo-clear.png"
@@ -58,8 +58,8 @@ export const ProPlanCheckout = ({
                 </div>
               </div>
 
-              <div className="flex flex-row w-full">
-                <div className="flex flex-col items-start justify-between w-full">
+              <div className="flex w-full flex-row">
+                <div className="flex w-full flex-col items-start justify-between">
                   <h3 className="text-lg font-semibold text-[hsl(var(--foreground))]">
                     Helicone Pro
                   </h3>
@@ -106,8 +106,8 @@ export const ProPlanCheckout = ({
           </div>
 
           {/* Footer */}
-          <div className="bg-[hsl(var(--muted))] py-3 px-6">
-            <p className="text-sm text-[hsl(var(--muted-foreground))] text-center">
+          <div className="bg-[hsl(var(--muted))] px-6 py-3">
+            <p className="text-center text-sm text-[hsl(var(--muted-foreground))]">
               All features are included in the trial!
             </p>
           </div>
@@ -115,9 +115,9 @@ export const ProPlanCheckout = ({
       }
     >
       {isUpdating && !clientSecret && (
-        <Card className="h-[600px] w-full flex items-center justify-center">
+        <Card className="flex h-[600px] w-full items-center justify-center">
           <div className="flex flex-col items-center gap-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[hsl(var(--primary))]"></div>
+            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-[hsl(var(--primary))]"></div>
             <p className="text-sm text-[hsl(var(--muted-foreground))]">
               Updating checkout...
             </p>

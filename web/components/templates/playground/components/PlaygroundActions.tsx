@@ -11,7 +11,6 @@ import _ from "lodash";
 import { ModelParameters } from "@/lib/api/llm/generate";
 import { DEFAULT_EMPTY_CHAT } from "../playgroundPage";
 import { CommandIcon, Undo2Icon } from "lucide-react";
-import { useFeatureFlag } from "@/services/hooks/admin";
 import { useOrg } from "@/components/layout/org/organizationContext";
 
 interface PlaygroundActionsProps {
@@ -22,7 +21,11 @@ interface PlaygroundActionsProps {
   setTools: (_tools: Tool[]) => void;
   promptVersionId: string | undefined;
   onCreatePrompt: (tags: string[], promptName: string) => void;
-  onSavePrompt: (newMajorVersion: boolean, setAsProduction: boolean, commitMessage: string) => void;
+  onSavePrompt: (
+    newMajorVersion: boolean,
+    setAsProduction: boolean,
+    commitMessage: string,
+  ) => void;
   onRun: () => void;
   requestId?: string;
   isScrolled: boolean;
@@ -41,10 +44,6 @@ const PlaygroundActions = ({
   isScrolled,
 }: PlaygroundActionsProps) => {
   const organization = useOrg();
-  const { data: hasAccessToPrompts } = useFeatureFlag(
-    "prompts_2025",
-    organization?.currentOrg?.id ?? "",
-  );
   const resetToDefault = () => {
     console.log("Reset triggered with:", {
       defaultContent,
@@ -90,7 +89,7 @@ const PlaygroundActions = ({
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" onClick={resetToDefault}>
-              <Undo2Icon className="w-4 h-4" />
+              <Undo2Icon className="h-4 w-4" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
@@ -98,26 +97,24 @@ const PlaygroundActions = ({
           </TooltipContent>
         </Tooltip>
       )}
-      
-      {hasAccessToPrompts && (
-        <PromptForm
-          isScrolled={isScrolled}
-          saveAndVersion={!!promptVersionId}
-          onCreatePrompt={onCreatePrompt}
-          onSavePrompt={onSavePrompt}
-        />
-      )}
+
+      <PromptForm
+        isScrolled={isScrolled}
+        saveAndVersion={!!promptVersionId}
+        onCreatePrompt={onCreatePrompt}
+        onSavePrompt={onSavePrompt}
+      />
       <Tooltip>
         <TooltipTrigger asChild>
           <Button onClick={onRun}>Run</Button>
         </TooltipTrigger>
         <TooltipContent>
           <div className="flex items-center gap-1">
-            <div className="p-1 rounded-md bg-muted">
-              <CommandIcon className="w-3 h-3" />
+            <div className="rounded-md bg-muted p-1">
+              <CommandIcon className="h-3 w-3" />
             </div>
             +{" "}
-            <div className="px-1 py rounded-md bg-muted">
+            <div className="py rounded-md bg-muted px-1">
               <kbd className="text-xs">Enter</kbd>
             </div>
           </div>

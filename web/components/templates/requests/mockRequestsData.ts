@@ -54,7 +54,7 @@ export const getMockFilterMap = () => {
 // Generate a realistic-looking mock request
 const generateMockRequest = (
   id: string,
-  forceStatusCode?: number
+  forceStatusCode?: number,
 ): MappedLLMRequest => {
   const models = ["gpt-4", "gpt-3.5-turbo", "claude-2", "llama-2"];
   const modelIndex = Math.floor(Math.random() * models.length);
@@ -168,17 +168,17 @@ const generateMockRequest = (
 
   // Select a random country from the question type
   const countryIndex = Math.floor(
-    Math.random() * questionType.countries.length
+    Math.random() * questionType.countries.length,
   );
   const country = questionType.countries[countryIndex];
 
   // Select a random template and insert the country
   const templateIndex = Math.floor(
-    Math.random() * questionType.templates.length
+    Math.random() * questionType.templates.length,
   );
   const questionText = questionType.templates[templateIndex].replace(
     "{country}",
-    country
+    country,
   );
 
   // Get the corresponding answer
@@ -297,10 +297,10 @@ const generateMockRequest = (
 // Generate mock requests data
 export const getMockRequests = (
   count: number = 25,
-  forceStatusCode?: number
+  forceStatusCode?: number,
 ): MappedLLMRequest[] => {
   return Array.from({ length: count }, (_, i) =>
-    generateMockRequest(`mock-req-${i}`, forceStatusCode)
+    generateMockRequest(`mock-req-${i}`, forceStatusCode),
   );
 };
 

@@ -22,7 +22,7 @@ const ScrollArea = React.forwardRef<
       width,
       ...props
     },
-    ref
+    ref,
   ) => (
     <ScrollAreaPrimitive.Root
       ref={ref}
@@ -34,7 +34,7 @@ const ScrollArea = React.forwardRef<
         {children}
       </ScrollAreaPrimitive.Viewport>
       {showBottomGradient && (
-        <div className="h-28 bg-gradient-to-b from-transparent to-white dark:to-neutral-950 absolute bottom-0 left-0 right-0 pointer-events-none" />
+        <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-b from-transparent to-white dark:to-neutral-950" />
       )}
       {orientation === "both" ? (
         <>
@@ -46,7 +46,7 @@ const ScrollArea = React.forwardRef<
       )}
       <ScrollAreaPrimitive.Corner />
     </ScrollAreaPrimitive.Root>
-  )
+  ),
 );
 ScrollArea.displayName = ScrollAreaPrimitive.Root.displayName;
 
@@ -60,7 +60,7 @@ const ScrollBar = React.forwardRef<
 >(
   (
     { className, orientation = "vertical", width = "default", ...props },
-    ref
+    ref,
   ) => (
     <ScrollAreaPrimitive.ScrollAreaScrollbar
       ref={ref}
@@ -72,13 +72,13 @@ const ScrollBar = React.forwardRef<
         orientation === "horizontal" &&
           "flex-col border-t border-t-transparent",
         orientation === "horizontal" && (width === "thin" ? "h-1.5" : "h-2.5"),
-        className
+        className,
       )}
       {...props}
     >
       <ScrollAreaPrimitive.ScrollAreaThumb className="relative flex-1 rounded-full bg-slate-200/75 dark:bg-slate-800/75" />
     </ScrollAreaPrimitive.ScrollAreaScrollbar>
-  )
+  ),
 );
 ScrollBar.displayName = ScrollAreaPrimitive.ScrollAreaScrollbar.displayName;
 

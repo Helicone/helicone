@@ -44,21 +44,21 @@ export default function OrgMoreDropdown({
   const currentIcon = useMemo(
     () =>
       ORGANIZATION_ICONS.find(
-        (icon) => icon.name === orgContext?.currentOrg?.icon
+        (icon) => icon.name === orgContext?.currentOrg?.icon,
       ),
-    [orgContext?.currentOrg?.icon]
+    [orgContext?.currentOrg?.icon],
   );
   const currentColor = useMemo(
     () =>
       ORGANIZATION_COLORS.find(
-        (icon) => icon.name === orgContext?.currentOrg?.color
+        (icon) => icon.name === orgContext?.currentOrg?.color,
       ),
-    [orgContext?.currentOrg?.color]
+    [orgContext?.currentOrg?.color],
   );
   const content = (
     <>
       {ownedOrgs && ownedOrgs.length > 0 && (
-        <DropdownMenuGroup className="flex flex-col min-h-0">
+        <DropdownMenuGroup className="flex min-h-0 flex-col">
           <DropdownMenuLabel className="text-xs font-semibold text-slate-500">
             Your Organizations
             {ownedOrgs.length > 7 && ` (${ownedOrgs.length})`}
@@ -66,7 +66,7 @@ export default function OrgMoreDropdown({
           <ScrollArea className="flex-grow overflow-y-auto">
             {ownedOrgs.map((org, idx) => {
               const icon = ORGANIZATION_ICONS.find(
-                (icon) => icon.name === org.icon
+                (icon) => icon.name === org.icon,
               );
               return (
                 <DropdownMenuItem
@@ -75,12 +75,12 @@ export default function OrgMoreDropdown({
                     setCurrentOrg ? () => setCurrentOrg(org.id) : undefined
                   }
                 >
-                  <div className="flex items-center justify-between w-full text-xs">
+                  <div className="flex w-full items-center justify-between text-xs">
                     <div className="flex items-center space-x-2">
                       {icon && (
                         <icon.icon className="h-4 w-4 text-slate-500 dark:text-slate-400" />
                       )}
-                      <span className="truncate max-w-[7.5rem]">
+                      <span className="max-w-[7.5rem] truncate">
                         {org.name}
                       </span>
                     </div>
@@ -97,7 +97,7 @@ export default function OrgMoreDropdown({
       {memberOrgs && memberOrgs.length > 0 && (
         <>
           <DropdownMenuSeparator />
-          <DropdownMenuGroup className="flex flex-col min-h-0">
+          <DropdownMenuGroup className="flex min-h-0 flex-col">
             <DropdownMenuLabel className="text-xs font-semibold text-slate-500">
               Member Organizations
               {memberOrgs.length > 7 && ` (${memberOrgs.length})`}
@@ -105,7 +105,7 @@ export default function OrgMoreDropdown({
             <ScrollArea className="flex-grow overflow-y-auto">
               {memberOrgs.map((org, idx) => {
                 const icon = ORGANIZATION_ICONS.find(
-                  (icon) => icon.name === org.icon
+                  (icon) => icon.name === org.icon,
                 );
                 return (
                   <DropdownMenuItem
@@ -114,12 +114,12 @@ export default function OrgMoreDropdown({
                       setCurrentOrg ? () => setCurrentOrg(org.id) : undefined
                     }
                   >
-                    <div className="flex items-center justify-between w-full text-xs">
+                    <div className="flex w-full items-center justify-between text-xs">
                       <div className="flex items-center space-x-2">
                         {icon && (
                           <icon.icon className="h-4 w-4 text-muted-foreground" />
                         )}
-                        <span className="truncate max-w-[7.5rem]">
+                        <span className="max-w-[7.5rem] truncate">
                           {org.name}
                         </span>
                       </div>
@@ -137,7 +137,7 @@ export default function OrgMoreDropdown({
       {customerOrgs && customerOrgs.length > 0 && (
         <>
           <DropdownMenuSeparator />
-          <DropdownMenuGroup className="flex flex-col min-h-0">
+          <DropdownMenuGroup className="flex min-h-0 flex-col">
             <DropdownMenuLabel className="text-xs font-semibold text-slate-500">
               Customers
               {customerOrgs.length > 7 && ` (${customerOrgs.length})`}
@@ -145,7 +145,7 @@ export default function OrgMoreDropdown({
             <ScrollArea className="flex-grow overflow-y-auto">
               {customerOrgs.map((org, idx) => {
                 const icon = ORGANIZATION_ICONS.find(
-                  (icon) => icon.name === org.icon
+                  (icon) => icon.name === org.icon,
                 );
                 return (
                   <DropdownMenuItem
@@ -154,12 +154,12 @@ export default function OrgMoreDropdown({
                       setCurrentOrg ? () => setCurrentOrg(org.id) : undefined
                     }
                   >
-                    <div className="flex items-center justify-between w-full text-xs">
+                    <div className="flex w-full items-center justify-between text-xs">
                       <div className="flex items-center space-x-2">
                         {icon && (
                           <icon.icon className="h-4 w-4 text-muted-foreground" />
                         )}
-                        <span className="truncate max-w-[7.5rem]">
+                        <span className="max-w-[7.5rem] truncate">
                           {org.name}
                         </span>
                       </div>
@@ -181,7 +181,7 @@ export default function OrgMoreDropdown({
         className="text-xs"
         onClick={() => createNewOrgHandler()}
       >
-        <PlusIcon className="h-4 w-4 mr-2" />
+        <PlusIcon className="mr-2 h-4 w-4" />
         Create New Org
       </DropdownMenuItem>
     </>
@@ -193,29 +193,29 @@ export default function OrgMoreDropdown({
       <div className="sm:hidden">{content}</div>
 
       {/* Desktop view */}
-      <div className="hidden sm:block w-full">
+      <div className="hidden w-full sm:block">
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
               size="icon"
-              className="p-2 hover:bg-slate-100 m-0 w-full h-auto outline-none focus-visible:outline-none flex justify-between items-center"
+              className="m-0 flex h-auto w-full items-center justify-between p-2 outline-none hover:bg-slate-100 focus-visible:outline-none"
             >
               <div className="flex gap-2">
                 {currentIcon && (
                   <currentIcon.icon
                     className={clsx(
                       `text-${currentColor?.name}-500`,
-                      "mt-1 flex-shrink-0 h-4 w-4"
+                      "mt-1 h-4 w-4 flex-shrink-0",
                     )}
                     aria-hidden="true"
                   />
                 )}
-                <div className="flex flex-col gap-1 items-start">
+                <div className="flex flex-col items-start gap-1">
                   <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-50">
                     {orgContext?.currentOrg?.name}
                   </h3>
-                  <p className="text-xs text-slate-500 font-medium max-w-[10rem] truncate">
+                  <p className="max-w-[10rem] truncate text-xs font-medium text-slate-500">
                     Switch Organization
                   </p>
                 </div>
@@ -226,7 +226,7 @@ export default function OrgMoreDropdown({
           <DropdownMenuContent
             side="right"
             align="start"
-            className="w-[15rem] max-h-[90vh] flex flex-col"
+            className="flex max-h-[90vh] w-[15rem] flex-col"
           >
             {content}
           </DropdownMenuContent>

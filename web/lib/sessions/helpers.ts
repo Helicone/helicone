@@ -8,7 +8,7 @@ import {
 } from "./sessionTypes";
 
 export const createTraceNodes = (
-  session: Session
+  session: Session,
 ): Record<string, TraceNode> => {
   const nodes: Record<string, TraceNode> = {};
 
@@ -88,7 +88,7 @@ export const tracesToFolderNodes = (traces: Trace[]): FolderNode[] => {
   });
 
   const rootPaths = Object.keys(folderMap).filter(
-    (path) => !path.includes("/")
+    (path) => !path.includes("/"),
   );
 
   return rootPaths.map((rootPath) => folderMap[rootPath]);
@@ -107,7 +107,7 @@ export const totalLatency = (folder: FolderNode): number => {
         } else {
           return child.start_unix_timestamp_ms;
         }
-      })
+      }),
     );
   };
   const latestFolder = (folder: FolderNode): number => {
@@ -122,7 +122,7 @@ export const totalLatency = (folder: FolderNode): number => {
         } else {
           return child.end_unix_timestamp_ms;
         }
-      })
+      }),
     );
   };
   return Math.round(latestFolder(folder) - earliestFolder(folder));
@@ -168,6 +168,6 @@ function getHeliconeRequestType(trace: Trace): HeliconeRequestType {
   return trace.request.model.startsWith("tool:")
     ? "Tool"
     : trace.request.model.startsWith("vector_db")
-    ? "VectorDB"
-    : "LLM";
+      ? "VectorDB"
+      : "LLM";
 }

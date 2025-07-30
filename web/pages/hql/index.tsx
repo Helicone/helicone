@@ -1,8 +1,6 @@
-import { ReactElement, useEffect, useRef } from "react";
+import { ReactElement } from "react";
 import AuthLayout from "@/components/layout/auth/authLayout";
 import HQLPage from "@/components/templates/hql/hqlPage";
-import { $JAWN_API } from "@/lib/clients/jawn";
-import Router from "next/router";
 
 const HQL = () => {
   return <HQLPage />;

@@ -3,13 +3,17 @@ import { AuthParams } from "../packages/common/auth/types";
 import { err, ok, Result } from "../packages/common/result";
 import { BaseManager } from "./BaseManager";
 import crypto from "crypto";
-import { KeyManager } from "./apiKeys/KeyManager";
 import {
   CreateRouterResult,
   LatestRouterConfig,
   Router,
+  RouterCostOverTime,
+  RouterLatencyOverTime,
+  RouterRequestsOverTime,
 } from "../controllers/public/gatewayController";
 import { init } from "@paralleldrive/cuid2";
+import { getXOverTime, TimeIncrement } from "./helpers/getXOverTime";
+import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 
 export class GatewayManager extends BaseManager {
   constructor(authParams: AuthParams) {
@@ -53,16 +57,16 @@ export class GatewayManager extends BaseManager {
   }
 
   async getLatestRouterConfig(
-    id: string
+    hash: string
   ): Promise<Result<LatestRouterConfig, string>> {
     const result = await dbExecute<LatestRouterConfig>(
       `SELECT routers.id, routers.hash, routers.name, router_config_versions.version, router_config_versions.config
       FROM routers
       INNER JOIN router_config_versions ON routers.id = router_config_versions.router_id
-      WHERE routers.id = $1 AND routers.organization_id = $2
+      WHERE routers.hash = $1 AND routers.organization_id = $2
       ORDER BY router_config_versions.created_at DESC
       LIMIT 1`,
-      [id, this.authParams.organizationId]
+      [hash, this.authParams.organizationId]
     );
 
     if (result.error || !result.data) {
@@ -70,6 +74,182 @@ export class GatewayManager extends BaseManager {
     }
 
     return ok(result.data[0]);
+  }
+
+  async getRouterRequestsOverTime({
+    routerHash,
+    timeFilter,
+    dbIncrement,
+    timeZoneDifference,
+  }: {
+    routerHash?: string;
+    timeFilter: {
+      start: string;
+      end: string;
+    };
+    dbIncrement: TimeIncrement;
+    timeZoneDifference: number;
+  }): Promise<Result<RouterRequestsOverTime[], string>> {
+    const res = await getXOverTime<{
+      count: number;
+      status: number;
+    }>(
+      {
+        timeFilter,
+        userFilter: {
+          left: {
+            request_response_rmt: {
+              gateway_router_id: {
+                equals: routerHash,
+              },
+            },
+          },
+          right: {
+            request_response_rmt: {
+              gateway_deployment_target: {
+                equals: "cloud",
+              },
+            },
+          },
+          operator: "and",
+        },
+        dbIncrement,
+        timeZoneDifference,
+      },
+      {
+        orgId: this.authParams.organizationId,
+        countColumns: ["count(*) as count"],
+        groupByColumns: ["status"],
+      }
+    );
+
+    if (res.error) {
+      return err(res.error);
+    }
+
+    return ok(
+      res.data?.map((d) => ({
+        time: new Date(new Date(d.created_at_trunc).getTime()),
+        count: d.count ? +d.count : 0,
+        status: d.status ? +d.status : 0,
+      })) ?? []
+    );
+  }
+
+  async getRouterCostOverTime({
+    routerHash,
+    timeFilter,
+    dbIncrement,
+    timeZoneDifference,
+  }: {
+    routerHash?: string;
+    timeFilter: {
+      start: string;
+      end: string;
+    };
+    dbIncrement: TimeIncrement;
+    timeZoneDifference: number;
+  }): Promise<Result<RouterCostOverTime[], string>> {
+    const res = await getXOverTime<{
+      cost: number;
+    }>(
+      {
+        timeFilter,
+        userFilter: {
+          left: {
+            request_response_rmt: {
+              gateway_router_id: {
+                equals: routerHash,
+              },
+            },
+          },
+          right: {
+            request_response_rmt: {
+              gateway_deployment_target: {
+                equals: "cloud",
+              },
+            },
+          },
+          operator: "and",
+        },
+        dbIncrement,
+        timeZoneDifference,
+      },
+      {
+        orgId: this.authParams.organizationId,
+        countColumns: [`sum(cost) / ${COST_PRECISION_MULTIPLIER} as cost`],
+        groupByColumns: [],
+      }
+    );
+
+    if (res.error) {
+      return err(res.error);
+    }
+
+    return ok(
+      res.data?.map((d) => ({
+        time: new Date(new Date(d.created_at_trunc).getTime()),
+        cost: d.cost ? +d.cost : 0,
+      })) ?? []
+    );
+  }
+
+  async getRouterLatencyOverTime({
+    routerHash,
+    timeFilter,
+    dbIncrement,
+    timeZoneDifference,
+  }: {
+    routerHash: string;
+    timeFilter: {
+      start: string;
+      end: string;
+    };
+    dbIncrement: TimeIncrement;
+    timeZoneDifference: number;
+  }): Promise<Result<RouterLatencyOverTime[], string>> {
+    const res = await getXOverTime<{
+      latency: number;
+    }>(
+      {
+        timeFilter,
+        userFilter: {
+          left: {
+            request_response_rmt: {
+              gateway_router_id: {
+                equals: routerHash,
+              },
+            },
+          },
+          right: {
+            request_response_rmt: {
+              gateway_deployment_target: {
+                equals: "cloud",
+              },
+            },
+          },
+          operator: "and",
+        },
+        dbIncrement,
+        timeZoneDifference,
+      },
+      {
+        orgId: this.authParams.organizationId,
+        countColumns: [`avg(request_response_rmt.latency) as latency`],
+        groupByColumns: [],
+      }
+    );
+
+    if (res.error) {
+      return err(res.error);
+    }
+
+    return ok(
+      res.data?.map((d) => ({
+        time: new Date(new Date(d.created_at_trunc).getTime()),
+        duration: d.latency ? +d.latency : 0,
+      })) ?? []
+    );
   }
 
   async createRouter(params: {
@@ -97,7 +277,7 @@ export class GatewayManager extends BaseManager {
       .update(config ?? "{}")
       .digest("hex");
     const versionResult = await dbExecute<{ id: string }>(
-      `INSERT INTO router_config_versions (router_id, version, config) VALUES ($1, $2, $3)`,
+      `INSERT INTO router_config_versions (router_id, version, config) VALUES ($1, $2, $3) RETURNING id`,
       [routerId, versionHash, config ?? "{}"]
     );
     if (versionResult.error || !versionResult.data) {
@@ -114,15 +294,15 @@ export class GatewayManager extends BaseManager {
   }
 
   async updateRouter(params: {
-    id: string;
+    hash: string;
     name?: string;
     config?: string;
   }): Promise<Result<null, string>> {
-    const { id, name, config } = params;
+    const { hash, name, config } = params;
 
     const routerConfigResult = await dbExecute<{ id: string }>(
-      `SELECT id FROM routers WHERE id = $1 AND organization_id = $2`,
-      [id, this.authParams.organizationId]
+      `SELECT id FROM routers WHERE hash = $1 AND organization_id = $2`,
+      [hash, this.authParams.organizationId]
     );
     if (routerConfigResult.error || !routerConfigResult.data) {
       return err(`Failed to get router: ${routerConfigResult.error}`);
@@ -131,7 +311,7 @@ export class GatewayManager extends BaseManager {
     if (name) {
       const nameResult = await dbExecute(
         `UPDATE routers SET name = $1 WHERE id = $2`,
-        [name, id]
+        [name, routerConfigResult.data[0].id]
       );
       if (nameResult.error) {
         return err(`Failed to update router name: ${nameResult.error}`);

@@ -4,13 +4,16 @@ This is the Python SDK for Helicone Helpers. It provides convenient access to so
 
 ## Supported Features
 
-- [Manual Logging](https://docs.helicone.ai/getting-started/integration-method/custom).
+- [Manual Logging](https://docs.helicone.ai/getting-started/integration-method/custom)
+- [Prompt Management](https://docs.helicone.ai/features/advanced-usage/prompts) - Fetch and compile prompts with variable substitution
 
 ## Installation
 
 ```bash
-pip install helicone-helpers
+pip install helicone-helpers openai
 ```
+
+**Note:** The OpenAI Python SDK is required for prompt management features. The SDK will work without it but with limited type safety.
 
 ## Usage
 
@@ -130,3 +133,80 @@ helicone_logger.send_log(
 ```
 
 Note: The default logging endpoint is now `https://api.worker.helicone.ai`.
+
+### Prompt Management
+
+The SDK provides powerful prompt management capabilities that allow you to store, version, and dynamically compile prompts with variable substitution.
+
+```python
+from helicone_helpers import HeliconePromptManager
+import openai
+
+# Initialize the prompt manager
+prompt_manager = HeliconePromptManager(
+    api_key="sk-helicone-..."  # Your Helicone API key
+)
+
+# Initialize OpenAI client
+client = openai.OpenAI(api_key="sk-openai-...")
+
+# Use a prompt with variable substitution
+params = {
+    "prompt_id": "your-prompt-id",
+    "model": "gpt-4o-mini",
+    "inputs": {
+        "customer_name": "Alice Johnson",
+        "product": "AI Gateway"
+    },
+    "messages": [
+        {"role": "user", "content": "Follow up question..."}
+    ]
+}
+
+# Get compiled prompt with validation
+result = prompt_manager.get_prompt_body(params)
+
+# Check for validation errors
+if result["errors"]:
+    for error in result["errors"]:
+        print(f"Validation error - {error.variable}: expected {error.expected}, got {error.value}")
+
+# Use compiled prompt with OpenAI
+response = client.chat.completions.create(**result["body"])
+```
+
+#### Key Features
+
+- **Variable Substitution**: Use `{{hc:name:type}}` syntax in your prompts
+- **Type Validation**: Automatic validation for `string`, `number`, and `boolean` types
+- **Version Control**: Specify exact prompt versions or use production versions
+- **Message Merging**: Runtime messages are appended to saved prompt messages
+- **Parameter Override**: Runtime parameters take precedence over saved ones
+- **Schema Variables**: Dynamic JSON schema generation for tools and response formats
+
+#### Advanced Usage
+
+```python
+# Use specific prompt version
+params = {
+    "prompt_id": "your-prompt-id",
+    "version_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "model": "gpt-4o-mini",
+    "inputs": {
+        "user_tier": "premium",
+        "max_tokens_allowed": 1000
+    }
+}
+
+result = prompt_manager.get_prompt_body(params)
+
+# Handle validation errors gracefully
+if result["errors"]:
+    print(f"Found {len(result['errors'])} validation errors")
+    # Prompt still works with original values where substitution failed
+    
+compiled_prompt = result["body"]
+response = client.chat.completions.create(**compiled_prompt)
+```
+
+For more examples, see the [example.py](example.py) file in this repository.

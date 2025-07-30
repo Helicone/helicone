@@ -4,6 +4,7 @@ import { costs as avianCosts } from "./avian";
 import { costs as awsBedrockCosts } from "./awsBedrock";
 import { costs as azureCosts } from "./azure";
 import { costs as llamaCosts } from "./llama";
+import { costs as nvidiaCosts } from "./nvidia";
 import { costs as cohereCosts } from "./cohere";
 import { costs as deepseekCosts } from "./deepseek";
 import { costs as fireworksAICosts } from "./fireworks";
@@ -18,6 +19,7 @@ import { costs as perplexityCosts } from "./perplexity";
 import { costs as qstashCosts } from "./qstash";
 import { costs as togetherAIChatCosts } from "./togetherai/chat";
 import { costs as togetherAIChatLlamaCosts } from "./togetherai/chat/llama";
+import { costs as vercelCosts } from "./vercel";
 import {
   costs as togetherAICompletionCosts,
   costs as togetherAICompletionLlamaCosts,
@@ -30,6 +32,7 @@ const anthropicPattern = /^https:\/\/api\.anthropic\.com/;
 const azurePattern =
   /^(https?:\/\/)?([^.]*\.)?(openai\.azure\.com|azure-api\.net|cognitiveservices\.azure\.com)(\/.*)?$/;
 const llamaApiPattern = /^https:\/\/api\.llama\.com/;
+const nvidiaApiPattern = /^https:\/\/integrate\.api\.nvidia\.com/;
 const localProxyPattern = /^http:\/\/127\.0\.0\.1:\d+\/v\d+\/?$/;
 const heliconeProxyPattern = /^https:\/\/oai\.hconeai\.com/;
 const amdbartekPattern = /^https:\/\/.*\.amdbartek\.dev/;
@@ -67,6 +70,9 @@ const avianPattern = /^https:\/\/api\.avian\.io/;
 
 //https://api.studio.nebius.ai
 const nebius = /^https:\/\/api\.studio\.nebius\.ai/;
+
+// https://ai-gateway.vercel.sh
+const vercelGateway = /^https:\/\/ai-gateway\.vercel\.sh/;
 
 // https://api.novita.ai
 const novita = /^https:\/\/api\.novita\.ai/;
@@ -109,6 +115,8 @@ export const providersNames = [
   "OPENPIPE",
   "CHUTES",
   "LLAMA",
+  "NVIDIA",
+  "VERCEL",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -137,6 +145,11 @@ export const providers: {
     pattern: llamaApiPattern,
     provider: "LLAMA",
     costs: llamaCosts,
+  },
+  {
+    pattern: nvidiaApiPattern,
+    provider: "NVIDIA",
+    costs: nvidiaCosts,
   },
   {
     pattern: azurePattern,
@@ -273,6 +286,11 @@ export const providers: {
     pattern: chutes,
     provider: "CHUTES",
     costs: [],
+  },
+  {
+    pattern: vercelGateway,
+    provider: "VERCEL",
+    costs: vercelCosts,
   },
 ];
 

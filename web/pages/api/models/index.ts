@@ -9,7 +9,7 @@ import { Result } from "@/packages/common/result";
 import { FilterNode } from "@helicone-package/filters/filterDefs";
 
 async function handler(
-  options: HandlerWrapperOptions<Result<ModelMetric[], string>>
+  options: HandlerWrapperOptions<Result<ModelMetric[], string>>,
 ) {
   const {
     req,
@@ -30,7 +30,7 @@ async function handler(
     filter,
     offset,
     limit,
-    timeFilter
+    timeFilter,
   );
   if (metricsError !== null) {
     res.status(500).json({ error: metricsError, data: null });

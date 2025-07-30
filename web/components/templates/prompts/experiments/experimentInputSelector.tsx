@@ -17,7 +17,7 @@ interface ExperimentInputSelectorProps {
       inputRecordId: string;
       inputs: Record<string, string>;
       autoInputs: any[];
-    }[]
+    }[],
   ) => void;
   selectJustOne?: boolean;
 }
@@ -59,7 +59,7 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
           body: {
             limit: 1000, // Adjust limit as needed
           },
-        }
+        },
       );
       return res.data?.data ?? [];
     },
@@ -131,10 +131,10 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
 
   return (
     <ThemedDrawer open={open} setOpen={setOpen}>
-      <div className="h-full flex flex-col space-y-4 justify-between w-full">
-        <div className="flex flex-col w-full">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-xl">
+      <div className="flex h-full w-full flex-col justify-between space-y-4">
+        <div className="flex w-full flex-col">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-semibold">
               Select Inputs ({inputRecords.length})
             </h2>
             {!selectJustOne && (
@@ -148,11 +148,11 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
               </Button>
             )}
           </div>
-          <p className="text-gray-500 text-sm pb-4">
+          <p className="pb-4 text-sm text-gray-500">
             Select the inputs you want to include in the dataset.
           </p>
 
-          <ul className="flex flex-col items-center space-y-4 w-full pt-4 px-1 overflow-y-auto">
+          <ul className="flex w-full flex-col items-center space-y-4 overflow-y-auto px-1 pt-4">
             {isLoading && <div>Loading inputs...</div>}
             {isError && <div>Error loading inputs.</div>}
             {!isLoading &&
@@ -161,8 +161,8 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
                 <li
                   key={request.id}
                   className={clsx(
-                    "w-full flex items-start",
-                    selectJustOne && "cursor-pointer"
+                    "flex w-full items-start",
+                    selectJustOne && "cursor-pointer",
                   )}
                   onClick={() => {
                     if (selectJustOne) {
@@ -179,16 +179,16 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
                 >
                   <input
                     type="checkbox"
-                    className="mt-2 mr-2 rounded border-slate-300 dark:border-slate-700"
+                    className="mr-2 mt-2 rounded border-slate-300 dark:border-slate-700"
                     checked={selectedRequests.some(
-                      (req) => req.id === request.id
+                      (req) => req.id === request.id,
                     )}
                     onChange={() => handleToggleRequest(request.id)}
                   />
                   <PromptPropertyCard
                     autoInputs={request.autoInputs}
                     isSelected={selectedRequests.some(
-                      (req) => req.id === request.id
+                      (req) => req.id === request.id,
                     )}
                     requestId={request.source_request}
                     createdAt={request.created_at}
@@ -200,7 +200,7 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
         </div>
 
         {!selectJustOne && (
-          <div className="flex justify-end space-x-4 sticky bottom-0 py-4 bg-white">
+          <div className="sticky bottom-0 flex justify-end space-x-4 bg-white py-4">
             <Button
               variant={"secondary"}
               size={"sm"}
@@ -222,7 +222,7 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
                     inputRecordId: request.id,
                     inputs: request.inputs,
                     autoInputs: request.autoInputs,
-                  }))
+                  })),
                 );
 
                 if (onSuccess) {

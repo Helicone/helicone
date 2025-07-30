@@ -39,7 +39,7 @@ interface PromptPlaygroundProps {
   playgroundMode?: "prompt" | "experiment" | "experiment-compact";
   handleCreateExperiment?: () => void;
   onExtractPromptVariables?: (
-    variables: Array<{ original: string; heliconeTag: string; value: string }>
+    variables: Array<{ original: string; heliconeTag: string; value: string }>,
   ) => void;
   onPromptChange?: (prompt: string | PromptObject) => void;
   className?: string;
@@ -59,7 +59,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
 }) => {
   const replaceTemplateVariables = (
     content: string,
-    inputs: Record<string, string>
+    inputs: Record<string, string>,
   ) => {
     return content.replace(/\{\{(\w+)\}\}/g, (match, key) => {
       return inputs[key] || match;
@@ -68,7 +68,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
 
   const parsePromptToMessages = (
     promptInput: string | PromptObject,
-    inputs?: Record<string, string>
+    inputs?: Record<string, string>,
   ): PromptMessage[] => {
     if (typeof promptInput === "string") {
       return promptInput
@@ -97,12 +97,12 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
             ? replaceTemplateVariables(
                 Array.isArray(msg.content)
                   ? msg.content.map((c) => c.text).join("\n")
-                  : msg.content ?? "",
-                inputs
+                  : (msg.content ?? ""),
+                inputs,
               )
             : Array.isArray(msg.content)
-            ? msg.content.map((c) => c.text).join("\n")
-            : msg.content,
+              ? msg.content.map((c) => c.text).join("\n")
+              : msg.content,
           _type: "message",
         };
       }) || []
@@ -112,7 +112,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   const [mode, setMode] = useState<(typeof PROMPT_MODES)[number]>("Pretty");
   const [isEditMode, setIsEditMode] = useState(defaultEditMode);
   const [currentChat, setCurrentChat] = useState<PromptMessage[]>(() =>
-    parsePromptToMessages(prompt, selectedInput?.inputs)
+    parsePromptToMessages(prompt, selectedInput?.inputs),
   );
 
   const { requestMessages, responseMessage, messages } = useMemo(() => {
@@ -120,7 +120,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     const responseMessage = getResponseMessage(
       undefined,
       selectedInput?.response_body || {},
-      (prompt as PromptObject).model
+      (prompt as PromptObject).model,
     );
     const messages = getMessages(requestMessages, responseMessage, 200);
     return { requestMessages, responseMessage, messages };
@@ -151,7 +151,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   const handleUpdateMessage = (
     index: number,
     newContent: string,
-    newRole: string
+    newRole: string,
   ) => {
     console.log("handleUpdateMessage", index, newContent, newRole);
     const updatedChat = [...currentChat];
@@ -190,7 +190,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
         return Array.from(variablesMap.values());
       });
     },
-    []
+    [],
   );
 
   useEffect(() => {
@@ -216,7 +216,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
             role: message.role as "user" | "assistant" | "system",
             content: Array.isArray(message.content)
               ? message.content.join(" ")
-              : message.content ?? "",
+              : (message.content ?? ""),
             _type: "message",
           };
         }),
@@ -236,7 +236,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
           "h-full rounded-md",
           playgroundMode === "experiment-compact" && "space-y-2",
           playgroundMode === "experiment" &&
-            "border border-slate-200 dark:border-slate-800"
+            "border border-slate-200 dark:border-slate-800",
         )}
       >
         <MessageRendererComponent
@@ -260,7 +260,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   return (
     <div className="flex flex-col space-y-4">
       <div
-        className={`w-full ${className} divide-y divide-slate-300 dark:divide-slate-700 h-full`}
+        className={`w-full ${className} h-full divide-y divide-slate-300 dark:divide-slate-700`}
       >
         <PlaygroundChatTopBar
           isPromptCreatedFromUi={isPromptCreatedFromUi}
@@ -269,7 +269,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
           isEditMode={isEditMode}
           setIsEditMode={setIsEditMode}
         />
-        <div className="flex-grow overflow-auto rounded-b-md ">
+        <div className="flex-grow overflow-auto rounded-b-md">
           <MessageRendererComponent
             messages={messages}
             mode={mode}
@@ -286,7 +286,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
           />
         </div>
         {isEditMode && (
-          <div className="flex justify-between items-center py-4 px-8 border-t border-slate-300 dark:border-slate-700 bg-white dark:bg-black rounded-b-lg">
+          <div className="flex items-center justify-between rounded-b-lg border-t border-slate-300 bg-white px-8 py-4 dark:border-slate-700 dark:bg-black">
             <p className="text-sm text-slate-500">
               Use &#123;&#123; sample_variable &#125;&#125; to insert variables
               into your prompt.
@@ -294,14 +294,14 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
           </div>
         )}
         {isEditMode && (
-          <div className="flex justify-between items-center py-4 px-8 border-t border-slate-300 dark:border-slate-700 bg-white dark:bg-black rounded-b-lg space-x-2">
-            <div className="w-full flex space-x-2">
+          <div className="flex items-center justify-between space-x-2 rounded-b-lg border-t border-slate-300 bg-white px-8 py-4 dark:border-slate-700 dark:bg-black">
+            <div className="flex w-full space-x-2">
               <Button onClick={handleAddMessage} variant="outline" size="sm">
-                <PlusIcon className="h-4 w-4 mr-2" />
+                <PlusIcon className="mr-2 h-4 w-4" />
                 Add Message
               </Button>
             </div>
-            <div className="flex space-x-4 w-full justify-end items-center">
+            <div className="flex w-full items-center justify-end space-x-4">
               <div className="font-normal">Model</div>
               <Select
                 value={selectedModel}

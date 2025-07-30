@@ -30,7 +30,7 @@ export const useCachePageClickHouse = ({
   dbIncrement,
 }: CachePageData) => {
   const createParams = (
-    userFilters: any
+    userFilters: any,
   ): BackendMetricsCall<any>["params"] => ({
     timeFilter,
     userFilters,
@@ -57,7 +57,7 @@ export const useCachePageClickHouse = ({
       key: "cacheHitsOverTime",
       postProcess: (data) => {
         return resultMap(data, (d) =>
-          d.map((d) => ({ count: +d.count, time: new Date(d.time) }))
+          d.map((d) => ({ count: +d.count, time: new Date(d.time) })),
         );
       },
     }),
@@ -84,7 +84,7 @@ export const useCachePageClickHouse = ({
         },
       },
       false,
-      true
+      true,
     ),
     totalSavings: useGetCacheTotalSavings(timeFilter),
     timeSaved: useGetCacheTimeSaved(timeFilter),
@@ -126,7 +126,7 @@ export const useCachePageClickHouse = ({
               right: currentCondition,
             };
           },
-          null
+          null,
         )
       : null;
 
@@ -138,7 +138,7 @@ export const useCachePageClickHouse = ({
     topRequestsFilter || defaultFilter,
     {
       created_at: "desc",
-    }
+    },
   );
 
   function isLoading(x: UseQueryResult<any>) {

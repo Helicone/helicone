@@ -13,7 +13,7 @@ const ChatPlaygroundFooter: React.FC<ChatPlaygroundFooterProps> = ({
   return (
     <div
       id="step-inc"
-      className="w-full flex justify-between sticky bottom-0 bg-gray-100 py-4 border-t border-gray-300 dark:border-gray-700 dark:bg-[#17191d]"
+      className="sticky bottom-0 flex w-full justify-between border-t border-gray-300 bg-gray-100 py-4 dark:border-gray-700 dark:bg-[#17191d]"
     >
       <Button variant={"secondary"} size={"sm"} onClick={onBack}>
         Back

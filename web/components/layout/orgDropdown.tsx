@@ -49,17 +49,17 @@ export default function OrgDropdown({}: OrgDropdownProps) {
       orgContext?.allOrgs.filter(
         (org) =>
           org.owner === heliconeAuthClient.user?.id &&
-          org.organization_type !== "customer"
+          org.organization_type !== "customer",
       ) || [];
     const member =
       orgContext?.allOrgs.filter(
         (org) =>
           org.owner !== heliconeAuthClient.user?.id &&
-          org.organization_type !== "customer"
+          org.organization_type !== "customer",
       ) || [];
     const customer =
       orgContext?.allOrgs.filter(
-        (org) => org.organization_type === "customer"
+        (org) => org.organization_type === "customer",
       ) || [];
     return { ownedOrgs: owned, memberOrgs: member, customerOrgs: customer };
   }, [orgContext?.allOrgs, heliconeAuthClient.user?.id]);
@@ -67,17 +67,17 @@ export default function OrgDropdown({}: OrgDropdownProps) {
   const currentIcon = useMemo(
     () =>
       ORGANIZATION_ICONS.find(
-        (icon) => icon.name === orgContext?.currentOrg?.icon
+        (icon) => icon.name === orgContext?.currentOrg?.icon,
       ),
-    [orgContext?.currentOrg?.icon]
+    [orgContext?.currentOrg?.icon],
   );
 
   const currentColor = useMemo(
     () =>
       ORGANIZATION_COLORS.find(
-        (icon) => icon.name === orgContext?.currentOrg?.color
+        (icon) => icon.name === orgContext?.currentOrg?.color,
       ),
-    [orgContext?.currentOrg?.color]
+    [orgContext?.currentOrg?.color],
   );
 
   const createNewOrgHandler = useCallback(() => {
@@ -107,31 +107,31 @@ export default function OrgDropdown({}: OrgDropdownProps) {
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="flex flex-row gap-2 justify-start px-2 py-2 h-full w-full"
+            className="flex h-full w-full flex-row justify-start gap-2 px-2 py-2"
           >
             <div className="flex flex-col gap-1">
-              <div className="flex flex-row gap-2 items-center">
+              <div className="flex flex-row items-center gap-2">
                 {currentIcon && (
                   <currentIcon.icon
                     className={clsx(
                       `text-${currentColor?.name}-500`,
-                      "flex-shrink-0 h-4 w-4"
+                      "h-4 w-4 flex-shrink-0",
                     )}
                     aria-hidden="true"
                   />
                 )}
-                <h3 className="text-sm font-medium text-left truncate max-w-24">
+                <h3 className="max-w-24 truncate text-left text-sm font-medium">
                   {orgContext?.currentOrg?.name}
                 </h3>
               </div>
 
-              <p className="ml-6 text-xs text-slate-400 font-medium max-w-[6rem] truncate">
+              <p className="ml-6 max-w-[6rem] truncate text-xs font-medium text-slate-400">
                 {heliconeAuthClient.user?.email}
               </p>
             </div>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-[15rem] ml-2 mt-2 max-h-[90vh] flex flex-col border-slate-200">
+        <DropdownMenuContent className="ml-2 mt-2 flex max-h-[90vh] w-[15rem] flex-col border-slate-200">
           <DropdownMenuGroup>
             <OrgMoreDropdown
               ownedOrgs={ownedOrgs}
@@ -158,7 +158,7 @@ export default function OrgDropdown({}: OrgDropdownProps) {
             )}
             {orgContext?.currentOrg?.tier !== "demo" && (
               <DropdownMenuItem asChild className="cursor-pointer text-xs">
-                <Link href="/settings/billing" className="flex flex-row gap-2 ">
+                <Link href="/settings/billing" className="flex flex-row gap-2">
                   <span>Billing</span>
                   <span className={tierDisplayInfo.className}>
                     {tierDisplayInfo.text}
@@ -170,11 +170,11 @@ export default function OrgDropdown({}: OrgDropdownProps) {
 
           <DropdownMenuGroup>
             <DropdownMenuItem
-              className={cn("hover:bg-transparent cursor-default")}
+              className={cn("cursor-default hover:bg-transparent")}
               disableHover
               disableClickClose
             >
-              <div className="flex items-center justify-between w-full text-xs">
+              <div className="flex w-full items-center justify-between text-xs">
                 <span>Dark mode</span>
                 <Switch
                   checked={theme === "dark"}
@@ -189,14 +189,14 @@ export default function OrgDropdown({}: OrgDropdownProps) {
           {orgContext?.currentOrg?.tier !== "demo" && (
             <Link href="/settings" rel="noopener noreferrer">
               <DropdownMenuItem className="text-xs">
-                <Cog6ToothIcon className="h-4 w-4 mr-2" />
+                <Cog6ToothIcon className="mr-2 h-4 w-4" />
                 Settings
               </DropdownMenuItem>
             </Link>
           )}
 
           <DropdownMenuItem onSelect={handleSignOut} className="text-xs">
-            <LogOutIcon className="h-4 w-4 mr-2" />
+            <LogOutIcon className="mr-2 h-4 w-4" />
             Sign out
           </DropdownMenuItem>
         </DropdownMenuContent>

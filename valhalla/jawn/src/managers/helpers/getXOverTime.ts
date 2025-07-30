@@ -1,6 +1,6 @@
 import { resultMap } from "../../packages/common/result";
 import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
-import { FilterNode } from "../../lib/shared/filters/filterDefs";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
 import {
   buildFilterWithAuthClickHouse,
   clickhouseParam,

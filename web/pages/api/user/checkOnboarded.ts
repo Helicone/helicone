@@ -11,7 +11,7 @@ async function checkAndUpdateOrgs(orgId: string): Promise<boolean> {
   if (count > 0) {
     const { error } = await dbExecute(
       `UPDATE organization SET has_onboarded = true WHERE id = $1`,
-      [orgId]
+      [orgId],
     );
     if (error) {
       console.error("Error updating org", error);

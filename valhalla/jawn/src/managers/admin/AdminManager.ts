@@ -4,6 +4,7 @@ import Stripe from "stripe";
 import { KVCache } from "../../lib/cache/kvCache";
 import pLimit from "p-limit";
 import { ok, err, Result } from "../../packages/common/result";
+import { ModelWithProvider } from "@helicone-package/cost";
 
 const adminKVCache = new KVCache(24 * 60 * 60 * 1000); // 1 day in milliseconds
 

@@ -20,7 +20,7 @@ const NotificationContext = createContext({
   setNotification: (
     title: string,
     // description: string,
-    variant: NotificationVariants
+    variant: NotificationVariants,
   ) => {},
 });
 
@@ -37,7 +37,7 @@ export const NotificationProvider = (props: NotificationProviderProps) => {
   const setNotification = (
     title: string,
     // description: string,
-    variant: NotificationVariants
+    variant: NotificationVariants,
   ) => {
     setTitle(title);
     // setDescription(description);

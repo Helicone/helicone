@@ -64,13 +64,13 @@ export const AssistantContent: React.FC<AssistantContentProps> = ({
   if (mode === "Debug") {
     return (
       <div
-        className="bg-slate-100 dark:bg-slate-900 items-start px-4 py-4 text-left font-semibold grid grid-cols-10 gap-2 cursor-pointer"
+        className="grid cursor-pointer grid-cols-10 items-start gap-2 bg-slate-100 px-4 py-4 text-left font-semibold dark:bg-slate-900"
         onClick={() => {
           navigator.clipboard.writeText(JSON.stringify(mappedRequest, null, 2));
           setNotification("Copied to clipboard", "success");
         }}
       >
-        <pre className="col-span-10 font-mono text-sm">
+        <pre className="font-mono col-span-10 text-sm">
           {JSON.stringify(mappedRequest, null, 2)}
         </pre>
       </div>
@@ -90,29 +90,29 @@ export const AssistantContent: React.FC<AssistantContentProps> = ({
   const runDetails = getRunDetails();
 
   return (
-    <div className="w-full flex flex-col text-left space-y-4 text-sm p-4">
-      <div className="w-full flex flex-col text-left space-y-1">
+    <div className="flex w-full flex-col space-y-4 p-4 text-left text-sm">
+      <div className="flex w-full flex-col space-y-1 text-left">
         <p className="font-semibold text-slate-900">Assistant Message</p>
-        <div className="p-2 border border-border bg-slate-50 dark:bg-slate-950 rounded-md whitespace-pre-wrap">
+        <div className="whitespace-pre-wrap rounded-md border border-border bg-slate-50 p-2 dark:bg-slate-950">
           {formatContent(mappedRequest.preview.request)}
         </div>
       </div>
-      <div className="w-full flex flex-col text-left space-y-1">
+      <div className="flex w-full flex-col space-y-1 text-left">
         <p className="font-semibold text-slate-900">
           {isError ? "Error" : "Response"}
         </p>
         <div
-          className={`p-2 border border-slate-300 ${
+          className={`border border-slate-300 p-2 ${
             isError ? "bg-red-50" : "bg-green-50"
-          } rounded-md whitespace-pre-wrap font-mono`}
+          } font-mono whitespace-pre-wrap rounded-md`}
         >
           {getMessageContent()}
         </div>
       </div>
       {!isError && runDetails && (
-        <div className="w-full flex flex-col text-left space-y-1">
+        <div className="flex w-full flex-col space-y-1 text-left">
           <p className="font-semibold text-slate-900">Run Details</p>
-          <div className="grid grid-cols-2 gap-4 p-2 border border-border bg-slate-50 dark:bg-slate-950 rounded-md">
+          <div className="grid grid-cols-2 gap-4 rounded-md border border-border bg-slate-50 p-2 dark:bg-slate-950">
             <div>
               <p className="text-slate-600">Run ID</p>
               <p className="font-mono">{runDetails.run_id}</p>
@@ -145,10 +145,10 @@ export const AssistantContent: React.FC<AssistantContentProps> = ({
         </div>
       )}
       {!isError && response?.tools?.length > 0 && (
-        <div className="w-full flex flex-col text-left space-y-1">
+        <div className="flex w-full flex-col space-y-1 text-left">
           <p className="font-semibold text-slate-900">Available Tools</p>
-          <div className="p-2 border border-border bg-slate-50 dark:bg-slate-950 rounded-md">
-            <ul className="list-disc list-inside space-y-1">
+          <div className="rounded-md border border-border bg-slate-50 p-2 dark:bg-slate-950">
+            <ul className="list-inside list-disc space-y-1">
               {response.tools.map((tool: any, index: number) => (
                 <li key={index} className="text-slate-700">
                   {tool.type === "function" ? (
@@ -166,9 +166,9 @@ export const AssistantContent: React.FC<AssistantContentProps> = ({
         </div>
       )}
       {!isError && response?.instructions && (
-        <div className="w-full flex flex-col text-left space-y-1">
+        <div className="flex w-full flex-col space-y-1 text-left">
           <p className="font-semibold text-slate-900">Instructions</p>
-          <div className="p-2 border border-border bg-slate-50 dark:bg-slate-950 rounded-md whitespace-pre-wrap">
+          <div className="whitespace-pre-wrap rounded-md border border-border bg-slate-50 p-2 dark:bg-slate-950">
             {response.instructions}
           </div>
         </div>

@@ -110,19 +110,19 @@ const useOpenPipeClient = ({ apiKey }: OpenPipeClientProps) => {
         throw new Error(
           `OpenPipe API error: ${response.statusText} ${
             response.status
-          } ${await response.text()}`
+          } ${await response.text()}`,
         );
       }
 
       return response.json();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [headers, apiKey]
+    [headers, apiKey],
   );
 
   const createDatasetEntry = (
     datasetId: string,
-    entries: DatasetEntry[]
+    entries: DatasetEntry[],
   ): Promise<CreateDatasetEntryResponse> => {
     return fetchWithAuth("/dataset-entry/create", {
       method: "POST",
@@ -138,7 +138,7 @@ const useOpenPipeClient = ({ apiKey }: OpenPipeClientProps) => {
   };
 
   const createFinetune = (
-    request: CreateFinetuneRequest
+    request: CreateFinetuneRequest,
   ): Promise<Finetune> => {
     return fetchWithAuth("/finetune/create", {
       method: "POST",

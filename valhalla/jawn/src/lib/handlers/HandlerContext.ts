@@ -107,6 +107,9 @@ export type HeliconeMeta = {
   posthogHost?: string;
   lytixKey?: string;
   lytixHost?: string;
+  promptId?: string;
+  promptVersionId?: string;
+  promptInputs?: Record<string, any>;
   heliconeManualAccessKey?: string;
   gatewayRouterId?: string;
   gatewayDeploymentTarget?: string;
@@ -190,7 +193,14 @@ export const toHeliconeRequest = (context: HandlerContext): HeliconeRequest => {
       ? 0
       : (context.usage.completionAudioTokens ?? null),
 
-    prompt_id: context.message.log.request.promptId ?? null,
+    /// NOTE: Unfortunately our codebase is running two prompts systems in parallel.
+    // This used to track the legacy feature, but its now the new one.
+    // It does not matter: 
+    // - this function is used to pull request and response bodies (no overlap with prompt IDs)
+    // - evals, which is deprecated and does not seem to access this field.
+    // When the legacy prompts and evals is deprecated, we should strongly consider refactoring and/or deleting this function. 
+    prompt_id: context.message.heliconeMeta.promptId ?? null, // TRACKS LEGACY PROMPTS ID
+    prompt_version: context.message.heliconeMeta.promptVersionId ?? null, // TRACKS LEGACY PROMPT VERSION ID
     llmSchema: null,
     country_code: context.message.log.request.countryCode ?? null,
     asset_ids: null,

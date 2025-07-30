@@ -50,7 +50,7 @@ export function generateOpenAIFunction({
         (choice) => ({
           const: choice.score,
           title: choice.description,
-        })
+        }),
       );
       break;
     case "range":
@@ -83,7 +83,7 @@ export function OpenAIFunctionToFunctionParams(
           required: string[];
         };
       }
-    | undefined
+    | undefined,
 ): OpenAIFunctionParams {
   if (!template || !template?.parameters?.properties) {
     return {
@@ -210,25 +210,25 @@ ${
               choiceScores,
               rangeMin,
               rangeMax,
-            })
+            }),
           ),
         },
       ],
     },
     null,
-    2
+    2,
   );
 }
 
 export function openAITemplateToOpenAIFunctionParams(
   template: any,
-  scoringType: "LLM-BOOLEAN" | "LLM-CHOICE" | "LLM-RANGE"
+  scoringType: "LLM-BOOLEAN" | "LLM-CHOICE" | "LLM-RANGE",
 ): OpenAIFunctionParams & { model: string } {
   const parsedTemplate = template;
   return {
     ...OpenAIFunctionToFunctionParams(
       scoringType,
-      parsedTemplate.tools[0].function
+      parsedTemplate.tools[0].function,
     ),
     model: parsedTemplate.model,
   };

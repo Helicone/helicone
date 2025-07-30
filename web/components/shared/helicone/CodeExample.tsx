@@ -51,14 +51,14 @@ export const CodeExample = (codeExampleKey: CodeExampleKey) => {
   const codeExample = CodeExamples[codeExampleKey] as CodeExampleType;
 
   return (
-    <div className="w-full md:w-[568.25px] h-full relative rounded-lg overflow-hidden">
+    <div className="relative h-full w-full overflow-hidden rounded-lg md:w-[568.25px]">
       {/* Background Image */}
       {codeExample.image && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={codeExample.image}
           alt={codeExample.alt}
-          className="w-full h-full object-cover"
+          className="h-full w-full object-cover"
         />
       )}
 
@@ -76,7 +76,7 @@ export const CodeExample = (codeExampleKey: CodeExampleKey) => {
           minHeight={false}
           maxHeight={false}
           textSize="md"
-          className="bg-[#1a1b26] rounded-lg [&_pre]:py-4"
+          className="rounded-lg bg-[#1a1b26] [&_pre]:py-4"
           marginTop={false}
         />
       </div>

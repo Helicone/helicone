@@ -51,7 +51,7 @@ export const MigrateGrowthToPro = () => {
     mutationFn: async () => {
       const jawn = getJawnClient(org?.currentOrg?.id);
       const result = await jawn.POST(
-        "/v1/stripe/subscription/cancel-subscription"
+        "/v1/stripe/subscription/cancel-subscription",
       );
       return result;
     },
@@ -78,10 +78,10 @@ export const MigrateGrowthToPro = () => {
       subscription.data?.data?.current_period_end
     ) {
       const startDate = new Date(
-        subscription.data.data.current_period_start * 1000
+        subscription.data.data.current_period_start * 1000,
       );
       const endDate = new Date(
-        subscription.data.data.current_period_end * 1000
+        subscription.data.data.current_period_end * 1000,
       );
       return `Next billing period: ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
     }
@@ -89,12 +89,12 @@ export const MigrateGrowthToPro = () => {
   };
 
   return (
-    <div className="flex gap-6 lg:flex-row flex-col">
-      <Card className="max-w-3xl w-full h-fit">
+    <div className="flex flex-col gap-6 lg:flex-row">
+      <Card className="h-fit w-full max-w-3xl">
         <CardHeader>
-          <CardTitle className="text-lg font-medium flex items-end">
+          <CardTitle className="flex items-end text-lg font-medium">
             Growth{" "}
-            <span className="text-sm px-2 py-1 rounded-md ml-2 font-light border border-slate-200">
+            <span className="ml-2 rounded-md border border-slate-200 px-2 py-1 text-sm font-light">
               Deprecating soon
             </span>
           </CardTitle>
@@ -108,8 +108,8 @@ export const MigrateGrowthToPro = () => {
           <InfoBox icon={() => <></>} variant="warning">
             <p>Growth plan will be discontinued on October 15th, 2024</p>
           </InfoBox>
-          <div className="text-xs text-muted-foreground flex items-center text-slate-500">
-            <CalendarIcon className="w-4 h-4 mr-1" />
+          <div className="flex items-center text-xs text-muted-foreground text-slate-500">
+            <CalendarIcon className="mr-1 h-4 w-4" />
             {getBillingCycleDates()}
           </div>
           <Col className="gap-2">
@@ -132,7 +132,7 @@ export const MigrateGrowthToPro = () => {
                 : "Cancel Subscription"}
             </Button>
             {isSubscriptionEnding && (
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="mt-1 text-sm text-gray-500">
                 Your subscription is already set to cancel at the end of the
                 current billing period.
               </p>
@@ -153,7 +153,7 @@ export const MigrateGrowthToPro = () => {
         </CardContent>
       </Card>
 
-      <div className="space-y-6 w-full lg:w-[450px]">
+      <div className="w-full space-y-6 lg:w-[450px]">
         <PlanFeatureCard
           title="Learn about our Enterprise plan"
           description="Built for companies looking to scale. Includes everything in Pro, plus unlimited requests, prompts, experiments and more."

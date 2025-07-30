@@ -4,10 +4,21 @@ import { $JAWN_API, getJawnClient } from "../../lib/clients/jawn";
 import { components } from "../../lib/clients/jawnTypes/private";
 
 const useCreateAlertBanner = (onSuccess?: () => void) => {
-  const { mutate: createBanner, isPending: isCreatingBanner } =
-    $JAWN_API.useMutation("post", "/v1/admin/alert_banners", {
-      onSuccess,
-    });
+  const { mutate: createBanner, isPending: isCreatingBanner } = useMutation({
+    mutationKey: ["create-alert-banner"],
+    mutationFn: async (req: { title: string; message: string }) => {
+      const jawnClient = getJawnClient();
+      const { data, error } = await jawnClient.POST("/v1/admin/alert_banners", {
+        body: req,
+      });
+
+      if (!error) {
+        onSuccess && onSuccess();
+      }
+
+      return { data, error };
+    },
+  });
   return {
     createBanner,
     isCreatingBanner,
@@ -139,31 +150,99 @@ const useChangelog = () => {
   };
 };
 
+const useBackfillCostsPreview = (onSuccess?: () => void) => {
+  const { mutateAsync: backfillCostsPreviewAsync, isPending: isLoadingPreview } = useMutation({
+    mutationKey: ["backfill-costs-preview"],
+    mutationFn: async (req: {
+      models: components["schemas"]["ModelWithProvider"][];
+      hasCosts: boolean;
+      fromDate?: string;
+      toDate?: string;
+    }) => {
+      const jawnClient = getJawnClient();
+      const { data, error } = await jawnClient.POST(
+        "/v1/admin/backfill-costs-preview",
+        {
+          body: {
+            models: req.models,
+            hasCosts: req.hasCosts,
+            fromDate: req.fromDate,
+            toDate: req.toDate,
+          },
+        }
+      );
+
+      console.log(`Backfill costs preview`, data);
+
+      if (!error) {
+        onSuccess && onSuccess();
+      }
+
+      return { data, error };
+    },
+  });
+
+  return {
+    backfillCostsPreviewAsync,
+    isLoadingPreview,
+  };
+};
+
+const useDeduplicateRequestResponse = (onSuccess?: () => void) => {
+  const { mutateAsync: deduplicateAsync, isPending: isDeduplicating } = useMutation({
+    mutationKey: ["deduplicate-request-response"],
+    mutationFn: async () => {
+      const jawnClient = getJawnClient();
+      const { data, error } = await jawnClient.POST(
+        "/v1/admin/deduplicate-request-response-rmt",
+        {
+          body: {},
+        }
+      );
+
+      console.log(`Deduplicated request response`, data);
+
+      if (!error) {
+        onSuccess && onSuccess();
+      }
+
+      return { data, error };
+    },
+  });
+
+  return {
+    deduplicateAsync,
+    isDeduplicating,
+  };
+};
+
 const useBackfillCosts = (onSuccess?: () => void) => {
-  const { mutate: backfillCosts, isPending: isBackfillingCosts } = useMutation({
+  const { mutate: backfillCosts, mutateAsync: backfillCostsAsync, isPending: isBackfillingCosts } = useMutation({
     mutationKey: ["backfill-costs"],
     mutationFn: async (req: {
-      timeExpression: string;
-      specifyModel: boolean;
-      modelId: string;
-      totalChunks: number;
-      chunkNumber: number;
+      models: components["schemas"]["ModelWithProvider"][];
+      confirmed: boolean;
+      fromDate?: string;
+      toDate?: string;
     }) => {
       const jawnClient = getJawnClient();
       const { data, error } = await jawnClient.POST(
         "/v1/admin/backfill-costs",
         {
           body: {
-            timeExpression: req.timeExpression,
-            specifyModel: req.specifyModel,
-            modelId: req.modelId,
-            totalChunks: req.totalChunks,
-            chunkNumber: req.chunkNumber,
+            models: req.models,
+            confirmed: req.confirmed,
+            fromDate: req.fromDate,
+            toDate: req.toDate,
           },
         }
       );
 
       console.log(`Backfilled costs`, data);
+
+      if (!error) {
+        onSuccess && onSuccess();
+      }
 
       return { data, error };
     },
@@ -171,6 +250,7 @@ const useBackfillCosts = (onSuccess?: () => void) => {
 
   return {
     backfillCosts,
+    backfillCostsAsync,
     isBackfillingCosts,
   };
 };
@@ -187,7 +267,7 @@ const useFeatureFlag = (feature: string, orgId: string) => {
     }
   );
   return {
-    data: data?.data ?? false,
+    data,
     isLoading,
     error,
   };
@@ -200,5 +280,7 @@ export {
   useUpdateAlertBanner,
   useUpdateSetting,
   useBackfillCosts,
+  useBackfillCostsPreview,
+  useDeduplicateRequestResponse,
   useFeatureFlag,
 };

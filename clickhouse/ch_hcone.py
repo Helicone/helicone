@@ -185,6 +185,9 @@ def main():
         "--list-migrations", action="store_true", help="List applied migrations"
     )
     parser.add_argument(
+        "--password", help="ClickHouse server password"
+    )
+    parser.add_argument(
         "--no-password", action="store_true", help="Do not prompt for password"
     )
     parser.add_argument(
@@ -200,7 +203,8 @@ def main():
     port = 19001 if test_env else 19000
     dynamic_container_name = container_name if not test_env else container_test_name
 
-    password = os.getenv("CLICKHOUSE_PASSWORD")
+    # Use command line password if provided, otherwise use environment variable
+    password = args.password if args.password else os.getenv("CLICKHOUSE_PASSWORD")
 
     if args.user and not password and not args.no_password:
         password = getpass.getpass(

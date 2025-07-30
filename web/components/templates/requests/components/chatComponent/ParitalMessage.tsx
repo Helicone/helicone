@@ -14,10 +14,10 @@ export const ShowMoreButton: React.FC<ShowMoreButtonProps> = ({
   setShowAllMessages,
 }) => {
   return (
-    <div className="flex flex-row justify-center items-center py-8 relative">
+    <div className="relative flex flex-row items-center justify-center py-8">
       <button
         onClick={() => setShowAllMessages(true)}
-        className="absolute flex flex-row space-x-1 items-center border border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg"
+        className="absolute flex flex-row items-center space-x-1 rounded-lg border border-gray-300 px-2 py-1 hover:bg-gray-200 dark:hover:bg-gray-800"
       >
         <ChatBubbleLeftRightIcon className="h-4 w-4" />
         <p className="text-xs font-semibold">

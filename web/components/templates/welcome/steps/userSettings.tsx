@@ -26,16 +26,16 @@ const UserSettings = (props: UserSettingsProps) => {
         `transition-all duration-700 ease-in-out ${
           loaded ? "opacity-100" : "opacity-0"
         }`,
-        "flex flex-col items-center text-center w-full px-2 space-y-4"
+        "flex w-full flex-col items-center space-y-4 px-2 text-center",
       )}
     >
-      <p className="text-2xl md:text-5xl font-semibold">Select your theme</p>
-      <div className="flex flex-col md:flex-row gap-4 py-8">
+      <p className="text-2xl font-semibold md:text-5xl">Select your theme</p>
+      <div className="flex flex-col gap-4 py-8 md:flex-row">
         <button
           onClick={() => setTheme("light")}
           className={clsx(
             theme === "light" ? "ring-2 ring-sky-500" : "",
-            "rounded-lg border border-gray-300 flex flex-col items-center justify-center p-4 space-y-4 bg-white"
+            "flex flex-col items-center justify-center space-y-4 rounded-lg border border-gray-300 bg-white p-4",
           )}
         >
           <Image
@@ -50,7 +50,7 @@ const UserSettings = (props: UserSettingsProps) => {
           onClick={() => setTheme("dark")}
           className={clsx(
             theme === "dark" ? "ring-2 ring-sky-500" : "",
-            "rounded-lg border border-gray-300 flex flex-col items-center justify-center p-4 space-y-4 bg-black"
+            "flex flex-col items-center justify-center space-y-4 rounded-lg border border-gray-300 bg-black p-4",
           )}
         >
           <Image
@@ -65,7 +65,7 @@ const UserSettings = (props: UserSettingsProps) => {
 
       <button
         onClick={nextStep}
-        className="px-28 py-3 bg-gray-900 hover:bg-gray-700 dark:bg-gray-100 dark:hover:bg-gray-300 dark:text-black font-medium text-white rounded-xl mt-8"
+        className="mt-8 rounded-xl bg-gray-900 px-28 py-3 font-medium text-white hover:bg-gray-700 dark:bg-gray-100 dark:text-black dark:hover:bg-gray-300"
       >
         Next
       </button>

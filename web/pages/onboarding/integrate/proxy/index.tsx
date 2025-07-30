@@ -27,7 +27,7 @@ client = OpenAI(
   }
 )`,
     curl: (
-      key: string
+      key: string,
     ) => `curl "https://oai.helicone.ai/v1/chat/completions" \\
   -H "Authorization: Bearer {{OPENAI_API_KEY}}" \\
   -H "Helicone-Auth: Bearer ${key}" \\
@@ -63,7 +63,7 @@ client = OpenAI(
   default_query={ "api-version": "{{API_VERSION}}" }
 )`,
     curl: (
-      key: string
+      key: string,
     ) => `curl "https://oai.helicone.ai/openai/deployments/{{YOUR_DEPLOYMENT}}/chat/completions?api-version={{API_VERSION}}" \\
   -H "api-key: {{AZURE_API_KEY}}" \\
   -H "Helicone-Auth: Bearer ${key}" \\

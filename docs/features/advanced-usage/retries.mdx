@@ -80,12 +80,12 @@ const openai = new OpenAIApi(configuration);
 
 You can customize the behavior of the retries feature by setting additional headers in your request.
 
-| Parameter                    | Description                                                                                                            |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `helicone-retry-num`         | Number of retries                                                                                                      |
-| `helicone-retry-factor`      | The exponential backoff factor used to increaase the wait time between subsequent retries. The default is usually `2`. |
-| `helicone-retry-min-timeout` | Minimum timeout (in milliseconds) between retries                                                                      |
-| `helicone-retry-max-timeout` | Maximum timeout (in milliseconds) between retries                                                                      |
+| Parameter                    | Description                                                                                                            | Default Value |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------- |
+| `helicone-retry-num`         | Number of retries                                                                                                      | `5`           |
+| `helicone-retry-factor`      | The exponential backoff factor used to increaase the wait time between subsequent retries. The default is usually `2`. | `2`           |
+| `helicone-retry-min-timeout` | Minimum timeout (in milliseconds) between retries                                                                      | `1000`        |
+| `helicone-retry-max-timeout` | Maximum timeout (in milliseconds) between retries                                                                      | `10000`       |
 
 <Info>
   Header values have to be strings. For example, `"helicone-retry-num":

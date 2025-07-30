@@ -8,7 +8,7 @@ export interface CacheHitsOverTime {
 }
 
 export async function getCacheHitsOverTime(
-  data: DataOverTimeRequest
+  data: DataOverTimeRequest,
 ): Promise<Result<CacheHitsOverTime[], string>> {
   const res = await getXOverTimeCacheHits<{
     count: number;
@@ -18,6 +18,6 @@ export async function getCacheHitsOverTime(
     resData.map((d) => ({
       time: new Date(new Date(d.created_at_trunc).getTime()),
       count: Number(d.count),
-    }))
+    })),
   );
 }

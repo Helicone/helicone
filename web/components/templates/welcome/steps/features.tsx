@@ -13,14 +13,14 @@ const Features = (props: FeaturesProps) => {
   const { apiKey = "{HELICONE_API_KEY}", previousStep, nextStep } = props;
 
   return (
-    <div id="content" className="w-full flex flex-col">
+    <div id="content" className="flex w-full flex-col">
       <div className="flex flex-col p-4">
         <h2 className="text-2xl font-semibold">Explore features and tooling</h2>
 
-        <p className="text-sm pt-1 pb-4">
+        <p className="pb-4 pt-1 text-sm">
           Learn more about our other features in our{" "}
           <Link
-            className="underline text-blue-500"
+            className="text-blue-500 underline"
             href="https://docs.helicone.ai/"
             target="_blank"
             rel="noopener noreferrer"
@@ -30,9 +30,9 @@ const Features = (props: FeaturesProps) => {
           .
         </p>
         <Tabs defaultValue="properties">
-          <TabsList className="grid w-full grid-cols-3 h-auto">
+          <TabsList className="grid h-auto w-full grid-cols-3">
             <TabsTrigger value="properties" className="flex flex-col text-left">
-              <p className="font-semibold text-md xl:text-lg">
+              <p className="text-md font-semibold xl:text-lg">
                 Custom Properties
               </p>
               <p className="text-xs xl:text-sm">
@@ -40,7 +40,7 @@ const Features = (props: FeaturesProps) => {
               </p>
             </TabsTrigger>
             <TabsTrigger value="templating" className="flex flex-col text-left">
-              <p className="font-semibold text-md xl:text-lg">
+              <p className="text-md font-semibold xl:text-lg">
                 Prompt Templating
               </p>
               <p className="text-xs xl:text-sm">
@@ -48,7 +48,7 @@ const Features = (props: FeaturesProps) => {
               </p>
             </TabsTrigger>
             <TabsTrigger value="caching" className="flex flex-col text-left">
-              <p className="font-semibold text-md xl:text-lg">Caching</p>
+              <p className="text-md font-semibold xl:text-lg">Caching</p>
               <p className="text-xs xl:text-sm">
                 Increase performance and save costs
               </p>
@@ -151,14 +151,14 @@ const openai = new OpenAI(configuration);
       </div>
       <Link
         href={"https://helicone.ai/community"}
-        className="text-blue-500 underline text-center p-4"
+        className="p-4 text-center text-blue-500 underline"
         target="_blank"
         rel="noopener noreferrer"
       >
         Explore our many integrations 🚀
       </Link>
 
-      <div className="sticky bottom-12 p-4 flex items-center justify-between">
+      <div className="sticky bottom-12 flex items-center justify-between p-4">
         <Button variant={"secondary"} size={"sm"} onClick={previousStep}>
           Back
         </Button>

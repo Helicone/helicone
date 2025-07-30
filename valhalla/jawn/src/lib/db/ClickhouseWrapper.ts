@@ -282,6 +282,14 @@ export interface RequestResponseRMT {
   cost: number;
   gateway_router_id?: string;
   gateway_deployment_target?: string;
+  prompt_id?: string;
+  prompt_version?: string;
+}
+
+export interface Prompt2025Input {
+  request_id: string;
+  version_id: string;
+  inputs: Record<string, any>;
 }
 
 export interface CacheMetricSMT {

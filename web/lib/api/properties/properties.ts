@@ -7,7 +7,7 @@ export interface Property {
 }
 
 export async function getProperties(
-  org_id: string
+  org_id: string,
 ): Promise<Result<Property[], string>> {
   const builtFilter = await buildFilterWithAuthClickHouseProperties({
     org_id,

@@ -49,7 +49,7 @@ export const useKeys = () => {
         keyName,
         isEu,
         useGovernance,
-        enableRateLimit
+        enableRateLimit,
       );
       return { res: await res, apiKey };
     },

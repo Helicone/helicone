@@ -54,7 +54,7 @@ export const TraceSpan = ({
   onHighlighterChange?: (
     start: number | null,
     end: number | null,
-    active: boolean
+    active: boolean,
   ) => void;
 }) => {
   const [selectedRequestId, setSelectedRequestId] = selectedRequestIdDispatch;
@@ -68,7 +68,7 @@ export const TraceSpan = ({
   const [highlighterEnd, setHighlighterEnd] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragEdge, setDragEdge] = useState<"start" | "end" | "middle" | null>(
-    null
+    null,
   );
   const [dragStartX, setDragStartX] = useState<number | null>(null);
   const [initialDragMovement, setInitialDragMovement] = useState(false);
@@ -143,7 +143,7 @@ export const TraceSpan = ({
       const ratio = domainWidth / chartWidth;
       return domain[0] + pixelX * ratio;
     },
-    [domain]
+    [domain],
   );
 
   // Initialize highlighter position when data is loaded
@@ -234,7 +234,7 @@ export const TraceSpan = ({
         setLastChartDimensions({ width: e.width, height: e.height });
       }
     },
-    [lastChartDimensions]
+    [lastChartDimensions],
   );
 
   // Handle mouse move for dragging the highlighter
@@ -286,13 +286,13 @@ export const TraceSpan = ({
         // Dragging left edge
         newStart = Math.max(
           domain[0],
-          Math.min(highlighterEnd - minSize, highlighterStart + domainDeltaX)
+          Math.min(highlighterEnd - minSize, highlighterStart + domainDeltaX),
         );
       } else if (dragEdge === "end") {
         // Dragging right edge
         newEnd = Math.min(
           domain[1],
-          Math.max(highlighterStart + minSize, highlighterEnd + domainDeltaX)
+          Math.max(highlighterStart + minSize, highlighterEnd + domainDeltaX),
         );
       } else if (dragEdge === "middle") {
         // Dragging the entire highlighter
@@ -336,7 +336,7 @@ export const TraceSpan = ({
       lastChartDimensions,
       initialDragMovement,
       updateChartDimensions,
-    ]
+    ],
   );
 
   // Handle mouse down on the chart for dragging the highlighter
@@ -390,7 +390,7 @@ export const TraceSpan = ({
       pixelToDomain,
       lastChartDimensions,
       updateChartDimensions,
-    ]
+    ],
   );
 
   // Unified mouse handler for reference areas
@@ -418,7 +418,7 @@ export const TraceSpan = ({
       updateChartDimensions(e);
       setDragStartX(eventX);
     },
-    [highlighterActive, updateChartDimensions]
+    [highlighterActive, updateChartDimensions],
   );
 
   // Handle mouse up to end dragging
@@ -486,7 +486,7 @@ export const TraceSpan = ({
     if (onHighlighterChange) {
       // For a single message click, set the range to just this message's index
       const messageIndex = spanData.findIndex(
-        (item) => item.request_id === clickedData.request_id
+        (item) => item.request_id === clickedData.request_id,
       );
       if (messageIndex !== -1) {
         // Set both start and end to the same index to indicate a single message
@@ -497,7 +497,7 @@ export const TraceSpan = ({
 
   return (
     <div
-      className="relative h-full flex flex-col select-none"
+      className="relative flex h-full select-none flex-col"
       id="sessions-trace-span"
     >
       <ScrollArea>
@@ -553,8 +553,8 @@ export const TraceSpan = ({
                 fill: highlighterActive
                   ? "transparent"
                   : theme === "dark"
-                  ? "#020617" // slate-950
-                  : "#f8fafc", // slate-50
+                    ? "#020617" // slate-950
+                    : "#f8fafc", // slate-50
               }}
               content={(props) => {
                 const { payload } = props;
@@ -569,14 +569,14 @@ export const TraceSpan = ({
                 const duration = traceData.duration;
 
                 return (
-                  <Col className="gap-2 rounded glass border border-slate-200 dark:border-slate-800 z-50 p-2">
+                  <Col className="glass z-50 gap-2 rounded border border-slate-200 p-2 dark:border-slate-800">
                     <Row className="justify-between">
-                      <Row className="gap-2 items-center">
+                      <Row className="items-center gap-2">
                         <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
                           {traceData?.name}
                         </h3>
                       </Row>
-                      <Row className="gap-1 items-center">
+                      <Row className="items-center gap-1">
                         <Clock4Icon
                           width={16}
                           height={16}
@@ -754,7 +754,7 @@ export const TraceSpan = ({
                   <ReferenceArea
                     x1={Math.max(
                       domain[0],
-                      highlighterStart - (domain[1] - domain[0]) * 0.02
+                      highlighterStart - (domain[1] - domain[0]) * 0.02,
                     )}
                     x2={highlighterStart + (domain[1] - domain[0]) * 0.02}
                     y1={0}
@@ -769,7 +769,7 @@ export const TraceSpan = ({
                     x1={highlighterEnd - (domain[1] - domain[0]) * 0.02}
                     x2={Math.min(
                       domain[1],
-                      highlighterEnd + (domain[1] - domain[0]) * 0.02
+                      highlighterEnd + (domain[1] - domain[0]) * 0.02,
                     )}
                     y1={0}
                     y2={spanData.length - 1}
@@ -811,7 +811,7 @@ export const TraceSpan = ({
           variant={highlighterActive ? "default" : "glass"}
           size="sm"
           onClick={toggleHighlighter}
-          className="absolute top-4 right-4 gap-2"
+          className="absolute right-4 top-4 gap-2"
         >
           <PiSplitHorizontalBold
             size={18}
