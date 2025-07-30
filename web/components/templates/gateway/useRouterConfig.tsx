@@ -67,11 +67,6 @@ export const useRouterConfig = (initialConfig?: any) => {
     };
 
     if (configObj["load-balance"]) {
-      // newState.loadBalanceConfig = configObj["load-balance"] as Record<
-      //   string,
-      //   unknown
-      // >;
-
       // Parse load balance configuration
       const loadBalance = configObj["load-balance"];
       if ("chat" in loadBalance && loadBalance.chat) {

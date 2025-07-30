@@ -364,13 +364,6 @@ const RouterConfigForm = ({ state, onStateChange }: RouterConfigFormProps) => {
                   >
                     <PlusIcon className="h-4 w-4" />
                   </Button>
-                  {/* <button
-                    type="button"
-                    onClick={addWeightedModel}
-                    className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90"
-                  >
-                    Add
-                  </button> */}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Enter model name and weight, then click Add. Click on badges
