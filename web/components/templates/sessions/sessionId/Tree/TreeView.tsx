@@ -1,3 +1,4 @@
+import React from "react";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -53,7 +54,7 @@ export interface TableTreeNode {
 
 interface TreeViewProps {
   selectedRequestId: string;
-  setSelectedRequestId: (id: string) => void;
+  setSelectedRequestId: (_id: string) => void;
   session: Session;
   isOriginalRealtime?: boolean;
 }
@@ -118,7 +119,6 @@ export const TreeView: React.FC<TreeViewProps> = ({
 
   const handleCollapseDrawer = () => {
     drawerRef.current?.collapse();
-    setDrawerSize(0);
   };
 
   const handleToggleAllRows = (table: any) => {
@@ -186,14 +186,11 @@ export const TreeView: React.FC<TreeViewProps> = ({
 
         <ResizablePanel
           ref={drawerRef}
-          defaultSize={0}
+          defaultSize={drawerSize}
           minSize={25}
           maxSize={75}
           collapsible={true}
           collapsedSize={0}
-          onCollapse={() => {
-            setDrawerSize(0);
-          }}
           onExpand={() => {
             drawerRef.current?.resize(drawerSize > 0 ? drawerSize : 33);
           }}
