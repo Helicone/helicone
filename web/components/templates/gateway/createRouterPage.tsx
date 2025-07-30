@@ -45,7 +45,7 @@ const CreateRouterPage = () => {
       return;
     }
 
-    const generatedConfig = generateYaml(true);
+    const generatedConfig = generateYaml();
     const obj = yaml.load(generatedConfig);
 
     try {
@@ -118,12 +118,7 @@ const CreateRouterPage = () => {
           </div>
 
           {/* Configuration Form */}
-          <RouterConfigForm
-            state={state}
-            onStateChange={setState}
-            mode="create"
-            showLoadBalance={true}
-          />
+          <RouterConfigForm state={state} onStateChange={setState} />
 
           {/* Generated Configuration Toggle */}
           <div className="flex justify-center py-2">
@@ -146,7 +141,7 @@ const CreateRouterPage = () => {
               </div>
               <div className="rounded-lg border bg-muted p-3">
                 <MarkdownEditor
-                  text={generateYaml(true)}
+                  text={generateYaml()}
                   disabled
                   setText={() => {}}
                   language="yaml"

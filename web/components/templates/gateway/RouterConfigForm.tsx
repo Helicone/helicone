@@ -1,3 +1,4 @@
+import React from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -15,11 +16,22 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { InfoIcon } from "lucide-react";
 import Link from "next/link";
+import { useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { InfoIcon, PlusIcon } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
+// Discriminated union for load balance inner configuration
+type LoadBalance =
+  | { type: "model-latency"; inner: string[] }
+  | { type: "model-weighted"; inner: { model: string; weight: number }[] }
+  | { type: "provider-weighted"; inner: { provider: string; weight: number }[] }
+  | { type: "provider-latency"; inner: string[] };
 
 export interface RouterConfigFormState {
+  loadBalance: LoadBalance;
+
   // Cache configuration
   enableCache: boolean;
   cacheDirective: string;
@@ -47,24 +59,131 @@ export interface RouterConfigFormState {
 
 interface RouterConfigFormProps {
   state: RouterConfigFormState;
-  onStateChange: (state: RouterConfigFormState) => void;
-  mode: "create" | "edit";
-  showLoadBalance?: boolean;
+  onStateChange: (_state: RouterConfigFormState) => void;
+  mode?: "create" | "edit";
 }
 
-const RouterConfigForm = ({
-  state,
-  onStateChange,
-  mode,
-  showLoadBalance = false,
-}: RouterConfigFormProps) => {
+const RouterConfigForm = ({ state, onStateChange }: RouterConfigFormProps) => {
+  const [modelInput, setModelInput] = useState("");
+  const [weightedModelInput, setWeightedModelInput] = useState("");
+  const [weightInput, setWeightInput] = useState("");
+
   const updateState = (updates: Partial<RouterConfigFormState>) => {
     onStateChange({ ...state, ...updates });
   };
 
+  // Helper function to add a model to the list
+  const addModel = (model: string) => {
+    const trimmedModel = model.trim();
+    if (trimmedModel && state.loadBalance.type === "model-latency") {
+      const currentModels = state.loadBalance.inner;
+      if (!currentModels.includes(trimmedModel)) {
+        updateState({
+          loadBalance: {
+            type: "model-latency",
+            inner: [...currentModels, trimmedModel],
+          },
+        });
+      }
+      setModelInput("");
+    }
+  };
+
+  // Helper function to remove a model from the list
+  const removeModel = (modelToRemove: string) => {
+    if (state.loadBalance.type === "model-latency") {
+      updateState({
+        loadBalance: {
+          type: "model-latency",
+          inner: state.loadBalance.inner.filter(
+            (model) => model !== modelToRemove,
+          ),
+        },
+      });
+    }
+  };
+
+  const modelWeightedInputRef = useRef<HTMLInputElement>(null);
+
+  // Helper function to add a weighted model to the list
+  const addWeightedModel = () => {
+    const trimmedModel = weightedModelInput.trim();
+    const weight = parseFloat(weightInput);
+
+    if (
+      trimmedModel &&
+      !isNaN(weight) &&
+      weight > 0 &&
+      state.loadBalance.type === "model-weighted"
+    ) {
+      const currentModels = state.loadBalance.inner as {
+        model: string;
+        weight: number;
+      }[];
+      const modelExists = currentModels.some(
+        (item) => item.model === trimmedModel,
+      );
+
+      if (!modelExists) {
+        updateState({
+          loadBalance: {
+            type: "model-weighted",
+            inner: [...currentModels, { model: trimmedModel, weight }],
+          },
+        });
+        setWeightedModelInput("");
+        setWeightInput("");
+        modelWeightedInputRef.current?.focus();
+      }
+    }
+  };
+
+  // Helper function to remove a weighted model from the list
+  const removeWeightedModel = (modelToRemove: string) => {
+    if (state.loadBalance.type === "model-weighted") {
+      const currentModels = state.loadBalance.inner as {
+        model: string;
+        weight: number;
+      }[];
+      updateState({
+        loadBalance: {
+          type: "model-weighted",
+          inner: currentModels.filter((item) => item.model !== modelToRemove),
+        },
+      });
+    }
+  };
+
+  // Handle input key press
+  const handleModelInputKeyPress = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+  ) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      addModel(modelInput);
+    }
+  };
+
+  // Handle input change
+  const handleModelInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setModelInput(e.target.value);
+  };
+
+  // Handle weighted model input change
+  const handleWeightedModelInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    setWeightedModelInput(e.target.value);
+  };
+
+  // Handle weight input change
+  const handleWeightInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setWeightInput(e.target.value);
+  };
+
   // Helper functions to get compact summaries
   const getLoadBalanceSummary = () => {
-    return "model-latency • 2 models";
+    return `${state.loadBalance.type} • ${state.loadBalance.inner.length} ${state.loadBalance.type.includes("model") ? "model" : "provider"}${state.loadBalance.inner.length > 1 ? "s" : ""}`;
   };
 
   const getCacheSummary = () => {
@@ -93,68 +212,209 @@ const RouterConfigForm = ({
   return (
     <Accordion
       type="multiple"
-      defaultValue={
-        showLoadBalance
-          ? ["load-balance", "cache", "rate-limit", "retries"]
-          : ["cache", "rate-limit", "retries"]
-      }
+      defaultValue={["load-balance", "cache", "rate-limit", "retries"]}
     >
-      {/* Load Balance Configuration (only for create mode) */}
-      {showLoadBalance && (
-        <AccordionItem value="load-balance">
-          <AccordionTrigger className="flex items-center justify-between rounded-md transition-colors hover:bg-muted/50 hover:no-underline">
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <span>Load Balancing</span>
-                <Badge variant="secondary" className="text-xs">
-                  {getLoadBalanceSummary()}
-                </Badge>
-              </div>
-              <div className="mt-0.5 text-xs text-muted-foreground">
-                Make sure you&apos;ve set up your provider keys in the{" "}
-                <Link
-                  href="/providers"
-                  className="text-blue-500 hover:underline"
-                >
-                  providers
-                </Link>{" "}
-                section.
-              </div>
+      <AccordionItem value="load-balance">
+        <AccordionTrigger className="flex items-center justify-between rounded-md transition-colors hover:bg-muted/50 hover:no-underline">
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+              <span>Load Balancing</span>
+              <Badge variant="secondary" className="text-xs">
+                {getLoadBalanceSummary()}
+              </Badge>
             </div>
-          </AccordionTrigger>
-          <AccordionContent>
-            <div className="space-y-4">
-              <Alert>
-                <InfoIcon className="h-4 w-4" />
-                <AlertDescription>
-                  Load balancing is configured with model-latency strategy and
-                  default models. You can edit the configuration after creation.
-                </AlertDescription>
-              </Alert>
+            <div className="mt-0.5 text-xs text-muted-foreground">
+              Make sure you&apos;ve set up your provider keys in the{" "}
+              <Link href="/providers" className="text-blue-500 hover:underline">
+                providers
+              </Link>{" "}
+              section.
+            </div>
+          </div>
+        </AccordionTrigger>
+        <AccordionContent>
+          <div className="space-y-4">
+            <div className="grid items-start gap-1.5">
+              <Label className="justify-start">Strategy</Label>
+              <Select
+                value={state.loadBalance.type}
+                onValueChange={(value: "model-latency" | "model-weighted") => {
+                  // Reset input when strategy changes
+                  setModelInput("");
 
-              <div className="rounded-lg border bg-muted p-4">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Strategy</span>
-                    <Badge variant="helicone">model-latency</Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Models</span>
-                    <div className="flex gap-1">
-                      <Badge variant="helicone" className="text-xs">
-                        openai/gpt-4o-mini
-                      </Badge>
-                      <Badge variant="helicone" className="text-xs">
-                        anthropic/claude-3-5-sonnet
-                      </Badge>
-                    </div>
-                  </div>
+                  // Create appropriate load balance config based on strategy
+                  let newLoadBalance: LoadBalance;
+                  switch (value) {
+                    case "model-latency":
+                      newLoadBalance = {
+                        type: "model-latency",
+                        inner: [],
+                      };
+                      break;
+                    case "model-weighted":
+                      newLoadBalance = {
+                        type: "model-weighted",
+                        inner: [],
+                      };
+                      break;
+                    default:
+                      newLoadBalance = {
+                        type: "model-latency",
+                        inner: [],
+                      };
+                  }
+
+                  updateState({
+                    loadBalance: newLoadBalance,
+                  });
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select strategy" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="model-latency">Model Latency</SelectItem>
+                  <SelectItem value="model-weighted">Model Weighted</SelectItem>
+                  {state.loadBalance.type === "provider-weighted" && (
+                    <SelectItem value="provider-weighted">
+                      Provider Weighted
+                    </SelectItem>
+                  )}
+                  {state.loadBalance.type === "provider-latency" && (
+                    <SelectItem value="provider-latency">
+                      Provider Latency
+                    </SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {state.loadBalance.type === "model-latency" && (
+              <div className="grid items-start gap-1.5">
+                <Label className="justify-start">Models</Label>
+                <Input
+                  value={modelInput}
+                  onChange={handleModelInputChange}
+                  onKeyDown={handleModelInputKeyPress}
+                  placeholder="openai/gpt-4o-mini, anthropic/claude-3-5-sonnet"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Press Enter or comma to add a model. Click on badges to remove
+                  them.
+                </p>
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {state.loadBalance.inner.map((model, index) => (
+                    <Badge
+                      key={index}
+                      variant="helicone"
+                      className="cursor-pointer text-xs transition-colors hover:bg-destructive hover:text-destructive-foreground"
+                      onClick={() => removeModel(model)}
+                      title="Click to remove"
+                    >
+                      {model} ×
+                    </Badge>
+                  ))}
                 </div>
               </div>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      )}
+            )}
+
+            {state.loadBalance.type === "model-weighted" && (
+              <div className="grid items-start gap-1.5">
+                <Label className="justify-start">Models</Label>
+                <div className="flex gap-2">
+                  <Input
+                    ref={modelWeightedInputRef}
+                    value={weightedModelInput}
+                    onChange={handleWeightedModelInputChange}
+                    placeholder="openai/gpt-4o-mini"
+                    className="flex-1"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        if (
+                          weightInput.trim() !== "" &&
+                          weightedModelInput.trim() !== ""
+                        ) {
+                          addWeightedModel();
+                        }
+                      }
+                    }}
+                  />
+                  <div className="w-20">
+                    <Input
+                      type="number"
+                      value={weightInput}
+                      onChange={handleWeightInputChange}
+                      placeholder="1.0"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          if (
+                            weightInput.trim() !== "" &&
+                            weightedModelInput.trim() !== ""
+                          ) {
+                            addWeightedModel();
+                          }
+                        }
+                      }}
+                    />
+                  </div>
+                  <Button
+                    size="icon"
+                    onClick={addWeightedModel}
+                    className="h-8 w-8"
+                  >
+                    <PlusIcon className="h-4 w-4" />
+                  </Button>
+                  {/* <button
+                    type="button"
+                    onClick={addWeightedModel}
+                    className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90"
+                  >
+                    Add
+                  </button> */}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Enter model name and weight, then click Add. Click on badges
+                  to remove them.
+                </p>
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {(
+                    state.loadBalance.inner as {
+                      model: string;
+                      weight: number;
+                    }[]
+                  ).map((item, index) => (
+                    <Badge
+                      key={index}
+                      variant="helicone"
+                      className="cursor-pointer text-xs transition-colors hover:bg-destructive hover:text-destructive-foreground"
+                      onClick={() => removeWeightedModel(item.model)}
+                      title="Click to remove"
+                    >
+                      {item.model} ({item.weight}) ×
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {(state.loadBalance.type === "provider-weighted" ||
+              state.loadBalance.type === "provider-latency") && (
+              <div className="grid items-start gap-1.5">
+                <Alert>
+                  <InfoIcon className="h-4 w-4" />
+                  <AlertTitle>
+                    We don&apos;t support provider-weighted or provider-latency
+                    on the UI yet.
+                  </AlertTitle>
+                  <AlertDescription>
+                    You can edit the config manually in the YAML editor.
+                  </AlertDescription>
+                </Alert>
+              </div>
+            )}
+          </div>
+        </AccordionContent>
+      </AccordionItem>
 
       {/* Cache Configuration */}
       <AccordionItem value="cache">
