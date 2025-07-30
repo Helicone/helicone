@@ -816,6 +816,7 @@ export interface components {
       response_body?: components["schemas"]["Partial_VectorOperators_"];
       cache_enabled?: components["schemas"]["Partial_BooleanOperators_"];
       cache_reference_id?: components["schemas"]["Partial_TextOperators_"];
+      cached?: components["schemas"]["Partial_BooleanOperators_"];
       assets?: components["schemas"]["Partial_TextOperators_"];
       "helicone-score-feedback"?: components["schemas"]["Partial_BooleanOperators_"];
       gateway_router_id?: components["schemas"]["Partial_TextOperators_"];

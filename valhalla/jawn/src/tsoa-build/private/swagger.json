@@ -3133,6 +3133,9 @@
 					"cache_reference_id": {
 						"$ref": "#/components/schemas/Partial_TextOperators_"
 					},
+					"cached": {
+						"$ref": "#/components/schemas/Partial_BooleanOperators_"
+					},
 					"assets": {
 						"$ref": "#/components/schemas/Partial_TextOperators_"
 					},
