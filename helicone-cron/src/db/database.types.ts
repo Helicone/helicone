@@ -1035,6 +1035,7 @@ export type Database = {
           organization_id: string
           soft_delete: boolean
           temp_key: boolean
+          updated_at: string | null
           user_id: string
         }
         Insert: {
@@ -1047,6 +1048,7 @@ export type Database = {
           organization_id: string
           soft_delete?: boolean
           temp_key?: boolean
+          updated_at?: string | null
           user_id: string
         }
         Update: {
@@ -1059,6 +1061,7 @@ export type Database = {
           organization_id?: string
           soft_delete?: boolean
           temp_key?: boolean
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: [
@@ -2103,15 +2106,7 @@ export type Database = {
           soft_delete?: boolean
           tags?: string[] | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "prompts_2025_organization_fkey"
-            columns: ["organization"]
-            isOneToOne: false
-            referencedRelation: "organization"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       prompts_2025_inputs: {
         Row: {
@@ -2135,22 +2130,7 @@ export type Database = {
           request_id?: string
           version_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "prompts_2025_inputs_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "request"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "prompts_2025_inputs_version_id_fkey"
-            columns: ["version_id"]
-            isOneToOne: false
-            referencedRelation: "prompts_2025_versions"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       prompts_2025_versions: {
         Row: {
@@ -2189,29 +2169,7 @@ export type Database = {
           prompt_id?: string
           soft_delete?: boolean
         }
-        Relationships: [
-          {
-            foreignKeyName: "prompts_2025_versions_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "users_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "prompts_2025_versions_organization_fkey"
-            columns: ["organization"]
-            isOneToOne: false
-            referencedRelation: "organization"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "prompts_2025_versions_prompt_id_fkey"
-            columns: ["prompt_id"]
-            isOneToOne: false
-            referencedRelation: "prompts_2025"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       prompts_versions: {
         Row: {
