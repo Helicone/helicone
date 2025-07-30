@@ -2,7 +2,7 @@ alter table "public"."provider_keys" add column "auth_type" text not null defaul
 
 alter table "public"."provider_keys" add column "provider_secret_key" text;
 
-CREATE OR REPLACE FUNCTION provider_keys_encrypt_secret_provider_key() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION provider_keys_encrypt_secrets() RETURNS trigger AS $$
 		BEGIN
 		        new.provider_key = CASE WHEN new.provider_key IS NULL THEN NULL ELSE
 			CASE WHEN new.key_id IS NULL THEN NULL ELSE pg_catalog.encode(
@@ -30,7 +30,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE TRIGGER provider_keys_encrypt_secret_trigger_provider_key
 AFTER INSERT OR UPDATE ON provider_keys
-FOR EACH ROW EXECUTE FUNCTION provider_keys_encrypt_secret_provider_key();
+FOR EACH ROW EXECUTE FUNCTION provider_keys_encrypt_secrets();
 
 create view public.decrypted_provider_keys_v2 as
  SELECT provider_keys.id,
