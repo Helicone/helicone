@@ -114,7 +114,9 @@ export const getInitialColumns = (): ColumnConfig<PromptWithVersions>[] => {
             size="sm"
             onClick={(e) => {
               e.stopPropagation();
-              router.push(`/playground?promptVersionId=${item.productionVersion.id}`);
+              router.push(
+                `/playground?promptVersionId=${item.productionVersion.id}`,
+              );
             }}
             className="flex items-center gap-1 rounded-lg"
           >
