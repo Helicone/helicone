@@ -104,7 +104,7 @@ export const getInitialColumns = (
     {
       key: "playground" as keyof PromptWithVersions,
       header: "Playground",
-      sortable: true,
+      sortable: false,
       minSize: 100,
       render: (item) => {
         return (
