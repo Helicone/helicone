@@ -15,6 +15,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useState, useEffect } from "react";
 import type { PromptWithVersions } from "@/services/hooks/prompts";
 import PromptVersionHistory from "./PromptVersionHistory";
@@ -50,6 +58,7 @@ const PromptDetails = ({
   );
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     if (promptWithVersions) {
@@ -164,7 +173,7 @@ const PromptDetails = ({
                       variant="none"
                       size="square_icon"
                       className="ml-1 w-fit text-muted-foreground hover:text-destructive"
-                      onClick={() => onDeletePrompt(prompt.id)}
+                      onClick={() => setDeleteDialogOpen(true)}
                     >
                       <Trash2 size={16} />
                     </Button>
@@ -220,6 +229,32 @@ const PromptDetails = ({
           onDeletePromptVersion={onDeletePromptVersion}
         />
       </div>
+
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Are you absolutely sure?</DialogTitle>
+            <DialogDescription>
+              This action cannot be undone. This will permanently delete your
+              prompt.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                onDeletePrompt(prompt.id);
+                setDeleteDialogOpen(false);
+              }}
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

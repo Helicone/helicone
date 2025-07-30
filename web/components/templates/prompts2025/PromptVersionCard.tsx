@@ -122,24 +122,45 @@ const PromptVersionCard = ({
               </AlertDialogContent>
             </AlertDialog>
           )}
-          <Tooltip delayDuration={100}>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDeletePromptVersion(version.id);
-                }}
-              >
-                <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Delete Version</p>
-            </TooltipContent>
-          </Tooltip>
+          <AlertDialog>
+            <Tooltip delayDuration={100}>
+              <TooltipTrigger asChild>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                  </Button>
+                </AlertDialogTrigger>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Delete Version</p>
+              </TooltipContent>
+            </Tooltip>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Version</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete version {versionDisplay}? This
+                  action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => onDeletePromptVersion(version.id)}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
       <div className="flex items-center gap-4 px-4 pb-3">
