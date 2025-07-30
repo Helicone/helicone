@@ -1,3 +1,5 @@
+import React from "react";
+
 import FoldedHeader from "@/components/shared/FoldedHeader";
 import {
   Select,
@@ -41,11 +43,11 @@ interface SessionContentProps {
   session_name: string;
   requests: ReturnType<typeof useGetRequests>;
   isLive: boolean;
-  setIsLive: (isLive: boolean) => void;
+  setIsLive: (_isLive: boolean) => void;
   currentPage: number;
   pageSize: number;
-  onPageChange: (newPage: number) => void;
-  onPageSizeChange: (newPageSize: number) => void;
+  onPageChange: (_newPage: number) => void;
+  onPageSizeChange: (_newPageSize: number) => void;
 }
 
 export const SessionContent: React.FC<SessionContentProps> = ({
@@ -61,7 +63,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
   const router = useRouter();
   const { initializeColorMap } = useColorMapStore();
 
-  const { _, requestId } = router.query;
+  const { requestId } = router.query;
   const [selectedRequestId, setSelectedRequestId] = useState<string>(
     (requestId as string) || "",
   );
