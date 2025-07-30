@@ -3144,6 +3144,12 @@
 					},
 					"gateway_deployment_target": {
 						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"prompt_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"prompt_version": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
 					}
 				},
 				"type": "object",

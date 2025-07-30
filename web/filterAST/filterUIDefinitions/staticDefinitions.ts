@@ -224,6 +224,20 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
     operators: ["eq", "neq", "like", "ilike", "contains"],
     table: "request_response_rmt",
   },
+  {
+    id: "prompt_id",
+    label: "Prompt ID",
+    type: "string",
+    operators: ["eq", "neq", "like", "ilike", "contains"],
+    table: "request_response_rmt",
+  },
+  {
+    id: "prompt_version",
+    label: "Prompt Version ID",
+    type: "string",
+    operators: ["eq", "neq", "like", "ilike", "contains"],
+    table: "request_response_rmt",
+  },
 
   // Number fields
   {
