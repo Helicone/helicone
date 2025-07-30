@@ -60,7 +60,7 @@ const PromptVersionCard = ({
             )}
           </div>
         </div>
-        <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+        <div className="flex shrink-0 items-center gap-1 transition-opacity">
           <Tooltip delayDuration={100}>
             <TooltipTrigger asChild>
               <Button
