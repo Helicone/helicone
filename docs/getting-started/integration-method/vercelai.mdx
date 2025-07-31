@@ -134,21 +134,27 @@ import { strings } from "/snippets/strings.mdx";
     ```
 
     ```javascript Azure OpenAI
-    import { createAzure } from '@ai-sdk/azure';
+    import { generateText } from "ai";
+    import { createAzure } from "@ai-sdk/azure";
 
     const azure = createAzure({
-      resourceName: 'your-resource-name', // Azure resource name
-      apiKey: 'your-api-key', // Azure API key
-      baseURL: 'https://gateway.helicone.ai/v1',
+      resourceName: process.env.AZURE_RESOURCE_NAME, // Your Azure OpenAI resource name (e.g., "your-resource")
+      apiKey: process.env.AZURE_API_KEY || "",
+      baseURL: "https://oai.helicone.ai/openai/deployments",
+      apiVersion: process.env.AZURE_API_VERSION || "2025-01-01-preview",
       headers: {
-        'Helicone-Auth': `Bearer ${process.env.HELICONE_API_KEY}`
+        "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+        "Helicone-OpenAI-Api-Base": process.env.AZURE_API_BASE || "", // Your Azure OpenAI endpoint (e.g., https://your-resource.openai.azure.com/)
       },
     });
 
-    const response = generateText({
-      model: azure("gpt-4o"),
-      prompt: "Hello world"
+    const result = await generateText({
+      model: azure(process.env.AZURE_DEPLOYMENT_NAME || "gpt-4o-mini"),
+      prompt: "Hello world",
+      maxOutputTokens: 100
     });
+
+    console.log(result);
     ```
 
     ```javascript AWS Bedrock
