@@ -582,16 +582,18 @@ export class OrganizationStore extends BaseStore {
   async updateOnboardingStatus(
     onboardingStatus: OnboardingStatus,
     name: string,
-    hasOnboarded: boolean
   ): Promise<Result<string, string>> {
+    const hasOnboarded = onboardingStatus.hasOnboarded ?? false;
+    const hasIntegrated = onboardingStatus.hasIntegrated ?? false;
     const result = await dbExecute<{ id: string }>(
       `UPDATE organization 
        SET onboarding_status = COALESCE(onboarding_status, '{}'::jsonb) || $1::jsonb,
            name = COALESCE(NULLIF($2, ''), name),
-           has_onboarded = CASE WHEN has_onboarded = true THEN true ELSE $3 END
-       WHERE id = $4
+           has_onboarded = CASE WHEN has_onboarded = true THEN true ELSE $3 END,
+           has_integrated = CASE WHEN has_integrated = true THEN true ELSE $4 END
+       WHERE id = $5
        RETURNING id`,
-      [onboardingStatus, name, hasOnboarded, this.organizationId]
+      [onboardingStatus, name, hasOnboarded, hasIntegrated, this.organizationId]
     );
 
     if (result.error || !result.data || result.data.length === 0) {

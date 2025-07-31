@@ -455,6 +455,9 @@
 										"has_onboarded": {
 											"type": "boolean"
 										},
+										"has_integrated": {
+											"type": "boolean"
+										},
 										"governance_settings": {
 											"allOf": [
 												{
@@ -499,6 +502,7 @@
 										"id",
 										"icon",
 										"has_onboarded",
+										"has_integrated",
 										"governance_settings",
 										"domain",
 										"created_at",
@@ -636,6 +640,9 @@
 							"has_onboarded": {
 								"type": "boolean"
 							},
+							"has_integrated": {
+								"type": "boolean"
+							},
 							"governance_settings": {
 								"allOf": [
 									{
@@ -680,6 +687,7 @@
 							"id",
 							"icon",
 							"has_onboarded",
+							"has_integrated",
 							"governance_settings",
 							"domain",
 							"created_at",
@@ -712,7 +720,7 @@
 					}
 				]
 			},
-			"ResultSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
+			"ResultSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
 				"properties": {
 					"data": {
 						"items": {
@@ -788,6 +796,9 @@
 								"has_onboarded": {
 									"type": "boolean"
 								},
+								"has_integrated": {
+									"type": "boolean"
+								},
 								"governance_settings": {
 									"$ref": "#/components/schemas/Json"
 								},
@@ -825,6 +836,7 @@
 								"id",
 								"icon",
 								"has_onboarded",
+								"has_integrated",
 								"governance_settings",
 								"domain",
 								"created_at",
@@ -849,20 +861,20 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_": {
+			"Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"
+						"$ref": "#/components/schemas/ResultSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
 			},
-			"ResultSuccess_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__": {
+			"ResultSuccess_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__": {
 				"properties": {
 					"data": {
-						"$ref": "#/components/schemas/Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_"
+						"$ref": "#/components/schemas/Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_"
 					},
 					"error": {
 						"type": "number",
@@ -897,10 +909,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_": {
+			"Result_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__"
+						"$ref": "#/components/schemas/ResultSuccess_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_unknown_"
@@ -1023,6 +1035,9 @@
 						"type": "string"
 					},
 					"has_onboarded": {
+						"type": "boolean"
+					},
+					"has_integrated": {
 						"type": "boolean"
 					},
 					"governance_settings": {
@@ -1335,7 +1350,7 @@
 					}
 				]
 			},
-			"Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___": {
+			"Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--hasIntegrated-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___": {
 				"properties": {
 					"currentStep": {
 						"type": "string"
@@ -1344,6 +1359,9 @@
 						"type": "string"
 					},
 					"hasOnboarded": {
+						"type": "boolean"
+					},
+					"hasIntegrated": {
 						"type": "boolean"
 					},
 					"members": {
@@ -1374,7 +1392,7 @@
 				"description": "Make all properties in T optional"
 			},
 			"OnboardingStatus": {
-				"$ref": "#/components/schemas/Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___"
+				"$ref": "#/components/schemas/Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--hasIntegrated-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___"
 			},
 			"EvaluatorResult": {
 				"properties": {
@@ -47276,7 +47294,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_"
+									"$ref": "#/components/schemas/Result_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_"
 								}
 							}
 						}
@@ -47922,9 +47940,6 @@
 						"application/json": {
 							"schema": {
 								"properties": {
-									"has_onboarded": {
-										"type": "boolean"
-									},
 									"name": {
 										"type": "string"
 									},
@@ -47933,7 +47948,6 @@
 									}
 								},
 								"required": [
-									"has_onboarded",
 									"name",
 									"onboarding_status"
 								],

@@ -24,7 +24,9 @@ export default function IntegratePage() {
 
   useEffect(() => {
     if (org?.currentOrg?.id) {
-      updateCurrentStep("INTEGRATION");
+      // TODO: Delete this integration page and related files
+      // this is set just for types
+      updateCurrentStep("REQUEST");
     }
   }, [org?.currentOrg?.id]);
 

@@ -139,6 +139,7 @@ limit 1
       id: org?.data?.[0]?.id ?? "",
       percentLog: org?.data?.[0]?.percent_to_log ?? 100_000,
       has_onboarded: org?.data?.[0]?.has_onboarded ?? false,
+      has_integrated: org?.data?.[0]?.has_integrated ?? false,
     };
 
     return ok(orgResult);

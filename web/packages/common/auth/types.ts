@@ -53,6 +53,7 @@ export type HeliconeOrg = {
   domain: string | null;
   governance_settings: any | null;
   has_onboarded: boolean;
+  has_integrated: boolean;
   icon: string;
   id: string;
   is_main_org: boolean;
