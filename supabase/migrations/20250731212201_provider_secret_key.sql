@@ -2,6 +2,11 @@ alter table "public"."provider_keys" add column "auth_type" text not null defaul
 
 alter table "public"."provider_keys" add column "provider_secret_key" text;
 
+DROP TRIGGER IF EXISTS provider_keys_encrypt_secret_trigger_provider_key ON provider_keys;
+
+-- Drop existing function if it exists to avoid permission issues
+DROP FUNCTION IF EXISTS provider_keys_encrypt_secret_provider_key();
+
 CREATE OR REPLACE FUNCTION provider_keys_encrypt_secret_provider_key() RETURNS trigger AS $$
 		BEGIN
 		        new.provider_key = CASE WHEN new.provider_key IS NULL THEN NULL ELSE
@@ -63,3 +68,5 @@ create view public.decrypted_provider_keys_v2 as
     provider_keys.nonce,
     provider_keys.config
    FROM provider_keys;
+
+
