@@ -690,6 +690,7 @@ export interface components {
       name?: string;
     };
     DecryptedProviderKey: {
+      provider_secret_key: string | null;
       provider_key_name: string | null;
       provider_name: string | null;
       provider_key: string | null;
@@ -6900,6 +6901,7 @@ export interface operations {
       content: {
         "application/json": {
           config?: components["schemas"]["Record_string.string_"];
+          providerSecretKey?: string;
           providerKey?: string;
         };
       };
@@ -6923,6 +6925,7 @@ export interface operations {
         "application/json": {
           providerKeyName: string;
           config: components["schemas"]["Record_string.string_"];
+          providerSecretKey?: string;
           providerKey: string;
           providerName: string;
         };

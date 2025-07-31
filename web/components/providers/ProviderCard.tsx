@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/tooltip";
 import useNotification from "@/components/shared/notification/useNotification";
 import { Muted, Small } from "@/components/ui/typography";
+import { Label } from "../ui/label";
 
 // ====== Types ======
 interface ProviderCardProps {
@@ -31,8 +32,10 @@ interface ProviderCardProps {
 interface ProviderCardState {
   key: {
     value: string;
+    secretValue?: string;
     displayState: "hidden" | "viewing" | "loading";
     decryptedValue: string | null;
+    decryptedSecretValue?: string | null;
   };
   config: {
     isVisible: boolean;
@@ -43,9 +46,13 @@ interface ProviderCardState {
 // Define action types
 type ProviderCardAction =
   | { type: "SET_KEY_VALUE"; payload: string }
+  | { type: "SET_SECRET_KEY_VALUE"; payload: string }
   | { type: "TOGGLE_KEY_VISIBILITY" }
   | { type: "SET_KEY_LOADING" }
-  | { type: "SET_DECRYPTED_KEY"; payload: string }
+  | {
+      type: "SET_DECRYPTED_KEY";
+      payload: { providerKey: string; providerSecretKey?: string | null };
+    }
   | { type: "HIDE_KEY" }
   | { type: "TOGGLE_CONFIG_VISIBILITY" }
   | { type: "UPDATE_CONFIG_FIELD"; payload: { key: string; value: string } }
@@ -77,8 +84,6 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
     } else if (provider.id === "aws") {
       initialConfig = {
         region: "",
-        accessKeyId: "",
-        sessionToken: "",
       };
     }
 
@@ -112,6 +117,14 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
                 displayState: "hidden",
                 decryptedValue: null,
               }),
+          },
+        };
+      case "SET_SECRET_KEY_VALUE":
+        return {
+          ...state,
+          key: {
+            ...state.key,
+            secretValue: action.payload,
           },
         };
 
@@ -151,7 +164,8 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
           key: {
             ...state.key,
             displayState: "viewing",
-            decryptedValue: action.payload,
+            decryptedValue: action.payload.providerKey,
+            decryptedSecretValue: action.payload.providerSecretKey,
           },
         };
 
@@ -252,7 +266,10 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
       dispatch({ type: "SET_KEY_LOADING" });
 
       try {
-        const key = (await viewDecryptedProviderKey(existingKey.id)) ?? "";
+        const key = (await viewDecryptedProviderKey(existingKey.id)) ?? {
+          providerKey: "",
+          providerSecretKey: null,
+        };
         dispatch({ type: "SET_DECRYPTED_KEY", payload: key });
       } catch (error) {
         console.error("Error viewing key:", error);
@@ -287,6 +304,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
         updateProviderKey.mutate({
           providerName: provider.name,
           key: state.key.value,
+          secretKey: state.key.secretValue,
           keyId: existingKey.id,
           providerKeyName: `${provider.name} API Key`,
           config: state.config.values,
@@ -296,6 +314,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
         addProviderKey.mutate({
           providerName: provider.name,
           key: state.key.value,
+          secretKey: state.key.secretValue,
           providerKeyName: `${provider.name} API Key`,
           config: state.config.values,
         });
@@ -331,16 +350,6 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
     } else if (provider.id === "aws") {
       configFields = [
         { label: "Region", key: "region", placeholder: "us-west-2" },
-        {
-          label: "AWS Access Key ID",
-          key: "accessKeyId",
-          placeholder: "Access key",
-        },
-        {
-          label: "AWS Session Token",
-          key: "sessionToken",
-          placeholder: "Session token (optional)",
-        },
       ];
     }
 
@@ -402,8 +411,9 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
           </div>
 
           {/* Key input row */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-end gap-1">
             <div className="relative flex-1">
+              {provider.id === "aws" && <Label>Access key</Label>}
               <Input
                 type={isViewingKey ? "text" : "password"}
                 placeholder={
@@ -420,6 +430,27 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
                 className="h-8 flex-1 py-1 text-sm"
               />
             </div>
+            {provider.id === "aws" && (
+              <div className="relative flex-1">
+                <Label>Secret key</Label>
+                <Input
+                  type={isViewingKey ? "text" : "password"}
+                  placeholder={isEditMode ? "••••••••••••••••" : "..."}
+                  value={
+                    isViewingKey && state.key.decryptedSecretValue
+                      ? state.key.decryptedSecretValue
+                      : state.key.secretValue
+                  }
+                  onChange={(e) =>
+                    dispatch({
+                      type: "SET_SECRET_KEY_VALUE",
+                      payload: e.target.value,
+                    })
+                  }
+                  className="h-8 flex-1 py-1 text-sm"
+                />
+              </div>
+            )}
 
             {/* Action buttons */}
             <div className="flex items-center gap-1">
