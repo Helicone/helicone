@@ -1,0 +1,444 @@
+---
+title: "Logging OpenAI Batch API Requests with Helicone"
+sidebarTitle: "OpenAI Batch API"
+description: "Learn how to track and monitor OpenAI Batch API requests using Helicone's Manual Logger for comprehensive observability."
+"twitter:title": "Logging OpenAI Batch API Requests with Helicone - LLM Observability"
+---
+
+The OpenAI Batch API allows you to process large volumes of requests asynchronously at 50% cheaper costs than synchronous requests. However, tracking these batch requests for observability can be challenging since they don't go through the standard real-time proxy flow.
+
+This guide shows you how to use [Helicone's Manual Logger](/getting-started/integration-method/custom) to comprehensively track your OpenAI Batch API requests, giving you full visibility into costs, performance, and request patterns.
+
+## Why Track Batch Requests?
+
+Batch processing offers significant cost savings, but without proper tracking, you lose visibility into:
+
+- **Cost analysis**: Understanding the true cost of your batch operations
+- **Performance monitoring**: Tracking completion times and success rates  
+- **Request patterns**: Analyzing which prompts and models perform best
+- **Error tracking**: Identifying failed requests and common issues
+- **Usage analytics**: Understanding your batch processing patterns over time
+
+With Helicone's Manual Logger, you get all the observability benefits of real-time requests for your batch operations.
+
+## Prerequisites
+
+Before getting started, you'll need:
+
+- **Node.js**: Version 16 or higher
+- **OpenAI API Key**: Get one from [OpenAI's platform](https://platform.openai.com/api-keys)
+- **Helicone API Key**: Get one free at [helicone.ai](https://helicone.ai/signup)
+
+
+
+## Installation
+
+First, install the required packages:
+
+```bash
+npm install @helicone/helpers openai dotenv
+# or
+yarn add @helicone/helpers openai dotenv
+# or  
+pnpm add @helicone/helpers openai dotenv
+```
+
+<Note>
+Not using TypeScript? The logging endpoint is usable in any language via HTTP requests, and the Manual Logger is also available in [Python](/getting-started/integration-method/manual-logger-python), [Go](/getting-started/integration-method/manual-logger-go), and [cURL](/getting-started/integration-method/manual-logger-curl).
+</Note>
+
+## Environment Setup
+
+Create a `.env` file in your project root:
+
+```bash
+OPENAI_API_KEY=your_openai_api_key_here
+HELICONE_API_KEY=your_helicone_api_key_here
+```
+
+## Complete Implementation
+
+Here's a complete example that demonstrates the entire batch workflow with Helicone logging:
+
+```typescript
+import { HeliconeManualLogger } from "@helicone/helpers";
+import OpenAI from "openai";
+import fs from "fs";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+// Initialize Helicone Manual Logger
+const heliconeLogger = new HeliconeManualLogger({
+  apiKey: process.env.HELICONE_API_KEY!,
+  loggingEndpoint: "https://api.worker.helicone.ai/oai/v1/log",
+  headers: {}
+});
+
+// Initialize OpenAI client
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY!,
+});
+
+function createBatchFile(filename: string = "data.jsonl") {
+  const batchRequests = [
+    {
+      custom_id: "req-1",
+      method: "POST",
+      url: "/v1/chat/completions",
+      body: {
+        model: "gpt-4o-mini",
+        messages: [{ 
+          role: "user", 
+          content: "Write a professional email to schedule a meeting with a client about quarterly business review" 
+        }],
+        max_tokens: 300
+      }
+    },
+    {
+      custom_id: "req-2", 
+      method: "POST",
+      url: "/v1/chat/completions",
+      body: {
+        model: "gpt-4o-mini",
+        messages: [{ 
+          role: "user", 
+          content: "Explain the benefits of cloud computing for small businesses in simple terms" 
+        }],
+        max_tokens: 250
+      }
+    },
+    {
+      custom_id: "req-3",
+      method: "POST", 
+      url: "/v1/chat/completions",
+      body: {
+        model: "gpt-4o-mini",
+        messages: [{ 
+          role: "user", 
+          content: "Create a Python function that calculates compound interest with proper error handling" 
+        }],
+        max_tokens: 400
+      }
+    }
+  ];
+
+  const jsonlContent = batchRequests.map(req => JSON.stringify(req)).join('\n');
+  fs.writeFileSync(filename, jsonlContent);
+  console.log(`Created batch file: ${filename}`);
+  return filename;
+}
+
+async function uploadFile(filename: string) {
+  console.log("Uploading file...");
+  
+  try {
+    const file = await openai.files.create({
+      file: fs.createReadStream(filename),
+      purpose: "batch",
+    });
+    
+    console.log(`File uploaded: ${file.id}`);
+    return file.id;
+  } catch (error) {
+    console.error("Error uploading file:", error);
+    throw error;
+  }
+}
+
+async function createBatch(fileId: string) {
+  console.log("Creating batch...");
+  
+  try {
+    const batch = await openai.batches.create({
+      input_file_id: fileId,
+      endpoint: "/v1/chat/completions", 
+      completion_window: "24h"
+    });
+    
+    console.log(`Batch created: ${batch.id}`);
+    console.log(`Status: ${batch.status}`);
+    return batch;
+  } catch (error) {
+    console.error("Error creating batch:", error);
+    throw error;
+  }
+}
+
+async function waitForCompletion(batchId: string) {
+  console.log("Waiting for batch completion...");
+  
+  while (true) {
+    try {
+      const batch = await openai.batches.retrieve(batchId);
+      console.log(`Status: ${batch.status}`);
+      
+      if (batch.status === "completed") {
+        console.log("Batch completed!");
+        return batch;
+      } else if (batch.status === "failed" || batch.status === "expired" || batch.status === "cancelled") {
+        throw new Error(`Batch failed with status: ${batch.status}`);
+      }
+      
+      console.log("Waiting 5 seconds...");
+      await new Promise(resolve => setTimeout(resolve, 5000));
+    } catch (error) {
+      console.error("Error checking batch status:", error);
+      throw error;
+    }
+  }
+}
+
+async function retrieveAndLogResults(batch: any) {
+  if (!batch.output_file_id || !batch.input_file_id) {
+    throw new Error("No output or input file available");
+  }
+
+  console.log("Retrieving batch results...");
+  
+  try {
+    // Get original requests
+    const inputFileContent = await openai.files.content(batch.input_file_id);
+    const inputContent = await inputFileContent.text();
+    const originalRequests = inputContent.trim().split('\n').map(line => JSON.parse(line));
+    
+    // Get batch results
+    const outputFileContent = await openai.files.content(batch.output_file_id);
+    const outputContent = await outputFileContent.text();
+    const results = outputContent.trim().split('\n').map(line => JSON.parse(line));
+    
+    console.log(`Found ${results.length} results`);
+    
+    // Create mapping of custom_id to original request
+    const requestMap = new Map();
+    originalRequests.forEach(req => {
+      requestMap.set(req.custom_id, req.body);
+    });
+    
+    // Log each result to Helicone
+    for (const result of results) {
+      const { custom_id, response } = result;
+      
+      if (response && response.body) {
+        console.log(`\nLogging ${custom_id}...`);
+        
+        const originalRequest = requestMap.get(custom_id);
+        
+        if (originalRequest) {
+          // Modify model name to distinguish batch requests
+          const modifiedRequest = {
+            ...originalRequest,
+            model: originalRequest.model + "-batch"
+          };
+          
+          const modifiedResponse = {
+            ...response.body,
+            model: response.body.model + "-batch"
+          };
+          
+          // Log to Helicone with additional metadata
+          await heliconeLogger.logSingleRequest(
+            modifiedRequest,
+            JSON.stringify(modifiedResponse),
+            {
+              additionalHeaders: {
+                "Helicone-User-Id": "batch-demo",
+                "Helicone-Property-CustomId": custom_id,
+                "Helicone-Property-BatchId": batch.id,
+                "Helicone-Property-ProcessingType": "batch",
+                "Helicone-Property-Provider": "openai"
+              }
+            }
+          );
+          
+          const responseText = response.body.choices?.[0]?.message?.content || "No response";
+          console.log(`${custom_id}: "${responseText.substring(0, 100)}..."`);
+        } else {
+          console.log(`Could not find original request for ${custom_id}`);
+        }
+      }
+    }
+    
+    console.log(`\nSuccessfully logged all ${results.length} requests to Helicone!`);
+    return results;
+    
+  } catch (error) {
+    console.error("Error retrieving results:", error);
+    throw error;
+  }
+}
+
+async function main() {
+  console.log("OpenAI Batch API with Helicone Logging\n");
+  
+  // Validate environment variables
+  if (!process.env.HELICONE_API_KEY) {
+    console.error("Please set HELICONE_API_KEY environment variable");
+    return;
+  }
+  
+  if (!process.env.OPENAI_API_KEY) {
+    console.error("Please set OPENAI_API_KEY environment variable");
+    return;
+  }
+
+  try {
+    // Complete batch workflow
+    const filename = createBatchFile();
+    const fileId = await uploadFile(filename);
+    const batch = await createBatch(fileId);
+    const completedBatch = await waitForCompletion(batch.id);
+    await retrieveAndLogResults(completedBatch);
+    
+    // Cleanup
+    if (fs.existsSync(filename)) {
+      fs.unlinkSync(filename);
+      console.log(`Cleaned up ${filename}`);
+    }
+    
+  } catch (error) {
+    console.error("Error:", error);
+  }
+}
+
+if (require.main === module) {
+  main();
+}
+```
+
+## Key Implementation Details
+
+### 1. Manual Logger Configuration
+
+The `HeliconeManualLogger` is configured with your API key and the logging endpoint:
+
+```typescript
+const heliconeLogger = new HeliconeManualLogger({
+  apiKey: process.env.HELICONE_API_KEY!,
+  loggingEndpoint: "https://api.worker.helicone.ai/oai/v1/log",
+  headers: {}
+});
+```
+
+### 2. Batch Request Processing
+
+The workflow follows OpenAI's standard batch process:
+
+1. **Create batch file**: Format requests as JSONL
+2. **Upload file**: Send to OpenAI's file storage
+3. **Create batch**: Submit for processing
+4. **Wait for completion**: Poll until finished
+5. **Retrieve results**: Download and process outputs
+
+### 3. Helicone Logging Strategy
+
+Each batch result is logged individually to Helicone with:
+
+- **Original request data**: Preserves the initial request structure
+- **Batch response data**: Includes the actual LLM response
+- **Custom metadata**: Adds batch-specific tracking properties
+
+```typescript
+await heliconeLogger.logSingleRequest(
+  modifiedRequest,
+  JSON.stringify(modifiedResponse),
+  {
+    additionalHeaders: {
+      "Helicone-User-Id": "batch-demo",
+      "Helicone-Property-CustomId": custom_id,
+      "Helicone-Property-BatchId": batch.id,
+      "Helicone-Property-ProcessingType": "batch"
+    }
+  }
+);
+```
+
+### 4. Model Name Modification
+
+The example modifies model names to distinguish batch requests:
+
+```typescript
+const modifiedRequest = {
+  ...originalRequest,
+  model: originalRequest.model + "-batch"
+};
+```
+
+This helps you filter and analyze batch vs. real-time requests in Helicone's dashboard.
+
+## Advanced Features
+
+### Custom Properties for Analytics
+
+Add custom properties to track additional metadata:
+
+```typescript
+"Helicone-Property-Department": "marketing",
+"Helicone-Property-CampaignId": "q4-2024",
+"Helicone-Property-Priority": "high"
+```
+
+### Error Handling and Retry Logic
+
+Implement robust error handling for production use:
+
+```typescript
+async function logWithRetry(request: any, response: any, headers: any, maxRetries = 3) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      await heliconeLogger.logSingleRequest(request, response, { additionalHeaders: headers });
+      return;
+    } catch (error) {
+      console.log(`Logging attempt ${attempt} failed:`, error);
+      if (attempt === maxRetries) throw error;
+      await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+    }
+  }
+}
+```
+
+### Batch Status Tracking
+
+Track the entire batch lifecycle in Helicone:
+
+```typescript
+// Log batch creation
+await heliconeLogger.logSingleRequest(
+  { batch_id: batch.id, operation: "batch_created" },
+  JSON.stringify({ status: "in_progress", file_id: fileId }),
+  {
+    additionalHeaders: {
+      "Helicone-Property-BatchId": batch.id,
+      "Helicone-Property-Operation": "batch_lifecycle"
+    }
+  }
+);
+```
+
+## Monitoring and Analytics
+
+Once logged, you can use Helicone's dashboard to:
+
+- **Analyze costs**: Compare batch vs. real-time request costs
+- **Monitor performance**: Track batch completion times and success rates
+- **Filter by properties**: Use custom properties to segment analysis
+- **Set up alerts**: Get notified of batch failures or cost spikes
+- **Export data**: Download detailed analytics for further analysis
+
+## Best Practices
+
+1. **Use descriptive custom_ids**: Make them meaningful for debugging
+2. **Add relevant properties**: Include metadata that helps with analysis
+3. **Handle errors gracefully**: Implement retry logic for logging failures
+4. **Monitor batch status**: Track the entire lifecycle, not just results
+5. **Clean up files**: Remove temporary files after processing
+6. **Validate environment**: Check API keys before starting batch operations
+
+## Learn More
+
+- [Helicone Manual Logger Documentation](/getting-started/integration-method/custom)
+- [OpenAI Batch API Documentation](https://platform.openai.com/docs/guides/batch)
+- [Helicone Properties and Headers](/helicone-headers/header-directory)
+- [Manual Logger Streaming Support](/guides/cookbooks/manual-logger-streaming)
+
+With this setup, you now have comprehensive observability for your OpenAI Batch API requests, enabling better cost management, performance monitoring, and request analytics at scale. 

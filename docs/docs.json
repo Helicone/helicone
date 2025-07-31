@@ -540,6 +540,8 @@
                   "guides/cookbooks/github-actions",
                   "guides/cookbooks/labeling-request-data",
                   "guides/cookbooks/manual-logger-streaming",
+                  "guides/cookbooks/openai-batch-api",
+                  "guides/cookbooks/openai-structured-outputs",
                   "guides/cookbooks/predefining-request-id",
                   "guides/cookbooks/replay-session",
                   "guides/cookbooks/segmentation"
