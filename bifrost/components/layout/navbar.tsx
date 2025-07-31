@@ -35,6 +35,8 @@ import { BlogStructureMetaData } from "../templates/blog/getMetaData";
 import { Button } from "../ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { ThemeAwareLogo } from "@/components/ui/theme-aware-logo";
 
 interface NavBarProps {
   stars?: number;
@@ -57,25 +59,11 @@ const MobileHeader = (props: {
       <div className="flex items-center col-span-7 lg:col-span-1 order-1">
         <Link href="/" className="-m-1.5">
           <span className="sr-only">Helicone</span>
-          <Image
-            src={"/static/logo.svg"}
-            alt={
-              "Helicone - Open-source LLM observability and monitoring platform for developers"
-            }
-            height={150}
-            width={150}
+          <ThemeAwareLogo 
+            width={150} 
+            height={150} 
             priority={true}
-            className="w-auto h-auto lg:block hidden"
-          />
-          <Image
-            src={"/static/logo.svg"}
-            alt={
-              "Helicone - Open-source LLM observability and monitoring platform for developers"
-            }
-            height={150}
-            width={150}
-            priority={true}
-            className="block lg:hidden"
+            className="transition-all duration-200 hover:opacity-80"
           />
         </Link>
       </div>
@@ -147,14 +135,14 @@ const MobileNav = () => {
 
   return (
     <nav className="lg:hidden" aria-label="Global">
-      <div className="fixed inset-x-0 top-0 z-50 bg-background">
+      <div className="fixed inset-x-0 top-0 z-50 bg-background/95 backdrop-blur-md">
         <MobileHeader
           menuDispatch={[menuOpen, setMenuOpen]}
           className="pl-2 pr-4"
         />
       </div>
       {menuOpen && (
-        <div className="fixed inset-0 top-[57px] z-50 bg-background">
+        <div className="fixed inset-0 top-[57px] z-50 bg-background/98 backdrop-blur-lg">
           <div className="h-full pb-10 overflow-y-auto">
             <div className="flex flex-col gap-4 pt-3 px-4">
               {/* Login and Contact Buttons */}
@@ -169,6 +157,9 @@ const MobileNav = () => {
                     Log In
                   </Button>
                 </Link>
+                <div className="flex justify-center">
+                  <ThemeToggle />
+                </div>
               </div>
 
               {renderLinks(mainComponents)}
@@ -337,7 +328,7 @@ const NavBar = (props: NavBarProps) => {
   return (
     <div
       ref={headerRef}
-      className="bg-background top-0 sticky z-30 border-b border-border mb-10"
+      className="bg-background/95 backdrop-blur-md top-0 sticky z-30 border-b border-border mb-10 transition-all duration-200"
     >
       <MobileNav />
 
@@ -349,25 +340,11 @@ const NavBar = (props: NavBarProps) => {
         <div className="flex items-center lg:col-span-1 order-1">
           <Link href="/" className="-m-1.5 w-[154px]">
             <span className="sr-only">Helicone</span>
-            <Image
-              src={"/static/logo.svg"}
-              alt={
-                "Helicone - Open-source LLM observability and monitoring platform for developers"
-              }
-              height={150}
-              width={150}
+            <ThemeAwareLogo 
+              width={150} 
+              height={150} 
               priority={true}
-              className="w-auto h-auto lg:block hidden"
-            />
-            <Image
-              src={"/static/logo.svg"}
-              alt={
-                "Helicone - Open-source LLM observability and monitoring platform for developers"
-              }
-              height={150}
-              width={150}
-              priority={true}
-              className="block lg:hidden"
+              className="transition-all duration-200 hover:opacity-80"
             />
           </Link>
         </div>
@@ -480,8 +457,9 @@ const NavBar = (props: NavBarProps) => {
           {/* Old Nav Links */}
           {/* <NavLinks /> */}
 
-          {/* Github, contact, login */}
+          {/* Theme toggle, Github, contact, login */}
           <div className="flex items-center gap-x-3">
+            <ThemeToggle />
             <a
               href="https://github.com/helicone/helicone"
               target="_blank"

@@ -32,10 +32,10 @@ const Prototype = () => {
   >("dashboard");
 
   return (
-    <div className=" bg-gradient-to-b from-white from-50% via-[#f2f9fc80] via-[61%] to-[#f2f9fc]">
+    <div className=" bg-gradient-to-b from-background from-50% via-muted/50 via-[61%] to-muted/30">
       <div className={cn(ISLAND_WIDTH, "pt-6 pb-12")}>
-        <div className="bg-white rounded-[20px] p-1 lg:p-3 border border-[#D1D5DC] aspect-[2/1] shadow-md">
-          <div className="hidden lg:grid w-full h-full bg-[#f8fafc] border border-[#f0f0f0] rounded-xl grid-cols-6">
+        <div className="bg-card rounded-[20px] p-1 lg:p-3 border border-border aspect-[2/1] shadow-md">
+          <div className="hidden lg:grid w-full h-full bg-muted/20 border border-border rounded-xl grid-cols-6">
             <PrototypeSidebar
               openedPage={openedPage}
               setOpenedPage={setOpenedPage}
@@ -77,16 +77,16 @@ const PrototypeSidebar = ({
   setOpenedPage: (page: "dashboard" | "requests" | "sessions") => void;
 }) => {
   return (
-    <div className="bg-white border-r border-[#e5e7eb] h-full flex-1 rounded-l-xl overflow-y-auto">
-      <div className="w-full flex flex-col h-full border-r dark:border-slate-800 px-2">
+    <div className="bg-card border-r border-border h-full flex-1 rounded-l-xl overflow-y-auto">
+      <div className="w-full flex flex-col h-full border-r border-border px-2">
         <div className="flex-grow overflow-y-auto pb-14">
-          <div className="flex items-center justify-between gap-2 h-14 border-b dark:border-slate-800 mx-1">
+          <div className="flex items-center justify-between gap-2 h-14 border-b border-border mx-1">
             <Button
               variant="ghost"
               className="flex items-center justify-start w-full p-2 truncate"
             >
               <RocketIcon className="mr-2 flex-shrink-0 h-4 w-4 text-[#5592F8]" />
-              <p className="text-xs text-black font-semibold w-fit text-left">
+              <p className="text-xs text-foreground font-semibold w-fit text-left">
                 Xpedia AI
               </p>
             </Button>
@@ -116,8 +116,8 @@ const PrototypeSidebar = ({
                         Dashboard
                         {openedPage !== "dashboard" && (
                           <>
-                            <div className="absolute w-1.5 h-1.5 bg-[#32ACEB] rounded-full top-[1px] right-[-9px]"></div>
-                            <div className="absolute w-1.5 h-1.5 bg-[#32ACEB] rounded-full top-[1px] right-[-9px] animate-ping"></div>
+                            <div className="absolute w-1.5 h-1.5 bg-primary rounded-full top-[1px] right-[-9px]"></div>
+                            <div className="absolute w-1.5 h-1.5 bg-primary rounded-full top-[1px] right-[-9px] animate-ping"></div>
                           </>
                         )}
                       </div>
@@ -140,14 +140,14 @@ const PrototypeSidebar = ({
                         Requests
                         {openedPage !== "requests" && (
                           <>
-                            <div className="absolute w-1.5 h-1.5 bg-[#32ACEB] rounded-full top-[1px] right-[-9px]"></div>
-                            <div className="absolute w-1.5 h-1.5 bg-[#32ACEB] rounded-full top-[1px] right-[-9px] animate-ping"></div>
+                            <div className="absolute w-1.5 h-1.5 bg-primary rounded-full top-[1px] right-[-9px]"></div>
+                            <div className="absolute w-1.5 h-1.5 bg-primary rounded-full top-[1px] right-[-9px] animate-ping"></div>
                           </>
                         )}
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 font-normal text-slate-400 mt-[10px] text-[11px]">
+                  <div className="flex items-center gap-1 font-normal text-muted-foreground mt-[10px] text-[11px]">
                     <div className="flex items-center">
                       Segments
                       <ChevronDownIcon className="h-3 w-3 transition-transform" />
@@ -170,8 +170,8 @@ const PrototypeSidebar = ({
                         Sessions
                         {openedPage !== "sessions" && (
                           <>
-                            <div className="absolute w-1.5 h-1.5 bg-[#32ACEB] rounded-full top-[1px] right-[-9px]"></div>
-                            <div className="absolute w-1.5 h-1.5 bg-[#32ACEB] rounded-full top-[1px] right-[-9px] animate-ping"></div>
+                            <div className="absolute w-1.5 h-1.5 bg-primary rounded-full top-[1px] right-[-9px]"></div>
+                            <div className="absolute w-1.5 h-1.5 bg-primary rounded-full top-[1px] right-[-9px] animate-ping"></div>
                           </>
                         )}
                       </div>

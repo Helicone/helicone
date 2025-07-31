@@ -5,6 +5,7 @@ import "@mintlify/mdx/dist/styles.css";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { PHProvider } from "./providers";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import dynamic from "next/dynamic";
 import Script from "next/script";
 import Head from "next/head";
@@ -77,9 +78,11 @@ export default async function RootLayout({
       </Head>
       <PHProvider>
         <body>
-          <div className={`bg-white flex flex-col ${inter.className}`}>
-            {children}
-          </div>
+          <ThemeProvider>
+            <div className={`bg-background text-foreground flex flex-col ${inter.className}`}>
+              {children}
+            </div>
+          </ThemeProvider>
           <PostHogPageView />
           <Analytics />
           <SpeedInsights />

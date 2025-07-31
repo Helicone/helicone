@@ -27,17 +27,17 @@ const AiGateway = () => {
         <div className="flex flex-col items-start md:items-end gap-3 md:gap-9 order-1 md:order-2 pl-4 md:pl-0">
           <div className="flex items-center gap-2.5">
             <p className="text-base sm:text-xl">01</p>
-            <div className="text-base sm:text-lg font-medium text-slate-700">
+            <div className="text-base sm:text-lg font-medium text-muted-foreground">
               Route
             </div>
           </div>
           <div className="flex flex-col items-start md:items-end gap-6 text-left md:text-right">
-            <h2 className="font-semibold text-4xl sm:text-5xl leading-[120%] max-w-[600px] text-wrap text-black">
+            <h2 className="font-semibold text-4xl sm:text-5xl leading-[120%] max-w-[600px] text-wrap text-foreground">
               <span className="text-brand">Smart & Speedy</span>
               <br />
               LLM Routing
             </h2>
-            <p className="text-lg max-w-[520px] text-landing-description font-light leading-relaxed">
+            <p className="text-lg max-w-[520px] text-muted-foreground font-light leading-relaxed">
               We make sure you always have the best model for your request, so
               you can focus on shipping features.
             </p>
@@ -65,7 +65,7 @@ const AiGateway = () => {
           </div>
           <div
             className={cn(
-              "bg-slate-50 border border-slate-200 px-6 py-3 cursor-pointer max-w-[550px] transition-all duration-300 ease-in-out",
+              "bg-muted/50 border border-border px-6 py-3 cursor-pointer max-w-[550px] transition-all duration-300 ease-in-out hover:bg-muted/70",
               isQuestionOpen ? "rounded-2xl" : "rounded-[24px]"
             )}
             onClick={() => setIsQuestionOpen(!isQuestionOpen)}
@@ -75,7 +75,7 @@ const AiGateway = () => {
                 "flex justify-between items-center transition-all duration-300"
               )}
             >
-              <p className="text-lg">What is LLM routing?</p>
+              <p className="text-lg text-foreground">What is LLM routing?</p>
               <div className="transition-transform duration-300">
                 {isQuestionOpen ? (
                   <XIcon className="h-4 w-4 rotate-0" />
@@ -93,7 +93,7 @@ const AiGateway = () => {
               )}
             >
               <div className="overflow-hidden">
-                <p className="text-sm sm:text-lg font-light text-gray-400">
+                <p className="text-sm sm:text-lg font-light text-muted-foreground">
                   LLM routing intelligently directs your requests to the optimal
                   model based on your criteria - whether that&apos;s cost,
                   speed, accuracy, or availability.

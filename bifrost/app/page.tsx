@@ -22,7 +22,7 @@ const Stats = dynamic(() => import("@/components/home/Stats"));
 
 const LoadingSection = ({ height = "h-96" }: { height?: string }) => (
   <div
-    className={`w-full bg-gray-100 animate-pulse rounded-lg ${height}`}
+    className={`w-full bg-muted animate-pulse rounded-lg ${height}`}
   ></div>
 );
 
@@ -48,12 +48,12 @@ export default async function Home() {
 
   return (
     <Layout>
-      <main className="bg-white text-landing-description">
+      <main className="bg-background text-foreground">
         <div className="max-w-8xl mx-auto">
           <Hero />
           <Prototype />
           <LazyLoadComponent fallback={<LoadingSection height="h-24" />}>
-            <Companies className={cn("bg-[#f2f9fc]")} />
+            <Companies className={cn("bg-muted/30")} />
           </LazyLoadComponent>
           <LazyLoadComponent fallback={<LoadingSection />}>
             <Quote2 />
