@@ -756,9 +756,8 @@ const costs: ModelRow[] = [
     cost: {
       prompt_token: cost.cost.prompt_token / 2,
       completion_token: cost.cost.completion_token / 2,
-      ...(cost.cost.prompt_cache_read_token && { prompt_cache_read_token: cost.cost.prompt_cache_read_token / 2 }),
-      ...(cost.cost.prompt_audio_token && { prompt_audio_token: cost.cost.prompt_audio_token / 2 }),
-      ...(cost.cost.completion_audio_token && { completion_audio_token: cost.cost.completion_audio_token / 2 }),
+      ...(cost.cost.prompt_audio_token && { prompt_audio_token: cost.cost.prompt_audio_token }),
+      ...(cost.cost.completion_audio_token && { completion_audio_token: cost.cost.completion_audio_token }),
     },
   }))
 ];
