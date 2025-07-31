@@ -9,8 +9,7 @@ export type OnboardingStep =
   | "ORGANIZATION"
   | "MEMBERS"
   | "BILLING"
-  | "INTEGRATION"
-  | "EVENT";
+  | "REQUEST";
 
 export type PlanType = "free" | "pro" | "team";
 
@@ -82,7 +81,8 @@ export const useDraftOnboardingStore = (orgId: string) => {
 export interface OnboardingState {
   name: string;
   hasOnboarded: boolean;
-  currentStep: "ORGANIZATION" | "MEMBERS" | "BILLING" | "INTEGRATION" | "EVENT";
+  hasIntegrated: boolean;
+  currentStep: "ORGANIZATION" | "MEMBERS" | "BILLING" | "REQUEST";
   selectedTier: "free" | "pro" | "team";
   members: { email: string; role: "admin" | "member" }[];
   addons: {
@@ -95,6 +95,7 @@ export interface OnboardingState {
 const defaultOnboardingState: OnboardingState = {
   name: "",
   hasOnboarded: false,
+  hasIntegrated: false,
   currentStep: "ORGANIZATION",
   selectedTier: "free",
   members: [],
@@ -162,7 +163,8 @@ export const useOrgOnboarding = (orgId: string) => {
   const { mutateAsync: saveOnboardingChangesAsync } = useMutation({
     mutationFn: async (newState: Partial<OnboardingState>) => {
       const fullState = {
-        hasOnboarded: onboardingState?.hasOnboarded ?? false,
+        hasOnboarded: newState.hasOnboarded ?? onboardingState?.hasOnboarded ?? false,
+        hasIntegrated: newState.hasIntegrated ?? onboardingState?.hasIntegrated ?? false,
         currentStep:
           newState.currentStep ??
           onboardingState?.currentStep ??
@@ -178,7 +180,6 @@ export const useOrgOnboarding = (orgId: string) => {
           body: {
             onboarding_status: fullState,
             name: draftName || onboardingState?.name || "",
-            has_onboarded: onboardingState?.hasOnboarded ?? false,
           },
         },
       );
