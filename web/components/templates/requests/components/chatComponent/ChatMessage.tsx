@@ -5,19 +5,31 @@ import { useRequestRenderModeStore } from "@/store/requestRenderModeStore";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { MappedLLMRequest, Message } from "@helicone-package/llm-mapper/types";
+import { Trash2Icon } from "lucide-react";
 import Image from "next/image";
 import { Dispatch, ReactNode, SetStateAction, useRef, useState } from "react";
 import { LuChevronDown, LuFileText } from "react-icons/lu";
+import { v4 as uuidv4 } from "uuid";
 import { ChatMode } from "../Chat";
+import ChatMessageTopBar from "./ChatMessageTopBar";
 import AssistantToolCalls from "./single/AssistantToolCalls";
 import { JsonRenderer } from "./single/JsonRenderer";
-import ToolMessage from "./ToolMessage";
 import TextMessage from "./single/TextMessage";
-import ChatMessageTopBar from "./ChatMessageTopBar";
-import { Trash2Icon } from "lucide-react";
-import { v4 as uuidv4 } from "uuid";
+import ToolMessage from "./ToolMessage";
 
 type MessageType = "image" | "tool" | "text" | "pdf" | "contentArray";
+function base64UrlToBase64(base64url: string) {
+  const [format, unformatted] = [
+    base64url.split("base64,")[0],
+    base64url.split("base64,")[1].replaceAll(" ", ""),
+  ];
+  let base64 = unformatted.replace(/-/g, "+").replace(/_/g, "/");
+  while (base64.length % 4 !== 0) {
+    base64 += "=";
+  }
+  
+  return `${format}base64,${base64}`;
+}
 
 const getMessageType = (message: Message): MessageType => {
   if (message._type === "contentArray") {
@@ -185,28 +197,34 @@ const renderImageContent = (
 
   if (!imageSrc) return null;
 
+  const processedImageSrc = base64UrlToBase64(imageSrc);
+
   const imageElement = (
     <div className="relative w-full max-w-md">
       <Image
-        src={imageSrc}
+        src={processedImageSrc}
         alt="Input image"
         width={1000}
         height={1000}
-        className="h-auto max-h-[200px] w-auto max-w-full object-contain"
+        className="h-auto max-h-[200px] w-auto max-w-full cursor-pointer object-contain transition-opacity hover:opacity-90"
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        onClick={() => {}}
+        title="Click to view full size"
       />
     </div>
   );
 
   return (
-    <ContentWrapper
-      showDeleteButton={options.showDeleteButton}
-      onDelete={options.onDelete}
-      wrapperClassName={options.wrapperClassName}
-      deleteButtonClassName="absolute top-1/2 right-2 -translate-y-1/2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-    >
-      {imageElement}
-    </ContentWrapper>
+    <>
+      <ContentWrapper
+        showDeleteButton={options.showDeleteButton}
+        onDelete={options.onDelete}
+        wrapperClassName={options.wrapperClassName}
+        deleteButtonClassName="absolute top-1/2 right-2 -translate-y-1/2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+      >
+        {imageElement}
+      </ContentWrapper>
+    </>
   );
 };
 

@@ -105,12 +105,9 @@ const getRequestMessages = (contents: any[]): Message[] => {
           } else if (part.inlineData?.data) {
             // Assuming inlineData.data contains the base64 string
             return {
-              // NOTE: Setting _type to "file" now as it could be image, pdf, etc.
-              // The UI will use mime_type to determine specific rendering.
-              _type: "file",
+              _type: "image",
               role: content.role || "user", // Role applied at part level
-              content: part.inlineData.data, // Store base64 here
-              mime_type: part.inlineData?.mime_type, // Corrected field name to snake_case
+              image_url: `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`, // Format as data URL
             };
           }
           // Handle other potential part types like functionCall if needed later

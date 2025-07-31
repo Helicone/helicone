@@ -1,6 +1,7 @@
 import { describe, expect, it } from "@jest/globals";
 import { mapGeminiPro } from "../../llm-mapper/mappers/gemini/chat";
 import { mapAnthropicRequest } from "../../llm-mapper/mappers/anthropic/chat";
+import { Message } from "@/llm-mapper/types";
 
 describe("mapGeminiPro", () => {
   it("should handle basic text messages", () => {
@@ -99,10 +100,18 @@ describe("mapGeminiPro", () => {
     // Test request message handling
     expect(result.schema.request.messages![0]).toEqual({
       role: "user",
-      content: "What's in this image?",
-      _type: "image",
-      image_url: imageData,
-    });
+      contentArray: [
+        {
+          _type: "message",
+          content: "What's in this image?",
+        },
+        {
+          _type: "image",
+          image_url: `data:image/png;base64, ${imageData}`,
+        },
+      ],
+      _type: "contentArray",
+    } as Message);
 
     // Test response message handling
     expect(result.schema.response!.messages![0]).toEqual({
