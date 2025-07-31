@@ -28,7 +28,7 @@ export default function RequestPage() {
   const [hasCompleted, setHasCompleted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const abortController = useRef<AbortController | null>(null);
-  const { updateCurrentStep } = useOrgOnboarding(org?.currentOrg?.id ?? "");
+  const { updateCurrentStep, completeOnboarding } = useOrgOnboarding(org?.currentOrg?.id ?? "");
 
   useEffect(() => {
     if (org?.currentOrg?.id) {
@@ -104,7 +104,8 @@ export default function RequestPage() {
     }
   };
 
-  const handleViewDashboard = () => {
+  const handleViewDashboard = async () => {
+    await completeOnboarding();
     router.push("/dashboard");
   };
 

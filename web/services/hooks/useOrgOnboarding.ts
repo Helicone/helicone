@@ -161,7 +161,7 @@ export const useOrgOnboarding = (orgId: string) => {
   const { mutateAsync: saveOnboardingChangesAsync } = useMutation({
     mutationFn: async (newState: Partial<OnboardingState>) => {
       const fullState = {
-        hasOnboarded: onboardingState?.hasOnboarded ?? false,
+        hasOnboarded: newState.hasOnboarded ?? onboardingState?.hasOnboarded ?? false,
         currentStep:
           newState.currentStep ??
           onboardingState?.currentStep ??
@@ -177,7 +177,7 @@ export const useOrgOnboarding = (orgId: string) => {
           body: {
             onboarding_status: fullState,
             name: draftName || onboardingState?.name || "",
-            has_onboarded: onboardingState?.hasOnboarded ?? false,
+            has_onboarded: newState.hasOnboarded ?? onboardingState?.hasOnboarded ?? false,
           },
         }
       );
