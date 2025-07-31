@@ -52,7 +52,7 @@ export type BatchPayload = {
     scores: Record<string, number | boolean | undefined>;
     evaluatorIds: Record<string, string>;
   }[];
-  orgsToMarkAsOnboarded: Set<string>;
+  orgsToMarkAsIntegrated: Set<string>;
 };
 
 const avgTokenLength = 4;
@@ -88,7 +88,7 @@ export class LoggingHandler extends AbstractLogHandler {
 
       experimentCellValues: [],
       scores: [],
-      orgsToMarkAsOnboarded: new Set<string>(),
+      orgsToMarkAsIntegrated: new Set<string>(),
     };
   }
 
@@ -111,8 +111,11 @@ export class LoggingHandler extends AbstractLogHandler {
       const requestResponseVersionedCHMapped =
         this.mapRequestResponseVersionedCH(context);
 
-      if (context.orgParams && context.orgParams.has_onboarded === false) {
-        this.batchPayload.orgsToMarkAsOnboarded.add(context.orgParams.id);
+      if (
+        requestMapped.user_id !== "helicone_playground" &&
+        !context.orgParams?.has_integrated
+      ) {
+        this.batchPayload.orgsToMarkAsIntegrated.add(context.orgParams?.id ?? "");
       }
 
       // Sanitize request_body to prevent JSON parsing errors in Clickhouse

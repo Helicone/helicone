@@ -81,6 +81,7 @@ export const useDraftOnboardingStore = (orgId: string) => {
 export interface OnboardingState {
   name: string;
   hasOnboarded: boolean;
+  hasIntegrated: boolean;
   currentStep: "ORGANIZATION" | "MEMBERS" | "BILLING" | "REQUEST";
   selectedTier: "free" | "pro" | "team";
   members: { email: string; role: "admin" | "member" }[];
@@ -94,6 +95,7 @@ export interface OnboardingState {
 const defaultOnboardingState: OnboardingState = {
   name: "",
   hasOnboarded: false,
+  hasIntegrated: false,
   currentStep: "ORGANIZATION",
   selectedTier: "free",
   members: [],
@@ -162,6 +164,7 @@ export const useOrgOnboarding = (orgId: string) => {
     mutationFn: async (newState: Partial<OnboardingState>) => {
       const fullState = {
         hasOnboarded: newState.hasOnboarded ?? onboardingState?.hasOnboarded ?? false,
+        hasIntegrated: newState.hasIntegrated ?? onboardingState?.hasIntegrated ?? false,
         currentStep:
           newState.currentStep ??
           onboardingState?.currentStep ??
@@ -177,7 +180,6 @@ export const useOrgOnboarding = (orgId: string) => {
           body: {
             onboarding_status: fullState,
             name: draftName || onboardingState?.name || "",
-            has_onboarded: newState.hasOnboarded ?? onboardingState?.hasOnboarded ?? false,
           },
         }
       );

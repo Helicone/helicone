@@ -66,6 +66,7 @@ export type OnboardingStatus = Partial<{
   currentStep: string;
   selectedTier: string;
   hasOnboarded: boolean;
+  hasIntegrated: boolean;
   members: any[];
   addons: {
     prompts: boolean;
@@ -491,7 +492,6 @@ export class OrganizationManager extends BaseManager {
     organizationId: string,
     onboardingStatus: OnboardingStatus,
     name: string,
-    hasOnboarded: boolean
   ): Promise<Result<string, string>> {
     if (!this.authParams.userId) return err("Unauthorized");
 
@@ -509,7 +509,6 @@ export class OrganizationManager extends BaseManager {
     const { data, error } = await this.organizationStore.updateOnboardingStatus(
       onboardingStatus,
       name,
-      hasOnboarded
     );
 
     if (error || !data) {

@@ -33,6 +33,7 @@ export interface OrgParams {
   id: string;
   percentLog: number;
   has_onboarded: boolean;
+  has_integrated: boolean;
 }
 
 export type OrgResult = PromiseGenericResult<OrgParams>;

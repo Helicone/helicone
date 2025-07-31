@@ -1,6 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { OnboardingHeader } from "@/components/onboarding/OnboardingHeader";
 import { useEffect, useState, useRef } from "react";
 import { ArrowRight, Loader, Play } from "lucide-react";
@@ -28,7 +34,9 @@ export default function RequestPage() {
   const [hasCompleted, setHasCompleted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const abortController = useRef<AbortController | null>(null);
-  const { updateCurrentStep, completeOnboarding } = useOrgOnboarding(org?.currentOrg?.id ?? "");
+  const { updateCurrentStep, completeOnboarding } = useOrgOnboarding(
+    org?.currentOrg?.id ?? "",
+  );
 
   useEffect(() => {
     if (org?.currentOrg?.id) {
@@ -94,8 +102,13 @@ export default function RequestPage() {
           setError("Request was cancelled");
         } else {
           console.error("Error:", error);
-          setError(error.message || "An error occurred while generating the response");
-          setNotification(error.message || "Failed to generate response", "error");
+          setError(
+            error.message || "An error occurred while generating the response",
+          );
+          setNotification(
+            error.message || "Failed to generate response",
+            "error",
+          );
         }
       }
     } finally {
@@ -111,10 +124,12 @@ export default function RequestPage() {
 
   return (
     <OnboardingHeader>
-      <div className="mx-auto flex max-w-md flex-col gap-6 py-12 px-4">
+      <div className="mx-auto flex max-w-md flex-col gap-6 px-4 py-12">
         <div className="flex flex-col gap-2">
           <H1>Send a Request</H1>
-          <Muted>Try out Helicone with a simple AI request to see it in action.</Muted>
+          <Muted>
+            Try out Helicone with a simple AI request to see it in action.
+          </Muted>
         </div>
 
         <div className="flex flex-col gap-4">
@@ -125,11 +140,13 @@ export default function RequestPage() {
             maxLength={100}
             disabled={hasCompleted}
           />
-          <Muted className="text-xs">
-            {prompt.length}/100 characters
-          </Muted>
+          <Muted className="text-xs">{prompt.length}/100 characters</Muted>
 
-          <Select value={selectedModel} onValueChange={setSelectedModel} disabled={hasCompleted}>
+          <Select
+            value={selectedModel}
+            onValueChange={setSelectedModel}
+            disabled={hasCompleted}
+          >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -166,9 +183,11 @@ export default function RequestPage() {
           {(response || error) && (
             <div className="w-full rounded-md border border-border bg-muted/50 p-3">
               {error ? (
-                <div className="text-destructive text-sm">{error}</div>
+                <div className="text-sm text-destructive">{error}</div>
               ) : (
-                <div className="whitespace-pre-wrap text-sm">{JSON.parse(response).content}</div>
+                <div className="whitespace-pre-wrap text-sm">
+                  {JSON.parse(response).content}
+                </div>
               )}
               {isStreaming && (
                 <div className="mt-2 flex items-center gap-2">
@@ -193,4 +212,4 @@ export default function RequestPage() {
       </div>
     </OnboardingHeader>
   );
-} 
+}

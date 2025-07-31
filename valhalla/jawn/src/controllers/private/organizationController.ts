@@ -550,7 +550,6 @@ export class OrganizationController extends Controller {
     requestBody: {
       onboarding_status: OnboardingStatus;
       name: string;
-      has_onboarded: boolean;
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
@@ -560,7 +559,6 @@ export class OrganizationController extends Controller {
       request.authParams.organizationId ?? "",
       requestBody.onboarding_status,
       requestBody.name,
-      requestBody.has_onboarded
     );
 
     if (result.error) {
