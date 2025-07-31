@@ -558,7 +558,7 @@ export class OrganizationController extends Controller {
     const result = await organizationManager.updateOnboardingStatus(
       request.authParams.organizationId ?? "",
       requestBody.onboarding_status,
-      requestBody.name,
+      requestBody.name
     );
 
     if (result.error) {
