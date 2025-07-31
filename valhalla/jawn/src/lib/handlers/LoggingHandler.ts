@@ -113,9 +113,11 @@ export class LoggingHandler extends AbstractLogHandler {
 
       if (
         requestMapped.user_id !== "helicone_playground" &&
-        !context.orgParams?.has_integrated
+        context.orgParams &&
+        !context.orgParams.has_integrated &&
+        context.orgParams.id
       ) {
-        this.batchPayload.orgsToMarkAsIntegrated.add(context.orgParams?.id ?? "");
+        this.batchPayload.orgsToMarkAsIntegrated.add(context.orgParams.id);
       }
 
       // Sanitize request_body to prevent JSON parsing errors in Clickhouse
