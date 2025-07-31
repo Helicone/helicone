@@ -28,8 +28,7 @@ export const STEP_ROUTES: Record<OnboardingStep, string> = {
   ORGANIZATION: "/onboarding",
   MEMBERS: "/onboarding",
   BILLING: "/onboarding/billing",
-  INTEGRATION: "/onboarding/integrate",
-  EVENT: "/onboarding/event",
+  REQUEST: "/onboarding/request",
 };
 
 interface OnboardingHeaderProps {
@@ -70,8 +69,7 @@ export const OnboardingHeader = ({ children }: OnboardingHeaderProps) => {
         : "ORGANIZATION",
     },
     ...billingStep,
-    { label: "Get integrated", step: "INTEGRATION" },
-    { label: "Send an event", step: "EVENT" },
+    { label: "Send a request", step: "REQUEST" },
   ];
 
   const currentStepIndex = steps.findIndex(
