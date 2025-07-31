@@ -107,7 +107,7 @@ const getRequestMessages = (contents: any[]): Message[] => {
             return {
               _type: "image",
               role: content.role || "user", // Role applied at part level
-              image_url: `data:${part.inlineData.mimeType};base64, ${part.inlineData.data}`, // Format as data URL
+              image_url: `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`, // Format as data URL
             };
           }
           // Handle other potential part types like functionCall if needed later
