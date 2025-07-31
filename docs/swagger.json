@@ -15899,6 +15899,9 @@
 									},
 									{
 										"properties": {
+											"logRequest": {
+												"type": "boolean"
+											},
 											"useAIGateway": {
 												"type": "boolean"
 											}

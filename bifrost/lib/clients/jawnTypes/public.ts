@@ -5523,6 +5523,7 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["OpenAIChatRequest"] & {
+          logRequest?: boolean;
           useAIGateway?: boolean;
         };
       };

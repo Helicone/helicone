@@ -119,7 +119,7 @@ export function CodeIntegrationPage({
   }, [hasEvent?.data]);
 
   useEffect(() => {
-    updateCurrentStep("EVENT");
+    updateCurrentStep("REQUEST");
     const generateKey = async () => {
       if (!user) return;
       if (apiKey) return;

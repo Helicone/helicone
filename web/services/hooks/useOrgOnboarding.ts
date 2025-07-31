@@ -9,8 +9,7 @@ export type OnboardingStep =
   | "ORGANIZATION"
   | "MEMBERS"
   | "BILLING"
-  | "INTEGRATION"
-  | "EVENT";
+  | "REQUEST";
 
 export type PlanType = "free" | "pro" | "team";
 
@@ -82,7 +81,7 @@ export const useDraftOnboardingStore = (orgId: string) => {
 export interface OnboardingState {
   name: string;
   hasOnboarded: boolean;
-  currentStep: "ORGANIZATION" | "MEMBERS" | "BILLING" | "INTEGRATION" | "EVENT";
+  currentStep: "ORGANIZATION" | "MEMBERS" | "BILLING" | "REQUEST";
   selectedTier: "free" | "pro" | "team";
   members: { email: string; role: "admin" | "member" }[];
   addons: {
