@@ -1035,6 +1035,7 @@ export type Database = {
           organization_id: string
           soft_delete: boolean
           temp_key: boolean
+          updated_at: string | null
           user_id: string
         }
         Insert: {
@@ -1047,6 +1048,7 @@ export type Database = {
           organization_id: string
           soft_delete?: boolean
           temp_key?: boolean
+          updated_at?: string | null
           user_id: string
         }
         Update: {
@@ -1059,6 +1061,7 @@ export type Database = {
           organization_id?: string
           soft_delete?: boolean
           temp_key?: boolean
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: [
@@ -1690,6 +1693,7 @@ export type Database = {
           created_at: string | null
           domain: string | null
           governance_settings: Json | null
+          has_integrated: boolean
           has_onboarded: boolean
           icon: string
           id: string
@@ -1719,6 +1723,7 @@ export type Database = {
           created_at?: string | null
           domain?: string | null
           governance_settings?: Json | null
+          has_integrated?: boolean
           has_onboarded?: boolean
           icon?: string
           id?: string
@@ -1748,6 +1753,7 @@ export type Database = {
           created_at?: string | null
           domain?: string | null
           governance_settings?: Json | null
+          has_integrated?: boolean
           has_onboarded?: boolean
           icon?: string
           id?: string
@@ -2103,19 +2109,12 @@ export type Database = {
           soft_delete?: boolean
           tags?: string[] | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "prompts_2025_organization_fkey"
-            columns: ["organization"]
-            isOneToOne: false
-            referencedRelation: "organization"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       prompts_2025_inputs: {
         Row: {
           created_at: string
+          environment: string | null
           id: string
           inputs: Json
           request_id: string
@@ -2123,6 +2122,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          environment?: string | null
           id?: string
           inputs: Json
           request_id: string
@@ -2130,33 +2130,20 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          environment?: string | null
           id?: string
           inputs?: Json
           request_id?: string
           version_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "prompts_2025_inputs_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "request"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "prompts_2025_inputs_version_id_fkey"
-            columns: ["version_id"]
-            isOneToOne: false
-            referencedRelation: "prompts_2025_versions"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       prompts_2025_versions: {
         Row: {
           commit_message: string | null
           created_at: string
           created_by: string | null
+          environment: string | null
           id: string
           major_version: number
           minor_version: number | null
@@ -2169,6 +2156,7 @@ export type Database = {
           commit_message?: string | null
           created_at?: string
           created_by?: string | null
+          environment?: string | null
           id?: string
           major_version: number
           minor_version?: number | null
@@ -2181,6 +2169,7 @@ export type Database = {
           commit_message?: string | null
           created_at?: string
           created_by?: string | null
+          environment?: string | null
           id?: string
           major_version?: number
           minor_version?: number | null
@@ -2189,29 +2178,7 @@ export type Database = {
           prompt_id?: string
           soft_delete?: boolean
         }
-        Relationships: [
-          {
-            foreignKeyName: "prompts_2025_versions_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "users_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "prompts_2025_versions_organization_fkey"
-            columns: ["organization"]
-            isOneToOne: false
-            referencedRelation: "organization"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "prompts_2025_versions_prompt_id_fkey"
-            columns: ["prompt_id"]
-            isOneToOne: false
-            referencedRelation: "prompts_2025"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       prompts_versions: {
         Row: {
@@ -3120,8 +3087,8 @@ export type Database = {
           auth_type?: string | null
           config?: Json | null
           created_at?: string | null
-          decrypted_provider_key?: never
-          decrypted_provider_secret_key?: never
+          decrypted_provider_key?: string | null
+          decrypted_provider_secret_key?: string | null
           id?: string | null
           key_id?: string | null
           nonce?: string | null
@@ -3137,8 +3104,8 @@ export type Database = {
           auth_type?: string | null
           config?: Json | null
           created_at?: string | null
-          decrypted_provider_key?: never
-          decrypted_provider_secret_key?: never
+          decrypted_provider_key?: string | null
+          decrypted_provider_secret_key?: string | null
           id?: string | null
           key_id?: string | null
           nonce?: string | null
@@ -3183,6 +3150,10 @@ export type Database = {
       }
     }
     Functions: {
+      bytea_to_text: {
+        Args: { data: string }
+        Returns: string
+      }
       check_request_access: {
         Args: { this_auth_hash: string; this_user_id: string }
         Returns: boolean
@@ -3215,21 +3186,21 @@ export type Database = {
       }
       http: {
         Args: { request: Database["public"]["CompositeTypes"]["http_request"] }
-        Returns: Database["public"]["CompositeTypes"]["http_response"]
+        Returns: unknown
       }
       http_delete: {
         Args:
           | { uri: string }
           | { uri: string; content: string; content_type: string }
-        Returns: Database["public"]["CompositeTypes"]["http_response"]
+        Returns: unknown
       }
       http_get: {
         Args: { uri: string } | { uri: string; data: Json }
-        Returns: Database["public"]["CompositeTypes"]["http_response"]
+        Returns: unknown
       }
       http_head: {
         Args: { uri: string }
-        Returns: Database["public"]["CompositeTypes"]["http_response"]
+        Returns: unknown
       }
       http_header: {
         Args: { field: string; value: string }
@@ -3244,17 +3215,17 @@ export type Database = {
       }
       http_patch: {
         Args: { uri: string; content: string; content_type: string }
-        Returns: Database["public"]["CompositeTypes"]["http_response"]
+        Returns: unknown
       }
       http_post: {
         Args:
           | { uri: string; content: string; content_type: string }
           | { uri: string; data: Json }
-        Returns: Database["public"]["CompositeTypes"]["http_response"]
+        Returns: unknown
       }
       http_put: {
         Args: { uri: string; content: string; content_type: string }
-        Returns: Database["public"]["CompositeTypes"]["http_response"]
+        Returns: unknown
       }
       http_reset_curlopt: {
         Args: Record<PropertyKey, never>
@@ -3276,6 +3247,10 @@ export type Database = {
           name: string
         }
         Returns: number
+      }
+      text_to_bytea: {
+        Args: { data: string }
+        Returns: string
       }
       urlencode: {
         Args: { data: Json } | { string: string } | { string: string }
@@ -3315,25 +3290,21 @@ export type Database = {
   }
 }
 
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
-
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+type DefaultSchema = Database[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof DatabaseWithoutInternals },
+    | { schema: keyof Database },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof Database
   }
-    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
@@ -3351,16 +3322,14 @@ export type Tables<
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+    | { schema: keyof Database },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof Database
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
@@ -3376,16 +3345,14 @@ export type TablesInsert<
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+    | { schema: keyof Database },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof Database
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
@@ -3401,16 +3368,14 @@ export type TablesUpdate<
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
+    | { schema: keyof Database },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof Database
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
@@ -3418,16 +3383,14 @@ export type Enums<
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof DatabaseWithoutInternals },
+    | { schema: keyof Database },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof Database
   }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
-> = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never

@@ -247,6 +247,9 @@ const useOrgsContextManager = (): OrgContextValue => {
         ) {
           return 1_000;
         }
+        if (selectedOrgsData.state.data?.data?.some((org) => !org.has_onboarded)) {
+          return 5_000;
+        }
         return false;
       },
       refetchIntervalInBackground: false,
