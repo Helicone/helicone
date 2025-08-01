@@ -49,12 +49,14 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
     mutationFn: async ({
       providerName,
       key,
+      secretKey,
       keyId,
       providerKeyName,
       config,
     }: {
       providerName: string;
       key?: string;
+      secretKey?: string;
       keyId: string;
       providerKeyName: string;
       config?: Record<string, any>;
@@ -71,6 +73,7 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
         },
         body: {
           providerKey: key,
+          providerSecretKey: secretKey,
           config,
         },
       });
@@ -81,7 +84,7 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
     onError: (error: Error) => {
       setNotification(
         "Failed to save key: " + (error.message || "Unknown error"),
-        "error"
+        "error",
       );
     },
   });
@@ -90,11 +93,13 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
     mutationFn: async ({
       providerName,
       key,
+      secretKey,
       providerKeyName,
       config,
     }: {
       providerName: string;
       key: string;
+      secretKey?: string;
       providerKeyName: string;
       config?: Record<string, any>;
     }) => {
@@ -106,6 +111,7 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
           body: {
             providerName,
             providerKey: key,
+            providerSecretKey: secretKey,
             providerKeyName,
             config: config || {},
           },
@@ -124,14 +130,17 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
     onError: (error: Error) => {
       setNotification(
         "Failed to add key: " + (error.message || "Unknown error"),
-        "error"
+        "error",
       );
     },
   });
 
   const viewDecryptedProviderKey = async (
-    keyId: string
-  ): Promise<string | null> => {
+    keyId: string,
+  ): Promise<{
+    providerKey: string;
+    providerSecretKey?: string | null;
+  } | null> => {
     if (!orgId) return null;
 
     try {
@@ -144,7 +153,7 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
               providerKeyId: keyId,
             },
           },
-        }
+        },
       );
 
       if (response && "error" in response) {
@@ -158,7 +167,13 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
         typeof response.data === "object" &&
         "provider_key" in response.data
       ) {
-        return response.data.provider_key || null;
+        return {
+          providerKey: response.data.provider_key || "",
+          providerSecretKey:
+            "secret_key" in response.data
+              ? response.data.provider_secret_key
+              : "",
+        };
       }
 
       return null;
@@ -171,7 +186,7 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
   const providerKeys = providerKeysData || [];
   const existingKey = providerId
     ? providerKeys.find(
-        (key: any) => key.provider_name === providerName && !key.soft_delete
+        (key: any) => key.provider_name === providerName && !key.soft_delete,
       )
     : undefined;
 

@@ -138,17 +138,17 @@ export const providers: Provider[] = [
   //   relevanceScore: 50,
   // },
   // TODO: Setup AWS Bedrock
-  // {
-  //   id: "aws",
-  //   name: "AWS Bedrock",
-  //   logoUrl: "/assets/home/providers/bedrock.webp",
-  //   description: "Configure your AWS Bedrock API keys",
-  //   docsUrl:
-  //     "https://docs.helicone.ai/getting-started/integration-methods/bedrock",
-  //   apiKeyLabel: "AWS Access Key ID",
-  //   apiKeyPlaceholder: "...",
-  //   relevanceScore: 45,
-  // },
+  {
+    id: "aws",
+    name: "AWS Bedrock",
+    logoUrl: "/assets/home/providers/bedrock.webp",
+    description: "Configure your AWS Bedrock API keys",
+    docsUrl:
+      "https://docs.helicone.ai/getting-started/integration-methods/bedrock",
+    apiKeyLabel: "AWS Access Key ID",
+    apiKeyPlaceholder: "...",
+    relevanceScore: 45,
+  },
   // {
   //   id: "deepinfra",
   //   name: "Deep Infra",

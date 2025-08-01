@@ -205,10 +205,17 @@ export class KeyManager extends BaseManager {
     providerName: string;
     providerKeyName: string;
     providerKey: string;
+    providerSecretKey?: string;
     config: Record<string, string>;
   }): Promise<Result<{ id: string }, string>> {
     try {
-      const { providerName, providerKey, providerKeyName, config } = data;
+      const {
+        providerName,
+        providerKey,
+        providerKeyName,
+        config,
+        providerSecretKey,
+      } = data;
 
       // Check if a key already exists for this provider
       const existingKeysResult = await dbExecute<{ id: string }>(
@@ -237,13 +244,14 @@ export class KeyManager extends BaseManager {
 
       // Insert the new key
       const result = await dbExecute<{ id: string }>(
-        `INSERT INTO provider_keys (provider_name, provider_key_name, provider_key, org_id, soft_delete, config)
-         VALUES ($1, $2, $3, $4, $5, $6)
+        `INSERT INTO provider_keys (provider_name, provider_key_name, provider_key, provider_secret_key, org_id, soft_delete, config)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
          RETURNING id`,
         [
           providerName,
           providerKeyName,
           providerKey,
+          providerSecretKey,
           this.authParams.organizationId,
           false,
           config,
@@ -267,10 +275,11 @@ export class KeyManager extends BaseManager {
   async updateProviderKey(params: {
     providerKeyId: string;
     providerKey?: string;
+    providerSecretKey?: string;
     config?: Record<string, string>;
   }): Promise<Result<{ id: string }, string>> {
     try {
-      const { providerKeyId, providerKey, config } = params;
+      const { providerKeyId, providerKey, providerSecretKey, config } = params;
 
       // Verify the key belongs to this organization
       const hasAccess = await this.hasAccessToProviderKey(providerKeyId);
@@ -288,6 +297,11 @@ export class KeyManager extends BaseManager {
         values.push(providerKey);
       } else {
         values.push(null);
+      }
+
+      if (providerSecretKey !== "" && providerSecretKey !== undefined) {
+        updateParts.push(`provider_secret_key = $${paramIndex++}`);
+        values.push(providerSecretKey);
       }
 
       if (config !== undefined) {
@@ -339,11 +353,12 @@ export class KeyManager extends BaseManager {
         id: string;
         org_id: string;
         decrypted_provider_key: string;
+        decrypted_provider_secret_key: string;
         provider_key_name: string;
         provider_name: string;
       }>(
-        `SELECT id, org_id, decrypted_provider_key, provider_key_name, provider_name
-         FROM decrypted_provider_keys
+        `SELECT id, org_id, decrypted_provider_key, provider_key_name, provider_name, provider_secret_key
+         FROM decrypted_provider_keys_v2
          WHERE id = $1
          AND org_id = $2
          AND soft_delete = false
@@ -362,6 +377,7 @@ export class KeyManager extends BaseManager {
         provider_key: key.decrypted_provider_key,
         provider_name: key.provider_name,
         provider_key_name: key.provider_key_name,
+        provider_secret_key: key.decrypted_provider_secret_key,
       };
 
       return ok(providerKey);
@@ -409,9 +425,8 @@ export class KeyManager extends BaseManager {
         return err(hasAccess.error);
       }
 
-      const providerKeyResult = await this.getDecryptedProviderKeyById(
-        providerKeyId
-      );
+      const providerKeyResult =
+        await this.getDecryptedProviderKeyById(providerKeyId);
 
       if (providerKeyResult.error || !providerKeyResult.data?.id) {
         return err(providerKeyResult.error || "Provider key not found");

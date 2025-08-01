@@ -260,6 +260,10 @@
 			},
 			"DecryptedProviderKey": {
 				"properties": {
+					"provider_secret_key": {
+						"type": "string",
+						"nullable": true
+					},
 					"provider_key_name": {
 						"type": "string",
 						"nullable": true
@@ -282,6 +286,7 @@
 					}
 				},
 				"required": [
+					"provider_secret_key",
 					"provider_key_name",
 					"provider_name",
 					"provider_key",
@@ -19390,6 +19395,9 @@
 									"config": {
 										"$ref": "#/components/schemas/Record_string.string_"
 									},
+									"providerSecretKey": {
+										"type": "string"
+									},
 									"providerKey": {
 										"type": "string"
 									}
@@ -19459,6 +19467,9 @@
 									},
 									"config": {
 										"$ref": "#/components/schemas/Record_string.string_"
+									},
+									"providerSecretKey": {
+										"type": "string"
 									},
 									"providerKey": {
 										"type": "string"

@@ -42,6 +42,7 @@ export class ApiKeyController extends Controller {
     body: {
       providerName: string;
       providerKey: string;
+      providerSecretKey?: string;
       config: Record<string, string>;
       providerKeyName: string;
     }
@@ -51,6 +52,7 @@ export class ApiKeyController extends Controller {
       providerName: body.providerName,
       providerKeyName: body.providerKeyName,
       providerKey: body.providerKey,
+      providerSecretKey: body.providerSecretKey,
       config: body.config,
     });
 
@@ -96,12 +98,18 @@ export class ApiKeyController extends Controller {
   public async updateProviderKey(
     @Request() request: JawnAuthenticatedRequest,
     @Path() providerKeyId: string,
-    @Body() body: { providerKey?: string; config?: Record<string, string> }
+    @Body()
+    body: {
+      providerKey?: string;
+      providerSecretKey?: string;
+      config?: Record<string, string>;
+    }
   ) {
     const keyManager = new KeyManager(request.authParams);
     const result = await keyManager.updateProviderKey({
       providerKeyId,
       providerKey: body.providerKey,
+      providerSecretKey: body.providerSecretKey,
       config: body.config,
     });
 
