@@ -454,6 +454,7 @@ export class RequestWrapper {
   }
 
   async getProviderAuthHeader(): Promise<string | undefined> {
+    console.log("the authorization is", this.authorization);
     return this.authorization ? await hash(this.authorization) : undefined;
   }
 
@@ -466,6 +467,10 @@ export class RequestWrapper {
 
   getAuthorization(): string | undefined {
     return this.authorization || undefined;
+  }
+
+  setProviderAuthKey(key: string): void {
+    this.providerAuth = key;
   }
 
   private async setAuthorization(
@@ -528,6 +533,7 @@ export class RequestWrapper {
       headers.set("Authorization", `Bearer ${this.authorization}`);
       this.headers = headers;
     } else {
+      console.log("the key is", authKey);
       this.authorization = authKey;
       return { data: this.authorization, error: null };
     }

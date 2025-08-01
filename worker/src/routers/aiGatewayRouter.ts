@@ -5,6 +5,12 @@ import { proxyForwarder } from "../lib/HeliconeProxyRequest/ProxyForwarder";
 import { RequestWrapper } from "../lib/RequestWrapper";
 import { BaseRouter } from "./routerFactory";
 import { providers } from "../packages/cost/providers/mappings";
+import { APIKeysManager } from "../lib/managers/APIKeysManager";
+import { APIKeysStore } from "../lib/db/APIKeysStore";
+import { createClient } from "@supabase/supabase-js";
+import { Database } from "../../supabase/database.types";
+import { ProviderKeysManager } from "../lib/managers/ProviderKeysManager";
+import { ProviderKeysStore } from "../lib/db/ProviderKeysStore";
 
 const getBody = async (requestWrapper: RequestWrapper) => {
   if (requestWrapper.getMethod() === "GET") {
@@ -66,6 +72,45 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
       if (!provider) {
         return new Response("Invalid inference provider", { status: 400 });
       }
+
+      const hashedKey = await requestWrapper.getProviderAuthHeader();
+      const isEU = requestWrapper.isEU();
+      const supabaseClient = isEU
+        ? createClient<Database>(
+            env.EU_SUPABASE_URL,
+            env.EU_SUPABASE_SERVICE_ROLE_KEY
+          )
+        : createClient<Database>(
+            env.SUPABASE_URL,
+            env.SUPABASE_SERVICE_ROLE_KEY
+          );
+      const apiKeyManager = new APIKeysManager(
+        new APIKeysStore(supabaseClient),
+        env
+      );
+      const orgId = await apiKeyManager.getAPIKey(hashedKey ?? "");
+      console.log("orgId", orgId);
+      if (!orgId) {
+        return new Response("Invalid API key", { status: 401 });
+      }
+      const providerKeysManager = new ProviderKeysManager(
+        new ProviderKeysStore(supabaseClient),
+        env
+      );
+      const providerKey = await providerKeysManager.getProviderKey(
+        provider,
+        orgId
+      );
+      console.log("providerKey", providerKey);
+      if (!providerKey) {
+        return new Response("Invalid provider key", { status: 401 });
+      }
+      requestWrapper.setHeader(
+        "Helicone-Auth",
+        requestWrapper.getAuthorization() ?? ""
+      );
+      // TODO: need to do some extra bs here for bedrock
+      requestWrapper.setProviderAuthKey(providerKey.decrypted_provider_key);
 
       if (model.includes("claude-")) {
         const anthropicBody = toAnthropic(parsedBody);
