@@ -10,7 +10,7 @@ import { APIKeysStore } from "../lib/db/APIKeysStore";
 import { createClient } from "@supabase/supabase-js";
 import { Database } from "../../supabase/database.types";
 import { ProviderKeysManager } from "../lib/managers/ProviderKeysManager";
-import { ProviderKeysStore } from "../lib/db/ProviderKeysStore";
+import { ProviderKey, ProviderKeysStore } from "../lib/db/ProviderKeysStore";
 
 const getBody = async (requestWrapper: RequestWrapper) => {
   if (requestWrapper.getMethod() === "GET") {
@@ -34,6 +34,39 @@ const getProviderFromProviderName = (provider: string) => {
   return providers.find(
     (p) => p.provider.toLowerCase() === provider.toLowerCase()
   )?.provider;
+};
+
+const authenticateRequest = (
+  requestWrapper: RequestWrapper,
+  providerKey: ProviderKey
+) => {
+  requestWrapper.setHeader(
+    "Helicone-Auth",
+    requestWrapper.getAuthorization() ?? ""
+  );
+  // TODO: need to do some extra bs here for bedrock
+  // requestWrapper.setProviderAuthKey(providerKey.decrypted_provider_key);
+  if (providerKey.provider === "AWS") {
+    if (providerKey.auth_type === "key") {
+      const awsAccessKey = providerKey.decrypted_provider_key;
+      const awsSecretKey = providerKey.decrypted_provider_secret_key;
+      const config = providerKey.config as
+        | { region?: string }
+        | null
+        | undefined;
+      const awsRegion = config?.region ?? "us-west-1";
+    } else {
+      requestWrapper.setHeader(
+        "Authorization",
+        `Bearer ${providerKey.decrypted_provider_key}`
+      );
+    }
+  }
+
+  requestWrapper.setHeader(
+    "Authorization",
+    `Bearer ${providerKey.decrypted_provider_key}`
+  );
 };
 
 export const getAIGatewayRouter = (router: BaseRouter) => {
@@ -103,16 +136,8 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
       if (!providerKey) {
         return new Response("Invalid provider key", { status: 401 });
       }
-      requestWrapper.setHeader(
-        "Helicone-Auth",
-        requestWrapper.getAuthorization() ?? ""
-      );
-      // TODO: need to do some extra bs here for bedrock
-      // requestWrapper.setProviderAuthKey(providerKey.decrypted_provider_key);
-      requestWrapper.setHeader(
-        "Authorization",
-        `Bearer ${providerKey.decrypted_provider_key}`
-      );
+
+      authenticateRequest(requestWrapper, providerKey);
 
       if (model.includes("claude-")) {
         const anthropicBody = toAnthropic(parsedBody);
