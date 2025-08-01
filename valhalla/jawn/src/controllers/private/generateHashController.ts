@@ -4,6 +4,7 @@ import { hashAuth } from "../../utils/hash";
 import { type JawnAuthenticatedRequest } from "../../types/request";
 import { KeyPermissions } from "../../packages/common/auth/types";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
+import { refetchAPIKeys } from "../../lib/refetchKeys";
 
 export interface GenerateHashQueryParams {
   apiKey: string;
@@ -64,6 +65,7 @@ export class GenerateHashController extends Controller {
           },
         };
       }
+      await refetchAPIKeys();
 
       this.setStatus(201);
       return {

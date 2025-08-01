@@ -29,7 +29,6 @@ function getAPIRouterV1(
       env: Env,
       ctx: ExecutionContext
     ) => {
-      const client = await createAPIClient(env, ctx, requestWrapper);
       const lastFetchedAt = await env.RATE_LIMIT_KV.get(
         "api-keys-last-refeched"
       );
@@ -54,10 +53,11 @@ function getAPIRouterV1(
           // Every 10 seconds
           new Date(lastFetchedAt).getTime() + 1000 * 10 < Date.now()
         ) {
-          return client.response.successJSON({ ok: "true" }, true);
+          return new Response("ok", { status: 200 });
         }
       } catch {
         console.error("Invalid date");
+        return new Response("error", { status: 500 });
       }
       const apiKeysManagerUS = new APIKeysManager(
         new APIKeysStore(supabaseClientUS),
@@ -70,6 +70,7 @@ function getAPIRouterV1(
         env
       );
       await apiKeysManagerEU.setAPIKeys();
+      return new Response("ok", { status: 200 });
     }
   );
 
@@ -81,7 +82,6 @@ function getAPIRouterV1(
       env: Env,
       ctx: ExecutionContext
     ) => {
-      const client = await createAPIClient(env, ctx, requestWrapper);
       const lastFetchedAt = await env.RATE_LIMIT_KV.get(
         "provider-keys-last-refeched"
       );
@@ -107,7 +107,7 @@ function getAPIRouterV1(
           // Every 10 seconds
           new Date(lastFetchedAt).getTime() + 1000 * 10 < Date.now()
         ) {
-          return client.response.successJSON({ ok: "true" }, true);
+          return new Response("ok", { status: 200 });
         }
       } catch {
         console.error("Invalid date");
