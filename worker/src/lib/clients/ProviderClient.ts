@@ -113,6 +113,8 @@ export async function callProvider(props: CallProps): Promise<Response> {
   const baseInit = { method, headers: headersWithExtra };
   const init = method === "GET" ? { ...baseInit } : { ...baseInit, body };
 
+  console.log("calling provider", targetUrl.href, headersWithExtra);
+
   let response: Response;
   if (increaseTimeout) {
     const controller = new AbortController();

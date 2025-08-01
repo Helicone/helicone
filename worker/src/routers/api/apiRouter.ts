@@ -29,6 +29,7 @@ function getAPIRouterV1(
       env: Env,
       ctx: ExecutionContext
     ) => {
+      console.log("refetching api keys");
       const lastFetchedAt = await env.RATE_LIMIT_KV.get(
         "api-keys-last-refeched"
       );
@@ -117,13 +118,16 @@ function getAPIRouterV1(
         new ProviderKeysStore(supabaseClientUS),
         env
       );
+
       await providerKeysManagerUS.setProviderKeys();
 
       const providerKeysManagerEU = new ProviderKeysManager(
         new ProviderKeysStore(supabaseClientEU),
         env
       );
+
       await providerKeysManagerEU.setProviderKeys();
+      return new Response("ok", { status: 200 });
     }
   );
 

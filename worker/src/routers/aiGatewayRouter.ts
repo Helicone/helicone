@@ -110,7 +110,11 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
         requestWrapper.getAuthorization() ?? ""
       );
       // TODO: need to do some extra bs here for bedrock
-      requestWrapper.setProviderAuthKey(providerKey.decrypted_provider_key);
+      // requestWrapper.setProviderAuthKey(providerKey.decrypted_provider_key);
+      requestWrapper.setHeader(
+        "Authorization",
+        `Bearer ${providerKey.decrypted_provider_key}`
+      );
 
       if (model.includes("claude-")) {
         const anthropicBody = toAnthropic(parsedBody);

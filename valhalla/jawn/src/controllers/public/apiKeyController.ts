@@ -14,6 +14,7 @@ import {
 } from "tsoa";
 import { type JawnAuthenticatedRequest } from "../../types/request";
 import { KeyManager } from "../../managers/apiKeys/KeyManager";
+import { refetchAPIKeys, refetchProviderKeys } from "../../lib/refetchKeys";
 
 @Route("v1/api-keys")
 @Tags("API Key")
