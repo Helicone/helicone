@@ -27,7 +27,6 @@ function base64UrlToBase64(base64url: string) {
   while (base64.length % 4 !== 0) {
     base64 += "=";
   }
-  
   return `${format}base64,${base64}`;
 }
 
