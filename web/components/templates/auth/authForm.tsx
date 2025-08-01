@@ -200,7 +200,8 @@ const AuthForm = (props: AuthFormProps) => {
     }
 
     if (regionEvent === "us") {
-      router.push("https://us.helicone.ai/" + authFormType);
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://us.helicone.ai";
+      router.push(appUrl + "/" + authFormType);
     }
     if (regionEvent === "eu") {
       router.push("https://eu.helicone.ai/" + authFormType);
