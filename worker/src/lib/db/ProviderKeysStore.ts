@@ -54,7 +54,8 @@ export class ProviderKeysStore {
       .from("decrypted_provider_keys_v2")
       .select(
         "org_id, decrypted_provider_key, decrypted_provider_secret_key, auth_type, provider_name"
-      );
+      )
+      .eq("soft_delete", false);
 
     if (error) {
       return null;
