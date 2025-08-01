@@ -152,10 +152,6 @@ async function modifyEnvBasedOnPath(
       AWS_REGION: env.EU_AWS_REGION ?? "eu-west-1",
     };
   }
-  return {
-    ...env,
-    WORKER_TYPE: "AI_GATEWAY_API",
-  };
 
   if (env.WORKER_TYPE) {
     return env;
