@@ -11,6 +11,8 @@ import { ProviderName } from "./packages/cost/providers/mappings";
 import { buildRouter } from "./routers/routerFactory";
 import { ReportManager } from "./lib/managers/ReportManager";
 import { ReportStore } from "./lib/db/ReportStore";
+import { ProviderKeysManager } from "./lib/managers/ProviderKeysManager";
+import { ProviderKeysStore } from "./lib/db/ProviderKeysStore";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
@@ -567,6 +569,21 @@ export default {
       if (checkAlertErrEU) {
         console.error(`Failed to check alerts: ${checkAlertErrEU}`);
       }
+      return;
+    }
+    // every 5 minutes
+    if (controller.cron === "*/5 * * * *") {
+      const providerKeysManagerUS = new ProviderKeysManager(
+        new ProviderKeysStore(supabaseClientUS),
+        env
+      );
+      await providerKeysManagerUS.setProviderKeys();
+
+      const providerKeysManagerEU = new ProviderKeysManager(
+        new ProviderKeysStore(supabaseClientEU),
+        env
+      );
+      await providerKeysManagerEU.setProviderKeys();
       return;
     }
     console.error(`Unknown cron: ${controller.cron}`);
