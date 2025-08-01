@@ -773,6 +773,7 @@ const models: TsoaRoute.Models = {
             "major_version": {"dataType":"double","required":true},
             "minor_version": {"dataType":"double","required":true},
             "commit_message": {"dataType":"string","required":true},
+            "environment": {"dataType":"string","required":true},
             "created_at": {"dataType":"string","required":true},
             "s3_url": {"dataType":"string"},
         },

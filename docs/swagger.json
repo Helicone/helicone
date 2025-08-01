@@ -2326,6 +2326,9 @@
 					"commit_message": {
 						"type": "string"
 					},
+					"environment": {
+						"type": "string"
+					},
 					"created_at": {
 						"type": "string"
 					},
@@ -2340,6 +2343,7 @@
 					"major_version",
 					"minor_version",
 					"commit_message",
+					"environment",
 					"created_at"
 				],
 				"type": "object",
