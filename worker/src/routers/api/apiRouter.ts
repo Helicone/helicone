@@ -12,6 +12,8 @@ import { createAPIClient } from "../../api/lib/apiClient";
 import { createClient } from "@supabase/supabase-js";
 import { ProviderKeysManager } from "../../lib/managers/ProviderKeysManager";
 import { ProviderKeysStore } from "../../lib/db/ProviderKeysStore";
+import { APIKeysStore } from "../../lib/db/APIKeysStore";
+import { APIKeysManager } from "../../lib/managers/APIKeysManager";
 
 function getAPIRouterV1(
   router: OpenAPIRouterType<
@@ -19,6 +21,58 @@ function getAPIRouterV1(
     [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]
   >
 ) {
+  router.get(
+    "/refetch-api-keys",
+    async (
+      _,
+      requestWrapper: RequestWrapper,
+      env: Env,
+      ctx: ExecutionContext
+    ) => {
+      const client = await createAPIClient(env, ctx, requestWrapper);
+      const lastFetchedAt = await env.RATE_LIMIT_KV.get(
+        "api-keys-last-refeched"
+      );
+      //TODO logic
+      ctx.waitUntil(
+        env.RATE_LIMIT_KV.put(
+          "api-keys-last-refetched",
+          new Date().toISOString()
+        )
+      );
+      const supabaseClientUS = createClient<Database>(
+        env.SUPABASE_URL,
+        env.SUPABASE_SERVICE_ROLE_KEY
+      );
+      const supabaseClientEU = createClient<Database>(
+        env.EU_SUPABASE_URL,
+        env.EU_SUPABASE_SERVICE_ROLE_KEY
+      );
+      try {
+        if (
+          lastFetchedAt &&
+          // Every 10 seconds
+          new Date(lastFetchedAt).getTime() + 1000 * 10 < Date.now()
+        ) {
+          return client.response.successJSON({ ok: "true" }, true);
+        }
+      } catch {
+        console.error("Invalid date");
+      }
+      const apiKeysManagerUS = new APIKeysManager(
+        new APIKeysStore(supabaseClientUS),
+        env
+      );
+      await apiKeysManagerUS.setAPIKeys();
+
+      const apiKeysManagerEU = new APIKeysManager(
+        new APIKeysStore(supabaseClientEU),
+        env
+      );
+      await apiKeysManagerEU.setAPIKeys();
+    }
+  );
+
   router.get(
     "/refetch-provider-keys",
     async (
