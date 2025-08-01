@@ -58,26 +58,6 @@ export class Prompt2025Manager extends BaseManager {
     return result;
   }
 
-  private async updateProductionVersion(promptId: string, promptVersionId: string): Promise<Result<null, string>> {
-    const updateProductionVersionResult = await dbExecute(
-      `
-      UPDATE prompts_2025
-      SET production_version = $1
-      WHERE id = $2 AND organization = $3
-      `, [
-        promptVersionId,
-        promptId,
-        this.authParams.organizationId,
-      ]
-    )
-
-    if (updateProductionVersionResult?.error) {
-      return err(updateProductionVersionResult.error);
-    }
-
-    return ok(null);
-  }
-
   async totalPrompts(): Promise<Result<number, string>> {
     const result = await dbExecute<{ count: number }>(
       `SELECT COUNT(*) as count FROM prompts_2025 WHERE organization = $1 AND soft_delete is false`,
@@ -199,7 +179,8 @@ export class Prompt2025Manager extends BaseManager {
       `SELECT 
         request_id,
         version_id,
-        inputs
+        inputs,
+        environment
       FROM prompts_2025_inputs
       WHERE version_id = $1 AND request_id = $2
       LIMIT 1
@@ -282,7 +263,8 @@ export class Prompt2025Manager extends BaseManager {
         minor_version,
         commit_message,
         created_at,
-        model
+        model,
+        environment
       FROM prompts_2025_versions
       WHERE prompt_id = $1
       AND organization = $2 AND soft_delete is false
@@ -312,7 +294,8 @@ export class Prompt2025Manager extends BaseManager {
         minor_version,
         commit_message,
         created_at,
-        model
+        model,
+        environment
       FROM prompts_2025_versions
       WHERE id = $1
       AND organization = $2 AND soft_delete is false
@@ -391,9 +374,10 @@ export class Prompt2025Manager extends BaseManager {
         commit_message,
         created_by,
         organization,
-        model
+        model,
+        environment
       )
-      VALUES (NOW(), $1, 0, 0, 'First version.', $2, $3, $4)
+      VALUES (NOW(), $1, 0, 0, 'First version.', $2, $3, $4, 'production')
       RETURNING id
       `, [
         promptId,
@@ -409,7 +393,11 @@ export class Prompt2025Manager extends BaseManager {
 
     const promptVersionId = insertPromptVersionResult?.data?.[0]?.id ?? '';
 
-    const updateProductionVersionResult = await this.updateProductionVersion(promptId, promptVersionId);
+    const updateProductionVersionResult = await this.setProductionVersion({
+      promptId,
+      promptVersionId,
+      environment: 'production',
+    });
     if (updateProductionVersionResult?.error) {
       return err(updateProductionVersionResult.error);
     }
@@ -511,7 +499,11 @@ export class Prompt2025Manager extends BaseManager {
     const promptVersionId = insertPromptVersionResult?.data?.[0]?.id ?? '';
 
     if (params.setAsProduction) {
-      const updateProductionVersionResult = await this.updateProductionVersion(params.promptId, promptVersionId);
+      const updateProductionVersionResult = await this.setProductionVersion({
+        promptId: params.promptId,
+        promptVersionId,
+        environment: 'production',
+      });
       if (updateProductionVersionResult?.error) {
         return err(updateProductionVersionResult.error);
       }
@@ -528,6 +520,7 @@ export class Prompt2025Manager extends BaseManager {
   async setProductionVersion(params: {
     promptId: string;
     promptVersionId: string;
+    environment: string;
   }): Promise<Result<null, string>> {
     const versionCheck = await dbExecute<{ id: string }>(
       `SELECT id FROM prompts_2025_versions 
@@ -543,6 +536,7 @@ export class Prompt2025Manager extends BaseManager {
       return err("Prompt version not found or does not belong to the specified prompt");
     }
 
+    // update legacy ref for production version
     const result = await dbExecute<null>(
       `UPDATE prompts_2025 SET production_version = $1 WHERE id = $2 AND organization = $3 AND soft_delete is false`,
       [params.promptVersionId, params.promptId, this.authParams.organizationId]
@@ -552,6 +546,27 @@ export class Prompt2025Manager extends BaseManager {
       return err(result.error);
     }
 
+    // update environment column atomically
+    const updateEnvResult = await dbExecute(
+      `
+      BEGIN;
+      
+      UPDATE prompts_2025_versions 
+      SET environment = NULL 
+      WHERE prompt_id = $1 AND organization = $2 AND environment = $3 AND soft_delete = false;
+      
+      UPDATE prompts_2025_versions 
+      SET environment = $3 
+      WHERE id = $4 AND prompt_id = $1 AND organization = $2 AND soft_delete = false;
+      
+      COMMIT;
+      `,
+      [params.promptId, this.authParams.organizationId, params.environment, params.promptVersionId]
+    );
+
+    if (updateEnvResult.error) {
+      return err(updateEnvResult.error);
+    }
     return ok(null);
   }
 
