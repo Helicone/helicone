@@ -579,25 +579,28 @@ export default {
         new ProviderKeysStore(supabaseClientUS),
         env
       );
-      await providerKeysManagerUS.setProviderKeys();
 
       const providerKeysManagerEU = new ProviderKeysManager(
         new ProviderKeysStore(supabaseClientEU),
         env
       );
-      await providerKeysManagerEU.setProviderKeys();
 
       const apiKeysManagerUS = new APIKeysManager(
         new APIKeysStore(supabaseClientUS),
         env
       );
-      await apiKeysManagerUS.setAPIKeys();
 
       const apiKeysManagerEU = new APIKeysManager(
         new APIKeysStore(supabaseClientEU),
         env
       );
-      await apiKeysManagerEU.setAPIKeys();
+
+      await Promise.all([
+        providerKeysManagerUS.setProviderKeys(),
+        providerKeysManagerEU.setProviderKeys(),
+        apiKeysManagerUS.setAPIKeys(),
+        apiKeysManagerEU.setAPIKeys(),
+      ]);
 
       return;
     }
