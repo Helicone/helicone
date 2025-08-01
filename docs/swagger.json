@@ -2343,7 +2343,6 @@
 					"major_version",
 					"minor_version",
 					"commit_message",
-					"environment",
 					"created_at"
 				],
 				"type": "object",

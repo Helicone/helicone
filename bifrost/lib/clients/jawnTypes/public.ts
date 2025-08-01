@@ -1243,7 +1243,7 @@ export interface components {
       /** Format: double */
       minor_version: number;
       commit_message: string;
-      environment: string;
+      environment?: string;
       created_at: string;
       s3_url?: string;
     };
