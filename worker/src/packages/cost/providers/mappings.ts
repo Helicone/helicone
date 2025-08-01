@@ -1,7 +1,8 @@
 import { ModelDetailsMap, ModelRow } from "../interfaces/Cost";
 import { anthropicProvider } from "./anthropic";
 import { costs as avianCosts } from "./avian";
-import { costs as awsBedrockCosts } from "./awsBedrock";
+import { costs as awsBedrockCosts } from "./aws/awsBedrock";
+import { costs as awsNovaCosts } from "./aws/awsNova";
 import { costs as azureCosts } from "./azure";
 import { costs as llamaCosts } from "./llama";
 import { costs as nvidiaCosts } from "./nvidia";
@@ -19,13 +20,13 @@ import { costs as perplexityCosts } from "./perplexity";
 import { costs as qstashCosts } from "./qstash";
 import { costs as togetherAIChatCosts } from "./togetherai/chat";
 import { costs as togetherAIChatLlamaCosts } from "./togetherai/chat/llama";
-import { costs as vercelCosts } from "./vercel";
 import {
   costs as togetherAICompletionCosts,
   costs as togetherAICompletionLlamaCosts,
 } from "./togetherai/completion";
 import { costs as xCosts } from "./x";
 import { googleProvider } from "./google";
+import { costs as vercelCosts } from "./vercel";
 
 const openAiPattern = /^https:\/\/api\.openai\.com/;
 const anthropicPattern = /^https:\/\/api\.anthropic\.com/;
@@ -62,6 +63,8 @@ const qstash = /^https:\/\/qstash\.upstash\.io/;
 const firecrawl = /^https:\/\/api\.firecrawl\.dev/;
 // https://bedrock-runtime.{some-region}.amazonaws.com/{something-after}
 const awsBedrock = /^https:\/\/bedrock-runtime\.[a-z0-9-]+\.amazonaws\.com\/.*/;
+// https://bedrock-runtime.{some-region}.amazonaws.com/{something-after} same runtime
+const awsNova = /^https:\/\/bedrock-runtime\.[a-z0-9-]+\.amazonaws\.com\/.*/;
 // https://api.deepseek.com
 const deepseek = /^https:\/\/api\.deepseek\.com/;
 // https://api.x.ai
@@ -261,6 +264,11 @@ export const providers: {
     pattern: awsBedrock,
     provider: "AWS",
     costs: awsBedrockCosts,
+  },
+  {
+    pattern: awsNova,
+    provider: "AWS",
+    costs: awsNovaCosts,
   },
   {
     pattern: deepseek,

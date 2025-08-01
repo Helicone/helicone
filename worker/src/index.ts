@@ -50,7 +50,8 @@ export interface BASE_Env {
     | "GATEWAY_API"
     | "CUSTOMER_GATEWAY"
     | "GENERATE_API"
-    | "VAPI_PROXY";
+    | "VAPI_PROXY"
+    | "AI_GATEWAY_API";
   TOKEN_CALC_URL: string;
   VAULT_ENABLED: string;
   STORAGE_URL: string;
@@ -151,6 +152,10 @@ async function modifyEnvBasedOnPath(
       AWS_REGION: env.EU_AWS_REGION ?? "eu-west-1",
     };
   }
+  return {
+    ...env,
+    WORKER_TYPE: "AI_GATEWAY_API",
+  };
 
   if (env.WORKER_TYPE) {
     return env;
@@ -161,7 +166,12 @@ async function modifyEnvBasedOnPath(
     hostParts.length >= 3
   ) {
     // helicone.ai requests
-    if (hostParts[0].includes("gateway")) {
+    if (hostParts[0].includes("ai-gateway")) {
+      return {
+        ...env,
+        WORKER_TYPE: "AI_GATEWAY_API",
+      };
+    } else if (hostParts[0].includes("gateway")) {
       return {
         ...env,
         WORKER_TYPE: "GATEWAY_API",

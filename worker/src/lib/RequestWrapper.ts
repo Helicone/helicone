@@ -573,6 +573,10 @@ export class RequestWrapper {
       promptInputs: inputs,
     };
   }
+
+  setBody(body: string): void {
+    this.cachedText = body;
+  }
 }
 
 interface CustomerPortalValues {
