@@ -13,6 +13,8 @@ import { ReportManager } from "./lib/managers/ReportManager";
 import { ReportStore } from "./lib/db/ReportStore";
 import { ProviderKeysManager } from "./lib/managers/ProviderKeysManager";
 import { ProviderKeysStore } from "./lib/db/ProviderKeysStore";
+import { APIKeysStore } from "./lib/db/APIKeysStore";
+import { APIKeysManager } from "./lib/managers/APIKeysManager";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
@@ -584,6 +586,19 @@ export default {
         env
       );
       await providerKeysManagerEU.setProviderKeys();
+
+      const apiKeysManagerUS = new APIKeysManager(
+        new APIKeysStore(supabaseClientUS),
+        env
+      );
+      await apiKeysManagerUS.setAPIKeys();
+
+      const apiKeysManagerEU = new APIKeysManager(
+        new APIKeysStore(supabaseClientEU),
+        env
+      );
+      await apiKeysManagerEU.setAPIKeys();
+
       return;
     }
     console.error(`Unknown cron: ${controller.cron}`);

@@ -50,9 +50,6 @@ export class ProviderKeysStore {
   constructor(private supabaseClient: SupabaseClient<Database>) {}
 
   async getProviderKeys(): Promise<ProviderKey[] | null> {
-    const check = await this.supabaseClient
-      .from("decrypted_provider_keys_v2")
-      .select("*");
     const { data, error } = await this.supabaseClient
       .from("decrypted_provider_keys_v2")
       .select(
