@@ -125,26 +125,32 @@ services:
   # HELICONE CORE SERVICES (include-helicone profile)
   # =============================================================================
 
+  # AI Gateway - See docker/README_AIGATEWAY.md for setup instructions
   aigateway:
-    build:
-      context: ../aigateway
-      dockerfile: Dockerfile
+    image: helicone/ai-gateway:latest
+    platform: linux/amd64  # ARM64 compatibility
     restart: unless-stopped
     ports:
-      - "5678:5678"
+      - "5678:8080"  # AI Gateway runs on port 8080 internally
     profiles: ["include-helicone"]
     depends_on:
       redis:
         condition: service_healthy
     env_file: "../aigateway/.env"
     environment:
-      # Configure server to bind to all interfaces (0.0.0.0) instead of localhost (127.0.0.1)
-      - PROXY__SERVER__ADDRESS=0.0.0.0
+      - PROXY__SERVER__ADDRESS=0.0.0.0  # Bind to all interfaces
     networks:
       - traces
       - default
     extra_hosts:
       - host.docker.internal:host-gateway
+
+  # Alternative: Build from source - See README_AIGATEWAY.md for instructions
+  # aigateway-from-source:
+  #   build:
+  #     context: ../ai-gateway
+  #     dockerfile: Dockerfile
+  #   profiles: ["build-from-source"]
 
   jawn:
     container_name: helicone-jawn
