@@ -88,8 +88,7 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
         new APIKeysStore(supabaseClient),
         env
       );
-      const orgId = await apiKeyManager.getAPIKey(hashedKey ?? "");
-      console.log("orgId", orgId);
+      const orgId = await apiKeyManager.getAPIKeyWithFetch(hashedKey ?? "");
       if (!orgId) {
         return new Response("Invalid API key", { status: 401 });
       }
@@ -101,7 +100,6 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
         provider,
         orgId
       );
-      console.log("providerKey", providerKey);
       if (!providerKey) {
         return new Response("Invalid provider key", { status: 401 });
       }
