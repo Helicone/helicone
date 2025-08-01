@@ -12,7 +12,8 @@ export class APIKeysStore {
   async getAPIKeys(): Promise<APIKey[] | null> {
     const { data, error } = await this.supabaseClient
       .from("helicone_api_keys")
-      .select("organization_id, api_key_hash");
+      .select("organization_id, api_key_hash")
+      .eq("soft_delete", false);
 
     if (error) {
       return null;
