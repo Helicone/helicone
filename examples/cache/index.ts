@@ -10,15 +10,15 @@ async function main() {
     baseURL: process.env.HELICONE_BASE_URL,
     defaultHeaders: {
       "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-      "Helicone-Cache-Enabled": "true",
-      "Helicone-Cache-Bucket-Max-Size": "3",
+      // "Helicone-Cache-Enabled": "true",
+      // "Helicone-Cache-Bucket-Max-Size": "3",
     },
   });
 
   const chatCompletion = await openai.chat.completions
     .create(
       {
-        model: "gpt-4.1-nano",
+        model: "claude-3-5-sonnet-20240620/anthropic",
         messages: [
           {
             role: "system",
@@ -32,10 +32,10 @@ async function main() {
         ],
         max_tokens: 700,
 
-        stream: true,
-        stream_options: {
-          include_usage: true,
-        }
+        // stream: true,
+        // stream_options: {
+        //   include_usage: true,
+        // },
       },
       {
         headers: {

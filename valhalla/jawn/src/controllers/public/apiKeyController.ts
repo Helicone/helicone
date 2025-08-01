@@ -15,6 +15,22 @@ import {
 import { type JawnAuthenticatedRequest } from "../../types/request";
 import { KeyManager } from "../../managers/apiKeys/KeyManager";
 
+async function refetchProviderKeys() {
+  try {
+    await fetch(`${process.env.HELICONE_WORKER_API}/refetch-provider-keys`);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+async function refetchAPIKeys() {
+  try {
+    await fetch(`${process.env.HELICONE_WORKER_API}/refetch-api-keys`);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
 @Route("v1/api-keys")
 @Tags("API Key")
 @Security("api_key")
@@ -32,6 +48,7 @@ export class ApiKeyController extends Controller {
       return { error: result.error };
     }
 
+    await refetchProviderKeys();
     return result.data;
   }
 
@@ -61,6 +78,7 @@ export class ApiKeyController extends Controller {
       return { error: result.error };
     }
 
+    await refetchProviderKeys();
     return result.data;
   }
 
@@ -91,6 +109,7 @@ export class ApiKeyController extends Controller {
       return { error: result.error };
     }
 
+    await refetchProviderKeys();
     return result.data;
   }
 
@@ -118,6 +137,7 @@ export class ApiKeyController extends Controller {
       return { error: result.error };
     }
 
+    await refetchProviderKeys();
     return result.data;
   }
 
@@ -149,6 +169,8 @@ export class ApiKeyController extends Controller {
       return { error: result.error };
     }
 
+    await refetchAPIKeys();
+
     return result.data;
   }
 
@@ -171,6 +193,8 @@ export class ApiKeyController extends Controller {
       this.setStatus(500);
       return { error: result.error };
     }
+
+    await refetchAPIKeys();
 
     return result.data;
   }
@@ -206,6 +230,8 @@ export class ApiKeyController extends Controller {
       this.setStatus(500);
       return { error: result.error };
     }
+
+    await refetchAPIKeys();
 
     return result.data;
   }
