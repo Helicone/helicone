@@ -10,6 +10,7 @@ export type DecryptedProviderKey = {
   provider_key: string | null;
   provider_name: string | null;
   provider_key_name: string | null;
+  provider_secret_key: string | null;
 };
 
 export class VaultManager extends BaseManager {
@@ -68,9 +69,10 @@ export class VaultManager extends BaseManager {
         decrypted_provider_key: string;
         provider_key_name: string;
         provider_name: string;
+        provider_secret_key: string;
       }>(
-        `SELECT id, org_id, decrypted_provider_key, provider_key_name, provider_name
-         FROM decrypted_provider_keys
+        `SELECT id, org_id, decrypted_provider_key, provider_key_name, provider_name, provider_secret_key
+         FROM decrypted_provider_keys_v2
          WHERE org_id = $1
          AND soft_delete = false
          ORDER BY created_at DESC`,
@@ -89,6 +91,7 @@ export class VaultManager extends BaseManager {
           provider_key: key.decrypted_provider_key,
           provider_name: key.provider_name,
           provider_key_name: key.provider_key_name,
+          provider_secret_key: key.provider_secret_key,
         })
       );
 
@@ -109,9 +112,10 @@ export class VaultManager extends BaseManager {
         decrypted_provider_key: string;
         provider_key_name: string;
         provider_name: string;
+        provider_secret_key: string;
       }>(
-        `SELECT id, org_id, decrypted_provider_key, provider_key_name, provider_name
-         FROM decrypted_provider_keys
+        `SELECT id, org_id, decrypted_provider_key, provider_key_name, provider_name, provider_secret_key
+         FROM decrypted_provider_keys_v2
          WHERE id = $1
          AND soft_delete = false
          LIMIT 1`,
@@ -130,6 +134,7 @@ export class VaultManager extends BaseManager {
         provider_key: key.decrypted_provider_key,
         provider_name: key.provider_name,
         provider_key_name: key.provider_key_name,
+        provider_secret_key: key.provider_secret_key,
       };
 
       return { data: providerKey, error: null };
