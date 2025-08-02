@@ -30,6 +30,27 @@ export class ProviderKeysManager {
     if (!key) {
       return null;
     }
+    console.log("key in cache", key);
     return JSON.parse(key) as ProviderKey;
+  }
+
+  async getProviderKeyWithFetch(
+    provider: Provider,
+    orgId: string
+  ): Promise<ProviderKey | null> {
+    const key = await this.getProviderKey(provider, orgId);
+    if (!key) {
+      console.log("no key in cache, fetching from db");
+      const key = await this.store.getProviderKeyWithFetch(provider, orgId);
+      if (!key) return null;
+
+      await storeInCache(
+        `provider_keys_${provider}_${orgId}`,
+        JSON.stringify(key),
+        this.env
+      );
+      return key;
+    }
+    return key;
   }
 }

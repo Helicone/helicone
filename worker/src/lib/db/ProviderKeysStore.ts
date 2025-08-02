@@ -47,6 +47,34 @@ const dbProviderToProvider = (provider: string): Provider | null => {
   return null;
 };
 
+const providerToDbProvider = (provider: Provider): string => {
+  if (provider === "OPENAI") {
+    return "OpenAI";
+  }
+  if (provider === "ANTHROPIC") {
+    return "Anthropic";
+  }
+  if (provider === "BEDROCK") {
+    return "AWS Bedrock";
+  }
+  if (provider === "GROQ") {
+    return "Groq";
+  }
+  if (provider === "GOOGLE") {
+    return "Google AI (Gemini)";
+  }
+  if (provider === "MISTRAL") {
+    return "Mistral AI";
+  }
+  if (provider === "DEEPSEEK") {
+    return "Deepseek";
+  }
+  if (provider === "X") {
+    return "X.AI (Grok)";
+  }
+  return provider;
+};
+
 export class ProviderKeysStore {
   constructor(private supabaseClient: SupabaseClient<Database>) {}
 
@@ -78,5 +106,33 @@ export class ProviderKeysStore {
         };
       })
       .filter((key): key is ProviderKey => key !== null);
+  }
+
+  async getProviderKeyWithFetch(
+    provider: Provider,
+    orgId: string
+  ): Promise<ProviderKey | null> {
+    const { data, error } = await this.supabaseClient
+      .from("decrypted_provider_keys_v2")
+      .select(
+        "org_id, decrypted_provider_key, decrypted_provider_secret_key, auth_type, provider_name, config"
+      )
+      .eq("provider_name", providerToDbProvider(provider))
+      .eq("org_id", orgId)
+      .eq("soft_delete", false);
+
+    if (error || !data || data.length === 0) {
+      return null;
+    }
+
+    return {
+      provider: dbProviderToProvider(data[0].provider_name ?? "") ?? provider,
+      org_id: orgId,
+      decrypted_provider_key: data[0].decrypted_provider_key ?? "",
+      decrypted_provider_secret_key:
+        data[0].decrypted_provider_secret_key ?? null,
+      auth_type: data[0].auth_type as "key" | "session_token",
+      config: data[0].config,
+    };
   }
 }

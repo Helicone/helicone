@@ -75,8 +75,6 @@ const authenticateRequest = async (
     "Helicone-Auth",
     requestWrapper.getAuthorization() ?? ""
   );
-  // TODO: need to do some extra bs here for bedrock
-  // requestWrapper.setProviderAuthKey(providerKey.decrypted_provider_key);
   if (providerKey.provider === "BEDROCK") {
     if (providerKey.auth_type === "key") {
       const awsAccessKey = providerKey.decrypted_provider_key;
@@ -89,10 +87,6 @@ const authenticateRequest = async (
       requestWrapper.setUrl(
         `https://bedrock-runtime.${awsRegion}.amazonaws.com/model/${model}/invoke`
       );
-      // requestWrapper.setHeader(
-      //   "Authorization",
-      //   `Bearer ${providerKey.decrypted_provider_key}`
-      // );
       const sigv4 = new SignatureV4({
         service: "bedrock",
         region: awsRegion,
@@ -126,14 +120,6 @@ const authenticateRequest = async (
 
       // Create new headers with the signed values
       const newHeaders = new Headers();
-      // Only copy over the essential headers
-      // newHeaders.set("host", forwardToHost);
-      // newHeaders.set("content-type", "application/json");
-
-      // Add model override header if model was found
-      // if (model) {
-      //   requestWrapper.heliconeHeaders.setModelOverride(model);
-      // }
 
       // Add all the signed AWS headers
       for (const [key, value] of Object.entries(signedRequest.headers)) {
@@ -154,6 +140,102 @@ const authenticateRequest = async (
   );
 };
 
+interface ModelAttempt {
+  model: string;
+  provider: Provider;
+  providerKey: ProviderKey;
+  body: string;
+}
+
+interface AttemptResult {
+  success: boolean;
+  response?: Response;
+  error?: string;
+}
+
+const parseModelOption = (
+  modelOption: string
+): { model: string; provider: Provider } | null => {
+  const modelParts = modelOption.split("/");
+  if (modelParts.length !== 2) {
+    return null;
+  }
+
+  const [model, inferenceProvider] = modelParts;
+  const provider = getProviderFromProviderName(inferenceProvider);
+
+  if (!provider) {
+    return null;
+  }
+
+  return { model, provider };
+};
+
+const prepareRequestBody = (
+  parsedBody: OpenAIRequestBody,
+  model: string,
+  provider: Provider
+): string => {
+  if (model.includes("claude-")) {
+    const anthropicBody = toAnthropic(parsedBody);
+    const updatedBody = {
+      ...anthropicBody,
+      ...(provider === "BEDROCK"
+        ? { anthropic_version: "bedrock-2023-05-31", model: undefined }
+        : { model: model }),
+    };
+    return JSON.stringify(updatedBody);
+  } else {
+    const updatedBody = {
+      ...parsedBody,
+      model: model,
+    };
+    return JSON.stringify(updatedBody);
+  }
+};
+
+const attemptModelRequest = async (
+  modelAttempt: ModelAttempt,
+  requestWrapper: RequestWrapper,
+  forwarder: (targetBaseUrl: string | null) => Promise<Response>
+): Promise<AttemptResult> => {
+  const { model, provider, providerKey, body } = modelAttempt;
+
+  // Reset request wrapper state for retry
+  requestWrapper.setBody(body);
+
+  await authenticateRequest(requestWrapper, providerKey, model, body);
+
+  const targetBaseUrl = getForwardUrl(
+    provider,
+    provider === "BEDROCK"
+      ? {
+          region:
+            (providerKey.config as { region?: string })?.region ?? "us-west-1",
+          model: model,
+        }
+      : undefined
+  );
+
+  try {
+    const response = await forwarder(targetBaseUrl);
+
+    if (response.ok) {
+      return { success: true, response };
+    }
+
+    return {
+      success: false,
+      error: `${model}/${provider}: ${response.status} ${response.statusText}`,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: `${model}/${provider}: ${error}`,
+    };
+  }
+};
+
 export const getAIGatewayRouter = (router: BaseRouter) => {
   // proxy forwarder only
   router.all(
@@ -164,7 +246,6 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
       env: Env,
       ctx: ExecutionContext
     ) => {
-      // hacky solution for now just to see if everything works
       const body = await getBody(requestWrapper);
 
       function tryJSONParse(body: string): OpenAIRequestBody | null {
@@ -208,10 +289,6 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
         env
       );
 
-      // Try each model option until one succeeds
-      let lastError: Response | null = null;
-      const failedAttempts: string[] = [];
-
       function forwarder(targetBaseUrl: string | null) {
         return gatewayForwarder(
           {
@@ -226,111 +303,51 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
         );
       }
 
-      for (let i = 0; i < modelOptions.length; i++) {
-        const modelOption = modelOptions[i];
-        const modelParts = modelOption.split("/");
-        if (modelParts.length !== 2) {
-          lastError = new Response(`Invalid model format: ${modelOption}`, {
-            status: 400,
-          });
+      // Try each model option sequentially until one succeeds
+      const failedAttempts: string[] = [];
+
+      for (const modelOption of modelOptions) {
+        const parsed = parseModelOption(modelOption);
+        if (!parsed) {
+          failedAttempts.push(`Invalid model format: ${modelOption}`);
           continue;
         }
 
-        const [model, inferenceProvider] = modelParts;
-        const provider = getProviderFromProviderName(inferenceProvider);
-        if (!provider) {
-          lastError = new Response(
-            `Invalid inference provider: ${inferenceProvider}`,
-            { status: 400 }
-          );
-          continue;
-        }
-
-        const providerKey = await providerKeysManager.getProviderKey(
+        const { model, provider } = parsed;
+        const providerKey = await providerKeysManager.getProviderKeyWithFetch(
           provider,
           orgId
         );
+
         if (!providerKey) {
-          lastError = new Response(`Invalid provider key for ${provider}`, {
-            status: 401,
-          });
+          failedAttempts.push(`Invalid provider key for ${provider}`);
           continue;
         }
 
-        // Reset request wrapper state if this is not the first attempt
-        if (i > 0) {
-          // Need to reset the body as well
-          requestWrapper.setBody(body ?? "");
-        }
+        const body = prepareRequestBody(parsedBody, model, provider);
+        const attempt = { model, provider, providerKey, body };
 
-        let finalBody;
-        if (model.includes("claude-")) {
-          const anthropicBody = toAnthropic(parsedBody);
-          const updatedBody = {
-            ...anthropicBody,
-            ...(provider === "BEDROCK"
-              ? { anthropic_version: "bedrock-2023-05-31", model: undefined }
-              : { model: model }),
-          };
-          requestWrapper.setBody(JSON.stringify(updatedBody));
-          finalBody = updatedBody;
-        } else {
-          const updatedBody = {
-            ...parsedBody,
-            model: model,
-          };
-          requestWrapper.setBody(JSON.stringify(updatedBody));
-          finalBody = updatedBody;
-        }
-
-        await authenticateRequest(
+        const result = await attemptModelRequest(
+          attempt,
           requestWrapper,
-          providerKey,
-          model,
-          JSON.stringify(finalBody)
+          forwarder
         );
 
-        const targetBaseUrl = getForwardUrl(
-          provider,
-          provider === "BEDROCK"
-            ? {
-                region:
-                  (providerKey.config as { region?: string })?.region ??
-                  "us-west-1",
-                model: model,
-              }
-            : undefined
-        );
+        if (result.success && result.response) {
+          return result.response;
+        }
 
-        try {
-          const response = await forwarder(targetBaseUrl);
-
-          // If successful (2xx status), return the response
-          if (response.ok) {
-            return response;
-          }
-
-          // For non-2xx responses, save the error and try next option
-          failedAttempts.push(
-            `${modelOption}: ${response.status} ${response.statusText}`
-          );
-          lastError = response;
-        } catch (error) {
-          // Network or other errors, try next option
-          failedAttempts.push(`${modelOption}: ${error}`);
-          lastError = new Response(`Failed to call ${provider}: ${error}`, {
-            status: 500,
-          });
+        if (result.error) {
+          failedAttempts.push(result.error);
         }
       }
 
-      // If all options failed, return a comprehensive error
       const errorMessage =
         failedAttempts.length > 0
-          ? `All model options failed. Attempts: ${failedAttempts.join(", ")}`
-          : "All model options failed";
-      return lastError || new Response(errorMessage, { status: 500 });
-      // return await proxyForwarder(requestWrapper, env, ctx, provider);
+          ? `All model attempts failed:\n${failedAttempts.join("\n")}`
+          : "No valid model configurations could be processed";
+
+      return new Response(errorMessage, { status: 500 });
     }
   );
 
