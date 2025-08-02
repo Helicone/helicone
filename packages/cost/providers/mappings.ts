@@ -83,6 +83,9 @@ const novita = /^https:\/\/api\.novita\.ai/;
 // api.openpipe.ai
 const openpipe = /^https:\/\/api\.openpipe\.ai/;
 
+// llm.chutes.com and chutes.com
+const chutes = /^https:\/\/(llm\.)?chutes\.com/;
+
 export const providersNames = [
   "OPENAI",
   "ANTHROPIC",
@@ -113,6 +116,7 @@ export const providersNames = [
   "NEBIUS",
   "NOVITA",
   "OPENPIPE",
+  "CHUTES",
   "LLAMA",
   "NVIDIA",
   "VERCEL",
@@ -287,6 +291,11 @@ export const providers: {
     costs: [],
   },
   {
+    pattern: chutes,
+    provider: "CHUTES",
+    costs: [],
+  },
+  {
     pattern: vercelGateway,
     provider: "VERCEL",
     costs: vercelCosts,
@@ -307,9 +316,12 @@ export const approvedDomains = providers.map((provider) => provider.pattern);
 
 export const modelNames = allCosts.map((cost) => cost.model.value);
 
-export const parentModelNames = providers.reduce((acc, provider) => {
-  if (provider.modelDetails) {
-    acc[provider.provider] = Object.keys(provider.modelDetails);
-  }
-  return acc;
-}, {} as Record<ProviderName, string[]>);
+export const parentModelNames = providers.reduce(
+  (acc, provider) => {
+    if (provider.modelDetails) {
+      acc[provider.provider] = Object.keys(provider.modelDetails);
+    }
+    return acc;
+  },
+  {} as Record<ProviderName, string[]>
+);

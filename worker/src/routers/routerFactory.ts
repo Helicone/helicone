@@ -13,6 +13,7 @@ import { handleFeedback } from "../lib/managers/FeedbackManager";
 import { getGatewayAPIRouter } from "./gatewayRouter";
 import { handleLoggingEndpoint } from "../lib/managers/PropertiesManager";
 import { getGenerateRouter } from "./generateRouter";
+import { getAIGatewayRouter } from "./aiGatewayRouter";
 
 export type BaseRouter = RouterType<
   Route,
@@ -37,6 +38,7 @@ const WORKER_MAP: Omit<
   HELICONE_API: getAPIRouter,
   GATEWAY_API: getGatewayAPIRouter,
   GENERATE_API: getGenerateRouter,
+  AI_GATEWAY_API: getAIGatewayRouter,
   CUSTOMER_GATEWAY: (router: BaseRouter) => {
     router.all(
       "*",

@@ -17,7 +17,7 @@ export type MapperType =
   | "vector-db"
   | "tool"
   | "unknown";
-export type Provider = ProviderName | "CUSTOM";
+export type Provider = ProviderName | "CUSTOM" | "VAPI";
 export type LlmType = "chat" | "completion";
 
 /* -------------------------------------------------------------------------- */

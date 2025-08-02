@@ -11,6 +11,10 @@ import { ProviderName } from "./packages/cost/providers/mappings";
 import { buildRouter } from "./routers/routerFactory";
 import { ReportManager } from "./lib/managers/ReportManager";
 import { ReportStore } from "./lib/db/ReportStore";
+import { ProviderKeysManager } from "./lib/managers/ProviderKeysManager";
+import { ProviderKeysStore } from "./lib/db/ProviderKeysStore";
+import { APIKeysStore } from "./lib/db/APIKeysStore";
+import { APIKeysManager } from "./lib/managers/APIKeysManager";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
@@ -50,7 +54,8 @@ export interface BASE_Env {
     | "GATEWAY_API"
     | "CUSTOMER_GATEWAY"
     | "GENERATE_API"
-    | "VAPI_PROXY";
+    | "VAPI_PROXY"
+    | "AI_GATEWAY_API";
   TOKEN_CALC_URL: string;
   VAULT_ENABLED: string;
   STORAGE_URL: string;
@@ -152,7 +157,6 @@ async function modifyEnvBasedOnPath(
       AWS_REGION: env.EU_AWS_REGION ?? "eu-west-1",
     };
   }
-
   if (env.WORKER_TYPE) {
     return env;
   }
@@ -162,7 +166,12 @@ async function modifyEnvBasedOnPath(
     hostParts.length >= 3
   ) {
     // helicone.ai requests
-    if (hostParts[0].includes("gateway")) {
+    if (hostParts[0].includes("ai-gateway")) {
+      return {
+        ...env,
+        WORKER_TYPE: "AI_GATEWAY_API",
+      };
+    } else if (hostParts[0].includes("gateway")) {
       return {
         ...env,
         WORKER_TYPE: "GATEWAY_API",
@@ -562,6 +571,37 @@ export default {
       if (checkAlertErrEU) {
         console.error(`Failed to check alerts: ${checkAlertErrEU}`);
       }
+      return;
+    }
+    // every 5 minutes
+    if (controller.cron === "*/5 * * * *") {
+      const providerKeysManagerUS = new ProviderKeysManager(
+        new ProviderKeysStore(supabaseClientUS),
+        env
+      );
+
+      const providerKeysManagerEU = new ProviderKeysManager(
+        new ProviderKeysStore(supabaseClientEU),
+        env
+      );
+
+      const apiKeysManagerUS = new APIKeysManager(
+        new APIKeysStore(supabaseClientUS),
+        env
+      );
+
+      const apiKeysManagerEU = new APIKeysManager(
+        new APIKeysStore(supabaseClientEU),
+        env
+      );
+
+      await Promise.all([
+        providerKeysManagerUS.setProviderKeys(),
+        providerKeysManagerEU.setProviderKeys(),
+        apiKeysManagerUS.setAPIKeys(),
+        apiKeysManagerEU.setAPIKeys(),
+      ]);
+
       return;
     }
     console.error(`Unknown cron: ${controller.cron}`);
