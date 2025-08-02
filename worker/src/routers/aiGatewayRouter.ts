@@ -258,8 +258,8 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
 
       const parsedBody = tryJSONParse(body ?? "{}");
 
-      if (!parsedBody) {
-        return new Response("Invalid body", { status: 400 });
+      if (!parsedBody || !parsedBody.model) {
+        return new Response("Invalid body or missing model", { status: 400 });
       }
 
       // Parse comma-separated models as fallback options
