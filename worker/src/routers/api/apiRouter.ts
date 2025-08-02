@@ -45,7 +45,7 @@ function getAPIRouterV1(
         if (
           lastFetchedAt &&
           // Every 10 seconds
-          new Date(lastFetchedAt).getTime() + 1000 * 10 < Date.now()
+          new Date(lastFetchedAt).getTime() + 1000 * 10 > Date.now()
         ) {
           return new Response("ok", { status: 200 });
         }
@@ -93,7 +93,7 @@ function getAPIRouterV1(
         if (
           lastFetchedAt &&
           // Every 10 seconds
-          new Date(lastFetchedAt).getTime() + 1000 * 10 < Date.now()
+          new Date(lastFetchedAt).getTime() + 1000 * 10 > Date.now()
         ) {
           return new Response("ok", { status: 200 });
         }
