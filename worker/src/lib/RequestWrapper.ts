@@ -338,7 +338,7 @@ export class RequestWrapper {
     return this.request.url;
   }
 
-  private setUrl(url: string): void {
+  setUrl(url: string): void {
     this.url = new URL(url);
   }
 

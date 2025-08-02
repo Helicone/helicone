@@ -1,6 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Provider } from "../..";
-import { Database } from "../../../supabase/database.types";
+import { Database, Json } from "../../../supabase/database.types";
 
 export type ProviderKey = {
   provider: Provider;
@@ -16,6 +16,7 @@ export type ProviderKey = {
    * In all other provider cases, this would be "key"
    */
   auth_type: "key" | "session_token";
+  config: Json | null;
 };
 
 const dbProviderToProvider = (provider: string): Provider | null => {
@@ -53,7 +54,7 @@ export class ProviderKeysStore {
     const { data, error } = await this.supabaseClient
       .from("decrypted_provider_keys_v2")
       .select(
-        "org_id, decrypted_provider_key, decrypted_provider_secret_key, auth_type, provider_name"
+        "org_id, decrypted_provider_key, decrypted_provider_secret_key, auth_type, provider_name, config"
       )
       .eq("soft_delete", false);
 
@@ -73,6 +74,7 @@ export class ProviderKeysStore {
           decrypted_provider_secret_key:
             row.decrypted_provider_secret_key ?? null,
           auth_type: row.auth_type as "key" | "session_token",
+          config: row.config,
         };
       })
       .filter((key): key is ProviderKey => key !== null);
