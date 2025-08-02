@@ -1,5 +1,3 @@
-import React from "react";
-
 /**
  * A visualization component that displays different visualization styles based on evaluator type
  */

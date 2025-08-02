@@ -1,5 +1,3 @@
-import React from "react";
-
 /**
  * A badge component that displays the evaluator type with appropriate styling
  */
