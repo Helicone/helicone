@@ -431,7 +431,6 @@ export class RequestWrapper {
       .slice(1)
       .join("/");
 
-    console.log("newUrl", newUrl.toString());
     this.setUrl(newUrl.toString());
   }
 
@@ -454,7 +453,6 @@ export class RequestWrapper {
   }
 
   async getProviderAuthHeader(): Promise<string | undefined> {
-    console.log("the authorization is", this.authorization);
     return this.authorization ? await hash(this.authorization) : undefined;
   }
 
@@ -533,7 +531,6 @@ export class RequestWrapper {
       headers.set("Authorization", `Bearer ${this.authorization}`);
       this.headers = headers;
     } else {
-      console.log("the key is", authKey);
       this.authorization = authKey;
       return { data: this.authorization, error: null };
     }
@@ -705,7 +702,6 @@ export async function getProviderKeyFromProxy(
   }
 
   if (limits.data && limits.data.length > 0) {
-    console.log("CHECKING LIMITS");
     if (!(await checkLimits(limits.data, env))) {
       return err("Limits are not valid");
     }
