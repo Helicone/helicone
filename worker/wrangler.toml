@@ -75,6 +75,7 @@ routes = [
 	{ pattern = "perplexity.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "novita.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "generate.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+	{ pattern = "ai-gateway.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 
 	{ pattern = "oai.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "anthropic.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
