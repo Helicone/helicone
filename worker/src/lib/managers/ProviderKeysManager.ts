@@ -8,6 +8,7 @@ export class ProviderKeysManager {
   async setProviderKeys() {
     const providerKeys = await this.store.getProviderKeys();
     if (providerKeys) {
+      console.log("setting provider keys", providerKeys.length);
       for (const key of providerKeys) {
         await storeInCache(
           `provider_keys_${key.provider}_${key.org_id}`,
@@ -16,6 +17,8 @@ export class ProviderKeysManager {
         );
       }
       // await storeInCache(`provider_keys_${provider}`, JSON.stringify(providerKeys), this.env);
+    } else {
+      console.error("No provider keys found");
     }
   }
 
