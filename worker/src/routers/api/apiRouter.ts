@@ -29,17 +29,10 @@ function getAPIRouterV1(
       env: Env,
       ctx: ExecutionContext
     ) => {
-      console.log("refetching api keys");
-      const lastFetchedAt = await env.RATE_LIMIT_KV.get(
-        "api-keys-last-refeched"
-      );
+      const KEY = "api-keys-last-refetched";
+      const lastFetchedAt = await env.RATE_LIMIT_KV.get(KEY);
       //TODO logic
-      ctx.waitUntil(
-        env.RATE_LIMIT_KV.put(
-          "api-keys-last-refetched",
-          new Date().toISOString()
-        )
-      );
+      ctx.waitUntil(env.RATE_LIMIT_KV.put(KEY, new Date().toISOString()));
       const supabaseClientUS = createClient<Database>(
         env.SUPABASE_URL,
         env.SUPABASE_SERVICE_ROLE_KEY
@@ -83,16 +76,10 @@ function getAPIRouterV1(
       env: Env,
       ctx: ExecutionContext
     ) => {
-      const lastFetchedAt = await env.RATE_LIMIT_KV.get(
-        "provider-keys-last-refeched"
-      );
+      const KEY = "provider-keys-last-refetched";
+      const lastFetchedAt = await env.RATE_LIMIT_KV.get(KEY);
       //TODO logic
-      ctx.waitUntil(
-        env.RATE_LIMIT_KV.put(
-          "provider-keys-last-refetched",
-          new Date().toISOString()
-        )
-      );
+      ctx.waitUntil(env.RATE_LIMIT_KV.put(KEY, new Date().toISOString()));
       const supabaseClientUS = createClient<Database>(
         env.SUPABASE_URL,
         env.SUPABASE_SERVICE_ROLE_KEY
