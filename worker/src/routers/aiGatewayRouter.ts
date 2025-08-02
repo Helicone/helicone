@@ -44,7 +44,7 @@ const getForwardUrl = (
   provider: Provider,
   bedRockConfig?: { region: string; model: string }
 ) => {
-  if (provider === "AWS") {
+  if (provider === "BEDROCK") {
     // TODO: add support for /converse (should be able to set)
     return `https://bedrock-runtime.${bedRockConfig?.region}.amazonaws.com/model/${bedRockConfig?.model}/invoke`;
   } else if (provider === "OPENAI") {
@@ -77,7 +77,7 @@ const authenticateRequest = async (
   );
   // TODO: need to do some extra bs here for bedrock
   // requestWrapper.setProviderAuthKey(providerKey.decrypted_provider_key);
-  if (providerKey.provider === "AWS") {
+  if (providerKey.provider === "BEDROCK") {
     if (providerKey.auth_type === "key") {
       const awsAccessKey = providerKey.decrypted_provider_key;
       const awsSecretKey = providerKey.decrypted_provider_secret_key;
@@ -181,15 +181,8 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
         return new Response("Invalid body", { status: 400 });
       }
 
-      const modelParts = parsedBody.model.split("/");
-      if (modelParts.length !== 2) {
-        return new Response("Invalid model format", { status: 400 });
-      }
-      const [model, inferenceProvider] = modelParts;
-      const provider = getProviderFromProviderName(inferenceProvider);
-      if (!provider) {
-        return new Response("Invalid inference provider", { status: 400 });
-      }
+      // Parse comma-separated models as fallback options
+      const modelOptions = parsedBody.model.split(",").map((m) => m.trim());
 
       const hashedKey = await requestWrapper.getProviderAuthHeader();
       const isEU = requestWrapper.isEU();
@@ -214,40 +207,10 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
         new ProviderKeysStore(supabaseClient),
         env
       );
-      const providerKey = await providerKeysManager.getProviderKey(
-        provider,
-        orgId
-      );
-      if (!providerKey) {
-        return new Response("Invalid provider key", { status: 401 });
-      }
 
-      let finalBody;
-      if (model.includes("claude-")) {
-        const anthropicBody = toAnthropic(parsedBody);
-        const updatedBody = {
-          ...anthropicBody,
-          ...(provider === "AWS"
-            ? { anthropic_version: "bedrock-2023-05-31", model: undefined }
-            : { model: model }),
-        };
-        requestWrapper.setBody(JSON.stringify(updatedBody));
-        finalBody = updatedBody;
-      } else {
-        const updatedBody = {
-          ...parsedBody,
-          model: model,
-        };
-        requestWrapper.setBody(JSON.stringify(updatedBody));
-        finalBody = updatedBody;
-      }
-
-      authenticateRequest(
-        requestWrapper,
-        providerKey,
-        model,
-        JSON.stringify(finalBody)
-      );
+      // Try each model option until one succeeds
+      let lastError: Response | null = null;
+      const failedAttempts: string[] = [];
 
       function forwarder(targetBaseUrl: string | null) {
         return gatewayForwarder(
@@ -263,18 +226,110 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
         );
       }
 
-      const targetBaseUrl = getForwardUrl(
-        provider,
-        provider === "AWS"
-          ? {
-              region:
-                (providerKey.config as { region?: string })?.region ??
-                "us-west-1",
-              model: model,
-            }
-          : undefined
-      );
-      return await forwarder(targetBaseUrl);
+      for (let i = 0; i < modelOptions.length; i++) {
+        const modelOption = modelOptions[i];
+        const modelParts = modelOption.split("/");
+        if (modelParts.length !== 2) {
+          lastError = new Response(`Invalid model format: ${modelOption}`, {
+            status: 400,
+          });
+          continue;
+        }
+
+        const [model, inferenceProvider] = modelParts;
+        const provider = getProviderFromProviderName(inferenceProvider);
+        if (!provider) {
+          lastError = new Response(
+            `Invalid inference provider: ${inferenceProvider}`,
+            { status: 400 }
+          );
+          continue;
+        }
+
+        const providerKey = await providerKeysManager.getProviderKey(
+          provider,
+          orgId
+        );
+        if (!providerKey) {
+          lastError = new Response(`Invalid provider key for ${provider}`, {
+            status: 401,
+          });
+          continue;
+        }
+
+        // Reset request wrapper state if this is not the first attempt
+        if (i > 0) {
+          // Need to reset the body as well
+          requestWrapper.setBody(body ?? "");
+        }
+
+        let finalBody;
+        if (model.includes("claude-")) {
+          const anthropicBody = toAnthropic(parsedBody);
+          const updatedBody = {
+            ...anthropicBody,
+            ...(provider === "BEDROCK"
+              ? { anthropic_version: "bedrock-2023-05-31", model: undefined }
+              : { model: model }),
+          };
+          requestWrapper.setBody(JSON.stringify(updatedBody));
+          finalBody = updatedBody;
+        } else {
+          const updatedBody = {
+            ...parsedBody,
+            model: model,
+          };
+          requestWrapper.setBody(JSON.stringify(updatedBody));
+          finalBody = updatedBody;
+        }
+
+        await authenticateRequest(
+          requestWrapper,
+          providerKey,
+          model,
+          JSON.stringify(finalBody)
+        );
+
+        const targetBaseUrl = getForwardUrl(
+          provider,
+          provider === "BEDROCK"
+            ? {
+                region:
+                  (providerKey.config as { region?: string })?.region ??
+                  "us-west-1",
+                model: model,
+              }
+            : undefined
+        );
+
+        try {
+          const response = await forwarder(targetBaseUrl);
+
+          // If successful (2xx status), return the response
+          if (response.ok) {
+            return response;
+          }
+
+          // For non-2xx responses, save the error and try next option
+          failedAttempts.push(
+            `${modelOption}: ${response.status} ${response.statusText}`
+          );
+          lastError = response;
+        } catch (error) {
+          // Network or other errors, try next option
+          failedAttempts.push(`${modelOption}: ${error}`);
+          lastError = new Response(`Failed to call ${provider}: ${error}`, {
+            status: 500,
+          });
+        }
+      }
+
+      // If all options failed, return a comprehensive error
+      const errorMessage =
+        failedAttempts.length > 0
+          ? `All model options failed. Attempts: ${failedAttempts.join(", ")}`
+          : "All model options failed";
+      return lastError || new Response(errorMessage, { status: 500 });
       // return await proxyForwarder(requestWrapper, env, ctx, provider);
     }
   );

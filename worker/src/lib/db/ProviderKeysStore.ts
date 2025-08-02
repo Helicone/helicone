@@ -27,7 +27,7 @@ const dbProviderToProvider = (provider: string): Provider | null => {
     return "ANTHROPIC";
   }
   if (provider === "AWS Bedrock") {
-    return "AWS";
+    return "BEDROCK";
   }
   if (provider === "Groq") {
     return "GROQ";

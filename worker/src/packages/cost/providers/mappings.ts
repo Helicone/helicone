@@ -110,6 +110,7 @@ export const providersNames = [
   "QSTASH",
   "FIRECRAWL",
   "AWS",
+  "BEDROCK",
   "DEEPSEEK",
   "X",
   "AVIAN",
@@ -259,6 +260,11 @@ export const providers: {
   {
     pattern: firecrawl,
     provider: "FIRECRAWL",
+  },
+  {
+    pattern: awsBedrock,
+    provider: "BEDROCK",
+    costs: awsBedrockCosts,
   },
   {
     pattern: awsBedrock,

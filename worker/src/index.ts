@@ -156,7 +156,6 @@ async function modifyEnvBasedOnPath(
       AWS_REGION: env.EU_AWS_REGION ?? "eu-west-1",
     };
   }
-
   if (env.WORKER_TYPE) {
     return env;
   }
