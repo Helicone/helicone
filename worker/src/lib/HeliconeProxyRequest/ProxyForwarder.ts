@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from "@supabase/supabase-js";
 import { Env } from "../..";
-import { Provider } from "@helicone-package/llm-mapper/types";
+import { Provider } from "../../packages/llm-mapper/types";
 import { DBWrapper } from "../db/DBWrapper";
 import {
   checkRateLimit,
@@ -11,7 +11,6 @@ import { RequestWrapper } from "../RequestWrapper";
 import { ResponseBuilder } from "../ResponseBuilder";
 import { getCachedResponse, saveToCache } from "../util/cache/cacheFunctions";
 import { CacheSettings, getCacheSettings } from "../util/cache/cacheSettings";
-import { HeliconeHeaders } from "../models/HeliconeHeaders";
 import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
 import { RequestResponseStore } from "../db/RequestResponseStore";
 import { Valhalla } from "../db/valhalla";
@@ -167,7 +166,8 @@ export async function proxyForwarder(
   }
 
   if (
-    proxyRequest.requestWrapper.heliconeHeaders.promptSecurityEnabled === true &&
+    proxyRequest.requestWrapper.heliconeHeaders.promptSecurityEnabled ===
+      true &&
     provider === "OPENAI"
   ) {
     const { data: latestMsg, error: latestMsgErr } =
@@ -311,7 +311,8 @@ export async function proxyForwarder(
                   responseBody: responseBody.body,
                   cacheControl: cacheSettings.cacheControl,
                   settings: cacheSettings.bucketSettings,
-                  responseLatencyMs: responseBody.endTime.getTime() - loggable.getTimingStart(),
+                  responseLatencyMs:
+                    responseBody.endTime.getTime() - loggable.getTimingStart(),
                   cacheKv: env.CACHE_KV,
                   cacheSeed: cacheSettings.cacheSeed ?? null,
                 });
@@ -326,7 +327,9 @@ export async function proxyForwarder(
                 const sentryManager = new SentryManager(env);
                 await sentryManager.sendError(
                   "Failed to save to cache",
-                  error instanceof Error ? error.stack ?? error.message : String(error)
+                  error instanceof Error
+                    ? error.stack ?? error.message
+                    : String(error)
                 );
                 console.error("Failed to save to cache:", error);
               }

@@ -28,7 +28,9 @@ class InMemoryCache<T> {
   set(key: string, value: T): void {
     if (this.cache.size >= this.maxEntries) {
       const firstKey = this.cache.keys().next().value;
-      this.cache.delete(firstKey);
+      if (firstKey) {
+        this.cache.delete(firstKey);
+      }
     }
     this.cache.set(key, value);
   }
@@ -102,7 +104,7 @@ export async function decrypt(
   return new TextDecoder().decode(decryptedContent);
 }
 
-async function storeInCache(
+export async function storeInCache(
   key: string,
   value: string,
   env: SecureCacheEnv,

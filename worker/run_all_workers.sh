@@ -11,6 +11,8 @@ npx wrangler dev --var WORKER_TYPE:ANTHROPIC_PROXY --port 8790 &
 sleep 1
 npx wrangler dev --var WORKER_TYPE:GENERATE_API --port 8791 &
 sleep 1
-npx wrangler dev --var GATEWAY_TARGET:https://api.groq.com --port 8792
+npx wrangler dev --var GATEWAY_TARGET:https://api.groq.com --port 8792 &
+sleep 1
+npx wrangler dev --var WORKER_TYPE:AI_GATEWAY_API --port 8793 --test-scheduled &
 # Wait for all background processes to finish
 wait
