@@ -165,7 +165,7 @@ export class SegmentLogHandler extends AbstractLogHandler {
         countryCode: request.countryCode ?? "",
         properties: context.processedLog.request.properties ?? {},
         costUSD: context.usage.cost ?? 0,
-        heliconeUrl: `https://us.helicone.ai/requests?requestId=${request.id}`,
+        heliconeUrl: `${process.env.APP_URL || "https://us.helicone.ai"}/requests?requestId=${request.id}`,
       },
       userId: request.userId,
       writeKey,
