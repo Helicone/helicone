@@ -10,6 +10,10 @@ import { COST_PRECISION_MULTIPLIER } from "./costCalc";
 export type { ModelRow } from "./interfaces/Cost";
 export { providers } from "./providers/mappings";
 
+// Export the new model-centric system
+export * from "./models";
+export { default as models } from "./models";
+
 export type ModelWithProvider = {
   provider: string;
   modelRow: ModelRow;
