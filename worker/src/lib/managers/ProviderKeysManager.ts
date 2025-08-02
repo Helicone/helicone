@@ -30,7 +30,6 @@ export class ProviderKeysManager {
     if (!key) {
       return null;
     }
-    console.log("key in cache", key);
     return JSON.parse(key) as ProviderKey;
   }
 
@@ -40,7 +39,6 @@ export class ProviderKeysManager {
   ): Promise<ProviderKey | null> {
     const key = await this.getProviderKey(provider, orgId);
     if (!key) {
-      console.log("no key in cache, fetching from db");
       const key = await this.store.getProviderKeyWithFetch(provider, orgId);
       if (!key) return null;
 
