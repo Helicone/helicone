@@ -21,6 +21,7 @@ export const MODEL_CREATORS = [
   "Alibaba",
   "01.AI",
   "Qwen",
+  "Moonshot",
 ] as const;
 
 export type ModelCreator = typeof MODEL_CREATORS[number];

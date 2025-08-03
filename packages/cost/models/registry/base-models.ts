@@ -1038,6 +1038,284 @@ export const baseModels = {
     },
     slug: "claude-haiku-3-5"
   },
+  // Groq Models - Production
+  "gemma2-9b-it": {
+    id: "gemma2-9b-it",
+    creator: "Google",
+    metadata: {
+      displayName: "Gemma 2 9B",
+      description: "Google's Gemma 2 model optimized for Groq",
+      contextWindow: 8192,
+      releaseDate: "2024-01-01"
+    },
+    providers: {
+      groq: {
+        provider: "groq",
+        available: true,
+        cost: {
+          prompt_token: 0.0000002,
+          completion_token: 0.0000002
+        }
+      }
+    },
+    slug: "gemma2-9b"
+  },
+  "llama-3.1-8b-instant": {
+    id: "llama-3.1-8b-instant",
+    creator: "Meta",
+    metadata: {
+      displayName: "Llama 3.1 8B Instant",
+      description: "Fast Llama 3.1 model optimized for speed",
+      contextWindow: 131072,
+      releaseDate: "2024-07-23"
+    },
+    providers: {
+      groq: {
+        provider: "groq",
+        available: true,
+        cost: {
+          prompt_token: 0.00000005,
+          completion_token: 0.00000008
+        }
+      }
+    },
+    slug: "llama-3-1-8b-instant"
+  },
+  "llama-3.3-70b-versatile": {
+    id: "llama-3.3-70b-versatile",
+    creator: "Meta",
+    metadata: {
+      displayName: "Llama 3.3 70B Versatile",
+      description: "Large versatile Llama model",
+      contextWindow: 131072,
+      maxOutputTokens: 32768,
+      releaseDate: "2024-12-06"
+    },
+    providers: {
+      groq: {
+        provider: "groq",
+        available: true,
+        cost: {
+          prompt_token: 0.00000059,
+          completion_token: 0.00000079
+        }
+      }
+    },
+    slug: "llama-3-3-70b-versatile"
+  },
+  "meta-llama/llama-guard-4-12b": {
+    id: "meta-llama/llama-guard-4-12b",
+    creator: "Meta",
+    metadata: {
+      displayName: "Llama Guard 4 12B",
+      description: "Safety-focused Llama model",
+      contextWindow: 131072,
+      maxOutputTokens: 1024,
+      releaseDate: "2024-12-01"
+    },
+    providers: {
+      groq: {
+        provider: "groq",
+        available: true,
+        cost: {
+          prompt_token: 0.0000002,
+          completion_token: 0.0000002
+        }
+      }
+    },
+    slug: "llama-guard-4-12b"
+  },
+  // Groq Models - Preview
+  "deepseek-r1-distill-llama-70b": {
+    id: "deepseek-r1-distill-llama-70b",
+    creator: "DeepSeek",
+    metadata: {
+      displayName: "DeepSeek R1 Distill Llama 70B",
+      description: "DeepSeek's distilled Llama model",
+      contextWindow: 131072,
+      releaseDate: "2025-01-01"
+    },
+    providers: {
+      groq: {
+        provider: "groq",
+        available: true,
+        cost: {
+          prompt_token: 0.00000075,
+          completion_token: 0.00000099
+        }
+      }
+    },
+    slug: "deepseek-r1-distill-llama-70b"
+  },
+  "meta-llama/llama-4-maverick-17b-128e-instruct": {
+    id: "meta-llama/llama-4-maverick-17b-128e-instruct",
+    creator: "Meta",
+    metadata: {
+      displayName: "Llama 4 Maverick 17B",
+      description: "Llama 4 Maverick model with 128 experts",
+      contextWindow: 131072,
+      releaseDate: "2025-01-01"
+    },
+    providers: {
+      groq: {
+        provider: "groq",
+        available: true,
+        cost: {
+          prompt_token: 0.0000002,
+          completion_token: 0.0000006
+        }
+      }
+    },
+    slug: "llama-4-maverick-17b"
+  },
+  "meta-llama/llama-4-scout-17b-16e-instruct": {
+    id: "meta-llama/llama-4-scout-17b-16e-instruct",
+    creator: "Meta",
+    metadata: {
+      displayName: "Llama 4 Scout 17B",
+      description: "Llama 4 Scout model with 16 experts",
+      contextWindow: 131072,
+      releaseDate: "2025-01-01"
+    },
+    providers: {
+      groq: {
+        provider: "groq",
+        available: true,
+        cost: {
+          prompt_token: 0.00000011,
+          completion_token: 0.00000034
+        }
+      }
+    },
+    slug: "llama-4-scout-17b"
+  },
+  "moonshotai/kimi-k2-instruct": {
+    id: "moonshotai/kimi-k2-instruct",
+    creator: "Moonshot",
+    metadata: {
+      displayName: "Kimi K2 1T",
+      description: "Moonshot's Kimi K2 model",
+      contextWindow: 131072,
+      releaseDate: "2025-01-01"
+    },
+    providers: {
+      groq: {
+        provider: "groq",
+        available: true,
+        cost: {
+          prompt_token: 0.000001,
+          completion_token: 0.000003
+        }
+      }
+    },
+    slug: "kimi-k2"
+  },
+  "qwen/qwen3-32b": {
+    id: "qwen/qwen3-32b",
+    creator: "Alibaba",
+    metadata: {
+      displayName: "Qwen3 32B",
+      description: "Alibaba's Qwen3 32B model",
+      contextWindow: 131072,
+      releaseDate: "2024-12-01"
+    },
+    providers: {
+      groq: {
+        provider: "groq",
+        available: true,
+        cost: {
+          prompt_token: 0.00000029,
+          completion_token: 0.00000059
+        }
+      }
+    },
+    slug: "qwen3-32b"
+  },
+  // Additional Groq models from pricing (need to match with models page IDs)
+  "llama3-70b-8192": {
+    id: "llama3-70b-8192",
+    creator: "Meta",
+    metadata: {
+      displayName: "Llama 3 70B",
+      description: "Meta's Llama 3 70B model",
+      contextWindow: 8192,
+      releaseDate: "2024-04-18"
+    },
+    providers: {
+      groq: {
+        provider: "groq",
+        available: true,
+        cost: {
+          prompt_token: 0.00000059,
+          completion_token: 0.00000079
+        }
+      }
+    },
+    slug: "llama3-70b"
+  },
+  "llama3-8b-8192": {
+    id: "llama3-8b-8192",
+    creator: "Meta",
+    metadata: {
+      displayName: "Llama 3 8B",
+      description: "Meta's Llama 3 8B model",
+      contextWindow: 8192,
+      releaseDate: "2024-04-18"
+    },
+    providers: {
+      groq: {
+        provider: "groq",
+        available: true,
+        cost: {
+          prompt_token: 0.00000005,
+          completion_token: 0.00000008
+        }
+      }
+    },
+    slug: "llama3-8b"
+  },
+  "mixtral-8x7b-32768": {
+    id: "mixtral-8x7b-32768",
+    creator: "Mistral",
+    metadata: {
+      displayName: "Mistral Saba 24B",
+      description: "Mistral's Saba model",
+      contextWindow: 32768,
+      releaseDate: "2024-12-01"
+    },
+    providers: {
+      groq: {
+        provider: "groq",
+        available: true,
+        cost: {
+          prompt_token: 0.00000079,
+          completion_token: 0.00000079
+        }
+      }
+    },
+    slug: "mistral-saba-24b"
+  },
+  "llama-guard-3-8b": {
+    id: "llama-guard-3-8b",
+    creator: "Meta",
+    metadata: {
+      displayName: "Llama Guard 3 8B",
+      description: "Safety-focused Llama model",
+      contextWindow: 8192,
+      releaseDate: "2024-10-01"
+    },
+    providers: {
+      groq: {
+        provider: "groq",
+        available: true,
+        cost: {
+          prompt_token: 0.0000002,
+          completion_token: 0.0000002
+        }
+      }
+    },
+    slug: "llama-guard-3-8b"
+  },
 } satisfies Record<string, BaseModel>;
 
 export type BaseModelId = keyof typeof baseModels;
