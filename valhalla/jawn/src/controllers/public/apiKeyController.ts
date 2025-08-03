@@ -14,6 +14,7 @@ import {
 } from "tsoa";
 import { type JawnAuthenticatedRequest } from "../../types/request";
 import { KeyManager } from "../../managers/apiKeys/KeyManager";
+import { refetchAPIKeys, refetchProviderKeys } from "../../lib/refetchKeys";
 
 @Route("v1/api-keys")
 @Tags("API Key")
@@ -32,6 +33,9 @@ export class ApiKeyController extends Controller {
       return { error: result.error };
     }
 
+    refetchProviderKeys().catch((error) => {
+      console.error("error refetching provider keys", error);
+    });
     return result.data;
   }
 
@@ -61,6 +65,9 @@ export class ApiKeyController extends Controller {
       return { error: result.error };
     }
 
+    refetchProviderKeys().catch((error) => {
+      console.error("error refetching provider keys", error);
+    });
     return result.data;
   }
 
@@ -118,6 +125,9 @@ export class ApiKeyController extends Controller {
       return { error: result.error };
     }
 
+    refetchProviderKeys().catch((error) => {
+      console.error("error refetching provider keys", error);
+    });
     return result.data;
   }
 
@@ -149,6 +159,8 @@ export class ApiKeyController extends Controller {
       return { error: result.error };
     }
 
+    await refetchAPIKeys();
+
     return result.data;
   }
 
@@ -172,6 +184,8 @@ export class ApiKeyController extends Controller {
       return { error: result.error };
     }
 
+    await refetchAPIKeys();
+
     return result.data;
   }
 
@@ -188,6 +202,7 @@ export class ApiKeyController extends Controller {
       return { error: result.error };
     }
 
+    await refetchAPIKeys();
     return result.data;
   }
 
@@ -206,6 +221,8 @@ export class ApiKeyController extends Controller {
       this.setStatus(500);
       return { error: result.error };
     }
+
+    await refetchAPIKeys();
 
     return result.data;
   }

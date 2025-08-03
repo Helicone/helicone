@@ -4,6 +4,7 @@ import { hashAuth } from "../../utils/hash";
 import { type JawnAuthenticatedRequest } from "../../types/request";
 import { KeyPermissions } from "../../packages/common/auth/types";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
+import { refetchAPIKeys } from "../../lib/refetchKeys";
 
 export interface GenerateHashQueryParams {
   apiKey: string;
@@ -29,6 +30,28 @@ export class GenerateHashController extends Controller {
     };
   }> {
     const { apiKey, keyName, governance } = requestBody;
+    const { data, error } = await dbExecute<{ count: number }>(
+      `select count(*) from helicone_api_keys where soft_delete = false and organization_id = $1`,
+      [request.authParams.organizationId]
+    );
+    if (error) {
+      this.setStatus(500);
+      return {
+        error: {
+          message: "Failed to check key count",
+          details: error,
+        },
+      };
+    }
+    if ((data?.[0]?.count ?? 0) >= 50) {
+      this.setStatus(400);
+      return {
+        error: {
+          message:
+            "You have reached the maximum number of keys for your organization",
+        },
+      };
+    }
     const userId = request.authParams.userId;
     if (!userId) {
       this.setStatus(401);
@@ -64,6 +87,9 @@ export class GenerateHashController extends Controller {
           },
         };
       }
+      refetchAPIKeys().catch((error) => {
+        console.error("error refetching provider keys", error);
+      });
 
       this.setStatus(201);
       return {

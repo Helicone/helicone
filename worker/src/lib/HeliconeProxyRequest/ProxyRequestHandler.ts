@@ -53,7 +53,6 @@ async function getProviderResponse(
       return await callProvider(callProps);
     }
   } catch (e) {
-
     if (e instanceof Error) {
       if (e.message.includes("Network connection lost")) {
         return new Response(
@@ -67,7 +66,7 @@ async function getProviderResponse(
           }),
           {
             status: 502, // Bad Gateway
-            headers: { "content-type": "application/json" }
+            headers: { "content-type": "application/json" },
           }
         );
       }
@@ -84,18 +83,22 @@ async function getProviderResponse(
           }),
           {
             status: 504, // Gateway Timeout
-            headers: { "content-type": "application/json" }
+            headers: { "content-type": "application/json" },
           }
         );
       }
     }
-    return new Response(JSON.stringify({
-      error: "Unknown error",
-      message: "An unknown error occurred",
-      "helicone-message": "An unknown error occurred",
-      support: "Please reach out on our discord or email us at help@helicone.ai, we'd love to help!",
-      "error-trace": JSON.stringify(e),
-    }), { status: 500, headers: { "content-type": "application/json" } });
+    return new Response(
+      JSON.stringify({
+        error: "Unknown error",
+        message: "An unknown error occurred",
+        "helicone-message": "An unknown error occurred",
+        support:
+          "Please reach out on our discord or email us at help@helicone.ai, we'd love to help!",
+        "error-trace": JSON.stringify(e),
+      }),
+      { status: 500, headers: { "content-type": "application/json" } }
+    );
   }
 }
 
@@ -170,7 +173,7 @@ export async function handleProxyRequest(
             body: (await interceptor?.waitForStream())?.body ?? [],
             endTime: new Date(
               (await interceptor?.waitForStream())?.endTimeUnix ??
-              new Date().getTime()
+                new Date().getTime()
             ),
           }),
           responseHeaders: new Headers(response.headers),

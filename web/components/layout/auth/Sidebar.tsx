@@ -6,7 +6,6 @@ import {
   Home,
   ListTreeIcon,
   ScrollTextIcon,
-  ServerIcon,
   SheetIcon,
   ShieldCheckIcon,
   ShuffleIcon,
@@ -136,28 +135,12 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
             icon: Webhook,
             current: pathname.includes("/webhooks"),
           },
-          ...(hasFeatureFlag?.data
-            ? [
-                {
-                  name: "AI Gateway",
-                  href: "/gateway",
-                  icon: ShuffleIcon,
-                  current: pathname.includes("/gateway"),
-                },
-                {
-                  name: "Providers",
-                  href: "/providers",
-                  icon: ServerIcon,
-                  current: pathname.includes("/providers"),
-                },
-              ]
-            : []),
-          // {
-          //   name: "Vault",
-          //   href: "/vault",
-          //   icon: LockIcon,
-          //   current: pathname.includes("/vault"),
-          // },
+          {
+            name: "AI Gateway",
+            href: "/gateway",
+            icon: ShuffleIcon,
+            current: pathname.includes("/gateway"),
+          },
         ],
       },
     ],

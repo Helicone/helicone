@@ -338,7 +338,7 @@ export class RequestWrapper {
     return this.request.url;
   }
 
-  private setUrl(url: string): void {
+  setUrl(url: string): void {
     this.url = new URL(url);
   }
 
@@ -431,7 +431,6 @@ export class RequestWrapper {
       .slice(1)
       .join("/");
 
-    console.log("newUrl", newUrl.toString());
     this.setUrl(newUrl.toString());
   }
 
@@ -466,6 +465,10 @@ export class RequestWrapper {
 
   getAuthorization(): string | undefined {
     return this.authorization || undefined;
+  }
+
+  setProviderAuthKey(key: string): void {
+    this.providerAuth = key;
   }
 
   private async setAuthorization(
@@ -572,6 +575,10 @@ export class RequestWrapper {
       ...this.promptSettings,
       promptInputs: inputs,
     };
+  }
+
+  setBody(body: string): void {
+    this.cachedText = body;
   }
 }
 
@@ -695,7 +702,6 @@ export async function getProviderKeyFromProxy(
   }
 
   if (limits.data && limits.data.length > 0) {
-    console.log("CHECKING LIMITS");
     if (!(await checkLimits(limits.data, env))) {
       return err("Limits are not valid");
     }
