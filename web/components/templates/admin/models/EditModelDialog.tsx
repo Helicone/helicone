@@ -113,14 +113,38 @@ export function EditModelDialog({
     }
   };
 
+  const handleClose = (newOpen: boolean) => {
+    if (!newOpen) {
+      // Reset to original model when closing without saving
+      setEditedModel(model);
+    }
+    onOpenChange(newOpen);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Model: {model.metadata.displayName}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="model-enabled" className="text-sm">
+              Model enabled
+            </Label>
+            <Switch
+              id="model-enabled"
+              checked={!editedModel.disabled}
+              onCheckedChange={(checked) =>
+                setEditedModel({
+                  ...editedModel,
+                  disabled: !checked,
+                })
+              }
+            />
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Model ID</Label>

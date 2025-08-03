@@ -57,8 +57,9 @@ export interface ModelCost {
   prompt_token: number;
   completion_token: number;
   // Optional costs
-  prompt_cache_write_token?: number;
-  prompt_cache_read_token?: number;
+  prompt_cache_write_token?: number; // Default cache write (e.g., 5min for Anthropic)
+  prompt_cache_read_token?: number; // Cache hits
+  prompt_cache_write_token_1hr?: number; // 1-hour cache write (Anthropic)
   prompt_audio_token?: number;
   completion_audio_token?: number;
   per_image?: number;
@@ -103,6 +104,7 @@ export interface BaseModel {
   metadata: ModelMetadata;
   providers: Record<string, ProviderImplementation>;
   slug: string;
+  disabled?: boolean; // Model-level disable flag
 }
 
 // Model variant interface - only stores differences from base

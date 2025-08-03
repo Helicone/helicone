@@ -13,7 +13,7 @@ const REGISTRY_PATH = path.join(
   "../packages/cost/models/registry/base-models.ts",
 );
 
-async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
     // Return current registry
     return res.status(200).json({
@@ -23,6 +23,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 
   if (req.method === "PUT") {
+    // Only allow updates in development mode
+    if (process.env.NODE_ENV !== "development") {
+      return res.status(403).json({ 
+        error: "Model updates are only available in development mode. Please run locally to make changes.",
+        isDevelopment: false
+      });
+    }
+
     try {
       const { models: updatedModels } = req.body;
 
@@ -32,7 +40,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       // Write to the file
       await fs.writeFile(REGISTRY_PATH, fileContent, "utf-8");
 
-      return res.status(200).json({ success: true });
+      return res.status(200).json({ 
+        success: true,
+        message: "Registry updated successfully. Changes saved to source files.",
+        isDevelopment: true
+      });
     } catch (error) {
       console.error("Error updating registry:", error);
       return res.status(500).json({ error: "Failed to update registry" });
@@ -65,7 +77,8 @@ export const baseModels = {\n`;
     content += `  "${modelId}": ${formatModelObject(model)},\n`;
   }
 
-  content += `} satisfies Record<string, BaseModel>;\n`;
+  content += `} satisfies Record<string, BaseModel>;\n\n`;
+  content += `export type BaseModelId = keyof typeof baseModels;\n`;
 
   return content;
 }
@@ -73,7 +86,9 @@ export const baseModels = {\n`;
 function formatModelObject(model: BaseModel): string {
   return `{
   id: "${model.id}",
-  creator: "${model.creator}",
+  creator: "${model.creator}",${
+    model.disabled ? `\n  disabled: ${model.disabled},` : ""
+  }
   metadata: {
     displayName: "${model.metadata.displayName}",
     description: "${model.metadata.description}",
@@ -105,6 +120,10 @@ function formatModelObject(model: BaseModel): string {
             ? `,\n        prompt_cache_read_token: ${data.cost.prompt_cache_read_token}`
             : ""
         }${
+          data.cost.prompt_cache_write_token_1hr !== undefined
+            ? `,\n        prompt_cache_write_token_1hr: ${data.cost.prompt_cache_write_token_1hr}`
+            : ""
+        }${
           data.cost.prompt_audio_token !== undefined
             ? `,\n        prompt_audio_token: ${data.cost.prompt_audio_token}`
             : ""
@@ -125,6 +144,14 @@ function formatModelObject(model: BaseModel): string {
         data.modelString ? `,\n      modelString: "${data.modelString}"` : ""
       }${data.endpoint ? `,\n      endpoint: "${data.endpoint}"` : ""}${
         data.notes ? `,\n      notes: "${data.notes}"` : ""
+      }${
+        data.rateLimit ? `,\n      rateLimit: {` + 
+          (data.rateLimit.tpm !== undefined ? `\n        tpm: ${data.rateLimit.tpm}` : "") +
+          (data.rateLimit.rpm !== undefined ? `${data.rateLimit.tpm !== undefined ? ',' : ''}\n        rpm: ${data.rateLimit.rpm}` : "") +
+          (data.rateLimit.tpd !== undefined ? `${(data.rateLimit.tpm !== undefined || data.rateLimit.rpm !== undefined) ? ',' : ''}\n        tpd: ${data.rateLimit.tpd}` : "") +
+          (data.rateLimit.rpd !== undefined ? `,\n        rpd: ${data.rateLimit.rpd}` : "") +
+          (data.rateLimit.imagesPerMinute !== undefined ? `,\n        imagesPerMinute: ${data.rateLimit.imagesPerMinute}` : "") +
+        `\n      }` : ""
       }
     }`,
     )
@@ -133,5 +160,3 @@ function formatModelObject(model: BaseModel): string {
   slug: "${model.slug}"
 }`;
 }
-
-export default withAdminAuth(handler);
