@@ -17,7 +17,7 @@ export const getRouterCode = (baseUrl: string, language: string) => {
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer YOUR_HELICONE_API_KEY" \\
   -d '{
-    "model": "openai/gpt-4o-mini",
+    "model": "gpt-4o-mini/openai",
     "messages": [
       {
         "role": "user",
@@ -34,7 +34,7 @@ const openai = new OpenAI({
 });
 
 const completion = await openai.chat.completions.create({
-  model: 'openai/gpt-4o-mini',
+  model: 'gpt-4o-mini/openai',
   messages: [
     {
       role: 'user',
@@ -51,7 +51,7 @@ client = OpenAI(
 )
 
 completion = client.chat.completions.create(
-  model="openai/gpt-4o-mini",
+  model="gpt-4o-mini/openai",
   messages=[
     {
       "role": "user",
