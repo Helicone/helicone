@@ -2,9 +2,7 @@ import { ReactElement } from "react";
 import AuthLayout from "../../../components/layout/auth/authLayout";
 import PortalPage from "../../../components/templates/enterprise/portal/portalPage";
 
-interface PortalProps {}
-
-const Portal = (props: PortalProps) => {
+const Portal = () => {
   return <PortalPage />;
 };
 

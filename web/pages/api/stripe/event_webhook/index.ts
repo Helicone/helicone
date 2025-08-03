@@ -704,13 +704,13 @@ const TeamVersion20250130 = {
           invoice_now: true,
           prorate: true,
         });
-      } catch (e) {
-        console.error("Error canceling old subscription:", e);
+      } catch (_e) {
+        console.error("Error canceling old subscription:", _e);
       }
     }
 
     // Update to new subscription
-    const { data: updateData, error: updateError } = await dbExecute(
+    const { error: updateError } = await dbExecute(
       `UPDATE organization 
        SET subscription_status = 'active', 
            stripe_subscription_id = $1, 
@@ -739,11 +739,11 @@ const TeamVersion20250130 = {
     });
   },
 
-  handleUpdate: async (event: Stripe.Event) => {
-    const subscription = event.data.object as Stripe.Subscription;
+  handleUpdate: async (_event: Stripe.Event) => {
+    const subscription = _event.data.object as Stripe.Subscription;
     await sendSubscriptionCanceledEvent(subscription);
   },
-  handleCheckoutSessionCompleted: async (event: Stripe.Event) => {
+  handleCheckoutSessionCompleted: async (_event: Stripe.Event) => {
     // We don't need to do anything here because the subscription is already active
     // All update states are handled in the jawn StripeManager
     return;
@@ -767,7 +767,7 @@ const PricingVersion20240913 = {
       }
     });
 
-    const { data: updateData, error: updateError } = await dbExecute(
+    const { error: updateError } = await dbExecute(
       `UPDATE organization 
        SET subscription_status = 'active', 
            stripe_subscription_id = $1, 
@@ -792,11 +792,11 @@ const PricingVersion20240913 = {
     });
   },
 
-  handleUpdate: async (event: Stripe.Event) => {
-    const subscription = event.data.object as Stripe.Subscription;
+  handleUpdate: async (_event: Stripe.Event) => {
+    const subscription = _event.data.object as Stripe.Subscription;
     await sendSubscriptionCanceledEvent(subscription);
   },
-  handleCheckoutSessionCompleted: async (event: Stripe.Event) => {
+  handleCheckoutSessionCompleted: async (_event: Stripe.Event) => {
     // We don't need to do anything here because the subscription is already active
     // All update states are handled in the jawn StripeManager
     return;
@@ -966,8 +966,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         sig,
         process.env.STRIPE_WEBHOOK_SECRET!,
       ) as Stripe.Event;
-    } catch (err) {
-      res.status(400).send(`Webhook Error: ${err}`);
+    } catch (_err) {
+      res.status(400).send(`Webhook Error: ${_err}`);
       return;
     }
     const stripeObject = event.data.object as

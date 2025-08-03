@@ -2,9 +2,7 @@ import { ReactElement } from "react";
 import AuthLayout from "../../components/layout/auth/authLayout";
 import ExperimentsPage from "../../components/templates/prompts/experiments/table/experimentsPage";
 
-interface ExperimentPage {}
-
-const Experiments = (props: ExperimentPage) => {
+const Experiments = () => {
   return <ExperimentsPage />;
 };
 

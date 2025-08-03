@@ -3,7 +3,7 @@ import { ReactElement } from "react";
 import RateLimitPage from "../components/templates/rateLimit/rateLimitPage";
 import { GetServerSidePropsContext } from "next";
 
-const RateLimit = (props: {}) => {
+const RateLimit = () => {
   return (
     <>
       <RateLimitPage />
@@ -18,7 +18,7 @@ RateLimit.getLayout = function getLayout(page: ReactElement) {
 export default RateLimit;
 
 export const getServerSideProps = async (
-  context: GetServerSidePropsContext,
+  _context: GetServerSidePropsContext,
 ) => {
   return {
     props: {},

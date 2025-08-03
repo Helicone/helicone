@@ -105,7 +105,7 @@ export const getServerSideProps = async (
     };
   }
 
-  const { data: slackData, error: slackError } = await dbExecute<{
+  const { error: slackError } = await dbExecute<{
     id: string;
   }>(
     `

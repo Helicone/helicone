@@ -97,11 +97,10 @@ const SignIn = ({
         ) : (
           <AuthForm
             handleEmailSubmit={async (email: string, password: string) => {
-              const { data, error } =
-                await heliconeAuthClient.signInWithPassword({
-                  email: email,
-                  password: password,
-                });
+              const { error } = await heliconeAuthClient.signInWithPassword({
+                email: email,
+                password: password,
+              });
 
               if (error) {
                 setNotification(error, "error");
