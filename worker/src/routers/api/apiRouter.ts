@@ -120,7 +120,7 @@ function getAPIRouterV1(
         env
       );
 
-      // await providerKeysManagerEU.setProviderKeys();
+      await providerKeysManagerEU.setProviderKeys();
       return new Response("ok", { status: 200 });
     }
   );
