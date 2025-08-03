@@ -43,12 +43,10 @@ export { providerConfigs } from "./provider-configs";
 export { 
   modelRegistry,
   baseModels,
-  modelVariants,
   modelCountByCreator,
   modelCountByProvider,
   variantsWithoutOverrides,
   type BaseModelId,
-  type ModelVariantId,
 } from "./registry";
 
 // Re-export all utilities

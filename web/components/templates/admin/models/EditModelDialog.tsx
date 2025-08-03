@@ -235,12 +235,12 @@ export function EditModelDialog({
                           <Input
                             type="number"
                             step="0.01"
-                            value={(data.cost.prompt_token * 1000000).toFixed(2)}
+                            value={data.cost.prompt_token.toFixed(2)}
                             onChange={(e) =>
                               handleProviderCostChange(
                                 provider,
                                 "prompt_token",
-                                (parseFloat(e.target.value) / 1000000).toString()
+                                e.target.value
                               )
                             }
                           />
@@ -250,12 +250,12 @@ export function EditModelDialog({
                           <Input
                             type="number"
                             step="0.01"
-                            value={(data.cost.completion_token * 1000000).toFixed(2)}
+                            value={data.cost.completion_token.toFixed(2)}
                             onChange={(e) =>
                               handleProviderCostChange(
                                 provider,
                                 "completion_token",
-                                (parseFloat(e.target.value) / 1000000).toString()
+                                e.target.value
                               )
                             }
                           />
@@ -268,13 +268,13 @@ export function EditModelDialog({
                           <Input
                             type="number"
                             step="0.01"
-                            value={data.cost.prompt_cache_write_token ? (data.cost.prompt_cache_write_token * 1000000).toFixed(2) : ""}
+                            value={data.cost.prompt_cache_write_token ? data.cost.prompt_cache_write_token.toFixed(2) : ""}
                             placeholder="Optional"
                             onChange={(e) =>
                               handleProviderCostChange(
                                 provider,
                                 "prompt_cache_write_token",
-                                e.target.value ? (parseFloat(e.target.value) / 1000000).toString() : ""
+                                e.target.value
                               )
                             }
                           />
@@ -284,13 +284,13 @@ export function EditModelDialog({
                           <Input
                             type="number"
                             step="0.01"
-                            value={data.cost.prompt_cache_read_token ? (data.cost.prompt_cache_read_token * 1000000).toFixed(2) : ""}
+                            value={data.cost.prompt_cache_read_token ? data.cost.prompt_cache_read_token.toFixed(2) : ""}
                             placeholder="Optional"
                             onChange={(e) =>
                               handleProviderCostChange(
                                 provider,
                                 "prompt_cache_read_token",
-                                e.target.value ? (parseFloat(e.target.value) / 1000000).toString() : ""
+                                e.target.value
                               )
                             }
                           />

@@ -32,6 +32,7 @@ export const PROVIDER_NAMES = [
   "azure", 
   "anthropic",
   "bedrock",
+  "google-ai",
   "google-vertex-ai",
   "openrouter",
   "deepseek",
@@ -53,18 +54,18 @@ export const PROVIDER_NAMES = [
 
 export type ProviderName = typeof PROVIDER_NAMES[number];
 
-// Core cost structure - reusing existing pattern
+// Core cost structure - ALL COSTS ARE PER MILLION TOKENS
 export interface ModelCost {
-  prompt_token: number;
-  completion_token: number;
-  // Optional costs
-  prompt_cache_write_token?: number; // Default cache write (e.g., 5min for Anthropic)
-  prompt_cache_read_token?: number; // Cache hits
-  prompt_cache_write_token_1hr?: number; // 1-hour cache write (Anthropic)
-  prompt_audio_token?: number;
-  completion_audio_token?: number;
-  per_image?: number;
-  per_call?: number;
+  prompt_token: number; // Cost per million prompt tokens ($/1M tokens)
+  completion_token: number; // Cost per million completion tokens ($/1M tokens)
+  // Optional costs (all per million tokens unless specified otherwise)
+  prompt_cache_write_token?: number; // Default cache write cost per million tokens (e.g., 5min for Anthropic)
+  prompt_cache_read_token?: number; // Cache hit cost per million tokens
+  prompt_cache_write_token_1hr?: number; // 1-hour cache write cost per million tokens (Anthropic)
+  prompt_audio_token?: number; // Audio prompt cost per million tokens
+  completion_audio_token?: number; // Audio completion cost per million tokens
+  per_image?: number; // Cost per image (absolute cost, not per million)
+  per_call?: number; // Cost per API call (absolute cost, not per million)
 }
 
 // Rate limit structure
@@ -98,6 +99,14 @@ export interface ModelMetadata {
   deprecatedDate?: string;
 }
 
+// Model variant interface - only stores differences from base
+export interface ModelVariant {
+  id: string;
+  // Optional overrides
+  providers?: Record<string, Partial<ProviderImplementation>>;
+  metadata?: Partial<ModelMetadata>;
+}
+
 // Base model interface - contains all required fields
 export interface BaseModel {
   id: string;
@@ -106,15 +115,7 @@ export interface BaseModel {
   providers: Record<string, ProviderImplementation>;
   slug: string;
   disabled?: boolean; // Model-level disable flag
-}
-
-// Model variant interface - only stores differences from base
-export interface ModelVariant {
-  id: string;
-  baseModelId: string;
-  // Optional overrides
-  providers?: Record<string, ProviderImplementation>;
-  metadata?: Partial<ModelMetadata>;
+  variants?: Record<string, ModelVariant>; // Optional variants
 }
 
 // Model registry with separated base models and variants

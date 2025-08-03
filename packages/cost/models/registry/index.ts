@@ -5,16 +5,14 @@
 
 import type { ModelRegistry } from "../types";
 import { baseModels } from "./base-models";
-import { modelVariants } from "./model-variants";
 
 export const modelRegistry: ModelRegistry = {
   models: baseModels,
-  variants: modelVariants
+  variants: {}
 };
 
 // Re-export for convenience
 export { baseModels, type BaseModelId } from "./base-models";
-export { modelVariants, type ModelVariantId } from "./model-variants";
 
 // Empty for now since we have no variants
 export const variantsWithoutOverrides = [] as string[];
@@ -25,7 +23,7 @@ export const modelCountByCreator = Object.values(baseModels).reduce((acc, model)
   return acc;
 }, {} as Record<string, number>);
 
-export const modelCountByProvider = [...Object.values(baseModels), ...Object.values(modelVariants)]
+export const modelCountByProvider = Object.values(baseModels)
   .reduce((acc, model) => {
     if ('providers' in model && model.providers) {
       Object.values(model.providers).forEach(impl => {
