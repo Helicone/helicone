@@ -25,7 +25,7 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
   const heliconeAuthClient = useHeliconeAuthClient();
   const orgContext = useOrg();
 
-  const [currentMonth, setCurrentMonth] = useState(startOfMonth(new Date()));
+  const [currentMonth, _setCurrentMonth] = useState(startOfMonth(new Date()));
 
   const startOfMonthFormatted = formatISO(currentMonth, {
     representation: "date",
@@ -34,7 +34,7 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
     representation: "date",
   });
 
-  const { count, isLoading: isCountLoading } = useGetRequestCountClickhouse(
+  const { count } = useGetRequestCountClickhouse(
     startOfMonthFormatted,
     endOfMonthFormatted,
   );

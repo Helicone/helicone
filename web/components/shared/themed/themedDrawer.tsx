@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import {
   ArrowsPointingOutIcon,
@@ -27,8 +27,6 @@ const ThemedDrawer: React.FC<ThemedDrawerProps> = ({
   defaultExpanded = false,
   defaultWidth = "md:min-w-[60rem] w-full md:w-[60vw]",
 }) => {
-  const drawerRef = useRef<HTMLDivElement>(null);
-
   const [expanded, setExpanded] = useState(defaultExpanded);
 
   const { theme } = useTheme();

@@ -20,8 +20,6 @@ export default function ActionButton(props: ActionButtonProps) {
       : props.className
   }`;
 
-  const IconComponent = props.icon;
-
   const content = (
     <>
       {props.icon &&

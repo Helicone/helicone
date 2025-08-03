@@ -40,10 +40,10 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
   const searchParams = useSearchParams();
   const [active, setActive] = useState<string>(defaultValue);
 
-  const [startDate, setStartDate] = useState<string | undefined>(
+  const [, setStartDate] = useState<string | undefined>(
     formatDateToInputString(currentTimeFilter?.start) || undefined,
   );
-  const [endDate, setEndDate] = useState<string | undefined>(
+  const [, setEndDate] = useState<string | undefined>(
     formatDateToInputString(currentTimeFilter?.end) || undefined,
   );
 
@@ -51,10 +51,10 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
     return active === key;
   };
 
-  const [relative, setRelative] = useState<
+  const [relative, _setRelative] = useState<
     "minute" | "hour" | "day" | "week" | "month"
   >("day");
-  const [relativeValue, setRelativeValue] = useState<number>(1);
+  const [relativeValue, _setRelativeValue] = useState<number>(1);
 
   useEffect(() => {
     if (relative && relativeValue) {

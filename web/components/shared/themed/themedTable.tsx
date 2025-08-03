@@ -42,11 +42,11 @@ export const SecretInput = (props: {
 
   const org = useOrg();
 
-  const { data, isLoading, refetch } = useGetOrgMembers(
+  const { data } = useGetOrgMembers(
     org?.currentOrg?.id || "",
   );
 
-  const { data: orgOwner, isLoading: isOrgOwnerLoading } = useGetOrgOwner(
+  const { data: orgOwner } = useGetOrgOwner(
     org?.currentOrg?.id || "",
   );
 

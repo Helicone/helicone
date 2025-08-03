@@ -28,7 +28,7 @@ export const ThemedMultiSelect = ({
 }) => {
   return (
     <Popover className="relative text-sm">
-      {({ open }) => (
+      {({ open: _open }) => (
         <>
           <Popover.Button className="flex flex-row items-center gap-2 rounded-lg border border-gray-300 bg-white px-2.5 py-1.5 hover:bg-sky-50">
             <TagIcon className="h-5 w-5 text-gray-900" />
@@ -54,7 +54,7 @@ export const ThemedMultiSelect = ({
                 "absolute z-10 mt-2.5 flex",
               )}
             >
-              {({ close }) => (
+              {({ close: _close }) => (
                 <div className="flex-auto rounded-lg bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5">
                   <div className="grid grid-cols-2 divide-x divide-gray-900/5 rounded-t-lg bg-gray-50">
                     <button

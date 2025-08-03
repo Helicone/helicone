@@ -26,11 +26,9 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
   const {
     setProviderKeyCallback,
     setDecryptedKey,
-    orgId,
     orgProviderKey,
     variant = "portal",
     defaultProviderKey,
-    showTitle = true,
   } = props;
 
   const { providerKeys, refetchProviderKeys } = useVaultPage();
@@ -55,7 +53,7 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
         return;
       }
     },
-    [setProviderKeyCallback, orgId, setNotification, setProviderKey],
+    [setProviderKeyCallback, setProviderKey],
   );
 
   const deleteProviderKey = async (id: string) => {
