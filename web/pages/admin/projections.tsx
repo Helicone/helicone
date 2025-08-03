@@ -8,9 +8,7 @@ interface AdminProps {
   user: User;
 }
 
-const Admin = (props: AdminProps) => {
-  const { user } = props;
-
+const Admin = () => {
   return <AdminProjections />;
 };
 
