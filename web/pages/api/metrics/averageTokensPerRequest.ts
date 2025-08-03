@@ -11,7 +11,7 @@ async function handler(
     UnPromise<ReturnType<typeof getTokensPerRequest>>
   >,
 ) {
-  const { req, res, userData } = options;
+  const { res, userData } = options;
   const { data: filterData, error: filterError } = resultsAll([
     options.body.getFilter(),
     options.body.getTimeFilter(),
