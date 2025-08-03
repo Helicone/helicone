@@ -18,6 +18,7 @@ export class APIKeysManager {
         apiKeys.map(async (key) => {
           if (key.soft_delete) {
             await removeFromCache(`api_keys_${key.api_key_hash}`, this.env);
+            return;
           }
           await storeInCache(
             `api_keys_${key.api_key_hash}`,
