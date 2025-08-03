@@ -6,7 +6,6 @@ import {
   Home,
   ListTreeIcon,
   ScrollTextIcon,
-  ServerIcon,
   SheetIcon,
   ShieldCheckIcon,
   ShuffleIcon,

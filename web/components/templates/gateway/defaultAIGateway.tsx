@@ -1,4 +1,4 @@
-import { Small, XSmall } from "@/components/ui/typography";
+import { Small } from "@/components/ui/typography";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,25 +23,13 @@ import { providers, recentlyUsedProviderIds } from "@/data/providers";
 import { ProviderCard } from "@/components/providers/ProviderCard";
 import { filterProviders, sortProviders } from "@/utils/providerUtils";
 
-import useGatewayRouterRequests from "./useGatewayRouterRequests";
-import { RequestOverTimeChart } from "./requestOverTimeChart";
-import { CostOverTimeChart } from "./costOverTimeChart";
-import { LatencyOverTimeChart } from "./latencyOverTimeChart";
-import { getInitialColumns } from "./initialColumns";
-import ThemedTable from "@/components/shared/themed/table/themedTable";
-import { TimeFilter } from "@/types/timeFilter";
-import { getTimeIntervalAgo } from "@/lib/timeCalculations/time";
 import { getRouterCode } from "./routerUseDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DiffHighlight } from "@/components/templates/welcome/diffHighlight";
 
 const baseUrl = `${process.env.NEXT_PUBLIC_CLOUD_GATEWAY_BASE_URL}/ai`;
 
-const DefaultAIGateway = ({
-  setTabValue,
-}: {
-  setTabValue: () => void;
-}) => {
+const DefaultAIGateway = ({ setTabValue }: { setTabValue: () => void }) => {
   // Provider management state
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("relevance");
@@ -54,16 +42,17 @@ const DefaultAIGateway = ({
   );
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col">
       {/* Beta Banner */}
-      <div className="w-full border border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/50 flex-shrink-0">
+      <div className="w-full flex-shrink-0 border border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/50">
         <div className="flex items-center justify-between p-4">
           <div className="flex flex-col gap-1">
             <Small className="font-medium text-blue-900 dark:text-blue-100">
               🚀 AI Gateway is in Beta
             </Small>
             <Small className="text-blue-700 dark:text-blue-200">
-              This is a new feature that we're actively improving. We'd love to hear your feedback!
+              This is a new feature that we&apos;re actively improving.
+              We&apos;d love to hear your feedback!
             </Small>
           </div>
           <a
@@ -78,16 +67,16 @@ const DefaultAIGateway = ({
       </div>
 
       {/* AI Gateway Getting Started Section */}
-      <div className="w-full border border-border bg-background flex-shrink-0">
+      <div className="w-full flex-shrink-0 border border-border bg-background">
         <div className="p-4">
           <Tabs defaultValue="curl" className="w-full">
-            <div className="flex items-center justify-between mb-2">
+            <div className="mb-2 flex items-center justify-between">
               <TabsList className="w-auto">
                 <TabsTrigger value="curl">cURL</TabsTrigger>
                 <TabsTrigger value="javascript">JavaScript</TabsTrigger>
                 <TabsTrigger value="python">Python</TabsTrigger>
               </TabsList>
-              
+
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -98,16 +87,19 @@ const DefaultAIGateway = ({
                   <DialogHeader>
                     <DialogTitle>Getting Started with AI Gateway</DialogTitle>
                     <DialogDescription>
-                      Learn how to use the AI Gateway and access advanced features.
+                      Learn how to use the AI Gateway and access advanced
+                      features.
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4">
                     <p className="text-sm text-muted-foreground">
-                      Send your first request to the AI Gateway using one of the code examples above.
+                      Send your first request to the AI Gateway using one of the
+                      code examples above.
                     </p>
                     <div className="space-y-2">
                       <p className="text-sm">
-                        For more information on how to use the AI Gateway, please refer to the{" "}
+                        For more information on how to use the AI Gateway,
+                        please refer to the{" "}
                         <a
                           href="https://docs.helicone.ai/ai-gateway"
                           className="font-medium text-primary underline"
@@ -118,7 +110,8 @@ const DefaultAIGateway = ({
                         </a>
                       </p>
                       <p className="text-sm">
-                        To create custom routers with load balancing, caching, rate limiting and retries strategy,{" "}
+                        To create custom routers with load balancing, caching,
+                        rate limiting and retries strategy,{" "}
                         <button
                           className="font-medium text-primary underline"
                           onClick={() => setTabValue()}
@@ -175,8 +168,8 @@ const DefaultAIGateway = ({
       </div>
 
       {/* Provider Management Section */}
-      <div className="border-t border-border bg-background flex-1 flex flex-col min-h-0">
-        <div className="flex items-center justify-between p-4 border-b border-border flex-shrink-0">
+      <div className="flex min-h-0 flex-1 flex-col border-t border-border bg-background">
+        <div className="flex flex-shrink-0 items-center justify-between border-b border-border p-4">
           <Small className="font-bold text-gray-500 dark:text-slate-300">
             Provider Configuration
           </Small>
@@ -185,7 +178,7 @@ const DefaultAIGateway = ({
           </Small>
         </div>
 
-        <div className="flex flex-col gap-3 sm:flex-row p-4 border-b border-border flex-shrink-0">
+        <div className="flex flex-shrink-0 flex-col gap-3 border-b border-border p-4 sm:flex-row">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -244,7 +237,6 @@ const DefaultAIGateway = ({
       </div>
     </div>
   );
-
 };
 
 export default DefaultAIGateway;

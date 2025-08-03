@@ -1,16 +1,12 @@
 import FoldedHeader from "@/components/shared/FoldedHeader";
 
 import { Small } from "@/components/ui/typography";
-import { useFeatureFlag } from "@/services/hooks/admin";
-import { useOrg } from "@/components/layout/org/organizationContext";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import MyRouters from "./myRouters";
 import DefaultAIGateway from "./defaultAIGateway";
 import { useState } from "react";
 
 const GatewayPage = () => {
-  const org = useOrg();
-
   const [tabValue, setTabValue] = useState<string>("/ai");
 
   return (
