@@ -82,4 +82,4 @@ REVOKE all PRIVILEGES on decrypted_provider_keys_v2
 from
     anonymous;
 
-GRANT SELECT ON decrypted_provider_keys_v2 TO authenticated;
+GRANT SELECT ON decrypted_provider_keys_v2 TO service_role;
