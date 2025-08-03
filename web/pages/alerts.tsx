@@ -2,8 +2,6 @@ import AuthLayout from "../components/layout/auth/authLayout";
 import AlertsPage from "../components/templates/alerts/alertsPage";
 import { ReactElement } from "react";
 
-interface AlertProps {}
-
 const Alert = () => {
   return <AlertsPage />;
 };

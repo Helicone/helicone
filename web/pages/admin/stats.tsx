@@ -3,8 +3,6 @@ import AdminLayout from "../../components/layout/admin/adminLayout";
 import AdminStats from "../../components/templates/admin/adminStats";
 import { withAdminSSR } from "../../lib/api/handlerWrappers";
 
-interface AdminProps {}
-
 const Admin = () => {
   return <AdminStats />;
 };

@@ -26,7 +26,7 @@ async function handler(
   res.status(200).json(
     await getRateLimitOverTime({
       timeFilter,
-      userFilter: {},
+      userFilter: userFilters,
       orgId,
       dbIncrement: dbIncrement ?? "hour",
       timeZoneDifference,

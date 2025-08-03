@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import crypto from "crypto";
 import { IntercomSlackService } from "../../lib/intercom-slack-service";
 
 interface IntercomMessage {
@@ -67,23 +66,6 @@ interface IntercomWebhookPayload {
   };
 }
 
-// Verify Intercom webhook signature
-function verifyIntercomWebhook(
-  payload: string,
-  signature: string,
-  secret: string,
-): boolean {
-  const expectedSignature = crypto
-    .createHmac("sha256", secret)
-    .update(payload)
-    .digest("hex");
-
-  return crypto.timingSafeEqual(
-    Buffer.from(signature, "hex"),
-    Buffer.from(expectedSignature, "hex"),
-  );
-}
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
@@ -93,8 +75,6 @@ export default async function handler(
   }
 
   try {
-    const signature = req.headers["x-hub-signature-256"] as string;
-
     const slackWebhookUrl = process.env.SLACK_WEBHOOK_URL;
 
     if (!slackWebhookUrl) {

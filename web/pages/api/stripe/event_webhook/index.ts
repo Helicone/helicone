@@ -13,7 +13,6 @@ import { buffer } from "micro";
 import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { hashAuth } from "../../../../lib/hashClient";
-const POSTHOG_EVENT_API = "https://us.i.posthog.com/i/v0/e/";
 
 async function getUserIdFromEmail(email: string): Promise<string | null> {
   try {
