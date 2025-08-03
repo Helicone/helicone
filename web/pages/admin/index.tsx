@@ -5,7 +5,7 @@ import { withAdminSSR } from "../../lib/api/handlerWrappers";
 
 interface AdminProps {}
 
-const Admin = (props: AdminProps) => {
+const Admin = () => {
   return <AdminPage />;
 };
 
