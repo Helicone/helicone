@@ -36,7 +36,7 @@ const CountryPanel = (props: CountryPanelProps) => {
   // Use either mock or real data
   const countries = shouldShowMockData ? mockCountries : realCountries;
 
-  const countryMapper = (country: CountryData, index: number) => {
+  const countryMapper = (country: CountryData) => {
     const countryInfo = COUTNRY_CODE_DIRECTORY.find(
       (c) => c.isoCode === country.country,
     );

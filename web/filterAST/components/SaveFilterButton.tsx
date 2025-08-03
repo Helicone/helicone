@@ -14,7 +14,7 @@ const SaveFilterButton: React.FC<SaveFilterButtonProps> = () => {
   if (crud.isRefetching || crud.isSaving) {
     return (
       <Row className="gap-2">
-        <div className="flex items-center text-muted-foreground bg-slate-50 dark:bg-slate-900 px-1.5 py-0.5 rounded-md text-xs border border-slate-200 dark:border-slate-800">
+        <div className="flex items-center rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-xs text-muted-foreground dark:border-slate-800 dark:bg-slate-900">
           Saving...
         </div>
         <Button
@@ -89,7 +89,7 @@ const SaveFilterButton: React.FC<SaveFilterButtonProps> = () => {
             navigator.clipboard.writeText(url);
             notification.setNotification(
               "Filter URL copied to clipboard",
-              "success"
+              "success",
             );
           }
         }}

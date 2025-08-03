@@ -67,7 +67,7 @@ export function removeMessage({
 
 export function inferMessageRole(
   hasSystemStart: boolean,
-  messageIndex: number
+  messageIndex: number,
 ): "user" | "assistant" {
   const adjustedIndex = hasSystemStart ? messageIndex - 1 : messageIndex;
   return adjustedIndex % 2 === 0 ? "user" : "assistant";

@@ -2,7 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
 import { Property } from "../../lib/api/properties/properties";
 import { ok, Result } from "@/packages/common/result";
-import { InputParam, SingleFilterDef } from "@helicone-package/filters/frontendFilterDefs";
+import {
+  InputParam,
+  SingleFilterDef,
+} from "@helicone-package/filters/frontendFilterDefs";
 import { getPropertyParamsV2 } from "../lib/propertyParamsV2";
 import { useDebounce } from "./debounce";
 import { getJawnClient } from "../../lib/clients/jawn";
@@ -11,8 +14,8 @@ import { useOrg } from "../../components/layout/org/organizationContext";
 function useGetPropertiesV2<T extends "properties" | "request_response_rmt">(
   getPropertyFilters: (
     properties: string[],
-    inputParams: InputParam[]
-  ) => SingleFilterDef<T>[]
+    inputParams: InputParam[],
+  ) => SingleFilterDef<T>[],
 ) {
   const [propertySearch, setPropertySearch] = useState({
     property: "",
@@ -38,7 +41,7 @@ function useGetPropertiesV2<T extends "properties" | "request_response_rmt">(
         ?.map((property: Property) => property.property)
         ?.filter(
           (property: string) =>
-            "helicone-sent-to-posthog" !== property.toLowerCase()
+            "helicone-sent-to-posthog" !== property.toLowerCase(),
         )
         .sort() ?? []
     );
@@ -49,7 +52,7 @@ function useGetPropertiesV2<T extends "properties" | "request_response_rmt">(
     queryFn: async ({ queryKey }) => {
       const [, { property, search }] = queryKey as [
         string,
-        typeof debouncedPropertySearch
+        typeof debouncedPropertySearch,
       ];
       if (property === "") {
         return getPropertyFilters(allProperties, []);
@@ -64,7 +67,7 @@ function useGetPropertiesV2<T extends "properties" | "request_response_rmt">(
         values.data?.map((v: any) => ({
           param: v.property_param,
           key: v.property_key,
-        })) || []
+        })) || [],
       );
     },
     enabled:
@@ -80,7 +83,7 @@ function useGetPropertiesV2<T extends "properties" | "request_response_rmt">(
       setPropertySearch({ property, search });
       return ok(undefined);
     },
-    []
+    [],
   );
 
   return {

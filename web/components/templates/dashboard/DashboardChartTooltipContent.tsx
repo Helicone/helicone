@@ -8,7 +8,7 @@ const DashboardChartTooltipContent = (props: CustomTooltipProps) => {
         {props.label?.toLocaleString()}
       </p>
       <div className="grid gap-1.5">
-        {props.payload?.map((item, index) => {
+        {props.payload?.map((item) => {
           return (
             <div
               key={item.dataKey}

@@ -10,7 +10,7 @@ export type SelectionRange = {
 
 export function createSelectionRange(
   pre: HTMLPreElement,
-  selection: SelectionInfo
+  selection: SelectionInfo,
 ): SelectionRange | null {
   // Create a range for the selection
   const range = document.createRange();

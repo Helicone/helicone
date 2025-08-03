@@ -26,7 +26,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Lucide icons (modern alternative to Heroicons)
 import { Tag, DollarSign, Table2, Clock, ExternalLink } from "lucide-react";
-import { useJawnClient } from "@/lib/clients/jawnHook";
 import PropertyTopCosts from "./propertyTopCosts";
 import { Row } from "@/components/layout/common";
 import {
@@ -80,23 +79,15 @@ const PropertyPanel = (props: PropertyPanelProps) => {
     direction: "desc",
   });
 
-  const { keyMetrics, valueMetrics, refetch, isRefetching, isAnyLoading } =
-    usePropertyCard({
-      timeFilter,
-      property,
-      limit: showMore ? 100 : 11,
-      sortKey: sortConfig.key,
-      sortDirection: sortConfig.direction,
-    });
+  const { keyMetrics, valueMetrics, isAnyLoading } = usePropertyCard({
+    timeFilter,
+    property,
+    limit: showMore ? 100 : 11,
+    sortKey: sortConfig.key,
+    sortDirection: sortConfig.direction,
+  });
 
-  const {
-    properties,
-    isLoading: isPropertiesLoading,
-    propertyFilters,
-    searchPropertyFilters,
-  } = useGetPropertiesV2(getPropertyFiltersV2);
-
-  const jawn = useJawnClient();
+  const { propertyFilters } = useGetPropertiesV2(getPropertyFiltersV2);
 
   const filterMap = (REQUEST_TABLE_FILTERS as SingleFilterDef<any>[]).concat(
     Array.isArray(propertyFilters) ? propertyFilters : [],

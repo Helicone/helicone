@@ -252,7 +252,7 @@ export default function SimplePricingComparisonTable() {
             </TableRow>
           </TableHeader>
 
-          {featureGroups.map((group, index) => (
+          {featureGroups.map((group) => (
             <TableBody key={group.title} className="relative">
               {group.features.map((feature, featureIndex) => (
                 <Fragment key={feature.name}>

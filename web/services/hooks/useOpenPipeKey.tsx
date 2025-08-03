@@ -14,7 +14,7 @@ export function useOpenPipeKey() {
       const response = await jawnClient.GET("/v1/vault/keys");
       if (response.data?.error) throw new Error(response.data.error);
       return response.data?.data?.find(
-        (key) => key.provider_name === OPEN_PIPE_PROVIDER_NAME
+        (key) => key.provider_name === OPEN_PIPE_PROVIDER_NAME,
       );
     },
   });

@@ -17,7 +17,7 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
     private supabaseClient?: SupabaseClient<Database>,
     user?: HeliconeUser,
     private org?: { org: HeliconeOrg; role: string },
-    private queryClient?: QueryClient
+    private queryClient?: QueryClient,
   ) {
     this.user = user;
   }
@@ -203,7 +203,7 @@ export function useSupabaseAuthClient(): HeliconeAuthClient {
         email: user?.email ?? "",
       },
       undefined,
-      queryClient
+      queryClient,
     );
   }, [supabaseClient, user?.id, user?.email, queryClient]);
 }

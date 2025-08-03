@@ -97,7 +97,7 @@ export const useFilterUIDefinitions = () => {
                 res?.data?.map((r) => ({
                   label: r,
                   value: r,
-                })) ?? []
+                })) ?? [],
             );
         },
         subType: "property",
@@ -116,12 +116,12 @@ export const useFilterUIDefinitions = () => {
             ?.filter(
               (m) =>
                 m.model.toLowerCase().includes(searchTerm.toLowerCase()) &&
-                m.model !== ""
+                m.model !== "",
             )
             .map((m) => ({
               label: m.model,
               value: m.model,
-            })) ?? []
+            })) ?? [],
         );
       },
       table: "request_response_rmt",
@@ -130,7 +130,7 @@ export const useFilterUIDefinitions = () => {
     // Replace or add dynamic definitions to the static ones
     const staticIdsToExclude = dynamicDefinitions.map((def) => def.id);
     const filteredStaticDefs = STATIC_FILTER_DEFINITIONS.filter(
-      (def) => !staticIdsToExclude.includes(def.id)
+      (def) => !staticIdsToExclude.includes(def.id),
     );
 
     const definitions = [

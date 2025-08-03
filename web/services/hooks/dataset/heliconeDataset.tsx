@@ -13,7 +13,7 @@ const fetchHeliconeDatasetRows = async (
   orgId: string,
   datasetId: string,
   page: number,
-  pageSize: number
+  pageSize: number,
 ) => {
   const jawn = getJawnClient(orgId);
   const response = await jawn.POST(`/v1/helicone-dataset/{datasetId}/query`, {
@@ -61,7 +61,7 @@ const fetchHeliconeDatasetRows = async (
         request_body,
         response_body,
       };
-    })
+    }),
   );
 
   return rowsWithBodies;
@@ -110,7 +110,7 @@ type NotNullAndUndefined<T> = NotNull<NotUndefined<T>>;
 const useGetHeliconeDatasetRows = (
   id: string,
   currentPage: number,
-  currentPageSize: number
+  currentPageSize: number,
 ) => {
   const org = useOrg();
   const [rows, setRows] = useState<any[]>([]);
@@ -289,7 +289,7 @@ const useDeleteHeliconeDataset = () => {
               datasetId,
             },
           },
-        }
+        },
       );
 
       if (!response.data) {
@@ -305,7 +305,7 @@ const useDeleteHeliconeDataset = () => {
       toast.error(
         `Failed to delete dataset: ${
           error instanceof Error ? error.message : String(error)
-        }`
+        }`,
       );
     },
   });

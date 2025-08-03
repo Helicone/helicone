@@ -15,23 +15,23 @@ export const SavedFiltersList: React.FC<SavedFiltersListProps> = ({
   const filterStore = useFilterStore();
   const { crud, helpers } = useFilterAST();
   if (crud.isLoading) {
-    return <P className="text-center py-4">Loading saved filters...</P>;
+    return <P className="py-4 text-center">Loading saved filters...</P>;
   }
 
   if (crud.savedFilters.length === 0) {
     return (
-      <P className="text-center py-4 text-muted-foreground">
+      <P className="py-4 text-center text-muted-foreground">
         No saved filters yet. Create and save a filter to see it here.
       </P>
     );
   }
 
   return (
-    <div className="space-y-2 max-h-[300px] overflow-y-auto">
+    <div className="max-h-[300px] space-y-2 overflow-y-auto">
       {crud.savedFilters.map((filter) => (
         <div
           key={filter.id}
-          className="p-2 border rounded-md hover:bg-accent cursor-pointer flex justify-between items-center"
+          className="flex cursor-pointer items-center justify-between rounded-md border p-2 hover:bg-accent"
           onClick={() => helpers.loadFilterById(filter.id || "")}
         >
           <div>

@@ -11,7 +11,7 @@ const useGetDataSets = (promptId?: string) => {
     },
     {
       refetchOnWindowFocus: false,
-    }
+    },
   );
 
   return {

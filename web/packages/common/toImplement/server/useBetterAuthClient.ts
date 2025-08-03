@@ -2,7 +2,10 @@ import { auth } from "@/lib/auth";
 import { fromNodeHeaders } from "better-auth/node";
 import { SSRContext } from "../../auth/client/getSSRHeliconeAuthClient";
 import { HeliconeAuthClient } from "../../auth/client/HeliconeAuthClient";
-import { authClient, heliconeAuthClientFromSession } from "../client/betterAuthHelper";
+import {
+  authClient,
+  heliconeAuthClientFromSession,
+} from "../client/betterAuthHelper";
 import { ORG_ID_COOKIE_KEY } from "@/lib/constants";
 import { dbExecute } from "@/lib/api/db/dbExecute";
 import { HeliconeOrg, HeliconeUserResult, Role } from "../../auth/types";
@@ -10,7 +13,9 @@ import { Database } from "@/db/database.types";
 import { err, ok } from "../../result";
 
 export type GenericHeaders = Record<string, string | string[] | undefined>;
-export async function getUser(betterAuthUserId: string): Promise<HeliconeUserResult> {
+export async function getUser(
+  betterAuthUserId: string,
+): Promise<HeliconeUserResult> {
   const user = await dbExecute<{
     user_id: string;
     email: string;
@@ -21,7 +26,7 @@ export async function getUser(betterAuthUserId: string): Promise<HeliconeUserRes
     FROM public.user
     LEFT JOIN auth.users on public.user.auth_user_id = auth.users.id
     WHERE public.user.id = $1`,
-    [betterAuthUserId]
+    [betterAuthUserId],
   );
   if (!user || !user.data?.[0]) {
     return err("User not found");
@@ -33,7 +38,7 @@ export async function getUser(betterAuthUserId: string): Promise<HeliconeUserRes
   });
 }
 export async function betterAuthClientFromSSRContext(
-  ctx: SSRContext<any, any, any>
+  ctx: SSRContext<any, any, any>,
 ): Promise<HeliconeAuthClient> {
   if (!ctx.req?.headers) {
     throw new Error("No headers provided");
@@ -69,7 +74,7 @@ export async function betterAuthClientFromSSRContext(
   and organization_member.member = $2
   limit 1
     `,
-    [orgId, userId]
+    [orgId, userId],
   );
 
   if (org?.error) {
@@ -77,7 +82,9 @@ export async function betterAuthClientFromSSRContext(
   }
 
   return heliconeAuthClientFromSession(
-    session as ReturnType<typeof authClient.getSession> & { user?: { authUserId: string } },
+    session as ReturnType<typeof authClient.getSession> & {
+      user?: { authUserId: string };
+    },
     () => {},
     org?.data?.[0]
       ? {

@@ -42,10 +42,10 @@ const AlertsPage = () => {
   }[] = [...(slackChannelsData?.data || [])];
   // Free tier limit checks
   const alertCount = alerts?.length || 0;
-  const {
-    canCreate: canCreateAlert,
-    freeLimit: MAX_ALERTS,
-  } = useFeatureLimit("alerts", alertCount);
+  const { canCreate: canCreateAlert, freeLimit: MAX_ALERTS } = useFeatureLimit(
+    "alerts",
+    alertCount,
+  );
 
   const isOrgLoading = !orgContext || !orgContext.currentOrg;
   const isPageLoading = isLoading || isLoadingSlackChannels || isOrgLoading;

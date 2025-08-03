@@ -71,7 +71,7 @@ const EvaluatorDetail = () => {
   });
 
   // State for managing create modal
-  const [_showCreateModal, setShowCreateModal] = useState(false);
+  const [, setShowCreateModal] = useState(false);
 
   // State for managing modal visibility - explicitly set to false to prevent auto-opening
   const [showEvaluatorsModal, setShowEvaluatorsModal] = useState(false);

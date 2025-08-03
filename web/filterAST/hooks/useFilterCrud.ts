@@ -63,7 +63,7 @@ export const useFilterCrud = () => {
       });
       return response.data?.data as StoreFilterType;
     },
-    [jawn, savedFiltersData]
+    [jawn, savedFiltersData],
   );
 
   // Extract saved filters

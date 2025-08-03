@@ -6,7 +6,7 @@ import { getJawnClient } from "../../lib/clients/jawn";
 const useOrganizationLayout = (
   orgId: string,
   layoutPage: "dashboard" | "requests",
-  initialData?: Result<OrganizationLayout | null, string>
+  initialData?: Result<OrganizationLayout | null, string>,
 ) => {
   const jawn = getJawnClient(orgId);
   const { data, isLoading, refetch, isRefetching } = useQuery({
@@ -31,7 +31,7 @@ const useOrganizationLayout = (
               filterType,
             },
           },
-        }
+        },
       );
 
       if (error) {

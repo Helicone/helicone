@@ -10,7 +10,6 @@ import { Slider } from "@/components/ui/slider";
 import { StateParameters } from "@/types/prompt-state";
 import {
   findCreatorForProviderAndModel,
-  getModelConfig,
   getModelInfoFromModelString,
   getModelsForCreator,
   getModelString,
@@ -223,13 +222,6 @@ export default function ParametersPanel({
       const modelString = getModelString(selectedCreator, model, providerToUse);
 
       if (modelString) {
-        // Get the model config to check for parameters
-        const modelConfig = getModelConfig(
-          selectedCreator,
-          model,
-          providerToUse,
-        );
-
         const updates: Partial<StateParameters> = {
           provider: providerToUse,
           model: modelString,
@@ -286,13 +278,6 @@ export default function ParametersPanel({
         );
 
         if (modelString) {
-          // Get the model config to check for parameters
-          const modelConfig = getModelConfig(
-            selectedCreator,
-            currentModelName,
-            validProvider,
-          );
-
           const updates: Partial<StateParameters> = {
             provider: validProvider,
             model: modelString,

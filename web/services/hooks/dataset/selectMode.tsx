@@ -28,13 +28,13 @@ export function useSelectMode<T>({ items, getItemId }: UseSelectModeProps<T>) {
         } else {
           if (isShiftPressed && lastSelectedItem) {
             const startIndex = items.findIndex(
-              (i) => getItemId(i) === getItemId(lastSelectedItem)
+              (i) => getItemId(i) === getItemId(lastSelectedItem),
             );
             const endIndex = items.findIndex((i) => getItemId(i) === id);
             const newSelectedIds = items
               .slice(
                 Math.min(startIndex, endIndex),
-                Math.max(startIndex, endIndex) + 1
+                Math.max(startIndex, endIndex) + 1,
               )
               .map(getItemId);
             return Array.from(new Set([...prevSelectedIds, ...newSelectedIds]));
@@ -45,12 +45,12 @@ export function useSelectMode<T>({ items, getItemId }: UseSelectModeProps<T>) {
       });
       setLastSelectedItem(item);
     },
-    [items, getItemId, isShiftPressed, lastSelectedItem]
+    [items, getItemId, isShiftPressed, lastSelectedItem],
   );
 
   const selectAll = useCallback(() => {
     setSelectedIds((prevSelectedIds) =>
-      prevSelectedIds.length > 0 ? [] : items.map(getItemId)
+      prevSelectedIds.length > 0 ? [] : items.map(getItemId),
     );
   }, [items, getItemId]);
 

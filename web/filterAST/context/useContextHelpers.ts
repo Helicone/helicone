@@ -1,7 +1,7 @@
 import { FilterState } from "@/filterAST/store/filterStore";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
-import { DEFAULT_FILTER_EXPRESSION, FilterExpression } from "../filterAst";
+import { FilterExpression } from "../filterAst";
 import { StoreFilterType, useFilterCrud } from "../hooks/useFilterCrud";
 import useNotification from "@/components/shared/notification/useNotification";
 
@@ -39,7 +39,7 @@ export const useContextHelpers = ({
 
       return false;
     },
-    [filterCrud, filterStore, pathname, searchParams, router]
+    [filterCrud, filterStore, pathname, searchParams, router],
   );
 
   const clearFilter = useCallback(() => {
@@ -94,11 +94,11 @@ export const useContextHelpers = ({
    */
   const updateFilterById = async (
     filterId: string,
-    updates: Partial<StoreFilterType>
+    updates: Partial<StoreFilterType>,
   ) => {
     let filterToUpdate: StoreFilterType | undefined =
       filterCrud.savedFilters.find(
-        (filter: StoreFilterType) => filter.id === filterId
+        (filter: StoreFilterType) => filter.id === filterId,
       );
 
     if (!filterToUpdate) {
