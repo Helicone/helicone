@@ -87,7 +87,9 @@ export class GenerateHashController extends Controller {
           },
         };
       }
-      await refetchAPIKeys();
+      refetchAPIKeys().catch((error) => {
+        console.error("error refetching provider keys", error);
+      });
 
       this.setStatus(201);
       return {
