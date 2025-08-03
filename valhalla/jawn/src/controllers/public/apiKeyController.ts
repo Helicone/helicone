@@ -94,7 +94,6 @@ export class ApiKeyController extends Controller {
       return { error: result.error };
     }
 
-    await refetchProviderKeys();
     return result.data;
   }
 
