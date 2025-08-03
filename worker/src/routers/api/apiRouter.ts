@@ -78,8 +78,7 @@ function getAPIRouterV1(
     ) => {
       const KEY = "provider-keys-last-refetched";
       const lastFetchedAt = await env.RATE_LIMIT_KV.get(KEY);
-      //TODO logic
-      ctx.waitUntil(env.RATE_LIMIT_KV.put(KEY, new Date().toISOString()));
+
       const supabaseClientUS = createClient<Database>(
         env.SUPABASE_URL,
         env.SUPABASE_SERVICE_ROLE_KEY
@@ -95,11 +94,12 @@ function getAPIRouterV1(
           // Every 10 seconds
           new Date(lastFetchedAt).getTime() + 1000 * 10 > Date.now()
         ) {
-          return new Response("ok", { status: 200 });
+          return new Response("try again", { status: 500 });
         }
       } catch {
         console.error("Invalid date");
       }
+      ctx.waitUntil(env.RATE_LIMIT_KV.put(KEY, new Date().toISOString()));
 
       const providerKeysManagerUS = new ProviderKeysManager(
         new ProviderKeysStore(supabaseClientUS),
