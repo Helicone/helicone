@@ -31,8 +31,23 @@ function getAPIRouterV1(
     ) => {
       const KEY = "api-keys-last-refetched";
       const lastFetchedAt = await env.RATE_LIMIT_KV.get(KEY);
-      //TODO logic
+
+      // Check rate limit first
+      try {
+        if (
+          lastFetchedAt &&
+          // Every 10 seconds
+          new Date(lastFetchedAt).getTime() + 1000 * 10 > Date.now()
+        ) {
+          return new Response("rate limited", { status: 429 });
+        }
+      } catch {
+        console.error("Invalid date in rate limit check");
+      }
+
+      // Update timestamp immediately when processing request (not when completing)
       ctx.waitUntil(env.RATE_LIMIT_KV.put(KEY, new Date().toISOString()));
+
       const supabaseClientUS = createClient<Database>(
         env.SUPABASE_URL,
         env.SUPABASE_SERVICE_ROLE_KEY
@@ -41,18 +56,7 @@ function getAPIRouterV1(
         env.EU_SUPABASE_URL,
         env.EU_SUPABASE_SERVICE_ROLE_KEY
       );
-      try {
-        if (
-          lastFetchedAt &&
-          // Every 10 seconds
-          new Date(lastFetchedAt).getTime() + 1000 * 10 > Date.now()
-        ) {
-          return new Response("ok", { status: 200 });
-        }
-      } catch {
-        console.error("Invalid date");
-        return new Response("error", { status: 500 });
-      }
+
       const apiKeysManagerUS = new APIKeysManager(
         new APIKeysStore(supabaseClientUS),
         env
@@ -78,8 +82,23 @@ function getAPIRouterV1(
     ) => {
       const KEY = "provider-keys-last-refetched";
       const lastFetchedAt = await env.RATE_LIMIT_KV.get(KEY);
-      //TODO logic
+
+      // Check rate limit first
+      try {
+        if (
+          lastFetchedAt &&
+          // Every 10 seconds
+          new Date(lastFetchedAt).getTime() + 1000 * 10 > Date.now()
+        ) {
+          return new Response("rate limited", { status: 429 });
+        }
+      } catch {
+        console.error("Invalid date in rate limit check");
+      }
+
+      // Update timestamp immediately when processing request (not when completing)
       ctx.waitUntil(env.RATE_LIMIT_KV.put(KEY, new Date().toISOString()));
+
       const supabaseClientUS = createClient<Database>(
         env.SUPABASE_URL,
         env.SUPABASE_SERVICE_ROLE_KEY
@@ -88,18 +107,6 @@ function getAPIRouterV1(
         env.EU_SUPABASE_URL,
         env.EU_SUPABASE_SERVICE_ROLE_KEY
       );
-
-      try {
-        if (
-          lastFetchedAt &&
-          // Every 10 seconds
-          new Date(lastFetchedAt).getTime() + 1000 * 10 > Date.now()
-        ) {
-          return new Response("ok", { status: 200 });
-        }
-      } catch {
-        console.error("Invalid date");
-      }
 
       const providerKeysManagerUS = new ProviderKeysManager(
         new ProviderKeysStore(supabaseClientUS),

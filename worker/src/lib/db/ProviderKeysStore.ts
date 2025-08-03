@@ -84,9 +84,11 @@ export class ProviderKeysStore {
       .select(
         "org_id, decrypted_provider_key, decrypted_provider_secret_key, auth_type, provider_name, config"
       )
-      .eq("soft_delete", false);
+      .eq("soft_delete", false)
+      .not("decrypted_provider_key", "is", null);
 
     if (error) {
+      console.error("error getting provider keys", error);
       return null;
     }
 
