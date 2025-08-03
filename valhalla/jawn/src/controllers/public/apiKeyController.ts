@@ -33,7 +33,9 @@ export class ApiKeyController extends Controller {
       return { error: result.error };
     }
 
-    await refetchProviderKeys();
+    refetchProviderKeys().catch((error) => {
+      console.error("error refetching provider keys", error);
+    });
     return result.data;
   }
 
@@ -63,7 +65,9 @@ export class ApiKeyController extends Controller {
       return { error: result.error };
     }
 
-    await refetchProviderKeys();
+    refetchProviderKeys().catch((error) => {
+      console.error("error refetching provider keys", error);
+    });
     return result.data;
   }
 
@@ -94,7 +98,6 @@ export class ApiKeyController extends Controller {
       return { error: result.error };
     }
 
-    await refetchProviderKeys();
     return result.data;
   }
 
@@ -122,7 +125,9 @@ export class ApiKeyController extends Controller {
       return { error: result.error };
     }
 
-    await refetchProviderKeys();
+    refetchProviderKeys().catch((error) => {
+      console.error("error refetching provider keys", error);
+    });
     return result.data;
   }
 
