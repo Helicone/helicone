@@ -6,7 +6,7 @@ import { Result, resultsAll } from "@/packages/common/result";
 import { getTotalFeedback } from "../../../lib/api/metrics/feedback";
 
 async function handler(options: HandlerWrapperOptions<Result<number, string>>) {
-  const { req, res, userData } = options;
+  const { res, userData } = options;
   const { data: filterData, error: filterError } = resultsAll([
     options.body.getFilter(),
     options.body.getTimeFilter(),
