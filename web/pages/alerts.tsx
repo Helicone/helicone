@@ -4,7 +4,7 @@ import { ReactElement } from "react";
 
 interface AlertProps {}
 
-const Alert = (props: AlertProps) => {
+const Alert = () => {
   return <AlertsPage />;
 };
 
