@@ -94,7 +94,7 @@ function getAPIRouterV1(
           // Every 10 seconds
           new Date(lastFetchedAt).getTime() + 1000 * 10 > Date.now()
         ) {
-          return new Response("try again", { status: 500 });
+          return new Response("try again", { status: 429 });
         }
       } catch {
         console.error("Invalid date");
