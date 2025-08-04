@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import type { ResolvedModel, ProviderName } from "@helicone-package/cost/models";
+import type { ResolvedModel } from "@helicone-package/cost/models";
 
 // Helper function to format numbers with commas
 const formatNumberWithCommas = (value: number | undefined): string => {
@@ -52,8 +52,8 @@ export function EditModelDialog({
 
   const handleProviderCostChange = (
     provider: string,
-    field: keyof typeof editedModel.providers[string]["cost"],
-    value: string
+    field: keyof (typeof editedModel.providers)[string]["cost"],
+    value: string,
   ) => {
     const numValue = parseFloat(value) || 0;
     setEditedModel({
@@ -74,7 +74,7 @@ export function EditModelDialog({
   const handleRateLimitChange = (
     provider: string,
     field: "tpm" | "rpm" | "tpd" | "rpd",
-    value: string
+    value: string,
   ) => {
     const numValue = parseNumberFromString(value);
     setEditedModel({
@@ -123,7 +123,7 @@ export function EditModelDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-h-[80vh] max-w-4xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Model: {model.metadata.displayName}</DialogTitle>
         </DialogHeader>
@@ -158,7 +158,9 @@ export function EditModelDialog({
               <Label>Context Window</Label>
               <Input
                 type="text"
-                value={formatNumberWithCommas(editedModel.metadata.contextWindow)}
+                value={formatNumberWithCommas(
+                  editedModel.metadata.contextWindow,
+                )}
                 onChange={(e) =>
                   setEditedModel({
                     ...editedModel,
@@ -174,7 +176,9 @@ export function EditModelDialog({
               <Label>Max Output Tokens</Label>
               <Input
                 type="text"
-                value={formatNumberWithCommas(editedModel.metadata.maxOutputTokens)}
+                value={formatNumberWithCommas(
+                  editedModel.metadata.maxOutputTokens,
+                )}
                 placeholder="Optional"
                 onChange={(e) =>
                   setEditedModel({
@@ -208,7 +212,7 @@ export function EditModelDialog({
           <div>
             <Label className="mb-2 block">Provider Costs</Label>
             <Tabs defaultValue={Object.keys(editedModel.providers)[0]}>
-              <TabsList className="grid grid-cols-5 w-full">
+              <TabsList className="grid w-full grid-cols-5">
                 {Object.keys(editedModel.providers).map((provider) => (
                   <TabsTrigger key={provider} value={provider}>
                     {provider}
@@ -240,7 +244,7 @@ export function EditModelDialog({
                               handleProviderCostChange(
                                 provider,
                                 "prompt_token",
-                                e.target.value
+                                e.target.value,
                               )
                             }
                           />
@@ -255,7 +259,7 @@ export function EditModelDialog({
                               handleProviderCostChange(
                                 provider,
                                 "completion_token",
-                                e.target.value
+                                e.target.value,
                               )
                             }
                           />
@@ -268,13 +272,17 @@ export function EditModelDialog({
                           <Input
                             type="number"
                             step="0.01"
-                            value={data.cost.prompt_cache_write_token ? data.cost.prompt_cache_write_token.toFixed(2) : ""}
+                            value={
+                              data.cost.prompt_cache_write_token
+                                ? data.cost.prompt_cache_write_token.toFixed(2)
+                                : ""
+                            }
                             placeholder="Optional"
                             onChange={(e) =>
                               handleProviderCostChange(
                                 provider,
                                 "prompt_cache_write_token",
-                                e.target.value
+                                e.target.value,
                               )
                             }
                           />
@@ -284,13 +292,17 @@ export function EditModelDialog({
                           <Input
                             type="number"
                             step="0.01"
-                            value={data.cost.prompt_cache_read_token ? data.cost.prompt_cache_read_token.toFixed(2) : ""}
+                            value={
+                              data.cost.prompt_cache_read_token
+                                ? data.cost.prompt_cache_read_token.toFixed(2)
+                                : ""
+                            }
                             placeholder="Optional"
                             onChange={(e) =>
                               handleProviderCostChange(
                                 provider,
                                 "prompt_cache_read_token",
-                                e.target.value
+                                e.target.value,
                               )
                             }
                           />
@@ -304,20 +316,24 @@ export function EditModelDialog({
                         </div>
                       )}
 
-                      <div className="space-y-2 pt-4 border-t">
-                        <Label className="text-sm font-semibold">Rate Limits</Label>
+                      <div className="space-y-2 border-t pt-4">
+                        <Label className="text-sm font-semibold">
+                          Rate Limits
+                        </Label>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <Label>Tokens Per Minute (TPM)</Label>
                             <Input
                               type="text"
-                              value={formatNumberWithCommas(data.rateLimit?.tpm)}
+                              value={formatNumberWithCommas(
+                                data.rateLimit?.tpm,
+                              )}
                               placeholder="e.g., 30,000,000"
                               onChange={(e) =>
                                 handleRateLimitChange(
                                   provider,
                                   "tpm",
-                                  e.target.value
+                                  e.target.value,
                                 )
                               }
                             />
@@ -326,13 +342,15 @@ export function EditModelDialog({
                             <Label>Requests Per Minute (RPM)</Label>
                             <Input
                               type="text"
-                              value={formatNumberWithCommas(data.rateLimit?.rpm)}
+                              value={formatNumberWithCommas(
+                                data.rateLimit?.rpm,
+                              )}
                               placeholder="e.g., 10,000"
                               onChange={(e) =>
                                 handleRateLimitChange(
                                   provider,
                                   "rpm",
-                                  e.target.value
+                                  e.target.value,
                                 )
                               }
                             />
@@ -341,13 +359,15 @@ export function EditModelDialog({
                             <Label>Tokens Per Day (TPD)</Label>
                             <Input
                               type="text"
-                              value={formatNumberWithCommas(data.rateLimit?.tpd)}
+                              value={formatNumberWithCommas(
+                                data.rateLimit?.tpd,
+                              )}
                               placeholder="e.g., 15,000,000,000"
                               onChange={(e) =>
                                 handleRateLimitChange(
                                   provider,
                                   "tpd",
-                                  e.target.value
+                                  e.target.value,
                                 )
                               }
                             />
@@ -356,13 +376,15 @@ export function EditModelDialog({
                             <Label>Requests Per Day (RPD)</Label>
                             <Input
                               type="text"
-                              value={formatNumberWithCommas(data.rateLimit?.rpd)}
+                              value={formatNumberWithCommas(
+                                data.rateLimit?.rpd,
+                              )}
                               placeholder="Optional"
                               onChange={(e) =>
                                 handleRateLimitChange(
                                   provider,
                                   "rpd",
-                                  e.target.value
+                                  e.target.value,
                                 )
                               }
                             />

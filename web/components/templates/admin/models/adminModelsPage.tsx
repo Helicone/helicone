@@ -20,12 +20,12 @@ import {
 import { Search, GitBranch } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { 
-  models, 
+import {
+  models,
   modelRegistry,
-  MODEL_CREATORS, 
+  MODEL_CREATORS,
   PROVIDER_NAMES,
-  type ResolvedModel 
+  type ResolvedModel,
 } from "@helicone-package/cost/models";
 
 export default function AdminModelsPage() {
@@ -39,7 +39,7 @@ export default function AdminModelsPage() {
   const { baseModels, variantsByBase } = useMemo(() => {
     const baseList: ResolvedModel[] = [];
     const variantsMap: Record<string, ResolvedModel[]> = {};
-    
+
     // Get all base models
     for (const modelId in modelRegistry.models) {
       const model = models.get(modelId);
@@ -48,7 +48,7 @@ export default function AdminModelsPage() {
         variantsMap[modelId] = [];
       }
     }
-    
+
     // Get all variants and group by base model
     for (const variantId in modelRegistry.variants) {
       const variant = models.get(variantId);
@@ -59,7 +59,7 @@ export default function AdminModelsPage() {
         variantsMap[variant.baseModelId].push(variant);
       }
     }
-    
+
     return { baseModels: baseList, variantsByBase: variantsMap };
   }, []);
 
@@ -68,20 +68,24 @@ export default function AdminModelsPage() {
     return baseModels.filter((model) => {
       const matchesSearch = searchQuery
         ? model.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          model.metadata.displayName.toLowerCase().includes(searchQuery.toLowerCase())
+          model.metadata.displayName
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase())
         : true;
 
-      const matchesProvider = selectedProvider === "all" 
-        ? true 
-        : Object.keys(model.providers).includes(selectedProvider);
+      const matchesProvider =
+        selectedProvider === "all"
+          ? true
+          : Object.keys(model.providers).includes(selectedProvider);
 
-      const matchesCreator = selectedCreator === "all"
-        ? true
-        : model.creator === selectedCreator;
+      const matchesCreator =
+        selectedCreator === "all" ? true : model.creator === selectedCreator;
 
       // Check if model is disabled (either model-level flag or all providers disabled)
-      const isDisabled = model.disabled || Object.values(model.providers).every(p => !p.available);
-      
+      const isDisabled =
+        model.disabled ||
+        Object.values(model.providers).every((p) => !p.available);
+
       // If showDisabled is false, hide disabled models
       if (!showDisabled && isDisabled) {
         return false;
@@ -89,7 +93,13 @@ export default function AdminModelsPage() {
 
       return matchesSearch && matchesProvider && matchesCreator;
     });
-  }, [baseModels, searchQuery, selectedProvider, selectedCreator, showDisabled]);
+  }, [
+    baseModels,
+    searchQuery,
+    selectedProvider,
+    selectedCreator,
+    showDisabled,
+  ]);
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -103,10 +113,10 @@ export default function AdminModelsPage() {
       </div>
 
       <Card className="p-4">
-        <div className="flex flex-col gap-4 mb-6">
+        <div className="mb-6 flex flex-col gap-4">
           <div className="flex items-center gap-4">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <div className="relative max-w-sm flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
               <Input
                 placeholder="Search models..."
                 value={searchQuery}
@@ -114,8 +124,11 @@ export default function AdminModelsPage() {
                 className="pl-10"
               />
             </div>
-            
-            <Select value={selectedProvider} onValueChange={setSelectedProvider}>
+
+            <Select
+              value={selectedProvider}
+              onValueChange={setSelectedProvider}
+            >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="All Providers" />
               </SelectTrigger>
@@ -149,11 +162,17 @@ export default function AdminModelsPage() {
               <span>{filteredModels.length} base models</span>
               <span>•</span>
               <span>
-                {Object.values(variantsByBase).reduce((sum, variants) => sum + variants.length, 0)} total variants
+                {Object.values(variantsByBase).reduce(
+                  (sum, variants) => sum + variants.length,
+                  0,
+                )}{" "}
+                total variants
               </span>
               {(() => {
-                const disabledCount = baseModels.filter(m => 
-                  m.disabled || Object.values(m.providers).every(p => !p.available)
+                const disabledCount = baseModels.filter(
+                  (m) =>
+                    m.disabled ||
+                    Object.values(m.providers).every((p) => !p.available),
                 ).length;
                 return disabledCount > 0 && !showDisabled ? (
                   <>
@@ -165,11 +184,21 @@ export default function AdminModelsPage() {
                 ) : null;
               })()}
             </div>
-            
+
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">
-                <svg className="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                <svg
+                  className="h-4 w-4 text-muted-foreground"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
+                  />
                 </svg>
                 <Label htmlFor="show-disabled" className="text-sm">
                   Show disabled
@@ -180,7 +209,7 @@ export default function AdminModelsPage() {
                   onCheckedChange={setShowDisabled}
                 />
               </div>
-              
+
               <div className="flex items-center gap-2">
                 <GitBranch className="h-4 w-4 text-muted-foreground" />
                 <Label htmlFor="show-variants" className="text-sm">
@@ -209,113 +238,154 @@ export default function AdminModelsPage() {
             </TableHeader>
             <TableBody>
               {filteredModels.map((model) => {
-                const isDisabled = model.disabled || Object.values(model.providers).every(p => !p.available);
+                const isDisabled =
+                  model.disabled ||
+                  Object.values(model.providers).every((p) => !p.available);
                 const costs = Object.values(model.providers)
-                  .filter(p => p.available && p.cost)
-                  .map(p => p.cost.prompt_token);
+                  .filter((p) => p.available && p.cost)
+                  .map((p) => p.cost.prompt_token);
                 const minCost = costs.length > 0 ? Math.min(...costs) : 0;
                 const maxCost = costs.length > 0 ? Math.max(...costs) : 0;
-                
+
                 return (
-                <>
-                  <TableRow key={model.id} className={isDisabled ? "opacity-50" : ""}>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <div>
-                          <div className="font-medium">{model.metadata.displayName}</div>
-                          <div className="text-xs text-muted-foreground">{model.id}</div>
-                        </div>
-                        {isDisabled && (
-                          <span className="inline-flex items-center px-2 py-1 text-xs rounded-md bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-200">
-                            Disabled
-                          </span>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>{model.creator}</TableCell>
-                    <TableCell>{model.metadata.contextWindow.toLocaleString()}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        {Object.entries(model.providers).slice(0, 3).map(([provider, data]) => (
-                          <span
-                            key={provider}
-                            className={`inline-flex items-center px-2 py-1 text-xs rounded-md ${
-                              data.available ? "bg-muted" : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-200"
-                            }`}
-                          >
-                            {provider}
-                          </span>
-                        ))}
-                        {Object.keys(model.providers).length > 3 && (
-                          <span className="text-xs text-muted-foreground">
-                            +{Object.keys(model.providers).length - 3} more
-                          </span>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="text-xs">
-                        ${minCost.toFixed(4)} - ${maxCost.toFixed(4)}/1K
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                  {showVariants && variantsByBase[model.id]?.map((variant) => {
-                    const isVariantDisabled = variant.disabled || Object.values(variant.providers).every(p => !p.available);
-                    const variantCosts = Object.values(variant.providers)
-                      .filter(p => p.available && p.cost)
-                      .map(p => p.cost.prompt_token);
-                    const variantMinCost = variantCosts.length > 0 ? Math.min(...variantCosts) : 0;
-                    const variantMaxCost = variantCosts.length > 0 ? Math.max(...variantCosts) : 0;
-                    
-                    return (
-                      <TableRow key={variant.id} className={`bg-muted/30 ${isVariantDisabled ? "opacity-50" : ""}`}>
-                        <TableCell>
-                          <div className="flex items-start gap-2 pl-4">
-                            <GitBranch className="h-4 w-4 text-muted-foreground mt-0.5" />
-                            <div className="flex items-center gap-2">
-                              <div>
-                                <div className="font-medium">{variant.metadata.displayName}</div>
-                                <div className="text-xs text-muted-foreground">{variant.id}</div>
-                              </div>
-                              {isVariantDisabled && (
-                                <span className="inline-flex items-center px-2 py-1 text-xs rounded-md bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-200">
-                                  Disabled
-                                </span>
-                              )}
+                  <>
+                    <TableRow
+                      key={model.id}
+                      className={isDisabled ? "opacity-50" : ""}
+                    >
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <div>
+                            <div className="font-medium">
+                              {model.metadata.displayName}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {model.id}
                             </div>
                           </div>
-                        </TableCell>
-                        <TableCell>{variant.creator}</TableCell>
-                        <TableCell>{variant.metadata.contextWindow.toLocaleString()}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1">
-                            {Object.entries(variant.providers).slice(0, 3).map(([provider, data]) => (
+                          {isDisabled && (
+                            <span className="inline-flex items-center rounded-md bg-yellow-100 px-2 py-1 text-xs text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-200">
+                              Disabled
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>{model.creator}</TableCell>
+                      <TableCell>
+                        {model.metadata.contextWindow.toLocaleString()}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          {Object.entries(model.providers)
+                            .slice(0, 3)
+                            .map(([provider, data]) => (
                               <span
                                 key={provider}
-                                className={`inline-flex items-center px-2 py-1 text-xs rounded-md ${
-                                  data.available ? "bg-muted" : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-200"
+                                className={`inline-flex items-center rounded-md px-2 py-1 text-xs ${
+                                  data.available
+                                    ? "bg-muted"
+                                    : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-200"
                                 }`}
                               >
                                 {provider}
                               </span>
                             ))}
-                            {Object.keys(variant.providers).length > 3 && (
-                              <span className="text-xs text-muted-foreground">
-                                +{Object.keys(variant.providers).length - 3} more
-                              </span>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="text-xs">
-                            ${variantMinCost.toFixed(4)} - ${variantMaxCost.toFixed(4)}/1K
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </>
-              );
+                          {Object.keys(model.providers).length > 3 && (
+                            <span className="text-xs text-muted-foreground">
+                              +{Object.keys(model.providers).length - 3} more
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="text-xs">
+                          ${minCost.toFixed(4)} - ${maxCost.toFixed(4)}/1K
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                    {showVariants &&
+                      variantsByBase[model.id]?.map((variant) => {
+                        const isVariantDisabled =
+                          variant.disabled ||
+                          Object.values(variant.providers).every(
+                            (p) => !p.available,
+                          );
+                        const variantCosts = Object.values(variant.providers)
+                          .filter((p) => p.available && p.cost)
+                          .map((p) => p.cost.prompt_token);
+                        const variantMinCost =
+                          variantCosts.length > 0
+                            ? Math.min(...variantCosts)
+                            : 0;
+                        const variantMaxCost =
+                          variantCosts.length > 0
+                            ? Math.max(...variantCosts)
+                            : 0;
+
+                        return (
+                          <TableRow
+                            key={variant.id}
+                            className={`bg-muted/30 ${isVariantDisabled ? "opacity-50" : ""}`}
+                          >
+                            <TableCell>
+                              <div className="flex items-start gap-2 pl-4">
+                                <GitBranch className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                                <div className="flex items-center gap-2">
+                                  <div>
+                                    <div className="font-medium">
+                                      {variant.metadata.displayName}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground">
+                                      {variant.id}
+                                    </div>
+                                  </div>
+                                  {isVariantDisabled && (
+                                    <span className="inline-flex items-center rounded-md bg-yellow-100 px-2 py-1 text-xs text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-200">
+                                      Disabled
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>{variant.creator}</TableCell>
+                            <TableCell>
+                              {variant.metadata.contextWindow.toLocaleString()}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-1">
+                                {Object.entries(variant.providers)
+                                  .slice(0, 3)
+                                  .map(([provider, data]) => (
+                                    <span
+                                      key={provider}
+                                      className={`inline-flex items-center rounded-md px-2 py-1 text-xs ${
+                                        data.available
+                                          ? "bg-muted"
+                                          : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-200"
+                                      }`}
+                                    >
+                                      {provider}
+                                    </span>
+                                  ))}
+                                {Object.keys(variant.providers).length > 3 && (
+                                  <span className="text-xs text-muted-foreground">
+                                    +{Object.keys(variant.providers).length - 3}{" "}
+                                    more
+                                  </span>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="text-xs">
+                                ${variantMinCost.toFixed(4)} - $
+                                {variantMaxCost.toFixed(4)}/1K
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                  </>
+                );
               })}
             </TableBody>
           </Table>

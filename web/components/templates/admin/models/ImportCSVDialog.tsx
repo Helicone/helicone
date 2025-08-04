@@ -35,10 +35,17 @@ export function ImportCSVDialog({
         return;
       }
 
-      const headers = lines[0].split(",").map(h => h.trim());
-      const requiredHeaders = ["model_id", "provider", "prompt_cost", "completion_cost"];
-      
-      const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
+      const headers = lines[0].split(",").map((h) => h.trim());
+      const requiredHeaders = [
+        "model_id",
+        "provider",
+        "prompt_cost",
+        "completion_cost",
+      ];
+
+      const missingHeaders = requiredHeaders.filter(
+        (h) => !headers.includes(h),
+      );
       if (missingHeaders.length > 0) {
         setError(`Missing required headers: ${missingHeaders.join(", ")}`);
         return;
@@ -46,7 +53,7 @@ export function ImportCSVDialog({
 
       const data = [];
       for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(",").map(v => v.trim());
+        const values = lines[i].split(",").map((v) => v.trim());
         const row: any = {};
         headers.forEach((header, index) => {
           row[header] = values[index];
@@ -79,7 +86,8 @@ claude-3-opus,anthropic,0.000015,0.000075,Anthropic,200000`;
           <Alert>
             <InfoIcon className="h-4 w-4" />
             <AlertDescription>
-              Import model costs in CSV format. Required columns: model_id, provider, prompt_cost, completion_cost
+              Import model costs in CSV format. Required columns: model_id,
+              provider, prompt_cost, completion_cost
             </AlertDescription>
           </Alert>
 
@@ -102,7 +110,7 @@ claude-3-opus,anthropic,0.000015,0.000075,Anthropic,200000`;
 
           <div>
             <Label>Example CSV Format:</Label>
-            <pre className="bg-muted p-2 rounded text-xs overflow-x-auto">
+            <pre className="overflow-x-auto rounded bg-muted p-2 text-xs">
               {sampleCSV}
             </pre>
           </div>
