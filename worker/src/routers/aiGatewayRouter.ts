@@ -1,7 +1,5 @@
 import { Env, Provider } from "..";
-import { toAnthropic } from "../lib/clients/llmmapper/providers/openai/request/toAnthropic";
-import { OpenAIRequestBody } from "../lib/clients/llmmapper/providers/openai/request/types";
-import { proxyForwarder } from "../lib/HeliconeProxyRequest/ProxyForwarder";
+
 import { RequestWrapper } from "../lib/RequestWrapper";
 import { BaseRouter } from "./routerFactory";
 import { providers } from "../packages/cost/providers/mappings";
@@ -64,6 +62,9 @@ const getForwardUrl = (
   }
   return null;
 };
+type LLMRequestBody = {
+  model: string;
+} & Record<string, any>;
 
 const authenticateRequest = async (
   requestWrapper: RequestWrapper,
@@ -134,10 +135,14 @@ const authenticateRequest = async (
     }
   }
 
-  requestWrapper.setHeader(
-    "Authorization",
-    `Bearer ${providerKey.decrypted_provider_key}`
-  );
+  if (providerKey.provider === "ANTHROPIC") {
+    requestWrapper.setHeader("x-api-key", providerKey.decrypted_provider_key);
+  } else {
+    requestWrapper.setHeader(
+      "Authorization",
+      `Bearer ${providerKey.decrypted_provider_key}`
+    );
+  }
 };
 
 interface ModelAttempt {
@@ -172,14 +177,13 @@ const parseModelOption = (
 };
 
 const prepareRequestBody = (
-  parsedBody: OpenAIRequestBody,
+  parsedBody: any,
   model: string,
   provider: Provider
 ): string => {
   if (model.includes("claude-")) {
-    const anthropicBody = toAnthropic(parsedBody);
     const updatedBody = {
-      ...anthropicBody,
+      ...parsedBody,
       ...(provider === "BEDROCK"
         ? { anthropic_version: "bedrock-2023-05-31", model: undefined }
         : { model: model }),
@@ -248,7 +252,7 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
     ) => {
       const body = await getBody(requestWrapper);
 
-      function tryJSONParse(body: string): OpenAIRequestBody | null {
+      function tryJSONParse(body: string): LLMRequestBody | null {
         try {
           return JSON.parse(body);
         } catch (e) {
