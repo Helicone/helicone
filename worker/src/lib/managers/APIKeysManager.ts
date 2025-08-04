@@ -38,6 +38,9 @@ export class APIKeysManager {
     return key;
   }
 
+  /**
+   * @returns the organization id or null if the api key is not found
+   */
   async getAPIKeyWithFetch(apiKeyHash: string): Promise<string | null> {
     const key = await getFromCache(`api_keys_${apiKeyHash}`, this.env);
     if (!key) {

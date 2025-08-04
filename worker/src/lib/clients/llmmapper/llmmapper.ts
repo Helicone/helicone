@@ -2,7 +2,7 @@ import { OpenAIRequestBody } from "./providers/openai/request/types";
 import { oai2ant } from "./router/oai2ant/nonStream";
 import { oaiStream2antStreamResponse } from "./router/oai2ant/stream";
 
-function tryJSONParse(body: string): OpenAIRequestBody | null {
+export function tryJSONParse(body: string): OpenAIRequestBody | null {
   try {
     return JSON.parse(body);
   } catch (e) {
