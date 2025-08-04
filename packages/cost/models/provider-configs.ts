@@ -12,28 +12,26 @@ export const providerConfigs: Record<string, ProviderConfig> = {
     globalRateLimits: {
       defaultModels: {
         tpm: 250000,
-        rpm: 3000
-      }
-    }
+        rpm: 3000,
+      },
+    },
   },
   anthropic: {
     provider: "anthropic",
-    monthlyUsageLimit: null, // No limit specified yet
     globalRateLimits: {
       defaultModels: {
         tpm: 100000,
-        rpm: 1000
-      }
-    }
+        rpm: 1000,
+      },
+    },
   },
   azure: {
     provider: "azure",
-    monthlyUsageLimit: null, // No limit specified yet
     globalRateLimits: {
       defaultModels: {
         tpm: 100000,
-        rpm: 1000
-      }
-    }
-  }
+        rpm: 1000,
+      },
+    },
+  },
 };

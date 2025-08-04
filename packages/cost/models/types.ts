@@ -7,52 +7,11 @@
  * - Keeping it simple and focused on core functionality
  */
 
-// Using const assertion for immutable creator list
-export const MODEL_CREATORS = [
-  "OpenAI",
-  "Anthropic", 
-  "Google",
-  "Meta",
-  "DeepSeek",
-  "Mistral",
-  "Cohere",
-  "xAI",
-  "Nvidia",
-  "Alibaba",
-  "01.AI",
-  "Qwen",
-  "Moonshot",
-] as const;
+// Import types from constants
+import type { ModelCreator, ProviderName } from "./constants";
 
-export type ModelCreator = typeof MODEL_CREATORS[number];
-
-// Provider names - where models can be accessed
-export const PROVIDER_NAMES = [
-  "openai",
-  "azure", 
-  "anthropic",
-  "bedrock",
-  "google-ai",
-  "google-vertex-ai",
-  "openrouter",
-  "deepseek",
-  "together",
-  "groq",
-  "perplexity",
-  "mistral",
-  "cohere",
-  "xAI",
-  "meta",
-  "nvidia",
-  "nebius",
-  "novita",
-  "vercel",
-  "fireworks",
-  "qstash",
-  "avian",
-] as const;
-
-export type ProviderName = typeof PROVIDER_NAMES[number];
+// Re-export types for backward compatibility
+export type { ModelCreator, ProviderName } from "./constants";
 
 // Core cost structure - ALL COSTS ARE PER MILLION TOKENS
 export interface ModelCost {
@@ -102,6 +61,7 @@ export interface ModelMetadata {
 // Model variant interface - only stores differences from base
 export interface ModelVariant {
   id: string;
+  baseModelId?: string; // Optional for nested variants, required for registry variants
   // Optional overrides
   providers?: Record<string, Partial<ProviderImplementation>>;
   metadata?: Partial<ModelMetadata>;
