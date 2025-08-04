@@ -1,0 +1,54 @@
+#################################################################################
+# General Configuration
+#################################################################################
+
+resource_prefix = "helicone"
+
+tags = {
+  Project     = "Helicone"
+  Environment = "production"
+  ManagedBy   = "Terraform"
+  Owner       = "platform-team"
+}
+
+#################################################################################
+# GitHub Configuration
+#################################################################################
+
+# GitHub organization and repository
+github_org        = "Helicone"  # Replace with your GitHub org
+github_repository = "helicone"  # Replace with your repo name
+
+# Repository management (optional)
+manage_repository_settings = false  # Set to true to manage repo settings via Terraform
+repository_visibility      = "private"
+
+#################################################################################
+# Docker Hub Configuration
+#################################################################################
+
+# Docker Hub credentials
+# IMPORTANT: These are sensitive values. Consider using environment variables:
+# export TF_VAR_docker_username="your-dockerhub-username"
+# export TF_VAR_docker_password="your-dockerhub-password-or-token"
+docker_username = "your-dockerhub-username"  # Replace with your Docker Hub username
+docker_password = "your-dockerhub-password"  # Replace with your Docker Hub password or access token
+
+#################################################################################
+# Environment Variables Required
+#################################################################################
+
+# The following environment variables must be set when running Terraform:
+#
+# GITHUB_TOKEN - GitHub personal access token with repo permissions
+#   Generate at: https://github.com/settings/tokens
+#   Required scopes:
+#   - repo (full control of private repositories)
+#   - workflow (if managing workflow settings)
+#
+# Example:
+# export GITHUB_TOKEN="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+#
+# For Docker Hub credentials (recommended approach):
+# export TF_VAR_docker_username="your-dockerhub-username"
+# export TF_VAR_docker_password="your-dockerhub-password-or-token"
