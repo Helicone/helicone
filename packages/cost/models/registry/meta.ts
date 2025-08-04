@@ -3,7 +3,7 @@
  * Auto-generated on: 2025-08-04T04:52:42.850Z
  */
 
-import type { BaseModel } from "../types";
+import type { Model } from "../types";
 
 export const metaModels = {
   "llama-3.1-8b-instant": {
@@ -176,4 +176,4 @@ export const metaModels = {
     },
     slug: "llama-guard-4-12b"
   }
-} satisfies Record<string, BaseModel>;
+} satisfies Record<string, Model>;

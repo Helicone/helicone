@@ -12,10 +12,9 @@
 
 // Re-export all types
 export type {
-  BaseModel,
+  Model,
   ModelVariant,
   ModelRegistry,
-  ResolvedModel,
   ModelCost,
   ProviderImplementation,
   ModelMetadata,
@@ -38,7 +37,6 @@ export {
   modelCountByCreator,
   modelCountByProvider,
   variantsWithoutOverrides,
-  type BaseModelId,
 } from "./registry";
 
 // Re-export the getModel utility
@@ -69,7 +67,13 @@ class ModelCatalog {
    * Get variant count
    */
   get variants() {
-    return Object.keys(this.registry.variants).length;
+    let count = 0;
+    for (const model of Object.values(this.registry.models)) {
+      if (model.variants) {
+        count += Object.keys(model.variants).length;
+      }
+    }
+    return count;
   }
 }
 

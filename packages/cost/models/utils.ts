@@ -1,27 +1,13 @@
 import type {
-  BaseModel,
+  Model,
   ModelVariant,
   ModelRegistry,
-  ResolvedModel,
 } from "./types";
 
 /**
  * Resolve a variant by merging with its base model
  */
-function resolveVariant(registry: ModelRegistry, variant: ModelVariant, baseModelId?: string): ResolvedModel | null {
-  // Use provided baseModelId or get it from variant (for backward compatibility)
-  const resolvedBaseModelId = baseModelId || variant.baseModelId;
-  
-  if (!resolvedBaseModelId) {
-    console.warn(`No base model ID found for variant: ${variant.id}`);
-    return null;
-  }
-  
-  const baseModel = registry.models[resolvedBaseModelId];
-  if (!baseModel) {
-    console.warn(`Base model not found: ${resolvedBaseModelId} for variant: ${variant.id}`);
-    return null;
-  }
+function resolveVariant(baseModel: Model, variant: ModelVariant): Model {
   
   // Merge base with variant overrides
   const mergedProviders = { ...baseModel.providers };
@@ -58,7 +44,7 @@ function resolveVariant(registry: ModelRegistry, variant: ModelVariant, baseMode
   return {
     ...baseModel,
     id: variant.id,
-    baseModelId: resolvedBaseModelId,
+    baseModelId: baseModel.id,
     metadata: { ...baseModel.metadata, ...variant.metadata },
     providers: mergedProviders,
   };
@@ -67,22 +53,17 @@ function resolveVariant(registry: ModelRegistry, variant: ModelVariant, baseMode
 /**
  * Get any model by ID (base or variant)
  */
-export function getModel(registry: ModelRegistry, modelId: string): ResolvedModel | null {
+export function getModel(registry: ModelRegistry, modelId: string): Model | null {
   // Check base models first
   if (registry.models[modelId]) {
     return registry.models[modelId];
   }
   
   // Check nested variants in base models
-  for (const [baseModelId, baseModel] of Object.entries(registry.models)) {
-    if ('variants' in baseModel && baseModel.variants && baseModel.variants[modelId]) {
-      return resolveVariant(registry, baseModel.variants[modelId], baseModelId);
+  for (const baseModel of Object.values(registry.models)) {
+    if (baseModel.variants && baseModel.variants[modelId]) {
+      return resolveVariant(baseModel, baseModel.variants[modelId]);
     }
-  }
-  
-  // Check variants in registry (for backward compatibility)
-  if (registry.variants[modelId]) {
-    return resolveVariant(registry, registry.variants[modelId]);
   }
   
   return null;

@@ -3,7 +3,7 @@
  * Auto-generated on: 2025-08-04T04:52:42.850Z
  */
 
-import type { BaseModel } from "../types";
+import type { Model } from "../types";
 
 export const mistralModels = {
   "mixtral-8x7b-32768": {
@@ -27,4 +27,4 @@ export const mistralModels = {
     },
     slug: "mixtral-8x7b"
   }
-} satisfies Record<string, BaseModel>;
+} satisfies Record<string, Model>;

@@ -3,7 +3,7 @@
  * Auto-generated on: 2025-08-04T04:52:42.851Z
  */
 
-import type { BaseModel } from "../types";
+import type { Model } from "../types";
 
 export const xaiModels = {
   "grok-2-vision-1212": {
@@ -153,4 +153,4 @@ export const xaiModels = {
     },
     slug: "grok-4"
   }
-} satisfies Record<string, BaseModel>;
+} satisfies Record<string, Model>;

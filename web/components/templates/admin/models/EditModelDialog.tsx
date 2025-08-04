@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import type { ResolvedModel } from "@helicone-package/cost/models";
+import type { Model } from "@helicone-package/cost/models";
 
 // Helper function to format numbers with commas
 const formatNumberWithCommas = (value: number | undefined): string => {
@@ -29,10 +29,10 @@ const parseNumberFromString = (value: string): number | undefined => {
 };
 
 interface EditModelDialogProps {
-  model: ResolvedModel | null;
+  model: Model | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (model: ResolvedModel) => void;
+  onSave: (model: Model) => void;
 }
 
 export function EditModelDialog({
@@ -41,7 +41,7 @@ export function EditModelDialog({
   onOpenChange,
   onSave,
 }: EditModelDialogProps) {
-  const [editedModel, setEditedModel] = useState<ResolvedModel | null>(null);
+  const [editedModel, setEditedModel] = useState<Model | null>(null);
 
   // Initialize edited model when dialog opens
   if (model && !editedModel && open) {

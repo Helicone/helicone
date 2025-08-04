@@ -61,14 +61,13 @@ export interface ModelMetadata {
 // Model variant interface - only stores differences from base
 export interface ModelVariant {
   id: string;
-  baseModelId?: string; // Optional for nested variants, required for registry variants
   // Optional overrides
   providers?: Record<string, Partial<ProviderImplementation>>;
   metadata?: Partial<ModelMetadata>;
 }
 
-// Base model interface - contains all required fields
-export interface BaseModel {
+// Model interface - represents both base models and resolved variants
+export interface Model {
   id: string;
   creator: ModelCreator;
   metadata: ModelMetadata;
@@ -76,24 +75,20 @@ export interface BaseModel {
   slug: string;
   disabled?: boolean; // Model-level disable flag
   variants?: Record<string, ModelVariant>; // Optional variants
+  baseModelId?: string; // Set when this model is a resolved variant
 }
 
-// Model registry with separated base models and variants
+// Model registry containing all models
 export interface ModelRegistry {
-  models: Record<string, BaseModel>;
-  variants: Record<string, ModelVariant>;
+  models: Record<string, Model>;
 }
 
-// Resolved model - what you get after merging base + variant
-export interface ResolvedModel extends BaseModel {
-  baseModelId?: string; // Set if this was resolved from a variant
-}
 
 // Flat lookup map for O(1) access to any model ID
 export interface ModelLookupMap {
   [modelId: string]: {
-    type: 'model' | 'variant';
-    data: BaseModel | ResolvedModel;
+    type: "model" | "variant";
+    data: Model;
   };
 }
 
@@ -101,10 +96,10 @@ export interface ModelLookupMap {
 export interface ModelIndices {
   // Provider → Model IDs
   byProvider: Map<ProviderName, Set<string>>;
-  
+
   // Creator → Model IDs
   byCreator: Map<ModelCreator, Set<string>>;
-  
+
   // Quick model lookup by various identifiers
   byAlias: Map<string, string>; // alias → canonical model ID
 }

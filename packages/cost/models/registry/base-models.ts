@@ -3,7 +3,7 @@
  * Auto-generated on: 2025-08-04T04:52:42.851Z
  */
 
-import type { BaseModel } from "../types";
+import type { Model } from "../types";
 
 import { anthropicModels } from "./anthropic";
 import { googleModels } from "./google";
@@ -19,6 +19,4 @@ export const baseModels = {
   ...mistralModels,
   ...openaiModels,
   ...xaiModels,
-} satisfies Record<string, BaseModel>;
-
-export type BaseModelId = keyof typeof baseModels;
+} satisfies Record<string, Model>;

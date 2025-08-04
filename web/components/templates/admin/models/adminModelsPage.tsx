@@ -25,8 +25,9 @@ import {
   modelRegistry,
   MODEL_CREATORS,
   PROVIDER_NAMES,
-  type ResolvedModel,
+  type Model,
 } from "@helicone-package/cost/models";
+import { ModelDetailsDialog } from "./ModelDetailsDialog";
 
 export default function AdminModelsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -34,29 +35,32 @@ export default function AdminModelsPage() {
   const [selectedCreator, setSelectedCreator] = useState<string>("all");
   const [showVariants, setShowVariants] = useState(false);
   const [showDisabled, setShowDisabled] = useState(false);
+  const [selectedModel, setSelectedModel] = useState<Model | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
+  const handleModelClick = (model: Model) => {
+    setSelectedModel(model);
+    setIsDetailsOpen(true);
+  };
 
   // Get models from the registry, organized by hierarchy
   const { baseModels, variantsByBase } = useMemo(() => {
-    const baseList: ResolvedModel[] = [];
-    const variantsMap: Record<string, ResolvedModel[]> = {};
+    const baseList: Model[] = [];
+    const variantsMap: Record<string, Model[]> = {};
 
-    // Get all base models
-    for (const modelId in modelRegistry.models) {
-      const model = models.get(modelId);
-      if (model) {
-        baseList.push(model);
-        variantsMap[modelId] = [];
-      }
-    }
-
-    // Get all variants and group by base model
-    for (const variantId in modelRegistry.variants) {
-      const variant = models.get(variantId);
-      if (variant && variant.baseModelId) {
-        if (!variantsMap[variant.baseModelId]) {
-          variantsMap[variant.baseModelId] = [];
+    // Get all base models and their variants
+    for (const [modelId, baseModel] of Object.entries(modelRegistry.models)) {
+      baseList.push(baseModel);
+      variantsMap[modelId] = [];
+      
+      // Get nested variants for this base model
+      if (baseModel.variants) {
+        for (const variantId of Object.keys(baseModel.variants)) {
+          const variant = models.get(variantId);
+          if (variant) {
+            variantsMap[modelId].push(variant);
+          }
         }
-        variantsMap[variant.baseModelId].push(variant);
       }
     }
 
@@ -251,7 +255,8 @@ export default function AdminModelsPage() {
                   <>
                     <TableRow
                       key={model.id}
-                      className={isDisabled ? "opacity-50" : ""}
+                      className={`cursor-pointer hover:bg-muted/50 transition-colors ${isDisabled ? "opacity-50" : ""}`}
+                      onClick={() => handleModelClick(model)}
                     >
                       <TableCell>
                         <div className="flex items-center gap-2">
@@ -299,7 +304,7 @@ export default function AdminModelsPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="text-xs">
-                          ${minCost.toFixed(4)} - ${maxCost.toFixed(4)}/1K
+                          ${minCost.toFixed(2)} - ${maxCost.toFixed(2)}/1M
                         </div>
                       </TableCell>
                     </TableRow>
@@ -325,7 +330,8 @@ export default function AdminModelsPage() {
                         return (
                           <TableRow
                             key={variant.id}
-                            className={`bg-muted/30 ${isVariantDisabled ? "opacity-50" : ""}`}
+                            className={`bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors ${isVariantDisabled ? "opacity-50" : ""}`}
+                            onClick={() => handleModelClick(variant)}
                           >
                             <TableCell>
                               <div className="flex items-start gap-2 pl-4">
@@ -377,8 +383,8 @@ export default function AdminModelsPage() {
                             </TableCell>
                             <TableCell className="text-right">
                               <div className="text-xs">
-                                ${variantMinCost.toFixed(4)} - $
-                                {variantMaxCost.toFixed(4)}/1K
+                                ${variantMinCost.toFixed(2)} - $
+                                {variantMaxCost.toFixed(2)}/1M
                               </div>
                             </TableCell>
                           </TableRow>
@@ -391,6 +397,12 @@ export default function AdminModelsPage() {
           </Table>
         </div>
       </Card>
+
+      <ModelDetailsDialog
+        model={selectedModel}
+        open={isDetailsOpen}
+        onOpenChange={setIsDetailsOpen}
+      />
     </div>
   );
 }

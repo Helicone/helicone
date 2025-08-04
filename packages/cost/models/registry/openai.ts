@@ -3,7 +3,7 @@
  * Auto-generated on: 2025-08-04T04:52:42.850Z
  */
 
-import type { BaseModel } from "../types";
+import type { Model } from "../types";
 
 export const openaiModels = {
   "chatgpt-4o-latest": {
@@ -807,4 +807,4 @@ export const openaiModels = {
       }
     }
   }
-} satisfies Record<string, BaseModel>;
+} satisfies Record<string, Model>;
