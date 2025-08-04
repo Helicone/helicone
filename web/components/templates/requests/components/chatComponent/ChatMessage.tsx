@@ -202,7 +202,7 @@ const renderImageContent = (
       ? imageSrc
       : null;
 
-  if (!processedImageSrc) return <></>;
+  if (!processedImageSrc) return null;
 
   const imageElement = (
     <div className="relative w-full max-w-md">
