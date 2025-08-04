@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import {
   modelRegistry,
-  BaseModel,
+  Model,
   ModelVariant,
 } from "@helicone-package/cost/models";
 
@@ -11,7 +11,7 @@ export default async function handler(
 ) {
   if (req.method === "GET") {
     // Return current registry
-    const models: Record<string, BaseModel> = {};
+    const models: Record<string, Model> = {};
     const variants: Record<string, ModelVariant> = {};
 
     // Extract models and their variants
