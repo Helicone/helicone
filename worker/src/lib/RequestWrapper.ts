@@ -43,6 +43,7 @@ export type PromptSettings =
 export class RequestWrapper {
   private authorization: string | undefined;
   url: URL;
+  originalUrl: URL;
   heliconeHeaders: HeliconeHeaders;
   providerAuth: string | undefined;
   headers: Headers;
@@ -121,9 +122,17 @@ export class RequestWrapper {
     }
     return headers;
   }
+  public resetObject() {
+    this.url = new URL(this.originalUrl);
+    this.headers = this.mutatedAuthorizationHeaders(this.request);
+    this.heliconeHeaders = new HeliconeHeaders(this.headers);
+    this.promptSettings = this.getPromptSettings();
+    this.injectPromptProperties();
+  }
 
   private constructor(private request: Request, private env: Env) {
     this.url = new URL(request.url);
+    this.originalUrl = new URL(request.url);
     this.headers = this.mutatedAuthorizationHeaders(request);
     this.heliconeHeaders = new HeliconeHeaders(this.headers);
     this.promptSettings = this.getPromptSettings();
