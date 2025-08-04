@@ -198,7 +198,7 @@ const renderImageContent = (
 
   const processedImageSrc = imageSrc.includes("base64,")
     ? base64UrlToBase64(imageSrc)
-    : imageSrc.includes("https://")
+    : imageSrc.includes("https://") || imageSrc.includes("http://")
       ? imageSrc
       : null;
 
