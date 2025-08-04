@@ -125,27 +125,6 @@ services:
   # HELICONE CORE SERVICES (include-helicone profile)
   # =============================================================================
 
-  aigateway:
-    build:
-      context: ../aigateway
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    ports:
-      - "5678:5678"
-    profiles: ["include-helicone"]
-    depends_on:
-      redis:
-        condition: service_healthy
-    env_file: "../aigateway/.env"
-    environment:
-      # Configure server to bind to all interfaces (0.0.0.0) instead of localhost (127.0.0.1)
-      - PROXY__SERVER__ADDRESS=0.0.0.0
-    networks:
-      - traces
-      - default
-    extra_hosts:
-      - host.docker.internal:host-gateway
-
   jawn:
     container_name: helicone-jawn
     build:
