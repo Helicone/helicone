@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createClient } from "@supabase/supabase-js";
+import { PostgresClient } from "./lib/db/postgres";
 import { Database } from "../supabase/database.types";
 import { InMemoryRateLimiter } from "./lib/clients/InMemoryRateLimiter";
 import { AlertStore } from "./lib/db/AlertStore";
@@ -31,10 +31,12 @@ export interface EU_Env {
   EU_REQUEST_LOGS_QUEUE_URL: string;
   EU_REQUEST_LOGS_QUEUE_URL_LOW_PRIORITY: string;
   EU_AWS_REGION?: "eu-west-1";
+  EU_POSTGRES_CONNECTION_STRING: string;
 }
 export interface BASE_Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
   SUPABASE_URL: string;
+  POSTGRES_CONNECTION_STRING: string;
   TOKENIZER_COUNT_API: string;
   TOKEN_COUNT_URL: string;
   RATE_LIMIT_KV: KVNamespace;
@@ -474,14 +476,10 @@ export default {
     env: Env,
     _ctx: ExecutionContext
   ): Promise<void> {
-    const supabaseClientUS = createClient<Database>(
-      env.SUPABASE_URL,
-      env.SUPABASE_SERVICE_ROLE_KEY
-    );
-    const supabaseClientEU = createClient<Database>(
-      env.EU_SUPABASE_URL,
-      env.EU_SUPABASE_SERVICE_ROLE_KEY
-    );
+    // Initialize PostgreSQL clients
+    const postgresClient = new PostgresClient(env);
+    const sqlUS = postgresClient.client;
+    const sqlEU = PostgresClient.eu(env).client;
     await updateLoopUsers(env);
     if (controller.cron === "0 * * * *") {
       return;
@@ -489,7 +487,7 @@ export default {
     if (controller.cron === "0 10 * * mon") {
       const reportManagerUS = new ReportManager(
         new ReportStore(
-          supabaseClientUS,
+          sqlUS,
           new ClickhouseClientWrapper({
             CLICKHOUSE_HOST: env.CLICKHOUSE_HOST,
             CLICKHOUSE_USER: env.CLICKHOUSE_USER,
@@ -506,7 +504,7 @@ export default {
       }
       const reportManagerEU = new ReportManager(
         new ReportStore(
-          supabaseClientEU,
+          sqlEU,
           new ClickhouseClientWrapper({
             CLICKHOUSE_HOST: env.EU_CLICKHOUSE_HOST,
             CLICKHOUSE_USER: env.EU_CLICKHOUSE_USER,
@@ -525,7 +523,7 @@ export default {
     if (controller.cron === "* * * * *") {
       const alertManagerUS = new AlertManager(
         new AlertStore(
-          supabaseClientUS,
+          sqlUS,
           new ClickhouseClientWrapper({
             CLICKHOUSE_HOST: env.CLICKHOUSE_HOST,
             CLICKHOUSE_USER: env.CLICKHOUSE_USER,
@@ -543,7 +541,7 @@ export default {
 
       const alertManagerEU = new AlertManager(
         new AlertStore(
-          supabaseClientEU,
+          sqlEU,
           new ClickhouseClientWrapper({
             CLICKHOUSE_HOST: env.EU_CLICKHOUSE_HOST,
             CLICKHOUSE_USER: env.EU_CLICKHOUSE_USER,
@@ -563,22 +561,22 @@ export default {
     // every 5 minutes
     if (controller.cron === "*/5 * * * *") {
       const providerKeysManagerUS = new ProviderKeysManager(
-        new ProviderKeysStore(supabaseClientUS),
+        new ProviderKeysStore(sqlUS),
         env
       );
 
       const providerKeysManagerEU = new ProviderKeysManager(
-        new ProviderKeysStore(supabaseClientEU),
+        new ProviderKeysStore(sqlEU),
         env
       );
 
       const apiKeysManagerUS = new APIKeysManager(
-        new APIKeysStore(supabaseClientUS),
+        new APIKeysStore(sqlUS),
         env
       );
 
       const apiKeysManagerEU = new APIKeysManager(
-        new APIKeysStore(supabaseClientEU),
+        new APIKeysStore(sqlEU),
         env
       );
 

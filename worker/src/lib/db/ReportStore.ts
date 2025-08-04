@@ -1,5 +1,5 @@
 import { ClickhouseClientWrapper } from "./ClickhouseWrapper";
-import { SupabaseClient } from "@supabase/supabase-js";
+import pgPromise from "pg-promise";
 import { Result, err, ok } from "../util/results";
 import { Database } from "../../../supabase/database.types";
 import { clickhousePriceCalc } from "../../packages/cost";
@@ -19,7 +19,7 @@ export type ReportMetric = {
 
 export class ReportStore {
   constructor(
-    private supabaseClient: SupabaseClient<Database>,
+    private sql: pgPromise.IDatabase<any>,
     private clickhouseClient: ClickhouseClientWrapper
   ) {}
 
@@ -205,19 +205,35 @@ export class ReportStore {
   }
 
   public async getReports(): Promise<Result<Integration[], string>> {
-    const { data: reports, error: reportsErr } = await this.supabaseClient
-      .from("integrations")
-      .select(
-        "*, organization (integrations (id, integration_name, settings, active))"
-      )
-      .eq("integration_name", "report")
-      .eq("active", true);
+    try {
+      const reports = await this.sql.query<Integration>(
+        `SELECT 
+          i.*,
+          json_build_object(
+            'integrations', COALESCE(
+              json_agg(
+                json_build_object(
+                  'id', org_int.id,
+                  'integration_name', org_int.integration_name,
+                  'settings', org_int.settings,
+                  'active', org_int.active
+                )
+              ) FILTER (WHERE org_int.id IS NOT NULL),
+              '[]'::json
+            )
+          ) as organization
+        FROM integrations i
+        LEFT JOIN integrations org_int ON org_int.organization_id = i.organization_id
+        WHERE i.integration_name = 'report'
+          AND i.active = true
+        GROUP BY i.id, i.organization_id, i.integration_name, i.settings, 
+                 i.active, i.created_at, i.updated_at`
+      );
 
-    if (reportsErr) {
-      return err(`Failed to retrieve all reports: ${reportsErr}`);
+      return ok(reports as Integration[]);
+    } catch (error) {
+      return err(`Failed to retrieve all reports: ${error}`);
     }
-
-    return ok(reports as Integration[]);
   }
 
   private async getNumberOfThreatsValue(

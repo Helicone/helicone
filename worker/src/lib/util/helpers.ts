@@ -97,20 +97,3 @@ export function getModelFromPath(path: string) {
     return undefined;
   }
 }
-
-export function getModelFromResponse(responseBody: any) {
-  try {
-    if (typeof responseBody !== "object" || !responseBody) {
-      return "unknown";
-    }
-    if (Array.isArray(responseBody)) {
-      return "unknown";
-    }
-
-    return (
-      responseBody["model"] || (responseBody.body as any)["model"] || "unknown"
-    );
-  } catch (e) {
-    return "unknown";
-  }
-}

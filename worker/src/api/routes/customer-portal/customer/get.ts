@@ -44,17 +44,15 @@ export class CustomerGet extends BaseAPIRoute {
   }): Promise<ReturnBodyType> {
     const customers = await client.db
       .getClient()
-      .from("organization")
-      .select("*")
-      .eq("reseller_id", authParams.organizationId)
-      .eq("organization_type", "customer")
-      .eq("soft_delete", false);
+      .query(
+        `SELECT * FROM organization
+         WHERE reseller_id = $1
+         AND organization_type = 'customer'
+         AND soft_delete = false`,
+        [authParams.organizationId]
+      );
 
-    if (customers.error) {
-      throw new Error(JSON.stringify(customers.error));
-    }
-
-    return customers.data.map((customer) => ({
+    return customers.map((customer: any) => ({
       id: customer.id,
       name: customer.name,
     }));

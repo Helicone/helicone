@@ -1,6 +1,6 @@
-import { createClient } from "@supabase/supabase-js";
 import { Env } from "../..";
 import { RequestWrapper } from "../RequestWrapper";
+import { PostgresClient } from "../db/postgres";
 
 interface LoggingRequestBody {
   "helicone-id": string;
@@ -35,38 +35,39 @@ export async function updateRequestProperties(
   properties: Record<string, string>,
   env: Env
 ): Promise<void> {
-  const dbClient = createClient(
-    env.SUPABASE_URL,
-    env.SUPABASE_SERVICE_ROLE_KEY
-  );
+  const postgresClient = new PostgresClient(env);
+  const sql = postgresClient.client;
 
-  // Fetch the existing properties
-  const { data: requestData, error: fetchError } = await dbClient
-    .from("request")
-    .select("properties")
-    .eq("id", id)
-    .single();
+  try {
+    // Fetch the existing properties
+    const requestData = await sql.oneOrNone(
+      `SELECT properties FROM request
+       WHERE id = $1
+       LIMIT 1`,
+      [id]
+    );
 
-  if (fetchError) {
-    console.error("Error fetching properties:", fetchError.message);
-    return;
-  }
+    if (!requestData) {
+      console.error("Request not found");
+      return;
+    }
 
-  // Update the properties with the new values
-  const updatedProperties = {
-    ...requestData.properties,
-    ...properties,
-  };
+    // Update the properties with the new values
+    const updatedProperties = {
+      ...requestData.properties,
+      ...properties,
+    };
 
-  // Save the updated properties to the database
-  const { error: updateError } = await dbClient
-    .from("request")
-    .update({ properties: updatedProperties })
-    .eq("id", id);
+    // Save the updated properties to the database
+    await sql.none(
+      `UPDATE request
+       SET properties = $1::jsonb
+       WHERE id = $2`,
+      [JSON.stringify(updatedProperties), id]
+    );
 
-  if (updateError) {
-    console.error("Error updating properties:", updateError.message);
-  } else {
     console.log("Update successful");
+  } catch (error) {
+    console.error("Error updating properties:", error);
   }
 }

@@ -1,7 +1,7 @@
-import { createClient } from "@supabase/supabase-js";
 import { Env } from "../..";
 import { Database } from "../../../supabase/database.types";
 import { DBWrapper, HeliconeAuth } from "../../lib/db/DBWrapper";
+import { PostgresClient } from "../../lib/db/postgres";
 import { RequestWrapper } from "../../lib/RequestWrapper";
 import { ClickhouseClientWrapper } from "../../lib/db/ClickhouseWrapper";
 import { Valhalla } from "../../lib/db/valhalla";
@@ -25,7 +25,7 @@ class InternalResponse {
           "Access-Control-Allow-Origin": "*",
           "Access-Control-Allow-Methods": "PUT",
           "Access-Control-Allow-Headers":
-            "Content-Type, helicone-jwt, helicone-org-id",
+            "Content-Type, helicone-org-id",
         },
       });
     }
@@ -56,8 +56,13 @@ export class APIClient {
   ) {
     this.response = new InternalResponse(this);
     this.db = new DBWrapper(env, auth);
+    
+    // Initialize PostgreSQL client
+    const postgresClient = new PostgresClient(env);
+    const sql = postgresClient.client;
+    
     this.queue = new RequestResponseStore(
-      createClient<Database>(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+      sql,
       new DBQueryTimer(ctx, {
         enabled: (env.DATADOG_ENABLED ?? "false") === "true",
         apiKey: env.DATADOG_API_KEY,

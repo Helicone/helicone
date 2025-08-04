@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Headers } from "@cloudflare/workers-types";
-import { SupabaseClient } from "@supabase/supabase-js";
 import { Env, Provider } from "../..";
 import { Database, Json } from "../../../supabase/database.types";
 import { getTokenCount } from "../clients/TokenCounterClient";
@@ -541,7 +540,6 @@ export class DBLoggable {
 
   async log(
     db: {
-      supabase: SupabaseClient<Database>; // TODO : Deprecate
       dbWrapper: DBWrapper;
       clickhouse: ClickhouseClientWrapper;
       queue: RequestResponseStore;
@@ -635,7 +633,6 @@ export class DBLoggable {
 
   async useKafka(
     db: {
-      supabase: SupabaseClient<Database>; // TODO : Deprecate
       dbWrapper: DBWrapper;
       clickhouse: ClickhouseClientWrapper;
       queue: RequestResponseStore;

@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createClient } from "@supabase/supabase-js";
 import { Env } from "../..";
 import { Provider } from "../../packages/llm-mapper/types";
 import { DBWrapper } from "../db/DBWrapper";
+import { PostgresClient } from "../db/postgres";
 import {
   checkRateLimit,
   updateRateLimitCounter,
@@ -361,17 +361,17 @@ export async function proxyForwarder(
       console.error("Error getting auth", authError);
       return;
     }
-    const supabase = createClient(
-      env.SUPABASE_URL,
-      env.SUPABASE_SERVICE_ROLE_KEY
-    );
+    
+    // Initialize PostgreSQL client
+    const postgresClient = new PostgresClient(env);
+    const sql = postgresClient.client;
+    
     const res = await loggable.log(
       {
         clickhouse: new ClickhouseClientWrapper(env),
-        supabase: supabase,
         dbWrapper: new DBWrapper(env, auth),
         queue: new RequestResponseStore(
-          createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+          sql,
           new DBQueryTimer(ctx, {
             enabled: (env.DATADOG_ENABLED ?? "false") === "true",
             apiKey: env.DATADOG_API_KEY,
@@ -390,7 +390,7 @@ export async function proxyForwarder(
             env.S3_BUCKET_NAME ?? "",
             env.S3_REGION ?? "us-west-2"
           ),
-          createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY)
+          sql
         ),
         producer: new HeliconeProducer(env),
       },
