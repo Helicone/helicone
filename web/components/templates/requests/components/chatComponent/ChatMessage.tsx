@@ -196,7 +196,13 @@ const renderImageContent = (
 
   if (!imageSrc) return null;
 
-  const processedImageSrc = base64UrlToBase64(imageSrc);
+  const processedImageSrc = imageSrc.includes("base64,")
+    ? base64UrlToBase64(imageSrc)
+    : imageSrc.includes("https://") || imageSrc.includes("http://")
+      ? imageSrc
+      : null;
+
+  if (!processedImageSrc) return null;
 
   const imageElement = (
     <div className="relative w-full max-w-md">
