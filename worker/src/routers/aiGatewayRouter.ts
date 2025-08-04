@@ -13,6 +13,8 @@ import { SignatureV4 } from "@smithy/signature-v4";
 import { Sha256 } from "@aws-crypto/sha256-js";
 import { HttpRequest } from "@smithy/protocol-http";
 import { gatewayForwarder } from "./gatewayRouter";
+import { toAnthropic } from "../lib/clients/llmmapper/providers/openai/request/toAnthropic";
+import { HeliconeHeaders } from "../lib/models/HeliconeHeaders";
 
 const getBody = async (requestWrapper: RequestWrapper) => {
   if (requestWrapper.getMethod() === "GET") {
@@ -179,11 +181,16 @@ const parseModelOption = (
 const prepareRequestBody = (
   parsedBody: any,
   model: string,
-  provider: Provider
+  provider: Provider,
+  heliconeHeaders: HeliconeHeaders
 ): string => {
-  if (model.includes("claude-")) {
+  if (model.includes("claude-") && provider === "BEDROCK") {
+    const anthropicBody =
+      heliconeHeaders.gatewayConfig.bodyMapping === "OPENAI"
+        ? toAnthropic(parsedBody)
+        : parsedBody;
     const updatedBody = {
-      ...parsedBody,
+      ...anthropicBody,
       ...(provider === "BEDROCK"
         ? { anthropic_version: "bedrock-2023-05-31", model: undefined }
         : { model: model }),
@@ -328,7 +335,12 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
           continue;
         }
 
-        const body = prepareRequestBody(parsedBody, model, provider);
+        const body = prepareRequestBody(
+          parsedBody,
+          model,
+          provider,
+          requestWrapper.heliconeHeaders
+        );
         const attempt = { model, provider, providerKey, body };
 
         const result = await attemptModelRequest(
