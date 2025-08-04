@@ -25,16 +25,14 @@ export type {
   ModelCost,
   ProviderImplementation,
   ModelMetadata,
-  ProviderName,
-  ModelCreator,
   ModelIndices,
   ModelLookupMap,
   ProviderSummary,
   ModelProviderCost,
 } from "./types";
 
-// Re-export constants
-export { MODEL_CREATORS, PROVIDER_NAMES } from "./types";
+// Re-export constants and types
+export { MODEL_CREATORS, PROVIDER_NAMES, type ModelCreator, type ProviderName } from "./constants";
 
 // Re-export provider configurations
 export { providerConfigs } from "./provider-configs";
@@ -61,6 +59,9 @@ export {
   getModelVariants,
   getModelFamily,
 } from "./utils";
+
+// Re-export registry updater for programmatic updates
+export { RegistryUpdater, registryUpdater } from "./registry-updater";
 
 // Convenience class for easier access
 import { modelRegistry } from "./registry";

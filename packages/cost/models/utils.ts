@@ -17,20 +17,59 @@ let modelLookupMap: ModelLookupMap | null = null;
 /**
  * Resolve a variant by merging with its base model
  */
-function resolveVariant(registry: ModelRegistry, variant: ModelVariant): ResolvedModel | null {
-  const baseModel = registry.models[variant.baseModelId];
+function resolveVariant(registry: ModelRegistry, variant: ModelVariant, baseModelId?: string): ResolvedModel | null {
+  // Use provided baseModelId or get it from variant (for backward compatibility)
+  const resolvedBaseModelId = baseModelId || variant.baseModelId;
+  
+  if (!resolvedBaseModelId) {
+    console.warn(`No base model ID found for variant: ${variant.id}`);
+    return null;
+  }
+  
+  const baseModel = registry.models[resolvedBaseModelId];
   if (!baseModel) {
-    console.warn(`Base model not found: ${variant.baseModelId} for variant: ${variant.id}`);
+    console.warn(`Base model not found: ${resolvedBaseModelId} for variant: ${variant.id}`);
     return null;
   }
   
   // Merge base with variant overrides
+  const mergedProviders = { ...baseModel.providers };
+  
+  // Merge variant providers with base providers (deep merge for each provider)
+  if (variant.providers) {
+    for (const [providerKey, variantProvider] of Object.entries(variant.providers)) {
+      if (mergedProviders[providerKey] && variantProvider) {
+        // Deep merge the provider implementation
+        mergedProviders[providerKey] = {
+          ...mergedProviders[providerKey],
+          ...variantProvider,
+          // Ensure cost is properly merged
+          cost: {
+            ...mergedProviders[providerKey].cost,
+            ...(variantProvider.cost || {}),
+          },
+          // Ensure rateLimit is properly merged
+          rateLimit: {
+            ...(mergedProviders[providerKey].rateLimit || {}),
+            ...(variantProvider.rateLimit || {}),
+          },
+        };
+      } else if (variantProvider) {
+        // If variant provider doesn't exist in base, we need to ensure it's complete
+        // For now, we'll only add it if it has all required fields
+        if (variantProvider.provider && variantProvider.available !== undefined && variantProvider.cost) {
+          mergedProviders[providerKey] = variantProvider as any; // Type assertion needed here
+        }
+      }
+    }
+  }
+
   return {
     ...baseModel,
     id: variant.id,
-    baseModelId: variant.baseModelId,
+    baseModelId: resolvedBaseModelId,
     metadata: { ...baseModel.metadata, ...variant.metadata },
-    providers: { ...baseModel.providers, ...variant.providers },
+    providers: mergedProviders,
   };
 }
 
@@ -46,16 +85,32 @@ export function buildModelLookupMap(registry: ModelRegistry): ModelLookupMap {
       type: 'model',
       data: model,
     };
+    
+    // Add nested variants from base models
+    if ('variants' in model && model.variants) {
+      for (const [variantId, variant] of Object.entries(model.variants)) {
+        const resolved = resolveVariant(registry, variant, id);
+        if (resolved) {
+          lookupMap[variantId] = {
+            type: 'variant',
+            data: resolved,
+          };
+        }
+      }
+    }
   }
   
-  // Add all variants (resolved)
+  // Add all variants from registry (for backward compatibility)
   for (const [id, variant] of Object.entries(registry.variants)) {
-    const resolved = resolveVariant(registry, variant);
-    if (resolved) {
-      lookupMap[id] = {
-        type: 'variant',
-        data: resolved,
-      };
+    // Skip if already added from nested variants
+    if (!lookupMap[id]) {
+      const resolved = resolveVariant(registry, variant);
+      if (resolved) {
+        lookupMap[id] = {
+          type: 'variant',
+          data: resolved,
+        };
+      }
     }
   }
   
@@ -77,7 +132,14 @@ export function getModel(registry: ModelRegistry, modelId: string): ResolvedMode
     return registry.models[modelId];
   }
   
-  // Check variants
+  // Check nested variants in base models
+  for (const [baseModelId, baseModel] of Object.entries(registry.models)) {
+    if ('variants' in baseModel && baseModel.variants && baseModel.variants[modelId]) {
+      return resolveVariant(registry, baseModel.variants[modelId], baseModelId);
+    }
+  }
+  
+  // Check variants in registry (for backward compatibility)
   if (registry.variants[modelId]) {
     return resolveVariant(registry, registry.variants[modelId]);
   }
@@ -296,9 +358,29 @@ export function getModelVariants(
   registry: ModelRegistry,
   baseModelId: string
 ): ModelVariant[] {
-  return Object.values(registry.variants).filter(
+  const variants: ModelVariant[] = [];
+  
+  // Get nested variants from base model
+  const baseModel = registry.models[baseModelId];
+  if (baseModel && 'variants' in baseModel && baseModel.variants) {
+    variants.push(...Object.values(baseModel.variants));
+  }
+  
+  // Get variants from registry (for backward compatibility)
+  const registryVariants = Object.values(registry.variants).filter(
     variant => variant.baseModelId === baseModelId
   );
+  
+  // Merge and deduplicate by ID
+  const allVariants = [...variants, ...registryVariants];
+  const uniqueVariants = allVariants.reduce((acc, variant) => {
+    if (!acc.find(v => v.id === variant.id)) {
+      acc.push(variant);
+    }
+    return acc;
+  }, [] as ModelVariant[]);
+  
+  return uniqueVariants;
 }
 
 /**
@@ -316,9 +398,19 @@ export function getModelFamily(
     };
   }
   
-  // Check if it's a variant
+  // Check if it's a nested variant in base models
+  for (const [baseModelId, baseModel] of Object.entries(registry.models)) {
+    if ('variants' in baseModel && baseModel.variants && baseModel.variants[modelId]) {
+      return {
+        base: baseModel,
+        variants: getModelVariants(registry, baseModelId),
+      };
+    }
+  }
+  
+  // Check if it's a variant in registry (for backward compatibility)
   const variant = registry.variants[modelId];
-  if (variant && registry.models[variant.baseModelId]) {
+  if (variant && variant.baseModelId && registry.models[variant.baseModelId]) {
     return {
       base: registry.models[variant.baseModelId],
       variants: getModelVariants(registry, variant.baseModelId),

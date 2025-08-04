@@ -35,36 +35,36 @@ if (gpt4) {
   console.log(`      Name: ${gpt4.metadata.displayName}`);
   console.log(`      Context: ${gpt4.metadata.contextWindow.toLocaleString()} tokens`);
   console.log(`      Providers: ${Object.keys(gpt4.providers).join(", ")}`);
-  console.log(`      OpenAI Cost: $${(gpt4.providers.openai?.cost.prompt_token || 0) * 1_000_000}/M input tokens`);
+  console.log(`      OpenAI Cost: $${(gpt4.providers.openai?.cost.prompt_token || 0).toFixed(2)}/M input tokens`);
 }
 
-console.log("\n   b) Get a variant (gpt-4-0314):");
-const gpt4Variant = getModel(modelRegistry, "gpt-4-0314");
-if (gpt4Variant) {
-  console.log(`      Inherits from: ${gpt4Variant.baseModelId || "N/A"}`);
-  console.log(`      Has own costs: ${!!modelRegistry.variants["gpt-4-0314"]?.providers}`);
-  console.log(`      Cost: $${(gpt4Variant.providers.openai?.cost.prompt_token || 0) * 1_000_000}/M (inherited)`);
+console.log("\n   b) Get a model with slash in name (gpt-3.5-turbo):");
+const gpt35 = getModel(modelRegistry, "gpt-3.5-turbo");
+if (gpt35) {
+  console.log(`      Name: ${gpt35.metadata.displayName}`);
+  console.log(`      Context: ${gpt35.metadata.contextWindow.toLocaleString()} tokens`);
+  console.log(`      Cost: $${(gpt35.providers.openai?.cost.prompt_token || 0).toFixed(2)}/M input`);
 }
 
 // Example 2: Provider lookups
 console.log("\n3. Provider-Centric Queries:");
-console.log("   a) All models available on OpenRouter:");
-const openrouterSummary = getProviderSummary(modelRegistry, indices, "openrouter");
-if (openrouterSummary) {
-  console.log(`      Total models: ${openrouterSummary.modelCount}`);
+console.log("   a) All models available on Groq:");
+const groqSummary = getProviderSummary(modelRegistry, indices, "groq");
+if (groqSummary) {
+  console.log(`      Total models: ${groqSummary.modelCount}`);
   // Filter out special -1 costs for price range
-  const validCosts = openrouterSummary.models
-    .map(m => m.cost.prompt_token * 1_000_000)
+  const validCosts = groqSummary.models
+    .map(m => m.cost.prompt_token)
     .filter(cost => cost >= 0);
   if (validCosts.length > 0) {
-    console.log(`      Price range: $${Math.min(...validCosts).toFixed(2)} - $${Math.max(...validCosts).toFixed(2)}/M tokens`);
+    console.log(`      Price range: $${Math.min(...validCosts).toFixed(4)} - $${Math.max(...validCosts).toFixed(4)}/M tokens`);
   }
   console.log(`      Sample models:`);
-  openrouterSummary.models
+  groqSummary.models
     .filter(m => m.cost.prompt_token >= 0) // Show only models with valid costs
     .slice(0, 3)
     .forEach(m => {
-      console.log(`        - ${m.displayName} (${m.creator}): $${(m.cost.prompt_token * 1_000_000).toFixed(2)}/M`);
+      console.log(`        - ${m.displayName} (${m.creator}): $${(m.cost.prompt_token).toFixed(4)}/M`);
     });
 }
 
@@ -76,7 +76,7 @@ const modelProviders = getModelProviders(modelRegistry, modelToCompare);
 if (modelProviders) {
   console.log(`   ${modelProviders.displayName} available from:`);
   modelProviders.providers.forEach(p => {
-    console.log(`     - ${p.provider}: $${(p.cost.prompt_token * 1_000_000).toFixed(2)}/M input, $${(p.cost.completion_token * 1_000_000).toFixed(2)}/M output`);
+    console.log(`     - ${p.provider}: $${(p.cost.prompt_token).toFixed(2)}/M input, $${(p.cost.completion_token).toFixed(2)}/M output`);
   });
 } else {
   console.log(`   Model ${modelToCompare} not found`);
@@ -84,7 +84,7 @@ if (modelProviders) {
 
 // Example 4: Model families
 console.log("\n5. Model Families (base + variants):");
-const families = ["gpt-4", "claude-3-opus", "llama-3.1-8b"];
+const families = ["gpt-4", "claude-opus-4", "llama-3.1-8b"];
 families.forEach(familyId => {
   const family = getModelFamily(modelRegistry, familyId);
   if (family) {
@@ -125,7 +125,7 @@ const cheapestModels = allModels
 
 console.log(`      Top 5 cheapest models (excluding dynamic pricing):`);
 cheapestModels.forEach(({ model, minCost }) => {
-  console.log(`        - ${model.metadata.displayName}: $${(minCost * 1_000_000).toFixed(4)}/M tokens`);
+  console.log(`        - ${model.metadata.displayName}: $${(minCost).toFixed(4)}/M tokens`);
 });
 
 // Example 6: Cost calculation helper
@@ -137,8 +137,8 @@ function calculateCost(modelId: string, inputTokens: number, outputTokens: numbe
   }
   
   const costs = model.providers[provider].cost;
-  const inputCost = (inputTokens / 1_000_000) * costs.prompt_token * 1_000_000;
-  const outputCost = (outputTokens / 1_000_000) * costs.completion_token * 1_000_000;
+  const inputCost = (inputTokens / 1_000_000) * costs.prompt_token;
+  const outputCost = (outputTokens / 1_000_000) * costs.completion_token;
   
   return {
     inputCost,
@@ -148,7 +148,7 @@ function calculateCost(modelId: string, inputTokens: number, outputTokens: numbe
 }
 
 const usage = { input: 1000, output: 500 };
-["gpt-4", "gpt-3.5-turbo", "claude-3-opus-20240229"].forEach(modelId => {
+["gpt-4", "gpt-3.5-turbo", "claude-opus-4"].forEach(modelId => {
   const cost = calculateCost(modelId, usage.input, usage.output);
   if (cost) {
     console.log(`   ${modelId}: $${cost.totalCost.toFixed(4)} (${usage.input} in + ${usage.output} out)`);
