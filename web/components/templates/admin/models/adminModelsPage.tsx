@@ -1,9 +1,6 @@
 import { useState, useMemo } from "react";
-import { EditModelDialog } from "./EditModelDialog";
-import { ImportCSVDialog } from "./ImportCSVDialog";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { H1, P } from "@/components/ui/typography";
 import {
   Table,
@@ -20,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Plus, Download, Upload, GitBranch } from "lucide-react";
+import { Search, GitBranch } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { 
@@ -30,26 +27,13 @@ import {
   PROVIDER_NAMES,
   type ResolvedModel 
 } from "@helicone-package/cost/models";
-import useNotification from "@/components/shared/notification/useNotification";
 
 export default function AdminModelsPage() {
-  const { setNotification } = useNotification();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProvider, setSelectedProvider] = useState<string>("all");
   const [selectedCreator, setSelectedCreator] = useState<string>("all");
-  const [editingModel, setEditingModel] = useState<ResolvedModel | null>(null);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [showVariants, setShowVariants] = useState(false);
   const [showDisabled, setShowDisabled] = useState(false);
-  const [isDevelopment, setIsDevelopment] = useState<boolean | null>(null);
-  
-  // Check if we're in development mode
-  useMemo(() => {
-    if (typeof window !== 'undefined') {
-      setIsDevelopment(window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-    }
-  }, []);
 
   // Get models from the registry, organized by hierarchy
   const { baseModels, variantsByBase } = useMemo(() => {
@@ -107,153 +91,14 @@ export default function AdminModelsPage() {
     });
   }, [baseModels, searchQuery, selectedProvider, selectedCreator, showDisabled]);
 
-  const handleEditModel = (model: ResolvedModel) => {
-    setEditingModel(model);
-    setIsEditDialogOpen(true);
-  };
-
-  const handleSaveModel = async (updatedModel: ResolvedModel) => {
-    try {
-      // Create a new models object with the update
-      const updatedModels = { ...modelRegistry.models };
-      
-      // If it's a base model (not a variant), update it
-      if (!updatedModel.baseModelId) {
-        updatedModels[updatedModel.id] = {
-          id: updatedModel.id,
-          creator: updatedModel.creator,
-          metadata: updatedModel.metadata,
-          providers: updatedModel.providers,
-          slug: updatedModel.slug,
-          disabled: updatedModel.disabled,
-        };
-      }
-
-      const response = await fetch("/api/admin/models", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ models: updatedModels }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        if (response.status === 403 && !data.isDevelopment) {
-          setNotification("Model updates are only available in development mode. Please run locally to make changes.", "error");
-          return;
-        }
-        throw new Error(data.error || "Failed to save model");
-      }
-
-      // Show success message
-      setNotification("Model updated successfully! Changes saved to source files.", "success");
-      
-      // Reload the page to reflect changes
-      setTimeout(() => window.location.reload(), 1000);
-    } catch (error) {
-      console.error("Error saving model:", error);
-      setNotification("Failed to save model. Check console for details.", "error");
-    }
-  };
-
-  const handleImportCSV = async (csvData: any[]) => {
-    try {
-      // Process CSV data and update models
-      const updatedModels = { ...modelRegistry.models };
-      
-      csvData.forEach((row) => {
-        const modelId = row.model_id;
-        const provider = row.provider;
-        
-        // Check if model exists, if not create a basic structure
-        if (!updatedModels[modelId]) {
-          updatedModels[modelId] = {
-            id: modelId,
-            creator: row.creator || "Unknown",
-            metadata: {
-              displayName: modelId,
-              description: "",
-              contextWindow: parseInt(row.context_window) || 4096,
-              releaseDate: new Date().toISOString().split("T")[0],
-            },
-            providers: {},
-            slug: modelId,
-          };
-        }
-        
-        // Update provider costs
-        updatedModels[modelId].providers[provider] = {
-          provider: provider,
-          available: true,
-          cost: {
-            prompt_token: parseFloat(row.prompt_cost) || 0,
-            completion_token: parseFloat(row.completion_cost) || 0,
-          },
-        };
-      });
-
-      const response = await fetch("/api/admin/models", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ models: updatedModels }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        if (response.status === 403 && !data.isDevelopment) {
-          setNotification("CSV imports are only available in development mode. Please run locally to make changes.", "error");
-          return;
-        }
-        throw new Error(data.error || "Failed to import models");
-      }
-
-      setNotification("Models imported successfully! Changes saved to source files.", "success");
-      setTimeout(() => window.location.reload(), 1000);
-    } catch (error) {
-      console.error("Error importing CSV:", error);
-      setNotification("Failed to import CSV. Check console for details.", "error");
-    }
-  };
-
   return (
     <div className="flex flex-col gap-6 p-6">
-      {isDevelopment === false && (
-        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md p-4">
-          <div className="flex items-center gap-2">
-            <svg className="h-5 w-5 text-yellow-600 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            <p className="text-sm text-yellow-800 dark:text-yellow-200">
-              <strong>Read-only mode:</strong> Model updates are only available in development. Run locally to make changes.
-            </p>
-          </div>
-        </div>
-      )}
       <div className="flex items-center justify-between">
         <div>
           <H1>Model Registry</H1>
           <P className="text-muted-foreground">
-            Manage AI model costs across {PROVIDER_NAMES.length} providers
+            View AI model costs across {PROVIDER_NAMES.length} providers
           </P>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => setIsImportDialogOpen(true)}
-          >
-            <Upload className="h-4 w-4 mr-2" />
-            Import CSV
-          </Button>
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Export
-          </Button>
-          <Button size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Model
-          </Button>
         </div>
       </div>
 
@@ -359,12 +204,18 @@ export default function AdminModelsPage() {
                 <TableHead>Creator</TableHead>
                 <TableHead>Context Window</TableHead>
                 <TableHead>Providers</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="text-right">Cost Range</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredModels.map((model) => {
                 const isDisabled = model.disabled || Object.values(model.providers).every(p => !p.available);
+                const costs = Object.values(model.providers)
+                  .filter(p => p.available && p.cost)
+                  .map(p => p.cost.prompt_token);
+                const minCost = costs.length > 0 ? Math.min(...costs) : 0;
+                const maxCost = costs.length > 0 ? Math.max(...costs) : 0;
+                
                 return (
                 <>
                   <TableRow key={model.id} className={isDisabled ? "opacity-50" : ""}>
@@ -403,17 +254,19 @@ export default function AdminModelsPage() {
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => handleEditModel(model)}
-                      >
-                        Edit
-                      </Button>
+                      <div className="text-xs">
+                        ${minCost.toFixed(4)} - ${maxCost.toFixed(4)}/1K
+                      </div>
                     </TableCell>
                   </TableRow>
                   {showVariants && variantsByBase[model.id]?.map((variant) => {
                     const isVariantDisabled = variant.disabled || Object.values(variant.providers).every(p => !p.available);
+                    const variantCosts = Object.values(variant.providers)
+                      .filter(p => p.available && p.cost)
+                      .map(p => p.cost.prompt_token);
+                    const variantMinCost = variantCosts.length > 0 ? Math.min(...variantCosts) : 0;
+                    const variantMaxCost = variantCosts.length > 0 ? Math.max(...variantCosts) : 0;
+                    
                     return (
                       <TableRow key={variant.id} className={`bg-muted/30 ${isVariantDisabled ? "opacity-50" : ""}`}>
                         <TableCell>
@@ -454,13 +307,9 @@ export default function AdminModelsPage() {
                           </div>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleEditModel(variant)}
-                          >
-                            Edit
-                          </Button>
+                          <div className="text-xs">
+                            ${variantMinCost.toFixed(4)} - ${variantMaxCost.toFixed(4)}/1K
+                          </div>
                         </TableCell>
                       </TableRow>
                     );
@@ -472,19 +321,6 @@ export default function AdminModelsPage() {
           </Table>
         </div>
       </Card>
-
-      <EditModelDialog
-        model={editingModel}
-        open={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
-        onSave={handleSaveModel}
-      />
-
-      <ImportCSVDialog
-        open={isImportDialogOpen}
-        onOpenChange={setIsImportDialogOpen}
-        onImport={handleImportCSV}
-      />
     </div>
   );
 }

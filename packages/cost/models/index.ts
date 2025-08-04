@@ -7,12 +7,6 @@
  * 
  * // Get any model by ID (base or variant)
  * const gpt4 = models.get("gpt-4");
- * 
- * // Find models by criteria
- * const cheapModels = models.find({ maxCost: 0.001 });
- * 
- * // Get all models from a provider
- * const openrouterModels = models.byProvider("openrouter");
  * ```
  */
 
@@ -47,63 +41,21 @@ export {
   type BaseModelId,
 } from "./registry";
 
-// Re-export all utilities
-export {
-  buildModelLookupMap,
-  buildModelIndices,
-  getModel,
-  getProviderSummary,
-  getModelProviders,
-  findModels,
-  resolveModelId,
-  getModelVariants,
-  getModelFamily,
-} from "./utils";
-
-// Re-export registry updater for programmatic updates
-export { RegistryUpdater, registryUpdater } from "./registry-updater";
+// Re-export the getModel utility
+export { getModel } from "./utils";
 
 // Convenience class for easier access
 import { modelRegistry } from "./registry";
-import { 
-  buildModelLookupMap, 
-  buildModelIndices,
-  getModel as getModelUtil,
-  getProviderSummary as getProviderSummaryUtil,
-  findModels as findModelsUtil,
-} from "./utils";
+import { getModel as getModelUtil } from "./utils";
 
-class ModelCostSystem {
+class ModelCatalog {
   private registry = modelRegistry;
-  private lookupMap = buildModelLookupMap(this.registry);
-  private indices = buildModelIndices(this.registry);
 
   /**
    * Get any model by ID (base or variant)
    */
   get(modelId: string) {
     return getModelUtil(this.registry, modelId);
-  }
-
-  /**
-   * Find models by various criteria
-   */
-  find(query: Parameters<typeof findModelsUtil>[2]) {
-    return findModelsUtil(this.registry, this.indices, query);
-  }
-
-  /**
-   * Get all models from a specific provider
-   */
-  byProvider(provider: Parameters<typeof getProviderSummaryUtil>[2]) {
-    return getProviderSummaryUtil(this.registry, this.indices, provider);
-  }
-
-  /**
-   * Get total model count
-   */
-  get totalModels() {
-    return Object.keys(this.lookupMap).length;
   }
 
   /**
@@ -122,7 +74,7 @@ class ModelCostSystem {
 }
 
 // Export a singleton instance
-export const models = new ModelCostSystem();
+export const models = new ModelCatalog();
 
 // Default export for convenience
 export default models;
