@@ -9,13 +9,15 @@ export class ProviderKeysManager {
     const providerKeys = await this.store.getProviderKeys();
     if (providerKeys) {
       console.log("setting provider keys", providerKeys.length);
-      for (const key of providerKeys) {
-        await storeInCache(
-          `provider_keys_${key.provider}_${key.org_id}`,
-          JSON.stringify(key),
-          this.env
-        );
-      }
+      await Promise.all(
+        providerKeys.map(async (key) => {
+          await storeInCache(
+            `provider_keys_${key.provider}_${key.org_id}`,
+            JSON.stringify(key),
+            this.env
+          );
+        })
+      );
       // await storeInCache(`provider_keys_${provider}`, JSON.stringify(providerKeys), this.env);
     } else {
       console.error("No provider keys found");
