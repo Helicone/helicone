@@ -1,10 +1,9 @@
 # Data sources
-data "aws_caller_identity" "current" {}
-data "aws_partition" "current" {}
+# Data sources
+# Removed unused AWS data sources - not needed for GitHub secrets management
 
 locals {
-  account_id = data.aws_caller_identity.current.account_id
-  partition  = data.aws_partition.current.partition
+  # Removed unused AWS-specific locals
 }
 
 #################################################################################
