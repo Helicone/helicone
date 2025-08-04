@@ -74,6 +74,7 @@ const authenticateRequest = async (
   model: string,
   body: string
 ) => {
+  requestWrapper.resetObject();
   requestWrapper.setHeader(
     "Helicone-Auth",
     requestWrapper.getAuthorization() ?? ""
