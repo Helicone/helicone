@@ -120,7 +120,6 @@ const signBedrockRequest = async (
   requestWrapper.setUrl(
     `https://bedrock-runtime.${awsRegion}.amazonaws.com/model/${model}/invoke`
   );
-  console.log("signing bedrock request", awsAccessKey, awsSecretKey);
   const sigv4 = new SignatureV4({
     service: "bedrock",
     region: awsRegion,
@@ -162,7 +161,6 @@ const signBedrockRequest = async (
     }
   }
   requestWrapper.remapHeaders(newHeaders);
-  console.log("signed request", signedRequest);
   return;
 };
 
@@ -180,7 +178,6 @@ const authenticateRequest = async (
   );
   if (providerKey.provider === "BEDROCK") {
     if (providerKey.auth_type === "key") {
-      console.log("signing bedrock request");
       await signBedrockRequest(requestWrapper, providerKey, model, body);
       return;
     } else if (providerKey.auth_type === "session_token") {
