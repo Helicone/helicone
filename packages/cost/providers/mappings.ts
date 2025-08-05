@@ -263,13 +263,13 @@ export const providers: {
   },
   {
     pattern: awsBedrock,
-    provider: "BEDROCK",
-    costs: awsBedrockCosts,
+    provider: "AWS",
+    costs: [...awsBedrockCosts, ...awsNovaCosts],
   },
   {
     pattern: awsBedrock,
-    provider: "AWS",
-    costs: [...awsBedrockCosts, ...awsNovaCosts],
+    provider: "BEDROCK",
+    costs: awsBedrockCosts,
   },
   {
     pattern: deepseek,
