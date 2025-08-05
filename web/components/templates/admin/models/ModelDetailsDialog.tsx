@@ -26,8 +26,9 @@ export function ModelDetailsDialog({
 }: ModelDetailsDialogProps) {
   if (!model) return null;
 
-  const availableEndpoints = endpoints.filter((ep) => ep.status === 0);
-  const unavailableEndpoints = endpoints.filter((ep) => ep.status !== 0);
+  // For now, all endpoints are considered available since we removed status
+  const availableEndpoints = endpoints;
+  const unavailableEndpoints: Endpoint[] = [];
 
   // Group endpoints by provider
   const endpointsByProvider = availableEndpoints.reduce(
@@ -302,7 +303,7 @@ export function ModelDetailsDialog({
                         <div>
                           <P className="font-medium">{endpoint.name}</P>
                           <Small className="font-mono text-muted-foreground">
-                            {endpoint.tag} • Status: {endpoint.status}
+                            {endpoint.tag}
                           </Small>
                         </div>
                       </div>
