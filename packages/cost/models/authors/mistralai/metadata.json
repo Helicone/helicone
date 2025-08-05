@@ -1,5 +1,6 @@
 {
   "slug": "mistralai",
   "name": "mistralai",
-  "modelCount": 35
+  "modelCount": 35,
+  "supported": true
 }

@@ -631,6 +631,72 @@
       ]
     }
   ],
+  "gpt-4o-2024-05-13": [
+    {
+      "name": "OpenAI | openai/gpt-4o-2024-05-13",
+      "provider": "OpenAI",
+      "tag": "openai",
+      "status": 0,
+      "pricing": {
+        "prompt": 5,
+        "completion": 15,
+        "image": 0.007225,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 128000,
+      "maxCompletionTokens": 4096,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "seed",
+        "max_tokens",
+        "response_format",
+        "structured_outputs",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "web_search_options",
+        "logit_bias",
+        "logprobs",
+        "top_logprobs"
+      ]
+    },
+    {
+      "name": "Azure | openai/gpt-4o-2024-05-13",
+      "provider": "Azure",
+      "tag": "azure",
+      "status": 0,
+      "pricing": {
+        "prompt": 5,
+        "completion": 15,
+        "image": 0.007225,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 128000,
+      "maxCompletionTokens": 4096,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "web_search_options",
+        "seed",
+        "logit_bias",
+        "logprobs",
+        "top_logprobs",
+        "response_format",
+        "structured_outputs"
+      ]
+    }
+  ],
   "gpt-4o": [
     {
       "name": "OpenAI | openai/gpt-4o",
@@ -728,72 +794,6 @@
         "logit_bias",
         "logprobs",
         "top_logprobs"
-      ]
-    }
-  ],
-  "gpt-4o-2024-05-13": [
-    {
-      "name": "OpenAI | openai/gpt-4o-2024-05-13",
-      "provider": "OpenAI",
-      "tag": "openai",
-      "status": 0,
-      "pricing": {
-        "prompt": 5,
-        "completion": 15,
-        "image": 0.007225,
-        "cacheRead": null,
-        "cacheWrite": null
-      },
-      "contextLength": 128000,
-      "maxCompletionTokens": 4096,
-      "supportedParameters": [
-        "tools",
-        "tool_choice",
-        "seed",
-        "max_tokens",
-        "response_format",
-        "structured_outputs",
-        "temperature",
-        "top_p",
-        "stop",
-        "frequency_penalty",
-        "presence_penalty",
-        "web_search_options",
-        "logit_bias",
-        "logprobs",
-        "top_logprobs"
-      ]
-    },
-    {
-      "name": "Azure | openai/gpt-4o-2024-05-13",
-      "provider": "Azure",
-      "tag": "azure",
-      "status": 0,
-      "pricing": {
-        "prompt": 5,
-        "completion": 15,
-        "image": 0.007225,
-        "cacheRead": null,
-        "cacheWrite": null
-      },
-      "contextLength": 128000,
-      "maxCompletionTokens": 4096,
-      "supportedParameters": [
-        "tools",
-        "tool_choice",
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "stop",
-        "frequency_penalty",
-        "presence_penalty",
-        "web_search_options",
-        "seed",
-        "logit_bias",
-        "logprobs",
-        "top_logprobs",
-        "response_format",
-        "structured_outputs"
       ]
     }
   ],
@@ -1049,6 +1049,38 @@
       ]
     }
   ],
+  "gpt-4-0314": [
+    {
+      "name": "OpenAI | openai/gpt-4-0314",
+      "provider": "OpenAI",
+      "tag": "openai",
+      "status": 0,
+      "pricing": {
+        "prompt": 30,
+        "completion": 60,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 8191,
+      "maxCompletionTokens": 4096,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "seed",
+        "max_tokens",
+        "response_format",
+        "structured_outputs",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "logit_bias",
+        "logprobs",
+        "top_logprobs"
+      ]
+    }
+  ],
   "gpt-4": [
     {
       "name": "OpenAI | openai/gpt-4",
@@ -1107,38 +1139,6 @@
         "logprobs",
         "top_logprobs",
         "response_format"
-      ]
-    }
-  ],
-  "gpt-4-0314": [
-    {
-      "name": "OpenAI | openai/gpt-4-0314",
-      "provider": "OpenAI",
-      "tag": "openai",
-      "status": 0,
-      "pricing": {
-        "prompt": 30,
-        "completion": 60,
-        "cacheRead": null,
-        "cacheWrite": null
-      },
-      "contextLength": 8191,
-      "maxCompletionTokens": 4096,
-      "supportedParameters": [
-        "tools",
-        "tool_choice",
-        "seed",
-        "max_tokens",
-        "response_format",
-        "structured_outputs",
-        "temperature",
-        "top_p",
-        "stop",
-        "frequency_penalty",
-        "presence_penalty",
-        "logit_bias",
-        "logprobs",
-        "top_logprobs"
       ]
     }
   ]

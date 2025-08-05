@@ -333,7 +333,7 @@
       "name": "Novita | microsoft/wizardlm-2-8x22b",
       "provider": "Novita",
       "tag": "novita",
-      "status": -2,
+      "status": 0,
       "pricing": {
         "prompt": 0.62,
         "completion": 0.62,

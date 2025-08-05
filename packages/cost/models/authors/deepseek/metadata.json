@@ -1,5 +1,6 @@
 {
   "slug": "deepseek",
   "name": "deepseek",
-  "modelCount": 19
+  "modelCount": 19,
+  "supported": true
 }

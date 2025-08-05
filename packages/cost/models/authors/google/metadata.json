@@ -1,5 +1,6 @@
 {
   "slug": "google",
   "name": "google",
-  "modelCount": 25
+  "modelCount": 25,
+  "supported": true
 }

@@ -1665,7 +1665,7 @@
       "name": "DeepInfra | deepseek/deepseek-r1-distill-llama-70b",
       "provider": "DeepInfra",
       "tag": "deepinfra/fp8",
-      "status": -2,
+      "status": 0,
       "pricing": {
         "prompt": 0.09999999999999999,
         "completion": 0.39999999999999997,
@@ -2361,7 +2361,7 @@
       "name": "Fireworks | deepseek/deepseek-chat-v3",
       "provider": "Fireworks",
       "tag": "fireworks",
-      "status": -5,
+      "status": 0,
       "pricing": {
         "prompt": 0.8999999999999999,
         "completion": 0.8999999999999999,
