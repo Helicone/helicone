@@ -10,14 +10,10 @@ import { COST_PRECISION_MULTIPLIER } from "./costCalc";
 export type { ModelRow } from "./interfaces/Cost";
 export { providers } from "./providers/mappings";
 
-// Export the new model-centric system
-export * from "./models";
-export { default as models } from "./models";
-
 export type ModelWithProvider = {
   provider: string;
   modelRow: ModelRow;
-}
+};
 
 export function costOf({
   model,
@@ -140,81 +136,79 @@ function caseForCost(
   table: string,
   multiple: number,
   useDefaultCost: boolean = false,
-  optimized: boolean = false,
+  optimized: boolean = false
 ) {
-  const validCases = costs
-    .map((cost) => {
-      const costPerMultiple = {
-        prompt: Math.round(cost.cost.prompt_token * multiple),
-        completion: Math.round(cost.cost.completion_token * multiple),
-        prompt_audio: Math.round(
-          (cost.cost.prompt_audio_token ?? cost.cost.prompt_token) * multiple
-        ),
-        completion_audio: Math.round(
-          (cost.cost.completion_audio_token ?? cost.cost.completion_token) *
-            multiple
-        ),
-        prompt_cache_write: Math.round(
-          (cost.cost.prompt_cache_write_token ?? cost.cost.prompt_token) *
-            multiple
-        ),
-        prompt_cache_read: Math.round(
-          (cost.cost.prompt_cache_read_token ?? cost.cost.prompt_token) *
-            multiple
-        ),
-        image: Math.round((cost.cost.per_image ?? 0) * multiple),
-        per_call: Math.round((cost.cost.per_call ?? 0) * multiple),
-      };
+  const validCases = costs.map((cost) => {
+    const costPerMultiple = {
+      prompt: Math.round(cost.cost.prompt_token * multiple),
+      completion: Math.round(cost.cost.completion_token * multiple),
+      prompt_audio: Math.round(
+        (cost.cost.prompt_audio_token ?? cost.cost.prompt_token) * multiple
+      ),
+      completion_audio: Math.round(
+        (cost.cost.completion_audio_token ?? cost.cost.completion_token) *
+          multiple
+      ),
+      prompt_cache_write: Math.round(
+        (cost.cost.prompt_cache_write_token ?? cost.cost.prompt_token) *
+          multiple
+      ),
+      prompt_cache_read: Math.round(
+        (cost.cost.prompt_cache_read_token ?? cost.cost.prompt_token) * multiple
+      ),
+      image: Math.round((cost.cost.per_image ?? 0) * multiple),
+      per_call: Math.round((cost.cost.per_call ?? 0) * multiple),
+    };
 
-      const costParts = [];
-      if (costPerMultiple.prompt > 0) {
-        costParts.push(`${costPerMultiple.prompt} * ${table}.prompt_tokens`);
-      }
-      if (costPerMultiple.completion > 0) {
-        costParts.push(
-          `${costPerMultiple.completion} * ${table}.completion_tokens`
-        );
-      }
-      if (costPerMultiple.prompt_audio > 0) {
-        costParts.push(
-          `${costPerMultiple.prompt_audio} * ${table}.prompt_audio_tokens`
-        );
-      }
-      if (costPerMultiple.completion_audio > 0) {
-        costParts.push(
-          `${costPerMultiple.completion_audio} * ${table}.completion_audio_tokens`
-        );
-      }
-      if (costPerMultiple.prompt_cache_write > 0) {
-        costParts.push(
-          `${costPerMultiple.prompt_cache_write} * ${table}.prompt_cache_write_tokens`
-        );
-      }
-      if (costPerMultiple.prompt_cache_read > 0) {
-        costParts.push(
-          `${costPerMultiple.prompt_cache_read} * ${table}.prompt_cache_read_tokens`
-        );
-      }
-      if (costPerMultiple.image > 0) {
-        costParts.push(`${costPerMultiple.image}`); // Assuming image cost is per image, not per token
-      }
-      if (costPerMultiple.per_call > 0) {
-        costParts.push(`${costPerMultiple.per_call}`); // Assuming per_call cost is per call
-      }
+    const costParts = [];
+    if (costPerMultiple.prompt > 0) {
+      costParts.push(`${costPerMultiple.prompt} * ${table}.prompt_tokens`);
+    }
+    if (costPerMultiple.completion > 0) {
+      costParts.push(
+        `${costPerMultiple.completion} * ${table}.completion_tokens`
+      );
+    }
+    if (costPerMultiple.prompt_audio > 0) {
+      costParts.push(
+        `${costPerMultiple.prompt_audio} * ${table}.prompt_audio_tokens`
+      );
+    }
+    if (costPerMultiple.completion_audio > 0) {
+      costParts.push(
+        `${costPerMultiple.completion_audio} * ${table}.completion_audio_tokens`
+      );
+    }
+    if (costPerMultiple.prompt_cache_write > 0) {
+      costParts.push(
+        `${costPerMultiple.prompt_cache_write} * ${table}.prompt_cache_write_tokens`
+      );
+    }
+    if (costPerMultiple.prompt_cache_read > 0) {
+      costParts.push(
+        `${costPerMultiple.prompt_cache_read} * ${table}.prompt_cache_read_tokens`
+      );
+    }
+    if (costPerMultiple.image > 0) {
+      costParts.push(`${costPerMultiple.image}`); // Assuming image cost is per image, not per token
+    }
+    if (costPerMultiple.per_call > 0) {
+      costParts.push(`${costPerMultiple.per_call}`); // Assuming per_call cost is per call
+    }
 
-      const costString = costParts.length > 0 ? costParts.join(" + ") : "0";
-      
-      if (cost.model.operator === "equals") {
-        const op = optimized ? "=" : "ILIKE";
-        return `WHEN (${table}.model ${op} '${cost.model.value}') THEN ${costString}`;
-      } else if (cost.model.operator === "startsWith") {
-        return `WHEN (${table}.model LIKE '${cost.model.value}%') THEN ${costString}`;
-      } else if (cost.model.operator === "includes") {
-        return `WHEN (${table}.model ILIKE '%${cost.model.value}%') THEN ${costString}`;
-      } else {
-        throw new Error("Unknown operator");
-      }
-    });
+    const costString = costParts.length > 0 ? costParts.join(" + ") : "0";
+
+    if (cost.model.operator === "equals") {
+      const op = optimized ? "=" : "ILIKE";
+      return `WHEN (${table}.model ${op} '${cost.model.value}') THEN ${costString}`;
+    } else if (cost.model.operator === "startsWith") {
+      return `WHEN (${table}.model LIKE '${cost.model.value}%') THEN ${costString}`;
+    } else if (cost.model.operator === "includes") {
+      return `WHEN (${table}.model ILIKE '%${cost.model.value}%') THEN ${costString}`;
+    } else {
+      throw new Error("Unknown operator");
+    }
+  });
 
   return `
   CASE
@@ -224,46 +218,50 @@ END
 `;
 }
 
-
 // Current only used for backfilling costs via admin.
 export function clickhouseModelFilter(
   rows: ModelWithProvider[],
-  table = "request_response_rmt",
+  table = "request_response_rmt"
 ) {
-  const uniqueProviders = Array.from(new Set(rows.map(row => row.provider)));
-  
+  const uniqueProviders = Array.from(new Set(rows.map((row) => row.provider)));
+
   return `
   (
-    (${rows.map((row) => {
-      if (row.modelRow.model.operator === "equals") {
-        return `${table}.model = '${row.modelRow.model.value}'`
-      } else if (row.modelRow.model.operator === "startsWith") {
-        return `${table}.model LIKE '${row.modelRow.model.value}%'`
-      } else if (row.modelRow.model.operator === "includes") {
-        return `${table}.model ILIKE '%${row.modelRow.model.value}%'`
-      } else {
-        throw new Error("Unknown operator");
-      }
-    }).join(" OR ")})
+    (${rows
+      .map((row) => {
+        if (row.modelRow.model.operator === "equals") {
+          return `${table}.model = '${row.modelRow.model.value}'`;
+        } else if (row.modelRow.model.operator === "startsWith") {
+          return `${table}.model LIKE '${row.modelRow.model.value}%'`;
+        } else if (row.modelRow.model.operator === "includes") {
+          return `${table}.model ILIKE '%${row.modelRow.model.value}%'`;
+        } else {
+          throw new Error("Unknown operator");
+        }
+      })
+      .join(" OR ")})
     AND
-    (${table}.provider IN (${uniqueProviders.map(provider => `'${provider}'`).join(",")}))
+    (${table}.provider IN (${uniqueProviders.map((provider) => `'${provider}'`).join(",")}))
   )
-  `
+  `;
 }
 
 // Currently only used for backfilling costs via admin.
 // If not chunked, the query will be too large for Clickhouse.
 export function clickhousePriceCalcNonAggregated(
   models: ModelWithProvider[],
-  table = "request_response_rmt",
+  table = "request_response_rmt"
 ) {
-  const modelsByProvider = models.reduce((acc, model) => {
-    if (!acc[model.provider]) {
-      acc[model.provider] = [];
-    }
-    acc[model.provider].push(model.modelRow);
-    return acc;
-  }, {} as Record<string, ModelRow[]>);
+  const modelsByProvider = models.reduce(
+    (acc, model) => {
+      if (!acc[model.provider]) {
+        acc[model.provider] = [];
+      }
+      acc[model.provider].push(model.modelRow);
+      return acc;
+    },
+    {} as Record<string, ModelRow[]>
+  );
 
   return `
   (
@@ -281,7 +279,6 @@ export function clickhousePriceCalcNonAggregated(
 }
 
 export function clickhousePriceCalc(table: string, inDollars: boolean = true) {
-
   const providersWithCosts = providers.filter(
     (p) => p.costs && defaultProvider.provider !== p.provider
   );
