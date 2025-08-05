@@ -21,11 +21,7 @@ import { Search, GitBranch } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { ModelDetailsDialog } from "./ModelDetailsDialog";
-import type {
-  Model,
-  Endpoint,
-  Author,
-} from "@helicone-package/cost/models";
+import type { Model, Endpoint, Author } from "@helicone-package/cost/models";
 
 interface RegistryData {
   models: Record<string, Model>;
@@ -103,7 +99,8 @@ export default function AdminModelsPage() {
         selectedAuthor === "all" ? true : model.author === selectedAuthor;
 
       // Check if model is disabled (no available endpoints)
-      const isDisabled = endpoints.length === 0 || endpoints.every((ep) => ep.status !== 0);
+      const isDisabled =
+        endpoints.length === 0 || endpoints.every((ep) => ep.status !== 0);
 
       // If showDisabled is false, hide disabled models
       if (!showDisabled && isDisabled) {
@@ -151,7 +148,7 @@ export default function AdminModelsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-96">
+      <div className="flex h-96 items-center justify-center">
         <div className="text-muted-foreground">Loading models...</div>
       </div>
     );
@@ -159,7 +156,7 @@ export default function AdminModelsPage() {
 
   if (!registryData) {
     return (
-      <div className="flex items-center justify-center h-96">
+      <div className="flex h-96 items-center justify-center">
         <div className="text-red-500">Failed to load models</div>
       </div>
     );
@@ -233,15 +230,15 @@ export default function AdminModelsPage() {
                 variants
               </span>
               {(() => {
-                const disabledCount = Object.entries(registryData.models).filter(
-                  ([modelKey]) => {
-                    const endpoints = registryData.endpoints[modelKey] || [];
-                    return (
-                      endpoints.length === 0 ||
-                      endpoints.every((ep) => ep.status !== 0)
-                    );
-                  },
-                ).length;
+                const disabledCount = Object.entries(
+                  registryData.models,
+                ).filter(([modelKey]) => {
+                  const endpoints = registryData.endpoints[modelKey] || [];
+                  return (
+                    endpoints.length === 0 ||
+                    endpoints.every((ep) => ep.status !== 0)
+                  );
+                }).length;
                 return disabledCount > 0 && !showDisabled ? (
                   <>
                     <span>•</span>
@@ -320,7 +317,7 @@ export default function AdminModelsPage() {
                   <>
                     <TableRow
                       key={modelKey}
-                      className={`cursor-pointer hover:bg-muted/50 transition-colors ${isDisabled ? "opacity-50" : ""}`}
+                      className={`cursor-pointer transition-colors hover:bg-muted/50 ${isDisabled ? "opacity-50" : ""}`}
                       onClick={() => handleModelClick(modelKey)}
                     >
                       <TableCell>
@@ -392,7 +389,7 @@ export default function AdminModelsPage() {
                         return (
                           <TableRow
                             key={variantKey}
-                            className={`bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors ${isVariantDisabled ? "opacity-50" : ""}`}
+                            className={`cursor-pointer bg-muted/30 transition-colors hover:bg-muted/50 ${isVariantDisabled ? "opacity-50" : ""}`}
                             onClick={() => handleModelClick(variantKey)}
                           >
                             <TableCell>
@@ -461,7 +458,9 @@ export default function AdminModelsPage() {
 
       <ModelDetailsDialog
         model={selectedModel}
-        endpoints={selectedModel ? registryData.endpoints[selectedModel.id] : []}
+        endpoints={
+          selectedModel ? registryData.endpoints[selectedModel.id] : []
+        }
         open={isDetailsOpen}
         onOpenChange={setIsDetailsOpen}
       />

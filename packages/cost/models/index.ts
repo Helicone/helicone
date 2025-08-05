@@ -1,7 +1,7 @@
 /**
  * Model Registry Index
- * Auto-generated on: 2025-08-05T00:26:04.707Z
- * 
+ * Auto-generated on: 2025-08-05T00:39:43.401Z
+ *
  * This file combines all author data from the ./authors/ directory
  */
 
@@ -41,7 +41,6 @@ import nousresearchModels from "./authors/nousresearch/models.json";
 import nvidiaModels from "./authors/nvidia/models.json";
 import openaiModels from "./authors/openai/models.json";
 import opengvlabModels from "./authors/opengvlab/models.json";
-import openrouterModels from "./authors/openrouter/models.json";
 import perplexityModels from "./authors/perplexity/models.json";
 import pygmalionaiModels from "./authors/pygmalionai/models.json";
 import qwenModels from "./authors/qwen/models.json";
@@ -97,7 +96,6 @@ import nousresearchEndpoints from "./authors/nousresearch/endpoints.json";
 import nvidiaEndpoints from "./authors/nvidia/endpoints.json";
 import openaiEndpoints from "./authors/openai/endpoints.json";
 import opengvlabEndpoints from "./authors/opengvlab/endpoints.json";
-import openrouterEndpoints from "./authors/openrouter/endpoints.json";
 import perplexityEndpoints from "./authors/perplexity/endpoints.json";
 import pygmalionaiEndpoints from "./authors/pygmalionai/endpoints.json";
 import qwenEndpoints from "./authors/qwen/endpoints.json";
@@ -153,7 +151,6 @@ import nousresearchMetadata from "./authors/nousresearch/metadata.json";
 import nvidiaMetadata from "./authors/nvidia/metadata.json";
 import openaiMetadata from "./authors/openai/metadata.json";
 import opengvlabMetadata from "./authors/opengvlab/metadata.json";
-import openrouterMetadata from "./authors/openrouter/metadata.json";
 import perplexityMetadata from "./authors/perplexity/metadata.json";
 import pygmalionaiMetadata from "./authors/pygmalionai/metadata.json";
 import qwenMetadata from "./authors/qwen/metadata.json";
@@ -247,7 +244,6 @@ export const models: Record<string, Model> = {
   ...nvidiaModels,
   ...openaiModels,
   ...opengvlabModels,
-  ...openrouterModels,
   ...perplexityModels,
   ...pygmalionaiModels,
   ...qwenModels,
@@ -305,7 +301,6 @@ export const endpoints: Record<string, Endpoint[]> = {
   ...nvidiaEndpoints,
   ...openaiEndpoints,
   ...opengvlabEndpoints,
-  ...openrouterEndpoints,
   ...perplexityEndpoints,
   ...pygmalionaiEndpoints,
   ...qwenEndpoints,
@@ -502,11 +497,6 @@ export const authors: Record<string, Author> = {
     slug: opengvlabMetadata.slug,
     name: opengvlabMetadata.name,
     models: Object.keys(opengvlabModels),
-  },
-  [openrouterMetadata.slug]: {
-    slug: openrouterMetadata.slug,
-    name: openrouterMetadata.name,
-    models: Object.keys(openrouterModels),
   },
   [perplexityMetadata.slug]: {
     slug: perplexityMetadata.slug,
