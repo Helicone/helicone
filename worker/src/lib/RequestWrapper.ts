@@ -3,7 +3,7 @@
 // without modifying the request object itself.
 // This also allows us to not have to redefine other objects repetitively like URL.
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
-import { Env, hash } from "..";
+import { hash } from "..";
 import { Database } from "../../supabase/database.types";
 import { HeliconeAuth } from "./db/DBWrapper";
 import {
@@ -14,7 +14,6 @@ import { HeliconeHeaders } from "./models/HeliconeHeaders";
 import { getAndStoreInCache } from "./util/cache/secureCache";
 import { Result, err, map, mapPostgrestErr, ok } from "./util/results";
 import { Sha256 } from "@aws-crypto/sha256-js";
-import { CfProperties } from "@cloudflare/workers-types";
 import { parseJSXObject } from "@helicone/prompts";
 import { HttpRequest } from "@smithy/protocol-http";
 import { SignatureV4 } from "@smithy/signature-v4";

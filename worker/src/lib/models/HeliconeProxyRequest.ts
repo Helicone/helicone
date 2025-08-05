@@ -1,6 +1,5 @@
 // This will store all of the information coming from the client.
 
-import { Env } from "../..";
 import { Provider } from "@helicone-package/llm-mapper/types";
 import { approvedDomains } from "@helicone-package/cost/providers/mappings";
 import { RequestWrapper } from "../RequestWrapper";
@@ -8,7 +7,6 @@ import { buildTargetUrl } from "../clients/ProviderClient";
 import { Result, ok } from "../util/results";
 import { IHeliconeHeaders } from "./HeliconeHeaders";
 
-import { CfProperties } from "@cloudflare/workers-types";
 import { parseJSXObject } from "@helicone/prompts";
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 import { MAPPERS } from "@helicone-package/llm-mapper/utils/getMappedContent";

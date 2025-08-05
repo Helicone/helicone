@@ -1,4 +1,3 @@
-import { Headers } from "@cloudflare/workers-types";
 import { HELICONE_RATE_LIMITED_API_KEY_REGEX } from "../util/apiKeyRegex";
 
 type Nullable<T> = T | null;

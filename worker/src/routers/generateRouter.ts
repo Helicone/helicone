@@ -1,9 +1,7 @@
-import { ExecutionContext } from "@cloudflare/workers-types";
 import { autoFillInputs } from "@helicone/prompts";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { type IRequest, type RouterType } from "itty-router";
 import { z } from "zod";
-import { Env } from "..";
 import { Database } from "../../supabase/database.types";
 import { DBWrapper } from "../lib/db/DBWrapper";
 import { RequestWrapper } from "../lib/RequestWrapper";

@@ -1,5 +1,3 @@
-import { Request } from "@cloudflare/workers-types";
-
 export class InMemoryRateLimiter {
   transactions: number[] = [];
   windowSizeSeconds: number;

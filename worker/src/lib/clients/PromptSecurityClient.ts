@@ -1,4 +1,3 @@
-import { Env } from "../..";
 
 export async function checkPromptSecurity(
   message: string,

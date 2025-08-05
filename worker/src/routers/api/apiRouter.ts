@@ -1,4 +1,3 @@
-import { Env } from "../..";
 import { Database, Json } from "../../../supabase/database.types";
 import { RequestWrapper } from "../../lib/RequestWrapper";
 import { Job, isValidStatus, validateRun } from "../../lib/models/Runs";
@@ -15,6 +14,7 @@ import { ProviderKey, ProviderKeysStore } from "../../lib/db/ProviderKeysStore";
 import { APIKeysStore } from "../../lib/db/APIKeysStore";
 import { APIKeysManager } from "../../lib/managers/APIKeysManager";
 import { ProviderName } from "@helicone-package/cost/models/providers";
+import { BaseOpenAPIRouter } from "../routerFactory";
 const RATE_LIMIT_MS = 1000 * 30;
 
 function getAPIRouterV1(
@@ -556,12 +556,7 @@ function getAPIRouterV1(
   );
 }
 
-export const getAPIRouter = (
-  router: OpenAPIRouterType<
-    Route,
-    [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]
-  >
-) => {
+export const getAPIRouter = (router: BaseOpenAPIRouter) => {
   getAPIRouterV1(router);
 
   // Proxy only + proxy forwarder

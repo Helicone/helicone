@@ -1,5 +1,5 @@
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
-import { Env, hash } from "../..";
+import { hash } from "../..";
 import { Database } from "../../../supabase/database.types";
 import { getProviderKeyFromProxyCache } from "../RequestWrapper";
 import { AuthParams } from "../dbLogger/DBLoggable";
@@ -149,7 +149,7 @@ export type HeliconeAuth = JwtAuth | BearerAuthProxy | BearerAuth;
 export class DBWrapper {
   private supabaseClient: SupabaseClient<Database>;
   private secureCacheEnv: SecureCacheEnv;
-  private atomicRateLimiter: DurableObjectNamespace;
+  private atomicRateLimiter: Env["RATE_LIMITER"];
   private rateLimiter?: RateLimiter;
   private authParams?: AuthParams;
   private tier?: string;

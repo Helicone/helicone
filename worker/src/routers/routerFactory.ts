@@ -4,7 +4,6 @@ import {
   OpenAPIRouterType,
 } from "@cloudflare/itty-router-openapi";
 
-import { Env } from "..";
 import { RequestWrapper } from "../lib/RequestWrapper";
 import { getAnthropicProxyRouter } from "./anthropicProxyRouter";
 import { getAPIRouter } from "./api/apiRouter";
@@ -25,14 +24,7 @@ export type BaseOpenAPIRouter = OpenAPIRouterType<
   [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]
 >;
 
-const WORKER_MAP: Omit<
-  {
-    [key in Env["WORKER_TYPE"]]: (router: BaseRouter) => BaseRouter;
-  },
-  "HELICONE_API"
-> & {
-  HELICONE_API: (router: OpenAPIRouterType) => OpenAPIRouterType;
-} = {
+const WORKER_MAP = {
   ANTHROPIC_PROXY: getAnthropicProxyRouter,
   OPENAI_PROXY: getOpenAIProxyRouter,
   VAPI_PROXY: () => {
@@ -171,6 +163,6 @@ export function buildRouter(
       });
     }
     addBaseRoutes(router);
-    return WORKER_MAP[provider](router);
+    return WORKER_MAP[provider as keyof typeof WORKER_MAP](router as any);
   }
 }

@@ -1,4 +1,3 @@
-import { Env } from "../..";
 import { Result, err, ok } from "../util/results";
 import { Integration, ReportStore } from "../db/ReportStore";
 

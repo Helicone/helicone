@@ -1,4 +1,3 @@
-import { Env } from "../..";
 import {
   buildEndpointUrl,
   buildModelId,
