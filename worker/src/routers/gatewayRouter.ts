@@ -1,4 +1,4 @@
-import { Env, Provider } from "..";
+import { Provider } from "..";
 import { proxyForwarder } from "../lib/HeliconeProxyRequest/ProxyForwarder";
 import { RequestWrapper } from "../lib/RequestWrapper";
 import { safePut } from "../lib/safePut";

@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-import { Env } from "../../../..";
 import { RequestWrapper } from "../../../../lib/RequestWrapper";
 import { AuthParams } from "../../../../lib/dbLogger/DBLoggable";
 import { APIClient } from "../../../lib/apiClient";

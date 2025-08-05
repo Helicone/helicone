@@ -1,5 +1,4 @@
 import { createClient } from "@supabase/supabase-js";
-import { Env } from "../..";
 import { Database } from "../../../supabase/database.types";
 import { DBWrapper, HeliconeAuth } from "../../lib/db/DBWrapper";
 import { RequestWrapper } from "../../lib/RequestWrapper";

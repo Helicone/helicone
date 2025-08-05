@@ -1,4 +1,3 @@
-import { Headers } from "@cloudflare/workers-types";
 import { Result } from "../results";
 
 const MAX_CACHE_AGE = 60 * 60 * 24 * 365; // 365 days

@@ -4,9 +4,8 @@ import {
   ValidationError,
 } from "@helicone-package/prompts/types";
 import { ChatCompletionCreateParams } from "openai/resources/chat/completions";
-import { Env } from "../..";
 import { PromptStore } from "../db/PromptStore";
-import { getAndStoreInCache, getFromCache } from "../util/cache/secureCache";
+import { getAndStoreInCache } from "../util/cache/secureCache";
 import { err, isErr, ok, Result } from "../util/results";
 
 export class PromptManager {

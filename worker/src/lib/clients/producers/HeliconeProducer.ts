@@ -1,4 +1,3 @@
-import { Env } from "../../..";
 import { DualWriteProducer } from "./DualProducer";
 import { KafkaProducerImpl } from "./KafkaProducerImpl";
 import { SQSProducerImpl } from "./SQSProducer";

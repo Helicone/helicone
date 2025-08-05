@@ -1,4 +1,4 @@
-import { Env, hash } from "../../..";
+import { hash } from "../../..";
 import { safePut } from "../../safePut";
 import { Result, ok } from "../results";
 

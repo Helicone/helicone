@@ -1,4 +1,3 @@
-import { Env } from "..";
 import { createClient } from "@supabase/supabase-js";
 import { Database } from "../../supabase/database.types";
 import { tryJSONParse } from "../lib/clients/llmmapper/llmmapper";

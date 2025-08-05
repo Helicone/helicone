@@ -1,4 +1,4 @@
-import { Env, hash } from "../..";
+import { hash } from "../..";
 import { Database } from "../../../supabase/database.types";
 import { clickhousePriceCalc } from "@helicone-package/cost";
 import { Result, err, ok } from "../util/results";
