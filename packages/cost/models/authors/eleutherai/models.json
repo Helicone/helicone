@@ -1,0 +1,13 @@
+{
+  "llemma_7b": {
+    "id": "llemma_7b",
+    "name": "EleutherAI: Llemma 7b",
+    "author": "eleutherai",
+    "description": "Llemma 7B is a language model for mathematics. It was initialized with Code Llama 7B weights, and trained on the Proof-Pile-2 for 200B tokens. Llemma models are particularly strong at chain-of-thought mathematical reasoning and using computational tools for mathematics, such as Python and formal theorem provers.",
+    "contextLength": 4096,
+    "maxOutputTokens": 4096,
+    "created": "2025-04-14T15:07:05.000Z",
+    "modality": "text->text",
+    "tokenizer": "Other"
+  }
+}

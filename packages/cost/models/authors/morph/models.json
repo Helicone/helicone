@@ -1,0 +1,24 @@
+{
+  "morph-v3-large": {
+    "id": "morph-v3-large",
+    "name": "Morph: Morph V3 Large",
+    "author": "morph",
+    "description": "Morph's high-accuracy apply model for complex code edits. 2000+ tokens/sec with 98% accuracy for precise code transformations.",
+    "contextLength": 81920,
+    "maxOutputTokens": 38000,
+    "created": "2025-07-07T17:54:18.000Z",
+    "modality": "text->text",
+    "tokenizer": "Other"
+  },
+  "morph-v3-fast": {
+    "id": "morph-v3-fast",
+    "name": "Morph: Morph V3 Fast",
+    "author": "morph",
+    "description": "Morph's fastest apply model for code edits. 4500+ tokens/sec with 96% accuracy for rapid code transformations.",
+    "contextLength": 81920,
+    "maxOutputTokens": 38000,
+    "created": "2025-07-07T17:40:02.000Z",
+    "modality": "text->text",
+    "tokenizer": "Other"
+  }
+}

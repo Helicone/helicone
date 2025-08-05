@@ -1,0 +1,57 @@
+{
+  "l3.3-euryale-70b": {
+    "id": "l3.3-euryale-70b",
+    "name": "Sao10K: Llama 3.3 Euryale 70B",
+    "author": "sao10k",
+    "description": "Euryale L3.3 70B is a model focused on creative roleplay from [Sao10k](https://ko-fi.com/sao10k). It is the successor of [Euryale L3 70B v2.2](/models/sao10k/l3-euryale-70b).",
+    "contextLength": 131072,
+    "maxOutputTokens": null,
+    "created": "2024-12-18T15:32:08.000Z",
+    "modality": "text->text",
+    "tokenizer": "Llama3"
+  },
+  "l3.1-euryale-70b": {
+    "id": "l3.1-euryale-70b",
+    "name": "Sao10K: Llama 3.1 Euryale 70B v2.2",
+    "author": "sao10k",
+    "description": "Euryale L3.1 70B v2.2 is a model focused on creative roleplay from [Sao10k](https://ko-fi.com/sao10k). It is the successor of [Euryale L3 70B v2.1](/models/sao10k/l3-euryale-70b).",
+    "contextLength": 32768,
+    "maxOutputTokens": null,
+    "created": "2024-08-28T00:00:00.000Z",
+    "modality": "text->text",
+    "tokenizer": "Llama3"
+  },
+  "l3-lunaris-8b": {
+    "id": "l3-lunaris-8b",
+    "name": "Sao10K: Llama 3 8B Lunaris",
+    "author": "sao10k",
+    "description": "Lunaris 8B is a versatile generalist and roleplaying model based on Llama 3. It's a strategic merge of multiple models, designed to balance creativity with improved logic and general knowledge.\n\nCreated by [Sao10k](https://huggingface.co/Sao10k), this model aims to offer an improved experience over Stheno v3.2, with enhanced creativity and logical reasoning.\n\nFor best results, use with Llama 3 Instruct context template, temperature 1.4, and min_p 0.1.",
+    "contextLength": 8192,
+    "maxOutputTokens": null,
+    "created": "2024-08-13T00:00:00.000Z",
+    "modality": "text->text",
+    "tokenizer": "Llama3"
+  },
+  "l3-euryale-70b": {
+    "id": "l3-euryale-70b",
+    "name": "Sao10k: Llama 3 Euryale 70B v2.1",
+    "author": "sao10k",
+    "description": "Euryale 70B v2.1 is a model focused on creative roleplay from [Sao10k](https://ko-fi.com/sao10k).\n\n- Better prompt adherence.\n- Better anatomy / spatial awareness.\n- Adapts much better to unique and custom formatting / reply formats.\n- Very creative, lots of unique swipes.\n- Is not restrictive during roleplays.",
+    "contextLength": 8192,
+    "maxOutputTokens": 8192,
+    "created": "2024-06-18T00:00:00.000Z",
+    "modality": "text->text",
+    "tokenizer": "Llama3"
+  },
+  "fimbulvetr-11b-v2": {
+    "id": "fimbulvetr-11b-v2",
+    "name": "Fimbulvetr 11B v2",
+    "author": "sao10k",
+    "description": "Creative writing model, routed with permission. It's fast, it keeps the conversation going, and it stays in character.\n\nIf you submit a raw prompt, you can use Alpaca or Vicuna formats.",
+    "contextLength": 4096,
+    "maxOutputTokens": 4096,
+    "created": "2024-04-21T00:00:00.000Z",
+    "modality": "text->text",
+    "tokenizer": "Llama2"
+  }
+}

@@ -1,0 +1,2114 @@
+{
+  "codestral-2508": [
+    {
+      "name": "Mistral | mistralai/codestral-2508",
+      "provider": "Mistral",
+      "tag": "mistral",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.3,
+        "completion": 0.8999999999999999,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 256000,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "structured_outputs",
+        "response_format",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed"
+      ]
+    }
+  ],
+  "devstral-medium": [
+    {
+      "name": "Mistral | mistralai/devstral-medium-2507",
+      "provider": "Mistral",
+      "tag": "mistral",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.39999999999999997,
+        "completion": 2,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "response_format",
+        "structured_outputs"
+      ]
+    }
+  ],
+  "devstral-small": [
+    {
+      "name": "DeepInfra | mistralai/devstral-small-2507",
+      "provider": "DeepInfra",
+      "tag": "deepinfra/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.07,
+        "completion": 0.28,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 128000,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "top_k",
+        "seed",
+        "min_p",
+        "response_format"
+      ]
+    },
+    {
+      "name": "Parasail | mistralai/devstral-small-2507",
+      "provider": "Parasail",
+      "tag": "parasail/bf16",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.09,
+        "completion": 0.3,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": 131072,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "frequency_penalty",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "top_k"
+      ]
+    },
+    {
+      "name": "Mistral | mistralai/devstral-small-2507",
+      "provider": "Mistral",
+      "tag": "mistral",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.09999999999999999,
+        "completion": 0.3,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "response_format",
+        "structured_outputs"
+      ]
+    }
+  ],
+  "mistral-small-3.2-24b-instruct:free": [
+    {
+      "name": "Chutes | mistralai/mistral-small-3.2-24b-instruct-2506:free",
+      "provider": "Chutes",
+      "tag": "chutes",
+      "status": 0,
+      "pricing": {
+        "prompt": 0,
+        "completion": 0,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "structured_outputs",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logprobs",
+        "logit_bias",
+        "top_logprobs"
+      ]
+    }
+  ],
+  "mistral-small-3.2-24b-instruct": [
+    {
+      "name": "Chutes | mistralai/mistral-small-3.2-24b-instruct-2506",
+      "provider": "Chutes",
+      "tag": "chutes",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.01999188,
+        "completion": 0.0800064,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "structured_outputs",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logprobs",
+        "logit_bias",
+        "top_logprobs"
+      ]
+    },
+    {
+      "name": "DeepInfra | mistralai/mistral-small-3.2-24b-instruct-2506",
+      "provider": "DeepInfra",
+      "tag": "deepinfra/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.049999999999999996,
+        "completion": 0.09999999999999999,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 128000,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "top_k",
+        "seed",
+        "min_p",
+        "response_format"
+      ]
+    },
+    {
+      "name": "Enfer | mistralai/mistral-small-3.2-24b-instruct-2506",
+      "provider": "Enfer",
+      "tag": "enfer/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.075,
+        "completion": 0.19999999999999998,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32000,
+      "maxCompletionTokens": 32000,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "logit_bias",
+        "logprobs",
+        "seed",
+        "repetition_penalty"
+      ]
+    },
+    {
+      "name": "Parasail | mistralai/mistral-small-3.2-24b-instruct-2506",
+      "provider": "Parasail",
+      "tag": "parasail/bf16",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.09,
+        "completion": 0.3,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": 131072,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "frequency_penalty",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "top_k"
+      ]
+    },
+    {
+      "name": "Mistral | mistralai/mistral-small-3.2-24b-instruct-2506",
+      "provider": "Mistral",
+      "tag": "mistral",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.09999999999999999,
+        "completion": 0.3,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "response_format",
+        "structured_outputs"
+      ]
+    }
+  ],
+  "magistral-small-2506": [
+    {
+      "name": "Mistral | mistralai/magistral-small-2506",
+      "provider": "Mistral",
+      "tag": "mistral",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.5,
+        "completion": 1.5,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 40000,
+      "maxCompletionTokens": 40000,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "reasoning",
+        "include_reasoning",
+        "structured_outputs",
+        "response_format",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed"
+      ]
+    }
+  ],
+  "magistral-medium-2506": [
+    {
+      "name": "Mistral | mistralai/magistral-medium-2506",
+      "provider": "Mistral",
+      "tag": "mistral",
+      "status": 0,
+      "pricing": {
+        "prompt": 2,
+        "completion": 5,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 40960,
+      "maxCompletionTokens": 40000,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "reasoning",
+        "include_reasoning",
+        "structured_outputs",
+        "response_format",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed"
+      ]
+    }
+  ],
+  "magistral-medium-2506:thinking": [
+    {
+      "name": "Mistral | mistralai/magistral-medium-2506:thinking",
+      "provider": "Mistral",
+      "tag": "mistral",
+      "status": 0,
+      "pricing": {
+        "prompt": 2,
+        "completion": 5,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 40960,
+      "maxCompletionTokens": 40000,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "reasoning",
+        "include_reasoning",
+        "structured_outputs",
+        "response_format",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed"
+      ]
+    }
+  ],
+  "devstral-small-2505:free": [
+    {
+      "name": "Chutes | mistralai/devstral-small-2505:free",
+      "provider": "Chutes",
+      "tag": "chutes",
+      "status": 0,
+      "pricing": {
+        "prompt": 0,
+        "completion": 0,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logprobs",
+        "logit_bias",
+        "top_logprobs"
+      ]
+    }
+  ],
+  "devstral-small-2505": [
+    {
+      "name": "Chutes | mistralai/devstral-small-2505",
+      "provider": "Chutes",
+      "tag": "chutes",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.01999188,
+        "completion": 0.0800064,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logprobs",
+        "logit_bias",
+        "top_logprobs"
+      ]
+    },
+    {
+      "name": "DeepInfra | mistralai/devstral-small-2505",
+      "provider": "DeepInfra",
+      "tag": "deepinfra/bf16",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.06,
+        "completion": 0.12,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 128000,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "top_k",
+        "seed",
+        "min_p",
+        "response_format"
+      ]
+    },
+    {
+      "name": "Nebius | mistralai/devstral-small-2505",
+      "provider": "Nebius",
+      "tag": "nebius/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.08,
+        "completion": 0.24,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 128000,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "logit_bias",
+        "logprobs",
+        "top_logprobs"
+      ]
+    },
+    {
+      "name": "Mistral | mistralai/devstral-small-2505",
+      "provider": "Mistral",
+      "tag": "mistral",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.09999999999999999,
+        "completion": 0.3,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "response_format",
+        "structured_outputs"
+      ]
+    }
+  ],
+  "mistral-medium-3": [
+    {
+      "name": "Mistral | mistralai/mistral-medium-3",
+      "provider": "Mistral",
+      "tag": "mistral",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.39999999999999997,
+        "completion": 2,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "response_format",
+        "structured_outputs"
+      ]
+    }
+  ],
+  "mistral-small-3.1-24b-instruct:free": [
+    {
+      "name": "Venice | mistralai/mistral-small-3.1-24b-instruct-2503:free",
+      "provider": "Venice",
+      "tag": "venice/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0,
+        "completion": 0,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 128000,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "structured_outputs",
+        "response_format",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "top_k"
+      ]
+    },
+    {
+      "name": "Chutes | mistralai/mistral-small-3.1-24b-instruct-2503:free",
+      "provider": "Chutes",
+      "tag": "chutes",
+      "status": 0,
+      "pricing": {
+        "prompt": 0,
+        "completion": 0,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 96000,
+      "maxCompletionTokens": 96000,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logprobs",
+        "logit_bias",
+        "top_logprobs"
+      ]
+    }
+  ],
+  "mistral-small-3.1-24b-instruct": [
+    {
+      "name": "Chutes | mistralai/mistral-small-3.1-24b-instruct-2503",
+      "provider": "Chutes",
+      "tag": "chutes",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.017992691999999998,
+        "completion": 0.07200576,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": 96000,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logprobs",
+        "logit_bias",
+        "top_logprobs"
+      ]
+    },
+    {
+      "name": "DeepInfra | mistralai/mistral-small-3.1-24b-instruct-2503",
+      "provider": "DeepInfra",
+      "tag": "deepinfra/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.049999999999999996,
+        "completion": 0.09999999999999999,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 128000,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "top_k",
+        "seed",
+        "min_p",
+        "response_format"
+      ]
+    },
+    {
+      "name": "Nebius | mistralai/mistral-small-3.1-24b-instruct-2503",
+      "provider": "Nebius",
+      "tag": "nebius/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.049999999999999996,
+        "completion": 0.15,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "logit_bias",
+        "logprobs",
+        "top_logprobs"
+      ]
+    },
+    {
+      "name": "Parasail | mistralai/mistral-small-3.1-24b-instruct-2503",
+      "provider": "Parasail",
+      "tag": "parasail/bf16",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.09999999999999999,
+        "completion": 0.3,
+        "image": 0.000926,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": 131072,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "frequency_penalty",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "top_k"
+      ]
+    },
+    {
+      "name": "Mistral | mistralai/mistral-small-3.1-24b-instruct-2503",
+      "provider": "Mistral",
+      "tag": "mistral",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.09999999999999999,
+        "completion": 0.3,
+        "image": 0.0009264,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "response_format",
+        "structured_outputs"
+      ]
+    },
+    {
+      "name": "Cloudflare | mistralai/mistral-small-3.1-24b-instruct-2503",
+      "provider": "Cloudflare",
+      "tag": "cloudflare",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.35,
+        "completion": 0.56,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 128000,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "top_k",
+        "seed",
+        "repetition_penalty",
+        "frequency_penalty",
+        "presence_penalty"
+      ]
+    }
+  ],
+  "mistral-saba": [
+    {
+      "name": "Mistral | mistralai/mistral-saba-2502",
+      "provider": "Mistral",
+      "tag": "mistral",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.19999999999999998,
+        "completion": 0.6,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "response_format",
+        "structured_outputs"
+      ]
+    }
+  ],
+  "mistral-small-24b-instruct-2501:free": [
+    {
+      "name": "Chutes | mistralai/mistral-small-24b-instruct-2501:free",
+      "provider": "Chutes",
+      "tag": "chutes",
+      "status": 0,
+      "pricing": {
+        "prompt": 0,
+        "completion": 0,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logprobs",
+        "logit_bias",
+        "top_logprobs"
+      ]
+    }
+  ],
+  "mistral-small-24b-instruct-2501": [
+    {
+      "name": "Chutes | mistralai/mistral-small-24b-instruct-2501",
+      "provider": "Chutes",
+      "tag": "chutes",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.01999188,
+        "completion": 0.0800064,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logprobs",
+        "logit_bias",
+        "top_logprobs"
+      ]
+    },
+    {
+      "name": "DeepInfra | mistralai/mistral-small-24b-instruct-2501",
+      "provider": "DeepInfra",
+      "tag": "deepinfra/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.049999999999999996,
+        "completion": 0.08,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": 16384,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "top_k",
+        "seed",
+        "min_p",
+        "response_format"
+      ]
+    },
+    {
+      "name": "Enfer | mistralai/mistral-small-24b-instruct-2501",
+      "provider": "Enfer",
+      "tag": "enfer/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.049999999999999996,
+        "completion": 0.09,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 28000,
+      "maxCompletionTokens": 28000,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "structured_outputs",
+        "response_format",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "logit_bias",
+        "logprobs",
+        "seed",
+        "repetition_penalty"
+      ]
+    },
+    {
+      "name": "Mistral | mistralai/mistral-small-24b-instruct-2501",
+      "provider": "Mistral",
+      "tag": "mistral",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.09999999999999999,
+        "completion": 0.3,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "response_format",
+        "structured_outputs"
+      ]
+    },
+    {
+      "name": "Together | mistralai/mistral-small-24b-instruct-2501",
+      "provider": "Together",
+      "tag": "together",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.7999999999999999,
+        "completion": 0.7999999999999999,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": 2048,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "top_k",
+        "repetition_penalty",
+        "logit_bias",
+        "min_p"
+      ]
+    }
+  ],
+  "codestral-2501": [
+    {
+      "name": "Mistral | mistralai/codestral-2501",
+      "provider": "Mistral",
+      "tag": "mistral",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.3,
+        "completion": 0.8999999999999999,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 262144,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "response_format",
+        "structured_outputs"
+      ]
+    }
+  ],
+  "mistral-large-2411": [
+    {
+      "name": "Mistral | mistralai/mistral-large-2411",
+      "provider": "Mistral",
+      "tag": "mistral",
+      "status": 0,
+      "pricing": {
+        "prompt": 2,
+        "completion": 6,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "response_format",
+        "structured_outputs"
+      ]
+    }
+  ],
+  "mistral-large-2407": [
+    {
+      "name": "Mistral | mistralai/mistral-large-2407",
+      "provider": "Mistral",
+      "tag": "mistral",
+      "status": 0,
+      "pricing": {
+        "prompt": 2,
+        "completion": 6,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "response_format",
+        "structured_outputs"
+      ]
+    }
+  ],
+  "pixtral-large-2411": [
+    {
+      "name": "Mistral | mistralai/pixtral-large-2411",
+      "provider": "Mistral",
+      "tag": "mistral",
+      "status": 0,
+      "pricing": {
+        "prompt": 2,
+        "completion": 6,
+        "image": 0.002888,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "response_format",
+        "structured_outputs"
+      ]
+    }
+  ],
+  "ministral-8b": [
+    {
+      "name": "Mistral | mistralai/ministral-8b",
+      "provider": "Mistral",
+      "tag": "mistral",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.09999999999999999,
+        "completion": 0.09999999999999999,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 128000,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "response_format",
+        "structured_outputs"
+      ]
+    }
+  ],
+  "ministral-3b": [
+    {
+      "name": "Mistral | mistralai/ministral-3b",
+      "provider": "Mistral",
+      "tag": "mistral",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.04,
+        "completion": 0.04,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "response_format",
+        "structured_outputs"
+      ]
+    }
+  ],
+  "pixtral-12b": [
+    {
+      "name": "Hyperbolic | mistralai/pixtral-12b",
+      "provider": "Hyperbolic",
+      "tag": "hyperbolic/bf16",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.09999999999999999,
+        "completion": 0.09999999999999999,
+        "image": 0.0001445,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "logprobs",
+        "top_logprobs",
+        "seed",
+        "logit_bias",
+        "top_k",
+        "min_p",
+        "repetition_penalty"
+      ]
+    },
+    {
+      "name": "Mistral | mistralai/pixtral-12b",
+      "provider": "Mistral",
+      "tag": "mistral",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.15,
+        "completion": 0.15,
+        "image": 0.0002168,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "response_format",
+        "structured_outputs"
+      ]
+    }
+  ],
+  "mistral-nemo:free": [
+    {
+      "name": "Chutes | mistralai/mistral-nemo:free",
+      "provider": "Chutes",
+      "tag": "chutes",
+      "status": 0,
+      "pricing": {
+        "prompt": 0,
+        "completion": 0,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": 128000,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logprobs",
+        "logit_bias",
+        "top_logprobs"
+      ]
+    }
+  ],
+  "mistral-nemo": [
+    {
+      "name": "Nineteen | mistralai/mistral-nemo",
+      "provider": "Nineteen",
+      "tag": "nineteen/bf16",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.0075,
+        "completion": 0.049999999999999996,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32000,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p"
+      ]
+    },
+    {
+      "name": "Chutes | mistralai/mistral-nemo",
+      "provider": "Chutes",
+      "tag": "chutes",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.01,
+        "completion": 0.0400032,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": 128000,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logprobs",
+        "logit_bias",
+        "top_logprobs"
+      ]
+    },
+    {
+      "name": "DeepInfra | mistralai/mistral-nemo",
+      "provider": "DeepInfra",
+      "tag": "deepinfra/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.02,
+        "completion": 0.04,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": 16384,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "top_k",
+        "seed",
+        "min_p",
+        "response_format"
+      ]
+    },
+    {
+      "name": "Enfer | mistralai/mistral-nemo",
+      "provider": "Enfer",
+      "tag": "enfer/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.024999999999999998,
+        "completion": 0.049999999999999996,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": 131072,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "structured_outputs",
+        "response_format",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "logit_bias",
+        "logprobs",
+        "seed",
+        "repetition_penalty"
+      ]
+    },
+    {
+      "name": "Parasail | mistralai/mistral-nemo",
+      "provider": "Parasail",
+      "tag": "parasail/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.03,
+        "completion": 0.11,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": 131072,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "frequency_penalty",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "top_k"
+      ]
+    },
+    {
+      "name": "InferenceNet | mistralai/mistral-nemo",
+      "provider": "InferenceNet",
+      "tag": "inference-net/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.0375,
+        "completion": 0.09999999999999999,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 16384,
+      "maxCompletionTokens": 16384,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "logit_bias",
+        "top_logprobs",
+        "response_format",
+        "structured_outputs"
+      ]
+    },
+    {
+      "name": "Nebius | mistralai/mistral-nemo",
+      "provider": "Nebius",
+      "tag": "nebius/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.04,
+        "completion": 0.12,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 128000,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "logit_bias",
+        "logprobs",
+        "top_logprobs"
+      ]
+    },
+    {
+      "name": "Novita | mistralai/mistral-nemo",
+      "provider": "Novita",
+      "tag": "novita",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.04,
+        "completion": 0.16999999999999998,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 60288,
+      "maxCompletionTokens": 32000,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logit_bias"
+      ]
+    },
+    {
+      "name": "Mistral | mistralai/mistral-nemo",
+      "provider": "Mistral",
+      "tag": "mistral",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.15,
+        "completion": 0.15,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "response_format",
+        "structured_outputs"
+      ]
+    },
+    {
+      "name": "Azure | mistralai/mistral-nemo",
+      "provider": "Azure",
+      "tag": "azure",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.3,
+        "completion": 0.3,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 128000,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "response_format",
+        "stop",
+        "seed"
+      ]
+    }
+  ],
+  "mistral-7b-instruct:free": [
+    {
+      "name": "DeepInfra | mistralai/mistral-7b-instruct:free",
+      "provider": "DeepInfra",
+      "tag": "deepinfra/bf16",
+      "status": 0,
+      "pricing": {
+        "prompt": 0,
+        "completion": 0,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": 16384,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "top_k",
+        "seed",
+        "min_p",
+        "response_format"
+      ]
+    }
+  ],
+  "mistral-7b-instruct": [
+    {
+      "name": "Enfer | mistralai/mistral-7b-instruct",
+      "provider": "Enfer",
+      "tag": "enfer",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.028,
+        "completion": 0.054,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": 16384,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "logit_bias",
+        "logprobs",
+        "seed",
+        "repetition_penalty"
+      ]
+    },
+    {
+      "name": "DeepInfra | mistralai/mistral-7b-instruct",
+      "provider": "DeepInfra",
+      "tag": "deepinfra/bf16",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.028,
+        "completion": 0.054,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": 16384,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "top_k",
+        "seed",
+        "min_p",
+        "response_format"
+      ]
+    },
+    {
+      "name": "Novita | mistralai/mistral-7b-instruct",
+      "provider": "Novita",
+      "tag": "novita",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.029,
+        "completion": 0.059,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logit_bias"
+      ]
+    },
+    {
+      "name": "Together | mistralai/mistral-7b-instruct",
+      "provider": "Together",
+      "tag": "together",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.19999999999999998,
+        "completion": 0.19999999999999998,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": 4096,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "top_k",
+        "repetition_penalty",
+        "logit_bias",
+        "min_p"
+      ]
+    }
+  ],
+  "mistral-7b-instruct-v0.3": [
+    {
+      "name": "DeepInfra | mistralai/mistral-7b-instruct-v0.3",
+      "provider": "DeepInfra",
+      "tag": "deepinfra/bf16",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.028,
+        "completion": 0.054,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": 16384,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "top_k",
+        "seed",
+        "min_p",
+        "response_format"
+      ]
+    },
+    {
+      "name": "Enfer | mistralai/mistral-7b-instruct-v0.3",
+      "provider": "Enfer",
+      "tag": "enfer",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.028,
+        "completion": 0.054,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": 16384,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "logit_bias",
+        "logprobs",
+        "seed",
+        "repetition_penalty"
+      ]
+    },
+    {
+      "name": "Novita | mistralai/mistral-7b-instruct-v0.3",
+      "provider": "Novita",
+      "tag": "novita",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.029,
+        "completion": 0.059,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": 8192,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logit_bias"
+      ]
+    },
+    {
+      "name": "Together | mistralai/mistral-7b-instruct-v0.3",
+      "provider": "Together",
+      "tag": "together",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.19999999999999998,
+        "completion": 0.19999999999999998,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": 4096,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "top_k",
+        "repetition_penalty",
+        "logit_bias",
+        "min_p"
+      ]
+    }
+  ],
+  "mixtral-8x22b-instruct": [
+    {
+      "name": "Fireworks | mistralai/mixtral-8x22b-instruct",
+      "provider": "Fireworks",
+      "tag": "fireworks",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.8999999999999999,
+        "completion": 0.8999999999999999,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 65536,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "top_k",
+        "repetition_penalty",
+        "logit_bias",
+        "logprobs",
+        "top_logprobs",
+        "response_format",
+        "structured_outputs"
+      ]
+    },
+    {
+      "name": "Mistral | mistralai/mixtral-8x22b-instruct",
+      "provider": "Mistral",
+      "tag": "mistral",
+      "status": 0,
+      "pricing": {
+        "prompt": 2,
+        "completion": 6,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 65536,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "response_format",
+        "structured_outputs"
+      ]
+    }
+  ],
+  "mistral-large": [
+    {
+      "name": "Mistral | mistralai/mistral-large",
+      "provider": "Mistral",
+      "tag": "mistral",
+      "status": 0,
+      "pricing": {
+        "prompt": 2,
+        "completion": 6,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 128000,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "response_format",
+        "structured_outputs"
+      ]
+    },
+    {
+      "name": "Azure | mistralai/mistral-large",
+      "provider": "Azure",
+      "tag": "azure",
+      "status": 0,
+      "pricing": {
+        "prompt": 3,
+        "completion": 9,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 128000,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "response_format",
+        "stop",
+        "seed"
+      ]
+    }
+  ],
+  "mistral-small": [
+    {
+      "name": "Mistral | mistralai/mistral-small",
+      "provider": "Mistral",
+      "tag": "mistral",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.19999999999999998,
+        "completion": 0.6,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "response_format",
+        "structured_outputs"
+      ]
+    }
+  ],
+  "mistral-tiny": [
+    {
+      "name": "Mistral | mistralai/mistral-tiny",
+      "provider": "Mistral",
+      "tag": "mistral",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.25,
+        "completion": 0.25,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "response_format",
+        "structured_outputs"
+      ]
+    }
+  ],
+  "mistral-7b-instruct-v0.2": [
+    {
+      "name": "Together | mistralai/mistral-7b-instruct-v0.2",
+      "provider": "Together",
+      "tag": "together",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.19999999999999998,
+        "completion": 0.19999999999999998,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "top_k",
+        "repetition_penalty",
+        "logit_bias",
+        "min_p"
+      ]
+    }
+  ],
+  "mixtral-8x7b-instruct": [
+    {
+      "name": "DeepInfra | mistralai/mixtral-8x7b-instruct",
+      "provider": "DeepInfra",
+      "tag": "deepinfra/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.08,
+        "completion": 0.24,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": 16384,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "top_k",
+        "seed",
+        "min_p",
+        "response_format"
+      ]
+    },
+    {
+      "name": "Together | mistralai/mixtral-8x7b-instruct",
+      "provider": "Together",
+      "tag": "together",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.6,
+        "completion": 0.6,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": 2048,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "top_k",
+        "repetition_penalty",
+        "logit_bias",
+        "min_p"
+      ]
+    }
+  ],
+  "mistral-7b-instruct-v0.1": [
+    {
+      "name": "Cloudflare | mistralai/mistral-7b-instruct-v0.1",
+      "provider": "Cloudflare",
+      "tag": "cloudflare",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.11,
+        "completion": 0.19,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 2824,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "top_k",
+        "seed",
+        "repetition_penalty",
+        "frequency_penalty",
+        "presence_penalty"
+      ]
+    },
+    {
+      "name": "Together | mistralai/mistral-7b-instruct-v0.1",
+      "provider": "Together",
+      "tag": "together",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.19999999999999998,
+        "completion": 0.19999999999999998,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": 2048,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "top_k",
+        "repetition_penalty",
+        "logit_bias",
+        "min_p"
+      ]
+    }
+  ]
+}

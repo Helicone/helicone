@@ -1,0 +1,68 @@
+{
+  "deephermes-3-mistral-24b-preview": {
+    "id": "deephermes-3-mistral-24b-preview",
+    "name": "Nous: DeepHermes 3 Mistral 24B Preview",
+    "author": "nousresearch",
+    "description": "DeepHermes 3 (Mistral 24B Preview) is an instruction-tuned language model by Nous Research based on Mistral-Small-24B, designed for chat, function calling, and advanced multi-turn reasoning. It introduces a dual-mode system that toggles between intuitive chat responses and structured “deep reasoning” mode using special system prompts. Fine-tuned via distillation from R1, it supports structured output (JSON mode) and function call syntax for agent-based applications.\n\nDeepHermes 3 supports a **reasoning toggle via system prompt**, allowing users to switch between fast, intuitive responses and deliberate, multi-step reasoning. When activated with the following specific system instruction, the model enters a *\"deep thinking\"* mode—generating extended chains of thought wrapped in `<think></think>` tags before delivering a final answer. \n\nSystem Prompt: You are a deep thinking AI, you may use extremely long chains of thought to deeply consider the problem and deliberate with yourself via systematic reasoning processes to help come to a correct solution prior to answering. You should enclose your thoughts and internal monologue inside <think> </think> tags, and then provide your solution or response to the problem.\n",
+    "contextLength": 32768,
+    "maxOutputTokens": null,
+    "created": "2025-05-09T22:48:24.000Z",
+    "modality": "text->text",
+    "tokenizer": "Other"
+  },
+  "deephermes-3-llama-3-8b-preview:free": {
+    "id": "deephermes-3-llama-3-8b-preview:free",
+    "name": "Nous: DeepHermes 3 Llama 3 8B Preview (free)",
+    "author": "nousresearch",
+    "description": "DeepHermes 3 Preview is the latest version of our flagship Hermes series of LLMs by Nous Research, and one of the first models in the world to unify Reasoning (long chains of thought that improve answer accuracy) and normal LLM response modes into one model. We have also improved LLM annotation, judgement, and function calling.\n\nDeepHermes 3 Preview is one of the first LLM models to unify both \"intuitive\", traditional mode responses and long chain of thought reasoning responses into a single model, toggled by a system prompt.",
+    "contextLength": 131072,
+    "maxOutputTokens": null,
+    "created": "2025-02-28T05:09:32.000Z",
+    "modality": "text->text",
+    "tokenizer": "Other"
+  },
+  "hermes-3-llama-3.1-70b": {
+    "id": "hermes-3-llama-3.1-70b",
+    "name": "Nous: Hermes 3 70B Instruct",
+    "author": "nousresearch",
+    "description": "Hermes 3 is a generalist language model with many improvements over [Hermes 2](/models/nousresearch/nous-hermes-2-mistral-7b-dpo), including advanced agentic capabilities, much better roleplaying, reasoning, multi-turn conversation, long context coherence, and improvements across the board.\n\nHermes 3 70B is a competitive, if not superior finetune of the [Llama-3.1 70B foundation model](/models/meta-llama/llama-3.1-70b-instruct), focused on aligning LLMs to the user, with powerful steering capabilities and control given to the end user.\n\nThe Hermes 3 series builds and expands on the Hermes 2 set of capabilities, including more powerful and reliable function calling and structured output capabilities, generalist assistant capabilities, and improved code generation skills.",
+    "contextLength": 131072,
+    "maxOutputTokens": null,
+    "created": "2024-08-18T00:00:00.000Z",
+    "modality": "text->text",
+    "tokenizer": "Llama3"
+  },
+  "hermes-3-llama-3.1-405b": {
+    "id": "hermes-3-llama-3.1-405b",
+    "name": "Nous: Hermes 3 405B Instruct",
+    "author": "nousresearch",
+    "description": "Hermes 3 is a generalist language model with many improvements over Hermes 2, including advanced agentic capabilities, much better roleplaying, reasoning, multi-turn conversation, long context coherence, and improvements across the board.\n\nHermes 3 405B is a frontier-level, full-parameter finetune of the Llama-3.1 405B foundation model, focused on aligning LLMs to the user, with powerful steering capabilities and control given to the end user.\n\nThe Hermes 3 series builds and expands on the Hermes 2 set of capabilities, including more powerful and reliable function calling and structured output capabilities, generalist assistant capabilities, and improved code generation skills.\n\nHermes 3 is competitive, if not superior, to Llama-3.1 Instruct models at general capabilities, with varying strengths and weaknesses attributable between the two.",
+    "contextLength": 131072,
+    "maxOutputTokens": 16384,
+    "created": "2024-08-16T00:00:00.000Z",
+    "modality": "text->text",
+    "tokenizer": "Llama3"
+  },
+  "hermes-2-pro-llama-3-8b": {
+    "id": "hermes-2-pro-llama-3-8b",
+    "name": "NousResearch: Hermes 2 Pro - Llama-3 8B",
+    "author": "nousresearch",
+    "description": "Hermes 2 Pro is an upgraded, retrained version of Nous Hermes 2, consisting of an updated and cleaned version of the OpenHermes 2.5 Dataset, as well as a newly introduced Function Calling and JSON Mode dataset developed in-house.",
+    "contextLength": 131072,
+    "maxOutputTokens": 131072,
+    "created": "2024-05-27T00:00:00.000Z",
+    "modality": "text->text",
+    "tokenizer": "Llama3"
+  },
+  "nous-hermes-2-mixtral-8x7b-dpo": {
+    "id": "nous-hermes-2-mixtral-8x7b-dpo",
+    "name": "Nous: Hermes 2 Mixtral 8x7B DPO",
+    "author": "nousresearch",
+    "description": "Nous Hermes 2 Mixtral 8x7B DPO is the new flagship Nous Research model trained over the [Mixtral 8x7B MoE LLM](/models/mistralai/mixtral-8x7b).\n\nThe model was trained on over 1,000,000 entries of primarily [GPT-4](/models/openai/gpt-4) generated data, as well as other high quality data from open datasets across the AI landscape, achieving state of the art performance on a variety of tasks.\n\n#moe",
+    "contextLength": 32768,
+    "maxOutputTokens": 2048,
+    "created": "2024-01-16T00:00:00.000Z",
+    "modality": "text->text",
+    "tokenizer": "Mistral"
+  }
+}

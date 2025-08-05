@@ -1,0 +1,68 @@
+{
+  "deepcoder-14b-preview:free": [
+    {
+      "name": "Chutes | agentica-org/deepcoder-14b-preview:free",
+      "provider": "Chutes",
+      "tag": "chutes",
+      "status": 0,
+      "pricing": {
+        "prompt": 0,
+        "completion": 0,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 96000,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "reasoning",
+        "include_reasoning",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logprobs",
+        "logit_bias",
+        "top_logprobs"
+      ]
+    }
+  ],
+  "deepcoder-14b-preview": [
+    {
+      "name": "Chutes | agentica-org/deepcoder-14b-preview",
+      "provider": "Chutes",
+      "tag": "chutes",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.015,
+        "completion": 0.015,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 96000,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "reasoning",
+        "include_reasoning",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logprobs",
+        "logit_bias",
+        "top_logprobs"
+      ]
+    }
+  ]
+}

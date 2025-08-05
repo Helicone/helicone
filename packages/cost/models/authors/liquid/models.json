@@ -1,0 +1,35 @@
+{
+  "lfm-7b": {
+    "id": "lfm-7b",
+    "name": "Liquid: LFM 7B",
+    "author": "liquid",
+    "description": "LFM-7B, a new best-in-class language model. LFM-7B is designed for exceptional chat capabilities, including languages like Arabic and Japanese. Powered by the Liquid Foundation Model (LFM) architecture, it exhibits unique features like low memory footprint and fast inference speed. \n\nLFM-7B is the world’s best-in-class multilingual language model in English, Arabic, and Japanese.\n\nSee the [launch announcement](https://www.liquid.ai/lfm-7b) for benchmarks and more info.",
+    "contextLength": 32768,
+    "maxOutputTokens": null,
+    "created": "2025-01-25T12:08:03.000Z",
+    "modality": "text->text",
+    "tokenizer": "Other"
+  },
+  "lfm-3b": {
+    "id": "lfm-3b",
+    "name": "Liquid: LFM 3B",
+    "author": "liquid",
+    "description": "Liquid's LFM 3B delivers incredible performance for its size. It positions itself as first place among 3B parameter transformers, hybrids, and RNN models It is also on par with Phi-3.5-mini on multiple benchmarks, while being 18.4% smaller.\n\nLFM-3B is the ideal choice for mobile and other edge text-based applications.\n\nSee the [launch announcement](https://www.liquid.ai/liquid-foundation-models) for benchmarks and more info.",
+    "contextLength": 32768,
+    "maxOutputTokens": null,
+    "created": "2025-01-25T12:01:41.000Z",
+    "modality": "text->text",
+    "tokenizer": "Other"
+  },
+  "lfm-40b": {
+    "id": "lfm-40b",
+    "name": "Liquid: LFM 40B MoE",
+    "author": "liquid",
+    "description": "Liquid's 40.3B Mixture of Experts (MoE) model. Liquid Foundation Models (LFMs) are large neural networks built with computational units rooted in dynamic systems.\n\nLFMs are general-purpose AI models that can be used to model any kind of sequential data, including video, audio, text, time series, and signals.\n\nSee the [launch announcement](https://www.liquid.ai/liquid-foundation-models) for benchmarks and more info.",
+    "contextLength": 65536,
+    "maxOutputTokens": 65536,
+    "created": "2024-09-30T00:00:00.000Z",
+    "modality": "text->text",
+    "tokenizer": "Other"
+  }
+}

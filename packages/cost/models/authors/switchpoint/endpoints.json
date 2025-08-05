@@ -1,0 +1,28 @@
+{
+  "router": [
+    {
+      "name": "Switchpoint | switchpoint/router",
+      "provider": "Switchpoint",
+      "tag": "switchpoint",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.85,
+        "completion": 3.4,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "reasoning",
+        "include_reasoning",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "top_k",
+        "seed"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,385 @@
+{
+  "anubis-70b-v1.1": [
+    {
+      "name": "NextBit | thedrummer/anubis-70b-v1.1",
+      "provider": "NextBit",
+      "tag": "nextbit/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.39999999999999997,
+        "completion": 0.7,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 16384,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "response_format",
+        "structured_outputs"
+      ]
+    },
+    {
+      "name": "Parasail | thedrummer/anubis-70b-v1.1",
+      "provider": "Parasail",
+      "tag": "parasail/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.5,
+        "completion": 0.7999999999999999,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": 131072,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "frequency_penalty",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "top_k"
+      ]
+    }
+  ],
+  "valkyrie-49b-v1": [
+    {
+      "name": "Parasail | thedrummer/valkyrie-49b-v1",
+      "provider": "Parasail",
+      "tag": "parasail/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.65,
+        "completion": 1,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": 131072,
+      "supportedParameters": [
+        "reasoning",
+        "include_reasoning",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "frequency_penalty",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "top_k"
+      ]
+    }
+  ],
+  "anubis-pro-105b-v1": [
+    {
+      "name": "Parasail | thedrummer/anubis-pro-105b-v1",
+      "provider": "Parasail",
+      "tag": "parasail/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.5,
+        "completion": 1,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": 131072,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "frequency_penalty",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "top_k"
+      ]
+    }
+  ],
+  "skyfall-36b-v2": [
+    {
+      "name": "Chutes | thedrummer/skyfall-36b-v2",
+      "provider": "Chutes",
+      "tag": "chutes",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.0481286,
+        "completion": 0.192608,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logprobs",
+        "logit_bias",
+        "top_logprobs"
+      ]
+    },
+    {
+      "name": "NextBit | thedrummer/skyfall-36b-v2",
+      "provider": "NextBit",
+      "tag": "nextbit/int4",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.39999999999999997,
+        "completion": 0.7,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "response_format",
+        "structured_outputs"
+      ]
+    },
+    {
+      "name": "Parasail | thedrummer/skyfall-36b-v2",
+      "provider": "Parasail",
+      "tag": "parasail/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.5,
+        "completion": 0.7999999999999999,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": 32768,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "frequency_penalty",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "top_k"
+      ]
+    }
+  ],
+  "unslopnemo-12b": [
+    {
+      "name": "NextBit | thedrummer/unslopnemo-12b",
+      "provider": "NextBit",
+      "tag": "nextbit/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.39999999999999997,
+        "completion": 0.39999999999999997,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "response_format",
+        "structured_outputs"
+      ]
+    },
+    {
+      "name": "Enfer | thedrummer/unslopnemo-12b",
+      "provider": "Enfer",
+      "tag": "enfer/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.39999999999999997,
+        "completion": 0.39999999999999997,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32000,
+      "maxCompletionTokens": 32000,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "structured_outputs",
+        "response_format",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "logit_bias",
+        "logprobs",
+        "seed",
+        "repetition_penalty"
+      ]
+    },
+    {
+      "name": "Infermatic | thedrummer/unslopnemo-12b",
+      "provider": "Infermatic",
+      "tag": "infermatic",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.5,
+        "completion": 0.5,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32000,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "logit_bias",
+        "top_k",
+        "min_p",
+        "seed"
+      ]
+    }
+  ],
+  "rocinante-12b": [
+    {
+      "name": "Parasail | thedrummer/rocinante-12b",
+      "provider": "Parasail",
+      "tag": "parasail/bf16",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.19,
+        "completion": 0.44999999999999996,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 8192,
+      "maxCompletionTokens": 8192,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "frequency_penalty",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "top_k"
+      ]
+    },
+    {
+      "name": "NextBit | thedrummer/rocinante-12b",
+      "provider": "NextBit",
+      "tag": "nextbit/bf16",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.19999999999999998,
+        "completion": 0.5,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "response_format",
+        "structured_outputs"
+      ]
+    },
+    {
+      "name": "Enfer | thedrummer/rocinante-12b",
+      "provider": "Enfer",
+      "tag": "enfer/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.24,
+        "completion": 0.44999999999999996,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": 32768,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "structured_outputs",
+        "response_format",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "logit_bias",
+        "logprobs",
+        "seed",
+        "repetition_penalty"
+      ]
+    },
+    {
+      "name": "Infermatic | thedrummer/rocinante-12b",
+      "provider": "Infermatic",
+      "tag": "infermatic/bf16",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.25,
+        "completion": 0.5,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "logit_bias",
+        "top_k",
+        "min_p",
+        "seed"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "goliath-120b": {
+    "id": "goliath-120b",
+    "name": "Goliath 120B",
+    "author": "alpindale",
+    "description": "A large LLM created by combining two fine-tuned Llama 70B models into one 120B model. Combines Xwin and Euryale.\n\nCredits to\n- [@chargoddard](https://huggingface.co/chargoddard) for developing the framework used to merge the model - [mergekit](https://github.com/cg123/mergekit).\n- [@Undi95](https://huggingface.co/Undi95) for helping with the merge ratios.\n\n#merge",
+    "contextLength": 6144,
+    "maxOutputTokens": null,
+    "created": "2023-11-10T00:00:00.000Z",
+    "modality": "text->text",
+    "tokenizer": "Llama2"
+  }
+}

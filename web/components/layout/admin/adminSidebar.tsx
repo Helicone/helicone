@@ -8,6 +8,7 @@ import {
   Flag,
   Users,
   Settings,
+  DollarSign,
 } from "lucide-react";
 import { useRouter } from "next/router";
 import {
@@ -27,6 +28,7 @@ const navigation = [
     group: "Navigation",
     items: [
       { name: "Dashboard", href: "/admin", icon: Home },
+      { name: "Models", href: "/admin/models", icon: DollarSign },
       { name: "On Prem", href: "/admin/on-prem", icon: Ticket },
       { name: "Settings", href: "/admin/settings", icon: Settings },
       { name: "All Orgs", href: "/admin/stats", icon: Building2 },

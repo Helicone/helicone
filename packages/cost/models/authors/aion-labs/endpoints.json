@@ -1,0 +1,69 @@
+{
+  "aion-1.0": [
+    {
+      "name": "AionLabs | aion-labs/aion-1.0",
+      "provider": "AionLabs",
+      "tag": "aion-labs",
+      "status": 0,
+      "pricing": {
+        "prompt": 4,
+        "completion": 8,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": 32768,
+      "supportedParameters": [
+        "reasoning",
+        "include_reasoning",
+        "max_tokens",
+        "temperature",
+        "top_p"
+      ]
+    }
+  ],
+  "aion-1.0-mini": [
+    {
+      "name": "AionLabs | aion-labs/aion-1.0-mini",
+      "provider": "AionLabs",
+      "tag": "aion-labs/bf16",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.7,
+        "completion": 1.4,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": 32768,
+      "supportedParameters": [
+        "reasoning",
+        "include_reasoning",
+        "max_tokens",
+        "temperature",
+        "top_p"
+      ]
+    }
+  ],
+  "aion-rp-llama-3.1-8b": [
+    {
+      "name": "AionLabs | aion-labs/aion-rp-llama-3.1-8b",
+      "provider": "AionLabs",
+      "tag": "aion-labs",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.19999999999999998,
+        "completion": 0.19999999999999998,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": 32768,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "ernie-4.5-300b-a47b": [
+    {
+      "name": "Novita | baidu/ernie-4.5-300b-a47b",
+      "provider": "Novita",
+      "tag": "novita",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.28,
+        "completion": 1.1,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 123000,
+      "maxCompletionTokens": 12000,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logit_bias"
+      ]
+    }
+  ]
+}
