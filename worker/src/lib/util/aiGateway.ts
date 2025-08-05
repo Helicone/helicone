@@ -293,12 +293,12 @@ const attemptModelRequest = async ({
       return ok(response);
     }
 
-    const body = await response.json();
+    const responseBody = await response.json();
     return err({
       type: "request_failed",
       message:
-        (body as { message?: string })?.message ??
-        (body as { error?: { message?: string } })?.error?.message ??
+        (responseBody as { message?: string })?.message ??
+        (responseBody as { error?: { message?: string } })?.error?.message ??
         response.statusText,
       code: response.status,
     });
