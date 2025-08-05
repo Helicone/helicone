@@ -1,5 +1,6 @@
 {
   "slug": "gryphe",
   "name": "gryphe",
-  "modelCount": 1
+  "modelCount": 1,
+  "supported": false
 }

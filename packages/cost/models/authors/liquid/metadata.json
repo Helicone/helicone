@@ -1,5 +1,6 @@
 {
   "slug": "liquid",
   "name": "liquid",
-  "modelCount": 3
+  "modelCount": 3,
+  "supported": false
 }

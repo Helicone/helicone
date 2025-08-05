@@ -23,7 +23,8 @@
         "tools",
         "tool_choice",
         "response_format",
-        "structured_outputs"
+        "structured_outputs",
+        "top_k"
       ]
     }
   ],
@@ -51,7 +52,8 @@
         "tools",
         "tool_choice",
         "response_format",
-        "structured_outputs"
+        "structured_outputs",
+        "top_k"
       ]
     }
   ]

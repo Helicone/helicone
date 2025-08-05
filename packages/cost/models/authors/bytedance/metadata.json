@@ -1,5 +1,6 @@
 {
   "slug": "bytedance",
   "name": "bytedance",
-  "modelCount": 1
+  "modelCount": 1,
+  "supported": true
 }

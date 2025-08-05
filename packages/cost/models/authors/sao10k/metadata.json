@@ -1,5 +1,6 @@
 {
   "slug": "sao10k",
   "name": "sao10k",
-  "modelCount": 5
+  "modelCount": 5,
+  "supported": false
 }

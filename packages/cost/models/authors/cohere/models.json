@@ -65,23 +65,23 @@
     "modality": "text->text",
     "tokenizer": "Cohere"
   },
-  "command": {
-    "id": "command",
-    "name": "Cohere: Command",
-    "author": "cohere",
-    "description": "Command is an instruction-following conversational model that performs language tasks with high quality, more reliably and with a longer context than our base generative models.\n\nUse of this model is subject to Cohere's [Usage Policy](https://docs.cohere.com/docs/usage-policy) and [SaaS Agreement](https://cohere.com/saas-agreement).",
-    "contextLength": 4096,
-    "maxOutputTokens": 4000,
-    "created": "2024-03-14T00:00:00.000Z",
-    "modality": "text->text",
-    "tokenizer": "Cohere"
-  },
   "command-r": {
     "id": "command-r",
     "name": "Cohere: Command R",
     "author": "cohere",
     "description": "Command-R is a 35B parameter model that performs conversational language tasks at a higher quality, more reliably, and with a longer context than previous models. It can be used for complex workflows like code generation, retrieval augmented generation (RAG), tool use, and agents.\n\nRead the launch post [here](https://txt.cohere.com/command-r/).\n\nUse of this model is subject to Cohere's [Usage Policy](https://docs.cohere.com/docs/usage-policy) and [SaaS Agreement](https://cohere.com/saas-agreement).",
     "contextLength": 128000,
+    "maxOutputTokens": 4000,
+    "created": "2024-03-14T00:00:00.000Z",
+    "modality": "text->text",
+    "tokenizer": "Cohere"
+  },
+  "command": {
+    "id": "command",
+    "name": "Cohere: Command",
+    "author": "cohere",
+    "description": "Command is an instruction-following conversational model that performs language tasks with high quality, more reliably and with a longer context than our base generative models.\n\nUse of this model is subject to Cohere's [Usage Policy](https://docs.cohere.com/docs/usage-policy) and [SaaS Agreement](https://cohere.com/saas-agreement).",
+    "contextLength": 4096,
     "maxOutputTokens": 4000,
     "created": "2024-03-14T00:00:00.000Z",
     "modality": "text->text",

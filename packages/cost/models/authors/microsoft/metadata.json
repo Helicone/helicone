@@ -1,5 +1,6 @@
 {
   "slug": "microsoft",
   "name": "microsoft",
-  "modelCount": 9
+  "modelCount": 9,
+  "supported": true
 }

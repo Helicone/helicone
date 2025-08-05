@@ -1,5 +1,6 @@
 {
   "slug": "minimax",
   "name": "minimax",
-  "modelCount": 2
+  "modelCount": 2,
+  "supported": true
 }

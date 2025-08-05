@@ -581,7 +581,7 @@
       "name": "Friendli | meta-llama/llama-4-scout-17b-16e-instruct",
       "provider": "Friendli",
       "tag": "friendli",
-      "status": -2,
+      "status": -5,
       "pricing": {
         "prompt": 0.09999999999999999,
         "completion": 0.6,
@@ -909,7 +909,7 @@
       "name": "Together | meta-llama/llama-3.3-70b-instruct:free",
       "provider": "Together",
       "tag": "together/fp8",
-      "status": 0,
+      "status": -5,
       "pricing": {
         "prompt": 0,
         "completion": 0,
@@ -1669,145 +1669,6 @@
       ]
     }
   ],
-  "llama-3.2-1b-instruct": [
-    {
-      "name": "DeepInfra | meta-llama/llama-3.2-1b-instruct",
-      "provider": "DeepInfra",
-      "tag": "deepinfra/bf16",
-      "status": 0,
-      "pricing": {
-        "prompt": 0.005,
-        "completion": 0.01,
-        "cacheRead": null,
-        "cacheWrite": null
-      },
-      "contextLength": 131072,
-      "maxCompletionTokens": 16384,
-      "supportedParameters": [
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "stop",
-        "frequency_penalty",
-        "presence_penalty",
-        "repetition_penalty",
-        "top_k",
-        "seed",
-        "min_p",
-        "response_format"
-      ]
-    },
-    {
-      "name": "InferenceNet | meta-llama/llama-3.2-1b-instruct",
-      "provider": "InferenceNet",
-      "tag": "inference-net/fp16",
-      "status": 0,
-      "pricing": {
-        "prompt": 0.01,
-        "completion": 0.01,
-        "cacheRead": null,
-        "cacheWrite": null
-      },
-      "contextLength": 16384,
-      "maxCompletionTokens": 16384,
-      "supportedParameters": [
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "stop",
-        "frequency_penalty",
-        "presence_penalty",
-        "seed",
-        "top_k",
-        "min_p",
-        "logit_bias",
-        "top_logprobs",
-        "response_format",
-        "structured_outputs"
-      ]
-    },
-    {
-      "name": "Cloudflare | meta-llama/llama-3.2-1b-instruct",
-      "provider": "Cloudflare",
-      "tag": "cloudflare",
-      "status": 0,
-      "pricing": {
-        "prompt": 0.027,
-        "completion": 0.19999999999999998,
-        "cacheRead": null,
-        "cacheWrite": null
-      },
-      "contextLength": 60000,
-      "maxCompletionTokens": null,
-      "supportedParameters": [
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "top_k",
-        "seed",
-        "repetition_penalty",
-        "frequency_penalty",
-        "presence_penalty"
-      ]
-    }
-  ],
-  "llama-3.2-90b-vision-instruct": [
-    {
-      "name": "Together | meta-llama/llama-3.2-90b-vision-instruct",
-      "provider": "Together",
-      "tag": "together/fp8",
-      "status": 0,
-      "pricing": {
-        "prompt": 1.2,
-        "completion": 1.2,
-        "image": 0.001734,
-        "cacheRead": null,
-        "cacheWrite": null
-      },
-      "contextLength": 131072,
-      "maxCompletionTokens": 2048,
-      "supportedParameters": [
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "stop",
-        "frequency_penalty",
-        "presence_penalty",
-        "top_k",
-        "repetition_penalty",
-        "logit_bias",
-        "min_p"
-      ]
-    },
-    {
-      "name": "DeepInfra | meta-llama/llama-3.2-90b-vision-instruct",
-      "provider": "DeepInfra",
-      "tag": "deepinfra/bf16",
-      "status": 0,
-      "pricing": {
-        "prompt": 0.35,
-        "completion": 0.39999999999999997,
-        "image": 0.0005058,
-        "cacheRead": null,
-        "cacheWrite": null
-      },
-      "contextLength": 32768,
-      "maxCompletionTokens": 16384,
-      "supportedParameters": [
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "stop",
-        "frequency_penalty",
-        "presence_penalty",
-        "repetition_penalty",
-        "top_k",
-        "seed",
-        "min_p",
-        "response_format"
-      ]
-    }
-  ],
   "llama-3.2-11b-vision-instruct:free": [
     {
       "name": "Together | meta-llama/llama-3.2-11b-vision-instruct:free",
@@ -1841,7 +1702,7 @@
       "name": "DeepInfra | meta-llama/llama-3.2-11b-vision-instruct",
       "provider": "DeepInfra",
       "tag": "deepinfra/bf16",
-      "status": 0,
+      "status": -5,
       "pricing": {
         "prompt": 0.049,
         "completion": 0.049,
@@ -2005,6 +1866,145 @@
       ]
     }
   ],
+  "llama-3.2-90b-vision-instruct": [
+    {
+      "name": "Together | meta-llama/llama-3.2-90b-vision-instruct",
+      "provider": "Together",
+      "tag": "together/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 1.2,
+        "completion": 1.2,
+        "image": 0.001734,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": 2048,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "top_k",
+        "repetition_penalty",
+        "logit_bias",
+        "min_p"
+      ]
+    },
+    {
+      "name": "DeepInfra | meta-llama/llama-3.2-90b-vision-instruct",
+      "provider": "DeepInfra",
+      "tag": "deepinfra/bf16",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.35,
+        "completion": 0.39999999999999997,
+        "image": 0.0005058,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": 16384,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "top_k",
+        "seed",
+        "min_p",
+        "response_format"
+      ]
+    }
+  ],
+  "llama-3.2-1b-instruct": [
+    {
+      "name": "DeepInfra | meta-llama/llama-3.2-1b-instruct",
+      "provider": "DeepInfra",
+      "tag": "deepinfra/bf16",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.005,
+        "completion": 0.01,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": 16384,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "top_k",
+        "seed",
+        "min_p",
+        "response_format"
+      ]
+    },
+    {
+      "name": "InferenceNet | meta-llama/llama-3.2-1b-instruct",
+      "provider": "InferenceNet",
+      "tag": "inference-net/fp16",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.01,
+        "completion": 0.01,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 16384,
+      "maxCompletionTokens": 16384,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "logit_bias",
+        "top_logprobs",
+        "response_format",
+        "structured_outputs"
+      ]
+    },
+    {
+      "name": "Cloudflare | meta-llama/llama-3.2-1b-instruct",
+      "provider": "Cloudflare",
+      "tag": "cloudflare",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.027,
+        "completion": 0.19999999999999998,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 60000,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "top_k",
+        "seed",
+        "repetition_penalty",
+        "frequency_penalty",
+        "presence_penalty"
+      ]
+    }
+  ],
   "llama-3.1-405b": [
     {
       "name": "Hyperbolic | meta-llama/llama-3.1-405b",
@@ -2048,6 +2048,211 @@
       },
       "contextLength": 32768,
       "maxCompletionTokens": 32768,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "logprobs",
+        "top_logprobs",
+        "seed",
+        "logit_bias",
+        "top_k",
+        "min_p",
+        "repetition_penalty"
+      ]
+    }
+  ],
+  "llama-3.1-405b-instruct:free": [
+    {
+      "name": "Venice | meta-llama/llama-3.1-405b-instruct:free",
+      "provider": "Venice",
+      "tag": "venice/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0,
+        "completion": 0,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 65536,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "structured_outputs",
+        "response_format",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "top_k"
+      ]
+    }
+  ],
+  "llama-3.1-405b-instruct": [
+    {
+      "name": "DeepInfra | meta-llama/llama-3.1-405b-instruct",
+      "provider": "DeepInfra",
+      "tag": "deepinfra/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.7999999999999999,
+        "completion": 0.7999999999999999,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": 16384,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "top_k",
+        "seed",
+        "min_p",
+        "response_format"
+      ]
+    },
+    {
+      "name": "Lambda | meta-llama/llama-3.1-405b-instruct",
+      "provider": "Lambda",
+      "tag": "lambda/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.7999999999999999,
+        "completion": 0.7999999999999999,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": 131072,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "logit_bias",
+        "logprobs",
+        "top_logprobs",
+        "min_p",
+        "repetition_penalty",
+        "top_k",
+        "response_format"
+      ]
+    },
+    {
+      "name": "Nebius | meta-llama/llama-3.1-405b-instruct",
+      "provider": "Nebius",
+      "tag": "nebius/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 1,
+        "completion": 3,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "logit_bias",
+        "logprobs",
+        "top_logprobs"
+      ]
+    },
+    {
+      "name": "Fireworks | meta-llama/llama-3.1-405b-instruct",
+      "provider": "Fireworks",
+      "tag": "fireworks/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 3,
+        "completion": 3,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "top_k",
+        "repetition_penalty",
+        "logit_bias",
+        "logprobs",
+        "top_logprobs",
+        "response_format",
+        "structured_outputs"
+      ]
+    },
+    {
+      "name": "Together | meta-llama/llama-3.1-405b-instruct",
+      "provider": "Together",
+      "tag": "together/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 3.5,
+        "completion": 3.5,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 130815,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "top_k",
+        "repetition_penalty",
+        "logit_bias",
+        "min_p"
+      ]
+    },
+    {
+      "name": "Hyperbolic | meta-llama/llama-3.1-405b-instruct",
+      "provider": "Hyperbolic",
+      "tag": "hyperbolic/bf16",
+      "status": 0,
+      "pricing": {
+        "prompt": 4,
+        "completion": 4,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131000,
+      "maxCompletionTokens": null,
       "supportedParameters": [
         "max_tokens",
         "temperature",
@@ -2270,7 +2475,7 @@
       "name": "Groq | meta-llama/llama-3.1-8b-instruct",
       "provider": "Groq",
       "tag": "groq",
-      "status": -2,
+      "status": 0,
       "pricing": {
         "prompt": 0.049999999999999996,
         "completion": 0.08,
@@ -2479,211 +2684,6 @@
         "top_p",
         "seed",
         "response_format"
-      ]
-    }
-  ],
-  "llama-3.1-405b-instruct:free": [
-    {
-      "name": "Venice | meta-llama/llama-3.1-405b-instruct:free",
-      "provider": "Venice",
-      "tag": "venice/fp8",
-      "status": 0,
-      "pricing": {
-        "prompt": 0,
-        "completion": 0,
-        "cacheRead": null,
-        "cacheWrite": null
-      },
-      "contextLength": 65536,
-      "maxCompletionTokens": null,
-      "supportedParameters": [
-        "structured_outputs",
-        "response_format",
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "stop",
-        "frequency_penalty",
-        "presence_penalty",
-        "top_k"
-      ]
-    }
-  ],
-  "llama-3.1-405b-instruct": [
-    {
-      "name": "DeepInfra | meta-llama/llama-3.1-405b-instruct",
-      "provider": "DeepInfra",
-      "tag": "deepinfra/fp8",
-      "status": 0,
-      "pricing": {
-        "prompt": 0.7999999999999999,
-        "completion": 0.7999999999999999,
-        "cacheRead": null,
-        "cacheWrite": null
-      },
-      "contextLength": 32768,
-      "maxCompletionTokens": 16384,
-      "supportedParameters": [
-        "tools",
-        "tool_choice",
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "stop",
-        "frequency_penalty",
-        "presence_penalty",
-        "repetition_penalty",
-        "top_k",
-        "seed",
-        "min_p",
-        "response_format"
-      ]
-    },
-    {
-      "name": "Lambda | meta-llama/llama-3.1-405b-instruct",
-      "provider": "Lambda",
-      "tag": "lambda/fp8",
-      "status": 0,
-      "pricing": {
-        "prompt": 0.7999999999999999,
-        "completion": 0.7999999999999999,
-        "cacheRead": null,
-        "cacheWrite": null
-      },
-      "contextLength": 131072,
-      "maxCompletionTokens": 131072,
-      "supportedParameters": [
-        "tools",
-        "tool_choice",
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "stop",
-        "frequency_penalty",
-        "presence_penalty",
-        "seed",
-        "logit_bias",
-        "logprobs",
-        "top_logprobs",
-        "min_p",
-        "repetition_penalty",
-        "top_k",
-        "response_format"
-      ]
-    },
-    {
-      "name": "Nebius | meta-llama/llama-3.1-405b-instruct",
-      "provider": "Nebius",
-      "tag": "nebius/fp8",
-      "status": 0,
-      "pricing": {
-        "prompt": 1,
-        "completion": 3,
-        "cacheRead": null,
-        "cacheWrite": null
-      },
-      "contextLength": 131072,
-      "maxCompletionTokens": null,
-      "supportedParameters": [
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "stop",
-        "frequency_penalty",
-        "presence_penalty",
-        "seed",
-        "top_k",
-        "logit_bias",
-        "logprobs",
-        "top_logprobs"
-      ]
-    },
-    {
-      "name": "Fireworks | meta-llama/llama-3.1-405b-instruct",
-      "provider": "Fireworks",
-      "tag": "fireworks/fp8",
-      "status": 0,
-      "pricing": {
-        "prompt": 3,
-        "completion": 3,
-        "cacheRead": null,
-        "cacheWrite": null
-      },
-      "contextLength": 131072,
-      "maxCompletionTokens": null,
-      "supportedParameters": [
-        "tools",
-        "tool_choice",
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "stop",
-        "frequency_penalty",
-        "presence_penalty",
-        "top_k",
-        "repetition_penalty",
-        "logit_bias",
-        "logprobs",
-        "top_logprobs",
-        "response_format",
-        "structured_outputs"
-      ]
-    },
-    {
-      "name": "Together | meta-llama/llama-3.1-405b-instruct",
-      "provider": "Together",
-      "tag": "together/fp8",
-      "status": 0,
-      "pricing": {
-        "prompt": 3.5,
-        "completion": 3.5,
-        "cacheRead": null,
-        "cacheWrite": null
-      },
-      "contextLength": 130815,
-      "maxCompletionTokens": null,
-      "supportedParameters": [
-        "tools",
-        "tool_choice",
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "stop",
-        "frequency_penalty",
-        "presence_penalty",
-        "top_k",
-        "repetition_penalty",
-        "logit_bias",
-        "min_p"
-      ]
-    },
-    {
-      "name": "Hyperbolic | meta-llama/llama-3.1-405b-instruct",
-      "provider": "Hyperbolic",
-      "tag": "hyperbolic/bf16",
-      "status": 0,
-      "pricing": {
-        "prompt": 4,
-        "completion": 4,
-        "cacheRead": null,
-        "cacheWrite": null
-      },
-      "contextLength": 131000,
-      "maxCompletionTokens": null,
-      "supportedParameters": [
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "stop",
-        "frequency_penalty",
-        "presence_penalty",
-        "logprobs",
-        "top_logprobs",
-        "seed",
-        "logit_bias",
-        "top_k",
-        "min_p",
-        "repetition_penalty"
       ]
     }
   ],
@@ -2948,6 +2948,146 @@
       ]
     }
   ],
+  "llama-3-70b-instruct": [
+    {
+      "name": "DeepInfra | meta-llama/llama-3-70b-instruct",
+      "provider": "DeepInfra",
+      "tag": "deepinfra/bf16",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.3,
+        "completion": 0.39999999999999997,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 8192,
+      "maxCompletionTokens": 16384,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "top_k",
+        "seed",
+        "min_p",
+        "response_format"
+      ]
+    },
+    {
+      "name": "Hyperbolic | meta-llama/llama-3-70b-instruct",
+      "provider": "Hyperbolic",
+      "tag": "hyperbolic",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.39999999999999997,
+        "completion": 0.39999999999999997,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 8192,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "logprobs",
+        "top_logprobs",
+        "seed",
+        "logit_bias",
+        "top_k",
+        "min_p",
+        "repetition_penalty"
+      ]
+    },
+    {
+      "name": "Novita | meta-llama/llama-3-70b-instruct",
+      "provider": "Novita",
+      "tag": "novita",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.51,
+        "completion": 0.74,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 8192,
+      "maxCompletionTokens": 8000,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logit_bias"
+      ]
+    },
+    {
+      "name": "Groq | meta-llama/llama-3-70b-instruct",
+      "provider": "Groq",
+      "tag": "groq",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.59,
+        "completion": 0.7899999999999999,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 8192,
+      "maxCompletionTokens": 8192,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "logprobs",
+        "top_logprobs",
+        "logit_bias",
+        "seed",
+        "response_format"
+      ]
+    },
+    {
+      "name": "Together | meta-llama/llama-3-70b-instruct",
+      "provider": "Together",
+      "tag": "together/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.88,
+        "completion": 0.88,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 8192,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "top_k",
+        "repetition_penalty",
+        "logit_bias",
+        "min_p"
+      ]
+    }
+  ],
   "llama-3-8b-instruct": [
     {
       "name": "DeepInfra | meta-llama/llama-3-8b-instruct",
@@ -3080,146 +3220,6 @@
         "repetition_penalty",
         "frequency_penalty",
         "presence_penalty"
-      ]
-    }
-  ],
-  "llama-3-70b-instruct": [
-    {
-      "name": "DeepInfra | meta-llama/llama-3-70b-instruct",
-      "provider": "DeepInfra",
-      "tag": "deepinfra/bf16",
-      "status": 0,
-      "pricing": {
-        "prompt": 0.3,
-        "completion": 0.39999999999999997,
-        "cacheRead": null,
-        "cacheWrite": null
-      },
-      "contextLength": 8192,
-      "maxCompletionTokens": 16384,
-      "supportedParameters": [
-        "tools",
-        "tool_choice",
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "stop",
-        "frequency_penalty",
-        "presence_penalty",
-        "repetition_penalty",
-        "top_k",
-        "seed",
-        "min_p",
-        "response_format"
-      ]
-    },
-    {
-      "name": "Hyperbolic | meta-llama/llama-3-70b-instruct",
-      "provider": "Hyperbolic",
-      "tag": "hyperbolic",
-      "status": 0,
-      "pricing": {
-        "prompt": 0.39999999999999997,
-        "completion": 0.39999999999999997,
-        "cacheRead": null,
-        "cacheWrite": null
-      },
-      "contextLength": 8192,
-      "maxCompletionTokens": null,
-      "supportedParameters": [
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "stop",
-        "frequency_penalty",
-        "presence_penalty",
-        "logprobs",
-        "top_logprobs",
-        "seed",
-        "logit_bias",
-        "top_k",
-        "min_p",
-        "repetition_penalty"
-      ]
-    },
-    {
-      "name": "Novita | meta-llama/llama-3-70b-instruct",
-      "provider": "Novita",
-      "tag": "novita",
-      "status": 0,
-      "pricing": {
-        "prompt": 0.51,
-        "completion": 0.74,
-        "cacheRead": null,
-        "cacheWrite": null
-      },
-      "contextLength": 8192,
-      "maxCompletionTokens": 8000,
-      "supportedParameters": [
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "stop",
-        "frequency_penalty",
-        "presence_penalty",
-        "seed",
-        "top_k",
-        "min_p",
-        "repetition_penalty",
-        "logit_bias"
-      ]
-    },
-    {
-      "name": "Groq | meta-llama/llama-3-70b-instruct",
-      "provider": "Groq",
-      "tag": "groq",
-      "status": -5,
-      "pricing": {
-        "prompt": 0.59,
-        "completion": 0.7899999999999999,
-        "cacheRead": null,
-        "cacheWrite": null
-      },
-      "contextLength": 8192,
-      "maxCompletionTokens": 8192,
-      "supportedParameters": [
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "stop",
-        "frequency_penalty",
-        "presence_penalty",
-        "logprobs",
-        "top_logprobs",
-        "logit_bias",
-        "seed",
-        "response_format"
-      ]
-    },
-    {
-      "name": "Together | meta-llama/llama-3-70b-instruct",
-      "provider": "Together",
-      "tag": "together/fp8",
-      "status": 0,
-      "pricing": {
-        "prompt": 0.88,
-        "completion": 0.88,
-        "cacheRead": null,
-        "cacheWrite": null
-      },
-      "contextLength": 8192,
-      "maxCompletionTokens": null,
-      "supportedParameters": [
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "stop",
-        "frequency_penalty",
-        "presence_penalty",
-        "top_k",
-        "repetition_penalty",
-        "logit_bias",
-        "min_p"
       ]
     }
   ]

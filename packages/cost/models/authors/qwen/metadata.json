@@ -1,5 +1,6 @@
 {
   "slug": "qwen",
   "name": "qwen",
-  "modelCount": 34
+  "modelCount": 34,
+  "supported": true
 }

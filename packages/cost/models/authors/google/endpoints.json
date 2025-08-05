@@ -642,7 +642,7 @@
       "name": "Chutes | google/gemma-3-12b-it:free",
       "provider": "Chutes",
       "tag": "chutes/bf16",
-      "status": 0,
+      "status": -2,
       "pricing": {
         "prompt": 0,
         "completion": 0,

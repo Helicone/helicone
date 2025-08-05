@@ -1,5 +1,6 @@
 {
   "slug": "tencent",
   "name": "tencent",
-  "modelCount": 2
+  "modelCount": 2,
+  "supported": false
 }

@@ -1,5 +1,6 @@
 {
   "slug": "arliai",
   "name": "arliai",
-  "modelCount": 2
+  "modelCount": 2,
+  "supported": false
 }

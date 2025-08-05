@@ -1,5 +1,6 @@
 {
   "slug": "raifle",
   "name": "raifle",
-  "modelCount": 1
+  "modelCount": 1,
+  "supported": false
 }

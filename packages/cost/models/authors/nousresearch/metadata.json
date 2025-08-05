@@ -1,5 +1,6 @@
 {
   "slug": "nousresearch",
   "name": "nousresearch",
-  "modelCount": 6
+  "modelCount": 6,
+  "supported": false
 }

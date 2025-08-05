@@ -385,7 +385,7 @@
       "name": "GMICloud | qwen/qwen3-coder-480b-a35b-07-25",
       "provider": "GMICloud",
       "tag": "gmicloud/fp8",
-      "status": -5,
+      "status": 0,
       "pricing": {
         "prompt": 1,
         "completion": 2,
@@ -785,7 +785,7 @@
       "name": "Together | qwen/qwen3-235b-a22b-07-25",
       "provider": "Together",
       "tag": "together",
-      "status": -2,
+      "status": 0,
       "pricing": {
         "prompt": 0.19999999999999998,
         "completion": 0.6,
@@ -1186,7 +1186,7 @@
       "name": "Friendli | qwen/qwen3-30b-a3b-04-28",
       "provider": "Friendli",
       "tag": "friendli",
-      "status": -2,
+      "status": 0,
       "pricing": {
         "prompt": 0.15,
         "completion": 0.6,
@@ -1812,7 +1812,7 @@
       "name": "Venice | qwen/qwen3-235b-a22b-04-28:free",
       "provider": "Venice",
       "tag": "venice/fp8",
-      "status": 0,
+      "status": -5,
       "pricing": {
         "prompt": 0,
         "completion": 0,
@@ -1903,7 +1903,7 @@
       "name": "Parasail | qwen/qwen3-235b-a22b-04-28",
       "provider": "Parasail",
       "tag": "parasail/fp8",
-      "status": -2,
+      "status": 0,
       "pricing": {
         "prompt": 0.13,
         "completion": 0.85,
@@ -2045,7 +2045,7 @@
       "name": "Chutes | qwen/qwen2.5-vl-32b-instruct:free",
       "provider": "Chutes",
       "tag": "chutes/bf16",
-      "status": 0,
+      "status": -5,
       "pricing": {
         "prompt": 0,
         "completion": 0,
@@ -2810,7 +2810,7 @@
       "name": "Chutes | qwen/qwen-2.5-coder-32b-instruct",
       "provider": "Chutes",
       "tag": "chutes",
-      "status": -2,
+      "status": -5,
       "pricing": {
         "prompt": 0.0499797,
         "completion": 0.200016,
@@ -3167,7 +3167,7 @@
       "name": "Chutes | qwen/qwen-2.5-72b-instruct",
       "provider": "Chutes",
       "tag": "chutes/bf16",
-      "status": -2,
+      "status": 0,
       "pricing": {
         "prompt": 0.0666396,
         "completion": 0.26668800000000004,

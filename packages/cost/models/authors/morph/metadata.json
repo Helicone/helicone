@@ -1,5 +1,6 @@
 {
   "slug": "morph",
   "name": "morph",
-  "modelCount": 2
+  "modelCount": 2,
+  "supported": false
 }

@@ -1,5 +1,6 @@
 {
   "slug": "rekaai",
   "name": "rekaai",
-  "modelCount": 1
+  "modelCount": 1,
+  "supported": true
 }

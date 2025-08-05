@@ -195,34 +195,6 @@
       ]
     }
   ],
-  "command": [
-    {
-      "name": "Cohere | cohere/command",
-      "provider": "Cohere",
-      "tag": "cohere",
-      "status": 0,
-      "pricing": {
-        "prompt": 1,
-        "completion": 2,
-        "cacheRead": null,
-        "cacheWrite": null
-      },
-      "contextLength": 4096,
-      "maxCompletionTokens": 4000,
-      "supportedParameters": [
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "stop",
-        "frequency_penalty",
-        "presence_penalty",
-        "top_k",
-        "seed",
-        "response_format",
-        "structured_outputs"
-      ]
-    }
-  ],
   "command-r": [
     {
       "name": "Cohere | cohere/command-r",
@@ -239,6 +211,34 @@
       "maxCompletionTokens": 4000,
       "supportedParameters": [
         "tools",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "top_k",
+        "seed",
+        "response_format",
+        "structured_outputs"
+      ]
+    }
+  ],
+  "command": [
+    {
+      "name": "Cohere | cohere/command",
+      "provider": "Cohere",
+      "tag": "cohere",
+      "status": 0,
+      "pricing": {
+        "prompt": 1,
+        "completion": 2,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 4096,
+      "maxCompletionTokens": 4000,
+      "supportedParameters": [
         "max_tokens",
         "temperature",
         "top_p",

@@ -125,7 +125,7 @@
       "name": "NextBit | nousresearch/hermes-3-llama-3.1-70b",
       "provider": "NextBit",
       "tag": "nextbit/int4",
-      "status": -2,
+      "status": -5,
       "pricing": {
         "prompt": 0.3,
         "completion": 0.3,
@@ -149,7 +149,7 @@
       "name": "Hyperbolic | nousresearch/hermes-3-llama-3.1-70b",
       "provider": "Hyperbolic",
       "tag": "hyperbolic/fp8",
-      "status": -5,
+      "status": 0,
       "pricing": {
         "prompt": 0.39999999999999997,
         "completion": 0.39999999999999997,

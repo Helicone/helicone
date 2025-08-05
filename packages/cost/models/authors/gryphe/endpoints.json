@@ -4,7 +4,7 @@
       "name": "NextBit | gryphe/mythomax-l2-13b",
       "provider": "NextBit",
       "tag": "nextbit/int4",
-      "status": -2,
+      "status": 0,
       "pricing": {
         "prompt": 0.06,
         "completion": 0.06,
@@ -28,7 +28,7 @@
       "name": "DeepInfra | gryphe/mythomax-l2-13b",
       "provider": "DeepInfra",
       "tag": "deepinfra/fp16",
-      "status": -2,
+      "status": 0,
       "pricing": {
         "prompt": 0.06,
         "completion": 0.06,

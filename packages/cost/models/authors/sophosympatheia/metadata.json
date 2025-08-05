@@ -1,5 +1,6 @@
 {
   "slug": "sophosympatheia",
   "name": "sophosympatheia",
-  "modelCount": 1
+  "modelCount": 1,
+  "supported": false
 }

@@ -1,5 +1,6 @@
 {
   "slug": "thedrummer",
   "name": "thedrummer",
-  "modelCount": 6
+  "modelCount": 6,
+  "supported": false
 }

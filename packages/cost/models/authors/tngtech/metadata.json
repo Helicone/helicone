@@ -1,5 +1,6 @@
 {
   "slug": "tngtech",
   "name": "tngtech",
-  "modelCount": 3
+  "modelCount": 3,
+  "supported": false
 }

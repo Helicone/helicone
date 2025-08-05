@@ -1,5 +1,6 @@
 {
   "slug": "ai21",
   "name": "ai21",
-  "modelCount": 2
+  "modelCount": 2,
+  "supported": true
 }

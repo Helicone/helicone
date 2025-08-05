@@ -1,5 +1,6 @@
 {
   "slug": "inflection",
   "name": "inflection",
-  "modelCount": 2
+  "modelCount": 2,
+  "supported": true
 }

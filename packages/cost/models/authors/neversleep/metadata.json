@@ -1,5 +1,6 @@
 {
   "slug": "neversleep",
   "name": "neversleep",
-  "modelCount": 3
+  "modelCount": 3,
+  "supported": false
 }
