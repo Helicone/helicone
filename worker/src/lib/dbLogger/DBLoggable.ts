@@ -324,7 +324,8 @@ export class DBLoggable {
             total_tokens: usageMetadataItem?.usageMetadata?.totalTokenCount,
             prompt_tokens: usageMetadataItem?.usageMetadata?.promptTokenCount,
             completion_tokens:
-              usageMetadataItem?.usageMetadata?.candidatesTokenCount,
+              (usageMetadataItem?.usageMetadata?.thoughtsTokenCount ?? 0) +
+              (usageMetadataItem?.usageMetadata?.candidatesTokenCount ?? 0),
             helicone_calculated: false,
           },
         });
