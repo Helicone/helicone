@@ -1,7 +1,7 @@
 /**
  * Model Registry Index
  * Auto-generated on: 2025-08-05T01:21:31.504Z
- * 
+ *
  * This file combines all author data from the ./authors/ directory
  */
 
@@ -64,10 +64,12 @@ export interface Model {
 }
 
 export interface Endpoint {
-  name: string;
+  name?: string;
   provider: string;
+  providerModelId?: string;
+  model?: string;
   tag: string;
-  status: number;
+  status?: number;
   pricing: {
     prompt: number;
     completion: number;
