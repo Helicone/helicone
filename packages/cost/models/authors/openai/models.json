@@ -230,6 +230,17 @@
     "modality": "text+image->text",
     "tokenizer": "GPT"
   },
+  "gpt-4o-2024-05-13": {
+    "id": "gpt-4o-2024-05-13",
+    "name": "OpenAI: GPT-4o (2024-05-13)",
+    "author": "openai",
+    "description": "GPT-4o (\"o\" for \"omni\") is OpenAI's latest AI model, supporting both text and image inputs with text outputs. It maintains the intelligence level of [GPT-4 Turbo](/models/openai/gpt-4-turbo) while being twice as fast and 50% more cost-effective. GPT-4o also offers improved performance in processing non-English languages and enhanced visual capabilities.\n\nFor benchmarking against other models, it was briefly called [\"im-also-a-good-gpt2-chatbot\"](https://twitter.com/LiamFedus/status/1790064963966370209)\n\n#multimodal",
+    "contextLength": 128000,
+    "maxOutputTokens": 4096,
+    "created": "2024-05-13T00:00:00.000Z",
+    "modality": "text+image->text",
+    "tokenizer": "GPT"
+  },
   "gpt-4o": {
     "id": "gpt-4o",
     "name": "OpenAI: GPT-4o",
@@ -248,17 +259,6 @@
     "description": "GPT-4o (\"o\" for \"omni\") is OpenAI's latest AI model, supporting both text and image inputs with text outputs. It maintains the intelligence level of [GPT-4 Turbo](/models/openai/gpt-4-turbo) while being twice as fast and 50% more cost-effective. GPT-4o also offers improved performance in processing non-English languages and enhanced visual capabilities.\n\nFor benchmarking against other models, it was briefly called [\"im-also-a-good-gpt2-chatbot\"](https://twitter.com/LiamFedus/status/1790064963966370209)\n\n#multimodal",
     "contextLength": 128000,
     "maxOutputTokens": 64000,
-    "created": "2024-05-13T00:00:00.000Z",
-    "modality": "text+image->text",
-    "tokenizer": "GPT"
-  },
-  "gpt-4o-2024-05-13": {
-    "id": "gpt-4o-2024-05-13",
-    "name": "OpenAI: GPT-4o (2024-05-13)",
-    "author": "openai",
-    "description": "GPT-4o (\"o\" for \"omni\") is OpenAI's latest AI model, supporting both text and image inputs with text outputs. It maintains the intelligence level of [GPT-4 Turbo](/models/openai/gpt-4-turbo) while being twice as fast and 50% more cost-effective. GPT-4o also offers improved performance in processing non-English languages and enhanced visual capabilities.\n\nFor benchmarking against other models, it was briefly called [\"im-also-a-good-gpt2-chatbot\"](https://twitter.com/LiamFedus/status/1790064963966370209)\n\n#multimodal",
-    "contextLength": 128000,
-    "maxOutputTokens": 4096,
     "created": "2024-05-13T00:00:00.000Z",
     "modality": "text+image->text",
     "tokenizer": "GPT"
@@ -340,22 +340,22 @@
     "modality": "text->text",
     "tokenizer": "GPT"
   },
-  "gpt-4": {
-    "id": "gpt-4",
-    "name": "OpenAI: GPT-4",
+  "gpt-4-0314": {
+    "id": "gpt-4-0314",
+    "name": "OpenAI: GPT-4 (older v0314)",
     "author": "openai",
-    "description": "OpenAI's flagship model, GPT-4 is a large-scale multimodal language model capable of solving difficult problems with greater accuracy than previous models due to its broader general knowledge and advanced reasoning capabilities. Training data: up to Sep 2021.",
+    "description": "GPT-4-0314 is the first version of GPT-4 released, with a context length of 8,192 tokens, and was supported until June 14. Training data: up to Sep 2021.",
     "contextLength": 8191,
     "maxOutputTokens": 4096,
     "created": "2023-05-28T00:00:00.000Z",
     "modality": "text->text",
     "tokenizer": "GPT"
   },
-  "gpt-4-0314": {
-    "id": "gpt-4-0314",
-    "name": "OpenAI: GPT-4 (older v0314)",
+  "gpt-4": {
+    "id": "gpt-4",
+    "name": "OpenAI: GPT-4",
     "author": "openai",
-    "description": "GPT-4-0314 is the first version of GPT-4 released, with a context length of 8,192 tokens, and was supported until June 14. Training data: up to Sep 2021.",
+    "description": "OpenAI's flagship model, GPT-4 is a large-scale multimodal language model capable of solving difficult problems with greater accuracy than previous models due to its broader general knowledge and advanced reasoning capabilities. Training data: up to Sep 2021.",
     "contextLength": 8191,
     "maxOutputTokens": 4096,
     "created": "2023-05-28T00:00:00.000Z",

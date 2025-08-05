@@ -423,6 +423,31 @@
       ]
     }
   ],
+  "claude-3.5-haiku-20241022": [
+    {
+      "name": "Google | anthropic/claude-3-5-haiku-20241022",
+      "provider": "Google",
+      "tag": "google-vertex",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.7999999999999999,
+        "completion": 4,
+        "cacheRead": 0.08,
+        "cacheWrite": 1
+      },
+      "contextLength": 200000,
+      "maxCompletionTokens": 8192,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "top_k",
+        "stop"
+      ]
+    }
+  ],
   "claude-3.5-haiku:beta": [
     {
       "name": "Anthropic | anthropic/claude-3-5-haiku:beta",
@@ -522,31 +547,6 @@
       "name": "Amazon Bedrock | anthropic/claude-3-5-haiku",
       "provider": "Amazon Bedrock",
       "tag": "amazon-bedrock",
-      "status": 0,
-      "pricing": {
-        "prompt": 0.7999999999999999,
-        "completion": 4,
-        "cacheRead": 0.08,
-        "cacheWrite": 1
-      },
-      "contextLength": 200000,
-      "maxCompletionTokens": 8192,
-      "supportedParameters": [
-        "tools",
-        "tool_choice",
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "top_k",
-        "stop"
-      ]
-    }
-  ],
-  "claude-3.5-haiku-20241022": [
-    {
-      "name": "Google | anthropic/claude-3-5-haiku-20241022",
-      "provider": "Google",
-      "tag": "google-vertex",
       "status": 0,
       "pricing": {
         "prompt": 0.7999999999999999,

@@ -88,7 +88,7 @@
       "name": "Chutes | moonshotai/kimi-k2",
       "provider": "Chutes",
       "tag": "chutes/fp8",
-      "status": -2,
+      "status": -5,
       "pricing": {
         "prompt": 0.296176,
         "completion": 1.18528,
@@ -285,7 +285,7 @@
       "name": "Groq | moonshotai/kimi-k2",
       "provider": "Groq",
       "tag": "groq",
-      "status": -2,
+      "status": 0,
       "pricing": {
         "prompt": 1,
         "completion": 3,

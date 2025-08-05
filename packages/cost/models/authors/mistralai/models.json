@@ -274,6 +274,17 @@
     "modality": "text->text",
     "tokenizer": "Mistral"
   },
+  "mistral-7b-instruct-v0.3": {
+    "id": "mistral-7b-instruct-v0.3",
+    "name": "Mistral: Mistral 7B Instruct v0.3",
+    "author": "mistralai",
+    "description": "A high-performing, industry-standard 7.3B parameter model, with optimizations for speed and context length.\n\nAn improved version of [Mistral 7B Instruct v0.2](/models/mistralai/mistral-7b-instruct-v0.2), with the following changes:\n\n- Extended vocabulary to 32768\n- Supports v3 Tokenizer\n- Supports function calling\n\nNOTE: Support for function calling depends on the provider.",
+    "contextLength": 32768,
+    "maxOutputTokens": 16384,
+    "created": "2024-05-27T00:00:00.000Z",
+    "modality": "text->text",
+    "tokenizer": "Mistral"
+  },
   "mistral-7b-instruct:free": {
     "id": "mistral-7b-instruct:free",
     "name": "Mistral: Mistral 7B Instruct (free)",
@@ -290,17 +301,6 @@
     "name": "Mistral: Mistral 7B Instruct",
     "author": "mistralai",
     "description": "A high-performing, industry-standard 7.3B parameter model, with optimizations for speed and context length.\n\n*Mistral 7B Instruct has multiple version variants, and this is intended to be the latest version.*",
-    "contextLength": 32768,
-    "maxOutputTokens": 16384,
-    "created": "2024-05-27T00:00:00.000Z",
-    "modality": "text->text",
-    "tokenizer": "Mistral"
-  },
-  "mistral-7b-instruct-v0.3": {
-    "id": "mistral-7b-instruct-v0.3",
-    "name": "Mistral: Mistral 7B Instruct v0.3",
-    "author": "mistralai",
-    "description": "A high-performing, industry-standard 7.3B parameter model, with optimizations for speed and context length.\n\nAn improved version of [Mistral 7B Instruct v0.2](/models/mistralai/mistral-7b-instruct-v0.2), with the following changes:\n\n- Extended vocabulary to 32768\n- Supports v3 Tokenizer\n- Supports function calling\n\nNOTE: Support for function calling depends on the provider.",
     "contextLength": 32768,
     "maxOutputTokens": 16384,
     "created": "2024-05-27T00:00:00.000Z",
