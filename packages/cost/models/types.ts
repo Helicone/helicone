@@ -7,11 +7,40 @@
  * - Keeping it simple and focused on core functionality
  */
 
-// Import types from constants
-import type { ModelCreator, ProviderName } from "./constants";
+// Define type unions based on actual data
+export type ModelCreator = 
+  | "amazon"
+  | "anthropic"
+  | "cohere"
+  | "deepseek"
+  | "google"
+  | "meta-llama"
+  | "microsoft"
+  | "mistralai"
+  | "moonshotai"
+  | "nvidia"
+  | "openai"
+  | "perplexity"
+  | "qwen"
+  | "x-ai";
 
-// Re-export types for backward compatibility
-export type { ModelCreator, ProviderName } from "./constants";
+export type ProviderName =
+  | "Anthropic"
+  | "OpenAI"
+  | "Google"
+  | "Amazon Bedrock"
+  | "Azure"
+  | "Together AI"
+  | "Fireworks"
+  | "Groq"
+  | "Perplexity"
+  | "DeepSeek"
+  | "Replicate"
+  | "Hugging Face"
+  | "Cohere"
+  | "Mistral"
+  | "X.AI"
+  | "OpenRouter";
 
 // Core cost structure - ALL COSTS ARE PER MILLION TOKENS
 export interface ModelCost {
@@ -82,7 +111,6 @@ export interface Model {
 export interface ModelRegistry {
   models: Record<string, Model>;
 }
-
 
 // Flat lookup map for O(1) access to any model ID
 export interface ModelLookupMap {
