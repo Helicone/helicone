@@ -1,0 +1,260 @@
+{
+  "glm-4.5": [
+    {
+      "name": "Chutes | z-ai/glm-4.5",
+      "provider": "Chutes",
+      "tag": "chutes/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.19999999999999998,
+        "completion": 0.19999999999999998,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "reasoning",
+        "include_reasoning",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logprobs",
+        "logit_bias",
+        "top_logprobs"
+      ]
+    },
+    {
+      "name": "DeepInfra | z-ai/glm-4.5",
+      "provider": "DeepInfra",
+      "tag": "deepinfra/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.55,
+        "completion": 2,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "reasoning",
+        "include_reasoning",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "top_k",
+        "seed",
+        "min_p",
+        "response_format"
+      ]
+    },
+    {
+      "name": "Parasail | z-ai/glm-4.5",
+      "provider": "Parasail",
+      "tag": "parasail/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.59,
+        "completion": 2.0999999999999996,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": 131072,
+      "supportedParameters": [
+        "reasoning",
+        "include_reasoning",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "frequency_penalty",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "top_k"
+      ]
+    },
+    {
+      "name": "Z.AI | z-ai/glm-4.5",
+      "provider": "Z.AI",
+      "tag": "z-ai/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.6,
+        "completion": 2.2,
+        "cacheRead": 0.11,
+        "cacheWrite": null
+      },
+      "contextLength": 128000,
+      "maxCompletionTokens": 96000,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "reasoning",
+        "include_reasoning",
+        "max_tokens",
+        "temperature",
+        "top_p"
+      ]
+    },
+    {
+      "name": "Novita | z-ai/glm-4.5",
+      "provider": "Novita",
+      "tag": "novita",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.6,
+        "completion": 2.2,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": 131072,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "reasoning",
+        "include_reasoning",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logit_bias"
+      ]
+    }
+  ],
+  "glm-4.5-air:free": [
+    {
+      "name": "Chutes | z-ai/glm-4.5-air:free",
+      "provider": "Chutes",
+      "tag": "chutes/bf16",
+      "status": 0,
+      "pricing": {
+        "prompt": 0,
+        "completion": 0,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "reasoning",
+        "include_reasoning",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logprobs",
+        "logit_bias",
+        "top_logprobs"
+      ]
+    }
+  ],
+  "glm-4.5-air": [
+    {
+      "name": "Z.AI | z-ai/glm-4.5-air",
+      "provider": "Z.AI",
+      "tag": "z-ai/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.19999999999999998,
+        "completion": 1.1,
+        "cacheRead": 0.03,
+        "cacheWrite": null
+      },
+      "contextLength": 128000,
+      "maxCompletionTokens": 96000,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "reasoning",
+        "include_reasoning",
+        "max_tokens",
+        "temperature",
+        "top_p"
+      ]
+    },
+    {
+      "name": "DeepInfra | z-ai/glm-4.5-air",
+      "provider": "DeepInfra",
+      "tag": "deepinfra/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.19999999999999998,
+        "completion": 1.1,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "reasoning",
+        "include_reasoning",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "top_k",
+        "seed",
+        "min_p",
+        "response_format"
+      ]
+    }
+  ],
+  "glm-4-32b": [
+    {
+      "name": "Z.AI | z-ai/glm-4-32b-0414",
+      "provider": "Z.AI",
+      "tag": "z-ai",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.09999999999999999,
+        "completion": 0.09999999999999999,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 128000,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p"
+      ]
+    }
+  ]
+}

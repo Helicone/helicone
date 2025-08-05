@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { H1, P } from "@/components/ui/typography";
@@ -20,90 +20,150 @@ import {
 import { Search, GitBranch } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import {
-  models,
-  modelRegistry,
-  MODEL_CREATORS,
-  PROVIDER_NAMES,
-  type Model,
-} from "@helicone-package/cost/models";
 import { ModelDetailsDialog } from "./ModelDetailsDialog";
+import type {
+  Model,
+  Endpoint,
+  Author,
+} from "@helicone-package/cost/models";
+
+interface RegistryData {
+  models: Record<string, Model>;
+  endpoints: Record<string, Endpoint[]>;
+  authors: Record<string, Author>;
+  modelVersions: Record<string, string[]>;
+}
 
 export default function AdminModelsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProvider, setSelectedProvider] = useState<string>("all");
-  const [selectedCreator, setSelectedCreator] = useState<string>("all");
+  const [selectedAuthor, setSelectedAuthor] = useState<string>("all");
   const [showVariants, setShowVariants] = useState(false);
   const [showDisabled, setShowDisabled] = useState(false);
   const [selectedModel, setSelectedModel] = useState<Model | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [registryData, setRegistryData] = useState<RegistryData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleModelClick = (model: Model) => {
-    setSelectedModel(model);
-    setIsDetailsOpen(true);
+  useEffect(() => {
+    fetch("/api/admin/models")
+      .then((res) => res.json())
+      .then((data) => {
+        setRegistryData(data);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.error("Failed to load models:", error);
+        setIsLoading(false);
+      });
+  }, []);
+
+  const handleModelClick = (modelKey: string) => {
+    if (registryData) {
+      setSelectedModel(registryData.models[modelKey]);
+      setIsDetailsOpen(true);
+    }
   };
 
-  // Get models from the registry, organized by hierarchy
-  const { baseModels, variantsByBase } = useMemo(() => {
-    const baseList: Model[] = [];
-    const variantsMap: Record<string, Model[]> = {};
+  // Get unique providers from endpoints
+  const allProviders = useMemo(() => {
+    if (!registryData) return [];
+    const providers = new Set<string>();
+    Object.values(registryData.endpoints).forEach((endpointList) => {
+      endpointList.forEach((endpoint) => {
+        providers.add(endpoint.provider);
+      });
+    });
+    return Array.from(providers).sort();
+  }, [registryData]);
 
-    // Get all base models and their variants
-    for (const [modelId, baseModel] of Object.entries(modelRegistry.models)) {
-      baseList.push(baseModel);
-      variantsMap[modelId] = [];
-      
-      // Get nested variants for this base model
-      if (baseModel.variants) {
-        for (const variantId of Object.keys(baseModel.variants)) {
-          const variant = models.get(variantId);
-          if (variant) {
-            variantsMap[modelId].push(variant);
-          }
-        }
-      }
-    }
-
-    return { baseModels: baseList, variantsByBase: variantsMap };
-  }, []);
+  // Get all authors
+  const allAuthors = useMemo(() => {
+    if (!registryData) return [];
+    return Object.keys(registryData.authors).sort();
+  }, [registryData]);
 
   // Filter models based on search and filters
   const filteredModels = useMemo(() => {
-    return baseModels.filter((model) => {
+    if (!registryData) return [];
+
+    return Object.entries(registryData.models).filter(([modelKey, model]) => {
       const matchesSearch = searchQuery
         ? model.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          model.metadata.displayName
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase())
+          model.name.toLowerCase().includes(searchQuery.toLowerCase())
         : true;
 
+      const endpoints = registryData.endpoints[modelKey] || [];
       const matchesProvider =
         selectedProvider === "all"
           ? true
-          : Object.keys(model.providers).includes(selectedProvider);
+          : endpoints.some((ep) => ep.provider === selectedProvider);
 
-      const matchesCreator =
-        selectedCreator === "all" ? true : model.creator === selectedCreator;
+      const matchesAuthor =
+        selectedAuthor === "all" ? true : model.author === selectedAuthor;
 
-      // Check if model is disabled (either model-level flag or all providers disabled)
-      const isDisabled =
-        model.disabled ||
-        Object.values(model.providers).every((p) => !p.available);
+      // Check if model is disabled (no available endpoints)
+      const isDisabled = endpoints.length === 0 || endpoints.every((ep) => ep.status !== 0);
 
       // If showDisabled is false, hide disabled models
       if (!showDisabled && isDisabled) {
         return false;
       }
 
-      return matchesSearch && matchesProvider && matchesCreator;
+      return matchesSearch && matchesProvider && matchesAuthor;
     });
   }, [
-    baseModels,
+    registryData,
     searchQuery,
     selectedProvider,
-    selectedCreator,
+    selectedAuthor,
     showDisabled,
   ]);
+
+  // Group models by base model
+  const { baseModels, variantsByBase } = useMemo(() => {
+    const bases: Array<[string, Model]> = [];
+    const variants: Record<string, Array<[string, Model]>> = {};
+
+    filteredModels.forEach(([modelKey, model]) => {
+      // Check if this is a variant
+      let isVariant = false;
+      for (const [baseKey, versionList] of Object.entries(
+        registryData?.modelVersions || {},
+      )) {
+        if (versionList.includes(modelKey)) {
+          isVariant = true;
+          if (!variants[baseKey]) {
+            variants[baseKey] = [];
+          }
+          variants[baseKey].push([modelKey, model]);
+          break;
+        }
+      }
+
+      if (!isVariant) {
+        bases.push([modelKey, model]);
+      }
+    });
+
+    return { baseModels: bases, variantsByBase: variants };
+  }, [filteredModels, registryData]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-muted-foreground">Loading models...</div>
+      </div>
+    );
+  }
+
+  if (!registryData) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-red-500">Failed to load models</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -111,7 +171,7 @@ export default function AdminModelsPage() {
         <div>
           <H1>Model Registry</H1>
           <P className="text-muted-foreground">
-            View AI model costs across {PROVIDER_NAMES.length} providers
+            View AI model costs across {allProviders.length} providers
           </P>
         </div>
       </div>
@@ -138,7 +198,7 @@ export default function AdminModelsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Providers</SelectItem>
-                {PROVIDER_NAMES.map((provider) => (
+                {allProviders.map((provider) => (
                   <SelectItem key={provider} value={provider}>
                     {provider}
                   </SelectItem>
@@ -146,15 +206,15 @@ export default function AdminModelsPage() {
               </SelectContent>
             </Select>
 
-            <Select value={selectedCreator} onValueChange={setSelectedCreator}>
+            <Select value={selectedAuthor} onValueChange={setSelectedAuthor}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="All Creators" />
+                <SelectValue placeholder="All Authors" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Creators</SelectItem>
-                {MODEL_CREATORS.map((creator) => (
-                  <SelectItem key={creator} value={creator}>
-                    {creator}
+                <SelectItem value="all">All Authors</SelectItem>
+                {allAuthors.map((author) => (
+                  <SelectItem key={author} value={author}>
+                    {author}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -163,20 +223,24 @@ export default function AdminModelsPage() {
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span>{filteredModels.length} base models</span>
+              <span>{baseModels.length} base models</span>
               <span>•</span>
               <span>
                 {Object.values(variantsByBase).reduce(
                   (sum, variants) => sum + variants.length,
                   0,
                 )}{" "}
-                total variants
+                variants
               </span>
               {(() => {
-                const disabledCount = baseModels.filter(
-                  (m) =>
-                    m.disabled ||
-                    Object.values(m.providers).every((p) => !p.available),
+                const disabledCount = Object.entries(registryData.models).filter(
+                  ([modelKey]) => {
+                    const endpoints = registryData.endpoints[modelKey] || [];
+                    return (
+                      endpoints.length === 0 ||
+                      endpoints.every((ep) => ep.status !== 0)
+                    );
+                  },
                 ).length;
                 return disabledCount > 0 && !showDisabled ? (
                   <>
@@ -234,36 +298,35 @@ export default function AdminModelsPage() {
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[300px]">Model</TableHead>
-                <TableHead>Creator</TableHead>
+                <TableHead>Author</TableHead>
                 <TableHead>Context Window</TableHead>
-                <TableHead>Providers</TableHead>
+                <TableHead>Endpoints</TableHead>
                 <TableHead className="text-right">Cost Range</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredModels.map((model) => {
+              {baseModels.map(([modelKey, model]) => {
+                const endpoints = registryData.endpoints[modelKey] || [];
                 const isDisabled =
-                  model.disabled ||
-                  Object.values(model.providers).every((p) => !p.available);
-                const costs = Object.values(model.providers)
-                  .filter((p) => p.available && p.cost)
-                  .map((p) => p.cost.prompt_token);
+                  endpoints.length === 0 ||
+                  endpoints.every((ep) => ep.status !== 0);
+                const costs = endpoints
+                  .filter((ep) => ep.status === 0)
+                  .map((ep) => ep.pricing.prompt);
                 const minCost = costs.length > 0 ? Math.min(...costs) : 0;
                 const maxCost = costs.length > 0 ? Math.max(...costs) : 0;
 
                 return (
                   <>
                     <TableRow
-                      key={model.id}
+                      key={modelKey}
                       className={`cursor-pointer hover:bg-muted/50 transition-colors ${isDisabled ? "opacity-50" : ""}`}
-                      onClick={() => handleModelClick(model)}
+                      onClick={() => handleModelClick(modelKey)}
                     >
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <div>
-                            <div className="font-medium">
-                              {model.metadata.displayName}
-                            </div>
+                            <div className="font-medium">{model.name}</div>
                             <div className="text-xs text-muted-foreground">
                               {model.id}
                             </div>
@@ -275,49 +338,48 @@ export default function AdminModelsPage() {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell>{model.creator}</TableCell>
+                      <TableCell>{model.author}</TableCell>
                       <TableCell>
-                        {model.metadata.contextWindow.toLocaleString()}
+                        {model.contextLength.toLocaleString()}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
-                          {Object.entries(model.providers)
-                            .slice(0, 3)
-                            .map(([provider, data]) => (
-                              <span
-                                key={provider}
-                                className={`inline-flex items-center rounded-md px-2 py-1 text-xs ${
-                                  data.available
-                                    ? "bg-muted"
-                                    : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-200"
-                                }`}
-                              >
-                                {provider}
-                              </span>
-                            ))}
-                          {Object.keys(model.providers).length > 3 && (
+                          {endpoints.slice(0, 3).map((endpoint, idx) => (
+                            <span
+                              key={idx}
+                              className={`inline-flex items-center rounded-md px-2 py-1 text-xs ${
+                                endpoint.status === 0
+                                  ? "bg-muted"
+                                  : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-200"
+                              }`}
+                            >
+                              {endpoint.provider}
+                            </span>
+                          ))}
+                          {endpoints.length > 3 && (
                             <span className="text-xs text-muted-foreground">
-                              +{Object.keys(model.providers).length - 3} more
+                              +{endpoints.length - 3} more
                             </span>
                           )}
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="text-xs">
-                          ${minCost.toFixed(2)} - ${maxCost.toFixed(2)}/1M
+                          ${(minCost / 1000000).toFixed(2)} - $
+                          {(maxCost / 1000000).toFixed(2)}/1K
                         </div>
                       </TableCell>
                     </TableRow>
                     {showVariants &&
-                      variantsByBase[model.id]?.map((variant) => {
+                      variantsByBase[modelKey]?.map(([variantKey, variant]) => {
+                        const variantEndpoints =
+                          registryData.endpoints[variantKey] || [];
                         const isVariantDisabled =
-                          variant.disabled ||
-                          Object.values(variant.providers).every(
-                            (p) => !p.available,
-                          );
-                        const variantCosts = Object.values(variant.providers)
-                          .filter((p) => p.available && p.cost)
-                          .map((p) => p.cost.prompt_token);
+                          variantEndpoints.length === 0 ||
+                          variantEndpoints.every((ep) => ep.status !== 0);
+                        const variantCosts = variantEndpoints
+                          .filter((ep) => ep.status === 0)
+                          .map((ep) => ep.pricing.prompt);
                         const variantMinCost =
                           variantCosts.length > 0
                             ? Math.min(...variantCosts)
@@ -329,9 +391,9 @@ export default function AdminModelsPage() {
 
                         return (
                           <TableRow
-                            key={variant.id}
+                            key={variantKey}
                             className={`bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors ${isVariantDisabled ? "opacity-50" : ""}`}
-                            onClick={() => handleModelClick(variant)}
+                            onClick={() => handleModelClick(variantKey)}
                           >
                             <TableCell>
                               <div className="flex items-start gap-2 pl-4">
@@ -339,7 +401,7 @@ export default function AdminModelsPage() {
                                 <div className="flex items-center gap-2">
                                   <div>
                                     <div className="font-medium">
-                                      {variant.metadata.displayName}
+                                      {variant.name}
                                     </div>
                                     <div className="text-xs text-muted-foreground">
                                       {variant.id}
@@ -353,38 +415,37 @@ export default function AdminModelsPage() {
                                 </div>
                               </div>
                             </TableCell>
-                            <TableCell>{variant.creator}</TableCell>
+                            <TableCell>{variant.author}</TableCell>
                             <TableCell>
-                              {variant.metadata.contextWindow.toLocaleString()}
+                              {variant.contextLength.toLocaleString()}
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center gap-1">
-                                {Object.entries(variant.providers)
+                                {variantEndpoints
                                   .slice(0, 3)
-                                  .map(([provider, data]) => (
+                                  .map((endpoint, idx) => (
                                     <span
-                                      key={provider}
+                                      key={idx}
                                       className={`inline-flex items-center rounded-md px-2 py-1 text-xs ${
-                                        data.available
+                                        endpoint.status === 0
                                           ? "bg-muted"
                                           : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-200"
                                       }`}
                                     >
-                                      {provider}
+                                      {endpoint.provider}
                                     </span>
                                   ))}
-                                {Object.keys(variant.providers).length > 3 && (
+                                {variantEndpoints.length > 3 && (
                                   <span className="text-xs text-muted-foreground">
-                                    +{Object.keys(variant.providers).length - 3}{" "}
-                                    more
+                                    +{variantEndpoints.length - 3} more
                                   </span>
                                 )}
                               </div>
                             </TableCell>
                             <TableCell className="text-right">
                               <div className="text-xs">
-                                ${variantMinCost.toFixed(2)} - $
-                                {variantMaxCost.toFixed(2)}/1M
+                                ${(variantMinCost / 1000000).toFixed(2)} - $
+                                {(variantMaxCost / 1000000).toFixed(2)}/1K
                               </div>
                             </TableCell>
                           </TableRow>
@@ -400,6 +461,7 @@ export default function AdminModelsPage() {
 
       <ModelDetailsDialog
         model={selectedModel}
+        endpoints={selectedModel ? registryData.endpoints[selectedModel.id] : []}
         open={isDetailsOpen}
         onOpenChange={setIsDetailsOpen}
       />

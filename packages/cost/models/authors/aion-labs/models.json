@@ -1,0 +1,35 @@
+{
+  "aion-1.0": {
+    "id": "aion-1.0",
+    "name": "AionLabs: Aion-1.0",
+    "author": "aion-labs",
+    "description": "Aion-1.0 is a multi-model system designed for high performance across various tasks, including reasoning and coding. It is built on DeepSeek-R1, augmented with additional models and techniques such as Tree of Thoughts (ToT) and Mixture of Experts (MoE). It is Aion Lab's most powerful reasoning model.",
+    "contextLength": 131072,
+    "maxOutputTokens": 32768,
+    "created": "2025-02-04T19:32:37.000Z",
+    "modality": "text->text",
+    "tokenizer": "Other"
+  },
+  "aion-1.0-mini": {
+    "id": "aion-1.0-mini",
+    "name": "AionLabs: Aion-1.0-Mini",
+    "author": "aion-labs",
+    "description": "Aion-1.0-Mini 32B parameter model is a distilled version of the DeepSeek-R1 model, designed for strong performance in reasoning domains such as mathematics, coding, and logic. It is a modified variant of a FuseAI model that outperforms R1-Distill-Qwen-32B and R1-Distill-Llama-70B, with benchmark results available on its [Hugging Face page](https://huggingface.co/FuseAI/FuseO1-DeepSeekR1-QwQ-SkyT1-32B-Preview), independently replicated for verification.",
+    "contextLength": 131072,
+    "maxOutputTokens": 32768,
+    "created": "2025-02-04T19:25:07.000Z",
+    "modality": "text->text",
+    "tokenizer": "Other"
+  },
+  "aion-rp-llama-3.1-8b": {
+    "id": "aion-rp-llama-3.1-8b",
+    "name": "AionLabs: Aion-RP 1.0 (8B)",
+    "author": "aion-labs",
+    "description": "Aion-RP-Llama-3.1-8B ranks the highest in the character evaluation portion of the RPBench-Auto benchmark, a roleplaying-specific variant of Arena-Hard-Auto, where LLMs evaluate each other’s responses. It is a fine-tuned base model rather than an instruct model, designed to produce more natural and varied writing.",
+    "contextLength": 32768,
+    "maxOutputTokens": 32768,
+    "created": "2025-02-04T19:18:38.000Z",
+    "modality": "text->text",
+    "tokenizer": "Other"
+  }
+}

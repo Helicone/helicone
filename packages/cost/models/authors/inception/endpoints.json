@@ -1,0 +1,58 @@
+{
+  "mercury": [
+    {
+      "name": "Inception | inception/mercury",
+      "provider": "Inception",
+      "tag": "inception",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.25,
+        "completion": 1,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 128000,
+      "maxCompletionTokens": 16384,
+      "supportedParameters": [
+        "max_tokens",
+        "frequency_penalty",
+        "presence_penalty",
+        "stop",
+        "temperature",
+        "top_p",
+        "tools",
+        "tool_choice",
+        "response_format",
+        "structured_outputs"
+      ]
+    }
+  ],
+  "mercury-coder": [
+    {
+      "name": "Inception | inception/mercury-coder-small-beta",
+      "provider": "Inception",
+      "tag": "inception",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.25,
+        "completion": 1,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 128000,
+      "maxCompletionTokens": 16384,
+      "supportedParameters": [
+        "max_tokens",
+        "frequency_penalty",
+        "presence_penalty",
+        "stop",
+        "temperature",
+        "top_p",
+        "tools",
+        "tool_choice",
+        "response_format",
+        "structured_outputs"
+      ]
+    }
+  ]
+}

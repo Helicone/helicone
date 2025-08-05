@@ -1,0 +1,413 @@
+{
+  "kimi-k2:free": [
+    {
+      "name": "Chutes | moonshotai/kimi-k2:free",
+      "provider": "Chutes",
+      "tag": "chutes/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0,
+        "completion": 0,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logprobs",
+        "logit_bias",
+        "top_logprobs"
+      ]
+    },
+    {
+      "name": "Parasail | moonshotai/kimi-k2:free",
+      "provider": "Parasail",
+      "tag": "parasail/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0,
+        "completion": 0,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 65536,
+      "maxCompletionTokens": 65536,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "frequency_penalty",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "top_k"
+      ]
+    }
+  ],
+  "kimi-k2": [
+    {
+      "name": "Targon | moonshotai/kimi-k2",
+      "provider": "Targon",
+      "tag": "targon/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.14,
+        "completion": 2.4899999999999998,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 63000,
+      "maxCompletionTokens": 63000,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "repetition_penalty"
+      ]
+    },
+    {
+      "name": "Chutes | moonshotai/kimi-k2",
+      "provider": "Chutes",
+      "tag": "chutes/fp8",
+      "status": -2,
+      "pricing": {
+        "prompt": 0.296176,
+        "completion": 1.18528,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 75000,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logprobs",
+        "logit_bias",
+        "top_logprobs"
+      ]
+    },
+    {
+      "name": "DeepInfra | moonshotai/kimi-k2",
+      "provider": "DeepInfra",
+      "tag": "deepinfra/fp4",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.55,
+        "completion": 2.2,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131000,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "top_k",
+        "seed",
+        "min_p",
+        "response_format"
+      ]
+    },
+    {
+      "name": "Fireworks | moonshotai/kimi-k2",
+      "provider": "Fireworks",
+      "tag": "fireworks/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.6,
+        "completion": 2.5,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "top_k",
+        "repetition_penalty",
+        "logit_bias",
+        "logprobs",
+        "top_logprobs",
+        "response_format",
+        "structured_outputs"
+      ]
+    },
+    {
+      "name": "BaseTen | moonshotai/kimi-k2",
+      "provider": "BaseTen",
+      "tag": "baseten/fp4",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.6,
+        "completion": 2.5,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131000,
+      "maxCompletionTokens": 131000,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "structured_outputs",
+        "response_format",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty"
+      ]
+    },
+    {
+      "name": "Moonshot AI | moonshotai/kimi-k2",
+      "provider": "Moonshot AI",
+      "tag": "moonshotai/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.6,
+        "completion": 2.5,
+        "cacheRead": 0.15,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "structured_outputs",
+        "response_format",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty"
+      ]
+    },
+    {
+      "name": "Parasail | moonshotai/kimi-k2",
+      "provider": "Parasail",
+      "tag": "parasail/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.9900000000000001,
+        "completion": 2.99,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": 131072,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "frequency_penalty",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "top_k"
+      ]
+    },
+    {
+      "name": "Together | moonshotai/kimi-k2",
+      "provider": "Together",
+      "tag": "together/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 1,
+        "completion": 3,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": 131072,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "structured_outputs",
+        "response_format",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "top_k",
+        "repetition_penalty",
+        "logit_bias",
+        "min_p"
+      ]
+    },
+    {
+      "name": "Groq | moonshotai/kimi-k2",
+      "provider": "Groq",
+      "tag": "groq",
+      "status": -2,
+      "pricing": {
+        "prompt": 1,
+        "completion": 3,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": 16384,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "logprobs",
+        "top_logprobs",
+        "logit_bias",
+        "seed",
+        "response_format"
+      ]
+    }
+  ],
+  "kimi-dev-72b:free": [
+    {
+      "name": "Chutes | moonshotai/kimi-dev-72b:free",
+      "provider": "Chutes",
+      "tag": "chutes/bf16",
+      "status": 0,
+      "pricing": {
+        "prompt": 0,
+        "completion": 0,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "reasoning",
+        "include_reasoning",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logprobs",
+        "logit_bias",
+        "top_logprobs"
+      ]
+    }
+  ],
+  "kimi-vl-a3b-thinking:free": [
+    {
+      "name": "Chutes | moonshotai/kimi-vl-a3b-thinking:free",
+      "provider": "Chutes",
+      "tag": "chutes",
+      "status": 0,
+      "pricing": {
+        "prompt": 0,
+        "completion": 0,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "reasoning",
+        "include_reasoning",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logprobs",
+        "logit_bias",
+        "top_logprobs"
+      ]
+    }
+  ],
+  "kimi-vl-a3b-thinking": [
+    {
+      "name": "Chutes | moonshotai/kimi-vl-a3b-thinking",
+      "provider": "Chutes",
+      "tag": "chutes",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.02498985,
+        "completion": 0.100008,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "reasoning",
+        "include_reasoning",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logprobs",
+        "logit_bias",
+        "top_logprobs"
+      ]
+    }
+  ]
+}

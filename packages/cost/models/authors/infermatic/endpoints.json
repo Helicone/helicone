@@ -1,0 +1,30 @@
+{
+  "mn-inferor-12b": [
+    {
+      "name": "Parasail | infermatic/mn-inferor-12b",
+      "provider": "Parasail",
+      "tag": "parasail/bf16",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.6,
+        "completion": 1,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 8192,
+      "maxCompletionTokens": 8192,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "frequency_penalty",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "top_k"
+      ]
+    }
+  ]
+}

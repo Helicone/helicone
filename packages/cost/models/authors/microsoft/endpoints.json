@@ -1,0 +1,360 @@
+{
+  "phi-4-reasoning-plus": [
+    {
+      "name": "DeepInfra | microsoft/phi-4-reasoning-plus-04-30",
+      "provider": "DeepInfra",
+      "tag": "deepinfra/bf16",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.07,
+        "completion": 0.35,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "reasoning",
+        "include_reasoning",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "top_k",
+        "seed",
+        "min_p",
+        "response_format"
+      ]
+    }
+  ],
+  "mai-ds-r1:free": [
+    {
+      "name": "Chutes | microsoft/mai-ds-r1:free",
+      "provider": "Chutes",
+      "tag": "chutes/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0,
+        "completion": 0,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 163840,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "reasoning",
+        "include_reasoning",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logprobs",
+        "logit_bias",
+        "top_logprobs"
+      ]
+    }
+  ],
+  "mai-ds-r1": [
+    {
+      "name": "Chutes | microsoft/mai-ds-r1",
+      "provider": "Chutes",
+      "tag": "chutes/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.1999188,
+        "completion": 0.800064,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 163840,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "reasoning",
+        "include_reasoning",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logprobs",
+        "logit_bias",
+        "top_logprobs"
+      ]
+    }
+  ],
+  "phi-4-multimodal-instruct": [
+    {
+      "name": "DeepInfra | microsoft/phi-4-multimodal-instruct",
+      "provider": "DeepInfra",
+      "tag": "deepinfra/bf16",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.049999999999999996,
+        "completion": 0.09999999999999999,
+        "image": 0.00017685,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "top_k",
+        "seed",
+        "min_p",
+        "response_format"
+      ]
+    }
+  ],
+  "phi-4": [
+    {
+      "name": "NextBit | microsoft/phi-4",
+      "provider": "NextBit",
+      "tag": "nextbit/int4",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.06,
+        "completion": 0.14,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 16384,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "response_format",
+        "structured_outputs"
+      ]
+    },
+    {
+      "name": "DeepInfra | microsoft/phi-4",
+      "provider": "DeepInfra",
+      "tag": "deepinfra/bf16",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.07,
+        "completion": 0.14,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 16384,
+      "maxCompletionTokens": 16384,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "top_k",
+        "seed",
+        "min_p",
+        "response_format"
+      ]
+    },
+    {
+      "name": "Nebius | microsoft/phi-4",
+      "provider": "Nebius",
+      "tag": "nebius/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.09999999999999999,
+        "completion": 0.3,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 16384,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "logit_bias",
+        "logprobs",
+        "top_logprobs"
+      ]
+    }
+  ],
+  "phi-3.5-mini-128k-instruct": [
+    {
+      "name": "Azure | microsoft/phi-3.5-mini-128k-instruct",
+      "provider": "Azure",
+      "tag": "azure",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.09999999999999999,
+        "completion": 0.09999999999999999,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 128000,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p"
+      ]
+    }
+  ],
+  "phi-3-mini-128k-instruct": [
+    {
+      "name": "Azure | microsoft/phi-3-mini-128k-instruct",
+      "provider": "Azure",
+      "tag": "azure",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.09999999999999999,
+        "completion": 0.09999999999999999,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 128000,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p"
+      ]
+    }
+  ],
+  "phi-3-medium-128k-instruct": [
+    {
+      "name": "Azure | microsoft/phi-3-medium-128k-instruct",
+      "provider": "Azure",
+      "tag": "azure",
+      "status": 0,
+      "pricing": {
+        "prompt": 1,
+        "completion": 1,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 128000,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p"
+      ]
+    }
+  ],
+  "wizardlm-2-8x22b": [
+    {
+      "name": "Parasail | microsoft/wizardlm-2-8x22b",
+      "provider": "Parasail",
+      "tag": "parasail/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.48,
+        "completion": 0.48,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 65536,
+      "maxCompletionTokens": 65536,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "frequency_penalty",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "top_k"
+      ]
+    },
+    {
+      "name": "DeepInfra | microsoft/wizardlm-2-8x22b",
+      "provider": "DeepInfra",
+      "tag": "deepinfra/bf16",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.48,
+        "completion": 0.48,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 65536,
+      "maxCompletionTokens": 16384,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "top_k",
+        "seed",
+        "min_p",
+        "response_format"
+      ]
+    },
+    {
+      "name": "Novita | microsoft/wizardlm-2-8x22b",
+      "provider": "Novita",
+      "tag": "novita",
+      "status": -2,
+      "pricing": {
+        "prompt": 0.62,
+        "completion": 0.62,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 65535,
+      "maxCompletionTokens": 8000,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logit_bias"
+      ]
+    }
+  ]
+}

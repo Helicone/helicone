@@ -1,0 +1,13 @@
+{
+  "router": {
+    "id": "router",
+    "name": "Switchpoint Router",
+    "author": "switchpoint",
+    "description": "Switchpoint AI's router instantly analyzes your request and directs it to the optimal AI from an ever-evolving library. \n\nAs the world of LLMs advances, our router gets smarter, ensuring you always benefit from the industry's newest models without changing your workflow.\n\nThis model is configured for a simple, flat rate per response here on OpenRouter. It's powered by the full routing engine from [Switchpoint AI](https://www.switchpoint.dev).",
+    "contextLength": 131072,
+    "maxOutputTokens": null,
+    "created": "2025-07-11T22:28:19.000Z",
+    "modality": "text->text",
+    "tokenizer": "Other"
+  }
+}

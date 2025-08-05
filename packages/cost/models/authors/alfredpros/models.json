@@ -1,0 +1,13 @@
+{
+  "codellama-7b-instruct-solidity": {
+    "id": "codellama-7b-instruct-solidity",
+    "name": "AlfredPros: CodeLLaMa 7B Instruct Solidity",
+    "author": "alfredpros",
+    "description": "A finetuned 7 billion parameters Code LLaMA - Instruct model to generate Solidity smart contract using 4-bit QLoRA finetuning provided by PEFT library.",
+    "contextLength": 8192,
+    "maxOutputTokens": 8192,
+    "created": "2025-04-14T14:44:34.000Z",
+    "modality": "text->text",
+    "tokenizer": "Other"
+  }
+}
