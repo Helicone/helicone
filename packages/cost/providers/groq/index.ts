@@ -189,4 +189,24 @@ export const costs: ModelRow[] = [
       completion_token: 0.00000019,
     },
   },
+  {
+    model: {
+      operator: "equals",
+      value: "openai/gpt-oss-20b",
+    },
+    cost: {
+      prompt_token: 0.0000001,
+      completion_token: 0.0000005,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "openai/gpt-oss-120b",
+    },
+    cost: {
+      prompt_token: 0.00000015,
+      completion_token: 0.00000075,
+    },
+  },
 ];

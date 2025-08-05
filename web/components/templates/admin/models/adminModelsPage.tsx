@@ -340,7 +340,7 @@ export default function AdminModelsPage() {
                           {endpoints.slice(0, 3).map((endpoint, idx) => (
                             <span
                               key={idx}
-                              className="inline-flex items-center rounded-md px-2 py-1 text-xs bg-muted"
+                              className="inline-flex items-center rounded-md bg-muted px-2 py-1 text-xs"
                             >
                               {endpoint.provider}
                             </span>
@@ -415,7 +415,7 @@ export default function AdminModelsPage() {
                                   .map((endpoint, idx) => (
                                     <span
                                       key={idx}
-                                      className="inline-flex items-center rounded-md px-2 py-1 text-xs bg-muted"
+                                      className="inline-flex items-center rounded-md bg-muted px-2 py-1 text-xs"
                                     >
                                       {endpoint.provider}
                                     </span>
