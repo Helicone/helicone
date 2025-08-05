@@ -63,8 +63,8 @@ export const costs: ModelRow[] = [
     },
     cost: {
       prompt_token: 3e-7,
-      completion_token: 2.5e-6
-    }
+      completion_token: 2.5e-6,
+    },
   },
   {
     model: {
@@ -793,13 +793,23 @@ export const costs: ModelRow[] = [
     },
     cost: {
       prompt_token: 3e-6,
-      completion_token: 1.5e-5, 
-    }
+      completion_token: 1.5e-5,
+    },
   },
   {
     model: {
       operator: "equals",
       value: "anthropic/claude-opus-4",
+    },
+    cost: {
+      prompt_token: 1.5e-5,
+      completion_token: 7.5e-5,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "anthropic/claude-opus-4.1",
     },
     cost: {
       prompt_token: 1.5e-5,
@@ -1595,7 +1605,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.000003,
       prompt_cache_read_token: 0.00000075,
       completion_token: 0.000015,
-    }
+    },
   },
   {
     model: {
