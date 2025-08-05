@@ -27,7 +27,7 @@ async function getOpenAIClient(
     provider_name: string;
   }>(
     `SELECT id, org_id, decrypted_provider_key, provider_key_name, provider_name
-     FROM decrypted_provider_keys
+     FROM decrypted_provider_keys_v2
      WHERE org_id = $1
      AND soft_delete = false
      AND provider_name = 'OpenRouter'
