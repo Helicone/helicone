@@ -1,0 +1,17 @@
+HEARTBEAT_URLS_JSON="[{ urls: ['https://www.google.com'], constructorName: 'AsyncHeartBeat' }];"
+AWS_REGION="us-west-2"
+ENVIRONMENT = "dev"
+VALHALLA_URL="https://..."
+
+# secrets
+OPENAI_API_KEY="sk-..."
+ANTHROPIC_API_KEY="sk-..."
+HELICONE_API_KEY="sk-..."
+SLACK_WEBHOOK_URL="https://..."
+SENTRY_API_KEY="sk-..."
+SENTRY_PROJECT_ID="my-project-..."
+HELICONE_MANUAL_ACCESS_KEY="sk-..."
+AWS_ACCESS_KEY_ID="aws-access-key-..."
+AWS_SECRET_ACCESS_KEY="aws-secret-key-..."
+REQUEST_LOGS_QUEUE_URL="https://..."
+REQUEST_LOGS_QUEUE_URL_LOW_PRIORITY="https://..."

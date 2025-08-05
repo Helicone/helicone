@@ -1,21 +1,15 @@
 name = "hcone-heartbeat"
 main = "src/index.ts"
-compatibility_date = "2023-02-04"
-node_compat = true
+compatibility_date = "2025-08-03"
+compatibility_flags = [
+	"nodejs_compat_v2"
+]
 
 [triggers]
 crons = ["* * * * *", "0 * * * *"]
 
 [env.production]
 name = "helicone-heartbeat-prod"
-
-[env.dev.vars]
-ENVIRONMENT = "dev"
-
-[[env.production.hyperdrive]]
-binding = "HYPERDRIVE"
-id = "e5d49fcb7b0942e7b0ec8f4c27c322e7"
-localConnectionString = "postgresql://postgres:postgres@localhost:54322/postgres"
 
 [vars]
 VALHALLA_URL = "http://localhost:8585"

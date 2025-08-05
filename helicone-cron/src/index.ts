@@ -3,8 +3,6 @@ import { AsyncHeartBeat } from "./heartbeats/async";
 import { FeedbackHeartBeat } from "./heartbeats/feedback";
 import { GraphQLHeartBeat } from "./heartbeats/graphQL";
 import { OpenAIProxyHeartBeat } from "./heartbeats/oaiProxy";
-import { UsageManager } from "./managers/UsageManager";
-import { PgWrapper } from "./db/PgWrapper";
 import { alertSqsCongestion } from "./heartbeats/alertSqsCongestion";
 import { AlertManager } from "./managers/AlertManager";
 
@@ -13,17 +11,7 @@ export interface Env {
   ANTHROPIC_API_KEY: string;
   HELICONE_API_KEY: string;
   HEARTBEAT_URLS_JSON: string;
-  SUPABASE_SERVICE_ROLE_KEY: string;
-  SUPABASE_URL: string;
-  CLICKHOUSE_HOST: string;
-  CLICKHOUSE_USER: string;
-  CLICKHOUSE_PASSWORD: string;
-  STRIPE_API_KEY: string;
-  STRIPE_WEBHOOK_SECRET: string;
-  SUPABASE_DATEBASE_URL: string;
-  SUPABASE_DATABASE_SSL: string;
   ENVIRONMENT: string;
-  HYPERDRIVE: Hyperdrive;
   SLACK_WEBHOOK_URL: string;
   SENTRY_API_KEY: string;
   SENTRY_PROJECT_ID: string;
