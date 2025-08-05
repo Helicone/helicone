@@ -173,6 +173,18 @@ export const costs: ModelRow[] = [
       prompt_cache_read_token: 0.0000015,
     },
   },
+  {
+    model: {
+      operator: "equals",
+      value: "claude-opus-4-1-20250805",
+    },
+    cost: {
+      prompt_token: 0.000015,
+      completion_token: 0.000075,
+      prompt_cache_write_token: 0.00001875,
+      prompt_cache_read_token: 0.0000015,
+    },
+  },
 ];
 
 export const modelDetails: ModelDetailsMap = {
