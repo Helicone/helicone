@@ -1,0 +1,377 @@
+{
+  "deephermes-3-mistral-24b-preview": [
+    {
+      "name": "Chutes | nousresearch/deephermes-3-mistral-24b-preview",
+      "provider": "Chutes",
+      "tag": "chutes",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.09329544,
+        "completion": 0.3733632,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "reasoning",
+        "include_reasoning",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logprobs",
+        "logit_bias",
+        "top_logprobs"
+      ]
+    }
+  ],
+  "deephermes-3-llama-3-8b-preview:free": [
+    {
+      "name": "Chutes | nousresearch/deephermes-3-llama-3-8b-preview:free",
+      "provider": "Chutes",
+      "tag": "chutes/bf16",
+      "status": 0,
+      "pricing": {
+        "prompt": 0,
+        "completion": 0,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logprobs",
+        "logit_bias",
+        "top_logprobs"
+      ]
+    }
+  ],
+  "hermes-3-llama-3.1-70b": [
+    {
+      "name": "DeepInfra | nousresearch/hermes-3-llama-3.1-70b",
+      "provider": "DeepInfra",
+      "tag": "deepinfra/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.09999999999999999,
+        "completion": 0.28,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "top_k",
+        "seed",
+        "min_p",
+        "response_format"
+      ]
+    },
+    {
+      "name": "Lambda | nousresearch/hermes-3-llama-3.1-70b",
+      "provider": "Lambda",
+      "tag": "lambda/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.12,
+        "completion": 0.3,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": 131072,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "logit_bias",
+        "logprobs",
+        "top_logprobs",
+        "min_p",
+        "repetition_penalty",
+        "top_k",
+        "response_format"
+      ]
+    },
+    {
+      "name": "NextBit | nousresearch/hermes-3-llama-3.1-70b",
+      "provider": "NextBit",
+      "tag": "nextbit/int4",
+      "status": -2,
+      "pricing": {
+        "prompt": 0.3,
+        "completion": 0.3,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 65000,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "response_format",
+        "structured_outputs"
+      ]
+    },
+    {
+      "name": "Hyperbolic | nousresearch/hermes-3-llama-3.1-70b",
+      "provider": "Hyperbolic",
+      "tag": "hyperbolic/fp8",
+      "status": -5,
+      "pricing": {
+        "prompt": 0.39999999999999997,
+        "completion": 0.39999999999999997,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 12288,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "logprobs",
+        "top_logprobs",
+        "seed",
+        "logit_bias",
+        "top_k",
+        "min_p",
+        "repetition_penalty"
+      ]
+    }
+  ],
+  "hermes-3-llama-3.1-405b": [
+    {
+      "name": "DeepInfra | nousresearch/hermes-3-llama-3.1-405b",
+      "provider": "DeepInfra",
+      "tag": "deepinfra/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.7,
+        "completion": 0.7999999999999999,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": 16384,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "top_k",
+        "seed",
+        "min_p",
+        "response_format"
+      ]
+    },
+    {
+      "name": "Lambda | nousresearch/hermes-3-llama-3.1-405b",
+      "provider": "Lambda",
+      "tag": "lambda/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.7999999999999999,
+        "completion": 0.7999999999999999,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": 131072,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "logit_bias",
+        "logprobs",
+        "top_logprobs",
+        "min_p",
+        "repetition_penalty",
+        "top_k",
+        "response_format"
+      ]
+    },
+    {
+      "name": "Nebius | nousresearch/hermes-3-llama-3.1-405b",
+      "provider": "Nebius",
+      "tag": "nebius/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 1,
+        "completion": 3,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "logit_bias",
+        "logprobs",
+        "top_logprobs"
+      ]
+    }
+  ],
+  "hermes-2-pro-llama-3-8b": [
+    {
+      "name": "Lambda | nousresearch/hermes-2-pro-llama-3-8b",
+      "provider": "Lambda",
+      "tag": "lambda/bf16",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.024999999999999998,
+        "completion": 0.04,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 131072,
+      "maxCompletionTokens": 131072,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "logit_bias",
+        "logprobs",
+        "top_logprobs",
+        "min_p",
+        "repetition_penalty",
+        "top_k",
+        "response_format"
+      ]
+    },
+    {
+      "name": "NextBit | nousresearch/hermes-2-pro-llama-3-8b",
+      "provider": "NextBit",
+      "tag": "nextbit/int4",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.024999999999999998,
+        "completion": 0.08,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "response_format",
+        "structured_outputs"
+      ]
+    },
+    {
+      "name": "Novita | nousresearch/hermes-2-pro-llama-3-8b",
+      "provider": "Novita",
+      "tag": "novita",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.14,
+        "completion": 0.14,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 8192,
+      "maxCompletionTokens": 8192,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logit_bias"
+      ]
+    }
+  ],
+  "nous-hermes-2-mixtral-8x7b-dpo": [
+    {
+      "name": "Together | nousresearch/nous-hermes-2-mixtral-8x7b-dpo",
+      "provider": "Together",
+      "tag": "together",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.6,
+        "completion": 0.6,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": 2048,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "top_k",
+        "repetition_penalty",
+        "logit_bias",
+        "min_p"
+      ]
+    }
+  ]
+}

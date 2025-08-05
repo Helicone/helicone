@@ -1,0 +1,13 @@
+{
+  "mythalion-13b": {
+    "id": "mythalion-13b",
+    "name": "Pygmalion: Mythalion 13B",
+    "author": "pygmalionai",
+    "description": "A blend of the new Pygmalion-13b and MythoMax. #merge",
+    "contextLength": 4096,
+    "maxOutputTokens": 4096,
+    "created": "2023-09-02T00:00:00.000Z",
+    "modality": "text->text",
+    "tokenizer": "Llama2"
+  }
+}

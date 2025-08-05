@@ -1,0 +1,24 @@
+{
+  "mercury": {
+    "id": "mercury",
+    "name": "Inception: Mercury",
+    "author": "inception",
+    "description": "Mercury is the first diffusion large language model (dLLM). Applying a breakthrough discrete diffusion approach, the model runs 5-10x faster than even speed optimized models like GPT-4.1 Nano and Claude 3.5 Haiku while matching their performance. Mercury's speed enables developers to provide responsive user experiences, including with voice agents, search interfaces, and chatbots. Read more in the blog post here. ",
+    "contextLength": 128000,
+    "maxOutputTokens": 16384,
+    "created": "2025-06-26T21:23:46.000Z",
+    "modality": "text->text",
+    "tokenizer": "Other"
+  },
+  "mercury-coder": {
+    "id": "mercury-coder",
+    "name": "Inception: Mercury Coder",
+    "author": "inception",
+    "description": "Mercury Coder is the first diffusion large language model (dLLM). Applying a breakthrough discrete diffusion approach, the model runs 5-10x faster than even speed optimized models like Claude 3.5 Haiku and GPT-4o Mini while matching their performance. Mercury Coder's speed means that developers can stay in the flow while coding, enjoying rapid chat-based iteration and responsive code completion suggestions. On Copilot Arena, Mercury Coder ranks 1st in speed and ties for 2nd in quality. Read more in the [blog post here](https://www.inceptionlabs.ai/introducing-mercury).",
+    "contextLength": 128000,
+    "maxOutputTokens": 16384,
+    "created": "2025-04-30T17:24:40.000Z",
+    "modality": "text->text",
+    "tokenizer": "Other"
+  }
+}

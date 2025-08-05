@@ -1,0 +1,24 @@
+{
+  "toppy-m-7b": {
+    "id": "toppy-m-7b",
+    "name": "Toppy M 7B",
+    "author": "undi95",
+    "description": "A wild 7B parameter model that merges several models using the new task_arithmetic merge method from mergekit.\nList of merged models:\n- NousResearch/Nous-Capybara-7B-V1.9\n- [HuggingFaceH4/zephyr-7b-beta](/models/huggingfaceh4/zephyr-7b-beta)\n- lemonilia/AshhLimaRP-Mistral-7B\n- Vulkane/120-Days-of-Sodom-LoRA-Mistral-7b\n- Undi95/Mistral-pippa-sharegpt-7b-qlora\n\n#merge #uncensored",
+    "contextLength": 4096,
+    "maxOutputTokens": 4096,
+    "created": "2023-11-10T00:00:00.000Z",
+    "modality": "text->text",
+    "tokenizer": "Mistral"
+  },
+  "remm-slerp-l2-13b": {
+    "id": "remm-slerp-l2-13b",
+    "name": "ReMM SLERP 13B",
+    "author": "undi95",
+    "description": "A recreation trial of the original MythoMax-L2-B13 but with updated models. #merge",
+    "contextLength": 6144,
+    "maxOutputTokens": null,
+    "created": "2023-07-22T00:00:00.000Z",
+    "modality": "text->text",
+    "tokenizer": "Llama2"
+  }
+}

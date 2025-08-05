@@ -1,0 +1,30 @@
+{
+  "qwerky-72b:free": [
+    {
+      "name": "Featherless | featherless/qwerky-72b:free",
+      "provider": "Featherless",
+      "tag": "featherless",
+      "status": 0,
+      "pricing": {
+        "prompt": 0,
+        "completion": 0,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": 4096,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "top_k",
+        "min_p",
+        "seed"
+      ]
+    }
+  ]
+}

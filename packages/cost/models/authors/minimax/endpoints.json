@@ -1,0 +1,78 @@
+{
+  "minimax-m1": [
+    {
+      "name": "Minimax | minimax/minimax-m1",
+      "provider": "Minimax",
+      "tag": "minimax",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.3,
+        "completion": 1.6500000000000001,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 1000000,
+      "maxCompletionTokens": 40000,
+      "supportedParameters": [
+        "reasoning",
+        "include_reasoning",
+        "max_tokens",
+        "temperature",
+        "top_p"
+      ]
+    },
+    {
+      "name": "Novita | minimax/minimax-m1",
+      "provider": "Novita",
+      "tag": "novita",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.55,
+        "completion": 2.2,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 1000000,
+      "maxCompletionTokens": 40000,
+      "supportedParameters": [
+        "tools",
+        "tool_choice",
+        "reasoning",
+        "include_reasoning",
+        "structured_outputs",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logit_bias"
+      ]
+    }
+  ],
+  "minimax-01": [
+    {
+      "name": "Minimax | minimax/minimax-01",
+      "provider": "Minimax",
+      "tag": "minimax",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.19999999999999998,
+        "completion": 1.1,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 1000192,
+      "maxCompletionTokens": 1000192,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p"
+      ]
+    }
+  ]
+}

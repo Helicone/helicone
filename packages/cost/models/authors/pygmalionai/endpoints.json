@@ -1,0 +1,56 @@
+{
+  "mythalion-13b": [
+    {
+      "name": "Parasail | pygmalionai/mythalion-13b",
+      "provider": "Parasail",
+      "tag": "parasail/fp16",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.6,
+        "completion": 1,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 4096,
+      "maxCompletionTokens": 4096,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "frequency_penalty",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "top_k"
+      ]
+    },
+    {
+      "name": "Featherless | pygmalionai/mythalion-13b",
+      "provider": "Featherless",
+      "tag": "featherless/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.7999999999999999,
+        "completion": 1.2,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 4096,
+      "maxCompletionTokens": 4096,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "top_k",
+        "min_p",
+        "seed"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "internvl3-14b": {
+    "id": "internvl3-14b",
+    "name": "OpenGVLab: InternVL3 14B",
+    "author": "opengvlab",
+    "description": "The 14b version of the InternVL3 series. An advanced multimodal large language model (MLLM) series that demonstrates superior overall performance. Compared to InternVL 2.5, InternVL3 exhibits superior multimodal perception and reasoning capabilities, while further extending its multimodal capabilities to encompass tool usage, GUI agents, industrial image analysis, 3D vision perception, and more.",
+    "contextLength": 12288,
+    "maxOutputTokens": null,
+    "created": "2025-04-30T13:55:55.000Z",
+    "modality": "text+image->text",
+    "tokenizer": "Other"
+  }
+}

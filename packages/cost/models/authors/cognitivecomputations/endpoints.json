@@ -1,0 +1,186 @@
+{
+  "dolphin-mistral-24b-venice-edition:free": [
+    {
+      "name": "Venice | venice/uncensored:free",
+      "provider": "Venice",
+      "tag": "venice/fp16",
+      "status": 0,
+      "pricing": {
+        "prompt": 0,
+        "completion": 0,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "structured_outputs",
+        "response_format",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "top_k"
+      ]
+    }
+  ],
+  "dolphin3.0-r1-mistral-24b:free": [
+    {
+      "name": "Chutes | cognitivecomputations/dolphin3.0-r1-mistral-24b:free",
+      "provider": "Chutes",
+      "tag": "chutes",
+      "status": 0,
+      "pricing": {
+        "prompt": 0,
+        "completion": 0,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "reasoning",
+        "include_reasoning",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logprobs",
+        "logit_bias",
+        "top_logprobs"
+      ]
+    }
+  ],
+  "dolphin3.0-r1-mistral-24b": [
+    {
+      "name": "Chutes | cognitivecomputations/dolphin3.0-r1-mistral-24b",
+      "provider": "Chutes",
+      "tag": "chutes",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.01,
+        "completion": 0.0340768,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "reasoning",
+        "include_reasoning",
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logprobs",
+        "logit_bias",
+        "top_logprobs"
+      ]
+    }
+  ],
+  "dolphin3.0-mistral-24b:free": [
+    {
+      "name": "Chutes | cognitivecomputations/dolphin3.0-mistral-24b:free",
+      "provider": "Chutes",
+      "tag": "chutes",
+      "status": 0,
+      "pricing": {
+        "prompt": 0,
+        "completion": 0,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logprobs",
+        "logit_bias",
+        "top_logprobs"
+      ]
+    }
+  ],
+  "dolphin3.0-mistral-24b": [
+    {
+      "name": "Chutes | cognitivecomputations/dolphin3.0-mistral-24b",
+      "provider": "Chutes",
+      "tag": "chutes",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.037022,
+        "completion": 0.14816,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logprobs",
+        "logit_bias",
+        "top_logprobs"
+      ]
+    }
+  ],
+  "dolphin-mixtral-8x22b": [
+    {
+      "name": "Novita | cognitivecomputations/dolphin-mixtral-8x22b",
+      "provider": "Novita",
+      "tag": "novita",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.8999999999999999,
+        "completion": 0.8999999999999999,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 16000,
+      "maxCompletionTokens": 8192,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logit_bias"
+      ]
+    }
+  ]
+}

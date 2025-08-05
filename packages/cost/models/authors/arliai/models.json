@@ -1,0 +1,24 @@
+{
+  "qwq-32b-arliai-rpr-v1:free": {
+    "id": "qwq-32b-arliai-rpr-v1:free",
+    "name": "ArliAI: QwQ 32B RpR v1 (free)",
+    "author": "arliai",
+    "description": "QwQ-32B-ArliAI-RpR-v1 is a 32B parameter model fine-tuned from Qwen/QwQ-32B using a curated creative writing and roleplay dataset originally developed for the RPMax series. It is designed to maintain coherence and reasoning across long multi-turn conversations by introducing explicit reasoning steps per dialogue turn, generated and refined using the base model itself.\n\nThe model was trained using RS-QLORA+ on 8K sequence lengths and supports up to 128K context windows (with practical performance around 32K). It is optimized for creative roleplay and dialogue generation, with an emphasis on minimizing cross-context repetition while preserving stylistic diversity.",
+    "contextLength": 32768,
+    "maxOutputTokens": null,
+    "created": "2025-04-13T14:53:02.000Z",
+    "modality": "text->text",
+    "tokenizer": "Other"
+  },
+  "qwq-32b-arliai-rpr-v1": {
+    "id": "qwq-32b-arliai-rpr-v1",
+    "name": "ArliAI: QwQ 32B RpR v1",
+    "author": "arliai",
+    "description": "QwQ-32B-ArliAI-RpR-v1 is a 32B parameter model fine-tuned from Qwen/QwQ-32B using a curated creative writing and roleplay dataset originally developed for the RPMax series. It is designed to maintain coherence and reasoning across long multi-turn conversations by introducing explicit reasoning steps per dialogue turn, generated and refined using the base model itself.\n\nThe model was trained using RS-QLORA+ on 8K sequence lengths and supports up to 128K context windows (with practical performance around 32K). It is optimized for creative roleplay and dialogue generation, with an emphasis on minimizing cross-context repetition while preserving stylistic diversity.",
+    "contextLength": 32768,
+    "maxOutputTokens": null,
+    "created": "2025-04-13T14:53:02.000Z",
+    "modality": "text->text",
+    "tokenizer": "Other"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "goliath-120b": [
+    {
+      "name": "NextBit | alpindale/goliath-120b",
+      "provider": "NextBit",
+      "tag": "nextbit/int4",
+      "status": 0,
+      "pricing": {
+        "prompt": 9,
+        "completion": 11,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 6144,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "response_format",
+        "structured_outputs"
+      ]
+    },
+    {
+      "name": "Mancer 2 | alpindale/goliath-120b",
+      "provider": "Mancer 2",
+      "tag": "mancer/int4",
+      "status": 0,
+      "pricing": {
+        "prompt": 10,
+        "completion": 12.5,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 6144,
+      "maxCompletionTokens": 512,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "logit_bias",
+        "top_k",
+        "min_p",
+        "seed",
+        "top_a"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "midnight-rose-70b": {
+    "id": "midnight-rose-70b",
+    "name": "Midnight Rose 70B",
+    "author": "sophosympatheia",
+    "description": "A merge with a complex family tree, this model was crafted for roleplaying and storytelling. Midnight Rose is a successor to Rogue Rose and Aurora Nights and improves upon them both. It wants to produce lengthy output by default and is the best creative writing merge produced so far by sophosympatheia.\n\nDescending from earlier versions of Midnight Rose and [Wizard Tulu Dolphin 70B](https://huggingface.co/sophosympatheia/Wizard-Tulu-Dolphin-70B-v1.0), it inherits the best qualities of each.",
+    "contextLength": 4096,
+    "maxOutputTokens": 2048,
+    "created": "2024-03-22T00:00:00.000Z",
+    "modality": "text->text",
+    "tokenizer": "Llama2"
+  }
+}

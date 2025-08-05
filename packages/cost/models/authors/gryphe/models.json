@@ -1,0 +1,13 @@
+{
+  "mythomax-l2-13b": {
+    "id": "mythomax-l2-13b",
+    "name": "MythoMax 13B",
+    "author": "gryphe",
+    "description": "One of the highest performing and most popular fine-tunes of Llama 2 13B, with rich descriptions and roleplay. #merge",
+    "contextLength": 4096,
+    "maxOutputTokens": null,
+    "created": "2023-07-02T00:00:00.000Z",
+    "modality": "text->text",
+    "tokenizer": "Llama2"
+  }
+}

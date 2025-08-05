@@ -1,0 +1,61 @@
+{
+  "magnum-v4-72b": [
+    {
+      "name": "Mancer 2 | anthracite-org/magnum-v4-72b",
+      "provider": "Mancer 2",
+      "tag": "mancer/fp6",
+      "status": 0,
+      "pricing": {
+        "prompt": 2.5,
+        "completion": 3,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 16384,
+      "maxCompletionTokens": 1024,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "logit_bias",
+        "top_k",
+        "min_p",
+        "seed",
+        "top_a"
+      ]
+    }
+  ],
+  "magnum-v2-72b": [
+    {
+      "name": "Infermatic | anthracite-org/magnum-v2-72b",
+      "provider": "Infermatic",
+      "tag": "infermatic/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 3,
+        "completion": 3,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "logit_bias",
+        "top_k",
+        "min_p",
+        "seed"
+      ]
+    }
+  ]
+}

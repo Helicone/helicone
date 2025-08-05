@@ -1,0 +1,13 @@
+{
+  "reka-flash-3:free": {
+    "id": "reka-flash-3:free",
+    "name": "Reka: Flash 3 (free)",
+    "author": "rekaai",
+    "description": "Reka Flash 3 is a general-purpose, instruction-tuned large language model with 21 billion parameters, developed by Reka. It excels at general chat, coding tasks, instruction-following, and function calling. Featuring a 32K context length and optimized through reinforcement learning (RLOO), it provides competitive performance comparable to proprietary models within a smaller parameter footprint. Ideal for low-latency, local, or on-device deployments, Reka Flash 3 is compact, supports efficient quantization (down to 11GB at 4-bit precision), and employs explicit reasoning tags (\"<reasoning>\") to indicate its internal thought process.\n\nReka Flash 3 is primarily an English model with limited multilingual understanding capabilities. The model weights are released under the Apache 2.0 license.",
+    "contextLength": 32768,
+    "maxOutputTokens": null,
+    "created": "2025-03-12T20:53:33.000Z",
+    "modality": "text->text",
+    "tokenizer": "Other"
+  }
+}

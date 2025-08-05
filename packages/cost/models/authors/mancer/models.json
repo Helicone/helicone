@@ -1,0 +1,13 @@
+{
+  "weaver": {
+    "id": "weaver",
+    "name": "Mancer: Weaver (alpha)",
+    "author": "mancer",
+    "description": "An attempt to recreate Claude-style verbosity, but don't expect the same level of coherence or memory. Meant for use in roleplay/narrative situations.",
+    "contextLength": 8000,
+    "maxOutputTokens": 1000,
+    "created": "2023-08-02T00:00:00.000Z",
+    "modality": "text->text",
+    "tokenizer": "Llama2"
+  }
+}

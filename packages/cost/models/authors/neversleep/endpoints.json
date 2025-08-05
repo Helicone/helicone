@@ -1,0 +1,190 @@
+{
+  "llama-3.1-lumimaid-8b": [
+    {
+      "name": "Parasail | neversleep/llama-3.1-lumimaid-8b",
+      "provider": "Parasail",
+      "tag": "parasail/bf16",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.09999999999999999,
+        "completion": 0.8999999999999999,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 8192,
+      "maxCompletionTokens": 8192,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "frequency_penalty",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "top_k"
+      ]
+    },
+    {
+      "name": "NextBit | neversleep/llama-3.1-lumimaid-8b",
+      "provider": "NextBit",
+      "tag": "nextbit/int4",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.18,
+        "completion": 1,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "response_format",
+        "structured_outputs"
+      ]
+    },
+    {
+      "name": "Mancer 2 | neversleep/llama-3.1-lumimaid-8b",
+      "provider": "Mancer 2",
+      "tag": "mancer/fp16",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.19999999999999998,
+        "completion": 1.25,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 32768,
+      "maxCompletionTokens": 2048,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "logit_bias",
+        "top_k",
+        "min_p",
+        "seed",
+        "top_a"
+      ]
+    },
+    {
+      "name": "Featherless | neversleep/llama-3.1-lumimaid-8b",
+      "provider": "Featherless",
+      "tag": "featherless/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.7999999999999999,
+        "completion": 1.2,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 16384,
+      "maxCompletionTokens": 4096,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "top_k",
+        "min_p",
+        "seed"
+      ]
+    }
+  ],
+  "llama-3-lumimaid-70b": [
+    {
+      "name": "Featherless | neversleep/llama-3-lumimaid-70b",
+      "provider": "Featherless",
+      "tag": "featherless/fp8",
+      "status": 0,
+      "pricing": {
+        "prompt": 4,
+        "completion": 6,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 8192,
+      "maxCompletionTokens": 4096,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "top_k",
+        "min_p",
+        "seed"
+      ]
+    }
+  ],
+  "noromaid-20b": [
+    {
+      "name": "NextBit | neversleep/noromaid-20b",
+      "provider": "NextBit",
+      "tag": "nextbit/int4",
+      "status": 0,
+      "pricing": {
+        "prompt": 1,
+        "completion": 1.75,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 4096,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "response_format",
+        "structured_outputs"
+      ]
+    },
+    {
+      "name": "Mancer 2 | neversleep/noromaid-20b",
+      "provider": "Mancer 2",
+      "tag": "mancer",
+      "status": 0,
+      "pricing": {
+        "prompt": 1.25,
+        "completion": 2,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 8192,
+      "maxCompletionTokens": 2048,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "logit_bias",
+        "top_k",
+        "min_p",
+        "seed",
+        "top_a"
+      ]
+    }
+  ]
+}

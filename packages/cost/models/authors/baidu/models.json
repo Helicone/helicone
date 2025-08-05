@@ -1,0 +1,13 @@
+{
+  "ernie-4.5-300b-a47b": {
+    "id": "ernie-4.5-300b-a47b",
+    "name": "Baidu: ERNIE 4.5 300B A47B ",
+    "author": "baidu",
+    "description": "ERNIE-4.5-300B-A47B is a 300B parameter Mixture-of-Experts (MoE) language model developed by Baidu as part of the ERNIE 4.5 series. It activates 47B parameters per token and supports text generation in both English and Chinese. Optimized for high-throughput inference and efficient scaling, it uses a heterogeneous MoE structure with advanced routing and quantization strategies, including FP8 and 2-bit formats. This version is fine-tuned for language-only tasks and supports reasoning, tool parameters, and extended context lengths up to 131k tokens. Suitable for general-purpose LLM applications with high reasoning and throughput demands.",
+    "contextLength": 123000,
+    "maxOutputTokens": 12000,
+    "created": "2025-06-30T16:15:39.000Z",
+    "modality": "text->text",
+    "tokenizer": "Other"
+  }
+}

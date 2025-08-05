@@ -1,0 +1,35 @@
+{
+  "llama-3.1-lumimaid-8b": {
+    "id": "llama-3.1-lumimaid-8b",
+    "name": "NeverSleep: Lumimaid v0.2 8B",
+    "author": "neversleep",
+    "description": "Lumimaid v0.2 8B is a finetune of [Llama 3.1 8B](/models/meta-llama/llama-3.1-8b-instruct) with a \"HUGE step up dataset wise\" compared to Lumimaid v0.1. Sloppy chats output were purged.\n\nUsage of this model is subject to [Meta's Acceptable Use Policy](https://llama.meta.com/llama3/use-policy/).",
+    "contextLength": 8192,
+    "maxOutputTokens": 8192,
+    "created": "2024-09-15T00:00:00.000Z",
+    "modality": "text->text",
+    "tokenizer": "Llama3"
+  },
+  "llama-3-lumimaid-70b": {
+    "id": "llama-3-lumimaid-70b",
+    "name": "NeverSleep: Llama 3 Lumimaid 70B",
+    "author": "neversleep",
+    "description": "The NeverSleep team is back, with a Llama 3 70B finetune trained on their curated roleplay data. Striking a balance between eRP and RP, Lumimaid was designed to be serious, yet uncensored when necessary.\n\nTo enhance it's overall intelligence and chat capability, roughly 40% of the training data was not roleplay. This provides a breadth of knowledge to access, while still keeping roleplay as the primary strength.\n\nUsage of this model is subject to [Meta's Acceptable Use Policy](https://llama.meta.com/llama3/use-policy/).",
+    "contextLength": 8192,
+    "maxOutputTokens": 4096,
+    "created": "2024-05-16T00:00:00.000Z",
+    "modality": "text->text",
+    "tokenizer": "Llama3"
+  },
+  "noromaid-20b": {
+    "id": "noromaid-20b",
+    "name": "Noromaid 20B",
+    "author": "neversleep",
+    "description": "A collab between IkariDev and Undi. This merge is suitable for RP, ERP, and general knowledge.\n\n#merge #uncensored",
+    "contextLength": 4096,
+    "maxOutputTokens": null,
+    "created": "2023-11-26T00:00:00.000Z",
+    "modality": "text->text",
+    "tokenizer": "Llama2"
+  }
+}

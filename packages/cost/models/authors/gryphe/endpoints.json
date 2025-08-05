@@ -1,0 +1,136 @@
+{
+  "mythomax-l2-13b": [
+    {
+      "name": "NextBit | gryphe/mythomax-l2-13b",
+      "provider": "NextBit",
+      "tag": "nextbit/int4",
+      "status": -2,
+      "pricing": {
+        "prompt": 0.06,
+        "completion": 0.06,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 4096,
+      "maxCompletionTokens": null,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "response_format",
+        "structured_outputs"
+      ]
+    },
+    {
+      "name": "DeepInfra | gryphe/mythomax-l2-13b",
+      "provider": "DeepInfra",
+      "tag": "deepinfra/fp16",
+      "status": -2,
+      "pricing": {
+        "prompt": 0.06,
+        "completion": 0.06,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 4096,
+      "maxCompletionTokens": 4096,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "top_k",
+        "seed",
+        "min_p",
+        "response_format"
+      ]
+    },
+    {
+      "name": "Parasail | gryphe/mythomax-l2-13b",
+      "provider": "Parasail",
+      "tag": "parasail/fp16",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.08,
+        "completion": 0.11,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 4096,
+      "maxCompletionTokens": 4096,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "frequency_penalty",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "top_k"
+      ]
+    },
+    {
+      "name": "Novita | gryphe/mythomax-l2-13b",
+      "provider": "Novita",
+      "tag": "novita",
+      "status": 0,
+      "pricing": {
+        "prompt": 0.09,
+        "completion": 0.09,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 4096,
+      "maxCompletionTokens": 32000,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "seed",
+        "top_k",
+        "min_p",
+        "repetition_penalty",
+        "logit_bias"
+      ]
+    },
+    {
+      "name": "Mancer 2 | gryphe/mythomax-l2-13b",
+      "provider": "Mancer 2",
+      "tag": "mancer",
+      "status": 0,
+      "pricing": {
+        "prompt": 1,
+        "completion": 1.5,
+        "cacheRead": null,
+        "cacheWrite": null
+      },
+      "contextLength": 8192,
+      "maxCompletionTokens": 1024,
+      "supportedParameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "stop",
+        "frequency_penalty",
+        "presence_penalty",
+        "repetition_penalty",
+        "logit_bias",
+        "top_k",
+        "min_p",
+        "seed",
+        "top_a"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "mn-inferor-12b": {
+    "id": "mn-inferor-12b",
+    "name": "Infermatic: Mistral Nemo Inferor 12B",
+    "author": "infermatic",
+    "description": "Inferor 12B is a merge of top roleplay models, expert on immersive narratives and storytelling.\n\nThis model was merged using the [Model Stock](https://arxiv.org/abs/2403.19522) merge method using [anthracite-org/magnum-v4-12b](https://openrouter.ai/anthracite-org/magnum-v4-72b) as a base.\n",
+    "contextLength": 8192,
+    "maxOutputTokens": 8192,
+    "created": "2024-11-13T02:20:28.000Z",
+    "modality": "text->text",
+    "tokenizer": "Mistral"
+  }
+}
