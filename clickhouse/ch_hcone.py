@@ -7,6 +7,7 @@ import re
 import getpass
 import tabulate
 from yarl import URL
+from urllib.parse import urlparse
 
 
 file_dir = os.path.dirname(os.path.realpath(__file__))
@@ -16,6 +17,13 @@ all_schemas = [os.path.join(schema_dir, file)
 seeds_dir = os.path.join(file_dir, "seeds")
 all_seeds = [os.path.join(seeds_dir, file)
              for file in os.listdir(seeds_dir)]
+
+def validate_url(url):
+    try:
+        result = urlparse(url)
+        return all([result.scheme, result.netloc])
+    except:
+        return False
 
 
 def schema_sort_key(filename):
@@ -29,21 +37,25 @@ container_name = "helicone-clickhouse-server"
 container_test_name = "helicone-clickhouse-server-test"
 
 
-def get_host(host: str):
-    return host if "http://" in host or "https://" in host else f"http://{host}"
+def get_url(args):
+    if args.url:
+        return args.url
+    else:
+        host_with_scheme = args.host if "http://" in args.host or "https://" in args.host else f"http://{args.host}"
+        return f"{host_with_scheme}:{args.port}"
 
-
-def run_curl_command(query, host, port, user=None, password=None, migration_file=None):
-    base_url = f"{get_host(host)}:{port}/"
+def run_curl_command(query, args, user=None, password=None, migration_file=None):
+    base_url = get_url(args)
     auth = f"--user '{user}:{password}'" if user and password else ""
+    timeout_opts = "--connect-timeout 5"
 
     if not query:
         curl_cmd = (
-            f"cat \"{migration_file}\" | curl {auth} '{base_url}' --data-binary @-"
+            f"cat \"{migration_file}\" | curl {auth} {timeout_opts} '{base_url}' --data-binary @-"
         ).strip()
     else:
         curl_cmd = (
-            f"echo \"{query}\" | curl {auth} '{base_url}' --data-binary @-"
+            f"echo \"{query}\" | curl {auth} {timeout_opts} '{base_url}' --data-binary @-"
         ).strip()
 
     result = subprocess.run(curl_cmd, shell=True,
@@ -56,14 +68,14 @@ def run_curl_command(query, host, port, user=None, password=None, migration_file
     return result
 
 
-def create_migration_table(host, port, user=None, password=None):
+def create_migration_table(args, user=None, password=None):
     query = """
     CREATE TABLE IF NOT EXISTS helicone_migrations (
         migration_name String,
         applied_date DateTime DEFAULT now()
     ) ENGINE = MergeTree() ORDER BY migration_name;
     """
-    res = run_curl_command(query, host, port, user, password)
+    res = run_curl_command(query, args, user, password)
 
     if res.returncode != 0:
         print("Failed to create helicone_migrations table")
@@ -74,33 +86,33 @@ def create_migration_table(host, port, user=None, password=None):
         print("Created helicone_migrations table")
 
 
-def is_migration_applied(migration_name, host, port, user=None, password=None):
+def is_migration_applied(migration_name, args, user=None, password=None):
     query = f"""
     SELECT count(*) FROM helicone_migrations WHERE migration_name = '{migration_name}';
     """
-    res = run_curl_command(query, host, port, user, password)
+    res = run_curl_command(query, args, user, password)
     return int(res.stdout.strip()) > 0
 
 
-def mark_migration_as_applied(migration_name, host, port, user=None, password=None):
+def mark_migration_as_applied(migration_name, args, user=None, password=None):
     query = f"""
     INSERT INTO helicone_migrations (migration_name) VALUES ('{migration_name}');
     """
-    run_curl_command(query, host, port, user, password)
+    run_curl_command(query, args, user, password)
 
 
-def run_migrations(host, port, retries=5, user=None, password=None):
+def run_migrations(args, retries=2, user=None, password=None):
     print("Running migrations")
     time.sleep(1)
     for schema_path in all_schemas:
         migration_name = os.path.basename(schema_path)
-        if is_migration_applied(migration_name, host, port, user, password):
+        if is_migration_applied(migration_name, args, user, password):
             print(f"Skipping already applied migration: {migration_name}")
             continue
 
         print(f"Running {schema_path}")
 
-        res = run_curl_command(None, host, port, user, password, schema_path)
+        res = run_curl_command(None, args, user, password, schema_path)
 
         if res.returncode != 0:
             print(f"Failed to run {schema_path}")
@@ -108,22 +120,22 @@ def run_migrations(host, port, retries=5, user=None, password=None):
             if retries > 0:
                 time.sleep(1)
                 print("Retrying")
-                run_migrations(host, port, retries, user, password)
+                run_migrations(args, retries, user, password)
             break
         else:
             mark_migration_as_applied(
-                migration_name, host, port, user, password)
+                migration_name, args, user, password)
 
     print("Finished running migrations")
 
 
-def list_migrations(host, port, user=None, password=None):
+def list_migrations(args, user=None, password=None):
     query = """
     SELECT migration_name, applied_date
     FROM helicone_migrations
     ORDER BY migration_name;
     """
-    res = run_curl_command(query, host, port, user, password)
+    res = run_curl_command(query, args, user, password)
     migrations = [line.split("\t") for line in res.stdout.strip().split("\n")]
 
     # Sort migrations based on schema version number
@@ -133,11 +145,11 @@ def list_migrations(host, port, user=None, password=None):
     print(tabulate.tabulate(migrations, headers=headers, tablefmt="grid"))
 
 
-def run_roles_seed(host, port, user=None, password=None):
+def run_roles_seed(args, user=None, password=None):
     """Run the roles.sql seed file to create roles and grant permissions"""
     for seed_file in all_seeds:
         print(seed_file)
-        res = run_curl_command(None, host, port, user, password, seed_file)
+        res = run_curl_command(None, args, user, password, seed_file)
         if res.returncode != 0:
             print("Warning: Failed to run seed file")
             print("STDOUT:", res.stdout)
@@ -155,7 +167,8 @@ def main():
 
     envhost = os.getenv("CLICKHOUSE_HOST")
     envport = os.getenv("CLICKHOUSE_PORT")
-    if envhost:
+    url = None
+    if envhost and validate_url(envhost):
         url = URL(envhost)
         envhost = str(url.host)
         envport = str(url.port) if url.port else envport
@@ -170,6 +183,9 @@ def main():
                         help="Restart services")
     parser.add_argument("--upgrade", action="store_true",
                         help="Apply all migrations")
+    parser.add_argument(
+        "--url", default=url, help="ClickHouse server url eg http://localhost:18123"
+    )
     parser.add_argument(
         "--host", default=envhost or "localhost", help="ClickHouse server host"
     )
@@ -229,12 +245,12 @@ def main():
         if res.returncode != 0:
             print("Failed to start services")
         else:
-            create_migration_table(args.host, args.port, args.user, password)
-            run_migrations(args.host, args.port,
+            create_migration_table(args, args.user, password)
+            run_migrations(args,
                            user=args.user, password=password)
             print(f"""
 Test query by running:
-echo 'SELECT 1' | curl '{get_host(args.host)}:{args.port}/' --data-binary @-
+echo 'SELECT 1' | curl '{get_url(args)}/' --data-binary @-
             """)
 
     elif args.stop:
@@ -252,22 +268,22 @@ echo 'SELECT 1' | curl '{get_host(args.host)}:{args.port}/' --data-binary @-
             shell=True,
         )
         time.sleep(5)
-        create_migration_table(args.host, args.port, args.user, password)
-        run_migrations(args.host, args.port, user=args.user, password=password)
+        create_migration_table(args, args.user, password)
+        run_migrations(args, user=args.user, password=password)
         print(f"""
 Test query by running:
-echo 'SELECT 1' | curl '{get_host(args.host)}:{args.port}/' --data-binary @-
+echo 'SELECT 1' | curl '{get_url(args)}/' --data-binary @-
         """)
 
     elif args.upgrade:
         print("Applying all migrations")
-        create_migration_table(args.host, args.port, args.user, password)
-        run_migrations(args.host, args.port, user=args.user, password=password)
+        create_migration_table(args, args.user, password)
+        run_migrations(args, user=args.user, password=password)
         print("Finished applying all migrations")
 
     elif args.list_migrations:
         print("Listing applied migrations")
-        list_migrations(args.host, args.port, args.user, password)
+        list_migrations(args, args.user, password)
 
     else:
         print("No action specified")
@@ -275,7 +291,7 @@ echo 'SELECT 1' | curl '{get_host(args.host)}:{args.port}/' --data-binary @-
     # Seed roles after all migrations are applied
     if args.seed_roles:
         print("Running roles seed file only")
-        run_roles_seed(args.host, args.port, user=args.user, password=password)
+        run_roles_seed(args, user=args.user, password=password)
 
 
 if __name__ == "__main__":
