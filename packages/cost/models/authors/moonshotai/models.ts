@@ -1,0 +1,80 @@
+/**
+ * Moonshotai model definitions
+ */
+
+import { type Model } from '../../types';
+
+/**
+ * Moonshot AI model names
+ */
+export type MoonshotModelName =
+  | "kimi-k2:free"
+  | "kimi-k2"
+  | "kimi-dev-72b:free"
+  | "kimi-vl-a3b-thinking:free"
+  | "kimi-vl-a3b-thinking";
+
+export const moonshotaiModels = {
+  'kimi-k2:free': {
+    id: 'kimi-k2:free',
+    name: 'MoonshotAI: Kimi K2 (free)',
+    author: 'moonshotai',
+    description: "Kimi K2 Instruct is a large-scale Mixture-of-Experts (MoE) language model developed by Moonshot AI, featuring 1 trillion total parameters with 32 billion active per forward pass. It is optimized for agentic capabilities, including advanced tool use, reasoning, and code synthesis. Kimi K2 excels across a broad range of benchmarks, particularly in coding (LiveCodeBench, SWE-bench), reasoning (ZebraLogic, GPQA), and tool-use (Tau2, AceBench) tasks. It supports long-context inference up to 128K tokens and is designed with a novel training stack that includes the MuonClip optimizer for stable large-scale MoE training.",
+    contextLength: 32768,
+    maxOutputTokens: 4000,
+    created: '2025-07-11T19:47:32.000Z',
+    modality: 'text->text',
+    tokenizer: 'GPT',
+  },
+  
+  'kimi-k2': {
+    id: 'kimi-k2',
+    name: 'MoonshotAI: Kimi K2',
+    author: 'moonshotai',
+    description: "Kimi K2 Instruct is a large-scale Mixture-of-Experts (MoE) language model developed by Moonshot AI, featuring 1 trillion total parameters with 32 billion active per forward pass. It is optimized for agentic capabilities, including advanced tool use, reasoning, and code synthesis. Kimi K2 excels across a broad range of benchmarks, particularly in coding (LiveCodeBench, SWE-bench), reasoning (ZebraLogic, GPQA), and tool-use (Tau2, AceBench) tasks. It supports long-context inference up to 128K tokens and is designed with a novel training stack that includes the MuonClip optimizer for stable large-scale MoE training.",
+    contextLength: 63000,
+    maxOutputTokens: 63000,
+    created: '2025-07-11T19:47:32.000Z',
+    modality: 'text->text',
+    tokenizer: 'GPT',
+  },
+  
+  'kimi-dev-72b:free': {
+    id: 'kimi-dev-72b:free',
+    name: 'Kimi Dev 72b (free)',
+    author: 'moonshotai',
+    description: "Kimi-Dev-72B is an open-source large language model fine-tuned for software engineering and issue resolution tasks. Based on Qwen2.5-72B, it is optimized using large-scale reinforcement learning that applies code patches in real repositories and validates them via full test suite execution\u2014rewarding only correct, robust completions. The model achieves 60.4% on SWE-bench Verified, setting a new benchmark among open-source models for software bug fixing and code reasoning.",
+    contextLength: 131072,
+    maxOutputTokens: 4000,
+    created: '2025-06-16T23:18:29.000Z',
+    modality: 'text->text',
+    tokenizer: 'GPT',
+  },
+  
+  'kimi-vl-a3b-thinking:free': {
+    id: 'kimi-vl-a3b-thinking:free',
+    name: 'Moonshot AI: Kimi VL A3B Thinking (free)',
+    author: 'moonshotai',
+    description: "Kimi-VL is a lightweight Mixture-of-Experts vision-language model that activates only 2.8B parameters per step while delivering strong performance on multimodal reasoning and long-context tasks. The Kimi-VL-A3B-Thinking variant, fine-tuned with chain-of-thought and reinforcement learning, excels in math and visual reasoning benchmarks like MathVision, MMMU, and MathVista, rivaling much larger models such as Qwen2.5-VL-7B and Gemma-3-12B. It supports 128K context and high-resolution input via its MoonViT encoder.",
+    contextLength: 131072,
+    maxOutputTokens: 4000,
+    created: '2025-04-10T17:07:21.000Z',
+    modality: 'text+image->text',
+    tokenizer: 'GPT',
+  },
+  
+  'kimi-vl-a3b-thinking': {
+    id: 'kimi-vl-a3b-thinking',
+    name: 'Moonshot AI: Kimi VL A3B Thinking',
+    author: 'moonshotai',
+    description: "Kimi-VL is a lightweight Mixture-of-Experts vision-language model that activates only 2.8B parameters per step while delivering strong performance on multimodal reasoning and long-context tasks. The Kimi-VL-A3B-Thinking variant, fine-tuned with chain-of-thought and reinforcement learning, excels in math and visual reasoning benchmarks like MathVision, MMMU, and MathVista, rivaling much larger models such as Qwen2.5-VL-7B and Gemma-3-12B. It supports 128K context and high-resolution input via its MoonViT encoder.",
+    contextLength: 131072,
+    maxOutputTokens: 4000,
+    created: '2025-04-10T17:07:21.000Z',
+    modality: 'text+image->text',
+    tokenizer: 'GPT',
+  },
+  
+} satisfies Record<MoonshotModelName, Model>;
+
+export default moonshotaiModels;
