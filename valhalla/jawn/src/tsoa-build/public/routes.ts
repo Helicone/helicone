@@ -2183,7 +2183,7 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ChatCompletionMessageToolCall.Function": {
+    "ChatCompletionMessageFunctionToolCall.Function": {
         "dataType": "refObject",
         "properties": {
             "arguments": {"dataType":"string","required":true},
@@ -2192,14 +2192,38 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ChatCompletionMessageToolCall": {
+    "ChatCompletionMessageFunctionToolCall": {
         "dataType": "refObject",
         "properties": {
             "id": {"dataType":"string","required":true},
-            "function": {"ref":"ChatCompletionMessageToolCall.Function","required":true},
+            "function": {"ref":"ChatCompletionMessageFunctionToolCall.Function","required":true},
             "type": {"dataType":"enum","enums":["function"],"required":true},
         },
         "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ChatCompletionMessageCustomToolCall.Custom": {
+        "dataType": "refObject",
+        "properties": {
+            "input": {"dataType":"string","required":true},
+            "name": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ChatCompletionMessageCustomToolCall": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "custom": {"ref":"ChatCompletionMessageCustomToolCall.Custom","required":true},
+            "type": {"dataType":"enum","enums":["custom"],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ChatCompletionMessageToolCall": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ChatCompletionMessageFunctionToolCall"},{"ref":"ChatCompletionMessageCustomToolCall"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ChatCompletionMessage": {
@@ -2211,7 +2235,7 @@ const models: TsoaRoute.Models = {
             "annotations": {"dataType":"array","array":{"dataType":"refObject","ref":"ChatCompletionMessage.Annotation"}},
             "audio": {"dataType":"union","subSchemas":[{"ref":"ChatCompletionAudio"},{"dataType":"enum","enums":[null]}]},
             "function_call": {"dataType":"union","subSchemas":[{"ref":"ChatCompletionMessage.FunctionCall"},{"dataType":"enum","enums":[null]}]},
-            "tool_calls": {"dataType":"array","array":{"dataType":"refObject","ref":"ChatCompletionMessageToolCall"}},
+            "tool_calls": {"dataType":"array","array":{"dataType":"refAlias","ref":"ChatCompletionMessageToolCall"}},
         },
         "additionalProperties": false,
     },
@@ -2267,7 +2291,7 @@ const models: TsoaRoute.Models = {
             "created": {"dataType":"double","required":true},
             "model": {"dataType":"string","required":true},
             "object": {"dataType":"enum","enums":["chat.completion"],"required":true},
-            "service_tier": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["auto"]},{"dataType":"enum","enums":["default"]},{"dataType":"enum","enums":["flex"]},{"dataType":"enum","enums":[null]}]},
+            "service_tier": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["auto"]},{"dataType":"enum","enums":["default"]},{"dataType":"enum","enums":["flex"]},{"dataType":"enum","enums":["scale"]},{"dataType":"enum","enums":["priority"]},{"dataType":"enum","enums":[null]}]},
             "system_fingerprint": {"dataType":"string"},
             "usage": {"ref":"CompletionUsage"},
         },

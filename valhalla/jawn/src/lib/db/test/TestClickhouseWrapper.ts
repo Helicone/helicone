@@ -72,7 +72,7 @@ export class TestClickhouseClientWrapper {
           wait_end_of_query: 1,
         },
       });
-      return { data: await queryResult.json<T[]>(), error: null };
+      return { data: await queryResult.json<T>(), error: null };
     } catch (err) {
       return {
         data: null,
@@ -96,8 +96,51 @@ export class TestClickhouseClientWrapper {
           wait_end_of_query: 1,
         },
       });
-      return { data: await queryResult.json<T[]>(), error: null };
+      return { data: await queryResult.json<T>(), error: null };
     } catch (err) {
+      return {
+        data: null,
+        error: JSON.stringify(err),
+      };
+    }
+  }
+
+  async queryWithContext<T>({
+    query,
+    organizationId,
+    parameters,
+  }: {
+    query: string;
+    organizationId: string;
+    parameters: (number | string | boolean | Date)[];
+  }): Promise<Result<T[], string>> {
+    try {
+      const query_params = this.paramsToValues(parameters);
+      if (query.toLowerCase().includes("settings")) {
+        return {
+          data: null,
+          error: "Query contains 'settings' keyword, which is not allowed in HQL queries",
+        };
+      }
+
+      const queryResult = await this.clickHouseHqlClient.query({
+        query,
+        query_params,
+        format: "JSONEachRow",
+        clickhouse_settings: {
+          wait_end_of_query: 1,
+          // Set the organization context for row-level security
+          // Custom settings must be prefixed with SQL_
+          SQL_helicone_organization_id: organizationId,
+          // CRITICAL: Set readonly=1 to prevent query from overriding settings
+          // This makes ALL settings immutable for this query
+          readonly: 1,
+        } as any,
+      });
+      return { data: await queryResult.json<T>(), error: null };
+    } catch (err) {
+      console.error("Error executing HQL query with context: ", query, organizationId, parameters);
+      console.error(err);
       return {
         data: null,
         error: JSON.stringify(err),

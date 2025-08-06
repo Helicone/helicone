@@ -609,6 +609,7 @@ Json: JsonObject;
           id: string;
           icon: string;
           has_onboarded: boolean;
+          has_integrated: boolean;
           governance_settings: components["schemas"]["Json"] | null;
           domain: string | null;
           created_at: string | null;
@@ -647,6 +648,7 @@ Json: JsonObject;
         id: string;
         icon: string;
         has_onboarded: boolean;
+        has_integrated: boolean;
         governance_settings: components["schemas"]["Json"] | null;
         domain: string | null;
         created_at: string | null;
@@ -656,7 +658,7 @@ Json: JsonObject;
       error: null;
     };
     "Result_Database-at-public_91_Tables_93_-at-organization_91_Row_93_.string_": components["schemas"]["ResultSuccess_Database-at-public_91_Tables_93_-at-organization_91_Row_93__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
+    "ResultSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
       data: {
           tier: string;
           subscription_status: string;
@@ -683,6 +685,7 @@ Json: JsonObject;
           id: string;
           icon: string;
           has_onboarded: boolean;
+          has_integrated: boolean;
           governance_settings: components["schemas"]["Json"];
           domain: string;
           created_at: string;
@@ -691,9 +694,9 @@ Json: JsonObject;
       /** @enum {number|null} */
       error: null;
     };
-    "Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_": components["schemas"]["ResultSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__": {
-      data: components["schemas"]["Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_"];
+    "Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_": components["schemas"]["ResultSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__": {
+      data: components["schemas"]["Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_"];
       /** @enum {number|null} */
       error: null;
     };
@@ -702,7 +705,7 @@ Json: JsonObject;
       data: null;
       error: unknown;
     };
-    "Result_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_": components["schemas"]["ResultSuccess_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__"] | components["schemas"]["ResultError_unknown_"];
+    "Result_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_": components["schemas"]["ResultSuccess_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__"] | components["schemas"]["ResultError_unknown_"];
     ResultSuccess_string_: {
       data: string;
       /** @enum {number|null} */
@@ -735,6 +738,7 @@ Json: JsonObject;
       id?: string;
       icon?: string;
       has_onboarded?: boolean;
+      has_integrated?: boolean;
       governance_settings?: components["schemas"]["Json"] | null;
       domain?: string | null;
       created_at?: string | null;
@@ -807,10 +811,12 @@ Json: JsonObject;
     };
     "Result_OrganizationOwner-Array.string_": components["schemas"]["ResultSuccess_OrganizationOwner-Array_"] | components["schemas"]["ResultError_string_"];
     /** @description Make all properties in T optional */
-    "Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___": {
+    "Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--hasIntegrated-boolean--hasCompletedQuickstart-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___": {
       currentStep?: string;
       selectedTier?: string;
       hasOnboarded?: boolean;
+      hasIntegrated?: boolean;
+      hasCompletedQuickstart?: boolean;
       members?: unknown[];
       addons?: {
         evals: boolean;
@@ -818,7 +824,7 @@ Json: JsonObject;
         prompts: boolean;
       };
     };
-    OnboardingStatus: components["schemas"]["Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___"];
+    OnboardingStatus: components["schemas"]["Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--hasIntegrated-boolean--hasCompletedQuickstart-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___"];
     EvaluatorResult: {
       id: string;
       created_at: string;
@@ -2231,7 +2237,7 @@ Json: JsonObject;
       name: string;
     };
     /** @description The function that the model called. */
-    "ChatCompletionMessageToolCall.Function": {
+    "ChatCompletionMessageFunctionToolCall.Function": {
       /**
        * @description The arguments to call the function with, as generated by the model in JSON
        * format. Note that the model does not always generate valid JSON, and may
@@ -2242,17 +2248,39 @@ Json: JsonObject;
       /** @description The name of the function to call. */
       name: string;
     };
-    ChatCompletionMessageToolCall: {
+    /** @description A call to a function tool created by the model. */
+    ChatCompletionMessageFunctionToolCall: {
       /** @description The ID of the tool call. */
       id: string;
       /** @description The function that the model called. */
-      function: components["schemas"]["ChatCompletionMessageToolCall.Function"];
+      function: components["schemas"]["ChatCompletionMessageFunctionToolCall.Function"];
       /**
        * @description The type of the tool. Currently, only `function` is supported.
        * @enum {string}
        */
       type: "function";
     };
+    /** @description The custom tool that the model called. */
+    "ChatCompletionMessageCustomToolCall.Custom": {
+      /** @description The input for the custom tool call generated by the model. */
+      input: string;
+      /** @description The name of the custom tool to call. */
+      name: string;
+    };
+    /** @description A call to a custom tool created by the model. */
+    ChatCompletionMessageCustomToolCall: {
+      /** @description The ID of the tool call. */
+      id: string;
+      /** @description The custom tool that the model called. */
+      custom: components["schemas"]["ChatCompletionMessageCustomToolCall.Custom"];
+      /**
+       * @description The type of the tool. Always `custom`.
+       * @enum {string}
+       */
+      type: "custom";
+    };
+    /** @description A call to a function tool created by the model. */
+    ChatCompletionMessageToolCall: components["schemas"]["ChatCompletionMessageFunctionToolCall"] | components["schemas"]["ChatCompletionMessageCustomToolCall"];
     /** @description A chat completion message generated by the model. */
     ChatCompletionMessage: {
       /** @description The contents of the message. */
@@ -2388,26 +2416,26 @@ Json: JsonObject;
        */
       object: "chat.completion";
       /**
-       * @description Specifies the latency tier to use for processing the request. This parameter is
-       * relevant for customers subscribed to the scale tier service:
+       * @description Specifies the processing type used for serving the request.
        *
-       * - If set to 'auto', and the Project is Scale tier enabled, the system will
-       *   utilize scale tier credits until they are exhausted.
-       * - If set to 'auto', and the Project is not Scale tier enabled, the request will
-       *   be processed using the default service tier with a lower uptime SLA and no
-       *   latency guarentee.
-       * - If set to 'default', the request will be processed using the default service
-       *   tier with a lower uptime SLA and no latency guarentee.
-       * - If set to 'flex', the request will be processed with the Flex Processing
-       *   service tier.
-       *   [Learn more](https://platform.openai.com/docs/guides/flex-processing).
+       * - If set to 'auto', then the request will be processed with the service tier
+       *   configured in the Project settings. Unless otherwise configured, the Project
+       *   will use 'default'.
+       * - If set to 'default', then the request will be processed with the standard
+       *   pricing and performance for the selected model.
+       * - If set to '[flex](https://platform.openai.com/docs/guides/flex-processing)' or
+       *   'priority', then the request will be processed with the corresponding service
+       *   tier. [Contact sales](https://openai.com/contact-sales) to learn more about
+       *   Priority processing.
        * - When not set, the default behavior is 'auto'.
        *
-       * When this parameter is set, the response body will include the `service_tier`
-       * utilized.
+       * When the `service_tier` parameter is set, the response body will include the
+       * `service_tier` value based on the processing mode actually used to serve the
+       * request. This response value may be different from the value set in the
+       * parameter.
        * @enum {string|null}
        */
-      service_tier?: "auto" | "default" | "flex" | null;
+      service_tier?: "auto" | "default" | "flex" | "scale" | "priority" | null;
       /**
        * @description This fingerprint represents the backend configuration that the model runs with.
        *
@@ -2645,10 +2673,6 @@ Json: JsonObject;
      * replace the previous `system` messages.
      */
     ChatCompletionMessageParam: components["schemas"]["ChatCompletionDeveloperMessageParam"] | components["schemas"]["ChatCompletionSystemMessageParam"] | components["schemas"]["ChatCompletionUserMessageParam"] | components["schemas"]["ChatCompletionAssistantMessageParam"] | components["schemas"]["ChatCompletionToolMessageParam"] | components["schemas"]["ChatCompletionFunctionMessageParam"];
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.unknown_": {
-      [key: string]: unknown;
-    };
     /**
      * @description The parameters the functions accepts, described as a JSON Schema object. See the
      * [guide](https://platform.openai.com/docs/guides/function-calling) for examples,
@@ -2658,7 +2682,9 @@ Json: JsonObject;
      *
      * Omitting `parameters` defines a function with an empty parameter list.
      */
-    FunctionParameters: components["schemas"]["Record_string.unknown_"];
+    FunctionParameters: {
+      [key: string]: unknown;
+    };
     FunctionDefinition: {
       /**
        * @description The name of the function to be called. Must be a-z, A-Z, 0-9, or contain
@@ -2685,17 +2711,105 @@ Json: JsonObject;
        * set to true, the model will follow the exact schema defined in the `parameters`
        * field. Only a subset of JSON Schema is supported when `strict` is `true`. Learn
        * more about Structured Outputs in the
-       * [function calling guide](docs/guides/function-calling).
+       * [function calling guide](https://platform.openai.com/docs/guides/function-calling).
        */
       strict?: boolean | null;
     };
-    ChatCompletionTool: {
+    /** @description A function tool that can be used to generate a response. */
+    ChatCompletionFunctionTool: {
       function: components["schemas"]["FunctionDefinition"];
       /**
        * @description The type of the tool. Currently, only `function` is supported.
        * @enum {string}
        */
       type: "function";
+    };
+    /** @description Unconstrained free-form text. */
+    "ChatCompletionCustomTool.Custom.Text": {
+      /**
+       * @description Unconstrained text format. Always `text`.
+       * @enum {string}
+       */
+      type: "text";
+    };
+    /** @description Your chosen grammar. */
+    "ChatCompletionCustomTool.Custom.Grammar.Grammar": {
+      /** @description The grammar definition. */
+      definition: string;
+      /**
+       * @description The syntax of the grammar definition. One of `lark` or `regex`.
+       * @enum {string}
+       */
+      syntax: "lark" | "regex";
+    };
+    /** @description A grammar defined by the user. */
+    "ChatCompletionCustomTool.Custom.Grammar": {
+      /** @description Your chosen grammar. */
+      grammar: components["schemas"]["ChatCompletionCustomTool.Custom.Grammar.Grammar"];
+      /**
+       * @description Grammar format. Always `grammar`.
+       * @enum {string}
+       */
+      type: "grammar";
+    };
+    /** @description Properties of the custom tool. */
+    "ChatCompletionCustomTool.Custom": {
+      /** @description The name of the custom tool, used to identify it in tool calls. */
+      name: string;
+      /** @description Optional description of the custom tool, used to provide more context. */
+      description?: string;
+      /** @description The input format for the custom tool. Default is unconstrained text. */
+      format?: components["schemas"]["ChatCompletionCustomTool.Custom.Text"] | components["schemas"]["ChatCompletionCustomTool.Custom.Grammar"];
+    };
+    /** @description A custom tool that processes input using a specified format. */
+    ChatCompletionCustomTool: {
+      /** @description Properties of the custom tool. */
+      custom: components["schemas"]["ChatCompletionCustomTool.Custom"];
+      /**
+       * @description The type of the custom tool. Always `custom`.
+       * @enum {string}
+       */
+      type: "custom";
+    };
+    /** @description A function tool that can be used to generate a response. */
+    ChatCompletionTool: components["schemas"]["ChatCompletionFunctionTool"] | components["schemas"]["ChatCompletionCustomTool"];
+    /** @description Constrains the tools available to the model to a pre-defined set. */
+    ChatCompletionAllowedTools: {
+      /**
+       * @description Constrains the tools available to the model to a pre-defined set.
+       *
+       * `auto` allows the model to pick from among the allowed tools and generate a
+       * message.
+       *
+       * `required` requires the model to call one or more of the allowed tools.
+       * @enum {string}
+       */
+      mode: "auto" | "required";
+      /**
+       * @description A list of tool definitions that the model should be allowed to call.
+       *
+       * For the Chat Completions API, the list of tool definitions might look like:
+       *
+       * ```json
+       * [
+       *   { "type": "function", "function": { "name": "get_weather" } },
+       *   { "type": "function", "function": { "name": "get_time" } }
+       * ]
+       * ```
+       */
+      tools: {
+          [key: string]: unknown;
+        }[];
+    };
+    /** @description Constrains the tools available to the model to a pre-defined set. */
+    ChatCompletionAllowedToolChoice: {
+      /** @description Constrains the tools available to the model to a pre-defined set. */
+      allowed_tools: components["schemas"]["ChatCompletionAllowedTools"];
+      /**
+       * @description Allowed tool configuration type. Always `allowed_tools`.
+       * @enum {string}
+       */
+      type: "allowed_tools";
     };
     "ChatCompletionNamedToolChoice.Function": {
       /** @description The name of the function to call. */
@@ -2708,10 +2822,26 @@ Json: JsonObject;
     ChatCompletionNamedToolChoice: {
       function: components["schemas"]["ChatCompletionNamedToolChoice.Function"];
       /**
-       * @description The type of the tool. Currently, only `function` is supported.
+       * @description For function calling, the type is always `function`.
        * @enum {string}
        */
       type: "function";
+    };
+    "ChatCompletionNamedToolChoiceCustom.Custom": {
+      /** @description The name of the custom tool to call. */
+      name: string;
+    };
+    /**
+     * @description Specifies a tool the model should use. Use to force the model to call a specific
+     * custom tool.
+     */
+    ChatCompletionNamedToolChoiceCustom: {
+      custom: components["schemas"]["ChatCompletionNamedToolChoiceCustom.Custom"];
+      /**
+       * @description For custom tool calling, the type is always `custom`.
+       * @enum {string}
+       */
+      type: "custom";
     };
     /**
      * @description Controls which (if any) tool is called by the model. `none` means the model will
@@ -2724,7 +2854,7 @@ Json: JsonObject;
      * `none` is the default when no tools are present. `auto` is the default if tools
      * are present.
      */
-    ChatCompletionToolChoiceOption: components["schemas"]["ChatCompletionNamedToolChoice"] | ("none" | "auto" | "required");
+    ChatCompletionToolChoiceOption: components["schemas"]["ChatCompletionAllowedToolChoice"] | components["schemas"]["ChatCompletionNamedToolChoice"] | components["schemas"]["ChatCompletionNamedToolChoiceCustom"] | ("none" | "auto" | "required");
     AlertResponse: {
       alerts: ({
           updated_at: string | null;
@@ -15900,7 +16030,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_"];
+          "application/json": components["schemas"]["Result_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_"];
         };
       };
     };
@@ -16148,7 +16278,6 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
-          has_onboarded: boolean;
           name: string;
           onboarding_status: components["schemas"]["OnboardingStatus"];
         };
