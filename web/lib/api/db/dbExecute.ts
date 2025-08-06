@@ -45,7 +45,10 @@ export async function dbQueryClickhouse<T>(
         return process.env.CLICKHOUSE_HOST;
       }
       // Use APP_URL to construct clickhouse host if not specified
-      const appUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost";
+      const appUrl =
+        process.env.APP_URL ||
+        process.env.NEXT_PUBLIC_APP_URL ||
+        "http://localhost";
       try {
         const url = new URL(appUrl);
         return `${url.protocol}//${url.hostname}:18123`;

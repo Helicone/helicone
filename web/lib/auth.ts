@@ -47,7 +47,7 @@ export const auth = betterAuth({
       const emailHtml = `
 <div style="width: 100%; background-color: #ffffff">
   <div style="margin: 0px auto; padding: 16px; width: 512px">
-    <img width="160" alt="Helicone Logo" src="${process.env.NEXT_PUBLIC_APP_URL || 'https://us.helicone.ai'}/_next/image?url=%2Fstatic%2Flogo-no-border.png&w=384&q=75">
+    <img width="160" alt="Helicone Logo" src="${process.env.NEXT_PUBLIC_APP_URL || "https://us.helicone.ai"}/_next/image?url=%2Fstatic%2Flogo-no-border.png&w=384&q=75">
     <p style="font-size: 16px;">Hey there 👋,</p> <!-- Removed extra </h1> -->
     <p style="font-size: 16px;">Thank you for joining our community of thousands of developers. To get started, please click the button below:</p>
     <!-- Use the 'url' variable provided by better-auth -->
