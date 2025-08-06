@@ -16,9 +16,22 @@ export function getJawnClient(apiKey?: string) {
   //       }
   //     : {};
 
+  const getJawnServiceUrl = () => {
+    if (process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE) {
+      return process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE;
+    }
+    // Fallback to NEXT_PUBLIC_APP_URL with Jawn port
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    try {
+      const url = new URL(appUrl);
+      return `${url.protocol}//${url.hostname}:8585`;
+    } catch {
+      return "http://localhost:8585";
+    }
+  };
+
   return createClient<publicPaths>({
-    baseUrl:
-      process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE ?? "http://localhost:8585",
+    baseUrl: getJawnServiceUrl(),
     headers: {
       Authorization: `Bearer ${apiKey}`,
     },

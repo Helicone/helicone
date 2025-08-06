@@ -9,10 +9,8 @@ export default async function Signin({
     searchParams as Record<string, string>
   ).toString();
 
-  const baseUrl =
-    process.env.NODE_ENV === "development"
-      ? "http://localhost:3000/signin"
-      : "https://us.helicone.ai/signin";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://us.helicone.ai";
+  const baseUrl = `${appUrl}/signin`;
 
   const redirectUrl = `${baseUrl}${queryString ? `?${queryString}` : ""}`;
   redirect(redirectUrl);
