@@ -3,8 +3,9 @@
  */
 
 import type { ModelEndpoint } from "../../types";
+import type { GoogleModelName } from "./models";
 
-export const googleEndpoints: Record<string, ModelEndpoint[]> = {
+export const googleEndpoints = {
   "gemini-2.5-flash-lite": [
     {
       name: "Google | google/gemini-2.5-flash-lite",
@@ -1358,6 +1359,6 @@ export const googleEndpoints: Record<string, ModelEndpoint[]> = {
       ],
     },
   ],
-};
+} satisfies Record<GoogleModelName, ModelEndpoint[]>;
 
 export default googleEndpoints;

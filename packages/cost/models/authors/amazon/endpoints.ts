@@ -3,8 +3,9 @@
  */
 
 import type { ModelEndpoint } from "../../types";
+import type { AmazonModelName } from "./models";
 
-export const amazonEndpoints: Record<string, ModelEndpoint[]> = {
+export const amazonEndpoints = {
   "nova-lite-v1": [
     {
       name: "Amazon Bedrock | amazon/nova-lite-v1",
@@ -81,6 +82,6 @@ export const amazonEndpoints: Record<string, ModelEndpoint[]> = {
       ]
     }
   ]
-};
+} satisfies Record<AmazonModelName, ModelEndpoint[]>;
 
 export default amazonEndpoints;

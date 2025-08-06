@@ -3,8 +3,9 @@
  */
 
 import type { ModelEndpoint } from "../../types";
+import type { CohereModelName } from "./models";
 
-export const cohereEndpoints: Record<string, ModelEndpoint[]> = {
+export const cohereEndpoints = {
   "command-a": [
     {
       name: "NextBit | cohere/command-a-03-2025",
@@ -285,6 +286,6 @@ export const cohereEndpoints: Record<string, ModelEndpoint[]> = {
       ],
     },
   ],
-};
+} satisfies Record<CohereModelName, ModelEndpoint[]>;
 
 export default cohereEndpoints;

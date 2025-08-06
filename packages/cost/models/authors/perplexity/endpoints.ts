@@ -3,8 +3,9 @@
  */
 
 import type { ModelEndpoint } from "../../types";
+import type { PerplexityModelName } from "./models";
 
-export const perplexityEndpoints: Record<string, ModelEndpoint[]> = {
+export const perplexityEndpoints = {
   "sonar-reasoning-pro": [
     {
       name: "Perplexity | perplexity/sonar-reasoning-pro",
@@ -188,6 +189,6 @@ export const perplexityEndpoints: Record<string, ModelEndpoint[]> = {
       ],
     },
   ],
-};
+} satisfies Record<PerplexityModelName, ModelEndpoint[]>;
 
 export default perplexityEndpoints;

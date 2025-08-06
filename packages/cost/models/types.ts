@@ -149,7 +149,7 @@ export interface ModelEndpoint {
   name?: string;
   /** Provider identifier */
   provider: Provider;
-  /** The model ID as used by this provider */
+  /** The model ID as used by this provider (for managed deployments) */
   providerModelId?: string;
   /** Alternative model reference */
   model?: string;
@@ -165,6 +165,10 @@ export interface ModelEndpoint {
   maxCompletionTokens: number | null;
   /** Parameters supported by this endpoint */
   supportedParameters: StandardParameter[];
+  /** For providers like Bedrock: indicates BYOK can use different regions */
+  supportsDynamicRegion?: boolean;
+  /** For BYOK: base model ID without region prefix */
+  baseModelId?: string;
 }
 
 export interface AuthorMetadata {

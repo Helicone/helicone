@@ -3,8 +3,9 @@
  */
 
 import type { ModelEndpoint } from "../../types";
+import type { OpenAIModelName } from "./models";
 
-export const openaiEndpoints: Record<string, ModelEndpoint[]> = {
+export const openaiEndpoints = {
   "o3-pro": [
     {
       name: "OpenAI | openai/o3-pro-2025-06-10",
@@ -1052,6 +1053,6 @@ export const openaiEndpoints: Record<string, ModelEndpoint[]> = {
       ]
     }
   ]
-};
+} satisfies Record<OpenAIModelName, ModelEndpoint[]>;
 
 export default openaiEndpoints;

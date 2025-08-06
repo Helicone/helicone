@@ -3,8 +3,9 @@
  */
 
 import type { ModelEndpoint } from "../../types";
+import type { XAIModelName } from "./models";
 
-export const xAiEndpoints: Record<string, ModelEndpoint[]> = {
+export const xAiEndpoints = {
   "grok-4": [
     {
       name: "xAI | x-ai/grok-4-07-09",
@@ -337,6 +338,6 @@ export const xAiEndpoints: Record<string, ModelEndpoint[]> = {
       ],
     },
   ],
-};
+} satisfies Record<XAIModelName, ModelEndpoint[]>;
 
 export default xAiEndpoints;
