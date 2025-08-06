@@ -476,7 +476,7 @@ export class ReportManager {
               type: "plain_text",
               text: "View Dashboard",
             },
-            url: "https://us.helicone.ai/dashboard",
+            url: `${this.env.APP_URL || "https://us.helicone.ai"}/dashboard`,
           },
         },
       ],

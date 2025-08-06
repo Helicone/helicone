@@ -11,7 +11,6 @@ export default async function handler(
       models: registry.models,
       endpoints: registry.endpoints,
       authors: registry.authors,
-      modelVersions: registry.modelVersions,
     });
   }
 

@@ -8,12 +8,12 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { H3, P, Small } from "@/components/ui/typography";
-import type { Model, Endpoint } from "@helicone-package/cost/models";
+import type { Model, ModelEndpoint } from "@helicone-package/cost/models";
 import { CheckCircle, XCircle, DollarSign, Clock, Globe } from "lucide-react";
 
 interface ModelDetailsDialogProps {
   model: Model | null;
-  endpoints: Endpoint[];
+  endpoints: ModelEndpoint[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -26,8 +26,9 @@ export function ModelDetailsDialog({
 }: ModelDetailsDialogProps) {
   if (!model) return null;
 
-  const availableEndpoints = endpoints.filter((ep) => ep.status === 0);
-  const unavailableEndpoints = endpoints.filter((ep) => ep.status !== 0);
+  // For now, all endpoints are considered available since we removed status
+  const availableEndpoints = endpoints;
+  const unavailableEndpoints: ModelEndpoint[] = [];
 
   // Group endpoints by provider
   const endpointsByProvider = availableEndpoints.reduce(
@@ -38,7 +39,7 @@ export function ModelDetailsDialog({
       acc[endpoint.provider].push(endpoint);
       return acc;
     },
-    {} as Record<string, Endpoint[]>,
+    {} as Record<string, ModelEndpoint[]>,
   );
 
   return (
@@ -211,11 +212,27 @@ export function ModelDetailsDialog({
                                     <span className="text-muted-foreground">
                                       Cache Write:
                                     </span>{" "}
-                                    $
-                                    {(
-                                      endpoint.pricing.cacheWrite / 1000000
-                                    ).toFixed(2)}
-                                    /1K
+                                    {typeof endpoint.pricing.cacheWrite ===
+                                    "number" ? (
+                                      <>
+                                        $
+                                        {(
+                                          endpoint.pricing.cacheWrite / 1000000
+                                        ).toFixed(2)}
+                                        /1K
+                                      </>
+                                    ) : (
+                                      <>
+                                        $
+                                        {(
+                                          (endpoint.pricing.cacheWrite
+                                            .default ||
+                                            endpoint.pricing.cacheWrite["5m"]) /
+                                          1000000
+                                        ).toFixed(2)}
+                                        /1K
+                                      </>
+                                    )}
                                   </div>
                                 )}
                               </div>
@@ -302,7 +319,7 @@ export function ModelDetailsDialog({
                         <div>
                           <P className="font-medium">{endpoint.name}</P>
                           <Small className="font-mono text-muted-foreground">
-                            {endpoint.tag} • Status: {endpoint.status}
+                            {endpoint.tag}
                           </Small>
                         </div>
                       </div>

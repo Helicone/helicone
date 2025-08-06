@@ -154,10 +154,12 @@ export const getServerSideProps = async (
     };
   }
 
-  // default to the https://us.helicone.ai/signin if no other conditions are met
+  // default to the configured app URL signin if no other conditions are met
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 
+    (process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://us.helicone.ai");
   return {
     redirect: {
-      destination: "https://us.helicone.ai/signin",
+      destination: `${appUrl}/signin`,
       permanent: true,
     },
   };

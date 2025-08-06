@@ -22,12 +22,16 @@ export const testAPIKey = async (apiKey: string) => {
     }),
   };
 
-  const response = await fetch(
-    process.env.NODE_ENV === "development"
-      ? "http://localhost:8585/v1/request/query"
-      : "https://api.helicone.ai/v1/request/query",
-    options
-  );
+  const getApiUrl = () => {
+    const jawnService = process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE;
+    if (jawnService) {
+      return `${jawnService}/v1/request/query`;
+    }
+    // Fallback to production API
+    return "https://api.helicone.ai/v1/request/query";
+  };
+
+  const response = await fetch(getApiUrl(), options);
   const data = await response.json();
 
   return data;

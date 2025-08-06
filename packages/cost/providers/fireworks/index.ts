@@ -215,4 +215,24 @@ export const costs: ModelRow[] = [
       completion_token: 0.0000009,
     },
   },
+  {
+    model: {
+      operator: "equals",
+      value: "accounts/fireworks/models/gpt-oss-20b",
+    },
+    cost: {
+      prompt_token: 0.0000001,
+      completion_token: 0.0000001,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "accounts/fireworks/models/gpt-oss-120b",
+    },
+    cost: {
+      prompt_token: 0.0000001,
+      completion_token: 0.0000001,
+    },
+  },
 ];

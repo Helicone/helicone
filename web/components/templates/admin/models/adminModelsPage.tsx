@@ -21,12 +21,16 @@ import { Search, GitBranch } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { ModelDetailsDialog } from "./ModelDetailsDialog";
-import type { Model, Endpoint, Author } from "@helicone-package/cost/models";
+import type {
+  Model,
+  ModelEndpoint,
+  AuthorInfo,
+} from "@helicone-package/cost/models";
 
 interface RegistryData {
   models: Record<string, Model>;
-  endpoints: Record<string, Endpoint[]>;
-  authors: Record<string, Author>;
+  endpoints: Record<string, ModelEndpoint[]>;
+  authors: Record<string, AuthorInfo>;
   modelVersions: Record<string, string[]>;
 }
 
@@ -98,9 +102,8 @@ export default function AdminModelsPage() {
       const matchesAuthor =
         selectedAuthor === "all" ? true : model.author === selectedAuthor;
 
-      // Check if model is disabled (no available endpoints)
-      const isDisabled =
-        endpoints.length === 0 || endpoints.every((ep) => ep.status !== 0);
+      // Check if model is disabled (no endpoints)
+      const isDisabled = endpoints.length === 0;
 
       // If showDisabled is false, hide disabled models
       if (!showDisabled && isDisabled) {
@@ -234,10 +237,7 @@ export default function AdminModelsPage() {
                   registryData.models,
                 ).filter(([modelKey]) => {
                   const endpoints = registryData.endpoints[modelKey] || [];
-                  return (
-                    endpoints.length === 0 ||
-                    endpoints.every((ep) => ep.status !== 0)
-                  );
+                  return endpoints.length === 0;
                 }).length;
                 return disabledCount > 0 && !showDisabled ? (
                   <>
@@ -344,11 +344,7 @@ export default function AdminModelsPage() {
                           {endpoints.slice(0, 3).map((endpoint, idx) => (
                             <span
                               key={idx}
-                              className={`inline-flex items-center rounded-md px-2 py-1 text-xs ${
-                                endpoint.status === 0
-                                  ? "bg-muted"
-                                  : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-200"
-                              }`}
+                              className="inline-flex items-center rounded-md bg-muted px-2 py-1 text-xs"
                             >
                               {endpoint.provider}
                             </span>
@@ -423,11 +419,7 @@ export default function AdminModelsPage() {
                                   .map((endpoint, idx) => (
                                     <span
                                       key={idx}
-                                      className={`inline-flex items-center rounded-md px-2 py-1 text-xs ${
-                                        endpoint.status === 0
-                                          ? "bg-muted"
-                                          : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-200"
-                                      }`}
+                                      className="inline-flex items-center rounded-md bg-muted px-2 py-1 text-xs"
                                     >
                                       {endpoint.provider}
                                     </span>
