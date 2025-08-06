@@ -34,6 +34,7 @@ RUN chown 2000:2000 /opt/flyway/flyway && chmod 755 /opt/flyway/flyway
 
 # Create a script to run migrations
 RUN echo '#!/bin/sh \n\
+    set -e \n\
     echo "Running PostgreSQL migrations..." \n\
     echo "Repairing migration checksums..." \n\
     flyway repair -configFiles=/app/supabase/flyway.conf \n\
