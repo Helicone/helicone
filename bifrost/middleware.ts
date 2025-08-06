@@ -5,7 +5,8 @@ import { NextResponse, NextRequest } from "next/server";
 export async function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
   const pathname = url.pathname;
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://us.helicone.ai";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 
+    (process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://us.helicone.ai");
 
   // Handle existing redirects first
   switch (pathname) {
