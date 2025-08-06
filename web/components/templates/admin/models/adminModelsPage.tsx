@@ -21,7 +21,11 @@ import { Search, GitBranch } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { ModelDetailsDialog } from "./ModelDetailsDialog";
-import type { Model, ModelEndpoint, AuthorInfo } from "@helicone-package/cost/models";
+import type {
+  Model,
+  ModelEndpoint,
+  AuthorInfo,
+} from "@helicone-package/cost/models";
 
 interface RegistryData {
   models: Record<string, Model>;
