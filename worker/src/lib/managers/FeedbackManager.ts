@@ -1,4 +1,4 @@
-import { SupabaseClient } from "@supabase/supabase-js";
+import pgPromise from "pg-promise";
 import { Database } from "../../../supabase/database.types";
 import { RequestWrapper } from "../RequestWrapper";
 import {
@@ -59,33 +59,30 @@ export async function handleFeedback(request: RequestWrapper) {
 }
 
 export async function getResponse(
-  dbClient: SupabaseClient<Database>,
+  sql: pgPromise.IDatabase<any>,
   dbQueryTimer: DBQueryTimer,
   heliconeId: string
 ): Promise<Result<Database["public"]["Tables"]["response"]["Row"], string>> {
   const maxRetries = 3;
 
   for (let i = 0; i < maxRetries; i++) {
-    const { data: response, error: responseError } =
-      await dbQueryTimer.withTiming(
-        dbClient.from("response").select("*").eq("request", heliconeId),
-        {
-          queryName: "select_response_by_request",
-          percentLogging: FREQUENT_PRECENT_LOGGING,
-        }
+    try {
+      const response = await sql.query<Database["public"]["Tables"]["response"]["Row"]>(
+        `SELECT * FROM response WHERE request = $1`,
+        [heliconeId]
       );
 
-    if (responseError) {
-      console.error("Error fetching response:", responseError.message);
-      return { error: responseError.message, data: null };
-    }
+      if (!response || response.length === 0) {
+        const sleepDuration = i === 0 ? 100 : 1000;
+        await new Promise((resolve) => setTimeout(resolve, sleepDuration));
+        continue;
+      }
 
-    if (response && response.length > 0) {
-      return { error: null, data: response[0] };
+      return { data: response[0], error: null };
+    } catch (error) {
+      console.error("Error fetching response:", error);
+      return { error: (error as any).message || "Database error", data: null };
     }
-
-    const sleepDuration = i === 0 ? 100 : 1000;
-    await new Promise((resolve) => setTimeout(resolve, sleepDuration));
   }
 
   return { error: "Response not found.", data: null };

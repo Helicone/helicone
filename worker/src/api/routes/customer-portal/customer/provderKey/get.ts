@@ -52,30 +52,32 @@ export class ProviderKeyGet extends BaseAPIRoute {
     const {
       params: { customerId },
     } = request;
-    const customers = await client.db
+    const customer = await client.db
       .getClient()
-      .from("organization")
-      .select("*")
-      .eq("reseller_id", authParams.organizationId)
-      .eq("id", customerId)
-      .eq("organization_type", "customer")
-      .eq("soft_delete", false)
-      .single();
+      .oneOrNone(
+        `SELECT * FROM organization
+         WHERE reseller_id = $1
+         AND id = $2
+         AND organization_type = 'customer'
+         AND soft_delete = false`,
+        [authParams.organizationId, customerId]
+      );
 
-    if (customers.error) {
-      throw new Error(JSON.stringify(customers.error));
+    if (!customer) {
+      throw new Error("Customer not found");
     }
 
     const providerKey = await client.db
       .getClient()
-      .from("decrypted_provider_keys")
-      .select("*")
-      .eq("provider_key", customers?.data.org_provider_key ?? "")
-      .single();
+      .oneOrNone(
+        `SELECT * FROM decrypted_provider_keys
+         WHERE provider_key = $1`,
+        [customer.org_provider_key ?? ""]
+      );
 
     return [
       {
-        providerKey: providerKey.data?.provider_key ?? "",
+        providerKey: providerKey?.provider_key ?? "",
       },
     ];
   }

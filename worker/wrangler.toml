@@ -1,12 +1,10 @@
 name = "helicone-worker-dev"
 main = "src/index.ts"
-compatibility_date = "2022-11-29"
+compatibility_date = "2025-08-03"
 compatibility_flags = [
-	"transformstream_enable_standard_constructor",
-	"streams_enable_constructors",
+	"nodejs_compat_v2"
 ]
 logpush = true
-node_compat = true
 
 durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
@@ -226,3 +224,15 @@ deleted_classes = ["AtomicAlerter"]
 tag = "v6"
 new_classes = ["InMemoryRateLimiter"]
 deleted_classes = ["AtomicRateLimiter"]
+
+# us hyperdrive configuration
+[[hyperdrive]]
+binding = "POSTGRES_CONNECTION_STRING"
+id = "6dea6459b7604521ab78962078a38528"
+localConnectionString = "postgres://postgres:testpassword@localhost:54388/helicone_test"
+
+# eu hyperdrive configuration
+[[hyperdrive]]
+binding = "EU_POSTGRES_CONNECTION_STRING"
+id = "ff1facd7a8f34774b35c43d41e996d17"
+localConnectionString = "postgres://postgres:testpassword@localhost:54388/helicone_test"

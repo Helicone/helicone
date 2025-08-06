@@ -1,5 +1,5 @@
 import { ClickhouseClientWrapper } from "./ClickhouseWrapper";
-import { SupabaseClient } from "@supabase/supabase-js";
+import pgPromise from "pg-promise";
 import { Result, err, ok } from "../util/results";
 import { Database } from "../../../supabase/database.types";
 import { clickhousePriceCalc } from "../../packages/cost";
@@ -19,44 +19,72 @@ export type AlertState = {
 
 export class AlertStore {
   constructor(
-    private supabaseClient: SupabaseClient<Database>,
+    private sql: pgPromise.IDatabase<any>,
     private clickhouseClient: ClickhouseClientWrapper
   ) {}
 
   public async getAlerts(): Promise<Result<Alert[], string>> {
-    const { data: alerts, error: alertsErr } = await this.supabaseClient
-      .from("alert")
-      .select(
-        "*, organization (integrations (id, integration_name, settings, active))"
-      )
-      .eq("soft_delete", false);
+    try {
+      const alerts = await this.sql.query(
+        `SELECT 
+          a.*,
+          COALESCE(
+            json_agg(
+              json_build_object(
+                'id', i.id,
+                'integration_name', i.integration_name,
+                'settings', i.settings,
+                'active', i.active
+              )
+            ) FILTER (WHERE i.id IS NOT NULL),
+            '[]'::json
+          ) as integrations
+        FROM alert a
+        LEFT JOIN LATERAL (
+          SELECT i.* 
+          FROM integrations i 
+          WHERE i.organization_id = a.organization
+        ) i ON true
+        WHERE a.soft_delete = false
+        GROUP BY a.id, a.name, a.emails, a.webhooks, a.texts, a.time_window, 
+                 a.threshold, a.status, a.soft_delete, a.updated_at, a.created_at,
+                 a.organization, a.minimum_count, a.alert_type, a.time_block_duration`
+      );
 
-    if (alertsErr) {
-      return err(`Failed to retrieve all alerts: ${alertsErr}`);
+      // Transform to match the expected structure
+      const transformedAlerts = alerts.map((alert: any) => ({
+        ...alert,
+        organization: {
+          integrations: alert.integrations
+        }
+      }));
+
+      return ok(transformedAlerts as Alert[]);
+    } catch (error) {
+      return err(`Failed to retrieve all alerts: ${error}`);
     }
-
-    return ok(alerts as Alert[]);
   }
 
   public async updateAlertStatuses(
     status: AlertStatus,
     alertIds: string[]
   ): Promise<Result<null, string>> {
-    const { error: alertUpdateErr } = await this.supabaseClient
-      .from("alert")
-      .update({
-        status: status,
-        updated_at: new Date().toISOString(),
-      })
-      .in("id", alertIds);
+    try {
+      await this.sql.none(
+        `UPDATE alert
+         SET 
+           status = $1,
+           updated_at = $2
+         WHERE id = ANY($3)`,
+        [status, new Date().toISOString(), alertIds]
+      );
 
-    if (alertUpdateErr) {
+      return ok(null);
+    } catch (error) {
       return err(
-        `Error updating triggered alerts: ${JSON.stringify(alertUpdateErr)}`
+        `Error updating triggered alerts: ${JSON.stringify(error)}`
       );
     }
-
-    return ok(null);
   }
 
   public async updateAlertHistoryStatuses(
@@ -64,39 +92,57 @@ export class AlertStore {
     alertIds: string[],
     alertEndTime?: string
   ): Promise<Result<null, string>> {
-    const { error: alertHistoryUpdateErr } = await this.supabaseClient
-      .from("alert_history")
-      .update({
-        status: status,
-        alert_end_time: alertEndTime,
-        updated_at: new Date().toISOString(),
-      })
-      .in("alert_id", alertIds)
-      .eq("status", "triggered");
+    try {
+      await this.sql.none(
+        `UPDATE alert_history
+         SET 
+           status = $1,
+           alert_end_time = $2,
+           updated_at = $3
+         WHERE alert_id = ANY($4)
+           AND status = 'triggered'`,
+        [status, alertEndTime || null, new Date().toISOString(), alertIds]
+      );
 
-    if (alertHistoryUpdateErr) {
+      return ok(null);
+    } catch (error) {
       return err(
-        `Error updating alert history: ${JSON.stringify(alertHistoryUpdateErr)}`
+        `Error updating alert history: ${JSON.stringify(error)}`
       );
     }
-
-    return ok(null);
   }
 
   public async insertAlertHistory(
     alertHistories: Database["public"]["Tables"]["alert_history"]["Insert"][]
   ): Promise<Result<null, string>> {
-    const { error: alertHistoryInsErr } = await this.supabaseClient
-      .from("alert_history")
-      .insert(alertHistories);
+    try {
+      if (alertHistories.length === 0) {
+        return ok(null);
+      }
 
-    if (alertHistoryInsErr) {
+      // Build dynamic insert with all the fields
+      const fields = Object.keys(alertHistories[0]);
+      const values = alertHistories.map(history => 
+        fields.map(field => (history as any)[field])
+      );
+
+      // Build dynamic insert with all the fields
+      const columns = fields.join(', ');
+      const valuePlaceholders = alertHistories.map((_, i) => 
+        `(${fields.map((_, j) => `$${i * fields.length + j + 1}`).join(', ')})`
+      ).join(', ');
+      
+      await this.sql.none(
+        `INSERT INTO alert_history (${columns}) VALUES ${valuePlaceholders}`,
+        values.flat()
+      );
+
+      return ok(null);
+    } catch (error) {
       return err(
-        `Error inserting alert history: ${JSON.stringify(alertHistoryInsErr)}`
+        `Error inserting alert history: ${JSON.stringify(error)}`
       );
     }
-
-    return ok(null);
   }
 
   public async getCost(

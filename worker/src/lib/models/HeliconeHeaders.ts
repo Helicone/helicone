@@ -17,7 +17,7 @@ export type HeliconeBearerKeyType = "standard" | "rate-limited";
 export interface IHeliconeHeaders {
   heliconeAuth: Nullable<string>;
   heliconeAuthV2: Nullable<{
-    _type: "jwt" | "bearer";
+    _type: "bearer";
     token: string;
   }>;
   rateLimitPolicy: Nullable<string>;
@@ -86,7 +86,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   heliconeProperties: Record<string, string>;
   heliconeAuth: Nullable<string>;
   heliconeAuthV2: Nullable<{
-    _type: "jwt" | "bearer";
+    _type: "bearer";
     token: string;
     orgId?: string;
     keyType?: HeliconeBearerKeyType;
@@ -251,7 +251,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   }
 
   private getHeliconeAuthV2(): Nullable<{
-    _type: "jwt" | "bearer";
+    _type: "bearer";
     token: string;
     orgId?: string;
     keyType?: HeliconeBearerKeyType;
@@ -271,14 +271,6 @@ export class HeliconeHeaders implements IHeliconeHeaders {
         _type: "bearer",
         token: heliconeAuthFallback,
         keyType: this.determineBearerKeyType(heliconeAuthFallback),
-      };
-    }
-    const heliconeAuthJWT = this.headers.get("helicone-jwt");
-    if (heliconeAuthJWT) {
-      return {
-        _type: "jwt",
-        token: heliconeAuthJWT,
-        orgId: this.headers.get("helicone-org-id") ?? undefined,
       };
     }
     return null;

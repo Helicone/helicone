@@ -9,7 +9,7 @@ import { OpenAPIRouterType } from "@cloudflare/itty-router-openapi";
 import { Route } from "itty-router";
 import { logAsync } from "../../lib/managers/AsyncLogManager";
 import { createAPIClient } from "../../api/lib/apiClient";
-import { createClient } from "@supabase/supabase-js";
+import { PostgresClient } from "../../lib/db/postgres";
 import { ProviderKeysManager } from "../../lib/managers/ProviderKeysManager";
 import { ProviderKeysStore } from "../../lib/db/ProviderKeysStore";
 import { APIKeysStore } from "../../lib/db/APIKeysStore";
@@ -49,23 +49,19 @@ function getAPIRouterV1(
       // Update timestamp immediately when processing request (not when completing)
       ctx.waitUntil(env.RATE_LIMIT_KV.put(KEY, new Date().toISOString()));
 
-      const supabaseClientUS = createClient<Database>(
-        env.SUPABASE_URL,
-        env.SUPABASE_SERVICE_ROLE_KEY
-      );
-      const supabaseClientEU = createClient<Database>(
-        env.EU_SUPABASE_URL,
-        env.EU_SUPABASE_SERVICE_ROLE_KEY
-      );
+      // Initialize PostgreSQL clients
+      const postgresClient = new PostgresClient(env);
+      const sqlUS = postgresClient.client;
+      const sqlEU = PostgresClient.eu(env).client;
 
       const apiKeysManagerUS = new APIKeysManager(
-        new APIKeysStore(supabaseClientUS),
+        new APIKeysStore(sqlUS),
         env
       );
       await apiKeysManagerUS.setAPIKeys();
 
       const apiKeysManagerEU = new APIKeysManager(
-        new APIKeysStore(supabaseClientEU),
+        new APIKeysStore(sqlEU),
         env
       );
       await apiKeysManagerEU.setAPIKeys();
@@ -100,24 +96,20 @@ function getAPIRouterV1(
       // Update timestamp immediately when processing request (not when completing)
       ctx.waitUntil(env.RATE_LIMIT_KV.put(KEY, new Date().toISOString()));
 
-      const supabaseClientUS = createClient<Database>(
-        env.SUPABASE_URL,
-        env.SUPABASE_SERVICE_ROLE_KEY
-      );
-      const supabaseClientEU = createClient<Database>(
-        env.EU_SUPABASE_URL,
-        env.EU_SUPABASE_SERVICE_ROLE_KEY
-      );
+      // Initialize PostgreSQL clients
+      const postgresClient = new PostgresClient(env);
+      const sqlUS = postgresClient.client;
+      const sqlEU = PostgresClient.eu(env).client;
 
       const providerKeysManagerUS = new ProviderKeysManager(
-        new ProviderKeysStore(supabaseClientUS),
+        new ProviderKeysStore(sqlUS),
         env
       );
 
       await providerKeysManagerUS.setProviderKeys();
 
       const providerKeysManagerEU = new ProviderKeysManager(
-        new ProviderKeysStore(supabaseClientEU),
+        new ProviderKeysStore(sqlEU),
         env
       );
 
@@ -553,6 +545,7 @@ function getAPIRouterV1(
         return client.response.newError("Logo not found", 404);
       }
 
+      // TODO: Update this to use alternative storage service URL
       const logoUrl = `${env.SUPABASE_URL}/storage/v1/object/public/organization_assets/${logoPath}`;
       return client.response.successJSON({ logoUrl: logoUrl }, true);
     }
@@ -571,7 +564,7 @@ function getAPIRouterV1(
           "Access-Control-Allow-Origin": "*",
           "Access-Control-Allow-Methods": "DELETE, POST, GET, PUT",
           "Access-Control-Allow-Headers":
-            "Content-Type, helicone-jwt, helicone-org-id",
+            "Content-Type, helicone-org-id",
         },
       });
     }

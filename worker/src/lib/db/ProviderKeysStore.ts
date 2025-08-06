@@ -1,6 +1,6 @@
-import { SupabaseClient } from "@supabase/supabase-js";
+import pgPromise from "pg-promise";
 import { Provider } from "../..";
-import { Database, Json } from "../../../supabase/database.types";
+import { Json } from "../../../supabase/database.types";
 
 export type ProviderKey = {
   provider: Provider;
@@ -76,65 +76,87 @@ const providerToDbProvider = (provider: Provider): string => {
 };
 
 export class ProviderKeysStore {
-  constructor(private supabaseClient: SupabaseClient<Database>) {}
+  constructor(private sql: pgPromise.IDatabase<any>) {}
 
   async getProviderKeys(): Promise<ProviderKey[] | null> {
-    const { data, error } = await this.supabaseClient
-      .from("decrypted_provider_keys_v2")
-      .select(
-        "org_id, decrypted_provider_key, decrypted_provider_secret_key, auth_type, provider_name, config"
-      )
-      .eq("soft_delete", false)
-      .not("decrypted_provider_key", "is", null);
+    try {
+      const data = await this.sql.query<{
+        org_id: string | null;
+        decrypted_provider_key: string | null;
+        decrypted_provider_secret_key: string | null;
+        auth_type: string;
+        provider_name: string | null;
+        config: Json;
+      }>(
+        `SELECT org_id, decrypted_provider_key, decrypted_provider_secret_key, 
+                auth_type, provider_name, config
+         FROM decrypted_provider_keys_v2
+         WHERE soft_delete = false
+           AND decrypted_provider_key IS NOT NULL`
+      );
 
-    if (error) {
+      return data
+        .map((row: any) => {
+          const provider = dbProviderToProvider(row.provider_name ?? "");
+          if (!provider) return null;
+
+          return {
+            org_id: row.org_id ?? "",
+            provider,
+            decrypted_provider_key: row.decrypted_provider_key ?? "",
+            decrypted_provider_secret_key:
+              row.decrypted_provider_secret_key ?? null,
+            auth_type: row.auth_type as "key" | "session_token",
+            config: row.config,
+          };
+        })
+        .filter((key: any): key is ProviderKey => key !== null);
+    } catch (error) {
       console.error("error getting provider keys", error);
       return null;
     }
-
-    return data
-      .map((row) => {
-        const provider = dbProviderToProvider(row.provider_name ?? "");
-        if (!provider) return null;
-
-        return {
-          org_id: row.org_id ?? "",
-          provider,
-          decrypted_provider_key: row.decrypted_provider_key ?? "",
-          decrypted_provider_secret_key:
-            row.decrypted_provider_secret_key ?? null,
-          auth_type: row.auth_type as "key" | "session_token",
-          config: row.config,
-        };
-      })
-      .filter((key): key is ProviderKey => key !== null);
   }
 
   async getProviderKeyWithFetch(
     provider: Provider,
     orgId: string
   ): Promise<ProviderKey | null> {
-    const { data, error } = await this.supabaseClient
-      .from("decrypted_provider_keys_v2")
-      .select(
-        "org_id, decrypted_provider_key, decrypted_provider_secret_key, auth_type, provider_name, config"
-      )
-      .eq("provider_name", providerToDbProvider(provider))
-      .eq("org_id", orgId)
-      .eq("soft_delete", false);
+    try {
+      const data = await this.sql.query<{
+        org_id: string | null;
+        decrypted_provider_key: string | null;
+        decrypted_provider_secret_key: string | null;
+        auth_type: string;
+        provider_name: string | null;
+        config: Json;
+      }>(
+        `SELECT org_id, decrypted_provider_key, decrypted_provider_secret_key, 
+                auth_type, provider_name, config
+         FROM decrypted_provider_keys_v2
+         WHERE provider_name = $1
+           AND org_id = $2
+           AND soft_delete = false
+         LIMIT 1`,
+        [providerToDbProvider(provider), orgId]
+      );
 
-    if (error || !data || data.length === 0) {
+      if (!data || data.length === 0) {
+        return null;
+      }
+
+      const firstRow = data[0];
+      return {
+        provider: dbProviderToProvider(firstRow.provider_name ?? "") ?? provider,
+        org_id: orgId,
+        decrypted_provider_key: firstRow.decrypted_provider_key ?? "",
+        decrypted_provider_secret_key:
+          firstRow.decrypted_provider_secret_key ?? null,
+        auth_type: firstRow.auth_type as "key" | "session_token",
+        config: firstRow.config,
+      };
+    } catch (error) {
+      console.error("Error fetching provider key:", error);
       return null;
     }
-
-    return {
-      provider: dbProviderToProvider(data[0].provider_name ?? "") ?? provider,
-      org_id: orgId,
-      decrypted_provider_key: data[0].decrypted_provider_key ?? "",
-      decrypted_provider_secret_key:
-        data[0].decrypted_provider_secret_key ?? null,
-      auth_type: data[0].auth_type as "key" | "session_token",
-      config: data[0].config,
-    };
   }
 }

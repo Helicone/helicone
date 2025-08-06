@@ -76,6 +76,7 @@ const WORKER_MAP: Omit<
     );
     return getOpenAIProxyRouter(router);
   },
+  VAPI_PROXY: getOpenAIProxyRouter, // VAPI uses OpenAI-compatible proxy
 };
 
 function addBaseRoutes(router: BaseRouter | BaseOpenAPIRouter): void {
@@ -120,7 +121,7 @@ function addBaseRoutes(router: BaseRouter | BaseOpenAPIRouter): void {
         headers: {
           "Access-Control-Allow-Origin": "*",
           "Access-Control-Allow-Methods": "POST",
-          "Access-Control-Allow-Headers": "Content-Type, helicone-jwt",
+          "Access-Control-Allow-Headers": "Content-Type",
         },
       });
     }

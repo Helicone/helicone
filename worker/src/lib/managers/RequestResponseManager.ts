@@ -1,7 +1,7 @@
-import { SupabaseClient } from "@supabase/supabase-js";
 import { S3Client } from "../clients/S3Client";
 import { Result, ok } from "../util/results";
 import { Database } from "../../../supabase/database.types";
+import pgPromise from "pg-promise";
 
 export type RequestResponseContent = {
   requestId: string;
@@ -17,7 +17,7 @@ export type RequestResponseContent = {
 export class RequestResponseManager {
   constructor(
     private s3Client: S3Client,
-    private supabase: SupabaseClient<Database>
+    private sql: pgPromise.IDatabase<any>
   ) {}
 
   async storeRequestResponseRaw(content: {
@@ -142,14 +142,15 @@ export class RequestResponseManager {
     requestId: string,
     organizationId: string
   ) {
-    const result = await this.supabase
-      .from("asset")
-      .insert([
-        { id: assetId, request_id: requestId, organization_id: organizationId },
-      ]);
-
-    if (result.error) {
-      throw new Error(`Error saving asset: ${result.error.message}`);
+    try {
+      await this.sql.none(
+        `INSERT INTO asset (id, request_id, organization_id)
+         VALUES ($1, $2, $3)`,
+        [assetId, requestId, organizationId]
+      );
+    } catch (error) {
+      console.error("Failed to save request response assets", error);
+      throw new Error(`Error saving asset: ${error}`);
     }
   }
 

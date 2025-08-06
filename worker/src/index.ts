@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createClient } from "@supabase/supabase-js";
+import { PostgresClient } from "./lib/db/postgres";
 import { Database } from "../supabase/database.types";
 import { InMemoryRateLimiter } from "./lib/clients/InMemoryRateLimiter";
 import { AlertStore } from "./lib/db/AlertStore";
@@ -27,17 +27,16 @@ export interface EU_Env {
   EU_S3_BUCKET_NAME: string;
   EU_SUPABASE_SERVICE_ROLE_KEY: string;
   EU_SUPABASE_URL: string;
-  EU_UPSTASH_KAFKA_PASSWORD: string;
-  EU_UPSTASH_KAFKA_URL: string;
-  EU_UPSTASH_KAFKA_USERNAME: string;
   EU_SECURE_CACHE: KVNamespace;
   EU_REQUEST_LOGS_QUEUE_URL: string;
   EU_REQUEST_LOGS_QUEUE_URL_LOW_PRIORITY: string;
   EU_AWS_REGION?: "eu-west-1";
+  EU_POSTGRES_CONNECTION_STRING: string;
 }
 export interface BASE_Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
   SUPABASE_URL: string;
+  POSTGRES_CONNECTION_STRING: string;
   TOKENIZER_COUNT_API: string;
   TOKEN_COUNT_URL: string;
   RATE_LIMIT_KV: KVNamespace;
@@ -78,13 +77,8 @@ export interface BASE_Env {
   GATEWAY_TARGET?: string;
   S3_ENABLED: string;
 
-  UPSTASH_KAFKA_URL: string;
-  UPSTASH_KAFKA_USERNAME: string;
-  UPSTASH_KAFKA_API_KEY: string;
-  UPSTASH_KAFKA_PASSWORD: string;
   HELICONE_MANUAL_ACCESS_KEY: string;
   ORG_IDS?: string;
-  PERCENT_LOG_KAFKA?: string;
   SENTRY_API_KEY: string;
   SENTRY_PROJECT_ID: string;
   WORKER_DEFINED_REDIRECT_URL?: string;
@@ -104,8 +98,7 @@ export interface BASE_Env {
   AWS_SECRET_ACCESS_KEY?: string;
   REQUEST_LOGS_QUEUE_URL?: string;
   REQUEST_LOGS_QUEUE_URL_LOW_PRIORITY?: string;
-
-  QUEUE_PROVIDER?: "kafka" | "sqs" | "dual";
+  QUEUE_PROVIDER?: "sqs";
 }
 export type Env = BASE_Env & EU_Env;
 
@@ -144,9 +137,6 @@ async function modifyEnvBasedOnPath(
       CLICKHOUSE_PASSWORD: env.EU_CLICKHOUSE_PASSWORD,
       SUPABASE_SERVICE_ROLE_KEY: env.EU_SUPABASE_SERVICE_ROLE_KEY,
       SUPABASE_URL: env.EU_SUPABASE_URL,
-      UPSTASH_KAFKA_PASSWORD: env.EU_UPSTASH_KAFKA_PASSWORD,
-      UPSTASH_KAFKA_URL: env.EU_UPSTASH_KAFKA_URL,
-      UPSTASH_KAFKA_USERNAME: env.EU_UPSTASH_KAFKA_USERNAME,
       S3_BUCKET_NAME: env.EU_S3_BUCKET_NAME,
       SECURE_CACHE: env.EU_SECURE_CACHE,
       REQUEST_LOGS_QUEUE_URL: env.EU_REQUEST_LOGS_QUEUE_URL,
@@ -486,14 +476,10 @@ export default {
     env: Env,
     _ctx: ExecutionContext
   ): Promise<void> {
-    const supabaseClientUS = createClient<Database>(
-      env.SUPABASE_URL,
-      env.SUPABASE_SERVICE_ROLE_KEY
-    );
-    const supabaseClientEU = createClient<Database>(
-      env.EU_SUPABASE_URL,
-      env.EU_SUPABASE_SERVICE_ROLE_KEY
-    );
+    // Initialize PostgreSQL clients
+    const postgresClient = new PostgresClient(env);
+    const sqlUS = postgresClient.client;
+    const sqlEU = PostgresClient.eu(env).client;
     await updateLoopUsers(env);
     if (controller.cron === "0 * * * *") {
       return;
@@ -501,7 +487,7 @@ export default {
     if (controller.cron === "0 10 * * mon") {
       const reportManagerUS = new ReportManager(
         new ReportStore(
-          supabaseClientUS,
+          sqlUS,
           new ClickhouseClientWrapper({
             CLICKHOUSE_HOST: env.CLICKHOUSE_HOST,
             CLICKHOUSE_USER: env.CLICKHOUSE_USER,
@@ -518,7 +504,7 @@ export default {
       }
       const reportManagerEU = new ReportManager(
         new ReportStore(
-          supabaseClientEU,
+          sqlEU,
           new ClickhouseClientWrapper({
             CLICKHOUSE_HOST: env.EU_CLICKHOUSE_HOST,
             CLICKHOUSE_USER: env.EU_CLICKHOUSE_USER,
@@ -537,7 +523,7 @@ export default {
     if (controller.cron === "* * * * *") {
       const alertManagerUS = new AlertManager(
         new AlertStore(
-          supabaseClientUS,
+          sqlUS,
           new ClickhouseClientWrapper({
             CLICKHOUSE_HOST: env.CLICKHOUSE_HOST,
             CLICKHOUSE_USER: env.CLICKHOUSE_USER,
@@ -555,7 +541,7 @@ export default {
 
       const alertManagerEU = new AlertManager(
         new AlertStore(
-          supabaseClientEU,
+          sqlEU,
           new ClickhouseClientWrapper({
             CLICKHOUSE_HOST: env.EU_CLICKHOUSE_HOST,
             CLICKHOUSE_USER: env.EU_CLICKHOUSE_USER,
@@ -575,22 +561,22 @@ export default {
     // every 5 minutes
     if (controller.cron === "*/5 * * * *") {
       const providerKeysManagerUS = new ProviderKeysManager(
-        new ProviderKeysStore(supabaseClientUS),
+        new ProviderKeysStore(sqlUS),
         env
       );
 
       const providerKeysManagerEU = new ProviderKeysManager(
-        new ProviderKeysStore(supabaseClientEU),
+        new ProviderKeysStore(sqlEU),
         env
       );
 
       const apiKeysManagerUS = new APIKeysManager(
-        new APIKeysStore(supabaseClientUS),
+        new APIKeysStore(sqlUS),
         env
       );
 
       const apiKeysManagerEU = new APIKeysManager(
-        new APIKeysStore(supabaseClientEU),
+        new APIKeysStore(sqlEU),
         env
       );
 

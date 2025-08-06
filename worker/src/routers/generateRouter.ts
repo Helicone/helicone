@@ -1,6 +1,6 @@
 import { ExecutionContext } from "@cloudflare/workers-types";
 import { autoFillInputs } from "@helicone/prompts";
-import { SupabaseClient } from "@supabase/supabase-js";
+import pgPromise from "pg-promise";
 import { type IRequest, type RouterType } from "itty-router";
 import { z } from "zod";
 import { Env } from "..";
@@ -80,7 +80,7 @@ const generateHandler = async (
 
     // 3. GET PROMPT BASED ON ORG ID, REQUEST ID, AND VERSION
     const promptResult = await getPromptVersion({
-      supabaseClient: db.getClient(),
+      sql: db.getClient(),
       orgId: orgData.organizationId,
       promptId: parameters.promptId,
       version: parameters.version,
@@ -339,19 +339,19 @@ function getProviderConfig(
 /**
  * Fetches and validates a prompt version from the database.
  *
- * @param {SupabaseClient<Database>} params.supabaseClient - The Supabase client instance
+ * @param {Sql} params.sql - The PostgreSQL client instance
  * @param {string} params.orgId - The organization ID to filter prompts by
  * @param {string} params.promptId - The user-defined ID of the prompt to fetch
  * @param {number | "production"} [params.version="production"] - The version to fetch. If "production", fetches the latest production version
  * @returns {Promise<Result<Database["public"]["Tables"]["prompts_versions"]["Row"], string>>} A Result containing either the prompt version or an error message
  */
 async function getPromptVersion({
-  supabaseClient,
+  sql,
   orgId,
   promptId,
   version = "production",
 }: {
-  supabaseClient: SupabaseClient<Database>;
+  sql: pgPromise.IDatabase<any>;
   orgId: string;
   promptId: string;
   version?: number | "production";
@@ -360,60 +360,53 @@ async function getPromptVersion({
 > {
   console.log("Query params:", { promptId, orgId, version });
 
-  // Build an optimized single query with join
-  let query = supabaseClient
-    .from("prompt_v2")
-    .select(
-      `
-      prompts_versions!inner (
-        *
-      )
-    `
-    )
-    .eq("user_defined_id", promptId)
-    .eq("organization", orgId)
-    .eq("soft_delete", false)
-    .eq("prompts_versions.organization", orgId)
-    .eq("prompts_versions.soft_delete", false);
+  try {
+    let result;
+    
+    if (version === "production") {
+      // Get latest production version
+      result = await sql.query(
+        `SELECT pv.*
+         FROM prompt_v2 p
+         INNER JOIN prompts_versions pv ON p.id = pv.prompt_id
+         WHERE p.user_defined_id = $1
+         AND p.organization = $2
+         AND p.soft_delete = false
+         AND pv.organization = $2
+         AND pv.soft_delete = false
+         AND pv.metadata->>'isProduction' = 'true'
+         ORDER BY pv.major_version DESC
+         LIMIT 1`,
+        [promptId, orgId]
+      );
+    } else {
+      // Get specific version
+      result = await sql.query(
+        `SELECT pv.*
+         FROM prompt_v2 p
+         INNER JOIN prompts_versions pv ON p.id = pv.prompt_id
+         WHERE p.user_defined_id = $1
+         AND p.organization = $2
+         AND p.soft_delete = false
+         AND pv.organization = $2
+         AND pv.soft_delete = false
+         AND pv.major_version = $3
+         LIMIT 1`,
+        [promptId, orgId, version]
+      );
+    }
 
-  // Add version conditions
-  if (version === "production") {
-    // Get latest production version using index on (organization, major_version)
-    query = query.filter(
-      "prompts_versions.metadata->>isProduction",
-      "eq",
-      true
-    );
-  } else {
-    // Get specific version using the same index
-    query = query.eq("prompts_versions.major_version", version);
-  }
+    console.log("Final query result:", { data: result });
 
-  const { data, error } = await query.limit(1);
-  console.log("Final query result:", { data, error });
+    if (!result || result.length === 0) {
+      return err("Prompt version not found");
+    }
 
-  if (error) {
+    return ok(result[0] as Database["public"]["Tables"]["prompts_versions"]["Row"]);
+  } catch (error) {
     console.error("Error fetching prompt version:", error);
     return err("Error fetching prompt version: Database query failed");
   }
-
-  if (!data || data.length === 0) {
-    const versionText =
-      version === "production" ? "production version" : `version ${version}`;
-    return err(
-      `Prompt not found: No ${versionText} of prompt "${promptId}" exists in your organization`
-    );
-  }
-
-  // Extract the prompt version from the nested result
-  const promptVersion = data[0].prompts_versions[0];
-  if (!promptVersion) {
-    return err(
-      `Prompt version not found: The prompt "${promptId}" exists but has no valid versions`
-    );
-  }
-
-  return ok(promptVersion);
 }
 type PromptMetadata = {
   provider?: Provider;

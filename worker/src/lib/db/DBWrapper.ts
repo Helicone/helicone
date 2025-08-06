@@ -1,6 +1,7 @@
-import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { Env, hash } from "../..";
 import { Database } from "../../../supabase/database.types";
+import { PostgresClient } from "./postgres";
+import pgPromise from "pg-promise";
 import { getProviderKeyFromProxyCache } from "../RequestWrapper";
 import { AuthParams } from "../dbLogger/DBLoggable";
 import { SecureCacheEnv, getAndStoreInCache } from "../util/cache/secureCache";
@@ -25,37 +26,44 @@ export type RateLimitPolicy = {
 const RATE_LIMIT_CACHE_TTL = 120; // 2 minutes
 
 async function getHeliconeApiKeyRow(
-  dbClient: SupabaseClient<Database>,
+  sql: pgPromise.IDatabase<any>,
   heliconeApi: string
 ): Promise<Result<InternalAuthParams, string>> {
-  const { data, error } = await dbClient
-    .from("helicone_api_keys")
-    .select("*")
-    .eq("api_key_hash", await hash(heliconeApi))
-    .eq("soft_delete", false)
-    .single();
+  try {
+    const hashedKey = await hash(heliconeApi);
+    const data = await sql.oneOrNone(
+      `SELECT * FROM helicone_api_keys
+       WHERE api_key_hash = $1
+       AND soft_delete = false
+       LIMIT 1`,
+      [hashedKey]
+    );
 
-  if (error !== null) {
-    return { data: null, error: error.message };
+    if (!data) {
+      return { data: null, error: "API key not found" };
+    }
+    
+    return {
+      data: {
+        organizationId: data.organization_id,
+        userId: data.user_id,
+        heliconeApiKeyId: data.id,
+      },
+      error: null,
+    };
+  } catch (error) {
+    return { data: null, error: (error as any).message || "Database error" };
   }
-  return {
-    data: {
-      organizationId: data?.organization_id,
-      userId: data?.user_id,
-      heliconeApiKeyId: data?.id,
-    },
-    error: null,
-  };
 }
 async function getHeliconeProxyKeyRow(
-  dbClient: SupabaseClient<Database>,
+  sql: pgPromise.IDatabase<any>,
   { token }: BearerAuthProxy,
   env: Env
 ): Promise<Result<InternalAuthParams, string>> {
   const { data, error } = await getProviderKeyFromProxyCache(
     token,
     env,
-    dbClient
+    sql
   );
 
   if (error || !data) {
@@ -69,71 +77,6 @@ async function getHeliconeProxyKeyRow(
   });
 }
 
-async function getHeliconeJwtAuthParams(
-  dbClient: SupabaseClient<Database>,
-  orgId: string,
-  heliconeJwt: string
-): Promise<Result<InternalAuthParams, string>> {
-  const user = await dbClient.auth.getUser(heliconeJwt);
-  if (user.error) {
-    console.error("Error fetching user:", user.error.message);
-    return { error: user.error.message, data: null };
-  }
-
-  const orgOwner = await dbClient
-    .from("organization")
-    .select("*")
-    .eq("id", orgId)
-    .eq("owner", user.data.user.id);
-
-  if (orgOwner.error) {
-    console.error("Error fetching user:", orgOwner.error?.message);
-    return { error: orgOwner.error?.message, data: null };
-  }
-
-  if (orgOwner.data.length > 0) {
-    return {
-      data: {
-        organizationId: orgOwner.data[0].id,
-        userId: user.data.user.id,
-        heliconeApiKeyId: undefined,
-      },
-      error: null,
-    };
-  } else {
-    const orgMember = await dbClient
-      .from("organization_member")
-      .select("*")
-      .eq("member", user.data.user.id)
-      .eq("organization", orgId)
-      .single();
-
-    if (orgMember.error) {
-      console.error("Error fetching user:", orgMember.error.message);
-      return { error: orgMember.error.message, data: null };
-    }
-
-    if (orgMember.data) {
-      return {
-        data: {
-          organizationId: orgMember.data.organization,
-          userId: user.data.user.id,
-          heliconeApiKeyId: undefined,
-        },
-        error: null,
-      };
-    }
-
-    return { data: null, error: "Invalid authentication." };
-  }
-}
-
-export type JwtAuth = {
-  _type: "jwt";
-  token: string;
-  orgId?: string;
-};
-
 export type BearerAuth = {
   _type: "bearer";
   token: string;
@@ -144,10 +87,10 @@ export type BearerAuthProxy = {
   token: string;
 };
 
-export type HeliconeAuth = JwtAuth | BearerAuthProxy | BearerAuth;
+export type HeliconeAuth = BearerAuthProxy | BearerAuth;
 
 export class DBWrapper {
-  private supabaseClient: SupabaseClient<Database>;
+  private postgresClient: PostgresClient;
   private secureCacheEnv: SecureCacheEnv;
   private atomicRateLimiter: DurableObjectNamespace;
   private rateLimiter?: RateLimiter;
@@ -155,10 +98,7 @@ export class DBWrapper {
   private tier?: string;
 
   constructor(private env: Env, private auth: HeliconeAuth) {
-    this.supabaseClient = createClient(
-      env.SUPABASE_URL,
-      env.SUPABASE_SERVICE_ROLE_KEY
-    );
+    this.postgresClient = new PostgresClient(env);
     this.secureCacheEnv = {
       REQUEST_CACHE_KEY: env.REQUEST_CACHE_KEY,
       SECURE_CACHE: env.SECURE_CACHE,
@@ -166,8 +106,8 @@ export class DBWrapper {
     this.atomicRateLimiter = env.RATE_LIMITER;
   }
 
-  getClient(): SupabaseClient<Database> {
-    return this.supabaseClient;
+  getClient(): pgPromise.IDatabase<any> {
+    return this.postgresClient.client;
   }
   async getRateLimiter(): Promise<Result<RateLimiter, string>> {
     if (this.rateLimiter !== undefined) {
@@ -186,22 +126,10 @@ export class DBWrapper {
     Result<InternalAuthParams, string>
   > {
     switch (this.auth._type) {
-      case "jwt":
-        if (!this.auth.orgId) {
-          return err(
-            "Helicone organization id is required for JWT authentication."
-          );
-        }
-        return getHeliconeJwtAuthParams(
-          this.supabaseClient,
-          this.auth.orgId,
-          this.auth.token
-        );
-
       case "bearerProxy":
-        return getHeliconeProxyKeyRow(this.supabaseClient, this.auth, this.env);
+        return getHeliconeProxyKeyRow(this.postgresClient.client, this.auth, this.env);
       case "bearer":
-        return getHeliconeApiKeyRow(this.supabaseClient, this.auth.token);
+        return getHeliconeApiKeyRow(this.postgresClient.client, this.auth.token);
     }
     throw new Error("Invalid authentication."); // this is unreachable
   }
@@ -212,25 +140,30 @@ export class DBWrapper {
       return err(internalAuthParams.error);
     }
 
-    const org = await this.supabaseClient
-      .from("organization")
-      .select("*")
-      .eq("id", internalAuthParams.data.organizationId)
-      .single();
+    try {
+      const org = await this.postgresClient.client.oneOrNone(
+        `SELECT * FROM organization
+         WHERE id = $1
+         LIMIT 1`,
+        [internalAuthParams.data.organizationId]
+      );
 
-    if (org.error !== null) {
-      return err(org.error.message);
+      if (!org) {
+        return err("Organization not found");
+      }
+
+      return ok({
+        organizationId: internalAuthParams.data.organizationId,
+        userId: internalAuthParams.data.userId,
+        heliconeApiKeyId: internalAuthParams.data.heliconeApiKeyId,
+        tier: org.tier ?? "free",
+        accessDict: {
+          cache: true,
+        },
+      });
+    } catch (error) {
+      return err((error as any).message || "Database error");
     }
-
-    return ok({
-      organizationId: internalAuthParams.data.organizationId,
-      userId: internalAuthParams.data.userId,
-      heliconeApiKeyId: internalAuthParams.data.heliconeApiKeyId,
-      tier: org.data.tier ?? "free",
-      accessDict: {
-        cache: true,
-      },
-    });
   }
 
   async getAuthParams(): Promise<Result<AuthParams, string>> {
@@ -262,31 +195,32 @@ export class DBWrapper {
       `rateLimitOptions-${authParams.data.organizationId}`,
       this.secureCacheEnv,
       async () => {
-        const { data, error } = await this.supabaseClient
-          .from("org_rate_limits")
-          .select("*")
-          .eq("organization_id", authParams.data.organizationId)
-          .is("deleted_at", null);
+        try {
+          const data = await this.postgresClient.client.query(
+            `SELECT * FROM org_rate_limits
+             WHERE organization_id = $1
+             AND deleted_at IS NULL`,
+            [authParams.data.organizationId]
+          );
 
-        if (error !== null) {
-          return err(error.message);
+          if (!data || data.length === 0) {
+            return ok([]);
+          }
+
+          const mappedData: RateLimitPolicy[] = data.map((dbPolicy: any) => ({
+            id: dbPolicy.id,
+            organization_id: dbPolicy.organization_id,
+            quota: dbPolicy.quota,
+            windowSeconds: dbPolicy.window_seconds,
+            unit: dbPolicy.unit as "request" | "cents",
+            segment: dbPolicy.segment ?? undefined,
+            name: dbPolicy.name,
+          }));
+
+          return ok(mappedData);
+        } catch (error) {
+          return err((error as any).message || "Database error");
         }
-
-        if (!data) {
-          return ok([]);
-        }
-
-        const mappedData: RateLimitPolicy[] = data.map((dbPolicy) => ({
-          id: dbPolicy.id,
-          organization_id: dbPolicy.organization_id,
-          quota: dbPolicy.quota,
-          windowSeconds: dbPolicy.window_seconds,
-          unit: dbPolicy.unit as "request" | "cents",
-          segment: dbPolicy.segment ?? undefined,
-          name: dbPolicy.name,
-        }));
-
-        return ok(mappedData);
       },
       RATE_LIMIT_CACHE_TTL
     );
@@ -317,20 +251,26 @@ export class DBWrapper {
       `org-${authParams.data.organizationId}`,
       this.secureCacheEnv,
       async () => {
-        const { data, error } = await this.supabaseClient
-          .from("organization")
-          .select("*")
-          .eq("id", authParams.data.organizationId)
-          .single();
+        try {
+          const data = await this.postgresClient.client.oneOrNone(
+            `SELECT * FROM organization
+             WHERE id = $1
+             LIMIT 1`,
+            [authParams.data.organizationId]
+          );
 
-        if (error !== null) {
-          return err(error.message);
+          if (!data) {
+            return err("Organization not found");
+          }
+          
+          return ok({
+            tier: data.tier ?? "free",
+            id: data.id ?? "",
+            percentLog: data.percent_to_log ?? 100_000,
+          });
+        } catch (error) {
+          return err((error as any).message || "Database error");
         }
-        return ok({
-          tier: data?.tier ?? "free",
-          id: data?.id ?? "",
-          percentLog: data?.percent_to_log ?? 100_000,
-        });
       }
     );
   }
@@ -363,85 +303,103 @@ export class DBWrapper {
   async getJobById(
     jobId: string
   ): Promise<Result<Database["public"]["Tables"]["job"]["Row"], string>> {
-    const { data, error } = await this.supabaseClient
-      .from("job")
-      .select("*")
-      .match({
-        id: jobId,
-      })
-      .eq("org_id", await this.orgId())
-      .single();
-    if (error) {
-      return { data: null, error: error.message };
+    try {
+      const orgId = await this.orgId();
+      const data = await this.postgresClient.client.oneOrNone(
+        `SELECT * FROM job
+         WHERE id = $1
+         AND org_id = $2
+         LIMIT 1`,
+        [jobId, orgId]
+      );
+      
+      if (!data) {
+        return { data: null, error: "Job not found" };
+      }
+      return { data: data as Database["public"]["Tables"]["job"]["Row"], error: null };
+    } catch (error) {
+      return { data: null, error: (error as any).message || "Database error" };
     }
-    return { data: data, error: null };
   }
 
   async getNodeById(
     nodeId: string
   ): Promise<Result<Database["public"]["Tables"]["job_node"]["Row"], string>> {
-    const { data, error } = await this.supabaseClient
-      .from("job_node")
-      .select("*")
-      .match({
-        id: nodeId,
-      })
-      .eq("org_id", await this.orgId())
-      .single();
-    if (error) {
-      return { data: null, error: error.message };
+    try {
+      const orgId = await this.orgId();
+      const data = await this.postgresClient.client.oneOrNone(
+        `SELECT * FROM job_node
+         WHERE id = $1
+         AND org_id = $2
+         LIMIT 1`,
+        [nodeId, orgId]
+      );
+      
+      if (!data) {
+        return { data: null, error: "Node not found" };
+      }
+      return { data: data as Database["public"]["Tables"]["job_node"]["Row"], error: null };
+    } catch (error) {
+      return { data: null, error: (error as any).message || "Database error" };
     }
-    return { data: data, error: null };
   }
 
   async getRequestById(
     requestId: string
   ): Promise<Result<Database["public"]["Tables"]["request"]["Row"], string>> {
-    const { data, error } = await this.supabaseClient
-      .from("request")
-      .select("*")
-      .match({
-        id: requestId,
-      })
-      .eq("helicone_org_id", await this.orgId())
-      .single();
-
-    if (error) {
-      return { data: null, error: error.message };
+    try {
+      const orgId = await this.orgId();
+      const data = await this.postgresClient.client.oneOrNone(
+        `SELECT * FROM request
+         WHERE id = $1
+         AND helicone_org_id = $2
+         LIMIT 1`,
+        [requestId, orgId]
+      );
+      
+      if (!data) {
+        return { data: null, error: "Request not found" };
+      }
+      return { data: data as Database["public"]["Tables"]["request"]["Row"], error: null };
+    } catch (error) {
+      return { data: null, error: (error as any).message || "Database error" };
     }
-    return { data: data, error: null };
   }
 
   async insertAlert(
     alert: Database["public"]["Tables"]["alert"]["Insert"]
   ): Promise<Result<Database["public"]["Tables"]["alert"]["Row"], string>> {
-    const { data, error } = await this.supabaseClient
-      .from("alert")
-      .insert(alert)
-      .select("*")
-      .single();
-
-    if (error) {
-      return { data: null, error: error.message };
+    try {
+      const data = await this.postgresClient.client.one(
+        `INSERT INTO alert (${Object.keys(alert).join(', ')})
+         VALUES (${Object.keys(alert).map((_, i) => `$${i + 1}`).join(', ')})
+         RETURNING *`,
+        Object.values(alert)
+      );
+      
+      return { data: data as Database["public"]["Tables"]["alert"]["Row"], error: null };
+    } catch (error) {
+      return { data: null, error: (error as any).message || "Database error" };
     }
-    return { data: data, error: null };
   }
 
   async deleteAlert(
     alertId: string,
     orgId: string
   ): Promise<Result<null, string>> {
-    const { error } = await this.supabaseClient
-      .from("alert")
-      .update({ soft_delete: true })
-      .eq("id", alertId)
-      .eq("org_id", orgId);
-
-    if (error) {
-      return { error: error.message, data: null };
+    try {
+      await this.postgresClient.client.none(
+        `UPDATE alert
+         SET soft_delete = true
+         WHERE id = $1
+         AND org_id = $2`,
+        [alertId, orgId]
+      );
+      
+      return { error: null, data: null };
+    } catch (error) {
+      return { error: (error as any).message || "Database error", data: null };
     }
-
-    return { error: null, data: null };
   }
 
   async uploadLogo(
@@ -449,65 +407,50 @@ export class DBWrapper {
     logoUrl: string,
     orgId: string
   ): Promise<Result<null, string>> {
-    const { data, error } = await this.supabaseClient.storage
-      .from("organization_assets")
-      .upload(logoUrl, logoFile);
-
-    if (error || !data) {
-      return err(error.message);
-    }
-
-    const { error: updateError } = await this.supabaseClient
-      .from("organization")
-      .update({
-        logo_path: data.path,
-      })
-      .eq("id", orgId);
-
-    if (updateError) {
-      return err(updateError.message);
-    }
-
-    return ok(null);
+    // Storage operations need to be handled differently without Supabase Storage
+    // This would need integration with an alternative storage service (e.g., S3, Cloudflare R2)
+    return err("Logo upload requires migration to an alternative storage service");
   }
 
   async getLogoPath(orgId: string): Promise<Result<string, string>> {
-    const { data: organization, error: organizationErr } =
-      await this.supabaseClient
-        .from("organization")
-        .select("*")
-        .eq("id", orgId)
-        .single();
-
-    console.log(`organization: ${JSON.stringify(organization)}`);
-
-    if (organizationErr || !organization) {
-      return err(organizationErr?.message ?? "Failed to get organization.");
-    }
-
-    // If logo path is already set, return it
-    if (organization.logo_path) {
-      return ok(organization.logo_path);
-    }
-
-    if (!organization.reseller_id) {
-      return err("Reseller id not found on organization.");
-    }
-
-    // Get logo path from reseller id
-    const { data: resellerOrg, error: resellerOrgErr } =
-      await this.supabaseClient
-        .from("organization")
-        .select("*")
-        .eq("organization_id", organization.reseller_id)
-        .single();
-
-    if (resellerOrgErr || !resellerOrg?.logo_path) {
-      return err(
-        resellerOrgErr?.message ?? "Failed to get logo path from reseller id."
+    try {
+      const organization = await this.postgresClient.client.oneOrNone(
+        `SELECT * FROM organization
+         WHERE id = $1
+         LIMIT 1`,
+        [orgId]
       );
-    }
 
-    return ok(resellerOrg.logo_path);
+      console.log(`organization: ${JSON.stringify(organization)}`);
+
+      if (!organization) {
+        return err("Failed to get organization.");
+      }
+
+      // If logo path is already set, return it
+      if (organization.logo_path) {
+        return ok(organization.logo_path);
+      }
+
+      if (!organization.reseller_id) {
+        return err("Reseller id not found on organization.");
+      }
+
+      // Get logo path from reseller id
+      const resellerOrg = await this.postgresClient.client.oneOrNone(
+        `SELECT * FROM organization
+         WHERE organization_id = $1
+         LIMIT 1`,
+        [organization.reseller_id]
+      );
+
+      if (!resellerOrg?.logo_path) {
+        return err("Failed to get logo path from reseller id.");
+      }
+
+      return ok(resellerOrg.logo_path);
+    } catch (error) {
+      return err((error as any).message || "Database error");
+    }
   }
 }

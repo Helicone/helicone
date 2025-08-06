@@ -1,5 +1,3 @@
-import { PostgrestSingleResponse } from "@supabase/supabase-js";
-
 export type Result<T, K> = SuccessResult<T> | ErrorResult<K>;
 
 interface SuccessResult<T> {
@@ -12,15 +10,6 @@ interface ErrorResult<T> {
 }
 
 export type GenericResult<T> = Result<T, string>;
-
-export function mapPostgrestErr<T>(
-  result: PostgrestSingleResponse<T>
-): Result<T, string> {
-  if (result.error === null) {
-    return { data: result.data, error: null };
-  }
-  return { data: null, error: result.error.message };
-}
 
 export function errMap<T, K, L>(
   result: Result<T, K>,

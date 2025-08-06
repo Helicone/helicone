@@ -5,8 +5,8 @@ import { BaseRouter } from "./routerFactory";
 import { providers } from "../packages/cost/providers/mappings";
 import { APIKeysManager } from "../lib/managers/APIKeysManager";
 import { APIKeysStore } from "../lib/db/APIKeysStore";
-import { createClient } from "@supabase/supabase-js";
 import { Database } from "../../supabase/database.types";
+import { PostgresClient } from "../lib/db/postgres";
 import { ProviderKeysManager } from "../lib/managers/ProviderKeysManager";
 import { ProviderKey, ProviderKeysStore } from "../lib/db/ProviderKeysStore";
 import { SignatureV4 } from "@smithy/signature-v4";
@@ -278,18 +278,13 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
       const modelOptions = parsedBody.model.split(",").map((m) => m.trim());
 
       const hashedKey = await requestWrapper.getProviderAuthHeader();
-      const isEU = requestWrapper.isEU();
-      const supabaseClient = isEU
-        ? createClient<Database>(
-            env.EU_SUPABASE_URL,
-            env.EU_SUPABASE_SERVICE_ROLE_KEY
-          )
-        : createClient<Database>(
-            env.SUPABASE_URL,
-            env.SUPABASE_SERVICE_ROLE_KEY
-          );
+      
+      // Initialize PostgreSQL client
+      const postgresClient = new PostgresClient(env);
+      const sql = requestWrapper.isEU() ? PostgresClient.eu(env).client : postgresClient.client;
+      
       const apiKeyManager = new APIKeysManager(
-        new APIKeysStore(supabaseClient),
+        new APIKeysStore(sql),
         env
       );
       const orgId = await apiKeyManager.getAPIKeyWithFetch(hashedKey ?? "");
@@ -297,7 +292,7 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
         return new Response("Invalid API key", { status: 401 });
       }
       const providerKeysManager = new ProviderKeysManager(
-        new ProviderKeysStore(supabaseClient),
+        new ProviderKeysStore(sql),
         env
       );
 
