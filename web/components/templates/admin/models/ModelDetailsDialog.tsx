@@ -212,11 +212,22 @@ export function ModelDetailsDialog({
                                     <span className="text-muted-foreground">
                                       Cache Write:
                                     </span>{" "}
-                                    $
-                                    {(
-                                      endpoint.pricing.cacheWrite / 1000000
-                                    ).toFixed(2)}
-                                    /1K
+                                    {typeof endpoint.pricing.cacheWrite === 'number' ? (
+                                      <>
+                                        $
+                                        {(
+                                          endpoint.pricing.cacheWrite / 1000000
+                                        ).toFixed(2)}
+                                        /1K
+                                      </>
+                                    ) : (
+                                      <>
+                                        ${(
+                                          (endpoint.pricing.cacheWrite.default || endpoint.pricing.cacheWrite["5m"]) / 1000000
+                                        ).toFixed(2)}
+                                        /1K
+                                      </>
+                                    )}
                                   </div>
                                 )}
                               </div>
