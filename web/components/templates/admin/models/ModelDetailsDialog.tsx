@@ -8,12 +8,12 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { H3, P, Small } from "@/components/ui/typography";
-import type { Model, Endpoint } from "@helicone-package/cost/models";
+import type { Model, ModelEndpoint } from "@helicone-package/cost/models";
 import { CheckCircle, XCircle, DollarSign, Clock, Globe } from "lucide-react";
 
 interface ModelDetailsDialogProps {
   model: Model | null;
-  endpoints: Endpoint[];
+  endpoints: ModelEndpoint[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -28,7 +28,7 @@ export function ModelDetailsDialog({
 
   // For now, all endpoints are considered available since we removed status
   const availableEndpoints = endpoints;
-  const unavailableEndpoints: Endpoint[] = [];
+  const unavailableEndpoints: ModelEndpoint[] = [];
 
   // Group endpoints by provider
   const endpointsByProvider = availableEndpoints.reduce(
@@ -39,7 +39,7 @@ export function ModelDetailsDialog({
       acc[endpoint.provider].push(endpoint);
       return acc;
     },
-    {} as Record<string, Endpoint[]>,
+    {} as Record<string, ModelEndpoint[]>,
   );
 
   return (
