@@ -123,10 +123,12 @@ export class TestClickhouseClientWrapper {
         };
       }
 
-      const queryResult = await this.clickHouseHqlClient.query({
+      // Check if this is a DDL command that doesn't return data
+      const isDDL = /^\s*(grant|revoke|create\s+(user|role)|alter\s+(user|role)|drop\s+(user|role))/i.test(query);
+
+      const queryOptions: any = {
         query,
         query_params,
-        format: "JSONEachRow",
         clickhouse_settings: {
           wait_end_of_query: 1,
           // Set the organization context for row-level security
@@ -136,8 +138,22 @@ export class TestClickhouseClientWrapper {
           // This makes ALL settings immutable for this query
           readonly: 1,
         } as any,
-      });
-      return { data: await queryResult.json<T>(), error: null };
+      };
+
+      // Only add format for queries that return data
+      if (!isDDL) {
+        queryOptions.format = "JSONEachRow";
+      }
+
+      const queryResult = await this.clickHouseHqlClient.query(queryOptions);
+      
+      if (isDDL) {
+        // DDL commands don't return data
+        return { data: [] as T[], error: null };
+      } else {
+        const jsonData = await queryResult.json<T>();
+        return { data: jsonData as unknown as T[], error: null };
+      }
     } catch (err) {
       console.error("Error executing HQL query with context: ", query, organizationId, parameters);
       console.error(err);
@@ -392,7 +408,7 @@ export class TestClickhouseClientWrapper {
 
 // Export a singleton instance for tests
 export const testClickhouseDb = new TestClickhouseClientWrapper({
-  CLICKHOUSE_HOST: "http://localhost:18124",
+  CLICKHOUSE_HOST: "http://localhost:18123",
   CLICKHOUSE_USER: process.env.CLICKHOUSE_USER || "default",
   CLICKHOUSE_PASSWORD: process.env.CLICKHOUSE_PASSWORD || "",
   CLICKHOUSE_HQL_USER: process.env.CLICKHOUSE_HQL_USER || "hql_user",
