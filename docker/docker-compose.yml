@@ -36,7 +36,7 @@ services:
         hard: 262144
     environment:
       CLICKHOUSE_USER: default
-      CLICKHOUSE_PASSWORD: "password"
+      # CLICKHOUSE_PASSWORD: "password"
     restart: unless-stopped
     healthcheck:
       test:
@@ -117,7 +117,7 @@ services:
       FLYWAY_PASSWORD: testpassword
       CLICKHOUSE_HOST: http://clickhouse:8123
       CLICKHOUSE_USER: default
-      CLICKHOUSE_PASSWORD: "password"
+      # CLICKHOUSE_PASSWORD: "password"
     volumes:
       - ../supabase:/app/supabase
       - ../clickhouse:/app/clickhouse
