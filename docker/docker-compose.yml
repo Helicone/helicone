@@ -36,7 +36,7 @@ services:
         hard: 262144
     environment:
       CLICKHOUSE_USER: default
-      CLICKHOUSE_PASSWORD: "password"
+      # CLICKHOUSE_PASSWORD: "password"
     restart: unless-stopped
     healthcheck:
       test:
@@ -118,7 +118,7 @@ services:
       CLICKHOUSE_HOST: clickhouse
       CLICKHOUSE_PORT: 8123
       CLICKHOUSE_USER: default
-      CLICKHOUSE_PASSWORD: "password"
+      # CLICKHOUSE_PASSWORD: "password"
     volumes:
       - ../supabase:/app/supabase
       - ../clickhouse:/app/clickhouse
