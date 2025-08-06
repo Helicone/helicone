@@ -55,7 +55,7 @@ The OpenAI fine-tuning API allows you to create custom versions of their models 
        ```python
        job = openai.FineTuningJob.create(
            training_file=file.id,
-           model="gpt-3.5-turbo"
+           model="gpt-4o-mini"
        )
        ```
 
@@ -98,7 +98,7 @@ When fine-tuning models, consider these best practices:
 
 1. **Data Quality**: Ensure your training data is high-quality, diverse, and representative of the tasks you want the model to perform. Quality often trumps quantity.
 
-2. **Model Selection**: Choose the appropriate base model. For most use cases, "gpt-3.5-turbo" is recommended, but consider your specific needs and budget. Learn more about [LLM fine-tuning duration](/faq/llm-fine-tuning-time) and [fine-tuning best practices chapter 2: models](https://openpipe.ai/blog/fine-tuning-best-practices-chapter-2-models) to make an informed decision.
+2. **Model Selection**: Choose the appropriate base model. For most use cases, "gpt-4o-mini" is recommended, but consider your specific needs and budget. Learn more about [LLM fine-tuning duration](/faq/llm-fine-tuning-time) and [fine-tuning best practices chapter 2: models](https://openpipe.ai/blog/fine-tuning-best-practices-chapter-2-models) to make an informed decision.
 
 3. **Prompt Engineering**: Craft clear and consistent prompts. Include relevant context and instructions within your prompts to guide the model effectively.
 

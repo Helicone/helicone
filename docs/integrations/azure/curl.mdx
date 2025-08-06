@@ -20,11 +20,11 @@ import { strings } from "/snippets/strings.mdx";
   <Step title={strings.modifyBasePath}>
     ```bash
     curl --request POST \
-        --url https://oai.helicone.ai/openai/deployments/[DEPLOYMENT_NAME]/chat/completions?api-version=[API_VERSION] \
-        --header 'Helicone-Auth: Bearer [HELICONE_KEY]' \
-        --header 'Helicone-OpenAI-Api-Base: https://[AZUREDOMAIN].azure.com' \
-        --header 'api-key: [AZURE_API_KEY]' \
-        --header 'content-type: application/json' \
+        --url "https://oai.helicone.ai/openai/deployments/$DEPLOYMENT_NAME/chat/completions?api-version=$API_VERSION" \
+        --header "Helicone-Auth: Bearer $HELICONE_API_KEY" \
+        --header "Helicone-OpenAI-Api-Base: https://$AZURE_DOMAIN.azure.com" \
+        --header "api-key: $AZURE_API_KEY" \
+        --header "content-type: application/json" \
         --data '{
             "messages": [
                 {
@@ -34,7 +34,7 @@ import { strings } from "/snippets/strings.mdx";
             ],
             "max_tokens": 800,
             "temperature": 1,
-            "model": "gpt-3.5-turbo-0613"
+            "model": "gpt-4o-mini-0613"
         }'
     ```
   </Step>

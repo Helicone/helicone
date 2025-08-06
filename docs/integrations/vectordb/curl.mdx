@@ -12,8 +12,8 @@ import { strings } from "/snippets/strings.mdx";
 
 ```bash
 curl -X POST https://api.worker.helicone.ai/custom/v1/log \
--H 'Authorization: Bearer <YOUR_HELICONE_API_KEY>' \
--H 'Content-Type: application/json' \
+-H "Authorization: Bearer <YOUR_HELICONE_API_KEY>" \
+-H "Content-Type: application/json" \
 -d '{
   "providerRequest": {
     "url": "custom-model-nopath",

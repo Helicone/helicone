@@ -103,7 +103,7 @@ CHAPTER_FUNCTIONS = [
 def run_creation(topic: str, create_course_outline: HeliconeNode):
 
     _course_outline = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4o-mini",
         messages=[
             {"role": "user", "content": f"Generate a course outline on {topic}"}
         ],
@@ -128,7 +128,7 @@ def run_creation(topic: str, create_course_outline: HeliconeNode):
     chapters = []
     for chapter in course_outline["chapters"]:
         _chapter = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4o-mini",
             messages=[
                 {"role": "user",
                     "content": f"Generate a chapter outline on {chapter['name']}, with description {chapter['description']}"}
@@ -156,7 +156,7 @@ def run_creation(topic: str, create_course_outline: HeliconeNode):
             sections = []
             for section in chapter["sections"]:
                 _section = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",
+                    model="gpt-4o-mini",
                     messages=[
                         {"role": "user",
                             "content": f"Generate a section outline on {section['name']}, with description {section['description']}"}

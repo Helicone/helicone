@@ -268,7 +268,7 @@ Let's say we have an app that generates a short story, where users are able to i
             content: hpf`Write a story about ${{ character }}`,
           },
         ],
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o-mini",
       },
       {
         // 4. Add Prompt Id Header
@@ -287,7 +287,7 @@ Let's say we have an app that generates a short story, where users are able to i
     from helicone_prompts import hpf, hpstatic
 
     response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4o-mini",
         messages=[
             {
                 "role": "system",

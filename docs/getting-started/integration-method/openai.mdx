@@ -43,7 +43,7 @@ from helicone.openai_async import openai, Meta
 # helicone_global.api_key = "sk-<your-api-key>"
 
 x = openai.ChatCompletion.create(
-  model="gpt-3.5-turbo",
+  model="gpt-4o-mini",
   messages=[{
   "role": "system",
   "content": "This will be logged"
@@ -97,7 +97,7 @@ x = openai.ChatCompletion.create(
       });
 
       const chatCompletion = await openai.chat.completion.create({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o-mini",
         messages: [{ role: "user", content: "Hello world" }],
       });
 
@@ -212,8 +212,8 @@ Here's an example using curl:
 
 ```sh
 curl -X POST https://api.helicone.ai/oai/v1/log \
--H 'Authorization: Bearer your_api_key' \
--H 'Content-Type: application/json' \
+-H "Authorization: Bearer your_api_key" \
+-H "Content-Type: application/json" \
 -d '{
   "providerRequest": {
     "url": "https://example.com",

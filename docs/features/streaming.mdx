@@ -20,7 +20,7 @@ In this mode, the request is made synchronously, but the response is streamed.
 
 ```python
 for chunk in openai.ChatCompletion.create(
-    model = 'gpt-3.5-turbo',
+    model = 'gpt-4o-mini',
     messages = [{
         'role': 'user',
         'content': "Hello World!"
@@ -38,7 +38,7 @@ In this mode, both the request is made asynchronously and the response is stream
 
 ```python
 for chunk in await openai.ChatCompletion.acreate(
-    model = 'gpt-3.5-turbo',
+    model = 'gpt-4o-mini',
     messages = [{
         'role': 'user',
         'content': "Hello World!"

@@ -53,13 +53,13 @@ description: "Combine Helicone's LLM analytics with PostHog, a comprehensive pro
     		```bash
     		curl --request POST \
     			--url https://oai.helicone.ai/v1/chat/completions \
-    			--header 'Authorization: Bearer <<YOUR_OPENAI_API_KEY>>' \
-    			--header 'Content-Type: application/json' \
-    			--header 'Helicone-Posthog-Key: Bearer <ph_project_api_key>' \
-    			--header 'Helicone-Posthog-Host: Bearer <ph_client_api_host>' \
-    			--header 'Helicone-Auth: Bearer <<YOUR_HELICONE_API_KEY>>' \
+    			--header "Authorization: Bearer $OPENAI_API_KEY" \
+    			--header "Content-Type: application/json" \
+    			--header "Helicone-Posthog-Key: Bearer $POSTHOG_PROJECT_API_KEY" \
+    			--header "Helicone-Posthog-Host: Bearer $POSTHOG_CLIENT_API_HOST" \
+    			--header "Helicone-Auth: Bearer $HELICONE_API_KEY" \
     			--data '{
-    				"model": "gpt-3.5-turbo",
+    				"model": "gpt-4o-mini",
     				"messages": [
     					{
     						"role": "system",
@@ -67,7 +67,7 @@ description: "Combine Helicone's LLM analytics with PostHog, a comprehensive pro
     					}
     				],
     				"temperature": 1,
-    				"max_tokens": 10
+    				"max_tokens": 30
     			}'
     		```
     	</Tab>

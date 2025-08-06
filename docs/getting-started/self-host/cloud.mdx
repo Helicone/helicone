@@ -74,11 +74,11 @@ curl localhost:8787/helicone/test
 # Example log command
 curl --request POST \
     --url http://localhost:8787/v1/chat/completions \
-    --header 'Authorization: Bearer <<YOUR_OPENAI_API_KEY>>' \
-    --header 'Content-Type: application/json' \
-    --header 'Helicone-Auth: Bearer <<YOUR_HELICONE_API_KEY>>' \
+    --header "Authorization: Bearer <<YOUR_OPENAI_API_KEY>>" \
+    --header "Content-Type: application/json" \
+    --header "Helicone-Auth: Bearer <<YOUR_HELICONE_API_KEY>>" \
     --data '{
-        "model": "gpt-3.5-turbo",
+        "model": "gpt-4o-mini",
         "messages": [
             {
                 "role": "system",
@@ -86,7 +86,7 @@ curl --request POST \
             }
         ],
         "temperature": 1,
-        "max_tokens": 10
+        "max_tokens": 30
  }'
 ```
 

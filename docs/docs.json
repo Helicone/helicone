@@ -140,7 +140,14 @@
                   },
                   "getting-started/integration-method/perplexity",
                   "getting-started/integration-method/together",
-                  "getting-started/integration-method/x"
+                  {
+                    "group": "xAI",
+                    "pages": [
+                      "integrations/xai/curl",
+                      "integrations/xai/javascript",
+                      "integrations/xai/python"
+                    ]
+                  }
                 ]
               },
               {

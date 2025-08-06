@@ -48,7 +48,7 @@ Understanding how changes impact your AI agents in real-world interactions is cr
 
     ````javascript Including Helicone Session Headers
     const completionParams = {
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o-mini",
       messages: conversation,
     };
 
@@ -123,7 +123,7 @@ Understanding how changes impact your AI agents in real-world interactions is cr
       sessionPath
     ) {
       const completionParams = {
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o-mini",
         messages: conversation,
       };
 
@@ -166,8 +166,8 @@ Understanding how changes impact your AI agents in real-world interactions is cr
     ````bash Querying Session Data
     curl --request POST \
       --url https://api.helicone.ai/v1/request/query \
-      --header 'Content-Type: application/json' \
-      --header 'authorization: Bearer sk-<your-helicone-api-key>' \
+      --header "Content-Type: application/json" \
+      --header "authorization: Bearer $HELICONE_API_KEY" \
       --data '{
         "limit": 100,
         "offset": 0,

@@ -45,8 +45,8 @@ Now you can access all the models on Nebius AI with a simple fetch call:
 
 ```bash
 curl \
-  --header 'Authorization: Bearer <NEBIUS_API_KEY>' \
-  --header 'Content-Type: application/json' \
+  --header "Authorization: Bearer $NEBIUS_API_KEY" \
+  --header "Content-Type: application/json" \
   --data '{
     "model": "stable-diffusion-xl",
     "prompt": "A beautiful sunset over a mountain landscape"

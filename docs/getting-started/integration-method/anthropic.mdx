@@ -54,44 +54,36 @@ max_tokens_to_sample: 300,
 
 </Tab>
 <Tab title="cURL">
-  **Replace the Anthropic Base url with Helicone's**
-```
-
-- POST https://api.anthropic.com
-
-* POST https://anthropic.helicone.ai/v1
-
-```
-
-**Add a Helicone-Auth header into the requests**
-
-```
-
-"Helicone-Auth": "Bearer HELICONE_API_KEY"
-
-```
 
 Example cURL command
 
-<Note>Please make sure to replace API keys with your own</Note>
+<Note>Please make sure to set environment variables for your API keys</Note>
 
 ```
 
 curl --request POST \
- --url https://anthropic.helicone.ai/v1/complete \
- --header 'Content-Type: application/json' \
- --header 'Helicone-Auth: Bearer <<HELICONE_API_KEY>> \
- --header 'x-api-key: <<ANTHROPIC_API_KEY>> \
- --data '{
-"prompt": "\n\nHuman: Tell me a haiku about trees\n\nAssistant:",
-"model": "claude-v1-100k",
-"max_tokens_to_sample": 300,
-"stop_sequences": [
-"\n\nHuman:"
-]
+      --url https://anthropic.helicone.ai/v1/messages \
+      --header 'Content-Type: application/json' \
+      --header "Helicone-Auth: Bearer $HELICONE_API_KEY" \
+      --header 'anthropic-version: 2023-06-01' \
+      --header "x-api-key: $ANTHROPIC_API_KEY" \
+      --data '{
+        "model": "claude-3-opus-20240229",
+        "max_tokens": 50,
+        "system": "Respond only in Spanish.",
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Test"
+                    }
+                ]
+            }
+        ]
 }'
-
-````
+```
 
    </Tab>
 
