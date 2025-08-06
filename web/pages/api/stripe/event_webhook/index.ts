@@ -403,10 +403,13 @@ async function generateTempAPIKey(
 function getJawnServiceUrl(): string {
   // Get the URL from environment variable
   const jawnServiceUrl = process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE;
-  
+
   if (!jawnServiceUrl) {
     // Fallback to APP_URL or NEXT_PUBLIC_APP_URL with Jawn port if not specified
-    const appUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const appUrl =
+      process.env.APP_URL ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      "http://localhost:3000";
     try {
       const url = new URL(appUrl);
       // Default Jawn port is 8585

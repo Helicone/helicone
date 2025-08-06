@@ -40,7 +40,6 @@ import { ProviderCard } from "@/components/providers/ProviderCard";
 import Image from "next/image";
 import { ModelParameters } from "@/lib/api/llm/generate";
 import { useOrg } from "@/components/layout/org/organizationContext";
-import { useFeatureFlag } from "@/services/hooks/admin";
 import { ResponseFormat, ResponseFormatType } from "../types";
 
 interface ModelParametersFormProps {
