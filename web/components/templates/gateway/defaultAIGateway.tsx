@@ -27,7 +27,7 @@ import { getRouterCode } from "./routerUseDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DiffHighlight } from "@/components/templates/welcome/diffHighlight";
 
-const baseUrl = `${process.env.NEXT_PUBLIC_CLOUD_GATEWAY_BASE_URL}/ai`;
+const baseUrl = `${process.env.NEXT_PUBLIC_CLOUD_GATEWAY_BASE_URL}/v1`;
 
 const DefaultAIGateway = ({ setTabValue }: { setTabValue: () => void }) => {
   // Provider management state
