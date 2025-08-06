@@ -52,7 +52,7 @@ export class APIKeysStore {
   async getAPIKeyWithFetch(apiKeyHash: string): Promise<APIKey | null> {
     const { data, error } = await this.supabaseClient
       .from("helicone_api_keys")
-      .select("organization_id, api_key_hash")
+      .select("organization_id, api_key_hash, soft_delete")
       .eq("api_key_hash", apiKeyHash)
       .eq("soft_delete", false);
 
