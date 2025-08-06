@@ -1,170 +1,247 @@
 /**
- * Model-centric type definitions for Helicone's cost system
- * Following TypeScript best practices:
- * - Using const assertions for literal types
- * - Favoring interfaces for extensibility
- * - Using discriminated unions where appropriate
- * - Keeping it simple and focused on core functionality
+ * Core type definitions for the model registry
  */
 
-// Define type unions based on actual data
-export type ModelCreator = 
-  | "amazon"
+// Import model name types from each author
+import type { AnthropicModelName } from './authors/anthropic';
+import type { OpenAIModelName } from './authors/openai';
+import type { GoogleModelName } from './authors/google';
+import type { MetaLlamaModelName } from './authors/meta-llama';
+import type { MistralModelName } from './authors/mistralai';
+import type { AmazonModelName } from './authors/amazon';
+import type { NvidiaModelName } from './authors/nvidia';
+import type { CohereModelName } from './authors/cohere';
+import type { DeepSeekModelName } from './authors/deepseek';
+import type { PerplexityModelName } from './authors/perplexity';
+import type { XAIModelName } from './authors/x-ai';
+import type { MoonshotModelName } from './authors/moonshotai';
+
+// Re-export for convenience
+export type {
+  AnthropicModelName,
+  OpenAIModelName,
+  GoogleModelName,
+  MetaLlamaModelName,
+  MistralModelName,
+  AmazonModelName,
+  NvidiaModelName,
+  CohereModelName,
+  DeepSeekModelName,
+  PerplexityModelName,
+  XAIModelName,
+  MoonshotModelName,
+};
+
+
+/**
+ * Comprehensive list of all model names/IDs
+ * This is the union of all author-specific model names
+ */
+export type ModelName =
+  | AnthropicModelName
+  | OpenAIModelName
+  | GoogleModelName
+  | MetaLlamaModelName
+  | MistralModelName
+  | AmazonModelName
+  | NvidiaModelName
+  | CohereModelName
+  | DeepSeekModelName
+  | PerplexityModelName
+  | XAIModelName
+  | MoonshotModelName;
+
+/**
+ * Model authors/creators
+ */
+export type AuthorName =
   | "anthropic"
-  | "cohere"
-  | "deepseek"
+  | "openai"
   | "google"
   | "meta-llama"
-  | "microsoft"
   | "mistralai"
-  | "moonshotai"
+  | "amazon"
+  | "microsoft"
   | "nvidia"
-  | "openai"
-  | "perplexity"
+  | "cohere"
+  | "deepseek"
   | "qwen"
-  | "x-ai";
+  | "x-ai"
+  | "moonshotai"
+  | "perplexity";
 
-export type ProviderName =
-  | "Anthropic"
-  | "OpenAI"
-  | "Google"
-  | "Amazon Bedrock"
-  | "Azure"
-  | "Together AI"
-  | "Fireworks"
-  | "Groq"
-  | "Perplexity"
-  | "DeepSeek"
-  | "Replicate"
-  | "Hugging Face"
-  | "Cohere"
-  | "Mistral"
-  | "X.AI"
-  | "OpenRouter";
+/**
+ * Inference providers (where models are hosted)
+ */
+export type Provider =
+  // Direct providers
+  | "anthropic"
+  | "openai"
+  | "cohere"
+  | "mistral"
+  | "deepseek"
+  | "perplexity"
+  // Cloud providers
+  | "vertex"
+  | "vertex-regional"
+  | "bedrock"
+  | "azure-openai"
+  // Aggregators
+  | "openrouter"
+  | "together"
+  | "groq"
+  | "fireworks"
+  | "replicate"
+  | "deepinfra"
+  | "chutes"
+  | "nextbit"
+  | "google-ai-studio"
+  | "google-vertex"
+  | "nebius"
+  | "parasail"
+  | "cloudflare"
+  | "novita"
+  | "xai"
+  | "alibaba"
+  | "cerebras"
+  | "baseten"
+  | "hyperbolic"
+  | "lambda"
+  | "moonshot-ai"
+  | "inferencenet";
 
-// Core cost structure - ALL COSTS ARE PER MILLION TOKENS
-export interface ModelCost {
-  prompt_token: number; // Cost per million prompt tokens ($/1M tokens)
-  completion_token: number; // Cost per million completion tokens ($/1M tokens)
-  // Optional costs (all per million tokens unless specified otherwise)
-  prompt_cache_write_token?: number; // Default cache write cost per million tokens (e.g., 5min for Anthropic)
-  prompt_cache_read_token?: number; // Cache hit cost per million tokens
-  prompt_cache_write_token_1hr?: number; // 1-hour cache write cost per million tokens (Anthropic)
-  prompt_audio_token?: number; // Audio prompt cost per million tokens
-  completion_audio_token?: number; // Audio completion cost per million tokens
-  per_image?: number; // Cost per image (absolute cost, not per million)
-  per_call?: number; // Cost per API call (absolute cost, not per million)
-}
-
-// Rate limit structure
-export interface RateLimit {
-  tpm?: number; // Tokens per minute
-  rpm?: number; // Requests per minute
-  rpd?: number; // Requests per day
-  tpd?: number; // Tokens per day (batch)
-  imagesPerMinute?: number; // For image models
-}
-
-// Provider implementation for a specific model
-export interface ProviderImplementation {
-  provider: ProviderName;
-  available: boolean;
-  cost: ModelCost;
-  // Optional fields
-  modelString?: string; // How provider names this model
-  endpoint?: string;
-  notes?: string;
-  rateLimit?: RateLimit; // Rate limits for this specific provider
-}
-
-// Core model metadata - keeping it simple
-export interface ModelMetadata {
-  displayName: string;
-  description: string;
-  contextWindow: number;
-  maxOutputTokens?: number;
-  releaseDate: string;
-  deprecatedDate?: string;
-}
-
-// Model variant interface - only stores differences from base
-export interface ModelVariant {
-  id: string;
-  // Optional overrides
-  providers?: Record<string, Partial<ProviderImplementation>>;
-  metadata?: Partial<ModelMetadata>;
-}
-
-// Model interface - represents both base models and resolved variants
 export interface Model {
-  id: string;
-  creator: ModelCreator;
-  metadata: ModelMetadata;
-  providers: Record<string, ProviderImplementation>;
-  slug: string;
-  disabled?: boolean; // Model-level disable flag
-  variants?: Record<string, ModelVariant>; // Optional variants
-  baseModelId?: string; // Set when this model is a resolved variant
+  id: ModelName;
+  name: string;
+  author: AuthorName;
+  description: string;
+  contextLength: number;
+  maxOutputTokens: number | null;
+  created: string;
+  modality: Modality;
+  tokenizer: Tokenizer;
 }
 
-// Model registry containing all models
-export interface ModelRegistry {
-  models: Record<string, Model>;
+export interface ModelPricing {
+  prompt: number;
+  completion: number;
+  image?: number;
+  cacheRead?: number | null;
+  cacheWrite?: number | {
+    "5m": number;
+    "1h": number;
+    default?: number;
+  } | null;
+  thinking?: number;
 }
 
-// Flat lookup map for O(1) access to any model ID
-export interface ModelLookupMap {
-  [modelId: string]: {
-    type: "model" | "variant";
-    data: Model;
-  };
+/**
+ * Status codes for endpoints
+ */
+export const EndpointStatus = {
+  ACTIVE: 0,
+  DEPRECATED: 1,
+  BETA: 2,
+  COMING_SOON: 3,
+} as const;
+
+export type EndpointStatusType =
+  (typeof EndpointStatus)[keyof typeof EndpointStatus];
+
+export interface ModelEndpoint {
+  /** Optional display name for this endpoint */
+  name?: string;
+  /** Provider identifier */
+  provider: Provider;
+  /** The model ID as used by this provider (for managed deployments) */
+  providerModelId?: string;
+  /** Alternative model reference */
+  model?: string;
+  /** Tag for categorizing this endpoint (often same as provider) */
+  tag?: string;
+  /** Status code */
+  status?: EndpointStatusType;
+  /** Pricing for this model on this provider */
+  pricing: ModelPricing;
+  /** Maximum context length for this deployment */
+  contextLength: number;
+  /** Maximum completion tokens for this deployment */
+  maxCompletionTokens: number | null;
+  /** Parameters supported by this endpoint */
+  supportedParameters: StandardParameter[];
+  /** For providers like Bedrock: indicates BYOK can use different regions */
+  supportsDynamicRegion?: boolean;
+  /** For BYOK: base model ID without region prefix */
+  baseModelId?: string;
 }
 
-// Computed indices for efficient lookups
-export interface ModelIndices {
-  // Provider → Model IDs
-  byProvider: Map<ProviderName, Set<string>>;
-
-  // Creator → Model IDs
-  byCreator: Map<ModelCreator, Set<string>>;
-
-  // Quick model lookup by various identifiers
-  byAlias: Map<string, string>; // alias → canonical model ID
-}
-
-// Provider summary for provider pages
-export interface ProviderSummary {
-  provider: ProviderName;
+export interface AuthorMetadata {
+  /** Number of models from this author */
   modelCount: number;
-  models: Array<{
-    modelId: string;
-    creator: ModelCreator;
-    displayName: string;
-    cost: ModelCost;
-    available: boolean;
-    contextWindow: number;
-  }>;
+  /** Whether this author is actively supported */
+  supported: boolean;
+  /** Optional base URL for this author's API */
+  baseUrl?: string;
 }
 
-// Model cost with provider context
-export interface ModelProviderCost {
-  modelId: string;
-  displayName: string;
-  creator: ModelCreator;
-  providers: Array<{
-    provider: ProviderName;
-    cost: ModelCost;
-    available: boolean;
-    endpoint?: string;
-    rateLimit?: RateLimit;
-  }>;
+
+export interface AuthorData {
+  metadata: AuthorMetadata;
+  models: Partial<Record<ModelName, Model>>;
+  endpoints: Partial<Record<ModelName, ModelEndpoint[]>>;
 }
 
-// Provider configuration with organization-level limits
-export interface ProviderConfig {
-  provider: ProviderName;
-  monthlyUsageLimit?: number; // e.g., $200,000 for OpenAI
-  globalRateLimits?: {
-    defaultModels?: RateLimit; // Default limits for models not specified
-  };
-}
+/**
+ * Standard parameter names used across providers
+ */
+export type StandardParameter =
+  // Common parameters
+  | "max_tokens"
+  | "temperature"
+  | "top_p"
+  | "top_k"
+  | "stop"
+  | "stream"
+  // Advanced parameters
+  | "frequency_penalty"
+  | "presence_penalty"
+  | "repetition_penalty"
+  | "seed"
+  // Tool use
+  | "tools"
+  | "tool_choice"
+  | "functions"
+  | "function_call"
+  // Reasoning/thinking
+  | "reasoning"
+  | "include_reasoning"
+  | "thinking"
+  // Response format
+  | "response_format"
+  | "json_mode";
+
+/**
+ * Common modality types
+ */
+export type Modality =
+  | "text"
+  | "text->text"
+  | "text+image->text"
+  | "text->image"
+  | "multimodal";
+
+/**
+ * Common tokenizer types
+ */
+export type Tokenizer =
+  | "Claude"
+  | "GPT"
+  | "Llama"
+  | "Llama3"
+  | "Llama4"
+  | "Gemini"
+  | "Mistral"
+  | "Qwen"
+  | "DeepSeek"
+  | "Cohere"
+  | "Grok";
