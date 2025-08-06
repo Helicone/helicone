@@ -36,38 +36,38 @@ import { startDBListener } from "./controlPlane/dbListener";
 if (ENVIRONMENT === "production" || process.env.ENABLE_CRON_JOB === "true") {
   runMainLoops();
 }
-// Helper function to check if origin matches allowed patterns
-const isOriginAllowed = (origin: string, environment: string): boolean => {
-  if (IS_ON_PREM) return true;
-  
+const getAppUrlRegex = () => {
+  const appUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   try {
-    const originUrl = new URL(origin);
-    const appUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    
-    // Check if it matches the configured app URL
-    if (origin === appUrl) return true;
-    
-    // Production-specific checks
-    if (environment === "production") {
-      const hostname = originUrl.hostname;
-      
-      // Check specific domains
-      if (hostname === "helicone.ai" || hostname === "www.helicone.ai") return true;
-      if (hostname === "eu.helicone.ai" || hostname === "www.eu.helicone.ai") return true;
-      if (hostname === "us.helicone.ai" || hostname === "www.us.helicone.ai") return true;
-      
-      // Check Vercel preview URLs
-      if (hostname.endsWith("-helicone.vercel.app") || 
-          hostname === "helicone.vercel.app" ||
-          hostname === "www.helicone.vercel.app") return true;
-    }
-    
-    // For development/preview, just check against the app URL
-    return origin === appUrl;
+    const url = new URL(appUrl);
+    const protocol = url.protocol.replace(":", "");
+    const hostname = url.hostname.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const port = url.port ? `:${url.port}` : "";
+    return new RegExp(`^${protocol}:\/\/${hostname}${port}$`);
   } catch {
-    return false;
+    return /^http:\/\/localhost:3000$/;
   }
 };
+
+const allowedOriginsEnv = {
+  production: [
+    /^https?:\/\/(www\.)?helicone\.ai$/,
+    /^https?:\/\/(www\.)?.*-helicone\.vercel\.app$/,
+    /^https?:\/\/(www\.)?helicone\.vercel\.app$/,
+    /^https?:\/\/(www\.)?helicone-git-valhalla-use-jawn-to-read-helicone\.vercel\.app$/,
+    getAppUrlRegex(),
+    /^https?:\/\/(www\.)?eu\.helicone\.ai$/, // Added eu.helicone.ai
+    /^https?:\/\/(www\.)?us\.helicone\.ai$/,
+  ],
+  development: [
+    getAppUrlRegex(),
+  ],
+  preview: [
+    getAppUrlRegex(),
+  ],
+};
+
+const allowedOrigins = allowedOriginsEnv[ENVIRONMENT];
 
 const app = express();
 
@@ -81,8 +81,10 @@ const corsOptions = {
       callback(null, true);
       return;
     }
-    
-    if (isOriginAllowed(origin, ENVIRONMENT)) {
+    if (
+      allowedOrigins.some((allowedOrigin) => allowedOrigin.test(origin)) ||
+      IS_ON_PREM
+    ) {
       callback(null, true);
     } else {
       // Important: Disallow origins not in the list
