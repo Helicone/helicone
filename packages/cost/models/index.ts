@@ -4,23 +4,14 @@
  * This file combines all author data from the ./authors/ directory
  */
 
-import {
-  providers,
-  getProvider,
-  buildEndpointUrl,
-  isDetailedEndpoint,
-  type ProviderConfig,
-  type ProviderEndpoint,
-  buildBedrockModelId,
-} from "./providers";
+import { providers } from "./providers";
 
 import {
   type Model,
   type ModelName,
   type ModelEndpoint,
   type AuthorData,
-  type Author as AuthorName,
-  type Provider,
+  type AuthorName,
 } from "./types";
 
 // Author imports (TypeScript)
@@ -37,8 +28,6 @@ import openai from "./authors/openai";
 import perplexity from "./authors/perplexity";
 import xAi from "./authors/x-ai";
 
-import modelVersions from "./model-versions";
-
 // Re-export types
 export {
   type Model,
@@ -47,15 +36,12 @@ export {
   type AuthorMetadata,
   type AuthorData,
   type ModelPricing,
-  type Author as AuthorName,
+  type AuthorName,
   type Provider,
 } from "./types";
 
-// Re-export ProviderConfig as EndpointDef for backward compatibility
-export type EndpointDef = ProviderConfig;
-
-// Legacy Author interface for backward compatibility
-export interface Author {
+// Author info interface
+export interface AuthorInfo {
   modelCount: number;
   supported: boolean;
   models: string[];
@@ -78,19 +64,23 @@ const authorData: Record<string, AuthorData> = {
 };
 
 // Combine all models from author data
-export const models: Partial<Record<ModelName, Model>> = Object.values(
+export const models: Record<ModelName, Model> = Object.values(
   authorData
-).reduce((acc, author) => ({ ...acc, ...author.models }), {});
+).reduce((acc, author) => ({ ...acc, ...author.models }), {}) as Record<
+  ModelName,
+  Model
+>;
 
 // Combine all endpoints from author data
-export const endpoints: Partial<Record<ModelName, ModelEndpoint[]>> =
-  Object.values(authorData).reduce(
-    (acc, author) => ({ ...acc, ...author.endpoints }),
-    {}
-  );
+export const endpoints: Record<ModelName, ModelEndpoint[]> = Object.values(
+  authorData
+).reduce((acc, author) => ({ ...acc, ...author.endpoints }), {}) as Record<
+  ModelName,
+  ModelEndpoint[]
+>;
 
-// Build legacy authors map for backward compatibility
-export const authors: Partial<Record<AuthorName, Author>> = Object.entries(
+// Build authors info map
+export const authors: Record<AuthorName, AuthorInfo> = Object.entries(
   authorData
 ).reduce(
   (acc, [key, data]) => ({
@@ -101,50 +91,89 @@ export const authors: Partial<Record<AuthorName, Author>> = Object.entries(
     },
   }),
   {}
-);
+) as Record<AuthorName, AuthorInfo>;
 
 // Export registry
 export const registry = {
   models,
   endpoints,
   authors,
-  authorData, // Also expose the full author data
-  modelVersions,
-  endpointDefs: providers,
+  authorData,
   providers,
 };
 
 // Helper functions with proper typing
-export function getModel(modelKey: ModelName): Model | undefined {
+export function getModel(modelKey: ModelName): Model {
   return registry.models[modelKey];
 }
 
 export function getEndpoints(modelKey: ModelName): ModelEndpoint[] {
-  return registry.endpoints[modelKey] || [];
+  return registry.endpoints[modelKey];
 }
 
-export function getAuthor(authorSlug: AuthorName): Author | undefined {
+export function getAuthor(authorSlug: AuthorName): AuthorInfo {
   return registry.authors[authorSlug];
 }
 
-export function getAuthorData(authorSlug: AuthorName): AuthorData | undefined {
+export function getAuthorData(authorSlug: AuthorName): AuthorData {
   return registry.authorData[authorSlug];
 }
 
-export function getModelVersions(baseModel: string): string[] {
-  return registry.modelVersions[baseModel] || [];
+/**
+ * Get provider configuration
+ */
+export function getProvider(providerId: string): ProviderConfig | undefined {
+  return providers[providerId as ProviderName];
 }
 
-export function getEndpointDef(provider: Provider): EndpointDef | undefined {
-  return getProvider(provider);
+/**
+ * Build model ID for any provider using their specific logic
+ */
+export function buildModelId(
+  endpoint: ModelEndpoint,
+  options?: {
+    region?: string;
+    crossRegion?: boolean;
+    projectId?: string;
+  }
+): string {
+  const provider = getProvider(endpoint.provider as ProviderName);
+  if (!provider?.buildModelId) {
+    return endpoint.providerModelId || "";
+  }
+  return provider.buildModelId(endpoint, options);
 }
 
-// Re-export provider utilities
-export {
-  getProvider,
-  buildEndpointUrl,
-  buildBedrockModelId,
-  isDetailedEndpoint,
+/**
+ * Build complete URL for any provider
+ */
+export function buildEndpointUrl(
+  endpoint: ModelEndpoint,
+  options?: {
+    region?: string;
+    crossRegion?: boolean;
+    projectId?: string;
+    deploymentName?: string;
+    resourceName?: string;
+  }
+): string | null {
+  const provider = getProvider(endpoint.provider as ProviderName);
+  if (!provider) return null;
+
+  if (provider.buildUrl) {
+    return provider.buildUrl(provider.baseUrl, endpoint, options);
+  }
+
+  // Fallback to simple URL construction
+  return `${provider.baseUrl}/v1/chat/completions`;
+}
+
+// Import provider types
+import {
   type ProviderConfig,
   type ProviderEndpoint,
-};
+  type ProviderName,
+} from "./providers";
+
+// Re-export types
+export type { ProviderConfig, ProviderEndpoint } from "./providers";

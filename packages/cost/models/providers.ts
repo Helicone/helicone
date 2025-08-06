@@ -1,3 +1,5 @@
+import type { ModelEndpoint } from "./types";
+
 export interface ProviderEndpoint {
   path: string;
   method?: "GET" | "POST" | "PUT" | "DELETE";
@@ -11,10 +13,19 @@ export interface ProviderConfig {
   requiresProjectId?: boolean;
   requiresRegion?: boolean;
   requiresDeploymentName?: boolean;
-  regions?: string[];
+  regions?: readonly string[];
   apiVersion?: string;
-  endpoints: Record<string, ProviderEndpoint | string>;
+  endpoints: Readonly<Record<string, ProviderEndpoint | string>>;
+  buildModelId?: (endpoint: ModelEndpoint, options?: any) => string;
+  buildUrl?: (
+    baseUrl: string,
+    endpoint: ModelEndpoint,
+    options?: any
+  ) => string;
 }
+
+// Define provider names type from the actual providers object
+export type ProviderName = keyof typeof providers;
 export const providers = {
   anthropic: {
     name: "Anthropic",
@@ -24,6 +35,8 @@ export const providers = {
       chat: "/v1/messages",
       complete: "/v1/complete",
     },
+    buildModelId: (endpoint) => endpoint.providerModelId || "",
+    buildUrl: (baseUrl) => `${baseUrl}/v1/messages`,
   },
   bedrock: {
     name: "Amazon Bedrock",
@@ -48,6 +61,43 @@ export const providers = {
       "sa-east-1",
     ],
     endpoints: {},
+    buildModelId: (endpoint, options) => {
+      // Handle dynamic region for BYOK
+      if (
+        endpoint.supportsDynamicRegion &&
+        options?.region &&
+        endpoint.baseModelId
+      ) {
+        if (options.crossRegion) {
+          const regionPrefix = options.region.split("-")[0];
+          return `${regionPrefix}.${endpoint.baseModelId}`;
+        }
+        return endpoint.baseModelId;
+      }
+      return endpoint.providerModelId || "";
+    },
+    buildUrl: (baseUrl, endpoint, options) => {
+      const url = options?.region
+        ? baseUrl.replace("{region}", options.region)
+        : baseUrl;
+      // Inline the model ID logic to avoid circular reference
+      let modelId: string;
+      if (
+        endpoint.supportsDynamicRegion &&
+        options?.region &&
+        endpoint.baseModelId
+      ) {
+        if (options.crossRegion) {
+          const regionPrefix = options.region.split("-")[0];
+          modelId = `${regionPrefix}.${endpoint.baseModelId}`;
+        } else {
+          modelId = endpoint.baseModelId;
+        }
+      } else {
+        modelId = endpoint.providerModelId || "";
+      }
+      return `${url}/model/${modelId}/invoke`;
+    },
   },
   vertex: {
     name: "Google Vertex AI",
@@ -56,6 +106,12 @@ export const providers = {
     requiresProjectId: true,
     requiresRegion: true,
     endpoints: {},
+    buildModelId: (endpoint) => endpoint.providerModelId || "",
+    buildUrl: (baseUrl, endpoint, options) => {
+      const { projectId, region } = options || {};
+      const modelId = endpoint.providerModelId || "";
+      return `${baseUrl}/v1/projects/${projectId}/locations/${region}/publishers/anthropic/models/${modelId}:streamRawPredict`;
+    },
   },
   // openai: {
   //   name: "OpenAI",
@@ -192,73 +248,5 @@ export const providers = {
   // },
 } as const satisfies Record<string, ProviderConfig>;
 
-export function getProvider(providerId: string): ProviderConfig | undefined {
-  return providers[providerId as keyof typeof providers] as
-    | ProviderConfig
-    | undefined;
-}
-
-export function buildEndpointUrl(
-  providerId: string,
-  endpointType: string,
-  params?: Record<string, string>
-): string | null {
-  const provider = providers[providerId as keyof typeof providers] as
-    | ProviderConfig
-    | undefined;
-  if (!provider) return null;
-
-  const endpoint = provider.endpoints[endpointType];
-  if (!endpoint) return null;
-
-  const endpointPath = typeof endpoint === "string" ? endpoint : endpoint.path;
-
-  let url = provider.baseUrl + endpointPath;
-
-  if (params) {
-    Object.entries(params).forEach(([key, value]) => {
-      url = url.replace(`{${key}}`, value);
-    });
-  }
-
-  return url;
-}
-
-export function isDetailedEndpoint(
-  endpoint: ProviderEndpoint | string
-): endpoint is ProviderEndpoint {
-  return typeof endpoint === "object" && "path" in endpoint;
-}
-
-export function buildBedrockModelId(
-  endpoint: {
-    providerModelId?: string;
-    baseModelId?: string;
-    supportsDynamicRegion?: boolean;
-  },
-  options?: {
-    region?: string;
-    crossRegion?: boolean;
-  }
-): string {
-  // If not dynamic region or no BYOK options, return the managed model ID
-  if (
-    !endpoint.supportsDynamicRegion ||
-    !options?.region ||
-    !endpoint.baseModelId
-  ) {
-    return endpoint.providerModelId || "";
-  }
-
-  // For BYOK with cross-region enabled
-  if (options.crossRegion) {
-    // Extract the region prefix (e.g., "us" from "us-east-1")
-    const regionPrefix = options.region.split("-")[0];
-    return `${regionPrefix}.${endpoint.baseModelId}`;
-  }
-
-  // For BYOK without cross-region
-  return endpoint.baseModelId;
-}
 
 export default providers;

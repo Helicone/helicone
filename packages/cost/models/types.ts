@@ -54,7 +54,7 @@ export type ModelName =
 /**
  * Model authors/creators
  */
-export type Author =
+export type AuthorName =
   | "anthropic"
   | "openai"
   | "google"
@@ -113,7 +113,7 @@ export type Provider =
 export interface Model {
   id: ModelName;
   name: string;
-  author: Author;
+  author: AuthorName;
   description: string;
   contextLength: number;
   maxOutputTokens: number | null;
