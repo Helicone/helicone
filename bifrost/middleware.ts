@@ -5,11 +5,13 @@ import { NextResponse, NextRequest } from "next/server";
 export async function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
   const pathname = url.pathname;
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 
+    (process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://us.helicone.ai");
 
   // Handle existing redirects first
   switch (pathname) {
     case "/dashboard":
-      return NextResponse.redirect("https://us.helicone.ai/dashboard", 301);
+      return NextResponse.redirect(`${appUrl}/dashboard`, 301);
     case "/job":
     case "/career":
       return NextResponse.redirect(
@@ -17,18 +19,18 @@ export async function middleware(request: NextRequest) {
         301
       );
     case "/developer":
-      return NextResponse.redirect("https://us.helicone.ai/developer", 301);
+      return NextResponse.redirect(`${appUrl}/developer`, 301);
     case "/features/customer-portal":
       return NextResponse.redirect(
         "https://docs.helicone.ai/features/customer-portal",
         301
       );
     case "/prompts":
-      return NextResponse.redirect("https://us.helicone.ai/prompts", 301);
+      return NextResponse.redirect(`${appUrl}/prompts`, 301);
     case "/requests":
-      return NextResponse.redirect("https://us.helicone.ai/requests", 301);
+      return NextResponse.redirect(`${appUrl}/requests`, 301);
     case "/roadmap":
-      return NextResponse.redirect("https://us.helicone.ai/roadmap", 301);
+      return NextResponse.redirect(`${appUrl}/roadmap`, 301);
   }
 
   // Continue to next middleware or page

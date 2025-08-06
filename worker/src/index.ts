@@ -106,6 +106,7 @@ export interface BASE_Env {
   REQUEST_LOGS_QUEUE_URL_LOW_PRIORITY?: string;
 
   QUEUE_PROVIDER?: "kafka" | "sqs" | "dual";
+  APP_URL?: string;
 }
 export type Env = BASE_Env & EU_Env;
 
