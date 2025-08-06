@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Image from "next/image";
 import { RenderImageWithPrettyInputKeys } from "../RenderImageWithPrettyInputKeys";
 import { ImageModal } from "./ImageModal";
 
@@ -33,17 +34,40 @@ export const ImageItem: React.FC<{
     ? `data:image/jpeg;base64,${imageUrl}`
     : imageUrl;
 
+  const handleOpenModal = () => setIsModalOpen(true);
+
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      handleOpenModal();
+    }
+  };
+
+  // Generate a descriptive alt text based on the image source
+  const getImageDescription = () => {
+    if (isBase64(imageUrl)) {
+      return "Base64 encoded image from API request or response - click or press Enter/Space to view full size";
+    }
+    return `Image from ${new URL(imageSrc).hostname} - click or press Enter/Space to view full size`;
+  };
+
   return (
     <>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img 
-        src={imageSrc} 
-        alt="" 
-        width={600} 
-        height={600}
-        className="cursor-pointer transition-opacity hover:opacity-90"
-        onClick={() => setIsModalOpen(true)}
-      />
+      <button
+        onClick={handleOpenModal}
+        onKeyDown={handleKeyDown}
+        className="cursor-pointer transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded p-0 border-0 bg-transparent"
+        aria-label="Open image in modal dialog"
+        type="button"
+      >
+        <Image
+          src={imageSrc}
+          alt={getImageDescription()}
+          width={600}
+          height={600}
+          className="rounded"
+        />
+      </button>
       
       <ImageModal
         isOpen={isModalOpen}

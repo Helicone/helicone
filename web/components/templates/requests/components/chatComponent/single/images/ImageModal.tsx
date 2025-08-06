@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect, useCallback, useRef } from "react";
 import ReactDOM from "react-dom";
 import { X, ZoomIn, ZoomOut, RotateCw, Maximize2 } from "lucide-react";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
@@ -16,6 +16,9 @@ export const ImageModal: React.FC<ImageModalProps> = ({
   imageSrc,
   alt = "",
 }) => {
+  // Store the original overflow value to restore it later
+  const originalOverflowRef = useRef<string | null>(null);
+  
   // Handle escape key
   const handleEscape = useCallback((e: KeyboardEvent) => {
     if (e.key === "Escape") {
@@ -27,16 +30,23 @@ export const ImageModal: React.FC<ImageModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
+      // Store original overflow value before changing it
+      originalOverflowRef.current = document.body.style.overflow || "";
+      
       // Use capture phase to handle event before other listeners
       document.addEventListener("keydown", handleEscape, true);
       // Prevent body scroll when modal is open
       document.body.style.overflow = "hidden";
+      
+      return () => {
+        document.removeEventListener("keydown", handleEscape, true);
+        // Restore the original overflow value only when modal was open
+        if (originalOverflowRef.current !== null) {
+          document.body.style.overflow = originalOverflowRef.current;
+          originalOverflowRef.current = null;
+        }
+      };
     }
-    
-    return () => {
-      document.removeEventListener("keydown", handleEscape, true);
-      document.body.style.overflow = "unset";
-    };
   }, [isOpen, handleEscape]);
 
   if (!isOpen) return null;
