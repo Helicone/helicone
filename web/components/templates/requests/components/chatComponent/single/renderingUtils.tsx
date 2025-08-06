@@ -10,19 +10,19 @@ export const OpenAIImage: React.FC<{
   isHeliconeTemplate?: boolean;
 }> = ({ imageUrl, selectedProperties, isHeliconeTemplate }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
+
   return (
     <>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img 
-        src={imageUrl} 
-        alt="" 
-        width={600} 
+      <img
+        src={imageUrl}
+        alt=""
+        width={600}
         height={600}
         className="cursor-pointer transition-opacity hover:opacity-90"
         onClick={() => setIsModalOpen(true)}
       />
-      
+
       <ImageModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

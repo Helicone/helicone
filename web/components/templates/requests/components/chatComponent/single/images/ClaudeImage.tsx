@@ -9,7 +9,7 @@ export const ClaudeImage: React.FC<{
 }> = ({ item, selectedProperties, isHeliconeTemplate }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const imageUrl = item.source.data;
-  
+
   if (isHeliconeTemplate) {
     return (
       <RenderImageWithPrettyInputKeys
@@ -18,19 +18,19 @@ export const ClaudeImage: React.FC<{
       />
     );
   }
-  
+
   return (
     <>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img 
-        src={imageUrl} 
-        alt="" 
-        width={600} 
+      <img
+        src={imageUrl}
+        alt=""
+        width={600}
         height={600}
         className="cursor-pointer transition-opacity hover:opacity-90"
         onClick={() => setIsModalOpen(true)}
       />
-      
+
       <ImageModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

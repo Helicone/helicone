@@ -6,7 +6,10 @@ export const RenderImageWithPrettyInputKeys = (props: {
   selectedProperties: Record<string, string> | undefined;
 }) => {
   const { text, selectedProperties } = props;
-  const [modalState, setModalState] = useState<{ isOpen: boolean; imageSrc: string }>({
+  const [modalState, setModalState] = useState<{
+    isOpen: boolean;
+    imageSrc: string;
+  }>({
     isOpen: false,
     imageSrc: "",
   });
@@ -40,13 +43,13 @@ export const RenderImageWithPrettyInputKeys = (props: {
 
       // eslint-disable-next-line @next/next/no-img-element
       parts.push(
-        <img 
+        <img
           key={`img-${keyName}-${offset}`}
-          src={renderText} 
-          alt={keyName} 
+          src={renderText}
+          alt={keyName}
           className="max-h-24 cursor-pointer transition-opacity hover:opacity-90"
           onClick={() => setModalState({ isOpen: true, imageSrc: renderText })}
-        />
+        />,
       );
 
       // Update lastIndex to the end of the current match
@@ -68,7 +71,7 @@ export const RenderImageWithPrettyInputKeys = (props: {
       <div className="text-md leading-8 text-black dark:text-white">
         {replaceInputKeysWithComponents(text)}
       </div>
-      
+
       <ImageModal
         isOpen={modalState.isOpen}
         onClose={() => setModalState({ isOpen: false, imageSrc: "" })}

@@ -18,26 +18,29 @@ export const ImageModal: React.FC<ImageModalProps> = ({
 }) => {
   // Store the original overflow value to restore it later
   const originalOverflowRef = useRef<string | null>(null);
-  
+
   // Handle escape key
-  const handleEscape = useCallback((e: KeyboardEvent) => {
-    if (e.key === "Escape") {
-      e.preventDefault();
-      e.stopPropagation();
-      onClose();
-    }
-  }, [onClose]);
+  const handleEscape = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        e.stopPropagation();
+        onClose();
+      }
+    },
+    [onClose],
+  );
 
   useEffect(() => {
     if (isOpen) {
       // Store original overflow value before changing it
       originalOverflowRef.current = document.body.style.overflow || "";
-      
+
       // Use capture phase to handle event before other listeners
       document.addEventListener("keydown", handleEscape, true);
       // Prevent body scroll when modal is open
       document.body.style.overflow = "hidden";
-      
+
       return () => {
         document.removeEventListener("keydown", handleEscape, true);
         // Restore the original overflow value only when modal was open
@@ -52,12 +55,10 @@ export const ImageModal: React.FC<ImageModalProps> = ({
   if (!isOpen) return null;
 
   const modalContent = (
-    <div 
-      className="fixed inset-0 z-[9999] flex items-center justify-center"
-    >
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/90" onClick={onClose} />
-      
+
       {/* Content */}
       <div className="relative z-10 flex h-full w-full items-center justify-center">
         <TransformWrapper
@@ -77,7 +78,7 @@ export const ImageModal: React.FC<ImageModalProps> = ({
           {({ zoomIn, zoomOut, resetTransform, centerView }) => (
             <>
               {/* Controls */}
-              <div className="absolute top-4 right-4 z-50 flex flex-col gap-2">
+              <div className="absolute right-4 top-4 z-50 flex flex-col gap-2">
                 {/* Close button */}
                 <button
                   onClick={onClose}
@@ -86,7 +87,7 @@ export const ImageModal: React.FC<ImageModalProps> = ({
                 >
                   <X className="h-5 w-5 text-white" />
                 </button>
-                
+
                 {/* Zoom controls */}
                 <div className="flex flex-col gap-2 rounded-lg bg-white/10 p-2 backdrop-blur-sm">
                   <button
@@ -119,14 +120,14 @@ export const ImageModal: React.FC<ImageModalProps> = ({
                   </button>
                 </div>
               </div>
-              
+
               {/* Instructions */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50 rounded-lg bg-white/10 px-4 py-2 backdrop-blur-sm">
+              <div className="absolute bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-white/10 px-4 py-2 backdrop-blur-sm">
                 <p className="text-sm text-white/80">
                   Scroll to zoom • Drag to pan • Double-click to zoom
                 </p>
               </div>
-              
+
               {/* Image container */}
               <TransformComponent
                 wrapperStyle={{
@@ -141,10 +142,10 @@ export const ImageModal: React.FC<ImageModalProps> = ({
                   justifyContent: "center",
                 }}
               >
-                <img 
-                  src={imageSrc} 
+                <img
+                  src={imageSrc}
                   alt={alt}
-                  className="max-w-[90vw] max-h-[90vh] object-contain"
+                  className="max-h-[90vh] max-w-[90vw] object-contain"
                   style={{ userSelect: "none" }}
                   draggable={false}
                 />
@@ -157,8 +158,5 @@ export const ImageModal: React.FC<ImageModalProps> = ({
   );
 
   // Render modal at document body level using Portal
-  return ReactDOM.createPortal(
-    modalContent,
-    document.body
-  );
+  return ReactDOM.createPortal(modalContent, document.body);
 };

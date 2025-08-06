@@ -56,7 +56,7 @@ export const ImageItem: React.FC<{
       <button
         onClick={handleOpenModal}
         onKeyDown={handleKeyDown}
-        className="cursor-pointer transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded p-0 border-0 bg-transparent"
+        className="cursor-pointer rounded border-0 bg-transparent p-0 transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
         aria-label="Open image in modal dialog"
         type="button"
       >
@@ -68,7 +68,7 @@ export const ImageItem: React.FC<{
           className="rounded"
         />
       </button>
-      
+
       <ImageModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

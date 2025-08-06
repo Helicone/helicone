@@ -188,7 +188,7 @@ const ImageContent: React.FC<{
   };
 }> = ({ message, options = {} }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
+
   let imageSrc = message.image_url;
   if (message.content && message.mime_type?.startsWith("image/")) {
     imageSrc = `data:${message.mime_type};base64,${message.content}`;
@@ -232,7 +232,7 @@ const ImageContent: React.FC<{
       >
         {imageElement}
       </ContentWrapper>
-      
+
       <ImageModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
