@@ -25,10 +25,10 @@ import { parseOpenAIStream } from "./streamParsers/openAIStreamParser";
 import { parseVercelStream } from "./streamParsers/vercelStreamParser";
 
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
-import { costOfPrompt } from "../../packages/cost";
+import { costOfPrompt } from "@helicone-package/cost";
 import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
 import { MessageData } from "../clients/producers/types";
-import { DEFAULT_UUID } from "../../packages/llm-mapper/types";
+import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
 
 export interface DBLoggableProps {
   response: {

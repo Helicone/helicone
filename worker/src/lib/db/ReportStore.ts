@@ -2,7 +2,7 @@ import { ClickhouseClientWrapper } from "./ClickhouseWrapper";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Result, err, ok } from "../util/results";
 import { Database } from "../../../supabase/database.types";
-import { clickhousePriceCalc } from "../../packages/cost";
+import { clickhousePriceCalc } from "@helicone-package/cost";
 
 export type Integration =
   Database["public"]["Tables"]["integrations"]["Row"] & {

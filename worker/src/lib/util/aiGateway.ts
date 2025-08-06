@@ -2,7 +2,7 @@ import { Env, Provider } from "../..";
 import { RequestWrapper } from "../RequestWrapper";
 import { APIKeysManager } from "../managers/APIKeysManager";
 import { APIKeysStore } from "../db/APIKeysStore";
-import { providers } from "../../packages/cost/providers/mappings";
+import { providers } from "@helicone-package/cost/providers/mappings";
 import { err, isErr, ok, Result } from "./results";
 import { ProviderKeysManager } from "../managers/ProviderKeysManager";
 import { toAnthropic } from "../clients/llmmapper/providers/openai/request/toAnthropic";
