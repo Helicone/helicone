@@ -124,7 +124,7 @@ export class ClickhouseClientWrapper {
           allow_ddl: 0,
         } as ClickHouseSettings,
       });
-      return { data: await queryResult.json<T>(), error: null };
+      return { data: await queryResult.json<T[]>(), error: null };
     } catch (err) {
       console.error("Error executing HQL query with context: ", query, organizationId, parameters);
       console.error(err);
