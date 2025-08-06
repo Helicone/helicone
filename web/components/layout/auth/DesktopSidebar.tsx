@@ -2,6 +2,7 @@ import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProF
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useLocalStorage } from "@/services/hooks/localStorage";
+import { useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
 import {
   Bars3Icon,
   ChevronLeftIcon,
@@ -41,6 +42,7 @@ const DesktopSidebar = ({
 }: SidebarProps) => {
   const orgContext = useOrg();
   const router = useRouter();
+  const { hasKeys, hasProviderKeys } = useOrgOnboarding(orgContext?.currentOrg?.id ?? "");
 
   const [isCollapsed, setIsCollapsed] = useLocalStorage(
     "isSideBarCollapsed",
@@ -255,6 +257,32 @@ const DesktopSidebar = ({
             <div className="mb-2 flex h-full flex-1 flex-col justify-between overflow-y-auto">
               {/* Navigation items */}
               <div className="flex flex-col">
+                {/* Quickstart Card - Only show if organization hasn't integrated */}
+                {orgContext?.currentOrg?.has_integrated === false && !isCollapsed && (
+                  <div
+                    onClick={() => router.push("/quickstart")}
+                    className="mx-2 cursor-pointer rounded-lg border border-slate-200 bg-sidebar-background p-3 dark:border-slate-800"
+                  >
+                    <p className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                      Quickstart
+                    </p>
+                    <div className="space-y-1">
+                      <div className={`inline-flex items-center text-xs ${hasProviderKeys ? 'text-muted-foreground line-through' : !hasProviderKeys ? 'text-slate-600 dark:text-slate-400 border-b-2 border-primary' : 'text-slate-600 dark:text-slate-400'}`}>
+                        <span className={`mr-2 text-xs ${hasProviderKeys ? 'text-muted-foreground' : 'text-slate-500'}`}>1.</span>
+                        Add provider key
+                      </div>
+                      <div className={`inline-flex items-center text-xs ${hasKeys ? 'text-muted-foreground line-through' : hasProviderKeys && !hasKeys ? 'text-slate-600 dark:text-slate-400 border-b-2 border-primary' : 'text-slate-600 dark:text-slate-400'}`}>
+                        <span className={`mr-2 text-xs ${hasKeys ? 'text-muted-foreground' : 'text-slate-500'}`}>2.</span>
+                        Create Helicone API key
+                      </div>
+                      <div className={`inline-flex items-center text-xs ${hasProviderKeys && hasKeys ? 'text-slate-600 dark:text-slate-400 border-b-2 border-primary' : 'text-slate-600 dark:text-slate-400'}`}>
+                        <span className="mr-2 text-xs text-slate-500">3.</span>
+                        Integrate
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
                 <div
                   ref={navItemsRef}
                   data-collapsed={isCollapsed}
