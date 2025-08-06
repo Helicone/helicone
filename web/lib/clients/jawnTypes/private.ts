@@ -810,12 +810,16 @@ Json: JsonObject;
       error: null;
     };
     "Result_OrganizationOwner-Array.string_": components["schemas"]["ResultSuccess_OrganizationOwner-Array_"] | components["schemas"]["ResultError_string_"];
+    QuickStartChecklist: {
+      hasViewedRequests: boolean;
+    };
     /** @description Make all properties in T optional */
-    "Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--hasIntegrated-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___": {
+    "Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--hasIntegrated-boolean--quickStartChecklist-QuickStartChecklist--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___": {
       currentStep?: string;
       selectedTier?: string;
       hasOnboarded?: boolean;
       hasIntegrated?: boolean;
+      quickStartChecklist?: components["schemas"]["QuickStartChecklist"];
       members?: unknown[];
       addons?: {
         evals: boolean;
@@ -823,7 +827,7 @@ Json: JsonObject;
         prompts: boolean;
       };
     };
-    OnboardingStatus: components["schemas"]["Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--hasIntegrated-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___"];
+    OnboardingStatus: components["schemas"]["Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--hasIntegrated-boolean--quickStartChecklist-QuickStartChecklist--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___"];
     EvaluatorResult: {
       id: string;
       created_at: string;
