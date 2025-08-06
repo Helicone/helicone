@@ -10,20 +10,11 @@ import { type Model } from "../../types";
 export type AnthropicModelName =
   | "claude-opus-4-1"
   | "claude-opus-4"
-  // | "claude-sonnet-4"  // TODO: Add endpoints
-  // | "claude-3.7-sonnet"  // TODO: Add endpoints
-  // | "claude-3.7-sonnet:thinking"  // TODO: Add endpoints
-  // | "claude-3.7-sonnet:beta"  // TODO: Add endpoints
-  // | "claude-3.5-haiku-20241022"  // TODO: Add endpoints
-  // | "claude-3.5-haiku:beta"  // TODO: Add endpoints
-  // | "claude-3.5-haiku"  // TODO: Add endpoints
-  // | "claude-3.5-sonnet:beta"  // TODO: Add endpoints
+  | "claude-sonnet-4"
+  | "claude-3.7-sonnet"
+  | "claude-3.5-haiku"
   | "claude-3.5-sonnet"
-  // | "claude-3.5-sonnet-20240620:beta"  // TODO: Add endpoints
-  // | "claude-3.5-sonnet-20240620"  // TODO: Add endpoints
-  // | "claude-3-haiku:beta"  // TODO: Add endpoints
   | "claude-3-haiku"
-  // | "claude-3-opus:beta"  // TODO: Add endpoints
   | "claude-3-opus";
 
 export const anthropicModels = {
@@ -32,10 +23,10 @@ export const anthropicModels = {
     name: "Anthropic: Claude Opus 4.1",
     author: "anthropic",
     description:
-      "Claude Opus 4.1 is an enhanced version of Claude Opus 4, maintaining the same exceptional coding and reasoning capabilities with improved performance and reliability. It continues to excel in software engineering tasks and extended agent workflows.",
+      "Our most capable model with the highest level of intelligence and capability. Supports extended thinking, multilingual capabilities, and vision processing. Moderately fast latency with 32,000 max output tokens. Training data cut-off: March 2025. API model name: claude-opus-4-1-20250805",
     contextLength: 200000,
     maxOutputTokens: 32000,
-    created: "2025-06-24T00:00:00.000Z",
+    created: "2025-08-05T00:00:00.000Z",
     modality: "text+image->text",
     tokenizer: "Claude",
   },
@@ -45,10 +36,36 @@ export const anthropicModels = {
     name: "Anthropic: Claude Opus 4",
     author: "anthropic",
     description:
-      "Claude Opus 4 is benchmarked as the world's best coding model, at time of release, bringing sustained performance on complex, long-running tasks and agent workflows. It sets new benchmarks in software engineering, achieving leading results on SWE-bench (72.5%) and Terminal-bench (43.2%). Opus 4 supports extended, agentic workflows, handling thousands of task steps continuously for hours without degradation.\n\nRead more at the [blog post here](https://www.anthropic.com/news/claude-4)",
+      "Our previous flagship model with very high intelligence and capability. Supports extended thinking, multilingual capabilities, and vision processing. Moderately fast latency with 32,000 max output tokens. Training data cut-off: March 2025. API model name: claude-opus-4-20250514",
     contextLength: 200000,
     maxOutputTokens: 32000,
-    created: "2025-05-22T16:27:25.000Z",
+    created: "2025-05-14T00:00:00.000Z",
+    modality: "text+image->text",
+    tokenizer: "Claude",
+  },
+
+  "claude-sonnet-4": {
+    id: "claude-sonnet-4",
+    name: "Anthropic: Claude Sonnet 4",
+    author: "anthropic",
+    description:
+      "High-performance model with high intelligence and balanced performance. Supports extended thinking, multilingual capabilities, and vision processing. Fast latency with 64,000 max output tokens. API model name: claude-sonnet-4-20250514",
+    contextLength: 200000,
+    maxOutputTokens: 64000,
+    created: "2025-05-14T00:00:00.000Z",
+    modality: "text+image->text",
+    tokenizer: "Claude",
+  },
+
+  "claude-3.7-sonnet": {
+    id: "claude-3.7-sonnet",
+    name: "Anthropic: Claude 3.7 Sonnet",
+    author: "anthropic",
+    description:
+      "High-performance model with toggleable extended thinking for complex reasoning tasks. Combines high intelligence with the ability to think through problems step-by-step. Fast latency with 64,000 max output tokens. API model name: claude-3-7-sonnet-20250219",
+    contextLength: 200000,
+    maxOutputTokens: 64000,
+    created: "2025-02-19T00:00:00.000Z",
     modality: "text+image->text",
     tokenizer: "Claude",
   },
@@ -58,10 +75,23 @@ export const anthropicModels = {
     name: "Anthropic: Claude 3.5 Sonnet",
     author: "anthropic",
     description:
-      "Claude 3.5 Sonnet delivers better-than-Opus capabilities, faster-than-Sonnet speeds, at the same Sonnet prices. Sonnet 3.5 brings particularly large improvements in coding, with an Aider benchmark score of 18.9%, compared to Claude 3 Opus's score of 13.8%.\n\nOut of all models currently available on the market, Claude 3.5 Sonnet shows the strongest vision capabilities, and it surpasses Claude 3 Opus on inference speed for the vast majority of workloads.",
+      "Our previous intelligent model with high level of intelligence and capability. Fast latency with multilingual and vision capabilities, but no extended thinking. 8,192 max output tokens. Training data cut-off: April 2024. Upgraded version API: claude-3-5-sonnet-20241022, Previous version API: claude-3-5-sonnet-20240620",
     contextLength: 200000,
     maxOutputTokens: 8192,
-    created: "2024-06-25T16:10:36.000Z",
+    created: "2024-10-22T00:00:00.000Z",
+    modality: "text+image->text",
+    tokenizer: "Claude",
+  },
+
+  "claude-3.5-haiku": {
+    id: "claude-3.5-haiku",
+    name: "Anthropic: Claude 3.5 Haiku",
+    author: "anthropic",
+    description:
+      "Our fastest model. Intelligence at blazing speeds. Multilingual and vision capabilities. 8,192 max output tokens. Training data cut-off: July 2024. API model name: claude-3-5-haiku-20241022",
+    contextLength: 200000,
+    maxOutputTokens: 8192,
+    created: "2024-10-22T00:00:00.000Z",
     modality: "text+image->text",
     tokenizer: "Claude",
   },
@@ -71,7 +101,7 @@ export const anthropicModels = {
     name: "Anthropic: Claude 3 Haiku",
     author: "anthropic",
     description:
-      "Claude 3 Haiku is Anthropic's fastest, most compact model for near-instant responsiveness. It answers simple queries and requests with speed.",
+      "Fast and compact model for near-instant responsiveness with quick and accurate targeted performance. Multilingual and vision capabilities. 4,096 max output tokens. Training data cut-off: August 2023. API model name: claude-3-haiku-20240307",
     contextLength: 200000,
     maxOutputTokens: 4096,
     created: "2024-03-07T00:00:00.000Z",
@@ -84,14 +114,13 @@ export const anthropicModels = {
     name: "Anthropic: Claude 3 Opus",
     author: "anthropic",
     description:
-      "Claude 3 Opus is Anthropic's strongest model, with best-in-market performance on highly complex tasks. It can navigate open-ended prompts and sight-unseen scenarios with remarkable fluency and human-like understanding.",
+      "Very high intelligence and capability model. No extended thinking support, no priority tier access. Multilingual and vision capabilities. 4,096 max output tokens. Training data cut-off: August 2023. API model name: claude-3-opus-20240229",
     contextLength: 200000,
     maxOutputTokens: 4096,
     created: "2024-02-29T00:00:00.000Z",
     modality: "text+image->text",
     tokenizer: "Claude",
   },
-
 } satisfies Record<AnthropicModelName, Model>;
 
 export default anthropicModels;

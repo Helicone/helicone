@@ -127,7 +127,11 @@ export interface ModelPricing {
   completion: number;
   image?: number;
   cacheRead?: number | null;
-  cacheWrite?: number | null;
+  cacheWrite?: number | {
+    "5m": number;
+    "1h": number;
+    default?: number;
+  } | null;
   thinking?: number;
 }
 

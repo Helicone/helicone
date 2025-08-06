@@ -15,7 +15,7 @@ export interface ProviderConfig {
   apiVersion?: string;
   endpoints: Record<string, ProviderEndpoint | string>;
 }
-export const providers: Record<string, ProviderConfig> = {
+export const providers = {
   anthropic: {
     name: "Anthropic",
     baseUrl: "https://api.anthropic.com",
@@ -198,10 +198,12 @@ export const providers: Record<string, ProviderConfig> = {
       models: "/v1/models/{owner}/{name}/predictions",
     },
   },
-} as const;
+} as const satisfies Record<string, ProviderConfig>;
 
 export function getProvider(providerId: string): ProviderConfig | undefined {
-  return providers[providerId];
+  return providers[providerId as keyof typeof providers] as
+    | ProviderConfig
+    | undefined;
 }
 
 export function buildEndpointUrl(
@@ -209,7 +211,9 @@ export function buildEndpointUrl(
   endpointType: string,
   params?: Record<string, string>
 ): string | null {
-  const provider = providers[providerId];
+  const provider = providers[providerId as keyof typeof providers] as
+    | ProviderConfig
+    | undefined;
   if (!provider) return null;
 
   const endpoint = provider.endpoints[endpointType];
@@ -235,24 +239,32 @@ export function isDetailedEndpoint(
 }
 
 export function buildBedrockModelId(
-  endpoint: { providerModelId?: string; baseModelId?: string; supportsDynamicRegion?: boolean },
+  endpoint: {
+    providerModelId?: string;
+    baseModelId?: string;
+    supportsDynamicRegion?: boolean;
+  },
   options?: {
     region?: string;
     crossRegion?: boolean;
   }
 ): string {
   // If not dynamic region or no BYOK options, return the managed model ID
-  if (!endpoint.supportsDynamicRegion || !options?.region || !endpoint.baseModelId) {
-    return endpoint.providerModelId || '';
+  if (
+    !endpoint.supportsDynamicRegion ||
+    !options?.region ||
+    !endpoint.baseModelId
+  ) {
+    return endpoint.providerModelId || "";
   }
-  
+
   // For BYOK with cross-region enabled
   if (options.crossRegion) {
     // Extract the region prefix (e.g., "us" from "us-east-1")
-    const regionPrefix = options.region.split('-')[0];
+    const regionPrefix = options.region.split("-")[0];
     return `${regionPrefix}.${endpoint.baseModelId}`;
   }
-  
+
   // For BYOK without cross-region
   return endpoint.baseModelId;
 }
