@@ -76,8 +76,8 @@ Here's a complete example of logging a request to a custom model:
 
 ```bash
 curl -X POST https://api.worker.helicone.ai/custom/v1/log \
--H 'Authorization: Bearer your_api_key' \
--H 'Content-Type: application/json' \
+-H "Authorization: Bearer your_api_key" \
+-H "Content-Type: application/json" \
 -d '{
   "providerRequest": {
     "url": "custom-model-nopath",

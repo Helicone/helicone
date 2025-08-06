@@ -163,8 +163,8 @@ Bash exmaple
 ```bash
 curl --request POST \
   --url https://api.helicone.ai/v1/prompt/helicone-test/compile \
-  --header 'Content-Type: application/json' \
-  --header 'authorization: sk-helicone-n4vqkhi-gg6exli-teictoi-aw7azyy' \
+  --header "Content-Type: application/json" \
+  --header "authorization: $HELICONE_API_KEY" \
   --data '{
   "filter": "all",
   "includeExperimentVersions": false,

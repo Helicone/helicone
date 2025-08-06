@@ -183,7 +183,7 @@ const openai = new OpenAI({
       });
 
       const chatCompletion = await openai.chat.completion.create({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o-mini",
         messages: [{ role: "user", content: "Hello world" }],
       });
 
@@ -197,7 +197,7 @@ const openai = new OpenAI({
 
     ```typescript
     const { data, response } = await openai.chat.completion.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o-mini",
       messages: [{ role: "user", content: "Hello world" }],
     }).withResponse();
 
@@ -248,11 +248,11 @@ Here is an example cURL command:
   ```bash
         curl --request POST \
             --url https://oai.helicone.ai/v1/chat/completions \
-            --header 'Authorization: Bearer <<YOUR_OPENAI_API_KEY>>' \
-            --header 'Content-Type: application/json' \
-            --header 'Helicone-Auth: Bearer <<YOUR_HELICONE_API_KEY>>' \
+            --header "Authorization: Bearer $OPENAI_API_KEY" \
+            --header "Content-Type: application/json" \
+            --header "Helicone-Auth: Bearer $HELICONE_API_KEY" \
             --data '{
-                "model": "gpt-3.5-turbo",
+                "model": "gpt-4o-mini",
                 "messages": [
                     {
                         "role": "system",
@@ -260,7 +260,7 @@ Here is an example cURL command:
                     }
                 ],
                 "temperature": 1,
-                "max_tokens": 10
+                "max_tokens": 30
         }'
   ```
 
@@ -298,7 +298,7 @@ Modify the API base and add a Helicone-Auth header
 
     ```typescript
     const llm = new OpenAI({
-      modelName: "gpt-3.5-turbo",
+      modelName: "gpt-4o-mini",
       configuration: {
         basePath: "https://oai.helicone.ai/v1",
         defaultHeaders: {

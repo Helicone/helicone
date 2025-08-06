@@ -28,9 +28,9 @@ iconType: "solid"
     Use the following cURL command to send a request to the Google Generative AI API through the Helicone proxy:
     ```bash
     curl --request POST \
-      --url "https://gateway.helicone.ai/v1beta/models/model-name:generateContent?key=${GOOGLE_GENERATIVE_API_KEY}" \
+      --url "https://gateway.helicone.ai/v1beta/models/$MODEL_NAME:generateContent?key=$GOOGLE_GENERATIVE_API_KEY" \
       --header "Content-Type: application/json" \
-      --header "Helicone-Auth: Bearer ${HELICONE_API_KEY}" \
+      --header "Helicone-Auth: Bearer $HELICONE_API_KEY" \
       --header "Helicone-Target-URL: https://generativelanguage.googleapis.com" \
       --data '{
         "contents": [{

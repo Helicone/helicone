@@ -57,7 +57,7 @@ fetch("https://openrouter.helicone.ai/api/v1/chat/completions", {
     "Content-Type": "application/json",
   },
   body: JSON.stringify({
-    model: "openai/gpt-3.5-turbo", // Optional (user controls the default),
+    model: "openai/gpt-4o-mini", // Optional (user controls the default),
     messages: [{ role: "user", content: "What is the meaning of life?" }],
     stream: true,
   }),

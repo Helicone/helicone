@@ -18,10 +18,10 @@ You can follow their documentation here: [https://api-docs.x.ai/](https://api-do
     Log into https://console.x.ai/ or create an account. Once you have an account, you
     can generate an API key from your dashboard.
   </Step>
-  <Step title="Set HELICONE_API_KEY and X_API_KEY as environment variable">
+  <Step title="Set HELICONE_API_KEY and XAI_API_KEY as environment variables">
 ```javascript
 HELICONE_API_KEY=<your API key>
-X_API_KEY=<your API key>
+XAI_API_KEY=<your API key>
 ```
   </Step>
   <Step title="Modify the base URL and add Auth headers">
@@ -33,7 +33,8 @@ Replace the following X AI URL with the Helicone Gateway URL:
 and then add the following authentication headers:
 
 ```javascript
-Authorization: Bearer <your API key>
+Authorization: Bearer $XAI_API_KEY
+Helicone-Auth: Bearer $HELICONE_API_KEY
 ```
 
 </Step>
@@ -44,14 +45,25 @@ Now you can access all the models on X AI with a simple fetch call:
 ## Example
 
 ```bash
-curl \
-  --header 'Authorization: Bearer <X_API_KEY>' \
-  --header 'Content-Type: application/json' \
-  --data '{
-    "model": "grok-beta",
-    "messages": [{"role": "user", "content": "Say this is a test"}]
-}' \
-  --url https://x.helicone.ai/chat/completions
+curl --request POST \
+      --url https://x.helicone.ai/v1/chat/completions \
+      --header "Content-Type: application/json" \
+      --header "Authorization: Bearer $XAI_API_KEY" \
+      --header "Helicone-Auth: Bearer $HELICONE_API_KEY" \
+      --data '{
+          "model": "grok-4-latest",
+          "messages": [
+              {
+                  "role": "system",
+                  "content": "You are a robot called Marvin with a brain the size of the planet."
+              },
+              {
+                  "role": "user",
+                  "content": "Say this is a test"
+              }
+          ],
+          "temperature": 1
+        }'
 ```
 
 For more information on how to use headers, see [Helicone Headers](https://docs.helicone.ai/helicone-headers/header-directory#utilizing-headers) docs.

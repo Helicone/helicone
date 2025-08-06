@@ -85,7 +85,7 @@ import { strings } from "/snippets/strings.mdx";
               "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
             },
             body: JSON.stringify({
-              model: "gpt-3.5-turbo",
+              model: "gpt-4o-mini",
               messages: [
                 {
                   role: "user",
@@ -146,7 +146,7 @@ import { strings } from "/snippets/strings.mdx";
               "Authorization": f"Bearer {os.getenv('OPENAI_API_KEY')}"
           },
           json={
-              "model": "gpt-3.5-turbo",
+              "model": "gpt-4o-mini",
               "messages": [
                   {
                       "role": "user",

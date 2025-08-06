@@ -1,0 +1,80 @@
+---
+title: "xAI with OpenAI JavaScript SDK"
+sidebarTitle: "JavaScript"
+description: "Use the OpenAI JavaScript SDK to integrate with xAI via Helicone to log your xAI usage."
+"twitter:title": "xAI with OpenAI JavaScript SDK - Helicone OSS LLM Observability"
+icon: "js"
+iconType: "solid"
+---
+
+import GenerateKey from "/snippets/generate-key.mdx";
+import { strings } from "/snippets/strings.mdx";
+
+This integration is used to log usage with the [xAI](https://x.ai) API.
+
+## {strings.howToIntegrate}
+
+<Steps>
+  <Step title={strings.generateKey}>
+    <div dangerouslySetInnerHTML={{ __html: strings.generateKeyInstructions }} />
+  </Step>
+
+  <Step title={strings.setApiKey}>
+    ```javascript
+    HELICONE_API_KEY=<your-helicone-api-key>
+    XAI_API_KEY=<your-xai-api-key>
+    ```
+  </Step>
+
+  <Step title={strings.modifyBasePath}>
+
+    ```javascript OpenAI SDK
+    import OpenAI from "openai";
+
+    const openai = new OpenAI({
+      apiKey: process.env.XAI_API_KEY,
+      baseURL: "https://x.helicone.ai/v1",
+      defaultHeaders: {
+        "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`
+      }
+    });
+
+    const response = await openai.chat.completions.create({
+      model: "grok-4-latest",
+      messages: [{ role: "user", content: "Hello, how are you?" }],
+      max_tokens: 1024,
+      temperature: 0.7
+    });
+
+    console.log(response);
+    ```
+
+  </Step>
+
+  <Step title={strings.verifyInHelicone}>
+    <div dangerouslySetInnerHTML={{ __html: strings.verifyInHeliconeDesciption("xAI") }} />
+  </Step>
+</Steps>
+
+## {strings.relatedGuides}
+
+<CardGroup cols={2}>
+  <Card
+    title="Building a chatbot with structured outputs"
+    icon="lightbulb"
+    href="/guides/cookbooks/openai-structured-outputs"
+    iconType="light"
+    vertical
+  >
+    {strings.chatbotCookbookDescription}
+  </Card>
+  <Card
+    title="How to Prompt Thinking Models Effectively"
+    icon="arrows-rotate"
+    href="/guides/cookbooks/prompt-thinking-models"
+    iconType="light"
+    vertical
+  >
+    {strings.howToPromptThinkingModelsCookbookDescription}
+  </Card>
+</CardGroup> 

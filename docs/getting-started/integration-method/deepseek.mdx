@@ -44,14 +44,22 @@ Now you can access all the models on DeepSeek AI with a simple fetch call:
 ## Example
 
 ```bash
-curl \
-  --header 'Authorization: Bearer <DEEPSEEK_API_KEY>' \
-  --header 'Content-Type: application/json' \
-  --data '{
-    "model": "deepseek-chat",
-    "messages": [{"role": "user", "content": "Say this is a test"}]
-}' \
-  --url https://deepseek.helicone.ai/chat/completions
+curl --request POST \
+      --url https://deepseek.helicone.ai/chat/completions \
+      --header 'Content-Type: application/json' \
+      --header "Authorization: Bearer $DEEPSEEK_API_KEY" \
+      --header "Helicone-Auth: Bearer $HELICONE_API_KEY" \
+      --data '{
+          "model": "deepseek-chat",
+          "messages": [
+              {
+                  "role": "system",
+                  "content": "Say Hello!"
+              }
+          ],
+          "temperature": 1,
+          "max_tokens": 30
+        }'
 ```
 
 For more information on how to use headers, see [Helicone Headers](https://docs.helicone.ai/helicone-headers/header-directory#utilizing-headers) docs.

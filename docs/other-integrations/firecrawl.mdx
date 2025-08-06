@@ -37,11 +37,11 @@ Firecrawl is a powerful web scraping and crawling tool designed for AI applicati
     ```bash
     curl --request POST \
       --url https://firecrawl.helicone.ai/v0/scrape \
-      --header 'Helicone-Auth: YOUR_HELICONE_API_KEY' \
-      --header 'Authorization: Bearer YOUR_FIRECRAWL_API_KEY' \
-      --header 'Helicone-Target-Url: https://api.firecrawl.dev' \
-      --header 'Helicone-Target-Provider: Firecrawl' \
-      --header 'content-type: application/json' \
+      --header "Helicone-Auth: YOUR_HELICONE_API_KEY" \
+      --header "Authorization: Bearer YOUR_FIRECRAWL_API_KEY" \
+      --header "Helicone-Target-Url: https://api.firecrawl.dev" \
+      --header "Helicone-Target-Provider: Firecrawl" \
+      --header "content-type: application/json" \
       --data '{
         "url": "firecrawl.dev"
       }'

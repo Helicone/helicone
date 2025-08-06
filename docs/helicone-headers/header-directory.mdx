@@ -8,10 +8,10 @@ description: "Comprehensive guide to all Helicone headers. Learn how to access a
 <CodeGroup>
 
 ```bash Curl
-curl https://gateway.helicone.ai/v1/completions \
-  -H 'Content-Type: application/json' \
-  -H 'Helicone-Auth: Bearer HELICONE_API_KEY' \ # required header
-  -H 'Helicone-<HEADER>: <VALUE>' # all headers will follow this format
+curl https://gateway.helicone.ai/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Helicone-Auth: Bearer $HELICONE_API_KEY" \
+  -H "Helicone-<HEADER>: <VALUE>"
   -d ...
 ```
 

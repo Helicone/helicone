@@ -24,12 +24,12 @@ iconType: "solid"
     Use the following CURL command to send a request to the Vertex AI API through the Helicone proxy:
     ```bash
     curl --request POST \
-      --url https://gateway.helicone.ai/v1/projects/your-project-id/locations/your-location/publishers/google/models/model-name:streamGenerateContent \
-      --header 'Authorization: Bearer ${GCLOUD_API_KEY}' \
-      --header 'Content-Type: application/json' \
-      --header 'Helicone-Auth: Bearer ${HELICONE_API_KEY}' \
-      --header 'Helicone-Target-URL: https://${LOCATION}-aiplatform.googleapis.com' \
-      --header 'User-Agent: curl/7.64.1' \
+      --url "https://gateway.helicone.ai/v1/projects/$PROJECT_ID/locations/$LOCATION/publishers/google/models/$MODEL_NAME:streamGenerateContent" \
+      --header "Authorization: Bearer $GCLOUD_API_KEY" \
+      --header "Content-Type: application/json" \
+      --header "Helicone-Auth: Bearer $HELICONE_API_KEY" \
+      --header "Helicone-Target-URL: https://$LOCATION-aiplatform.googleapis.com" \
+      --header "User-Agent: curl/7.64.1" \
       --data '{
       "contents": {
         "role": "user",

@@ -70,7 +70,7 @@ file = openai.File.create(
 # Create fine-tuning job
 job = openai.FineTuningJob.create(
   training_file=file.id,
-  model="gpt-3.5-turbo"
+  model="gpt-4o-mini"
 )
 ```
 </Step>
@@ -258,7 +258,7 @@ const legalDataset = await helicone.datasets.create({
 
 // Fine-tune with platform-specific parameters
 const fineTuneJob = await openai.fineTuning.create({
-  model: "gpt-3.5-turbo",
+  model: "gpt-4o-mini",
   trainingFile: legalDataset.exportedFileId,
   hyperparameters: {
     nEpochs: 3,
@@ -353,13 +353,13 @@ const qualityDataset = {
 // Track fine-tuned model performance
 const response = await openai.chat.completions.create(
   {
-    model: "ft:gpt-3.5-turbo:org-name:model-name:id",
+    model: "ft:gpt-4o-mini:org-name:model-name:id",
     messages: [{ role: "user", content: prompt }]
   },
   {
     headers: {
       "Helicone-Property-Model-Type": "fine-tuned",
-      "Helicone-Property-Base-Model": "gpt-3.5-turbo",
+      "Helicone-Property-Base-Model": "gpt-4o-mini",
       "Helicone-Property-Training-Job": "ftjob-123"
     }
   }
