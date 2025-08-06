@@ -10,7 +10,7 @@ repository = "https://github.com/Helicone/helicone/tree/main/sdk/python/helpers"
 [tool.poetry.dependencies]
 python = "^3.8"
 requests = "^2.32.3"
-httpx = "^0.27.2"
+httpx = "^0.28.0"
 
 
 [build-system]
