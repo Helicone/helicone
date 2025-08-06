@@ -1,15 +1,35 @@
 import { Message } from "@helicone-package/llm-mapper/types";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { JsonRenderer } from "./JsonRenderer";
 import { isJSON } from "@helicone-package/llm-mapper/utils/contentHelpers";
+import { ImageModal } from "./images/ImageModal";
 
 export const OpenAIImage: React.FC<{
   imageUrl: string;
   selectedProperties?: Record<string, string>;
   isHeliconeTemplate?: boolean;
 }> = ({ imageUrl, selectedProperties, isHeliconeTemplate }) => {
-  // eslint-disable-next-line @next/next/no-img-element
-  return <img src={imageUrl} alt="" width={600} height={600} />;
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  return (
+    <>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img 
+        src={imageUrl} 
+        alt="" 
+        width={600} 
+        height={600}
+        className="cursor-pointer transition-opacity hover:opacity-90"
+        onClick={() => setIsModalOpen(true)}
+      />
+      
+      <ImageModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        imageSrc={imageUrl}
+      />
+    </>
+  );
 };
 
 export const UnsupportedImage: React.FC = () => (

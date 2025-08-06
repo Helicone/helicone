@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { RenderImageWithPrettyInputKeys } from "../RenderImageWithPrettyInputKeys";
+import { ImageModal } from "./ImageModal";
 
 const isBase64 = (str: string): boolean => {
   try {
@@ -17,6 +18,8 @@ export const ImageItem: React.FC<{
   selectedProperties?: Record<string, string>;
   isHeliconeTemplate?: boolean;
 }> = ({ imageUrl, selectedProperties, isHeliconeTemplate }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   if (isHeliconeTemplate) {
     return (
       <RenderImageWithPrettyInputKeys
@@ -30,6 +33,23 @@ export const ImageItem: React.FC<{
     ? `data:image/jpeg;base64,${imageUrl}`
     : imageUrl;
 
-  // eslint-disable-next-line @next/next/no-img-element
-  return <img src={imageSrc} alt="" width={600} height={600} />;
+  return (
+    <>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img 
+        src={imageSrc} 
+        alt="" 
+        width={600} 
+        height={600}
+        className="cursor-pointer transition-opacity hover:opacity-90"
+        onClick={() => setIsModalOpen(true)}
+      />
+      
+      <ImageModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        imageSrc={imageSrc}
+      />
+    </>
+  );
 };
