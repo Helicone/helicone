@@ -114,8 +114,7 @@ services:
       FLYWAY_URL: jdbc:postgresql://db:5432/helicone_test
       FLYWAY_USER: postgres
       FLYWAY_PASSWORD: testpassword
-      CLICKHOUSE_HOST: clickhouse
-      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_HOST: http://clickhouse:8123
       CLICKHOUSE_USER: default
     volumes:
       - ../supabase:/app/supabase
