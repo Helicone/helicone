@@ -2,13 +2,12 @@
  * Anthropic endpoint configurations
  */
 
-import type { ModelEndpoint } from "../../types";
+import type { ModelEndpointMap } from "../../types";
 import type { AnthropicModelName } from "./models";
 
 export const anthropicEndpoints = {
-  "claude-opus-4-1": [
-    {
-      provider: "anthropic",
+  "claude-opus-4-1": {
+    anthropic: {
       providerModelId: "claude-opus-4-1-20250805",
       pricing: {
         prompt: 15,
@@ -33,10 +32,8 @@ export const anthropicEndpoints = {
         "tool_choice",
       ],
     },
-    {
-      provider: "vertex",
+    vertex: {
       providerModelId: "claude-opus-4-1@20250805",
-      tag: "vertex",
       pricing: {
         prompt: 15,
         completion: 75,
@@ -60,10 +57,8 @@ export const anthropicEndpoints = {
         "tool_choice",
       ],
     },
-    {
-      provider: "bedrock",
+    bedrock: {
       providerModelId: "us.anthropic.claude-opus-4-1-20250805-v1:0",
-      tag: "bedrock",
       supportsDynamicRegion: true,
       baseModelId: "anthropic.claude-opus-4-1-20250805-v1:0",
       pricing: {
@@ -74,7 +69,7 @@ export const anthropicEndpoints = {
         cacheWrite: {
           "5m": 18.75,
           "1h": 30,
-          default: 18.75
+          default: 18.75,
         },
       },
       contextLength: 200000,
@@ -91,10 +86,9 @@ export const anthropicEndpoints = {
         "stop",
       ],
     },
-  ],
-  "claude-opus-4": [
-    {
-      provider: "anthropic",
+  },
+  "claude-opus-4": {
+    anthropic: {
       providerModelId: "claude-opus-4-20250514",
       pricing: {
         prompt: 15,
@@ -119,10 +113,8 @@ export const anthropicEndpoints = {
         "tool_choice",
       ],
     },
-    {
-      provider: "vertex",
+    vertex: {
       providerModelId: "claude-opus-4@20250514",
-      tag: "vertex",
       pricing: {
         prompt: 15,
         completion: 75,
@@ -146,11 +138,9 @@ export const anthropicEndpoints = {
         "tool_choice",
       ],
     },
-    {
-      provider: "bedrock",
+    bedrock: {
       providerModelId: "us.anthropic.claude-opus-4-20250514-v1:0",
       model: "claude-4-opus-20250522",
-      tag: "bedrock",
       supportsDynamicRegion: true,
       baseModelId: "anthropic.claude-opus-4-20250514-v1:0",
       pricing: {
@@ -178,10 +168,9 @@ export const anthropicEndpoints = {
         "stop",
       ],
     },
-  ],
-  "claude-sonnet-4": [
-    {
-      provider: "anthropic",
+  },
+  "claude-sonnet-4": {
+    anthropic: {
       providerModelId: "claude-sonnet-4-20250514",
       pricing: {
         prompt: 5,
@@ -206,10 +195,8 @@ export const anthropicEndpoints = {
         "tool_choice",
       ],
     },
-    {
-      provider: "vertex",
+    vertex: {
       providerModelId: "claude-sonnet-4@20250514",
-      tag: "vertex",
       pricing: {
         prompt: 5,
         completion: 25,
@@ -233,10 +220,8 @@ export const anthropicEndpoints = {
         "tool_choice",
       ],
     },
-    {
-      provider: "bedrock",
+    bedrock: {
       providerModelId: "us.anthropic.claude-sonnet-4-20250514-v1:0",
-      tag: "bedrock",
       supportsDynamicRegion: true,
       baseModelId: "anthropic.claude-sonnet-4-20250514-v1:0",
       pricing: {
@@ -264,10 +249,9 @@ export const anthropicEndpoints = {
         "stop",
       ],
     },
-  ],
-  "claude-3.7-sonnet": [
-    {
-      provider: "anthropic",
+  },
+  "claude-3.7-sonnet": {
+    anthropic: {
       providerModelId: "claude-3-7-sonnet-20250219",
       pricing: {
         prompt: 3,
@@ -292,10 +276,8 @@ export const anthropicEndpoints = {
         "tool_choice",
       ],
     },
-    {
-      provider: "vertex",
+    vertex: {
       providerModelId: "claude-3-7-sonnet@20250219",
-      tag: "vertex",
       pricing: {
         prompt: 3,
         completion: 15,
@@ -319,10 +301,8 @@ export const anthropicEndpoints = {
         "tool_choice",
       ],
     },
-    {
-      provider: "bedrock",
+    bedrock: {
       providerModelId: "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
-      tag: "bedrock",
       supportsDynamicRegion: true,
       baseModelId: "anthropic.claude-3-7-sonnet-20250219-v1:0",
       pricing: {
@@ -350,14 +330,11 @@ export const anthropicEndpoints = {
         "stop",
       ],
     },
-  ],
-  "claude-3.5-sonnet": [
-    {
+  },
+  "claude-3.5-sonnet": {
+    anthropic: {
       name: "Anthropic | anthropic/claude-3.5-sonnet",
-      provider: "anthropic",
       providerModelId: "claude-3-5-sonnet-20241022",
-      tag: "anthropic",
-      status: 0,
       pricing: {
         prompt: 3,
         completion: 15,
@@ -381,14 +358,11 @@ export const anthropicEndpoints = {
         "stop",
       ],
     },
-    {
+    bedrock: {
       name: "Amazon Bedrock | anthropic/claude-3.5-sonnet",
-      provider: "bedrock",
       providerModelId: "us.anthropic.claude-3-5-sonnet-20241022-v2:0",
       supportsDynamicRegion: true,
       baseModelId: "anthropic.claude-3-5-sonnet-20241022-v2:0",
-      tag: "bedrock",
-      status: 0,
       pricing: {
         prompt: 3,
         completion: 15,
@@ -412,12 +386,9 @@ export const anthropicEndpoints = {
         "stop",
       ],
     },
-    {
+    vertex: {
       name: "Google Vertex | anthropic/claude-3.5-sonnet",
-      provider: "vertex",
       providerModelId: "claude-3-5-sonnet-v2@20241022",
-      tag: "vertex",
-      status: 0,
       pricing: {
         prompt: 3,
         completion: 15,
@@ -441,11 +412,9 @@ export const anthropicEndpoints = {
         "stop",
       ],
     },
-  ],
-
-  "claude-3.5-haiku": [
-    {
-      provider: "anthropic",
+  },
+  "claude-3.5-haiku": {
+    anthropic: {
       providerModelId: "claude-3-5-haiku-20241022",
       pricing: {
         prompt: 0.8,
@@ -470,10 +439,8 @@ export const anthropicEndpoints = {
         "stop",
       ],
     },
-    {
-      provider: "vertex",
+    vertex: {
       providerModelId: "claude-3-5-haiku@20241022",
-      tag: "vertex",
       pricing: {
         prompt: 0.8,
         completion: 4,
@@ -497,10 +464,8 @@ export const anthropicEndpoints = {
         "stop",
       ],
     },
-    {
-      provider: "bedrock",
+    bedrock: {
       providerModelId: "us.anthropic.claude-3-5-haiku-20241022-v1:0",
-      tag: "bedrock",
       supportsDynamicRegion: true,
       baseModelId: "anthropic.claude-3-5-haiku-20241022-v1:0",
       pricing: {
@@ -526,14 +491,11 @@ export const anthropicEndpoints = {
         "stop",
       ],
     },
-  ],
-  "claude-3-haiku": [
-    {
+  },
+  "claude-3-haiku": {
+    anthropic: {
       name: "Anthropic | anthropic/claude-3-haiku",
-      provider: "anthropic",
       providerModelId: "claude-3-haiku-20240307",
-      tag: "anthropic",
-      status: 0,
       pricing: {
         prompt: 0.25,
         completion: 1.25,
@@ -557,12 +519,9 @@ export const anthropicEndpoints = {
         "stop",
       ],
     },
-    {
+    vertex: {
       name: "Google Vertex | anthropic/claude-3-haiku",
-      provider: "vertex",
       providerModelId: "claude-3-haiku@20240307",
-      tag: "vertex",
-      status: 0,
       pricing: {
         prompt: 0.25,
         completion: 1.25,
@@ -586,14 +545,11 @@ export const anthropicEndpoints = {
         "stop",
       ],
     },
-    {
+    bedrock: {
       name: "Amazon Bedrock | anthropic/claude-3-haiku",
-      provider: "bedrock",
       providerModelId: "us.anthropic.claude-3-haiku-20240307-v1:0",
       supportsDynamicRegion: true,
       baseModelId: "anthropic.claude-3-haiku-20240307-v1:0",
-      tag: "bedrock",
-      status: 0,
       pricing: {
         prompt: 0.25,
         completion: 1.25,
@@ -617,15 +573,11 @@ export const anthropicEndpoints = {
         "stop",
       ],
     },
-  ],
-
-  "claude-3-opus": [
-    {
+  },
+  "claude-3-opus": {
+    anthropic: {
       name: "Anthropic | anthropic/claude-3-opus",
-      provider: "anthropic",
       providerModelId: "claude-3-opus-20240229",
-      tag: "anthropic",
-      status: 0,
       pricing: {
         prompt: 15,
         completion: 75,
@@ -649,12 +601,9 @@ export const anthropicEndpoints = {
         "stop",
       ],
     },
-    {
+    vertex: {
       name: "Google Vertex | anthropic/claude-3-opus",
-      provider: "vertex",
       providerModelId: "claude-3-opus@20240229",
-      tag: "vertex",
-      status: 0,
       pricing: {
         prompt: 15,
         completion: 75,
@@ -678,14 +627,11 @@ export const anthropicEndpoints = {
         "stop",
       ],
     },
-    {
+    bedrock: {
       name: "Amazon Bedrock | anthropic/claude-3-opus",
-      provider: "bedrock",
       providerModelId: "us.anthropic.claude-3-opus-20240229-v1:0",
       supportsDynamicRegion: true,
       baseModelId: "anthropic.claude-3-opus-20240229-v1:0",
-      tag: "bedrock",
-      status: 0,
       pricing: {
         prompt: 15,
         completion: 75,
@@ -709,7 +655,7 @@ export const anthropicEndpoints = {
         "stop",
       ],
     },
-  ],
-} satisfies Record<AnthropicModelName, ModelEndpoint[]>;
+  },
+} satisfies Record<AnthropicModelName, ModelEndpointMap>;
 
 export default anthropicEndpoints;

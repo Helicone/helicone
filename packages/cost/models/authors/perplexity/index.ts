@@ -7,7 +7,7 @@ import perplexityModels, { type PerplexityModelName } from './models';
 import perplexityEndpoints from './endpoints';
 import perplexityMetadata from './metadata';
 
-export const perplexity: AuthorData = {
+export const perplexity: AuthorData<PerplexityModelName> = {
   metadata: {
     ...perplexityMetadata,
     modelCount: Object.keys(perplexityModels).length,

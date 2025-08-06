@@ -3,18 +3,18 @@
  */
 
 // Import model name types from each author
-import type { AnthropicModelName } from './authors/anthropic';
-import type { OpenAIModelName } from './authors/openai';
-import type { GoogleModelName } from './authors/google';
-import type { MetaLlamaModelName } from './authors/meta-llama';
-import type { MistralModelName } from './authors/mistralai';
-import type { AmazonModelName } from './authors/amazon';
-import type { NvidiaModelName } from './authors/nvidia';
-import type { CohereModelName } from './authors/cohere';
-import type { DeepSeekModelName } from './authors/deepseek';
-import type { PerplexityModelName } from './authors/perplexity';
-import type { XAIModelName } from './authors/x-ai';
-import type { MoonshotModelName } from './authors/moonshotai';
+import type { AnthropicModelName } from "./authors/anthropic";
+import type { OpenAIModelName } from "./authors/openai";
+import type { GoogleModelName } from "./authors/google";
+import type { MetaLlamaModelName } from "./authors/meta-llama";
+import type { MistralModelName } from "./authors/mistralai";
+import type { AmazonModelName } from "./authors/amazon";
+import type { NvidiaModelName } from "./authors/nvidia";
+import type { CohereModelName } from "./authors/cohere";
+import type { DeepSeekModelName } from "./authors/deepseek";
+import type { PerplexityModelName } from "./authors/perplexity";
+import type { XAIModelName } from "./authors/x-ai";
+import type { MoonshotModelName } from "./authors/moonshotai";
 
 // Re-export for convenience
 export type {
@@ -31,7 +31,6 @@ export type {
   XAIModelName,
   MoonshotModelName,
 };
-
 
 /**
  * Comprehensive list of all model names/IDs
@@ -127,40 +126,24 @@ export interface ModelPricing {
   completion: number;
   image?: number;
   cacheRead?: number | null;
-  cacheWrite?: number | {
-    "5m": number;
-    "1h": number;
-    default?: number;
-  } | null;
+  cacheWrite?:
+    | number
+    | {
+        "5m": number;
+        "1h": number;
+        default?: number;
+      }
+    | null;
   thinking?: number;
 }
-
-/**
- * Status codes for endpoints
- */
-export const EndpointStatus = {
-  ACTIVE: 0,
-  DEPRECATED: 1,
-  BETA: 2,
-  COMING_SOON: 3,
-} as const;
-
-export type EndpointStatusType =
-  (typeof EndpointStatus)[keyof typeof EndpointStatus];
 
 export interface ModelEndpoint {
   /** Optional display name for this endpoint */
   name?: string;
-  /** Provider identifier */
-  provider: Provider;
   /** The model ID as used by this provider (for managed deployments) */
   providerModelId?: string;
   /** Alternative model reference */
   model?: string;
-  /** Tag for categorizing this endpoint (often same as provider) */
-  tag?: string;
-  /** Status code */
-  status?: EndpointStatusType;
   /** Pricing for this model on this provider */
   pricing: ModelPricing;
   /** Maximum context length for this deployment */
@@ -175,6 +158,11 @@ export interface ModelEndpoint {
   baseModelId?: string;
 }
 
+/**
+ * Map of provider to endpoint configuration
+ */
+export type ModelEndpointMap = Record<string, ModelEndpoint>;
+
 export interface AuthorMetadata {
   /** Number of models from this author */
   modelCount: number;
@@ -184,11 +172,10 @@ export interface AuthorMetadata {
   baseUrl?: string;
 }
 
-
-export interface AuthorData {
+export interface AuthorData<TModelName extends string = string> {
   metadata: AuthorMetadata;
-  models: Partial<Record<ModelName, Model>>;
-  endpoints: Partial<Record<ModelName, ModelEndpoint[]>>;
+  models: Record<TModelName, Model>;
+  endpoints: Record<TModelName, ModelEndpointMap>;
 }
 
 /**

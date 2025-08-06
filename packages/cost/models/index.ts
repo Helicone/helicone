@@ -10,8 +10,11 @@ import {
   type Model,
   type ModelName,
   type ModelEndpoint,
+  type ModelPricing,
   type AuthorData,
   type AuthorName,
+  type Provider,
+  type ModelEndpointMap,
 } from "./types";
 
 // Author imports (TypeScript)
@@ -72,11 +75,11 @@ export const models: Record<ModelName, Model> = Object.values(
 >;
 
 // Combine all endpoints from author data
-export const endpoints: Record<ModelName, ModelEndpoint[]> = Object.values(
+export const endpoints: Record<ModelName, ModelEndpointMap> = Object.values(
   authorData
 ).reduce((acc, author) => ({ ...acc, ...author.endpoints }), {}) as Record<
   ModelName,
-  ModelEndpoint[]
+  ModelEndpointMap
 >;
 
 // Build authors info map
@@ -107,8 +110,8 @@ export function getModel(modelKey: ModelName): Model {
   return registry.models[modelKey];
 }
 
-export function getEndpoints(modelKey: ModelName): ModelEndpoint[] {
-  return registry.endpoints[modelKey];
+export function getEndpoints(modelKey: ModelName): ModelEndpointMap {
+  return registry.endpoints[modelKey] || {};
 }
 
 export function getAuthor(authorSlug: AuthorName): AuthorInfo {
@@ -131,13 +134,14 @@ export function getProvider(providerId: string): ProviderConfig | undefined {
  */
 export function buildModelId(
   endpoint: ModelEndpoint,
+  providerName: Provider,
   options?: {
     region?: string;
     crossRegion?: boolean;
     projectId?: string;
   }
 ): string {
-  const provider = getProvider(endpoint.provider as ProviderName);
+  const provider = getProvider(providerName as ProviderName);
   if (!provider?.buildModelId) {
     return endpoint.providerModelId || "";
   }
@@ -149,6 +153,7 @@ export function buildModelId(
  */
 export function buildEndpointUrl(
   endpoint: ModelEndpoint,
+  providerName: Provider,
   options?: {
     region?: string;
     crossRegion?: boolean;
@@ -157,7 +162,7 @@ export function buildEndpointUrl(
     resourceName?: string;
   }
 ): string | null {
-  const provider = getProvider(endpoint.provider as ProviderName);
+  const provider = getProvider(providerName as ProviderName);
   if (!provider) return null;
 
   if (provider.buildUrl) {

@@ -2,16 +2,13 @@
  * Xai endpoint configurations
  */
 
-import type { ModelEndpoint } from "../../types";
+import type { ModelEndpointMap } from "../../types";
 import type { XAIModelName } from "./models";
 
 export const xAiEndpoints = {
-  "grok-4": [
-    {
+  "grok-4": {
+    xai: {
       name: "xAI | x-ai/grok-4-07-09",
-      provider: "xai",
-      tag: "xai",
-      status: 0,
       pricing: {
         prompt: 3,
         completion: 15,
@@ -32,14 +29,11 @@ export const xAiEndpoints = {
         "response_format",
       ],
     },
-  ],
+  },
 
-  "grok-3-mini": [
-    {
+  "grok-3-mini": {
+    xai: {
       name: "xAI | x-ai/grok-3-mini",
-      provider: "xai",
-      tag: "xai",
-      status: 0,
       pricing: {
         prompt: 0.3,
         completion: 0.5,
@@ -61,40 +55,11 @@ export const xAiEndpoints = {
         "stop",
       ],
     },
-    {
-      name: "xAI | x-ai/grok-3-mini",
-      provider: "xai",
-      tag: "xai",
-      status: 0,
-      pricing: {
-        prompt: 0.6,
-        completion: 4,
-        cacheRead: 0.15,
-        cacheWrite: null,
-      },
-      contextLength: 131072,
-      maxCompletionTokens: null,
-      supportedParameters: [
-        "tools",
-        "tool_choice",
-        "reasoning",
-        "include_reasoning",
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "seed",
-        "response_format",
-        "stop",
-      ],
-    },
-  ],
+  },
 
-  "grok-3": [
-    {
+  "grok-3": {
+    xai: {
       name: "xAI | x-ai/grok-3",
-      provider: "xai",
-      tag: "xai",
-      status: 0,
       pricing: {
         prompt: 3,
         completion: 15,
@@ -116,40 +81,11 @@ export const xAiEndpoints = {
         "presence_penalty",
       ],
     },
-    {
-      name: "xAI | x-ai/grok-3",
-      provider: "xai",
-      tag: "xai/fast",
-      status: 0,
-      pricing: {
-        prompt: 5,
-        completion: 25,
-        cacheRead: 1.25,
-        cacheWrite: null,
-      },
-      contextLength: 131072,
-      maxCompletionTokens: null,
-      supportedParameters: [
-        "tools",
-        "tool_choice",
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "seed",
-        "response_format",
-        "stop",
-        "frequency_penalty",
-        "presence_penalty",
-      ],
-    },
-  ],
+  },
 
-  "grok-3-mini-beta": [
-    {
+  "grok-3-mini-beta": {
+    xai: {
       name: "xAI | x-ai/grok-3-mini",
-      provider: "xai",
-      tag: "xai",
-      status: 0,
       pricing: {
         prompt: 0.3,
         completion: 0.5,
@@ -171,40 +107,11 @@ export const xAiEndpoints = {
         "stop",
       ],
     },
-    {
-      name: "xAI | x-ai/grok-3-mini",
-      provider: "xai",
-      tag: "xai",
-      status: 0,
-      pricing: {
-        prompt: 0.6,
-        completion: 4,
-        cacheRead: 0.15,
-        cacheWrite: null,
-      },
-      contextLength: 131072,
-      maxCompletionTokens: null,
-      supportedParameters: [
-        "tools",
-        "tool_choice",
-        "reasoning",
-        "include_reasoning",
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "seed",
-        "response_format",
-        "stop",
-      ],
-    },
-  ],
+  },
 
-  "grok-3-beta": [
-    {
+  "grok-3-beta": {
+    xai: {
       name: "xAI | x-ai/grok-3",
-      provider: "xai",
-      tag: "xai",
-      status: 0,
       pricing: {
         prompt: 3,
         completion: 15,
@@ -226,40 +133,11 @@ export const xAiEndpoints = {
         "presence_penalty",
       ],
     },
-    {
-      name: "xAI | x-ai/grok-3",
-      provider: "xai",
-      tag: "xai/fast",
-      status: 0,
-      pricing: {
-        prompt: 5,
-        completion: 25,
-        cacheRead: 1.25,
-        cacheWrite: null,
-      },
-      contextLength: 131072,
-      maxCompletionTokens: null,
-      supportedParameters: [
-        "tools",
-        "tool_choice",
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "seed",
-        "response_format",
-        "stop",
-        "frequency_penalty",
-        "presence_penalty",
-      ],
-    },
-  ],
+  },
 
-  "grok-2-vision-1212": [
-    {
+  "grok-2-vision-1212": {
+    xai: {
       name: "xAI | x-ai/grok-2-vision-1212",
-      provider: "xai",
-      tag: "xai",
-      status: 0,
       pricing: {
         prompt: 2,
         completion: 10,
@@ -280,14 +158,11 @@ export const xAiEndpoints = {
         "presence_penalty",
       ],
     },
-  ],
+  },
 
-  "grok-2-1212": [
-    {
+  "grok-2-1212": {
+    xai: {
       name: "xAI | x-ai/grok-2-1212",
-      provider: "xai",
-      tag: "xai",
-      status: 0,
       pricing: {
         prompt: 2,
         completion: 10,
@@ -309,14 +184,11 @@ export const xAiEndpoints = {
         "presence_penalty",
       ],
     },
-  ],
+  },
 
-  "grok-vision-beta": [
-    {
+  "grok-vision-beta": {
+    xai: {
       name: "xAI | x-ai/grok-vision-beta",
-      provider: "xai",
-      tag: "xai",
-      status: 0,
       pricing: {
         prompt: 5,
         completion: 15,
@@ -337,7 +209,7 @@ export const xAiEndpoints = {
         "presence_penalty",
       ],
     },
-  ],
-} satisfies Record<XAIModelName, ModelEndpoint[]>;
+  },
+} satisfies Record<XAIModelName, ModelEndpointMap>;
 
 export default xAiEndpoints;

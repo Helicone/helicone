@@ -7,7 +7,7 @@ import anthropicModels, { type AnthropicModelName } from './models';
 import anthropicEndpoints from './endpoints';
 import anthropicMetadata from './metadata';
 
-export const anthropic: AuthorData = {
+export const anthropic: AuthorData<AnthropicModelName> = {
   metadata: {
     ...anthropicMetadata,
     modelCount: Object.keys(anthropicModels).length,
