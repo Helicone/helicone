@@ -27,6 +27,14 @@ export interface ProviderConfig {
 // Define provider names type from the actual providers object
 export type ProviderName = keyof typeof providers;
 export const providers = {
+  openai: {
+    name: "OpenAI",
+    baseUrl: "https://api.openai.com",
+    auth: "api-key",
+    endpoints: {},
+    buildModelId: (endpoint) => endpoint.providerModelId || "",
+    buildUrl: (baseUrl) => `${baseUrl}/v1/chat/completions`,
+  },
   anthropic: {
     name: "Anthropic",
     baseUrl: "https://api.anthropic.com",
@@ -247,6 +255,5 @@ export const providers = {
   //   },
   // },
 } as const satisfies Record<string, ProviderConfig>;
-
 
 export default providers;

@@ -9,6 +9,7 @@ export const openaiEndpoints = {
   "o3-pro": [
     {
       name: "OpenAI | openai/o3-pro-2025-06-10",
+      providerModelId: "o3-pro",
       provider: "openai",
       tag: "openai",
       status: 0,
@@ -17,7 +18,7 @@ export const openaiEndpoints = {
         completion: 80,
         image: 0.0153,
         cacheRead: null,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 200000,
       maxCompletionTokens: 100000,
@@ -26,14 +27,15 @@ export const openaiEndpoints = {
         "tool_choice",
         "seed",
         "max_tokens",
-        "response_format"
-      ]
-    }
+        "response_format",
+      ],
+    },
   ],
-  
+
   "codex-mini": [
     {
       name: "OpenAI | openai/codex-mini",
+      providerModelId: "codex-mini",
       provider: "openai",
       tag: "openai",
       status: 0,
@@ -41,7 +43,7 @@ export const openaiEndpoints = {
         prompt: 1.5,
         completion: 6,
         cacheRead: 0.375,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 200000,
       maxCompletionTokens: 100000,
@@ -50,14 +52,15 @@ export const openaiEndpoints = {
         "tool_choice",
         "seed",
         "max_tokens",
-        "response_format"
-      ]
-    }
+        "response_format",
+      ],
+    },
   ],
-  
+
   "o4-mini-high": [
     {
       name: "OpenAI | openai/o4-mini-high-2025-04-16",
+      providerModelId: "o4-mini-high",
       provider: "openai",
       tag: "openai",
       status: 0,
@@ -66,7 +69,7 @@ export const openaiEndpoints = {
         completion: 4.4,
         image: 0.0008415,
         cacheRead: 0.275,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 200000,
       maxCompletionTokens: 100000,
@@ -75,14 +78,15 @@ export const openaiEndpoints = {
         "tool_choice",
         "seed",
         "max_tokens",
-        "response_format"
-      ]
-    }
+        "response_format",
+      ],
+    },
   ],
-  
-  "o3": [
+
+  o3: [
     {
       name: "OpenAI | openai/o3-2025-04-16",
+      providerModelId: "o3",
       provider: "openai",
       tag: "openai",
       status: 0,
@@ -91,7 +95,7 @@ export const openaiEndpoints = {
         completion: 8,
         image: 0.00153,
         cacheRead: 0.5,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 200000,
       maxCompletionTokens: 100000,
@@ -100,14 +104,15 @@ export const openaiEndpoints = {
         "tool_choice",
         "seed",
         "max_tokens",
-        "response_format"
-      ]
-    }
+        "response_format",
+      ],
+    },
   ],
-  
+
   "o4-mini": [
     {
       name: "OpenAI | openai/o4-mini-2025-04-16",
+      providerModelId: "o4-mini",
       provider: "openai",
       tag: "openai",
       status: 0,
@@ -116,7 +121,7 @@ export const openaiEndpoints = {
         completion: 4.4,
         image: 0.0008415,
         cacheRead: 0.275,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 200000,
       maxCompletionTokens: 100000,
@@ -125,14 +130,15 @@ export const openaiEndpoints = {
         "tool_choice",
         "seed",
         "max_tokens",
-        "response_format"
-      ]
-    }
+        "response_format",
+      ],
+    },
   ],
-  
+
   "gpt-4.1": [
     {
       name: "OpenAI | openai/gpt-4.1-2025-04-14",
+      providerModelId: "gpt-4.1",
       provider: "openai",
       tag: "openai",
       status: 0,
@@ -140,7 +146,7 @@ export const openaiEndpoints = {
         prompt: 2,
         completion: 8,
         cacheRead: 0.5,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 1047576,
       maxCompletionTokens: 32768,
@@ -155,13 +161,14 @@ export const openaiEndpoints = {
         "stop",
         "frequency_penalty",
         "presence_penalty",
-      ]
-    }
+      ],
+    },
   ],
-  
+
   "gpt-4.1-mini": [
     {
       name: "OpenAI | openai/gpt-4.1-mini-2025-04-14",
+      providerModelId: "gpt-4.1-mini",
       provider: "openai",
       tag: "openai",
       status: 0,
@@ -169,7 +176,7 @@ export const openaiEndpoints = {
         prompt: 0.4,
         completion: 1.6,
         cacheRead: 0.1,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 1047576,
       maxCompletionTokens: 32768,
@@ -184,13 +191,14 @@ export const openaiEndpoints = {
         "stop",
         "frequency_penalty",
         "presence_penalty",
-      ]
-    }
+      ],
+    },
   ],
-  
+
   "gpt-4.1-nano": [
     {
       name: "OpenAI | openai/gpt-4.1-nano-2025-04-14",
+      providerModelId: "gpt-4.1-nano",
       provider: "openai",
       tag: "openai",
       status: 0,
@@ -198,7 +206,7 @@ export const openaiEndpoints = {
         prompt: 0.1,
         completion: 0.4,
         cacheRead: 0.025,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 1047576,
       maxCompletionTokens: 32768,
@@ -213,13 +221,14 @@ export const openaiEndpoints = {
         "stop",
         "frequency_penalty",
         "presence_penalty",
-      ]
-    }
+      ],
+    },
   ],
-  
+
   "o1-pro": [
     {
       name: "OpenAI | openai/o1-pro",
+      providerModelId: "o1-pro",
       provider: "openai",
       tag: "openai",
       status: 0,
@@ -228,21 +237,18 @@ export const openaiEndpoints = {
         completion: 600,
         image: 0.21675,
         cacheRead: null,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 200000,
       maxCompletionTokens: 100000,
-      supportedParameters: [
-        "seed",
-        "max_tokens",
-        "response_format"
-      ]
-    }
+      supportedParameters: ["seed", "max_tokens", "response_format"],
+    },
   ],
-  
+
   "gpt-4o-mini-search-preview": [
     {
       name: "OpenAI | openai/gpt-4o-mini-search-preview-2025-03-11",
+      providerModelId: "gpt-4o-mini-search-preview",
       provider: "openai",
       tag: "openai",
       status: 0,
@@ -251,20 +257,18 @@ export const openaiEndpoints = {
         completion: 0.6,
         image: 0.000217,
         cacheRead: null,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 128000,
       maxCompletionTokens: 16384,
-      supportedParameters: [
-        "max_tokens",
-        "response_format"
-      ]
-    }
+      supportedParameters: ["max_tokens", "response_format"],
+    },
   ],
-  
+
   "gpt-4o-search-preview": [
     {
       name: "OpenAI | openai/gpt-4o-search-preview-2025-03-11",
+      providerModelId: "gpt-4o-search-preview",
       provider: "openai",
       tag: "openai",
       status: 0,
@@ -273,20 +277,18 @@ export const openaiEndpoints = {
         completion: 10,
         image: 0.003613,
         cacheRead: null,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 128000,
       maxCompletionTokens: 16384,
-      supportedParameters: [
-        "max_tokens",
-        "response_format"
-      ]
-    }
+      supportedParameters: ["max_tokens", "response_format"],
+    },
   ],
-  
+
   "o3-mini-high": [
     {
       name: "OpenAI | openai/o3-mini-high-2025-01-31",
+      providerModelId: "o3-mini-high",
       provider: "openai",
       tag: "openai",
       status: 0,
@@ -294,7 +296,7 @@ export const openaiEndpoints = {
         prompt: 1.1,
         completion: 4.4,
         cacheRead: 0.55,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 200000,
       maxCompletionTokens: 100000,
@@ -303,14 +305,15 @@ export const openaiEndpoints = {
         "tool_choice",
         "seed",
         "max_tokens",
-        "response_format"
-      ]
-    }
+        "response_format",
+      ],
+    },
   ],
-  
+
   "o3-mini": [
     {
       name: "OpenAI | openai/o3-mini-2025-01-31",
+      providerModelId: "o3-mini",
       provider: "openai",
       tag: "openai",
       status: 0,
@@ -318,7 +321,7 @@ export const openaiEndpoints = {
         prompt: 1.1,
         completion: 4.4,
         cacheRead: 0.55,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 200000,
       maxCompletionTokens: 100000,
@@ -327,14 +330,15 @@ export const openaiEndpoints = {
         "tool_choice",
         "seed",
         "max_tokens",
-        "response_format"
-      ]
-    }
+        "response_format",
+      ],
+    },
   ],
-  
-  "o1": [
+
+  o1: [
     {
       name: "OpenAI | openai/o1-2024-12-17",
+      providerModelId: "o1",
       provider: "openai",
       tag: "openai",
       status: 0,
@@ -343,7 +347,7 @@ export const openaiEndpoints = {
         completion: 60,
         image: 0.021675,
         cacheRead: 7.5,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 200000,
       maxCompletionTokens: 100000,
@@ -352,14 +356,15 @@ export const openaiEndpoints = {
         "tool_choice",
         "seed",
         "max_tokens",
-        "response_format"
-      ]
-    }
+        "response_format",
+      ],
+    },
   ],
-  
+
   "gpt-4o-2024-11-20": [
     {
       name: "OpenAI | openai/gpt-4o-2024-11-20",
+      providerModelId: "gpt-4o-2024-11-20",
       provider: "openai",
       tag: "openai",
       status: 0,
@@ -368,7 +373,7 @@ export const openaiEndpoints = {
         completion: 10,
         image: 0.003613,
         cacheRead: 1.25,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 128000,
       maxCompletionTokens: 16384,
@@ -383,13 +388,14 @@ export const openaiEndpoints = {
         "stop",
         "frequency_penalty",
         "presence_penalty",
-      ]
-    }
+      ],
+    },
   ],
-  
+
   "o1-mini": [
     {
       name: "OpenAI | openai/o1-mini",
+      providerModelId: "o1-mini",
       provider: "openai",
       tag: "openai",
       status: 0,
@@ -397,20 +403,18 @@ export const openaiEndpoints = {
         prompt: 1.1,
         completion: 4.4,
         cacheRead: 0.55,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 128000,
       maxCompletionTokens: 65536,
-      supportedParameters: [
-        "seed",
-        "max_tokens"
-      ]
-    }
+      supportedParameters: ["seed", "max_tokens"],
+    },
   ],
-  
+
   "o1-mini-2024-09-12": [
     {
       name: "OpenAI | openai/o1-mini-2024-09-12",
+      providerModelId: "o1-mini-2024-09-12",
       provider: "openai",
       tag: "openai",
       status: 0,
@@ -418,20 +422,18 @@ export const openaiEndpoints = {
         prompt: 1.1,
         completion: 4.4,
         cacheRead: 0.55,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 128000,
       maxCompletionTokens: 65536,
-      supportedParameters: [
-        "seed",
-        "max_tokens"
-      ]
-    }
+      supportedParameters: ["seed", "max_tokens"],
+    },
   ],
-  
+
   "chatgpt-4o-latest": [
     {
       name: "OpenAI | openai/chatgpt-4o-latest",
+      providerModelId: "chatgpt-4o-latest",
       provider: "openai",
       tag: "openai",
       status: 0,
@@ -440,7 +442,7 @@ export const openaiEndpoints = {
         completion: 15,
         image: 0.007225,
         cacheRead: null,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 128000,
       maxCompletionTokens: 16384,
@@ -453,10 +455,10 @@ export const openaiEndpoints = {
         "stop",
         "frequency_penalty",
         "presence_penalty",
-      ]
-    }
+      ],
+    },
   ],
-  
+
   "gpt-4o-2024-08-06": [
     {
       name: "Azure | openai/gpt-4o-2024-08-06",
@@ -468,7 +470,7 @@ export const openaiEndpoints = {
         completion: 10,
         image: 0.003613,
         cacheRead: 1.25,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 128000,
       maxCompletionTokens: 16384,
@@ -482,11 +484,12 @@ export const openaiEndpoints = {
         "frequency_penalty",
         "presence_penalty",
         "seed",
-        "response_format"
-      ]
+        "response_format",
+      ],
     },
     {
       name: "OpenAI | openai/gpt-4o-2024-08-06",
+      providerModelId: "gpt-4o-2024-08-06",
       provider: "openai",
       tag: "openai",
       status: 0,
@@ -495,7 +498,7 @@ export const openaiEndpoints = {
         completion: 10,
         image: 0.003613,
         cacheRead: 1.25,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 128000,
       maxCompletionTokens: 16384,
@@ -510,13 +513,14 @@ export const openaiEndpoints = {
         "stop",
         "frequency_penalty",
         "presence_penalty",
-      ]
-    }
+      ],
+    },
   ],
-  
+
   "gpt-4o-mini": [
     {
       name: "OpenAI | openai/gpt-4o-mini",
+      providerModelId: "gpt-4o-mini",
       provider: "openai",
       tag: "openai",
       status: 0,
@@ -525,7 +529,7 @@ export const openaiEndpoints = {
         completion: 0.6,
         image: 0.000217,
         cacheRead: 0.075,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 128000,
       maxCompletionTokens: 16384,
@@ -540,7 +544,7 @@ export const openaiEndpoints = {
         "stop",
         "frequency_penalty",
         "presence_penalty",
-      ]
+      ],
     },
     {
       name: "Azure | openai/gpt-4o-mini",
@@ -551,7 +555,7 @@ export const openaiEndpoints = {
         prompt: 0.15,
         completion: 0.6,
         cacheRead: 0.075,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 128000,
       maxCompletionTokens: 16384,
@@ -563,14 +567,15 @@ export const openaiEndpoints = {
         "frequency_penalty",
         "presence_penalty",
         "seed",
-        "response_format"
-      ]
-    }
+        "response_format",
+      ],
+    },
   ],
-  
+
   "gpt-4o-mini-2024-07-18": [
     {
       name: "OpenAI | openai/gpt-4o-mini-2024-07-18",
+      providerModelId: "gpt-4o-mini-2024-07-18",
       provider: "openai",
       tag: "openai",
       status: 0,
@@ -579,7 +584,7 @@ export const openaiEndpoints = {
         completion: 0.6,
         image: 0.007225,
         cacheRead: 0.075,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 128000,
       maxCompletionTokens: 16384,
@@ -594,13 +599,14 @@ export const openaiEndpoints = {
         "stop",
         "frequency_penalty",
         "presence_penalty",
-      ]
-    }
+      ],
+    },
   ],
-  
+
   "gpt-4o-2024-05-13": [
     {
       name: "OpenAI | openai/gpt-4o-2024-05-13",
+      providerModelId: "gpt-4o-2024-05-13",
       provider: "openai",
       tag: "openai",
       status: 0,
@@ -609,7 +615,7 @@ export const openaiEndpoints = {
         completion: 15,
         image: 0.007225,
         cacheRead: null,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 128000,
       maxCompletionTokens: 4096,
@@ -624,7 +630,7 @@ export const openaiEndpoints = {
         "stop",
         "frequency_penalty",
         "presence_penalty",
-      ]
+      ],
     },
     {
       name: "Azure | openai/gpt-4o-2024-05-13",
@@ -636,7 +642,7 @@ export const openaiEndpoints = {
         completion: 15,
         image: 0.007225,
         cacheRead: null,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 128000,
       maxCompletionTokens: 4096,
@@ -650,14 +656,15 @@ export const openaiEndpoints = {
         "frequency_penalty",
         "presence_penalty",
         "seed",
-        "response_format"
-      ]
-    }
+        "response_format",
+      ],
+    },
   ],
-  
+
   "gpt-4o": [
     {
       name: "OpenAI | openai/gpt-4o",
+      providerModelId: "gpt-4o",
       provider: "openai",
       tag: "openai",
       status: 0,
@@ -666,7 +673,7 @@ export const openaiEndpoints = {
         completion: 10,
         image: 0.003613,
         cacheRead: 1.25,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 128000,
       maxCompletionTokens: 16384,
@@ -681,7 +688,7 @@ export const openaiEndpoints = {
         "stop",
         "frequency_penalty",
         "presence_penalty",
-      ]
+      ],
     },
     {
       name: "Azure | openai/gpt-4o",
@@ -693,7 +700,7 @@ export const openaiEndpoints = {
         completion: 10,
         image: 0.003613,
         cacheRead: null,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 128000,
       maxCompletionTokens: 16384,
@@ -707,14 +714,15 @@ export const openaiEndpoints = {
         "frequency_penalty",
         "presence_penalty",
         "seed",
-        "response_format"
-      ]
-    }
+        "response_format",
+      ],
+    },
   ],
-  
+
   "gpt-4o:extended": [
     {
       name: "OpenAI | openai/gpt-4o:extended",
+      providerModelId: "gpt-4o:extended",
       provider: "openai",
       tag: "openai",
       status: 0,
@@ -723,7 +731,7 @@ export const openaiEndpoints = {
         completion: 18,
         image: 0.007225,
         cacheRead: null,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 128000,
       maxCompletionTokens: 64000,
@@ -738,13 +746,14 @@ export const openaiEndpoints = {
         "stop",
         "frequency_penalty",
         "presence_penalty",
-      ]
-    }
+      ],
+    },
   ],
-  
+
   "gpt-4-turbo": [
     {
       name: "OpenAI | openai/gpt-4-turbo",
+      providerModelId: "gpt-4-turbo",
       provider: "openai",
       tag: "openai",
       status: 0,
@@ -753,7 +762,7 @@ export const openaiEndpoints = {
         completion: 30,
         image: 0.01445,
         cacheRead: null,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 128000,
       maxCompletionTokens: 4096,
@@ -768,10 +777,10 @@ export const openaiEndpoints = {
         "stop",
         "frequency_penalty",
         "presence_penalty",
-      ]
-    }
+      ],
+    },
   ],
-  
+
   "gpt-3.5-turbo-0613": [
     {
       name: "Azure | openai/gpt-3.5-turbo-0613",
@@ -782,7 +791,7 @@ export const openaiEndpoints = {
         prompt: 1,
         completion: 2,
         cacheRead: null,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 4095,
       maxCompletionTokens: 4096,
@@ -796,14 +805,15 @@ export const openaiEndpoints = {
         "frequency_penalty",
         "presence_penalty",
         "seed",
-        "response_format"
-      ]
-    }
+        "response_format",
+      ],
+    },
   ],
-  
+
   "gpt-4-turbo-preview": [
     {
       name: "OpenAI | openai/gpt-4-turbo-preview",
+      providerModelId: "gpt-4-turbo-preview",
       provider: "openai",
       tag: "openai",
       status: 0,
@@ -811,7 +821,7 @@ export const openaiEndpoints = {
         prompt: 10,
         completion: 30,
         cacheRead: null,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 128000,
       maxCompletionTokens: 4096,
@@ -826,13 +836,14 @@ export const openaiEndpoints = {
         "stop",
         "frequency_penalty",
         "presence_penalty",
-      ]
-    }
+      ],
+    },
   ],
-  
+
   "gpt-4-1106-preview": [
     {
       name: "OpenAI | openai/gpt-4-1106-preview",
+      providerModelId: "gpt-4-1106-preview",
       provider: "openai",
       tag: "openai",
       status: 0,
@@ -840,7 +851,7 @@ export const openaiEndpoints = {
         prompt: 10,
         completion: 30,
         cacheRead: null,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 128000,
       maxCompletionTokens: 4096,
@@ -855,13 +866,14 @@ export const openaiEndpoints = {
         "stop",
         "frequency_penalty",
         "presence_penalty",
-      ]
-    }
+      ],
+    },
   ],
-  
+
   "gpt-3.5-turbo-instruct": [
     {
       name: "OpenAI | openai/gpt-3.5-turbo-instruct",
+      providerModelId: "gpt-3.5-turbo-instruct",
       provider: "openai",
       tag: "openai",
       status: 0,
@@ -869,7 +881,7 @@ export const openaiEndpoints = {
         prompt: 1.5,
         completion: 2,
         cacheRead: null,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 4095,
       maxCompletionTokens: 4096,
@@ -882,13 +894,14 @@ export const openaiEndpoints = {
         "stop",
         "frequency_penalty",
         "presence_penalty",
-      ]
-    }
+      ],
+    },
   ],
-  
+
   "gpt-3.5-turbo-16k": [
     {
       name: "OpenAI | openai/gpt-3.5-turbo-16k",
+      providerModelId: "gpt-3.5-turbo-16k",
       provider: "openai",
       tag: "openai",
       status: 0,
@@ -896,7 +909,7 @@ export const openaiEndpoints = {
         prompt: 3,
         completion: 4,
         cacheRead: null,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 16385,
       maxCompletionTokens: 4096,
@@ -911,7 +924,7 @@ export const openaiEndpoints = {
         "stop",
         "frequency_penalty",
         "presence_penalty",
-      ]
+      ],
     },
     {
       name: "Azure | openai/gpt-3.5-turbo-16k",
@@ -922,7 +935,7 @@ export const openaiEndpoints = {
         prompt: 3,
         completion: 4,
         cacheRead: null,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 16385,
       maxCompletionTokens: 4096,
@@ -936,14 +949,15 @@ export const openaiEndpoints = {
         "frequency_penalty",
         "presence_penalty",
         "seed",
-        "response_format"
-      ]
-    }
+        "response_format",
+      ],
+    },
   ],
-  
+
   "gpt-3.5-turbo": [
     {
       name: "OpenAI | openai/gpt-3.5-turbo",
+      providerModelId: "gpt-3.5-turbo",
       provider: "openai",
       tag: "openai",
       status: 0,
@@ -951,7 +965,7 @@ export const openaiEndpoints = {
         prompt: 0.5,
         completion: 1.5,
         cacheRead: null,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 16385,
       maxCompletionTokens: 4096,
@@ -966,13 +980,14 @@ export const openaiEndpoints = {
         "stop",
         "frequency_penalty",
         "presence_penalty",
-      ]
-    }
+      ],
+    },
   ],
-  
+
   "gpt-4-0314": [
     {
       name: "OpenAI | openai/gpt-4-0314",
+      providerModelId: "gpt-4-0314",
       provider: "openai",
       tag: "openai",
       status: 0,
@@ -980,7 +995,7 @@ export const openaiEndpoints = {
         prompt: 30,
         completion: 60,
         cacheRead: null,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 8191,
       maxCompletionTokens: 4096,
@@ -995,13 +1010,14 @@ export const openaiEndpoints = {
         "stop",
         "frequency_penalty",
         "presence_penalty",
-      ]
-    }
+      ],
+    },
   ],
-  
+
   "gpt-4": [
     {
       name: "OpenAI | openai/gpt-4",
+      providerModelId: "gpt-4",
       provider: "openai",
       tag: "openai",
       status: 0,
@@ -1009,7 +1025,7 @@ export const openaiEndpoints = {
         prompt: 30,
         completion: 60,
         cacheRead: null,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 8191,
       maxCompletionTokens: 4096,
@@ -1024,7 +1040,7 @@ export const openaiEndpoints = {
         "stop",
         "frequency_penalty",
         "presence_penalty",
-      ]
+      ],
     },
     {
       name: "Azure | openai/gpt-4",
@@ -1035,7 +1051,7 @@ export const openaiEndpoints = {
         prompt: 30,
         completion: 60,
         cacheRead: null,
-        cacheWrite: null
+        cacheWrite: null,
       },
       contextLength: 8191,
       maxCompletionTokens: 4096,
@@ -1049,10 +1065,10 @@ export const openaiEndpoints = {
         "frequency_penalty",
         "presence_penalty",
         "seed",
-        "response_format"
-      ]
-    }
-  ]
+        "response_format",
+      ],
+    },
+  ],
 } satisfies Record<OpenAIModelName, ModelEndpoint[]>;
 
 export default openaiEndpoints;

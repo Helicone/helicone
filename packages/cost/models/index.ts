@@ -107,8 +107,18 @@ export function getModel(modelKey: ModelName): Model {
   return registry.models[modelKey];
 }
 
-export function getEndpoints(modelKey: ModelName): ModelEndpoint[] {
-  return registry.endpoints[modelKey];
+export function getEndpoints(modelKey: ModelName | string): ModelEndpoint[] {
+  return modelKey in registry.endpoints
+    ? registry.endpoints[modelKey as ModelName]
+    : [];
+}
+
+export function getEndpoint(
+  modelKey: ModelName | string,
+  provider: ProviderName
+): ModelEndpoint | undefined {
+  const endpoints = getEndpoints(modelKey);
+  return endpoints.find((endpoint) => endpoint.provider === provider);
 }
 
 export function getAuthor(authorSlug: AuthorName): AuthorInfo {
@@ -123,7 +133,9 @@ export function getAuthorData(authorSlug: AuthorName): AuthorData {
  * Get provider configuration
  */
 export function getProvider(providerId: string): ProviderConfig | undefined {
-  return providers[providerId as ProviderName];
+  return providerId in providers
+    ? providers[providerId as ProviderName]
+    : undefined;
 }
 
 /**

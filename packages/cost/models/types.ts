@@ -3,18 +3,18 @@
  */
 
 // Import model name types from each author
-import type { AnthropicModelName } from './authors/anthropic';
-import type { OpenAIModelName } from './authors/openai';
-import type { GoogleModelName } from './authors/google';
-import type { MetaLlamaModelName } from './authors/meta-llama';
-import type { MistralModelName } from './authors/mistralai';
-import type { AmazonModelName } from './authors/amazon';
-import type { NvidiaModelName } from './authors/nvidia';
-import type { CohereModelName } from './authors/cohere';
-import type { DeepSeekModelName } from './authors/deepseek';
-import type { PerplexityModelName } from './authors/perplexity';
-import type { XAIModelName } from './authors/x-ai';
-import type { MoonshotModelName } from './authors/moonshotai';
+import type { AnthropicModelName } from "./authors/anthropic";
+import type { OpenAIModelName } from "./authors/openai";
+import type { GoogleModelName } from "./authors/google";
+import type { MetaLlamaModelName } from "./authors/meta-llama";
+import type { MistralModelName } from "./authors/mistralai";
+import type { AmazonModelName } from "./authors/amazon";
+import type { NvidiaModelName } from "./authors/nvidia";
+import type { CohereModelName } from "./authors/cohere";
+import type { DeepSeekModelName } from "./authors/deepseek";
+import type { PerplexityModelName } from "./authors/perplexity";
+import type { XAIModelName } from "./authors/x-ai";
+import type { MoonshotModelName } from "./authors/moonshotai";
 
 // Re-export for convenience
 export type {
@@ -31,7 +31,6 @@ export type {
   XAIModelName,
   MoonshotModelName,
 };
-
 
 /**
  * Comprehensive list of all model names/IDs
@@ -70,45 +69,47 @@ export type AuthorName =
   | "moonshotai"
   | "perplexity";
 
+const providers = [
+  "anthropic",
+  "openai",
+  "cohere",
+  "mistral",
+  "deepseek",
+  "perplexity",
+  // Cloud providers
+  "vertex",
+  "vertex-regional",
+  "bedrock",
+  "azure-openai",
+  // Aggregators
+  "openrouter",
+  "together",
+  "groq",
+  "fireworks",
+  "replicate",
+  "deepinfra",
+  "chutes",
+  "nextbit",
+  "google-ai-studio",
+  "google-vertex",
+  "nebius",
+  "parasail",
+  "cloudflare",
+  "novita",
+  "xai",
+  "alibaba",
+  "cerebras",
+  "baseten",
+  "hyperbolic",
+  "lambda",
+  "moonshot-ai",
+  "inferencenet",
+] as const;
+
 /**
  * Inference providers (where models are hosted)
  */
-export type Provider =
-  // Direct providers
-  | "anthropic"
-  | "openai"
-  | "cohere"
-  | "mistral"
-  | "deepseek"
-  | "perplexity"
-  // Cloud providers
-  | "vertex"
-  | "vertex-regional"
-  | "bedrock"
-  | "azure-openai"
-  // Aggregators
-  | "openrouter"
-  | "together"
-  | "groq"
-  | "fireworks"
-  | "replicate"
-  | "deepinfra"
-  | "chutes"
-  | "nextbit"
-  | "google-ai-studio"
-  | "google-vertex"
-  | "nebius"
-  | "parasail"
-  | "cloudflare"
-  | "novita"
-  | "xai"
-  | "alibaba"
-  | "cerebras"
-  | "baseten"
-  | "hyperbolic"
-  | "lambda"
-  | "moonshot-ai"
-  | "inferencenet";
+export type Provider = (typeof providers)[number];
 
 export interface Model {
   id: ModelName;
@@ -127,11 +128,14 @@ export interface ModelPricing {
   completion: number;
   image?: number;
   cacheRead?: number | null;
-  cacheWrite?: number | {
-    "5m": number;
-    "1h": number;
-    default?: number;
-  } | null;
+  cacheWrite?:
+    | number
+    | {
+        "5m": number;
+        "1h": number;
+        default?: number;
+      }
+    | null;
   thinking?: number;
 }
 
@@ -183,7 +187,6 @@ export interface AuthorMetadata {
   /** Optional base URL for this author's API */
   baseUrl?: string;
 }
-
 
 export interface AuthorData {
   metadata: AuthorMetadata;
