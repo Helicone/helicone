@@ -1,27 +1,4 @@
-import type { ModelEndpoint, Provider } from "./types";
-
-export interface ProviderEndpoint {
-  path: string;
-  method?: "GET" | "POST" | "PUT" | "DELETE";
-  description?: string;
-}
-
-export interface ProviderConfig {
-  baseUrl: string;
-  auth: "api-key" | "oauth" | "aws-signature" | "azure-ad";
-  requiresProjectId?: boolean;
-  requiresRegion?: boolean;
-  requiresDeploymentName?: boolean;
-  regions?: readonly string[];
-  apiVersion?: string;
-  endpoints: Readonly<Record<string, ProviderEndpoint | string>>;
-  buildModelId?: (endpoint: ModelEndpoint, options?: any) => string;
-  buildUrl?: (
-    baseUrl: string,
-    endpoint: ModelEndpoint,
-    options?: any
-  ) => string;
-}
+import type { ProviderConfig, ProviderName } from "./types";
 
 export const providers = {
   openai: {
@@ -247,6 +224,6 @@ export const providers = {
   //     models: "/v1/models/{owner}/{name}/predictions",
   //   },
   // },
-} as const satisfies Record<Provider, ProviderConfig>;
+} as const satisfies Record<ProviderName, ProviderConfig>;
 
 export default providers;

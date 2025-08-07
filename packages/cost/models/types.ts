@@ -109,7 +109,13 @@ const providers = [
 /**
  * Inference providers (where models are hosted)
  */
-export type Provider = (typeof providers)[number];
+export type ProviderName = (typeof providers)[number];
+
+/**
+ * Endpoint names include provider and optional variant (e.g., "vertex:us", "vertex:global")
+ * Format: "provider" or "provider:variant"
+ */
+export type EndpointName = ProviderName | `${ProviderName}:${string}`;
 
 export interface Model {
   id: ModelName;
@@ -180,6 +186,28 @@ export interface AuthorData<TModelName extends string = string> {
   endpoints: Record<TModelName, ModelEndpointMap>;
 }
 
+export interface ProviderEndpoint {
+  path: string;
+  method?: "GET" | "POST" | "PUT" | "DELETE";
+  description?: string;
+}
+
+export interface ProviderConfig {
+  baseUrl: string;
+  auth: "api-key" | "oauth" | "aws-signature" | "azure-ad";
+  requiresProjectId?: boolean;
+  requiresRegion?: boolean;
+  requiresDeploymentName?: boolean;
+  regions?: readonly string[];
+  apiVersion?: string;
+  endpoints: Readonly<Record<string, ProviderEndpoint | string>>;
+  buildModelId?: (endpoint: ModelEndpoint, options?: any) => string;
+  buildUrl?: (
+    baseUrl: string,
+    endpoint: ModelEndpoint,
+    options?: any
+  ) => string;
+}
 /**
  * Standard parameter names used across providers
  */
