@@ -24,6 +24,7 @@ lastmile/
 rosebud/
 
 .env.*
+*.env*
 
 dev.vars.*
 node_modules/

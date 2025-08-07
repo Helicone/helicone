@@ -12,8 +12,8 @@ async function main() {
 
   const chatCompletion = await openai.chat.completions
     .create({
-      model:
-        "gpt-4.1-nano/openai,claude-3-5-sonnet-20240620/anthropic,anthropic.claude-3-5-sonnet-20240620-v1:0/bedrock",
+      // model: "claude-3-5-sonnet-20240620/anthropic",
+      model: "claude-3.5-sonnet",
       messages: [
         {
           role: "system",
@@ -30,8 +30,6 @@ async function main() {
     .withResponse();
 
   console.log(JSON.stringify(chatCompletion.data, null, 2));
-
-  console.log(chatCompletion.response.headers);
 }
 
 main();

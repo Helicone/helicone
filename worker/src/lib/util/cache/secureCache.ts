@@ -104,6 +104,15 @@ export async function decrypt(
   return new TextDecoder().decode(decryptedContent);
 }
 
+export async function removeFromCache(
+  key: string,
+  env: SecureCacheEnv
+): Promise<void> {
+  const hashedKey = await hash(key);
+  await env.SECURE_CACHE.delete(hashedKey);
+  InMemoryCache.getInstance<string>().delete(hashedKey);
+}
+
 export async function storeInCache(
   key: string,
   value: string,

@@ -14,6 +14,7 @@ import { ProviderKeysManager } from "../../lib/managers/ProviderKeysManager";
 import { ProviderKeysStore } from "../../lib/db/ProviderKeysStore";
 import { APIKeysStore } from "../../lib/db/APIKeysStore";
 import { APIKeysManager } from "../../lib/managers/APIKeysManager";
+const RATE_LIMIT_MS = 1000 * 30;
 
 function getAPIRouterV1(
   router: OpenAPIRouterType<
@@ -37,7 +38,7 @@ function getAPIRouterV1(
         if (
           lastFetchedAt &&
           // Every 10 seconds
-          new Date(lastFetchedAt).getTime() + 1000 * 10 > Date.now()
+          new Date(lastFetchedAt).getTime() + RATE_LIMIT_MS > Date.now()
         ) {
           return new Response("rate limited", { status: 429 });
         }
@@ -88,7 +89,7 @@ function getAPIRouterV1(
         if (
           lastFetchedAt &&
           // Every 10 seconds
-          new Date(lastFetchedAt).getTime() + 1000 * 10 > Date.now()
+          new Date(lastFetchedAt).getTime() + RATE_LIMIT_MS > Date.now()
         ) {
           return new Response("rate limited", { status: 429 });
         }

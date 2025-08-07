@@ -4,6 +4,7 @@ import { Database } from "../../../supabase/database.types";
 export type APIKey = {
   api_key_hash: string;
   organization_id: string;
+  soft_delete: boolean;
 };
 
 export class APIKeysStore {
@@ -15,12 +16,16 @@ export class APIKeysStore {
     let offset = 0;
 
     while (true) {
+      const ONE_DAY_AGO = new Date(
+        Date.now() - 24 * 60 * 60 * 1000
+      ).toISOString();
+
       const { data, error } = await this.supabaseClient
         .from("helicone_api_keys")
-        .select("organization_id, api_key_hash")
-        .eq("soft_delete", false)
+        .select("organization_id, api_key_hash, soft_delete")
         .eq("temp_key", false)
         .neq("api_key_name", "auto-generated-experiment-key")
+        .or(`created_at.gte.${ONE_DAY_AGO},updated_at.gte.${ONE_DAY_AGO}`)
         .range(offset, offset + pageSize - 1);
 
       if (error) {

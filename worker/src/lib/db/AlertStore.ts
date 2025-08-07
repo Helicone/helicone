@@ -2,7 +2,7 @@ import { ClickhouseClientWrapper } from "./ClickhouseWrapper";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Result, err, ok } from "../util/results";
 import { Database } from "../../../supabase/database.types";
-import { clickhousePriceCalc } from "../../packages/cost";
+import { clickhousePriceCalc } from "@helicone-package/cost";
 
 type AlertStatus = "triggered" | "resolved";
 export type Alert = Database["public"]["Tables"]["alert"]["Row"] & {

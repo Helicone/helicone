@@ -1,6 +1,10 @@
 import { Env } from "../..";
 import { APIKeysStore } from "../db/APIKeysStore";
-import { getFromCache, storeInCache } from "../util/cache/secureCache";
+import {
+  getFromCache,
+  removeFromCache,
+  storeInCache,
+} from "../util/cache/secureCache";
 
 export class APIKeysManager {
   constructor(private store: APIKeysStore, private env: Env) {}
@@ -8,13 +12,21 @@ export class APIKeysManager {
   async setAPIKeys() {
     const apiKeys = await this.store.getAPIKeys();
     if (apiKeys) {
-      for (const key of apiKeys) {
-        await storeInCache(
-          `api_keys_${key.api_key_hash}`,
-          key.organization_id,
-          this.env
-        );
-      }
+      console.log("setting api keys", apiKeys.length);
+
+      await Promise.all(
+        apiKeys.map(async (key) => {
+          if (key.soft_delete) {
+            await removeFromCache(`api_keys_${key.api_key_hash}`, this.env);
+            return;
+          }
+          await storeInCache(
+            `api_keys_${key.api_key_hash}`,
+            key.organization_id,
+            this.env
+          );
+        })
+      );
     }
   }
 
@@ -26,6 +38,9 @@ export class APIKeysManager {
     return key;
   }
 
+  /**
+   * @returns the organization id or null if the api key is not found
+   */
   async getAPIKeyWithFetch(apiKeyHash: string): Promise<string | null> {
     const key = await getFromCache(`api_keys_${apiKeyHash}`, this.env);
     if (!key) {

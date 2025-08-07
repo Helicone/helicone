@@ -1,8 +1,8 @@
 // This will store all of the information coming from the client.
 
 import { Env } from "../..";
-import { Provider } from "../../packages/llm-mapper/types";
-import { approvedDomains } from "../../packages/cost/providers/mappings";
+import { Provider } from "@helicone-package/llm-mapper/types";
+import { approvedDomains } from "@helicone-package/cost/providers/mappings";
 import { RequestWrapper } from "../RequestWrapper";
 import { buildTargetUrl } from "../clients/ProviderClient";
 import { Result, ok } from "../util/results";
@@ -11,8 +11,8 @@ import { IHeliconeHeaders } from "./HeliconeHeaders";
 import { CfProperties } from "@cloudflare/workers-types";
 import { parseJSXObject } from "@helicone/prompts";
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
-import { MAPPERS } from "../../packages/llm-mapper/utils/getMappedContent";
-import { getMapperType } from "../../packages/llm-mapper/utils/getMapperType";
+import { MAPPERS } from "@helicone-package/llm-mapper/utils/getMappedContent";
+import { getMapperType } from "@helicone-package/llm-mapper/utils/getMapperType";
 import { RateLimitOptions } from "../clients/KVRateLimiterClient";
 import { RateLimitOptionsBuilder } from "../util/rateLimitOptions";
 

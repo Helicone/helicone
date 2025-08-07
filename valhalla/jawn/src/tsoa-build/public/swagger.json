@@ -2798,6 +2798,7 @@
 					"QSTASH",
 					"FIRECRAWL",
 					"AWS",
+					"BEDROCK",
 					"DEEPSEEK",
 					"X",
 					"AVIAN",
@@ -5396,6 +5397,132 @@
 					"amount",
 					"description",
 					"totalCost"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ValidationError": {
+				"properties": {
+					"field": {
+						"type": "string"
+					},
+					"message": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"field",
+					"message"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ValidationResult": {
+				"properties": {
+					"isValid": {
+						"type": "boolean"
+					},
+					"errors": {
+						"items": {
+							"$ref": "#/components/schemas/ValidationError"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"isValid",
+					"errors"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Record_string.unknown_": {
+				"properties": {},
+				"additionalProperties": {},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
+			"TypedProviderRequest": {
+				"properties": {
+					"url": {
+						"type": "string"
+					},
+					"json": {
+						"$ref": "#/components/schemas/Record_string.unknown_"
+					},
+					"meta": {
+						"$ref": "#/components/schemas/Record_string.string_"
+					}
+				},
+				"required": [
+					"url",
+					"json",
+					"meta"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"TypedProviderResponse": {
+				"properties": {
+					"json": {
+						"$ref": "#/components/schemas/Record_string.unknown_"
+					},
+					"textBody": {
+						"type": "string"
+					},
+					"status": {
+						"type": "number",
+						"format": "double"
+					},
+					"headers": {
+						"$ref": "#/components/schemas/Record_string.string_"
+					}
+				},
+				"required": [
+					"status",
+					"headers"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"TypedTiming": {
+				"properties": {
+					"timeToFirstToken": {
+						"type": "number",
+						"format": "double"
+					},
+					"startTime": {
+						"type": "string"
+					},
+					"endTime": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"startTime",
+					"endTime"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"TypedAsyncLogModel": {
+				"properties": {
+					"providerRequest": {
+						"$ref": "#/components/schemas/TypedProviderRequest"
+					},
+					"providerResponse": {
+						"$ref": "#/components/schemas/TypedProviderResponse"
+					},
+					"timing": {
+						"$ref": "#/components/schemas/TypedTiming"
+					},
+					"provider": {
+						"$ref": "#/components/schemas/Provider"
+					}
+				},
+				"required": [
+					"providerRequest",
+					"providerResponse"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -15332,6 +15459,47 @@
 					"content": {
 						"application/json": {
 							"schema": {}
+						}
+					}
+				}
+			}
+		},
+		"/v1/trace/custom/log/typed": {
+			"post": {
+				"operationId": "LogCustomTraceTyped",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ValidationResult"
+										},
+										{}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Trace"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/TypedAsyncLogModel"
+							}
 						}
 					}
 				}

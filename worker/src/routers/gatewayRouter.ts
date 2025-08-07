@@ -7,7 +7,7 @@ import { Result, err, ok } from "../lib/util/results";
 import {
   approvedDomains,
   providers,
-} from "../packages/cost/providers/mappings";
+} from "@helicone-package/cost/providers/mappings";
 import { BaseRouter } from "./routerFactory";
 
 function validateURL(url: string) {

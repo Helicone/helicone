@@ -142,22 +142,4 @@ CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 
 # --------------------------------------------------------------------------------------------------------------------
 
-# Copy AI Gateway from existing image
-COPY --from=helicone/ai-gateway:latest /app /app/gateway
-
-# Update supervisord configuration to include all services
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
-# Copy monitoring and debugging scripts
-COPY monitor_logs.sh /usr/local/bin/monitor_logs
-COPY debug_jawn.sh /usr/local/bin/debug_jawn
-COPY health_check.sh /usr/local/bin/health_check.sh
-RUN chmod +x /usr/local/bin/monitor_logs /usr/local/bin/debug_jawn /usr/local/bin/health_check.sh
-
-# Create a volume for logs
-VOLUME ["/var/log/supervisor"]
-
-# Expose all service ports
-# 3000: Web frontend, 8585: Jawn backend, 8123: ClickHouse
-# 8788: AI Gateway, 9080: MinIO API, 9001: MinIO Console, 5432: PostgreSQL
-EXPOSE 3000 8585 8123 8788 9080 9001 5432
+EXPOSE 3000 8585 8123 9080 9001 5432

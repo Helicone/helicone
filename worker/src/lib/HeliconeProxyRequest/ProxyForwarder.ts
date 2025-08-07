@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from "@supabase/supabase-js";
 import { Env } from "../..";
-import { Provider } from "../../packages/llm-mapper/types";
+import { Provider } from "@helicone-package/llm-mapper/types";
 import { DBWrapper } from "../db/DBWrapper";
 import {
   checkRateLimit,

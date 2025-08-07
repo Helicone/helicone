@@ -30,10 +30,11 @@ COPY ./clickhouse/migrations /app/clickhouse/migrations
 COPY ./clickhouse/seeds /app/clickhouse/seeds
 COPY ./clickhouse/ch_hcone.py /app/clickhouse/ch_hcone.py
 RUN chmod +x /app/clickhouse/ch_hcone.py
-RUN chmod 755 /opt/flyway/flyway
+RUN chown 2000:2000 /opt/flyway/flyway && chmod 755 /opt/flyway/flyway
 
 # Create a script to run migrations
 RUN echo '#!/bin/sh \n\
+    set -e \n\
     echo "Running PostgreSQL migrations..." \n\
     echo "Repairing migration checksums..." \n\
     flyway repair -configFiles=/app/supabase/flyway.conf \n\
@@ -42,9 +43,9 @@ RUN echo '#!/bin/sh \n\
     \n\
     echo "Running ClickHouse migrations..." \n\
     if [ -n "${CLICKHOUSE_PASSWORD}" ]; then \n\
-        python3 /app/clickhouse/ch_hcone.py --upgrade --host ${CLICKHOUSE_HOST:-helicone-core-clickhouse} --port ${CLICKHOUSE_PORT:-8123} --user ${CLICKHOUSE_USER:-default} --password "${CLICKHOUSE_PASSWORD}" \n\
+        python3 /app/clickhouse/ch_hcone.py --upgrade --password "${CLICKHOUSE_PASSWORD}" \n\
     else \n\
-        python3 /app/clickhouse/ch_hcone.py --upgrade --host ${CLICKHOUSE_HOST:-helicone-core-clickhouse} --port ${CLICKHOUSE_PORT:-8123} --user ${CLICKHOUSE_USER:-default} --no-password \n\
+        python3 /app/clickhouse/ch_hcone.py --upgrade --no-password \n\
     fi \n\
     echo "ClickHouse migrations completed" \n\
     \n\

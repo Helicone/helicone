@@ -1,8 +1,8 @@
 {
   "extends": [
     "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "prettier"
+    // "plugin:@typescript-eslint/recommended", // this was throwing some error
+    "plugin:prettier/recommended"
   ],
   "ignorePatterns": ["/src/lib/db/valhalla.types.ts"],
   "plugins": ["prettier"],
@@ -17,10 +17,10 @@
         "printWidth": 80
       }
     ]
-  },
-  "parser": "@typescript-eslint/parser",
-  "parserOptions": {
-    "ecmaVersion": 2018,
-    "sourceType": "module"
   }
+  // "parser": "@typescript-eslint/parser",
+  // "parserOptions": {
+  //   "ecmaVersion": 2018,
+  //   "sourceType": "module"
+  // }
 }
