@@ -42,6 +42,17 @@ variable "docker_password" {
 }
 
 #################################################################################
+# Docker Build Cloud (optional)
+#################################################################################
+
+variable "docker_build_cloud_token" {
+  description = "Docker Build Cloud access token (OAT or PAT). If empty, the secret will not be created."
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+#################################################################################
 # GitHub Configuration
 #################################################################################
 

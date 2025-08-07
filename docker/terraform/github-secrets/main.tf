@@ -10,11 +10,11 @@ locals {
 # GitHub Repository Secrets
 #################################################################################
 
-# Docker Hub Username
-resource "github_actions_secret" "docker_username" {
-  repository      = var.github_repository
-  secret_name     = "DOCKER_USERNAME"
-  plaintext_value = var.docker_username
+# Docker Hub Username as a repository variable (non-secret)
+resource "github_actions_variable" "docker_username" {
+  repository    = var.github_repository
+  variable_name = "DOCKER_USERNAME"
+  value         = var.docker_username
 }
 
 # Docker Hub Password
@@ -22,6 +22,14 @@ resource "github_actions_secret" "docker_password" {
   repository      = var.github_repository
   secret_name     = "DOCKER_PASSWORD"
   plaintext_value = var.docker_password
+}
+
+# Docker Build Cloud Token (optional)
+resource "github_actions_secret" "docker_build_cloud_token" {
+  count           = length(var.docker_build_cloud_token) > 0 ? 1 : 0
+  repository      = var.github_repository
+  secret_name     = "DOCKER_BUILD_CLOUD_TOKEN"
+  plaintext_value = var.docker_build_cloud_token
 }
 
 
