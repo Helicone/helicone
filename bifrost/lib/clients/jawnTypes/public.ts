@@ -320,6 +320,9 @@ export interface paths {
   "/v1/trace/custom/log": {
     post: operations["LogCustomTrace"];
   };
+  "/v1/trace/custom/log/typed": {
+    post: operations["LogCustomTraceTyped"];
+  };
   "/v1/trace/log": {
     post: operations["LogTrace"];
   };
@@ -2005,6 +2008,42 @@ Json: JsonObject;
         /** Format: double */
         completion_token: number;
       };
+    };
+    ValidationError: {
+      field: string;
+      message: string;
+    };
+    ValidationResult: {
+      isValid: boolean;
+      errors: components["schemas"]["ValidationError"][];
+    };
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.unknown_": {
+      [key: string]: unknown;
+    };
+    TypedProviderRequest: {
+      url: string;
+      json: components["schemas"]["Record_string.unknown_"];
+      meta: components["schemas"]["Record_string.string_"];
+    };
+    TypedProviderResponse: {
+      json?: components["schemas"]["Record_string.unknown_"];
+      textBody?: string;
+      /** Format: double */
+      status: number;
+      headers: components["schemas"]["Record_string.string_"];
+    };
+    TypedTiming: {
+      /** Format: double */
+      timeToFirstToken?: number;
+      startTime: string;
+      endTime: string;
+    };
+    TypedAsyncLogModel: {
+      providerRequest: components["schemas"]["TypedProviderRequest"];
+      providerResponse: components["schemas"]["TypedProviderResponse"];
+      timing?: components["schemas"]["TypedTiming"];
+      provider?: components["schemas"]["Provider"];
     };
     OTELTrace: {
       resourceSpans: {
@@ -5292,6 +5331,21 @@ export interface operations {
       /** @description No content */
       204: {
         content: never;
+      };
+    };
+  };
+  LogCustomTraceTyped: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TypedAsyncLogModel"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": unknown;
+        };
       };
     };
   };

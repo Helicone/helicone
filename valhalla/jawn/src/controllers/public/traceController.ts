@@ -4,6 +4,11 @@ import { type OTELTrace, TraceManager } from "../../managers/traceManager";
 import * as protobuf from "protobufjs";
 import path from "path";
 import { CustomTraceManager } from "../../managers/customTraceManager";
+import {
+  TypedAsyncLogModel,
+  validateTypedAsyncLogModel,
+  ValidationResult,
+} from "../../types/customTrace";
 
 @Route("v1/trace")
 @Tags("Trace")
@@ -23,6 +28,53 @@ export class TraceController extends Controller {
     @Body() traceBody: any
   ) {
     await this.processCustomTrace(request, traceBody);
+  }
+
+  @Post("custom/log/typed")
+  public async logCustomTraceTyped(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body() traceBody: TypedAsyncLogModel
+  ): Promise<ValidationResult | void> {
+    const validation = validateTypedAsyncLogModel(traceBody);
+
+    if (!validation.isValid) {
+      this.setStatus(400);
+      return validation;
+    }
+
+    try {
+      const legacyTraceBody = {
+        providerRequest: {
+          url: traceBody.providerRequest.url,
+          json: traceBody.providerRequest.json,
+          meta: traceBody.providerRequest.meta,
+        },
+        providerResponse: {
+          json: traceBody.providerResponse.json,
+          textBody: traceBody.providerResponse.textBody,
+          status: traceBody.providerResponse.status,
+          headers: traceBody.providerResponse.headers,
+        },
+        timing: traceBody.timing
+          ? {
+              timeToFirstToken: traceBody.timing.timeToFirstToken,
+              startTime: traceBody.timing.startTime,
+              endTime: traceBody.timing.endTime,
+            }
+          : undefined,
+        provider: traceBody.provider,
+      };
+
+      await this.processCustomTrace(request, legacyTraceBody);
+      this.setStatus(200);
+    } catch (error: any) {
+      console.error(`Error processing typed custom trace: ${error.message}`);
+      this.setStatus(500);
+      return {
+        isValid: false,
+        errors: [{ field: "processing", message: error.message }],
+      };
+    }
   }
 
   private async processCustomTrace(
