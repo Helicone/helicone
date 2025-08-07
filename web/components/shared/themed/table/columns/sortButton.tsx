@@ -43,7 +43,11 @@ export default function SortButton<T>(props: SortButtonProps<T>) {
             variant="ghost"
             size="icon"
             onClick={() => {
-              const { sortDirection: _, sortKey: __, ...restQuery } = router.query;
+              const {
+                sortDirection: _,
+                sortKey: __,
+                ...restQuery
+              } = router.query;
               router.push({
                 pathname: router.pathname,
                 query: restQuery,

@@ -72,7 +72,6 @@ const ProviderKeySelector = (props: ProviderKeySelectorProps) => {
   const org = useOrg();
   const { data: orgMembers } = useGetOrgMembers(org?.currentOrg?.id || "");
 
-
   const changeProviderKeyHandler = useCallback(
     async (newProviderKey: string) => {
       if (setProviderKeyCallback) {

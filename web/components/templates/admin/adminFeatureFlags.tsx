@@ -127,10 +127,7 @@ export const AdminFeatureFlags = () => {
     queryKey: ["admin-feature-flags", org?.currentOrg?.id],
     queryFn: async (query) => {
       const jawn = getJawnClient(query.queryKey[1]);
-      const { data } = await jawn.POST(
-        `/v1/admin/feature-flags/query`,
-        {},
-      );
+      const { data } = await jawn.POST(`/v1/admin/feature-flags/query`, {});
       return data;
     },
   });

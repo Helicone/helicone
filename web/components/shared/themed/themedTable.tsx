@@ -42,13 +42,9 @@ export const SecretInput = (props: {
 
   const org = useOrg();
 
-  const { data } = useGetOrgMembers(
-    org?.currentOrg?.id || "",
-  );
+  const { data } = useGetOrgMembers(org?.currentOrg?.id || "");
 
-  const { data: orgOwner } = useGetOrgOwner(
-    org?.currentOrg?.id || "",
-  );
+  const { data: orgOwner } = useGetOrgOwner(org?.currentOrg?.id || "");
 
   const isOwner = org?.currentOrg?.owner === user?.id;
 

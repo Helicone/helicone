@@ -189,7 +189,8 @@ export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
         <span>
           {isCached
             ? 0
-            : Number(info.row.original.heliconeMetadata.timeToFirstToken) / 1000}
+            : Number(info.row.original.heliconeMetadata.timeToFirstToken) /
+              1000}
           s
         </span>
       );
