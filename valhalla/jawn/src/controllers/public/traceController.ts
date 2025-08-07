@@ -5,9 +5,9 @@ import * as protobuf from "protobufjs";
 import path from "path";
 import { CustomTraceManager } from "../../managers/customTraceManager";
 import {
-  TypedAsyncLogModel,
+  type TypedAsyncLogModel,
   validateTypedAsyncLogModel,
-  ValidationResult,
+  type ValidationResult,
 } from "../../types/customTrace";
 
 @Route("v1/trace")
