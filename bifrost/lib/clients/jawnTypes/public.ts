@@ -133,9 +133,6 @@ export interface paths {
   "/v1/request/query-ids": {
     post: operations["GetRequestsByIds"];
   };
-  "/v1/request/{requestId}/feedback": {
-    post: operations["FeedbackRequest"];
-  };
   "/v1/request/{requestId}/property": {
     put: operations["PutProperty"];
   };
@@ -340,9 +337,6 @@ export interface paths {
   };
   "/v1/session/metrics/query": {
     post: operations["GetMetrics"];
-  };
-  "/v1/session/{sessionId}/feedback": {
-    post: operations["UpdateSessionFeedback"];
   };
   "/v1/session/{sessionId}/tag": {
     get: operations["GetSessionTag"];
@@ -4244,28 +4238,6 @@ export interface operations {
       };
     };
   };
-  FeedbackRequest: {
-    parameters: {
-      path: {
-        requestId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          rating: boolean;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
   PutProperty: {
     parameters: {
       path: {
@@ -5426,28 +5398,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_SessionMetrics.string_"];
-        };
-      };
-    };
-  };
-  UpdateSessionFeedback: {
-    parameters: {
-      path: {
-        sessionId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          rating: boolean;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };

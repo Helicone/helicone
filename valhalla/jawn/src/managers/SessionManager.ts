@@ -371,41 +371,6 @@ export class SessionManager {
     );
   }
 
-  async updateSessionFeedback(
-    sessionId: string,
-    rating: boolean
-  ): Promise<Result<null, string>> {
-    try {
-      const result = await dbExecute<{ id: string }>(
-        `SELECT id
-         FROM request
-         WHERE properties->>'Helicone-Session-Id' = $1
-         AND helicone_org_id = $2
-         ORDER BY created_at ASC
-         LIMIT 1`,
-        [sessionId, this.authParams.organizationId]
-      );
-
-      if (result.error || !result.data || result.data.length === 0) {
-        return err(result.error ?? "No request found");
-      }
-
-      const requestManager = new RequestManager(this.authParams);
-      const res = await requestManager.addPropertyToRequest(
-        result.data[0].id,
-        "Helicone-Session-Feedback",
-        rating ? "1" : "0"
-      );
-
-      if (res.error) {
-        return err(res.error);
-      }
-      return ok(null);
-    } catch (error) {
-      console.error("Error updating session feedback:", error);
-      return err(String(error));
-    }
-  }
 
   async getSessionTag(
     sessionId: string

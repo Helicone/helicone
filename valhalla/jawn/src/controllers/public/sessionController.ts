@@ -159,25 +159,6 @@ export class SessionController extends Controller {
     return result;
   }
 
-  @Post("/{sessionId}/feedback")
-  public async updateSessionFeedback(
-    @Path() sessionId: string,
-    @Body() requestBody: { rating: boolean },
-    @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<null, string>> {
-    const sessionManager = new SessionManager(request.authParams);
-
-    const result = await sessionManager.updateSessionFeedback(
-      sessionId,
-      requestBody.rating
-    );
-    if (result.error) {
-      this.setStatus(500);
-    } else {
-      this.setStatus(200);
-    }
-    return result;
-  }
 
   @Get("/{sessionId}/tag")
   public async getSessionTag(

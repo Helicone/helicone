@@ -191,26 +191,6 @@ export class RequestController extends Controller {
     return reqManager.getRequestByIds(requestBody.requestIds);
   }
 
-  @Post("/{requestId}/feedback")
-  public async feedbackRequest(
-    @Body()
-    requestBody: { rating: boolean },
-    @Request() request: JawnAuthenticatedRequest,
-    @Path() requestId: string
-  ): Promise<Result<null, string>> {
-    const reqManager = new RequestManager(request.authParams);
-
-    const requestFeedback = await reqManager.feedbackRequest(
-      requestId,
-      requestBody.rating
-    );
-    if (requestFeedback.error) {
-      this.setStatus(500);
-    } else {
-      this.setStatus(201);
-    }
-    return requestFeedback;
-  }
 
   @Put("/{requestId}/property")
   public async putProperty(

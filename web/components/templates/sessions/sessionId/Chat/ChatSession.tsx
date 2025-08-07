@@ -11,7 +11,6 @@ import { useGetPropertiesV2 } from "../../../../../services/hooks/propertiesV2";
 import { useGetRequests } from "../../../../../services/hooks/requests";
 import { Col } from "../../../../layout/common/col";
 import { Row } from "../../../../layout/common/row";
-import FeedbackAction from "../../../feedback/thumbsUpThumbsDown";
 import { CustomPropertiesCard } from "../../../requests/customProperties";
 import RequestDrawer from "../../../requests/RequestDrawer";
 import StatusBadge from "../../../requests/statusBadge";
@@ -80,24 +79,6 @@ const ChatSession: React.FC<ChatSessionProps> = ({
                           mappedRequest.heliconeMetadata.status.statusType
                         }
                         errorCode={mappedRequest.heliconeMetadata.status.code}
-                      />
-                      <FeedbackAction
-                        id={mappedRequest.id}
-                        type="request"
-                        defaultValue={
-                          mappedRequest.heliconeMetadata.scores &&
-                          mappedRequest.heliconeMetadata.scores[
-                            "helicone-score-feedback"
-                          ]
-                            ? Number(
-                                mappedRequest.heliconeMetadata.scores[
-                                  "helicone-score-feedback"
-                                ],
-                              ) === 1
-                              ? true
-                              : false
-                            : null
-                        }
                       />
                     </Row>
 

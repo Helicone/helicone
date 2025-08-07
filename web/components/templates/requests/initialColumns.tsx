@@ -229,33 +229,6 @@ export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
     size: 175,
   },
   {
-    id: "feedback",
-    accessorKey: "scores",
-    header: "Feedback",
-    cell: (info) => {
-      const scores = info.row.original.heliconeMetadata.scores;
-      const rating =
-        scores && scores["helicone-score-feedback"]
-          ? Number(scores["helicone-score-feedback"]) === 1
-            ? true
-            : false
-          : null;
-      if (rating === null) {
-        return <span className="text-gray-500"></span>;
-      }
-
-      return (
-        <span className={clsx(rating ? "text-green-500" : "text-red-500")}>
-          {rating ? (
-            <HandThumbUpIcon className="inline h-5 w-5" />
-          ) : (
-            <HandThumbDownIcon className="inline h-5 w-5" />
-          )}
-        </span>
-      );
-    },
-  },
-  {
     id: "promptId",
     accessorKey: "promptId",
     header: "Prompt ID",
