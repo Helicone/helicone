@@ -14,7 +14,7 @@ This module creates:
 1. **GitHub Personal Access Token**: Create a token with `repo` permissions at https://github.com/settings/tokens
 2. **Docker Hub Account**: You need Docker Hub credentials (username and password/access token)
 3. **(Optional) Docker Build Cloud Token**: Organization Access Token (OAT) with `cloud-connect` scope or a Personal Access Token (PAT)
-3. **Terraform**: Version 1.0 or higher
+4. **Terraform**: Version 1.0 or higher
 
 ## Usage
 
