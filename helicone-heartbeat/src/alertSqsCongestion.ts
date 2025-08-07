@@ -1,7 +1,6 @@
-import { Env } from "..";
-import { AlertManager } from "../managers/AlertManager";
-import { callJawn } from "../util/helpers";
-import { SqsClient } from "../client/SqsClient";
+import { AlertManager } from "./AlertManager";
+import { callJawn } from "./helpers";
+import { SqsClient } from "./clients/SqsClient";
 
 const ALERT_BANNER_ID_DELAY_IN_QUEUE = 7;
 const HIGH_PRIORITY_QUEUE_SIZE_THRESHOLD = 100_000;
@@ -12,7 +11,7 @@ export async function alertSqsCongestion(env: Env, alertManager: AlertManager) {
   const queueSize = await sqsClient.getQueueSize();
   const queueSizeLowPriority = await sqsClient.getQueueSizeLowPriority();
 
-  console.log("Queue size: ", queueSize);
+  console.log("Normal queue size: ", queueSize, " low priority queue: ", queueSizeLowPriority);
 
   // If we can't determine queue size, don't change alert state
   if (queueSize === null || queueSizeLowPriority === null) {

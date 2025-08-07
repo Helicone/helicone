@@ -1,5 +1,4 @@
-import { Env } from "..";
-import { Result, err, ok } from "../util/results";
+import { Result, err, ok } from "../result";
 
 export class SlackClient {
     private slackWebhookUrl: Env["SLACK_WEBHOOK_URL"];
@@ -63,3 +62,4 @@ export class SlackClient {
         );
       }
     }
+}
