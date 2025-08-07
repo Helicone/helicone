@@ -1,17 +1,34 @@
-FROM node:20-bookworm-slim
-
-# Apply security updates
-RUN apt-get update && apt-get upgrade -y && apt-get autoremove -y && apt-get clean
+FROM node:20-bookworm-slim AS builder
 
 WORKDIR /app
 
 COPY package.json yarn.lock ./
+COPY packages/cost/package.json ./packages/cost/
+COPY packages/filters/package.json ./packages/filters/
+COPY packages/llm-mapper/package.json ./packages/llm-mapper/
+COPY packages/prompts/package.json ./packages/prompts/
+COPY web/package.json ./web/
+COPY valhalla/jawn/package.json ./valhalla/jawn/
+COPY bifrost/package.json ./bifrost/
+
+RUN yarn install --frozen-lockfile --network-timeout 300000
+
 COPY packages/ ./packages/
 COPY web/ ./web/
 
-RUN chmod -R o+w /app/web/public
-
-RUN yarn install --frozen-lockfile
 RUN cd web && yarn build
+
+FROM node:20-bookworm-slim
+
+RUN apt-get update && apt-get upgrade -y && apt-get autoremove -y && apt-get clean
+
+WORKDIR /app
+
+COPY --from=builder /app/package.json /app/yarn.lock ./
+COPY --from=builder /app/packages/ ./packages/
+COPY --from=builder /app/web/ ./web/
+COPY --from=builder /app/node_modules/ ./node_modules/
+
+RUN chmod -R o+w /app/web/public
 
 CMD ["yarn", "--cwd", "web", "start"]
