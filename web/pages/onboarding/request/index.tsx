@@ -34,7 +34,7 @@ export default function RequestPage() {
   const [hasCompleted, setHasCompleted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const abortController = useRef<AbortController | null>(null);
-  const { updateCurrentStep, completeOnboarding } = useOrgOnboarding(
+  const { updateCurrentStep, updateOnboardingStatus } = useOrgOnboarding(
     org?.currentOrg?.id ?? "",
   );
 
@@ -118,8 +118,8 @@ export default function RequestPage() {
   };
 
   const handleViewDashboard = async () => {
-    await completeOnboarding();
-    router.push("/dashboard");
+    await updateOnboardingStatus({ hasOnboarded: true });
+    router.push("/quickstart");
   };
 
   return (

@@ -80,10 +80,6 @@ export const useDraftOnboardingStore = (orgId: string) => {
   return storeCache.get(orgId)!;
 };
 
-export type QuickStartChecklist = {
-  hasViewedRequests: boolean; 
-}
-
 export interface OnboardingState {
   name: string;
   hasOnboarded: boolean;
@@ -96,16 +92,14 @@ export interface OnboardingState {
     experiments: boolean;
     evals: boolean;
   };
-  quickStartChecklist: QuickStartChecklist;
+  hasCompletedQuickstart: boolean;
 }
 
 const defaultOnboardingState: OnboardingState = {
   name: "",
   hasOnboarded: false,
   hasIntegrated: false,
-  quickStartChecklist: {
-    hasViewedRequests: false,
-  },
+  hasCompletedQuickstart: false,
   currentStep: "ORGANIZATION",
   selectedTier: "free",
   members: [],
@@ -184,6 +178,7 @@ export const useOrgOnboarding = (orgId: string) => {
       const fullState = {
         hasOnboarded: newState.hasOnboarded ?? onboardingState?.hasOnboarded ?? false,
         hasIntegrated: newState.hasIntegrated ?? onboardingState?.hasIntegrated ?? false,
+        hasCompletedQuickstart: newState.hasCompletedQuickstart ?? onboardingState?.hasCompletedQuickstart ?? false,
         currentStep:
           newState.currentStep ??
           onboardingState?.currentStep ??
@@ -227,8 +222,8 @@ export const useOrgOnboarding = (orgId: string) => {
     });
   };
 
-  const completeOnboarding = async () => {
-    await saveOnboardingChangesAsync({ hasOnboarded: true });
+  const updateOnboardingStatus = async (status: Partial<OnboardingState>) => {
+    await saveOnboardingChangesAsync(status);
     clearDraft();
     await queryClient.invalidateQueries({
       queryKey: ["org", orgId, "onboarding"],
@@ -248,7 +243,7 @@ export const useOrgOnboarding = (orgId: string) => {
     draftMembers,
     setDraftMembers,
     updateCurrentStep,
-    completeOnboarding,
+    updateOnboardingStatus,
     hasKeys,
     hasProviderKeys,
   };
