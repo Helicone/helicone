@@ -25,7 +25,7 @@ jobs:
           DOCKER_ACCOUNT: ${{ vars.DOCKER_USERNAME }}
         with:
           driver: cloud
-          endpoint: helicone/heli_linux-amd64
+          endpoint: helicone/heli
 
       - name: Push images to Docker Hub
         run: |
