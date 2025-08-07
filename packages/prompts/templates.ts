@@ -97,20 +97,22 @@ export class HeliconeTemplateManager {
 
   private static isWholeMatch = (str: string): boolean => {
     if (typeof str !== 'string') return false;
-    TEMPLATE_REGEX.lastIndex = 0;
-    const match = TEMPLATE_REGEX.exec(str);
+    // Create a new regex instance to avoid state pollution
+    const regex = new RegExp(TEMPLATE_REGEX.source, 'g');
+    const match = regex.exec(str);
     return match !== null && match[0] === str;
   };
 
   private static getVariableName = (str: string): string | null => {
     if (typeof str !== 'string') return null;
-    TEMPLATE_REGEX.lastIndex = 0;
-    const match = TEMPLATE_REGEX.exec(str);
+    // Create a new regex instance to avoid state pollution
+    const regex = new RegExp(TEMPLATE_REGEX.source, 'g');
+    const match = regex.exec(str);
     return match ? match[1].trim() : null;
   };
 
   private static performRegexReplacement(str: string, inputs: Record<string, any>): string {
-    TEMPLATE_REGEX.lastIndex = 0;
+    // String.replace() with global regex is safe as it handles the iteration internally
     return str.replace(TEMPLATE_REGEX, (match, name) => {
       const value = inputs[name.trim()];
       return value !== undefined && value !== null ? String(value) : match;
