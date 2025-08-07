@@ -3,7 +3,19 @@ import { IHeartBeat } from "./IHeartBeat";
 
 export class AsyncHeartBeat implements IHeartBeat {
   async beat(env: Env): Promise<number> {
+    console.log("AsyncHeartBeat - Starting beat");
+
+    // Check for required environment variables
+    if (!env.HELICONE_API_KEY) {
+      console.error(
+        "AsyncHeartBeat - Missing HELICONE_API_KEY environment variable"
+      );
+      return 500;
+    }
+    console.log("AsyncHeartBeat - HELICONE_API_KEY is present");
+
     const baseUrl = "https://api.helicone.ai/oai/v1/log";
+    console.log(`AsyncHeartBeat - Using base URL: ${baseUrl}`);
 
     const options = {
       method: "POST",
@@ -14,8 +26,50 @@ export class AsyncHeartBeat implements IHeartBeat {
       body: JSON.stringify(providerRequest),
     };
 
-    const res: Response = await fetch(baseUrl, options);
-    return res.status;
+    console.log("AsyncHeartBeat - Request options prepared:", {
+      method: options.method,
+      url: baseUrl,
+      headers: {
+        ...options.headers,
+        Authorization: `Bearer ${env.HELICONE_API_KEY ? "[REDACTED]" : "MISSING"}`,
+      },
+      bodyLength: options.body.length,
+    });
+
+    try {
+      console.log("AsyncHeartBeat - Making fetch request...");
+      const res: Response = await fetch(baseUrl, options);
+
+      console.log(
+        `AsyncHeartBeat - Response received - Status: ${res.status}, StatusText: ${res.statusText}`
+      );
+      console.log(
+        "AsyncHeartBeat - Response headers:",
+        Object.fromEntries(res.headers.entries())
+      );
+
+      if (!res.ok) {
+        const responseText = await res.text();
+        console.error(
+          `AsyncHeartBeat - Request failed with status ${res.status}:`,
+          responseText
+        );
+      } else {
+        console.log("AsyncHeartBeat - Request successful");
+      }
+
+      return res.status;
+    } catch (error) {
+      console.error("AsyncHeartBeat - Fetch request failed:", error);
+      if (error instanceof Error) {
+        console.error("AsyncHeartBeat - Error details:", {
+          name: error.name,
+          message: error.message,
+          stack: error.stack,
+        });
+      }
+      return 500;
+    }
   }
 }
 

@@ -35,19 +35,8 @@ export interface Env {
   REQUEST_LOGS_QUEUE_URL: string;
   REQUEST_LOGS_QUEUE_URL_LOW_PRIORITY: string;
   SLACK_ALERT_CHANNEL: string;
-}
-
-const constructorMapping: Record<string, any> = {
-  AsyncHeartBeat: new AsyncHeartBeat(),
-  FeedbackHeartBeat: new FeedbackHeartBeat(),
-  GraphQLHeartBeat: new GraphQLHeartBeat(),
-  OpenAIProxyHeartBeat: new OpenAIProxyHeartBeat(),
-  AnthropicProxyHeartBeat: new AnthropicProxyHeartBeat(),
-};
-
-interface HeartBeatItem {
-  urls: string[];
-  constructorName: string; // You can extend this interface to include any other properties as needed.
+  US_API_HEARTBEAT_URL: string;
+  EU_API_HEARTBEAT_URL: string;
 }
 
 export default {
@@ -57,24 +46,18 @@ export default {
     ctx: ExecutionContext
   ): Promise<void> {
     if (controller.cron === "* * * * *") {
-      const heartBeats = JSON.parse(env.HEARTBEAT_URLS_JSON) as HeartBeatItem[];
-
-      const heartBeatPromises = heartBeats.map(async (item) => {
-        const constructor = constructorMapping[item.constructorName];
-        if (!constructor) {
-          console.error(`Instance for ${item.constructorName} not found.`);
-          return;
-        }
-
-        const status = await constructor.beat(env);
-
-        if (status === 200) {
-          const urlPromises = item.urls.map((url) => fetch(url));
-          await Promise.all(urlPromises);
-        }
-      });
-
-      await Promise.all(heartBeatPromises);
+      const apiHeartbeat = await fetch("https://api.helicone.ai/healthcheck");
+      if (apiHeartbeat.ok) {
+        console.log(env.US_API_HEARTBEAT_URL);
+        await fetch(env.US_API_HEARTBEAT_URL);
+      }
+      const euApiHeartbeat = await fetch(
+        "https://eu.api.helicone.ai/healthcheck"
+      );
+      if (euApiHeartbeat.ok) {
+        console.log(env.EU_API_HEARTBEAT_URL);
+        await fetch(env.EU_API_HEARTBEAT_URL);
+      }
       await alertSqsCongestion(env, new AlertManager(env));
     } else if (controller.cron === "0 * * * *") {
       console.log("hourly cron");
