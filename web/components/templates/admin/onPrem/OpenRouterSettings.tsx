@@ -83,7 +83,6 @@ export const OpenRouterSettings = () => {
                       setNotification("Settings saved", "success");
                     } else {
                       setNotification("Failed to save settings", "error");
-                      console.log(response.response);
                     }
                   });
               }}

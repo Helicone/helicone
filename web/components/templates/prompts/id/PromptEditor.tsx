@@ -275,7 +275,7 @@ export default function PromptEditor({
     (ver: any) => {
       if (!ver) return;
 
-      console.log(`Loading version data:`, ver);
+      // Loading version data
 
       let templateData: any = {};
       let metadata: {
@@ -448,32 +448,25 @@ export default function PromptEditor({
 
         // Extract variables from all updatedMessages, preserving existing variable data, and deduplicating
         const existingVariables = prev.inputs || [];
-        console.log("Existing variables:", existingVariables);
+        // Extract variables from all messages
 
         const extractedVars = updatedMessages.flatMap((msg) => {
           const vars = extractVariables(msg.content || "", "helicone");
-          console.log("Extracted vars from message:", msg.content, vars);
+          // Extract variables from each message
           return vars;
         });
-        console.log("All extracted vars:", extractedVars);
+        // Process all extracted variables
 
         const updatedVariables = deduplicateVariables(
           extractedVars.map((newVar) => {
             const existingVar = existingVariables.find(
               (v) => v.name === newVar.name,
             );
-            console.log(
-              "Processing var:",
-              newVar.name,
-              "existing:",
-              existingVar,
-              "new:",
-              newVar,
-            );
+            // Preserve existing variable data or use new variable
             return existingVar || newVar;
           }),
         );
-        console.log("Final updated variables:", updatedVariables);
+        // Variables processed and deduplicated
 
         return {
           messages: updatedMessages,
@@ -708,7 +701,7 @@ export default function PromptEditor({
         isProduction: false,
         inputs: variableMap,
       };
-      console.log("Saving Template:", heliconeTemplate, metadata);
+      // Save template with metadata
 
       try {
         let result = await jawnClient.POST(
@@ -746,7 +739,7 @@ export default function PromptEditor({
         template: state.messages,
       }),
     });
-    console.log("Run Template:", runTemplate);
+    // Execute template with parameters
 
     // 6. EXECUTE
     try {

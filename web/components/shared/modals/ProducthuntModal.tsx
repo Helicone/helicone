@@ -75,7 +75,6 @@ const UpgradeOfferModal: React.FC<ProducthuntModalProps> = ({
 }) => {
   const handleUpgradeClick = () => {
     // Implement your upgrade logic here
-    console.log("Upgrade clicked");
     Cookies.set("closedProductHuntPromo", "true", { expires: 365 });
     setOpen(false);
     upgradeOpen(true);

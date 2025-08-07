@@ -76,7 +76,6 @@ export default function MessagesPanel({
 
     return messagesToRemove.includes(index);
   };
-  console.log(messages);
 
   return (
     <div ref={containerRef} className="flex h-full flex-col gap-4">

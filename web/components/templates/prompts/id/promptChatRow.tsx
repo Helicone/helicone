@@ -143,7 +143,7 @@ export const PrettyInput = ({
             <MarkdownEditor
               text={selectedProperties?.[keyName] || ""}
               setText={(text) => {
-                console.log(text);
+                // setText handler - text changes are handled upstream
               }}
               disabled={true}
               language="markdown"
