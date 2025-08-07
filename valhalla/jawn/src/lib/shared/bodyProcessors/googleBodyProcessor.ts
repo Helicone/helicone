@@ -46,7 +46,8 @@ export class GoogleBodyProcessor implements IBodyProcessor {
         totalTokens: usageMetadataItem?.usageMetadata?.totalTokenCount,
         promptTokens: usageMetadataItem?.usageMetadata?.promptTokenCount,
         completionTokens:
-          usageMetadataItem?.usageMetadata?.candidatesTokenCount,
+          (usageMetadataItem?.usageMetadata?.thoughtsTokenCount ?? 0) +
+          (usageMetadataItem?.usageMetadata?.candidatesTokenCount ?? 0),
         heliconeCalculated: false,
       },
     });

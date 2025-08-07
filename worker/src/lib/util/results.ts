@@ -42,7 +42,7 @@ export function map<T, K, L>(
   return err(result.error);
 }
 
-export function isErr<T, K>(result: Result<T, K>) {
+export function isErr<T, K>(result: Result<T, K>): result is ErrorResult<K> {
   return result.error !== null;
 }
 

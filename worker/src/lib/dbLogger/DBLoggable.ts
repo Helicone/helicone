@@ -25,10 +25,10 @@ import { parseOpenAIStream } from "./streamParsers/openAIStreamParser";
 import { parseVercelStream } from "./streamParsers/vercelStreamParser";
 
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
-import { costOfPrompt } from "../../packages/cost";
+import { costOfPrompt } from "@helicone-package/cost";
 import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
 import { MessageData } from "../clients/producers/types";
-import { DEFAULT_UUID } from "../../packages/llm-mapper/types";
+import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
 
 export interface DBLoggableProps {
   response: {
@@ -324,7 +324,8 @@ export class DBLoggable {
             total_tokens: usageMetadataItem?.usageMetadata?.totalTokenCount,
             prompt_tokens: usageMetadataItem?.usageMetadata?.promptTokenCount,
             completion_tokens:
-              usageMetadataItem?.usageMetadata?.candidatesTokenCount,
+              (usageMetadataItem?.usageMetadata?.thoughtsTokenCount ?? 0) +
+              (usageMetadataItem?.usageMetadata?.candidatesTokenCount ?? 0),
             helicone_calculated: false,
           },
         });

@@ -1,4 +1,5 @@
-import { Env, Provider } from "../..";
+import { Env } from "../..";
+import { ProviderName } from "@helicone-package/cost/models/providers";
 import { ProviderKey, ProviderKeysStore } from "../db/ProviderKeysStore";
 import { getFromCache, storeInCache } from "../util/cache/secureCache";
 
@@ -8,14 +9,15 @@ export class ProviderKeysManager {
   async setProviderKeys() {
     const providerKeys = await this.store.getProviderKeys();
     if (providerKeys) {
-      console.log("setting provider keys", providerKeys.length);
-      for (const key of providerKeys) {
-        await storeInCache(
-          `provider_keys_${key.provider}_${key.org_id}`,
-          JSON.stringify(key),
-          this.env
-        );
-      }
+      await Promise.all(
+        providerKeys.map(async (key) => {
+          await storeInCache(
+            `provider_keys_${key.provider}_${key.org_id}`,
+            JSON.stringify(key),
+            this.env
+          );
+        })
+      );
       // await storeInCache(`provider_keys_${provider}`, JSON.stringify(providerKeys), this.env);
     } else {
       console.error("No provider keys found");
@@ -23,7 +25,7 @@ export class ProviderKeysManager {
   }
 
   async getProviderKey(
-    provider: Provider,
+    provider: ProviderName,
     orgId: string
   ): Promise<ProviderKey | null> {
     const key = await getFromCache(
@@ -37,7 +39,7 @@ export class ProviderKeysManager {
   }
 
   async getProviderKeyWithFetch(
-    provider: Provider,
+    provider: ProviderName,
     orgId: string
   ): Promise<ProviderKey | null> {
     const key = await this.getProviderKey(provider, orgId);

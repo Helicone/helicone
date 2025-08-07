@@ -40,8 +40,25 @@ export async function dbQueryClickhouse<T>(
   try {
     const query_params = paramsToValues(parameters);
 
+    const getClickhouseHost = () => {
+      if (process.env.CLICKHOUSE_HOST) {
+        return process.env.CLICKHOUSE_HOST;
+      }
+      // Use APP_URL to construct clickhouse host if not specified
+      const appUrl =
+        process.env.APP_URL ||
+        process.env.NEXT_PUBLIC_APP_URL ||
+        "http://localhost";
+      try {
+        const url = new URL(appUrl);
+        return `${url.protocol}//${url.hostname}:18123`;
+      } catch {
+        return "http://localhost:18123";
+      }
+    };
+
     const client = clickhouseCreateClient({
-      host: process.env.CLICKHOUSE_HOST ?? "http://localhost:18123",
+      host: getClickhouseHost(),
       username: process.env.CLICKHOUSE_USER ?? "default",
       password: process.env.CLICKHOUSE_PASSWORD ?? "",
     });

@@ -11,10 +11,13 @@ import { err, ok, Result } from "../lib/util/results";
 import {
   buildProviderUrl,
   getProviderConfig as getUnifiedProviderConfig,
-} from "../packages/cost/unified/providers";
-import { Provider } from "../packages/cost/unified/types";
-import { getMapper, PathMapper } from "../packages/llm-mapper/path-mapper";
-import { LLMRequestBody } from "../packages/llm-mapper/types";
+} from "@helicone-package/cost/unified/providers";
+import { Provider } from "@helicone-package/cost/unified/types";
+import {
+  getMapper,
+  PathMapper,
+} from "@helicone-package/llm-mapper/path-mapper";
+import { LLMRequestBody } from "@helicone-package/llm-mapper/types";
 import { gatewayForwarder } from "./gatewayRouter";
 
 const generateParamsSchema = z.object({

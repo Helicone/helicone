@@ -398,11 +398,25 @@ async function generateTempAPIKey(
   return new TempAPIKey(apiKey, keyData[0].id);
 }
 
-// Helper function to get the Jawn service URL, replacing localhost with 127.0.0.1 in serverless environments
+// Helper function to get the Jawn service URL
 function getJawnServiceUrl(): string {
   // Get the URL from environment variable
-  const jawnServiceUrl =
-    process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE || "http://localhost:8585";
+  const jawnServiceUrl = process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE;
+
+  if (!jawnServiceUrl) {
+    // Fallback to APP_URL or NEXT_PUBLIC_APP_URL with Jawn port if not specified
+    const appUrl =
+      process.env.APP_URL ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      "http://localhost:3000";
+    try {
+      const url = new URL(appUrl);
+      // Default Jawn port is 8585
+      return `${url.protocol}//${url.hostname}:8585`;
+    } catch {
+      return "http://localhost:8585";
+    }
+  }
 
   // In serverless environments (Next.js API routes), replace localhost with 127.0.0.1
   // This is needed because localhost doesn't resolve correctly in serverless environments

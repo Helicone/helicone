@@ -1,10 +1,20 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "allow": [
       "Bash(grep:*)",
       "Bash(find:*)",
       "Bash(npm run build:*)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:openrouter.ai)",
+      "Bash(ls:*)",
+      "WebFetch(domain:platform.openai.com)",
+      "WebFetch(domain:openai.com)",
+      "WebFetch(domain:docs.anthropic.com)",
+      "WebFetch(domain:console.groq.com)",
+      "WebFetch(domain:groq.com)",
+      "Bash(chmod:*)",
+      "Bash(./tsoa_run.sh)"
     ],
     "deny": []
   }

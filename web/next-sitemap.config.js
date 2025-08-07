@@ -1,4 +1,4 @@
-const SITE_URL = "https://us.helicone.ai";
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://us.helicone.ai";
 
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {

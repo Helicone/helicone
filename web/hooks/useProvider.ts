@@ -170,7 +170,7 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
         return {
           providerKey: response.data.provider_key || "",
           providerSecretKey:
-            "secret_key" in response.data
+            "provider_secret_key" in response.data
               ? response.data.provider_secret_key
               : "",
         };

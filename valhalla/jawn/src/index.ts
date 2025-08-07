@@ -36,27 +36,34 @@ import { startDBListener } from "./controlPlane/dbListener";
 if (ENVIRONMENT === "production" || process.env.ENABLE_CRON_JOB === "true") {
   runMainLoops();
 }
+const getAppUrlRegex = () => {
+  const appUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  try {
+    const url = new URL(appUrl);
+    const protocol = url.protocol.replace(":", "");
+    const hostname = url.hostname.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const port = url.port ? `:${url.port}` : "";
+    return new RegExp(`^${protocol}:\/\/${hostname}${port}$`);
+  } catch {
+    return /^http:\/\/localhost:3000$/;
+  }
+};
+
 const allowedOriginsEnv = {
   production: [
     /^https?:\/\/(www\.)?helicone\.ai$/,
     /^https?:\/\/(www\.)?.*-helicone\.vercel\.app$/,
     /^https?:\/\/(www\.)?helicone\.vercel\.app$/,
     /^https?:\/\/(www\.)?helicone-git-valhalla-use-jawn-to-read-helicone\.vercel\.app$/,
-    /^http:\/\/localhost:3000$/,
-    /^http:\/\/localhost:3001$/,
-    /^http:\/\/localhost:3002$/,
+    getAppUrlRegex(),
     /^https?:\/\/(www\.)?eu\.helicone\.ai$/, // Added eu.helicone.ai
     /^https?:\/\/(www\.)?us\.helicone\.ai$/,
   ],
   development: [
-    /^http:\/\/localhost:3000$/,
-    /^http:\/\/localhost:3001$/,
-    /^http:\/\/localhost:3002$/,
+    getAppUrlRegex(),
   ],
   preview: [
-    /^http:\/\/localhost:3000$/,
-    /^http:\/\/localhost:3001$/,
-    /^http:\/\/localhost:3002$/,
+    getAppUrlRegex(),
   ],
 };
 

@@ -1,9 +1,9 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { Provider } from "../..";
+import { ProviderName } from "@helicone-package/cost/models/providers";
 import { Database, Json } from "../../../supabase/database.types";
 
 export type ProviderKey = {
-  provider: Provider;
+  provider: ProviderName;
   org_id: string;
   decrypted_provider_key: string;
   /*
@@ -19,58 +19,34 @@ export type ProviderKey = {
   config: Json | null;
 };
 
-const dbProviderToProvider = (provider: string): Provider | null => {
+const dbProviderToProvider = (provider: string): ProviderName | null => {
   if (provider === "openai" || provider === "OpenAI") {
-    return "OPENAI";
+    return "openai";
   }
   if (provider === "Anthropic") {
-    return "ANTHROPIC";
+    return "anthropic";
   }
   if (provider === "AWS Bedrock") {
-    return "BEDROCK";
+    return "bedrock";
   }
-  if (provider === "Groq") {
-    return "GROQ";
-  }
-  if (provider === "Google AI (Gemini)") {
-    return "GOOGLE";
-  }
-  if (provider === "Mistral AI") {
-    return "MISTRAL";
-  }
-  if (provider === "Deepseek") {
-    return "DEEPSEEK";
-  }
-  if (provider === "X.AI (Grok)") {
-    return "X";
+  if (provider === "Vertex AI") {
+    return "vertex";
   }
   return null;
 };
 
-const providerToDbProvider = (provider: Provider): string => {
-  if (provider === "OPENAI") {
+const providerToDbProvider = (provider: ProviderName): string => {
+  if (provider === "openai") {
     return "OpenAI";
   }
-  if (provider === "ANTHROPIC") {
+  if (provider === "anthropic") {
     return "Anthropic";
   }
-  if (provider === "BEDROCK") {
+  if (provider === "bedrock") {
     return "AWS Bedrock";
   }
-  if (provider === "GROQ") {
-    return "Groq";
-  }
-  if (provider === "GOOGLE") {
-    return "Google AI (Gemini)";
-  }
-  if (provider === "MISTRAL") {
-    return "Mistral AI";
-  }
-  if (provider === "DEEPSEEK") {
-    return "Deepseek";
-  }
-  if (provider === "X") {
-    return "X.AI (Grok)";
+  if (provider === "vertex") {
+    return "Vertex AI";
   }
   return provider;
 };
@@ -111,7 +87,7 @@ export class ProviderKeysStore {
   }
 
   async getProviderKeyWithFetch(
-    provider: Provider,
+    provider: ProviderName,
     orgId: string
   ): Promise<ProviderKey | null> {
     const { data, error } = await this.supabaseClient

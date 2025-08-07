@@ -2,5 +2,12 @@
   "name": "@helicone-package/cost",
   "types": "./",
   "sideEffects": false,
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "scripts": {
+    "sync-openrouter": "tsx models/scripts/sync-openrouter.ts",
+    "build-registry": "tsx models/scripts/build-registry.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0"
+  }
 }

@@ -187,7 +187,6 @@ IMAGES=(
   "helicone/web:.."
   "helicone/jawn:.."
   "helicone/migrations:.."
-  "helicone/ai-gateway:.."
 )
 
 # Docker Hub mode
@@ -199,7 +198,6 @@ if [ "$MODE" = "dockerhub" ]; then
     "helicone/web:.."
     "helicone/jawn:.."
     "helicone/migrations:.."
-    "helicone/ai-gateway:.."
   )
   
   # Filter images if specific ones were selected

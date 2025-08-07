@@ -40,7 +40,6 @@ import { ProviderCard } from "@/components/providers/ProviderCard";
 import Image from "next/image";
 import { ModelParameters } from "@/lib/api/llm/generate";
 import { useOrg } from "@/components/layout/org/organizationContext";
-import { useFeatureFlag } from "@/services/hooks/admin";
 import { ResponseFormat, ResponseFormatType } from "../types";
 
 interface ModelParametersFormProps {
@@ -72,10 +71,6 @@ export default function ModelParametersForm({
   error,
 }: ModelParametersFormProps) {
   const organization = useOrg();
-  const { data: hasAccessToAIGateway } = useFeatureFlag(
-    "ai_gateway",
-    organization?.currentOrg?.id ?? "",
-  );
 
   const updateParameter = (key: keyof ModelParameters, value: any) => {
     onParametersChange({
@@ -217,26 +212,6 @@ export default function ModelParametersForm({
                 />
               </div>
             </div>
-            {hasAccessToAIGateway && (
-              <div className="flex justify-end">
-                <div className="flex items-center gap-2">
-                  <Label htmlFor="ai-gateway" className="text-sm">
-                    Use Helicone AI Gateway
-                  </Label>
-                  <Switch
-                    className="data-[state=checked]:bg-foreground"
-                    size="sm"
-                    variant="helicone"
-                    id="ai-gateway"
-                    checked={useAIGateway}
-                    onCheckedChange={(checked) => {
-                      setUseAIGateway(checked);
-                    }}
-                    disabled={isPending}
-                  />
-                </div>
-              </div>
-            )}
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-2">
