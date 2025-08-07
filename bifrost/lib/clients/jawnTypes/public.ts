@@ -320,6 +320,9 @@ export interface paths {
   "/v1/trace/custom/log": {
     post: operations["LogCustomTrace"];
   };
+  "/v1/trace/custom/log/typed": {
+    post: operations["LogCustomTraceTyped"];
+  };
   "/v1/trace/log": {
     post: operations["LogTrace"];
   };
@@ -558,6 +561,9 @@ export interface paths {
   };
   "/v1/evals/score-distributions/query": {
     post: operations["QueryScoreDistributions"];
+  };
+  "/dynamo/metrics": {
+    post: operations["Asdfsadf"];
   };
   "/v1/public/dataisbeautiful/total-values": {
     post: operations["GetTotalValues"];
@@ -2006,6 +2012,62 @@ Json: JsonObject;
         completion_token: number;
       };
     };
+    /** @description Request validation errors */
+    ValidationError: {
+      field: string;
+      message: string;
+    };
+    /** @description Validation result */
+    ValidationResult: {
+      isValid: boolean;
+      errors: components["schemas"]["ValidationError"][];
+    };
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.unknown_": {
+      [key: string]: unknown;
+    };
+    /** @description Provider request with strict typing */
+    TypedProviderRequest: {
+      /** @description The URL of the provider endpoint */
+      url: string;
+      /** @description The JSON request body sent to the provider */
+      json: components["schemas"]["Record_string.unknown_"];
+      /** @description Metadata headers (e.g., helicone-request-id, helicone-user-id) */
+      meta: components["schemas"]["Record_string.string_"];
+    };
+    /** @description Provider response with strict typing */
+    TypedProviderResponse: {
+      /** @description The JSON response body from the provider */
+      json?: components["schemas"]["Record_string.unknown_"];
+      /** @description Raw text response body (for non-JSON responses) */
+      textBody?: string;
+      /**
+       * Format: double
+       * @description HTTP status code
+       */
+      status: number;
+      /** @description Response headers */
+      headers: components["schemas"]["Record_string.string_"];
+    };
+    /** @description Timing information for the request */
+    TypedTiming: {
+      /**
+       * Format: double
+       * @description Time to first token in milliseconds (for streaming responses)
+       */
+      timeToFirstToken?: number;
+      /** @description Request start time - Unix timestamp as string (seconds) or ISO string */
+      startTime: string;
+      /** @description Request end time - Unix timestamp as string (seconds) or ISO string */
+      endTime: string;
+    };
+    /** @description Well-typed version of AsyncLogModel for the new typed endpoint */
+    TypedAsyncLogModel: {
+      providerRequest: components["schemas"]["TypedProviderRequest"];
+      providerResponse: components["schemas"]["TypedProviderResponse"];
+      timing?: components["schemas"]["TypedTiming"];
+      provider?: components["schemas"]["Provider"];
+    };
     OTELTrace: {
       resourceSpans: {
           scopeSpans: {
@@ -3287,6 +3349,12 @@ Json: JsonObject;
       error: null;
     };
     "Result_ScoreDistribution-Array.string_": components["schemas"]["ResultSuccess_ScoreDistribution-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess____: {
+      data: Record<string, never>;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result___.string_": components["schemas"]["ResultSuccess____"] | components["schemas"]["ResultError_string_"];
     TotalValuesForAllOfTime: {
       /** Format: double */
       total_cost: number;
@@ -5295,6 +5363,21 @@ export interface operations {
       };
     };
   };
+  LogCustomTraceTyped: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TypedAsyncLogModel"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": unknown;
+        };
+      };
+    };
+  };
   LogTrace: {
     requestBody: {
       content: {
@@ -6685,6 +6768,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_ScoreDistribution-Array.string_"];
+        };
+      };
+    };
+  };
+  Asdfsadf: {
+    requestBody: {
+      content: {
+        "application/json": unknown;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result___.string_"];
         };
       };
     };

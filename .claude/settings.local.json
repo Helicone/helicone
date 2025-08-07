@@ -12,7 +12,9 @@
       "WebFetch(domain:openai.com)",
       "WebFetch(domain:docs.anthropic.com)",
       "WebFetch(domain:console.groq.com)",
-      "WebFetch(domain:groq.com)"
+      "WebFetch(domain:groq.com)",
+      "Bash(chmod:*)",
+      "Bash(./tsoa_run.sh)"
     ],
     "deny": []
   }
