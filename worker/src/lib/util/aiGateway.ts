@@ -246,17 +246,29 @@ const attemptDirectProviderRequest = async (
     });
   }
 
-  const endpoint = getEndpoint(modelName, provider);
+  let endpoint = getEndpoint(modelName, provider);
+  const providerModelId =
+    (endpoint ? endpoint.providerModelId : modelName) ?? "";
+
   if (!endpoint) {
-    return err({
-      type: "invalid_format",
-      message: "Invalid model",
-      code: 400,
-    });
+    // backwards compatibility if someone passes the explicit model id used by the provider
+    endpoint = {
+      provider,
+      pricing: {
+        prompt: 0,
+        completion: 0,
+        cacheRead: 0,
+        cacheWrite: 0,
+      },
+      contextLength: 0,
+      maxCompletionTokens: 0,
+      supportedParameters: [],
+    };
   }
+
   const body = prepareRequestBody(
     parsedBody,
-    endpoint?.providerModelId ?? "",
+    providerModelId,
     provider,
     requestWrapper.heliconeHeaders
   );
@@ -265,7 +277,7 @@ const attemptDirectProviderRequest = async (
   await authenticateRequest(
     requestWrapper,
     providerKey,
-    endpoint?.providerModelId ?? "",
+    providerModelId,
     body,
     requestWrapper.heliconeHeaders
   );
