@@ -65,7 +65,7 @@ const CountryPanel = (props: CountryPanelProps) => {
           showAnimation={true}
           data={
             countries?.data
-              ?.map((country, index) => countryMapper(country, index))
+              ?.map((country) => countryMapper(country))
               .sort((a, b) => b.value - a.value - (b.name === "n/a" ? 1 : 0))
               .slice(0, 5) ?? []
           }
@@ -105,7 +105,7 @@ const CountryPanel = (props: CountryPanelProps) => {
               showAnimation={true}
               data={
                 countries?.data
-                  ?.map((country, index) => countryMapper(country))
+                  ?.map((country) => countryMapper(country))
                   .sort(
                     (a, b) => b.value - a.value - (b.name === "n/a" ? 1 : 0),
                   ) ?? []
