@@ -10,10 +10,8 @@ import {
   type Model,
   type ModelName,
   type ModelEndpoint,
-  type ModelPricing,
   type AuthorData,
   type AuthorName,
-  type Provider,
   type ModelEndpointMap,
 } from "./types";
 
@@ -40,7 +38,6 @@ export {
   type AuthorData,
   type ModelPricing,
   type AuthorName,
-  type Provider,
 } from "./types";
 
 // Author info interface
@@ -125,8 +122,10 @@ export function getAuthorData(authorSlug: AuthorName): AuthorData {
 /**
  * Get provider configuration
  */
-export function getProvider(providerId: string): ProviderConfig | undefined {
-  return providers[providerId as ProviderName];
+export function getProvider(
+  providerId: ProviderName
+): ProviderConfig | undefined {
+  return providers[providerId];
 }
 
 /**
@@ -134,14 +133,14 @@ export function getProvider(providerId: string): ProviderConfig | undefined {
  */
 export function buildModelId(
   endpoint: ModelEndpoint,
-  providerName: Provider,
+  providerName: ProviderName,
   options?: {
     region?: string;
     crossRegion?: boolean;
     projectId?: string;
   }
 ): string {
-  const provider = getProvider(providerName as ProviderName);
+  const provider = getProvider(providerName);
   if (!provider?.buildModelId) {
     return endpoint.providerModelId || "";
   }
@@ -153,7 +152,7 @@ export function buildModelId(
  */
 export function buildEndpointUrl(
   endpoint: ModelEndpoint,
-  providerName: Provider,
+  providerName: ProviderName,
   options?: {
     region?: string;
     crossRegion?: boolean;
@@ -174,11 +173,11 @@ export function buildEndpointUrl(
 }
 
 // Import provider types
-import {
-  type ProviderConfig,
-  type ProviderEndpoint,
-  type ProviderName,
-} from "./providers";
+import { type ProviderConfig, type ProviderName } from "./providers";
 
 // Re-export types
-export type { ProviderConfig, ProviderEndpoint } from "./providers";
+export type {
+  ProviderConfig,
+  ProviderEndpoint,
+  ProviderName,
+} from "./providers";
