@@ -111,15 +111,13 @@ const signBedrockRequest = async (
   requestWrapper: RequestWrapper,
   providerKey: ProviderKey,
   model: string,
-  body: string
+  body: string,
+  targetBaseUrl: string | null
 ) => {
   const awsAccessKey = providerKey.decrypted_provider_key;
   const awsSecretKey = providerKey.decrypted_provider_secret_key;
   const config = providerKey.config as { region?: string } | null | undefined;
   const awsRegion = config?.region ?? "us-west-1";
-  requestWrapper.setUrl(
-    `https://bedrock-runtime.${awsRegion}.amazonaws.com/model/${model}/invoke`
-  );
   const sigv4 = new SignatureV4({
     service: "bedrock",
     region: awsRegion,
@@ -169,16 +167,24 @@ const authenticateRequest = async (
   providerKey: ProviderKey,
   model: string,
   body: string,
-  heliconeHeaders: HeliconeHeaders
+  heliconeHeaders: HeliconeHeaders,
+  targetBaseUrl: string | null
 ) => {
   requestWrapper.resetObject();
   requestWrapper.setHeader(
     "Helicone-Auth",
     requestWrapper.getAuthorization() ?? ""
   );
+  requestWrapper.setUrl(targetBaseUrl ?? requestWrapper.url.toString());
   if (providerKey.provider === "bedrock") {
     if (providerKey.auth_type === "key") {
-      await signBedrockRequest(requestWrapper, providerKey, model, body);
+      await signBedrockRequest(
+        requestWrapper,
+        providerKey,
+        model,
+        body,
+        targetBaseUrl
+      );
       return;
     } else if (providerKey.auth_type === "session_token") {
       // TODO: manage session token based auth for aws bedrock
@@ -204,7 +210,10 @@ const prepareRequestBody = (
   provider: ProviderName,
   heliconeHeaders: HeliconeHeaders
 ): string => {
-  if (model.includes("claude-") && provider === "bedrock") {
+  if (
+    model.includes("claude-") &&
+    (provider === "bedrock" || provider === "vertex")
+  ) {
     const anthropicBody =
       heliconeHeaders.gatewayConfig.bodyMapping === "OPENAI"
         ? toAnthropic(parsedBody)
@@ -213,6 +222,8 @@ const prepareRequestBody = (
       ...anthropicBody,
       ...(provider === "bedrock"
         ? { anthropic_version: "bedrock-2023-05-31", model: undefined }
+        : provider === "vertex"
+        ? { anthropic_version: "vertex-2023-10-16", model: undefined }
         : { model: model }),
     };
     return JSON.stringify(updatedBody);
@@ -278,7 +289,6 @@ const attemptDirectProviderRequest = async (
       supportedParameters: [],
     };
   }
-
   const body = prepareRequestBody(
     parsedBody,
     providerModelId,
@@ -287,18 +297,12 @@ const attemptDirectProviderRequest = async (
   );
 
   requestWrapper.setBody(body);
-  await authenticateRequest(
-    requestWrapper,
-    providerKey,
-    providerModelId,
-    body,
-    requestWrapper.heliconeHeaders
-  );
-
   const targetBaseUrl = endpoint
     ? buildEndpointUrl(endpoint, {
         region:
-          (providerKey.config as { region?: string })?.region ?? "us-west-1",
+          (providerKey.config as { region?: string })?.region ??
+          (providerKey.config as { location?: string })?.location ??
+          "us-west-1",
         crossRegion:
           (providerKey.config as { crossRegion?: string })?.crossRegion ===
           "true",
@@ -313,6 +317,23 @@ const attemptDirectProviderRequest = async (
           undefined,
       })
     : null;
+  await authenticateRequest(
+    requestWrapper,
+    providerKey,
+    providerModelId,
+    body,
+    requestWrapper.heliconeHeaders,
+    targetBaseUrl
+  );
+
+  await authenticateRequest(
+    requestWrapper,
+    providerKey,
+    providerModelId,
+    body,
+    requestWrapper.heliconeHeaders,
+    targetBaseUrl
+  );
 
   if (!targetBaseUrl) {
     return err({
@@ -329,15 +350,23 @@ const attemptDirectProviderRequest = async (
       return ok(response);
     }
 
-    const responseBody = await response.json();
-    return err({
-      type: "request_failed",
-      message:
-        (responseBody as { message?: string })?.message ??
-        (responseBody as { error?: { message?: string } })?.error?.message ??
-        response.statusText,
-      code: response.status,
-    });
+    try {
+      const responseBody = await response.json();
+      return err({
+        type: "request_failed",
+        message:
+          (responseBody as { message?: string })?.message ??
+          (responseBody as { error?: { message?: string } })?.error?.message ??
+          response.statusText,
+        code: response.status,
+      });
+    } catch (error) {
+      return err({
+        type: "request_failed",
+        message: response.statusText,
+        code: response.status,
+      });
+    }
   } catch (error) {
     return err({
       type: "request_failed",
