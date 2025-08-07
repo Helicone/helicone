@@ -1,5 +1,4 @@
-import { Env } from "..";
-import { err, ok, Result } from "../util/results";
+import { err, ok, Result } from "./result";
 
 export class AlertManager {
   private slackWebhookUrl: Env["SLACK_WEBHOOK_URL"];
@@ -13,7 +12,7 @@ export class AlertManager {
     message: string
   ): Promise<Result<null, string>> {
     if (!this.slackWebhookUrl) {
-      return err("Slack API key not configured");
+      return err("Slack webhook URL not configured");
     }
 
     const blocks = [

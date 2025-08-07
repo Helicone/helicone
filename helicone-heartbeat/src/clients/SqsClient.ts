@@ -1,4 +1,3 @@
-import { Env } from "..";
 import { SQSClient, GetQueueAttributesCommand } from "@aws-sdk/client-sqs";
 
 export class SqsClient {

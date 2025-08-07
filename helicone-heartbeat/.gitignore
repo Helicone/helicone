@@ -1,6 +1,3 @@
-.wrangler/
-
-yarn.lock
 # Logs
 
 logs
@@ -95,14 +92,6 @@ web_modules/
 
 .yarn-integrity
 
-# dotenv environment variable files
-
-.env
-.env.development.local
-.env.test.local
-.env.production.local
-.env.local
-
 # parcel-bundler cache (https://parceljs.org/)
 
 .cache
@@ -169,7 +158,10 @@ dist
 .yarn/install-state.gz
 .pnp.\*
 
-
 # wrangler project
 
-.dev.vars
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
+.wrangler/
