@@ -63,18 +63,17 @@ export const providers = {
 
   vertex: {
     id: "vertex",
-    baseUrl: "https://aiplatform.googleapis.com",
+    baseUrl: "https://{region}-aiplatform.googleapis.com",
     auth: "oauth",
     requiredConfig: ["projectId", "region"],
-    buildUrl: (endpoint, config) => {
-      const { projectId, region } = config;
-      if (!projectId || !region) {
-        throw new Error("Vertex AI requires projectId and region");
-      }
-      const modelId = endpoint.providerModelId;
-      return `https://aiplatform.googleapis.com/v1/projects/${projectId}/locations/${region}/publishers/anthropic/models/${modelId}:streamRawPredict`;
+    buildModelId: (endpoint) => endpoint.providerModelId || "",
+    buildUrl: (endpoint, options) => {
+      const { projectId, region } = options || {};
+      const modelId = endpoint.providerModelId || "";
+      const baseUrl = "https://{region}-aiplatform.googleapis.com";
+      const baseUrlWithRegion = baseUrl.replace("{region}", region || "");
+      return `${baseUrlWithRegion}/v1/projects/${projectId}/locations/${region}/publishers/anthropic/models/${modelId}:streamRawPredict`;
     },
-    buildModelId: (endpoint) => endpoint.providerModelId,
     pricingPages: [
       "https://cloud.google.com/vertex-ai/generative-ai/pricing",
       "https://ai.google.dev/pricing",

@@ -122,15 +122,13 @@ const signBedrockRequest = async (
   requestWrapper: RequestWrapper,
   providerKey: ProviderKey,
   model: string,
-  body: string
+  body: string,
+  targetBaseUrl: string | null
 ) => {
   const awsAccessKey = providerKey.decrypted_provider_key;
   const awsSecretKey = providerKey.decrypted_provider_secret_key;
   const config = providerKey.config as { region?: string } | null | undefined;
   const awsRegion = config?.region ?? "us-west-1";
-  requestWrapper.setUrl(
-    `https://bedrock-runtime.${awsRegion}.amazonaws.com/model/${model}/invoke`
-  );
   const sigv4 = new SignatureV4({
     service: "bedrock",
     region: awsRegion,
@@ -191,7 +189,13 @@ const authenticateRequest = async (
   requestWrapper.setUrl(targetBaseUrl ?? requestWrapper.url.toString());
   if (providerKey.provider === "bedrock") {
     if (providerKey.auth_type === "key") {
-      await signBedrockRequest(requestWrapper, providerKey, model, body);
+      await signBedrockRequest(
+        requestWrapper,
+        providerKey,
+        model,
+        body,
+        targetBaseUrl
+      );
       return;
     } else if (providerKey.auth_type === "session_token") {
       // TODO: manage session token based auth for aws bedrock
@@ -217,7 +221,10 @@ const prepareRequestBody = (
   provider: ProviderName,
   heliconeHeaders: HeliconeHeaders
 ): string => {
-  if (model.includes("claude-") && provider === "bedrock") {
+  if (
+    model.includes("claude-") &&
+    (provider === "bedrock" || provider === "vertex")
+  ) {
     const anthropicBody =
       heliconeHeaders.gatewayConfig.bodyMapping === "OPENAI"
         ? toAnthropic(parsedBody)
@@ -226,7 +233,9 @@ const prepareRequestBody = (
       ...anthropicBody,
       ...(provider === "bedrock"
         ? { anthropic_version: "bedrock-2023-05-31", model: undefined }
-        : { model: model }),
+        : provider === "vertex"
+          ? { anthropic_version: "vertex-2023-10-16", model: undefined }
+          : { model: model }),
     };
     return JSON.stringify(updatedBody);
   } else {
@@ -302,7 +311,6 @@ const attemptDirectProviderRequest = async (
         ? modelName
         : modelIdResult.data;
   }
-
   const body = prepareRequestBody(
     parsedBody,
     providerModelId,
@@ -316,6 +324,7 @@ const attemptDirectProviderRequest = async (
   const config = providerKey.config as
     | {
         region?: string;
+        location?: string;
         crossRegion?: string;
         projectId?: string;
         deploymentName?: string;
@@ -325,7 +334,7 @@ const attemptDirectProviderRequest = async (
     | undefined;
 
   const targetBaseUrlResult = buildEndpointUrl(endpoint, {
-    region: config?.region ?? "us-west-1",
+    region: config?.region ?? config?.location ?? "us-west-1",
     crossRegion: config?.crossRegion === "true",
     projectId: config?.projectId,
     deploymentName: config?.deploymentName,
@@ -358,15 +367,23 @@ const attemptDirectProviderRequest = async (
       return ok(response);
     }
 
-    const responseBody = await response.json();
-    return err({
-      type: "request_failed",
-      message:
-        (responseBody as { message?: string })?.message ??
-        (responseBody as { error?: { message?: string } })?.error?.message ??
-        response.statusText,
-      code: response.status,
-    });
+    try {
+      const responseBody = await response.json();
+      return err({
+        type: "request_failed",
+        message:
+          (responseBody as { message?: string })?.message ??
+          (responseBody as { error?: { message?: string } })?.error?.message ??
+          response.statusText,
+        code: response.status,
+      });
+    } catch (error) {
+      return err({
+        type: "request_failed",
+        message: response.statusText,
+        code: response.status,
+      });
+    }
   } catch (error) {
     return err({
       type: "request_failed",

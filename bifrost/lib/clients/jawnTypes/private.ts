@@ -2949,7 +2949,7 @@ Json: JsonObject;
     /** @enum {string} */
     SettingName: "kafka:dlq" | "kafka:log" | "kafka:score" | "kafka:dlq:score" | "kafka:dlq:eu" | "kafka:log:eu" | "kafka:orgs-to-dlq" | "azure:experiment" | "openai:apiKey" | "anthropic:apiKey" | "openrouter:apiKey" | "togetherai:apiKey" | "sqs:request-response-logs" | "sqs:helicone-scores" | "sqs:request-response-logs-dlq" | "sqs:helicone-scores-dlq";
     /**
-     * @description The URL interface represents an object providing static methods used for creating object URLs.
+     * @description The **`URL`** interface is used to parse, construct, normalize, and encode URL.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL)
      * `URL` class is a global reference for `import { URL } from 'node:url'`
