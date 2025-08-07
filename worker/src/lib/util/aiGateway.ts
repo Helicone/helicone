@@ -1,6 +1,7 @@
 import { Env } from "../..";
 import {
   buildEndpointUrl,
+  buildModelId,
   getEndpoint,
   getProvider,
   ProviderConfig,
@@ -248,7 +249,18 @@ const attemptDirectProviderRequest = async (
 
   let endpoint = getEndpoint(modelName, provider);
   const providerModelId =
-    (endpoint ? endpoint.providerModelId : modelName) ?? "";
+    (endpoint
+      ? buildModelId(endpoint, {
+          region:
+            (providerKey.config as { region?: string })?.region ?? "us-west-1",
+          crossRegion:
+            (providerKey.config as { crossRegion?: string })?.crossRegion ===
+            "true",
+          projectId:
+            (providerKey.config as { projectId?: string })?.projectId ??
+            undefined,
+        })
+      : modelName) ?? "";
 
   if (!endpoint) {
     // backwards compatibility if someone passes the explicit model id used by the provider
