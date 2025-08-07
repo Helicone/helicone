@@ -5,8 +5,16 @@
 output "github_repository_secrets" {
   description = "List of GitHub repository secrets created"
   value = [
-    "DOCKER_USERNAME",
-    "DOCKER_PASSWORD"
+    "DOCKER_PASSWORD",
+    length(var.docker_build_cloud_token) > 0 ? "DOCKER_BUILD_CLOUD_TOKEN" : null
+  ]
+  sensitive = true
+}
+
+output "github_repository_variables" {
+  description = "List of GitHub repository variables created"
+  value = [
+    "DOCKER_USERNAME"
   ]
 }
 

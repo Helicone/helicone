@@ -35,6 +35,17 @@ docker_username = "your-dockerhub-username"  # Replace with your Docker Hub user
 docker_password = "your-dockerhub-password"  # Replace with your Docker Hub password or access token
 
 #################################################################################
+# Docker Build Cloud (optional)
+#################################################################################
+
+# Docker Build Cloud token (optional). If set, the module creates the
+# DOCKER_BUILD_CLOUD_TOKEN secret used by the GitHub workflow to connect
+# to Docker Build Cloud.
+# Example values can be an Organization Access Token (OAT) with cloud-connect scope
+# or a personal access token. Leave commented to skip creating the secret.
+# docker_build_cloud_token = "dbc_xxx_or_access_token"
+
+#################################################################################
 # Environment Variables Required
 #################################################################################
 
