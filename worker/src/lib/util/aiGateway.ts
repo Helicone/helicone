@@ -263,7 +263,9 @@ const attemptDirectProviderRequest = async (
     (endpoint
       ? buildModelId(endpoint, {
           region:
-            (providerKey.config as { region?: string })?.region ?? "us-west-1",
+            (providerKey.config as { region?: string })?.region ??
+            (providerKey.config as { location?: string })?.location ??
+            "us-west-1",
           crossRegion:
             (providerKey.config as { crossRegion?: string })?.crossRegion ===
             "true",
