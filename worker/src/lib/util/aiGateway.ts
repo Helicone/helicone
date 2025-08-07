@@ -326,15 +326,6 @@ const attemptDirectProviderRequest = async (
     targetBaseUrl
   );
 
-  await authenticateRequest(
-    requestWrapper,
-    providerKey,
-    providerModelId,
-    body,
-    requestWrapper.heliconeHeaders,
-    targetBaseUrl
-  );
-
   if (!targetBaseUrl) {
     return err({
       type: "request_failed",
