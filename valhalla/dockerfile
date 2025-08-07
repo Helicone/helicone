@@ -4,6 +4,7 @@
 # Use an official Node.js runtime as the base image
 FROM node:20-bookworm-slim
 
+ARG TARGETARCH
 
 WORKDIR /usr/src/app/valhalla/prompt_security
 
@@ -30,7 +31,11 @@ ENV FFPROBE_PATH="/usr/bin/ffprobe"
 
 COPY ./valhalla/prompt_security/requirements.txt ./
 RUN . venv/bin/activate && \
-    pip3 install torch==2.3.1+cpu torchvision==0.18.1+cpu -f https://download.pytorch.org/whl/torch_stable.html && \
+    if [ "$TARGETARCH" = "arm64" ]; then \
+      pip3 install torch==2.3.1 torchvision==0.18.1 -f https://download.pytorch.org/whl/torch_stable.html; \
+    else \
+      pip3 install torch==2.3.1+cpu torchvision==0.18.1+cpu -f https://download.pytorch.org/whl/torch_stable.html; \
+    fi && \
     pip3 install "transformers[torch]"
 
 RUN . venv/bin/activate && \
