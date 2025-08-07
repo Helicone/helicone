@@ -187,6 +187,7 @@ IMAGES=(
   "helicone/web:.."
   "helicone/jawn:.."
   "helicone/migrations:.."
+  "helicone/helicone-all-in-one:.."
 )
 
 # Docker Hub mode
@@ -198,6 +199,7 @@ if [ "$MODE" = "dockerhub" ]; then
     "helicone/web:.."
     "helicone/jawn:.."
     "helicone/migrations:.."
+    "helicone/helicone-all-in-one:.."
   )
   
   # Filter images if specific ones were selected
@@ -244,6 +246,9 @@ if [ "$MODE" = "dockerhub" ]; then
     elif [ "$DOCKERFILE_NAME" = "ai_gateway" ]; then
       DOCKERFILE_PATH="../aigateway/Dockerfile"
       BUILD_CONTEXT="../aigateway"
+    elif [ "$DOCKERFILE_NAME" = "helicone_all_in_one" ]; then
+      DOCKERFILE_PATH="../Dockerfile"
+      BUILD_CONTEXT=".."
     fi
 
     # Build and push multi-platform image
