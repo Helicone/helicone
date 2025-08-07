@@ -22,6 +22,8 @@ import {
 import useNotification from "@/components/shared/notification/useNotification";
 import { Muted, Small } from "@/components/ui/typography";
 import { Label } from "../ui/label";
+import { Checkbox } from "../ui/checkbox";
+import { cn } from "@/lib/utils";
 
 // ====== Types ======
 interface ProviderCardProps {
@@ -84,6 +86,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
     } else if (provider.id === "aws") {
       initialConfig = {
         region: "",
+        crossRegion: "false",
       };
     }
 
@@ -330,8 +333,12 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
     if (!hasAdvancedConfig) return null;
 
     // Configuration fields based on provider
-    let configFields: { label: string; key: string; placeholder: string }[] =
-      [];
+    let configFields: {
+      label: string;
+      key: string;
+      placeholder: string;
+      type?: string;
+    }[] = [];
 
     if (provider.id === "azure") {
       configFields = [
@@ -350,6 +357,12 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
     } else if (provider.id === "aws") {
       configFields = [
         { label: "Region", key: "region", placeholder: "us-west-2" },
+        {
+          label: "Cross Region",
+          key: "crossRegion",
+          placeholder: "false",
+          type: "boolean",
+        },
       ];
     }
 
@@ -360,17 +373,37 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
 
         <div className="mt-2 flex flex-col gap-3">
           {configFields.map((field) => (
-            <div key={field.key} className="flex flex-col gap-1">
+            <div
+              key={field.key}
+              className={cn(
+                "flex gap-1",
+                field.type === "boolean"
+                  ? "flex-row items-center gap-2"
+                  : "flex-col",
+              )}
+            >
               <Small className="text-xs">{field.label}</Small>
-              <Input
-                type="text"
-                placeholder={field.placeholder}
-                value={state.config.values[field.key] || ""}
-                onChange={(e) =>
-                  handleUpdateConfigField(field.key, e.target.value)
-                }
-                className="h-8 text-sm"
-              />
+              {field.type === "boolean" ? (
+                <Checkbox
+                  checked={state.config.values[field.key] === "true"}
+                  onCheckedChange={(checked) =>
+                    handleUpdateConfigField(
+                      field.key,
+                      checked ? "true" : "false",
+                    )
+                  }
+                />
+              ) : (
+                <Input
+                  type={field.type ?? "text"}
+                  placeholder={field.placeholder}
+                  value={state.config.values[field.key] || ""}
+                  onChange={(e) =>
+                    handleUpdateConfigField(field.key, e.target.value)
+                  }
+                  className="h-8 text-sm"
+                />
+              )}
             </div>
           ))}
         </div>

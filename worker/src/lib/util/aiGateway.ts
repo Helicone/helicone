@@ -275,8 +275,8 @@ const attemptDirectProviderRequest = async (
         region:
           (providerKey.config as { region?: string })?.region ?? "us-west-1",
         crossRegion:
-          (providerKey.config as { crossRegion?: boolean })?.crossRegion ??
-          false,
+          (providerKey.config as { crossRegion?: string })?.crossRegion ===
+          "true",
         projectId:
           (providerKey.config as { projectId?: string })?.projectId ??
           undefined,
