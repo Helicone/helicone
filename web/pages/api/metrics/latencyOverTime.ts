@@ -15,7 +15,6 @@ async function handler(
   options: HandlerWrapperOptions<Result<LatencyOverTime[], string>>,
 ) {
   const {
-    req,
     res,
     userData: { orgId },
   } = options;

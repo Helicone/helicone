@@ -1,26 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import crypto from "crypto";
+
 import { IntercomSlackService } from "../../lib/intercom-slack-service";
-
-interface SlackEvent {
-  type: string;
-  user: string;
-  text: string;
-  ts: string;
-  thread_ts?: string;
-  channel: string;
-  event_ts: string;
-}
-
-interface SlackEventPayload {
-  token: string;
-  team_id: string;
-  api_app_id: string;
-  event: SlackEvent;
-  type: string;
-  event_id: string;
-  event_time: number;
-}
 
 // Verify Slack webhook signature
 function verifySlackWebhook(
@@ -41,6 +22,26 @@ function verifySlackWebhook(
     Buffer.from(hash, "hex"),
     Buffer.from(expectedHash, "hex"),
   );
+}
+
+interface SlackEvent {
+  type: string;
+  user: string;
+  text: string;
+  ts: string;
+  thread_ts?: string;
+  channel: string;
+  event_ts: string;
+}
+
+interface SlackEventPayload {
+  token: string;
+  team_id: string;
+  api_app_id: string;
+  event: SlackEvent;
+  type: string;
+  event_id: string;
+  event_time: number;
 }
 
 export default async function handler(
@@ -75,9 +76,10 @@ export default async function handler(
     const payload = JSON.stringify(req.body);
 
     // Verify webhook signature (temporarily disabled for testing)
-    // if (signature && !verifySlackWebhook(payload, signature, slackSecret)) {
-    //   return res.status(401).json({ error: "Invalid signature" });
-    // }
+    if (signature && !verifySlackWebhook(payload, signature, slackSecret)) {
+      return res.status(401).json({ error: "Invalid signature" });
+    }
+    // Note: Webhook signature verification is disabled for testing
 
     const eventData = req.body as SlackEventPayload;
     const service = new IntercomSlackService();

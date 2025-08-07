@@ -62,6 +62,11 @@ async function handler({
       limit.helicone_proxy_key,
     ]),
   );
+
+  if (error) {
+    return res.status(500).json({ error, data: null });
+  }
+
   const limitResults = Object.values(keyMappings?.[0])?.[0] as [
     number,
     number,

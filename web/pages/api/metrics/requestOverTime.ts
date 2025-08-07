@@ -12,7 +12,6 @@ async function handler(
   options: HandlerWrapperOptions<Result<RequestsOverTime[], string>>,
 ) {
   const {
-    req,
     res,
     userData: { orgId, userId },
   } = options;
