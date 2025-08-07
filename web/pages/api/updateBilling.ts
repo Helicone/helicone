@@ -10,9 +10,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>,
 ) {
-  const stripe = await loadStripe(
-    process.env.STRIPE_PUBLISHABLE_KEY!,
-  );
+  const stripe = await loadStripe(process.env.STRIPE_PUBLISHABLE_KEY!);
 
   // Create payment request (test endpoint)
   await stripe!.paymentRequest({
