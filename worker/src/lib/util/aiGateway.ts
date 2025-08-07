@@ -265,6 +265,7 @@ const attemptDirectProviderRequest = async (
   if (!endpoint) {
     // backwards compatibility if someone passes the explicit model id used by the provider
     endpoint = {
+      providerModelId: modelName,
       provider,
       pricing: {
         prompt: 0,
