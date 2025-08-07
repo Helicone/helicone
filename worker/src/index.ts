@@ -7,7 +7,7 @@ import { ClickhouseClientWrapper } from "./lib/db/ClickhouseWrapper";
 import { AlertManager } from "./lib/managers/AlertManager";
 import { updateLoopUsers } from "./lib/managers/LoopsManager";
 import { RequestWrapper } from "./lib/RequestWrapper";
-import { ProviderName } from "./packages/cost/providers/mappings";
+import { ProviderName } from "@helicone-package/cost/providers/mappings";
 import { buildRouter } from "./routers/routerFactory";
 import { ReportManager } from "./lib/managers/ReportManager";
 import { ReportStore } from "./lib/db/ReportStore";

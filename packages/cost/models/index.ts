@@ -13,6 +13,7 @@ import {
   type AuthorData,
   type AuthorName,
   type ModelEndpointMap,
+  Provider,
 } from "./types";
 
 // Author imports (TypeScript)
@@ -111,6 +112,13 @@ export function getEndpoints(modelKey: ModelName): ModelEndpointMap {
   return registry.endpoints[modelKey] || {};
 }
 
+export function getEndpoint(
+  modelKey: ModelName,
+  provider: Provider
+): ModelEndpoint | undefined {
+  return registry.endpoints[modelKey][provider];
+}
+
 export function getAuthor(authorSlug: AuthorName): AuthorInfo {
   return registry.authors[authorSlug];
 }
@@ -118,13 +126,10 @@ export function getAuthor(authorSlug: AuthorName): AuthorInfo {
 export function getAuthorData(authorSlug: AuthorName): AuthorData {
   return registry.authorData[authorSlug];
 }
-
 /**
  * Get provider configuration
  */
-export function getProvider(
-  providerId: ProviderName
-): ProviderConfig | undefined {
+export function getProvider(providerId: Provider): ProviderConfig | undefined {
   return providers[providerId];
 }
 
@@ -133,7 +138,7 @@ export function getProvider(
  */
 export function buildModelId(
   endpoint: ModelEndpoint,
-  providerName: ProviderName,
+  providerName: Provider,
   options?: {
     region?: string;
     crossRegion?: boolean;

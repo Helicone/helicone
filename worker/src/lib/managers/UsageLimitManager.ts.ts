@@ -1,6 +1,6 @@
 import { Env, hash } from "../..";
 import { Database } from "../../../supabase/database.types";
-import { clickhousePriceCalc } from "../../packages/cost";
+import { clickhousePriceCalc } from "@helicone-package/cost";
 import { Result, err, ok } from "../util/results";
 import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
 import { safePut } from "../safePut";

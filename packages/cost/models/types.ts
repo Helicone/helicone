@@ -69,45 +69,47 @@ export type AuthorName =
   | "moonshotai"
   | "perplexity";
 
+const providers = [
+  "anthropic",
+  "openai",
+  // "cohere",
+  // "mistral",
+  // "deepseek",
+  // "perplexity",
+  // Cloud providers
+  "vertex",
+  // "vertex-regional",
+  "bedrock",
+  // "azure-openai",
+  // Aggregators
+  // "openrouter",
+  // "together",
+  // "groq",
+  // "fireworks",
+  // "replicate",
+  // "deepinfra",
+  // "chutes",
+  // "nextbit",
+  // "google-ai-studio",
+  // "google-vertex",
+  // "nebius",
+  // "parasail",
+  // "cloudflare",
+  // "novita",
+  // "xai",
+  // "alibaba",
+  // "cerebras",
+  // "baseten",
+  // "hyperbolic",
+  // "lambda",
+  // "moonshot-ai",
+  // "inferencenet",
+] as const;
+
 /**
  * Inference providers (where models are hosted)
  */
-// export type Provider =
-//   // Direct providers
-//   | "anthropic"
-//   | "openai"
-//   | "cohere"
-//   | "mistral"
-//   | "deepseek"
-//   | "perplexity"
-//   // Cloud providers
-//   | "vertex"
-//   | "vertex-regional"
-//   | "bedrock"
-//   | "azure-openai"
-//   // Aggregators
-//   | "openrouter"
-//   | "together"
-//   | "groq"
-//   | "fireworks"
-//   | "replicate"
-//   | "deepinfra"
-//   | "chutes"
-//   | "nextbit"
-//   | "google-ai-studio"
-//   | "google-vertex"
-//   | "nebius"
-//   | "parasail"
-//   | "cloudflare"
-//   | "novita"
-//   | "xai"
-//   | "alibaba"
-//   | "cerebras"
-//   | "baseten"
-//   | "hyperbolic"
-//   | "lambda"
-//   | "moonshot-ai"
-//   | "inferencenet";
+export type Provider = (typeof providers)[number];
 
 export interface Model {
   id: ModelName;

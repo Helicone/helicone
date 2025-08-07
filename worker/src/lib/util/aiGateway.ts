@@ -1,8 +1,13 @@
-import { Env, Provider } from "../..";
+import { Env } from "../..";
+import {
+  buildEndpointUrl,
+  getEndpoint,
+  getProvider,
+  ProviderConfig,
+} from "@helicone-package/cost/models";
 import { RequestWrapper } from "../RequestWrapper";
 import { APIKeysManager } from "../managers/APIKeysManager";
 import { APIKeysStore } from "../db/APIKeysStore";
-import { providers } from "../../packages/cost/providers/mappings";
 import { err, isErr, ok, Result } from "./results";
 import { ProviderKeysManager } from "../managers/ProviderKeysManager";
 import { toAnthropic } from "../clients/llmmapper/providers/openai/request/toAnthropic";
@@ -11,6 +16,10 @@ import { ProviderKey } from "../db/ProviderKeysStore";
 import { SignatureV4 } from "@smithy/signature-v4";
 import { Sha256 } from "@aws-crypto/sha256-js";
 import { HttpRequest } from "@smithy/protocol-http";
+import { getEndpoints, ModelEndpoint } from "@helicone-package/cost/models";
+import providers, {
+  ProviderName,
+} from "@helicone-package/cost/models/providers";
 
 type Error = {
   type: "invalid_format" | "missing_provider_key" | "request_failed";
@@ -48,53 +57,38 @@ export const authenticate = async (
   return orgId;
 };
 
-export const getProviderFromProviderName = (provider: string) => {
-  return providers.find(
-    (p) => p.provider.toLowerCase() === provider.toLowerCase()
-  )?.provider;
+type DirectProviderEndpoint = {
+  type: "direct";
+  provider: ProviderName;
+  providerConfig: ProviderConfig;
+  modelName: string;
 };
 
-export const getForwardUrl = (
-  provider: Provider,
-  bedRockConfig?: { region: string; model: string }
-) => {
-  if (provider === "BEDROCK") {
-    // TODO: add support for /converse (should be able to set)
-    return `https://bedrock-runtime.${bedRockConfig?.region}.amazonaws.com/model/${bedRockConfig?.model}/invoke`;
-  } else if (provider === "OPENAI") {
-    return "https://api.openai.com";
-  } else if (provider === "ANTHROPIC") {
-    return "https://api.anthropic.com";
-  } else if (provider === "GROQ") {
-    return "https://api.groq.com";
-  } else if (provider === "GOOGLE") {
-    return "https://generativelanguage.googleapis.com";
-  } else if (provider === "MISTRAL") {
-    return "https://api.mistral.ai";
-  } else if (provider === "DEEPSEEK") {
-    return "https://api.deepseek.com";
-  } else if (provider === "X") {
-    return "https://api.x.ai";
-  }
-  return null;
+type EndpointsProviderEndpoint = {
+  type: "endpoints";
+  endpoints: ModelEndpoint[];
 };
 
-const validateModelString = (
-  model: string
-): Result<{ provider: Provider; modelName: string }, Error> => {
+type ValidateModelStringResult = Result<
+  DirectProviderEndpoint | EndpointsProviderEndpoint,
+  Error
+>;
+
+const validateModelString = (model: string): ValidateModelStringResult => {
   const modelParts = model.split("/");
   if (modelParts.length !== 2) {
-    return err({
-      type: "invalid_format",
-      message: "Invalid model",
-      code: 400,
-    });
+    const endpoints = getEndpoints(model);
+    if (endpoints.length === 0) {
+      return err({
+        type: "invalid_format",
+        message: "Invalid model",
+        code: 400,
+      });
+    }
+    return ok({ type: "endpoints", endpoints });
   }
 
-  const [modelName, provider] = [
-    modelParts[0],
-    getProviderFromProviderName(modelParts[1]),
-  ];
+  const [modelName, provider] = [modelParts[0], getProvider(modelParts[1])];
 
   if (!provider) {
     return err({
@@ -104,7 +98,12 @@ const validateModelString = (
     });
   }
 
-  return ok({ provider, modelName });
+  return ok({
+    type: "direct",
+    provider: modelParts[1] as ProviderName,
+    modelName,
+    providerConfig: provider,
+  });
 };
 
 const signBedrockRequest = async (
@@ -176,7 +175,7 @@ const authenticateRequest = async (
     "Helicone-Auth",
     requestWrapper.getAuthorization() ?? ""
   );
-  if (providerKey.provider === "BEDROCK") {
+  if (providerKey.provider === "bedrock") {
     if (providerKey.auth_type === "key") {
       await signBedrockRequest(requestWrapper, providerKey, model, body);
       return;
@@ -186,7 +185,7 @@ const authenticateRequest = async (
   }
 
   if (
-    providerKey.provider === "ANTHROPIC" &&
+    providerKey.provider === "anthropic" &&
     heliconeHeaders.gatewayConfig.bodyMapping === "NO_MAPPING"
   ) {
     requestWrapper.setHeader("x-api-key", providerKey.decrypted_provider_key);
@@ -201,17 +200,17 @@ const authenticateRequest = async (
 const prepareRequestBody = (
   parsedBody: any,
   model: string,
-  provider: Provider,
+  provider: ProviderName,
   heliconeHeaders: HeliconeHeaders
 ): string => {
-  if (model.includes("claude-") && provider === "BEDROCK") {
+  if (model.includes("claude-") && provider === "bedrock") {
     const anthropicBody =
       heliconeHeaders.gatewayConfig.bodyMapping === "OPENAI"
         ? toAnthropic(parsedBody)
         : parsedBody;
     const updatedBody = {
       ...anthropicBody,
-      ...(provider === "BEDROCK"
+      ...(provider === "bedrock"
         ? { anthropic_version: "bedrock-2023-05-31", model: undefined }
         : { model: model }),
     };
@@ -225,27 +224,15 @@ const prepareRequestBody = (
   }
 };
 
-const attemptModelRequest = async ({
-  model,
-  requestWrapper,
-  forwarder,
-  providerKeysManager,
-  orgId,
-  parsedBody,
-}: {
-  model: string;
-  requestWrapper: RequestWrapper;
-  forwarder: (targetBaseUrl: string | null) => Promise<Response>;
-  providerKeysManager: ProviderKeysManager;
-  orgId: string;
-  parsedBody: any;
-}): Promise<Result<Response, Error>> => {
-  const result = validateModelString(model);
-  if (isErr(result)) {
-    return err(result.error);
-  }
-
-  const { provider, modelName } = result.data;
+const attemptDirectProviderRequest = async (
+  directProviderEndpoint: DirectProviderEndpoint,
+  requestWrapper: RequestWrapper,
+  forwarder: (targetBaseUrl: string | null) => Promise<Response>,
+  providerKeysManager: ProviderKeysManager,
+  orgId: string,
+  parsedBody: any
+): Promise<Result<Response, Error>> => {
+  const { provider, modelName } = directProviderEndpoint;
   const providerKey = await providerKeysManager.getProviderKeyWithFetch(
     provider,
     orgId
@@ -254,14 +241,22 @@ const attemptModelRequest = async ({
   if (!providerKey) {
     return err({
       type: "missing_provider_key",
-      message: "Missing provider key",
+      message: "Missing/Incorrect provider key",
       code: 400,
     });
   }
 
+  const endpoint = getEndpoint(modelName, provider);
+  if (!endpoint) {
+    return err({
+      type: "invalid_format",
+      message: "Invalid model",
+      code: 400,
+    });
+  }
   const body = prepareRequestBody(
     parsedBody,
-    modelName,
+    endpoint?.providerModelId ?? "",
     provider,
     requestWrapper.heliconeHeaders
   );
@@ -270,21 +265,37 @@ const attemptModelRequest = async ({
   await authenticateRequest(
     requestWrapper,
     providerKey,
-    modelName,
+    endpoint?.providerModelId ?? "",
     body,
     requestWrapper.heliconeHeaders
   );
 
-  const targetBaseUrl = getForwardUrl(
-    provider,
-    provider === "BEDROCK"
-      ? {
-          region:
-            (providerKey.config as { region?: string })?.region ?? "us-west-1",
-          model: modelName,
-        }
-      : undefined
-  );
+  const targetBaseUrl = endpoint
+    ? buildEndpointUrl(endpoint, {
+        region:
+          (providerKey.config as { region?: string })?.region ?? "us-west-1",
+        crossRegion:
+          (providerKey.config as { crossRegion?: boolean })?.crossRegion ??
+          false,
+        projectId:
+          (providerKey.config as { projectId?: string })?.projectId ??
+          undefined,
+        deploymentName:
+          (providerKey.config as { deploymentName?: string })?.deploymentName ??
+          undefined,
+        resourceName:
+          (providerKey.config as { resourceName?: string })?.resourceName ??
+          undefined,
+      })
+    : null;
+
+  if (!targetBaseUrl) {
+    return err({
+      type: "request_failed",
+      message: "Failed to get target base URL",
+      code: 500,
+    });
+  }
 
   try {
     const response = await forwarder(targetBaseUrl);
@@ -309,6 +320,98 @@ const attemptModelRequest = async ({
       code: 500,
     });
   }
+};
+
+const attemptEndpointsProviderRequest = async (
+  modelName: string,
+  endpointsProviderEndpoint: EndpointsProviderEndpoint,
+  requestWrapper: RequestWrapper,
+  forwarder: (targetBaseUrl: string | null) => Promise<Response>,
+  providerKeysManager: ProviderKeysManager,
+  orgId: string,
+  parsedBody: any
+): Promise<Result<Response, Error>> => {
+  const { endpoints } = endpointsProviderEndpoint;
+
+  let error: Error | null = null;
+  for (const endpoint of endpoints) {
+    const provider = getProvider(endpoint.provider);
+    if (!provider) {
+      continue;
+    }
+
+    const result = await attemptDirectProviderRequest(
+      {
+        type: "direct",
+        provider: endpoint.provider as ProviderName,
+        modelName,
+        providerConfig: provider,
+      },
+      requestWrapper,
+      forwarder,
+      providerKeysManager,
+      orgId,
+      parsedBody
+    );
+
+    if (!isErr(result)) {
+      return result;
+    }
+    error = result.error;
+  }
+
+  return err(
+    error ?? {
+      type: "request_failed",
+      message: "All models failed",
+      code: 500,
+    }
+  );
+};
+
+const attemptModelRequest = async ({
+  model,
+  requestWrapper,
+  forwarder,
+  providerKeysManager,
+  orgId,
+  parsedBody,
+}: {
+  model: string;
+  requestWrapper: RequestWrapper;
+  forwarder: (targetBaseUrl: string | null) => Promise<Response>;
+  providerKeysManager: ProviderKeysManager;
+  orgId: string;
+  parsedBody: any;
+}): Promise<Result<Response, Error>> => {
+  const result = validateModelString(model);
+  if (isErr(result)) {
+    return err(result.error);
+  }
+
+  if (result.data.type == "direct") {
+    const directProviderRequestResult = await attemptDirectProviderRequest(
+      result.data,
+      requestWrapper,
+      forwarder,
+      providerKeysManager,
+      orgId,
+      parsedBody
+    );
+    return directProviderRequestResult;
+  }
+
+  const endpointsProviderRequestResult = await attemptEndpointsProviderRequest(
+    model,
+    result.data,
+    requestWrapper,
+    forwarder,
+    providerKeysManager,
+    orgId,
+    parsedBody
+  );
+
+  return endpointsProviderRequestResult;
 };
 
 export const attemptModelRequestWithFallback = async ({

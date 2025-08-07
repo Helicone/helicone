@@ -54,6 +54,7 @@ export const openaiEndpoints = {
   o3: {
     openai: {
       name: "OpenAI | openai/o3-2025-04-16",
+
       pricing: {
         prompt: 2,
         completion: 8,
@@ -76,6 +77,7 @@ export const openaiEndpoints = {
   "o4-mini": {
     openai: {
       name: "OpenAI | openai/o4-mini-2025-04-16",
+      providerModelId: "o4-mini",
       pricing: {
         prompt: 1.1,
         completion: 4.4,
@@ -98,6 +100,7 @@ export const openaiEndpoints = {
   "gpt-4.1": {
     openai: {
       name: "OpenAI | openai/gpt-4.1-2025-04-14",
+      providerModelId: "gpt-4.1",
       pricing: {
         prompt: 2,
         completion: 8,
@@ -124,6 +127,7 @@ export const openaiEndpoints = {
   "gpt-4.1-mini": {
     openai: {
       name: "OpenAI | openai/gpt-4.1-mini-2025-04-14",
+      providerModelId: "gpt-4.1-mini",
       pricing: {
         prompt: 0.4,
         completion: 1.6,
@@ -150,6 +154,7 @@ export const openaiEndpoints = {
   "gpt-4.1-nano": {
     openai: {
       name: "OpenAI | openai/gpt-4.1-nano-2025-04-14",
+      providerModelId: "gpt-4.1-nano",
       pricing: {
         prompt: 0.1,
         completion: 0.4,
@@ -176,6 +181,7 @@ export const openaiEndpoints = {
   "o1-pro": {
     openai: {
       name: "OpenAI | openai/o1-pro",
+      providerModelId: "o1-pro",
       pricing: {
         prompt: 150,
         completion: 600,
@@ -192,6 +198,7 @@ export const openaiEndpoints = {
   "gpt-4o-mini-search-preview": {
     openai: {
       name: "OpenAI | openai/gpt-4o-mini-search-preview-2025-03-11",
+      providerModelId: "gpt-4o-mini-search-preview",
       pricing: {
         prompt: 0.15,
         completion: 0.6,
@@ -208,6 +215,7 @@ export const openaiEndpoints = {
   "gpt-4o-search-preview": {
     openai: {
       name: "OpenAI | openai/gpt-4o-search-preview-2025-03-11",
+      providerModelId: "gpt-4o-search-preview",
       pricing: {
         prompt: 2.5,
         completion: 10,
@@ -224,6 +232,7 @@ export const openaiEndpoints = {
   "o3-mini-high": {
     openai: {
       name: "OpenAI | openai/o3-mini-high-2025-01-31",
+      providerModelId: "o3-mini-high",
       pricing: {
         prompt: 1.1,
         completion: 4.4,
@@ -245,6 +254,7 @@ export const openaiEndpoints = {
   "o3-mini": {
     openai: {
       name: "OpenAI | openai/o3-mini-2025-01-31",
+      providerModelId: "o3-mini",
       pricing: {
         prompt: 1.1,
         completion: 4.4,
@@ -266,6 +276,7 @@ export const openaiEndpoints = {
   o1: {
     openai: {
       name: "OpenAI | openai/o1-2024-12-17",
+      providerModelId: "o1",
       pricing: {
         prompt: 15,
         completion: 60,
@@ -288,6 +299,7 @@ export const openaiEndpoints = {
   "o1-mini": {
     openai: {
       name: "OpenAI | openai/o1-mini",
+      providerModelId: "o1-mini",
       pricing: {
         prompt: 1.1,
         completion: 4.4,
@@ -303,6 +315,7 @@ export const openaiEndpoints = {
   "chatgpt-4o-latest": {
     openai: {
       name: "OpenAI | openai/chatgpt-4o-latest",
+      providerModelId: "chatgpt-4o-latest",
       pricing: {
         prompt: 5,
         completion: 15,
@@ -328,6 +341,7 @@ export const openaiEndpoints = {
   "gpt-4o-mini": {
     openai: {
       name: "OpenAI | openai/gpt-4o-mini",
+      providerModelId: "gpt-4o-mini",
       pricing: {
         prompt: 0.15,
         completion: 0.6,
@@ -376,6 +390,7 @@ export const openaiEndpoints = {
   "gpt-4o": {
     openai: {
       name: "OpenAI | openai/gpt-4o",
+      providerModelId: "gpt-4o",
       pricing: {
         prompt: 2.5,
         completion: 10,
@@ -427,6 +442,7 @@ export const openaiEndpoints = {
   "gpt-4o:extended": {
     openai: {
       name: "OpenAI | openai/gpt-4o:extended",
+      providerModelId: "gpt-4o:extended",
       pricing: {
         prompt: 6,
         completion: 18,

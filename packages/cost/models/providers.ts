@@ -1,4 +1,4 @@
-import type { ModelEndpoint } from "./types";
+import type { ModelEndpoint, Provider } from "./types";
 
 export interface ProviderEndpoint {
   path: string;
@@ -7,7 +7,6 @@ export interface ProviderEndpoint {
 }
 
 export interface ProviderConfig {
-  name: string;
   baseUrl: string;
   auth: "api-key" | "oauth" | "aws-signature" | "azure-ad";
   requiresProjectId?: boolean;
@@ -24,11 +23,15 @@ export interface ProviderConfig {
   ) => string;
 }
 
-// Define provider names type from the actual providers object
-export type ProviderName = keyof typeof providers;
 export const providers = {
+  openai: {
+    baseUrl: "https://api.openai.com",
+    auth: "api-key",
+    endpoints: {},
+    buildModelId: (endpoint) => endpoint.providerModelId || "",
+    buildUrl: (baseUrl) => `${baseUrl}/v1/chat/completions`,
+  },
   anthropic: {
-    name: "Anthropic",
     baseUrl: "https://api.anthropic.com",
     auth: "api-key",
     endpoints: {
@@ -39,7 +42,6 @@ export const providers = {
     buildUrl: (baseUrl) => `${baseUrl}/v1/messages`,
   },
   bedrock: {
-    name: "Amazon Bedrock",
     baseUrl: "https://bedrock-runtime.{region}.amazonaws.com",
     auth: "aws-signature",
     requiresRegion: true,
@@ -100,7 +102,6 @@ export const providers = {
     },
   },
   vertex: {
-    name: "Google Vertex AI",
     baseUrl: "https://aiplatform.googleapis.com",
     auth: "oauth",
     requiresProjectId: true,
@@ -246,7 +247,6 @@ export const providers = {
   //     models: "/v1/models/{owner}/{name}/predictions",
   //   },
   // },
-} as const satisfies Record<string, ProviderConfig>;
-
+} as const satisfies Record<Provider, ProviderConfig>;
 
 export default providers;
