@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ChevronsRightIcon } from "lucide-react";
-import React, { useRef } from "react";
+import React from "react";
 
 interface ThemedDivProps {
   open: boolean;
@@ -11,14 +11,12 @@ interface ThemedDivProps {
 }
 
 const ThemedDiv: React.FC<ThemedDivProps> = ({
-  open,
+  open: _open,
   setOpen,
   children,
   actions,
-  defaultWidth = "md:w-[60vw]",
+  defaultWidth: _defaultWidth = "md:w-[60vw]",
 }) => {
-  const divRef = useRef<HTMLDivElement>(null);
-
   return (
     <>
       <div className="sticky top-0 z-10 border-b border-gray-200 bg-white px-2 py-1 dark:border-gray-800 dark:bg-black">

@@ -64,7 +64,7 @@ export default function BillingPage() {
 
   const subscription = useQuery({
     queryKey: ["subscription", createdOrgId],
-    queryFn: async (query: any) => {
+    queryFn: async () => {
       const jawn = getJawnClient();
       const subscription = await jawn.GET("/v1/stripe/subscription");
       return subscription;

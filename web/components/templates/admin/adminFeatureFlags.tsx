@@ -28,7 +28,7 @@ export const FeatureFlagCard: React.FC<FeatureFlagCardProps> = ({
     mutationFn: async (params: { flag: string; orgId: string }) => {
       const { flag, orgId } = params;
       const jawn = getJawnClient(org?.currentOrg?.id);
-      const { error } = await jawn.POST(`/v1/admin/feature-flags`, {
+      await jawn.POST(`/v1/admin/feature-flags`, {
         body: {
           flag,
           orgId,
@@ -127,10 +127,7 @@ export const AdminFeatureFlags = () => {
     queryKey: ["admin-feature-flags", org?.currentOrg?.id],
     queryFn: async (query) => {
       const jawn = getJawnClient(query.queryKey[1]);
-      const { data, error } = await jawn.POST(
-        `/v1/admin/feature-flags/query`,
-        {},
-      );
+      const { data } = await jawn.POST(`/v1/admin/feature-flags/query`, {});
       return data;
     },
   });
@@ -139,7 +136,7 @@ export const AdminFeatureFlags = () => {
     mutationFn: async (params: { flag: string; orgId: string }) => {
       const { flag, orgId } = params;
       const jawn = getJawnClient(org?.currentOrg?.id);
-      const { error } = await jawn.POST(`/v1/admin/feature-flags`, {
+      await jawn.POST(`/v1/admin/feature-flags`, {
         body: {
           flag,
           orgId,

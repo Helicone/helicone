@@ -140,7 +140,6 @@ export const CourseGenerator: React.FC = () => {
     let toolName = "";
     let toolDescription = "";
     let toolParameters: any = {};
-    let maxTokens = 1000;
     let sessionPath = "";
 
     switch (part) {
@@ -159,7 +158,6 @@ export const CourseGenerator: React.FC = () => {
           title: { type: "string" },
           description: { type: "string" },
         };
-        maxTokens = 250;
         // Based on the other sections, what should the overview and section titles be?
         sessionPath = "/overview";
         break;
@@ -177,7 +175,6 @@ export const CourseGenerator: React.FC = () => {
         toolParameters = {
           titles: { type: "array", items: { type: "string" } },
         };
-        maxTokens = 500;
         sessionPath = "/sectionTitles";
         break;
       case "sectionContent":
@@ -196,7 +193,6 @@ export const CourseGenerator: React.FC = () => {
         toolParameters = {
           content: { type: "string" },
         };
-        maxTokens = 500;
         sessionPath = `/sections/${args.sectionTitle}/content`;
         break;
       case "quiz":
@@ -208,7 +204,6 @@ export const CourseGenerator: React.FC = () => {
             sectionContent: args.sectionContent.slice(0, 500),
           }}..."`,
         });
-        maxTokens = 300;
         toolName = "generateQuiz";
         toolDescription = "Generate a quiz for a course section";
         toolParameters = {

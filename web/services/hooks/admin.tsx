@@ -34,7 +34,7 @@ const useUpdateAlertBanner = (onSuccess?: () => void) => {
         "/v1/admin/alert_banners",
         {
           body: req,
-        }
+        },
       );
 
       if (!error) {
@@ -82,7 +82,7 @@ const useUpdateSetting = (onSuccess?: () => void) => {
 
 const useGetSetting = (
   settingName: components["schemas"]["SettingName"],
-  onSuccess?: () => void
+  onSuccess?: () => void,
 ) => {
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["settings", settingName],
@@ -98,7 +98,7 @@ const useGetSetting = (
               name: settingName,
             },
           },
-        }
+        },
       );
 
       console.log(`Received setting ${settingName}`, data);
@@ -131,7 +131,7 @@ const useChangelog = () => {
     queryFn: async () => {
       try {
         const feed = await parser.parseURL(
-          "https://www.helicone.ai/rss/changelog.xml"
+          "https://www.helicone.ai/rss/changelog.xml",
         );
         return feed.items;
       } catch (err) {
@@ -151,7 +151,10 @@ const useChangelog = () => {
 };
 
 const useBackfillCostsPreview = (onSuccess?: () => void) => {
-  const { mutateAsync: backfillCostsPreviewAsync, isPending: isLoadingPreview } = useMutation({
+  const {
+    mutateAsync: backfillCostsPreviewAsync,
+    isPending: isLoadingPreview,
+  } = useMutation({
     mutationKey: ["backfill-costs-preview"],
     mutationFn: async (req: {
       models: components["schemas"]["ModelWithProvider"][];
@@ -169,7 +172,7 @@ const useBackfillCostsPreview = (onSuccess?: () => void) => {
             fromDate: req.fromDate,
             toDate: req.toDate,
           },
-        }
+        },
       );
 
       console.log(`Backfill costs preview`, data);
@@ -189,26 +192,27 @@ const useBackfillCostsPreview = (onSuccess?: () => void) => {
 };
 
 const useDeduplicateRequestResponse = (onSuccess?: () => void) => {
-  const { mutateAsync: deduplicateAsync, isPending: isDeduplicating } = useMutation({
-    mutationKey: ["deduplicate-request-response"],
-    mutationFn: async () => {
-      const jawnClient = getJawnClient();
-      const { data, error } = await jawnClient.POST(
-        "/v1/admin/deduplicate-request-response-rmt",
-        {
-          body: {},
+  const { mutateAsync: deduplicateAsync, isPending: isDeduplicating } =
+    useMutation({
+      mutationKey: ["deduplicate-request-response"],
+      mutationFn: async () => {
+        const jawnClient = getJawnClient();
+        const { data, error } = await jawnClient.POST(
+          "/v1/admin/deduplicate-request-response-rmt",
+          {
+            body: {},
+          },
+        );
+
+        console.log(`Deduplicated request response`, data);
+
+        if (!error) {
+          onSuccess && onSuccess();
         }
-      );
 
-      console.log(`Deduplicated request response`, data);
-
-      if (!error) {
-        onSuccess && onSuccess();
-      }
-
-      return { data, error };
-    },
-  });
+        return { data, error };
+      },
+    });
 
   return {
     deduplicateAsync,
@@ -217,7 +221,11 @@ const useDeduplicateRequestResponse = (onSuccess?: () => void) => {
 };
 
 const useBackfillCosts = (onSuccess?: () => void) => {
-  const { mutate: backfillCosts, mutateAsync: backfillCostsAsync, isPending: isBackfillingCosts } = useMutation({
+  const {
+    mutate: backfillCosts,
+    mutateAsync: backfillCostsAsync,
+    isPending: isBackfillingCosts,
+  } = useMutation({
     mutationKey: ["backfill-costs"],
     mutationFn: async (req: {
       models: components["schemas"]["ModelWithProvider"][];
@@ -235,7 +243,7 @@ const useBackfillCosts = (onSuccess?: () => void) => {
             fromDate: req.fromDate,
             toDate: req.toDate,
           },
-        }
+        },
       );
 
       console.log(`Backfilled costs`, data);
@@ -264,7 +272,7 @@ const useFeatureFlag = (feature: string, orgId: string) => {
         feature,
         orgId,
       },
-    }
+    },
   );
   return {
     data,

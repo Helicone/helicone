@@ -1,6 +1,6 @@
 export default function autoCompletePrompt(
   currentText: string,
-  contextText: string
+  contextText: string,
 ) {
   const textWithContext = `${
     contextText ? `${contextText}\n\n` : ""

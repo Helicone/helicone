@@ -26,7 +26,7 @@ interface DraftOnboardingState {
   setDraftName: (name: string) => void;
   setDraftPlan: (plan: "free" | "pro" | "team") => void;
   setDraftMembers: (
-    members: { email: string; role: "admin" | "member" }[]
+    members: { email: string; role: "admin" | "member" }[],
   ) => void;
   setDraftAddons: (addons: {
     prompts: boolean;
@@ -58,8 +58,8 @@ const createDraftStore = (orgId: string) => {
       {
         name: `onboarding-draft-storage-${orgId}`,
         skipHydration: true, // Skip initial hydration
-      }
-    )
+      },
+    ),
   );
 };
 
@@ -140,7 +140,7 @@ export const useOrgOnboarding = (orgId: string) => {
 
         return { ...baseState, name: organization?.name ?? "" };
       },
-    }
+    },
   );
 
   useEffect(() => {
@@ -180,7 +180,7 @@ export const useOrgOnboarding = (orgId: string) => {
             name: draftName || onboardingState?.name || "",
             has_onboarded: onboardingState?.hasOnboarded ?? false,
           },
-        }
+        },
       );
 
       if (error) {

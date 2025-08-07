@@ -28,7 +28,7 @@ const useGetOrgMembers = (orgId: string) => {
     },
     {
       refetchOnWindowFocus: false,
-    }
+    },
   );
   return {
     data: data?.data || [],
@@ -44,7 +44,7 @@ const useGetOrgSlackIntegration = (orgId: string) => {
     {},
     {
       refetchOnWindowFocus: false,
-    }
+    },
   );
 };
 
@@ -55,7 +55,7 @@ const useGetOrgSlackChannels = (orgId: string) => {
     {},
     {
       refetchOnWindowFocus: false,
-    }
+    },
   );
 };
 
@@ -68,7 +68,7 @@ const useGetOrgOwner = (orgId: string) => {
     },
     {
       refetchOnWindowFocus: false,
-    }
+    },
   );
 };
 
@@ -82,7 +82,7 @@ const useGetOrg = (orgId: string) => {
     {
       refetchOnWindowFocus: false,
       retry: true,
-    }
+    },
   );
 };
 
@@ -116,7 +116,7 @@ const useGetOrgs = () => {
         });
         return response;
       },
-    }
+    },
   );
 
   return {
@@ -128,7 +128,7 @@ const useGetOrgs = () => {
 
 const identifyUserOrg = (
   org: Database["public"]["Tables"]["organization"]["Row"],
-  user: HeliconeUser
+  user: HeliconeUser,
 ) => {
   if (user) {
     posthog.identify(user.id, {
@@ -200,7 +200,7 @@ export const useUpdateOrgMutation = () => {
             icon,
             variant,
           },
-        }
+        },
       );
     },
     onSuccess: () => {
@@ -223,7 +223,7 @@ const setOrgCookie = (orgId: string) => {
 
 const useOrgsContextManager = (): OrgContextValue => {
   const [selectedOrgId, setSelectedOrgId] = useState<string | undefined>(
-    undefined
+    undefined,
   );
   const { user } = useHeliconeAuthClient();
   const { data: orgs, refetch } = $JAWN_API.useQuery(
@@ -260,7 +260,7 @@ const useOrgsContextManager = (): OrgContextValue => {
           return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1;
         });
       },
-    }
+    },
   );
 
   const demoOrg = orgs?.find((org) => org.tier === "demo");
@@ -273,7 +273,7 @@ const useOrgsContextManager = (): OrgContextValue => {
         ((demoOrg?.has_onboarded as any)?.demoDataSetup ?? false) === false,
       refetchOnWindowFocus: false,
       retry: false,
-    }
+    },
   );
   const org = useMemo(() => {
     if (orgs && orgs.length > 0) {

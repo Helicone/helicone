@@ -87,7 +87,6 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
     timeFilter,
     advancedFilters,
     viewToggle,
-    savedFilters,
     activeColumns,
     setActiveColumns,
     customButtons,

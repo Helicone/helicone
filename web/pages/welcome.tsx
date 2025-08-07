@@ -3,11 +3,7 @@ import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 // import "prismjs/themes/prism.css";
-interface WelcomeProps {
-  currentStep: number;
-}
-
-const Welcome = (props: WelcomeProps) => {
+const Welcome = () => {
   const org = useOrg();
   const router = useRouter();
 

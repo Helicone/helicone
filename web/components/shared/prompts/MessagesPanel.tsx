@@ -48,10 +48,6 @@ export default function MessagesPanel({
   }, [messages.length]);
 
   // HELPERS
-  // - Are the first two messages empty?
-  const areFirstMessagesEmpty = messages
-    .slice(0, 2)
-    .every((msg) => msg.content === "");
   // - Can we add a message pair or prefill message?
   const canAddMessagePair = isLastMessageUser(messages);
   // - Is message removable?

@@ -311,10 +311,7 @@ export default function PromptBox({
       if (isVariable(part)) {
         const varContent = part.slice(2, -2);
         const varName = varContent.trim();
-        const { isValid, hasValue, value } = getVariableStatus(
-          varName,
-          variables,
-        );
+        const { isValid, hasValue } = getVariableStatus(varName, variables);
 
         return (
           <span
@@ -342,7 +339,6 @@ export default function PromptBox({
     const textarea = textareaRef.current;
     const pre = textarea.nextElementSibling as HTMLPreElement;
     const viewPortWidth = window.innerWidth;
-    const viewPortHeight = window.innerHeight;
     if (!pre) return;
     const toolbox = toolboxRef.current;
     if (!toolbox) return;
@@ -351,7 +347,7 @@ export default function PromptBox({
     // Step 2. Get all client rects for the range to handle multi-line selections
     const selectionRange = createSelectionRange(pre, selection);
     if (!selectionRange) return;
-    const { range, preRect } = selectionRange;
+    const { range } = selectionRange;
     const rects = Array.from(range.getClientRects());
     const firstRect = rects[0];
     const lastRect = rects[rects.length - 1];

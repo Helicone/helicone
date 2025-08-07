@@ -38,7 +38,6 @@ export function SimpleTable<T>(props: SimpleTableProps<T>) {
     columns,
     emptyMessage = "No data available",
     onSelect,
-    className,
     defaultSortKey,
     defaultSortDirection = "desc",
     onSort,

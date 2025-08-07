@@ -33,7 +33,7 @@ interface ViewColumnsProps<T> {
 }
 
 export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
-  const { columns, activeColumns, setActiveColumns, isDatasetsPage } = props;
+  const { columns, activeColumns, setActiveColumns } = props;
 
   const categories = columns.reduce(
     (acc, column) => {

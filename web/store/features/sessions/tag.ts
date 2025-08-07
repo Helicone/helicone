@@ -18,7 +18,7 @@ type TagStoreAction = {
     orgId: string,
     sessionId: string,
     tag: string,
-    type: TagType
+    type: TagType,
   ) => void;
 };
 
@@ -36,16 +36,16 @@ export const useTagStore = create<TagStoreState & TagStoreAction>(
           state.tagStore[orgId] = state.tagStore[orgId] ?? {};
           state.tagStore[orgId][type] = state.tagStore[orgId][type] ?? {};
           state.tagStore[orgId][type][sessionId] = tag;
-        })
+        }),
       ),
-  })
+  }),
 );
 
 export async function fetchTag(
   orgId: string,
   sessionId: string,
   type: TagType,
-  setTag: TagStoreAction["setTag"]
+  setTag: TagStoreAction["setTag"],
 ) {
   if (type === TagType.SESSION) {
     const response = await $JAWN_API.GET("/v1/session/{sessionId}/tag", {
@@ -70,7 +70,7 @@ export async function updateTag(
   sessionId: string,
   tag: string,
   type: TagType,
-  setTag: TagStoreAction["setTag"]
+  setTag: TagStoreAction["setTag"],
 ) {
   if (type === TagType.SESSION) {
     const response = await $JAWN_API.POST("/v1/session/{sessionId}/tag", {

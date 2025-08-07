@@ -7,7 +7,7 @@ import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
 import { Message } from "@helicone-package/llm-mapper/types";
 
 export const getChat = (
-  requests: MappedLLMRequest[]
+  requests: MappedLLMRequest[],
 ): {
   chat: Message[];
   isChat: boolean;
@@ -128,7 +128,7 @@ export const usePlaygroundPage = (requestId: string) => {
     },
     {},
     false,
-    false
+    false,
   );
 
   const { chat, isChat, tools } = getChat(requests.requests);

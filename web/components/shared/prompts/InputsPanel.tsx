@@ -39,7 +39,7 @@ export default function VariablesPanel({
     .map((v, i) => ({ variable: v, originalIndex: i }))
     .filter(({ variable }) => isValidVariableName(variable.name));
 
-  const { inputs, isLoading, refetch } = useInputs(promptVersionId);
+  const { inputs } = useInputs(promptVersionId);
   const hasInputs = inputs && inputs.length > 0;
 
   const getRandomInput = useMutation({

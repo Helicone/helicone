@@ -31,7 +31,7 @@ export class SupabaseAuthWrapper implements HeliconeAuthClient {
     `;
     let { data: userId, error: userIdError } = await dbExecute<{ id: string }>(
       getUserIdQuery,
-      [email]
+      [email],
     );
 
     if (userIdError) {
@@ -53,7 +53,7 @@ export class SupabaseAuthWrapper implements HeliconeAuthClient {
   }
 
   async getOrganization(
-    authParams: AuthParams
+    authParams: AuthParams,
   ): Promise<Result<OrgParams, string>> {
     throw new Error("not implemented");
   }

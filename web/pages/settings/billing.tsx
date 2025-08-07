@@ -1,7 +1,6 @@
 import { ReactElement } from "react";
 import AuthLayout from "../../components/layout/auth/authLayout";
 import BillingPlanPage from "@/components/templates/organization/plan/billingPage";
-import { GetServerSidePropsContext } from "next";
 import { NextPageWithLayout } from "../_app";
 import SettingsLayout from "@/components/templates/settings/settingsLayout";
 
@@ -19,9 +18,7 @@ PlanSettings.getLayout = function getLayout(page: ReactElement) {
 
 export default PlanSettings;
 
-export const getServerSideProps = async (
-  context: GetServerSidePropsContext,
-) => {
+export const getServerSideProps = async () => {
   return {
     props: {},
   };

@@ -21,9 +21,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import AuthHeader from "@/components/shared/authHeader";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 
-interface AlertsPageProps {}
-
-const AlertsPage = (props: AlertsPageProps) => {
+const AlertsPage = () => {
   const [createNewAlertModal, setCreateNewAlertModal] = useState(false);
   const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
   const [editAlertOpen, setEditAlertOpen] = useState(false);
@@ -44,11 +42,10 @@ const AlertsPage = (props: AlertsPageProps) => {
   }[] = [...(slackChannelsData?.data || [])];
   // Free tier limit checks
   const alertCount = alerts?.length || 0;
-  const {
-    canCreate: canCreateAlert,
-    hasAccess,
-    freeLimit: MAX_ALERTS,
-  } = useFeatureLimit("alerts", alertCount);
+  const { canCreate: canCreateAlert, freeLimit: MAX_ALERTS } = useFeatureLimit(
+    "alerts",
+    alertCount,
+  );
 
   const isOrgLoading = !orgContext || !orgContext.currentOrg;
   const isPageLoading = isLoading || isLoadingSlackChannels || isOrgLoading;

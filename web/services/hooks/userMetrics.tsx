@@ -6,7 +6,7 @@ import { FilterNode } from "@helicone-package/filters/filterDefs";
 const useUserMetrics = (
   filter: FilterNode,
   pSize: "p50" | "p75" | "p95" | "p99" | "p99.9",
-  useInterquartile: boolean
+  useInterquartile: boolean,
 ) => {
   const org = useOrg();
   return useQuery({
@@ -79,7 +79,7 @@ const useSessionNames = (sessionNameSearch: string) => {
 const useSessionMetrics = (
   sessionNameSearch: string,
   pSize: "p50" | "p75" | "p95" | "p99" | "p99.9",
-  useInterquartile: boolean
+  useInterquartile: boolean,
 ) => {
   const org = useOrg();
   const { data, isLoading, refetch, isRefetching } = useQuery({

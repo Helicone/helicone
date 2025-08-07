@@ -214,7 +214,7 @@ const AdminSettings = () => {
   };
 
   // Render a masked version of the settings json
-  const renderMaskedJson = (settings: any): string => {
+  const renderMaskedJson = (_settings: any): string => {
     return "••••••••••••";
   };
 

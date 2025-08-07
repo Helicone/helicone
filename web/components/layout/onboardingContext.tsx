@@ -10,7 +10,7 @@ import {
   SparklesIcon,
   WorkflowIcon,
 } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   createContext,
   useCallback,
@@ -20,7 +20,6 @@ import {
 } from "react";
 import { OnboardingPopoverAccordion } from "../templates/onboarding/OnboardingPopoverMore";
 import { DiffHighlight } from "../templates/welcome/diffHighlight";
-import { useOrg } from "./org/organizationContext";
 
 export const ONBOARDING_STEP_LABELS = [
   "REQUESTS_TABLE",
@@ -549,9 +548,6 @@ export const OnboardingProvider = ({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStep, isOnboardingVisible]);
-
-  const org = useOrg();
-  const pathname = usePathname();
 
   // useEffect(() => {
   //   if (

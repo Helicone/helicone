@@ -2,9 +2,7 @@ import { ReactElement } from "react";
 import AuthLayout from "../components/layout/auth/authLayout";
 import VaultPage from "../components/templates/vault/vaultPage";
 
-interface VaultProps {}
-
-const Vault = (props: VaultProps) => {
+const Vault = () => {
   return <VaultPage />;
 };
 

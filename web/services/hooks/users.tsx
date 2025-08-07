@@ -15,7 +15,9 @@ const useUserId = (userId: string) => {
       const userId = query.queryKey[1] as string;
 
       const timeFilter = {
-        start: new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+        start: new Date(
+          new Date().getTime() - 30 * 24 * 60 * 60 * 1000,
+        ).toISOString(),
         end: new Date().toISOString(),
       };
 
@@ -35,7 +37,11 @@ const useUserId = (userId: string) => {
               last_active: "desc",
             },
             timeFilter: {
-              startTimeUnixSeconds: Math.floor(new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000).getTime() / 1000),
+              startTimeUnixSeconds: Math.floor(
+                new Date(
+                  new Date().getTime() - 30 * 24 * 60 * 60 * 1000,
+                ).getTime() / 1000,
+              ),
               endTimeUnixSeconds: Math.floor(new Date().getTime() / 1000),
             },
             timeZoneDifferenceMinutes: new Date().getTimezoneOffset(),
@@ -85,18 +91,18 @@ const useUserId = (userId: string) => {
         response,
         requestOverTime: requestOverTime?.data?.map((d: any) => ({
           requests: +d.count,
-          date: new Date(d.time).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
+          date: new Date(d.time).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
           }),
         })),
         costOverTime: costOverTime?.data?.map((d: any) => ({
           cost: +d.cost,
-          date: new Date(d.time).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
+          date: new Date(d.time).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
           }),
         })),
       };
@@ -124,7 +130,7 @@ const useUsers = (
   currentPage: number,
   currentPageSize: number,
   sortLeaf: any,
-  timeFilter: TimeFilter
+  timeFilter: TimeFilter,
 ) => {
   const org = useOrg();
   const filter = useFilterAST();
@@ -161,7 +167,7 @@ const useUsers = (
             endTimeUnixSeconds: Math.floor(timeFilter.end.getTime() / 1000),
           },
           timeZoneDifferenceMinutes: new Date().getTimezoneOffset(),
-        }
+        },
       });
 
       if (result.error || result.data.error) {

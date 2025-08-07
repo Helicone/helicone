@@ -26,7 +26,7 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [date, setDate] = useState<Date | undefined>(
-    value ? parseISO(value) : undefined
+    value ? parseISO(value) : undefined,
   );
 
   // Update the date state when value prop changes
@@ -86,12 +86,12 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
           variant="outline"
           disabled={disabled}
           className={cn(
-            "h-7 justify-start text-[10px] px-3 py-1 font-normal border-none focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none bg-transparent w-full",
+            "h-7 w-full justify-start rounded-none border-none bg-transparent px-3 py-1 text-[10px] font-normal focus-visible:ring-0 focus-visible:ring-offset-0",
             !date && "text-muted-foreground",
-            className
+            className,
           )}
         >
-          <div className="flex items-center justify-between w-full">
+          <div className="flex w-full items-center justify-between">
             <div className="flex items-center">
               <CalendarIcon className="mr-2 h-3 w-3" />
               {formattedDate || "Select date & time"}
@@ -129,7 +129,7 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
               type="time"
               value={date ? format(date, "HH:mm") : ""}
               onChange={handleTimeChange}
-              className="h-7 text-[10px] border rounded-sm"
+              className="h-7 rounded-sm border text-[10px]"
               disabled={!date}
             />
           </div>

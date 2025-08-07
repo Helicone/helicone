@@ -76,7 +76,7 @@ const useSessions = ({
 
 const useSessionNames = (
   sessionNameSearch: string,
-  timeFilter?: TimeFilter
+  timeFilter?: TimeFilter,
 ) => {
   const org = useOrg();
   const filterStore = useFilterAST();
@@ -133,7 +133,7 @@ const useSessionMetrics = (
   sessionNameSearch: string,
   pSize: "p50" | "p75" | "p95" | "p99" | "p99.9",
   useInterquartile: boolean,
-  timeFilter: TimeFilter
+  timeFilter: TimeFilter,
 ) => {
   const org = useOrg();
   const filterStore = useFilterAST();

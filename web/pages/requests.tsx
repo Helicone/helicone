@@ -46,7 +46,7 @@ const RequestsV2 = (props: RequestsV2Props) => {
   const { currentPage, pageSize, sort, initialRequestId } = props;
 
   useEffect(() => {
-    var observer = new MutationObserver(function (event) {
+    var observer = new MutationObserver(function () {
       if (document.documentElement.className.match("translated")) {
         eval(jsToRun);
       } else {

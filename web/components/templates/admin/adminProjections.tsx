@@ -71,7 +71,6 @@ const AdminProjections = () => {
     upcomingInvoices: MOCK_UPCOMING_INVOICES,
   });
   const [error, setError] = useState<string | null>(null);
-  const [dataFetched, setDataFetched] = useState(false);
   const [expandedSections, setExpandedSections] = useState<
     Record<string, boolean>
   >({});

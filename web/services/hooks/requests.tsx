@@ -75,7 +75,7 @@ export const useGetRequestWithBodies = (requestId: string) => {
           if (response.data?.data?.asset_urls) {
             content = placeAssetIdValues(
               response.data?.data?.asset_urls,
-              content
+              content,
             );
           }
           requestBodyCache.set(response.data?.data?.request_id, content);
@@ -99,7 +99,7 @@ export const useGetRequestsWithBodies = (
   advancedFilter: FilterNode,
   sortLeaf: SortLeafRequest,
   isLive: boolean = false,
-  isCached: boolean = false
+  isCached: boolean = false,
 ) => {
   // First query to fetch the initial request data
   const requestQuery = $JAWN_API.useQuery(
@@ -118,7 +118,7 @@ export const useGetRequestsWithBodies = (
       refetchOnWindowFocus: false,
       refetchInterval: isLive ? 1_000 : false,
       keepPreviousData: true,
-    }
+    },
   );
 
   // Second query to fetch and process request bodies
@@ -149,7 +149,7 @@ export const useGetRequestsWithBodies = (
               const contentResponse = await fetch(request.signed_body_url);
               if (!contentResponse.ok) {
                 console.error(
-                  `Error fetching request body: ${contentResponse.status}`
+                  `Error fetching request body: ${contentResponse.status}`,
                 );
                 return request;
               }
@@ -176,7 +176,7 @@ export const useGetRequestsWithBodies = (
               console.error("Error processing request body:", error);
               return request;
             }
-          }) ?? []
+          }) ?? [],
         );
       } catch (error) {
         console.error("Error processing requests with bodies:", error);
@@ -189,7 +189,7 @@ export const useGetRequestsWithBodies = (
     const rawRequests = requestQuery.data?.data ?? [];
     return rawRequests.map((rawRequest) => {
       const requestWithBody = requests?.find(
-        (request) => request.request_id === rawRequest.request_id
+        (request) => request.request_id === rawRequest.request_id,
       );
       if (requestWithBody) {
         return requestWithBody;
@@ -216,7 +216,12 @@ const useGetRequestCount = (
   return useQuery({
     queryKey: ["requestsCount", filter, isCached],
     queryFn: async (query) => {
-      const [_, filter, isLive, isCached] = query.queryKey as [string, FilterNode, boolean, boolean];
+      const [_, filter, isLive, isCached] = query.queryKey as [
+        string,
+        FilterNode,
+        boolean,
+        boolean,
+      ];
       const processedFilter = processFilter(filter);
       return await fetch("/api/request/count", {
         method: "POST",
@@ -230,7 +235,7 @@ const useGetRequestCount = (
     refetchInterval: isLive ? 2_000 : false,
     gcTime: 5 * 60 * 1000,
   });
-}
+};
 
 const useGetRequests = (
   currentPage: number,
@@ -238,7 +243,7 @@ const useGetRequests = (
   advancedFilter: FilterNode,
   sortLeaf: SortLeafRequest,
   isCached: boolean = false,
-  isLive: boolean = false
+  isLive: boolean = false,
 ) => {
   return {
     requests: useGetRequestsWithBodies(
@@ -247,7 +252,7 @@ const useGetRequests = (
       advancedFilter,
       sortLeaf,
       isLive,
-      isCached
+      isCached,
     ),
     count: useGetRequestCount(advancedFilter, isLive, isCached),
   };
@@ -255,7 +260,7 @@ const useGetRequests = (
 
 const useGetRequestCountClickhouse = (
   startDateISO: string,
-  endDateISO: string
+  endDateISO: string,
 ) => {
   const { data, isLoading, refetch } = $JAWN_API.useQuery(
     "post",
@@ -281,7 +286,7 @@ const useGetRequestCountClickhouse = (
         },
       },
     },
-    { refetchOnWindowFocus: false }
+    { refetchOnWindowFocus: false },
   );
 
   return {
@@ -347,7 +352,7 @@ const getRequestBodiesBySession = async (sessions: TSessions[]) => {
           const contentResponse = await fetch(request.signed_body_url);
           if (!contentResponse.ok) {
             console.error(
-              `Error fetching request body: ${contentResponse.status}`
+              `Error fetching request body: ${contentResponse.status}`,
             );
             return request;
           }
@@ -373,7 +378,7 @@ const getRequestBodiesBySession = async (sessions: TSessions[]) => {
           console.error("Error processing request body:", error);
           return request;
         }
-      })
+      }),
     );
   } catch (error) {
     console.error("Error fetching requests by session IDs with bodies:", error);

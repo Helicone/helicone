@@ -28,7 +28,7 @@ export function useIntegration(integrationName: IntegrationNames) {
       const response = await jawnClient.GET("/v1/integration");
       if (response.data?.error) throw new Error(response.data.error);
       return response.data?.data?.find(
-        (int) => int.integration_name === integrationName
+        (int) => int.integration_name === integrationName,
       );
     },
   });
@@ -64,7 +64,7 @@ export function useIntegration(integrationName: IntegrationNames) {
       onSuccess: () => {
         setNotification(
           "OpenPipe integration settings updated successfully",
-          "success"
+          "success",
         );
         queryClient.invalidateQueries({
           queryKey: ["integrations", org?.currentOrg?.id, integrationName],
@@ -73,7 +73,7 @@ export function useIntegration(integrationName: IntegrationNames) {
       onError: (error) => {
         setNotification(
           `Failed to update OpenPipe integration settings: ${error}`,
-          "error"
+          "error",
         );
       },
     });

@@ -289,7 +289,7 @@ const OpenPipe = () => {
 export default OpenPipe;
 
 export const getServerSideProps = async (
-  context: GetServerSidePropsContext,
+  _context: GetServerSidePropsContext,
 ) => {
   // redirect the user to `/features/customer-portal`
   return {

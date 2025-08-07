@@ -71,7 +71,7 @@ const EvaluatorDetail = () => {
   });
 
   // State for managing create modal
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [, setShowCreateModal] = useState(false);
 
   // State for managing modal visibility - explicitly set to false to prevent auto-opening
   const [showEvaluatorsModal, setShowEvaluatorsModal] = useState(false);
@@ -224,56 +224,6 @@ const EvaluatorDetail = () => {
       setIsLoading(false);
     }
   }, [evaluators.data, id, router, notification]);
-
-  // Helper to add a new choice score
-  const addChoiceScore = () => {
-    if (!evaluatorFormValues) return;
-
-    const lastScore =
-      evaluatorFormValues.choiceScores.length > 0
-        ? evaluatorFormValues.choiceScores[
-            evaluatorFormValues.choiceScores.length - 1
-          ].score + 1
-        : 1;
-    setEvaluatorFormValues({
-      ...evaluatorFormValues,
-      choiceScores: [
-        ...evaluatorFormValues.choiceScores,
-        { score: lastScore, description: "" },
-      ],
-    });
-  };
-
-  // Helper to remove a choice score
-  const removeChoiceScore = (index: number) => {
-    if (!evaluatorFormValues) return;
-
-    setEvaluatorFormValues({
-      ...evaluatorFormValues,
-      choiceScores: evaluatorFormValues.choiceScores.filter(
-        (_: any, i: number) => i !== index,
-      ),
-    });
-  };
-
-  // Helper to update a choice score
-  const updateChoiceScore = (
-    index: number,
-    field: "score" | "description",
-    value: string | number,
-  ) => {
-    if (!evaluatorFormValues) return;
-
-    const newScores = [...evaluatorFormValues.choiceScores];
-    newScores[index] = {
-      ...newScores[index],
-      [field]: field === "score" ? Number(value) : value,
-    };
-    setEvaluatorFormValues({
-      ...evaluatorFormValues,
-      choiceScores: newScores,
-    });
-  };
 
   // Handle form submission
   const handleSubmit = async (data: any): Promise<void> => {

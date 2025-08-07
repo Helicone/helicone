@@ -6,7 +6,7 @@ const usePublicStats = () => {
     queryKey: ["publicStats"],
     queryFn: async () => {
       return fetch("/api/public-stats").then(
-        (res) => res.json() as Promise<PublicHeliconeStatsResult>
+        (res) => res.json() as Promise<PublicHeliconeStatsResult>,
       );
     },
     refetchOnWindowFocus: false,

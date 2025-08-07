@@ -4,11 +4,7 @@ import DeleteKeyModal from "./components/DeleteKeyModal";
 import EditKeyModal from "./components/EditKeyModal";
 import HeliconeKeyTable from "./components/HeliconeKeyTable";
 
-interface KeyPageProps {
-  hideTabs?: boolean;
-}
-
-const KeyPage = (props: KeyPageProps) => {
+const KeyPage = () => {
   const [editOpen, setEditOpen] = useState(false);
   const [addKeyOpen, setAddKeyOpen] = useState(false);
   const [deleteHeliconeOpen, setDeleteHeliconeOpen] = useState(false);

@@ -23,7 +23,7 @@ const OrgAnalytics = () => {
   const [hasAttemptedTopOrgsFetch, setHasAttemptedTopOrgsFetch] =
     useState(false);
 
-  const { data, refetch, isLoading, error } = useQuery({
+  const { data, refetch, error } = useQuery({
     queryKey: ["whodis", organizationId, userId, email],
     queryFn: async () => {
       const jawn = getJawnClient();
@@ -111,7 +111,7 @@ const OrgAnalytics = () => {
       adminIds: string[];
     }) => {
       const jawn = getJawnClient();
-      const { data, error } = await jawn.POST("/v1/admin/admins/org/query", {
+      const { error } = await jawn.POST("/v1/admin/admins/org/query", {
         body: {
           orgId,
           adminIds,

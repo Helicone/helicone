@@ -142,7 +142,6 @@ export default function ThemedTable<T extends { id?: string }>(
     selectedIds,
     selectedRows,
     fullWidth = false,
-    isDatasetsPage,
     rightPanel,
     search,
     rowLink,
@@ -199,7 +198,7 @@ export default function ThemedTable<T extends { id?: string }>(
     onRowSelect?.(row, index, event);
   };
 
-  const [isPanelVisible, setIsPanelVisible] = useState(false);
+  const [, setIsPanelVisible] = useState(false);
 
   useEffect(() => {
     if (rightPanel) {
@@ -213,7 +212,7 @@ export default function ThemedTable<T extends { id?: string }>(
     }
   }, [rightPanel]);
 
-  const sessionData = useMemo(() => {
+  useMemo(() => {
     if (rows.length === 0) {
       return undefined;
     }

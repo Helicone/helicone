@@ -25,7 +25,7 @@ export function findClosestProvider(provider: string): Provider {
     similarity: findBestMatch(provider, p),
   }));
   const closestMatch = similarities.reduce((best, current) =>
-    current.similarity > best.similarity ? current : best
+    current.similarity > best.similarity ? current : best,
   );
   return closestMatch.target as Provider;
 }
@@ -45,7 +45,7 @@ export function findClosestModel(provider: Provider, model: string): string {
     Object.values(creatorModels).forEach((modelConfig) => {
       // Find provider models that match our provider
       const providerModels = modelConfig.providers.filter(
-        (pm) => pm.provider === provider
+        (pm) => pm.provider === provider,
       );
 
       // Add their model strings to our collection
@@ -58,7 +58,7 @@ export function findClosestModel(provider: Provider, model: string): string {
   // Check for exact match first (case insensitive)
   const normalizedModel = model.trim().toLowerCase();
   const exactMatch = modelStrings.find(
-    (m) => m.toLowerCase() === normalizedModel
+    (m) => m.toLowerCase() === normalizedModel,
   );
   if (exactMatch) {
     return exactMatch;
@@ -74,7 +74,7 @@ export function findClosestModel(provider: Provider, model: string): string {
     similarity: findBestMatch(model, m),
   }));
   const closestMatch = similarities.reduce((best, current) =>
-    current.similarity > best.similarity ? current : best
+    current.similarity > best.similarity ? current : best,
   );
   return closestMatch.target;
 }
@@ -87,7 +87,7 @@ export function findClosestModel(provider: Provider, model: string): string {
  */
 export function findClosestModelProvider(
   modelInput: string,
-  providerInput?: string
+  providerInput?: string,
 ): { provider: Provider; model: string } {
   // Get all available models for all providers
   const allModels: {
@@ -116,14 +116,14 @@ export function findClosestModelProvider(
   // Check for exact match first (case insensitive)
   const normalizedModel = modelInput.trim().toLowerCase();
   const exactMatches = allModels.filter(
-    (m) => m.modelString.toLowerCase() === normalizedModel
+    (m) => m.modelString.toLowerCase() === normalizedModel,
   );
   if (exactMatches.length > 0) {
     // If we have a provider input, try to match it
     if (providerInput) {
       const normalizedProvider = providerInput.trim().toUpperCase();
       const providerMatch = exactMatches.find(
-        (m) => m.provider === normalizedProvider
+        (m) => m.provider === normalizedProvider,
       );
       if (providerMatch) {
         return {
@@ -146,7 +146,7 @@ export function findClosestModelProvider(
   }));
 
   const closestMatch = similarities.reduce((best, current) =>
-    current.similarity > best.similarity ? current : best
+    current.similarity > best.similarity ? current : best,
   );
 
   return {

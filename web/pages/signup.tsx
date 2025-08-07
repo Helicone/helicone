@@ -50,7 +50,7 @@ const SignUp = () => {
           const origin = window.location.origin;
           console.log("signing up");
 
-          const { data, error } = await heliconeAuthClient.signUp({
+          const { error } = await heliconeAuthClient.signUp({
             email: email,
             password: password,
             options: {
