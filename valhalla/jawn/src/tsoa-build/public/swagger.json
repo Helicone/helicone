@@ -5401,7 +5401,6 @@
 				"additionalProperties": false
 			},
 			"ValidationError": {
-				"description": "Request validation errors",
 				"properties": {
 					"field": {
 						"type": "string"
@@ -5418,7 +5417,6 @@
 				"additionalProperties": false
 			},
 			"ValidationResult": {
-				"description": "Validation result",
 				"properties": {
 					"isValid": {
 						"type": "boolean"
@@ -5444,19 +5442,15 @@
 				"description": "Construct a type with a set of properties K of type T"
 			},
 			"TypedProviderRequest": {
-				"description": "Provider request with strict typing",
 				"properties": {
 					"url": {
-						"type": "string",
-						"description": "The URL of the provider endpoint"
+						"type": "string"
 					},
 					"json": {
-						"$ref": "#/components/schemas/Record_string.unknown_",
-						"description": "The JSON request body sent to the provider"
+						"$ref": "#/components/schemas/Record_string.unknown_"
 					},
 					"meta": {
-						"$ref": "#/components/schemas/Record_string.string_",
-						"description": "Metadata headers (e.g., helicone-request-id, helicone-user-id)"
+						"$ref": "#/components/schemas/Record_string.string_"
 					}
 				},
 				"required": [
@@ -5468,24 +5462,19 @@
 				"additionalProperties": false
 			},
 			"TypedProviderResponse": {
-				"description": "Provider response with strict typing",
 				"properties": {
 					"json": {
-						"$ref": "#/components/schemas/Record_string.unknown_",
-						"description": "The JSON response body from the provider"
+						"$ref": "#/components/schemas/Record_string.unknown_"
 					},
 					"textBody": {
-						"type": "string",
-						"description": "Raw text response body (for non-JSON responses)"
+						"type": "string"
 					},
 					"status": {
 						"type": "number",
-						"format": "double",
-						"description": "HTTP status code"
+						"format": "double"
 					},
 					"headers": {
-						"$ref": "#/components/schemas/Record_string.string_",
-						"description": "Response headers"
+						"$ref": "#/components/schemas/Record_string.string_"
 					}
 				},
 				"required": [
@@ -5496,20 +5485,16 @@
 				"additionalProperties": false
 			},
 			"TypedTiming": {
-				"description": "Timing information for the request",
 				"properties": {
 					"timeToFirstToken": {
 						"type": "number",
-						"format": "double",
-						"description": "Time to first token in milliseconds (for streaming responses)"
+						"format": "double"
 					},
 					"startTime": {
-						"type": "string",
-						"description": "Request start time - Unix timestamp as string (seconds) or ISO string"
+						"type": "string"
 					},
 					"endTime": {
-						"type": "string",
-						"description": "Request end time - Unix timestamp as string (seconds) or ISO string"
+						"type": "string"
 					}
 				},
 				"required": [
@@ -5520,7 +5505,6 @@
 				"additionalProperties": false
 			},
 			"TypedAsyncLogModel": {
-				"description": "Well-typed version of AsyncLogModel for the new typed endpoint",
 				"properties": {
 					"providerRequest": {
 						"$ref": "#/components/schemas/TypedProviderRequest"
@@ -10093,37 +10077,6 @@
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ResultSuccess_ScoreDistribution-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"ResultSuccess____": {
-				"properties": {
-					"data": {
-						"properties": {},
-						"type": "object"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result___.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess____"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -19027,40 +18980,6 @@
 							"schema": {
 								"$ref": "#/components/schemas/EvalQueryParams"
 							}
-						}
-					}
-				}
-			}
-		},
-		"/dynamo/metrics": {
-			"post": {
-				"operationId": "Asdfsadf",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result___.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Dynamo"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {}
 						}
 					}
 				}

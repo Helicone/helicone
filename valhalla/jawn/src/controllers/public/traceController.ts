@@ -35,7 +35,6 @@ export class TraceController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Body() traceBody: TypedAsyncLogModel
   ): Promise<ValidationResult | void> {
-    // Validate the request body
     const validation = validateTypedAsyncLogModel(traceBody);
 
     if (!validation.isValid) {
@@ -44,7 +43,6 @@ export class TraceController extends Controller {
     }
 
     try {
-      // Convert typed model to the format expected by existing processor
       const legacyTraceBody = {
         providerRequest: {
           url: traceBody.providerRequest.url,
@@ -84,14 +82,6 @@ export class TraceController extends Controller {
     traceBody: any
   ) {
     console.log("Received traces.");
-    console.log("Trace body:", JSON.stringify(traceBody, null, 2));
-    
-    if (traceBody.timing) {
-      console.log("Timing debug:");
-      console.log("- startTime:", traceBody.timing.startTime, "Type:", typeof traceBody.timing.startTime);
-      console.log("- endTime:", traceBody.timing.endTime, "Type:", typeof traceBody.timing.endTime);
-    }
-    
     const traceManager = new CustomTraceManager();
 
     const headers = new Headers();

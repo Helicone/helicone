@@ -58,8 +58,6 @@ import { GatewayController } from './../../controllers/public/gatewayController'
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { EvalController } from './../../controllers/public/evalController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-import { DynamoController } from './../../controllers/public/dynamoController';
-// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { DataIsBeautifulRouter } from './../../controllers/public/dataIsBeautifulController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { DashboardController } from './../../controllers/public/dashboardController';
@@ -3311,20 +3309,6 @@ const models: TsoaRoute.Models = {
     "Result_ScoreDistribution-Array.string_": {
         "dataType": "refAlias",
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_ScoreDistribution-Array_"},{"ref":"ResultError_string_"}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ResultSuccess____": {
-        "dataType": "refObject",
-        "properties": {
-            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{},"required":true},
-            "error": {"dataType":"enum","enums":[null],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Result___.string_": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess____"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "TotalValuesForAllOfTime": {
@@ -9860,38 +9844,6 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'queryScoreDistributions',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: undefined,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsDynamoController_asdfsadf: Record<string, TsoaRoute.ParameterSchema> = {
-                requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"any"},
-                request: {"in":"request","name":"request","required":true,"dataType":"object"},
-        };
-        app.post('/dynamo/metrics',
-            authenticateMiddleware([{"api_key":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(DynamoController)),
-            ...(fetchMiddlewares<RequestHandler>(DynamoController.prototype.asdfsadf)),
-
-            async function DynamoController_asdfsadf(request: ExRequest, response: ExResponse, next: any) {
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsDynamoController_asdfsadf, request, response });
-
-                const controller = new DynamoController();
-
-              await templateService.apiHandler({
-                methodName: 'asdfsadf',
                 controller,
                 response,
                 next,

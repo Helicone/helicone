@@ -54,30 +54,14 @@ const getTime = (
       }
     | string
 ) => {
-  console.log("getTime called with:", time, "Type:", typeof time);
-  
   if (typeof time === "string") {
-    // Check if it's a Unix timestamp as string (seconds or milliseconds)
     if (/^\d+$/.test(time)) {
       const timestamp = parseInt(time);
-      console.log("Parsed timestamp:", timestamp);
-      // If timestamp is in seconds (less than year 2100), convert to milliseconds
-      // Otherwise assume it's already in milliseconds
-      const result = timestamp < 4102444800 ? new Date(timestamp * 1000) : new Date(timestamp);
-      console.log("Result date:", result);
-      return result;
+      return timestamp < 4102444800 ? new Date(timestamp * 1000) : new Date(timestamp);
     }
-    // Try to parse as ISO date string
-    console.log("Parsing as ISO string");
-    const result = new Date(time);
-    console.log("Result date:", result);
-    return result;
+    return new Date(time);
   }
-  // Legacy object format for backwards compatibility
-  console.log("Using legacy object format");
-  const result = new Date(time.seconds * 1000 + time.milliseconds);
-  console.log("Result date:", result);
-  return result;
+  return new Date(time.seconds * 1000 + time.milliseconds);
 };
 
 function mergeHeaders(x: Headers, y: Headers) {
