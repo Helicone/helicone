@@ -485,7 +485,7 @@ export default function ChatMessage({
                         _type: "image" as const,
                         role: "user",
                         image_url: base64,
-                        id: `img-${uuidv4() + 1}`,
+                        id: `img-${uuidv4()}`,
                       },
                     ];
 
@@ -494,7 +494,7 @@ export default function ChatMessage({
                       _type: "contentArray" as const,
                       role: "user",
                       contentArray,
-                      id: msg.id || `msg-${uuidv4() + 2}`,
+                      id: msg.id || `msg-${uuidv4()}`,
                     };
                   }
                   return msg;
@@ -715,7 +715,7 @@ export default function ChatMessage({
                 _type: "message" as const,
                 role: "user",
                 content: "",
-                id: `text-${uuidv4() + 1}`,
+                id: `text-${uuidv4()}`,
               });
 
               return {
@@ -723,7 +723,7 @@ export default function ChatMessage({
                 _type: "contentArray" as const,
                 role: "user",
                 contentArray,
-                id: msg.id || `msg-${uuidv4() + 2}`,
+                id: msg.id || `msg-${uuidv4()}`,
               };
             }
             return msg;
