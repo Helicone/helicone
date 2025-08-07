@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 clickhouse/clickhouse-server:24.3.13.40 AS database-stage
+FROM clickhouse/clickhouse-server:24.3.13.40 AS database-stage
 
 # Install PostgreSQL and other dependencies
 RUN apt-get update && apt-get install -y \
@@ -117,10 +117,14 @@ RUN --mount=type=cache,target=/root/.yarn \
 
 FROM web-stage AS minio-stage
 
-# Install MinIO server and client
-RUN wget -q -O /usr/local/bin/minio https://dl.min.io/server/minio/release/linux-amd64/minio \
+# Install MinIO server and client (arch-aware)
+ARG TARGETOS
+ARG TARGETARCH
+RUN set -euo pipefail; \
+    ARCH_DIR="linux-${TARGETARCH}"; \
+    wget -q -O /usr/local/bin/minio "https://dl.min.io/server/minio/release/${ARCH_DIR}/minio" \
     && chmod +x /usr/local/bin/minio \
-    && wget -q -O /usr/local/bin/mc https://dl.min.io/client/mc/release/linux-amd64/mc \
+    && wget -q -O /usr/local/bin/mc "https://dl.min.io/client/mc/release/${ARCH_DIR}/mc" \
     && chmod +x /usr/local/bin/mc
 
 # Create MinIO data directory
