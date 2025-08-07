@@ -6,7 +6,7 @@ import { useOrgOnboarding } from "../../../services/hooks/useOrgOnboarding";
 const QuickstartPage = () => {
   const router = useRouter();
   const org = useOrg();
-  const { hasKeys, hasProviderKeys } = useOrgOnboarding(org?.currentOrg?.id ?? "");
+  const { hasKeys, hasProviderKeys, updateOnboardingStatus } = useOrgOnboarding(org?.currentOrg?.id ?? "");
 
   const steps = [
     {
@@ -29,6 +29,8 @@ const QuickstartPage = () => {
     },
   ];
 
+  const allStepsCompleted = hasProviderKeys && hasKeys && org?.currentOrg?.has_integrated;
+
   return (
     <div className="flex flex-col gap-8 p-6">
       <div className="mx-auto max-w-2xl text-center mt-4">
@@ -41,8 +43,9 @@ const QuickstartPage = () => {
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-4">
         {steps.map((step, index) => {
           const isCompleted = 
-            (index === 0 && hasProviderKeys) || // Step 1 (Add provider key) is completed if hasProviderKeys
-            (index === 1 && hasKeys); // Step 2 (Create Helicone API key) is completed if hasKeys
+            (index === 0 && hasProviderKeys) ||
+            (index === 1 && hasKeys) ||
+            (index === 2 && org?.currentOrg?.has_integrated);
           
           return (
             <div
@@ -72,6 +75,22 @@ const QuickstartPage = () => {
             </div>
           );
         })}
+
+        {allStepsCompleted && (
+          <div
+            onClick={async () => {
+              await updateOnboardingStatus({ hasCompletedQuickstart: true });
+              router.push("/dashboard");
+            }}
+            className="cursor-pointer rounded-lg border border-border py-1 transition-colors duration-150 bg-primary hover:bg-primary/90"
+          >
+            <div className="flex items-center justify-center">
+              <h3 className="text-lg font-semibold text-primary-foreground">
+                Finished!
+              </h3>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProF
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useLocalStorage } from "@/services/hooks/localStorage";
-import { useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
+import { OnboardingState, useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
 import {
   Bars3Icon,
   ChevronLeftIcon,
@@ -43,6 +43,7 @@ const DesktopSidebar = ({
   const orgContext = useOrg();
   const router = useRouter();
   const { hasKeys, hasProviderKeys } = useOrgOnboarding(orgContext?.currentOrg?.id ?? "");
+  const onboardingStatus = orgContext?.currentOrg?.onboarding_status as unknown as OnboardingState;
 
   const [isCollapsed, setIsCollapsed] = useLocalStorage(
     "isSideBarCollapsed",
@@ -258,7 +259,7 @@ const DesktopSidebar = ({
               {/* Navigation items */}
               <div className="flex flex-col">
                 {/* Quickstart Card - Only show if organization hasn't integrated */}
-                {orgContext?.currentOrg?.has_integrated === false && !isCollapsed && (
+                {!onboardingStatus?.hasCompletedQuickstart && !isCollapsed && (
                   <div
                     onClick={() => router.push("/quickstart")}
                     className="mx-2 cursor-pointer rounded-lg border border-slate-200 bg-sidebar-background p-3 dark:border-slate-800"
@@ -275,8 +276,8 @@ const DesktopSidebar = ({
                         <span className={`mr-2 text-xs ${hasKeys ? 'text-muted-foreground' : 'text-slate-500'}`}>2.</span>
                         Create Helicone API key
                       </div>
-                      <div className={`inline-flex items-center text-xs ${hasProviderKeys && hasKeys ? 'text-slate-600 dark:text-slate-400 border-b-2 border-primary' : 'text-slate-600 dark:text-slate-400'}`}>
-                        <span className="mr-2 text-xs text-slate-500">3.</span>
+                      <div className={`inline-flex items-center text-xs ${orgContext?.currentOrg?.has_integrated ? 'text-muted-foreground line-through' : hasProviderKeys && hasKeys && !orgContext?.currentOrg?.has_integrated ? 'text-slate-600 dark:text-slate-400 border-b-2 border-primary' : 'text-slate-600 dark:text-slate-400'}`}>
+                        <span className={`mr-2 text-xs ${orgContext?.currentOrg?.has_integrated ? 'text-muted-foreground' : 'text-slate-500'}`}>3.</span>
                         Integrate
                       </div>
                     </div>

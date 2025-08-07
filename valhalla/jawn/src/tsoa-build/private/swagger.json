@@ -1350,18 +1350,7 @@
 					}
 				]
 			},
-			"QuickStartChecklist": {
-				"properties": {
-					"hasViewedRequests": {
-						"type": "boolean"
-					}
-				},
-				"required": [
-					"hasViewedRequests"
-				],
-				"type": "object"
-			},
-			"Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--hasIntegrated-boolean--quickStartChecklist-QuickStartChecklist--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___": {
+			"Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--hasIntegrated-boolean--hasCompletedQuickstart-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___": {
 				"properties": {
 					"currentStep": {
 						"type": "string"
@@ -1375,8 +1364,8 @@
 					"hasIntegrated": {
 						"type": "boolean"
 					},
-					"quickStartChecklist": {
-						"$ref": "#/components/schemas/QuickStartChecklist"
+					"hasCompletedQuickstart": {
+						"type": "boolean"
 					},
 					"members": {
 						"items": {},
@@ -1406,7 +1395,7 @@
 				"description": "Make all properties in T optional"
 			},
 			"OnboardingStatus": {
-				"$ref": "#/components/schemas/Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--hasIntegrated-boolean--quickStartChecklist-QuickStartChecklist--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___"
+				"$ref": "#/components/schemas/Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--hasIntegrated-boolean--hasCompletedQuickstart-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___"
 			},
 			"EvaluatorResult": {
 				"properties": {

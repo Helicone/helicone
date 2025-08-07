@@ -62,18 +62,12 @@ export type OrganizationOwner = {
   tier: string;
 };
 
-// in no particular order or grouping, tracks completed
-// items on onboarding quickstart.
-export type QuickStartChecklist = {
-  hasViewedRequests: boolean; 
-}
-
 export type OnboardingStatus = Partial<{
   currentStep: string;
   selectedTier: string;
   hasOnboarded: boolean;
   hasIntegrated: boolean;
-  quickStartChecklist: QuickStartChecklist;
+  hasCompletedQuickstart: boolean;
   members: any[];
   addons: {
     prompts: boolean;
