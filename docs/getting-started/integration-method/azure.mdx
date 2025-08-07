@@ -121,7 +121,7 @@ openai.api_version = "2023-03-15-preview"
 openai.api_key = YOUR_AZURE_API_KEY
 
 response = openai.ChatCompletion.create(
-engine = 'gpt-35-turbo',
+engine = 'gpt-4o-mini',
 messages = [{
     'role': 'user',
     'content': "Hello World!"
@@ -138,7 +138,7 @@ max_tokens=30,
 ```javascript
 const model = new ChatOpenAI({
   azureOpenAIApiKey: "[AZURE_OPENAI_API_KEY]",
-  azureOpenAIApiDeploymentName: "openai/deployments/gpt-35-turbo",
+  azureOpenAIApiDeploymentName: "openai/deployments/gpt-4o-mini",
   azureOpenAIApiVersion: "2023-03-15-preview",
   azureOpenAIBasePath: "https://oai.helicone.ai",
   configuration: {
@@ -167,7 +167,7 @@ helicone_headers = {
 }
 self.model = AzureChatOpenAI(
 openai_api_base="https://oai.helicone.ai",
-deployment_name="gpt-35-turbo",
+deployment_name="gpt-4o-mini",
 openai_api_key=<AZURE_OPENAI_API_KEY>,
 openai_api_version="2023-05-15",
 openai_api_type="azure",
