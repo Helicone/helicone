@@ -18,7 +18,8 @@ import { dbQueryClickhouse, printRunnableQuery } from "../db/dbExecute";
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
 
 function convertDbIncrement(dbIncrement: TimeIncrement): string {
-  return dbIncrement === "min" ? "MINUTE" : dbIncrement;
+  // Use lowercase to align with ClickHouse date_trunc argument values
+  return dbIncrement === "min" ? "minute" : dbIncrement;
 }
 
 function buildFill(
@@ -43,9 +44,9 @@ function buildFill(
     clickhouseParam(i + 1, endDate),
   );
 
-  const fill = `WITH FILL FROM ${startDateVal} to ${endDateVal} + 1 STEP INTERVAL 1 ${convertDbIncrement(
+  const fill = `WITH FILL FROM ${startDateVal} to ${endDateVal} + INTERVAL 1 ${convertDbIncrement(
     dbIncrement,
-  )}`;
+  )} STEP INTERVAL 1 ${convertDbIncrement(dbIncrement)}`;
   return { fill, argsAcc: [...argsAcc, startDate, endDate] };
 }
 
@@ -54,11 +55,9 @@ function buildDateTrunc(
   timeZoneDifference: number,
   column: string,
 ): string {
-  return `DATE_TRUNC('${convertDbIncrement(dbIncrement)}', ${column} ${
-    timeZoneDifference > 0
-      ? `- INTERVAL '${Math.abs(timeZoneDifference)} minute'`
-      : `+ INTERVAL '${timeZoneDifference} minute'`
-  }, 'UTC')`;
+  const minutes = Math.abs(timeZoneDifference);
+  const operator = timeZoneDifference >= 0 ? "-" : "+";
+  return `toDateTime64(DATE_TRUNC('${convertDbIncrement(dbIncrement)}', ${column} ${operator} INTERVAL ${minutes} minute, 'UTC'), 0, 'UTC')`;
 }
 
 export async function getXOverTime<T>(
@@ -224,7 +223,7 @@ export async function getXOverTimeCacheHits<T extends { count: number }>(
   if (request.dbIncrement === "day") {
     const startDateStr = clickhouseParam(builtFilterArgsAcc.length, startDate);
     const endDateStr = clickhouseParam(builtFilterArgsAcc.length + 1, endDate);
-    fillClause = `WITH FILL FROM toDate(${startDateStr}) TO toDate(${endDateStr}) + 1 STEP INTERVAL 1 DAY`;
+    fillClause = `WITH FILL FROM toDateTime64(${startDateStr}) TO toDateTime64(${endDateStr}) + 1 STEP INTERVAL 1 DAY`;
     builtFilterArgsAcc.push(startDate, endDate);
   } else if (request.dbIncrement === "hour" || request.dbIncrement === "min") {
     const dateTrunc = buildDateTrunc(
