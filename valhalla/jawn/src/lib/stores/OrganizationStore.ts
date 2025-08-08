@@ -124,7 +124,7 @@ export class OrganizationStore extends BaseStore {
     organizationId: string
   ): Promise<Result<string, string>> {
     try {
-      // Build dynamic SQL based on provided parameters
+      // Build dynamic SQL based on provided parameters - only allow name, color, and icon
       const updateFields = [];
       const params = [];
       let paramIndex = 1;
@@ -146,31 +146,6 @@ export class OrganizationStore extends BaseStore {
         params.push(updateOrgParams.icon || null);
         paramIndex++;
       }
-
-      if (updateOrgParams.org_provider_key !== undefined) {
-        updateFields.push(`org_provider_key = $${paramIndex}`);
-        params.push(updateOrgParams.org_provider_key || null);
-        paramIndex++;
-      }
-
-      if (updateOrgParams.limits !== undefined) {
-        updateFields.push(`limits = $${paramIndex}`);
-        params.push(updateOrgParams.limits || {});
-        paramIndex++;
-      }
-
-      if (updateOrgParams.organization_type !== undefined) {
-        updateFields.push(`organization_type = $${paramIndex}`);
-        params.push(updateOrgParams.organization_type);
-        paramIndex++;
-      }
-
-      if (updateOrgParams.onboarding_status !== undefined) {
-        updateFields.push(`onboarding_status = $${paramIndex}`);
-        params.push(updateOrgParams.onboarding_status || {});
-        paramIndex++;
-      }
-
 
       if (updateFields.length === 0) {
         return err("No fields to update");
