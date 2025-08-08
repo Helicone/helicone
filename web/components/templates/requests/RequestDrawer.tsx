@@ -19,6 +19,7 @@ import {
   ListTreeIcon,
   ScrollTextIcon,
   ShuffleIcon,
+  Share2,
   UserIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -862,6 +863,33 @@ export default function RequestDrawer(props: RequestDivProps) {
                 <LuPlus className="h-4 w-4" />
                 Dataset
               </Button>
+
+              {/* Share link */}
+              <TooltipProvider>
+                <Tooltip delayDuration={100}>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant={"ghost"}
+                      size={"square_icon"}
+                      onClick={() => {
+                        try {
+                          const url = new URL(window.location.href);
+                          url.searchParams.set("requestId", request.id);
+                          navigator.clipboard.writeText(url.toString());
+                          setNotification("Share URL copied", "success");
+                        } catch (e) {
+                          setNotification("Failed to copy link", "error");
+                        }
+                      }}
+                    >
+                      <Share2 className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-xs">
+                    Copy share link
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
 
             <FeedbackAction
