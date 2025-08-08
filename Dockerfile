@@ -119,11 +119,13 @@ FROM web-stage AS minio-stage
 # Install MinIO server and client (arch-aware)
 ARG TARGETOS
 ARG TARGETARCH
+RUN apt-get update && apt-get install -y ca-certificates && update-ca-certificates
 RUN set -euo pipefail; \
-    ARCH_DIR="linux-${TARGETARCH}"; \
-    wget -q -O /usr/local/bin/minio "https://dl.min.io/server/minio/release/${ARCH_DIR}/minio" \
+    ARCH="${TARGETARCH:-amd64}"; \
+    ARCH_DIR="linux-${ARCH}"; \
+    curl -fsSL --retry 5 --retry-delay 3 -o /usr/local/bin/minio "https://dl.min.io/server/minio/release/${ARCH_DIR}/minio" \
     && chmod +x /usr/local/bin/minio \
-    && wget -q -O /usr/local/bin/mc "https://dl.min.io/client/mc/release/${ARCH_DIR}/mc" \
+    && curl -fsSL --retry 5 --retry-delay 3 -o /usr/local/bin/mc "https://dl.min.io/client/mc/release/${ARCH_DIR}/mc" \
     && chmod +x /usr/local/bin/mc
 
 # Create MinIO data directory
