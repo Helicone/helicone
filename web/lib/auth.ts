@@ -38,8 +38,9 @@ export const auth = betterAuth({
     new Set(
       [
         ...(process.env.BETTER_AUTH_TRUSTED_ORIGINS
-          ? process.env.BETTER_AUTH_TRUSTED_ORIGINS.split(",",
-            ).map((o) => o.trim()).filter(Boolean)
+          ? process.env.BETTER_AUTH_TRUSTED_ORIGINS.split(",")
+              .map((o) => o.trim())
+              .filter(Boolean)
           : []),
         process.env.NEXT_PUBLIC_APP_URL ?? "",
       ].filter(Boolean),
