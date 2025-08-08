@@ -48715,6 +48715,32 @@
 				"parameters": []
 			}
 		},
+		"/v1/prompt-2025/environments": {
+			"get": {
+				"operationId": "GetPrompt2025Environments",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_string-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt2025"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
 		"/v1/prompt-2025": {
 			"post": {
 				"operationId": "CreatePrompt2025",
@@ -48806,8 +48832,8 @@
 									"commitMessage": {
 										"type": "string"
 									},
-									"setAsProduction": {
-										"type": "boolean"
+									"environment": {
+										"type": "string"
 									},
 									"newMajorVersion": {
 										"type": "boolean"
@@ -48822,7 +48848,6 @@
 								"required": [
 									"promptBody",
 									"commitMessage",
-									"setAsProduction",
 									"newMajorVersion",
 									"promptVersionId",
 									"promptId"
@@ -48834,9 +48859,9 @@
 				}
 			}
 		},
-		"/v1/prompt-2025/update/production-version": {
+		"/v1/prompt-2025/update/environment": {
 			"post": {
-				"operationId": "SetProductionVersion",
+				"operationId": "SetPromptVersionEnvironment",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -48864,6 +48889,9 @@
 						"application/json": {
 							"schema": {
 								"properties": {
+									"environment": {
+										"type": "string"
+									},
 									"promptVersionId": {
 										"type": "string"
 									},
@@ -48872,6 +48900,7 @@
 									}
 								},
 								"required": [
+									"environment",
 									"promptVersionId",
 									"promptId"
 								],

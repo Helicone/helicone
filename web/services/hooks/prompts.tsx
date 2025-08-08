@@ -23,6 +23,7 @@ export const useCreatePrompt = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["prompts"] });
       queryClient.invalidateQueries({ queryKey: ["promptTags"] });
+      queryClient.invalidateQueries({ queryKey: ["promptEnvironments"] });
     },
   });
 };
@@ -47,6 +48,24 @@ export const usePushPromptVersion = () => {
   return $JAWN_API.useMutation("post", "/v1/prompt-2025/update", {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["prompts"] });
+      queryClient.invalidateQueries({ queryKey: ["promptsWithVersions"] });
+      queryClient.invalidateQueries({ queryKey: ["promptVersions"] });
+      queryClient.invalidateQueries({ queryKey: ["promptVersionWithBody"] });
+      queryClient.invalidateQueries({ queryKey: ["promptEnvironments"] });
+    },
+  });
+};
+
+export const useGetPromptEnvironments = () => {
+  return useQuery<string[]>({
+    queryKey: ["promptEnvironments"],
+    queryFn: async () => {
+      const result = await $JAWN_API.GET("/v1/prompt-2025/environments", {});
+      if (result.error || !result.data?.data) {
+        console.error("Error fetching prompt environments:", result.error);
+        return [];
+      }
+      return result.data.data;
     },
   });
 };
@@ -100,18 +119,19 @@ export const useGetPromptInputs = (
   });
 };
 
-export const useSetProductionVersion = () => {
+export const useSetPromptVersionEnvironment = () => {
   const queryClient = useQueryClient();
 
   return $JAWN_API.useMutation(
     "post",
-    "/v1/prompt-2025/update/production-version",
+    "/v1/prompt-2025/update/environment",
     {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["prompts"] });
         queryClient.invalidateQueries({ queryKey: ["promptsWithVersions"] });
         queryClient.invalidateQueries({ queryKey: ["promptVersions"] });
         queryClient.invalidateQueries({ queryKey: ["promptVersionWithBody"] });
+        queryClient.invalidateQueries({ queryKey: ["promptEnvironments"] });
       },
     },
   );
