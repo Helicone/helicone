@@ -193,6 +193,7 @@ export class Prompt2025Controller extends Controller {
     const result = await promptManager.setProductionVersion({
       promptId: requestBody.promptId,
       promptVersionId: requestBody.promptVersionId,
+      environment: 'production',
     });
     if (result.error) {
       this.setStatus(500);

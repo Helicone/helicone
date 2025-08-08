@@ -2326,6 +2326,9 @@
 					"commit_message": {
 						"type": "string"
 					},
+					"environment": {
+						"type": "string"
+					},
 					"created_at": {
 						"type": "string"
 					},
