@@ -6,7 +6,7 @@ click==8.1.8
 fastapi==0.115.8
 filelock==3.17.0
 fsspec==2025.2.0
-h11==0.14.0
+h11==0.16.0
 huggingface-hub==0.28.1
 idna==3.10
 Jinja2==3.1.5
@@ -27,6 +27,7 @@ starlette==0.45.3
 sympy==1.13.1
 tokenizers==0.21.0
 tqdm==4.67.1
+torch>=2.6.0  # Security: CVE-2025-32434, CVE-2024-48063
 transformers==4.48.3
 typing_extensions==4.12.2
 urllib3==2.3.0
