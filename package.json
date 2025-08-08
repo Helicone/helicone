@@ -9,10 +9,16 @@
     "worker"
   ],
   "scripts": {
-    "build:web": "yarn workspace helicone build"
+    "build:web": "yarn workspace helicone build",
+    "prepare": "husky",
+    "lint": "yarn -s workspace helicone run lint && yarn -s workspace bifrost run lint",
+    "lint:fix": "yarn -s workspace helicone run lint-fix && yarn -s workspace bifrost run lint-fix"
   },
   "engines": {
     "node": "=20"
   },
-  "version": "0.1.0"
+  "version": "0.1.0",
+  "devDependencies": {
+    "husky": "^9.1.7"
+  }
 }
