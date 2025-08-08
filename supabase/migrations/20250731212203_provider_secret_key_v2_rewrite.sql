@@ -60,7 +60,7 @@
 -- ------------------------------------------------------------------
 -- -- 3. Permissions: only service_role can read the view
 -- ------------------------------------------------------------------
--- REVOKE ALL ON public.decrypted_provider_keys_v2 FROM anon, authenticated;
--- GRANT  SELECT ON public.decrypted_provider_keys_v2 TO service_role;
+REVOKE ALL ON public.decrypted_provider_keys_v2 FROM anon, authenticated;
+GRANT  SELECT ON public.decrypted_provider_keys_v2 TO service_role;
 
 -- COMMIT;
