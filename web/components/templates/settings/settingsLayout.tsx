@@ -1,5 +1,4 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
-import { IslandContainer } from "@/components/ui/islandContainer";
 import { cn } from "@/lib/utils";
 import {
   BuildingOfficeIcon,
@@ -9,7 +8,15 @@ import {
   NoSymbolIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
-import { FingerprintIcon, KeyIcon, LinkIcon, Plug, ShuffleIcon, Webhook, Coins } from "lucide-react";
+import {
+  FingerprintIcon,
+  KeyIcon,
+  LinkIcon,
+  Plug,
+  ShuffleIcon,
+  Webhook,
+  Coins,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ReactNode, useMemo } from "react";
@@ -129,9 +136,10 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
       </h3>
       <nav className="space-y-1">
         {tabs.map((tab) => {
-          const isActive = currentPath === tab.href || 
+          const isActive =
+            currentPath === tab.href ||
             (tab.href === "/settings" && currentPath === "/settings");
-          
+
           return (
             <Link key={tab.id} href={tab.href}>
               <div
@@ -140,16 +148,16 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
                   "hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-slate-50",
                   isActive
                     ? "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300"
-                    : "text-slate-700 dark:text-slate-300"
+                    : "text-slate-700 dark:text-slate-300",
                 )}
               >
-                <tab.icon 
+                <tab.icon
                   className={cn(
                     "h-3.5 w-3.5",
-                    isActive 
-                      ? "text-blue-700 dark:text-blue-300" 
-                      : "text-slate-500 dark:text-slate-400"
-                  )} 
+                    isActive
+                      ? "text-blue-700 dark:text-blue-300"
+                      : "text-slate-500 dark:text-slate-400",
+                  )}
                 />
                 {tab.title}
               </div>
@@ -164,9 +172,9 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
     <>
       <AuthHeader isWithinIsland={true} title={""} />
       {org?.currentOrg?.tier !== "demo" && (
-        <div className="flex h-full min-h-screen -mt-6">
+        <div className="-mt-6 flex h-full min-h-screen">
           {/* Settings Sidebar */}
-          <div className="w-48 border-r border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 px-4 py-4">
+          <div className="w-48 border-r border-slate-200 bg-slate-50/50 px-4 py-4 dark:border-slate-800 dark:bg-slate-900/50">
             <div className="space-y-8">
               {renderNavSection("Organization", organizationTabs)}
               {renderNavSection("Developer", DEVELOPER_TABS)}
@@ -174,13 +182,10 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
           </div>
 
           {/* Main Content */}
-          <div className="flex-1 px-6 py-6">
-            {children}
-          </div>
+          <div className="flex-1 px-6 py-6">{children}</div>
         </div>
       )}
-      </>
-    
+    </>
   );
 };
 

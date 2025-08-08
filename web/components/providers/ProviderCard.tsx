@@ -412,7 +412,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
   };
 
   return (
-    <div className="border-b border-border bg-background last:border-b-0 transition-colors hover:bg-muted/50">
+    <div className="border-b border-border bg-background transition-colors last:border-b-0 hover:bg-muted/50">
       <div className="p-3">
         <div className="flex flex-col gap-1.5">
           {/* Provider info and key status */}

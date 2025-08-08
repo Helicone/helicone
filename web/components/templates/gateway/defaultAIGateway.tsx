@@ -17,7 +17,6 @@ import { DiffHighlight } from "@/components/templates/welcome/diffHighlight";
 const baseUrl = `${process.env.NEXT_PUBLIC_CLOUD_GATEWAY_BASE_URL}/v1`;
 
 const DefaultAIGateway = ({ setTabValue }: { setTabValue: () => void }) => {
-
   return (
     <div className="flex h-full flex-col">
       {/* Beta Banner */}
@@ -143,7 +142,6 @@ const DefaultAIGateway = ({ setTabValue }: { setTabValue: () => void }) => {
           </Tabs>
         </div>
       </div>
-
     </div>
   );
 };

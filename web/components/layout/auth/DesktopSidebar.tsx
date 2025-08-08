@@ -356,24 +356,26 @@ const DesktopSidebar = ({
                   size="none"
                   onClick={() => router.push("/settings")}
                   className={cn(
-                    "flex items-center text-xs hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-800",
-                    isCollapsed ? "h-9 w-9 justify-center" : "h-9 w-full gap-2 justify-start px-3",
-                    router.pathname.startsWith("/settings") 
-                      ? "bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900/50" 
-                      : "text-muted-foreground"
+                    "flex items-center text-xs hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800",
+                    isCollapsed
+                      ? "h-9 w-9 justify-center"
+                      : "h-9 w-full justify-start gap-2 px-3",
+                    router.pathname.startsWith("/settings")
+                      ? "bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900/50"
+                      : "text-muted-foreground",
                   )}
                 >
-                  <Settings 
-                    size={16} 
+                  <Settings
+                    size={16}
                     className={cn(
-                      router.pathname.startsWith("/settings") 
-                        ? "text-blue-700 dark:text-blue-300" 
-                        : "text-muted-foreground"
+                      router.pathname.startsWith("/settings")
+                        ? "text-blue-700 dark:text-blue-300"
+                        : "text-muted-foreground",
                     )}
                   />
                   {!isCollapsed && <span>Configure</span>}
                 </Button>
-                
+
                 {/* Help dropdown */}
                 <SidebarHelpDropdown
                   changelog={changelog}

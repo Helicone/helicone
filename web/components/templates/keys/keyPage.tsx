@@ -28,10 +28,10 @@ const KeyPage = () => {
           <div className="flex flex-row items-center justify-between">
             <div>
               <h1 className="text-sm font-semibold">API Keys</h1>
-              <p className="text-xs text-muted-foreground mt-1">
-                These keys can be used to read and write data to Helicone. Please
-                do not share these keys and make sure you store them somewhere
-                secure.
+              <p className="mt-1 text-xs text-muted-foreground">
+                These keys can be used to read and write data to Helicone.
+                Please do not share these keys and make sure you store them
+                somewhere secure.
               </p>
             </div>
             <Button

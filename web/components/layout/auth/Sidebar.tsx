@@ -112,7 +112,6 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
           },
         ],
       },
-
     ],
     [pathname, hasFeatureFlag?.data],
   );

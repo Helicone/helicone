@@ -1,6 +1,5 @@
 import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 import { useState } from "react";
 import { Database } from "../../../../db/database.types";

@@ -30,7 +30,7 @@ const HeliconeKeyTable = ({
     return (
       <button
         onClick={onAddKey}
-        className="relative block w-full border-2 border-dashed border-muted-foreground/50 bg-muted/30 m-4 p-8 text-center hover:cursor-pointer hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+        className="relative m-4 block w-full border-2 border-dashed border-muted-foreground/50 bg-muted/30 p-8 text-center hover:cursor-pointer hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
       >
         <div className="w-full items-center justify-center align-middle">
           <KeyIcon className="mx-auto h-8 w-8 text-muted-foreground" />
@@ -53,11 +53,7 @@ const HeliconeKeyTable = ({
         rows={keys?.data?.data?.data?.map((key) => ({
           ...key,
           id: key.id.toString(),
-          key_name: (
-            <p className="text-xs font-semibold">
-              {key.api_key_name}
-            </p>
-          ),
+          key_name: <p className="text-xs font-semibold">{key.api_key_name}</p>,
           created_at: (
             <p className="text-xs text-muted-foreground">
               {new Date(key.created_at).toLocaleString()}
@@ -80,28 +76,28 @@ const HeliconeKeyTable = ({
           box-shadow: none !important;
           ring: none !important;
         }
-        
+
         .dark .overflow-auto.rounded-lg.bg-white.ring-1.ring-gray-300 {
           background-color: transparent !important;
         }
-        
+
         .min-w-full.divide-y.divide-gray-300 {
           border-collapse: collapse !important;
         }
-        
+
         .min-w-full.divide-y.divide-gray-300 th {
           font-size: 0.75rem !important;
           padding: 0.75rem !important;
           border-bottom: 1px solid hsl(var(--border)) !important;
           background-color: transparent !important;
         }
-        
+
         .min-w-full.divide-y.divide-gray-300 td {
           font-size: 0.75rem !important;
           padding: 0.75rem !important;
           border-bottom: 1px solid hsl(var(--border)) !important;
         }
-        
+
         .min-w-full.divide-y.divide-gray-300 tr:last-child td {
           border-bottom: none !important;
         }

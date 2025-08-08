@@ -11,7 +11,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { SortOption } from "@/types/provider";
 import { providers, recentlyUsedProviderIds } from "@/data/providers";
 import { ProviderCard } from "@/components/providers/ProviderCard";
@@ -32,7 +31,7 @@ const ProvidersSettings: NextPageWithLayout<void> = () => {
     <div className="flex w-full max-w-6xl flex-col border border-border bg-background">
       <div className="border-b border-border p-4">
         <h1 className="text-sm font-semibold">Providers</h1>
-        <p className="text-xs text-muted-foreground mt-1">
+        <p className="mt-1 text-xs text-muted-foreground">
           Configure your API keys for different LLM providers
         </p>
       </div>
@@ -47,7 +46,7 @@ const ProvidersSettings: NextPageWithLayout<void> = () => {
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setSearchQuery(e.target.value)
               }
-              className="pl-8 h-8 text-sm"
+              className="h-8 pl-8 text-sm"
               size="sm"
             />
           </div>
@@ -56,7 +55,7 @@ const ProvidersSettings: NextPageWithLayout<void> = () => {
               <Button
                 variant="outline"
                 size="sm"
-                className="flex min-w-[120px] items-center justify-between gap-1 h-8"
+                className="flex h-8 min-w-[120px] items-center justify-between gap-1"
               >
                 <span className="text-xs">
                   Sort:{" "}

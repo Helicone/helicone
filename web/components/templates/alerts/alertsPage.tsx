@@ -13,12 +13,9 @@ import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
-import { H3, Muted, P, Small } from "@/components/ui/typography";
 import { FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import AuthHeader from "@/components/shared/authHeader";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 
 const AlertsPage = () => {
@@ -113,7 +110,12 @@ const AlertsPage = () => {
 
           <div className="flex flex-col items-end gap-1">
             <FreeTierLimitWrapper feature="alerts" itemCount={alertCount}>
-              <Button variant="default" size="sm" className="text-xs" onClick={handleCreateAlert}>
+              <Button
+                variant="default"
+                size="sm"
+                className="text-xs"
+                onClick={handleCreateAlert}
+              >
                 Create a new alert
               </Button>
             </FreeTierLimitWrapper>
@@ -185,8 +187,12 @@ const AlertsPage = () => {
                     {key.metric === "response.status" ? "status" : key.metric}
                   </Badge>
                 ),
-                time_window: <p className="text-xs">{formatTimeWindow(key.time_window)}</p>,
-                minimum_request_count: <p className="text-xs">{key.minimum_request_count}</p>,
+                time_window: (
+                  <p className="text-xs">{formatTimeWindow(key.time_window)}</p>
+                ),
+                minimum_request_count: (
+                  <p className="text-xs">{key.minimum_request_count}</p>
+                ),
                 emails: <div className="flex">{key.emails.join(", ")}</div>,
                 slack_channels: (
                   <div className="flex">
@@ -220,8 +226,7 @@ const AlertsPage = () => {
         <div className="flex flex-col gap-1">
           <h2 className="text-sm font-semibold">Alert History</h2>
           <p className="text-xs text-muted-foreground">
-            These are the alerts that have been triggered for your
-            organization
+            These are the alerts that have been triggered for your organization
           </p>
         </div>
       </div>
@@ -229,8 +234,13 @@ const AlertsPage = () => {
       <div className="p-4">
         {alertHistory.length === 0 ? (
           <div className="border-2 border-dashed border-muted-foreground/50 bg-muted/30 p-8 text-center">
-            <FileText size={24} className="mx-auto mb-2 text-muted-foreground" />
-            <p className="text-xs font-medium">No alerts have been triggered yet</p>
+            <FileText
+              size={24}
+              className="mx-auto mb-2 text-muted-foreground"
+            />
+            <p className="text-xs font-medium">
+              No alerts have been triggered yet
+            </p>
           </div>
         ) : (
           <div className="border-t border-border">
@@ -333,32 +343,32 @@ const AlertsPage = () => {
           box-shadow: none !important;
           ring: none !important;
         }
-        
+
         .dark .overflow-auto.rounded-lg.bg-white.ring-1.ring-gray-300 {
           background-color: transparent !important;
         }
-        
+
         .min-w-full.divide-y.divide-gray-300 {
           border-collapse: collapse !important;
         }
-        
+
         .min-w-full.divide-y.divide-gray-300 th {
           font-size: 0.75rem !important;
           padding: 0.75rem !important;
           border-bottom: 1px solid hsl(var(--border)) !important;
           background-color: transparent !important;
         }
-        
+
         .min-w-full.divide-y.divide-gray-300 td {
           font-size: 0.75rem !important;
           padding: 0.75rem !important;
           border-bottom: 1px solid hsl(var(--border)) !important;
         }
-        
+
         .min-w-full.divide-y.divide-gray-300 tr:last-child td {
           border-bottom: none !important;
         }
-        
+
         /* Fix action buttons to display horizontally */
         .min-w-full.divide-y.divide-gray-300 td:last-child {
           display: flex !important;
