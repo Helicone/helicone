@@ -17,12 +17,12 @@ RUN apt-get update && apt-get install -y supervisor
 # Apply security updates
 RUN apt-get update && apt-get upgrade -y && apt-get autoremove -y && apt-get clean
 
-# Install patched versions to fix security vulnerabilities
+# Install latest versions to address security vulnerabilities
 # CVE-2023-26819: libcjson vulnerability 
 # CVE-2025-6170: libxml2 vulnerability
 RUN apt-get update && \
     apt-get install -y \
-    libcjson-dev=1.7.15-1+deb12u3 \
+    libcjson-dev \
     libxml2-dev \
     && apt-get clean
 
