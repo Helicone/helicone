@@ -18,6 +18,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import "@/styles/settings-tables.css";
+import { SettingsContainer, SettingsSection } from "@/components/ui/settings-container";
+import "@/styles/settings.css";
 
 const AlertsPage = () => {
   const [createNewAlertModal, setCreateNewAlertModal] = useState(false);
@@ -87,7 +89,7 @@ const AlertsPage = () => {
   }
 
   return (
-    <div className="flex w-full max-w-6xl flex-col border border-border bg-background">
+    <SettingsContainer>
       {!canCreateAlert && (
         <div className="border-b border-border p-4">
           <FreeTierLimitBanner
@@ -335,7 +337,7 @@ const AlertsPage = () => {
         }}
         alertId={selectedAlert?.id || ""}
       />
-    </div>
+    </SettingsContainer>
   );
 };
 

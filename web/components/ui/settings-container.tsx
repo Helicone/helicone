@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { Small, Muted } from "@/components/ui/typography";
 import "@/styles/settings.css";
 
 interface SettingsContainerProps {
@@ -40,10 +41,8 @@ export const SettingsSection = ({
   <>
     {/* Section Header */}
     <div className={cn("settings-section-header", className)}>
-      <h2 className="settings-title">{title}</h2>
-      {description && (
-        <p className="settings-description mt-1">{description}</p>
-      )}
+      <Small className="font-semibold">{title}</Small>
+      {description && <Muted className="mt-1 text-xs">{description}</Muted>}
     </div>
 
     {/* Section Content */}
@@ -73,10 +72,8 @@ export const SettingsSectionHeader = ({
   <div className={cn("settings-section-header", className)}>
     <div className="flex items-center justify-between">
       <div>
-        <h2 className="settings-title">{title}</h2>
-        {description && (
-          <p className="settings-description mt-1">{description}</p>
-        )}
+        <Small className="font-semibold">{title}</Small>
+        {description && <Muted className="mt-1 text-xs">{description}</Muted>}
       </div>
       {children && <div>{children}</div>}
     </div>

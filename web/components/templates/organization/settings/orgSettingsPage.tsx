@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Small, XSmall } from "@/components/ui/typography";
 import { useUpdateOrgMutation } from "@/services/hooks/organizations";
 import { useEffect, useState } from "react";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
@@ -13,6 +14,8 @@ import { CopyIcon } from "lucide-react";
 import useNotification from "@/components/shared/notification/useNotification";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 import { useOrg } from "../../../layout/org/organizationContext";
+import { SettingsContainer, SettingsSection } from "@/components/ui/settings-container";
+import "@/styles/settings.css";
 interface OrgSettingsPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
   variant?: "organization" | "reseller";
@@ -64,28 +67,23 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
   }, [debouncedOrgName]);
 
   return (
-    <div className="flex w-full max-w-6xl flex-col border border-border bg-background">
-      {/* Organization Details Section */}
-      <div className="border-b border-border p-4">
-        <h1 className="text-sm font-semibold">Organization Details</h1>
-      </div>
-
-      <div className="space-y-4 p-4">
+    <SettingsContainer>
+      <SettingsSection title="Organization Details">
         <div className="space-y-1">
-          <Label htmlFor="org-name" className="text-xs font-medium">
-            Organization Name
+          <Label htmlFor="org-name">
+            <XSmall className="font-medium">Organization Name</XSmall>
           </Label>
           <Input
             id="org-name"
             value={debouncedOrgName}
             onChange={(e) => setDebouncedOrgName(e.target.value)}
-            className="max-w-[450px] text-xs"
+            className="max-w-[450px]" size="sm"
           />
         </div>
 
         <div className="space-y-1">
-          <Label htmlFor="org-id" className="text-xs font-medium">
-            Organization Id
+          <Label htmlFor="org-id">
+            <XSmall className="font-medium">Organization Id</XSmall>
           </Label>
           <div className="flex flex-row items-center gap-2">
             <Input
@@ -107,17 +105,12 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
             </Button>
           </div>
         </div>
-      </div>
+      </SettingsSection>
 
-      {/* Customization Section */}
-      <div className="border-b border-border p-4">
-        <h2 className="text-sm font-semibold">Organization Customization</h2>
-      </div>
-
-      <div className="space-y-4 p-4">
+      <SettingsSection title="Organization Customization">
         <div className="flex max-w-[450px] flex-col gap-6">
           <div className="flex flex-col gap-3">
-            <Label className="text-xs font-medium">Choose a color</Label>
+            <Label><XSmall className="font-medium">Choose a color</XSmall></Label>
             <RadioGroup
               defaultValue={org.color}
               onValueChange={(value) =>
@@ -156,14 +149,14 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
           </div>
 
           <div className="flex flex-col gap-3">
-            <Label className="text-xs font-medium">Choose an icon</Label>
+            <Label><XSmall className="font-medium">Choose an icon</XSmall></Label>
             <RadioGroup
               defaultValue={org.icon}
               onValueChange={(value) =>
                 handleOrgUpdate({
                   orgId: org.id,
                   icon: value,
-                  name: org.name,
+                  name: debouncedOrgName,
                   color: org.color,
                   variant: variant,
                 })
@@ -198,14 +191,9 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
             </RadioGroup>
           </div>
         </div>
-      </div>
+      </SettingsSection>
 
-      {/* Actions Section */}
-      <div className="border-b border-border p-4">
-        <h2 className="text-sm font-semibold">Actions</h2>
-      </div>
-
-      <div className="p-4">
+      <SettingsSection title="Actions">
         <div className="flex items-center justify-between">
           {isOwner && (
             <Button
@@ -230,7 +218,7 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
             Launch Demo Widget (Reload) 🚀
           </Button>
         </div>
-      </div>
+      </SettingsSection>
 
       <DeleteOrgModal
         open={deleteOpen}
@@ -239,7 +227,7 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
         onDeleteRoute={"/dashboard"}
         orgName={org.name}
       />
-    </div>
+    </SettingsContainer>
   );
 };
 

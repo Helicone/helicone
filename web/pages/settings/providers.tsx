@@ -5,6 +5,7 @@ import AuthLayout from "../../components/layout/auth/authLayout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, ChevronDown } from "lucide-react";
+import { XSmall, Muted } from "@/components/ui/typography";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -50,23 +51,24 @@ const ProvidersSettings: NextPageWithLayout<void> = () => {
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setSearchQuery(e.target.value)
               }
-              className="settings-search-small"
+              className="h-8 pl-8 text-xs"
             />
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className="settings-btn-small flex min-w-[120px] items-center justify-between gap-1"
+                size="sm"
+                className="flex min-w-[120px] items-center justify-between gap-1"
               >
-                <span className="settings-small">
+                <XSmall>
                   Sort:{" "}
                   {sortOption === "relevance"
                     ? "Relevance"
                     : sortOption === "alphabetical"
                       ? "A-Z"
                       : "Recently Used"}
-                </span>
+                </XSmall>
                 <ChevronDown className="h-3 w-3" />
               </Button>
             </DropdownMenuTrigger>
@@ -86,10 +88,10 @@ const ProvidersSettings: NextPageWithLayout<void> = () => {
 
         <div className="space-y-0">
           {filteredProviders.length === 0 ? (
-            <div className="settings-empty-state">
-              <p className="settings-empty-state-text">
+            <div className="border-2 border-dashed border-border bg-muted p-8 text-center">
+              <Muted className="font-medium">
                 No providers found matching your search.
-              </p>
+              </Muted>
             </div>
           ) : (
             filteredProviders.map((provider) => (

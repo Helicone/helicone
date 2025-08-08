@@ -7,6 +7,8 @@ import { useGetOrgMembers } from "../../../../services/hooks/organizations";
 import { useOrg } from "../../../layout/org/organizationContext";
 import AddMemberModal from "../addMemberModal";
 import OrgMemberItem from "../orgMemberItem";
+import { SettingsSectionHeader, SettingsSectionContent } from "@/components/ui/settings-container";
+import "@/styles/settings.css";
 interface OrgMembersPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
   wFull?: boolean;
@@ -58,26 +60,21 @@ const OrgMembersPage = (props: OrgMembersPageProps) => {
 
   return (
     <>
-      <div className="border-b border-border p-4">
-        <div className="flex flex-row items-center justify-between">
-          <h1 className="text-sm font-semibold">Members</h1>
-
-          <div className="flex flex-row space-x-4">
-            <ProFeatureWrapper featureName="invite">
-              <Button
-                onClick={() => setAddOpen(true)}
-                variant="default"
-                size="sm"
-                className="text-xs"
-              >
-                add member +
-              </Button>
-            </ProFeatureWrapper>
-          </div>
+      <SettingsSectionHeader title="Members">
+        <div className="flex flex-row space-x-4">
+          <ProFeatureWrapper featureName="invite">
+            <Button
+              onClick={() => setAddOpen(true)}
+              variant="default"
+              size="sm"
+            >
+              add member +
+            </Button>
+          </ProFeatureWrapper>
         </div>
-      </div>
+      </SettingsSectionHeader>
 
-      <div className="p-4">
+      <SettingsSectionContent>
         {isLoading ? (
           <ul className="flex flex-col space-y-4">
             {Array.from({ length: 3 }).map((_, index) => (
@@ -102,7 +99,7 @@ const OrgMembersPage = (props: OrgMembersPageProps) => {
             ))}
           </ul>
         )}
-      </div>
+      </SettingsSectionContent>
 
       <AddMemberModal
         orgId={org.id}

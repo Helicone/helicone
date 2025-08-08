@@ -13,55 +13,11 @@
   @apply p-4;
 }
 
-/* Typography Classes */
-.settings-title {
-  @apply text-sm font-semibold;
-}
+/* Typography Classes - minimal overrides only where needed */
 
-.settings-description {
-  @apply text-xs text-muted-foreground;
-}
+/* Settings Container Enhancements - work WITH shadcn components */
 
-.settings-label {
-  @apply text-xs font-medium;
-}
-
-.settings-body {
-  @apply text-sm;
-}
-
-.settings-small {
-  @apply text-xs;
-}
-
-.settings-muted {
-  @apply text-xs text-muted-foreground;
-}
-
-/* Interactive Element Classes */
-.settings-btn-small {
-  @apply h-8 px-3 text-xs;
-}
-
-.settings-btn-default {
-  @apply h-9 px-4 text-sm;
-}
-
-.settings-btn-icon {
-  @apply h-8 w-8;
-}
-
-.settings-input-small {
-  @apply h-8 text-xs;
-}
-
-.settings-input-default {
-  @apply h-9 text-sm;
-}
-
-.settings-search-small {
-  @apply h-8 pl-8 text-xs;
-}
+/* Minimal utility classes only when needed */
 
 /* State & Feedback Classes */
 .settings-empty-state {
