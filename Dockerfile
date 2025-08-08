@@ -110,7 +110,6 @@ RUN find /app -name ".env.*" -exec rm {} \;
 WORKDIR /app/web
 RUN --mount=type=cache,target=/root/.yarn \
     yarn install --frozen-lockfile \
-    && yarn add --dev @types/js-yaml \
     && DISABLE_ESLINT=true yarn build
 
 # --------------------------------------------------------------------------------------------------------------------
