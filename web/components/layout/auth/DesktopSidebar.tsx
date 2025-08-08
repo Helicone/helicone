@@ -3,6 +3,10 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import {
+  OnboardingState,
+  useOrgOnboarding,
+} from "@/services/hooks/useOrgOnboarding";
+import {
   Bars3Icon,
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -16,6 +20,7 @@ import { useOrg } from "../org/organizationContext";
 import OrgDropdown from "../orgDropdown";
 import SidebarHelpDropdown from "../SidebarHelpDropdown";
 import NavItem from "./NavItem";
+import { QuickstartStep } from "@/components/onboarding/QuickstartStep";
 import { ChangelogItem } from "./types";
 
 export interface NavigationItem {
@@ -41,6 +46,11 @@ const DesktopSidebar = ({
 }: SidebarProps) => {
   const orgContext = useOrg();
   const router = useRouter();
+  const { hasKeys, hasProviderKeys, updateOnboardingStatus } = useOrgOnboarding(
+    orgContext?.currentOrg?.id ?? "",
+  );
+  const onboardingStatus = orgContext?.currentOrg
+    ?.onboarding_status as unknown as OnboardingState;
 
   const [isCollapsed, setIsCollapsed] = useLocalStorage(
     "isSideBarCollapsed",
@@ -255,6 +265,67 @@ const DesktopSidebar = ({
             <div className="mb-2 flex h-full flex-1 flex-col justify-between overflow-y-auto">
               {/* Navigation items */}
               <div className="flex flex-col">
+                {/* Quickstart Card - Only show if organization hasn't integrated */}
+                {onboardingStatus?.hasCompletedQuickstart === false &&
+                  !isCollapsed && (
+                    <div
+                      onClick={() => router.push("/quickstart")}
+                      className="mx-2 cursor-pointer rounded-lg border border-slate-200 bg-sidebar-background p-3 dark:border-slate-800"
+                    >
+                      <p className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                        Quickstart
+                      </p>
+                      <div className="space-y-1">
+                        <QuickstartStep
+                          stepNumber={1}
+                          isCompleted={hasProviderKeys}
+                          isActive={!hasProviderKeys}
+                        >
+                          Add provider key
+                        </QuickstartStep>
+                        <QuickstartStep
+                          stepNumber={2}
+                          isCompleted={hasKeys}
+                          isActive={hasProviderKeys && !hasKeys}
+                        >
+                          Create Helicone API key
+                        </QuickstartStep>
+                        <QuickstartStep
+                          stepNumber={3}
+                          isCompleted={!!orgContext?.currentOrg?.has_integrated}
+                          isActive={
+                            hasProviderKeys &&
+                            hasKeys &&
+                            !orgContext?.currentOrg?.has_integrated
+                          }
+                        >
+                          Integrate
+                        </QuickstartStep>
+                      </div>
+
+                      {hasProviderKeys &&
+                        hasKeys &&
+                        orgContext?.currentOrg?.has_integrated && (
+                          <div className="mt-2">
+                            <Button
+                              variant="outline"
+                              size="xs"
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                await updateOnboardingStatus({
+                                  hasCompletedQuickstart: true,
+                                });
+                                router.push("/dashboard");
+                              }}
+                              className="w-full"
+                            >
+                              Finished!
+                            </Button>
+                          </div>
+                        )}
+                    </div>
+                  )}
+
                 <div
                   ref={navItemsRef}
                   data-collapsed={isCollapsed}

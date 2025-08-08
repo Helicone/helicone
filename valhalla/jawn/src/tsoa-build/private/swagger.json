@@ -1350,7 +1350,7 @@
 					}
 				]
 			},
-			"Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--hasIntegrated-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___": {
+			"Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--hasIntegrated-boolean--hasCompletedQuickstart-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___": {
 				"properties": {
 					"currentStep": {
 						"type": "string"
@@ -1362,6 +1362,9 @@
 						"type": "boolean"
 					},
 					"hasIntegrated": {
+						"type": "boolean"
+					},
+					"hasCompletedQuickstart": {
 						"type": "boolean"
 					},
 					"members": {
@@ -1392,7 +1395,7 @@
 				"description": "Make all properties in T optional"
 			},
 			"OnboardingStatus": {
-				"$ref": "#/components/schemas/Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--hasIntegrated-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___"
+				"$ref": "#/components/schemas/Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--hasIntegrated-boolean--hasCompletedQuickstart-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___"
 			},
 			"EvaluatorResult": {
 				"properties": {

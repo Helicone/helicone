@@ -75,7 +75,7 @@ export function CodeIntegrationPage({
   const org = useOrg();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { updateCurrentStep, completeOnboarding } = useOrgOnboarding(
+  const { updateCurrentStep, updateOnboardingStatus } = useOrgOnboarding(
     org?.currentOrg?.id ?? "",
   );
   const [provider, setProvider] = useState<Provider>(defaultProvider);
@@ -204,13 +204,13 @@ export function CodeIntegrationPage({
           queryKey: ["topRequests"],
         });
 
-        await completeOnboarding();
+        await updateOnboardingStatus({ hasOnboarded: true });
         router.push("/dashboard");
       }, 1500);
 
       return () => clearTimeout(timeout);
     }
-  }, [hasEvent?.data, router, completeOnboarding, queryClient]);
+  }, [hasEvent?.data, router, updateOnboardingStatus, queryClient]);
 
   const availableLanguages = Object.keys(codeSnippets[provider]).filter(
     (key) => typeof codeSnippets[provider][key] === "function",
