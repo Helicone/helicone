@@ -49,6 +49,10 @@ function messageReducer(
               `Error: An array has an empty value when tool_calls are constructed. tool_calls: ${accArray}; tool: ${value}`,
             );
           }
+          // Ensure array is large enough before accessing index
+          while (accArray.length <= index) {
+            accArray.push({});
+          }
           accArray[index] = reduce(accArray[index], chunkTool);
         }
       } else if (typeof acc[key] === "object" && typeof value === "object") {
