@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import "@/styles/settings.css";
 
 const CreditsSettings: NextPageWithLayout<void> = () => {
   const [autoTopUpEnabled, setAutoTopUpEnabled] = useState(false);
@@ -23,19 +24,19 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
   const transactions: any[] = [];
 
   return (
-    <div className="flex w-full max-w-6xl flex-col border border-border bg-background">
+    <div className="settings-container">
       {/* Coming Soon Banner */}
-      <div className="border-b border-yellow-200 bg-yellow-50 p-3">
-        <div className="text-center text-sm font-medium text-yellow-800">
+      <div className="settings-warning-banner border-b p-3">
+        <div className="text-center text-sm font-medium">
           🚧 Coming Soon - Credits system is currently under development
         </div>
       </div>
 
       {/* Current Balance */}
-      <div className="border-b border-border p-4">
+      <div className="settings-section-header">
         <div className="flex flex-row items-center justify-between">
           <div className="space-y-1">
-            <h2 className="text-sm font-semibold">Credits</h2>
+            <h2 className="settings-title">Credits</h2>
           </div>
           <Button variant="ghost" size="icon">
             <RefreshCcw className="h-3 w-3" />
@@ -48,16 +49,15 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2">
         {/* Buy Credits */}
-        <div className="border-b border-border p-4 md:border-r">
-          <h3 className="mb-3 text-sm font-semibold">Buy Credits</h3>
+        <div className="settings-section-content border-b border-border md:border-r">
+          <h3 className="settings-title mb-3">Buy Credits</h3>
           <div className="space-y-1">
-            <Button className="w-full" size="sm" disabled>
+            <Button className="settings-btn-small w-full" disabled>
               Add Credits
             </Button>
             <Button
               variant="outline"
-              className="w-full justify-start"
-              size="sm"
+              className="settings-btn-small w-full justify-start"
             >
               <span>View Usage</span>
               <ExternalLink className="ml-2 h-3 w-3" />
@@ -66,19 +66,19 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
         </div>
 
         {/* Auto Top-Up */}
-        <div className="border-b border-t border-border p-4 md:border-l-0 md:border-t-0">
+        <div className="settings-section-content border-b border-t border-border md:border-l-0 md:border-t-0">
           <div className="mb-3 flex flex-row items-center justify-between">
-            <h3 className="text-sm font-semibold">Auto Top-Up</h3>
+            <h3 className="settings-title">Auto Top-Up</h3>
             <div className="flex items-center space-x-2">
               <Switch
                 checked={autoTopUpEnabled}
                 onCheckedChange={setAutoTopUpEnabled}
               />
               <Settings className="h-3 w-3" />
-              <span className="text-xs">Enable</span>
+              <span className="settings-small">Enable</span>
             </div>
           </div>
-          <p className="text-xs text-muted-foreground">
+          <p className="settings-description">
             Automatically purchase credits when your balance is below a certain
             threshold. Your most recent payment method will be used.
           </p>
@@ -86,10 +86,10 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
       </div>
 
       {/* Recent Transactions */}
-      <div className="p-4">
+      <div className="settings-section-content">
         <div className="mb-4 flex flex-row items-center justify-between">
-          <h3 className="text-sm font-semibold">Recent Transactions</h3>
-          <Button variant="outline" size="sm">
+          <h3 className="settings-title">Recent Transactions</h3>
+          <Button variant="outline" className="settings-btn-small">
             <span>Payment History</span>
             <ExternalLink className="ml-2 h-3 w-3" />
           </Button>
@@ -104,13 +104,13 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
                 <div className="text-sm">{transaction.date}</div>
                 <div className="text-sm font-medium">${transaction.amount}</div>
                 <Button variant="ghost" size="sm">
-                  <span className="text-xs">Get invoice</span>
+                  <span className="settings-small">Get invoice</span>
                   <FileText className="ml-1 h-3 w-3" />
                 </Button>
               </div>
             ))
           ) : (
-            <div className="py-4 text-center text-sm text-muted-foreground">
+            <div className="settings-muted py-4 text-center">
               No transactions yet
             </div>
           )}
@@ -121,7 +121,7 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
           <div className="mt-4 flex items-center justify-center space-x-2">
             <Button
               variant="ghost"
-              size="sm"
+              className="settings-btn-small"
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
             >
@@ -132,7 +132,7 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
             </Badge>
             <Button
               variant="ghost"
-              size="sm"
+              className="settings-btn-small"
               onClick={() => setCurrentPage(currentPage + 1)}
             >
               <ChevronRight className="h-3 w-3" />

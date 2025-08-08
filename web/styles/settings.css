@@ -1,0 +1,131 @@
+/* Settings Design System - CSS Custom Properties */
+
+/* Layout Classes */
+.settings-container {
+  @apply flex w-full max-w-6xl flex-col border border-border bg-background;
+}
+
+.settings-section-header {
+  @apply border-b border-border p-4;
+}
+
+.settings-section-content {
+  @apply p-4;
+}
+
+/* Typography Classes */
+.settings-title {
+  @apply text-sm font-semibold;
+}
+
+.settings-description {
+  @apply text-xs text-muted-foreground;
+}
+
+.settings-label {
+  @apply text-xs font-medium;
+}
+
+.settings-body {
+  @apply text-sm;
+}
+
+.settings-small {
+  @apply text-xs;
+}
+
+.settings-muted {
+  @apply text-xs text-muted-foreground;
+}
+
+/* Interactive Element Classes */
+.settings-btn-small {
+  @apply h-8 px-3 text-xs;
+}
+
+.settings-btn-default {
+  @apply h-9 px-4 text-sm;
+}
+
+.settings-btn-icon {
+  @apply h-8 w-8;
+}
+
+.settings-input-small {
+  @apply h-8 text-xs;
+}
+
+.settings-input-default {
+  @apply h-9 text-sm;
+}
+
+.settings-search-small {
+  @apply h-8 pl-8 text-xs;
+}
+
+/* State & Feedback Classes */
+.settings-empty-state {
+  @apply border-2 border-dashed border-border bg-muted p-8 text-center;
+}
+
+.settings-empty-state-icon {
+  @apply mx-auto mb-2 h-6 w-6 text-muted-foreground;
+}
+
+.settings-empty-state-text {
+  @apply text-xs font-medium text-muted-foreground;
+}
+
+.settings-loading-skeleton {
+  @apply animate-pulse bg-muted h-4 rounded;
+}
+
+.settings-success-banner {
+  @apply border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-200;
+}
+
+.settings-error-banner {
+  @apply border-red-200 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200;
+}
+
+.settings-warning-banner {
+  @apply border-yellow-200 bg-yellow-50 text-yellow-800 dark:border-yellow-800 dark:bg-yellow-950 dark:text-yellow-200;
+}
+
+/* Pattern Classes */
+.settings-table-wrapper {
+  @apply border-t border-border;
+}
+
+.settings-card-section {
+  @apply border border-border bg-card rounded-lg p-4;
+}
+
+.settings-action-row {
+  @apply flex items-center justify-between;
+}
+
+.settings-action-row-end {
+  @apply flex items-center gap-2 justify-end;
+}
+
+.settings-form-section {
+  @apply space-y-4;
+}
+
+.settings-form-row {
+  @apply space-y-1;
+}
+
+.settings-form-row-inline {
+  @apply flex items-center gap-2;
+}
+
+/* Grid Layouts */
+.settings-grid-2 {
+  @apply grid grid-cols-1 md:grid-cols-2;
+}
+
+.settings-grid-3 {
+  @apply grid grid-cols-1 md:grid-cols-3;
+}

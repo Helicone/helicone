@@ -15,6 +15,12 @@ import { SortOption } from "@/types/provider";
 import { providers, recentlyUsedProviderIds } from "@/data/providers";
 import { ProviderCard } from "@/components/providers/ProviderCard";
 import { filterProviders, sortProviders } from "@/utils/providerUtils";
+import {
+  SettingsContainer,
+  SettingsSectionHeader,
+  SettingsSectionContent,
+} from "@/components/ui/settings-container";
+import "@/styles/settings.css";
 
 const ProvidersSettings: NextPageWithLayout<void> = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -28,16 +34,14 @@ const ProvidersSettings: NextPageWithLayout<void> = () => {
   );
 
   return (
-    <div className="flex w-full max-w-6xl flex-col border border-border bg-background">
-      <div className="border-b border-border p-4">
-        <h1 className="text-sm font-semibold">Providers</h1>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Configure your API keys for different LLM providers
-        </p>
-      </div>
+    <SettingsContainer>
+      <SettingsSectionHeader
+        title="Providers"
+        description="Configure your API keys for different LLM providers"
+      />
 
-      <div className="border-b border-border p-4">
-        <div className="flex flex-col gap-2 sm:flex-row">
+      <SettingsSectionContent>
+        <div className="mb-4 flex flex-col gap-2 sm:flex-row">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -46,18 +50,16 @@ const ProvidersSettings: NextPageWithLayout<void> = () => {
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setSearchQuery(e.target.value)
               }
-              className="h-8 pl-8 text-sm"
-              size="sm"
+              className="settings-search-small"
             />
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                size="sm"
-                className="flex h-8 min-w-[120px] items-center justify-between gap-1"
+                className="settings-btn-small flex min-w-[120px] items-center justify-between gap-1"
               >
-                <span className="text-xs">
+                <span className="settings-small">
                   Sort:{" "}
                   {sortOption === "relevance"
                     ? "Relevance"
@@ -81,13 +83,13 @@ const ProvidersSettings: NextPageWithLayout<void> = () => {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-      </div>
 
-      <div className="p-4">
         <div className="space-y-0">
           {filteredProviders.length === 0 ? (
-            <div className="py-4 text-center text-sm text-muted-foreground">
-              No providers found matching your search.
+            <div className="settings-empty-state">
+              <p className="settings-empty-state-text">
+                No providers found matching your search.
+              </p>
             </div>
           ) : (
             filteredProviders.map((provider) => (
@@ -95,8 +97,8 @@ const ProvidersSettings: NextPageWithLayout<void> = () => {
             ))
           )}
         </div>
-      </div>
-    </div>
+      </SettingsSectionContent>
+    </SettingsContainer>
   );
 };
 

@@ -17,6 +17,7 @@ import { FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
+import "@/styles/settings-tables.css";
 
 const AlertsPage = () => {
   const [createNewAlertModal, setCreateNewAlertModal] = useState(false);
@@ -124,7 +125,7 @@ const AlertsPage = () => {
       </div>
 
       <div className="border-b border-border">
-        <div className="border-t border-border">
+        <div className="border-t border-border settings-table">
           <ThemedTable
             columns={[
               { name: "Name", key: "key_name", hidden: false },
@@ -154,8 +155,8 @@ const AlertsPage = () => {
                     {key.status === "resolved" ? (
                       <Tooltip title={"Healthy"}>
                         <Badge
-                          variant="default"
-                          className="bg-green-500 hover:bg-green-600"
+                          variant="outline"
+                          className="border-emerald-500 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-400 dark:bg-emerald-950 dark:text-emerald-300 dark:hover:bg-emerald-900"
                         >
                           Healthy
                         </Badge>
@@ -233,7 +234,7 @@ const AlertsPage = () => {
 
       <div className="p-4">
         {alertHistory.length === 0 ? (
-          <div className="border-2 border-dashed border-muted-foreground/50 bg-muted/30 p-8 text-center">
+          <div className="border-2 border-dashed border-border bg-muted p-8 text-center">
             <FileText
               size={24}
               className="mx-auto mb-2 text-muted-foreground"
@@ -243,7 +244,7 @@ const AlertsPage = () => {
             </p>
           </div>
         ) : (
-          <div className="border-t border-border">
+          <div className="border-t border-border settings-table">
             <ThemedTable
               columns={[
                 {
@@ -334,50 +335,6 @@ const AlertsPage = () => {
         }}
         alertId={selectedAlert?.id || ""}
       />
-
-      <style jsx global>{`
-        .overflow-auto.rounded-lg.bg-white.ring-1.ring-gray-300 {
-          overflow: visible !important;
-          border-radius: 0 !important;
-          background-color: transparent !important;
-          box-shadow: none !important;
-          ring: none !important;
-        }
-
-        .dark .overflow-auto.rounded-lg.bg-white.ring-1.ring-gray-300 {
-          background-color: transparent !important;
-        }
-
-        .min-w-full.divide-y.divide-gray-300 {
-          border-collapse: collapse !important;
-        }
-
-        .min-w-full.divide-y.divide-gray-300 th {
-          font-size: 0.75rem !important;
-          padding: 0.75rem !important;
-          border-bottom: 1px solid hsl(var(--border)) !important;
-          background-color: transparent !important;
-        }
-
-        .min-w-full.divide-y.divide-gray-300 td {
-          font-size: 0.75rem !important;
-          padding: 0.75rem !important;
-          border-bottom: 1px solid hsl(var(--border)) !important;
-        }
-
-        .min-w-full.divide-y.divide-gray-300 tr:last-child td {
-          border-bottom: none !important;
-        }
-
-        /* Fix action buttons to display horizontally */
-        .min-w-full.divide-y.divide-gray-300 td:last-child {
-          display: flex !important;
-          flex-direction: row !important;
-          gap: 0.25rem !important;
-          justify-content: flex-end !important;
-          align-items: center !important;
-        }
-      `}</style>
     </div>
   );
 };
