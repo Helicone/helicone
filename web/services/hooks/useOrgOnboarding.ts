@@ -160,11 +160,7 @@ export const useOrgOnboarding = (orgId: string) => {
     }
   }, []);
 
-  let hasKeys = false;
-  if (!keys?.isLoading && (keys?.data?.data?.data?.length ?? 0) > 0) {
-    hasKeys = true;
-  }
-
+  const hasKeys = !keys?.isLoading && ((keys?.data?.data?.data?.length ?? 0) > 0);
   const hasProviderKeys = providerKeys && providerKeys.length > 0;
 
   const currentState = {

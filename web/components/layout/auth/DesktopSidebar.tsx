@@ -259,7 +259,7 @@ const DesktopSidebar = ({
               {/* Navigation items */}
               <div className="flex flex-col">
                 {/* Quickstart Card - Only show if organization hasn't integrated */}
-                {!onboardingStatus?.hasCompletedQuickstart && !isCollapsed && (
+                {onboardingStatus?.hasCompletedQuickstart === false && !isCollapsed && (
                   <div
                     onClick={() => router.push("/quickstart")}
                     className="mx-2 cursor-pointer rounded-lg border border-slate-200 bg-sidebar-background p-3 dark:border-slate-800"
