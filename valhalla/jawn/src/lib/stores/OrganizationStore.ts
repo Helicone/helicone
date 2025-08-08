@@ -124,21 +124,64 @@ export class OrganizationStore extends BaseStore {
     organizationId: string
   ): Promise<Result<string, string>> {
     try {
-      // Prepare the SQL and parameters based on update type
-      let sql = `
+      // Build dynamic SQL based on provided parameters
+      const updateFields = [];
+      const params = [];
+      let paramIndex = 1;
+
+      if (updateOrgParams.name !== undefined) {
+        updateFields.push(`name = $${paramIndex}`);
+        params.push(updateOrgParams.name);
+        paramIndex++;
+      }
+
+      if (updateOrgParams.color !== undefined) {
+        updateFields.push(`color = $${paramIndex}`);
+        params.push(updateOrgParams.color || null);
+        paramIndex++;
+      }
+
+      if (updateOrgParams.icon !== undefined) {
+        updateFields.push(`icon = $${paramIndex}`);
+        params.push(updateOrgParams.icon || null);
+        paramIndex++;
+      }
+
+      if (updateOrgParams.org_provider_key !== undefined) {
+        updateFields.push(`org_provider_key = $${paramIndex}`);
+        params.push(updateOrgParams.org_provider_key || null);
+        paramIndex++;
+      }
+
+      if (updateOrgParams.limits !== undefined) {
+        updateFields.push(`limits = $${paramIndex}`);
+        params.push(updateOrgParams.limits || {});
+        paramIndex++;
+      }
+
+      if (updateOrgParams.organization_type !== undefined) {
+        updateFields.push(`organization_type = $${paramIndex}`);
+        params.push(updateOrgParams.organization_type);
+        paramIndex++;
+      }
+
+      if (updateOrgParams.onboarding_status !== undefined) {
+        updateFields.push(`onboarding_status = $${paramIndex}`);
+        params.push(updateOrgParams.onboarding_status || {});
+        paramIndex++;
+      }
+
+
+      if (updateFields.length === 0) {
+        return err("No fields to update");
+      }
+
+      const sql = `
         UPDATE organization 
-        SET name = $1, 
-            color = $2, 
-            icon = $3`;
-
-      const params = [
-        updateOrgParams.name,
-        updateOrgParams.color || null,
-        updateOrgParams.icon || null,
-      ];
-
-      // Add WHERE clause and RETURNING
-      sql += ` WHERE id = $${params.length + 1} RETURNING id`;
+        SET ${updateFields.join(', ')}
+        WHERE id = $${paramIndex} 
+        RETURNING id`;
+      
       params.push(organizationId);
 
       // Execute the query

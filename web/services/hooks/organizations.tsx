@@ -205,12 +205,16 @@ export const useUpdateOrgMutation = () => {
     },
     onSuccess: () => {
       setNotification("Organization updated", "success");
+      // Invalidate queries
       queryClient.invalidateQueries({
-        queryKey: ["Organizations", user?.id ?? ""],
-        refetchType: "all",
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["OrganizationsId"],
+        predicate: (query) => {
+          const queryKey = query.queryKey;
+          return (
+            queryKey.includes("/v1/organization") ||
+            queryKey.includes("organization") ||
+            queryKey.includes("Organizations")
+          );
+        },
         refetchType: "all",
       });
     },
