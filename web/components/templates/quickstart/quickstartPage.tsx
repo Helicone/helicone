@@ -2,6 +2,7 @@ import { useRouter } from "next/router";
 import { H1, P } from "../../ui/typography";
 import { useOrg } from "../../layout/org/organizationContext";
 import { useOrgOnboarding } from "../../../services/hooks/useOrgOnboarding";
+import IntegrationGuide from "./integrationGuide";
 
 const QuickstartPage = () => {
   const router = useRouter();
@@ -22,10 +23,7 @@ const QuickstartPage = () => {
     {
       title: "Integrate",
       description: "Connect your application to start logging requests",
-      onClick: () => {
-        // Placeholder for step 3
-        console.log("Step 3 clicked - integrate");
-      },
+      onClick: () => router.push("/gateway"),
     },
   ];
 
@@ -69,9 +67,14 @@ const QuickstartPage = () => {
                   {step.title}
                 </h3>
               </div>
-              <P className={`text-muted-foreground ${isCompleted ? 'line-through' : ''}`}>
+              <P className={`text-muted-foreground text-xs ${isCompleted ? 'line-through' : ''}`}>
                 {step.description}
               </P>
+              {index === 2 && (
+                <div className="mt-4">
+                  <IntegrationGuide />
+                </div>
+              )}
             </div>
           );
         })}
