@@ -23,6 +23,8 @@ jobs:
         uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Build Cloud
+        id: buildx_cloud
+        continue-on-error: true
         uses: docker/setup-buildx-action@v3
         env:
           DOCKER_ACCESS_TOKEN: ${{ secrets.DOCKER_BUILD_CLOUD_TOKEN }}
@@ -30,6 +32,10 @@ jobs:
         with:
           driver: cloud
           endpoint: helicone/heli_linux-amd64
+
+      - name: Set up Docker Buildx (local fallback)
+        if: steps.buildx_cloud.outcome == 'failure'
+        uses: docker/setup-buildx-action@v3
 
       - name: Push images to Docker Hub
         run: |
