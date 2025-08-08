@@ -61,7 +61,7 @@ export const QuickstartStepCard = ({
         "cursor-pointer rounded-lg border border-border px-6 py-4 transition-colors duration-150",
         isCompleted
           ? "bg-background hover:bg-background"
-          : "bg-card hover:bg-muted/50"
+          : "bg-card hover:bg-muted/50",
       )}
     >
       <div className="flex items-center justify-between">
@@ -71,7 +71,7 @@ export const QuickstartStepCard = ({
               "flex h-6 w-6 items-center justify-center rounded-full text-sm",
               isCompleted
                 ? "bg-muted text-muted-foreground"
-                : "bg-primary text-primary-foreground"
+                : "bg-primary text-primary-foreground",
             )}
           >
             {stepNumber}
@@ -79,7 +79,7 @@ export const QuickstartStepCard = ({
           <h3
             className={cn(
               "text-lg font-semibold",
-              isCompleted && "text-muted-foreground line-through"
+              isCompleted && "text-muted-foreground line-through",
             )}
           >
             {title}
