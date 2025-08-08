@@ -86,21 +86,6 @@ services:
       - "1025:1025" # SMTP port
       - "8025:8025" # Web UI port
 
-  redis:
-    image: redis:8.0.2-alpine
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    environment:
-      - REDIS_PASSWORD=helicone-redis-pw
-      - REDIS_PORT=6379
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 5s
-
   migrations:
     build:
       context: ../
