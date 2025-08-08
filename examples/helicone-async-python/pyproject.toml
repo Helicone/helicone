@@ -1,0 +1,28 @@
+[project]
+name = "helicone-async-python-example"
+version = "0.1.0"
+description = "Example usage of Helicone async Python SDK"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "helicone-async>=0.1.0",
+    "openai>=1.0.0",
+    "python-dotenv>=1.0.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=23.0.0",
+    "isort>=5.0.0"
+]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=7.0.0",
+    "black>=23.0.0",
+    "isort>=5.0.0"
+]
+
+[tool.uv.sources]
+helicone-async = { path = "../../sdk/python/async", editable = true }

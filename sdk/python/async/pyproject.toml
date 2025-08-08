@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "helicone_async"
-version = "1.0.6"
+version = "2.0.0"
 description = "A Python wrapper for logging llm traces directly to Helicone, by passing the proxy, with OpenLLMetry."
 license = "Apache-2.0"
 authors = ["Helicone, Inc. <help@helicone.ai>"]
@@ -9,8 +9,8 @@ repository = "https://github.com/helicone/helicone/helicone-python-async"
 
 [tool.poetry.dependencies]
 python = ">=3.11.0,<4"
-opentelemetry-exporter-otlp-proto-http = "^1.27.0"
-traceloop-sdk = "^0.33.1"
+opentelemetry-exporter-otlp-proto-http = "^1.34.1"
+traceloop-sdk = "^0.44.1"
 
 
 [build-system]
