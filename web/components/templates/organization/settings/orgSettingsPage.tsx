@@ -14,6 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { CopyIcon } from "lucide-react";
 import useNotification from "@/components/shared/notification/useNotification";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+import { useOrg } from "../../../layout/org/organizationContext";
 interface OrgSettingsPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
   variant?: "organization" | "reseller";
@@ -26,6 +27,7 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
   const [, setOpenDemo] = useLocalStorage("openDemo", false);
   const [, setRemovedDemo] = useLocalStorage("removedDemo", false);
   const { setNotification } = useNotification();
+  const orgContext = useOrg();
 
   const isOwner = org.owner === user?.id;
 
@@ -33,10 +35,24 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
 
   const [debouncedOrgName, setDebouncedOrgName] = useState(org.name);
 
+  const handleOrgUpdate = (updateData: {
+    orgId: string;
+    name: string;
+    color: string;
+    icon: string;
+    variant: string;
+  }) => {
+    updateOrgMutation.mutate(updateData, {
+      onSuccess: () => {
+        orgContext?.refetchOrgs?.();
+      },
+    });
+  };
+
   useEffect(() => {
     if (debouncedOrgName === org.name) return;
     const timeout = setTimeout(() => {
-      updateOrgMutation.mutate({
+      handleOrgUpdate({
         orgId: org.id,
         name: debouncedOrgName,
         color: org.color,
@@ -91,7 +107,7 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
               <RadioGroup
                 defaultValue={org.color}
                 onValueChange={(value) =>
-                  updateOrgMutation.mutate({
+                  handleOrgUpdate({
                     orgId: org.id,
                     color: value,
                     name: debouncedOrgName,
@@ -130,7 +146,7 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
               <RadioGroup
                 defaultValue={org.icon}
                 onValueChange={(value) =>
-                  updateOrgMutation.mutate({
+                  handleOrgUpdate({
                     orgId: org.id,
                     icon: value,
                     name: org.name,

@@ -51,14 +51,15 @@ const NavItem: React.FC<NavItemProps> = ({
                 size: "icon",
               }),
               "h-9 w-9",
-              link.current && "bg-accent hover:bg-accent",
+              link.current &&
+                "bg-blue-100 hover:bg-blue-100 dark:bg-blue-900/50 dark:hover:bg-blue-900/50",
             )}
           >
             {link.icon && (
               <link.icon
                 className={cn(
                   "h-4 w-4 text-slate-500",
-                  link.current && "text-slate-800 dark:text-slate-200",
+                  link.current && "text-blue-600 dark:text-blue-400",
                 )}
               />
             )}
@@ -88,13 +89,14 @@ const NavItem: React.FC<NavItemProps> = ({
             ? "mt-[14px] flex items-center gap-0.5 pl-2 text-[11px] text-xs font-normal text-slate-400"
             : cn(
                 buttonVariants({
-                  variant: link.current ? "secondary" : "ghost",
+                  variant: "ghost",
                   size: "xs",
                 }),
                 deep && deep > 1 ? "h-6" : "h-8",
                 "w-full justify-start font-normal",
                 "text-[12px] text-slate-500",
-                link.current && "text-slate-800 dark:text-slate-200",
+                link.current &&
+                  "bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900/50",
               ),
           "",
         )}
@@ -104,7 +106,7 @@ const NavItem: React.FC<NavItemProps> = ({
             <link.icon
               className={cn(
                 "mr-2 h-3.5 w-3.5 text-slate-500",
-                link.current && "text-slate-800 dark:text-slate-200",
+                link.current && "text-blue-700 dark:text-blue-300",
               )}
             />
           )}
