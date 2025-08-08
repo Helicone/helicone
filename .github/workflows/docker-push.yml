@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - dockerhub-cost
 
 jobs:
   docker-push:
@@ -17,6 +18,9 @@ jobs:
         with:
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Set up QEMU (for local multi-arch builds fallback)
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Build Cloud
         uses: docker/setup-buildx-action@v3

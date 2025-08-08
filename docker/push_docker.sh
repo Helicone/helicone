@@ -134,6 +134,47 @@ setup_buildx() {
   run_command docker buildx inspect --bootstrap
 }
 
+# Ensure a local builder exists and switch to it
+switch_to_local_builder() {
+  echo "Switching to local buildx builder..."
+  if ! docker buildx ls | grep -q "helicone-builder"; then
+    echo "Creating local buildx builder 'helicone-builder'..."
+    # Use run_command to respect test mode
+    run_command docker buildx create --name helicone-builder --use
+  else
+    echo "Using existing local buildx builder 'helicone-builder'..."
+    run_command docker buildx use helicone-builder
+  fi
+  CLOUD_BUILDER=false
+}
+
+# Try a bake; if it fails on a cloud builder (e.g., no credits), fall back to local and retry once
+attempt_bake_with_fallback() {
+  local target=$1
+  local full_tag=$2
+  local latest_tag=$3
+  set +e
+  if [ "$TEST_MODE" = true ]; then
+    echo docker buildx bake --allow=fs.read=.. -f docker-bake.hcl --push "$target" --set "$target.platform=$PLATFORMS" --set "$target.tags=$full_tag" --set "$target.tags+=$latest_tag"
+    set -e
+    return 0
+  fi
+  docker buildx bake --allow=fs.read=.. -f docker-bake.hcl --push "$target" --set "$target.platform=$PLATFORMS" --set "$target.tags=$full_tag" --set "$target.tags+=$latest_tag"
+  local status=$?
+  if [ $status -ne 0 ] && [ "$CLOUD_BUILDER" = true ]; then
+    echo "Cloud bake failed (possibly out of credits). Falling back to local builder..."
+    switch_to_local_builder
+    if [ "$DONT_PRUNE" = false ]; then
+      echo "Pruning Docker images before local fallback bake..."
+      run_command docker system prune -af
+    fi
+    docker buildx bake --allow=fs.read=.. -f docker-bake.hcl --push "$target" --set "$target.platform=$PLATFORMS" --set "$target.tags=$full_tag" --set "$target.tags+=$latest_tag"
+    status=$?
+  fi
+  set -e
+  return $status
+}
+
 # Function to create ECR repository if it doesn't exist (ECR mode only)
 create_ecr_repo() {
   local repo_name=$1
@@ -168,6 +209,7 @@ get_available_ecr_tag() {
 
 # Setup Docker buildx for multi-platform builds
 setup_buildx
+INITIAL_CLOUD_BUILDER=$CLOUD_BUILDER
 
 # Prune Docker images if not disabled (skip when using a cloud builder)
 if [ "$DONT_PRUNE" = false ] && [ "$CLOUD_BUILDER" = false ]; then
@@ -195,12 +237,7 @@ if [ ! -z "$CUSTOM_TAG" ]; then
   fi
 fi
 
-# Define images and their contexts (unified for both modes)
-IMAGES=(
-  "helicone/web:.."
-  "helicone/jawn:.."
-  "helicone/migrations:.."
-)
+# Note: image lists now defined per-registry section; unused IMAGES removed
 
 # Docker Hub mode
 if [ "$MODE" = "dockerhub" ]; then
@@ -230,9 +267,9 @@ if [ "$MODE" = "dockerhub" ]; then
   fi
   
   for IMAGE_INFO in "${DOCKERHUB_IMAGES[@]}"; do
-    IFS=':' read -r IMAGE_NAME CONTEXT <<< "$IMAGE_INFO"
+    IFS=':' read -r IMAGE_NAME _ <<< "$IMAGE_INFO"
     echo "Processing $IMAGE_NAME..."
-    
+
     # Get the Docker tags for the current image from Docker Hub
     echo "Checking existing tags for $IMAGE_NAME..."
     tags=$(curl -s "https://hub.docker.com/v2/repositories/${IMAGE_NAME}/tags/?page_size=100" | jq -r '.results|.[]|.name' 2>/dev/null || echo "")
@@ -241,39 +278,34 @@ if [ "$MODE" = "dockerhub" ]; then
     tag=$VERSION_TAG
     counter=1
     while [[ $tags =~ $tag ]]; do
-      # If it does, increment the counter and append it to the date tag
       tag=$VERSION_TAG-$counter
       ((counter++))
     done
 
-    # Get Dockerfile path and context
+    # Map image to bake target name and tags
     DOCKERFILE_NAME=$(basename "$IMAGE_NAME" | tr '-' '_')
-    DOCKERFILE_PATH="dockerfiles/dockerfile_${DOCKERFILE_NAME}"
-    BUILD_CONTEXT="$CONTEXT"
-    
-    if [ "$DOCKERFILE_NAME" = "jawn" ]; then
-      DOCKERFILE_PATH="../valhalla/dockerfile"
-    elif [ "$DOCKERFILE_NAME" = "migrations" ]; then
-      DOCKERFILE_PATH="dockerfiles/dockerfile_migrations"
-    elif [ "$DOCKERFILE_NAME" = "ai_gateway" ]; then
-      DOCKERFILE_PATH="../aigateway/Dockerfile"
-      BUILD_CONTEXT="../aigateway"
-    elif [[ "$DOCKERFILE_NAME" == *"all_in_one" ]]; then
-      DOCKERFILE_PATH="../Dockerfile"
-      BUILD_CONTEXT=".."
+    BAKE_TARGET="$DOCKERFILE_NAME"
+    if [[ "$DOCKERFILE_NAME" == *"all_in_one" ]]; then
+      BAKE_TARGET="all_in_one"
     fi
-
-    # Build and push multi-platform image
     FULL_IMAGE_TAG="$IMAGE_NAME:$tag"
     LATEST_TAG="$IMAGE_NAME:latest"
-    echo "Building and pushing multi-platform image $FULL_IMAGE_TAG for platforms: $PLATFORMS"
-    run_command docker buildx build \
-      --platform "$PLATFORMS" \
-      -t "$FULL_IMAGE_TAG" \
-      -t "$LATEST_TAG" \
-      -f "$DOCKERFILE_PATH" \
-      --push \
-      "$BUILD_CONTEXT"
+    echo "Baking target $BAKE_TARGET with tags: $FULL_IMAGE_TAG and $LATEST_TAG"
+    if [[ "$DOCKERFILE_NAME" == *"all_in_one" ]]; then
+      # Always use local builder for the all-in-one image
+      switch_to_local_builder
+      if [ "$DONT_PRUNE" = false ] && [ "$INITIAL_CLOUD_BUILDER" = true ]; then
+        echo "Pruning Docker images before local all-in-one bake..."
+        run_command docker system prune -af
+      fi
+      if [ "$TEST_MODE" = true ]; then
+        echo docker buildx bake --allow=fs.read=.. -f docker-bake.hcl --push "$BAKE_TARGET" --set "$BAKE_TARGET.platform=$PLATFORMS" --set "$BAKE_TARGET.tags=$FULL_IMAGE_TAG" --set "$BAKE_TARGET.tags+=$LATEST_TAG"
+      else
+        docker buildx bake --allow=fs.read=.. -f docker-bake.hcl --push "$BAKE_TARGET" --set "$BAKE_TARGET.platform=$PLATFORMS" --set "$BAKE_TARGET.tags=$FULL_IMAGE_TAG" --set "$BAKE_TARGET.tags+=$LATEST_TAG"
+      fi
+    else
+      attempt_bake_with_fallback "$BAKE_TARGET" "$FULL_IMAGE_TAG" "$LATEST_TAG"
+    fi
   done
 
 # ECR mode
@@ -292,7 +324,6 @@ elif [ "$MODE" = "ecr" ]; then
     "helicone/web:.."
     "helicone/jawn:.."
     "helicone/migrations:.."
-    "helicone/ai-gateway:.."
     "helicone/helicone-all-in-one:.."
   )
   
@@ -319,7 +350,7 @@ elif [ "$MODE" = "ecr" ]; then
 
   # Process each image
   for IMAGE_INFO in "${ECR_IMAGES[@]}"; do
-    IFS=':' read -r IMAGE_NAME CONTEXT <<< "$IMAGE_INFO"
+    IFS=':' read -r IMAGE_NAME _ <<< "$IMAGE_INFO"
     
     # Skip if specific images were selected and this isn't one of them
     if [ ${#SELECTED_IMAGES[@]} -gt 0 ]; then
@@ -341,35 +372,32 @@ elif [ "$MODE" = "ecr" ]; then
     # Get available tag (with counter if needed)
     tag=$(get_available_ecr_tag "$IMAGE_NAME" "$VERSION_TAG")
     
-    # Get Dockerfile path and context
-    DOCKERFILE_NAME=$(basename "$IMAGE_NAME" | tr '-' '_')
-    DOCKERFILE_PATH="dockerfiles/dockerfile_${DOCKERFILE_NAME}"
-    BUILD_CONTEXT="$CONTEXT"
-    
-    if [ "$DOCKERFILE_NAME" = "jawn" ]; then
-      DOCKERFILE_PATH="../valhalla/dockerfile"
-    elif [ "$DOCKERFILE_NAME" = "migrations" ]; then
-      DOCKERFILE_PATH="dockerfiles/dockerfile_migrations"
-    elif [ "$DOCKERFILE_NAME" = "ai_gateway" ]; then
-      DOCKERFILE_PATH="../aigateway/Dockerfile"
-      BUILD_CONTEXT="../aigateway"
-    elif [[ "$DOCKERFILE_NAME" == *"all_in_one" ]]; then
-      DOCKERFILE_PATH="../Dockerfile"
-      BUILD_CONTEXT=".."
-    fi
-    
-    # Build and push multi-platform image
+    # Build and push multi-platform image via bake
     ECR_REPO="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME"
     FULL_IMAGE_TAG="$ECR_REPO:$tag"
     LATEST_TAG="$ECR_REPO:latest"
+    DOCKERFILE_NAME=$(basename "$IMAGE_NAME" | tr '-' '_')
+    BAKE_TARGET="$DOCKERFILE_NAME"
+    if [[ "$DOCKERFILE_NAME" == *"all_in_one" ]]; then
+      BAKE_TARGET="all_in_one"
+    fi
     echo "Building and pushing multi-platform image $FULL_IMAGE_TAG for platforms: $PLATFORMS"
-    run_command docker buildx build \
-      --platform "$PLATFORMS" \
-      -t "$FULL_IMAGE_TAG" \
-      -t "$LATEST_TAG" \
-      -f "$DOCKERFILE_PATH" \
-      --push \
-      "$BUILD_CONTEXT"
+    if [[ "$DOCKERFILE_NAME" == *"all_in_one" ]]; then
+      # Always use local builder for the all-in-one image, because it's too expensive for cloud builder
+      switch_to_local_builder
+      if [ "$DONT_PRUNE" = false ] && [ "$INITIAL_CLOUD_BUILDER" = true ]; then
+        echo "Pruning Docker images before local all-in-one build..."
+        run_command docker system prune -af
+      fi
+      if [ "$TEST_MODE" = true ]; then
+        echo docker buildx bake --allow=fs.read=.. -f docker-bake.hcl --push "$BAKE_TARGET" --set "$BAKE_TARGET.platform=$PLATFORMS" --set "$BAKE_TARGET.tags=$FULL_IMAGE_TAG" --set "$BAKE_TARGET.tags+=$LATEST_TAG"
+      else
+        docker buildx bake --allow=fs.read=.. -f docker-bake.hcl --push "$BAKE_TARGET" --set "$BAKE_TARGET.platform=$PLATFORMS" --set "$BAKE_TARGET.tags=$FULL_IMAGE_TAG" --set "$BAKE_TARGET.tags+=$LATEST_TAG"
+      fi
+    else
+      # Try cloud builder first (if active), then fall back to local
+      attempt_bake_with_fallback "$BAKE_TARGET" "$FULL_IMAGE_TAG" "$LATEST_TAG"
+    fi
   done
 fi
 
