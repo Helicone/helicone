@@ -8,60 +8,61 @@ FROM --platform=linux/amd64 node:20-bookworm-slim
 WORKDIR /usr/src/app/valhalla/prompt_security
 
 SHELL ["/bin/bash", "-c"]
-RUN apt-get update && apt-get install -y python3-venv python3
-RUN python3 -m venv venv
-# Install supervisor
-RUN apt-get update && apt-get install -y supervisor
 
-# Apply security updates
-RUN apt-get update && apt-get upgrade -y && apt-get autoremove -y && apt-get clean
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Fix CVE-2023-6879 by installing fixed aom version from testing
-RUN echo "deb https://deb.debian.org/debian testing main" > /etc/apt/sources.list.d/testing.list && \
-    apt-get update && \
-    apt-get install -y -t testing libaom3=3.12.1-1 && \
-    rm /etc/apt/sources.list.d/testing.list && \
-    apt-get update
+# Combine apt operations for caching and speed; avoid upgrade to keep image small
+RUN set -eux; \
+    echo "deb https://deb.debian.org/debian testing main" > /etc/apt/sources.list.d/testing.list; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends -t testing libaom3=3.12.1-1; \
+    rm -f /etc/apt/sources.list.d/testing.list; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
+      python3-venv python3 supervisor ffmpeg curl; \
+    rm -rf /var/lib/apt/lists/*
 
-# Install FFMEG and FFPROBE
-RUN apt-get install -y ffmpeg
 ENV FFMPEG_PATH="/usr/bin/ffmpeg"
 ENV FFPROBE_PATH="/usr/bin/ffprobe"
 
+# Create and use Python venv via PATH so we don't need to source it repeatedly
+RUN python3 -m venv /usr/src/app/valhalla/prompt_security/venv
+ENV VIRTUAL_ENV=/usr/src/app/valhalla/prompt_security/venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+# Install Python deps in a single layer for better caching
 COPY ./valhalla/prompt_security/requirements.txt ./
-RUN . venv/bin/activate && \
-    pip3 install torch==2.3.1+cpu torchvision==0.18.1+cpu -f https://download.pytorch.org/whl/torch_stable.html && \
-    pip3 install "transformers[torch]"
+RUN pip3 install --no-cache-dir \
+      torch==2.3.1+cpu torchvision==0.18.1+cpu \
+      --find-links https://download.pytorch.org/whl/torch_stable.html && \
+    pip3 install --no-cache-dir -r requirements.txt
 
-RUN . venv/bin/activate && \
-    pip3 install tokenizers safetensors fastapi tqdm uvicorn boto3
-
-RUN . venv/bin/activate && \
-    pip3 install regex numpy packaging requests tqdm filelock typing-extensions
-
-
-RUN apt install curl -y
+# Begin Node build setup
 WORKDIR /usr/src/app
+# Copy relatively static deps first for better yarn cache hits
 COPY ./shared ./shared
 COPY ./packages ./packages
 COPY ./package.json ./package.json
 
-
+# Copy only jawn manifest files first to leverage layer cache on source changes
 WORKDIR /usr/src/app/valhalla/jawn
-COPY ./valhalla/jawn .
+COPY ./valhalla/jawn/package.json ./package.json
+COPY ./valhalla/jawn/yarn.lock ./yarn.lock
 
-
-RUN find /usr/src/app/valhalla/jawn -name ".env.*" -exec rm {} \;
-
-#yarn workspace jawn serve
 ENV PORT=8585
 
-RUN yarn
+# Install only once based on lockfile
+RUN corepack enable && yarn install --frozen-lockfile
+
+# Now copy the rest of jawn source and build
+COPY ./valhalla/jawn .
+RUN find /usr/src/app/valhalla/jawn -name ".env.*" -exec rm {} \;
 RUN yarn build
+
+# Copy prompt security runtime files
 COPY ./valhalla/prompt_security/main.py /usr/src/app/valhalla/prompt_security/main.py
 COPY ./valhalla/prompt_security/run_service.sh /usr/src/app/valhalla/prompt_security/run_service.sh
 RUN chmod +x /usr/src/app/valhalla/prompt_security/run_service.sh
-
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONFAULTHANDLER=1
@@ -71,8 +72,6 @@ ENV DLQ_WORKER_COUNT=1
 ENV NORMAL_WORKER_COUNT=3
 ENV CSB_API_KEY="1234567890"
 ENV ENABLE_PROMPT_SECURITY="true"
-
-
 
 # Add supervisor configuration
 COPY ./valhalla/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
