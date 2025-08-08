@@ -17,6 +17,7 @@ import { useOrg } from "../org/organizationContext";
 import OrgDropdown from "../orgDropdown";
 import SidebarHelpDropdown from "../SidebarHelpDropdown";
 import NavItem from "./NavItem";
+import { QuickstartStep } from "@/components/onboarding/QuickstartStep";
 import { ChangelogItem } from "./types";
 
 export interface NavigationItem {
@@ -268,18 +269,27 @@ const DesktopSidebar = ({
                       Quickstart
                     </p>
                     <div className="space-y-1">
-                      <div className={`inline-flex items-center text-xs ${hasProviderKeys ? 'text-muted-foreground line-through' : !hasProviderKeys ? 'text-slate-600 dark:text-slate-400 border-b-2 border-primary' : 'text-slate-600 dark:text-slate-400'}`}>
-                        <span className={`mr-2 text-xs ${hasProviderKeys ? 'text-muted-foreground' : 'text-slate-500'}`}>1.</span>
+                      <QuickstartStep
+                        stepNumber={1}
+                        isCompleted={hasProviderKeys}
+                        isActive={!hasProviderKeys}
+                      >
                         Add provider key
-                      </div>
-                      <div className={`inline-flex items-center text-xs ${hasKeys ? 'text-muted-foreground line-through' : hasProviderKeys && !hasKeys ? 'text-slate-600 dark:text-slate-400 border-b-2 border-primary' : 'text-slate-600 dark:text-slate-400'}`}>
-                        <span className={`mr-2 text-xs ${hasKeys ? 'text-muted-foreground' : 'text-slate-500'}`}>2.</span>
+                      </QuickstartStep>
+                      <QuickstartStep
+                        stepNumber={2}
+                        isCompleted={hasKeys}
+                        isActive={hasProviderKeys && !hasKeys}
+                      >
                         Create Helicone API key
-                      </div>
-                      <div className={`inline-flex items-center text-xs ${orgContext?.currentOrg?.has_integrated ? 'text-muted-foreground line-through' : hasProviderKeys && hasKeys && !orgContext?.currentOrg?.has_integrated ? 'text-slate-600 dark:text-slate-400 border-b-2 border-primary' : 'text-slate-600 dark:text-slate-400'}`}>
-                        <span className={`mr-2 text-xs ${orgContext?.currentOrg?.has_integrated ? 'text-muted-foreground' : 'text-slate-500'}`}>3.</span>
+                      </QuickstartStep>
+                      <QuickstartStep
+                        stepNumber={3}
+                        isCompleted={!!orgContext?.currentOrg?.has_integrated}
+                        isActive={hasProviderKeys && hasKeys && !orgContext?.currentOrg?.has_integrated}
+                      >
                         Integrate
-                      </div>
+                      </QuickstartStep>
                     </div>
                     
                     {hasProviderKeys && hasKeys && orgContext?.currentOrg?.has_integrated && (
