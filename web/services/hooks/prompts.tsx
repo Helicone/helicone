@@ -23,6 +23,7 @@ export const useCreatePrompt = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["prompts"] });
       queryClient.invalidateQueries({ queryKey: ["promptTags"] });
+      queryClient.invalidateQueries({ queryKey: ["promptEnvironments"] });
     },
   });
 };
@@ -47,6 +48,10 @@ export const usePushPromptVersion = () => {
   return $JAWN_API.useMutation("post", "/v1/prompt-2025/update", {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["prompts"] });
+      queryClient.invalidateQueries({ queryKey: ["promptsWithVersions"] });
+      queryClient.invalidateQueries({ queryKey: ["promptVersions"] });
+      queryClient.invalidateQueries({ queryKey: ["promptVersionWithBody"] });
+      queryClient.invalidateQueries({ queryKey: ["promptEnvironments"] });
     },
   });
 };
@@ -114,18 +119,19 @@ export const useGetPromptInputs = (
   });
 };
 
-export const useSetProductionVersion = () => {
+export const useSetPromptVersionEnvironment = () => {
   const queryClient = useQueryClient();
 
   return $JAWN_API.useMutation(
     "post",
-    "/v1/prompt-2025/update/production-version",
+    "/v1/prompt-2025/update/environment",
     {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["prompts"] });
         queryClient.invalidateQueries({ queryKey: ["promptsWithVersions"] });
         queryClient.invalidateQueries({ queryKey: ["promptVersions"] });
         queryClient.invalidateQueries({ queryKey: ["promptVersionWithBody"] });
+        queryClient.invalidateQueries({ queryKey: ["promptEnvironments"] });
       },
     },
   );

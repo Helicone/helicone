@@ -48832,8 +48832,8 @@
 									"commitMessage": {
 										"type": "string"
 									},
-									"setAsProduction": {
-										"type": "boolean"
+									"environment": {
+										"type": "string"
 									},
 									"newMajorVersion": {
 										"type": "boolean"
@@ -48848,7 +48848,6 @@
 								"required": [
 									"promptBody",
 									"commitMessage",
-									"setAsProduction",
 									"newMajorVersion",
 									"promptVersionId",
 									"promptId"
@@ -48860,9 +48859,9 @@
 				}
 			}
 		},
-		"/v1/prompt-2025/update/production-version": {
+		"/v1/prompt-2025/update/environment": {
 			"post": {
-				"operationId": "SetProductionVersion",
+				"operationId": "SetPromptVersionEnvironment",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -48890,6 +48889,9 @@
 						"application/json": {
 							"schema": {
 								"properties": {
+									"environment": {
+										"type": "string"
+									},
 									"promptVersionId": {
 										"type": "string"
 									},
@@ -48898,6 +48900,7 @@
 									}
 								},
 								"required": [
+									"environment",
 									"promptVersionId",
 									"promptId"
 								],

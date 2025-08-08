@@ -100,8 +100,8 @@ export interface paths {
   "/v1/prompt-2025/update": {
     post: operations["UpdatePrompt2025"];
   };
-  "/v1/prompt-2025/update/production-version": {
-    post: operations["SetProductionVersion"];
+  "/v1/prompt-2025/update/environment": {
+    post: operations["SetPromptVersionEnvironment"];
   };
   "/v1/prompt-2025/count": {
     get: operations["GetPrompt2025Count"];
@@ -4042,7 +4042,7 @@ export interface operations {
         "application/json": {
           promptBody: components["schemas"]["OpenAIChatRequest"];
           commitMessage: string;
-          setAsProduction: boolean;
+          environment?: string;
           newMajorVersion: boolean;
           promptVersionId: string;
           promptId: string;
@@ -4058,10 +4058,11 @@ export interface operations {
       };
     };
   };
-  SetProductionVersion: {
+  SetPromptVersionEnvironment: {
     requestBody: {
       content: {
         "application/json": {
+          environment: string;
           promptVersionId: string;
           promptId: string;
         };

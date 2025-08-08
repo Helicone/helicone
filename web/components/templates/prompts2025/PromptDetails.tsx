@@ -34,7 +34,7 @@ import useNotification from "@/components/shared/notification/useNotification";
 interface PromptDetailsProps {
   promptWithVersions: PromptWithVersions | null;
   onRenamePrompt: (promptId: string, newName: string) => void;
-  onSetProductionVersion: (promptId: string, promptVersionId: string) => void;
+  onSetEnvironment: (promptId: string, promptVersionId: string, environment: string) => void;
   onOpenPromptVersion: (promptVersionId: string) => void;
   onDeletePrompt: (promptId: string) => void;
   onDeletePromptVersion: (promptVersionId: string) => void;
@@ -45,7 +45,7 @@ interface PromptDetailsProps {
 const PromptDetails = ({
   promptWithVersions,
   onRenamePrompt,
-  onSetProductionVersion,
+  onSetEnvironment,
   onOpenPromptVersion,
   onDeletePrompt,
   onDeletePromptVersion,
@@ -224,7 +224,7 @@ const PromptDetails = ({
       <div className="flex-1 overflow-y-auto">
         <PromptVersionHistory
           promptWithVersions={promptWithVersions}
-          onSetProductionVersion={onSetProductionVersion}
+          onSetEnvironment={onSetEnvironment}
           onOpenPromptVersion={onOpenPromptVersion}
           onDeletePromptVersion={onDeletePromptVersion}
         />

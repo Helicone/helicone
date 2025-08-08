@@ -39,7 +39,7 @@ interface PlaygroundHeaderProps {
   onCreatePrompt: (tags: string[], promptName: string) => void;
   onSavePrompt: (
     newMajorVersion: boolean,
-    setAsProduction: boolean,
+    environment: string | undefined,
     commitMessage: string,
   ) => void;
   onRun: () => void;

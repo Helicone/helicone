@@ -34,6 +34,7 @@ import { Prompt2025Input } from "../../lib/db/ClickhouseWrapper";
 
 const PROMPT_ID_LENGTH = 6;
 const MAX_PROMPT_ID_GENERATION_ATTEMPTS = 3;
+const PRODUCTION_ENVIRONMENT = 'production';
 
 export class Prompt2025Manager extends BaseManager {
   private s3Client: S3Client;
@@ -392,10 +393,9 @@ export class Prompt2025Manager extends BaseManager {
         commit_message,
         created_by,
         organization,
-        model,
-        environment
+        model
       )
-      VALUES (NOW(), $1, 0, 0, 'First version.', $2, $3, $4, 'production')
+      VALUES (NOW(), $1, 0, 0, 'First version.', $2, $3, $4)
       RETURNING id
       `, [
         promptId,
@@ -411,10 +411,10 @@ export class Prompt2025Manager extends BaseManager {
 
     const promptVersionId = insertPromptVersionResult?.data?.[0]?.id ?? '';
 
-    const updateProductionVersionResult = await this.setProductionVersion({
+    const updateProductionVersionResult = await this.setPromptVersionEnvironment({
       promptId,
       promptVersionId,
-      environment: 'production',
+      environment: PRODUCTION_ENVIRONMENT,
     });
     if (updateProductionVersionResult?.error) {
       return err(updateProductionVersionResult.error);
@@ -432,7 +432,7 @@ export class Prompt2025Manager extends BaseManager {
     promptId: string;
     promptVersionId: string;
     newMajorVersion: boolean;
-    setAsProduction: boolean;
+    environment?: string;
     commitMessage: string;
     promptBody: OpenAIChatRequest;
   }): Promise<Result<{ id: string }, string>> {
@@ -516,14 +516,14 @@ export class Prompt2025Manager extends BaseManager {
 
     const promptVersionId = insertPromptVersionResult?.data?.[0]?.id ?? '';
 
-    if (params.setAsProduction) {
-      const updateProductionVersionResult = await this.setProductionVersion({
+    if (params.environment) {
+      const updateEnvironmentVersionResult = await this.setPromptVersionEnvironment({
         promptId: params.promptId,
         promptVersionId,
-        environment: 'production',
+        environment: params.environment,
       });
-      if (updateProductionVersionResult?.error) {
-        return err(updateProductionVersionResult.error);
+      if (updateEnvironmentVersionResult?.error) {
+        return err(updateEnvironmentVersionResult.error);
       }
     }
 
@@ -535,7 +535,7 @@ export class Prompt2025Manager extends BaseManager {
     return ok({ id: promptVersionId });
   }
 
-  async setProductionVersion(params: {
+  async setPromptVersionEnvironment(params: {
     promptId: string;
     promptVersionId: string;
     environment: string;
@@ -554,17 +554,18 @@ export class Prompt2025Manager extends BaseManager {
       return err("Prompt version not found or does not belong to the specified prompt");
     }
 
-    // update legacy ref for production version
-    const result = await dbExecute<null>(
-      `UPDATE prompts_2025 SET production_version = $1 WHERE id = $2 AND organization = $3 AND soft_delete is false`,
-      [params.promptVersionId, params.promptId, this.authParams.organizationId]
-    );
+    // Update production version ref
+    if (params.environment === PRODUCTION_ENVIRONMENT) {
+      const result = await dbExecute<null>(
+        `UPDATE prompts_2025 SET production_version = $1 WHERE id = $2 AND organization = $3 AND soft_delete is false`,
+        [params.promptVersionId, params.promptId, this.authParams.organizationId]
+      );
 
-    if (result.error) {
-      return err(result.error);
+      if (result.error) {
+        return err(result.error);
+      }
     }
 
-    // update environment column atomically
     const updateEnvResult = await dbExecute(
       `
       BEGIN;

@@ -14,10 +14,18 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch";
-import { InfoIcon } from "lucide-react";
+import { InfoIcon, Check, ChevronsUpDown, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useGetPromptTags } from "@/services/hooks/prompts";
+import { useGetPromptTags, useGetPromptEnvironments } from "@/services/hooks/prompts";
 import TagsFilter from "@/components/templates/prompts2025/TagsFilter";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 
 interface PromptFormProps {
   isScrolled: boolean;
@@ -25,7 +33,7 @@ interface PromptFormProps {
   onCreatePrompt: (tags: string[], promptName: string) => void;
   onSavePrompt: (
     newMajorVersion: boolean,
-    setAsProduction: boolean,
+    environment: string | undefined,
     commitMessage: string,
   ) => void;
 }
@@ -40,13 +48,18 @@ export default function PromptForm({
   const [commitMessage, setCommitMessage] = useState("Update.");
   const [isPromptFormPopoverOpen, setIsPromptFormPopoverOpen] = useState(false);
   const [upgradeMajorVersion, setUpgradeMajorVersion] = useState(false);
-  const [setAsProduction, setSetAsProduction] = useState(true);
+  const [selectedEnvironment, setSelectedEnvironment] = useState<string | undefined>(undefined);
+  const [isEnvironmentOpen, setIsEnvironmentOpen] = useState(false);
+  const [customEnvironment, setCustomEnvironment] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [customTags, setCustomTags] = useState("");
   const [saveAsNewPrompt, setSaveAsNewPrompt] = useState(!saveAndVersion);
 
   const { data: existingTags = [], isLoading: isLoadingTags } =
     useGetPromptTags();
+  
+  const { data: environments = [], isLoading: isLoadingEnvironments } =
+    useGetPromptEnvironments();
 
   const handleTagsChange = (tags: string[]) => {
     setSelectedTags(tags);
@@ -192,27 +205,91 @@ export default function PromptForm({
                   />
                 </div>
               </div>
-              <div className="flex justify-end">
+              
+              <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
+                  <Label>Environment</Label>
                   <Tooltip>
                     <TooltipTrigger>
                       <InfoIcon className="h-3 w-3 text-muted-foreground" />
                     </TooltipTrigger>
                     <TooltipContent align="start">
-                      Mark this version as the production version for this
-                      prompt.
+                      Select an existing environment or create a custom one. Leave empty for no environment assignment.
                     </TooltipContent>
                   </Tooltip>
-                  <Label htmlFor="set-as-production" className="text-sm">
-                    Set as production
-                  </Label>
-                  <Switch
-                    className="data-[state=checked]:bg-foreground"
-                    size="sm"
-                    variant="helicone"
-                    id="set-as-production"
-                    checked={setAsProduction}
-                    onCheckedChange={setSetAsProduction}
+                </div>
+                <Popover open={isEnvironmentOpen} onOpenChange={setIsEnvironmentOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={isEnvironmentOpen}
+                      className="w-full justify-between"
+                      disabled={isLoadingEnvironments}
+                    >
+                      {selectedEnvironment || customEnvironment || "Select environment (optional)"}
+                      <ChevronsUpDown size={16} className="opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0">
+                    <Command>
+                      <CommandInput placeholder="Search environments..." />
+                      <CommandList>
+                        <CommandEmpty>No environments found.</CommandEmpty>
+                        <CommandGroup>
+                          <CommandItem
+                            onSelect={() => {
+                              setSelectedEnvironment(undefined);
+                              setCustomEnvironment("");
+                              setIsEnvironmentOpen(false);
+                            }}
+                          >
+                            <Check
+                              size={16}
+                              className={cn(
+                                "mr-2",
+                                !selectedEnvironment && !customEnvironment ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            No environment
+                          </CommandItem>
+                          {environments.map((env) => (
+                            <CommandItem
+                              key={env}
+                              onSelect={() => {
+                                setSelectedEnvironment(env);
+                                setCustomEnvironment("");
+                                setIsEnvironmentOpen(false);
+                              }}
+                            >
+                              <Check
+                                size={16}
+                                className={cn(
+                                  "mr-2",
+                                  selectedEnvironment === env ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              {env}
+                              {env === 'production' && (
+                                <Crown className="ml-auto text-muted-foreground/50 h-3 w-3"/>
+                              )}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+                <div className="mt-2 flex flex-col gap-2">
+                  <Input
+                    placeholder="Or enter custom environment name..."
+                    value={customEnvironment}
+                    onChange={(e) => {
+                      setCustomEnvironment(e.target.value);
+                      if (e.target.value) {
+                        setSelectedEnvironment(undefined);
+                      }
+                    }}
                   />
                 </div>
               </div>
@@ -229,7 +306,7 @@ export default function PromptForm({
               } else {
                 onSavePrompt(
                   upgradeMajorVersion,
-                  setAsProduction,
+                  selectedEnvironment || customEnvironment,
                   commitMessage,
                 );
               }

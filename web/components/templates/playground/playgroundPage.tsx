@@ -540,7 +540,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
 
   const onSavePrompt = async (
     newMajorVersion: boolean,
-    setAsProduction: boolean,
+    environment: string | undefined,
     commitMessage: string,
   ) => {
     if (!mappedContent) {
@@ -567,7 +567,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           promptId: promptVersionData.prompt.id,
           promptVersionId: promptVersionData.promptVersion.id,
           newMajorVersion,
-          setAsProduction,
+          environment,
           commitMessage,
           promptBody,
         },
