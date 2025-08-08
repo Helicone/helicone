@@ -16,7 +16,10 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { InfoIcon, Check, ChevronsUpDown, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useGetPromptTags, useGetPromptEnvironments } from "@/services/hooks/prompts";
+import {
+  useGetPromptTags,
+  useGetPromptEnvironments,
+} from "@/services/hooks/prompts";
 import TagsFilter from "@/components/templates/prompts2025/TagsFilter";
 import {
   Command,
@@ -48,7 +51,9 @@ export default function PromptForm({
   const [commitMessage, setCommitMessage] = useState("Update.");
   const [isPromptFormPopoverOpen, setIsPromptFormPopoverOpen] = useState(false);
   const [upgradeMajorVersion, setUpgradeMajorVersion] = useState(false);
-  const [selectedEnvironment, setSelectedEnvironment] = useState<string | undefined>(undefined);
+  const [selectedEnvironment, setSelectedEnvironment] = useState<
+    string | undefined
+  >(undefined);
   const [isEnvironmentOpen, setIsEnvironmentOpen] = useState(false);
   const [customEnvironment, setCustomEnvironment] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -57,7 +62,7 @@ export default function PromptForm({
 
   const { data: existingTags = [], isLoading: isLoadingTags } =
     useGetPromptTags();
-  
+
   const { data: environments = [], isLoading: isLoadingEnvironments } =
     useGetPromptEnvironments();
 
@@ -205,7 +210,7 @@ export default function PromptForm({
                   />
                 </div>
               </div>
-              
+
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
                   <Label>Environment</Label>
@@ -214,11 +219,15 @@ export default function PromptForm({
                       <InfoIcon className="h-3 w-3 text-muted-foreground" />
                     </TooltipTrigger>
                     <TooltipContent align="start">
-                      Select an existing environment or create a custom one. Leave empty for no environment assignment.
+                      Select an existing environment or create a custom one.
+                      Leave empty for no environment assignment.
                     </TooltipContent>
                   </Tooltip>
                 </div>
-                <Popover open={isEnvironmentOpen} onOpenChange={setIsEnvironmentOpen}>
+                <Popover
+                  open={isEnvironmentOpen}
+                  onOpenChange={setIsEnvironmentOpen}
+                >
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
@@ -227,7 +236,9 @@ export default function PromptForm({
                       className="w-full justify-between"
                       disabled={isLoadingEnvironments}
                     >
-                      {selectedEnvironment || customEnvironment || "Select environment (optional)"}
+                      {selectedEnvironment ||
+                        customEnvironment ||
+                        "Select environment (optional)"}
                       <ChevronsUpDown size={16} className="opacity-50" />
                     </Button>
                   </PopoverTrigger>
@@ -248,7 +259,9 @@ export default function PromptForm({
                               size={16}
                               className={cn(
                                 "mr-2",
-                                !selectedEnvironment && !customEnvironment ? "opacity-100" : "opacity-0"
+                                !selectedEnvironment && !customEnvironment
+                                  ? "opacity-100"
+                                  : "opacity-0",
                               )}
                             />
                             No environment
@@ -266,12 +279,14 @@ export default function PromptForm({
                                 size={16}
                                 className={cn(
                                   "mr-2",
-                                  selectedEnvironment === env ? "opacity-100" : "opacity-0"
+                                  selectedEnvironment === env
+                                    ? "opacity-100"
+                                    : "opacity-0",
                                 )}
                               />
                               {env}
-                              {env === 'production' && (
-                                <Crown className="ml-auto text-muted-foreground/50 h-3 w-3"/>
+                              {env === "production" && (
+                                <Crown className="ml-auto h-3 w-3 text-muted-foreground/50" />
                               )}
                             </CommandItem>
                           ))}

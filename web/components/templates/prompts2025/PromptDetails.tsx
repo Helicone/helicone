@@ -34,7 +34,11 @@ import useNotification from "@/components/shared/notification/useNotification";
 interface PromptDetailsProps {
   promptWithVersions: PromptWithVersions | null;
   onRenamePrompt: (promptId: string, newName: string) => void;
-  onSetEnvironment: (promptId: string, promptVersionId: string, environment: string) => void;
+  onSetEnvironment: (
+    promptId: string,
+    promptVersionId: string,
+    environment: string,
+  ) => void;
   onOpenPromptVersion: (promptVersionId: string) => void;
   onDeletePrompt: (promptId: string) => void;
   onDeletePromptVersion: (promptVersionId: string) => void;

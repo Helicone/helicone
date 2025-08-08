@@ -3,7 +3,11 @@ import PromptVersionCard from "./PromptVersionCard";
 
 interface PromptVersionHistoryProps {
   promptWithVersions: PromptWithVersions;
-  onSetEnvironment: (promptId: string, promptVersionId: string, environment: string) => void;
+  onSetEnvironment: (
+    promptId: string,
+    promptVersionId: string,
+    environment: string,
+  ) => void;
   onOpenPromptVersion: (promptVersionId: string) => void;
   onDeletePromptVersion: (promptVersionId: string) => void;
 }

@@ -35,7 +35,15 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { TestTube2, Rocket, Clock, Trash2, Check, ChevronsUpDown, Crown } from "lucide-react";
+import {
+  TestTube2,
+  Rocket,
+  Clock,
+  Trash2,
+  Check,
+  ChevronsUpDown,
+  Crown,
+} from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -51,7 +59,11 @@ type Prompt2025Version = components["schemas"]["Prompt2025Version"];
 interface PromptVersionCardProps {
   version: Prompt2025Version;
   isProductionVersion?: boolean;
-  onSetEnvironment: (promptId: string, promptVersionId: string, environment: string) => void;
+  onSetEnvironment: (
+    promptId: string,
+    promptVersionId: string,
+    environment: string,
+  ) => void;
   onOpenPromptVersion: (promptVersionId: string) => void;
   onDeletePromptVersion: (promptVersionId: string) => void;
 }
@@ -64,11 +76,15 @@ const PromptVersionCard = ({
   onDeletePromptVersion,
 }: PromptVersionCardProps) => {
   const [isEnvironmentDialogOpen, setIsEnvironmentDialogOpen] = useState(false);
-  const [selectedEnvironment, setSelectedEnvironment] = useState<string | undefined>(undefined);
+  const [selectedEnvironment, setSelectedEnvironment] = useState<
+    string | undefined
+  >(undefined);
   const [customEnvironment, setCustomEnvironment] = useState("");
-  const [isEnvironmentDropdownOpen, setIsEnvironmentDropdownOpen] = useState(false);
+  const [isEnvironmentDropdownOpen, setIsEnvironmentDropdownOpen] =
+    useState(false);
 
-  const { data: environments = [], isLoading: isLoadingEnvironments } = useGetPromptEnvironments();
+  const { data: environments = [], isLoading: isLoadingEnvironments } =
+    useGetPromptEnvironments();
 
   const versionDisplay =
     version.minor_version === 0
@@ -97,16 +113,20 @@ const PromptVersionCard = ({
               {versionDisplay}
             </span>
             {version.environment && (
-              <span className={cn(
-                "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset",
-                version.environment === 'production' 
-                  ? "bg-green-100 text-green-800 ring-green-600/20"
-                  : ['dev', 'development', 'staging'].includes(version.environment.toLowerCase())
-                  ? "bg-blue-100 text-blue-800 ring-blue-600/20"
-                  : "bg-gray-100 text-gray-800 ring-gray-600/20"
-              )}>
+              <span
+                className={cn(
+                  "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset",
+                  version.environment === "production"
+                    ? "bg-green-100 text-green-800 ring-green-600/20"
+                    : ["dev", "development", "staging"].includes(
+                          version.environment.toLowerCase(),
+                        )
+                      ? "bg-blue-100 text-blue-800 ring-blue-600/20"
+                      : "bg-gray-100 text-gray-800 ring-gray-600/20",
+                )}
+              >
                 {version.environment}
-                {version.environment === 'production' && (
+                {version.environment === "production" && (
                   <Crown className="ml-2 h-3 w-3" />
                 )}
               </span>
@@ -132,8 +152,11 @@ const PromptVersionCard = ({
               <p>Open in Playground</p>
             </TooltipContent>
           </Tooltip>
-          
-          <Dialog open={isEnvironmentDialogOpen} onOpenChange={setIsEnvironmentDialogOpen}>
+
+          <Dialog
+            open={isEnvironmentDialogOpen}
+            onOpenChange={setIsEnvironmentDialogOpen}
+          >
             <Tooltip delayDuration={100}>
               <TooltipTrigger asChild>
                 <DialogTrigger asChild>
@@ -157,13 +180,18 @@ const PromptVersionCard = ({
               <DialogHeader>
                 <DialogTitle>Set Environment for {versionDisplay}</DialogTitle>
                 <DialogDescription>
-                  Select an environment to deploy this prompt version to. This will immediately point all prompt calls in this environment to this version.
+                  Select an environment to deploy this prompt version to. This
+                  will immediately point all prompt calls in this environment to
+                  this version.
                 </DialogDescription>
               </DialogHeader>
               <div className="flex flex-col gap-4 pb-2">
                 <div className="flex flex-col gap-2">
                   <label className="text-sm font-medium">Environment</label>
-                  <Popover open={isEnvironmentDropdownOpen} onOpenChange={setIsEnvironmentDropdownOpen}>
+                  <Popover
+                    open={isEnvironmentDropdownOpen}
+                    onOpenChange={setIsEnvironmentDropdownOpen}
+                  >
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
@@ -172,7 +200,9 @@ const PromptVersionCard = ({
                         className="w-full justify-between"
                         disabled={isLoadingEnvironments}
                       >
-                        {selectedEnvironment || customEnvironment || "Select environment"}
+                        {selectedEnvironment ||
+                          customEnvironment ||
+                          "Select environment"}
                         <ChevronsUpDown size={16} className="opacity-50" />
                       </Button>
                     </PopoverTrigger>
@@ -195,12 +225,14 @@ const PromptVersionCard = ({
                                   size={16}
                                   className={cn(
                                     "mr-2",
-                                    selectedEnvironment === env ? "opacity-100" : "opacity-0"
+                                    selectedEnvironment === env
+                                      ? "opacity-100"
+                                      : "opacity-0",
                                   )}
                                 />
                                 {env}
-                                {env === 'production' && (
-                                  <Crown className="ml-auto text-muted-foreground/50 h-3 w-3"/>
+                                {env === "production" && (
+                                  <Crown className="ml-auto h-3 w-3 text-muted-foreground/50" />
                                 )}
                               </CommandItem>
                             ))}
@@ -224,10 +256,13 @@ const PromptVersionCard = ({
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setIsEnvironmentDialogOpen(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsEnvironmentDialogOpen(false)}
+                >
                   Cancel
                 </Button>
-                <Button 
+                <Button
                   onClick={handleSetEnvironment}
                   disabled={!selectedEnvironment && !customEnvironment}
                 >
