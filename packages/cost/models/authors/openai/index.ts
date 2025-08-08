@@ -7,7 +7,7 @@ import openaiModels, { type OpenAIModelName } from './models';
 import openaiEndpoints from './endpoints';
 import openaiMetadata from './metadata';
 
-export const openai: AuthorData = {
+export const openai: AuthorData<OpenAIModelName> = {
   metadata: {
     ...openaiMetadata,
     modelCount: Object.keys(openaiModels).length,

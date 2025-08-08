@@ -12,6 +12,8 @@ import {
   type ModelEndpoint,
   type AuthorData,
   type AuthorName,
+  type ModelEndpointMap,
+  Provider,
 } from "./types";
 
 // Author imports (TypeScript)
@@ -37,7 +39,6 @@ export {
   type AuthorData,
   type ModelPricing,
   type AuthorName,
-  type Provider,
 } from "./types";
 
 // Author info interface
@@ -72,11 +73,11 @@ export const models: Record<ModelName, Model> = Object.values(
 >;
 
 // Combine all endpoints from author data
-export const endpoints: Record<ModelName, ModelEndpoint[]> = Object.values(
+export const endpoints: Record<ModelName, ModelEndpointMap> = Object.values(
   authorData
 ).reduce((acc, author) => ({ ...acc, ...author.endpoints }), {}) as Record<
   ModelName,
-  ModelEndpoint[]
+  ModelEndpointMap
 >;
 
 // Build authors info map
@@ -107,18 +108,15 @@ export function getModel(modelKey: ModelName): Model {
   return registry.models[modelKey];
 }
 
-export function getEndpoints(modelKey: ModelName | string): ModelEndpoint[] {
-  return modelKey in registry.endpoints
-    ? registry.endpoints[modelKey as ModelName]
-    : [];
+export function getEndpoints(modelKey: ModelName): ModelEndpointMap {
+  return registry.endpoints[modelKey] || {};
 }
 
 export function getEndpoint(
-  modelKey: ModelName | string,
-  provider: ProviderName
+  modelKey: ModelName,
+  provider: Provider
 ): ModelEndpoint | undefined {
-  const endpoints = getEndpoints(modelKey);
-  return endpoints.find((endpoint) => endpoint.provider === provider);
+  return registry.endpoints[modelKey][provider];
 }
 
 export function getAuthor(authorSlug: AuthorName): AuthorInfo {
@@ -128,14 +126,11 @@ export function getAuthor(authorSlug: AuthorName): AuthorInfo {
 export function getAuthorData(authorSlug: AuthorName): AuthorData {
   return registry.authorData[authorSlug];
 }
-
 /**
  * Get provider configuration
  */
-export function getProvider(providerId: string): ProviderConfig | undefined {
-  return providerId in providers
-    ? providers[providerId as ProviderName]
-    : undefined;
+export function getProvider(providerId: Provider): ProviderConfig | undefined {
+  return providers[providerId];
 }
 
 /**
@@ -143,13 +138,14 @@ export function getProvider(providerId: string): ProviderConfig | undefined {
  */
 export function buildModelId(
   endpoint: ModelEndpoint,
+  providerName: Provider,
   options?: {
     region?: string;
     crossRegion?: boolean;
     projectId?: string;
   }
 ): string {
-  const provider = getProvider(endpoint.provider as ProviderName);
+  const provider = getProvider(providerName);
   if (!provider?.buildModelId) {
     return endpoint.providerModelId || "";
   }
@@ -161,6 +157,7 @@ export function buildModelId(
  */
 export function buildEndpointUrl(
   endpoint: ModelEndpoint,
+  providerName: ProviderName,
   options?: {
     region?: string;
     crossRegion?: boolean;
@@ -169,7 +166,7 @@ export function buildEndpointUrl(
     resourceName?: string;
   }
 ): string | null {
-  const provider = getProvider(endpoint.provider as ProviderName);
+  const provider = getProvider(providerName as ProviderName);
   if (!provider) return null;
 
   if (provider.buildUrl) {
@@ -181,11 +178,11 @@ export function buildEndpointUrl(
 }
 
 // Import provider types
-import {
-  type ProviderConfig,
-  type ProviderEndpoint,
-  type ProviderName,
-} from "./providers";
+import { type ProviderConfig, type ProviderName } from "./providers";
 
 // Re-export types
-export type { ProviderConfig, ProviderEndpoint } from "./providers";
+export type {
+  ProviderConfig,
+  ProviderEndpoint,
+  ProviderName,
+} from "./providers";

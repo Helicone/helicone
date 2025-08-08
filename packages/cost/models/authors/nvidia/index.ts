@@ -7,7 +7,7 @@ import nvidiaModels, { type NvidiaModelName } from './models';
 import nvidiaEndpoints from './endpoints';
 import nvidiaMetadata from './metadata';
 
-export const nvidia: AuthorData = {
+export const nvidia: AuthorData<NvidiaModelName> = {
   metadata: {
     ...nvidiaMetadata,
     modelCount: Object.keys(nvidiaModels).length,

@@ -7,7 +7,7 @@ import amazonModels, { type AmazonModelName } from './models';
 import amazonEndpoints from './endpoints';
 import amazonMetadata from './metadata';
 
-export const amazon: AuthorData = {
+export const amazon: AuthorData<AmazonModelName> = {
   metadata: {
     ...amazonMetadata,
     modelCount: Object.keys(amazonModels).length,

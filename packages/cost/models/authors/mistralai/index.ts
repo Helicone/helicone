@@ -7,7 +7,7 @@ import mistralaiModels, { type MistralModelName } from './models';
 import mistralaiEndpoints from './endpoints';
 import mistralaiMetadata from './metadata';
 
-export const mistralai: AuthorData = {
+export const mistralai: AuthorData<MistralModelName> = {
   metadata: {
     ...mistralaiMetadata,
     modelCount: Object.keys(mistralaiModels).length,

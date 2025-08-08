@@ -72,44 +72,50 @@ export type AuthorName =
 const providers = [
   "anthropic",
   "openai",
-  "cohere",
-  "mistral",
-  "deepseek",
-  "perplexity",
+  // "cohere",
+  // "mistral",
+  // "deepseek",
+  // "perplexity",
   // Cloud providers
   "vertex",
-  "vertex-regional",
+  // "vertex-regional",
   "bedrock",
-  "azure-openai",
+  // "azure-openai",
   // Aggregators
-  "openrouter",
-  "together",
-  "groq",
-  "fireworks",
-  "replicate",
-  "deepinfra",
-  "chutes",
-  "nextbit",
-  "google-ai-studio",
-  "google-vertex",
-  "nebius",
-  "parasail",
-  "cloudflare",
-  "novita",
-  "xai",
-  "alibaba",
-  "cerebras",
-  "baseten",
-  "hyperbolic",
-  "lambda",
-  "moonshot-ai",
-  "inferencenet",
+  // "openrouter",
+  // "together",
+  // "groq",
+  // "fireworks",
+  // "replicate",
+  // "deepinfra",
+  // "chutes",
+  // "nextbit",
+  // "google-ai-studio",
+  // "google-vertex",
+  // "nebius",
+  // "parasail",
+  // "cloudflare",
+  // "novita",
+  // "xai",
+  // "alibaba",
+  // "cerebras",
+  // "baseten",
+  // "hyperbolic",
+  // "lambda",
+  // "moonshot-ai",
+  // "inferencenet",
 ] as const;
 
 /**
  * Inference providers (where models are hosted)
  */
-export type Provider = (typeof providers)[number];
+export type ProviderName = (typeof providers)[number];
+
+/**
+ * Endpoint names include provider and optional variant (e.g., "vertex:us", "vertex:global")
+ * Format: "provider" or "provider:variant"
+ */
+export type EndpointName = ProviderName | `${ProviderName}:${string}`;
 
 export interface Model {
   id: ModelName;
@@ -139,32 +145,13 @@ export interface ModelPricing {
   thinking?: number;
 }
 
-/**
- * Status codes for endpoints
- */
-export const EndpointStatus = {
-  ACTIVE: 0,
-  DEPRECATED: 1,
-  BETA: 2,
-  COMING_SOON: 3,
-} as const;
-
-export type EndpointStatusType =
-  (typeof EndpointStatus)[keyof typeof EndpointStatus];
-
 export interface ModelEndpoint {
   /** Optional display name for this endpoint */
   name?: string;
-  /** Provider identifier */
-  provider: Provider;
   /** The model ID as used by this provider (for managed deployments) */
   providerModelId?: string;
   /** Alternative model reference */
   model?: string;
-  /** Tag for categorizing this endpoint (often same as provider) */
-  tag?: string;
-  /** Status code */
-  status?: EndpointStatusType;
   /** Pricing for this model on this provider */
   pricing: ModelPricing;
   /** Maximum context length for this deployment */
@@ -179,6 +166,11 @@ export interface ModelEndpoint {
   baseModelId?: string;
 }
 
+/**
+ * Map of provider to endpoint configuration
+ */
+export type ModelEndpointMap = Record<string, ModelEndpoint>;
+
 export interface AuthorMetadata {
   /** Number of models from this author */
   modelCount: number;
@@ -188,12 +180,34 @@ export interface AuthorMetadata {
   baseUrl?: string;
 }
 
-export interface AuthorData {
+export interface AuthorData<TModelName extends string = string> {
   metadata: AuthorMetadata;
-  models: Partial<Record<ModelName, Model>>;
-  endpoints: Partial<Record<ModelName, ModelEndpoint[]>>;
+  models: Record<TModelName, Model>;
+  endpoints: Record<TModelName, ModelEndpointMap>;
 }
 
+export interface ProviderEndpoint {
+  path: string;
+  method?: "GET" | "POST" | "PUT" | "DELETE";
+  description?: string;
+}
+
+export interface ProviderConfig {
+  baseUrl: string;
+  auth: "api-key" | "oauth" | "aws-signature" | "azure-ad";
+  requiresProjectId?: boolean;
+  requiresRegion?: boolean;
+  requiresDeploymentName?: boolean;
+  regions?: readonly string[];
+  apiVersion?: string;
+  endpoints: Readonly<Record<string, ProviderEndpoint | string>>;
+  buildModelId?: (endpoint: ModelEndpoint, options?: any) => string;
+  buildUrl?: (
+    baseUrl: string,
+    endpoint: ModelEndpoint,
+    options?: any
+  ) => string;
+}
 /**
  * Standard parameter names used across providers
  */

@@ -7,7 +7,7 @@ import moonshotaiModels, { type MoonshotModelName } from './models';
 import moonshotaiEndpoints from './endpoints';
 import moonshotaiMetadata from './metadata';
 
-export const moonshotai: AuthorData = {
+export const moonshotai: AuthorData<MoonshotModelName> = {
   metadata: {
     ...moonshotaiMetadata,
     modelCount: Object.keys(moonshotaiModels).length,
