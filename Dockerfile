@@ -119,14 +119,24 @@ FROM web-stage AS minio-stage
 # Install MinIO server and client (arch-aware)
 ARG TARGETOS
 ARG TARGETARCH
-RUN apt-get update && apt-get install -y ca-certificates && update-ca-certificates
-RUN set -euo pipefail; \
+RUN apt-get update && apt-get install -y curl ca-certificates && update-ca-certificates
+RUN set -eu; \
     ARCH="${TARGETARCH:-amd64}"; \
     ARCH_DIR="linux-${ARCH}"; \
-    curl -fsSL --retry 5 --retry-delay 3 -o /usr/local/bin/minio "https://dl.min.io/server/minio/release/${ARCH_DIR}/minio" \
+    MINIO_URL="https://dl.min.io/server/minio/release/${ARCH_DIR}/minio"; \
+    MC_URL="https://dl.min.io/client/mc/release/${ARCH_DIR}/mc"; \
+    ALT_MINIO_URL="https://dl.minio.org.cn/server/minio/release/${ARCH_DIR}/minio"; \
+    ALT_MC_URL="https://dl.minio.org.cn/client/mc/release/${ARCH_DIR}/mc"; \
+    echo "Downloading MinIO from $MINIO_URL"; \
+    (curl -fSL --retry 5 --retry-delay 3 -o /usr/local/bin/minio "$MINIO_URL" \
+      || curl -fSL --retry 5 --retry-delay 3 -o /usr/local/bin/minio "$ALT_MINIO_URL") \
     && chmod +x /usr/local/bin/minio \
-    && curl -fsSL --retry 5 --retry-delay 3 -o /usr/local/bin/mc "https://dl.min.io/client/mc/release/${ARCH_DIR}/mc" \
-    && chmod +x /usr/local/bin/mc
+    && echo "Downloading mc from $MC_URL" \
+    && (curl -fSL --retry 5 --retry-delay 3 -o /usr/local/bin/mc "$MC_URL" \
+      || curl -fSL --retry 5 --retry-delay 3 -o /usr/local/bin/mc "$ALT_MC_URL") \
+    && chmod +x /usr/local/bin/mc \
+    && /usr/local/bin/minio --version >/dev/null 2>&1 \
+    && /usr/local/bin/mc --version >/dev/null 2>&1
 
 # Create MinIO data directory
 RUN mkdir -p /data
