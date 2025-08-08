@@ -6,8 +6,8 @@ const baseUrl = `${process.env.NEXT_PUBLIC_CLOUD_GATEWAY_BASE_URL}/v1`;
 
 const IntegrationGuide = () => {
   return (
-    <div 
-      className="w-full border border-border bg-background rounded-lg"
+    <div
+      className="w-full rounded-lg border border-border bg-background"
       onClick={(e) => e.stopPropagation()}
     >
       <div className="p-4">
@@ -64,4 +64,4 @@ const IntegrationGuide = () => {
   );
 };
 
-export default IntegrationGuide; 
+export default IntegrationGuide;
