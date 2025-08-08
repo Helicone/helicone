@@ -26,7 +26,7 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
   return (
     <div className="flex w-full max-w-6xl flex-col border border-border bg-background">
       {/* Coming Soon Banner */}
-      <div className="border-b border-yellow-200 bg-yellow-50 p-3 text-yellow-800 dark:border-yellow-800 dark:bg-yellow-950 dark:text-yellow-200">
+      <div className="border-b border-amber-200 bg-amber-50 p-3 text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
         <div className="text-center text-sm font-medium">
           🚧 Coming Soon - Credits system is currently under development
         </div>

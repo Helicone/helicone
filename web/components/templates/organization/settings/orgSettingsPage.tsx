@@ -80,7 +80,6 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
             value={debouncedOrgName}
             onChange={(e) => setDebouncedOrgName(e.target.value)}
             className="max-w-[450px]"
-            size={1}
           />
         </div>
 
@@ -141,9 +140,9 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
                     className={clsx(
                       "h-8 w-8 cursor-pointer rounded-full",
                       "ring-offset-2 transition-all",
-                      "hover:ring-2 hover:ring-sky-300 hover:ring-offset-2 dark:hover:ring-sky-700",
+                      "hover:ring-2 hover:ring-ring hover:ring-offset-2",
                       org.color === color.name &&
-                        "ring-2 ring-sky-300 ring-offset-2 dark:ring-sky-700",
+                        "ring-2 ring-ring ring-offset-2",
                       color.bgColor,
                       "border border-black/10 dark:border-white/10",
                     )}
@@ -184,8 +183,8 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
                       "flex items-center justify-center",
                       "ring-1 transition-all",
                       org.icon === icon.name
-                        ? "ring-2 ring-sky-300 ring-offset-1 dark:ring-sky-700"
-                        : "ring-gray-200 dark:ring-gray-800",
+                        ? "ring-2 ring-ring ring-offset-1"
+                        : "ring-border",
                       "bg-white dark:bg-black",
                     )}
                   >

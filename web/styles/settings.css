@@ -10,21 +10,6 @@
   @apply p-4;
 }
 
-.settings-empty-state {
-  @apply border-2 border-dashed border-border bg-muted p-8 text-center;
-}
-
-.settings-empty-state-icon {
-  @apply mx-auto mb-2 h-6 w-6 text-muted-foreground;
-}
-
-.settings-empty-state-text {
-  @apply text-xs font-medium text-muted-foreground;
-}
-
-.settings-loading-skeleton {
-  @apply animate-pulse bg-muted h-4 rounded;
-}
 
 .settings-success-banner {
   @apply border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-200;
