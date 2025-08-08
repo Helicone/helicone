@@ -25,7 +25,7 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
   const filteredProperties = useMemo(() => {
     if (!searchQuery) return properties;
     return properties.filter((property) =>
-      property.toLowerCase().includes(searchQuery.toLowerCase())
+      property.toLowerCase().includes(searchQuery.toLowerCase()),
     );
   }, [properties, searchQuery]);
 
@@ -126,7 +126,7 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
       )}
 
       <div className="flex flex-1 flex-col overflow-hidden">
-        <div className="flex flex-1 flex-col border border-border bg-background lg:flex-row lg:h-full">
+        <div className="flex flex-1 flex-col border border-border bg-background lg:h-full lg:flex-row">
           <div className="flex w-full flex-col border-b border-border bg-background lg:w-72 lg:border-b-0 lg:border-r">
             <div className="border-b border-border p-4">
               <div className="relative">
@@ -142,7 +142,8 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
             <div className="flex-1 overflow-y-auto">
               {filteredProperties.map((property, i) => {
                 const originalIndex = properties.indexOf(property);
-                const requiresPremium = !hasAccess && originalIndex >= freeLimit;
+                const requiresPremium =
+                  !hasAccess && originalIndex >= freeLimit;
                 const isSelected = selectedProperty === property;
 
                 return (

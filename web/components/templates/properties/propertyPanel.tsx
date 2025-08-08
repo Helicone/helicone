@@ -211,9 +211,8 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                       <div className="mt-0.5 text-lg font-semibold">
                         {
                           +(
-                            keyMetrics.totalRequests?.data?.data?.toFixed(
-                              2,
-                            ) ?? 0
+                            keyMetrics.totalRequests?.data?.data?.toFixed(2) ??
+                            0
                           )
                         }
                       </div>
@@ -226,7 +225,9 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                     <Clock className="h-3 w-3 text-purple-600 dark:text-purple-400" />
                   </div>
                   <div className="min-w-0">
-                    <XSmall className="text-muted-foreground">Avg Latency</XSmall>
+                    <XSmall className="text-muted-foreground">
+                      Avg Latency
+                    </XSmall>
                     {isAnyLoading ? (
                       <Skeleton className="mt-1 h-5 w-16 bg-muted" />
                     ) : (
@@ -245,9 +246,19 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                 <div className="w-full">
                   <div className="space-y-3">
                     <div className="flex items-center gap-4">
-                      {["Value", "Requests", "Cost", "Avg Prompt Tokens", "Avg Comp Tokens", "Avg Latency", "Avg Cost"].map((header) => (
+                      {[
+                        "Value",
+                        "Requests",
+                        "Cost",
+                        "Avg Prompt Tokens",
+                        "Avg Comp Tokens",
+                        "Avg Latency",
+                        "Avg Cost",
+                      ].map((header) => (
                         <div key={header} className="flex-1">
-                          <XSmall className="mb-2 font-medium text-muted-foreground">{header}</XSmall>
+                          <XSmall className="mb-2 font-medium text-muted-foreground">
+                            {header}
+                          </XSmall>
                           <Skeleton className="h-5 w-full bg-muted" />
                         </div>
                       ))}
@@ -266,120 +277,120 @@ const PropertyPanel = (props: PropertyPanelProps) => {
               ) : (
                 <div className="overflow-x-auto">
                   <SimpleTable
-                      className="w-full"
-                      data={cleanedValueData}
-                      columns={[
-                        {
-                          key: "property_value" as keyof (typeof cleanedValueData)[0],
-                          header: "Value",
-                          sortable: true,
-                          render: (propertyValue) => (
-                            <button
-                              className="flex items-center gap-1 text-left font-medium text-foreground hover:text-primary"
-                              title={propertyValue.property_value}
-                              onClick={() => {
-                                const value = propertyValue.property_value;
-                                const filterMapIndex = filterMap.findIndex(
-                                  (f) => f.label === property,
-                                );
-                                const currentAdvancedFilters =
-                                  encodeURIComponent(
-                                    JSON.stringify({
-                                      filter: [
-                                        {
-                                          filterMapIdx: filterMapIndex,
-                                          operatorIdx: 0,
-                                          value,
-                                        },
-                                      ]
-                                        .map(encodeFilter)
-                                        .join("|"),
-                                    }),
-                                  );
+                    className="w-full"
+                    data={cleanedValueData}
+                    columns={[
+                      {
+                        key: "property_value" as keyof (typeof cleanedValueData)[0],
+                        header: "Value",
+                        sortable: true,
+                        render: (propertyValue) => (
+                          <button
+                            className="flex items-center gap-1 text-left font-medium text-foreground hover:text-primary"
+                            title={propertyValue.property_value}
+                            onClick={() => {
+                              const value = propertyValue.property_value;
+                              const filterMapIndex = filterMap.findIndex(
+                                (f) => f.label === property,
+                              );
+                              const currentAdvancedFilters = encodeURIComponent(
+                                JSON.stringify({
+                                  filter: [
+                                    {
+                                      filterMapIdx: filterMapIndex,
+                                      operatorIdx: 0,
+                                      value,
+                                    },
+                                  ]
+                                    .map(encodeFilter)
+                                    .join("|"),
+                                }),
+                              );
 
-                                router.push({
-                                  pathname: "/requests",
-                                  query: {
-                                    t: "3m",
-                                    filters: currentAdvancedFilters,
-                                  },
-                                });
-                              }}
-                            >
-                              <span className="truncate">{propertyValue.property_value}</span>
-                              <ExternalLink className="h-3 w-3 flex-shrink-0 text-muted-foreground" />
-                            </button>
+                              router.push({
+                                pathname: "/requests",
+                                query: {
+                                  t: "3m",
+                                  filters: currentAdvancedFilters,
+                                },
+                              });
+                            }}
+                          >
+                            <span className="truncate">
+                              {propertyValue.property_value}
+                            </span>
+                            <ExternalLink className="h-3 w-3 flex-shrink-0 text-muted-foreground" />
+                          </button>
+                        ),
+                      },
+                      {
+                        key: "total_requests" as keyof (typeof cleanedValueData)[0],
+                        header: "Requests",
+                        sortable: true,
+                        render: (propertyValue) => propertyValue.total_requests,
+                      },
+                      {
+                        key: "total_cost" as keyof (typeof cleanedValueData)[0],
+                        header: "Cost",
+                        sortable: true,
+                        render: (propertyValue) =>
+                          `$${formatNumber(propertyValue.total_cost, 6)}`,
+                      },
+                      {
+                        key: "avg_prompt_tokens_per_request" as keyof (typeof cleanedValueData)[0],
+                        header: "Avg Prompt Tokens",
+                        sortable: true,
+                        render: (propertyValue) =>
+                          formatNumber(
+                            propertyValue.avg_prompt_tokens_per_request,
+                            6,
                           ),
-                        },
-                        {
-                          key: "total_requests" as keyof (typeof cleanedValueData)[0],
-                          header: "Requests",
-                          sortable: true,
-                          render: (propertyValue) =>
-                            propertyValue.total_requests,
-                        },
-                        {
-                          key: "total_cost" as keyof (typeof cleanedValueData)[0],
-                          header: "Cost",
-                          sortable: true,
-                          render: (propertyValue) =>
-                            `$${formatNumber(propertyValue.total_cost, 6)}`,
-                        },
-                        {
-                          key: "avg_prompt_tokens_per_request" as keyof (typeof cleanedValueData)[0],
-                          header: "Avg Prompt Tokens",
-                          sortable: true,
-                          render: (propertyValue) =>
-                            formatNumber(
-                              propertyValue.avg_prompt_tokens_per_request,
-                              6,
-                            ),
-                        },
-                        {
-                          key: "avg_completion_tokens_per_request" as keyof (typeof cleanedValueData)[0],
-                          header: "Avg Comp Tokens",
-                          sortable: true,
-                          render: (propertyValue) =>
-                            formatNumber(
-                              propertyValue.avg_completion_tokens_per_request,
-                              6,
-                            ),
-                        },
-                        {
-                          key: "avg_latency_per_request" as keyof (typeof cleanedValueData)[0],
-                          header: "Avg Latency",
-                          sortable: true,
-                          render: (propertyValue) =>
-                            formatNumber(
-                              propertyValue.avg_latency_per_request,
-                              6,
-                            ),
-                        },
-                        {
-                          key: "average_cost_per_request" as keyof (typeof cleanedValueData)[0],
-                          header: "Avg Cost",
-                          sortable: true,
-                          render: (propertyValue) =>
-                            `$${formatNumber(
-                              propertyValue.average_cost_per_request,
-                              6,
-                            )}`,
-                        },
-                      ]}
-                      emptyMessage="No property data available"
-                      onSort={(
-                        key: keyof (typeof cleanedValueData)[0] | undefined,
-                        direction: "asc" | "desc",
-                      ) => {
-                        setSortConfig({
-                          key: key as string,
-                          direction,
-                        });
-                      }}
-                      currentSortKey={sortConfig.key}
-                      currentSortDirection={sortConfig.direction}
-                    />
-                  </div>
+                      },
+                      {
+                        key: "avg_completion_tokens_per_request" as keyof (typeof cleanedValueData)[0],
+                        header: "Avg Comp Tokens",
+                        sortable: true,
+                        render: (propertyValue) =>
+                          formatNumber(
+                            propertyValue.avg_completion_tokens_per_request,
+                            6,
+                          ),
+                      },
+                      {
+                        key: "avg_latency_per_request" as keyof (typeof cleanedValueData)[0],
+                        header: "Avg Latency",
+                        sortable: true,
+                        render: (propertyValue) =>
+                          formatNumber(
+                            propertyValue.avg_latency_per_request,
+                            6,
+                          ),
+                      },
+                      {
+                        key: "average_cost_per_request" as keyof (typeof cleanedValueData)[0],
+                        header: "Avg Cost",
+                        sortable: true,
+                        render: (propertyValue) =>
+                          `$${formatNumber(
+                            propertyValue.average_cost_per_request,
+                            6,
+                          )}`,
+                      },
+                    ]}
+                    emptyMessage="No property data available"
+                    onSort={(
+                      key: keyof (typeof cleanedValueData)[0] | undefined,
+                      direction: "asc" | "desc",
+                    ) => {
+                      setSortConfig({
+                        key: key as string,
+                        direction,
+                      });
+                    }}
+                    currentSortKey={sortConfig.key}
+                    currentSortDirection={sortConfig.direction}
+                  />
+                </div>
               )}
 
               {propertyValueData.length > 10 && (
