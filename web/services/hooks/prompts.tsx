@@ -51,6 +51,20 @@ export const usePushPromptVersion = () => {
   });
 };
 
+export const useGetPromptEnvironments = () => {
+  return useQuery<string[]>({
+    queryKey: ["promptEnvironments"],
+    queryFn: async () => {
+      const result = await $JAWN_API.GET("/v1/prompt-2025/environments", {});
+      if (result.error || !result.data?.data) {
+        console.error("Error fetching prompt environments:", result.error);
+        return [];
+      }
+      return result.data.data;
+    },
+  });
+};
+
 export const useGetPromptTags = () => {
   return useQuery<string[]>({
     queryKey: ["promptTags"],

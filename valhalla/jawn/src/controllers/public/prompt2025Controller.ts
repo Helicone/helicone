@@ -135,6 +135,20 @@ export class Prompt2025Controller extends Controller {
     return result;
   }
 
+  @Get("environments")
+  public async getPrompt2025Environments(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<string[], string>> {
+    const promptManager = new Prompt2025Manager(request.authParams);
+    const result = await promptManager.getPromptEnvironments();
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
   @Post("")
   public async createPrompt2025(
     @Body()

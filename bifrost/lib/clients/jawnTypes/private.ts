@@ -177,6 +177,9 @@ export interface paths {
   "/v1/prompt-2025/tags": {
     get: operations["GetPrompt2025Tags"];
   };
+  "/v1/prompt-2025/environments": {
+    get: operations["GetPrompt2025Environments"];
+  };
   "/v1/prompt-2025": {
     post: operations["CreatePrompt2025"];
   };
@@ -16460,6 +16463,16 @@ export interface operations {
     };
   };
   GetPrompt2025Tags: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string-Array.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025Environments: {
     responses: {
       /** @description Ok */
       200: {

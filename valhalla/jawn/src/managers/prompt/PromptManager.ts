@@ -69,6 +69,24 @@ export class Prompt2025Manager extends BaseManager {
     return ok(Number(result.data?.[0]?.count ?? 0));
   }
 
+  async getPromptEnvironments(): Promise<Result<string[], string>> {
+    const result = await dbExecute<{ environment: string }>(
+      `SELECT DISTINCT environment 
+       FROM prompts_2025_versions 
+       WHERE organization = $1 AND soft_delete = false AND environment IS NOT NULL
+       ORDER BY environment`,
+      [this.authParams.organizationId]
+    );
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    const environments = result.data?.map(row => row.environment) || [];
+    return ok(environments);
+  }
+
+
   async getPromptTags(): Promise<Result<string[], string>> {
     const result = await dbExecute<{ tags: string }>(
       `SELECT DISTINCT UNNEST(tags) as tags FROM prompts_2025 WHERE organization = $1 AND soft_delete is false`,

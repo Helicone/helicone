@@ -12027,6 +12027,32 @@
 				"parameters": []
 			}
 		},
+		"/v1/prompt-2025/environments": {
+			"get": {
+				"operationId": "GetPrompt2025Environments",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_string-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt2025"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
 		"/v1/prompt-2025": {
 			"post": {
 				"operationId": "CreatePrompt2025",
