@@ -40,4 +40,4 @@ jobs:
       - name: Push images to Docker Hub
         run: |
           cd docker
-          ./push_docker.sh --mode dockerhub
+          ./push_docker.sh
