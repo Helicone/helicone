@@ -4,7 +4,7 @@ import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Small, XSmall } from "@/components/ui/typography";
+import { XSmall } from "@/components/ui/typography";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { LockIcon, Search, Tag } from "lucide-react";
 import { useRouter } from "next/router";

@@ -179,8 +179,8 @@ const PropertyPanel = (props: PropertyPanelProps) => {
           </div>
         ) : (
           <div className="flex w-full flex-col pt-6">
-            <TabsContent value="overview" className="flex flex-col gap-6 px-6 pt-0">
-              <div className="flex gap-3">
+            <TabsContent value="overview" className="flex flex-col pt-0">
+              <div className="flex">
                 <div className="flex min-w-[140px] flex-1 items-center gap-2 border border-border bg-background p-3">
                   <div className="rounded bg-emerald-50 p-1 dark:bg-emerald-950">
                     <DollarSign className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
@@ -241,9 +241,8 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                   </div>
                 </div>
               </div>
-
               {isAnyLoading ? (
-                <div className="border border-border bg-background p-4">
+                <div className="w-full">
                   <div className="space-y-3">
                     <div className="flex items-center gap-4">
                       {["Value", "Requests", "Cost", "Avg Prompt Tokens", "Avg Comp Tokens", "Avg Latency", "Avg Cost"].map((header) => (
@@ -265,10 +264,9 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                   </div>
                 </div>
               ) : (
-                <div className="border border-border bg-background">
-                  <div className="overflow-x-auto">
-                    <SimpleTable
-                      className="w-full min-w-[800px]"
+                <div className="overflow-x-auto">
+                  <SimpleTable
+                      className="w-full"
                       data={cleanedValueData}
                       columns={[
                         {
@@ -382,7 +380,6 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                       currentSortDirection={sortConfig.direction}
                     />
                   </div>
-                </div>
               )}
 
               {propertyValueData.length > 10 && (
@@ -398,7 +395,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
               )}
             </TabsContent>
 
-            <TabsContent value="metrics" className="flex flex-col gap-6 px-6 pt-0">
+            <TabsContent value="metrics" className="flex flex-col gap-6 pt-0">
               <PropertyTopCosts property={property} timeFilter={timeFilter} />
             </TabsContent>
           </div>
