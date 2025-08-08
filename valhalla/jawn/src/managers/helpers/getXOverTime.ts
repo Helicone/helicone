@@ -27,7 +27,8 @@ export interface DataOverTimeRequest {
 }
 
 function convertDbIncrement(dbIncrement: TimeIncrement): string {
-  return dbIncrement === "min" ? "MINUTE" : dbIncrement;
+  // Use lowercase to align with ClickHouse date_trunc argument values
+  return dbIncrement === "min" ? "minute" : dbIncrement;
 }
 
 function buildFill(
@@ -52,9 +53,9 @@ function buildFill(
     clickhouseParam(i + 1, endDate)
   );
 
-  const fill = `WITH FILL FROM ${startDateVal} to ${endDateVal} + 1 STEP INTERVAL 1 ${convertDbIncrement(
+  const fill = `WITH FILL FROM ${startDateVal} to ${endDateVal} + INTERVAL 1 ${convertDbIncrement(
     dbIncrement
-  )}`;
+  )} STEP INTERVAL 1 ${convertDbIncrement(dbIncrement)}`;
   return { fill, argsAcc: [...argsAcc, startDate, endDate] };
 }
 
@@ -63,11 +64,9 @@ function buildDateTrunc(
   timeZoneDifference: number,
   column: string
 ): string {
-  return `DATE_TRUNC('${convertDbIncrement(dbIncrement)}', ${column} ${
-    timeZoneDifference > 0
-      ? `- INTERVAL '${Math.abs(timeZoneDifference)} minute'`
-      : `+ INTERVAL '${timeZoneDifference} minute'`
-  }, 'UTC')`;
+  const minutes = Math.abs(timeZoneDifference);
+  const operator = timeZoneDifference >= 0 ? "-" : "+";
+  return `toDateTime64(DATE_TRUNC('${convertDbIncrement(dbIncrement)}', ${column} ${operator} INTERVAL ${minutes} minute, 'UTC'), 0, 'UTC')`;
 }
 
 export async function getXOverTime<T>(
