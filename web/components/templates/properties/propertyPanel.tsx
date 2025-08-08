@@ -181,7 +181,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
           <div className="flex w-full flex-col pt-6">
             <TabsContent value="overview" className="flex flex-col pt-0">
               <div className="flex">
-                <div className="flex min-w-[140px] flex-1 items-center gap-2 border border-border bg-background p-3">
+                <div className="flex min-w-[140px] flex-1 items-center gap-2 border-y border-r border-border bg-background p-3">
                   <div className="rounded bg-emerald-50 p-1 dark:bg-emerald-950">
                     <DollarSign className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
                   </div>
@@ -199,7 +199,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                   </div>
                 </div>
 
-                <div className="flex min-w-[140px] flex-1 items-center gap-2 border border-border bg-background p-3">
+                <div className="flex min-w-[140px] flex-1 items-center gap-2 border-y border-r border-border bg-background p-3">
                   <div className="rounded bg-blue-50 p-1 dark:bg-blue-950">
                     <Table2 className="h-3 w-3 text-blue-600 dark:text-blue-400" />
                   </div>
@@ -221,7 +221,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                   </div>
                 </div>
 
-                <div className="flex min-w-[140px] flex-1 items-center gap-2 border border-border bg-background p-3">
+                <div className="flex min-w-[140px] flex-1 items-center gap-2 border-y border-border bg-background p-3">
                   <div className="rounded bg-purple-50 p-1 dark:bg-purple-950">
                     <Clock className="h-3 w-3 text-purple-600 dark:text-purple-400" />
                   </div>
