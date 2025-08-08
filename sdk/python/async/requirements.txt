@@ -1113,7 +1113,7 @@ regex==2024.9.11 ; python_full_version >= "3.11.0" and python_version < "4" \
 requests==2.32.3 ; python_full_version >= "3.11.0" and python_version < "4" \
     --hash=sha256:55365417734eb18255590a9ff9eb97e9e1da868d4ccd6402399eaf68af20a760 \
     --hash=sha256:70761cfe03c773ceb22aa2f671b4757976145175cdfca038c02654d061d6dcc6
-setuptools==75.2.0 ; python_full_version >= "3.11.0" and python_version < "4" \
+setuptools==78.1.1  # Security: CVE-2024-6345, CVE-2025-47273 ; python_full_version >= "3.11.0" and python_version < "4" \
     --hash=sha256:753bb6ebf1f465a1912e19ed1d41f403a79173a9acf66a42e7e6aec45c3c16ec \
     --hash=sha256:a7fcb66f68b4d9e8e66b42f9876150a3371558f98fa32222ffaa5bced76406f8
 six==1.16.0 ; python_full_version >= "3.11.0" and python_version < "4" \
