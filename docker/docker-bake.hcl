@@ -9,7 +9,7 @@ target "web" {
 
 target "jawn" {
   context    = ".."
-  dockerfile = "valhalla/dockerfile"
+  dockerfile = "docker/dockerfiles/dockerfile_jawn"
 }
 
 target "migrations" {

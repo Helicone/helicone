@@ -1,9 +1,9 @@
-# This docker file must be built using the context of it's parent directory
-# docker build -t valhalla .. -f dockerfile
+# This Dockerfile is built using the repository root as the build context
+# Example:
+# docker build -t helicone/jawn .. -f docker/dockerfiles/dockerfile_jawn
 
 # Use an official Node.js runtime as the base image
 FROM --platform=linux/amd64 node:20-bookworm-slim
-
 
 WORKDIR /usr/src/app/valhalla/prompt_security
 
@@ -15,8 +15,15 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN set -eux; \
     echo "deb https://deb.debian.org/debian testing main" > /etc/apt/sources.list.d/testing.list; \
     apt-get update; \
-    apt-get install -y --no-install-recommends -t testing libaom3=3.12.1-1; \
-    rm -f /etc/apt/sources.list.d/testing.list; \
+    if apt-get install -y --no-install-recommends -t testing libaom3; then \
+      echo "Installed libaom3 from testing"; \
+    else \
+      echo "Falling back to stable libaom3"; \
+      rm -f /etc/apt/sources.list.d/testing.list; \
+      apt-get update; \
+      apt-get install -y --no-install-recommends libaom3 || true; \
+    fi; \
+    rm -f /etc/apt/sources.list.d/testing.list || true; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
       python3-venv python3 supervisor ffmpeg curl; \
@@ -64,6 +71,7 @@ COPY ./valhalla/prompt_security/main.py /usr/src/app/valhalla/prompt_security/ma
 COPY ./valhalla/prompt_security/run_service.sh /usr/src/app/valhalla/prompt_security/run_service.sh
 RUN chmod +x /usr/src/app/valhalla/prompt_security/run_service.sh
 
+# TODO Ensure that these environment variables are maintained properly in the dockerfile
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONFAULTHANDLER=1
 
@@ -77,3 +85,4 @@ ENV ENABLE_PROMPT_SECURITY="true"
 COPY ./valhalla/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
+

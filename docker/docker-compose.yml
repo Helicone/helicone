@@ -128,7 +128,7 @@ services:
     container_name: helicone-jawn
     build:
       context: ../
-      dockerfile: valhalla/dockerfile
+      dockerfile: docker/dockerfiles/dockerfile_jawn
     restart: unless-stopped
     ports:
       - ${JAWN_PORT:-8585}:${JAWN_PORT:-8585}
