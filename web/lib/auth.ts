@@ -31,6 +31,20 @@ const transporter = nodemailer.createTransport({
 });
 
 export const auth = betterAuth({
+  // Ensure Better Auth knows the public origin to build correct redirects/cookies
+  baseURL: process.env.NEXT_PUBLIC_APP_URL,
+  // Limit cross-origin calls to trusted origins (comma-separated env + baseURL)
+  trustedOrigins: Array.from(
+    new Set(
+      [
+        ...(process.env.BETTER_AUTH_TRUSTED_ORIGINS
+          ? process.env.BETTER_AUTH_TRUSTED_ORIGINS.split(",",
+            ).map((o) => o.trim()).filter(Boolean)
+          : []),
+        process.env.NEXT_PUBLIC_APP_URL ?? "",
+      ].filter(Boolean),
+    ),
+  ),
   database: new Pool({
     connectionString: process.env.DATABASE_URL,
   }),
@@ -41,7 +55,10 @@ export const auth = betterAuth({
   emailVerification: {
     sendOnSignUp: true,
     // Define the function to send the verification email
-    sendVerificationEmail: async ({ user, url }, request) => {
+    sendVerificationEmail: async (
+      { user, url }: { user: any; url: string },
+      request: unknown,
+    ) => {
       console.log("Sending verification email to", user.email);
       // Define your email content using the provided HTML template
       const emailHtml = `
@@ -99,7 +116,7 @@ export const auth = betterAuth({
     },
   },
   plugins: [
-    customSession(async ({ user, session }) => {
+    customSession(async ({ user, session }: any) => {
       const dbUser = await getUser(user.id);
       if (dbUser.error || !dbUser.data) {
         console.warn("could not fetch authUserId from db");
