@@ -45,6 +45,7 @@ import { useVariableColorMapStore } from "@/store/features/playground/variableCo
 import { ResponseFormat, ResponseFormatType, VariableInput } from "./types";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import Link from "next/link";
+import EnvironmentPill from "@/components/templates/prompts2025/EnvironmentPill";
 
 export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
   _type: "openai-chat",
@@ -904,6 +905,11 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                       ? `v${promptVersionData.promptVersion.major_version}`
                       : `v${promptVersionData.promptVersion.major_version}.${promptVersionData.promptVersion.minor_version}`}
                   </span>
+                  {promptVersionData.promptVersion.environment && (
+                    <EnvironmentPill
+                      environment={promptVersionData.promptVersion.environment}
+                    />
+                  )}
                 </div>
               </>
             )}

@@ -53,6 +53,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useGetPromptEnvironments } from "@/services/hooks/prompts";
 import { Input } from "@/components/ui/input";
+import EnvironmentPill from "./EnvironmentPill";
 
 type Prompt2025Version = components["schemas"]["Prompt2025Version"];
 
@@ -113,23 +114,7 @@ const PromptVersionCard = ({
               {versionDisplay}
             </span>
             {version.environment && (
-              <span
-                className={cn(
-                  "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset",
-                  version.environment === "production"
-                    ? "bg-green-100 text-green-800 ring-green-600/20"
-                    : ["dev", "development", "staging"].includes(
-                          version.environment.toLowerCase(),
-                        )
-                      ? "bg-blue-100 text-blue-800 ring-blue-600/20"
-                      : "bg-gray-100 text-gray-800 ring-gray-600/20",
-                )}
-              >
-                {version.environment}
-                {version.environment === "production" && (
-                  <Crown className="ml-2 h-3 w-3" />
-                )}
-              </span>
+              <EnvironmentPill environment={version.environment} />
             )}
           </div>
         </div>
