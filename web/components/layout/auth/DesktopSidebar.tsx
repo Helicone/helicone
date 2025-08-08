@@ -42,7 +42,7 @@ const DesktopSidebar = ({
 }: SidebarProps) => {
   const orgContext = useOrg();
   const router = useRouter();
-  const { hasKeys, hasProviderKeys } = useOrgOnboarding(orgContext?.currentOrg?.id ?? "");
+  const { hasKeys, hasProviderKeys, updateOnboardingStatus } = useOrgOnboarding(orgContext?.currentOrg?.id ?? "");
   const onboardingStatus = orgContext?.currentOrg?.onboarding_status as unknown as OnboardingState;
 
   const [isCollapsed, setIsCollapsed] = useLocalStorage(
@@ -281,6 +281,23 @@ const DesktopSidebar = ({
                         Integrate
                       </div>
                     </div>
+                    
+                    {hasProviderKeys && hasKeys && orgContext?.currentOrg?.has_integrated && (
+                      <div className="mt-2">
+                        <Button
+                          variant="outline"
+                          size="xs"
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            await updateOnboardingStatus({ hasCompletedQuickstart: true });
+                            router.push("/dashboard");
+                          }}
+                          className="w-full"
+                        >
+                          Finished!
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 )}
                 
