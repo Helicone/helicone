@@ -1,14 +1,6 @@
 import { Small } from "@/components/ui/typography";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ChevronDown, Search, HelpCircle } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { HelpCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -17,11 +9,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { SortOption } from "@/types/provider";
-import { providers, recentlyUsedProviderIds } from "@/data/providers";
-import { ProviderCard } from "@/components/providers/ProviderCard";
-import { filterProviders, sortProviders } from "@/utils/providerUtils";
 
 import { getRouterCode } from "./routerUseDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -30,17 +17,6 @@ import { DiffHighlight } from "@/components/templates/welcome/diffHighlight";
 const baseUrl = `${process.env.NEXT_PUBLIC_CLOUD_GATEWAY_BASE_URL}/v1`;
 
 const DefaultAIGateway = ({ setTabValue }: { setTabValue: () => void }) => {
-  // Provider management state
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortOption, setSortOption] = useState<SortOption>("relevance");
-
-  // Filter and sort the providers based on user selections
-  const filteredProviders = sortProviders(
-    filterProviders(providers, searchQuery),
-    sortOption,
-    recentlyUsedProviderIds,
-  );
-
   return (
     <div className="flex h-full flex-col">
       {/* Beta Banner */}
@@ -165,75 +141,6 @@ const DefaultAIGateway = ({ setTabValue }: { setTabValue: () => void }) => {
             </TabsContent>
           </Tabs>
         </div>
-      </div>
-
-      {/* Provider Management Section */}
-      <div className="flex min-h-0 flex-1 flex-col border-t border-border bg-background">
-        <div className="flex flex-shrink-0 items-center justify-between border-b border-border p-4">
-          <Small className="font-bold text-gray-500 dark:text-slate-300">
-            Provider Configuration
-          </Small>
-          <Small className="text-muted-foreground">
-            Configure your API keys for different LLM providers
-          </Small>
-        </div>
-
-        <div className="flex flex-shrink-0 flex-col gap-3 border-b border-border p-4 sm:flex-row">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search providers..."
-              value={searchQuery}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setSearchQuery(e.target.value)
-              }
-              className="pl-10"
-            />
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                className="flex min-w-[150px] items-center justify-between gap-1"
-              >
-                <span>
-                  Sort:{" "}
-                  {sortOption === "relevance"
-                    ? "Relevance"
-                    : sortOption === "alphabetical"
-                      ? "A-Z"
-                      : "Recently Used"}
-                </span>
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setSortOption("relevance")}>
-                Relevance
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortOption("alphabetical")}>
-                Alphabetical (A-Z)
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortOption("recently-used")}>
-                Recently Used
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
-        <ScrollArea className="flex-1 p-4">
-          <div className="grid grid-cols-1 gap-2">
-            {filteredProviders.length === 0 ? (
-              <div className="col-span-full py-6 text-center text-muted-foreground">
-                No providers found matching your search.
-              </div>
-            ) : (
-              filteredProviders.map((provider) => (
-                <ProviderCard key={provider.id} provider={provider} />
-              ))
-            )}
-          </div>
-        </ScrollArea>
       </div>
     </div>
   );
