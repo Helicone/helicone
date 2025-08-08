@@ -44,7 +44,7 @@ const HeliconeKeyTable = ({
   }
 
   return (
-    <div className="border-t border-border settings-table">
+    <div className="settings-table border-t border-border">
       <ThemedTable
         columns={[
           { name: "Name", key: "key_name", hidden: false },

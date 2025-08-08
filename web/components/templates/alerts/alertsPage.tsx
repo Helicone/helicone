@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import "@/styles/settings-tables.css";
-import { SettingsContainer, SettingsSection } from "@/components/ui/settings-container";
+import { SettingsContainer } from "@/components/ui/settings-container";
 import "@/styles/settings.css";
 
 const AlertsPage = () => {
@@ -127,7 +127,7 @@ const AlertsPage = () => {
       </div>
 
       <div className="border-b border-border">
-        <div className="border-t border-border settings-table">
+        <div className="settings-table border-t border-border">
           <ThemedTable
             columns={[
               { name: "Name", key: "key_name", hidden: false },
@@ -246,7 +246,7 @@ const AlertsPage = () => {
             </p>
           </div>
         ) : (
-          <div className="border-t border-border settings-table">
+          <div className="settings-table border-t border-border">
             <ThemedTable
               columns={[
                 {

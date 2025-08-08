@@ -7,7 +7,10 @@ import { useGetOrgMembers } from "../../../../services/hooks/organizations";
 import { useOrg } from "../../../layout/org/organizationContext";
 import AddMemberModal from "../addMemberModal";
 import OrgMemberItem from "../orgMemberItem";
-import { SettingsSectionHeader, SettingsSectionContent } from "@/components/ui/settings-container";
+import {
+  SettingsSectionHeader,
+  SettingsSectionContent,
+} from "@/components/ui/settings-container";
 import "@/styles/settings.css";
 interface OrgMembersPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];

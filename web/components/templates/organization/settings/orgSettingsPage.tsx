@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Small, XSmall } from "@/components/ui/typography";
+import { XSmall } from "@/components/ui/typography";
 import { useUpdateOrgMutation } from "@/services/hooks/organizations";
 import { useEffect, useState } from "react";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
@@ -14,7 +14,10 @@ import { CopyIcon } from "lucide-react";
 import useNotification from "@/components/shared/notification/useNotification";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 import { useOrg } from "../../../layout/org/organizationContext";
-import { SettingsContainer, SettingsSection } from "@/components/ui/settings-container";
+import {
+  SettingsContainer,
+  SettingsSection,
+} from "@/components/ui/settings-container";
 import "@/styles/settings.css";
 interface OrgSettingsPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
@@ -77,7 +80,8 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
             id="org-name"
             value={debouncedOrgName}
             onChange={(e) => setDebouncedOrgName(e.target.value)}
-            className="max-w-[450px]" size="sm"
+            className="max-w-[450px]"
+            size="sm"
           />
         </div>
 
@@ -110,7 +114,9 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
       <SettingsSection title="Organization Customization">
         <div className="flex max-w-[450px] flex-col gap-6">
           <div className="flex flex-col gap-3">
-            <Label><XSmall className="font-medium">Choose a color</XSmall></Label>
+            <Label>
+              <XSmall className="font-medium">Choose a color</XSmall>
+            </Label>
             <RadioGroup
               defaultValue={org.color}
               onValueChange={(value) =>
@@ -149,7 +155,9 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
           </div>
 
           <div className="flex flex-col gap-3">
-            <Label><XSmall className="font-medium">Choose an icon</XSmall></Label>
+            <Label>
+              <XSmall className="font-medium">Choose an icon</XSmall>
+            </Label>
             <RadioGroup
               defaultValue={org.icon}
               onValueChange={(value) =>
