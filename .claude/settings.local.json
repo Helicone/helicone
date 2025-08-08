@@ -25,7 +25,10 @@
       "mcp__playwright__browser_wait_for",
       "Bash(pkill:*)",
       "Bash(true)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(rm:*)",
+      "Bash(npx prettier:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": []
   }
