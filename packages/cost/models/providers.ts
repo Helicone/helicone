@@ -109,7 +109,7 @@ export const providers = {
   },
   vertex: {
     name: "Google Vertex AI",
-    baseUrl: "https://aiplatform.googleapis.com",
+    baseUrl: "https://{region}-aiplatform.googleapis.com",
     auth: "oauth",
     requiresProjectId: true,
     requiresRegion: true,
@@ -118,7 +118,8 @@ export const providers = {
     buildUrl: (baseUrl, endpoint, options) => {
       const { projectId, region } = options || {};
       const modelId = endpoint.providerModelId || "";
-      return `${baseUrl}/v1/projects/${projectId}/locations/${region}/publishers/anthropic/models/${modelId}:streamRawPredict`;
+      const baseUrlWithRegion = baseUrl.replace("{region}", region);
+      return `${baseUrlWithRegion}/v1/projects/${projectId}/locations/${region}/publishers/anthropic/models/${modelId}:streamRawPredict`;
     },
   },
   // openai: {

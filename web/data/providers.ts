@@ -36,16 +36,27 @@ export const providers: Provider[] = [
   //   relevanceScore: 90,
   // },
   {
-    id: "google",
-    name: "Google AI (Gemini)",
+    id: "vertex",
+    name: "Vertex AI",
     logoUrl: "/assets/home/providers/gemini.webp",
-    description: "Configure your Google AI API keys for Gemini models",
-    docsUrl:
-      "https://docs.helicone.ai/getting-started/integration-methods/gemini",
-    apiKeyLabel: "Google AI API Key",
+    description:
+      "Configure your Google Cloud Access Token for Vertex AI models",
+    docsUrl: "https://docs.helicone.ai/integrations/gemini/vertex/curl",
+    apiKeyLabel: "Google Cloud Access Token",
     apiKeyPlaceholder: "...",
     relevanceScore: 85,
   },
+  // {
+  //   id: "google",
+  //   name: "Google AI (Gemini)",
+  //   logoUrl: "/assets/home/providers/gemini.webp",
+  //   description: "Configure your Google AI API keys for Gemini models",
+  //   docsUrl:
+  //     "https://docs.helicone.ai/getting-started/integration-methods/gemini",
+  //   apiKeyLabel: "Google AI API Key",
+  //   apiKeyPlaceholder: "...",
+  //   relevanceScore: 85,
+  // },
   // {
   //   id: "mistral",
   //   name: "Mistral AI",

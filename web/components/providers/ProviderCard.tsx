@@ -88,6 +88,11 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
         region: "",
         crossRegion: "false",
       };
+    } else if (provider.id === "vertex") {
+      initialConfig = {
+        location: "",
+        projectId: "",
+      };
     }
 
     return {
@@ -233,7 +238,10 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
   const isViewingKey = state.key.displayState === "viewing";
   const isEditMode = !!existingKey;
   const isLoadingKey = state.key.displayState === "loading";
-  const hasAdvancedConfig = provider.id === "azure" || provider.id === "aws";
+  const hasAdvancedConfig =
+    provider.id === "azure" ||
+    provider.id === "aws" ||
+    provider.id === "vertex";
 
   // ====== Effects ======
   // Initialize config from existing key
@@ -362,6 +370,15 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
           key: "crossRegion",
           placeholder: "false",
           type: "boolean",
+        },
+      ];
+    } else if (provider.id === "vertex") {
+      configFields = [
+        { label: "Location", key: "location", placeholder: "us-east5" },
+        {
+          label: "Project ID",
+          key: "projectId",
+          placeholder: "your-project-id",
         },
       ];
     }
