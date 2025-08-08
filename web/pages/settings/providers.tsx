@@ -21,7 +21,6 @@ import {
   SettingsSectionHeader,
   SettingsSectionContent,
 } from "@/components/ui/settings-container";
-import "@/styles/settings.css";
 
 const ProvidersSettings: NextPageWithLayout<void> = () => {
   const [searchQuery, setSearchQuery] = useState("");

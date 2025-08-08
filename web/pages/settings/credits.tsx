@@ -14,7 +14,6 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import "@/styles/settings.css";
 
 const CreditsSettings: NextPageWithLayout<void> = () => {
   const [autoTopUpEnabled, setAutoTopUpEnabled] = useState(false);

@@ -18,7 +18,6 @@ import {
   SettingsContainer,
   SettingsSection,
 } from "@/components/ui/settings-container";
-import "@/styles/settings.css";
 interface OrgSettingsPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
   variant?: "organization" | "reseller";
@@ -81,7 +80,7 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
             value={debouncedOrgName}
             onChange={(e) => setDebouncedOrgName(e.target.value)}
             className="max-w-[450px]"
-            size="sm"
+            size={1}
           />
         </div>
 

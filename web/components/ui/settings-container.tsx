@@ -8,10 +8,6 @@ interface SettingsContainerProps {
   className?: string;
 }
 
-/**
- * Main container wrapper for settings pages
- * Provides consistent width, borders, and background
- */
 export const SettingsContainer = ({
   children,
   className,
@@ -27,10 +23,6 @@ interface SettingsSectionProps {
   contentClassName?: string;
 }
 
-/**
- * Individual section within a settings page
- * Includes header with title/description and content area
- */
 export const SettingsSection = ({
   title,
   description,
@@ -39,13 +31,11 @@ export const SettingsSection = ({
   contentClassName,
 }: SettingsSectionProps) => (
   <>
-    {/* Section Header */}
     <div className={cn("settings-section-header", className)}>
       <Small className="font-semibold">{title}</Small>
       {description && <Muted className="mt-1 text-xs">{description}</Muted>}
     </div>
 
-    {/* Section Content */}
     <div className={cn("settings-section-content", contentClassName)}>
       {children}
     </div>
@@ -59,10 +49,6 @@ interface SettingsSectionHeaderProps {
   className?: string;
 }
 
-/**
- * Just the header part of a settings section
- * Useful when you need custom content area styling
- */
 export const SettingsSectionHeader = ({
   title,
   description,
@@ -85,10 +71,6 @@ interface SettingsSectionContentProps {
   className?: string;
 }
 
-/**
- * Just the content area of a settings section
- * Use with SettingsSectionHeader for custom layouts
- */
 export const SettingsSectionContent = ({
   children,
   className,
