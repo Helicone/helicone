@@ -51,7 +51,8 @@ const NavItem: React.FC<NavItemProps> = ({
                 size: "icon",
               }),
               "h-9 w-9",
-              link.current && "bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-100 dark:hover:bg-blue-900/50",
+              link.current &&
+                "bg-blue-100 hover:bg-blue-100 dark:bg-blue-900/50 dark:hover:bg-blue-900/50",
             )}
           >
             {link.icon && (
@@ -94,7 +95,8 @@ const NavItem: React.FC<NavItemProps> = ({
                 deep && deep > 1 ? "h-6" : "h-8",
                 "w-full justify-start font-normal",
                 "text-[12px] text-slate-500",
-                link.current && "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50",
+                link.current &&
+                  "bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900/50",
               ),
           "",
         )}

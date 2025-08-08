@@ -100,7 +100,7 @@ const SidebarHelpDropdown = ({
               <ArrowUpRightIcon className="ml-2 h-3.5 w-3.5 text-slate-400 dark:text-slate-600" />
             </DropdownMenuItem>
           </Link>
-          <DropdownMenuItem 
+          <DropdownMenuItem
             className="cursor-pointer"
             onSelect={() => {
               setChatOpen(!chatOpen);
