@@ -89,41 +89,40 @@ const AlertsPage = () => {
   }
 
   return (
-    <div className="">
-      <AuthHeader title="" />
-
+    <div className="flex w-full max-w-6xl flex-col border border-border bg-background">
       {!canCreateAlert && (
-        <FreeTierLimitBanner
-          feature="alerts"
-          itemCount={alertCount}
-          freeLimit={MAX_ALERTS}
-          className="mb-6"
-        />
+        <div className="border-b border-border p-4">
+          <FreeTierLimitBanner
+            feature="alerts"
+            itemCount={alertCount}
+            freeLimit={MAX_ALERTS}
+          />
+        </div>
       )}
 
-      <div className="flex flex-col gap-8 px-8">
-        {/* Active Alerts Section */}
-        <section className="flex flex-col gap-6">
-          <div className="flex flex-col gap-2">
-            <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-              <div className="flex flex-col gap-1">
-                <H3>Active Alerts</H3>
-                <Muted>
-                  These are the alerts that are currently active for your
-                  organization
-                </Muted>
-              </div>
-
-              <div className="flex flex-col items-end gap-1">
-                <FreeTierLimitWrapper feature="alerts" itemCount={alertCount}>
-                  <Button variant="action" onClick={handleCreateAlert}>
-                    Create a new alert
-                  </Button>
-                </FreeTierLimitWrapper>
-              </div>
-            </div>
+      {/* Active Alerts Section */}
+      <div className="border-b border-border p-4">
+        <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-sm font-semibold">Active Alerts</h1>
+            <p className="text-xs text-muted-foreground">
+              These are the alerts that are currently active for your
+              organization
+            </p>
           </div>
 
+          <div className="flex flex-col items-end gap-1">
+            <FreeTierLimitWrapper feature="alerts" itemCount={alertCount}>
+              <Button variant="default" size="sm" className="text-xs" onClick={handleCreateAlert}>
+                Create a new alert
+              </Button>
+            </FreeTierLimitWrapper>
+          </div>
+        </div>
+      </div>
+
+      <div className="border-b border-border">
+        <div className="border-t border-border">
           <ThemedTable
             columns={[
               { name: "Name", key: "key_name", hidden: false },
@@ -147,7 +146,7 @@ const AlertsPage = () => {
             rows={alerts?.map((key) => {
               return {
                 ...key,
-                key_name: <P className="font-semibold">{key.name}</P>,
+                key_name: <p className="text-xs font-semibold">{key.name}</p>,
                 status: (
                   <div>
                     {key.status === "resolved" ? (
@@ -167,27 +166,27 @@ const AlertsPage = () => {
                   </div>
                 ),
                 created_at: (
-                  <Small className="text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     {getUSDate(new Date(key.created_at || ""))}
-                  </Small>
+                  </p>
                 ),
                 threshold: (
-                  <P>
+                  <p className="text-xs">
                     {key.metric === "response.status" && (
                       <span>{`${key.threshold}%`}</span>
                     )}
                     {key.metric === "cost" && (
                       <span>{`$${Number(key.threshold).toFixed(2)}`}</span>
                     )}
-                  </P>
+                  </p>
                 ),
                 metric: (
                   <Badge variant="helicone">
                     {key.metric === "response.status" ? "status" : key.metric}
                   </Badge>
                 ),
-                time_window: <P>{formatTimeWindow(key.time_window)}</P>,
-                minimum_request_count: <P>{key.minimum_request_count}</P>,
+                time_window: <p className="text-xs">{formatTimeWindow(key.time_window)}</p>,
+                minimum_request_count: <p className="text-xs">{key.minimum_request_count}</p>,
                 emails: <div className="flex">{key.emails.join(", ")}</div>,
                 slack_channels: (
                   <div className="flex">
@@ -213,26 +212,28 @@ const AlertsPage = () => {
               setSelectedAlert(row);
             }}
           />
-        </section>
+        </div>
+      </div>
 
-        {/* Alert History Section */}
-        <section className="flex flex-col gap-6">
-          <div className="flex flex-col gap-1">
-            <H3>Alert History</H3>
-            <Muted>
-              These are the alerts that have been triggered for your
-              organization
-            </Muted>
+      {/* Alert History Section */}
+      <div className="border-b border-border p-4">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-sm font-semibold">Alert History</h2>
+          <p className="text-xs text-muted-foreground">
+            These are the alerts that have been triggered for your
+            organization
+          </p>
+        </div>
+      </div>
+
+      <div className="p-4">
+        {alertHistory.length === 0 ? (
+          <div className="border-2 border-dashed border-muted-foreground/50 bg-muted/30 p-8 text-center">
+            <FileText size={24} className="mx-auto mb-2 text-muted-foreground" />
+            <p className="text-xs font-medium">No alerts have been triggered yet</p>
           </div>
-
-          {alertHistory.length === 0 ? (
-            <Card className="border-2 border-dashed border-border">
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <FileText size={24} className="mb-2 text-foreground" />
-                <P className="font-medium">No alerts have been triggered yet</P>
-              </CardContent>
-            </Card>
-          ) : (
+        ) : (
+          <div className="border-t border-border">
             <ThemedTable
               columns={[
                 {
@@ -257,20 +258,20 @@ const AlertsPage = () => {
                 return {
                   ...key,
                   alertStartTime: (
-                    <P className="font-semibold">
+                    <p className="text-xs font-semibold">
                       {getUSDate(new Date(key.alert_start_time))}
-                    </P>
+                    </p>
                   ),
                   alertEndTime: (
-                    <P className="font-semibold">
+                    <p className="text-xs font-semibold">
                       {key.alert_end_time
                         ? getUSDate(new Date(key.alert_end_time))
                         : ""}
-                    </P>
+                    </p>
                   ),
-                  alertName: <P>{key.alert_name}</P>,
+                  alertName: <p className="text-xs">{key.alert_name}</p>,
                   triggered_value: (
-                    <P>
+                    <p className="text-xs">
                       {key.alert_metric === "response.status" && (
                         <span>{`${key.triggered_value}%`}</span>
                       )}
@@ -281,7 +282,7 @@ const AlertsPage = () => {
                         key.alert_metric !== "cost" && (
                           <span>{key.triggered_value}</span>
                         )}
-                    </P>
+                    </p>
                   ),
                   status: (
                     <Badge
@@ -295,34 +296,78 @@ const AlertsPage = () => {
                 };
               })}
             />
-          )}
-        </section>
-
-        {/* Modals */}
-        <CreateAlertModal
-          open={createNewAlertModal}
-          setOpen={setCreateNewAlertModal}
-          onSuccess={() => {
-            refetch();
-          }}
-        />
-        <EditAlertModal
-          open={editAlertOpen}
-          setOpen={setEditAlertOpen}
-          onSuccess={() => {
-            refetch();
-          }}
-          currentAlert={selectedAlert}
-        />
-        <DeleteAlertModal
-          open={deleteAlertOpen}
-          setOpen={setDeleteAlertOpen}
-          onSuccess={() => {
-            refetch();
-          }}
-          alertId={selectedAlert?.id || ""}
-        />
+          </div>
+        )}
       </div>
+
+      {/* Modals */}
+      <CreateAlertModal
+        open={createNewAlertModal}
+        setOpen={setCreateNewAlertModal}
+        onSuccess={() => {
+          refetch();
+        }}
+      />
+      <EditAlertModal
+        open={editAlertOpen}
+        setOpen={setEditAlertOpen}
+        onSuccess={() => {
+          refetch();
+        }}
+        currentAlert={selectedAlert}
+      />
+      <DeleteAlertModal
+        open={deleteAlertOpen}
+        setOpen={setDeleteAlertOpen}
+        onSuccess={() => {
+          refetch();
+        }}
+        alertId={selectedAlert?.id || ""}
+      />
+
+      <style jsx global>{`
+        .overflow-auto.rounded-lg.bg-white.ring-1.ring-gray-300 {
+          overflow: visible !important;
+          border-radius: 0 !important;
+          background-color: transparent !important;
+          box-shadow: none !important;
+          ring: none !important;
+        }
+        
+        .dark .overflow-auto.rounded-lg.bg-white.ring-1.ring-gray-300 {
+          background-color: transparent !important;
+        }
+        
+        .min-w-full.divide-y.divide-gray-300 {
+          border-collapse: collapse !important;
+        }
+        
+        .min-w-full.divide-y.divide-gray-300 th {
+          font-size: 0.75rem !important;
+          padding: 0.75rem !important;
+          border-bottom: 1px solid hsl(var(--border)) !important;
+          background-color: transparent !important;
+        }
+        
+        .min-w-full.divide-y.divide-gray-300 td {
+          font-size: 0.75rem !important;
+          padding: 0.75rem !important;
+          border-bottom: 1px solid hsl(var(--border)) !important;
+        }
+        
+        .min-w-full.divide-y.divide-gray-300 tr:last-child td {
+          border-bottom: none !important;
+        }
+        
+        /* Fix action buttons to display horizontally */
+        .min-w-full.divide-y.divide-gray-300 td:last-child {
+          display: flex !important;
+          flex-direction: row !important;
+          gap: 0.25rem !important;
+          justify-content: flex-end !important;
+          align-items: center !important;
+        }
+      `}</style>
     </div>
   );
 };

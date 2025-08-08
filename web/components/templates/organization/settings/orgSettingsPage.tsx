@@ -9,7 +9,6 @@ import { Database } from "../../../../db/database.types";
 import { clsx } from "../../../shared/clsx";
 import { DeleteOrgModal } from "../deleteOrgModal";
 import { ORGANIZATION_COLORS, ORGANIZATION_ICONS } from "../orgConstants";
-import OrgMembersPage from "../members/orgMembersPage";
 import { Separator } from "@/components/ui/separator";
 import { CopyIcon } from "lucide-react";
 import useNotification from "@/components/shared/notification/useNotification";
@@ -70,6 +69,16 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
       <div className="flex w-full max-w-2xl flex-col space-y-8 text-gray-900 dark:text-gray-100">
         <div className="space-y-6">
           <div className="space-y-2">
+            <Label htmlFor="org-name">Organization Name</Label>
+            <Input
+              id="org-name"
+              value={debouncedOrgName}
+              onChange={(e) => setDebouncedOrgName(e.target.value)}
+              className="max-w-[450px]"
+            />
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="org-id">Organization Id</Label>
             <div className="flex flex-row items-center gap-2">
               <Input
@@ -89,16 +98,6 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
                 <CopyIcon className="h-4 w-4" />
               </Button>
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="org-name">Organization Name</Label>
-            <Input
-              id="org-name"
-              value={debouncedOrgName}
-              onChange={(e) => setDebouncedOrgName(e.target.value)}
-              className="max-w-[450px]"
-            />
           </div>
 
           <div className="flex max-w-[450px] flex-col gap-8">
@@ -184,7 +183,6 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
               </RadioGroup>
             </div>
           </div>
-          <OrgMembersPage org={org} wFull />
 
           <div className="flex max-w-[450px] justify-end"></div>
         </div>
@@ -193,7 +191,7 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
 
         <div className="flex items-center justify-between space-y-4">
           {isOwner && (
-            <Button variant="destructive" onClick={() => setDeleteOpen(true)}>
+            <Button variant="destructive" onClick={() => setDeleteOpen(true)} className="text-white">
               Delete Organization
             </Button>
           )}

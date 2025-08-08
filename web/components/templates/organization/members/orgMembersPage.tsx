@@ -59,54 +59,52 @@ const OrgMembersPage = (props: OrgMembersPageProps) => {
 
   return (
     <>
-      <div
-        className={cn(
-          "flex flex-col space-y-8 text-foreground",
-          wFull ? "w-full" : "max-w-2xl",
-        )}
-      >
-        <div className="mt-8 flex h-full w-full flex-col space-y-4">
-          <div className="flex flex-row items-center justify-between">
-            <h3 className="font-semibold">Members</h3>
+      <div className="border-b border-border p-4">
+        <div className="flex flex-row items-center justify-between">
+          <h1 className="text-sm font-semibold">Members</h1>
 
-            <div className="flex flex-row space-x-4">
-              <ProFeatureWrapper featureName="invite">
-                <Button
-                  onClick={() => setAddOpen(true)}
-                  variant="default"
-                  size="sm_sleek"
-                >
-                  add member +
-                </Button>
-              </ProFeatureWrapper>
-            </div>
+          <div className="flex flex-row space-x-4">
+            <ProFeatureWrapper featureName="invite">
+              <Button
+                onClick={() => setAddOpen(true)}
+                variant="default"
+                size="sm"
+                className="text-xs"
+              >
+                add member +
+              </Button>
+            </ProFeatureWrapper>
           </div>
-          {isLoading ? (
-            <ul className="flex flex-col space-y-6">
-              {Array.from({ length: 3 }).map((_, index) => (
-                <li
-                  key={index}
-                  className="flex h-6 animate-pulse flex-row justify-between gap-2 rounded-md bg-muted"
-                ></li>
-              ))}
-            </ul>
-          ) : (
-            <ul className="divide-y divide-border border-t">
-              {members.map((member, index) => (
-                <OrgMemberItem
-                  key={index}
-                  index={index}
-                  orgMember={member}
-                  orgId={org.id}
-                  refetch={refetch}
-                  isUserAdmin={isUserAdmin}
-                  refreshOrgs={onLeaveSuccess}
-                />
-              ))}
-            </ul>
-          )}
         </div>
       </div>
+
+      <div className="p-4">
+        {isLoading ? (
+          <ul className="flex flex-col space-y-4">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <li
+                key={index}
+                className="flex h-12 animate-pulse flex-row justify-between gap-2 bg-muted"
+              ></li>
+            ))}
+          </ul>
+        ) : (
+          <ul className="divide-y divide-border">
+            {members.map((member, index) => (
+              <OrgMemberItem
+                key={index}
+                index={index}
+                orgMember={member}
+                orgId={org.id}
+                refetch={refetch}
+                isUserAdmin={isUserAdmin}
+                refreshOrgs={onLeaveSuccess}
+              />
+            ))}
+          </ul>
+        )}
+      </div>
+
       <AddMemberModal
         orgId={org.id}
         orgOwnerId={org.owner}

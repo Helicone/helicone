@@ -30,12 +30,12 @@ const HeliconeKeyTable = ({
     return (
       <button
         onClick={onAddKey}
-        className="relative mt-8 block w-full rounded-lg border-2 border-dashed border-gray-500 bg-gray-200 p-12 text-center hover:cursor-pointer hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:bg-gray-800 dark:hover:bg-gray-700"
+        className="relative block w-full border-2 border-dashed border-muted-foreground/50 bg-muted/30 m-4 p-8 text-center hover:cursor-pointer hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
       >
         <div className="w-full items-center justify-center align-middle">
-          <KeyIcon className="mx-auto h-10 w-10 text-gray-900 dark:text-gray-100" />
+          <KeyIcon className="mx-auto h-8 w-8 text-muted-foreground" />
         </div>
-        <span className="mt-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
+        <span className="mt-2 block text-xs font-medium">
           Click here to generate a Helicone key
         </span>
       </button>
@@ -43,7 +43,7 @@ const HeliconeKeyTable = ({
   }
 
   return (
-    <>
+    <div className="border-t border-border">
       <ThemedTable
         columns={[
           { name: "Name", key: "key_name", hidden: false },
@@ -54,17 +54,17 @@ const HeliconeKeyTable = ({
           ...key,
           id: key.id.toString(),
           key_name: (
-            <p className="font-semibold text-gray-900 dark:text-gray-100">
+            <p className="text-xs font-semibold">
               {key.api_key_name}
             </p>
           ),
           created_at: (
-            <p className="text-gray-500">
+            <p className="text-xs text-muted-foreground">
               {new Date(key.created_at).toLocaleString()}
             </p>
           ),
           permissions: (
-            <p className="text-gray-500">
+            <p className="text-xs text-muted-foreground">
               {keyPermissions.get(key.key_permissions ?? "rw") ?? "Read/Write"}
             </p>
           ),
@@ -72,7 +72,41 @@ const HeliconeKeyTable = ({
         editHandler={(key) => onEdit(key.id)}
         deleteHandler={(key) => onDelete(key.id)}
       />
-    </>
+      <style jsx global>{`
+        .overflow-auto.rounded-lg.bg-white.ring-1.ring-gray-300 {
+          overflow: visible !important;
+          border-radius: 0 !important;
+          background-color: transparent !important;
+          box-shadow: none !important;
+          ring: none !important;
+        }
+        
+        .dark .overflow-auto.rounded-lg.bg-white.ring-1.ring-gray-300 {
+          background-color: transparent !important;
+        }
+        
+        .min-w-full.divide-y.divide-gray-300 {
+          border-collapse: collapse !important;
+        }
+        
+        .min-w-full.divide-y.divide-gray-300 th {
+          font-size: 0.75rem !important;
+          padding: 0.75rem !important;
+          border-bottom: 1px solid hsl(var(--border)) !important;
+          background-color: transparent !important;
+        }
+        
+        .min-w-full.divide-y.divide-gray-300 td {
+          font-size: 0.75rem !important;
+          padding: 0.75rem !important;
+          border-bottom: 1px solid hsl(var(--border)) !important;
+        }
+        
+        .min-w-full.divide-y.divide-gray-300 tr:last-child td {
+          border-bottom: none !important;
+        }
+      `}</style>
+    </div>
   );
 };
 

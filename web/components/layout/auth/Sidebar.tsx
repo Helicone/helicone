@@ -1,18 +1,15 @@
 /* eslint-disable @next/next/no-img-element */
 import {
   ArchiveIcon,
-  BellIcon,
   DatabaseIcon,
   Home,
   ListTreeIcon,
   ScrollTextIcon,
   SheetIcon,
   ShieldCheckIcon,
-  ShuffleIcon,
   TagIcon,
   TestTube2,
   UsersIcon,
-  Webhook,
 } from "lucide-react";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
@@ -69,12 +66,23 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
             icon: TagIcon,
             current: pathname.includes("/properties"),
           },
-
           {
             name: "Users",
             href: "/users",
             icon: UsersIcon,
             current: pathname.includes("/users"),
+          },
+          {
+            name: "Cache",
+            href: "/cache",
+            icon: ArchiveIcon,
+            current: pathname.includes("/cache"),
+          },
+          {
+            name: "Rate Limits",
+            href: "/rate-limit",
+            icon: ShieldCheckIcon,
+            current: pathname === "/rate-limit",
           },
         ],
       },
@@ -105,44 +113,6 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
         ],
       },
 
-      {
-        name: "Developer",
-        href: "/developer",
-        icon: null,
-        current: pathname.includes("/developer"),
-        subItems: [
-          {
-            name: "Cache",
-            href: "/cache",
-            icon: ArchiveIcon,
-            current: pathname.includes("/cache"),
-          },
-          {
-            name: "Rate Limits",
-            href: "/rate-limit",
-            icon: ShieldCheckIcon,
-            current: pathname === "/rate-limit",
-          },
-          {
-            name: "Alerts",
-            href: "/alerts",
-            icon: BellIcon,
-            current: pathname.includes("/alerts"),
-          },
-          {
-            name: "Webhooks",
-            href: "/webhooks",
-            icon: Webhook,
-            current: pathname.includes("/webhooks"),
-          },
-          {
-            name: "AI Gateway",
-            href: "/gateway",
-            icon: ShuffleIcon,
-            current: pathname.includes("/gateway"),
-          },
-        ],
-      },
     ],
     [pathname, hasFeatureFlag?.data],
   );
