@@ -192,3 +192,8 @@ services:
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-your-secret-key}
       SMTP_SECURE: false
       NODE_ENV: development
+
+volumes:
+  postgres_flyway_data:
+  clickhouse_data:
+  minio_data:
