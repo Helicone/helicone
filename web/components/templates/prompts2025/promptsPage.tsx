@@ -12,7 +12,7 @@ import {
 import {
   useGetPromptsWithVersions,
   useGetPromptVersions,
-  useSetProductionVersion,
+  useSetPromptVersionEnvironment,
   useGetPromptTags,
   useDeletePrompt,
   useDeletePromptVersion,
@@ -93,7 +93,7 @@ const PromptsPage = (props: PromptsPageProps) => {
     setFilteredMajorVersion(majorVersion);
   };
 
-  const setProductionVersion = useSetProductionVersion();
+  const setEnvironment = useSetPromptVersionEnvironment();
   const deletePrompt = useDeletePrompt();
   const deletePromptVersion = useDeletePromptVersion();
   const renamePrompt = useRenamePrompt();
@@ -119,22 +119,24 @@ const PromptsPage = (props: PromptsPageProps) => {
     }
   };
 
-  const handleSetProductionVersion = async (
+  const handleSetPromptVersionEnvironment = async (
     promptId: string,
     promptVersionId: string,
+    environment: string,
   ) => {
-    const result = await setProductionVersion.mutateAsync({
+    const result = await setEnvironment.mutateAsync({
       body: {
         promptId,
         promptVersionId,
+        environment,
       },
     });
 
     if (result.error) {
-      setNotification("Error setting production version", "error");
-      console.error("Error setting production version", result.error);
+      setNotification("Error setting environment", "error");
+      console.error("Error setting environment", result.error);
     } else {
-      setNotification("Production version set successfully", "success");
+      setNotification("Environment set successfully", "success");
     }
   };
 
@@ -370,7 +372,7 @@ const PromptsPage = (props: PromptsPageProps) => {
           >
             <PromptDetails
               onRenamePrompt={handleRenamePrompt}
-              onSetProductionVersion={handleSetProductionVersion}
+              onSetEnvironment={handleSetPromptVersionEnvironment}
               onOpenPromptVersion={handleOpenPromptVersion}
               onDeletePrompt={handleDeletePrompt}
               onDeletePromptVersion={handleDeletePromptVersion}
