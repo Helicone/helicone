@@ -93,7 +93,7 @@ const PromptsPage = (props: PromptsPageProps) => {
     setFilteredMajorVersion(majorVersion);
   };
 
-  const setProductionVersion = useSetPromptVersionEnvironment();
+  const setEnvironment = useSetPromptVersionEnvironment();
   const deletePrompt = useDeletePrompt();
   const deletePromptVersion = useDeletePromptVersion();
   const renamePrompt = useRenamePrompt();
@@ -124,7 +124,7 @@ const PromptsPage = (props: PromptsPageProps) => {
     promptVersionId: string,
     environment: string,
   ) => {
-    const result = await setProductionVersion.mutateAsync({
+    const result = await setEnvironment.mutateAsync({
       body: {
         promptId,
         promptVersionId,
