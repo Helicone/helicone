@@ -50,9 +50,6 @@ Dockerfile*
 *.swp
 *.swo
 
-# Asset directories if not needed for most image contexts
-bifrost/
-web/
 docs/
 examples/
 sdk/
