@@ -50,12 +50,11 @@ Dockerfile*
 *.swp
 *.swo
 
-# Asset directories if not needed for your image context
+# Asset directories if not needed for most image contexts
 bifrost/
 web/
 docs/
 examples/
-clickhouse/
 sdk/
 helicone-cron/
 docker/
