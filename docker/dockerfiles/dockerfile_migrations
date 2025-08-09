@@ -35,6 +35,8 @@ RUN chown 2000:2000 /opt/flyway/flyway && chmod 755 /opt/flyway/flyway
 # Create a script to run migrations
 RUN echo '#!/bin/sh \n\
     set -eu \n\
+    success=0 \n\
+    trap "if [ \"${success:-0}\" -ne 1 ]; then echo \"Migrations failed\" >&2; fi" EXIT \n\
     echo "Running PostgreSQL migrations..." \n\
     echo "Cleaning database and migration history..." \n\
     flyway -cleanDisabled=false -configFiles=/app/supabase/flyway.conf clean \n\
@@ -51,6 +53,7 @@ RUN echo '#!/bin/sh \n\
     fi \n\
     echo "ClickHouse migrations completed" \n\
     \n\
+    success=1 \n\
     echo "All migrations completed successfully!" \n\
     ' > /app/run-migrations.sh && chmod +x /app/run-migrations.sh
 
