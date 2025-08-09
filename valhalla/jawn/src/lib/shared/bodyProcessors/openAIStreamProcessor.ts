@@ -26,6 +26,16 @@ export const NON_DATA_LINES = [
   "event: thread.run.in_progress",
   "event: thread.message.created",
   "event: thread.message.in_progress",
+  // OpenAI /responses SSE events
+  "event: response.created",
+  "event: response.in_progress",
+  "event: response.output_item.added",
+  "event: response.content_part.added",
+  "event: response.output_text.delta",
+  "event: response.output_text.done",
+  "event: response.content_part.done",
+  "event: response.output_item.done",
+  "event: response.completed",
 ];
 
 function tryModel(requestData: string) {
