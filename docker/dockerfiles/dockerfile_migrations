@@ -34,17 +34,17 @@ RUN chown 2000:2000 /opt/flyway/flyway && chmod 755 /opt/flyway/flyway
 
 # Create a script to run migrations
 RUN echo '#!/bin/sh \n\
-    set -e \n\
+    set -eu \n\
     echo "Running PostgreSQL migrations..." \n\
     echo "Cleaning database and migration history..." \n\
-    flyway clean -configFiles=/app/supabase/flyway.conf \n\
+    flyway -cleanDisabled=false -configFiles=/app/supabase/flyway.conf clean \n\
     echo "Repairing migration checksums..." \n\
     flyway repair -configFiles=/app/supabase/flyway.conf \n\
     flyway migrate -configFiles=/app/supabase/flyway.conf \n\
     echo "PostgreSQL migrations completed" \n\
     \n\
     echo "Running ClickHouse migrations..." \n\
-    if [ -n "${CLICKHOUSE_PASSWORD}" ]; then \n\
+    if [ -n "${CLICKHOUSE_PASSWORD:-}" ]; then \n\
         python3 /app/clickhouse/ch_hcone.py --upgrade --password "${CLICKHOUSE_PASSWORD}" \n\
     else \n\
         python3 /app/clickhouse/ch_hcone.py --upgrade --no-password \n\
