@@ -7,7 +7,7 @@ GRANT USAGE ON SCHEMA auth TO anon;
 GRANT USAGE ON SCHEMA auth TO authenticated;
 GRANT USAGE ON SCHEMA auth TO service_role;
 -- 3. Create the auth.users table (excluding triggers)
-CREATE TABLE auth.users (
+CREATE TABLE IF NOT EXISTS auth.users (
     id uuid not null,
     email character varying(255) null,
     last_sign_in_at timestamp without time zone null,
@@ -15,6 +15,7 @@ CREATE TABLE auth.users (
     constraint users_pkey primary key (id)
 ) TABLESPACE pg_default;
 -- Grant permissions on the table to the roles (mirroring what might be expected)
+-- Grants are idempotent in practice; if role/table exists, these apply or no-op
 GRANT ALL ON TABLE auth.users TO postgres;
 GRANT ALL ON TABLE auth.users TO anon;
 GRANT ALL ON TABLE auth.users TO authenticated;
