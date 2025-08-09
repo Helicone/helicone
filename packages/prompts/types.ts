@@ -60,6 +60,7 @@ export interface Prompt2025Input {
  * const promptParams = {
  *   prompt_id: "XXXXXX",
  *   version_id: "5d4ec7d7-5725-46c2-ad26-41ddf6287527", // optional
+ *   environment: "production", // optional - targets specific environment
  *   inputs: {
  *     name: "John",
  *     age: 20,
@@ -70,6 +71,8 @@ export interface Prompt2025Input {
 export type HeliconePromptParams = {
   /** The unique identifier for your Helicone prompt template */
   prompt_id: string;
+  /** The deployment environment to target for the prompt */
+  environment?: string;
   /** Optional version ID. If not provided, uses the latest version */
   version_id?: string;
   /**

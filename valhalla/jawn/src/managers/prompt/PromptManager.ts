@@ -264,9 +264,18 @@ export class Prompt2025Manager extends BaseManager {
     }
 
     if (!result.data?.[0]) {
-      return err("Production version not found");
+      return err("Prompt production version not found");
     }
-    return ok(result.data[0]);
+
+    const promptVersion = result.data[0];
+
+    const s3UrlResult = await this.getPromptVersionS3Url(promptVersion.prompt_id, promptVersion.id);
+    if (s3UrlResult.error) {
+      return err(s3UrlResult.error);
+    }
+    promptVersion.s3_url = s3UrlResult.data ?? undefined;
+
+    return ok(promptVersion);
   }
 
   async getPromptVersions(params: {
