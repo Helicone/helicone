@@ -77,6 +77,115 @@ interface OpenAIResponseRequest {
   functions?: Array<any>;
 }
 
+/**
+ * Generate a human-readable preview text for Requests API requests.
+ * Mirrors the intent of getRequestText in chat.ts, but adapted to the
+ * Responses API where the request payload uses `input` instead of `messages`.
+ */
+export const getRequestText = (requestBody: OpenAIResponseRequest): string => {
+  try {
+    const anyRequest = requestBody as any;
+    const heliconeMessage = anyRequest?.heliconeMessage;
+    if (heliconeMessage) {
+      return typeof heliconeMessage === "string"
+        ? heliconeMessage
+        : JSON.stringify(heliconeMessage);
+    }
+
+    const input = requestBody?.input;
+    if (!input) return "";
+
+    // If the entire input is a string, return directly
+    if (typeof input === "string") {
+      return input;
+    }
+
+    if (Array.isArray(input) && input.length > 0) {
+      const lastItem = input[input.length - 1];
+      const content = (lastItem as any)?.content;
+
+      // Content can be a string or an array of typed items
+      if (typeof content === "string") {
+        return content;
+      }
+
+      if (Array.isArray(content)) {
+        // Prefer text content if available
+        const textItems = content.filter(
+          (c: any) => c?.type === "input_text" && typeof c?.text === "string",
+        );
+        if (textItems.length > 0) {
+          return textItems.map((c: any) => c.text).join(" ");
+        }
+
+        // Next, indicate image/file content succinctly
+        if (content.some((c: any) => c?.type === "input_image")) {
+          return "[Image]";
+        }
+        if (content.some((c: any) => c?.type === "input_file")) {
+          return "[File]";
+        }
+
+        // Fallback to JSON preview of the first item
+        return JSON.stringify(content[0] ?? "");
+      }
+
+      return "";
+    }
+
+    return "";
+  } catch (error) {
+    console.error("Error parsing request text (Responses API):", error);
+    return "error_parsing_request";
+  }
+};
+
+/**
+ * Generate a human-readable preview text for Responses API responses.
+ * Similar to getResponseText in chat.ts, but tailored to `output` format.
+ */
+export const getResponseText = (
+  responseBody: any,
+  statusCode: number = 200,
+): string => {
+  try {
+    if (statusCode === 0 || statusCode === null) {
+      return "";
+    }
+
+    if (responseBody?.error) {
+      // Prefer message if present; else stringify the error object
+      return (
+        responseBody.error?.message ?? JSON.stringify(responseBody.error)
+      );
+    }
+
+    // Responses API returns an `output` array with message items
+    if (Array.isArray(responseBody?.output)) {
+      const firstMessage = responseBody.output.find(
+        (item: any) => item?.type === "message",
+      );
+      const content = firstMessage?.content;
+      if (Array.isArray(content)) {
+        const textContent = content.find((c: any) => c?.type === "output_text");
+        if (textContent?.text) {
+          return textContent.text;
+        }
+      }
+    }
+
+    // Fallbacks
+    if (typeof responseBody?.text === "string") {
+      return responseBody.text;
+    }
+
+    return "";
+  } catch (error) {
+    console.error("Error parsing response text (Responses API):", error);
+    return "error_parsing_response";
+  }
+};
+
 const convertRequestInputToMessages = (
   input: OpenAIResponseRequest["input"]
 ): Message[] => {
@@ -406,8 +515,8 @@ export const mapOpenAIResponse = ({
       concatenatedMessages: (schema.request.messages ?? []).concat(
         schema.response?.messages || []
       ),
-      request: JSON.stringify(request),
-      response: JSON.stringify(response),
+      request: getRequestText(request),
+      response: getResponseText(response),
       fullRequestText: () => JSON.stringify(request),
       fullResponseText: () => JSON.stringify(response),
     },
