@@ -271,6 +271,25 @@ export class Prompt2025Controller extends Controller {
     return result;
   }
 
+  @Post("query/environment-version")
+  public async getPrompt2025EnvironmentVersion(
+    @Body()
+    requestBody: {
+      promptId: string;
+      environment: string;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<Prompt2025Version, string>> {
+    const promptManager = new Prompt2025Manager(request.authParams);
+    const result = await promptManager.getPromptVersionWithBodyByEnvironment(requestBody);
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
   @Post("query/versions")
   public async getPrompt2025Versions(
     @Body()
