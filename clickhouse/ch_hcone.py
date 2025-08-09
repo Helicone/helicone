@@ -47,15 +47,16 @@ def get_url(args):
 def run_curl_command(query, args, user=None, password=None, migration_file=None):
     base_url = get_url(args)
     auth = f"--user '{user}:{password}'" if user and password else ""
-    timeout_opts = "--connect-timeout 5"
+    # Ensure curl fails on HTTP error status codes (use --fail for broad compatibility)
+    common_opts = "--silent --show-error --fail --connect-timeout 5"
 
     if not query:
         curl_cmd = (
-            f"cat \"{migration_file}\" | curl {auth} {timeout_opts} '{base_url}' --data-binary @-"
+            f"cat \"{migration_file}\" | curl {auth} {common_opts} '{base_url}' --data-binary @-"
         ).strip()
     else:
         curl_cmd = (
-            f"echo \"{query}\" | curl {auth} {timeout_opts} '{base_url}' --data-binary @-"
+            f"echo \"{query}\" | curl {auth} {common_opts} '{base_url}' --data-binary @-"
         ).strip()
 
     result = subprocess.run(curl_cmd, shell=True,
@@ -64,6 +65,13 @@ def run_curl_command(query, args, user=None, password=None, migration_file=None)
         print("Error running query")
         print("STDOUT:", result.stdout)
         print("STDERR:", result.stderr)
+        sys.exit(1)
+    # ClickHouse sometimes returns HTTP 200 with error details in body
+    # Detect common error patterns and fail hard so the container exits non-zero
+    stdout_lower = (result.stdout or "").lower()
+    if "code:" in stdout_lower and "exception" in stdout_lower:
+        print("ClickHouse reported an error in response body")
+        print("STDOUT:", result.stdout)
         sys.exit(1)
     return result
 
