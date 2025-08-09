@@ -3,7 +3,12 @@ import { HeliconeAuthClient } from "../../auth/client/HeliconeAuthClient";
 import { HeliconeOrg, HeliconeUser } from "../../auth/types";
 import { err, ok, Result } from "../../result";
 
-export const authClient = createAuthClient();
+export const authClient = createAuthClient({
+  baseURL:
+    typeof window === "undefined"
+      ? process.env.NEXT_PUBLIC_APP_URL
+      : window.location.origin,
+});
 
 // Helper: Ensure user exists in Better Auth
 async function ensureUserInBetterAuth(
