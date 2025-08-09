@@ -174,6 +174,21 @@ export const getResponseText = (
       }
     }
 
+    // A consolidated response from a streamed OpenAI /v1/responses call
+    if (responseBody?.item?.content && Array.isArray(responseBody.item.content)) {
+      const contentArray = responseBody.item.content;
+      const textContent = contentArray.find(
+        (c: any) => c?.type === "output_text",
+      );
+      if (textContent?.text) {
+        return textContent.text;
+      }
+      const firstItemType = contentArray[0]?.type;
+      if (typeof firstItemType === "string" && firstItemType) {
+        return `[${firstItemType}]`;
+      }
+    }
+
     // Fallbacks
     if (typeof responseBody?.text === "string") {
       return responseBody.text;
