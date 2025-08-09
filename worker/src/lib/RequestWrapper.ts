@@ -461,6 +461,14 @@ export class RequestWrapper {
     return ok(null);
   }
 
+  async getRawProviderAuthHeader(): Promise<string | undefined> {
+    let auth = this.authorization;
+    if (auth?.startsWith("Bearer ")) {
+      auth = auth.split(" ")[1];
+    }
+    return auth ?? undefined;
+  }
+  
   async getProviderAuthHeader(): Promise<string | undefined> {
     return this.authorization ? await hash(this.authorization) : undefined;
   }
