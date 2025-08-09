@@ -519,22 +519,29 @@ export class RequestManager extends BaseManager {
       const seen = new Map<string, HeliconeRequest>();
 
       for (const r of reqs) {
-        if (seen.has(r.request_id)) {
-          const existing = seen.get(r.request_id);
-          if (
-            existing?.updated_at &&
-            r.updated_at &&
-            r.updated_at > existing.updated_at
-          ) {
-            seen.set(r.request_id, r);
-          }
+        const existing = seen.get(r.request_id);
+        if (!existing) {
+          seen.set(r.request_id, r);
+          continue;
+        }
+        if (
+          existing.updated_at &&
+          r.updated_at &&
+          r.updated_at > existing.updated_at
+        ) {
+          seen.set(r.request_id, r);
         }
       }
 
-      if (sort.created_at === "asc") {
-        reqs.reverse();
-      }
-      return reqs;
+      let deduped = Array.from(seen.values());
+
+      deduped.sort((a, b) => {
+        const aTime = new Date(a.request_created_at).getTime();
+        const bTime = new Date(b.request_created_at).getTime();
+        return sort.created_at === "asc" ? aTime - bTime : bTime - aTime;
+      });
+
+      return deduped;
     });
   }
 
