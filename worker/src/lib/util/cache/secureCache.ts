@@ -49,7 +49,6 @@ class InMemoryCache<T> {
 }
 
 async function getCacheKey(env: SecureCacheEnv): Promise<CryptoKey> {
-  console.log("REQUEST_CACHE_KEY", env.REQUEST_CACHE_KEY);
   // Convert the hexadecimal key to a byte array
   const keyBytes = Buffer.from(env.REQUEST_CACHE_KEY, "hex");
 
