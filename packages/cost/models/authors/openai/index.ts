@@ -1,20 +1,7 @@
 /**
- * OpenAI author data aggregation
+ * OpenAI author exports
  */
 
-import { type AuthorData } from '../../types';
-import openaiModels, { type OpenAIModelName } from './models';
-import openaiEndpoints from './endpoints';
-import openaiMetadata from './metadata';
-
-export const openai: AuthorData<OpenAIModelName> = {
-  metadata: {
-    ...openaiMetadata,
-    modelCount: Object.keys(openaiModels).length,
-  },
-  models: openaiModels,
-  endpoints: openaiEndpoints,
-};
-
-export type { OpenAIModelName };
-export default openai;
+export { openaiMetadata } from "./metadata";
+export { openaiModels, type OpenAIModelName } from "./models";
+export { openaiEndpoints, type OpenAIEndpointId } from "./endpoints";

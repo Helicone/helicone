@@ -2,77 +2,75 @@
  * Amazon endpoint configurations
  */
 
-import type { ModelEndpointMap } from "../../types";
+import type { Endpoint } from "../../types";
 import type { AmazonModelName } from "./models";
 
+/**
+ * Amazon endpoint IDs
+ */
+export type AmazonEndpointId = `${AmazonModelName}:bedrock`;
+
 export const amazonEndpoints = {
-  "nova-lite-v1": {
-    bedrock: {
-      name: "Amazon Bedrock | amazon/nova-lite-v1",
-      pricing: {
-        prompt: 0.06,
-        completion: 0.24,
-        image: 0.00009,
-        cacheRead: null,
-        cacheWrite: null,
-      },
-      contextLength: 300000,
-      maxCompletionTokens: 5120,
-      supportedParameters: [
-        "tools",
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "top_k",
-        "stop",
-      ],
+  "nova-lite-v1:bedrock": {
+    modelId: "nova-lite-v1",
+    provider: "bedrock",
+    providerModelId: "amazon.nova-lite-v1:0",
+    pricing: {
+      prompt: 0.06,
+      completion: 0.24,
+      image: 0.00009,
     },
+    contextLength: 300000,
+    maxCompletionTokens: 5120,
+    supportedParameters: [
+      "tools",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "top_k",
+      "stop",
+    ],
+    ptbEnabled: false,
   },
-
-  "nova-micro-v1": {
-    bedrock: {
-      name: "Amazon Bedrock | amazon/nova-micro-v1",
-      pricing: {
-        prompt: 0.035,
-        completion: 0.14,
-        cacheRead: null,
-        cacheWrite: null,
-      },
-      contextLength: 128000,
-      maxCompletionTokens: 5120,
-      supportedParameters: [
-        "tools",
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "top_k",
-        "stop",
-      ],
+  "nova-micro-v1:bedrock": {
+    modelId: "nova-micro-v1",
+    provider: "bedrock",
+    providerModelId: "amazon.nova-micro-v1:0",
+    pricing: {
+      prompt: 0.035,
+      completion: 0.14,
     },
+    contextLength: 128000,
+    maxCompletionTokens: 5120,
+    supportedParameters: [
+      "tools",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "top_k",
+      "stop",
+    ],
+    ptbEnabled: false,
   },
-
-  "nova-pro-v1": {
-    bedrock: {
-      name: "Amazon Bedrock | amazon/nova-pro-v1",
-      pricing: {
-        prompt: 0.8,
-        completion: 3.2,
-        image: 0.0012,
-        cacheRead: null,
-        cacheWrite: null,
-      },
-      contextLength: 300000,
-      maxCompletionTokens: 5120,
-      supportedParameters: [
-        "tools",
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "top_k",
-        "stop",
-      ],
+  "nova-pro-v1:bedrock": {
+    modelId: "nova-pro-v1",
+    provider: "bedrock",
+    providerModelId: "amazon.nova-pro-v1:0",
+    pricing: {
+      prompt: 0.8,
+      completion: 3.2,
+      image: 0.0012,
     },
+    contextLength: 300000,
+    maxCompletionTokens: 5120,
+    supportedParameters: [
+      "tools",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "top_k",
+      "stop",
+    ],
+    ptbEnabled: false,
   },
-} satisfies Record<AmazonModelName, ModelEndpointMap>;
-
-export default amazonEndpoints;
+} satisfies Record<AmazonEndpointId, Endpoint>;

@@ -2,11 +2,12 @@
  * DeepSeek endpoint configurations
  */
 
-import type { ModelEndpointMap } from "../../types";
+import type { Endpoint } from "../../types";
 import type { DeepSeekModelName } from "./models";
 
-export const deepseekEndpoints = {
-  // TODO: Add endpoints for deepseek models
-} satisfies Record<DeepSeekModelName, ModelEndpointMap>;
+/**
+ * DeepSeek endpoint IDs
+ */
+export type DeepSeekEndpointId = never;
 
-export default deepseekEndpoints;
+export const deepseekEndpoints = {} satisfies Record<DeepSeekEndpointId, Endpoint>;

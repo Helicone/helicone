@@ -2,101 +2,97 @@
  * Perplexity endpoint configurations
  */
 
-import type { ModelEndpointMap } from "../../types";
+import type { Endpoint } from "../../types";
 import type { PerplexityModelName } from "./models";
 
+/**
+ * Perplexity endpoint IDs
+ */
+export type PerplexityEndpointId = `${PerplexityModelName}:perplexity`;
+
 export const perplexityEndpoints = {
-  "sonar-reasoning-pro": {
-    perplexity: {
-      name: "Perplexity | perplexity/sonar-reasoning-pro",
-      pricing: {
-        prompt: 2,
-        completion: 8,
-        cacheRead: null,
-        cacheWrite: null,
-      },
-      contextLength: 128000,
-      maxCompletionTokens: null,
-      supportedParameters: [
-        "reasoning",
-        "include_reasoning",
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "top_k",
-        "frequency_penalty",
-        "presence_penalty",
-      ],
+  "sonar-reasoning-pro:perplexity": {
+    modelId: "sonar-reasoning-pro",
+    provider: "perplexity",
+    providerModelId: "sonar-reasoning-pro",
+    pricing: {
+      prompt: 2,
+      completion: 8,
     },
+    contextLength: 128000,
+    maxCompletionTokens: 8000,
+    supportedParameters: [
+      "reasoning",
+      "include_reasoning",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "top_k",
+      "frequency_penalty",
+      "presence_penalty",
+    ],
+    ptbEnabled: true,
   },
-
-  "sonar-pro": {
-    perplexity: {
-      name: "Perplexity | perplexity/sonar-pro",
-      pricing: {
-        prompt: 3,
-        completion: 15,
-        cacheRead: null,
-        cacheWrite: null,
-      },
-      contextLength: 200000,
-      maxCompletionTokens: 8000,
-      supportedParameters: [
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "top_k",
-        "frequency_penalty",
-        "presence_penalty",
-      ],
+  "sonar-pro:perplexity": {
+    modelId: "sonar-pro",
+    provider: "perplexity",
+    providerModelId: "sonar-pro",
+    pricing: {
+      prompt: 3,
+      completion: 15,
     },
+    contextLength: 200000,
+    maxCompletionTokens: 8000,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "top_k",
+      "frequency_penalty",
+      "presence_penalty",
+    ],
+    ptbEnabled: true,
   },
-
-  sonar: {
-    perplexity: {
-      name: "Perplexity | perplexity/sonar",
-      pricing: {
-        prompt: 1,
-        completion: 5,
-        cacheRead: null,
-        cacheWrite: null,
-      },
-      contextLength: 200000,
-      maxCompletionTokens: 8000,
-      supportedParameters: [
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "top_k",
-        "frequency_penalty",
-        "presence_penalty",
-      ],
+  "sonar:perplexity": {
+    modelId: "sonar",
+    provider: "perplexity",
+    providerModelId: "sonar",
+    pricing: {
+      prompt: 1,
+      completion: 5,
     },
+    contextLength: 200000,
+    maxCompletionTokens: 8000,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "top_k",
+      "frequency_penalty",
+      "presence_penalty",
+    ],
+    ptbEnabled: true,
   },
-
-  "sonar-reasoning": {
-    perplexity: {
-      name: "Perplexity | perplexity/sonar-reasoning",
-      pricing: {
-        prompt: 1,
-        completion: 5,
-        cacheRead: null,
-        cacheWrite: null,
-      },
-      contextLength: 128000,
-      maxCompletionTokens: null,
-      supportedParameters: [
-        "reasoning",
-        "include_reasoning",
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "top_k",
-        "frequency_penalty",
-        "presence_penalty",
-      ],
+  "sonar-reasoning:perplexity": {
+    modelId: "sonar-reasoning",
+    provider: "perplexity",
+    providerModelId: "sonar-reasoning",
+    pricing: {
+      prompt: 1,
+      completion: 5,
     },
+    contextLength: 128000,
+    maxCompletionTokens: 8000,
+    supportedParameters: [
+      "reasoning",
+      "include_reasoning",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "top_k",
+      "frequency_penalty",
+      "presence_penalty",
+    ],
+    ptbEnabled: true,
   },
-} satisfies Record<PerplexityModelName, ModelEndpointMap>;
-
-export default perplexityEndpoints;
+} satisfies Record<PerplexityEndpointId, Endpoint>;

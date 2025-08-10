@@ -2,11 +2,10 @@
  * Nvidia metadata
  */
 
-import { type AuthorMetadata } from '../../types';
+import type { AuthorMetadata } from "../../types";
+import { nvidiaModels } from "./models";
 
-export const nvidiaMetadata: AuthorMetadata = {
-  modelCount: 4,
+export const nvidiaMetadata = {
+  modelCount: Object.keys(nvidiaModels).length,
   supported: false,
-};
-
-export default nvidiaMetadata;
+} satisfies AuthorMetadata;

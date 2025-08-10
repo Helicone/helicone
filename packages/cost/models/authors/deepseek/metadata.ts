@@ -1,12 +1,11 @@
 /**
- * Deepseek metadata
+ * DeepSeek metadata
  */
 
-import { type AuthorMetadata } from '../../types';
+import type { AuthorMetadata } from "../../types";
+import { deepseekModels } from "./models";
 
-export const deepseekMetadata: AuthorMetadata = {
-  modelCount: 19,
+export const deepseekMetadata = {
+  modelCount: Object.keys(deepseekModels).length,
   supported: true,
-};
-
-export default deepseekMetadata;
+} satisfies AuthorMetadata;

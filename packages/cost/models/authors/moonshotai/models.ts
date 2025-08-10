@@ -1,22 +1,14 @@
 /**
- * Moonshotai model definitions
+ * MoonshotAI model definitions
  */
 
-import { type Model } from '../../types';
+import type { Model } from "../../types";
 
 /**
- * Moonshot AI model names
+ * MoonshotAI model names as const array
  */
-export type MoonshotModelName =
-  // | "kimi-k2:free"  // TODO: Add endpoints
-  // | "kimi-k2"  // TODO: Add endpoints
-  // | "kimi-dev-72b:free"  // TODO: Add endpoints
-  // | "kimi-vl-a3b-thinking:free"  // TODO: Add endpoints
-  // | "kimi-vl-a3b-thinking"  // TODO: Add endpoints
-  never;
+export const moonshotaiModelNames = [] as const;
 
-export const moonshotaiModels = {
-  // TODO: Add models when endpoints are available
-} satisfies Record<MoonshotModelName, Model>;
+export type MoonshotModelName = (typeof moonshotaiModelNames)[number];
 
-export default moonshotaiModels;
+export const moonshotaiModels = {} satisfies Record<MoonshotModelName, Model>;

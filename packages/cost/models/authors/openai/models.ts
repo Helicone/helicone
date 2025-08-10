@@ -2,35 +2,37 @@
  * OpenAI model definitions
  */
 
-import { type Model } from "../../types";
+import type { Model } from "../../types";
 
 /**
- * OpenAI model names
+ * OpenAI model names as const array
  */
-export type OpenAIModelName =
-  | "o3-pro"
-  | "o4-mini-high"
-  | "o3"
-  | "o4-mini"
-  | "gpt-4.1"
-  | "gpt-4.1-mini"
-  | "gpt-4.1-nano"
-  | "o1-pro"
-  | "gpt-4o-mini-search-preview"
-  | "gpt-4o-search-preview"
-  | "o3-mini-high"
-  | "o3-mini"
-  | "o1"
-  | "o1-mini"
-  | "chatgpt-4o-latest"
-  | "gpt-4o-mini"
-  | "gpt-4o"
-  | "gpt-4o:extended"
-  | "gpt-4";
+export const openaiModelNames = [
+  "o3-pro",
+  "o4-mini-high",
+  "o3",
+  "o4-mini",
+  "gpt-4.1",
+  "gpt-4.1-mini",
+  "gpt-4.1-nano",
+  "o1-pro",
+  "gpt-4o-mini-search-preview",
+  "gpt-4o-search-preview",
+  "o3-mini-high",
+  "o3-mini",
+  "o1",
+  "o1-mini",
+  "chatgpt-4o-latest",
+  "gpt-4o-mini",
+  "gpt-4o",
+  "gpt-4o:extended",
+  "gpt-4",
+] as const;
+
+export type OpenAIModelName = (typeof openaiModelNames)[number];
 
 export const openaiModels = {
   "o3-pro": {
-    id: "o3-pro",
     name: "OpenAI: o3 Pro",
     author: "openai",
     description:
@@ -42,7 +44,6 @@ export const openaiModels = {
     tokenizer: "GPT",
   },
   "o4-mini-high": {
-    id: "o4-mini-high",
     name: "OpenAI: o4 Mini High",
     author: "openai",
     description:
@@ -53,9 +54,7 @@ export const openaiModels = {
     modality: "text+image->text",
     tokenizer: "GPT",
   },
-
   o3: {
-    id: "o3",
     name: "OpenAI: o3",
     author: "openai",
     description:
@@ -66,9 +65,7 @@ export const openaiModels = {
     modality: "text+image->text",
     tokenizer: "GPT",
   },
-
   "o4-mini": {
-    id: "o4-mini",
     name: "OpenAI: o4 Mini",
     author: "openai",
     description:
@@ -79,9 +76,7 @@ export const openaiModels = {
     modality: "text+image->text",
     tokenizer: "GPT",
   },
-
   "gpt-4.1": {
-    id: "gpt-4.1",
     name: "OpenAI: GPT-4.1",
     author: "openai",
     description:
@@ -92,9 +87,7 @@ export const openaiModels = {
     modality: "text+image->text",
     tokenizer: "GPT",
   },
-
   "gpt-4.1-mini": {
-    id: "gpt-4.1-mini",
     name: "OpenAI: GPT-4.1 Mini",
     author: "openai",
     description:
@@ -105,9 +98,7 @@ export const openaiModels = {
     modality: "text+image->text",
     tokenizer: "GPT",
   },
-
   "gpt-4.1-nano": {
-    id: "gpt-4.1-nano",
     name: "OpenAI: GPT-4.1 Nano",
     author: "openai",
     description:
@@ -118,9 +109,7 @@ export const openaiModels = {
     modality: "text+image->text",
     tokenizer: "GPT",
   },
-
   "o1-pro": {
-    id: "o1-pro",
     name: "OpenAI: o1-pro",
     author: "openai",
     description:
@@ -131,9 +120,7 @@ export const openaiModels = {
     modality: "text+image->text",
     tokenizer: "GPT",
   },
-
   "gpt-4o-mini-search-preview": {
-    id: "gpt-4o-mini-search-preview",
     name: "OpenAI: GPT-4o-mini Search Preview",
     author: "openai",
     description:
@@ -144,9 +131,7 @@ export const openaiModels = {
     modality: "text->text",
     tokenizer: "GPT",
   },
-
   "gpt-4o-search-preview": {
-    id: "gpt-4o-search-preview",
     name: "OpenAI: GPT-4o Search Preview",
     author: "openai",
     description:
@@ -157,9 +142,7 @@ export const openaiModels = {
     modality: "text->text",
     tokenizer: "GPT",
   },
-
   "o3-mini-high": {
-    id: "o3-mini-high",
     name: "OpenAI: o3 Mini High",
     author: "openai",
     description:
@@ -170,9 +153,7 @@ export const openaiModels = {
     modality: "text->text",
     tokenizer: "GPT",
   },
-
   "o3-mini": {
-    id: "o3-mini",
     name: "OpenAI: o3 Mini",
     author: "openai",
     description:
@@ -183,9 +164,7 @@ export const openaiModels = {
     modality: "text->text",
     tokenizer: "GPT",
   },
-
   o1: {
-    id: "o1",
     name: "OpenAI: o1",
     author: "openai",
     description:
@@ -196,9 +175,7 @@ export const openaiModels = {
     modality: "text+image->text",
     tokenizer: "GPT",
   },
-
   "o1-mini": {
-    id: "o1-mini",
     name: "OpenAI: o1-mini",
     author: "openai",
     description:
@@ -209,9 +186,7 @@ export const openaiModels = {
     modality: "text->text",
     tokenizer: "GPT",
   },
-
   "chatgpt-4o-latest": {
-    id: "chatgpt-4o-latest",
     name: "OpenAI: ChatGPT-4o",
     author: "openai",
     description:
@@ -222,9 +197,7 @@ export const openaiModels = {
     modality: "text+image->text",
     tokenizer: "GPT",
   },
-
   "gpt-4o-mini": {
-    id: "gpt-4o-mini",
     name: "OpenAI: GPT-4o-mini",
     author: "openai",
     description:
@@ -235,9 +208,7 @@ export const openaiModels = {
     modality: "text+image->text",
     tokenizer: "GPT",
   },
-
   "gpt-4o": {
-    id: "gpt-4o",
     name: "OpenAI: GPT-4o",
     author: "openai",
     description:
@@ -248,9 +219,7 @@ export const openaiModels = {
     modality: "text+image->text",
     tokenizer: "GPT",
   },
-
   "gpt-4o:extended": {
-    id: "gpt-4o:extended",
     name: "OpenAI: GPT-4o (extended)",
     author: "openai",
     description:
@@ -261,9 +230,7 @@ export const openaiModels = {
     modality: "text+image->text",
     tokenizer: "GPT",
   },
-
   "gpt-4": {
-    id: "gpt-4",
     name: "OpenAI: GPT-4",
     author: "openai",
     description:
@@ -275,5 +242,3 @@ export const openaiModels = {
     tokenizer: "GPT",
   },
 } satisfies Record<OpenAIModelName, Model>;
-
-export default openaiModels;

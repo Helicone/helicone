@@ -1,12 +1,10 @@
 /**
- * Anthropic model definitions
+ * Anthropic model definitions (flat structure)
  */
 
-import { type Model } from "../../types";
+import type { Model } from "../../types";
 
-/**
- * Anthropic model names
- */
+// Strict type for Anthropic model names
 export type AnthropicModelName =
   | "claude-opus-4-1"
   | "claude-opus-4"
@@ -17,9 +15,9 @@ export type AnthropicModelName =
   | "claude-3-haiku"
   | "claude-3-opus";
 
+// Models are keyed by their ID for O(1) lookup
 export const anthropicModels = {
   "claude-opus-4-1": {
-    id: "claude-opus-4-1",
     name: "Anthropic: Claude Opus 4.1",
     author: "anthropic",
     description:
@@ -32,7 +30,6 @@ export const anthropicModels = {
   },
 
   "claude-opus-4": {
-    id: "claude-opus-4",
     name: "Anthropic: Claude Opus 4",
     author: "anthropic",
     description:
@@ -45,7 +42,6 @@ export const anthropicModels = {
   },
 
   "claude-sonnet-4": {
-    id: "claude-sonnet-4",
     name: "Anthropic: Claude Sonnet 4",
     author: "anthropic",
     description:
@@ -58,7 +54,6 @@ export const anthropicModels = {
   },
 
   "claude-3.7-sonnet": {
-    id: "claude-3.7-sonnet",
     name: "Anthropic: Claude 3.7 Sonnet",
     author: "anthropic",
     description:
@@ -71,7 +66,6 @@ export const anthropicModels = {
   },
 
   "claude-3.5-sonnet": {
-    id: "claude-3.5-sonnet",
     name: "Anthropic: Claude 3.5 Sonnet",
     author: "anthropic",
     description:
@@ -84,7 +78,6 @@ export const anthropicModels = {
   },
 
   "claude-3.5-haiku": {
-    id: "claude-3.5-haiku",
     name: "Anthropic: Claude 3.5 Haiku",
     author: "anthropic",
     description:
@@ -97,7 +90,6 @@ export const anthropicModels = {
   },
 
   "claude-3-haiku": {
-    id: "claude-3-haiku",
     name: "Anthropic: Claude 3 Haiku",
     author: "anthropic",
     description:
@@ -110,7 +102,6 @@ export const anthropicModels = {
   },
 
   "claude-3-opus": {
-    id: "claude-3-opus",
     name: "Anthropic: Claude 3 Opus",
     author: "anthropic",
     description:
@@ -122,5 +113,3 @@ export const anthropicModels = {
     tokenizer: "Claude",
   },
 } satisfies Record<AnthropicModelName, Model>;
-
-export default anthropicModels;

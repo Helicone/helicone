@@ -2,11 +2,14 @@
  * Meta-Llama endpoint configurations
  */
 
-import type { ModelEndpointMap } from "../../types";
-import type { MetaLlamaModelName } from "./models";
+import type { Endpoint } from "../../types";
 
-export const metaLlamaEndpoints = {
-  // TODO: Add endpoints for meta-llama models
-} satisfies Record<MetaLlamaModelName, ModelEndpointMap>;
+/**
+ * Meta-Llama endpoint IDs
+ */
+export type MetaLlamaEndpointId = never;
 
-export default metaLlamaEndpoints;
+export const metaLlamaEndpoints = {} satisfies Record<
+  MetaLlamaEndpointId,
+  Endpoint
+>;

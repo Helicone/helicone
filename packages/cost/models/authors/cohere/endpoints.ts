@@ -2,12 +2,12 @@
  * Cohere endpoint configurations
  */
 
-import type { ModelEndpointMap } from "../../types";
+import type { Endpoint } from "../../types";
 import type { CohereModelName } from "./models";
 
-export const cohereEndpoints = {} satisfies Record<
-  CohereModelName,
-  ModelEndpointMap
->;
+/**
+ * Cohere endpoint IDs
+ */
+export type CohereEndpointId = never;
 
-export default cohereEndpoints;
+export const cohereEndpoints = {} satisfies Record<CohereEndpointId, Endpoint>;

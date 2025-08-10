@@ -1,215 +1,208 @@
 /**
- * Xai endpoint configurations
+ * X-AI endpoint configurations
  */
 
-import type { ModelEndpointMap } from "../../types";
+import type { Endpoint } from "../../types";
 import type { XAIModelName } from "./models";
 
+/**
+ * X-AI endpoint IDs
+ */
+export type XAIEndpointId = `${XAIModelName}:xai`;
+
 export const xAiEndpoints = {
-  "grok-4": {
-    xai: {
-      name: "xAI | x-ai/grok-4-07-09",
-      pricing: {
-        prompt: 3,
-        completion: 15,
-        cacheRead: 0.75,
-        cacheWrite: null,
-      },
-      contextLength: 256000,
-      maxCompletionTokens: null,
-      supportedParameters: [
-        "tools",
-        "tool_choice",
-        "reasoning",
-        "include_reasoning",
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "seed",
-        "response_format",
-      ],
+  "grok-4:xai": {
+    modelId: "grok-4",
+    provider: "xai",
+    providerModelId: "grok-4-07-09",
+    pricing: {
+      prompt: 3,
+      completion: 15,
+      cacheRead: 0.75,
     },
+    contextLength: 256000,
+    maxCompletionTokens: 256000,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "reasoning",
+      "include_reasoning",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "seed",
+      "response_format",
+    ],
+    ptbEnabled: true,
   },
-
-  "grok-3-mini": {
-    xai: {
-      name: "xAI | x-ai/grok-3-mini",
-      pricing: {
-        prompt: 0.3,
-        completion: 0.5,
-        cacheRead: 0.075,
-        cacheWrite: null,
-      },
-      contextLength: 131072,
-      maxCompletionTokens: null,
-      supportedParameters: [
-        "tools",
-        "tool_choice",
-        "reasoning",
-        "include_reasoning",
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "seed",
-        "response_format",
-        "stop",
-      ],
+  "grok-3-mini:xai": {
+    modelId: "grok-3-mini",
+    provider: "xai",
+    providerModelId: "grok-3-mini",
+    pricing: {
+      prompt: 0.3,
+      completion: 0.5,
+      cacheRead: 0.075,
     },
+    contextLength: 131072,
+    maxCompletionTokens: 131072,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "reasoning",
+      "include_reasoning",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "seed",
+      "response_format",
+      "stop",
+    ],
+    ptbEnabled: true,
   },
-
-  "grok-3": {
-    xai: {
-      name: "xAI | x-ai/grok-3",
-      pricing: {
-        prompt: 3,
-        completion: 15,
-        cacheRead: 0.75,
-        cacheWrite: null,
-      },
-      contextLength: 131072,
-      maxCompletionTokens: null,
-      supportedParameters: [
-        "tools",
-        "tool_choice",
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "seed",
-        "response_format",
-        "stop",
-        "frequency_penalty",
-        "presence_penalty",
-      ],
+  "grok-3:xai": {
+    modelId: "grok-3",
+    provider: "xai",
+    providerModelId: "grok-3",
+    pricing: {
+      prompt: 3,
+      completion: 15,
+      cacheRead: 0.75,
     },
+    contextLength: 131072,
+    maxCompletionTokens: 131072,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "seed",
+      "response_format",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+    ],
+    ptbEnabled: true,
   },
-
-  "grok-3-mini-beta": {
-    xai: {
-      name: "xAI | x-ai/grok-3-mini",
-      pricing: {
-        prompt: 0.3,
-        completion: 0.5,
-        cacheRead: 0.075,
-        cacheWrite: null,
-      },
-      contextLength: 131072,
-      maxCompletionTokens: null,
-      supportedParameters: [
-        "tools",
-        "tool_choice",
-        "reasoning",
-        "include_reasoning",
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "seed",
-        "response_format",
-        "stop",
-      ],
+  "grok-3-mini-beta:xai": {
+    modelId: "grok-3-mini-beta",
+    provider: "xai",
+    providerModelId: "grok-3-mini-beta",
+    pricing: {
+      prompt: 0.3,
+      completion: 0.5,
+      cacheRead: 0.075,
     },
+    contextLength: 131072,
+    maxCompletionTokens: 131072,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "reasoning",
+      "include_reasoning",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "seed",
+      "response_format",
+      "stop",
+    ],
+    ptbEnabled: true,
   },
-
-  "grok-3-beta": {
-    xai: {
-      name: "xAI | x-ai/grok-3",
-      pricing: {
-        prompt: 3,
-        completion: 15,
-        cacheRead: 0.75,
-        cacheWrite: null,
-      },
-      contextLength: 131072,
-      maxCompletionTokens: null,
-      supportedParameters: [
-        "tools",
-        "tool_choice",
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "seed",
-        "response_format",
-        "stop",
-        "frequency_penalty",
-        "presence_penalty",
-      ],
+  "grok-3-beta:xai": {
+    modelId: "grok-3-beta",
+    provider: "xai",
+    providerModelId: "grok-3-beta",
+    pricing: {
+      prompt: 3,
+      completion: 15,
+      cacheRead: 0.75,
     },
+    contextLength: 131072,
+    maxCompletionTokens: 131072,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "seed",
+      "response_format",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+    ],
+    ptbEnabled: true,
   },
-
-  "grok-2-vision-1212": {
-    xai: {
-      name: "xAI | x-ai/grok-2-vision-1212",
-      pricing: {
-        prompt: 2,
-        completion: 10,
-        image: 0.0036,
-        cacheRead: null,
-        cacheWrite: null,
-      },
-      contextLength: 32768,
-      maxCompletionTokens: null,
-      supportedParameters: [
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "seed",
-        "response_format",
-        "stop",
-        "frequency_penalty",
-        "presence_penalty",
-      ],
+  "grok-2-vision-1212:xai": {
+    modelId: "grok-2-vision-1212",
+    provider: "xai",
+    providerModelId: "grok-2-vision-1212",
+    pricing: {
+      prompt: 2,
+      completion: 10,
+      image: 0.0036,
     },
+    contextLength: 32768,
+    maxCompletionTokens: 32768,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "seed",
+      "response_format",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+    ],
+    ptbEnabled: true,
   },
-
-  "grok-2-1212": {
-    xai: {
-      name: "xAI | x-ai/grok-2-1212",
-      pricing: {
-        prompt: 2,
-        completion: 10,
-        cacheRead: null,
-        cacheWrite: null,
-      },
-      contextLength: 131072,
-      maxCompletionTokens: null,
-      supportedParameters: [
-        "tools",
-        "tool_choice",
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "seed",
-        "response_format",
-        "stop",
-        "frequency_penalty",
-        "presence_penalty",
-      ],
+  "grok-2-1212:xai": {
+    modelId: "grok-2-1212",
+    provider: "xai",
+    providerModelId: "grok-2-1212",
+    pricing: {
+      prompt: 2,
+      completion: 10,
     },
+    contextLength: 131072,
+    maxCompletionTokens: 131072,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "seed",
+      "response_format",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+    ],
+    ptbEnabled: true,
   },
-
-  "grok-vision-beta": {
-    xai: {
-      name: "xAI | x-ai/grok-vision-beta",
-      pricing: {
-        prompt: 5,
-        completion: 15,
-        image: 0.009,
-        cacheRead: null,
-        cacheWrite: null,
-      },
-      contextLength: 8192,
-      maxCompletionTokens: null,
-      supportedParameters: [
-        "max_tokens",
-        "temperature",
-        "top_p",
-        "seed",
-        "response_format",
-        "stop",
-        "frequency_penalty",
-        "presence_penalty",
-      ],
+  "grok-vision-beta:xai": {
+    modelId: "grok-vision-beta",
+    provider: "xai",
+    providerModelId: "grok-vision-beta",
+    pricing: {
+      prompt: 5,
+      completion: 15,
+      image: 0.009,
     },
+    contextLength: 8192,
+    maxCompletionTokens: 8192,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "seed",
+      "response_format",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+    ],
+    ptbEnabled: true,
   },
-} satisfies Record<XAIModelName, ModelEndpointMap>;
-
-export default xAiEndpoints;
+} satisfies Record<XAIEndpointId, Endpoint>;

@@ -1,20 +1,7 @@
 /**
- * Anthropic author data aggregation
+ * Anthropic author exports
  */
 
-import { type AuthorData } from '../../types';
-import anthropicModels, { type AnthropicModelName } from './models';
-import anthropicEndpoints from './endpoints';
-import anthropicMetadata from './metadata';
-
-export const anthropic: AuthorData<AnthropicModelName> = {
-  metadata: {
-    ...anthropicMetadata,
-    modelCount: Object.keys(anthropicModels).length,
-  },
-  models: anthropicModels,
-  endpoints: anthropicEndpoints,
-};
-
-export type { AnthropicModelName };
-export default anthropic;
+export { anthropicMetadata } from "./metadata";
+export { anthropicModels, type AnthropicModelName } from "./models";
+export { anthropicEndpoints, type AnthropicEndpointId } from "./endpoints";

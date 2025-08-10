@@ -2,11 +2,10 @@
  * Cohere metadata
  */
 
-import { type AuthorMetadata } from '../../types';
+import type { AuthorMetadata } from "../../types";
+import { cohereModels } from "./models";
 
-export const cohereMetadata: AuthorMetadata = {
-  modelCount: 9,
+export const cohereMetadata = {
+  modelCount: Object.keys(cohereModels).length,
   supported: true,
-};
-
-export default cohereMetadata;
+} satisfies AuthorMetadata;

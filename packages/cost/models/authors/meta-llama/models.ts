@@ -1,37 +1,14 @@
 /**
- * Metallama model definitions
+ * Meta-Llama model definitions
  */
 
-import { type Model } from '../../types';
+import type { Model } from "../../types";
 
 /**
- * Meta-Llama model names
+ * Meta-Llama model names as const array
  */
-export type MetaLlamaModelName =
-  // | "llama-guard-4-12b"  // TODO: Add endpoints
-  // | "llama-4-maverick"  // TODO: Add endpoints
-  // | "llama-4-scout"  // TODO: Add endpoints
-  // | "llama-guard-3-8b"  // TODO: Add endpoints
-  // | "llama-3.3-70b-instruct:free"  // TODO: Add endpoints
-  // | "llama-3.3-70b-instruct"  // TODO: Add endpoints
-  // | "llama-3.2-3b-instruct:free"  // TODO: Add endpoints
-  // | "llama-3.2-3b-instruct"  // TODO: Add endpoints
-  // | "llama-3.2-11b-vision-instruct:free"  // TODO: Add endpoints
-  // | "llama-3.2-11b-vision-instruct"  // TODO: Add endpoints
-  // | "llama-3.2-90b-vision-instruct"  // TODO: Add endpoints
-  // | "llama-3.2-1b-instruct"  // TODO: Add endpoints
-  // | "llama-3.1-405b"  // TODO: Add endpoints
-  // | "llama-3.1-405b-instruct:free"  // TODO: Add endpoints
-  // | "llama-3.1-405b-instruct"  // TODO: Add endpoints
-  // | "llama-3.1-8b-instruct"  // TODO: Add endpoints
-  // | "llama-3.1-70b-instruct"  // TODO: Add endpoints
-  // | "llama-guard-2-8b"  // TODO: Add endpoints
-  // | "llama-3-70b-instruct"  // TODO: Add endpoints
-  // | "llama-3-8b-instruct"  // TODO: Add endpoints
-  never;
+export const metaLlamaModelNames = [] as const;
 
-export const metaLlamaModels = {
-  // TODO: Add models when endpoints are available
-} satisfies Record<MetaLlamaModelName, Model>;
+export type MetaLlamaModelName = (typeof metaLlamaModelNames)[number];
 
-export default metaLlamaModels;
+export const metaLlamaModels = {} satisfies Record<MetaLlamaModelName, Model>;

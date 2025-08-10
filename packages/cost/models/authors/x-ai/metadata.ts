@@ -1,12 +1,11 @@
 /**
- * Xai metadata
+ * X-AI metadata
  */
 
-import { type AuthorMetadata } from '../../types';
+import type { AuthorMetadata } from "../../types";
+import { xAiModels } from "./models";
 
-export const xAiMetadata: AuthorMetadata = {
-  modelCount: 8,
+export const xAiMetadata = {
+  modelCount: Object.keys(xAiModels).length,
   supported: true,
-};
-
-export default xAiMetadata;
+} satisfies AuthorMetadata;

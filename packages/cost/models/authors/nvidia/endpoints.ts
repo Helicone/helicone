@@ -2,11 +2,12 @@
  * Nvidia endpoint configurations
  */
 
-import type { ModelEndpointMap } from "../../types";
+import type { Endpoint } from "../../types";
 import type { NvidiaModelName } from "./models";
 
-export const nvidiaEndpoints = {
-  // TODO: Add endpoints for nvidia models
-} satisfies Record<NvidiaModelName, ModelEndpointMap>;
+/**
+ * Nvidia endpoint IDs
+ */
+export type NvidiaEndpointId = never;
 
-export default nvidiaEndpoints;
+export const nvidiaEndpoints = {} satisfies Record<NvidiaEndpointId, Endpoint>;

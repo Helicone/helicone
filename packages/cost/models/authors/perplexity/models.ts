@@ -2,20 +2,22 @@
  * Perplexity model definitions
  */
 
-import { type Model } from "../../types";
+import type { Model } from "../../types";
 
 /**
- * Perplexity model names
+ * Perplexity model names as const array
  */
-export type PerplexityModelName =
-  | "sonar-reasoning-pro"
-  | "sonar-pro"
-  | "sonar-reasoning"
-  | "sonar";
+export const perplexityModelNames = [
+  "sonar-reasoning-pro",
+  "sonar-pro",
+  "sonar-reasoning",
+  "sonar",
+] as const;
+
+export type PerplexityModelName = (typeof perplexityModelNames)[number];
 
 export const perplexityModels = {
   "sonar-reasoning-pro": {
-    id: "sonar-reasoning-pro",
     name: "Perplexity: Sonar Reasoning Pro",
     author: "perplexity",
     description:
@@ -26,9 +28,7 @@ export const perplexityModels = {
     modality: "text+image->text",
     tokenizer: "GPT",
   },
-
   "sonar-pro": {
-    id: "sonar-pro",
     name: "Perplexity: Sonar Pro",
     author: "perplexity",
     description:
@@ -39,9 +39,7 @@ export const perplexityModels = {
     modality: "text+image->text",
     tokenizer: "GPT",
   },
-
   "sonar-reasoning": {
-    id: "sonar-reasoning",
     name: "Perplexity: Sonar Reasoning",
     author: "perplexity",
     description:
@@ -52,13 +50,11 @@ export const perplexityModels = {
     modality: "text->text",
     tokenizer: "GPT",
   },
-
   sonar: {
-    id: "sonar",
     name: "Perplexity: Sonar",
     author: "perplexity",
     description:
-      "Sonar is lightweight, affordable, fast, and simple to use \u2014 now featuring citations and the ability to customize sources. It is designed for companies seeking to integrate lightweight question-and-answer features optimized for speed.",
+      "Sonar is lightweight, affordable, fast, and simple to use — now featuring citations and the ability to customize sources. It is designed for companies seeking to integrate lightweight question-and-answer features optimized for speed.",
     contextLength: 127072,
     maxOutputTokens: 4000,
     created: "2025-01-27T21:36:48.000Z",
@@ -66,5 +62,3 @@ export const perplexityModels = {
     tokenizer: "GPT",
   },
 } satisfies Record<PerplexityModelName, Model>;
-
-export default perplexityModels;

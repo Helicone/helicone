@@ -2,11 +2,10 @@
  * OpenAI metadata
  */
 
-import { type AuthorMetadata } from '../../types';
+import type { AuthorMetadata } from "../../types";
+import { openaiModels } from "./models";
 
-export const openaiMetadata: AuthorMetadata = {
-  modelCount: 33,
+export const openaiMetadata = {
+  modelCount: Object.keys(openaiModels).length,
   supported: true,
-};
-
-export default openaiMetadata;
+} satisfies AuthorMetadata;
