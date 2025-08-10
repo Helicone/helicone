@@ -28,7 +28,7 @@ export async function safePut({
       throw new Error("CLOUDFLARE_KV_NAMESPACE_ID is not set");
     }
     await cloudflare.kv.namespaces.values.update(
-      process.env.CLOUDFLARE_KV_NAMESPACE_ID ?? "",
+      process.env.CLOUDFLARE_KV_NAMESPACE_ID,
       keyName,
       // value,
       {
