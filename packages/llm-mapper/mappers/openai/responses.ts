@@ -175,7 +175,7 @@ export const getResponseText = (
     }
 
     // A consolidated response from a streamed OpenAI /v1/responses call
-    if (responseBody?.item?.content && Array.isArray(responseBody.item.content)) {
+    if (responseBody?.item?.content && Array.isArray(responseBody.item.content) && responseBody.item.content.length) {
       const contentArray = responseBody.item.content;
       const textContent = contentArray.find(
         (c: any) => c?.type === "output_text",
