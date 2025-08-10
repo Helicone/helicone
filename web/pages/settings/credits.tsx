@@ -24,7 +24,7 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
   const transactions: any[] = [];
 
   return (
-    <div className="flex w-full max-w-6xl flex-col border border-border bg-background">
+    <div className="flex w-full max-w-6xl flex-col border-y border-border">
       {/* Coming Soon Banner */}
       <div className="border-b border-amber-200 bg-amber-50 p-3 text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
         <div className="text-center text-sm font-medium">

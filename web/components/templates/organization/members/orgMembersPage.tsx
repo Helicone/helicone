@@ -12,6 +12,7 @@ import {
   SettingsSectionContent,
 } from "@/components/ui/settings-container";
 import "@/styles/settings.css";
+import { PlusIcon } from "lucide-react";
 interface OrgMembersPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
   wFull?: boolean;
@@ -70,14 +71,16 @@ const OrgMembersPage = (props: OrgMembersPageProps) => {
               onClick={() => setAddOpen(true)}
               variant="default"
               size="sm"
+              className="flex items-center gap-1"
             >
-              add member +
+              Add Member
+              <PlusIcon className="h-4 w-4" />
             </Button>
           </ProFeatureWrapper>
         </div>
       </SettingsSectionHeader>
 
-      <SettingsSectionContent>
+      <SettingsSectionContent className="!p-0">
         {isLoading ? (
           <ul className="flex flex-col space-y-4">
             {Array.from({ length: 3 }).map((_, index) => (

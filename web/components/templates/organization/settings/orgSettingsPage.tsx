@@ -112,7 +112,7 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
       <SettingsSection title="Organization Customization">
         <div className="flex max-w-[450px] flex-col gap-6">
           <div className="flex flex-col gap-3">
-            <Label>
+            <Label className="items-start justify-start">
               <XSmall className="font-medium">Choose a color</XSmall>
             </Label>
             <RadioGroup
@@ -153,7 +153,7 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
           </div>
 
           <div className="flex flex-col gap-3">
-            <Label>
+            <Label className="items-start justify-start">
               <XSmall className="font-medium">Choose an icon</XSmall>
             </Label>
             <RadioGroup
@@ -205,7 +205,7 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
             <Button
               variant="outline"
               size="sm"
-              className="border-destructive text-xs text-destructive hover:bg-destructive hover:text-destructive-foreground"
+              className="border-destructive text-xs text-destructive hover:bg-destructive hover:text-destructive-foreground dark:bg-destructive dark:text-destructive-foreground dark:hover:bg-destructive/80 dark:hover:text-destructive-foreground/80"
               onClick={() => setDeleteOpen(true)}
             >
               Delete Organization

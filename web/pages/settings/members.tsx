@@ -8,7 +8,7 @@ import SettingsLayout from "@/components/templates/settings/settingsLayout";
 const MembersSettings: NextPageWithLayout<void> = () => {
   const orgContext = useOrg();
   return orgContext?.currentOrg ? (
-    <div className="flex w-full max-w-6xl flex-col border border-border bg-background">
+    <div className="flex w-full max-w-6xl flex-col border-y border-border">
       <OrgMembersPage org={orgContext.currentOrg} wFull />
     </div>
   ) : null;

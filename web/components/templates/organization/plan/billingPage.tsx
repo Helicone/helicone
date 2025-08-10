@@ -23,7 +23,7 @@ const BillingPlanPage = (props: OrgPlanPageProps) => {
 
   return (
     <>
-      <Col className="gap-4">
+      <Col className="gap-4 p-4">
         {org?.currentOrg?.tier === "growth" && <MigrateGrowthToPro />}
         {org?.currentOrg?.tier === "free" && <FreePlanCard />}
         {org?.currentOrg?.tier === "pro-20240913" && <ProPlanCard />}

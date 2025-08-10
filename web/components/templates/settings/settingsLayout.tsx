@@ -131,7 +131,7 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
 
   const renderNavSection = (title: string, tabs: typeof ORGANIZATION_TABS) => (
     <div className="space-y-2">
-      <h3 className="px-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+      <h3 className="px-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
         {title}
       </h3>
       <nav className="space-y-1">
@@ -174,7 +174,7 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
       {org?.currentOrg?.tier !== "demo" && (
         <div className="-mt-6 flex h-full min-h-screen">
           {/* Settings Sidebar */}
-          <div className="w-48 border-r border-slate-200 bg-slate-50/50 px-4 py-4 dark:border-slate-800 dark:bg-slate-900/50">
+          <div className="w-48 border-r border-slate-200 bg-slate-50/50 px-2 py-2 dark:border-slate-800 dark:bg-slate-900/50">
             <div className="space-y-8">
               {renderNavSection("Organization", organizationTabs)}
               {renderNavSection("Developer", DEVELOPER_TABS)}
@@ -182,7 +182,7 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
           </div>
 
           {/* Main Content */}
-          <div className="flex-1 px-6 py-6">{children}</div>
+          <div className="flex-1">{children}</div>
         </div>
       )}
     </>
