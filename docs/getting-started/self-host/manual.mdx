@@ -60,7 +60,7 @@ python3 minio_hcone.py --restart
 
 # Start Postgres
 docker run -d --name helicone-postgres-flyway-test -e POSTGRES_DB=helicone_test -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=testpassword -p 54388:5432 -v postgres_flyway_data:/var/lib/postgresql/data postgres:17.4
-flyway migrate -configFiles=supabase/flyway.conf
+flyway migrate -configFiles=postgres/flyway.conf
 ```
 
 ### Start mailhog server (local email testing)

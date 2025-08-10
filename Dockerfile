@@ -37,14 +37,14 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 ENV FLYWAY_URL=jdbc:postgresql://localhost:5432/helicone_test
 ENV FLYWAY_USER=postgres
 ENV FLYWAY_PASSWORD=password
-ENV FLYWAY_LOCATIONS=filesystem:/app/supabase/migrations,filesystem:/app/supabase/migrations_without_supabase
+ENV FLYWAY_LOCATIONS=filesystem:/app/postgres/migrations,filesystem:/app/postgres/migrations_without_supabase
 ENV FLYWAY_SQL_MIGRATION_PREFIX=
 ENV FLYWAY_SQL_MIGRATION_SEPARATOR=_
 ENV FLYWAY_SQL_MIGRATION_SUFFIXES=.sql
 
 
-COPY ./supabase/migrations /app/supabase/migrations
-COPY ./supabase/migrations_without_supabase /app/supabase/migrations_without_supabase
+COPY ./postgres/migrations /app/postgres/migrations
+COPY ./postgres/migrations_without_supabase /app/postgres/migrations_without_supabase
 COPY ./clickhouse/migrations /app/clickhouse/migrations
 COPY ./clickhouse/seeds /app/clickhouse/seeds
 COPY ./clickhouse/ch_hcone.py /app/clickhouse/ch_hcone.py

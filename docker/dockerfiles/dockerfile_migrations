@@ -23,9 +23,9 @@ RUN pip install --no-cache-dir requests clickhouse-driver tabulate yarl
 WORKDIR /app
 
 # Copy files with absolute paths from the root of the build context
-COPY ./supabase/flyway.conf /app/supabase/flyway.conf
-COPY ./supabase/migrations /app/supabase/migrations
-COPY ./supabase/migrations_without_supabase /app/supabase/migrations_without_supabase
+COPY ./postgres/flyway.conf /app/postgres/flyway.conf
+COPY ./postgres/migrations /app/postgres/migrations
+COPY ./postgres/migrations_without_supabase /app/postgres/migrations_without_supabase
 COPY ./clickhouse/migrations /app/clickhouse/migrations
 COPY ./clickhouse/seeds /app/clickhouse/seeds
 COPY ./clickhouse/ch_hcone.py /app/clickhouse/ch_hcone.py
@@ -37,10 +37,10 @@ RUN echo '#!/bin/sh \n\
     set -eu \n\
     echo "Running PostgreSQL migrations..." \n\
     echo "Cleaning database and migration history..." \n\
-    flyway -cleanDisabled=false -configFiles=/app/supabase/flyway.conf clean \n\
+    flyway -cleanDisabled=false -configFiles=/app/postgres/flyway.conf clean \n\
     echo "Repairing migration checksums..." \n\
-    flyway repair -configFiles=/app/supabase/flyway.conf \n\
-    flyway migrate -configFiles=/app/supabase/flyway.conf \n\
+    flyway repair -configFiles=/app/postgres/flyway.conf \n\
+    flyway migrate -configFiles=/app/postgres/flyway.conf \n\
     echo "PostgreSQL migrations completed" \n\
     \n\
     echo "Running ClickHouse migrations..." \n\
