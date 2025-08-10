@@ -34,7 +34,6 @@ function getAPIRouterV1(
       if (env.ENVIRONMENT !== "development") {
         return new Response("not allowed", { status: 403 });
       }
-      console.log("mock setting api key");
 
       const data = await requestWrapper.getJson<{
         apiKeyHash: string;
@@ -89,7 +88,6 @@ function getAPIRouterV1(
       if (env.ENVIRONMENT !== "development") {
         return new Response("not allowed", { status: 403 });
       }
-      console.log("mock setting provider key");
 
       const data = await requestWrapper.getJson<{
         provider: ProviderName;
@@ -152,7 +150,6 @@ function getAPIRouterV1(
       if (env.ENVIRONMENT !== "development") {
         return new Response("not allowed", { status: 403 });
       }
-      console.log("mock deleting provider key");
 
       const data = await requestWrapper.getJson<{
         providerName: ProviderName;
