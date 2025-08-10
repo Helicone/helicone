@@ -3,14 +3,18 @@ import PromptVersionCard from "./PromptVersionCard";
 
 interface PromptVersionHistoryProps {
   promptWithVersions: PromptWithVersions;
-  onSetProductionVersion: (promptId: string, promptVersionId: string) => void;
+  onSetEnvironment: (
+    promptId: string,
+    promptVersionId: string,
+    environment: string,
+  ) => void;
   onOpenPromptVersion: (promptVersionId: string) => void;
   onDeletePromptVersion: (promptVersionId: string) => void;
 }
 
 const PromptVersionHistory = ({
   promptWithVersions,
-  onSetProductionVersion,
+  onSetEnvironment,
   onOpenPromptVersion,
   onDeletePromptVersion,
 }: PromptVersionHistoryProps) => {
@@ -23,7 +27,7 @@ const PromptVersionHistory = ({
           key={version.id}
           version={version}
           isProductionVersion={version.id === productionVersion.id}
-          onSetProductionVersion={onSetProductionVersion}
+          onSetEnvironment={onSetEnvironment}
           onOpenPromptVersion={onOpenPromptVersion}
           onDeletePromptVersion={onDeletePromptVersion}
         />

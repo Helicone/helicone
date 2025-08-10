@@ -135,6 +135,20 @@ export class Prompt2025Controller extends Controller {
     return result;
   }
 
+  @Get("environments")
+  public async getPrompt2025Environments(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<string[], string>> {
+    const promptManager = new Prompt2025Manager(request.authParams);
+    const result = await promptManager.getPromptEnvironments();
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
   @Post("")
   public async createPrompt2025(
     @Body()
@@ -163,7 +177,7 @@ export class Prompt2025Controller extends Controller {
       promptId: string;
       promptVersionId: string;
       newMajorVersion: boolean;
-      setAsProduction: boolean;
+      environment?: string;
       commitMessage: string;
       promptBody: OpenAIChatRequest;
     },
@@ -180,19 +194,21 @@ export class Prompt2025Controller extends Controller {
     return result;
   }
 
-  @Post("update/production-version")
-  public async setProductionVersion(
+  @Post("update/environment")
+  public async setPromptVersionEnvironment(
     @Body()
     requestBody: {
       promptId: string;
       promptVersionId: string;
+      environment: string;
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
     const promptManager = new Prompt2025Manager(request.authParams);
-    const result = await promptManager.setProductionVersion({
+    const result = await promptManager.setPromptVersionEnvironment({
       promptId: requestBody.promptId,
       promptVersionId: requestBody.promptVersionId,
+      environment: requestBody.environment,
     });
     if (result.error) {
       this.setStatus(500);

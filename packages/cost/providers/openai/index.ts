@@ -745,6 +745,39 @@ const baseCosts: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "gpt-5-2025-08-07",
+    },
+    cost: {
+      prompt_token: 0.00000125,
+      completion_token: 0.00001,
+      prompt_cache_read_token: 0.000000125,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "gpt-5-mini-2025-08-07",
+    },
+    cost: {
+      prompt_token: 0.00000025,
+      completion_token: 0.000002,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "gpt-5-nano-2025-08-07",
+    },
+    cost: {
+      // 1m -> 0.050, 1 -> 0.05/1000000
+      prompt_token: 5e-8,
+      completion_token: 0.0000004,
+      prompt_cache_read_token: 5e-9,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
       value: "gpt-5",
     },
     cost: {

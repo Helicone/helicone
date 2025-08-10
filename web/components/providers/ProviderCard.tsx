@@ -401,7 +401,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
                   onChange={(e) =>
                     handleUpdateConfigField(field.key, e.target.value)
                   }
-                  className="h-8 text-sm"
+                  className="h-7 text-xs"
                 />
               )}
             </div>
@@ -412,8 +412,8 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
   };
 
   return (
-    <div className="overflow-hidden rounded-md border bg-card transition-colors hover:border-primary/40">
-      <div className="px-3 py-2">
+    <div className="border-b border-border bg-background transition-colors last:border-b-0 hover:bg-muted/50">
+      <div className="p-3">
         <div className="flex flex-col gap-1.5">
           {/* Provider info and key status */}
           <div className="flex items-center justify-between">
@@ -430,9 +430,9 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
                   }}
                 />
               </div>
-              <div className="text-sm font-medium">{provider.name}</div>
+              <div className="text-xs font-medium">{provider.name}</div>
               {isEditMode && (
-                <div className="rounded border border-muted-foreground/30 px-1.5 py-0.5 text-xs text-muted-foreground">
+                <div className="border border-muted-foreground/30 px-1 py-0.5 text-xs text-muted-foreground">
                   Key set
                 </div>
               )}
@@ -460,7 +460,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
                 onChange={(e) =>
                   dispatch({ type: "SET_KEY_VALUE", payload: e.target.value })
                 }
-                className="h-8 flex-1 py-1 text-sm"
+                className="h-7 flex-1 py-1 text-xs"
               />
             </div>
             {provider.id === "aws" && (
@@ -480,7 +480,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
                       payload: e.target.value,
                     })
                   }
-                  className="h-8 flex-1 py-1 text-sm"
+                  className="h-7 flex-1 py-1 text-xs"
                 />
               </div>
             )}
@@ -499,7 +499,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
                         onClick={() =>
                           handleCopyToClipboard(state.key.decryptedValue || "")
                         }
-                        className="h-8 w-8 text-blue-500"
+                        className="h-7 w-7 text-blue-500"
                       >
                         <Copy className="h-3.5 w-3.5" />
                       </Button>
@@ -518,7 +518,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
                       variant="ghost"
                       size="icon"
                       onClick={handleToggleKeyVisibility}
-                      className="h-8 w-8 text-blue-500"
+                      className="h-7 w-7 text-blue-500"
                       disabled={isLoadingKey}
                     >
                       {isLoadingKey ? (
@@ -540,7 +540,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
                 onClick={handleSaveKey}
                 disabled={(!state.key.value && !isEditMode) || isSavingKey}
                 size="sm"
-                className="flex h-8 items-center gap-1 whitespace-nowrap px-3"
+                className="flex h-7 items-center gap-1 whitespace-nowrap px-2 text-xs"
               >
                 {isSavingKey ? (
                   "Saving..."
@@ -569,7 +569,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
                 variant="ghost"
                 size="sm"
                 onClick={() => dispatch({ type: "TOGGLE_CONFIG_VISIBILITY" })}
-                className="flex h-7 items-center gap-1 px-2 text-xs text-muted-foreground"
+                className="flex h-6 items-center gap-1 px-2 text-xs text-muted-foreground"
               >
                 {state.config.isVisible ? (
                   <>

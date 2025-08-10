@@ -1,25 +1,40 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
-import { IslandContainer } from "@/components/ui/islandContainer";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 import {
   BuildingOfficeIcon,
   CreditCardIcon,
   DocumentTextIcon,
+  ExclamationTriangleIcon,
   NoSymbolIcon,
+  UsersIcon,
 } from "@heroicons/react/24/outline";
-import { FingerprintIcon, KeyIcon, LinkIcon } from "lucide-react";
+import {
+  FingerprintIcon,
+  KeyIcon,
+  LinkIcon,
+  Plug,
+  ShuffleIcon,
+  Webhook,
+  Coins,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ReactNode, useMemo } from "react";
 import { useIsGovernanceEnabled } from "../organization/hooks";
 import AuthHeader from "@/components/shared/authHeader";
 
-const DEFAULT_TABS = [
+const ORGANIZATION_TABS = [
   {
-    id: "organization",
-    title: "Organization",
+    id: "general",
+    title: "General",
     icon: BuildingOfficeIcon,
     href: "/settings",
+  },
+  {
+    id: "members",
+    title: "Members",
+    icon: UsersIcon,
+    href: "/settings/members",
   },
   {
     id: "billing",
@@ -28,11 +43,26 @@ const DEFAULT_TABS = [
     href: "/settings/billing",
   },
   {
+    id: "credits",
+    title: "Credits",
+    icon: Coins,
+    href: "/settings/credits",
+  },
+  {
     id: "reports",
     title: "Reports",
     icon: DocumentTextIcon,
     href: "/settings/reports",
   },
+  {
+    id: "rate-limits",
+    title: "Rate Limits",
+    icon: NoSymbolIcon,
+    href: "/settings/rate-limits",
+  },
+];
+
+const DEVELOPER_TABS = [
   {
     id: "api-keys",
     title: "API Keys",
@@ -40,17 +70,34 @@ const DEFAULT_TABS = [
     href: "/settings/api-keys",
   },
   {
+    id: "providers",
+    title: "Providers",
+    icon: Plug,
+    href: "/settings/providers",
+  },
+  {
+    id: "ai-gateway",
+    title: "AI Gateway",
+    icon: ShuffleIcon,
+    href: "/settings/ai-gateway",
+  },
+  {
+    id: "webhooks",
+    title: "Webhooks",
+    icon: Webhook,
+    href: "/settings/webhooks",
+  },
+  {
+    id: "alerts",
+    title: "Alerts",
+    icon: ExclamationTriangleIcon,
+    href: "/settings/alerts",
+  },
+  {
     id: "connections",
     title: "Connections",
     icon: LinkIcon,
     href: "/settings/connections",
-  },
-
-  {
-    id: "rate-limits",
-    title: "Rate Limits",
-    icon: NoSymbolIcon,
-    href: "/settings/rate-limits",
   },
 ];
 
@@ -65,65 +112,80 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
 
   const isGovernanceEnabled = useIsGovernanceEnabled();
 
-  const tabs = useMemo(() => {
+  // Add access keys for governance orgs
+  const organizationTabs = useMemo(() => {
     if (isGovernanceEnabled.data?.data?.data) {
-      return DEFAULT_TABS.slice(0, 1)
-        .concat([
-          {
-            id: "access-keys",
-            title: "Access Keys",
-            icon: FingerprintIcon,
-            href: "/settings/access-keys",
-          },
-        ])
-        .concat(DEFAULT_TABS.slice(1));
+      return [
+        ORGANIZATION_TABS[0], // General
+        {
+          id: "access-keys",
+          title: "Access Keys",
+          icon: FingerprintIcon,
+          href: "/settings/access-keys",
+        },
+        ...ORGANIZATION_TABS.slice(1), // Rest of organization tabs
+      ];
     }
-
-    return DEFAULT_TABS;
+    return ORGANIZATION_TABS;
   }, [isGovernanceEnabled.data?.data?.data]);
 
+  const renderNavSection = (title: string, tabs: typeof ORGANIZATION_TABS) => (
+    <div className="space-y-2">
+      <h3 className="px-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+        {title}
+      </h3>
+      <nav className="space-y-1">
+        {tabs.map((tab) => {
+          const isActive =
+            currentPath === tab.href ||
+            (tab.href === "/settings" && currentPath === "/settings");
+
+          return (
+            <Link key={tab.id} href={tab.href}>
+              <div
+                className={cn(
+                  "flex items-center gap-2 rounded-md px-3 py-2 text-xs transition-colors",
+                  "hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-slate-50",
+                  isActive
+                    ? "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300"
+                    : "text-slate-700 dark:text-slate-300",
+                )}
+              >
+                <tab.icon
+                  className={cn(
+                    "h-3.5 w-3.5",
+                    isActive
+                      ? "text-blue-700 dark:text-blue-300"
+                      : "text-slate-500 dark:text-slate-400",
+                  )}
+                />
+                {tab.title}
+              </div>
+            </Link>
+          );
+        })}
+      </nav>
+    </div>
+  );
+
   return (
-    <IslandContainer>
+    <>
       <AuthHeader isWithinIsland={true} title={""} />
       {org?.currentOrg?.tier !== "demo" && (
-        <div className="flex flex-col items-start space-y-8">
-          <div className="flex flex-col items-start space-y-2">
-            <Tabs
-              defaultValue={
-                tabs.find((tab) => tab.href === currentPath)?.id || "general"
-              }
-              className=""
-              orientation="vertical"
-            >
-              <TabsList className="flex w-full overflow-x-auto p-1">
-                {tabs.map((tab) => (
-                  <Link
-                    key={tab.id}
-                    href={tab.href}
-                    passHref
-                    legacyBehavior
-                    className="hover:no-underline"
-                  >
-                    <TabsTrigger
-                      value={tab.id}
-                      className="gap-2 px-4 py-2 text-sm"
-                      asChild
-                    >
-                      <a href={tab.href} className="cursor-pointer">
-                        <tab.icon className="h-5 w-5" />
-                        {tab.title}
-                      </a>
-                    </TabsTrigger>
-                  </Link>
-                ))}
-              </TabsList>
-            </Tabs>
+        <div className="-mt-6 flex h-full min-h-screen">
+          {/* Settings Sidebar */}
+          <div className="w-48 border-r border-slate-200 bg-slate-50/50 px-4 py-4 dark:border-slate-800 dark:bg-slate-900/50">
+            <div className="space-y-8">
+              {renderNavSection("Organization", organizationTabs)}
+              {renderNavSection("Developer", DEVELOPER_TABS)}
+            </div>
           </div>
 
-          <div className="w-full flex-1">{children}</div>
+          {/* Main Content */}
+          <div className="flex-1 px-6 py-6">{children}</div>
         </div>
       )}
-    </IslandContainer>
+    </>
   );
 };
 

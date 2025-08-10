@@ -2,8 +2,9 @@
 # docker build -t valhalla .. -f dockerfile
 
 # Use an official Node.js runtime as the base image
-FROM --platform=linux/amd64 node:20-bookworm-slim
+FROM node:20.19.4-bookworm-slim
 
+ARG TARGETARCH
 
 WORKDIR /usr/src/app/valhalla/prompt_security
 
@@ -15,6 +16,15 @@ RUN apt-get update && apt-get install -y supervisor
 
 # Apply security updates
 RUN apt-get update && apt-get upgrade -y && apt-get autoremove -y && apt-get clean
+
+# Install latest versions to address security vulnerabilities
+# CVE-2023-26819: libcjson vulnerability 
+# CVE-2025-6170: libxml2 vulnerability
+RUN apt-get update && \
+    apt-get install -y \
+    libcjson-dev \
+    libxml2-dev \
+    && apt-get clean
 
 # Fix CVE-2023-6879 by installing fixed aom version from testing
 RUN echo "deb https://deb.debian.org/debian testing main" > /etc/apt/sources.list.d/testing.list && \
@@ -30,7 +40,11 @@ ENV FFPROBE_PATH="/usr/bin/ffprobe"
 
 COPY ./valhalla/prompt_security/requirements.txt ./
 RUN . venv/bin/activate && \
-    pip3 install torch==2.3.1+cpu torchvision==0.18.1+cpu -f https://download.pytorch.org/whl/torch_stable.html && \
+    if [ "$TARGETARCH" = "arm64" ]; then \
+      pip3 install torch==2.3.1 torchvision==0.18.1 -f https://download.pytorch.org/whl/torch_stable.html; \
+    else \
+      pip3 install torch==2.3.1+cpu torchvision==0.18.1+cpu -f https://download.pytorch.org/whl/torch_stable.html; \
+    fi && \
     pip3 install "transformers[torch]"
 
 RUN . venv/bin/activate && \

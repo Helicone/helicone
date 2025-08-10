@@ -7,7 +7,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
-import { Rocket } from "lucide-react";
+import { Rocket, Settings } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -230,7 +230,7 @@ const DesktopSidebar = ({
         <div className="flex h-full w-full flex-col border-r border-slate-200 dark:border-slate-800">
           {/* Collapse button and OrgDropdown */}
           <div
-            className={`flex flex-row items-center p-2.5 ${isCollapsed ? "justify-center" : "justify-between"}`}
+            className={`flex h-16 flex-row items-center border-b border-slate-200 px-4 dark:border-slate-800 ${isCollapsed ? "justify-center" : "justify-between"}`}
           >
             {/* - OrgDropdown */}
             {!isCollapsed && <OrgDropdown />}
@@ -347,9 +347,36 @@ const DesktopSidebar = ({
                 ))}
             </div>
 
-            {/* Sticky help dropdown */}
+            {/* Bottom buttons */}
             {orgContext?.currentOrg?.tier !== "demo" && (
-              <div className="p-3">
+              <div className="flex flex-col gap-2 p-3">
+                {/* Settings button */}
+                <Button
+                  variant="ghost"
+                  size="none"
+                  onClick={() => router.push("/settings")}
+                  className={cn(
+                    "flex items-center text-xs hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800",
+                    isCollapsed
+                      ? "h-9 w-9 justify-center"
+                      : "h-9 w-full justify-start gap-2 px-3",
+                    router.pathname.startsWith("/settings")
+                      ? "bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900/50"
+                      : "text-muted-foreground",
+                  )}
+                >
+                  <Settings
+                    size={16}
+                    className={cn(
+                      router.pathname.startsWith("/settings")
+                        ? "text-blue-700 dark:text-blue-300"
+                        : "text-muted-foreground",
+                    )}
+                  />
+                  {!isCollapsed && <span>Configure</span>}
+                </Button>
+
+                {/* Help dropdown */}
                 <SidebarHelpDropdown
                   changelog={changelog}
                   handleChangelogClick={handleChangelogClick}
