@@ -30,6 +30,21 @@ export class APIKeysManager {
     }
   }
 
+  async setAPIKey(
+    apiKeyHash: string,
+    organizationId: string,
+    softDelete?: boolean
+  ) {
+    if (this.env.ENVIRONMENT !== "development") {
+      return;
+    }
+    if (softDelete) {
+      await removeFromCache(`api_keys_${apiKeyHash}`, this.env);
+      return;
+    }
+    await storeInCache(`api_keys_${apiKeyHash}`, organizationId, this.env);
+  }
+
   async getAPIKey(apiKeyHash: string): Promise<string | null> {
     const key = await getFromCache(`api_keys_${apiKeyHash}`, this.env);
     if (!key) {

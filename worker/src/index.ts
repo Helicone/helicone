@@ -107,6 +107,7 @@ export interface BASE_Env {
 
   QUEUE_PROVIDER?: "kafka" | "sqs" | "dual";
   APP_URL?: string;
+  ENVIRONMENT?: "development" | "production";
 }
 export type Env = BASE_Env & EU_Env;
 

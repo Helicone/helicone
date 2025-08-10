@@ -1,8 +1,38 @@
+import { ProviderName } from "@helicone-package/cost/models/providers";
+import { Json } from "./db/database.types";
+import { removeFromCache, storeInCache } from "./clients/cloudflareKV";
+
+type ProviderKey = {
+  provider: ProviderName;
+  decryptedProviderKey: string;
+  decryptedProviderSecretKey: string;
+  authType: "key" | "session_token";
+  config: Json | null;
+  orgId: string;
+};
+
 export const MAX_RETRIES = 3;
-export async function refetchProviderKeys(retries = MAX_RETRIES) {
+async function setProviderKeyDev(
+  providerKey: ProviderKey,
+  retries = MAX_RETRIES
+) {
   try {
     const res = await fetch(
-      `${process.env.HELICONE_WORKER_API}/refetch-provider-keys`
+      `${process.env.HELICONE_WORKER_API}/mock-set-provider-key`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          provider: providerKey.provider,
+          decryptedProviderKey: providerKey.decryptedProviderKey,
+          decryptedProviderSecretKey: providerKey.decryptedProviderSecretKey,
+          authType: providerKey.authType,
+          config: providerKey.config,
+          orgId: providerKey.orgId,
+        }),
+      }
     );
     if (!res.ok) {
       console.error(res);
@@ -10,7 +40,66 @@ export async function refetchProviderKeys(retries = MAX_RETRIES) {
         await new Promise((resolve) =>
           setTimeout(resolve, 10_000 * (MAX_RETRIES - retries))
         );
-        await refetchProviderKeys(retries - 1);
+        await setProviderKeyDev(providerKey, retries - 1);
+      }
+    }
+  } catch (e) {
+    console.error(JSON.stringify(e));
+  }
+}
+
+export async function setProviderKey(providerKey: ProviderKey) {
+  if (process.env.ENVIRONMENT === "production") {
+    await storeInCache(
+      `provider_keys_${providerKey.provider}_${providerKey.orgId}`,
+      JSON.stringify(providerKey)
+    );
+  } else {
+    await setProviderKeyDev(providerKey);
+  }
+}
+
+export async function setAPIKey(
+  apiKeyHash: string,
+  organizationId: string,
+  softDelete: boolean
+) {
+  if (process.env.ENVIRONMENT === "production") {
+    if (softDelete) {
+      await removeFromCache(`api_keys_${apiKeyHash}`);
+    } else {
+      await storeInCache(`api_keys_${apiKeyHash}`, organizationId);
+    }
+  } else {
+    await setAPIKeyDev(apiKeyHash, organizationId, softDelete);
+  }
+}
+
+export async function setAPIKeyDev(
+  apiKeyHash: string,
+  organizationId: string,
+  softDelete: boolean,
+  retries = MAX_RETRIES
+) {
+  try {
+    const res = await fetch(
+      `${process.env.HELICONE_WORKER_API}/mock-set-api-key`,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          apiKeyHash,
+          organizationId,
+          softDelete,
+        }),
+      }
+    );
+    if (!res.ok) {
+      console.error(res);
+      if (retries > 0) {
+        await new Promise((resolve) =>
+          setTimeout(resolve, 10_000 * (MAX_RETRIES - retries))
+        );
+        await setAPIKeyDev(apiKeyHash, organizationId, softDelete, retries - 1);
       }
     }
   } catch (e) {
@@ -18,21 +107,23 @@ export async function refetchProviderKeys(retries = MAX_RETRIES) {
   }
 }
 
-export async function refetchAPIKeys(retries = MAX_RETRIES) {
-  try {
-    const res = await fetch(
-      `${process.env.HELICONE_WORKER_API}/refetch-api-keys`
-    );
-    if (!res.ok) {
-      console.error(res);
-      if (retries > 0) {
-        await new Promise((resolve) =>
-          setTimeout(resolve, 10_000 * (MAX_RETRIES - retries))
-        );
-        await refetchAPIKeys(retries - 1);
-      }
+export async function deleteProviderKey(
+  providerName: ProviderName,
+  orgId: string
+) {
+  if (process.env.ENVIRONMENT === "production") {
+    await removeFromCache(`provider_keys_${providerName}_${orgId}`);
+  } else {
+    try {
+      const res = await fetch(
+        `${process.env.HELICONE_WORKER_API}/delete-provider-key`,
+        {
+          method: "POST",
+          body: JSON.stringify({ providerName, orgId }),
+        }
+      );
+    } catch (e) {
+      console.error(e);
     }
-  } catch (e) {
-    console.error(e);
   }
 }
