@@ -2,7 +2,7 @@ import { Env } from "../..";
 import { ProviderName } from "@helicone-package/cost/models/providers";
 import { ProviderKey, ProviderKeysStore } from "../db/ProviderKeysStore";
 import {
-  getFromCache,
+  getFromKVCacheOnly,
   removeFromCache,
   storeInCache,
 } from "../util/cache/secureCache";
@@ -54,7 +54,7 @@ export class ProviderKeysManager {
     provider: ProviderName,
     orgId: string
   ): Promise<ProviderKey | null> {
-    const key = await getFromCache(
+    const key = await getFromKVCacheOnly(
       `provider_keys_${provider}_${orgId}`,
       this.env
     );

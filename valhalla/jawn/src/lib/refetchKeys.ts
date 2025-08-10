@@ -44,7 +44,7 @@ async function setProviderKeyDev(
       }
     }
   } catch (e) {
-    console.error(JSON.stringify(e));
+    console.error(e);
   }
 }
 
@@ -86,6 +86,9 @@ export async function setAPIKeyDev(
       `${process.env.HELICONE_WORKER_API}/mock-set-api-key`,
       {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           apiKeyHash,
           organizationId,
@@ -119,6 +122,9 @@ export async function deleteProviderKey(
         `${process.env.HELICONE_WORKER_API}/delete-provider-key`,
         {
           method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify({ providerName, orgId }),
         }
       );

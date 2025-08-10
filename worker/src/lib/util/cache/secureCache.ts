@@ -49,6 +49,7 @@ class InMemoryCache<T> {
 }
 
 async function getCacheKey(env: SecureCacheEnv): Promise<CryptoKey> {
+  console.log("REQUEST_CACHE_KEY", env.REQUEST_CACHE_KEY);
   // Convert the hexadecimal key to a byte array
   const keyBytes = Buffer.from(env.REQUEST_CACHE_KEY, "hex");
 
@@ -155,6 +156,22 @@ export async function getFromCache(
   }
 
   return decrypt(JSON.parse(encryptedRemote), env);
+}
+
+export async function getFromKVCacheOnly(
+  key: string,
+  env: SecureCacheEnv,
+  expirationTtl?: number
+): Promise<string | null> {
+  const hashedKey = await hash(key);
+  const encryptedRemote = await env.SECURE_CACHE.get(hashedKey, {
+    cacheTtl: expirationTtl ?? 60,
+  });
+  if (!encryptedRemote) {
+    return null;
+  }
+  const value = await decrypt(JSON.parse(encryptedRemote), env);
+  return value;
 }
 
 export async function getAndStoreInCache<T, K>(
