@@ -83,9 +83,9 @@ export class ApiKeyController extends Controller {
     if (providerName) {
       setProviderKey({
         provider: providerName,
-        decryptedProviderKey: body.providerKey,
-        decryptedProviderSecretKey: body.providerSecretKey ?? "",
-        authType: "key",
+        decrypted_provider_key: body.providerKey,
+        decrypted_provider_secret_key: body.providerSecretKey ?? "",
+        auth_type: "key",
         config: body.config,
         orgId: request.authParams.organizationId,
       }).catch((error) => {
@@ -153,9 +153,9 @@ export class ApiKeyController extends Controller {
     if (providerName) {
       setProviderKey({
         provider: providerName,
-        decryptedProviderKey: body.providerKey ?? "",
-        decryptedProviderSecretKey: body.providerSecretKey ?? "",
-        authType: "key",
+        decrypted_provider_key: body.providerKey ?? "",
+        decrypted_provider_secret_key: body.providerSecretKey ?? "",
+        auth_type: "key",
         config: body.config ?? {},
         orgId: request.authParams.organizationId,
       }).catch((error) => {

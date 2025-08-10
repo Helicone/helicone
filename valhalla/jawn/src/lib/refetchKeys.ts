@@ -4,9 +4,9 @@ import { removeFromCache, storeInCache } from "./clients/cloudflareKV";
 
 type ProviderKey = {
   provider: ProviderName;
-  decryptedProviderKey: string;
-  decryptedProviderSecretKey: string;
-  authType: "key" | "session_token";
+  decrypted_provider_key: string;
+  decrypted_provider_secret_key: string;
+  auth_type: "key" | "session_token";
   config: Json | null;
   orgId: string;
 };
@@ -26,9 +26,9 @@ async function setProviderKeyDev(
         },
         body: JSON.stringify({
           provider: providerKey.provider,
-          decryptedProviderKey: providerKey.decryptedProviderKey,
-          decryptedProviderSecretKey: providerKey.decryptedProviderSecretKey,
-          authType: providerKey.authType,
+          decryptedProviderKey: providerKey.decrypted_provider_key,
+          decryptedProviderSecretKey: providerKey.decrypted_provider_secret_key,
+          authType: providerKey.auth_type,
           config: providerKey.config,
           orgId: providerKey.orgId,
         }),

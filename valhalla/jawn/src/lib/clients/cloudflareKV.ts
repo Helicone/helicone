@@ -1,7 +1,8 @@
 import { Cloudflare } from "cloudflare";
 
 const cloudflare = new Cloudflare({
-  apiToken: process.env.CLOUDFLARE_API_TOKEN,
+  apiKey: process.env.CLOUDFLARE_API_KEY,
+  apiEmail: process.env.CLOUDFLARE_API_EMAIL,
 });
 
 export async function safePut({
