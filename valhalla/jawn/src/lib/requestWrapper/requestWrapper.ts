@@ -361,9 +361,8 @@ export class RequestWrapper {
 
     // If using proxy key, get the real key from vault
     if (authKey?.startsWith("Bearer sk-helicone-cp")) {
-      const { data, error } = await this.getProviderKeyFromCustomerPortalKey(
-        authKey
-      );
+      const { data, error } =
+        await this.getProviderKeyFromCustomerPortalKey(authKey);
 
       if (error || !data || !data.providerKey) {
         return err(
@@ -501,7 +500,7 @@ export async function getProviderKeyFromPortalKey(
   const providerKey = await dbExecute<{
     decrypted_provider_key: string;
   }>(
-    `SELECT decrypted_provider_key FROM decrypted_provider_keys WHERE id = $1 LIMIT 1`,
+    `SELECT decrypted_provider_key FROM decrypted_provider_keys_v2 WHERE id = $1 LIMIT 1`,
     [providerKeyId.data?.[0]?.id ?? ""]
   );
 
@@ -566,7 +565,7 @@ export async function getProviderKeyFromProxy(
   const providerKey = await dbExecute<{
     decrypted_provider_key: string;
   }>(
-    `SELECT decrypted_provider_key FROM decrypted_provider_keys WHERE id = $1 AND soft_delete = false LIMIT 1`,
+    `SELECT decrypted_provider_key FROM decrypted_provider_keys_v2 WHERE id = $1 AND soft_delete = false LIMIT 1`,
     [storedProxyKey.data?.[0]?.provider_key_id ?? ""]
   );
 
