@@ -139,7 +139,7 @@ export class DatasetController extends Controller {
     const keyResult = await dbExecute<{
       decrypted_provider_key: string;
     }>(
-      `SELECT decrypted_provider_key FROM decrypted_provider_keys 
+      `SELECT decrypted_provider_key FROM decrypted_provider_keys_v2
        WHERE id = $1 AND org_id = $2`,
       [providerKeyId, request.authParams.organizationId]
     );
