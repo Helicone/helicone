@@ -53,3 +53,5 @@ export const deepseekEndpoints = {
   //   ptbEnabled: false,
   // },
 } satisfies Record<EndpointKey<DeepSeekModelName>, Endpoint>;
+
+export type DeepSeekEndpointId = EndpointKey<DeepSeekModelName>;
