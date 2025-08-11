@@ -50,3 +50,5 @@ EXCEPTION
     WHEN duplicate_object THEN
         RAISE NOTICE 'grant service_role to postgres already exists, skipping';
 END $$ LANGUAGE plpgsql;
+
+

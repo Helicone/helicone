@@ -50,3 +50,4 @@ AFTER
 UPDATE ON public.user FOR EACH ROW EXECUTE FUNCTION public.sync_public_user_to_auth_update();
 CREATE TRIGGER trigger_sync_public_user_to_auth_delete
 AFTER DELETE ON public.user FOR EACH ROW EXECUTE FUNCTION public.sync_public_user_to_auth_delete();
+

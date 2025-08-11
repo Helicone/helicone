@@ -12,3 +12,5 @@ GRANT EXECUTE ON FUNCTION auth.uid() TO postgres;
 GRANT EXECUTE ON FUNCTION auth.uid() TO anon;
 GRANT EXECUTE ON FUNCTION auth.uid() TO authenticated;
 GRANT EXECUTE ON FUNCTION auth.uid() TO service_role;
+
+

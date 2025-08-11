@@ -113,3 +113,4 @@ alter table "public"."user"
 add constraint "user_email_key" UNIQUE using index "user_email_key";
 alter table "public"."user"
 add constraint "user_auth_user_id_key" UNIQUE using index "user_auth_user_id_key";
+
