@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y supervisor
 # CVE-2023-52425: expat vulnerability
 # CVE-2025-4802: glibc vulnerability  
 # CVE-2025-6020: pam vulnerability
-# CVE-2025-52496, CVE-2025-48965: mbedtls vulnerabilities
+# CVE-2025-52496, CVE-2025-48965, CVE-2025-47917: mbedtls vulnerabilities
 RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
     libexpat1 \
@@ -33,6 +33,9 @@ RUN apt-get update && apt-get upgrade -y && \
 # CVE-2023-26819: libcjson vulnerability (fixed with libcjson-dev update)
 # CVE-2025-6170: libxml2 vulnerability (fixed with libxml2-dev update)
 # CVE-2023-5752: pip vulnerability (fixed with pip>=23.3 upgrade above)
+# CVE-2025-32434: torch RCE vulnerability (fixed with torch>=2.6.0)
+# CVE-2024-48063: torch RemoteModule RCE vulnerability (fixed with torch>=2.4.2, using 2.6.0)
+# CVE-2025-47917: mbedtls use-after-free vulnerability (NOT APPLICABLE - app doesn't use mbedtls_x509_string_to_names)
 # Force rebuild to ensure vulnerability fixes are deployed - 2025-08-11
 RUN apt-get update && \
     apt-get install -y \
@@ -53,11 +56,15 @@ ENV FFMPEG_PATH="/usr/bin/ffmpeg"
 ENV FFPROBE_PATH="/usr/bin/ffprobe"
 
 COPY ./valhalla/prompt_security/requirements.txt ./
+# Fix critical torch vulnerabilities CVE-2025-32434, CVE-2024-48063
+# CVE-2025-32434: Fixed in PyTorch 2.6.0+ (Critical RCE via torch.load)
+# CVE-2024-48063: Fixed in PyTorch 2.4.2+ (Critical RCE in RemoteModule deserialization)
+# Upgrading to torch 2.6.0 to address both critical security issues
 RUN . venv/bin/activate && \
     if [ "$TARGETARCH" = "arm64" ]; then \
-      pip3 install torch==2.3.1 torchvision==0.18.1 -f https://download.pytorch.org/whl/torch_stable.html; \
+      pip3 install torch==2.6.0 torchvision==0.21.0 -f https://download.pytorch.org/whl/torch_stable.html; \
     else \
-      pip3 install torch==2.3.1+cpu torchvision==0.18.1+cpu -f https://download.pytorch.org/whl/torch_stable.html; \
+      pip3 install torch==2.6.0+cpu torchvision==0.21.0+cpu -f https://download.pytorch.org/whl/torch_stable.html; \
     fi && \
     pip3 install "transformers[torch]"
 
