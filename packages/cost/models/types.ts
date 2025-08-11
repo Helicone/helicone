@@ -198,6 +198,7 @@ export interface Endpoint {
   modelId: ModelName; // e.g., "claude-3.5-sonnet"
   provider: ProviderName; // e.g., "bedrock"
   region?: string; // e.g., "us-west-2"
+  version?: string; // e.g., "20250514"
 
   // Configuration
   providerModelId: string; // e.g., "us.anthropic.claude-3-5-sonnet-20241022-v2:0"

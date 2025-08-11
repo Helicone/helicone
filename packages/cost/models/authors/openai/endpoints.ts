@@ -13,7 +13,6 @@ export const openaiEndpoints = {
     pricing: {
       prompt: 20,
       completion: 80,
-      image: 0.0153,
     },
     contextLength: 200000,
     maxCompletionTokens: 100000,
@@ -33,7 +32,6 @@ export const openaiEndpoints = {
     pricing: {
       prompt: 1.1,
       completion: 4.4,
-      image: 0.0008415,
       cacheRead: 0.275,
     },
     contextLength: 200000,
@@ -54,7 +52,6 @@ export const openaiEndpoints = {
     pricing: {
       prompt: 2,
       completion: 8,
-      image: 0.00153,
       cacheRead: 0.5,
     },
     contextLength: 200000,
@@ -75,7 +72,6 @@ export const openaiEndpoints = {
     pricing: {
       prompt: 1.1,
       completion: 4.4,
-      image: 0.0008415,
       cacheRead: 0.275,
     },
     contextLength: 200000,
@@ -171,7 +167,6 @@ export const openaiEndpoints = {
     pricing: {
       prompt: 150,
       completion: 600,
-      image: 0.21675,
     },
     contextLength: 200000,
     maxCompletionTokens: 100000,
@@ -185,7 +180,6 @@ export const openaiEndpoints = {
     pricing: {
       prompt: 0.15,
       completion: 0.6,
-      image: 0.000217,
     },
     contextLength: 128000,
     maxCompletionTokens: 16384,
@@ -199,7 +193,6 @@ export const openaiEndpoints = {
     pricing: {
       prompt: 2.5,
       completion: 10,
-      image: 0.003613,
     },
     contextLength: 128000,
     maxCompletionTokens: 16384,
@@ -288,7 +281,6 @@ export const openaiEndpoints = {
     pricing: {
       prompt: 5,
       completion: 20,
-      image: 0.007225,
       cacheRead: 2.5,
     },
     contextLength: 128000,
@@ -314,7 +306,6 @@ export const openaiEndpoints = {
     pricing: {
       prompt: 0.15,
       completion: 0.6,
-      image: 0.000217,
       cacheRead: 0.075,
     },
     contextLength: 128000,
@@ -340,7 +331,6 @@ export const openaiEndpoints = {
     pricing: {
       prompt: 2.5,
       completion: 10,
-      image: 0.003613,
       cacheRead: 1.25,
     },
     contextLength: 128000,
@@ -366,7 +356,6 @@ export const openaiEndpoints = {
     pricing: {
       prompt: 2.5,
       completion: 10,
-      image: 0.003613,
       cacheRead: 1.25,
     },
     contextLength: 128000,

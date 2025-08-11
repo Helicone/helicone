@@ -54,8 +54,8 @@ export const anthropicModels = {
     tokenizer: "Claude",
   },
 
-  "claude-3.5-sonnet": {
-    name: "Anthropic: Claude 3.5 Sonnet",
+  "claude-3.5-sonnet-v2": {
+    name: "Anthropic: Claude 3.5 Sonnet v2",
     author: "anthropic",
     description:
       "Our previous intelligent model with high level of intelligence and capability. Fast latency with multilingual and vision capabilities, but no extended thinking. 8,192 max output tokens. Training data cut-off: April 2024. Upgraded version API: claude-3-5-sonnet-20241022, Previous version API: claude-3-5-sonnet-20240620",
@@ -86,18 +86,6 @@ export const anthropicModels = {
     contextLength: 200000,
     maxOutputTokens: 4096,
     created: "2024-03-07T00:00:00.000Z",
-    modality: "text+image->text",
-    tokenizer: "Claude",
-  },
-
-  "claude-3-opus": {
-    name: "Anthropic: Claude 3 Opus",
-    author: "anthropic",
-    description:
-      "Very high intelligence and capability model. No extended thinking support, no priority tier access. Multilingual and vision capabilities. 4,096 max output tokens. Training data cut-off: August 2023. API model name: claude-3-opus-20240229",
-    contextLength: 200000,
-    maxOutputTokens: 4096,
-    created: "2024-02-29T00:00:00.000Z",
     modality: "text+image->text",
     tokenizer: "Claude",
   },
