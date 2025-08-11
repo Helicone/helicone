@@ -9,7 +9,7 @@ on:
 
 jobs:
   worker-build-precheck:
-    name: Worker Client
+    name: Worker Build Precheck
     runs-on: node20-bullseye
     steps:
       - uses: actions/checkout@v3
