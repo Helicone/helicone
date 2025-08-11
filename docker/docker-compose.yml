@@ -69,9 +69,9 @@ services:
       - |
           atlas login --token $${ATLAS_CLOUD_TOKEN} &&
           atlas migrate hash --dir file:///app/clickhouse/migrations &&
-          atlas migrate apply --dir file:///app/clickhouse/migrations --url $${CLICKHOUSE_URL} &&
-        # atlas migrate hash --dir file:///app/clickhouse/seeds &&  # TODO fix: 20200101001000_create_hql_user.sql" is partially applied but migration file was not found
-        # atlas migrate apply --dir file:///app/clickhouse/seeds --url $${CLICKHOUSE_URL}
+          atlas migrate apply --dir file:///app/clickhouse/migrations --url $${CLICKHOUSE_URL}
+          # atlas migrate hash --dir file:///app/clickhouse/seeds &&  # TODO fix: 20200101001000_create_hql_user.sql" is partially applied but migration file was not found
+          # atlas migrate apply --dir file:///app/clickhouse/seeds --url $${CLICKHOUSE_URL}
 
   minio:
     image: minio/minio
