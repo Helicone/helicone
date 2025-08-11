@@ -131,12 +131,10 @@ export async function removeFromCache(
   const hashedKey2 = await hashWithHmac(key, 2);
   await Promise.all([
     env.SECURE_CACHE.delete(hashedKey1),
-    env.SECURE_CACHE.delete(hashedKey2)
+    env.SECURE_CACHE.delete(hashedKey2),
   ]);
   InMemoryCache.getInstance<string>().delete(hashedKey1);
   InMemoryCache.getInstance<string>().delete(hashedKey2);
-  await env.SECURE_CACHE.delete(hashedKey);
-  InMemoryCache.getInstance<string>().delete(hashedKey);
 }
 
 async function storeInCacheWithHmac({
