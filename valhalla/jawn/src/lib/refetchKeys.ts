@@ -1,6 +1,7 @@
 import { ProviderName } from "@helicone-package/cost/models/providers";
 import { Json } from "./db/database.types";
 import { removeFromCache, storeInCache } from "./clients/cloudflareKV";
+import { ENVIRONMENT } from "./clients/constant";
 
 type ProviderKey = {
   provider: ProviderName;
@@ -49,7 +50,7 @@ async function setProviderKeyDev(
 }
 
 export async function setProviderKey(providerKey: ProviderKey) {
-  if (process.env.ENVIRONMENT === "production") {
+  if (ENVIRONMENT === "production") {
     await storeInCache(
       `provider_keys_${providerKey.provider}_${providerKey.orgId}`,
       JSON.stringify(providerKey)
@@ -64,7 +65,7 @@ export async function setAPIKey(
   organizationId: string,
   softDelete: boolean
 ) {
-  if (process.env.ENVIRONMENT === "production") {
+  if (ENVIRONMENT === "production") {
     if (softDelete) {
       await removeFromCache(`api_keys_${apiKeyHash}`);
     } else {
@@ -114,7 +115,7 @@ export async function deleteProviderKey(
   providerName: ProviderName,
   orgId: string
 ) {
-  if (process.env.ENVIRONMENT === "production") {
+  if (ENVIRONMENT === "production") {
     await removeFromCache(`provider_keys_${providerName}_${orgId}`);
   } else {
     try {
