@@ -59,12 +59,12 @@ COPY ./valhalla/prompt_security/requirements.txt ./
 # Fix critical torch vulnerabilities CVE-2025-32434, CVE-2024-48063
 # CVE-2025-32434: Fixed in PyTorch 2.6.0+ (Critical RCE via torch.load)
 # CVE-2024-48063: Fixed in PyTorch 2.4.2+ (Critical RCE in RemoteModule deserialization)
-# Upgrading to torch 2.6.0 to address both critical security issues
+# Upgrading to torch 2.7.1 (latest stable) to address both critical security issues
 RUN . venv/bin/activate && \
     if [ "$TARGETARCH" = "arm64" ]; then \
-      pip3 install torch==2.6.0 torchvision==0.21.0 -f https://download.pytorch.org/whl/torch_stable.html; \
+      pip3 install torch==2.7.1 torchvision==0.22.1 -f https://download.pytorch.org/whl/torch_stable.html; \
     else \
-      pip3 install torch==2.6.0+cpu torchvision==0.21.0+cpu -f https://download.pytorch.org/whl/torch_stable.html; \
+      pip3 install torch==2.7.1 torchvision==0.22.1 --index-url https://download.pytorch.org/whl/cpu; \
     fi && \
     pip3 install "transformers[torch]"
 
