@@ -96,21 +96,26 @@ export async function decrypt(
   },
   env: SecureCacheEnv,
   hmac_key: 1 | 2
-): Promise<string> {
-  const key = getCacheKey(env, hmac_key);
-  const iv = Buffer.from(encrypted.iv, "hex");
-  const encryptedContent = Buffer.from(encrypted.content, "hex");
+): Promise<string | null> {
+  try {
+    const key = getCacheKey(env, hmac_key);
+    const iv = Buffer.from(encrypted.iv, "hex");
+    const encryptedContent = Buffer.from(encrypted.content, "hex");
 
-  const decryptedContent = await crypto.subtle.decrypt(
-    {
-      name: "AES-GCM",
-      iv: new Uint8Array(iv),
-    },
-    await key,
-    new Uint8Array(encryptedContent)
-  );
+    const decryptedContent = await crypto.subtle.decrypt(
+      {
+        name: "AES-GCM",
+        iv: new Uint8Array(iv),
+      },
+      await key,
+      new Uint8Array(encryptedContent)
+    );
 
-  return new TextDecoder().decode(decryptedContent);
+    return new TextDecoder().decode(decryptedContent);
+  } catch (e) {
+    console.error("Error decrypting cache", e);
+    return null;
+  }
 }
 
 export async function removeFromCache(
@@ -148,7 +153,7 @@ async function storeInCacheWithHmac({
       },
     });
   } catch (e) {
-    console.log("Error storing in cache", e);
+    console.error("Error storing in cache", e);
   }
   InMemoryCache.getInstance<string>().set(hashedKey, JSON.stringify(encrypted));
 }
@@ -215,7 +220,6 @@ export async function getFromCache({
 }: {
   key: string;
   env: SecureCacheEnv;
-
   useMemoryCache?: boolean;
   expirationTtl?: number;
 }): Promise<string | null> {
@@ -260,7 +264,12 @@ export async function getAndStoreInCache<T, K>(
   fn: () => Promise<Result<T, K>>,
   expirationTtl?: number
 ): Promise<Result<T, K>> {
-  const cached = await getFromCache(key, env);
+  const cached = await getFromCache({
+    key,
+    env,
+    useMemoryCache: false,
+    expirationTtl: 60, // 1 minute
+  });
   if (cached !== null) {
     try {
       const cachedResult = JSON.parse(cached);
@@ -269,7 +278,7 @@ export async function getAndStoreInCache<T, K>(
       }
       return ok(JSON.parse(cached) as T);
     } catch (e) {
-      console.log("Error parsing cached result", e);
+      console.error("Error parsing cached result", e);
     }
   }
   const value = await fn();

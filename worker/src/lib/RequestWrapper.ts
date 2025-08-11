@@ -468,7 +468,7 @@ export class RequestWrapper {
     }
     return auth;
   }
-  
+
   async getProviderAuthHeader(): Promise<string | undefined> {
     return this.authorization ? await hash(this.authorization) : undefined;
   }
@@ -724,6 +724,7 @@ export async function getProviderKeyFromProxy(
     }
   }
 
+  // @ts-ignore
   const verified = await supabaseClient.rpc("verify_helicone_proxy_key", {
     api_key: proxyKey,
     stored_hashed_key: storedProxyKey.data.helicone_proxy_key,

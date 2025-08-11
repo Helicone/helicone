@@ -35,6 +35,9 @@ const WORKER_MAP: Omit<
 } = {
   ANTHROPIC_PROXY: getAnthropicProxyRouter,
   OPENAI_PROXY: getOpenAIProxyRouter,
+  VAPI_PROXY: () => {
+    throw new Error("VAPI_PROXY not implemented");
+  },
   HELICONE_API: getAPIRouter,
   GATEWAY_API: getGatewayAPIRouter,
   GENERATE_API: getGenerateRouter,
