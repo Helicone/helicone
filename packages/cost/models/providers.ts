@@ -16,6 +16,12 @@ export const providers = {
     auth: "api-key",
     buildUrl: () => "https://api.anthropic.com/v1/messages",
     buildModelId: (endpoint) => endpoint.providerModelId,
+    pricingPages: [
+      "https://docs.anthropic.com/en/docs/build-with-claude/pricing",
+    ],
+    modelPages: [
+      "https://docs.anthropic.com/en/docs/about-claude/models/all-models",
+    ],
   },
 
   openai: {
@@ -24,6 +30,8 @@ export const providers = {
     auth: "api-key",
     buildUrl: () => "https://api.openai.com/v1/chat/completions",
     buildModelId: (endpoint) => endpoint.providerModelId,
+    pricingPages: ["https://openai.com/api/pricing"],
+    modelPages: ["https://platform.openai.com/docs/models"],
   },
 
   bedrock: {
@@ -46,6 +54,10 @@ export const providers = {
       }
       return endpoint.providerModelId;
     },
+    pricingPages: ["https://aws.amazon.com/bedrock/pricing/"],
+    modelPages: [
+      "https://docs.aws.amazon.com/bedrock/latest/userguide/model-ids.html",
+    ],
   },
 
   vertex: {
@@ -62,6 +74,13 @@ export const providers = {
       return `https://aiplatform.googleapis.com/v1/projects/${projectId}/locations/${region}/publishers/anthropic/models/${modelId}:streamRawPredict`;
     },
     buildModelId: (endpoint) => endpoint.providerModelId,
+    pricingPages: [
+      "https://cloud.google.com/vertex-ai/generative-ai/pricing",
+      "https://ai.google.dev/pricing",
+    ],
+    modelPages: [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/models",
+    ],
   },
 
   "azure-openai": {
@@ -80,6 +99,12 @@ export const providers = {
       return `https://${resourceName}.openai.azure.com/openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`;
     },
     buildModelId: (endpoint) => endpoint.providerModelId,
+    pricingPages: [
+      "https://azure.microsoft.com/en-us/pricing/details/cognitive-services/openai-service/",
+    ],
+    modelPages: [
+      "https://learn.microsoft.com/azure/ai-services/openai/concepts/models",
+    ],
   },
 
   perplexity: {
@@ -88,6 +113,41 @@ export const providers = {
     auth: "api-key",
     buildUrl: () => "https://api.perplexity.ai/chat/completions",
     buildModelId: (endpoint) => endpoint.providerModelId,
+    pricingPages: ["https://docs.perplexity.ai/guides/pricing"],
+    modelPages: ["https://docs.perplexity.ai/guides/models"],
+  },
+
+  groq: {
+    id: "groq",
+    baseUrl: "https://api.groq.com/openai/v1",
+    auth: "api-key",
+    buildUrl: () => "https://api.groq.com/openai/v1/chat/completions",
+    buildModelId: (endpoint) => endpoint.providerModelId,
+    pricingPages: [
+      "https://console.groq.com/pricing",
+      "https://groq.com/pricing/",
+    ],
+    modelPages: ["https://console.groq.com/docs/models"],
+  },
+
+  deepseek: {
+    id: "deepseek",
+    baseUrl: "https://api.deepseek.com",
+    auth: "api-key",
+    buildUrl: () => "https://api.deepseek.com/chat/completions",
+    buildModelId: (endpoint) => endpoint.providerModelId,
+    pricingPages: ["https://api-docs.deepseek.com/"],
+    modelPages: ["https://api-docs.deepseek.com/"],
+  },
+
+  cohere: {
+    id: "cohere",
+    baseUrl: "https://api.cohere.ai",
+    auth: "api-key",
+    buildUrl: () => "https://api.cohere.ai/v1/chat",
+    buildModelId: (endpoint) => endpoint.providerModelId,
+    pricingPages: ["https://cohere.com/pricing"],
+    modelPages: ["https://docs.cohere.com/docs/models"],
   },
 
   xai: {
@@ -96,6 +156,8 @@ export const providers = {
     auth: "api-key",
     buildUrl: () => "https://api.x.ai/v1/chat/completions",
     buildModelId: (endpoint) => endpoint.providerModelId,
+    pricingPages: ["https://docs.x.ai/docs/pricing"],
+    modelPages: ["https://docs.x.ai/docs/models"],
   },
 } satisfies Record<ProviderName, ProviderConfig>;
 
