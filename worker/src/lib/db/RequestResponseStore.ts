@@ -158,18 +158,15 @@ export class RequestResponseStore {
     responseData: Database["public"]["Tables"]["response"]["Update"]
   ) {
     try {
-      if (typeof responseData.body !== "object" || !responseData.body) {
+      const body = (responseData as any)?.body as any;
+      if (typeof body !== "object" || !body) {
         return "unknown";
       }
-      if (Array.isArray(responseData.body)) {
+      if (Array.isArray(body)) {
         return "unknown";
       }
 
-      return (
-        responseData.body["model"] ||
-        (responseData.body.body as any)["model"] ||
-        "unknown"
-      );
+      return body["model"] || (body.body as any)["model"] || "unknown";
     } catch (e) {
       return "unknown";
     }
@@ -197,7 +194,7 @@ export class RequestResponseStore {
       prompt_tokens: response.prompt_tokens ?? null,
       delay_ms: response.delay_ms ?? null,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      body: (response.body as any) ?? null,
+      body: (response as any)?.body ?? null,
     });
 
     if (responseUpdate.error) {

@@ -19,7 +19,7 @@ export class PromptManager {
   async getSourcePromptBody(versionId: string, orgId: string) {
     const promptBody = await getFromCache({
       key: `prompt_body_${versionId}_${orgId}`,
-      env: this.env
+      env: this.env,
     });
     if (!promptBody) {
       return null;

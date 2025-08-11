@@ -2,6 +2,11 @@ import { Env, hash } from "../../..";
 import { safePut } from "../../safePut";
 import { Result, ok } from "../results";
 
+const hashWithHmac = async (key: string, hmac_key: 1 | 2) => {
+  const hashedKey = await hash(hmac_key === 1 ? key : `${key}_2`);
+  return hashedKey;
+};
+
 export interface SecureCacheEnv {
   SECURE_CACHE: Env["SECURE_CACHE"];
   REQUEST_CACHE_KEY: Env["REQUEST_CACHE_KEY"];
@@ -96,30 +101,40 @@ export async function decrypt(
   },
   env: SecureCacheEnv,
   hmac_key: 1 | 2
-): Promise<string> {
-  const key = getCacheKey(env, hmac_key);
-  const iv = Buffer.from(encrypted.iv, "hex");
-  const encryptedContent = Buffer.from(encrypted.content, "hex");
+): Promise<string | null> {
+  try {
+    const key = getCacheKey(env, hmac_key);
+    const iv = Buffer.from(encrypted.iv, "hex");
+    const encryptedContent = Buffer.from(encrypted.content, "hex");
 
-  const decryptedContent = await crypto.subtle.decrypt(
-    {
-      name: "AES-GCM",
-      iv: new Uint8Array(iv),
-    },
-    await key,
-    new Uint8Array(encryptedContent)
-  );
+    const decryptedContent = await crypto.subtle.decrypt(
+      {
+        name: "AES-GCM",
+        iv: new Uint8Array(iv),
+      },
+      await key,
+      new Uint8Array(encryptedContent)
+    );
 
-  return new TextDecoder().decode(decryptedContent);
+    return new TextDecoder().decode(decryptedContent);
+  } catch (e) {
+    console.error("Error decrypting cache", e);
+    return null;
+  }
 }
 
 export async function removeFromCache(
   key: string,
   env: SecureCacheEnv
 ): Promise<void> {
-  const hashedKey = await hash(key);
-  await env.SECURE_CACHE.delete(hashedKey);
-  InMemoryCache.getInstance<string>().delete(hashedKey);
+  const hashedKey1 = await hashWithHmac(key, 1);
+  const hashedKey2 = await hashWithHmac(key, 2);
+  await Promise.all([
+    env.SECURE_CACHE.delete(hashedKey1),
+    env.SECURE_CACHE.delete(hashedKey2),
+  ]);
+  InMemoryCache.getInstance<string>().delete(hashedKey1);
+  InMemoryCache.getInstance<string>().delete(hashedKey2);
 }
 
 async function storeInCacheWithHmac({
@@ -136,7 +151,7 @@ async function storeInCacheWithHmac({
   expirationTtl?: number;
 }): Promise<void> {
   const encrypted = await encrypt(value, env, hmac_key);
-  const hashedKey = await hash(key);
+  const hashedKey = await hashWithHmac(key, hmac_key);
   const ttlToUse = expirationTtl ?? 600;
   try {
     await safePut({
@@ -148,7 +163,7 @@ async function storeInCacheWithHmac({
       },
     });
   } catch (e) {
-    console.log("Error storing in cache", e);
+    console.error("Error storing in cache", e);
   }
   InMemoryCache.getInstance<string>().set(hashedKey, JSON.stringify(encrypted));
 }
@@ -190,7 +205,7 @@ async function getFromCacheWithHmac({
   useMemoryCache?: boolean;
   expirationTtl?: number;
 }): Promise<string | null> {
-  const hashedKey = await hash(key);
+  const hashedKey = await hashWithHmac(key, hmac_key);
   if (useMemoryCache) {
     const encryptedMemory = InMemoryCache.getInstance<string>().get(hashedKey);
     if (encryptedMemory !== undefined) {
@@ -215,7 +230,6 @@ export async function getFromCache({
 }: {
   key: string;
   env: SecureCacheEnv;
-
   useMemoryCache?: boolean;
   expirationTtl?: number;
 }): Promise<string | null> {
@@ -260,7 +274,12 @@ export async function getAndStoreInCache<T, K>(
   fn: () => Promise<Result<T, K>>,
   expirationTtl?: number
 ): Promise<Result<T, K>> {
-  const cached = await getFromCache(key, env);
+  const cached = await getFromCache({
+    key,
+    env,
+    useMemoryCache: false,
+    expirationTtl: 60, // 1 minute
+  });
   if (cached !== null) {
     try {
       const cachedResult = JSON.parse(cached);
@@ -269,7 +288,7 @@ export async function getAndStoreInCache<T, K>(
       }
       return ok(JSON.parse(cached) as T);
     } catch (e) {
-      console.log("Error parsing cached result", e);
+      console.error("Error parsing cached result", e);
     }
   }
   const value = await fn();

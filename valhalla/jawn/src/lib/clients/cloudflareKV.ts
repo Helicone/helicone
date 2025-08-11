@@ -4,6 +4,11 @@ const cloudflare = new Cloudflare({
   apiToken: process.env.CLOUDFLARE_API_TOKEN,
 });
 
+const hashWithHmac = async (key: string, hmac_key: 1 | 2) => {
+  const hashedKey = await hash(hmac_key === 1 ? key : `${key}_2`);
+  return hashedKey;
+};
+
 export async function safePut({
   keyName,
   value,
@@ -115,28 +120,8 @@ export async function encrypt(
   };
 }
 
-export async function decrypt(encrypted: {
-  iv: string;
-  content: string;
-}): Promise<string> {
-  const key = getCacheKey();
-  const iv = Buffer.from(encrypted.iv, "hex");
-  const encryptedContent = Buffer.from(encrypted.content, "hex");
-
-  const decryptedContent = await crypto.subtle.decrypt(
-    {
-      name: "AES-GCM",
-      iv: new Uint8Array(iv),
-    },
-    await key,
-    new Uint8Array(encryptedContent)
-  );
-
-  return new TextDecoder().decode(decryptedContent);
-}
-
 export async function removeFromCache(key: string): Promise<void> {
-  const hashedKey = await hash(key);
+  const hashedKey = await hashWithHmac(key, 2);
   await cloudflare.kv.namespaces.values.delete(
     process.env.CLOUDFLARE_KV_NAMESPACE_ID ?? "",
     hashedKey,
@@ -152,7 +137,7 @@ export async function storeInCache(
   expirationTtl?: number
 ): Promise<void> {
   const encrypted = await encrypt(value);
-  const hashedKey = await hash(key);
+  const hashedKey = await hashWithHmac(key, 2);
   const ttlToUse = expirationTtl ?? 600;
   try {
     await safePut({

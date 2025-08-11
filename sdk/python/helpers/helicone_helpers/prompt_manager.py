@@ -63,13 +63,34 @@ class HeliconePromptManager:
             await self._async_client.aclose()
             self._async_client = None
     
-    def pull_prompt_body(self, prompt_id: str, version_id: Optional[str] = None) -> ChatCompletionParams:
+    def pull_prompt_version(self, params: HeliconeChatParams) -> Prompt2025Version:
         """
-        Pulls a prompt body from Helicone storage by prompt ID and optional version ID.
+        Finds the prompt version dynamically based on prompt params.
         
         Args:
-            prompt_id: The unique identifier of the prompt
-            version_id: Optional version ID, if not provided uses production version
+            params: The chat completion parameters containing prompt_id, optional version_id, 
+                   environment, inputs, and other OpenAI parameters
+                   
+        Returns:
+            The prompt version object
+        """
+        prompt_id = params.get("prompt_id")
+        version_id = params.get("version_id")
+        environment = params.get("environment")
+        
+        if environment:
+            return self._get_environment_version(prompt_id, environment)
+        if version_id:
+            return self._get_prompt_version(version_id)
+        return self._get_production_version(prompt_id)
+    
+    def pull_prompt_body(self, params: HeliconeChatParams) -> ChatCompletionParams:
+        """
+        Pulls a prompt body from Helicone storage based on prompt parameters.
+        
+        Args:
+            params: The chat completion parameters containing prompt_id, optional version_id, 
+                   environment, inputs, and other OpenAI parameters
             
         Returns:
             The raw prompt body from storage
@@ -78,18 +99,125 @@ class HeliconePromptManager:
             Exception: If API call fails or prompt not found
         """
         try:
-            if not version_id:
-                production_version = self._get_production_version(prompt_id)
-                version_id = production_version.id
-            
-            prompt_version = self._get_prompt_version(version_id)
+            prompt_version = self.pull_prompt_version(params)
             prompt_body = self._fetch_prompt_body_from_s3(prompt_version.s3_url)
-            
             return prompt_body
-        
         except Exception as e:
             print(f"Error pulling prompt body: {e}")
             raise
+    
+    def pull_prompt_body_by_version_id(self, version_id: str) -> ChatCompletionParams:
+        """
+        Pulls a prompt body from Helicone storage by version ID.
+        
+        Args:
+            version_id: The unique identifier of the prompt version
+            
+        Returns:
+            The raw prompt body from storage
+            
+        Raises:
+            Exception: If API call fails or prompt not found
+        """
+        try:
+            prompt_version = self._get_prompt_version(version_id)
+            prompt_body = self._fetch_prompt_body_from_s3(prompt_version.s3_url)
+            return prompt_body
+        except Exception as e:
+            print(f"Error pulling prompt body: {e}")
+            raise
+    
+    def merge_prompt_body(
+        self, 
+        params: HeliconeChatParams, 
+        source_prompt_body: ChatCompletionParams
+    ) -> PromptCompilationResult:
+        """
+        Merges prompt body with input parameters and variable substitution.
+        
+        Args:
+            params: The chat completion parameters containing inputs and other OpenAI parameters
+            source_prompt_body: The source prompt body to merge with
+                   
+        Returns:
+            PromptCompilationResult containing the compiled prompt body and any validation errors
+        """
+        errors: List[ValidationError] = []
+        
+        # Prepare substitution values from inputs
+        substitution_values = params.get("inputs", {})
+        
+        # Merge and substitute messages
+        pulled_messages = source_prompt_body.get("messages", [])
+        input_messages = params.get("messages", [])
+        merged_messages = pulled_messages + input_messages
+        
+        substituted_messages = []
+        for message in merged_messages:
+            if isinstance(message.get("content"), str):
+                substituted = HeliconeTemplateManager.substitute_variables(
+                    message["content"],
+                    substitution_values
+                )
+                if not substituted.success:
+                    errors.extend(substituted.errors or [])
+                
+                new_message = message.copy()
+                new_message["content"] = (
+                    substituted.result if substituted.success else message["content"]
+                )
+                substituted_messages.append(new_message)
+            else:
+                substituted_messages.append(message)
+        
+        # Substitute variables in response format if present
+        final_response_format = source_prompt_body.get("response_format")
+        if final_response_format:
+            substituted_response_format = HeliconeTemplateManager.substitute_variables_json(
+                final_response_format,
+                substitution_values
+            )
+            if not substituted_response_format.success:
+                errors.extend(substituted_response_format.errors or [])
+            else:
+                final_response_format = substituted_response_format.result
+        
+        # Substitute variables in tools if present
+        final_tools = source_prompt_body.get("tools")
+        if final_tools:
+            substituted_tools = HeliconeTemplateManager.substitute_variables_json(
+                final_tools,
+                substitution_values
+            )
+            if not substituted_tools.success:
+                errors.extend(substituted_tools.errors or [])
+            else:
+                final_tools = substituted_tools.result
+        
+        # Extract non-Helicone parameters from input
+        input_openai_params = {k: v for k, v in params.items() 
+                             if k not in ["prompt_id", "version_id", "inputs", "environment"]}
+        
+        # Remove messages, response_format, and tools from input params since we handle them specially
+        input_openai_params.pop("messages", None)
+        input_openai_params.pop("response_format", None)
+        input_openai_params.pop("tools", None)
+        
+        # Merge pulled prompt body with input parameters
+        # Input parameters take precedence over pulled parameters
+        merged_body = {
+            **source_prompt_body,
+            **input_openai_params,
+            "messages": substituted_messages,
+        }
+        
+        if final_response_format is not None:
+            merged_body["response_format"] = final_response_format
+        
+        if final_tools is not None:
+            merged_body["tools"] = final_tools
+        
+        return PromptCompilationResult(body=merged_body, errors=errors)
     
     def get_prompt_body(self, params: HeliconeChatParams) -> PromptCompilationResult:
         """
@@ -97,101 +225,24 @@ class HeliconePromptManager:
         
         Args:
             params: The chat completion parameters containing prompt_id, optional version_id, 
-                   inputs, and other OpenAI parameters
+                   environment, inputs, and other OpenAI parameters
                    
         Returns:
             PromptCompilationResult containing the compiled prompt body and any validation errors
         """
         try:
-            errors: List[ValidationError] = []
-            
             # If no prompt_id, just return the input params as-is
             if not params.get("prompt_id"):
                 # Remove Helicone-specific keys
                 body = {k: v for k, v in params.items() 
-                       if k not in ["prompt_id", "version_id", "inputs"]}
-                return PromptCompilationResult(body=body, errors=errors)
+                       if k not in ["prompt_id", "version_id", "inputs", "environment"]}
+                return PromptCompilationResult(body=body, errors=[])
             
             # Pull the stored prompt body
-            pulled_prompt_body = self.pull_prompt_body(
-                params["prompt_id"], 
-                params.get("version_id")
-            )
+            pulled_prompt_body = self.pull_prompt_body(params)
             
-            # Prepare substitution values from inputs
-            substitution_values = params.get("inputs", {})
-            
-            # Merge and substitute messages
-            pulled_messages = pulled_prompt_body.get("messages", [])
-            input_messages = params.get("messages", [])
-            merged_messages = pulled_messages + input_messages
-            
-            substituted_messages = []
-            for message in merged_messages:
-                if isinstance(message.get("content"), str):
-                    substituted = HeliconeTemplateManager.substitute_variables(
-                        message["content"],
-                        substitution_values
-                    )
-                    if not substituted.success:
-                        errors.extend(substituted.errors or [])
-                    
-                    new_message = message.copy()
-                    new_message["content"] = (
-                        substituted.result if substituted.success else message["content"]
-                    )
-                    substituted_messages.append(new_message)
-                else:
-                    substituted_messages.append(message)
-            
-            # Substitute variables in response format if present
-            final_response_format = pulled_prompt_body.get("response_format")
-            if final_response_format:
-                substituted_response_format = HeliconeTemplateManager.substitute_variables_json(
-                    final_response_format,
-                    substitution_values
-                )
-                if not substituted_response_format.success:
-                    errors.extend(substituted_response_format.errors or [])
-                else:
-                    final_response_format = substituted_response_format.result
-            
-            # Substitute variables in tools if present
-            final_tools = pulled_prompt_body.get("tools")
-            if final_tools:
-                substituted_tools = HeliconeTemplateManager.substitute_variables_json(
-                    final_tools,
-                    substitution_values
-                )
-                if not substituted_tools.success:
-                    errors.extend(substituted_tools.errors or [])
-                else:
-                    final_tools = substituted_tools.result
-            
-                        # Extract non-Helicone parameters from input
-            input_openai_params = {k: v for k, v in params.items() 
-                                 if k not in ["prompt_id", "version_id", "inputs"]}
-            
-            # Remove messages, response_format, and tools from input params since we handle them specially
-            input_openai_params.pop("messages", None)
-            input_openai_params.pop("response_format", None)
-            input_openai_params.pop("tools", None)
-            
-            # Merge pulled prompt body with input parameters
-            # Input parameters take precedence over pulled parameters
-            merged_body = {
-                **pulled_prompt_body,
-                **input_openai_params,
-                "messages": substituted_messages,
-            }
-            
-            if final_response_format is not None:
-                merged_body["response_format"] = final_response_format
-            
-            if final_tools is not None:
-                merged_body["tools"] = final_tools
-            
-            return PromptCompilationResult(body=merged_body, errors=errors)
+            # Merge and substitute
+            return self.merge_prompt_body(params, pulled_prompt_body)
         
         except Exception as e:
             print(f"Error getting prompt body: {e}")
@@ -255,6 +306,35 @@ class HeliconePromptManager:
             s3_url=data.get("s3_url")
         )
     
+    def _get_environment_version(self, prompt_id: str, environment: str) -> Prompt2025Version:
+        """Get the environment version of a prompt."""
+        response = self.session.post(
+            f"{self.base_url}/v1/prompt-2025/query/environment-version",
+            json={"promptId": prompt_id, "environment": environment}
+        )
+        
+        if not response.ok:
+            raise Exception(f"Failed to get environment version: {response.text}")
+        
+        result = response.json()
+        if result.get("error"):
+            raise Exception(f"API error: {result['error']}")
+        
+        data = result.get("data")
+        if not data:
+            raise Exception("No environment version data returned")
+        
+        return Prompt2025Version(
+            id=data["id"],
+            model=data["model"],
+            prompt_id=data["prompt_id"],
+            major_version=data["major_version"],
+            minor_version=data["minor_version"],
+            commit_message=data["commit_message"],
+            created_at=data["created_at"],
+            s3_url=data.get("s3_url")
+        )
+    
     def _fetch_prompt_body_from_s3(self, s3_url: Optional[str]) -> ChatCompletionParams:
         """Fetch prompt body from S3 URL."""
         if not s3_url:
@@ -267,14 +347,36 @@ class HeliconePromptManager:
         
         return response.json() 
     
-    async def apull_prompt_body(self, prompt_id: str, version_id: Optional[str] = None) -> ChatCompletionParams:
+    async def apull_prompt_version(self, params: HeliconeChatParams) -> Prompt2025Version:
         """
-        Async version of pull_prompt_body.
-        Pulls a prompt body from Helicone storage by prompt ID and optional version ID.
+        Async version of pull_prompt_version.
+        Finds the prompt version dynamically based on prompt params.
         
         Args:
-            prompt_id: The unique identifier of the prompt
-            version_id: Optional version ID, if not provided uses production version
+            params: The chat completion parameters containing prompt_id, optional version_id, 
+                   environment, inputs, and other OpenAI parameters
+                   
+        Returns:
+            The prompt version object
+        """
+        prompt_id = params.get("prompt_id")
+        version_id = params.get("version_id")
+        environment = params.get("environment")
+        
+        if environment:
+            return await self._aget_environment_version(prompt_id, environment)
+        if version_id:
+            return await self._aget_prompt_version(version_id)
+        return await self._aget_production_version(prompt_id)
+    
+    async def apull_prompt_body(self, params: HeliconeChatParams) -> ChatCompletionParams:
+        """
+        Async version of pull_prompt_body.
+        Pulls a prompt body from Helicone storage based on prompt parameters.
+        
+        Args:
+            params: The chat completion parameters containing prompt_id, optional version_id, 
+                   environment, inputs, and other OpenAI parameters
             
         Returns:
             The raw prompt body from storage
@@ -283,18 +385,53 @@ class HeliconePromptManager:
             Exception: If API call fails or prompt not found
         """
         try:
-            if not version_id:
-                production_version = await self._aget_production_version(prompt_id)
-                version_id = production_version.id
-            
-            prompt_version = await self._aget_prompt_version(version_id)
+            prompt_version = await self.apull_prompt_version(params)
             prompt_body = await self._afetch_prompt_body_from_s3(prompt_version.s3_url)
-            
             return prompt_body
-        
         except Exception as e:
             print(f"Error pulling prompt body: {e}")
             raise
+    
+    async def apull_prompt_body_by_version_id(self, version_id: str) -> ChatCompletionParams:
+        """
+        Async version of pull_prompt_body_by_version_id.
+        Pulls a prompt body from Helicone storage by version ID.
+        
+        Args:
+            version_id: The unique identifier of the prompt version
+            
+        Returns:
+            The raw prompt body from storage
+            
+        Raises:
+            Exception: If API call fails or prompt not found
+        """
+        try:
+            prompt_version = await self._aget_prompt_version(version_id)
+            prompt_body = await self._afetch_prompt_body_from_s3(prompt_version.s3_url)
+            return prompt_body
+        except Exception as e:
+            print(f"Error pulling prompt body: {e}")
+            raise
+    
+    async def amerge_prompt_body(
+        self, 
+        params: HeliconeChatParams, 
+        source_prompt_body: ChatCompletionParams
+    ) -> PromptCompilationResult:
+        """
+        Async version of merge_prompt_body.
+        Merges prompt body with input parameters and variable substitution.
+        
+        Args:
+            params: The chat completion parameters containing inputs and other OpenAI parameters
+            source_prompt_body: The source prompt body to merge with
+                   
+        Returns:
+            PromptCompilationResult containing the compiled prompt body and any validation errors
+        """
+        # This method doesn't need async operations, so we can reuse the sync version
+        return self.merge_prompt_body(params, source_prompt_body)
     
     async def aget_prompt_body(self, params: HeliconeChatParams) -> PromptCompilationResult:
         """
@@ -303,101 +440,24 @@ class HeliconePromptManager:
         
         Args:
             params: The chat completion parameters containing prompt_id, optional version_id, 
-                   inputs, and other OpenAI parameters
+                   environment, inputs, and other OpenAI parameters
                    
         Returns:
             PromptCompilationResult containing the compiled prompt body and any validation errors
         """
         try:
-            errors: List[ValidationError] = []
-            
             # If no prompt_id, just return the input params as-is
             if not params.get("prompt_id"):
                 # Remove Helicone-specific keys
                 body = {k: v for k, v in params.items() 
-                       if k not in ["prompt_id", "version_id", "inputs"]}
-                return PromptCompilationResult(body=body, errors=errors)
+                       if k not in ["prompt_id", "version_id", "inputs", "environment"]}
+                return PromptCompilationResult(body=body, errors=[])
             
             # Pull the stored prompt body
-            pulled_prompt_body = await self.apull_prompt_body(
-                params["prompt_id"], 
-                params.get("version_id")
-            )
+            pulled_prompt_body = await self.apull_prompt_body(params)
             
-            # Prepare substitution values from inputs
-            substitution_values = params.get("inputs", {})
-            
-            # Merge and substitute messages
-            pulled_messages = pulled_prompt_body.get("messages", [])
-            input_messages = params.get("messages", [])
-            merged_messages = pulled_messages + input_messages
-            
-            substituted_messages = []
-            for message in merged_messages:
-                if isinstance(message.get("content"), str):
-                    substituted = HeliconeTemplateManager.substitute_variables(
-                        message["content"],
-                        substitution_values
-                    )
-                    if not substituted.success:
-                        errors.extend(substituted.errors or [])
-                    
-                    new_message = message.copy()
-                    new_message["content"] = (
-                        substituted.result if substituted.success else message["content"]
-                    )
-                    substituted_messages.append(new_message)
-                else:
-                    substituted_messages.append(message)
-            
-            # Substitute variables in response format if present
-            final_response_format = pulled_prompt_body.get("response_format")
-            if final_response_format:
-                substituted_response_format = HeliconeTemplateManager.substitute_variables_json(
-                    final_response_format,
-                    substitution_values
-                )
-                if not substituted_response_format.success:
-                    errors.extend(substituted_response_format.errors or [])
-                else:
-                    final_response_format = substituted_response_format.result
-            
-            # Substitute variables in tools if present
-            final_tools = pulled_prompt_body.get("tools")
-            if final_tools:
-                substituted_tools = HeliconeTemplateManager.substitute_variables_json(
-                    final_tools,
-                    substitution_values
-                )
-                if not substituted_tools.success:
-                    errors.extend(substituted_tools.errors or [])
-                else:
-                    final_tools = substituted_tools.result
-            
-            # Extract non-Helicone parameters from input
-            input_openai_params = {k: v for k, v in params.items() 
-                                 if k not in ["prompt_id", "version_id", "inputs"]}
-            
-            # Remove messages, response_format, and tools from input params since we handle them specially
-            input_openai_params.pop("messages", None)
-            input_openai_params.pop("response_format", None)
-            input_openai_params.pop("tools", None)
-            
-            # Merge pulled prompt body with input parameters
-            # Input parameters take precedence over pulled parameters
-            merged_body = {
-                **pulled_prompt_body,
-                **input_openai_params,
-                "messages": substituted_messages,
-            }
-            
-            if final_response_format is not None:
-                merged_body["response_format"] = final_response_format
-            
-            if final_tools is not None:
-                merged_body["tools"] = final_tools
-            
-            return PromptCompilationResult(body=merged_body, errors=errors)
+            # Merge and substitute
+            return await self.amerge_prompt_body(params, pulled_prompt_body)
         
         except Exception as e:
             print(f"Error getting prompt body: {e}")
@@ -482,6 +542,46 @@ class HeliconePromptManager:
             if "Failed to get production version" in str(e) or "API error" in str(e):
                 raise
             raise Exception(f"Unexpected error getting production version: {e}")
+    
+    async def _aget_environment_version(self, prompt_id: str, environment: str) -> Prompt2025Version:
+        """Async version of _get_environment_version. Get the environment version of a prompt."""
+        try:
+            response = await self.async_client.post(
+                f"{self.base_url}/v1/prompt-2025/query/environment-version",
+                json={"promptId": prompt_id, "environment": environment}
+            )
+            
+            if not response.is_success:
+                raise Exception(f"Failed to get environment version: {response.text}")
+            
+            result = response.json()
+            if result.get("error"):
+                raise Exception(f"API error: {result['error']}")
+            
+            data = result.get("data")
+            if not data:
+                raise Exception("No environment version data returned")
+            
+            return Prompt2025Version(
+                id=data["id"],
+                model=data["model"],
+                prompt_id=data["prompt_id"],
+                major_version=data["major_version"],
+                minor_version=data["minor_version"],
+                commit_message=data["commit_message"],
+                created_at=data["created_at"],
+                s3_url=data.get("s3_url")
+            )
+        except httpx.HTTPError as e:
+            raise Exception(f"HTTP error getting environment version: {e}")
+        except httpx.ConnectError as e:
+            raise Exception(f"Connection error getting environment version: {e}")
+        except httpx.TimeoutException as e:
+            raise Exception(f"Timeout error getting environment version: {e}")
+        except Exception as e:
+            if "Failed to get environment version" in str(e) or "API error" in str(e):
+                raise
+            raise Exception(f"Unexpected error getting environment version: {e}")
     
     async def _afetch_prompt_body_from_s3(self, s3_url: Optional[str]) -> ChatCompletionParams:
         """Async version of _fetch_prompt_body_from_s3. Fetch prompt body from S3 URL."""
