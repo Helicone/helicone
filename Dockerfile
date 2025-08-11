@@ -65,6 +65,9 @@ RUN find packages -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx"
 RUN --mount=type=cache,target=/root/.yarn \
     yarn install --frozen-lockfile
 
+# Ensure type declarations needed for the monorepo build are available at the workspace root
+RUN yarn add -W -D @types/js-yaml
+
 # Install jawn dependencies
 WORKDIR /app/valhalla/jawn
 RUN --mount=type=cache,target=/root/.yarn \
