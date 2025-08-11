@@ -613,7 +613,7 @@ export class RequestWrapper {
   setPrompt2025Settings(params: {
     promptId: string,
     promptVersionId: string,
-    inputs: Record<string, string>,
+    inputs: Record<string, any>,
     environment?: string
   }): void {
     this.prompt2025Settings = {

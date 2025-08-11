@@ -485,7 +485,6 @@ export const attemptModelRequestWithFallback = async ({
       });
     }
 
-    
     requestWrapper.setPrompt2025Settings({
       promptId: parsedBody.prompt_id,
       promptVersionId: result.data.promptVersionId,
