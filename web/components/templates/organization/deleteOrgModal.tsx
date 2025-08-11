@@ -1,10 +1,17 @@
-import { clsx } from "../../shared/clsx";
 import { useOrg } from "../../layout/org/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
-import ThemedModal from "../../shared/themed/themedModal";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { getJawnClient } from "../../../lib/clients/jawn";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface DeleteOrgModalProps {
   open: boolean;
@@ -23,21 +30,32 @@ export const DeleteOrgModal = (props: DeleteOrgModalProps) => {
   const [confirmOrgName, setConfirmOrgName] = useState("");
 
   return (
-    <ThemedModal open={isOpen} setOpen={setOpen}>
-      <div className="flex w-full flex-col gap-4">
-        <p className="text-lg font-semibold">Delete Organization</p>
-        <p className="w-[400px] whitespace-pre-wrap text-sm text-gray-700">
-          Organization {` "${orgName}" `} will be deleted from your account.
-        </p>
-        <p className="w-[400px] whitespace-pre-wrap text-sm text-gray-700">
+    <Dialog open={isOpen} onOpenChange={setOpen}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete Organization</DialogTitle>
+        </DialogHeader>
+        <DialogDescription>
+          Organization <span className="font-medium">{` "${orgName}" `}</span>{" "}
+          will be deleted from your account.
+        </DialogDescription>
+        <DialogDescription>
           This is an irreversible action and cannot be undone, please confirm
           you want to delete this organization.
-        </p>
-        <div className="flex flex-col gap-1 py-4">
-          <i className="whitespace-pre-wrap text-xs text-gray-700">
+        </DialogDescription>
+        <div className="flex flex-col gap-1">
+          <i className="whitespace-pre-wrap text-xs dark:text-slate-500">
             Confirm the name of the organization you want to delete
           </i>
-          <input
+          <Input
+            type="text"
+            name="confirm-org-name"
+            id="confirm-org-name"
+            value={confirmOrgName}
+            placeholder={orgName}
+            onChange={(e) => setConfirmOrgName(e.target.value)}
+          />
+          {/* <input
             type="text"
             name="confirm-org-name"
             id="confirm-org-name"
@@ -47,20 +65,18 @@ export const DeleteOrgModal = (props: DeleteOrgModalProps) => {
             )}
             placeholder={orgName}
             onChange={(e) => setConfirmOrgName(e.target.value)}
-          />
+          /> */}
         </div>
         <div className="mt-4 flex w-full justify-end gap-4">
-          <button
+          <Button
             onClick={() => {
               setOpen(false);
             }}
-            className={clsx(
-              "relative inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50",
-            )}
+            variant="outline"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={async () => {
               if (
                 orgContext?.currentOrg?.tier === "pro-20240913" ||
@@ -97,14 +113,12 @@ export const DeleteOrgModal = (props: DeleteOrgModalProps) => {
 
               setOpen(false);
             }}
-            className={clsx(
-              "relative inline-flex items-center rounded-md bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-700",
-            )}
+            variant="destructive"
           >
             Delete
-          </button>
+          </Button>
         </div>
-      </div>
-    </ThemedModal>
+      </DialogContent>
+    </Dialog>
   );
 };

@@ -71,7 +71,7 @@ export class FineTuneMainController extends Controller {
     const keyResult = await dbExecute<{
       decrypted_provider_key: string;
     }>(
-      `SELECT decrypted_provider_key FROM decrypted_provider_keys 
+      `SELECT decrypted_provider_key FROM decrypted_provider_keys_v2
        WHERE id = $1 AND org_id = $2`,
       [providerKeyId, request.authParams.organizationId]
     );
@@ -220,7 +220,7 @@ export class FineTuneMainController extends Controller {
       decrypted_provider_key: string;
     }>(
       `SELECT decrypted_provider_key
-       FROM decrypted_provider_keys
+       FROM decrypted_provider_keys_v2
        WHERE id = $1 AND org_id = $2`,
       [fineTuneJob.provider_key_id, request.authParams.organizationId]
     );

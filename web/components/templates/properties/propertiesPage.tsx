@@ -2,15 +2,13 @@ import AuthHeader from "@/components/shared/authHeader";
 import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { H3 } from "@/components/ui/typography";
+import { XSmall } from "@/components/ui/typography";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
-import { LockIcon, Tag } from "lucide-react";
+import { LockIcon, Search, Tag } from "lucide-react";
 import { useRouter } from "next/router";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 import { getPropertyFiltersV2 } from "@helicone-package/filters/frontendFilterDefs";
 import PropertyPanel from "./propertyPanel";
@@ -21,6 +19,15 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
     useGetPropertiesV2(getPropertyFiltersV2);
 
   const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Filter properties based on search query
+  const filteredProperties = useMemo(() => {
+    if (!searchQuery) return properties;
+    return properties.filter((property) =>
+      property.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+  }, [properties, searchQuery]);
 
   // Only update URL when property is selected via UI
   const handlePropertySelect = (property: string) => {
@@ -32,11 +39,11 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
     if (initialPropertyKey && properties.includes(initialPropertyKey)) {
       return initialPropertyKey;
     }
-    if (properties.length > 0 && !isPropertiesLoading) {
-      return properties[0];
+    if (filteredProperties.length > 0 && !isPropertiesLoading) {
+      return filteredProperties[0];
     }
     return "";
-  }, [initialPropertyKey, properties, isPropertiesLoading]);
+  }, [initialPropertyKey, properties, filteredProperties, isPropertiesLoading]);
 
   const { hasAccess, freeLimit, canCreate } = useFeatureLimit(
     "properties",
@@ -57,38 +64,37 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
 
   if (isPropertiesLoading) {
     return (
-      <div className="flex h-full min-h-screen flex-col bg-background dark:bg-sidebar-background">
+      <div className="flex h-screen flex-col bg-background">
         <AuthHeader title="Properties" />
 
-        <div className="flex h-full flex-1 flex-col bg-background dark:bg-sidebar-background lg:flex-row">
-          <Card className="h-full w-full rounded-none border-0 bg-background shadow-none dark:bg-sidebar-background lg:w-[350px] lg:min-w-[350px] lg:max-w-[350px] lg:flex-shrink-0">
-            <CardContent className="p-0">
-              <div className="border-b border-border bg-background dark:border-sidebar-border dark:bg-sidebar-background">
-                <CardHeader className="px-4 py-3">
-                  <H3>Your Properties</H3>
-                </CardHeader>
-              </div>
-
-              <ScrollArea className="h-full">
-                <div className="space-y-3 p-4">
-                  {Array.from({ length: 8 }).map((_, i) => (
-                    <div key={i} className="flex items-center">
-                      <Skeleton className="mr-2 h-4 w-4 bg-slate-200 dark:bg-slate-700" />
-                      <Skeleton className="h-6 w-full bg-slate-200 dark:bg-slate-700" />
-                    </div>
-                  ))}
+        <div className="flex flex-1 flex-col overflow-hidden px-4 py-4">
+          <div className="flex flex-1 flex-col border border-border bg-background lg:flex-row">
+            <div className="flex w-full flex-col border-b border-border bg-background lg:w-72 lg:border-b-0 lg:border-r">
+              <div className="border-b border-border p-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Search properties..."
+                    disabled
+                    className="h-8 pl-10 text-sm"
+                  />
                 </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-
-          <div className="flex w-full flex-col pt-2">
-            <Card className="rounded-none border-0 shadow-none">
-              <CardContent className="flex flex-col items-center justify-center py-16">
-                <Skeleton className="mb-6 h-8 w-48 bg-slate-200 dark:bg-slate-700" />
-                <Skeleton className="h-4 w-64 bg-slate-200 dark:bg-slate-700" />
-              </CardContent>
-            </Card>
+              </div>
+              <div className="flex-1 space-y-2 overflow-y-auto p-4">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <Skeleton className="h-4 w-4 bg-muted" />
+                    <Skeleton className="h-5 flex-1 bg-muted" />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex flex-1 items-center justify-center overflow-y-auto p-8">
+              <div className="text-center">
+                <Skeleton className="mx-auto mb-4 h-8 w-48 bg-muted" />
+                <Skeleton className="mx-auto h-4 w-64 bg-muted" />
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -97,8 +103,9 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
 
   if (properties.length === 0) {
     return (
-      <div className="flex h-screen w-full flex-col bg-background dark:bg-sidebar-background">
-        <div className="flex h-full flex-1">
+      <div className="flex h-screen w-full flex-col bg-background">
+        <AuthHeader title="Properties" />
+        <div className="flex flex-1 items-center justify-center">
           <EmptyStateCard feature="properties" />
         </div>
       </div>
@@ -106,7 +113,7 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
   }
 
   return (
-    <div className="flex h-full min-h-screen flex-col bg-background dark:bg-sidebar-background">
+    <div className="flex h-screen flex-col bg-background">
       <AuthHeader title="Properties" />
 
       {!canCreate && (
@@ -118,12 +125,26 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
         />
       )}
 
-      <div className="flex h-full flex-col bg-background dark:bg-sidebar-background lg:flex-row">
-        <Card className="h-full w-full rounded-none border-0 border-r border-border bg-background shadow-none dark:border-sidebar-border dark:bg-sidebar-background lg:w-[300px] lg:min-w-[300px] lg:max-w-[300px] lg:flex-shrink-0">
-          <CardContent>
-            <ScrollArea className="h-full bg-background dark:bg-sidebar-background">
-              {properties.map((property, i) => {
-                const requiresPremium = !hasAccess && i >= freeLimit;
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <div className="flex flex-1 flex-col border border-border bg-background lg:h-full lg:flex-row">
+          <div className="flex w-full flex-col border-b border-border bg-background lg:w-72 lg:border-b-0 lg:border-r">
+            <div className="border-b border-border p-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Search properties..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="h-8 pl-10 text-sm"
+                />
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              {filteredProperties.map((property, i) => {
+                const originalIndex = properties.indexOf(property);
+                const requiresPremium =
+                  !hasAccess && originalIndex >= freeLimit;
+                const isSelected = selectedProperty === property;
 
                 return (
                   <div key={i}>
@@ -132,39 +153,31 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
                         feature="properties"
                         itemCount={properties.length}
                       >
-                        <Button
-                          variant="ghost"
-                          className="h-auto w-full justify-start rounded-none py-3 font-medium text-muted-foreground hover:text-foreground dark:text-sidebar-foreground dark:hover:text-sidebar-foreground"
-                        >
-                          <LockIcon className="mr-2 h-3 w-3 text-muted-foreground dark:text-sidebar-foreground" />
-                          <span className="max-w-[250px] truncate">
-                            {property}
-                          </span>
-                        </Button>
+                        <div className="flex items-center gap-2 px-4 py-3 text-muted-foreground">
+                          <LockIcon className="h-3 w-3 flex-shrink-0" />
+                          <XSmall className="truncate">{property}</XSmall>
+                        </div>
                       </FreeTierLimitWrapper>
                     ) : (
-                      <Button
-                        variant={
-                          selectedProperty === property ? "default" : "ghost"
-                        }
-                        className="h-auto w-full justify-start rounded-none py-3 font-medium"
+                      <button
+                        className={`flex w-full items-center gap-2 px-4 py-3 text-left transition-colors ${
+                          isSelected
+                            ? "bg-muted text-foreground"
+                            : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                        }`}
                         onClick={() => handlePropertySelect(property)}
                       >
-                        <Tag className="mr-2 h-4 w-4" />
-                        <span className="max-w-[250px] truncate">
-                          {property}
-                        </span>
-                      </Button>
+                        <Tag className="h-3 w-3 flex-shrink-0" />
+                        <XSmall className="truncate">{property}</XSmall>
+                      </button>
                     )}
                   </div>
                 );
               })}
-            </ScrollArea>
-          </CardContent>
-        </Card>
+            </div>
+          </div>
 
-        <div className="h-full w-full flex-1 overflow-auto bg-background pt-2 dark:bg-sidebar-background">
-          <div className="h-full min-w-0">
+          <div className="flex-1 overflow-y-auto">
             <PropertyPanel property={selectedProperty} />
           </div>
         </div>

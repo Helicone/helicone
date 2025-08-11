@@ -290,6 +290,7 @@ export interface Prompt2025Input {
   request_id: string;
   version_id: string;
   inputs: Record<string, any>;
+  environment?: string;
 }
 
 export interface CacheMetricSMT {

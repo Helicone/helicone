@@ -16,27 +16,15 @@ import { UIFilterRow } from "@helicone-package/filters/types";
 import ThemedTableHeader from "../../shared/themed/themedHeader";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { formatNumber } from "../users/initialColumns";
-import { SimpleTable } from "../../shared/table/simpleTable";
 
-// ShadCN components
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-// Lucide icons (modern alternative to Heroicons)
 import { Tag, DollarSign, Table2, Clock, ExternalLink } from "lucide-react";
 import PropertyTopCosts from "./propertyTopCosts";
 import { Row } from "@/components/layout/common";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableHead,
-  TableRow,
-  TableCell,
-} from "@/components/ui/table";
-import { H3, P } from "@/components/ui/typography";
+import { SimpleTable } from "../../shared/table/simpleTable";
+import { Small, XSmall, Muted } from "@/components/ui/typography";
 
 interface PropertyPanelProps {
   property: string;
@@ -124,7 +112,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
       className="mb-1 w-full"
     >
       <div className="flex flex-col">
-        <div className="mx-4 flex flex-col items-center justify-between md:flex-row">
+        <div className="flex flex-col items-center justify-between p-4 md:flex-row">
           <Row className="flex-wrap items-center gap-2">
             <TabsList variant={"default"} className="mb-2 sm:mb-0">
               <TabsTrigger value="overview" className="text-sm font-medium">
@@ -178,289 +166,238 @@ const PropertyPanel = (props: PropertyPanelProps) => {
         </div>
 
         {property === "" ? (
-          <Card className="mt-4 flex w-full items-center justify-center rounded-none border-0 bg-background py-16 shadow-none dark:bg-sidebar-background">
-            <CardContent className="flex flex-col items-center text-center">
-              <div className="mb-6 rounded-full bg-accent p-4 dark:bg-sidebar-accent">
-                <Tag className="h-8 w-8 text-primary dark:text-sidebar-primary" />
+          <div className="flex h-full items-center justify-center p-8">
+            <div className="text-center">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                <Tag className="h-6 w-6 text-muted-foreground" />
               </div>
-              <H3 className="mb-2">No Property Selected</H3>
-              <P className="max-w-sm text-muted-foreground dark:text-sidebar-foreground">
+              <Small className="mb-2 font-semibold">No Property Selected</Small>
+              <Muted className="text-xs">
                 Please select a property from the sidebar to view its metrics
-              </P>
-            </CardContent>
-          </Card>
+              </Muted>
+            </div>
+          </div>
         ) : (
-          <div className="flex w-full flex-col gap-6 py-4">
-            <TabsContent value="overview" className="flex flex-col gap-6">
-              <div className="mx-4 flex flex-wrap gap-4">
-                <Card className="min-w-[250px] flex-1 rounded-lg border border-border bg-card shadow-sm dark:border-sidebar-border dark:bg-sidebar-background">
-                  <CardContent className="flex items-center p-4">
-                    <div className="mr-4 rounded-full bg-primary/10 p-3 dark:bg-primary/10">
-                      <DollarSign className="h-5 w-5 text-primary dark:text-sidebar-primary" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground dark:text-sidebar-foreground">
-                        Cost
-                      </p>
-                      {isAnyLoading ? (
-                        <div className="flex items-center space-x-2">
-                          <Skeleton className="h-7 w-24 bg-accent dark:bg-sidebar-accent" />
-                        </div>
-                      ) : (
-                        <p className="text-2xl font-semibold text-foreground dark:text-sidebar-foreground">
-                          {keyMetrics.totalCost.data?.data
-                            ? `$${keyMetrics.totalCost.data?.data.toFixed(5)}`
-                            : "$0.00"}
-                        </p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+          <div className="flex w-full flex-col pt-6">
+            <TabsContent value="overview" className="flex flex-col pt-0">
+              <div className="flex">
+                <div className="flex min-w-[140px] flex-1 items-center gap-2 border-y border-r border-border bg-background p-3">
+                  <div className="rounded bg-emerald-50 p-1 dark:bg-emerald-950">
+                    <DollarSign className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <div className="min-w-0">
+                    <XSmall className="text-muted-foreground">Cost</XSmall>
+                    {isAnyLoading ? (
+                      <Skeleton className="mt-1 h-5 w-16 bg-muted" />
+                    ) : (
+                      <div className="mt-0.5 text-lg font-semibold">
+                        {keyMetrics.totalCost.data?.data
+                          ? `$${keyMetrics.totalCost.data?.data.toFixed(5)}`
+                          : "$0.00"}
+                      </div>
+                    )}
+                  </div>
+                </div>
 
-                <Card className="min-w-[250px] flex-1 rounded-lg border border-border bg-card shadow-sm dark:border-sidebar-border dark:bg-sidebar-background">
-                  <CardContent className="flex items-center p-4">
-                    <div className="mr-4 rounded-full bg-pink-50/80 p-3 dark:bg-pink-900/20">
-                      <Table2 className="h-5 w-5 text-pink-500 dark:text-pink-400" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">
-                        Requests
-                      </p>
-                      {isAnyLoading ? (
-                        <div className="flex items-center space-x-2">
-                          <Skeleton className="h-7 w-24 bg-accent dark:bg-sidebar-accent" />
-                        </div>
-                      ) : (
-                        <p className="text-2xl font-semibold">
-                          {
-                            +(
-                              keyMetrics.totalRequests?.data?.data?.toFixed(
-                                2,
-                              ) ?? 0
-                            )
-                          }
-                        </p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                <div className="flex min-w-[140px] flex-1 items-center gap-2 border-y border-r border-border bg-background p-3">
+                  <div className="rounded bg-blue-50 p-1 dark:bg-blue-950">
+                    <Table2 className="h-3 w-3 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div className="min-w-0">
+                    <XSmall className="text-muted-foreground">Requests</XSmall>
+                    {isAnyLoading ? (
+                      <Skeleton className="mt-1 h-5 w-16 bg-muted" />
+                    ) : (
+                      <div className="mt-0.5 text-lg font-semibold">
+                        {
+                          +(
+                            keyMetrics.totalRequests?.data?.data?.toFixed(2) ??
+                            0
+                          )
+                        }
+                      </div>
+                    )}
+                  </div>
+                </div>
 
-                <Card className="min-w-[250px] flex-1 rounded-lg border border-border bg-card shadow-sm dark:border-sidebar-border dark:bg-sidebar-background">
-                  <CardContent className="flex items-center p-4">
-                    <div className="mr-4 rounded-full bg-purple-50/80 p-3 dark:bg-purple-900/20">
-                      <Clock className="h-5 w-5 text-purple-500 dark:text-purple-400" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">
-                        Average Latency / Req
-                      </p>
-                      {isAnyLoading ? (
-                        <div className="flex items-center space-x-2">
-                          <Skeleton className="h-7 w-24 bg-accent dark:bg-sidebar-accent" />
-                        </div>
-                      ) : (
-                        <p className="text-2xl font-semibold">
-                          {keyMetrics.averageLatency.data?.data
-                            ? (
-                                keyMetrics.averageLatency.data.data / 1000
-                              ).toFixed(2)
-                            : "0.00"}
-                        </p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                <div className="flex min-w-[140px] flex-1 items-center gap-2 border-y border-border bg-background p-3">
+                  <div className="rounded bg-purple-50 p-1 dark:bg-purple-950">
+                    <Clock className="h-3 w-3 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <div className="min-w-0">
+                    <XSmall className="text-muted-foreground">
+                      Avg Latency
+                    </XSmall>
+                    {isAnyLoading ? (
+                      <Skeleton className="mt-1 h-5 w-16 bg-muted" />
+                    ) : (
+                      <div className="mt-0.5 text-lg font-semibold">
+                        {keyMetrics.averageLatency.data?.data
+                          ? (
+                              keyMetrics.averageLatency.data.data / 1000
+                            ).toFixed(2)
+                          : "0.00"}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
-
               {isAnyLoading ? (
-                <Card className="w-full rounded-lg border border-border bg-background shadow-sm dark:border-sidebar-border dark:bg-sidebar-background">
-                  <CardContent className="overflow-auto p-0">
-                    <div className="min-w-[800px] bg-background dark:bg-sidebar-background">
-                      <Table className="w-full bg-background dark:bg-sidebar-background">
-                        <TableHeader>
-                          <TableRow className="sticky top-0 bg-background shadow-sm dark:bg-sidebar-background">
-                            {[
-                              "Value",
-                              "Requests",
-                              "Cost",
-                              "Avg Prompt Tokens",
-                              "Avg Comp Tokens",
-                              "Avg Latency",
-                              "Avg Cost",
-                            ].map((header, index) => (
-                              <TableHead
-                                key={index}
-                                className={`relative text-[12px] font-semibold text-foreground dark:text-sidebar-foreground ${
-                                  index === 0 ? "pl-10" : ""
-                                }`}
-                              >
-                                {header}
-                                {index < 6 && (
-                                  <div className="absolute right-0 top-0 h-full w-px bg-border dark:bg-sidebar-border" />
-                                )}
-                                <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-border dark:bg-sidebar-border" />
-                              </TableHead>
-                            ))}
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody className="text-sm">
-                          {Array.from({ length: 10 }).map((_, rowIndex) => (
-                            <TableRow key={`skeleton-row-${rowIndex}`}>
-                              {Array.from({ length: 7 }).map((_, colIndex) => (
-                                <TableCell
-                                  key={`skeleton-cell-${rowIndex}-${colIndex}`}
-                                  className={`border-t border-border px-2 py-3 text-foreground dark:border-sidebar-border dark:text-sidebar-foreground ${
-                                    colIndex === 0 ? "pl-10" : ""
-                                  } ${
-                                    colIndex === 6
-                                      ? "border-r border-border pr-10 dark:border-sidebar-border"
-                                      : ""
-                                  }`}
-                                >
-                                  <Skeleton
-                                    className={`h-5 ${
-                                      colIndex === 0 ? "w-32" : "w-16"
-                                    } bg-accent dark:bg-sidebar-accent`}
-                                  />
-                                </TableCell>
-                              ))}
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                <div className="w-full">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-4">
+                      {[
+                        "Value",
+                        "Requests",
+                        "Cost",
+                        "Avg Prompt Tokens",
+                        "Avg Comp Tokens",
+                        "Avg Latency",
+                        "Avg Cost",
+                      ].map((header) => (
+                        <div key={header} className="flex-1">
+                          <XSmall className="mb-2 font-medium text-muted-foreground">
+                            {header}
+                          </XSmall>
+                          <Skeleton className="h-5 w-full bg-muted" />
+                        </div>
+                      ))}
                     </div>
-                  </CardContent>
-                </Card>
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <div key={i} className="flex items-center gap-4">
+                        {Array.from({ length: 7 }).map((_, j) => (
+                          <div key={j} className="flex-1">
+                            <Skeleton className="h-5 w-full bg-muted" />
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </div>
               ) : (
-                <Card className="w-full rounded-lg border border-border bg-background shadow-sm dark:border-sidebar-border dark:bg-sidebar-background">
-                  <CardContent className="overflow-hidden p-0">
-                    <div className="overflow-x-auto">
-                      <SimpleTable
-                        className="w-full min-w-[800px]"
-                        data={cleanedValueData}
-                        columns={[
-                          {
-                            key: "property_value" as keyof (typeof cleanedValueData)[0],
-                            header: "Value",
-                            sortable: true,
-                            render: (propertyValue) => (
-                              <div className="overflow-hidden">
-                                <Button
-                                  variant="link"
-                                  className="flex h-auto items-center truncate p-0 font-semibold"
-                                  title={propertyValue.property_value}
-                                  onClick={() => {
-                                    const value = propertyValue.property_value;
-                                    const filterMapIndex = filterMap.findIndex(
-                                      (f) => f.label === property,
-                                    );
-                                    const currentAdvancedFilters =
-                                      encodeURIComponent(
-                                        JSON.stringify({
-                                          filter: [
-                                            {
-                                              filterMapIdx: filterMapIndex,
-                                              operatorIdx: 0,
-                                              value,
-                                            },
-                                          ]
-                                            .map(encodeFilter)
-                                            .join("|"),
-                                        }),
-                                      );
+                <div className="overflow-x-auto">
+                  <SimpleTable
+                    className="w-full"
+                    data={cleanedValueData}
+                    columns={[
+                      {
+                        key: "property_value" as keyof (typeof cleanedValueData)[0],
+                        header: "Value",
+                        sortable: true,
+                        render: (propertyValue) => (
+                          <button
+                            className="flex items-center gap-1 text-left font-medium text-foreground hover:text-primary"
+                            title={propertyValue.property_value}
+                            onClick={() => {
+                              const value = propertyValue.property_value;
+                              const filterMapIndex = filterMap.findIndex(
+                                (f) => f.label === property,
+                              );
+                              const currentAdvancedFilters = encodeURIComponent(
+                                JSON.stringify({
+                                  filter: [
+                                    {
+                                      filterMapIdx: filterMapIndex,
+                                      operatorIdx: 0,
+                                      value,
+                                    },
+                                  ]
+                                    .map(encodeFilter)
+                                    .join("|"),
+                                }),
+                              );
 
-                                    router.push({
-                                      pathname: "/requests",
-                                      query: {
-                                        t: "3m",
-                                        filters: currentAdvancedFilters,
-                                      },
-                                    });
-                                  }}
-                                >
-                                  {propertyValue.property_value}
-                                  <ExternalLink className="ml-1 h-3 w-3 flex-shrink-0 text-muted-foreground" />
-                                </Button>
-                              </div>
-                            ),
-                          },
-                          {
-                            key: "total_requests" as keyof (typeof cleanedValueData)[0],
-                            header: "Requests",
-                            sortable: true,
-                            render: (propertyValue) =>
-                              propertyValue.total_requests,
-                          },
-                          {
-                            key: "total_cost" as keyof (typeof cleanedValueData)[0],
-                            header: "Cost",
-                            sortable: true,
-                            render: (propertyValue) =>
-                              `$${formatNumber(propertyValue.total_cost, 6)}`,
-                          },
-                          {
-                            key: "avg_prompt_tokens_per_request" as keyof (typeof cleanedValueData)[0],
-                            header: "Avg Prompt Tokens",
-                            sortable: true,
-                            render: (propertyValue) =>
-                              formatNumber(
-                                propertyValue.avg_prompt_tokens_per_request,
-                                6,
-                              ),
-                          },
-                          {
-                            key: "avg_completion_tokens_per_request" as keyof (typeof cleanedValueData)[0],
-                            header: "Avg Comp Tokens",
-                            sortable: true,
-                            render: (propertyValue) =>
-                              formatNumber(
-                                propertyValue.avg_completion_tokens_per_request,
-                                6,
-                              ),
-                          },
-                          {
-                            key: "avg_latency_per_request" as keyof (typeof cleanedValueData)[0],
-                            header: "Avg Latency",
-                            sortable: true,
-                            render: (propertyValue) =>
-                              formatNumber(
-                                propertyValue.avg_latency_per_request,
-                                6,
-                              ),
-                          },
-                          {
-                            key: "average_cost_per_request" as keyof (typeof cleanedValueData)[0],
-                            header: "Avg Cost",
-                            sortable: true,
-                            render: (propertyValue) =>
-                              `$${formatNumber(
-                                propertyValue.average_cost_per_request,
-                                6,
-                              )}`,
-                          },
-                        ]}
-                        emptyMessage="No property data available"
-                        onSort={(
-                          key: keyof (typeof cleanedValueData)[0] | undefined,
-                          direction: "asc" | "desc",
-                        ) => {
-                          setSortConfig({
-                            key: key as string,
-                            direction,
-                          });
-                        }}
-                        currentSortKey={sortConfig.key}
-                        currentSortDirection={sortConfig.direction}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
+                              router.push({
+                                pathname: "/requests",
+                                query: {
+                                  t: "3m",
+                                  filters: currentAdvancedFilters,
+                                },
+                              });
+                            }}
+                          >
+                            <span className="truncate">
+                              {propertyValue.property_value}
+                            </span>
+                            <ExternalLink className="h-3 w-3 flex-shrink-0 text-muted-foreground" />
+                          </button>
+                        ),
+                      },
+                      {
+                        key: "total_requests" as keyof (typeof cleanedValueData)[0],
+                        header: "Requests",
+                        sortable: true,
+                        render: (propertyValue) => propertyValue.total_requests,
+                      },
+                      {
+                        key: "total_cost" as keyof (typeof cleanedValueData)[0],
+                        header: "Cost",
+                        sortable: true,
+                        render: (propertyValue) =>
+                          `$${formatNumber(propertyValue.total_cost, 6)}`,
+                      },
+                      {
+                        key: "avg_prompt_tokens_per_request" as keyof (typeof cleanedValueData)[0],
+                        header: "Avg Prompt Tokens",
+                        sortable: true,
+                        render: (propertyValue) =>
+                          formatNumber(
+                            propertyValue.avg_prompt_tokens_per_request,
+                            6,
+                          ),
+                      },
+                      {
+                        key: "avg_completion_tokens_per_request" as keyof (typeof cleanedValueData)[0],
+                        header: "Avg Comp Tokens",
+                        sortable: true,
+                        render: (propertyValue) =>
+                          formatNumber(
+                            propertyValue.avg_completion_tokens_per_request,
+                            6,
+                          ),
+                      },
+                      {
+                        key: "avg_latency_per_request" as keyof (typeof cleanedValueData)[0],
+                        header: "Avg Latency",
+                        sortable: true,
+                        render: (propertyValue) =>
+                          formatNumber(
+                            propertyValue.avg_latency_per_request,
+                            6,
+                          ),
+                      },
+                      {
+                        key: "average_cost_per_request" as keyof (typeof cleanedValueData)[0],
+                        header: "Avg Cost",
+                        sortable: true,
+                        render: (propertyValue) =>
+                          `$${formatNumber(
+                            propertyValue.average_cost_per_request,
+                            6,
+                          )}`,
+                      },
+                    ]}
+                    emptyMessage="No property data available"
+                    onSort={(
+                      key: keyof (typeof cleanedValueData)[0] | undefined,
+                      direction: "asc" | "desc",
+                    ) => {
+                      setSortConfig({
+                        key: key as string,
+                        direction,
+                      });
+                    }}
+                    currentSortKey={sortConfig.key}
+                    currentSortDirection={sortConfig.direction}
+                  />
+                </div>
               )}
 
               {propertyValueData.length > 10 && (
-                <div className="flex justify-center">
+                <div className="flex justify-center p-4">
                   <Button
                     variant="outline"
+                    size="sm"
                     onClick={() => setShowMore(!showMore)}
                   >
                     {showMore ? "Show Less" : "Show More"}
@@ -469,7 +406,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
               )}
             </TabsContent>
 
-            <TabsContent value="metrics" className="flex flex-col gap-6">
+            <TabsContent value="metrics" className="flex flex-col gap-6 pt-0">
               <PropertyTopCosts property={property} timeFilter={timeFilter} />
             </TabsContent>
           </div>

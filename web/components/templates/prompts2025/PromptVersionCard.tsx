@@ -13,19 +13,58 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { TestTube2, Crown, Clock, Trash2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  TestTube2,
+  Rocket,
+  Clock,
+  Trash2,
+  Check,
+  ChevronsUpDown,
+  Crown,
+} from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
+import { useGetPromptEnvironments } from "@/services/hooks/prompts";
+import { Input } from "@/components/ui/input";
+import EnvironmentPill from "./EnvironmentPill";
 
 type Prompt2025Version = components["schemas"]["Prompt2025Version"];
 
 interface PromptVersionCardProps {
   version: Prompt2025Version;
   isProductionVersion?: boolean;
-  onSetProductionVersion: (promptId: string, promptVersionId: string) => void;
+  onSetEnvironment: (
+    promptId: string,
+    promptVersionId: string,
+    environment: string,
+  ) => void;
   onOpenPromptVersion: (promptVersionId: string) => void;
   onDeletePromptVersion: (promptVersionId: string) => void;
 }
@@ -33,14 +72,35 @@ interface PromptVersionCardProps {
 const PromptVersionCard = ({
   version,
   isProductionVersion = false,
-  onSetProductionVersion,
+  onSetEnvironment,
   onOpenPromptVersion,
   onDeletePromptVersion,
 }: PromptVersionCardProps) => {
+  const [isEnvironmentDialogOpen, setIsEnvironmentDialogOpen] = useState(false);
+  const [selectedEnvironment, setSelectedEnvironment] = useState<
+    string | undefined
+  >(undefined);
+  const [customEnvironment, setCustomEnvironment] = useState("");
+  const [isEnvironmentDropdownOpen, setIsEnvironmentDropdownOpen] =
+    useState(false);
+
+  const { data: environments = [], isLoading: isLoadingEnvironments } =
+    useGetPromptEnvironments();
+
   const versionDisplay =
     version.minor_version === 0
       ? `v${version.major_version}`
       : `v${version.major_version}.${version.minor_version}`;
+
+  const handleSetEnvironment = () => {
+    const environmentToSet = selectedEnvironment || customEnvironment;
+    if (environmentToSet) {
+      onSetEnvironment(version.prompt_id, version.id, environmentToSet);
+      setIsEnvironmentDialogOpen(false);
+      setSelectedEnvironment(undefined);
+      setCustomEnvironment("");
+    }
+  };
 
   return (
     <div className="group w-full cursor-pointer border-b border-border bg-background transition-colors hover:bg-muted/50">
@@ -53,10 +113,8 @@ const PromptVersionCard = ({
             <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20">
               {versionDisplay}
             </span>
-            {isProductionVersion && (
-              <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800 ring-1 ring-inset ring-green-600/20">
-                Production
-              </span>
+            {version.environment && (
+              <EnvironmentPill environment={version.environment} />
             )}
           </div>
         </div>
@@ -79,49 +137,126 @@ const PromptVersionCard = ({
               <p>Open in Playground</p>
             </TooltipContent>
           </Tooltip>
-          {!isProductionVersion && (
-            <AlertDialog>
-              <Tooltip delayDuration={100}>
-                <TooltipTrigger asChild>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                      }}
-                    >
-                      <Crown className="h-4 w-4 text-muted-foreground" />
-                    </Button>
-                  </AlertDialogTrigger>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Set as Production</p>
-                </TooltipContent>
-              </Tooltip>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Set as Production Version</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Are you sure you want to set {versionDisplay} as the
-                    production version? This will replace the current production
-                    version and affect all future API calls using this prompt.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() =>
-                      onSetProductionVersion(version.prompt_id, version.id)
-                    }
+
+          <Dialog
+            open={isEnvironmentDialogOpen}
+            onOpenChange={setIsEnvironmentDialogOpen}
+          >
+            <Tooltip delayDuration={100}>
+              <TooltipTrigger asChild>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
                   >
-                    Set as Production
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          )}
+                    <Rocket className="h-4 w-4 text-muted-foreground" />
+                  </Button>
+                </DialogTrigger>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Set Environment</p>
+              </TooltipContent>
+            </Tooltip>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Set Environment for {versionDisplay}</DialogTitle>
+                <DialogDescription>
+                  Select an environment to deploy this prompt version to. This
+                  will immediately point all prompt calls in this environment to
+                  this version.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex flex-col gap-4 pb-2">
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium">Environment</label>
+                  <Popover
+                    open={isEnvironmentDropdownOpen}
+                    onOpenChange={setIsEnvironmentDropdownOpen}
+                  >
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={isEnvironmentDropdownOpen}
+                        className="w-full justify-between"
+                        disabled={isLoadingEnvironments}
+                      >
+                        {selectedEnvironment ||
+                          customEnvironment ||
+                          "Select environment"}
+                        <ChevronsUpDown size={16} className="opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0">
+                      <Command>
+                        <CommandInput placeholder="Search environments..." />
+                        <CommandList>
+                          <CommandEmpty>No environments found.</CommandEmpty>
+                          <CommandGroup>
+                            {environments.map((env) => (
+                              <CommandItem
+                                key={env}
+                                onSelect={() => {
+                                  setSelectedEnvironment(env);
+                                  setCustomEnvironment("");
+                                  setIsEnvironmentDropdownOpen(false);
+                                }}
+                              >
+                                <Check
+                                  size={16}
+                                  className={cn(
+                                    "mr-2",
+                                    selectedEnvironment === env
+                                      ? "opacity-100"
+                                      : "opacity-0",
+                                  )}
+                                />
+                                {env}
+                                {env === "production" && (
+                                  <Crown className="ml-auto h-3 w-3 text-muted-foreground/50" />
+                                )}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  <div className="mt-2 flex flex-col gap-2">
+                    <Input
+                      placeholder="Or enter custom environment name..."
+                      value={customEnvironment}
+                      onChange={(e) => {
+                        setCustomEnvironment(e.target.value);
+                        if (e.target.value) {
+                          setSelectedEnvironment(undefined);
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsEnvironmentDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSetEnvironment}
+                  disabled={!selectedEnvironment && !customEnvironment}
+                >
+                  Set Environment
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
           <AlertDialog>
             <Tooltip delayDuration={100}>
               <TooltipTrigger asChild>

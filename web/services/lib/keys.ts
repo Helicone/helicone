@@ -36,7 +36,7 @@ async function getDecryptedProviderKeysByOrgId(
       provider_name: string;
       provider_key_name: string;
     }>(
-      `SELECT id, org_id, decrypted_provider_key, provider_key_name, provider_name from decrypted_provider_keys where org_id = $1 and soft_delete = false`,
+      `SELECT id, org_id, decrypted_provider_key, provider_key_name, provider_name from decrypted_provider_keys_v2 where org_id = $1 and soft_delete = false`,
       [orgId],
     ),
     (keys) =>
@@ -61,7 +61,7 @@ async function getDecryptedProviderKeyById(
       provider_key_name: string;
       provider_name: string;
     }>(
-      `SELECT id, org_id, decrypted_provider_key, provider_key_name, provider_name from decrypted_provider_keys where id = $1 and soft_delete = false limit 1`,
+      `SELECT id, org_id, decrypted_provider_key, provider_key_name, provider_name from decrypted_provider_keys_v2 where id = $1 and soft_delete = false limit 1`,
       [providerKeyId],
     ),
     (key) => ({

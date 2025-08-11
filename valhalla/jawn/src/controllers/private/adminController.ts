@@ -498,8 +498,7 @@ export class AdminController extends Controller {
       }')
       group by dt, organization_id
       order by organization_id, dt ASC
-      -- WITH FILL FROM toStartOfHour(now() - INTERVAL '30 day') TO toStartOfHour(now()) + 1 STEP INTERVAL 1 HOUR
-      WITH FILL FROM toDateTime('${body.startDate}') TO toDateTime('${
+      WITH FILL FROM toDateTime64('${body.startDate}') TO toDateTime64('${
         body.endDate
       }') STEP INTERVAL 1 ${timeGrain}
     `,

@@ -1,0 +1,10 @@
+{
+  "version": "v1",
+  "packages": {
+    "@helicone/async": {
+      "signature": "95296967c1ea6d54927039b1ceac9b00",
+      "file": true,
+      "replaced": "^1.0.1"
+    }
+  }
+}

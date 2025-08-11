@@ -1,0 +1,17 @@
+{
+	"name": "helicone-cron",
+	"version": "0.0.0",
+	"private": true,
+	"scripts": {
+		"deploy:eu": "wrangler deploy --env eu",
+		"deploy:us": "wrangler deploy --env us",
+		"deploy:all": "npm run deploy:eu && npm run deploy:us",
+		"dev": "wrangler dev --test-scheduled",
+		"start": "wrangler dev --test-scheduled",
+		"cf-typegen": "wrangler types"
+	},
+	"devDependencies": {
+		"typescript": "^5.5.2",
+		"wrangler": "^4.28.1"
+	}
+}

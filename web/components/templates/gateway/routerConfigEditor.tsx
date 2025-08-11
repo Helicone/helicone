@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import yaml from "js-yaml";
+import * as yaml from "js-yaml";
 import { Loader2, Settings, Code2, FormInput } from "lucide-react";
 import useNotification from "@/components/shared/notification/useNotification";
 import {

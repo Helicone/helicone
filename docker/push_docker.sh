@@ -83,25 +83,36 @@ run_command() {
 setup_buildx() {
   echo "Setting up Docker buildx for multi-platform builds..."
 
-  # Try to detect an already selected builder (e.g., a Docker Build Cloud builder set up by CI)
-  CURRENT_BUILDER=$(docker buildx ls 2>/dev/null | sed -n 's/^\* \([^ ]\+\).*/\1/p' || true)
-  if [ -n "$CURRENT_BUILDER" ]; then
-    echo "Detected current buildx builder '$CURRENT_BUILDER'. Using it as-is."
-    run_command docker buildx use "$CURRENT_BUILDER"
-    # Detect driver type to adapt behavior (e.g., skip local prune for cloud driver)
-    DRIVER_LINE=$(docker buildx inspect "$CURRENT_BUILDER" 2>/dev/null | grep -i '^Driver:' || true)
-    if echo "$DRIVER_LINE" | grep -qi 'cloud'; then
-      CLOUD_BUILDER=true
-    fi
+  # Prefer builder supplied by CI (from docker/setup-buildx-action outputs)
+  if [ -n "$BUILDX_BUILDER" ]; then
+    echo "Using buildx builder from environment: '$BUILDX_BUILDER'"
+    run_command docker buildx use "$BUILDX_BUILDER"
   else
-    # Fallback: create or use a local builder
-    if ! docker buildx ls | grep -q "helicone-builder"; then
-      echo "Creating new buildx builder 'helicone-builder'..."
-      run_command docker buildx create --name helicone-builder --use
+    # Try to detect an already selected builder (leading '*' in ls output)
+    CURRENT_BUILDER=$(docker buildx ls 2>/dev/null | sed -n 's/^\* \([^ ]\+\).*/\1/p' || true)
+    if [ -n "$CURRENT_BUILDER" ]; then
+      echo "Detected current buildx builder '$CURRENT_BUILDER'. Using it as-is."
+      run_command docker buildx use "$CURRENT_BUILDER"
     else
-      echo "Using existing buildx builder 'helicone-builder'..."
-      run_command docker buildx use helicone-builder
+      # Fallback: create or use a local builder
+      if ! docker buildx ls | grep -q "helicone-builder"; then
+        echo "Creating new buildx builder 'helicone-builder'..."
+        run_command docker buildx create --name helicone-builder --use
+      else
+        echo "Using existing buildx builder 'helicone-builder'..."
+        run_command docker buildx use helicone-builder
+      fi
     fi
+  fi
+
+  # Determine if current builder is cloud
+  ACTIVE_BUILDER=$(docker buildx ls 2>/dev/null | sed -n 's/^\* \([^ ]\+\).*/\1/p' || true)
+  if [ -z "$ACTIVE_BUILDER" ] && [ -n "$BUILDX_BUILDER" ]; then
+    ACTIVE_BUILDER="$BUILDX_BUILDER"
+  fi
+  DRIVER_LINE=$(docker buildx inspect "$ACTIVE_BUILDER" 2>/dev/null | grep -i '^Driver:' || true)
+  if echo "$DRIVER_LINE" | grep -qi 'cloud'; then
+    CLOUD_BUILDER=true
   fi
 
   # Bootstrap the builder

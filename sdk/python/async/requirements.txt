@@ -372,7 +372,7 @@ grpcio==1.67.0 ; python_full_version >= "3.11.0" and python_version < "4" \
     --hash=sha256:f95e15db43e75a534420e04822df91f645664bf4ad21dfaad7d51773c80e6bb4 \
     --hash=sha256:fd6bc27861e460fe28e94226e3673d46e294ca4673d46b224428d197c5935e69 \
     --hash=sha256:fe89295219b9c9e47780a0f1c75ca44211e706d1c598242249fe717af3385ec8
-h11==0.14.0 ; python_full_version >= "3.11.0" and python_version < "4" \
+h11==0.16.0 ; python_full_version >= "3.11.0" and python_version < "4" \
     --hash=sha256:8f19fbbe99e72420ff35c00b27a34cb9937e902a8b810e2c88300c6f0a3b699d \
     --hash=sha256:e3fe4ac4b851c468cc8363d500db52c2ead036020723024a109d37346efaa761
 httpcore==1.0.6 ; python_full_version >= "3.11.0" and python_version < "4" \
@@ -1113,7 +1113,7 @@ regex==2024.9.11 ; python_full_version >= "3.11.0" and python_version < "4" \
 requests==2.32.3 ; python_full_version >= "3.11.0" and python_version < "4" \
     --hash=sha256:55365417734eb18255590a9ff9eb97e9e1da868d4ccd6402399eaf68af20a760 \
     --hash=sha256:70761cfe03c773ceb22aa2f671b4757976145175cdfca038c02654d061d6dcc6
-setuptools==75.2.0 ; python_full_version >= "3.11.0" and python_version < "4" \
+setuptools==78.1.1  # Security: CVE-2024-6345, CVE-2025-47273 ; python_full_version >= "3.11.0" and python_version < "4" \
     --hash=sha256:753bb6ebf1f465a1912e19ed1d41f403a79173a9acf66a42e7e6aec45c3c16ec \
     --hash=sha256:a7fcb66f68b4d9e8e66b42f9876150a3371558f98fa32222ffaa5bced76406f8
 six==1.16.0 ; python_full_version >= "3.11.0" and python_version < "4" \

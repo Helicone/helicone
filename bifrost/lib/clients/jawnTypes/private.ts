@@ -177,14 +177,17 @@ export interface paths {
   "/v1/prompt-2025/tags": {
     get: operations["GetPrompt2025Tags"];
   };
+  "/v1/prompt-2025/environments": {
+    get: operations["GetPrompt2025Environments"];
+  };
   "/v1/prompt-2025": {
     post: operations["CreatePrompt2025"];
   };
   "/v1/prompt-2025/update": {
     post: operations["UpdatePrompt2025"];
   };
-  "/v1/prompt-2025/update/production-version": {
-    post: operations["SetProductionVersion"];
+  "/v1/prompt-2025/update/environment": {
+    post: operations["SetPromptVersionEnvironment"];
   };
   "/v1/prompt-2025/count": {
     get: operations["GetPrompt2025Count"];
@@ -1140,6 +1143,7 @@ Json: JsonObject;
       /** Format: double */
       minor_version: number;
       commit_message: string;
+      environment?: string;
       created_at: string;
       s3_url?: string;
     };
@@ -16468,6 +16472,16 @@ export interface operations {
       };
     };
   };
+  GetPrompt2025Environments: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string-Array.string_"];
+        };
+      };
+    };
+  };
   CreatePrompt2025: {
     requestBody: {
       content: {
@@ -16493,7 +16507,7 @@ export interface operations {
         "application/json": {
           promptBody: components["schemas"]["OpenAIChatRequest"];
           commitMessage: string;
-          setAsProduction: boolean;
+          environment?: string;
           newMajorVersion: boolean;
           promptVersionId: string;
           promptId: string;
@@ -16509,10 +16523,11 @@ export interface operations {
       };
     };
   };
-  SetProductionVersion: {
+  SetPromptVersionEnvironment: {
     requestBody: {
       content: {
         "application/json": {
+          environment: string;
           promptVersionId: string;
           promptId: string;
         };

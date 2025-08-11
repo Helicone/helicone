@@ -31,13 +31,15 @@ jobs:
           DOCKER_ACCOUNT: ${{ vars.DOCKER_USERNAME }}
         with:
           driver: cloud
-          endpoint: helicone/heli_linux-amd64
+          endpoint: helicone/heli
 
       - name: Set up Docker Buildx (local fallback)
         if: steps.buildx_cloud.outcome == 'failure'
         uses: docker/setup-buildx-action@v3
 
       - name: Push images to Docker Hub
+        env:
+          BUILDX_BUILDER: ${{ steps.buildx.outputs.name }}
         run: |
           cd docker
           ./push_docker.sh
