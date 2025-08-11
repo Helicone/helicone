@@ -9,6 +9,7 @@ TEST_MODE=false
 DONT_PRUNE=false
 SELECTED_IMAGES=()
 PLATFORMS="linux/amd64,linux/arm64"
+DEFAULT_PLATFORMS="$PLATFORMS"
 CLOUD_BUILDER=false
 
 # Function to show usage
@@ -165,6 +166,12 @@ attempt_bake_with_fallback() {
 # Setup Docker buildx for multi-platform builds
 setup_buildx
 INITIAL_CLOUD_BUILDER=$CLOUD_BUILDER
+
+# If running on a local builder and the user didn't override --platforms, default to single-platform to reduce memory usage
+if [ "$CLOUD_BUILDER" = false ] && [ "$PLATFORMS" = "$DEFAULT_PLATFORMS" ]; then
+  echo "Detected local buildx builder. Defaulting to single-platform linux/amd64 to reduce memory usage. Use --platforms to override."
+  PLATFORMS="linux/amd64"
+fi
 
 # Prune Docker images if not disabled (skip when using a cloud builder)
 if [ "$DONT_PRUNE" = false ] && [ "$CLOUD_BUILDER" = false ]; then
