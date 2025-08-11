@@ -1,5 +1,5 @@
 import { Env } from "../..";
-import { Database } from "../../../supabase/database.types";
+import { Database, Json } from "../../../supabase/database.types";
 import { RequestWrapper } from "../../lib/RequestWrapper";
 import { Job, isValidStatus, validateRun } from "../../lib/models/Runs";
 import { HeliconeNode, validateHeliconeNode } from "../../lib/models/Tasks";
@@ -11,9 +11,10 @@ import { logAsync } from "../../lib/managers/AsyncLogManager";
 import { createAPIClient } from "../../api/lib/apiClient";
 import { createClient } from "@supabase/supabase-js";
 import { ProviderKeysManager } from "../../lib/managers/ProviderKeysManager";
-import { ProviderKeysStore } from "../../lib/db/ProviderKeysStore";
+import { ProviderKey, ProviderKeysStore } from "../../lib/db/ProviderKeysStore";
 import { APIKeysStore } from "../../lib/db/APIKeysStore";
 import { APIKeysManager } from "../../lib/managers/APIKeysManager";
+import { ProviderName } from "@helicone-package/cost/models/providers";
 const RATE_LIMIT_MS = 1000 * 30;
 
 function getAPIRouterV1(
@@ -22,32 +23,27 @@ function getAPIRouterV1(
     [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]
   >
 ) {
-  router.get(
-    "/refetch-api-keys",
+  router.post(
+    "/mock-set-api-key",
     async (
       _,
       requestWrapper: RequestWrapper,
       env: Env,
       ctx: ExecutionContext
     ) => {
-      const KEY = "api-keys-last-refetched";
-      const lastFetchedAt = await env.RATE_LIMIT_KV.get(KEY);
-
-      // Check rate limit first
-      try {
-        if (
-          lastFetchedAt &&
-          // Every 10 seconds
-          new Date(lastFetchedAt).getTime() + RATE_LIMIT_MS > Date.now()
-        ) {
-          return new Response("rate limited", { status: 429 });
-        }
-      } catch {
-        console.error("Invalid date in rate limit check");
+      if (env.ENVIRONMENT !== "development") {
+        return new Response("not allowed", { status: 403 });
       }
 
-      // Update timestamp immediately when processing request (not when completing)
-      ctx.waitUntil(env.RATE_LIMIT_KV.put(KEY, new Date().toISOString()));
+      const data = await requestWrapper.getJson<{
+        apiKeyHash: string;
+        orgId: string;
+        softDelete?: boolean;
+      }>();
+
+      if (!data) {
+        return new Response("invalid request", { status: 400 });
+      }
 
       const supabaseClientUS = createClient<Database>(
         env.SUPABASE_URL,
@@ -62,43 +58,103 @@ function getAPIRouterV1(
         new APIKeysStore(supabaseClientUS),
         env
       );
-      await apiKeysManagerUS.setAPIKeys();
+      await apiKeysManagerUS.setAPIKey(
+        data.apiKeyHash,
+        data.orgId,
+        data.softDelete
+      );
 
       const apiKeysManagerEU = new APIKeysManager(
         new APIKeysStore(supabaseClientEU),
         env
       );
-      await apiKeysManagerEU.setAPIKeys();
+      await apiKeysManagerEU.setAPIKey(
+        data.apiKeyHash,
+        data.orgId,
+        data.softDelete
+      );
       return new Response("ok", { status: 200 });
     }
   );
 
-  router.get(
-    "/refetch-provider-keys",
+  router.post(
+    "/mock-set-provider-key",
     async (
       _,
       requestWrapper: RequestWrapper,
       env: Env,
       ctx: ExecutionContext
     ) => {
-      const KEY = "provider-keys-last-refetched";
-      const lastFetchedAt = await env.RATE_LIMIT_KV.get(KEY);
-
-      // Check rate limit first
-      try {
-        if (
-          lastFetchedAt &&
-          // Every 10 seconds
-          new Date(lastFetchedAt).getTime() + RATE_LIMIT_MS > Date.now()
-        ) {
-          return new Response("rate limited", { status: 429 });
-        }
-      } catch {
-        console.error("Invalid date in rate limit check");
+      if (env.ENVIRONMENT !== "development") {
+        return new Response("not allowed", { status: 403 });
       }
 
-      // Update timestamp immediately when processing request (not when completing)
-      ctx.waitUntil(env.RATE_LIMIT_KV.put(KEY, new Date().toISOString()));
+      const data = await requestWrapper.getJson<{
+        provider: ProviderName;
+        decryptedProviderKey: string;
+        decryptedProviderSecretKey: string;
+        authType: "key" | "session_token";
+        config: Json | null;
+        orgId: string;
+        softDelete?: boolean;
+      }>();
+
+      const supabaseClientUS = createClient<Database>(
+        env.SUPABASE_URL,
+        env.SUPABASE_SERVICE_ROLE_KEY
+      );
+      const supabaseClientEU = createClient<Database>(
+        env.EU_SUPABASE_URL,
+        env.EU_SUPABASE_SERVICE_ROLE_KEY
+      );
+      const providerKey: ProviderKey = {
+        provider: data.provider,
+        org_id: data.orgId,
+        decrypted_provider_key: data.decryptedProviderKey,
+        decrypted_provider_secret_key: data.decryptedProviderSecretKey,
+        auth_type: data.authType,
+        config: data.config,
+      };
+
+      const providerKeysManagerUS = new ProviderKeysManager(
+        new ProviderKeysStore(supabaseClientUS),
+        env
+      );
+      await providerKeysManagerUS.setProviderKey(
+        data.provider,
+        data.orgId,
+        providerKey
+      );
+
+      const providerKeysManagerEU = new ProviderKeysManager(
+        new ProviderKeysStore(supabaseClientEU),
+        env
+      );
+      await providerKeysManagerEU.setProviderKey(
+        data.provider,
+        data.orgId,
+        providerKey
+      );
+      return new Response("ok", { status: 200 });
+    }
+  );
+
+  router.post(
+    "/mock-delete-provider-key",
+    async (
+      _,
+      requestWrapper: RequestWrapper,
+      env: Env,
+      _ctx: ExecutionContext
+    ) => {
+      if (env.ENVIRONMENT !== "development") {
+        return new Response("not allowed", { status: 403 });
+      }
+
+      const data = await requestWrapper.getJson<{
+        providerName: ProviderName;
+        orgId: string;
+      }>();
 
       const supabaseClientUS = createClient<Database>(
         env.SUPABASE_URL,
@@ -113,15 +169,19 @@ function getAPIRouterV1(
         new ProviderKeysStore(supabaseClientUS),
         env
       );
-
-      await providerKeysManagerUS.setProviderKeys();
+      await providerKeysManagerUS.deleteProviderKey(
+        data.providerName,
+        data.orgId
+      );
 
       const providerKeysManagerEU = new ProviderKeysManager(
         new ProviderKeysStore(supabaseClientEU),
         env
       );
-
-      await providerKeysManagerEU.setProviderKeys();
+      await providerKeysManagerEU.deleteProviderKey(
+        data.providerName,
+        data.orgId
+      );
       return new Response("ok", { status: 200 });
     }
   );

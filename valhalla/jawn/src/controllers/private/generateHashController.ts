@@ -4,7 +4,7 @@ import { hashAuth } from "../../utils/hash";
 import { type JawnAuthenticatedRequest } from "../../types/request";
 import { KeyPermissions } from "../../packages/common/auth/types";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { refetchAPIKeys } from "../../lib/refetchKeys";
+import { setAPIKey } from "../../lib/refetchKeys";
 
 export interface GenerateHashQueryParams {
   apiKey: string;
@@ -87,9 +87,11 @@ export class GenerateHashController extends Controller {
           },
         };
       }
-      refetchAPIKeys().catch((error) => {
-        console.error("error refetching provider keys", error);
-      });
+      setAPIKey(hashedKey, request.authParams.organizationId, false).catch(
+        (error) => {
+          console.error("error setting api key in gateway", error);
+        }
+      );
 
       this.setStatus(201);
       return {

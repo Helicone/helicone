@@ -63,6 +63,7 @@ export interface BASE_Env {
   LOOPS_API_KEY: string;
   POSTHOG_API_KEY: string;
   REQUEST_CACHE_KEY: string;
+  REQUEST_CACHE_KEY_2: string;
   SECURE_CACHE: KVNamespace;
   RATE_LIMITER: DurableObjectNamespace;
   OPENAI_API_KEY: string;
@@ -107,6 +108,7 @@ export interface BASE_Env {
 
   QUEUE_PROVIDER?: "kafka" | "sqs" | "dual";
   APP_URL?: string;
+  ENVIRONMENT?: "development" | "production";
 }
 export type Env = BASE_Env & EU_Env;
 

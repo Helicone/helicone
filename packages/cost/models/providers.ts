@@ -24,6 +24,38 @@ export interface ProviderConfig {
   ) => string;
 }
 
+export const dbProviderToProvider = (provider: string): ProviderName | null => {
+  if (provider === "openai" || provider === "OpenAI") {
+    return "openai";
+  }
+  if (provider === "Anthropic") {
+    return "anthropic";
+  }
+  if (provider === "AWS Bedrock") {
+    return "bedrock";
+  }
+  if (provider === "Vertex AI") {
+    return "vertex";
+  }
+  return null;
+};
+
+export const providerToDbProvider = (provider: ProviderName): string => {
+  if (provider === "openai") {
+    return "OpenAI";
+  }
+  if (provider === "anthropic") {
+    return "Anthropic";
+  }
+  if (provider === "bedrock") {
+    return "AWS Bedrock";
+  }
+  if (provider === "vertex") {
+    return "Vertex AI";
+  }
+  return provider;
+};
+
 // Define provider names type from the actual providers object
 export type ProviderName = keyof typeof providers;
 export const providers = {

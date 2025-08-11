@@ -6976,7 +6976,12 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": unknown;
+          "application/json": ({
+            /** @enum {string} */
+            providerName: "openai" | "anthropic" | "bedrock" | "vertex";
+          }) | {
+            error: string;
+          };
         };
       };
     };
@@ -7001,6 +7006,7 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            providerName: string;
             id: string;
           } | {
             error: string;
@@ -7071,6 +7077,7 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            hashedKey: string;
             apiKey: string;
             id: string;
           } | {
@@ -7113,7 +7120,11 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": unknown;
+          "application/json": {
+            hashedKey: string;
+          } | {
+            error: string;
+          };
         };
       };
     };
@@ -7136,6 +7147,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            hashedKey: string;
+          } | {
             error: string;
           };
         };
