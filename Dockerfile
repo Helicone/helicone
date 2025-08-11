@@ -19,14 +19,6 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Flyway directly
-RUN wget -q -O flyway.tar.gz https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/10.5.0/flyway-commandline-10.5.0.tar.gz \
-    && mkdir -p /opt/flyway \
-    && tar -xzf flyway.tar.gz -C /opt/flyway --strip-components=1 \
-    && rm flyway.tar.gz \
-    && ln -s /opt/flyway/flyway /usr/local/bin/flyway \
-    && flyway -v
-
 # Install Python dependencies
 RUN pip3 install --no-cache-dir requests clickhouse-driver tabulate yarl
 
@@ -47,8 +39,6 @@ COPY ./postgres/migrations /app/postgres/migrations
 COPY ./postgres/migrations_without_supabase /app/postgres/migrations_without_supabase
 COPY ./clickhouse/migrations /app/clickhouse/migrations
 COPY ./clickhouse/seeds /app/clickhouse/seeds
-COPY ./clickhouse/ch_hcone.py /app/clickhouse/ch_hcone.py
-RUN chmod +x /app/clickhouse/ch_hcone.py
 
 RUN service postgresql start && \
     su - postgres -c "createdb helicone_test" && \

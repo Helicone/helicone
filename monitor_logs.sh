@@ -20,7 +20,7 @@ show_help() {
     echo "  postgresql  - PostgreSQL database"
     echo "  clickhouse  - ClickHouse database"
     echo "  minio       - MinIO object storage"
-    echo "  flyway      - Database migrations"
+    echo "  atlas       - Database migrations"
     echo "  clickhouse-migrate - ClickHouse migrations"
     echo "  minio-setup - MinIO setup"
     echo "  supervisord - Supervisor daemon"

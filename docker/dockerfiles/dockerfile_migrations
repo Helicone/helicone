@@ -1,56 +1,22 @@
-FROM python:3.10-slim
+FROM debian:stable-slim
 
-# Install Java for Flyway and other necessary tools
+# Install required tools (curl) and clean up
 RUN apt-get update && apt-get install -y \
-    openjdk-17-jre-headless \
-    wget \
-    unzip \
-    curl \
+    curl ca-certificates \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Flyway using Java method (should work better cross-platform)
-RUN wget -q -O flyway.tar.gz https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/10.5.0/flyway-commandline-10.5.0.tar.gz \
-    && mkdir -p /opt/flyway \
-    && tar -xzf flyway.tar.gz -C /opt/flyway --strip-components=1 \
-    && rm flyway.tar.gz \
-    && ln -s /opt/flyway/flyway /usr/local/bin/flyway \
-    && flyway -v
-
-# Install Python dependencies
-RUN pip install --no-cache-dir requests clickhouse-driver tabulate yarl
+# Install Atlas CLI
+RUN curl -sSf https://atlasgo.sh | sh
+ENV PATH="/root/bin:/usr/local/bin:${PATH}"
 
 WORKDIR /app
 
-# Copy files with absolute paths from the root of the build context
-COPY ./postgres/flyway.conf /app/postgres/flyway.conf
+# Copy migration files
 COPY ./postgres/migrations /app/postgres/migrations
 COPY ./postgres/migrations_without_supabase /app/postgres/migrations_without_supabase
 COPY ./clickhouse/migrations /app/clickhouse/migrations
-COPY ./clickhouse/seeds /app/clickhouse/seeds
-COPY ./clickhouse/ch_hcone.py /app/clickhouse/ch_hcone.py
-RUN chmod +x /app/clickhouse/ch_hcone.py
-RUN chown 2000:2000 /opt/flyway/flyway && chmod 755 /opt/flyway/flyway
 
-# Create a script to run migrations
-RUN echo '#!/bin/sh \n\
-    set -eu \n\
-    echo "Running PostgreSQL migrations..." \n\
-    echo "Cleaning database and migration history..." \n\
-    flyway -cleanDisabled=false -configFiles=/app/postgres/flyway.conf clean \n\
-    echo "Repairing migration checksums..." \n\
-    flyway repair -configFiles=/app/postgres/flyway.conf \n\
-    flyway migrate -configFiles=/app/postgres/flyway.conf \n\
-    echo "PostgreSQL migrations completed" \n\
-    \n\
-    echo "Running ClickHouse migrations..." \n\
-    if [ -n "${CLICKHOUSE_PASSWORD:-}" ]; then \n\
-        python3 /app/clickhouse/ch_hcone.py --upgrade --password "${CLICKHOUSE_PASSWORD}" \n\
-    else \n\
-        python3 /app/clickhouse/ch_hcone.py --upgrade --no-password \n\
-    fi \n\
-    echo "ClickHouse migrations completed" \n\
-    echo "All migrations completed successfully!" \n\
-    ' > /app/run-migrations.sh && chmod +x /app/run-migrations.sh
-
-CMD ["/app/run-migrations.sh"]
+# Use Atlas as entrypoint. The compose file will supply the specific commands.
+ENTRYPOINT ["atlas"]
+CMD ["version"]

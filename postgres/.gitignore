@@ -1,3 +1,6 @@
 # Supabase
 .branches
 .temp
+atlas.sum
+atlas.hcl.local
+atlas_migrations/

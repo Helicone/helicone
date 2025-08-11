@@ -7,7 +7,7 @@ services:
 
   db:
     image: postgres:17.4
-    container_name: helicone-postgres-flyway-test
+    container_name: helicone-postgres-atlas
     environment:
       POSTGRES_DB: helicone_test
       POSTGRES_USER: postgres
@@ -15,7 +15,7 @@ services:
     ports:
       - "54388:5432"
     volumes:
-      - postgres_flyway_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -48,6 +48,21 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+
+  clickhouse-migrations:
+    build:
+      context: ../
+      dockerfile: docker/dockerfiles/dockerfile_migrations
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+    environment:
+      CLICKHOUSE_URL: clickhouse://default:password@clickhouse:9000
+    volumes:
+      - ../clickhouse:/app/clickhouse
+    # Hash and apply ClickHouse migrations using Atlas
+    entrypoint: ["/bin/sh", "-lc"]
+    command: "atlas migrate hash --dir file:///app/clickhouse/migrations && atlas migrate apply --dir file:///app/clickhouse/migrations --url ${CLICKHOUSE_URL}"
 
   minio:
     image: minio/minio
@@ -97,15 +112,33 @@ services:
       clickhouse:
         condition: service_healthy
     environment:
-      FLYWAY_URL: jdbc:postgresql://db:5432/helicone_test
-      FLYWAY_USER: postgres
-      FLYWAY_PASSWORD: testpassword
+      DATABASE_URL: postgres://postgres:testpassword@db:5432/helicone_test
       CLICKHOUSE_HOST: http://clickhouse:8123
       CLICKHOUSE_USER: default
       CLICKHOUSE_PASSWORD: "password"
     volumes:
       - ../postgres:/app/postgres
       - ../clickhouse:/app/clickhouse
+    # Hash and apply Postgres migrations (primary dir)
+    entrypoint: ["/bin/sh", "-lc"]
+    command: "atlas migrate hash --dir file:///app/postgres/migrations && atlas migrate apply --dir file:///app/postgres/migrations --url ${DATABASE_URL}"
+
+  migrations-extra:
+    build:
+      context: ../
+      dockerfile: docker/dockerfiles/dockerfile_migrations
+    depends_on:
+      db:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgres://postgres:testpassword@db:5432/helicone_test
+    volumes:
+      - ../postgres:/app/postgres
+    # Hash and apply Postgres migrations (secondary dir)
+    entrypoint: ["/bin/sh", "-lc"]
+    command: "atlas migrate hash --dir file:///app/postgres/migrations_without_supabase && atlas migrate apply --dir file:///app/postgres/migrations_without_supabase --url ${DATABASE_URL}"
 
   # =============================================================================
   # HELICONE CORE SERVICES (include-helicone profile)
@@ -128,6 +161,10 @@ services:
       minio:
         condition: service_healthy
       migrations:
+        condition: service_completed_successfully
+      migrations-extra:
+        condition: service_completed_successfully
+      clickhouse-migrations:
         condition: service_completed_successfully
     environment:
       PORT: ${JAWN_PORT:-8585}
@@ -181,6 +218,6 @@ services:
       NODE_ENV: development
 
 volumes:
-  postgres_flyway_data:
+  postgres_data:
   clickhouse_data:
   minio_data:

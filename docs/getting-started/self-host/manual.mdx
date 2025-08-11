@@ -53,14 +53,19 @@ source env/bin/activate
 pip install tabulate requests minio yarl
 
 # Start Clickhouse (time-series database)
-python3 clickhouse/ch_hcone.py --restart --no-password --url http://localhost:18123
+docker compose -f docker/docker-compose.yml up -d clickhouse
+
+## Apply migrations with Atlas
+export CLICKHOUSE_URL="clickhouse://default:password@localhost:19000/default"
+atlas migrate hash --dir "file://clickhouse/migrations"
+atlas migrate apply --dir "file://clickhouse/migrations" --url "$CLICKHOUSE_URL"
 
 # Start Minio (S3 compatible object storage)
 python3 minio_hcone.py --restart
 
 # Start Postgres
-docker run -d --name helicone-postgres-flyway-test -e POSTGRES_DB=helicone_test -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=testpassword -p 54388:5432 -v postgres_flyway_data:/var/lib/postgresql/data postgres:17.4
-flyway migrate -configFiles=postgres/flyway.conf
+docker run -d --name helicone-postgres-atlas -e POSTGRES_DB=helicone_test -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=testpassword -p 54388:5432 -v postgres_data:/var/lib/postgresql/data postgres:17.4
+atlas migrate apply --dir "file://postgres/migrations" --url "postgres://postgres:testpassword@localhost:54388/helicone_test?sslmode=disable"
 ```
 
 ### Start mailhog server (local email testing)
