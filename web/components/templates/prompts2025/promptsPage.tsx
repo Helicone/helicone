@@ -312,9 +312,13 @@ const PromptsPage = (props: PromptsPageProps) => {
                       className="pl-9"
                     />
                   </div>
-                  <Button variant="default" size="sm" onClick={() => {
-                    router.push("/playground");
-                  }}>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => {
+                      router.push("/playground");
+                    }}
+                  >
                     <Plus className="h-4 w-4" />
                     <span className="ml-2 text-sm">Create Prompt</span>
                   </Button>
