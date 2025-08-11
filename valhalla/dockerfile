@@ -11,6 +11,8 @@ WORKDIR /usr/src/app/valhalla/prompt_security
 SHELL ["/bin/bash", "-c"]
 RUN apt-get update && apt-get install -y python3-venv python3
 RUN python3 -m venv venv
+# Upgrade pip to fix CVE-2023-5752 (pip vulnerability)
+RUN . venv/bin/activate && pip3 install --upgrade pip>=23.3
 # Install supervisor
 RUN apt-get update && apt-get install -y supervisor
 
