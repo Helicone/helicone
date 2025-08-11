@@ -3,6 +3,24 @@
 -- and may require manual changes to the script to ensure changes are applied in the correct order.
 -- Please report an issue for any failure with the reproduction steps.
 
+-- Ensure auth schema and function exist in non-Supabase environments
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.schemata WHERE schema_name = 'auth'
+  ) THEN
+    EXECUTE 'CREATE SCHEMA auth';
+  END IF;
+END $$;
+
+CREATE OR REPLACE FUNCTION auth.uid()
+RETURNS uuid
+LANGUAGE sql
+STABLE
+AS $$
+  SELECT NULL::uuid;
+$$;
+
 DROP POLICY "Does user have access to response using RBAC" on response;
 DROP POLICY "Select using auth token" on request;
 CREATE TABLE IF NOT EXISTS public.user_api_keys

@@ -3,6 +3,23 @@
 -- and may require manual changes to the script to ensure changes are applied in the correct order.
 -- Please report an issue for any failure with the reproduction steps.
 
+-- Ensure stub auth schema and users table exist in non-Supabase environments
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.schemata WHERE schema_name = 'auth'
+  ) THEN
+    EXECUTE 'CREATE SCHEMA auth';
+  END IF;
+END $$;
+
+CREATE TABLE IF NOT EXISTS auth.users (
+  id uuid PRIMARY KEY,
+  email text,
+  last_sign_in_at timestamptz,
+  created_at timestamptz DEFAULT now()
+);
+
 ALTER TABLE IF EXISTS public.user_api_keys DROP CONSTRAINT IF EXISTS user_api_keys_pkey;
 
 ALTER TABLE IF EXISTS public.user_api_keys
