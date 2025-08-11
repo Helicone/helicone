@@ -14,7 +14,12 @@ import {
 } from "tsoa";
 import { type JawnAuthenticatedRequest } from "../../types/request";
 import { KeyManager } from "../../managers/apiKeys/KeyManager";
-import { refetchAPIKeys, refetchProviderKeys } from "../../lib/refetchKeys";
+import {
+  deleteProviderKey,
+  setAPIKey,
+  setProviderKey,
+} from "../../lib/refetchKeys";
+import { dbProviderToProvider } from "@helicone-package/cost/models/providers";
 
 @Route("v1/api-keys")
 @Tags("API Key")
@@ -33,9 +38,18 @@ export class ApiKeyController extends Controller {
       return { error: result.error };
     }
 
-    refetchProviderKeys().catch((error) => {
-      console.error("error refetching provider keys", error);
-    });
+    if (result.data === null) {
+      return { error: "Provider key not found" };
+    }
+
+    if (result.data.providerName) {
+      deleteProviderKey(
+        result.data.providerName,
+        request.authParams.organizationId
+      ).catch((error) => {
+        console.error("error refetching provider keys", error);
+      });
+    }
     return result.data;
   }
 
@@ -65,9 +79,19 @@ export class ApiKeyController extends Controller {
       return { error: result.error };
     }
 
-    refetchProviderKeys().catch((error) => {
-      console.error("error refetching provider keys", error);
-    });
+    const providerName = dbProviderToProvider(body.providerName);
+    if (providerName) {
+      setProviderKey({
+        provider: providerName,
+        decrypted_provider_key: body.providerKey,
+        decrypted_provider_secret_key: body.providerSecretKey ?? "",
+        auth_type: "key",
+        config: body.config,
+        orgId: request.authParams.organizationId,
+      }).catch((error) => {
+        console.error("error refetching provider keys", error);
+      });
+    }
     return result.data;
   }
 
@@ -120,14 +144,24 @@ export class ApiKeyController extends Controller {
       config: body.config,
     });
 
-    if (result.error) {
+    if (result.error || !result.data) {
       this.setStatus(500);
       return { error: result.error };
     }
 
-    refetchProviderKeys().catch((error) => {
-      console.error("error refetching provider keys", error);
-    });
+    const providerName = dbProviderToProvider(result.data.providerName);
+    if (providerName) {
+      setProviderKey({
+        provider: providerName,
+        decrypted_provider_key: body.providerKey ?? "",
+        decrypted_provider_secret_key: body.providerSecretKey ?? "",
+        auth_type: "key",
+        config: body.config ?? {},
+        orgId: request.authParams.organizationId,
+      }).catch((error) => {
+        console.error("error refetching provider keys", error);
+      });
+    }
     return result.data;
   }
 
@@ -154,12 +188,16 @@ export class ApiKeyController extends Controller {
       body.key_permissions ?? "rw"
     );
 
-    if (result.error) {
+    if (result.error || !result.data) {
       this.setStatus(500);
       return { error: result.error };
     }
 
-    await refetchAPIKeys();
+    await setAPIKey(
+      result.data.hashedKey,
+      request.authParams.organizationId,
+      false
+    );
 
     return result.data;
   }
@@ -184,8 +222,6 @@ export class ApiKeyController extends Controller {
       return { error: result.error };
     }
 
-    await refetchAPIKeys();
-
     return result.data;
   }
 
@@ -197,12 +233,17 @@ export class ApiKeyController extends Controller {
     const keyManager = new KeyManager(request.authParams);
     const result = await keyManager.deleteAPIKey(apiKeyId);
 
-    if (result.error) {
+    if (result.error || !result.data) {
       this.setStatus(500);
       return { error: result.error };
     }
 
-    await refetchAPIKeys();
+    await setAPIKey(
+      result.data.hashedKey,
+      request.authParams.organizationId,
+      true
+    );
+
     return result.data;
   }
 
@@ -217,12 +258,16 @@ export class ApiKeyController extends Controller {
       api_key_name: body.api_key_name,
     });
 
-    if (result.error) {
+    if (result.error || !result.data) {
       this.setStatus(500);
       return { error: result.error };
     }
 
-    await refetchAPIKeys();
+    await setAPIKey(
+      result.data.hashedKey,
+      request.authParams.organizationId,
+      false
+    );
 
     return result.data;
   }

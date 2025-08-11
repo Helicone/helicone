@@ -19508,7 +19508,38 @@
 						"description": "Ok",
 						"content": {
 							"application/json": {
-								"schema": {}
+								"schema": {
+									"anyOf": [
+										{
+											"properties": {
+												"providerName": {
+													"type": "string",
+													"enum": [
+														"openai",
+														"anthropic",
+														"bedrock",
+														"vertex"
+													]
+												}
+											},
+											"required": [
+												"providerName"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"error": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"error"
+											],
+											"type": "object"
+										}
+									]
+								}
 							}
 						}
 					}
@@ -19591,11 +19622,15 @@
 									"anyOf": [
 										{
 											"properties": {
+												"providerName": {
+													"type": "string"
+												},
 												"id": {
 													"type": "string"
 												}
 											},
 											"required": [
+												"providerName",
 												"id"
 											],
 											"type": "object"
@@ -19818,6 +19853,9 @@
 									"anyOf": [
 										{
 											"properties": {
+												"hashedKey": {
+													"type": "string"
+												},
 												"apiKey": {
 													"type": "string"
 												},
@@ -19826,6 +19864,7 @@
 												}
 											},
 											"required": [
+												"hashedKey",
 												"apiKey",
 												"id"
 											],
@@ -19968,7 +20007,32 @@
 						"description": "Ok",
 						"content": {
 							"application/json": {
-								"schema": {}
+								"schema": {
+									"anyOf": [
+										{
+											"properties": {
+												"hashedKey": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"hashedKey"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"error": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"error"
+											],
+											"type": "object"
+										}
+									]
+								}
 							}
 						}
 					}
@@ -20001,15 +20065,30 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"properties": {
-										"error": {
-											"type": "string"
+									"anyOf": [
+										{
+											"properties": {
+												"hashedKey": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"hashedKey"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"error": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"error"
+											],
+											"type": "object"
 										}
-									},
-									"required": [
-										"error"
-									],
-									"type": "object"
+									]
 								}
 							}
 						}

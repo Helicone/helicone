@@ -42,6 +42,7 @@ S3_SECRET_KEY = "minioadmin"
 S3_BUCKET_NAME = "request-response-storage"
 HELICONE_MANUAL_ACCESS_KEY = "Q2xH5Cwid/gAmuLv8QWhgcpNXA4DG1Dxe0ypQTJ8oEA="
 APP_URL = "https://us.helicone.ai"
+ENVIRONMENT = "development"
 
 [triggers]
 crons = ["* * * * *", "0 * * * *", "0 10 * * mon", "*/5 * * * *"]
@@ -142,6 +143,8 @@ CLICKHOUSE_HOST = "https://p76qbrlulo.us-east-1.aws.clickhouse.cloud:8443"
 VAULT_ENABLED = "true"
 DATADOG_ENABLED = "true"
 QUEUE_PROVIDER = "sqs"
+ENVIRONMENT = "production"
+APP_URL = "https://us.helicone.ai"
 
 
 [env.production_staging]
@@ -199,6 +202,8 @@ SUPABASE_URL = "https://bolqqmqbrciybnypvklh.supabase.co"
 CLICKHOUSE_HOST = "https://p76qbrlulo.us-east-1.aws.clickhouse.cloud:8443"
 VAULT_ENABLED = "true"
 QUEUE_PROVIDER = "dual"
+ENVIRONMENT = "production"
+APP_URL = "https://us.helicone.ai"
 
 [env.production_staging.triggers]
 crons = []

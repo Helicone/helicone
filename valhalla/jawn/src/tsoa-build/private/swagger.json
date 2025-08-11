@@ -5865,6 +5865,9 @@
 					"promptVersionId": {
 						"type": "string"
 					},
+					"promptEnvironment": {
+						"type": "string"
+					},
 					"promptId": {
 						"type": "string"
 					},
