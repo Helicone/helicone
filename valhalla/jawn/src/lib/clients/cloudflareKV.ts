@@ -1,8 +1,7 @@
 import { Cloudflare } from "cloudflare";
 
 const cloudflare = new Cloudflare({
-  apiKey: process.env.CLOUDFLARE_API_KEY,
-  apiEmail: process.env.CLOUDFLARE_API_EMAIL,
+  apiToken: process.env.CLOUDFLARE_API_TOKEN,
 });
 
 export async function safePut({
@@ -37,7 +36,7 @@ export async function safePut({
         value: value,
       }
     );
-    // await cloudflareKV.put(keyName, value, options);
+
     return { success: true };
   } catch (e) {
     console.error(
