@@ -1,0 +1,80 @@
+FROM node:20-bookworm-slim
+
+WORKDIR /usr/src/app/valhalla/prompt_security
+
+SHELL ["/bin/bash", "-c"]
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Combine apt operations for caching and speed; avoid upgrade to keep image small
+RUN set -eux; \
+    echo "deb https://deb.debian.org/debian testing main" > /etc/apt/sources.list.d/testing.list; \
+    apt-get update; \
+    if apt-get install -y --no-install-recommends -t testing libaom3; then \
+      echo "Installed libaom3 from testing"; \
+    else \
+      echo "Falling back to stable libaom3"; \
+      rm -f /etc/apt/sources.list.d/testing.list; \
+      apt-get update; \
+      apt-get install -y --no-install-recommends libaom3 || true; \
+    fi; \
+    rm -f /etc/apt/sources.list.d/testing.list || true; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
+      python3-venv python3 supervisor ffmpeg curl; \
+    rm -rf /var/lib/apt/lists/*
+
+ENV FFMPEG_PATH="/usr/bin/ffmpeg"
+ENV FFPROBE_PATH="/usr/bin/ffprobe"
+
+# Create and use Python venv via PATH so we don't need to source it repeatedly
+RUN python3 -m venv /usr/src/app/valhalla/prompt_security/venv
+ENV VIRTUAL_ENV=/usr/src/app/valhalla/prompt_security/venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+# Install Python deps in a single layer for better caching
+COPY ./valhalla/prompt_security/requirements.txt ./
+
+# Begin Node build setup
+WORKDIR /usr/src/app
+# Copy relatively static deps first for better yarn cache hits
+COPY ./shared ./shared
+COPY ./packages ./packages
+COPY ./package.json ./package.json
+
+# Copy only jawn manifest files first to leverage layer cache on source changes
+WORKDIR /usr/src/app/valhalla/jawn
+COPY ./valhalla/jawn/package.json ./package.json
+COPY ./valhalla/jawn/yarn.lock ./yarn.lock
+
+ENV PORT=8585
+
+# Install only once based on lockfile
+RUN corepack enable && yarn install --frozen-lockfile
+
+# Now copy the rest of jawn source and build
+COPY ./valhalla/jawn .
+RUN find /usr/src/app/valhalla/jawn -name ".env.*" -exec rm {} \;
+RUN yarn build
+
+# Copy prompt security runtime files
+COPY ./valhalla/prompt_security/main.py /usr/src/app/valhalla/prompt_security/main.py
+COPY ./valhalla/prompt_security/run_service.sh /usr/src/app/valhalla/prompt_security/run_service.sh
+RUN chmod +x /usr/src/app/valhalla/prompt_security/run_service.sh
+
+# TODO Ensure that these environment variables are maintained properly in the dockerfile
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONFAULTHANDLER=1
+
+ENV DLQ_MESSAGES_PER_MINI_BATCH=1
+ENV DLQ_WORKER_COUNT=1
+ENV NORMAL_WORKER_COUNT=3
+ENV CSB_API_KEY="1234567890"
+ENV ENABLE_PROMPT_SECURITY="true"
+
+# Add supervisor configuration
+COPY ./valhalla/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
+
+

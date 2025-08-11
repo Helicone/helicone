@@ -32,3 +32,5 @@ COPY --from=builder /app/node_modules/ ./node_modules/
 RUN chmod -R o+w /app/web/public
 
 CMD ["yarn", "--cwd", "web", "start"]
+
+
