@@ -1,0 +1,23 @@
+name: Worker Build Precheck
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  worker-build-precheck:
+    name: Worker Client
+    runs-on: node20-bullseye
+    steps:
+      - uses: actions/checkout@v3
+      - name: install
+        run: |
+          cd worker
+          npm install
+      - name: build
+        run: |
+          cd worker
+          npx tsc
