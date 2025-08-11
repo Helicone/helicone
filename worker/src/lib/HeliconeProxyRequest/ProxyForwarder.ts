@@ -7,7 +7,7 @@ import {
   checkRateLimit,
   updateRateLimitCounter,
 } from "../clients/KVRateLimiterClient";
-import { RequestWrapper } from "../RequestWrapper";
+import { Prompt2025Settings, RequestWrapper } from "../RequestWrapper";
 import { ResponseBuilder } from "../ResponseBuilder";
 import { getCachedResponse, saveToCache } from "../util/cache/cacheFunctions";
 import { CacheSettings, getCacheSettings } from "../util/cache/cacheSettings";

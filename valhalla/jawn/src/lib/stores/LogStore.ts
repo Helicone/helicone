@@ -220,7 +220,7 @@ export class LogStore {
 
     try {
       const cs = new pgp.helpers.ColumnSet(
-        ['request_id', 'version_id', 'inputs'],
+        ['request_id', 'version_id', 'inputs', 'environment'],
         { table: 'prompts_2025_inputs' }
       );
       
