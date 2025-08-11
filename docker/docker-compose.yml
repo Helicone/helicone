@@ -9,15 +9,15 @@ services:
     image: postgres:17.4
     container_name: helicone-postgres-atlas
     environment:
-      POSTGRES_DB: helicone_test
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: testpassword
+      POSTGRES_DB: ${POSTGRES_DB:-helicone_test}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-testpassword}
     ports:
-      - "54388:5432"
+      - "${DB_HOST_PORT:-54388}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -26,8 +26,8 @@ services:
     image: clickhouse/clickhouse-server:24.3.13.40
     container_name: helicone-clickhouse
     ports:
-      - "18123:8123" # HTTP interface
-      - "19000:9000" # Native interface
+      - "${CLICKHOUSE_HTTP_HOST_PORT:-18123}:8123" # HTTP interface
+      - "${CLICKHOUSE_NATIVE_HOST_PORT:-19000}:9000" # Native interface
     volumes:
       - clickhouse_data:/var/lib/clickhouse
     ulimits:
@@ -35,8 +35,8 @@ services:
         soft: 262144
         hard: 262144
     environment:
-      CLICKHOUSE_DEFAULT_USER: default
-      CLICKHOUSE_PASSWORD: "password"
+      CLICKHOUSE_DEFAULT_USER: ${CLICKHOUSE_DEFAULT_USER:-default}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-password}
     restart: unless-stopped
     healthcheck:
       test:
@@ -57,7 +57,7 @@ services:
       clickhouse:
         condition: service_healthy
     environment:
-      CLICKHOUSE_URL: clickhouse://default:password@clickhouse:9000
+      CLICKHOUSE_URL: clickhouse://${CLICKHOUSE_DEFAULT_USER:-default}:${CLICKHOUSE_PASSWORD:-password}@${CLICKHOUSE_HOSTNAME:-clickhouse}:${CLICKHOUSE_NATIVE_PORT:-9000}
       ATLAS_CLOUD_TOKEN: ${ATLAS_CLOUD_TOKEN}  # Clickhouse migrations require an atlas cloud token to run the CLI commands
     env_file:
       - .env
@@ -69,11 +69,11 @@ services:
     image: minio/minio
     container_name: helicone-minio
     ports:
-      - "9000:9000" # MinIO API port
-      - "9001:9001" # MinIO Console port
+      - "${MINIO_HOST_PORT:-9000}:9000" # MinIO API port
+      - "${MINIO_CONSOLE_HOST_PORT:-9001}:9001" # MinIO Console port
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
     volumes:
       - minio_data:/data
     command: server /data --console-address ":9001"
@@ -91,7 +91,7 @@ services:
         condition: service_healthy
     entrypoint: >
       /bin/sh -c "
-      /usr/bin/mc alias set localminio http://minio:9000 minioadmin minioadmin;
+      /usr/bin/mc alias set localminio http://minio:9000 ${MINIO_ROOT_USER:-minioadmin} ${MINIO_ROOT_PASSWORD:-minioadmin};
       /usr/bin/mc mb --ignore-existing localminio/request-response-storage;
       exit 0;
       "
@@ -100,8 +100,8 @@ services:
     image: mailhog/mailhog
     container_name: mailhog
     ports:
-      - "1025:1025" # SMTP port
-      - "8025:8025" # Web UI port
+      - "${MAILHOG_SMTP_HOST_PORT:-1025}:1025" # SMTP port
+      - "${MAILHOG_UI_HOST_PORT:-8025}:8025" # Web UI port
 
   postgres-migrations:
     build:
@@ -111,8 +111,8 @@ services:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgres://postgres:testpassword@db:5432/helicone_test?sslmode=disable
-      PGSSLMODE: disable
+      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-testpassword}@${POSTGRES_HOSTNAME:-db}:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-helicone_test}?sslmode=disable
+      PGSSLMODE: ${PGSSLMODE:-disable}
     volumes:
       - ../postgres:/app/postgres
     # Hash and apply Postgres migrations
@@ -144,23 +144,23 @@ services:
         condition: service_completed_successfully
     environment:
       PORT: ${JAWN_PORT:-8585}
-      NEXT_PUBLIC_BETTER_AUTH: "true"
-      S3_ENDPOINT: http://minio:9000
-      S3_ACCESS_KEY: minioadmin
-      S3_SECRET_KEY: minioadmin
-      S3_BUCKET_NAME: "request-response-storage"
-      S3_ENDPOINT_PUBLIC: http://localhost:9000
+      NEXT_PUBLIC_BETTER_AUTH: ${NEXT_PUBLIC_BETTER_AUTH:-true}
+      S3_ENDPOINT: ${S3_ENDPOINT:-http://minio:9000}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-minioadmin}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-minioadmin}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME:-request-response-storage}
+      S3_ENDPOINT_PUBLIC: ${S3_ENDPOINT_PUBLIC:-http://localhost:9000}
       CLICKHOUSE_CREDS: |
         {
-          "CLICKHOUSE_HOST": "http://clickhouse:8123",
-          "CLICKHOUSE_USER": "default",
-          "CLICKHOUSE_PASSWORD": "password",
-          "CLICKHOUSE_HQL_USER": "hql_user",
-          "CLICKHOUSE_HQL_PASSWORD": ""
+          "CLICKHOUSE_HOST": "${CLICKHOUSE_HOST:-http://clickhouse:8123}",
+          "CLICKHOUSE_USER": "${CLICKHOUSE_USER:-default}",
+          "CLICKHOUSE_PASSWORD": "${CLICKHOUSE_PASSWORD:-password}",
+          "CLICKHOUSE_HQL_USER": "${CLICKHOUSE_HQL_USER:-hql_user}",
+          "CLICKHOUSE_HQL_PASSWORD": "${CLICKHOUSE_HQL_PASSWORD:-}"
         }
       VERCEL_ENV: ${VERCEL_ENV:-development}
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-your-secret-key}
-      SUPABASE_DATABASE_URL: postgres://postgres:testpassword@db:5432/helicone_test
+      SUPABASE_DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-testpassword}@${POSTGRES_HOSTNAME:-db}:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-helicone_test}
 
   web:
     container_name: helicone-web
@@ -169,10 +169,10 @@ services:
       dockerfile: docker/dockerfiles/Dockerfile.web
       args:
         NEXT_PUBLIC_HELICONE_JAWN_SERVICE: ${JAWN_PUBLIC_URL:-http://localhost:8585}
-        NEXT_PUBLIC_BETTER_AUTH: "true"
-        NODE_ENV: development
+        NEXT_PUBLIC_BETTER_AUTH: ${NEXT_PUBLIC_BETTER_AUTH:-true}
+        NODE_ENV: ${NODE_ENV:-development}
     ports:
-      - "3000:3000"
+      - "${WEB_HOST_PORT:-3000}:3000"
     profiles: ["include-helicone"]
     depends_on:
       jawn:
@@ -181,17 +181,17 @@ services:
         condition: service_healthy
     environment:
       NEXT_PUBLIC_HELICONE_JAWN_SERVICE: ${JAWN_PUBLIC_URL:-http://localhost:8585}
-      DATABASE_URL: postgres://postgres:testpassword@db:5432/helicone_test
-      CLICKHOUSE_HOST: http://clickhouse:8123
-      CLICKHOUSE_USER: default
-      CLICKHOUSE_PASSWORD: "password"
+      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-testpassword}@${POSTGRES_HOSTNAME:-db}:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-helicone_test}
+      CLICKHOUSE_HOST: ${CLICKHOUSE_HOST:-http://clickhouse:8123}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-password}
       VERCEL_ENV: ${VERCEL_ENV:-development}
-      SMTP_HOST: mailhog
-      SMTP_PORT: 1025
-      NEXT_PUBLIC_BETTER_AUTH: "true"
+      SMTP_HOST: ${SMTP_HOST:-mailhog}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+      NEXT_PUBLIC_BETTER_AUTH: ${NEXT_PUBLIC_BETTER_AUTH:-true}
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-your-secret-key}
-      SMTP_SECURE: false
-      NODE_ENV: development
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      NODE_ENV: ${NODE_ENV:-development}
 
 volumes:
   postgres_data:
