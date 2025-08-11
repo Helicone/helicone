@@ -4,11 +4,6 @@
 
 import type { Model } from "../../types";
 
-/**
- * MoonshotAI model names as const array
- */
-export const moonshotaiModelNames = [] as const;
+export const moonshotaiModels = {} satisfies Record<string, Model>;
 
-export type MoonshotModelName = (typeof moonshotaiModelNames)[number];
-
-export const moonshotaiModels = {} satisfies Record<MoonshotModelName, Model>;
+export type MoonshotModelName = keyof typeof moonshotaiModels;

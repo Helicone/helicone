@@ -12,4 +12,8 @@ export const googleMetadata = {
   description: "Google's Gemini models via Vertex AI",
   website: "https://cloud.google.com/vertex-ai",
   apiUrl: "https://{region}-aiplatform.googleapis.com/v1",
+  pricingPages: [
+    "https://cloud.google.com/vertex-ai/generative-ai/pricing",
+    "https://ai.google.dev/pricing",
+  ],
 } satisfies AuthorMetadata;

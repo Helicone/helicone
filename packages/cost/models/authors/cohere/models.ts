@@ -4,22 +4,6 @@
 
 import type { Model } from "../../types";
 
-/**
- * Cohere model names as const array
- */
-export const cohereModelNames = [
-  "command-a-03-2025",
-  "command-r-plus",
-  "command-r",
-  "command-light",
-  "c4ai-aya-expanse-32b",
-  "c4ai-aya-expanse-8b",
-  "embed-english-v3.0",
-  "embed-multilingual-v3.0",
-] as const;
-
-export type CohereModelName = (typeof cohereModelNames)[number];
-
 export const cohereModels = {
   "command-a-03-2025": {
     name: "Cohere: Command A",
@@ -116,4 +100,6 @@ export const cohereModels = {
     modality: "text->text",
     tokenizer: "Cohere",
   },
-} satisfies Record<CohereModelName, Model>;
+} satisfies Record<string, Model>;
+
+export type CohereModelName = keyof typeof cohereModels;

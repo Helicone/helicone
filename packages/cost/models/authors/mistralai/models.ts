@@ -4,11 +4,6 @@
 
 import type { Model } from "../../types";
 
-/**
- * MistralAI model names as const array
- */
-export const mistralaiModelNames = [] as const;
+export const mistralaiModels = {} satisfies Record<string, Model>;
 
-export type MistralModelName = (typeof mistralaiModelNames)[number];
-
-export const mistralaiModels = {} satisfies Record<MistralModelName, Model>;
+export type MistralModelName = keyof typeof mistralaiModels;

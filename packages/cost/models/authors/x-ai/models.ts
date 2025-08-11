@@ -4,22 +4,6 @@
 
 import type { Model } from "../../types";
 
-/**
- * X-AI model names as const array
- */
-export const xAiModelNames = [
-  "grok-4",
-  "grok-3-mini",
-  "grok-3",
-  "grok-3-mini-beta",
-  "grok-3-beta",
-  "grok-2-vision-1212",
-  "grok-2-1212",
-  "grok-vision-beta",
-] as const;
-
-export type XAIModelName = (typeof xAiModelNames)[number];
-
 export const xAiModels = {
   "grok-4": {
     name: "xAI: Grok 4",
@@ -109,4 +93,6 @@ export const xAiModels = {
     modality: "text+image->text",
     tokenizer: "Grok",
   },
-} satisfies Record<XAIModelName, Model>;
+} satisfies Record<string, Model>;
+
+export type XAIModelName = keyof typeof xAiModels;

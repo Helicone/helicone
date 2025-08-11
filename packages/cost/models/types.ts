@@ -74,6 +74,7 @@ export interface AuthorMetadata {
   description?: string;
   website?: string;
   apiUrl?: string;
+  pricingPages: string[];
 }
 
 export const AUTHORS = [

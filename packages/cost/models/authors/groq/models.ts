@@ -4,23 +4,6 @@
 
 import type { Model } from "../../types";
 
-/**
- * Groq model names as const array
- */
-export const groqModelNames = [
-  "llama-3.3-70b-versatile",
-  "llama-3.1-8b-instant", 
-  "llama-guard-4-12b",
-  "deepseek-r1-distill-llama-70b",
-  "llama-4-maverick-17b-128e-instruct",
-  "llama-4-scout-17b-16e-instruct",
-  "qwen3-32b",
-  "whisper-large-v3",
-  "whisper-large-v3-turbo",
-] as const;
-
-export type GroqModelName = (typeof groqModelNames)[number];
-
 export const groqModels = {
   "llama-3.3-70b-versatile": {
     name: "Groq: Llama 3.3 70B Versatile",
@@ -129,4 +112,6 @@ export const groqModels = {
     modality: "text->text",
     tokenizer: "GPT",
   },
-} satisfies Record<GroqModelName, Model>;
+} satisfies Record<string, Model>;
+
+export type GroqModelName = keyof typeof groqModels;

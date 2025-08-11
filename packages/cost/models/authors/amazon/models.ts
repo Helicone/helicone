@@ -4,17 +4,6 @@
 
 import type { Model } from "../../types";
 
-/**
- * Amazon model names as const array
- */
-export const amazonModelNames = [
-  "nova-lite-v1",
-  "nova-micro-v1",
-  "nova-pro-v1",
-] as const;
-
-export type AmazonModelName = (typeof amazonModelNames)[number];
-
 export const amazonModels = {
   "nova-lite-v1": {
     name: "Amazon: Nova Lite 1.0",
@@ -49,4 +38,6 @@ export const amazonModels = {
     modality: "text+image->text",
     tokenizer: "GPT",
   },
-} satisfies Record<AmazonModelName, Model>;
+} satisfies Record<string, Model>;
+
+export type AmazonModelName = keyof typeof amazonModels;

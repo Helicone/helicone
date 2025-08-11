@@ -4,16 +4,6 @@
 
 import type { Model } from "../../types";
 
-/**
- * DeepSeek model names as const array
- */
-export const deepseekModelNames = [
-  "deepseek-chat",
-  "deepseek-reasoner",
-] as const;
-
-export type DeepSeekModelName = (typeof deepseekModelNames)[number];
-
 export const deepseekModels = {
   "deepseek-chat": {
     name: "DeepSeek: DeepSeek-V3 Chat",
@@ -38,4 +28,6 @@ export const deepseekModels = {
     modality: "text->text",
     tokenizer: "DeepSeek",
   },
-} satisfies Record<DeepSeekModelName, Model>;
+} satisfies Record<string, Model>;
+
+export type DeepSeekModelName = keyof typeof deepseekModels;

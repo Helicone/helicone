@@ -4,22 +4,6 @@
 
 import type { Model } from "../../types";
 
-/**
- * Google model names as const array
- */
-export const googleModelNames = [
-  "gemini-2.5-pro",
-  "gemini-2.5-flash", 
-  "gemini-2.5-flash-lite",
-  "gemini-2.0-flash",
-  "gemini-2.0-flash-lite",
-  "gemini-1.5-pro",
-  "gemini-1.5-flash",
-  "gemini-1.5-flash-8b",
-] as const;
-
-export type GoogleModelName = (typeof googleModelNames)[number];
-
 export const googleModels = {
   "gemini-2.5-pro": {
     name: "Google: Gemini 2.5 Pro",
@@ -32,7 +16,7 @@ export const googleModels = {
     modality: "text+image->text",
     tokenizer: "Gemini",
   },
-  
+
   "gemini-2.5-flash": {
     name: "Google: Gemini 2.5 Flash",
     author: "google",
@@ -47,7 +31,7 @@ export const googleModels = {
 
   "gemini-2.5-flash-lite": {
     name: "Google: Gemini 2.5 Flash Lite",
-    author: "google", 
+    author: "google",
     description:
       "Fast, low-cost, high-performance model in the Gemini 2.5 series. Optimized for speed and efficiency while maintaining quality performance.",
     contextLength: 1000000,
@@ -116,4 +100,6 @@ export const googleModels = {
     modality: "text+image->text",
     tokenizer: "Gemini",
   },
-} satisfies Record<GoogleModelName, Model>;
+} satisfies Record<string, Model>;
+
+export type GoogleModelName = keyof typeof googleModels;

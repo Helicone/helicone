@@ -4,17 +4,6 @@
 
 import type { Model } from "../../types";
 
-// Strict type for Anthropic model names
-export type AnthropicModelName =
-  | "claude-opus-4-1"
-  | "claude-opus-4"
-  | "claude-sonnet-4"
-  | "claude-3.7-sonnet"
-  | "claude-3.5-haiku"
-  | "claude-3.5-sonnet"
-  | "claude-3-haiku"
-  | "claude-3-opus";
-
 // Models are keyed by their ID for O(1) lookup
 export const anthropicModels = {
   "claude-opus-4-1": {
@@ -112,4 +101,6 @@ export const anthropicModels = {
     modality: "text+image->text",
     tokenizer: "Claude",
   },
-} satisfies Record<AnthropicModelName, Model>;
+} satisfies Record<string, Model>;
+
+export type AnthropicModelName = keyof typeof anthropicModels;

@@ -4,18 +4,6 @@
 
 import type { Model } from "../../types";
 
-/**
- * Perplexity model names as const array
- */
-export const perplexityModelNames = [
-  "sonar-reasoning-pro",
-  "sonar-pro",
-  "sonar-reasoning",
-  "sonar",
-] as const;
-
-export type PerplexityModelName = (typeof perplexityModelNames)[number];
-
 export const perplexityModels = {
   "sonar-reasoning-pro": {
     name: "Perplexity: Sonar Reasoning Pro",
@@ -61,4 +49,6 @@ export const perplexityModels = {
     modality: "text+image->text",
     tokenizer: "GPT",
   },
-} satisfies Record<PerplexityModelName, Model>;
+} satisfies Record<string, Model>;
+
+export type PerplexityModelName = keyof typeof perplexityModels;

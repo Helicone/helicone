@@ -4,11 +4,6 @@
 
 import type { Model } from "../../types";
 
-/**
- * Meta-Llama model names as const array
- */
-export const metaLlamaModelNames = [] as const;
+export const metaLlamaModels = {} satisfies Record<string, Model>;
 
-export type MetaLlamaModelName = (typeof metaLlamaModelNames)[number];
-
-export const metaLlamaModels = {} satisfies Record<MetaLlamaModelName, Model>;
+export type MetaLlamaModelName = keyof typeof metaLlamaModels;

@@ -4,33 +4,6 @@
 
 import type { Model } from "../../types";
 
-/**
- * OpenAI model names as const array
- */
-export const openaiModelNames = [
-  "o3-pro",
-  "o4-mini-high",
-  "o3",
-  "o4-mini",
-  "gpt-4.1",
-  "gpt-4.1-mini",
-  "gpt-4.1-nano",
-  "o1-pro",
-  "gpt-4o-mini-search-preview",
-  "gpt-4o-search-preview",
-  "o3-mini-high",
-  "o3-mini",
-  "o1",
-  "o1-mini",
-  "chatgpt-4o-latest",
-  "gpt-4o-mini",
-  "gpt-4o",
-  "gpt-4o:extended",
-  "gpt-4",
-] as const;
-
-export type OpenAIModelName = (typeof openaiModelNames)[number];
-
 export const openaiModels = {
   "o3-pro": {
     name: "OpenAI: o3 Pro",
@@ -241,4 +214,6 @@ export const openaiModels = {
     modality: "text->text",
     tokenizer: "GPT",
   },
-} satisfies Record<OpenAIModelName, Model>;
+} satisfies Record<string, Model>;
+
+export type OpenAIModelName = keyof typeof openaiModels;
