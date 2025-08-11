@@ -24,7 +24,10 @@ export class PromptManager {
   async getSourcePromptBodyWithFetch(
     params: HeliconeChatCreateParams,
     orgId: string
-  ): Promise<Result<ChatCompletionCreateParams, string>> {
+  ): Promise<Result<{
+    promptVersionId: string,
+    body: ChatCompletionCreateParams
+  }, string>> {
     const versionIdResult = await this.promptStore.getPromptVersionId(params, orgId);
     if (isErr(versionIdResult)) return err(versionIdResult.error);
 
@@ -38,23 +41,32 @@ export class PromptManager {
           JSON.stringify(sourcePromptBody),
           this.env
         );
-        return ok(sourcePromptBody);
+        return ok({
+          promptVersionId: versionIdResult.data,
+          body: sourcePromptBody,
+        });
       } catch (error) {
         return err(`Error retrieving prompt body: ${error}`);
       }
     }
-    return ok(sourcePromptBody);
+    return ok({
+      promptVersionId: versionIdResult.data,
+      body: sourcePromptBody,
+    });
   }
 
   async getMergedPromptBody(
     params: HeliconeChatCreateParams,
     orgId: string,
-  ): Promise<Result<{ body: ChatCompletionCreateParams; errors: ValidationError[] }, string>> {
+  ): Promise<Result<{ body: ChatCompletionCreateParams; errors: ValidationError[]; promptVersionId: string }, string>> {
     const result = await this.getSourcePromptBodyWithFetch(params, orgId);
     if (isErr(result)) return err(result.error);
 
-    const mergedPromptBody = await this.promptManager.mergePromptBody(params, result.data);
-    return ok(mergedPromptBody);
+    const mergedPromptBody = await this.promptManager.mergePromptBody(params, result.data.body);
+    return ok({
+      ...mergedPromptBody,
+      promptVersionId: result.data.promptVersionId,
+    });
   }
 
 } 

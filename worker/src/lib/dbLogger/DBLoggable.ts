@@ -12,7 +12,7 @@ import { RequestResponseManager } from "../managers/RequestResponseManager";
 import { AsyncLogModel } from "../models/AsyncLog";
 import { HeliconeHeaders } from "../models/HeliconeHeaders";
 import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
-import { PromptSettings, RequestWrapper } from "../RequestWrapper";
+import { Prompt2025Settings, PromptSettings, RequestWrapper } from "../RequestWrapper";
 import { INTERNAL_ERRORS } from "../util/constants";
 import { withTimeout } from "../util/helpers";
 import { Result, err, ok } from "../util/results";
@@ -46,6 +46,7 @@ export interface DBLoggableProps {
     userId?: string;
     heliconeProxyKeyId?: string;
     promptSettings: PromptSettings;
+    prompt2025Settings: Prompt2025Settings;
     startTime: Date;
     bodyText?: string;
     path: string;
@@ -88,6 +89,7 @@ export function dbLoggableRequestFromProxyRequest(
     requestId: proxyRequest.requestId,
     heliconeProxyKeyId: proxyRequest.heliconeProxyKeyId,
     promptSettings: proxyRequest.requestWrapper.promptSettings,
+    prompt2025Settings: proxyRequest.requestWrapper.prompt2025Settings,
     heliconeTemplate: proxyRequest.heliconePromptTemplate ?? undefined,
     userId: proxyRequest.userId,
     startTime: requestStartTime,
@@ -161,6 +163,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
             promptVersion: "",
             promptMode: "deactivated",
           },
+      prompt2025Settings: requestWrapper.prompt2025Settings,
       userId: providerRequestHeaders.userId ?? undefined,
       startTime: asyncLogModel.timing
         ? new Date(
@@ -711,6 +714,10 @@ export class DBLoggable {
         posthogHost: requestHeaders.posthogHost ?? undefined,
         heliconeManualAccessKey:
           requestHeaders.heliconeManualAccessKey ?? undefined,
+        promptId: this.request.prompt2025Settings.promptId,
+        promptVersionId: this.request.prompt2025Settings.promptVersionId,
+        promptInputs: this.request.prompt2025Settings.promptInputs,
+        promptEnvironment: this.request.prompt2025Settings.environment,
       },
       log: {
         request: {

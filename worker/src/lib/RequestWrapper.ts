@@ -26,6 +26,7 @@ export type RequestHandlerType =
   | "logging"
   | "feedback";
 
+// LEGACY PROMPTS
 export type PromptSettings =
   | {
       promptId: string;
@@ -40,6 +41,13 @@ export type PromptSettings =
       promptInputs?: Record<string, string>;
     };
 
+export type Prompt2025Settings = {
+  promptId?: string;
+  promptVersionId?: string;
+  environment?: string;
+  promptInputs?: Record<string, any>;
+}
+
 export class RequestWrapper {
   private authorization: string | undefined;
   url: URL;
@@ -51,6 +59,7 @@ export class RequestWrapper {
   baseURLOverride: string | null;
   cf: CfProperties | undefined;
   promptSettings: PromptSettings;
+  prompt2025Settings: Prompt2025Settings; // I'm sorry. Will clean whenever we can remove old promtps.
   extraHeaders: Headers | null = null;
 
   private cachedText: string | null = null;
@@ -136,6 +145,7 @@ export class RequestWrapper {
     this.headers = this.mutatedAuthorizationHeaders(request);
     this.heliconeHeaders = new HeliconeHeaders(this.headers);
     this.promptSettings = this.getPromptSettings();
+    this.prompt2025Settings = {}; // initialized later, if a prompt is used.
     this.injectPromptProperties();
     this.baseURLOverride = null;
     this.cf = request.cf;
@@ -591,6 +601,26 @@ export class RequestWrapper {
     this.promptSettings = {
       ...this.promptSettings,
       promptInputs: inputs,
+    };
+  }
+
+  /**
+   * Sets prompts settings (new prompts)
+   * @param promptVersionId The version id of the prompt
+   * @param environment The environment of the prompt
+   * @param inputs The inputs to associate with the prompt
+   */
+  setPrompt2025Settings(params: {
+    promptId: string,
+    promptVersionId: string,
+    inputs: Record<string, any>,
+    environment?: string
+  }): void {
+    this.prompt2025Settings = {
+      promptId: params.promptId,
+      promptVersionId: params.promptVersionId,
+      promptInputs: params.inputs,
+      environment: params.environment,
     };
   }
 

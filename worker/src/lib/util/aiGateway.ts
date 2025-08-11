@@ -485,7 +485,12 @@ export const attemptModelRequestWithFallback = async ({
       });
     }
 
-    
+    requestWrapper.setPrompt2025Settings({
+      promptId: parsedBody.prompt_id,
+      promptVersionId: result.data.promptVersionId,
+      inputs: parsedBody.inputs,
+      environment: parsedBody.environment,
+    });
     parsedBody = result.data.body;
   }
 
