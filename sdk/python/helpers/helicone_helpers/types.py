@@ -61,6 +61,7 @@ if OPENAI_AVAILABLE:
     class HeliconeChatParams(CompletionCreateParamsBase, total=False):
         prompt_id: str
         version_id: Optional[str]
+        environment: Optional[str]
         inputs: Optional[Dict[str, Any]]
     
     ChatMessage = ChatCompletionMessageParam

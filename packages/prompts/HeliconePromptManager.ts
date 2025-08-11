@@ -164,7 +164,7 @@ export class HeliconePromptManager {
     params: HeliconeChatCreateParams | HeliconeChatCreateParamsStreaming
   ): Promise<{ body: ChatCompletionCreateParams; errors: ValidationError[] }> {
     if (!params.prompt_id) {
-      const { prompt_id, version_id, inputs, ...openaiParams } = params;
+      const { prompt_id, version_id, inputs, environment, ...openaiParams } = params;
       return { body: openaiParams as ChatCompletionCreateParams, errors: [] };
     }
 
