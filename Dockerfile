@@ -95,9 +95,19 @@ RUN find /app -name ".env.*" -exec rm {} \;
 
 # Install web-specific dependencies and build
 WORKDIR /app/web
+# Reduce memory pressure during Next.js build
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_DISABLE_SOURCEMAPS=1
+ENV NEXT_DISABLE_ESLINT=1
+ENV NEXT_SKIP_TYPE_CHECK=1
+ENV NODE_OPTIONS=--max-old-space-size=2048
+
+# Install deps and build with caching to lower peak RAM usage
 RUN --mount=type=cache,target=/root/.yarn \
-    yarn install --frozen-lockfile \
-    && DISABLE_ESLINT=true yarn build
+    yarn install --frozen-lockfile
+
+RUN --mount=type=cache,target=/app/web/.next/cache \
+    yarn build
 
 # --------------------------------------------------------------------------------------------------------------------
 
@@ -128,19 +138,15 @@ RUN set -eu; \
 # Create MinIO data directory
 RUN mkdir -p /data
 
+# Runtime configuration: pass credentials at container runtime, not baked into image
 ENV POSTGRES_DB=helicone_test
 ENV POSTGRES_USER=postgres
-ENV POSTGRES_PASSWORD=password
-ENV POSTGRES_ATLAS_URL=postgres://postgres:password@localhost:5432/helicone_test?sslmode=disable
 ENV CLICKHOUSE_DEFAULT_USER=default
 
 # Default ClickHouse URL for Atlas migrations (can be overridden at runtime)
 ENV CLICKHOUSE_URL=clickhouse://default:@localhost:9000
 
 ENV CLICKHOUSE_HOST=http://localhost:8123
-
-ENV MINIO_ROOT_USER=minioadmin
-ENV MINIO_ROOT_PASSWORD=minioadmin
 
 
 # Use supervisord as entrypoint
