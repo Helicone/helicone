@@ -51,6 +51,28 @@ export function buildIndexes(
     }
   }
 
+  // Sort all arrays by cost (cheapest first)
+  const sortByCost = (a: Endpoint, b: Endpoint) => {
+    const aCost = a.pricing.prompt + a.pricing.completion;
+    const bCost = b.pricing.prompt + b.pricing.completion;
+    return aCost - bCost;
+  };
+
+  // Sort each model's endpoints by cost
+  byModel.forEach((endpoints) => {
+    endpoints.sort(sortByCost);
+  });
+
+  // Sort PTB endpoints by cost
+  byModelPtb.forEach((endpoints) => {
+    endpoints.sort(sortByCost);
+  });
+
+  // Sort model+provider endpoints by cost
+  byModelProvider.forEach((endpoints) => {
+    endpoints.sort(sortByCost);
+  });
+
   return {
     byModel,
     byModelPtb,

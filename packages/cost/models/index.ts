@@ -18,7 +18,6 @@ export {
   getByokEndpoints,
   getProviderModels,
   hasPtbSupport,
-  getCheapestEndpoint,
 } from "./registry";
 
 // Export provider utilities

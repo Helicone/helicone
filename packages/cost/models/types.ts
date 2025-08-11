@@ -217,9 +217,6 @@ export interface Endpoint {
 
   // Availability
   ptbEnabled: boolean; // Can Helicone use this for pass-through billing?
-
-  // Performance (optional, can be populated from monitoring)
-  performance?: EndpointPerformance;
 }
 
 // ============= Provider Configuration =============
