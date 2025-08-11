@@ -19,24 +19,17 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Install Atlas CLI for migrations
+RUN curl -sSf https://atlasgo.sh | sh
+ENV PATH="/root/bin:/usr/local/bin:${PATH}"
+
 # Install Python dependencies
 RUN pip3 install --no-cache-dir requests clickhouse-driver tabulate yarl
 
 # Create supervisord directories and copy configuration
 RUN mkdir -p /var/log/supervisor
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
-ENV FLYWAY_URL=jdbc:postgresql://localhost:5432/helicone_test
-ENV FLYWAY_USER=postgres
-ENV FLYWAY_PASSWORD=password
-ENV FLYWAY_LOCATIONS=filesystem:/app/postgres/migrations,filesystem:/app/postgres/migrations_without_supabase
-ENV FLYWAY_SQL_MIGRATION_PREFIX=
-ENV FLYWAY_SQL_MIGRATION_SEPARATOR=_
-ENV FLYWAY_SQL_MIGRATION_SUFFIXES=.sql
-
-
 COPY ./postgres/migrations /app/postgres/migrations
-COPY ./postgres/migrations_without_supabase /app/postgres/migrations_without_supabase
 COPY ./clickhouse/migrations /app/clickhouse/migrations
 COPY ./clickhouse/seeds /app/clickhouse/seeds
 
@@ -65,6 +58,7 @@ COPY valhalla/jawn/package.json ./valhalla/jawn/package.json
 
 # Copy packages directory structure and package.json files
 COPY packages ./packages
+# TODO Terrible hack to remove all non-package files from the packages directory that should be re-written
 RUN find packages -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" -o -name "*.json" ! -name "package.json" | xargs rm -f 2>/dev/null || true
 
 # Install root dependencies first with cache mount
@@ -119,7 +113,11 @@ RUN mkdir -p /data
 ENV POSTGRES_DB=helicone_test
 ENV POSTGRES_USER=postgres
 ENV POSTGRES_PASSWORD=password
+ENV POSTGRES_ATLAS_URL=postgres://postgres:password@localhost:5432/helicone_test?sslmode=disable
 ENV CLICKHOUSE_DEFAULT_USER=default
+
+# Default ClickHouse URL for Atlas migrations (can be overridden at runtime)
+ENV CLICKHOUSE_URL=clickhouse://default:@localhost:9000
 
 ENV CLICKHOUSE_HOST=http://localhost:8123
 
