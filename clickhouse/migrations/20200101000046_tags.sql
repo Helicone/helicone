@@ -8,4 +8,4 @@ CREATE TABLE IF NOT EXISTS default.tags (
 ) ENGINE = ReplacingMergeTree()
 ORDER BY (organization_id, entity_type, entity_id, tag);
 
--- https://clickhouse.com/docs/guides/developer/deduplication
+/* https://clickhouse.com/docs/guides/developer/deduplication */
