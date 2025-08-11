@@ -96,7 +96,7 @@ export type HeliconePromptParams = {
  *     name: "John",
  *     age: 20,
  *   }
- * } as HeliconePromptChatCompletion);
+ * } as HeliconeChatCreateCompletion);
  * ```
  */
 export type HeliconeChatCreateParams = ChatCompletionCreateParamsNonStreaming &
