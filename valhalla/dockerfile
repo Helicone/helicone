@@ -30,8 +30,10 @@ RUN apt-get update && apt-get upgrade -y && \
     && apt-get autoremove -y && apt-get clean
 
 # Install latest versions to address security vulnerabilities
-# CVE-2023-26819: libcjson vulnerability 
-# CVE-2025-6170: libxml2 vulnerability
+# CVE-2023-26819: libcjson vulnerability (fixed with libcjson-dev update)
+# CVE-2025-6170: libxml2 vulnerability (fixed with libxml2-dev update)
+# CVE-2023-5752: pip vulnerability (fixed with pip>=23.3 upgrade above)
+# Force rebuild to ensure vulnerability fixes are deployed - 2025-08-11
 RUN apt-get update && \
     apt-get install -y \
     libcjson-dev \
