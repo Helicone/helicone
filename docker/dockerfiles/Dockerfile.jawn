@@ -1,9 +1,4 @@
-# This Dockerfile is built using the repository root as the build context
-# Example:
-# docker build -t helicone/jawn .. -f docker/dockerfiles/Dockerfile.jawn
-
-# Use an official Node.js runtime as the base image
-FROM --platform=linux/amd64 node:20-bookworm-slim
+FROM node:20-bookworm-slim
 
 WORKDIR /usr/src/app/valhalla/prompt_security
 
@@ -39,10 +34,6 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # Install Python deps in a single layer for better caching
 COPY ./valhalla/prompt_security/requirements.txt ./
-RUN pip3 install --no-cache-dir \
-      torch==2.3.1+cpu torchvision==0.18.1+cpu \
-      --find-links https://download.pytorch.org/whl/torch_stable.html && \
-    pip3 install --no-cache-dir -r requirements.txt
 
 # Begin Node build setup
 WORKDIR /usr/src/app
