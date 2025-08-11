@@ -36,7 +36,7 @@ services:
         hard: 262144
     environment:
       CLICKHOUSE_DEFAULT_USER: default
-      CLICKHOUSE_PASSWORD: "password"  # TODO Make sure other areas of the codebase honor the fact that a password was set
+      CLICKHOUSE_PASSWORD: "password"
     restart: unless-stopped
     healthcheck:
       test:
