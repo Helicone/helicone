@@ -22,6 +22,8 @@ import { xAiModels, xAiEndpoints } from "./authors/x-ai";
 import { amazonModels, amazonEndpoints } from "./authors/amazon";
 import { cohereModels, cohereEndpoints } from "./authors/cohere";
 import { deepseekModels, deepseekEndpoints } from "./authors/deepseek";
+import { googleModels, googleEndpoints } from "./authors/google";
+import { groqModels, groqEndpoints } from "./authors/groq";
 import { metaLlamaModels, metaLlamaEndpoints } from "./authors/meta-llama";
 import { mistralaiModels, mistralaiEndpoints } from "./authors/mistralai";
 import { moonshotaiModels, moonshotaiEndpoints } from "./authors/moonshotai";
@@ -36,6 +38,8 @@ const allEndpoints: Record<EndpointId, Endpoint> = {
   ...amazonEndpoints,
   ...cohereEndpoints,
   ...deepseekEndpoints,
+  ...googleEndpoints,
+  ...groqEndpoints,
   ...metaLlamaEndpoints,
   ...mistralaiEndpoints,
   ...moonshotaiEndpoints,
@@ -51,6 +55,8 @@ const allModels: Record<ModelName, Model> = {
   ...amazonModels,
   ...cohereModels,
   ...deepseekModels,
+  ...googleModels,
+  ...groqModels,
   ...metaLlamaModels,
   ...mistralaiModels,
   ...moonshotaiModels,

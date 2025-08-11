@@ -3,9 +3,13 @@
  */
 
 import type { AuthorMetadata } from "../../types";
-import { deepseekModels } from "./models";
 
 export const deepseekMetadata = {
-  modelCount: Object.keys(deepseekModels).length,
+  modelCount: 2,
   supported: true,
+  name: "DeepSeek",
+  slug: "deepseek",
+  description: "Cost-effective frontier AI models with advanced reasoning capabilities",
+  website: "https://www.deepseek.com",
+  apiUrl: "https://api.deepseek.com/v1",
 } satisfies AuthorMetadata;

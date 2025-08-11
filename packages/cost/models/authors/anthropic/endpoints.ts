@@ -3,24 +3,8 @@
  * Each endpoint is complete and self-contained
  */
 
-import type { Endpoint } from "../../types";
-
-// Define specific endpoint IDs as a union type
-export type AnthropicEndpointId =
-  // Claude Opus 4.1
-  | "claude-opus-4-1:anthropic"
-  | "claude-opus-4-1:vertex:us-central1"
-  | "claude-opus-4-1:bedrock:us-west-2"
-  | "claude-opus-4-1:bedrock:ap-southeast-1"
-  // Claude 3.5 Sonnet
-  | "claude-3.5-sonnet:anthropic"
-  | "claude-3.5-sonnet:bedrock:us-west-2"
-  | "claude-3.5-sonnet:bedrock:eu-west-1"
-  | "claude-3.5-sonnet:vertex:us-central1"
-  // Claude 3.5 Haiku
-  | "claude-3.5-haiku:anthropic"
-  | "claude-3.5-haiku:vertex:us-central1"
-  | "claude-3.5-haiku:bedrock:us-west-2";
+import type { Endpoint, EndpointKey } from "../../types";
+import { AnthropicModelName } from "./models";
 
 // Endpoints keyed by their ID for O(1) lookup and consistency with models
 export const anthropicEndpoints = {
@@ -354,4 +338,6 @@ export const anthropicEndpoints = {
     ],
     ptbEnabled: true,
   },
-} satisfies Record<AnthropicEndpointId, Endpoint>;
+} satisfies Record<EndpointKey<AnthropicModelName>, Endpoint>;
+
+export type AnthropicEndpointId = keyof typeof anthropicEndpoints;

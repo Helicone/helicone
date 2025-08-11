@@ -2,14 +2,12 @@
  * Meta-Llama endpoint configurations
  */
 
-import type { Endpoint } from "../../types";
-
-/**
- * Meta-Llama endpoint IDs
- */
-export type MetaLlamaEndpointId = never;
+import type { Endpoint, EndpointKey } from "../../types";
+import { MetaLlamaModelName } from "./models";
 
 export const metaLlamaEndpoints = {} satisfies Record<
-  MetaLlamaEndpointId,
+  EndpointKey<MetaLlamaModelName>,
   Endpoint
 >;
+
+export type MetaLlamaEndpointId = keyof typeof metaLlamaEndpoints;

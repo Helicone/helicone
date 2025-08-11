@@ -2,13 +2,8 @@
  * Amazon endpoint configurations
  */
 
-import type { Endpoint } from "../../types";
-import type { AmazonModelName } from "./models";
-
-/**
- * Amazon endpoint IDs
- */
-export type AmazonEndpointId = `${AmazonModelName}:bedrock`;
+import type { Endpoint, EndpointKey } from "../../types";
+import { AmazonModelName } from "./models";
 
 export const amazonEndpoints = {
   "nova-lite-v1:bedrock": {
@@ -73,4 +68,6 @@ export const amazonEndpoints = {
     ],
     ptbEnabled: false,
   },
-} satisfies Record<AmazonEndpointId, Endpoint>;
+} satisfies Record<EndpointKey<AmazonModelName>, Endpoint>;
+
+export type AmazonEndpointId = keyof typeof amazonEndpoints;

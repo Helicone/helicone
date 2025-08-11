@@ -2,13 +2,8 @@
  * X-AI endpoint configurations
  */
 
-import type { Endpoint } from "../../types";
+import type { Endpoint, EndpointKey } from "../../types";
 import type { XAIModelName } from "./models";
-
-/**
- * X-AI endpoint IDs
- */
-export type XAIEndpointId = `${XAIModelName}:xai`;
 
 export const xAiEndpoints = {
   "grok-4:xai": {
@@ -205,4 +200,6 @@ export const xAiEndpoints = {
     ],
     ptbEnabled: true,
   },
-} satisfies Record<XAIEndpointId, Endpoint>;
+} satisfies Record<EndpointKey<XAIModelName>, Endpoint>;
+
+export type XAIEndpointId = keyof typeof xAiEndpoints;

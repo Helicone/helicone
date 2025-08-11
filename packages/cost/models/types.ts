@@ -10,12 +10,23 @@ import type { AnthropicModelName } from "./authors/anthropic/models";
 import type { AnthropicEndpointId } from "./authors/anthropic/endpoints";
 import { CohereModelName, type CohereEndpointId } from "./authors/cohere";
 import { DeepSeekModelName, type DeepSeekEndpointId } from "./authors/deepseek";
-import { MetaLlamaModelName, type MetaLlamaEndpointId } from "./authors/meta-llama";
+import { GoogleModelName, type GoogleEndpointId } from "./authors/google";
+import { GroqModelName, type GroqEndpointId } from "./authors/groq";
+import {
+  MetaLlamaModelName,
+  type MetaLlamaEndpointId,
+} from "./authors/meta-llama";
 import { MistralModelName, type MistralEndpointId } from "./authors/mistralai";
-import { MoonshotModelName, type MoonshotEndpointId } from "./authors/moonshotai";
+import {
+  MoonshotModelName,
+  type MoonshotEndpointId,
+} from "./authors/moonshotai";
 import { NvidiaModelName, type NvidiaEndpointId } from "./authors/nvidia";
 import { OpenAIModelName, type OpenAIEndpointId } from "./authors/openai";
-import { PerplexityModelName, type PerplexityEndpointId } from "./authors/perplexity";
+import {
+  PerplexityModelName,
+  type PerplexityEndpointId,
+} from "./authors/perplexity";
 import { XAIModelName, type XAIEndpointId } from "./authors/x-ai";
 
 // Union of all model names
@@ -27,6 +38,8 @@ export type ModelName =
   | AmazonModelName
   | CohereModelName
   | DeepSeekModelName
+  | GoogleModelName
+  | GroqModelName
   | MetaLlamaModelName
   | MistralModelName
   | MoonshotModelName
@@ -41,6 +54,8 @@ export type EndpointId =
   | AmazonEndpointId
   | CohereEndpointId
   | DeepSeekEndpointId
+  | GoogleEndpointId
+  | GroqEndpointId
   | MetaLlamaEndpointId
   | MistralEndpointId
   | MoonshotEndpointId
@@ -88,6 +103,9 @@ export const PROVIDERS = [
   "bedrock",
   "azure-openai",
   "xai",
+  "groq",
+  "deepseek",
+  "cohere",
 ] as const;
 
 export type ProviderName = (typeof PROVIDERS)[number];
@@ -136,7 +154,16 @@ export type StandardParameter =
   | "thinking"
   // Response format
   | "response_format"
-  | "json_mode";
+  | "json_mode"
+  | "truncate";
+
+// ============= Endpoint Types =============
+
+/**
+ * Generic endpoint key type for flexible endpoint IDs
+ * Allows for model:provider, model:provider:region, etc.
+ */
+export type EndpointKey<TModelName extends string> = `${TModelName}:${string}`;
 
 // ============= Model Definition =============
 

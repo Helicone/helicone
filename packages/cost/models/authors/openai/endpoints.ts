@@ -2,13 +2,8 @@
  * OpenAI endpoint configurations
  */
 
-import type { Endpoint } from "../../types";
+import type { Endpoint, EndpointKey } from "../../types";
 import type { OpenAIModelName } from "./models";
-
-/**
- * OpenAI endpoint IDs
- */
-export type OpenAIEndpointId = `${OpenAIModelName}:openai`;
 
 export const openaiEndpoints = {
   "o3-pro:openai": {
@@ -414,4 +409,6 @@ export const openaiEndpoints = {
     ],
     ptbEnabled: true,
   },
-} satisfies Record<OpenAIEndpointId, Endpoint>;
+} satisfies Record<EndpointKey<OpenAIModelName>, Endpoint>;
+
+export type OpenAIEndpointId = keyof typeof openaiEndpoints;
