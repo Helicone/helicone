@@ -127,7 +127,14 @@ export async function removeFromCache(
   key: string,
   env: SecureCacheEnv
 ): Promise<void> {
-  const hashedKey = await hashWithHmac(key, 1);
+  const hashedKey1 = await hashWithHmac(key, 1);
+  const hashedKey2 = await hashWithHmac(key, 2);
+  await Promise.all([
+    env.SECURE_CACHE.delete(hashedKey1),
+    env.SECURE_CACHE.delete(hashedKey2)
+  ]);
+  InMemoryCache.getInstance<string>().delete(hashedKey1);
+  InMemoryCache.getInstance<string>().delete(hashedKey2);
   await env.SECURE_CACHE.delete(hashedKey);
   InMemoryCache.getInstance<string>().delete(hashedKey);
 }
