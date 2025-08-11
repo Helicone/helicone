@@ -3,7 +3,7 @@
  */
 
 import type { AuthorMetadata } from "../../types";
-import { anthropicModels } from "./models";
+import { anthropicModels } from "./index";
 
 export const anthropicMetadata = {
   name: "Anthropic",

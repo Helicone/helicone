@@ -3,7 +3,7 @@
  */
 
 import type { AuthorMetadata } from "../../types";
-import { openaiModels } from "./models";
+import { openaiModels } from "./index";
 
 export const openaiMetadata = {
   modelCount: Object.keys(openaiModels).length,

@@ -6,8 +6,7 @@
 
 // Import all model name types from authors
 import { AmazonModelName, type AmazonEndpointId } from "./authors/amazon";
-import type { AnthropicModelName } from "./authors/anthropic/models";
-import type { AnthropicEndpointId } from "./authors/anthropic/endpoints";
+import { AnthropicModelName, AnthropicEndpointId } from "./authors/anthropic";
 import { CohereModelName, type CohereEndpointId } from "./authors/cohere";
 import { DeepSeekModelName, type DeepSeekEndpointId } from "./authors/deepseek";
 import { GoogleModelName, type GoogleEndpointId } from "./authors/google";
@@ -191,6 +190,15 @@ export interface ModelPricing {
   thinking?: number;
 }
 
+// ============= Performance Metrics (Optional) =============
+
+export interface EndpointPerformance {
+  latencyP50?: number; // Median latency in ms
+  latencyP99?: number; // 99th percentile latency in ms
+  timeToFirstToken?: number; // TTFT in ms
+  tokensPerSecond?: number; // Generation speed
+}
+
 // ============= Endpoint Definition (The Core Type) =============
 
 export interface Endpoint {
@@ -209,6 +217,9 @@ export interface Endpoint {
 
   // Availability
   ptbEnabled: boolean; // Can Helicone use this for pass-through billing?
+
+  // Performance (optional, can be populated from monitoring)
+  performance?: EndpointPerformance;
 }
 
 // ============= Provider Configuration =============
