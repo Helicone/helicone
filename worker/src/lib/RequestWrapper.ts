@@ -466,7 +466,7 @@ export class RequestWrapper {
     if (auth?.startsWith("Bearer ")) {
       auth = auth.split(" ")[1];
     }
-    return auth ?? undefined;
+    return auth;
   }
   
   async getProviderAuthHeader(): Promise<string | undefined> {
