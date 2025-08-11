@@ -24,7 +24,11 @@ import providers, {
 import { PromptManager } from "../managers/PromptManager";
 
 type Error = {
-  type: "invalid_format" | "missing_provider_key" | "request_failed" | "invalid_prompt";
+  type:
+    | "invalid_format"
+    | "missing_provider_key"
+    | "request_failed"
+    | "invalid_prompt";
   message: string;
   code: number;
 };
@@ -466,7 +470,6 @@ export const attemptModelRequestWithFallback = async ({
     });
   }
 
-  
   if (parsedBody.prompt_id) {
     const result = await promptManager.getMergedPromptBody(parsedBody, orgId);
     if (isErr(result)) {
@@ -480,7 +483,12 @@ export const attemptModelRequestWithFallback = async ({
     if (result.data.errors && result.data.errors.length > 0) {
       return err({
         type: "invalid_prompt",
-        message: result.data.errors.map((error) => `Variable '${error.variable}' is '${error.expected}' but got '${error.value}'`).join("\n"),
+        message: result.data.errors
+          .map(
+            (error) =>
+              `Variable '${error.variable}' is '${error.expected}' but got '${error.value}'`
+          )
+          .join("\n"),
         code: 400,
       });
     }
@@ -491,6 +499,7 @@ export const attemptModelRequestWithFallback = async ({
       inputs: parsedBody.inputs,
       environment: parsedBody.environment,
     });
+
     parsedBody = result.data.body;
   }
 

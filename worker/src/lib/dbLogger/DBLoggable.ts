@@ -633,7 +633,6 @@ export class DBLoggable {
         cost: cost,
       });
     } catch (error) {
-      console.error("Error logging", error);
       return err("Error logging");
     }
   }

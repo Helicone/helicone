@@ -18,7 +18,7 @@ import { APIKeysManager } from "./lib/managers/APIKeysManager";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
-export type Provider = ProviderName | "CUSTOM" | "VAPI";
+export type Provider = ProviderName | "CUSTOM";
 
 export interface EU_Env {
   EU_CLICKHOUSE_HOST: string;
