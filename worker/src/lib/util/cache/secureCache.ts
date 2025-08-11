@@ -2,6 +2,11 @@ import { Env, hash } from "../../..";
 import { safePut } from "../../safePut";
 import { Result, ok } from "../results";
 
+const hashWithHmac = async (key: string, hmac_key: 1 | 2) => {
+  const hashedKey = await hash(hmac_key === 1 ? key : `${key}_2`);
+  return hashedKey;
+};
+
 export interface SecureCacheEnv {
   SECURE_CACHE: Env["SECURE_CACHE"];
   REQUEST_CACHE_KEY: Env["REQUEST_CACHE_KEY"];
@@ -122,7 +127,7 @@ export async function removeFromCache(
   key: string,
   env: SecureCacheEnv
 ): Promise<void> {
-  const hashedKey = await hash(key);
+  const hashedKey = await hashWithHmac(key, 1);
   await env.SECURE_CACHE.delete(hashedKey);
   InMemoryCache.getInstance<string>().delete(hashedKey);
 }
@@ -141,7 +146,7 @@ async function storeInCacheWithHmac({
   expirationTtl?: number;
 }): Promise<void> {
   const encrypted = await encrypt(value, env, hmac_key);
-  const hashedKey = await hash(key);
+  const hashedKey = await hashWithHmac(key, hmac_key);
   const ttlToUse = expirationTtl ?? 600;
   try {
     await safePut({
@@ -195,7 +200,7 @@ async function getFromCacheWithHmac({
   useMemoryCache?: boolean;
   expirationTtl?: number;
 }): Promise<string | null> {
-  const hashedKey = await hash(key);
+  const hashedKey = await hashWithHmac(key, hmac_key);
   if (useMemoryCache) {
     const encryptedMemory = InMemoryCache.getInstance<string>().get(hashedKey);
     if (encryptedMemory !== undefined) {
