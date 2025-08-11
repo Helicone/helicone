@@ -74,7 +74,6 @@ export interface AuthorMetadata {
   description?: string;
   website?: string;
   apiUrl?: string;
-  pricingPages: string[];
 }
 
 export const AUTHORS = [
@@ -160,10 +159,6 @@ export type StandardParameter =
 
 // ============= Endpoint Types =============
 
-/**
- * Generic endpoint key type for flexible endpoint IDs
- * Allows for model:provider, model:provider:region, etc.
- */
 export type EndpointKey<TModelName extends string> = `${TModelName}:${string}`;
 
 // ============= Model Definition =============
@@ -232,6 +227,8 @@ export interface ProviderConfig {
   buildUrl: (endpoint: Endpoint, config: UserConfig) => string;
   buildModelId?: (endpoint: Endpoint, config: UserConfig) => string;
   requiredConfig?: Array<keyof UserConfig>;
+  pricingPages?: string[];
+  modelPages?: string[];
 }
 
 // ============= Index Types (Build-time generated) =============

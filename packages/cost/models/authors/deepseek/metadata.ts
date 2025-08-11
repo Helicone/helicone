@@ -13,5 +13,4 @@ export const deepseekMetadata = {
     "Cost-effective frontier AI models with advanced reasoning capabilities",
   website: "https://www.deepseek.com",
   apiUrl: "https://api.deepseek.com/v1",
-  pricingPages: ["https://api-docs.deepseek.com/"],
 } satisfies AuthorMetadata;

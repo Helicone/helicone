@@ -89,29 +89,7 @@ export const groqModels = {
     tokenizer: "Qwen",
   },
 
-  "whisper-large-v3": {
-    name: "Groq: Whisper Large V3",
-    author: "openai",
-    description:
-      "OpenAI's large-scale automatic speech recognition model, optimized for Groq's LPU infrastructure. Supports multiple languages with high accuracy.",
-    contextLength: 448,
-    maxOutputTokens: 448,
-    created: "2023-11-06T00:00:00.000Z",
-    modality: "text->text",
-    tokenizer: "GPT",
-  },
-
-  "whisper-large-v3-turbo": {
-    name: "Groq: Whisper Large V3 Turbo",
-    author: "openai",
-    description:
-      "Turbocharged version of Whisper Large V3 with enhanced speed optimizations on Groq's LPU. Faster speech recognition with maintained accuracy.",
-    contextLength: 448,
-    maxOutputTokens: 448,
-    created: "2024-11-25T00:00:00.000Z",
-    modality: "text->text",
-    tokenizer: "GPT",
-  },
+  // voice/ASR models removed (Helicone does not support voice)
 } satisfies Record<string, Model>;
 
 export type GroqModelName = keyof typeof groqModels;

@@ -146,33 +146,7 @@ export const groqEndpoints = {
     ptbEnabled: false,
   },
 
-  "whisper-large-v3:groq": {
-    modelId: "whisper-large-v3",
-    provider: "groq",
-    providerModelId: "whisper-large-v3",
-    pricing: {
-      prompt: 0.11, // USD per million tokens (estimated for audio processing)
-      completion: 0.11, // USD per million tokens (estimated for audio processing)
-    },
-    contextLength: 448,
-    maxCompletionTokens: 448,
-    supportedParameters: ["temperature"],
-    ptbEnabled: false,
-  },
-
-  "whisper-large-v3-turbo:groq": {
-    modelId: "whisper-large-v3-turbo",
-    provider: "groq",
-    providerModelId: "whisper-large-v3-turbo",
-    pricing: {
-      prompt: 0.04, // USD per million tokens (estimated for turbo audio processing)
-      completion: 0.04, // USD per million tokens (estimated for turbo audio processing)
-    },
-    contextLength: 448,
-    maxCompletionTokens: 448,
-    supportedParameters: ["temperature"],
-    ptbEnabled: false,
-  },
+  // voice/ASR models removed (Helicone does not support voice)
 } satisfies Record<EndpointKey<GroqModelName>, Endpoint>;
 
 export type GroqEndpointId = keyof typeof groqEndpoints;

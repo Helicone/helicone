@@ -13,8 +13,4 @@ export const anthropicMetadata = {
   apiUrl: "https://api.anthropic.com",
   supported: true,
   modelCount: Object.keys(anthropicModels).length,
-  pricingPages: [
-    "https://docs.anthropic.com/en/docs/build-with-claude/pricing",
-    "https://www.anthropic.com/pricing",
-  ],
 } satisfies AuthorMetadata;

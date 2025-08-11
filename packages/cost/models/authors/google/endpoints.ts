@@ -50,27 +50,6 @@ export const googleEndpoints = {
     ptbEnabled: false,
   },
 
-  "gemini-2.5-flash-lite:vertex": {
-    modelId: "gemini-2.5-flash-lite",
-    provider: "vertex",
-    providerModelId: "gemini-2.5-flash-lite",
-    pricing: {
-      prompt: 0.15, // USD per million tokens (estimated based on Flash pricing)
-      completion: 1.25, // USD per million tokens (estimated based on Flash pricing)
-    },
-    contextLength: 1000000,
-    maxCompletionTokens: 32768,
-    supportedParameters: [
-      "max_tokens",
-      "temperature",
-      "top_p",
-      "top_k",
-      "stop",
-      "response_format",
-    ],
-    ptbEnabled: false,
-  },
-
   "gemini-2.0-flash:vertex": {
     modelId: "gemini-2.0-flash",
     provider: "vertex",
@@ -90,27 +69,6 @@ export const googleEndpoints = {
       "stop",
       "tools",
       "tool_choice",
-      "response_format",
-    ],
-    ptbEnabled: false,
-  },
-
-  "gemini-2.0-flash-lite:vertex": {
-    modelId: "gemini-2.0-flash-lite",
-    provider: "vertex",
-    providerModelId: "gemini-2.0-flash-lite",
-    pricing: {
-      prompt: 0.05, // USD per million tokens (estimated)
-      completion: 0.2, // USD per million tokens (estimated)
-    },
-    contextLength: 1000000,
-    maxCompletionTokens: 32768,
-    supportedParameters: [
-      "max_tokens",
-      "temperature",
-      "top_p",
-      "top_k",
-      "stop",
       "response_format",
     ],
     ptbEnabled: false,
@@ -158,26 +116,6 @@ export const googleEndpoints = {
       "stop",
       "tools",
       "tool_choice",
-    ],
-    ptbEnabled: false,
-  },
-
-  "gemini-1.5-flash-8b:vertex": {
-    modelId: "gemini-1.5-flash-8b",
-    provider: "vertex",
-    providerModelId: "gemini-1.5-flash-8b",
-    pricing: {
-      prompt: 0.038, // USD per million tokens (estimated at ~50% of 1.5-flash)
-      completion: 0.15, // USD per million tokens (estimated at ~50% of 1.5-flash)
-    },
-    contextLength: 1000000,
-    maxCompletionTokens: 8192,
-    supportedParameters: [
-      "max_tokens",
-      "temperature",
-      "top_p",
-      "top_k",
-      "stop",
     ],
     ptbEnabled: false,
   },
