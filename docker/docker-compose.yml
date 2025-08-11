@@ -63,7 +63,15 @@ services:
       - .env
     volumes:
       - ../clickhouse:/app/clickhouse
-    entrypoint: ["/bin/sh", "-lc", "atlas login --token $${ATLAS_CLOUD_TOKEN} && atlas migrate hash --dir file:///app/clickhouse/migrations && atlas migrate apply --dir file:///app/clickhouse/migrations --url $${CLICKHOUSE_URL}"]
+    entrypoint:
+      - /bin/sh
+      - -lc
+      - |
+          atlas login --token $${ATLAS_CLOUD_TOKEN} &&
+          atlas migrate hash --dir file:///app/clickhouse/migrations &&
+          atlas migrate apply --dir file:///app/clickhouse/migrations --url $${CLICKHOUSE_URL} &&
+          # atlas migrate hash --dir file:///app/clickhouse/seeds &&  # TODO fix: 20200101001000_create_hql_user.sql" is partially applied but migration file was not found
+          # atlas migrate apply --dir file:///app/clickhouse/seeds --url $${CLICKHOUSE_URL}
 
   minio:
     image: minio/minio
@@ -116,7 +124,14 @@ services:
     volumes:
       - ../postgres:/app/postgres
     # Hash and apply Postgres migrations
-    entrypoint: ["/bin/sh", "-lc", "atlas migrate hash --dir file:///app/postgres/migrations && atlas migrate apply --dir file:///app/postgres/migrations --url $${DATABASE_URL}"]
+    entrypoint:
+      - /bin/sh
+      - -lc
+      - |
+          atlas migrate hash --dir file:///app/postgres/migrations &&
+          atlas migrate apply --dir file:///app/postgres/migrations --url $${DATABASE_URL} &&
+          atlas migrate hash --dir file:///app/postgres/seeds &&
+          atlas migrate apply --dir file:///app/postgres/seeds --url $${DATABASE_URL}
 
   # =============================================================================
   # HELICONE CORE SERVICES (include-helicone profile)
