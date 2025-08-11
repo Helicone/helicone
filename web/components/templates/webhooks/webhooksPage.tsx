@@ -42,7 +42,6 @@ interface WebhooksPageProps {}
 const WebhooksPage = (props: WebhooksPageProps) => {
   const { setNotification } = useNotification();
   const org = useOrg();
-  const [viewWebhookOpen, setViewWebhookOpen] = useState(false);
   const [addWebhookOpen, setAddWebhookOpen] = useState(false);
   const [webhookError, setWebhookError] = useState<string | undefined>(
     undefined,
@@ -75,11 +74,6 @@ const WebhooksPage = (props: WebhooksPageProps) => {
       return () => clearTimeout(timerId);
     }
   }, []);
-
-  const dismissChangelogBanner = () => {
-    setShowChangelogBanner(false);
-    localStorage.setItem("webhooks_changelog_banner_dismissed", "true");
-  };
 
   const {
     data: webhooks,
@@ -297,22 +291,30 @@ const WebhooksPage = (props: WebhooksPageProps) => {
         </div>
 
         <div className="mx-8">
-          <Table className="w-full rounded-md border bg-white shadow-sm">
-            <TableHeader className="bg-gray-50">
+          <Table className="w-full rounded-md border border-border bg-background shadow-sm">
+            <TableHeader className="bg-card">
               <TableRow>
-                <TableHead className="font-medium">Destination</TableHead>
-                <TableHead className="font-medium">Created</TableHead>
-                <TableHead className="font-medium">Version</TableHead>
-                <TableHead className="font-medium">Sample Rate</TableHead>
-                <TableHead className="font-medium">Property Filters</TableHead>
-                <TableHead className="font-medium">Include Data</TableHead>
-                <TableHead className="font-medium">HMAC Key</TableHead>
-                <TableHead className="font-medium">Actions</TableHead>
+                <TableHead className="text-xs font-medium">
+                  Destination
+                </TableHead>
+                <TableHead className="text-xs font-medium">Created</TableHead>
+                <TableHead className="text-xs font-medium">Version</TableHead>
+                <TableHead className="text-xs font-medium">
+                  Sample Rate
+                </TableHead>
+                <TableHead className="text-xs font-medium">
+                  Property Filters
+                </TableHead>
+                <TableHead className="text-xs font-medium">
+                  Include Data
+                </TableHead>
+                <TableHead className="text-xs font-medium">HMAC Key</TableHead>
+                <TableHead className="text-xs font-medium">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {webhooks?.data?.data?.map((webhook) => (
-                <TableRow key={webhook.id} className="hover:bg-gray-50">
+                <TableRow key={webhook.id} className="hover:bg-muted">
                   <TableCell className="max-w-[200px] truncate">
                     <TooltipProvider>
                       <Tooltip>

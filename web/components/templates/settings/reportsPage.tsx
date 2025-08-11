@@ -207,7 +207,7 @@ const ReportsPage = () => {
   };
 
   return (
-    <div className="max-w-2xl">
+    <div className="p-4">
       <form onSubmit={handleCustomizeReports} className="h-full w-full">
         <div className="col-span-4 flex flex-row items-center justify-between">
           <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
@@ -225,8 +225,8 @@ const ReportsPage = () => {
           <strong>10am UTC</strong>.
         </small>
         {reportEnabled && (
-          <div className="col-span-4 w-full space-y-1.5 rounded-md bg-gray-100 p-6">
-            <h3 className="font-semibold">Notify By</h3>
+          <div className="col-span-4 w-full space-y-1.5 rounded-md bg-card p-6">
+            {/* <h3 className="font-semibold">Notify By</h3> */}
             <div className="col-span-4 w-full space-y-1.5 text-sm">
               <div className="flex items-center justify-between">
                 <label htmlFor="alert-emails" className="text-gray-500">
@@ -246,7 +246,7 @@ const ReportsPage = () => {
                       <Button
                         variant="outline"
                         role="combobox"
-                        className="w-full justify-between"
+                        className="mb-2 w-full justify-between"
                         size="sm"
                         disabled={isLoading}
                       >

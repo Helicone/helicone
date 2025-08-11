@@ -23,7 +23,7 @@ const KeyPage = () => {
 
   return (
     <>
-      <div className="flex w-full max-w-6xl flex-col border border-border bg-background">
+      <div className="flex w-full max-w-6xl flex-col border-y border-border">
         <div className="border-b border-border p-4">
           <div className="flex flex-row items-center justify-between">
             <div>

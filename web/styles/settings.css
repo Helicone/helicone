@@ -1,5 +1,5 @@
 .settings-container {
-  @apply flex w-full max-w-6xl flex-col border border-border bg-background;
+  @apply flex w-full max-w-6xl flex-col border-y border-border bg-background p-0;
 }
 
 .settings-section-header {
