@@ -52,7 +52,7 @@ services:
   clickhouse-migrations:
     build:
       context: ../
-      dockerfile: docker/dockerfiles/dockerfile_clickhouse_migrations
+      dockerfile: docker/dockerfiles/Dockerfile.clickhouse_migrations
     depends_on:
       clickhouse:
         condition: service_healthy
@@ -106,7 +106,7 @@ services:
   postgres-migrations:
     build:
       context: ../
-      dockerfile: docker/dockerfiles/dockerfile_postgres_migrations
+      dockerfile: docker/dockerfiles/Dockerfile.postgres_migrations
     depends_on:
       db:
         condition: service_healthy
@@ -126,7 +126,7 @@ services:
     container_name: helicone-jawn
     build:
       context: ../
-      dockerfile: docker/dockerfiles/dockerfile_jawn
+      dockerfile: docker/dockerfiles/Dockerfile.jawn
     restart: unless-stopped
     ports:
       - ${JAWN_PORT:-8585}:${JAWN_PORT:-8585}
@@ -166,7 +166,7 @@ services:
     container_name: helicone-web
     build:
       context: ../
-      dockerfile: docker/dockerfiles/dockerfile_web
+      dockerfile: docker/dockerfiles/Dockerfile.web
       args:
         NEXT_PUBLIC_HELICONE_JAWN_SERVICE: ${JAWN_PUBLIC_URL:-http://localhost:8585}
         NEXT_PUBLIC_BETTER_AUTH: "true"

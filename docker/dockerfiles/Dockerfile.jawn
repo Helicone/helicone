@@ -1,6 +1,6 @@
 # This Dockerfile is built using the repository root as the build context
 # Example:
-# docker build -t helicone/jawn .. -f docker/dockerfiles/dockerfile_jawn
+# docker build -t helicone/jawn .. -f docker/dockerfiles/Dockerfile.jawn
 
 # Use an official Node.js runtime as the base image
 FROM --platform=linux/amd64 node:20-bookworm-slim
@@ -85,4 +85,5 @@ ENV ENABLE_PROMPT_SECURITY="true"
 COPY ./valhalla/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
+
 

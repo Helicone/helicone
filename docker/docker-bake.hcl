@@ -4,22 +4,22 @@
 
 target "web" {
   context    = ".."
-  dockerfile = "docker/dockerfiles/dockerfile_web"
+  dockerfile = "docker/dockerfiles/Dockerfile.web"
 }
 
 target "jawn" {
   context    = ".."
-  dockerfile = "docker/dockerfiles/dockerfile_jawn"
+  dockerfile = "docker/dockerfiles/Dockerfile.jawn"
 }
 
 target "postgres_migrations" {
   context    = ".."
-  dockerfile = "docker/dockerfiles/dockerfile_postgres_migrations"
+  dockerfile = "docker/dockerfiles/Dockerfile.postgres_migrations"
 }
 
 target "clickhouse_migrations" {
   context    = ".."
-  dockerfile = "docker/dockerfiles/dockerfile_clickhouse_migrations"
+  dockerfile = "docker/dockerfiles/Dockerfile.clickhouse_migrations"
 }
 
 target "all_in_one" {
