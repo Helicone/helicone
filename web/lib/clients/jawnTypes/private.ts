@@ -1964,6 +1964,7 @@ Json: JsonObject;
       heliconeManualAccessKey?: string;
       promptInputs?: components["schemas"]["Record_string.any_"];
       promptVersionId?: string;
+      promptEnvironment?: string;
       promptId?: string;
       lytixHost?: string;
       lytixKey?: string;
