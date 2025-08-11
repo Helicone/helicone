@@ -1,5 +1,8 @@
 name: Worker Build Precheck
 on:
+  push:
+    branches:
+      - "main"
   pull_request:
     branches:
       - "**"
