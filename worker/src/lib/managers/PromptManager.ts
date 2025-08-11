@@ -16,17 +16,6 @@ export class PromptManager {
     private env: Env
   ) {}
 
-  async getSourcePromptBody(versionId: string, orgId: string) {
-    const promptBody = await getFromCache({
-      key: `prompt_body_${versionId}_${orgId}`,
-      env: this.env,
-    });
-    if (!promptBody) {
-      return null;
-    }
-    return JSON.parse(promptBody) as ChatCompletionCreateParams;
-  }
-
   async getSourcePromptBodyWithFetch(
     params: HeliconeChatCreateParams,
     orgId: string
