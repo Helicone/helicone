@@ -235,7 +235,7 @@ export async function getFromCache({
       expirationTtl,
     }),
   ]);
-  if (value2 !== null) {
+  if (value2) {
     return value2;
   }
   return value1;
