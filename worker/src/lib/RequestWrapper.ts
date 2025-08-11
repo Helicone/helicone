@@ -754,7 +754,7 @@ export async function getProviderKeyFromProxy(
     }
   }
 
-  // @ts-ignore
+  // @ts-ignore - RPC function not included in generated database types
   const verified = await supabaseClient.rpc("verify_helicone_proxy_key", {
     api_key: proxyKey,
     stored_hashed_key: storedProxyKey.data.helicone_proxy_key,
