@@ -63,6 +63,7 @@ export interface BASE_Env {
   LOOPS_API_KEY: string;
   POSTHOG_API_KEY: string;
   REQUEST_CACHE_KEY: string;
+  REQUEST_CACHE_KEY_2: string;
   SECURE_CACHE: KVNamespace;
   RATE_LIMITER: DurableObjectNamespace;
   OPENAI_API_KEY: string;

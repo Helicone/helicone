@@ -5,6 +5,7 @@ import { Result, ok } from "../results";
 export interface SecureCacheEnv {
   SECURE_CACHE: Env["SECURE_CACHE"];
   REQUEST_CACHE_KEY: Env["REQUEST_CACHE_KEY"];
+  REQUEST_CACHE_KEY_2: Env["REQUEST_CACHE_KEY_2"];
 }
 
 class InMemoryCache<T> {
@@ -48,9 +49,15 @@ class InMemoryCache<T> {
   }
 }
 
-async function getCacheKey(env: SecureCacheEnv): Promise<CryptoKey> {
+async function getCacheKey(
+  env: SecureCacheEnv,
+  hmac_key: 1 | 2 = 2
+): Promise<CryptoKey> {
   // Convert the hexadecimal key to a byte array
-  const keyBytes = Buffer.from(env.REQUEST_CACHE_KEY, "hex");
+  const keyBytes = Buffer.from(
+    hmac_key === 1 ? env.REQUEST_CACHE_KEY : env.REQUEST_CACHE_KEY_2,
+    "hex"
+  );
 
   return crypto.subtle.importKey("raw", keyBytes, { name: "AES-GCM" }, false, [
     "encrypt",
@@ -60,9 +67,10 @@ async function getCacheKey(env: SecureCacheEnv): Promise<CryptoKey> {
 
 export async function encrypt(
   text: string,
-  env: SecureCacheEnv
+  env: SecureCacheEnv,
+  hmac_key: 1 | 2
 ): Promise<{ iv: string; content: string }> {
-  const key = getCacheKey(env);
+  const key = getCacheKey(env, hmac_key);
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const encoded = new TextEncoder().encode(text);
 
@@ -86,9 +94,10 @@ export async function decrypt(
     iv: string;
     content: string;
   },
-  env: SecureCacheEnv
+  env: SecureCacheEnv,
+  hmac_key: 1 | 2
 ): Promise<string> {
-  const key = getCacheKey(env);
+  const key = getCacheKey(env, hmac_key);
   const iv = Buffer.from(encrypted.iv, "hex");
   const encryptedContent = Buffer.from(encrypted.content, "hex");
 
@@ -113,13 +122,20 @@ export async function removeFromCache(
   InMemoryCache.getInstance<string>().delete(hashedKey);
 }
 
-export async function storeInCache(
-  key: string,
-  value: string,
-  env: SecureCacheEnv,
-  expirationTtl?: number
-): Promise<void> {
-  const encrypted = await encrypt(value, env);
+async function storeInCacheWithHmac({
+  key,
+  value,
+  env,
+  hmac_key,
+  expirationTtl,
+}: {
+  key: string;
+  value: string;
+  env: SecureCacheEnv;
+  hmac_key: 1 | 2;
+  expirationTtl?: number;
+}): Promise<void> {
+  const encrypted = await encrypt(value, env, hmac_key);
   const hashedKey = await hash(key);
   const ttlToUse = expirationTtl ?? 600;
   try {
@@ -137,24 +153,92 @@ export async function storeInCache(
   InMemoryCache.getInstance<string>().set(hashedKey, JSON.stringify(encrypted));
 }
 
-export async function getFromCache(
+export async function storeInCache(
   key: string,
-  env: SecureCacheEnv
-): Promise<string | null> {
-  const hashedKey = await hash(key);
-  const encryptedMemory = InMemoryCache.getInstance<string>().get(hashedKey);
-  if (encryptedMemory !== undefined) {
-    return decrypt(JSON.parse(encryptedMemory), env);
-  }
+  value: string,
+  env: SecureCacheEnv,
+  expirationTtl?: number
+): Promise<void> {
+  await Promise.all([
+    storeInCacheWithHmac({
+      key,
+      value,
+      env,
+      hmac_key: 1,
+      expirationTtl,
+    }),
+    await storeInCacheWithHmac({
+      key,
+      value,
+      env,
+      hmac_key: 2,
+      expirationTtl,
+    }),
+  ]);
+}
 
+async function getFromCacheWithHmac({
+  key,
+  env,
+  hmac_key,
+  useMemoryCache,
+  expirationTtl,
+}: {
+  key: string;
+  env: SecureCacheEnv;
+  hmac_key: 1 | 2;
+  useMemoryCache?: boolean;
+  expirationTtl?: number;
+}): Promise<string | null> {
+  const hashedKey = await hash(key);
+  if (useMemoryCache) {
+    const encryptedMemory = InMemoryCache.getInstance<string>().get(hashedKey);
+    if (encryptedMemory !== undefined) {
+      return decrypt(JSON.parse(encryptedMemory), env, hmac_key);
+    }
+  }
   const encryptedRemote = await env.SECURE_CACHE.get(hashedKey, {
-    cacheTtl: 3600,
+    cacheTtl: expirationTtl ?? 60 * 60, // 1 hour
   });
   if (!encryptedRemote) {
     return null;
   }
 
-  return decrypt(JSON.parse(encryptedRemote), env);
+  return decrypt(JSON.parse(encryptedRemote), env, hmac_key);
+}
+
+export async function getFromCache({
+  key,
+  env,
+  useMemoryCache,
+  expirationTtl,
+}: {
+  key: string;
+  env: SecureCacheEnv;
+
+  useMemoryCache?: boolean;
+  expirationTtl?: number;
+}): Promise<string | null> {
+  const [value1, value2] = await Promise.all([
+    getFromCacheWithHmac({
+      key,
+      env,
+      hmac_key: 1,
+      useMemoryCache,
+      expirationTtl,
+    }),
+    getFromCacheWithHmac({
+      key,
+      env,
+      hmac_key: 2,
+      useMemoryCache,
+      expirationTtl,
+    }),
+  ]);
+  if (value2 !== null) {
+    return value2;
+  }
+  return value1;
 }
 
 export async function getFromKVCacheOnly(
@@ -162,15 +246,12 @@ export async function getFromKVCacheOnly(
   env: SecureCacheEnv,
   expirationTtl?: number
 ): Promise<string | null> {
-  const hashedKey = await hash(key);
-  const encryptedRemote = await env.SECURE_CACHE.get(hashedKey, {
-    cacheTtl: expirationTtl ?? 60,
+  return getFromCache({
+    key,
+    env,
+    useMemoryCache: false,
+    expirationTtl: 60, // 1 minute
   });
-  if (!encryptedRemote) {
-    return null;
-  }
-  const value = await decrypt(JSON.parse(encryptedRemote), env);
-  return value;
 }
 
 export async function getAndStoreInCache<T, K>(

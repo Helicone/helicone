@@ -1,7 +1,6 @@
 import { Env } from "../..";
 import { APIKeysStore } from "../db/APIKeysStore";
 import {
-  getFromCache,
   getFromKVCacheOnly,
   removeFromCache,
   storeInCache,
