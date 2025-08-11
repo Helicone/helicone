@@ -36,7 +36,7 @@ services:
         hard: 262144
     environment:
       CLICKHOUSE_DEFAULT_USER: default
-      CLICKHOUSE_PASSWORD: "password"
+      CLICKHOUSE_PASSWORD: "password"  # TODO Make sure other areas of the codebase honor the fact that a password was set
     restart: unless-stopped
     healthcheck:
       test:
@@ -52,17 +52,18 @@ services:
   clickhouse-migrations:
     build:
       context: ../
-      dockerfile: docker/dockerfiles/dockerfile_migrations
+      dockerfile: docker/dockerfiles/dockerfile_clickhouse_migrations
     depends_on:
       clickhouse:
         condition: service_healthy
     environment:
       CLICKHOUSE_URL: clickhouse://default:password@clickhouse:9000
+      ATLAS_CLOUD_TOKEN: ${ATLAS_CLOUD_TOKEN}  # Clickhouse migrations require an atlas cloud token to run the CLI commands
+    env_file:
+      - .env
     volumes:
       - ../clickhouse:/app/clickhouse
-    # Hash and apply ClickHouse migrations using Atlas
-    entrypoint: ["/bin/sh", "-lc"]
-    command: "atlas migrate hash --dir file:///app/clickhouse/migrations && atlas migrate apply --dir file:///app/clickhouse/migrations --url ${CLICKHOUSE_URL}"
+    entrypoint: ["/bin/sh", "-lc", "atlas login --token $${ATLAS_CLOUD_TOKEN} && atlas migrate hash --dir file:///app/clickhouse/migrations && atlas migrate apply --dir file:///app/clickhouse/migrations --url $${CLICKHOUSE_URL}"]
 
   minio:
     image: minio/minio
@@ -102,43 +103,20 @@ services:
       - "1025:1025" # SMTP port
       - "8025:8025" # Web UI port
 
-  migrations:
+  postgres-migrations:
     build:
       context: ../
-      dockerfile: docker/dockerfiles/dockerfile_migrations
+      dockerfile: docker/dockerfiles/dockerfile_postgres_migrations
     depends_on:
       db:
         condition: service_healthy
-      clickhouse:
-        condition: service_healthy
     environment:
-      DATABASE_URL: postgres://postgres:testpassword@db:5432/helicone_test
-      CLICKHOUSE_HOST: http://clickhouse:8123
-      CLICKHOUSE_USER: default
-      CLICKHOUSE_PASSWORD: "password"
+      DATABASE_URL: postgres://postgres:testpassword@db:5432/helicone_test?sslmode=disable
+      PGSSLMODE: disable
     volumes:
       - ../postgres:/app/postgres
-      - ../clickhouse:/app/clickhouse
-    # Hash and apply Postgres migrations (primary dir)
-    entrypoint: ["/bin/sh", "-lc"]
-    command: "atlas migrate hash --dir file:///app/postgres/migrations && atlas migrate apply --dir file:///app/postgres/migrations --url ${DATABASE_URL}"
-
-  migrations-extra:
-    build:
-      context: ../
-      dockerfile: docker/dockerfiles/dockerfile_migrations
-    depends_on:
-      db:
-        condition: service_healthy
-      migrations:
-        condition: service_completed_successfully
-    environment:
-      DATABASE_URL: postgres://postgres:testpassword@db:5432/helicone_test
-    volumes:
-      - ../postgres:/app/postgres
-    # Hash and apply Postgres migrations (secondary dir)
-    entrypoint: ["/bin/sh", "-lc"]
-    command: "atlas migrate hash --dir file:///app/postgres/migrations_without_supabase && atlas migrate apply --dir file:///app/postgres/migrations_without_supabase --url ${DATABASE_URL}"
+    # Hash and apply Postgres migrations
+    entrypoint: ["/bin/sh", "-lc", "atlas migrate hash --dir file:///app/postgres/migrations && atlas migrate apply --dir file:///app/postgres/migrations --url $${DATABASE_URL}"]
 
   # =============================================================================
   # HELICONE CORE SERVICES (include-helicone profile)
@@ -160,9 +138,7 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
-      migrations:
-        condition: service_completed_successfully
-      migrations-extra:
+      postgres-migrations:
         condition: service_completed_successfully
       clickhouse-migrations:
         condition: service_completed_successfully

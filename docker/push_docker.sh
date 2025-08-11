@@ -177,7 +177,8 @@ echo "=== Docker Hub Push ==="
 DOCKERHUB_IMAGES=(
   "helicone/web:.."
   "helicone/jawn:.."
-  "helicone/migrations:.."
+  "helicone/postgres-migrations:.."
+  "helicone/clickhouse-migrations:.."
   "helicone/helicone-all-in-one:.."
 )
 

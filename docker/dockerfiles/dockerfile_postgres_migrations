@@ -1,0 +1,18 @@
+FROM debian:stable-slim
+
+# Install required tools (curl) and clean up
+RUN apt-get update && apt-get install -y \
+    curl ca-certificates \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Atlas CLI
+RUN curl -sSf https://atlasgo.sh | sh
+ENV PATH="/root/bin:/usr/local/bin:${PATH}"
+
+WORKDIR /app
+
+COPY ./postgres/migrations /app/postgres/migrations
+
+ENTRYPOINT ["/bin/sh", "-lc"]
+CMD ["atlas version"]

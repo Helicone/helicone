@@ -12,9 +12,14 @@ target "jawn" {
   dockerfile = "docker/dockerfiles/dockerfile_jawn"
 }
 
-target "migrations" {
+target "postgres_migrations" {
   context    = ".."
-  dockerfile = "docker/dockerfiles/dockerfile_migrations"
+  dockerfile = "docker/dockerfiles/dockerfile_postgres_migrations"
+}
+
+target "clickhouse_migrations" {
+  context    = ".."
+  dockerfile = "docker/dockerfiles/dockerfile_clickhouse_migrations"
 }
 
 target "all_in_one" {
