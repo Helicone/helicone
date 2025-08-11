@@ -1,4 +1,4 @@
-FROM python:3.10-slim
+FROM python:3.12-slim-bookworm
 
 # Install Java for Flyway and other necessary tools
 RUN apt-get update && apt-get install -y \
@@ -17,7 +17,8 @@ RUN wget -q -O flyway.tar.gz https://repo1.maven.org/maven2/org/flywaydb/flyway-
     && ln -s /opt/flyway/flyway /usr/local/bin/flyway \
     && flyway -v
 
-# Install Python dependencies
+# Install Python dependencies  
+RUN pip install --no-cache-dir --upgrade pip>=24.3.0
 RUN pip install --no-cache-dir requests clickhouse-driver tabulate yarl
 
 WORKDIR /app

@@ -123,11 +123,11 @@ export const SearchableInput: React.FC<SearchableInputProps> = ({
               onFocus={() => onSearch(inputValue).then(setOptions)}
               placeholder={placeholder}
               disabled={disabled}
-              className={cn("w-full text-xs h-8 px-2", className)}
+              className={cn("h-8 w-full px-2 text-xs", className)}
             />
             {loading && (
               <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                <div className="animate-spin h-3 w-3 border-2 border-primary border-t-transparent rounded-full" />
+                <div className="h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent" />
               </div>
             )}
           </div>
@@ -138,7 +138,7 @@ export const SearchableInput: React.FC<SearchableInputProps> = ({
         >
           <Command className="border border-border">
             <CommandList className="max-h-[200px] overflow-auto">
-              <CommandEmpty className="text-xs py-2">
+              <CommandEmpty className="py-2 text-xs">
                 {emptyMessage}
               </CommandEmpty>
               <CommandGroup>
@@ -147,12 +147,12 @@ export const SearchableInput: React.FC<SearchableInputProps> = ({
                     key={option.value}
                     value={option.value}
                     onSelect={handleSelect}
-                    className="flex items-center text-xs py-1.5"
+                    className="flex items-center py-1.5 text-xs"
                   >
                     <Check
                       className={cn(
                         "mr-2 h-3 w-3",
-                        value === option.value ? "opacity-100" : "opacity-0"
+                        value === option.value ? "opacity-100" : "opacity-0",
                       )}
                     />
                     {option.label}

@@ -57,7 +57,10 @@ async function createProxyKey(
 
 class TempProxyKey implements BaseTempKey {
   private keyUsed = false;
-  constructor(private proxyKey: string, private proxyKeyId: string) {}
+  constructor(
+    private proxyKey: string,
+    private proxyKeyId: string
+  ) {}
 
   async cleanup() {
     if (this.keyUsed) {
@@ -106,7 +109,7 @@ export async function generateProxyKey(
       // Use direct database query to get organization ID
       const keyResult = await dbExecute<{ org_id: string }>(
         `SELECT org_id
-         FROM decrypted_provider_keys
+         FROM decrypted_provider_keys_v2
          WHERE id = $1 
          AND soft_delete = false
          LIMIT 1`,

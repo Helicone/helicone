@@ -23,7 +23,7 @@ export type LimitResult = FeatureLimitResult | SubfeatureLimitResult;
 export function useFeatureLimit(
   feature: FeatureId,
   itemCount: number,
-  subfeature?: SubfeatureId | undefined
+  subfeature?: SubfeatureId | undefined,
 ): LimitResult {
   const hasAccess = useHasAccess(feature);
   let config: LimitConfig | null = null;

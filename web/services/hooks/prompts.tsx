@@ -19,48 +19,55 @@ export interface PromptWithVersions {
 export const useCreatePrompt = () => {
   const queryClient = useQueryClient();
 
-  return $JAWN_API.useMutation(
-    "post",
-    "/v1/prompt-2025",
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["prompts"] });
-        queryClient.invalidateQueries({ queryKey: ["promptTags"] });
-      },
-    }
-  );
+  return $JAWN_API.useMutation("post", "/v1/prompt-2025", {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["prompts"] });
+      queryClient.invalidateQueries({ queryKey: ["promptTags"] });
+      queryClient.invalidateQueries({ queryKey: ["promptEnvironments"] });
+    },
+  });
 };
 
 export const useRenamePrompt = () => {
   const queryClient = useQueryClient();
 
-  return $JAWN_API.useMutation(
-    "post",
-    "/v1/prompt-2025/id/{promptId}/rename",
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["prompts"] });
-        queryClient.invalidateQueries({ queryKey: ["promptsWithVersions"] });
-        queryClient.invalidateQueries({ queryKey: ["promptTags"] });
-        queryClient.invalidateQueries({ queryKey: ["promptVersions"] });
-        queryClient.invalidateQueries({ queryKey: ["promptVersionWithBody"] });
-      },
-    }
-  );
+  return $JAWN_API.useMutation("post", "/v1/prompt-2025/id/{promptId}/rename", {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["prompts"] });
+      queryClient.invalidateQueries({ queryKey: ["promptsWithVersions"] });
+      queryClient.invalidateQueries({ queryKey: ["promptTags"] });
+      queryClient.invalidateQueries({ queryKey: ["promptVersions"] });
+      queryClient.invalidateQueries({ queryKey: ["promptVersionWithBody"] });
+    },
+  });
 };
 
 export const usePushPromptVersion = () => {
   const queryClient = useQueryClient();
 
-  return $JAWN_API.useMutation(
-    "post",
-    "/v1/prompt-2025/update",
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["prompts"] });
-      },
-    }
-  );
+  return $JAWN_API.useMutation("post", "/v1/prompt-2025/update", {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["prompts"] });
+      queryClient.invalidateQueries({ queryKey: ["promptsWithVersions"] });
+      queryClient.invalidateQueries({ queryKey: ["promptVersions"] });
+      queryClient.invalidateQueries({ queryKey: ["promptVersionWithBody"] });
+      queryClient.invalidateQueries({ queryKey: ["promptEnvironments"] });
+    },
+  });
+};
+
+export const useGetPromptEnvironments = () => {
+  return useQuery<string[]>({
+    queryKey: ["promptEnvironments"],
+    queryFn: async () => {
+      const result = await $JAWN_API.GET("/v1/prompt-2025/environments", {});
+      if (result.error || !result.data?.data) {
+        console.error("Error fetching prompt environments:", result.error);
+        return [];
+      }
+      return result.data.data;
+    },
+  });
 };
 
 export const useGetPromptTags = () => {
@@ -77,23 +84,30 @@ export const useGetPromptTags = () => {
   });
 };
 
-export const useGetPromptInputs = (promptId: string, versionId: string, requestId: string) => {
+export const useGetPromptInputs = (
+  promptId: string,
+  versionId: string,
+  requestId: string,
+) => {
   return useQuery<Prompt2025Input | null>({
     queryKey: ["promptInputs", promptId, versionId, requestId],
     refetchOnWindowFocus: false,
     enabled: !!promptId && !!versionId && !!requestId,
     queryFn: async () => {
-      const result = await $JAWN_API.GET("/v1/prompt-2025/id/{promptId}/{versionId}/inputs", {
-        params: {
-          path: {
-            promptId: promptId,
-            versionId: versionId,
-          },
-          query: {
-            requestId: requestId,
+      const result = await $JAWN_API.GET(
+        "/v1/prompt-2025/id/{promptId}/{versionId}/inputs",
+        {
+          params: {
+            path: {
+              promptId: promptId,
+              versionId: versionId,
+            },
+            query: {
+              requestId: requestId,
+            },
           },
         },
-      });
+      );
 
       if (result.error || !result.data?.data) {
         console.error("Error fetching prompt inputs:", result.error);
@@ -105,39 +119,36 @@ export const useGetPromptInputs = (promptId: string, versionId: string, requestI
   });
 };
 
-export const useSetProductionVersion = () => {
+export const useSetPromptVersionEnvironment = () => {
   const queryClient = useQueryClient();
 
   return $JAWN_API.useMutation(
     "post",
-    "/v1/prompt-2025/update/production-version",
+    "/v1/prompt-2025/update/environment",
     {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["prompts"] });
         queryClient.invalidateQueries({ queryKey: ["promptsWithVersions"] });
         queryClient.invalidateQueries({ queryKey: ["promptVersions"] });
         queryClient.invalidateQueries({ queryKey: ["promptVersionWithBody"] });
+        queryClient.invalidateQueries({ queryKey: ["promptEnvironments"] });
       },
-    }
+    },
   );
 };
 
 export const useDeletePrompt = () => {
   const queryClient = useQueryClient();
 
-  return $JAWN_API.useMutation(
-    "delete",
-    "/v1/prompt-2025/{promptId}",
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["prompts"] });
-        queryClient.invalidateQueries({ queryKey: ["promptsWithVersions"] });
-        queryClient.invalidateQueries({ queryKey: ["promptTags"] });
-        queryClient.invalidateQueries({ queryKey: ["promptVersions"] });
-        queryClient.invalidateQueries({ queryKey: ["promptVersionWithBody"] });
-      },
-    }
-  );
+  return $JAWN_API.useMutation("delete", "/v1/prompt-2025/{promptId}", {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["prompts"] });
+      queryClient.invalidateQueries({ queryKey: ["promptsWithVersions"] });
+      queryClient.invalidateQueries({ queryKey: ["promptTags"] });
+      queryClient.invalidateQueries({ queryKey: ["promptVersions"] });
+      queryClient.invalidateQueries({ queryKey: ["promptVersionWithBody"] });
+    },
+  });
 };
 
 export const useDeletePromptVersion = () => {
@@ -153,7 +164,7 @@ export const useDeletePromptVersion = () => {
         queryClient.invalidateQueries({ queryKey: ["promptVersions"] });
         queryClient.invalidateQueries({ queryKey: ["promptVersionWithBody"] });
       },
-    }
+    },
   );
 };
 
@@ -182,13 +193,16 @@ export const useGetPromptVersionWithBody = (promptVersionId?: string) => {
         };
       }
 
-      const promptResult = await $JAWN_API.GET("/v1/prompt-2025/id/{promptId}", {
-        params: {
-          path: {
-            promptId: result.data.data.prompt_id
-          }
-        }
-      });
+      const promptResult = await $JAWN_API.GET(
+        "/v1/prompt-2025/id/{promptId}",
+        {
+          params: {
+            path: {
+              promptId: result.data.data.prompt_id,
+            },
+          },
+        },
+      );
 
       if (promptResult.error || !promptResult.data?.data) {
         console.error("Error fetching prompt:", promptResult.error);
@@ -197,7 +211,7 @@ export const useGetPromptVersionWithBody = (promptVersionId?: string) => {
           promptBody: undefined,
           prompt: {} as Prompt2025,
         };
-      }  
+      }
 
       const prompt = promptResult.data.data;
       const promptVersion = result.data.data;
@@ -207,7 +221,7 @@ export const useGetPromptVersionWithBody = (promptVersionId?: string) => {
         try {
           const s3Response = await fetch(promptVersion.s3_url);
           if (s3Response.ok) {
-            promptBody = await s3Response.json() as OpenAIChatRequest;
+            promptBody = (await s3Response.json()) as OpenAIChatRequest;
           } else {
             console.error("Failed to fetch from S3 URL:", s3Response.status);
           }
@@ -223,21 +237,27 @@ export const useGetPromptVersionWithBody = (promptVersionId?: string) => {
       };
     },
   });
-}
+};
 
-export const useGetPromptVersions = (promptId: string, majorVersion?: number) => {
+export const useGetPromptVersions = (
+  promptId: string,
+  majorVersion?: number,
+) => {
   return useQuery<Prompt2025Version[]>({
     queryKey: ["promptVersions", promptId, majorVersion],
     refetchOnWindowFocus: false,
     // ONLY RUN IF PROMPT ID AND MAJOR VERSION ARE DEFINED
     enabled: !!promptId && majorVersion !== undefined,
     queryFn: async () => {
-      const versionsResult = await $JAWN_API.POST("/v1/prompt-2025/query/versions", {
-        body: {
-          promptId: promptId,
-          majorVersion: majorVersion,
+      const versionsResult = await $JAWN_API.POST(
+        "/v1/prompt-2025/query/versions",
+        {
+          body: {
+            promptId: promptId,
+            majorVersion: majorVersion,
+          },
         },
-      });
+      );
 
       if (versionsResult.error || !versionsResult.data?.data) {
         console.error("Error fetching prompt versions:", versionsResult.error);
@@ -283,23 +303,32 @@ export const useGetPromptsWithVersions = (
 
       const promptsWithVersions = await Promise.all(
         prompts.map(async (prompt): Promise<PromptWithVersions> => {
-          const versionsResult = await $JAWN_API.POST("/v1/prompt-2025/query/versions", {
-            body: {
-              promptId: prompt.id,
+          const versionsResult = await $JAWN_API.POST(
+            "/v1/prompt-2025/query/versions",
+            {
+              body: {
+                promptId: prompt.id,
+              },
             },
-          });
+          );
 
-          const totalVersionsResult = await $JAWN_API.POST("/v1/prompt-2025/query/total-versions", {
-            body: {
-              promptId: prompt.id,
+          const totalVersionsResult = await $JAWN_API.POST(
+            "/v1/prompt-2025/query/total-versions",
+            {
+              body: {
+                promptId: prompt.id,
+              },
             },
-          });
+          );
 
-          const productionVersionResult = await $JAWN_API.POST("/v1/prompt-2025/query/production-version", {
-            body: {
-              promptId: prompt.id,
+          const productionVersionResult = await $JAWN_API.POST(
+            "/v1/prompt-2025/query/production-version",
+            {
+              body: {
+                promptId: prompt.id,
+              },
             },
-          });
+          );
 
           if (
             versionsResult.error ||
@@ -311,7 +340,7 @@ export const useGetPromptsWithVersions = (
           ) {
             console.error(
               `Error fetching versions for prompt ${prompt.id}:`,
-              versionsResult.error
+              versionsResult.error,
             );
             return {
               prompt,
@@ -337,13 +366,18 @@ export const useGetPromptsWithVersions = (
             versions: versionsResult.data.data,
             productionVersion: productionVersionResult.data.data,
           };
-        })
+        }),
       );
 
-
-      const totalPromptsResult = await $JAWN_API.GET("/v1/prompt-2025/count", {});
+      const totalPromptsResult = await $JAWN_API.GET(
+        "/v1/prompt-2025/count",
+        {},
+      );
       if (totalPromptsResult.error || !totalPromptsResult.data?.data) {
-        console.error("Error fetching total prompts:", totalPromptsResult.error);
+        console.error(
+          "Error fetching total prompts:",
+          totalPromptsResult.error,
+        );
         return {
           prompts: [],
           totalCount: 0,
@@ -353,7 +387,6 @@ export const useGetPromptsWithVersions = (
         prompts: promptsWithVersions,
         totalCount: totalPromptsResult.data.data,
       };
-
     },
   });
 };

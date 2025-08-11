@@ -1,5 +1,4 @@
 import { CheckCircleIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
-import { useRouter } from "next/router";
 import MetaData from "../../components/layout/public/authMetaData";
 import NavBarV2 from "../../components/layout/navbar/navBarV2";
 import GridBackground from "../../components/layout/public/gridBackground";
@@ -20,8 +19,6 @@ const bullets = [
 ];
 
 const CustomerPortal = () => {
-  const router = useRouter();
-
   return (
     <MetaData title={"Contact Us"}>
       <NavBarV2 />

@@ -1,8 +1,18 @@
+import React, { useState } from "react";
+import { ImageModal } from "./images/ImageModal";
+
 export const RenderImageWithPrettyInputKeys = (props: {
   text: string;
   selectedProperties: Record<string, string> | undefined;
 }) => {
   const { text, selectedProperties } = props;
+  const [modalState, setModalState] = useState<{
+    isOpen: boolean;
+    imageSrc: string;
+  }>({
+    isOpen: false,
+    imageSrc: "",
+  });
 
   // Function to replace matched patterns with JSX components
   const replaceInputKeysWithComponents = (inputText: string) => {
@@ -32,7 +42,15 @@ export const RenderImageWithPrettyInputKeys = (props: {
       const renderText = getRenderText();
 
       // eslint-disable-next-line @next/next/no-img-element
-      parts.push(<img src={renderText} alt={keyName} className="max-h-24" />);
+      parts.push(
+        <img
+          key={`img-${keyName}-${offset}`}
+          src={renderText}
+          alt={keyName}
+          className="max-h-24 cursor-pointer transition-opacity hover:opacity-90"
+          onClick={() => setModalState({ isOpen: true, imageSrc: renderText })}
+        />,
+      );
 
       // Update lastIndex to the end of the current match
       lastIndex = offset + match.length;
@@ -49,8 +67,16 @@ export const RenderImageWithPrettyInputKeys = (props: {
   };
 
   return (
-    <div className="text-md leading-8 text-black dark:text-white">
-      {replaceInputKeysWithComponents(text)}
-    </div>
+    <>
+      <div className="text-md leading-8 text-black dark:text-white">
+        {replaceInputKeysWithComponents(text)}
+      </div>
+
+      <ImageModal
+        isOpen={modalState.isOpen}
+        onClose={() => setModalState({ isOpen: false, imageSrc: "" })}
+        imageSrc={modalState.imageSrc}
+      />
+    </>
   );
 };

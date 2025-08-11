@@ -13,6 +13,12 @@ description: "Connect Helicone with LiteLLM using callbacks to log and monitor A
   are available in `metadata` starting with LiteLLM version `1.41.23`.
 </Note>
 
+<Warning>
+  **System Instructions Limitation:** When using LiteLLM callbacks, system instructions for Gemini and Claude may not appear as `"role": "system"` messages in Helicone logs. This is because LiteLLM processes the request before sending it to Helicone.
+  
+  For full system instruction support, consider using [proxy-based integration](/getting-started/integration-method/litellm-proxy) instead.
+</Warning>
+
 ## 1 line integration
 
 Add `HELICONE_API_KEY` to your environment variables.
@@ -43,7 +49,7 @@ litellm.success_callback=["helicone"]
 
 #openai call
 response = completion(
-  model="gpt-3.5-turbo",
+  model="gpt-4o-mini",
   messages=[{"role": "user", "content": "Hi 👋 - i'm openai"}],
   metadata={
     "Helicone-Property-Hello": "World"

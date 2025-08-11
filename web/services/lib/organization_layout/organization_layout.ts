@@ -51,7 +51,7 @@ export function transformFilter(filter: any): UIFilterRowTree {
 }
 
 export function transformOrganizationLayoutFilters(
-  filters: OrganizationFilter[]
+  filters: OrganizationFilter[],
 ): OrganizationFilter[] {
   return filters.map((filter) => ({
     ...filter,

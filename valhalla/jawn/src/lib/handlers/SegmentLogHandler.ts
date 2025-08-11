@@ -44,7 +44,7 @@ async function getSegmentConfig(
     // Get the decrypted provider key
     const writeKeyResult = await dbExecute<{ decrypted_provider_key: string }>(
       `SELECT decrypted_provider_key
-       FROM decrypted_provider_keys
+       FROM decrypted_provider_keys_v2
        WHERE provider_name = $1
        AND org_id = $2
        LIMIT 1`,

@@ -11,6 +11,7 @@ TEST_MODE=false
 DONT_PRUNE=false
 SELECTED_IMAGES=()
 PLATFORMS="linux/amd64,linux/arm64"
+CLOUD_BUILDER=false
 
 # Function to show usage
 show_usage() {
@@ -107,16 +108,39 @@ run_command() {
 # Function to setup Docker buildx for multi-platform builds
 setup_buildx() {
   echo "Setting up Docker buildx for multi-platform builds..."
-  
-  # Create a new builder instance if it doesn't exist
-  if ! docker buildx ls | grep -q "helicone-builder"; then
-    echo "Creating new buildx builder 'helicone-builder'..."
-    run_command docker buildx create --name helicone-builder --use
+
+  # Prefer builder supplied by CI (from docker/setup-buildx-action outputs)
+  if [ -n "$BUILDX_BUILDER" ]; then
+    echo "Using buildx builder from environment: '$BUILDX_BUILDER'"
+    run_command docker buildx use "$BUILDX_BUILDER"
   else
-    echo "Using existing buildx builder 'helicone-builder'..."
-    run_command docker buildx use helicone-builder
+    # Try to detect an already selected builder (leading '*' in ls output)
+    CURRENT_BUILDER=$(docker buildx ls 2>/dev/null | sed -n 's/^\* \([^ ]\+\).*/\1/p' || true)
+    if [ -n "$CURRENT_BUILDER" ]; then
+      echo "Detected current buildx builder '$CURRENT_BUILDER'. Using it as-is."
+      run_command docker buildx use "$CURRENT_BUILDER"
+    else
+      # Fallback: create or use a local builder
+      if ! docker buildx ls | grep -q "helicone-builder"; then
+        echo "Creating new buildx builder 'helicone-builder'..."
+        run_command docker buildx create --name helicone-builder --use
+      else
+        echo "Using existing buildx builder 'helicone-builder'..."
+        run_command docker buildx use helicone-builder
+      fi
+    fi
   fi
-  
+
+  # Determine if current builder is cloud
+  ACTIVE_BUILDER=$(docker buildx ls 2>/dev/null | sed -n 's/^\* \([^ ]\+\).*/\1/p' || true)
+  if [ -z "$ACTIVE_BUILDER" ] && [ -n "$BUILDX_BUILDER" ]; then
+    ACTIVE_BUILDER="$BUILDX_BUILDER"
+  fi
+  DRIVER_LINE=$(docker buildx inspect "$ACTIVE_BUILDER" 2>/dev/null | grep -i '^Driver:' || true)
+  if echo "$DRIVER_LINE" | grep -qi 'cloud'; then
+    CLOUD_BUILDER=true
+  fi
+
   # Bootstrap the builder
   run_command docker buildx inspect --bootstrap
 }
@@ -156,8 +180,8 @@ get_available_ecr_tag() {
 # Setup Docker buildx for multi-platform builds
 setup_buildx
 
-# Prune Docker images if not disabled
-if [ "$DONT_PRUNE" = false ]; then
+# Prune Docker images if not disabled (skip when using a cloud builder)
+if [ "$DONT_PRUNE" = false ] && [ "$CLOUD_BUILDER" = false ]; then
   echo "Pruning Docker images..."
   if [ "$MODE" = "dockerhub" ]; then
     run_command bash -c 'echo "y" | docker system prune -a'
@@ -198,6 +222,7 @@ if [ "$MODE" = "dockerhub" ]; then
     "helicone/web:.."
     "helicone/jawn:.."
     "helicone/migrations:.."
+    "helicone/helicone-all-in-one:.."
   )
   
   # Filter images if specific ones were selected
@@ -244,6 +269,9 @@ if [ "$MODE" = "dockerhub" ]; then
     elif [ "$DOCKERFILE_NAME" = "ai_gateway" ]; then
       DOCKERFILE_PATH="../aigateway/Dockerfile"
       BUILD_CONTEXT="../aigateway"
+    elif [[ "$DOCKERFILE_NAME" == *"all_in_one" ]]; then
+      DOCKERFILE_PATH="../Dockerfile"
+      BUILD_CONTEXT=".."
     fi
 
     # Build and push multi-platform image
@@ -276,6 +304,7 @@ elif [ "$MODE" = "ecr" ]; then
     "helicone/jawn:.."
     "helicone/migrations:.."
     "helicone/ai-gateway:.."
+    "helicone/helicone-all-in-one:.."
   )
   
   # Create ECR repositories first
@@ -335,6 +364,9 @@ elif [ "$MODE" = "ecr" ]; then
     elif [ "$DOCKERFILE_NAME" = "ai_gateway" ]; then
       DOCKERFILE_PATH="../aigateway/Dockerfile"
       BUILD_CONTEXT="../aigateway"
+    elif [[ "$DOCKERFILE_NAME" == *"all_in_one" ]]; then
+      DOCKERFILE_PATH="../Dockerfile"
+      BUILD_CONTEXT=".."
     fi
     
     # Build and push multi-platform image

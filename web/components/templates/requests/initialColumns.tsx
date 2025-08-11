@@ -179,6 +179,27 @@ export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
     },
   },
   {
+    id: "tfft",
+    accessorKey: "tfft",
+    header: "TFFT",
+    cell: (info) => {
+      const isCached =
+        info.row.original.heliconeMetadata.cacheReferenceId !== DEFAULT_UUID;
+      return (
+        <span>
+          {isCached
+            ? 0
+            : Number(info.row.original.heliconeMetadata.timeToFirstToken) /
+              1000}
+          s
+        </span>
+      );
+    },
+    meta: {
+      sortKey: "tfft",
+    },
+  },
+  {
     id: "user",
     accessorKey: "user",
     header: "User",

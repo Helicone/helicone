@@ -58,7 +58,7 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({
       crud: filterCrud,
       helpers,
     }),
-    [filterStore, filterCrud, helpers]
+    [filterStore, filterCrud, helpers],
   );
 
   return (

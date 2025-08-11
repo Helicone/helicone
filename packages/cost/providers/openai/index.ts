@@ -547,7 +547,7 @@ const baseCosts: ModelRow[] = [
     cost: {
       prompt_token: 0.00015,
       completion_token: 0.0006,
-    }
+    },
   },
   {
     model: {
@@ -586,12 +586,12 @@ const baseCosts: ModelRow[] = [
   {
     model: {
       operator: "includes",
-      value: "o3-pro"
+      value: "o3-pro",
     },
     cost: {
       prompt_token: 0.00002,
       completion_token: 0.00008,
-    }
+    },
   },
   {
     model: {
@@ -740,15 +740,92 @@ const baseCosts: ModelRow[] = [
     cost: {
       prompt_token: 0.000005,
       completion_token: 0.000015,
-    }
-  }
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "gpt-5-2025-08-07",
+    },
+    cost: {
+      prompt_token: 0.00000125,
+      completion_token: 0.00001,
+      prompt_cache_read_token: 0.000000125,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "gpt-5-mini-2025-08-07",
+    },
+    cost: {
+      prompt_token: 0.00000025,
+      completion_token: 0.000002,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "gpt-5-nano-2025-08-07",
+    },
+    cost: {
+      // 1m -> 0.050, 1 -> 0.05/1000000
+      prompt_token: 5e-8,
+      completion_token: 0.0000004,
+      prompt_cache_read_token: 5e-9,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "gpt-5",
+    },
+    cost: {
+      prompt_token: 0.00000125,
+      completion_token: 0.00001,
+      prompt_cache_read_token: 0.000000125,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "gpt-5-mini",
+    },
+    cost: {
+      prompt_token: 0.00000025,
+      completion_token: 0.000002,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "gpt-5-nano",
+    },
+    cost: {
+      // 1m -> 0.050, 1 -> 0.05/1000000
+      prompt_token: 5e-8,
+      completion_token: 0.0000004,
+      prompt_cache_read_token: 5e-9,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "gpt-5-chat-latest",
+    },
+    cost: {
+      prompt_token: 0.00000125,
+      completion_token: 0.00001,
+      prompt_cache_read_token: 0.000000125,
+    },
+  },
 ];
 
 // OpenAI Batch API is 50% cheaper than the regular API
 // We add every single one with a equals operator and a -batch suffix.
 const costs: ModelRow[] = [
   ...baseCosts,
-  ...baseCosts.map(cost => ({
+  ...baseCosts.map((cost) => ({
     model: {
       operator: "equals" as const,
       value: `${cost.model.value}-batch`,
@@ -756,10 +833,14 @@ const costs: ModelRow[] = [
     cost: {
       prompt_token: cost.cost.prompt_token / 2,
       completion_token: cost.cost.completion_token / 2,
-      ...(cost.cost.prompt_audio_token && { prompt_audio_token: cost.cost.prompt_audio_token }),
-      ...(cost.cost.completion_audio_token && { completion_audio_token: cost.cost.completion_audio_token }),
+      ...(cost.cost.prompt_audio_token && {
+        prompt_audio_token: cost.cost.prompt_audio_token,
+      }),
+      ...(cost.cost.completion_audio_token && {
+        completion_audio_token: cost.cost.completion_audio_token,
+      }),
     },
-  }))
+  })),
 ];
 
 const modelDetails: ModelDetailsMap = {

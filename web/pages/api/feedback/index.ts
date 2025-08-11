@@ -29,7 +29,6 @@ async function getFeedbackMetrics(
 }
 
 async function handler({
-  req,
   res,
   userData: { orgId },
 }: HandlerWrapperOptions<Result<FeedbackMetric[], string>>) {

@@ -12,7 +12,7 @@ export async function supabaseAuthClientFromSSRContext(
     NextApiRequest & { headers: Record<string, string> },
     NextApiResponse,
     GetServerSidePropsContext
-  >
+  >,
 ) {
   const supabaseClient = new SupabaseServerWrapper(ctx);
   const user = await supabaseClient.getClient().auth.getUser();
@@ -30,6 +30,6 @@ export async function supabaseAuthClientFromSSRContext(
           org: userAndOrg.org,
           role: userAndOrg.role,
         }
-      : undefined
+      : undefined,
   );
 }

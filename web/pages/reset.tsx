@@ -14,7 +14,7 @@ const Reset = () => {
   return (
     <>
       <AuthForm
-        handleEmailSubmit={async (email: string, password: string) => {
+        handleEmailSubmit={async (email: string) => {
           const { error } = await heliconeAuthClient.resetPassword({
             email,
             options: {

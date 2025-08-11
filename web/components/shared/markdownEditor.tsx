@@ -23,7 +23,6 @@ const MonacoMarkdownEditor = (props: MarkdownEditorProps) => {
     language,
     disabled = false,
     className,
-    textareaClassName,
     containerClassName,
     monacoOptions,
     showLargeTextWarning = true,
@@ -102,7 +101,6 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
     className,
     textareaClassName,
     monaco = false,
-    monacoOptions,
     id,
     placeholder,
   } = props;

@@ -27,8 +27,6 @@ async function handler(
     search as string,
   );
 
-  console.log(properties);
-
   res.status(properties.error === null ? 200 : 500).json(properties);
 }
 

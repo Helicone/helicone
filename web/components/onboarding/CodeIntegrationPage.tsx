@@ -66,7 +66,7 @@ export function CodeIntegrationPage({
   title,
   description,
   codeSnippets,
-  languages = ["typescript"],
+  languages: _languages = ["typescript"],
   defaultProvider = "openai",
   defaultLanguage = "typescript",
 }: CodeIntegrationPageProps) {

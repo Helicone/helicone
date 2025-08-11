@@ -8,7 +8,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { H1, Muted } from "@/components/ui/typography";
 import { getJawnClient } from "@/lib/clients/jawn";
-import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 import { useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
 import { useQuery } from "@tanstack/react-query";
 import { Info } from "lucide-react";
@@ -18,7 +17,6 @@ import { useEffect } from "react";
 export default function OnboardingPage() {
   const router = useRouter();
   const org = useOrg();
-  const { user } = useHeliconeAuthClient();
   const { setNotification } = useNotification();
   const { onboardingState, isLoading, draftName, updateCurrentStep } =
     useOrgOnboarding(org?.currentOrg?.id ?? "");

@@ -90,7 +90,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
     return null;
   }, [alertBanners?.data, orgContext, router]);
 
-  const { changelog, isLoading: isChangelogLoading } = useChangelog();
+  const { changelog } = useChangelog();
 
   const sidebarRef = useRef<HTMLDivElement>(null);
 

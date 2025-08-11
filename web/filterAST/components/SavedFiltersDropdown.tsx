@@ -52,7 +52,7 @@ export const SavedFiltersDropdown: React.FC<
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64">
         <div className="px-2 py-1.5">
-          <Small className="font-medium text-xs">Saved Filters</Small>
+          <Small className="text-xs font-medium">Saved Filters</Small>
         </div>
         <DropdownMenuSeparator />
 
@@ -69,12 +69,12 @@ export const SavedFiltersDropdown: React.FC<
             {crud.savedFilters.map((filter) => (
               <DropdownMenuItem
                 key={filter.id}
-                className="flex justify-between items-center px-2 py-2 cursor-pointer"
+                className="flex cursor-pointer items-center justify-between px-2 py-2"
                 onClick={() => handleSelectFilter(filter.id || "")}
               >
                 <div className="flex flex-col">
                   <span className="text-sm font-medium">{filter.name}</span>
-                  <Small className="text-muted-foreground text-[10px]">
+                  <Small className="text-[10px] text-muted-foreground">
                     {filter.createdAt
                       ? new Date(filter.createdAt).toLocaleDateString()
                       : "Unknown date"}
@@ -87,7 +87,7 @@ export const SavedFiltersDropdown: React.FC<
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-6 w-6 opacity-50 hover:opacity-100 hover:bg-destructive/10"
+                    className="h-6 w-6 opacity-50 hover:bg-destructive/10 hover:opacity-100"
                     onClick={(e) => handleDeleteFilter(e, filter.id || "")}
                     disabled={crud.isDeleting}
                   >

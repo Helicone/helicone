@@ -155,7 +155,7 @@ const ExperimentsPreview = () => {
     return null;
   }
 
-  console.log(`Requires upgrade: ${isPaidPlan}`);
+  // Check if user requires upgrade for experiments feature
 
   return (
     <>

@@ -30,8 +30,8 @@ Here's an example to get all the requests where `user_id` is `abc@email.com`.
 ```bash
 curl --request POST \
   --url https://api.helicone.ai/v1/request/query \
-  --header 'Content-Type: application/json' \
-  --header 'authorization: Bearer sk-<your-helicone-api-key>' \
+  --header "Content-Type: application/json" \
+  --header "authorization: Bearer $HELICONE_API_KEY" \
   --data '{
   "filter": {
     "request": {
@@ -57,8 +57,8 @@ You can structure your query to add any number of filters.
 ```bash
 curl --request POST \
   --url https://api.helicone.ai/v1/request/query \
-  --header 'Content-Type: application/json' \
-  --header 'authorization: Bearer sk-<your-helicone-api-key>' \
+  --header "Content-Type: application/json" \
+  --header "authorization: Bearer $HELICONE_API_KEY" \
   --data '{
   "filter": {
     "operator": "and",

@@ -2,7 +2,7 @@ export default function performEditPrompt(
   editGoal: string,
   editTarget: string,
   contextBefore: string,
-  contextAfter: string
+  contextAfter: string,
 ) {
   const system = `You are a world-class prompt editor, tasked with making very specific and targeted edit goal to only an edit target of a high-performance LLM prompt.
 

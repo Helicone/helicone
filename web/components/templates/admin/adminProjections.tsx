@@ -71,7 +71,7 @@ const AdminProjections = () => {
     upcomingInvoices: MOCK_UPCOMING_INVOICES,
   });
   const [error, setError] = useState<string | null>(null);
-  const [dataFetched, setDataFetched] = useState(false);
+
   const [expandedSections, setExpandedSections] = useState<
     Record<string, boolean>
   >({});
@@ -183,7 +183,6 @@ const AdminProjections = () => {
           discounts: response.data.discounts,
           upcomingInvoices: response.data.upcomingInvoices,
         });
-        setDataFetched(true);
       } catch (err) {
         console.error("Error fetching subscription data:", err);
         setError("Failed to load subscription data. Using mock data instead.");

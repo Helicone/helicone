@@ -1,6 +1,7 @@
 import { Env } from "../..";
 import {
   buildEndpointUrl,
+  buildModelId,
   getEndpoint,
   getProvider,
   ProviderConfig,
@@ -246,17 +247,41 @@ const attemptDirectProviderRequest = async (
     });
   }
 
-  const endpoint = getEndpoint(modelName, provider);
+  let endpoint = getEndpoint(modelName, provider);
+  const providerModelId =
+    (endpoint
+      ? buildModelId(endpoint, {
+          region:
+            (providerKey.config as { region?: string })?.region ?? "us-west-1",
+          crossRegion:
+            (providerKey.config as { crossRegion?: string })?.crossRegion ===
+            "true",
+          projectId:
+            (providerKey.config as { projectId?: string })?.projectId ??
+            undefined,
+        })
+      : modelName) ?? "";
+
   if (!endpoint) {
-    return err({
-      type: "invalid_format",
-      message: "Invalid model",
-      code: 400,
-    });
+    // backwards compatibility if someone passes the explicit model id used by the provider
+    endpoint = {
+      providerModelId: modelName,
+      provider,
+      pricing: {
+        prompt: 0,
+        completion: 0,
+        cacheRead: 0,
+        cacheWrite: 0,
+      },
+      contextLength: 0,
+      maxCompletionTokens: 0,
+      supportedParameters: [],
+    };
   }
+
   const body = prepareRequestBody(
     parsedBody,
-    endpoint?.providerModelId ?? "",
+    providerModelId,
     provider,
     requestWrapper.heliconeHeaders
   );
@@ -265,7 +290,7 @@ const attemptDirectProviderRequest = async (
   await authenticateRequest(
     requestWrapper,
     providerKey,
-    endpoint?.providerModelId ?? "",
+    providerModelId,
     body,
     requestWrapper.heliconeHeaders
   );
@@ -275,8 +300,8 @@ const attemptDirectProviderRequest = async (
         region:
           (providerKey.config as { region?: string })?.region ?? "us-west-1",
         crossRegion:
-          (providerKey.config as { crossRegion?: boolean })?.crossRegion ??
-          false,
+          (providerKey.config as { crossRegion?: string })?.crossRegion ===
+          "true",
         projectId:
           (providerKey.config as { projectId?: string })?.projectId ??
           undefined,

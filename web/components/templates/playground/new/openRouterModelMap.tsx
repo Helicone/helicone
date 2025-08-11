@@ -86,4 +86,8 @@ export const OPENROUTER_MODEL_MAP: Record<string, string> = {
   "o4-mini": "openai/o4-mini",
   "o4-mini-2025-04-16": "openai/o4-mini",
   "claude-sonnet-4": "anthropic/claude-sonnet-4",
+  "gpt-5": "openai/gpt-5",
+  "gpt-5-mini": "openai/gpt-5-mini",
+  "gpt-5-nano": "openai/gpt-5-nano",
+  "gpt-5-chat-latest": "openai/gpt-5-chat",
 };

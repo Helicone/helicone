@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 clickhouse/clickhouse-server:24.3.13.40 AS database-stage
+FROM clickhouse/clickhouse-server:24.3.13.40 AS database-stage
 
 # Install PostgreSQL and other dependencies
 RUN apt-get update && apt-get install -y \
@@ -110,18 +110,33 @@ RUN find /app -name ".env.*" -exec rm {} \;
 WORKDIR /app/web
 RUN --mount=type=cache,target=/root/.yarn \
     yarn install --frozen-lockfile \
-    && yarn add --dev @types/js-yaml \
     && DISABLE_ESLINT=true yarn build
 
 # --------------------------------------------------------------------------------------------------------------------
 
 FROM web-stage AS minio-stage
 
-# Install MinIO server and client
-RUN wget -q -O /usr/local/bin/minio https://dl.min.io/server/minio/release/linux-amd64/minio \
+# Install MinIO server and client (arch-aware)
+ARG TARGETOS
+ARG TARGETARCH
+RUN apt-get update && apt-get install -y curl ca-certificates && update-ca-certificates
+RUN set -eu; \
+    ARCH="${TARGETARCH:-amd64}"; \
+    ARCH_DIR="linux-${ARCH}"; \
+    MINIO_URL="https://dl.min.io/server/minio/release/${ARCH_DIR}/minio"; \
+    MC_URL="https://dl.min.io/client/mc/release/${ARCH_DIR}/mc"; \
+    ALT_MINIO_URL="https://dl.minio.org.cn/server/minio/release/${ARCH_DIR}/minio"; \
+    ALT_MC_URL="https://dl.minio.org.cn/client/mc/release/${ARCH_DIR}/mc"; \
+    echo "Downloading MinIO from $MINIO_URL"; \
+    (curl -fSL --retry 5 --retry-delay 3 -o /usr/local/bin/minio "$MINIO_URL" \
+      || curl -fSL --retry 5 --retry-delay 3 -o /usr/local/bin/minio "$ALT_MINIO_URL") \
     && chmod +x /usr/local/bin/minio \
-    && wget -q -O /usr/local/bin/mc https://dl.min.io/client/mc/release/linux-amd64/mc \
-    && chmod +x /usr/local/bin/mc
+    && echo "Downloading mc from $MC_URL" \
+    && (curl -fSL --retry 5 --retry-delay 3 -o /usr/local/bin/mc "$MC_URL" \
+      || curl -fSL --retry 5 --retry-delay 3 -o /usr/local/bin/mc "$ALT_MC_URL") \
+    && chmod +x /usr/local/bin/mc \
+    && /usr/local/bin/minio --version >/dev/null 2>&1 \
+    && /usr/local/bin/mc --version >/dev/null 2>&1
 
 # Create MinIO data directory
 RUN mkdir -p /data

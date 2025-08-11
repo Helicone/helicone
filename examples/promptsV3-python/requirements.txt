@@ -1,0 +1,13 @@
+# Helicone Python SDK (local development)
+-e ../../sdk/python/helpers
+# Helicone Python SDK (published)
+#helicone_helpers>=1.0.7
+
+# OpenAI SDK
+openai>=1.0.0
+
+# Environment variable management
+python-dotenv>=1.0.0
+
+# HTTP client for async support (dependency of helicone_helpers)
+httpx>=0.28.0

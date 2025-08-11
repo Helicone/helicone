@@ -45,8 +45,8 @@ Now you can access all the models on Mistral AI with a simple fetch call:
 
 ```bash
 curl \
-  --header 'Authorization: Bearer <MISTRAL_API_KEY>' \
-  --header 'Content-Type: application/json' \
+  --header "Authorization: Bearer $MISTRAL_API_KEY" \
+  --header "Content-Type: application/json" \
   --data '{
     "model": "mistral-large-latest",
     "messages": [{"role": "user", "content": "Say this is a test"}]

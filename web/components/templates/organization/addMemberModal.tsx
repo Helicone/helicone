@@ -22,7 +22,7 @@ interface AddMemberModalProps {
 }
 
 const AddMemberModal = (props: AddMemberModalProps) => {
-  const { orgId, orgOwnerId, open, setOpen, onSuccess } = props;
+  const { orgId, open, setOpen, onSuccess } = props;
 
   const [isLoading, setIsLoading] = useState(false);
 

@@ -199,7 +199,7 @@ export default function OrgMoreDropdown({
             <Button
               variant="ghost"
               size="icon"
-              className="m-0 flex h-auto w-full items-center justify-between p-2 outline-none hover:bg-slate-100 focus-visible:outline-none"
+              className="m-0 flex h-auto w-full items-center justify-between p-2 outline-none hover:bg-slate-100 focus-visible:outline-none dark:hover:bg-slate-800"
             >
               <div className="flex gap-2">
                 {currentIcon && (

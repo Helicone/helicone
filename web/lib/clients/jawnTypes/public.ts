@@ -91,14 +91,17 @@ export interface paths {
   "/v1/prompt-2025/tags": {
     get: operations["GetPrompt2025Tags"];
   };
+  "/v1/prompt-2025/environments": {
+    get: operations["GetPrompt2025Environments"];
+  };
   "/v1/prompt-2025": {
     post: operations["CreatePrompt2025"];
   };
   "/v1/prompt-2025/update": {
     post: operations["UpdatePrompt2025"];
   };
-  "/v1/prompt-2025/update/production-version": {
-    post: operations["SetProductionVersion"];
+  "/v1/prompt-2025/update/environment": {
+    post: operations["SetPromptVersionEnvironment"];
   };
   "/v1/prompt-2025/count": {
     get: operations["GetPrompt2025Count"];
@@ -319,6 +322,9 @@ export interface paths {
   };
   "/v1/trace/custom/log": {
     post: operations["LogCustomTrace"];
+  };
+  "/v1/trace/custom/log/typed": {
+    post: operations["LogCustomTraceTyped"];
   };
   "/v1/trace/log": {
     post: operations["LogTrace"];
@@ -1243,6 +1249,7 @@ export interface components {
       /** Format: double */
       minor_version: number;
       commit_message: string;
+      environment?: string;
       created_at: string;
       s3_url?: string;
     };
@@ -2005,6 +2012,42 @@ Json: JsonObject;
         /** Format: double */
         completion_token: number;
       };
+    };
+    ValidationError: {
+      field: string;
+      message: string;
+    };
+    ValidationResult: {
+      isValid: boolean;
+      errors: components["schemas"]["ValidationError"][];
+    };
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.unknown_": {
+      [key: string]: unknown;
+    };
+    TypedProviderRequest: {
+      url: string;
+      json: components["schemas"]["Record_string.unknown_"];
+      meta: components["schemas"]["Record_string.string_"];
+    };
+    TypedProviderResponse: {
+      json?: components["schemas"]["Record_string.unknown_"];
+      textBody?: string;
+      /** Format: double */
+      status: number;
+      headers: components["schemas"]["Record_string.string_"];
+    };
+    TypedTiming: {
+      /** Format: double */
+      timeToFirstToken?: number;
+      startTime: string;
+      endTime: string;
+    };
+    TypedAsyncLogModel: {
+      providerRequest: components["schemas"]["TypedProviderRequest"];
+      providerResponse: components["schemas"]["TypedProviderResponse"];
+      timing?: components["schemas"]["TypedTiming"];
+      provider?: components["schemas"]["Provider"];
     };
     OTELTrace: {
       resourceSpans: {
@@ -3964,6 +4007,16 @@ export interface operations {
       };
     };
   };
+  GetPrompt2025Environments: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string-Array.string_"];
+        };
+      };
+    };
+  };
   CreatePrompt2025: {
     requestBody: {
       content: {
@@ -3989,7 +4042,7 @@ export interface operations {
         "application/json": {
           promptBody: components["schemas"]["OpenAIChatRequest"];
           commitMessage: string;
-          setAsProduction: boolean;
+          environment?: string;
           newMajorVersion: boolean;
           promptVersionId: string;
           promptId: string;
@@ -4005,10 +4058,11 @@ export interface operations {
       };
     };
   };
-  SetProductionVersion: {
+  SetPromptVersionEnvironment: {
     requestBody: {
       content: {
         "application/json": {
+          environment: string;
           promptVersionId: string;
           promptId: string;
         };
@@ -5292,6 +5346,21 @@ export interface operations {
       /** @description No content */
       204: {
         content: never;
+      };
+    };
+  };
+  LogCustomTraceTyped: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TypedAsyncLogModel"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": unknown;
+        };
       };
     };
   };

@@ -1,16 +1,15 @@
 import * as traceloop from "@traceloop/node-server-sdk";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
 
-import OpenAI from "openai";
-import * as anthropic from "@anthropic-ai/sdk";
-import * as azureOpenAI from "@azure/openai";
-import * as cohere from "cohere-ai";
-import * as bedrock from "@aws-sdk/client-bedrock-runtime";
-import * as google_aiplatform from "@google-cloud/aiplatform";
-import Together from "together-ai";
-import * as ChainsModule from "langchain/chains";
-import * as AgentsModule from "langchain/agents";
-import * as ToolsModule from "langchain/tools";
+import type OpenAI from "openai";
+import type * as anthropic from "@anthropic-ai/sdk";
+import type * as cohere from "cohere-ai";
+import type * as bedrock from "@aws-sdk/client-bedrock-runtime";
+import type * as google_aiplatform from "@google-cloud/aiplatform";
+import type Together from "together-ai";
+import type * as ChainsModule from "langchain/chains";
+import type * as AgentsModule from "langchain/agents";
+import type * as ToolsModule from "langchain/tools";
 
 type IHeliconeAsyncLoggerOptions = {
   apiKey: string;
@@ -18,7 +17,6 @@ type IHeliconeAsyncLoggerOptions = {
   providers: {
     openAI?: typeof OpenAI;
     anthropic?: typeof anthropic;
-    azureOpenAI?: typeof azureOpenAI;
     cohere?: typeof cohere;
     bedrock?: typeof bedrock;
     google_aiplatform?: typeof google_aiplatform;
@@ -37,7 +35,6 @@ export class HeliconeAsyncLogger {
   private baseUrl: string;
   private openAI?: typeof OpenAI;
   private anthropic?: typeof anthropic;
-  private azureOpenAI?: typeof azureOpenAI;
   private together?: typeof Together;
   private cohere?: typeof cohere;
   private bedrock?: typeof bedrock;
@@ -52,7 +49,6 @@ export class HeliconeAsyncLogger {
     this.baseUrl = opts.baseUrl ?? "https://api.helicone.ai/v1/trace/log";
     this.openAI = opts.providers?.openAI ?? undefined;
     this.anthropic = opts.providers?.anthropic ?? undefined;
-    this.azureOpenAI = opts.providers?.azureOpenAI ?? undefined;
     this.cohere = opts.providers?.cohere ?? undefined;
     this.bedrock = opts.providers?.bedrock ?? undefined;
     this.google_aiplatform = opts.providers?.google_aiplatform ?? undefined;
@@ -78,7 +74,6 @@ export class HeliconeAsyncLogger {
       instrumentModules: {
         openAI: this.openAI ?? undefined,
         anthropic: this.anthropic ?? undefined,
-        azureOpenAI: this.azureOpenAI ?? undefined,
         cohere: this.cohere ?? undefined,
         bedrock: this.bedrock ?? undefined,
         google_aiplatform: this.google_aiplatform ?? undefined,

@@ -108,7 +108,7 @@ const PromptCard = (props: PromptCardProps) => {
             showGridLines={false}
             yAxisWidth={60}
             curveType="monotone"
-            onValueChange={(v) => console.log(v)}
+            onValueChange={(v) => {}}
           />
         )}
       </div>

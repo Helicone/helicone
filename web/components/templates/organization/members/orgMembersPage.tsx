@@ -1,6 +1,5 @@
 import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 import { useState } from "react";
 import { Database } from "../../../../db/database.types";
@@ -8,6 +7,12 @@ import { useGetOrgMembers } from "../../../../services/hooks/organizations";
 import { useOrg } from "../../../layout/org/organizationContext";
 import AddMemberModal from "../addMemberModal";
 import OrgMemberItem from "../orgMemberItem";
+import {
+  SettingsSectionHeader,
+  SettingsSectionContent,
+} from "@/components/ui/settings-container";
+import "@/styles/settings.css";
+import { PlusIcon } from "lucide-react";
 interface OrgMembersPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
   wFull?: boolean;
@@ -59,54 +64,49 @@ const OrgMembersPage = (props: OrgMembersPageProps) => {
 
   return (
     <>
-      <div
-        className={cn(
-          "flex flex-col space-y-8 text-foreground",
-          wFull ? "w-full" : "max-w-2xl",
-        )}
-      >
-        <div className="mt-8 flex h-full w-full flex-col space-y-4">
-          <div className="flex flex-row items-center justify-between">
-            <h3 className="font-semibold">Members</h3>
-
-            <div className="flex flex-row space-x-4">
-              <ProFeatureWrapper featureName="invite">
-                <Button
-                  onClick={() => setAddOpen(true)}
-                  variant="default"
-                  size="sm_sleek"
-                >
-                  add member +
-                </Button>
-              </ProFeatureWrapper>
-            </div>
-          </div>
-          {isLoading ? (
-            <ul className="flex flex-col space-y-6">
-              {Array.from({ length: 3 }).map((_, index) => (
-                <li
-                  key={index}
-                  className="flex h-6 animate-pulse flex-row justify-between gap-2 rounded-md bg-muted"
-                ></li>
-              ))}
-            </ul>
-          ) : (
-            <ul className="divide-y divide-border border-t">
-              {members.map((member, index) => (
-                <OrgMemberItem
-                  key={index}
-                  index={index}
-                  orgMember={member}
-                  orgId={org.id}
-                  refetch={refetch}
-                  isUserAdmin={isUserAdmin}
-                  refreshOrgs={onLeaveSuccess}
-                />
-              ))}
-            </ul>
-          )}
+      <SettingsSectionHeader title="Members">
+        <div className="flex flex-row space-x-4">
+          <ProFeatureWrapper featureName="invite">
+            <Button
+              onClick={() => setAddOpen(true)}
+              variant="default"
+              size="sm"
+              className="flex items-center gap-1"
+            >
+              Add Member
+              <PlusIcon className="h-4 w-4" />
+            </Button>
+          </ProFeatureWrapper>
         </div>
-      </div>
+      </SettingsSectionHeader>
+
+      <SettingsSectionContent className="!p-0">
+        {isLoading ? (
+          <ul className="flex flex-col space-y-4">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <li
+                key={index}
+                className="flex h-12 animate-pulse flex-row justify-between gap-2 bg-muted"
+              ></li>
+            ))}
+          </ul>
+        ) : (
+          <ul className="divide-y divide-border">
+            {members.map((member, index) => (
+              <OrgMemberItem
+                key={index}
+                index={index}
+                orgMember={member}
+                orgId={org.id}
+                refetch={refetch}
+                isUserAdmin={isUserAdmin}
+                refreshOrgs={onLeaveSuccess}
+              />
+            ))}
+          </ul>
+        )}
+      </SettingsSectionContent>
+
       <AddMemberModal
         orgId={org.id}
         orgOwnerId={org.owner}

@@ -55,9 +55,9 @@ const getTime = (
     | string
 ) => {
   if (typeof time === "string") {
-    /// is numnber as string check using regex
     if (/^\d+$/.test(time)) {
-      return new Date(parseInt(time));
+      const timestamp = parseInt(time);
+      return timestamp < 4102444800 ? new Date(timestamp * 1000) : new Date(timestamp);
     }
     return new Date(time);
   }

@@ -153,7 +153,10 @@ export const mapGeminiPro: MapperFn<any, any> = ({
       ? response.modelVersion
       : model;
 
-  // Extract system instruction
+  // Extract system instruction and map to "role": "system" message
+  // Note: This mapping only works for requests coming through Helicone's proxy.
+  // For LiteLLM callback integration, system instructions may not be preserved
+  // as LiteLLM processes the request before sending it to Helicone.
   const systemInstructionText = request?.systemInstruction?.parts?.[0]?.text;
   const systemMessage: Message | null = systemInstructionText
     ? {

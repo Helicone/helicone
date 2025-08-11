@@ -32,7 +32,7 @@ import DraggableColumnHeader from "./columns/draggableColumnHeader";
 
 type CheckboxMode = "always_visible" | "on_hover" | "never";
 
-function ConditionalLink<T>({
+function ConditionalLink({
   children,
   href,
   className,

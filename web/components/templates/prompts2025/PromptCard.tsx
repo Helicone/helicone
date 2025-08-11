@@ -16,13 +16,11 @@ interface PromptCardProps {
 
 const PromptCard = ({
   name,
-  id,
   tags,
   majorVersion,
   minorVersion,
   totalVersions,
   model,
-  updatedAt,
   createdAt,
 }: PromptCardProps) => {
   const versionDisplay =

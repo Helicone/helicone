@@ -10,7 +10,7 @@ export const fetchAnthropic = async (
   model: string,
   maxTokens: number,
   anthropicAPIKey?: string,
-  requestId?: string
+  requestId?: string,
 ) => {
   const completion = await fetch("/api/anthropic/chat", {
     method: "POST",

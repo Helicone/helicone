@@ -3,7 +3,7 @@ import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
 export function extractVariables(
   content: string,
-  mode: "helicone" | "template"
+  mode: "helicone" | "template",
 ): StateInputs[] {
   const regex =
     mode === "helicone"
@@ -34,7 +34,7 @@ export function isValidVariableName(varContent: string): boolean {
 
 export function getVariableStatus(
   varName: string,
-  variables: StateInputs[]
+  variables: StateInputs[],
 ): { isValid: boolean; hasValue: boolean; value?: string } {
   const variable = variables.find((v) => v.name === varName);
   const hasValue = Boolean(variable?.value && variable.value.length > 0);
@@ -49,7 +49,7 @@ export function getVariableStatus(
 
 export function replaceVariables(
   content: string,
-  variables: StateInputs[]
+  variables: StateInputs[],
 ): string {
   let result = content;
   (variables || [])
@@ -103,7 +103,7 @@ export function processMessageContent(
   options: {
     convertTags?: boolean;
     variables?: StateInputs[];
-  } = {}
+  } = {},
 ): string {
   const content = message.content;
 
@@ -146,7 +146,7 @@ function processContent(
   options: {
     convertTags?: boolean;
     variables?: StateInputs[];
-  } = {}
+  } = {},
 ): string {
   // First convert helicone tags to variables if needed
   let processedContent = options.convertTags

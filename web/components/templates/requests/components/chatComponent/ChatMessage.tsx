@@ -16,6 +16,7 @@ import AssistantToolCalls from "./single/AssistantToolCalls";
 import { JsonRenderer } from "./single/JsonRenderer";
 import TextMessage from "./single/TextMessage";
 import ToolMessage from "./ToolMessage";
+import { ImageModal } from "./single/images/ImageModal";
 
 type MessageType = "image" | "tool" | "text" | "pdf" | "contentArray";
 function base64UrlToBase64(base64url: string) {
@@ -178,14 +179,16 @@ const renderToolMessage = (
 
 const MESSAGE_LENGTH_THRESHOLD = 1000; // Characters before truncating
 
-const renderImageContent = (
-  message: Message,
-  options: {
+const ImageContent: React.FC<{
+  message: Message;
+  options?: {
     showDeleteButton?: boolean;
     onDelete?: () => void;
     wrapperClassName?: string;
-  } = {},
-) => {
+  };
+}> = ({ message, options = {} }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   let imageSrc = message.image_url;
   if (message.content && message.mime_type?.startsWith("image/")) {
     imageSrc = `data:${message.mime_type};base64,${message.content}`;
@@ -213,7 +216,7 @@ const renderImageContent = (
         height={1000}
         className="h-auto max-h-[200px] w-auto max-w-full cursor-pointer object-contain transition-opacity hover:opacity-90"
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-        onClick={() => {}}
+        onClick={() => setIsModalOpen(true)}
         title="Click to view full size"
       />
     </div>
@@ -229,8 +232,25 @@ const renderImageContent = (
       >
         {imageElement}
       </ContentWrapper>
+
+      <ImageModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        imageSrc={processedImageSrc}
+      />
     </>
   );
+};
+
+const renderImageContent = (
+  message: Message,
+  options: {
+    showDeleteButton?: boolean;
+    onDelete?: () => void;
+    wrapperClassName?: string;
+  } = {},
+) => {
+  return <ImageContent message={message} options={options} />;
 };
 
 const renderTextContent = (
@@ -465,7 +485,7 @@ export default function ChatMessage({
                         _type: "image" as const,
                         role: "user",
                         image_url: base64,
-                        id: `img-${uuidv4() + 1}`,
+                        id: `img-${uuidv4()}`,
                       },
                     ];
 
@@ -474,7 +494,7 @@ export default function ChatMessage({
                       _type: "contentArray" as const,
                       role: "user",
                       contentArray,
-                      id: msg.id || `msg-${uuidv4() + 2}`,
+                      id: msg.id || `msg-${uuidv4()}`,
                     };
                   }
                   return msg;
@@ -695,7 +715,7 @@ export default function ChatMessage({
                 _type: "message" as const,
                 role: "user",
                 content: "",
-                id: `text-${uuidv4() + 1}`,
+                id: `text-${uuidv4()}`,
               });
 
               return {
@@ -703,7 +723,7 @@ export default function ChatMessage({
                 _type: "contentArray" as const,
                 role: "user",
                 contentArray,
-                id: msg.id || `msg-${uuidv4() + 2}`,
+                id: msg.id || `msg-${uuidv4()}`,
               };
             }
             return msg;

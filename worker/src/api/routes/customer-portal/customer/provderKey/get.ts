@@ -68,7 +68,7 @@ export class ProviderKeyGet extends BaseAPIRoute {
 
     const providerKey = await client.db
       .getClient()
-      .from("decrypted_provider_keys")
+      .from("decrypted_provider_keys_v2")
       .select("*")
       .eq("provider_key", customers?.data.org_provider_key ?? "")
       .single();

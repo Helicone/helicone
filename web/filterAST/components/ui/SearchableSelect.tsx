@@ -86,13 +86,13 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            `justify-between w-[${width}] font-normal text-[10px]`,
-            className
+            `justify-between w-[${width}] text-[10px] font-normal`,
+            className,
           )}
           disabled={disabled}
         >
           {getCurrentLabel()}
-          <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50 " />
+          <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className={`w-[${width}] p-0`}>
@@ -119,7 +119,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
                     <Check
                       className={cn(
                         "mr-2 h-3 w-3",
-                        value === option.value ? "opacity-100" : "opacity-0"
+                        value === option.value ? "opacity-100" : "opacity-0",
                       )}
                     />
                     {option.label}
@@ -144,7 +144,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
                     <Check
                       className={cn(
                         "mr-2 h-3 w-3",
-                        value === option.value ? "opacity-100" : "opacity-0"
+                        value === option.value ? "opacity-100" : "opacity-0",
                       )}
                     />
                     {option.label}
@@ -176,7 +176,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
                     <Check
                       className={cn(
                         "mr-2 h-3 w-3",
-                        value === option.value ? "opacity-100" : "opacity-0"
+                        value === option.value ? "opacity-100" : "opacity-0",
                       )}
                     />
                     {option.label}
@@ -205,7 +205,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
                     <Check
                       className={cn(
                         "mr-2 h-3 w-3",
-                        value === option.value ? "opacity-100" : "opacity-0"
+                        value === option.value ? "opacity-100" : "opacity-0",
                       )}
                     />
                     {option.label}
@@ -230,7 +230,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
                     <Check
                       className={cn(
                         "mr-2 h-3 w-3",
-                        value === option.value ? "opacity-100" : "opacity-0"
+                        value === option.value ? "opacity-100" : "opacity-0",
                       )}
                     />
                     {option.label}

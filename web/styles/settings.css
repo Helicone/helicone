@@ -1,0 +1,60 @@
+.settings-container {
+  @apply flex w-full max-w-6xl flex-col border-y border-border bg-background p-0;
+}
+
+.settings-section-header {
+  @apply border-b border-border p-4;
+}
+
+.settings-section-content {
+  @apply p-4;
+}
+
+
+.settings-success-banner {
+  @apply border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-200;
+}
+
+.settings-error-banner {
+  @apply border-red-200 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200;
+}
+
+.settings-warning-banner {
+  @apply border-yellow-200 bg-yellow-50 text-yellow-800 dark:border-yellow-800 dark:bg-yellow-950 dark:text-yellow-200;
+}
+
+.settings-table-wrapper {
+  @apply border-t border-border;
+}
+
+.settings-card-section {
+  @apply border border-border bg-card rounded-lg p-4;
+}
+
+.settings-action-row {
+  @apply flex items-center justify-between;
+}
+
+.settings-action-row-end {
+  @apply flex items-center gap-2 justify-end;
+}
+
+.settings-form-section {
+  @apply space-y-4;
+}
+
+.settings-form-row {
+  @apply space-y-1;
+}
+
+.settings-form-row-inline {
+  @apply flex items-center gap-2;
+}
+
+.settings-grid-2 {
+  @apply grid grid-cols-1 md:grid-cols-2;
+}
+
+.settings-grid-3 {
+  @apply grid grid-cols-1 md:grid-cols-3;
+}

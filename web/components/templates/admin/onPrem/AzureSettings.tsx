@@ -171,7 +171,6 @@ export const AzureSettings = () => {
                       setNotification("Settings saved", "success");
                     } else {
                       setNotification("Failed to save settings", "error");
-                      console.log(s.response);
                     }
                   });
               }}
@@ -209,7 +208,6 @@ export const AzureSettings = () => {
                       setNotification("Test completed", "success");
                     } else {
                       setNotification("Test failed", "error");
-                      console.log(s.response);
                     }
                   });
               }}

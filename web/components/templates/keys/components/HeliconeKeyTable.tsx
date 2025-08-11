@@ -3,6 +3,7 @@ import { KeyIcon } from "@heroicons/react/24/outline";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import ThemedTable from "../../../shared/themed/themedTable";
 import { useKeys } from "../useKeys";
+import "@/styles/settings-tables.css";
 
 interface HeliconeKeyTableProps {
   onAddKey: () => void;
@@ -30,12 +31,12 @@ const HeliconeKeyTable = ({
     return (
       <button
         onClick={onAddKey}
-        className="relative mt-8 block w-full rounded-lg border-2 border-dashed border-gray-500 bg-gray-200 p-12 text-center hover:cursor-pointer hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:bg-gray-800 dark:hover:bg-gray-700"
+        className="relative m-4 block w-full border-2 border-dashed border-border bg-muted p-8 text-center hover:cursor-pointer hover:bg-muted/80 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
       >
         <div className="w-full items-center justify-center align-middle">
-          <KeyIcon className="mx-auto h-10 w-10 text-gray-900 dark:text-gray-100" />
+          <KeyIcon className="mx-auto h-8 w-8 text-muted-foreground" />
         </div>
-        <span className="mt-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
+        <span className="mt-2 block text-xs font-medium">
           Click here to generate a Helicone key
         </span>
       </button>
@@ -43,7 +44,7 @@ const HeliconeKeyTable = ({
   }
 
   return (
-    <>
+    <div className="settings-table border-t border-border">
       <ThemedTable
         columns={[
           { name: "Name", key: "key_name", hidden: false },
@@ -53,18 +54,14 @@ const HeliconeKeyTable = ({
         rows={keys?.data?.data?.data?.map((key) => ({
           ...key,
           id: key.id.toString(),
-          key_name: (
-            <p className="font-semibold text-gray-900 dark:text-gray-100">
-              {key.api_key_name}
-            </p>
-          ),
+          key_name: <p className="text-xs font-semibold">{key.api_key_name}</p>,
           created_at: (
-            <p className="text-gray-500">
+            <p className="text-xs text-muted-foreground">
               {new Date(key.created_at).toLocaleString()}
             </p>
           ),
           permissions: (
-            <p className="text-gray-500">
+            <p className="text-xs text-muted-foreground">
               {keyPermissions.get(key.key_permissions ?? "rw") ?? "Read/Write"}
             </p>
           ),
@@ -72,7 +69,7 @@ const HeliconeKeyTable = ({
         editHandler={(key) => onEdit(key.id)}
         deleteHandler={(key) => onDelete(key.id)}
       />
-    </>
+    </div>
   );
 };
 

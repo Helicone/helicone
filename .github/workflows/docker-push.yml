@@ -12,16 +12,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
+          username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Set up Docker Build Cloud
+        id: buildx
+        uses: docker/setup-buildx-action@v3
+        env:
+          DOCKER_ACCESS_TOKEN: ${{ secrets.DOCKER_BUILD_CLOUD_TOKEN }}
+          DOCKER_ACCOUNT: ${{ vars.DOCKER_USERNAME }}
+        with:
+          driver: cloud
+          endpoint: helicone/heli
+
       - name: Push images to Docker Hub
+        env:
+          BUILDX_BUILDER: ${{ steps.buildx.outputs.name }}
         run: |
           cd docker
           ./push_docker.sh --mode dockerhub

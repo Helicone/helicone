@@ -3,7 +3,7 @@ import { Result } from "@/packages/common/result";
 
 const getPropertyParamsV2 = async (property: string, search: string) => {
   const resp = await fetch(
-    `/api/propertiesV2/${property}/params?search=${search}`
+    `/api/propertiesV2/${property}/params?search=${search}`,
   );
   const data = await resp.json();
   return data as Result<PropertyParam[], string>;

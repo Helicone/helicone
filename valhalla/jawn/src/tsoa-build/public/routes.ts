@@ -759,6 +759,7 @@ const models: TsoaRoute.Models = {
             "major_version": {"dataType":"double","required":true},
             "minor_version": {"dataType":"double","required":true},
             "commit_message": {"dataType":"string","required":true},
+            "environment": {"dataType":"string"},
             "created_at": {"dataType":"string","required":true},
             "s3_url": {"dataType":"string"},
         },
@@ -1749,6 +1750,71 @@ const models: TsoaRoute.Models = {
             "amount": {"dataType":"double","required":true},
             "description": {"dataType":"string","required":true},
             "totalCost": {"dataType":"nestedObjectLiteral","nestedProperties":{"prompt_token":{"dataType":"double","required":true},"completion_token":{"dataType":"double","required":true}},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ValidationError": {
+        "dataType": "refObject",
+        "properties": {
+            "field": {"dataType":"string","required":true},
+            "message": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ValidationResult": {
+        "dataType": "refObject",
+        "properties": {
+            "isValid": {"dataType":"boolean","required":true},
+            "errors": {"dataType":"array","array":{"dataType":"refObject","ref":"ValidationError"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Record_string.unknown_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"dataType":"any"},"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "TypedProviderRequest": {
+        "dataType": "refObject",
+        "properties": {
+            "url": {"dataType":"string","required":true},
+            "json": {"ref":"Record_string.unknown_","required":true},
+            "meta": {"ref":"Record_string.string_","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "TypedProviderResponse": {
+        "dataType": "refObject",
+        "properties": {
+            "json": {"ref":"Record_string.unknown_"},
+            "textBody": {"dataType":"string"},
+            "status": {"dataType":"double","required":true},
+            "headers": {"ref":"Record_string.string_","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "TypedTiming": {
+        "dataType": "refObject",
+        "properties": {
+            "timeToFirstToken": {"dataType":"double"},
+            "startTime": {"dataType":"string","required":true},
+            "endTime": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "TypedAsyncLogModel": {
+        "dataType": "refObject",
+        "properties": {
+            "providerRequest": {"ref":"TypedProviderRequest","required":true},
+            "providerResponse": {"ref":"TypedProviderResponse","required":true},
+            "timing": {"ref":"TypedTiming"},
+            "provider": {"ref":"Provider"},
         },
         "additionalProperties": false,
     },
@@ -4463,6 +4529,37 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsPrompt2025Controller_getPrompt2025Environments: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.get('/v1/prompt-2025/environments',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(Prompt2025Controller)),
+            ...(fetchMiddlewares<RequestHandler>(Prompt2025Controller.prototype.getPrompt2025Environments)),
+
+            async function Prompt2025Controller_getPrompt2025Environments(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsPrompt2025Controller_getPrompt2025Environments, request, response });
+
+                const controller = new Prompt2025Controller();
+
+              await templateService.apiHandler({
+                methodName: 'getPrompt2025Environments',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsPrompt2025Controller_createPrompt2025: Record<string, TsoaRoute.ParameterSchema> = {
                 requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"promptBody":{"ref":"OpenAIChatRequest","required":true},"tags":{"dataType":"array","array":{"dataType":"string"},"required":true},"name":{"dataType":"string","required":true}}},
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
@@ -4496,7 +4593,7 @@ export function RegisterRoutes(app: Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsPrompt2025Controller_updatePrompt2025: Record<string, TsoaRoute.ParameterSchema> = {
-                requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"promptBody":{"ref":"OpenAIChatRequest","required":true},"commitMessage":{"dataType":"string","required":true},"setAsProduction":{"dataType":"boolean","required":true},"newMajorVersion":{"dataType":"boolean","required":true},"promptVersionId":{"dataType":"string","required":true},"promptId":{"dataType":"string","required":true}}},
+                requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"promptBody":{"ref":"OpenAIChatRequest","required":true},"commitMessage":{"dataType":"string","required":true},"environment":{"dataType":"string"},"newMajorVersion":{"dataType":"boolean","required":true},"promptVersionId":{"dataType":"string","required":true},"promptId":{"dataType":"string","required":true}}},
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
         app.post('/v1/prompt-2025/update',
@@ -4527,27 +4624,27 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsPrompt2025Controller_setProductionVersion: Record<string, TsoaRoute.ParameterSchema> = {
-                requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"promptVersionId":{"dataType":"string","required":true},"promptId":{"dataType":"string","required":true}}},
+        const argsPrompt2025Controller_setPromptVersionEnvironment: Record<string, TsoaRoute.ParameterSchema> = {
+                requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"environment":{"dataType":"string","required":true},"promptVersionId":{"dataType":"string","required":true},"promptId":{"dataType":"string","required":true}}},
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
-        app.post('/v1/prompt-2025/update/production-version',
+        app.post('/v1/prompt-2025/update/environment',
             authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(Prompt2025Controller)),
-            ...(fetchMiddlewares<RequestHandler>(Prompt2025Controller.prototype.setProductionVersion)),
+            ...(fetchMiddlewares<RequestHandler>(Prompt2025Controller.prototype.setPromptVersionEnvironment)),
 
-            async function Prompt2025Controller_setProductionVersion(request: ExRequest, response: ExResponse, next: any) {
+            async function Prompt2025Controller_setPromptVersionEnvironment(request: ExRequest, response: ExResponse, next: any) {
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
             let validatedArgs: any[] = [];
             try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsPrompt2025Controller_setProductionVersion, request, response });
+                validatedArgs = templateService.getValidatedArgs({ args: argsPrompt2025Controller_setPromptVersionEnvironment, request, response });
 
                 const controller = new Prompt2025Controller();
 
               await templateService.apiHandler({
-                methodName: 'setProductionVersion',
+                methodName: 'setPromptVersionEnvironment',
                 controller,
                 response,
                 next,
@@ -6996,6 +7093,38 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'logCustomTrace',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsTraceController_logCustomTraceTyped: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                traceBody: {"in":"body","name":"traceBody","required":true,"ref":"TypedAsyncLogModel"},
+        };
+        app.post('/v1/trace/custom/log/typed',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(TraceController)),
+            ...(fetchMiddlewares<RequestHandler>(TraceController.prototype.logCustomTraceTyped)),
+
+            async function TraceController_logCustomTraceTyped(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsTraceController_logCustomTraceTyped, request, response });
+
+                const controller = new TraceController();
+
+              await templateService.apiHandler({
+                methodName: 'logCustomTraceTyped',
                 controller,
                 response,
                 next,

@@ -46,7 +46,7 @@ const Login = (props: LoginProps) => {
 
     setLoading(true);
 
-    const { data: user, error: authError } = await heliconeAuthClient.signUp({
+    const { error: authError } = await heliconeAuthClient.signUp({
       email,
       password,
       options: {
@@ -250,7 +250,7 @@ const Login = (props: LoginProps) => {
                     <button
                       onClick={async () => {
                         setLoading(true);
-                        const { data, error } =
+                        const { error } =
                           await heliconeAuthClient.signInWithOAuth({
                             provider: "google",
                           });

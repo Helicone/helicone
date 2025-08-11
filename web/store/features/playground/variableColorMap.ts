@@ -23,21 +23,23 @@ const CHART_COLORS = [
   "chart-10",
 ];
 
-export const useVariableColorMapStore = create<VariableColorMapStore>((set, get) => ({
-  colorMap: {},
-  setColorMap: (colorMap) => set({ colorMap }),
-  setColor: (variableName: string, color: string) =>
-    set((state) => ({
-      colorMap: { ...state.colorMap, [variableName]: color },
-    })),
-  getColor: (variableName: string) => {
-    return get().colorMap[variableName] || "chart-1";
-  },
-  initializeColorMap: (variables: string[]) => {
-    const newColorMap: VariableColorMap = {};
-    variables.forEach((variable, index) => {
-      newColorMap[variable] = CHART_COLORS[index % CHART_COLORS.length];
-    });
-    set({ colorMap: newColorMap });
-  },
-})); 
+export const useVariableColorMapStore = create<VariableColorMapStore>(
+  (set, get) => ({
+    colorMap: {},
+    setColorMap: (colorMap) => set({ colorMap }),
+    setColor: (variableName: string, color: string) =>
+      set((state) => ({
+        colorMap: { ...state.colorMap, [variableName]: color },
+      })),
+    getColor: (variableName: string) => {
+      return get().colorMap[variableName] || "chart-1";
+    },
+    initializeColorMap: (variables: string[]) => {
+      const newColorMap: VariableColorMap = {};
+      variables.forEach((variable, index) => {
+        newColorMap[variable] = CHART_COLORS[index % CHART_COLORS.length];
+      });
+      set({ colorMap: newColorMap });
+    },
+  }),
+);

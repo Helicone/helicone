@@ -660,7 +660,7 @@ export async function getProviderKeyFromPortalKey(
   }
 
   const providerKey = await supabaseClient
-    .from("decrypted_provider_keys")
+    .from("decrypted_provider_keys_v2")
     .select("decrypted_provider_key")
     .eq("id", providerKeyId.data?.id ?? "")
     .eq("soft_delete", false)
@@ -726,7 +726,7 @@ export async function getProviderKeyFromProxy(
   }
 
   const providerKey = await supabaseClient
-    .from("decrypted_provider_keys")
+    .from("decrypted_provider_keys_v2")
     .select("decrypted_provider_key")
     .eq("id", storedProxyKey.data.provider_key_id)
     .eq("soft_delete", false)

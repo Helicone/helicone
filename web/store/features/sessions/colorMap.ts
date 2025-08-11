@@ -31,7 +31,7 @@ export const useColorMapStore = create<ColorMapStore>((set, get) => ({
 function setAllPathColors(
   treeData: TreeNodeData,
   colors: ColorMap,
-  parentColor: string | null = null
+  parentColor: string | null = null,
 ): ColorMap {
   // Skip if node has no children
   if (!treeData.children?.length) return colors;

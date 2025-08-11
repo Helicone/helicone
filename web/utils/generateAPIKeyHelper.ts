@@ -7,7 +7,7 @@ export function generateAPIKeyHelper(
   keyName: string,
   isEu: boolean,
   governance: boolean,
-  enableRateLimit?: boolean
+  enableRateLimit?: boolean,
 ) {
   const apiKeyPrefix = permission === "rw" ? "sk" : "pk";
 

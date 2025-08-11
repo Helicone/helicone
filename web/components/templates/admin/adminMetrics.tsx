@@ -34,16 +34,13 @@ const AdminMetrics = (props: AdminStatsProps) => {
       const jawn = getJawnClient(query.queryKey[1]);
       const timeFilter = query.queryKey[2];
       const groupBy = query.queryKey[3];
-      const { data, error } = await jawn.POST(
-        `/v1/admin/orgs/over-time/query`,
-        {
-          method: "POST",
-          body: {
-            timeFilter: timeFilter as any,
-            groupBy: groupBy as any,
-          },
+      const { data } = await jawn.POST(`/v1/admin/orgs/over-time/query`, {
+        method: "POST",
+        body: {
+          timeFilter: timeFilter as any,
+          groupBy: groupBy as any,
         },
-      );
+      });
       return data;
     },
   });

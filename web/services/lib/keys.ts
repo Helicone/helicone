@@ -26,7 +26,7 @@ export type AddKeyObj = {
 };
 
 async function getDecryptedProviderKeysByOrgId(
-  orgId: string
+  orgId: string,
 ): Promise<Result<DecryptedProviderKey[], string>> {
   return resultMap(
     await dbExecute<{
@@ -36,8 +36,8 @@ async function getDecryptedProviderKeysByOrgId(
       provider_name: string;
       provider_key_name: string;
     }>(
-      `SELECT id, org_id, decrypted_provider_key, provider_key_name, provider_name from decrypted_provider_keys where org_id = $1 and soft_delete = false`,
-      [orgId]
+      `SELECT id, org_id, decrypted_provider_key, provider_key_name, provider_name from decrypted_provider_keys_v2 where org_id = $1 and soft_delete = false`,
+      [orgId],
     ),
     (keys) =>
       keys.map((key) => ({
@@ -46,12 +46,12 @@ async function getDecryptedProviderKeysByOrgId(
         provider_key: key.decrypted_provider_key,
         provider_name: key.provider_name,
         provider_key_name: key.provider_key_name,
-      }))
+      })),
   );
 }
 
 async function getDecryptedProviderKeyById(
-  providerKeyId: string
+  providerKeyId: string,
 ): Promise<Result<DecryptedProviderKey, string>> {
   return resultMap(
     await dbExecute<{
@@ -61,8 +61,8 @@ async function getDecryptedProviderKeyById(
       provider_key_name: string;
       provider_name: string;
     }>(
-      `SELECT id, org_id, decrypted_provider_key, provider_key_name, provider_name from decrypted_provider_keys where id = $1 and soft_delete = false limit 1`,
-      [providerKeyId]
+      `SELECT id, org_id, decrypted_provider_key, provider_key_name, provider_name from decrypted_provider_keys_v2 where id = $1 and soft_delete = false limit 1`,
+      [providerKeyId],
     ),
     (key) => ({
       id: key?.[0]?.id,
@@ -70,7 +70,7 @@ async function getDecryptedProviderKeyById(
       provider_key: key?.[0]?.decrypted_provider_key,
       provider_name: key?.[0]?.provider_name,
       provider_key_name: key?.[0]?.provider_key_name,
-    })
+    }),
   );
 }
 

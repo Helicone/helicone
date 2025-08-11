@@ -25,7 +25,7 @@ export class PosthogClient {
     organizationId?: string,
   ): Promise<boolean> {
     if (!this.isEnabled || !this.apiKey) {
-      console.log(`[PostHog Disabled] Would have sent: ${eventName}`);
+      console.warn(`[PostHog Disabled] Would have sent: ${eventName}`);
       return false;
     }
 

@@ -13,17 +13,15 @@ import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
-import { H3, Muted, P, Small } from "@/components/ui/typography";
 import { FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import AuthHeader from "@/components/shared/authHeader";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
+import "@/styles/settings-tables.css";
+import { SettingsContainer } from "@/components/ui/settings-container";
+import "@/styles/settings.css";
 
-interface AlertsPageProps {}
-
-const AlertsPage = (props: AlertsPageProps) => {
+const AlertsPage = () => {
   const [createNewAlertModal, setCreateNewAlertModal] = useState(false);
   const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
   const [editAlertOpen, setEditAlertOpen] = useState(false);
@@ -44,11 +42,10 @@ const AlertsPage = (props: AlertsPageProps) => {
   }[] = [...(slackChannelsData?.data || [])];
   // Free tier limit checks
   const alertCount = alerts?.length || 0;
-  const {
-    canCreate: canCreateAlert,
-    hasAccess,
-    freeLimit: MAX_ALERTS,
-  } = useFeatureLimit("alerts", alertCount);
+  const { canCreate: canCreateAlert, freeLimit: MAX_ALERTS } = useFeatureLimit(
+    "alerts",
+    alertCount,
+  );
 
   const isOrgLoading = !orgContext || !orgContext.currentOrg;
   const isPageLoading = isLoading || isLoadingSlackChannels || isOrgLoading;
@@ -92,41 +89,45 @@ const AlertsPage = (props: AlertsPageProps) => {
   }
 
   return (
-    <div className="">
-      <AuthHeader title="" />
-
+    <SettingsContainer>
       {!canCreateAlert && (
-        <FreeTierLimitBanner
-          feature="alerts"
-          itemCount={alertCount}
-          freeLimit={MAX_ALERTS}
-          className="mb-6"
-        />
+        <div className="border-b border-border p-4">
+          <FreeTierLimitBanner
+            feature="alerts"
+            itemCount={alertCount}
+            freeLimit={MAX_ALERTS}
+          />
+        </div>
       )}
 
-      <div className="flex flex-col gap-8 px-8">
-        {/* Active Alerts Section */}
-        <section className="flex flex-col gap-6">
-          <div className="flex flex-col gap-2">
-            <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-              <div className="flex flex-col gap-1">
-                <H3>Active Alerts</H3>
-                <Muted>
-                  These are the alerts that are currently active for your
-                  organization
-                </Muted>
-              </div>
-
-              <div className="flex flex-col items-end gap-1">
-                <FreeTierLimitWrapper feature="alerts" itemCount={alertCount}>
-                  <Button variant="action" onClick={handleCreateAlert}>
-                    Create a new alert
-                  </Button>
-                </FreeTierLimitWrapper>
-              </div>
-            </div>
+      {/* Active Alerts Section */}
+      <div className="border-b border-border p-4">
+        <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-sm font-semibold">Active Alerts</h1>
+            <p className="text-xs text-muted-foreground">
+              These are the alerts that are currently active for your
+              organization
+            </p>
           </div>
 
+          <div className="flex flex-col items-end gap-1">
+            <FreeTierLimitWrapper feature="alerts" itemCount={alertCount}>
+              <Button
+                variant="default"
+                size="sm"
+                className="text-xs"
+                onClick={handleCreateAlert}
+              >
+                Create a new alert
+              </Button>
+            </FreeTierLimitWrapper>
+          </div>
+        </div>
+      </div>
+
+      <div className="border-b border-border">
+        <div className="settings-table border-t border-border">
           <ThemedTable
             columns={[
               { name: "Name", key: "key_name", hidden: false },
@@ -150,14 +151,14 @@ const AlertsPage = (props: AlertsPageProps) => {
             rows={alerts?.map((key) => {
               return {
                 ...key,
-                key_name: <P className="font-semibold">{key.name}</P>,
+                key_name: <p className="text-xs font-semibold">{key.name}</p>,
                 status: (
                   <div>
                     {key.status === "resolved" ? (
                       <Tooltip title={"Healthy"}>
                         <Badge
-                          variant="default"
-                          className="bg-green-500 hover:bg-green-600"
+                          variant="outline"
+                          className="border-emerald-500 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-400 dark:bg-emerald-950 dark:text-emerald-300 dark:hover:bg-emerald-900"
                         >
                           Healthy
                         </Badge>
@@ -170,27 +171,31 @@ const AlertsPage = (props: AlertsPageProps) => {
                   </div>
                 ),
                 created_at: (
-                  <Small className="text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     {getUSDate(new Date(key.created_at || ""))}
-                  </Small>
+                  </p>
                 ),
                 threshold: (
-                  <P>
+                  <p className="text-xs">
                     {key.metric === "response.status" && (
                       <span>{`${key.threshold}%`}</span>
                     )}
                     {key.metric === "cost" && (
                       <span>{`$${Number(key.threshold).toFixed(2)}`}</span>
                     )}
-                  </P>
+                  </p>
                 ),
                 metric: (
                   <Badge variant="helicone">
                     {key.metric === "response.status" ? "status" : key.metric}
                   </Badge>
                 ),
-                time_window: <P>{formatTimeWindow(key.time_window)}</P>,
-                minimum_request_count: <P>{key.minimum_request_count}</P>,
+                time_window: (
+                  <p className="text-xs">{formatTimeWindow(key.time_window)}</p>
+                ),
+                minimum_request_count: (
+                  <p className="text-xs">{key.minimum_request_count}</p>
+                ),
                 emails: <div className="flex">{key.emails.join(", ")}</div>,
                 slack_channels: (
                   <div className="flex">
@@ -216,26 +221,32 @@ const AlertsPage = (props: AlertsPageProps) => {
               setSelectedAlert(row);
             }}
           />
-        </section>
+        </div>
+      </div>
 
-        {/* Alert History Section */}
-        <section className="flex flex-col gap-6">
-          <div className="flex flex-col gap-1">
-            <H3>Alert History</H3>
-            <Muted>
-              These are the alerts that have been triggered for your
-              organization
-            </Muted>
+      {/* Alert History Section */}
+      <div className="border-b border-border p-4">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-sm font-semibold">Alert History</h2>
+          <p className="text-xs text-muted-foreground">
+            These are the alerts that have been triggered for your organization
+          </p>
+        </div>
+      </div>
+
+      <div className="p-4">
+        {alertHistory.length === 0 ? (
+          <div className="border-2 border-dashed border-border bg-muted p-8 text-center">
+            <FileText
+              size={24}
+              className="mx-auto mb-2 text-muted-foreground"
+            />
+            <p className="text-xs font-medium">
+              No alerts have been triggered yet
+            </p>
           </div>
-
-          {alertHistory.length === 0 ? (
-            <Card className="border-2 border-dashed border-border">
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <FileText size={24} className="mb-2 text-foreground" />
-                <P className="font-medium">No alerts have been triggered yet</P>
-              </CardContent>
-            </Card>
-          ) : (
+        ) : (
+          <div className="settings-table border-t border-border">
             <ThemedTable
               columns={[
                 {
@@ -260,20 +271,20 @@ const AlertsPage = (props: AlertsPageProps) => {
                 return {
                   ...key,
                   alertStartTime: (
-                    <P className="font-semibold">
+                    <p className="text-xs font-semibold">
                       {getUSDate(new Date(key.alert_start_time))}
-                    </P>
+                    </p>
                   ),
                   alertEndTime: (
-                    <P className="font-semibold">
+                    <p className="text-xs font-semibold">
                       {key.alert_end_time
                         ? getUSDate(new Date(key.alert_end_time))
                         : ""}
-                    </P>
+                    </p>
                   ),
-                  alertName: <P>{key.alert_name}</P>,
+                  alertName: <p className="text-xs">{key.alert_name}</p>,
                   triggered_value: (
-                    <P>
+                    <p className="text-xs">
                       {key.alert_metric === "response.status" && (
                         <span>{`${key.triggered_value}%`}</span>
                       )}
@@ -284,7 +295,7 @@ const AlertsPage = (props: AlertsPageProps) => {
                         key.alert_metric !== "cost" && (
                           <span>{key.triggered_value}</span>
                         )}
-                    </P>
+                    </p>
                   ),
                   status: (
                     <Badge
@@ -298,35 +309,35 @@ const AlertsPage = (props: AlertsPageProps) => {
                 };
               })}
             />
-          )}
-        </section>
-
-        {/* Modals */}
-        <CreateAlertModal
-          open={createNewAlertModal}
-          setOpen={setCreateNewAlertModal}
-          onSuccess={() => {
-            refetch();
-          }}
-        />
-        <EditAlertModal
-          open={editAlertOpen}
-          setOpen={setEditAlertOpen}
-          onSuccess={() => {
-            refetch();
-          }}
-          currentAlert={selectedAlert}
-        />
-        <DeleteAlertModal
-          open={deleteAlertOpen}
-          setOpen={setDeleteAlertOpen}
-          onSuccess={() => {
-            refetch();
-          }}
-          alertId={selectedAlert?.id || ""}
-        />
+          </div>
+        )}
       </div>
-    </div>
+
+      {/* Modals */}
+      <CreateAlertModal
+        open={createNewAlertModal}
+        setOpen={setCreateNewAlertModal}
+        onSuccess={() => {
+          refetch();
+        }}
+      />
+      <EditAlertModal
+        open={editAlertOpen}
+        setOpen={setEditAlertOpen}
+        onSuccess={() => {
+          refetch();
+        }}
+        currentAlert={selectedAlert}
+      />
+      <DeleteAlertModal
+        open={deleteAlertOpen}
+        setOpen={setDeleteAlertOpen}
+        onSuccess={() => {
+          refetch();
+        }}
+        alertId={selectedAlert?.id || ""}
+      />
+    </SettingsContainer>
   );
 };
 

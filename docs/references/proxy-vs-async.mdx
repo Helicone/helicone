@@ -58,7 +58,7 @@ Since the proxy sits on the edge and is the gatekeeper of the requests, you get 
 
     # Generate a chat completion request
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4o-mini",
         messages=[{"role": "user", "content": "Say hi!"}],
         headers={
             "Helicone-Auth": "Bearer [HELICONE_API_KEY]"  # Your Helicone API key

@@ -61,7 +61,7 @@ const SidebarHelpDropdown = ({
     }
   }, [pathname]);
   return (
-    <div className="flex w-full flex-col items-center gap-2">
+    <div className="flex w-full flex-col items-center">
       <DropdownMenu
         modal={false}
         onOpenChange={
@@ -88,9 +88,6 @@ const SidebarHelpDropdown = ({
               >
                 ?
               </span>
-              {hasNewChangelog && (
-                <span className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-destructive"></span>
-              )}
             </div>
             {!isCollapsed && <span>Help</span>}
           </Button>
@@ -103,6 +100,19 @@ const SidebarHelpDropdown = ({
               <ArrowUpRightIcon className="ml-2 h-3.5 w-3.5 text-slate-400 dark:text-slate-600" />
             </DropdownMenuItem>
           </Link>
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onSelect={() => {
+              setChatOpen(!chatOpen);
+              Intercom({
+                app_id: INTERCOM_APP_ID,
+                hide_default_launcher: !chatOpen,
+              });
+            }}
+          >
+            <MessageCircleMore className="mr-2 h-4 w-4 text-slate-500" />
+            Message us
+          </DropdownMenuItem>
           <Link href="https://discord.gg/zsSTcH2qhG" target="_blank">
             <DropdownMenuItem className="cursor-pointer">
               <FaDiscord className="mr-2 h-4 w-4 text-slate-500" />
@@ -166,33 +176,6 @@ const SidebarHelpDropdown = ({
           </Link>
         </DropdownMenuContent>
       </DropdownMenu>
-
-      <Button
-        variant="outline"
-        size="none"
-        onClick={() => {
-          setChatOpen(!chatOpen);
-          Intercom({
-            app_id: INTERCOM_APP_ID,
-            hide_default_launcher: !chatOpen,
-          });
-        }}
-        className={clsx(
-          "flex items-center text-xs text-muted-foreground hover:text-foreground",
-          isCollapsed ? "h-9 w-9" : "h-7 w-full gap-1",
-          chatOpen && "text-primary",
-        )}
-      >
-        <MessageCircleMore
-          size={12}
-          className={clsx(
-            chatOpen
-              ? "text-primary"
-              : "text-muted-foreground hover:text-primary",
-          )}
-        />
-        {!isCollapsed && <div>Message us</div>}
-      </Button>
     </div>
   );
 };

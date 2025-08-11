@@ -2,7 +2,7 @@ import { getJawnClient } from "../../lib/clients/jawn";
 
 export const updateRequestFeedback = async (
   requestId: string,
-  rating: boolean
+  rating: boolean,
 ) => {
   const jawn = getJawnClient();
 
@@ -22,7 +22,7 @@ export const addRequestProperty = async (
   requestId: string,
   orgId: string,
   key: string,
-  value: string
+  value: string,
 ) => {
   const jawn = getJawnClient(orgId);
   return (
@@ -44,7 +44,7 @@ export const addRequestScore = async (
   requestId: string,
   orgId: string,
   key: string,
-  value: number | boolean
+  value: number | boolean,
 ) => {
   const jawn = getJawnClient(orgId);
   return (

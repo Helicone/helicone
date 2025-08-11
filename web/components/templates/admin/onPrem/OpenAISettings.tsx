@@ -90,7 +90,6 @@ export const OpenAISettings = () => {
                       setNotification("Settings saved", "success");
                     } else {
                       setNotification("Failed to save settings", "error");
-                      console.log(s.response);
                     }
                   });
               }}

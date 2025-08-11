@@ -185,7 +185,7 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                           setCategorySelected(false);
                         }}
                       >
-                        {({ selected, active }) => (
+                        {({ selected, active: _ }) => (
                           <>
                             <span className={clsx("text-md block truncate")}>
                               {option.label}

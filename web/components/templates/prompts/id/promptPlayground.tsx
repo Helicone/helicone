@@ -153,7 +153,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     newContent: string,
     newRole: string,
   ) => {
-    console.log("handleUpdateMessage", index, newContent, newRole);
+    // Handle message update
     const updatedChat = [...currentChat];
     if (typeof updatedChat[index] === "string") {
       return;

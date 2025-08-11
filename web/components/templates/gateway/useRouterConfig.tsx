@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import yaml from "js-yaml";
+import * as yaml from "js-yaml";
 import { RouterConfigFormState } from "./RouterConfigForm";
 
 export const useRouterConfig = (initialConfig?: any) => {

@@ -1,0 +1,47 @@
+/* 
+ * Shared CSS for settings page tables
+ * This removes the default ThemedTable styling to achieve a flatter look
+ * Used by: HeliconeKeyTable.tsx, alertsPage.tsx
+ */
+
+.settings-table .overflow-auto.rounded-lg.bg-white.ring-1.ring-gray-300 {
+  overflow: visible !important;
+  border-radius: 0 !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  ring: none !important;
+}
+
+.settings-table .dark .overflow-auto.rounded-lg.bg-white.ring-1.ring-gray-300 {
+  background-color: transparent !important;
+}
+
+.settings-table .min-w-full.divide-y.divide-gray-300 {
+  border-collapse: collapse !important;
+}
+
+.settings-table .min-w-full.divide-y.divide-gray-300 th {
+  font-size: 0.75rem !important;
+  padding: 0.75rem !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
+  background-color: transparent !important;
+}
+
+.settings-table .min-w-full.divide-y.divide-gray-300 td {
+  font-size: 0.75rem !important;
+  padding: 0.75rem !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
+}
+
+.settings-table .min-w-full.divide-y.divide-gray-300 tr:last-child td {
+  border-bottom: none !important;
+}
+
+/* Fix action buttons to display horizontally (for alerts page) */
+.settings-table .min-w-full.divide-y.divide-gray-300 td:last-child {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 0.25rem !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+}

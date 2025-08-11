@@ -48,11 +48,9 @@ const ProviderKeySelector = (props: ProviderKeySelectorProps) => {
   const {
     setProviderKeyCallback,
     setDecryptedKey,
-    orgId,
     orgProviderKey,
     variant = "portal",
     defaultProviderKey,
-    showTitle = true,
   } = props;
 
   const { providerKeys, refetchProviderKeys } = useVaultPage();
@@ -73,10 +71,6 @@ const ProviderKeySelector = (props: ProviderKeySelectorProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const org = useOrg();
   const { data: orgMembers } = useGetOrgMembers(org?.currentOrg?.id || "");
-
-  const currentUserRole = orgMembers?.find(
-    (d) => d.email === heliconeAuthClient?.user?.email,
-  )?.org_role;
 
   const changeProviderKeyHandler = useCallback(
     async (newProviderKey: string) => {

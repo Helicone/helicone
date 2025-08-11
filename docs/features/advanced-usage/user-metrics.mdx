@@ -204,7 +204,7 @@ class AIService {
   async processRequest(userId, prompt, userTier = "free") {
     const response = await this.openai.chat.completions.create(
       {
-        model: userTier === "premium" ? "gpt-4o-mini" : "gpt-3.5-turbo",
+        model: userTier === "premium" ? "o3" : "gpt-4o-mini",
         messages: [{ role: "user", content: prompt }]
       },
       {

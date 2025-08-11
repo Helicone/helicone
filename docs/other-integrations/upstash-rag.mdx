@@ -45,7 +45,7 @@ Upstash RAG Chat is a TypeScript toolkit for building powerful retrieval-augment
     import { RAGChat, openai } from "@upstash/rag-chat";
 
     const ragChat = new RAGChat({
-      model: openai("gpt-3.5-turbo", {
+      model: openai("gpt-4o-mini", {
         apiKey: process.env.OPENAI_API_KEY!,
         analytics: { name: "helicone", token: process.env.HELICONE_API_KEY },
       }),

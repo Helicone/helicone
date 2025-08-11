@@ -34,6 +34,7 @@ import { Prompt2025Input } from "../../lib/db/ClickhouseWrapper";
 
 const PROMPT_ID_LENGTH = 6;
 const MAX_PROMPT_ID_GENERATION_ATTEMPTS = 3;
+const PRODUCTION_ENVIRONMENT = 'production';
 
 export class Prompt2025Manager extends BaseManager {
   private s3Client: S3Client;
@@ -58,26 +59,6 @@ export class Prompt2025Manager extends BaseManager {
     return result;
   }
 
-  private async updateProductionVersion(promptId: string, promptVersionId: string): Promise<Result<null, string>> {
-    const updateProductionVersionResult = await dbExecute(
-      `
-      UPDATE prompts_2025
-      SET production_version = $1
-      WHERE id = $2 AND organization = $3
-      `, [
-        promptVersionId,
-        promptId,
-        this.authParams.organizationId,
-      ]
-    )
-
-    if (updateProductionVersionResult?.error) {
-      return err(updateProductionVersionResult.error);
-    }
-
-    return ok(null);
-  }
-
   async totalPrompts(): Promise<Result<number, string>> {
     const result = await dbExecute<{ count: number }>(
       `SELECT COUNT(*) as count FROM prompts_2025 WHERE organization = $1 AND soft_delete is false`,
@@ -88,6 +69,24 @@ export class Prompt2025Manager extends BaseManager {
     }
     return ok(Number(result.data?.[0]?.count ?? 0));
   }
+
+  async getPromptEnvironments(): Promise<Result<string[], string>> {
+    const result = await dbExecute<{ environment: string }>(
+      `SELECT DISTINCT environment 
+       FROM prompts_2025_versions 
+       WHERE organization = $1 AND soft_delete = false AND environment IS NOT NULL
+       ORDER BY environment`,
+      [this.authParams.organizationId]
+    );
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    const environments = result.data?.map(row => row.environment) || [];
+    return ok(environments);
+  }
+
 
   async getPromptTags(): Promise<Result<string[], string>> {
     const result = await dbExecute<{ tags: string }>(
@@ -199,7 +198,8 @@ export class Prompt2025Manager extends BaseManager {
       `SELECT 
         request_id,
         version_id,
-        inputs
+        inputs,
+        environment
       FROM prompts_2025_inputs
       WHERE version_id = $1 AND request_id = $2
       LIMIT 1
@@ -282,7 +282,8 @@ export class Prompt2025Manager extends BaseManager {
         minor_version,
         commit_message,
         created_at,
-        model
+        model,
+        environment
       FROM prompts_2025_versions
       WHERE prompt_id = $1
       AND organization = $2 AND soft_delete is false
@@ -312,7 +313,8 @@ export class Prompt2025Manager extends BaseManager {
         minor_version,
         commit_message,
         created_at,
-        model
+        model,
+        environment
       FROM prompts_2025_versions
       WHERE id = $1
       AND organization = $2 AND soft_delete is false
@@ -409,7 +411,11 @@ export class Prompt2025Manager extends BaseManager {
 
     const promptVersionId = insertPromptVersionResult?.data?.[0]?.id ?? '';
 
-    const updateProductionVersionResult = await this.updateProductionVersion(promptId, promptVersionId);
+    const updateProductionVersionResult = await this.setPromptVersionEnvironment({
+      promptId,
+      promptVersionId,
+      environment: PRODUCTION_ENVIRONMENT,
+    });
     if (updateProductionVersionResult?.error) {
       return err(updateProductionVersionResult.error);
     }
@@ -426,7 +432,7 @@ export class Prompt2025Manager extends BaseManager {
     promptId: string;
     promptVersionId: string;
     newMajorVersion: boolean;
-    setAsProduction: boolean;
+    environment?: string;
     commitMessage: string;
     promptBody: OpenAIChatRequest;
   }): Promise<Result<{ id: string }, string>> {
@@ -510,10 +516,14 @@ export class Prompt2025Manager extends BaseManager {
 
     const promptVersionId = insertPromptVersionResult?.data?.[0]?.id ?? '';
 
-    if (params.setAsProduction) {
-      const updateProductionVersionResult = await this.updateProductionVersion(params.promptId, promptVersionId);
-      if (updateProductionVersionResult?.error) {
-        return err(updateProductionVersionResult.error);
+    if (params.environment) {
+      const updateEnvironmentVersionResult = await this.setPromptVersionEnvironment({
+        promptId: params.promptId,
+        promptVersionId,
+        environment: params.environment,
+      });
+      if (updateEnvironmentVersionResult?.error) {
+        return err(updateEnvironmentVersionResult.error);
       }
     }
 
@@ -525,9 +535,10 @@ export class Prompt2025Manager extends BaseManager {
     return ok({ id: promptVersionId });
   }
 
-  async setProductionVersion(params: {
+  async setPromptVersionEnvironment(params: {
     promptId: string;
     promptVersionId: string;
+    environment: string;
   }): Promise<Result<null, string>> {
     const versionCheck = await dbExecute<{ id: string }>(
       `SELECT id FROM prompts_2025_versions 
@@ -543,15 +554,38 @@ export class Prompt2025Manager extends BaseManager {
       return err("Prompt version not found or does not belong to the specified prompt");
     }
 
-    const result = await dbExecute<null>(
-      `UPDATE prompts_2025 SET production_version = $1 WHERE id = $2 AND organization = $3 AND soft_delete is false`,
-      [params.promptVersionId, params.promptId, this.authParams.organizationId]
-    );
+    // Update production version ref
+    if (params.environment === PRODUCTION_ENVIRONMENT) {
+      const result = await dbExecute<null>(
+        `UPDATE prompts_2025 SET production_version = $1 WHERE id = $2 AND organization = $3 AND soft_delete is false`,
+        [params.promptVersionId, params.promptId, this.authParams.organizationId]
+      );
 
-    if (result.error) {
-      return err(result.error);
+      if (result.error) {
+        return err(result.error);
+      }
     }
 
+    const updateEnvResult = await dbExecute(
+      `
+      BEGIN;
+      
+      UPDATE prompts_2025_versions 
+      SET environment = NULL 
+      WHERE prompt_id = $1 AND organization = $2 AND environment = $3 AND soft_delete = false;
+      
+      UPDATE prompts_2025_versions 
+      SET environment = $3 
+      WHERE id = $4 AND prompt_id = $1 AND organization = $2 AND soft_delete = false;
+      
+      COMMIT;
+      `,
+      [params.promptId, this.authParams.organizationId, params.environment, params.promptVersionId]
+    );
+
+    if (updateEnvResult.error) {
+      return err(updateEnvResult.error);
+    }
     return ok(null);
   }
 

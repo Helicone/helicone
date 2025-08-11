@@ -3,8 +3,6 @@ import { ReactElement } from "react";
 import AdminLayout from "../../components/layout/admin/adminLayout";
 import { withAdminSSR } from "../../lib/api/handlerWrappers";
 
-interface AdminProps {}
-
 const Admin = () => {
   return <AdminPage />;
 };

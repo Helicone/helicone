@@ -3,8 +3,6 @@ import AdminLayout from "../../components/layout/admin/adminLayout";
 import OrgAnalytics from "../../components/templates/admin/orgAnalytics";
 import { withAdminSSR } from "../../lib/api/handlerWrappers";
 
-interface AdminProps {}
-
 const Admin = () => {
   return <OrgAnalytics />;
 };

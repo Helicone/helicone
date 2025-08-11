@@ -1,6 +1,6 @@
 export function placeAssetIdValues(
   inputValues: Record<string, string>,
-  heliconeTemplate: any
+  heliconeTemplate: any,
 ): any {
   function traverseAndTransform(obj: any): any {
     if (typeof obj === "string") {

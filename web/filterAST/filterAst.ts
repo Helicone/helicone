@@ -187,7 +187,7 @@ function all(): AllExpression {
 function condition(
   column: string,
   operator: FilterOperator,
-  value: string | number | boolean
+  value: string | number | boolean,
 ): ConditionExpression {
   return {
     type: "condition",
@@ -254,7 +254,7 @@ function or(...expressions: FilterExpression[]): OrExpression {
 function propertyCondition(
   key: string,
   operator: FilterOperator,
-  value: string | number | boolean
+  value: string | number | boolean,
 ): ConditionExpression {
   return {
     type: "condition",
@@ -282,7 +282,7 @@ function propertyCondition(
  */
 function propertyKeyCondition(
   operator: FilterOperator,
-  value: string
+  value: string,
 ): ConditionExpression {
   return {
     type: "condition",
@@ -311,7 +311,7 @@ function propertyKeyCondition(
 function scoreCondition(
   key: string,
   operator: FilterOperator,
-  value: string | number | boolean
+  value: string | number | boolean,
 ): ConditionExpression {
   return {
     type: "condition",
@@ -339,7 +339,7 @@ function scoreCondition(
  */
 function scoreKeyCondition(
   operator: FilterOperator,
-  value: string
+  value: string,
 ): ConditionExpression {
   return {
     type: "condition",
@@ -642,8 +642,8 @@ export const FilterAST = {
         condition(
           condExpr.field.column,
           negatedOp[condExpr.operator] || "neq",
-          condExpr.value
-        )
+          condExpr.value,
+        ),
       );
     }
     // For complex expressions, we'd need De Morgan's laws
@@ -672,11 +672,11 @@ export type {
 export const DEFAULT_FILTER_EXPRESSION = FilterAST.condition(
   "status",
   "eq",
-  "200"
+  "200",
 );
 
 export const DEFAULT_FILTER_GROUP_EXPRESSION = FilterAST.and(
-  FilterAST.condition("status", "eq", "200")
+  FilterAST.condition("status", "eq", "200"),
 );
 
 export const EMPTY_FILTER_GROUP_EXPRESSION = null;
