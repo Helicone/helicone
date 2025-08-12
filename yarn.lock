@@ -1759,6 +1759,11 @@
   resolved "https://registry.yarnpkg.com/@cloudflare/workerd-windows-64/-/workerd-windows-64-1.20250803.0.tgz#39dc0c64a4a4820da570bf1d8cf4b06d54d2cfd6"
   integrity sha512-uLV8gdudz36o9sUaAKbBxxTwZwLFz1KyW7QpBvOo4+r3Ib8yVKXGiySIMWGD7A0urSMrjf3e5LlLcJKgZUOjMA==
 
+"@cloudflare/workers-types@^4.20250813.0":
+  version "4.20250813.0"
+  resolved "https://registry.yarnpkg.com/@cloudflare/workers-types/-/workers-types-4.20250813.0.tgz#cbce7f5cdc6c958f841dbf6d149b6f88a051c194"
+  integrity sha512-RFFjomDndGR+p7ug1HWDlW21qOJyRZbmI99dUtuR9tmwJbSZhUUnSFmzok9lBYVfkMMrO1O5vmB+IlgiecgLEA==
+
 "@codesandbox/sdk@^0.0.10":
   version "0.0.10"
   resolved "https://registry.npmjs.org/@codesandbox/sdk/-/sdk-0.0.10.tgz"
@@ -18219,6 +18224,13 @@ stripe@17.7.0, stripe@^17.6.0:
   integrity sha512-aT2BU9KkizY9SATf14WhhYVv2uOapBWX0OFWF4xvcj1mPaNotlSc2CsxpS4DS46ZueSppmCF5BX1sNYBtwBvfw==
   dependencies:
     "@types/node" ">=8.1.0"
+    qs "^6.11.0"
+
+stripe@^18.4.0:
+  version "18.4.0"
+  resolved "https://registry.yarnpkg.com/stripe/-/stripe-18.4.0.tgz#1c0d5a7ed168f1ecd0f4a80d1e947e615d3eb841"
+  integrity sha512-LKFeDnDYo4U/YzNgx2Lc9PT9XgKN0JNF1iQwZxgkS4lOw5NunWCnzyH5RhTlD3clIZnf54h7nyMWkS8VXPmtTQ==
+  dependencies:
     qs "^6.11.0"
 
 strnum@^1.0.5:
