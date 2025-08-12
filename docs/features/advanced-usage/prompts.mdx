@@ -12,6 +12,7 @@ Traditional prompt development involves hardcoded prompts in application code, m
 Our Prompts offers a better approach!
 - **Powerful composability**: Variables of all types in system prompts, messages, and tool/response schemas
 - **Clear version control**: Track, compare, and rollback prompt versions without code changes
+- **Environment management**: Full control over deployment environments like production, staging, and development
 - **Easy deployment**: Reference prompts by ID and let our AI Gateway handle the rest
 - **Real-time testing**: Test prompts instantly with different models and parameters
 
@@ -53,20 +54,24 @@ Our Prompts offers a better approach!
   </Step>
 
   <Step title="Run Prompt with AI Gateway">
-    Use your prompt instantly by referencing its ID in your [configured AI Gateway](/ai-gateway/config#helicone-add-ons). No code changes, no rebuilds.
+    Use your prompt instantly by referencing its ID in your [AI Gateway](/features/advanced-usage/cloud-ai-gateway-overview). No code changes, no rebuilds.
 
     <CodeGroup>
       ```typescript TypeScript
       import { OpenAI } from "openai";
 
       const openai = new OpenAI({
-        baseURL: "http://localhost:8080/ai",
-        apiKey: "api-key",
+        baseURL: "https://ai-gateway.helicone.ai/v1",
+        apiKey: "your-openai-api-key",
+        defaultHeaders: {
+          "Helicone-Auth": "Bearer your-helicone-api-key",
+        },
       });
 
       const response = await openai.chat.completions.create({
         model: "openai/gpt-4o-mini",
         prompt_id: "abc123", // Reference your saved prompt
+        environment: "production", // Optional: specify environment
         inputs: {
           customer_name: "John Doe",
           product: "AI Gateway"
@@ -77,12 +82,18 @@ Our Prompts offers a better approach!
       ```python Python
       import openai
 
-      openai.api_base = "http://localhost:8080/ai"
-      openai.api_key = "api-key"
+      client = openai.OpenAI(
+          api_key="your-openai-api-key",
+          base_url="https://ai-gateway.helicone.ai/v1",
+          default_headers={
+              "Helicone-Auth": "Bearer your-helicone-api-key"
+          }
+      )
 
-      response = openai.chat.completions.create(
+      response = client.chat.completions.create(
           model="openai/gpt-4o-mini",
           prompt_id="abc123",  # Reference your saved prompt
+          environment="production",  # Optional: specify environment
           inputs={
               "customer_name": "John Doe",
               "product": "AI Gateway"
@@ -91,11 +102,14 @@ Our Prompts offers a better approach!
       ```
 
       ```bash cURL
-      curl http://localhost:8080/ai/chat/completions \
+      curl https://ai-gateway.helicone.ai/v1/chat/completions \
         -H "Content-Type: application/json" \
+        -H "Authorization: Bearer your-openai-api-key" \
+        -H "Helicone-Auth: Bearer your-helicone-api-key" \
         -d '{
           "model": "openai/gpt-4o-mini",
           "prompt_id": "abc123",
+          "environment": "production",
           "inputs": {
             "customer_name": "John Doe",
             "product": "AI Gateway"
@@ -113,6 +127,18 @@ Our Prompts offers a better approach!
 ## Prompt Assembly Process
 
 When you make an LLM call with a prompt ID, the AI Gateway will compile your saved prompt alongside runtime parameters you provide.
+
+### Version Selection
+
+The AI Gateway automatically determines which prompt version to use based on the parameters you provide:
+
+1. **Environment specified**: If you provide an `environment` parameter, the gateway uses the prompt version deployed to that environment (e.g., "production", "staging", "development")
+2. **Version ID specified**: If you provide a `version_id` parameter but no environment, the gateway uses that specific version
+3. **Default behavior**: If neither environment nor version ID is specified, the gateway automatically uses the production version
+
+<Note>
+  Environment takes precedence over version ID. If both are specified, the environment parameter will be used and version ID will be ignored.
+</Note>
 
 ### Parameter Priority
 
@@ -228,6 +254,23 @@ Messages work differently than other parameters. Instead of overriding, runtime 
 <Note>
   This compilation approach gives you the flexibility to have consistent prompt templates while still allowing runtime customization for specific use cases.
 </Note>
+
+## Managing Environments
+
+You can easily manage different deployment environments for your prompts directly in the Helicone dashboard. Create and deploy prompts to production, staging, development, or any custom environment you need.
+
+<Frame>
+  <video width="100%" autoPlay loop muted playsInline>
+    <source
+      src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/Prompts2025-Environment.mp4"
+      type="video/mp4"
+    />
+    <img
+      src="/static/features/prompts/environment_placeholder.png"
+      alt="Managing prompt environments in Helicone dashboard"
+    />
+  </video>
+</Frame>
 
 ## Variables
 
@@ -407,6 +450,7 @@ Prompts through the AI Gateway come with several benefits:
 
     Both types extend the OpenAI SDK's chat completion parameters and add:
     - `prompt_id` - Your saved prompt identifier
+    - `environment` - Optional environment to target (e.g., "production", "staging")
     - `version_id` - Optional specific version (defaults to production version)
     - `inputs` - Variable values
 
@@ -425,8 +469,14 @@ Prompts through the AI Gateway come with several benefits:
 
     | Type | Description | Use Case |
     |------|-------------|----------|
-    | `HeliconeChatParams` | Chat completion parameters with prompt support | All prompt requests |
+    | `HeliconeChatParams` | Chat completion parameters with prompt support (includes environment) | All prompt requests |
     | `PromptCompilationResult` | Result with body and validation errors | Error handling |
+
+    The `HeliconeChatParams` type includes all OpenAI parameters plus:
+    - `prompt_id` - Your saved prompt identifier
+    - `environment` - Optional environment to target (e.g., "production", "staging")
+    - `version_id` - Optional specific version (defaults to production version)
+    - `inputs` - Variable values for template substitution
 
     The main class for direct SDK integration:
     ```python
@@ -445,8 +495,11 @@ Both SDKs provide the `HeliconePromptManager` with these main methods:
 
 | Method | Description | Returns |
 |--------|-------------|---------|
+| `pullPromptVersion()` | Determine which prompt version to use | Prompt version object |
 | `pullPromptBody()` | Fetch raw prompt from storage | Raw prompt body |
-| `getPromptBody()` | Compile prompt with inputs and validation | Compiled body + validation errors |
+| `pullPromptBodyByVersionId()` | Fetch prompt by specific version ID | Raw prompt body |
+| `mergePromptBody()` | Merge prompt with inputs and validation | Compilation result |
+| `getPromptBody()` | Complete compile process with inputs | Compiled body + validation errors |
 
 ### Usage Examples
 
@@ -491,7 +544,7 @@ Both SDKs provide the `HeliconePromptManager` with these main methods:
       }
       ```
 
-      ```typescript With Version Control
+      ```typescript With Environment Control
       import OpenAI from 'openai';
       import { HeliconePromptManager } from '@helicone/helpers';
 
@@ -507,10 +560,10 @@ Both SDKs provide the `HeliconePromptManager` with these main methods:
         apiKey: "your-helicone-api-key"
       });
 
-      async function useSpecificVersion() {
+      async function useEnvironmentVersion() {
         const { body, errors } = await promptManager.getPromptBody({
           prompt_id: "abc123",
-          version_id: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+          environment: "staging", // Use staging environment
           model: "gpt-4o-mini",
           inputs: {
             user_query: "How does caching work?",
@@ -519,6 +572,26 @@ Both SDKs provide the `HeliconePromptManager` with these main methods:
           messages: [
             { role: "user", content: "Follow up question..." }
           ]
+        });
+
+        if (errors.length > 0) {
+          console.warn("Variable validation failed:", errors);
+        }
+
+        return await openai.chat.completions.create(body);
+      }
+      ```
+
+      ```typescript With Specific Version
+      async function useSpecificVersion() {
+        const { body, errors } = await promptManager.getPromptBody({
+          prompt_id: "abc123",
+          version_id: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+          model: "gpt-4o-mini",
+          inputs: {
+            user_query: "How does caching work?",
+            context: "technical documentation"
+          }
         });
 
         if (errors.length > 0) {
@@ -611,7 +684,7 @@ Both SDKs provide the `HeliconePromptManager` with these main methods:
           print(response.choices[0].message.content)
       ```
 
-      ```python With Version Control
+      ```python With Environment Control
       import openai
       from helicone_helpers import HeliconePromptManager
 
@@ -627,10 +700,10 @@ Both SDKs provide the `HeliconePromptManager` with these main methods:
           api_key="your-helicone-api-key"
       )
 
-      def use_specific_version():
+      def use_environment_version():
           result = prompt_manager.get_prompt_body({
               "prompt_id": "abc123",
-              "version_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+              "environment": "staging",  # Use staging environment
               "model": "gpt-4o-mini",
               "inputs": {
                   "user_query": "How does caching work?",
@@ -639,6 +712,24 @@ Both SDKs provide the `HeliconePromptManager` with these main methods:
               "messages": [
                   {"role": "user", "content": "Follow up question..."}
               ]
+          })
+
+          if result["errors"]:
+              print("Variable validation failed:", result["errors"])
+
+          return client.chat.completions.create(**result["body"])
+      ```
+
+      ```python With Specific Version
+      def use_specific_version():
+          result = prompt_manager.get_prompt_body({
+              "prompt_id": "abc123",
+              "version_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+              "model": "gpt-4o-mini",
+              "inputs": {
+                  "user_query": "How does caching work?",
+                  "context": "technical documentation"
+              }
           })
 
           if result["errors"]:
@@ -692,5 +783,5 @@ Both SDKs provide the `HeliconePromptManager` with these main methods:
 The Helicone AI Gateway is the recommended way to interact with prompts, as it offers a fully OpenAI-compatible router, caching, rate limits, and more alongside prompts usage. However, the SDK is a great option for users that need direct interaction with compiled prompt bodies.
 
 <Note>
-  Both approaches are fully compatible with all OpenAI SDK features including function calling, response formats, and advanced parameters. The `HeliconePromptManager` gives you the additional benefit of validation error handling.
+  Both approaches are fully compatible with all OpenAI SDK features including function calling, response formats, and advanced parameters. The `HeliconePromptManager`, while not providing input traces, will provide validation error handling.
 </Note>
