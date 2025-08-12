@@ -536,3 +536,4 @@ function handleError(e: unknown): Response {
   );
 }
 export { InMemoryRateLimiter };
+export { Wallet } from "./lib/durableObjects/Wallet";

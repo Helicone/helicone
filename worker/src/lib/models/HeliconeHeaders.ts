@@ -79,6 +79,7 @@ export interface IHeliconeHeaders {
     experimentId: Nullable<string>;
   };
   heliconeManualAccessKey: Nullable<string>;
+  cloudBillingEnabled: Nullable<boolean>;
 }
 
 export class HeliconeHeaders implements IHeliconeHeaders {
@@ -147,6 +148,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   lytixKey: Nullable<string>;
   lytixHost: Nullable<string>;
   heliconeManualAccessKey: Nullable<string>;
+  cloudBillingEnabled: Nullable<boolean>;
 
   constructor(private headers: Headers) {
     const heliconeHeaders = this.getHeliconeHeaders();
@@ -195,6 +197,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       experimentId: heliconeHeaders.experimentHeaders.experimentId,
     };
     this.heliconeManualAccessKey = heliconeHeaders.heliconeManualAccessKey;
+    this.cloudBillingEnabled = heliconeHeaders.cloudBillingEnabled;
   }
 
   private getFallBacks(): Nullable<HeliconeFallback[]> {
@@ -387,6 +390,12 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       },
       heliconeManualAccessKey:
         this.headers.get("Helicone-Manual-Access-Key") ?? null,
+      cloudBillingEnabled:
+        (
+          this.headers.get("Helicone-Cloud-Billing") ??
+          this.headers.get("Helicone-Cloud-Billing-Enabled") ??
+          ""
+        ).toLowerCase() === "true",
     };
   }
 

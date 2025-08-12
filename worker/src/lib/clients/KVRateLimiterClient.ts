@@ -63,12 +63,13 @@ function binarySearchFirstRelevantIndex(
   return result;
 }
 
-interface RateLimitProps {
+export interface RateLimitProps {
   heliconeProperties: HeliconeProperties;
   userId: string | undefined;
   rateLimitOptions: RateLimitOptions;
   organizationId: string | undefined;
   rateLimitKV: KVNamespace;
+  cost?: number;
 }
 
 export async function checkRateLimit(
@@ -153,6 +154,11 @@ export async function updateRateLimitCounter(
     prunedTimestamps.push({
       timestamp: now,
       unit: 1,
+    });
+  } else if (props.rateLimitOptions.unit === "cents") {
+    prunedTimestamps.push({
+      timestamp: now,
+      unit: Math.round((props.cost ?? 0) * 100),
     });
   }
 

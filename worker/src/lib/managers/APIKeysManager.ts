@@ -55,7 +55,7 @@ export class APIKeysManager {
   /**
    * @returns the organization id or null if the api key is not found
    */
-  async getAPIKeyWithFetch(apiKeyHash: string): Promise<string | null> {
+  async getOrgIdWithFetch(apiKeyHash: string): Promise<string | null> {
     const key = await getFromKVCacheOnly(`api_keys_${apiKeyHash}`, this.env);
     if (!key) {
       const key = await this.store.getAPIKeyWithFetch(apiKeyHash);

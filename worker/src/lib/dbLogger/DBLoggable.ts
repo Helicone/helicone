@@ -83,6 +83,7 @@ export interface AuthParams {
   accessDict: {
     cache: boolean;
   };
+  stripeCustomerId?: string;
 }
 
 export function dbLoggableRequestFromProxyRequest(
@@ -233,7 +234,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
 // Represents an object that can be logged to the database
 export class DBLoggable {
   private response: DBLoggableProps["response"];
-  private request: DBLoggableProps["request"];
+  request: DBLoggableProps["request"];
   private timing: DBLoggableProps["timing"];
   private provider: Provider;
   private tokenCalcUrl: string;
@@ -568,6 +569,11 @@ export class DBLoggable {
     Result<
       {
         cost: number;
+        model: string;
+        promptTokens?: number;
+        completionTokens?: number;
+        promptCacheWriteTokens: number;
+        promptCacheReadTokens: number;
       } | null,
       string
     >
@@ -606,15 +612,19 @@ export class DBLoggable {
         console.error(`Error checking rate limit: ${e}`);
       }
 
-      await this.useKafka(
-        db,
-        authParams,
-        S3_ENABLED,
-        orgRateLimit,
-        requestHeaders,
-        cachedHeaders,
-        cacheSettings
-      );
+      try {
+        await this.useKafka(
+          db,
+          authParams,
+          S3_ENABLED,
+          orgRateLimit,
+          requestHeaders,
+          cachedHeaders,
+          cacheSettings
+        );
+      } catch (e) {
+        console.error(`Error logging: ${e}`);
+      }
 
       // THIS IS ONLY USED FOR COST CALCULATION ON RATELIMITING
       const readResponse = await this.readResponse();
@@ -634,13 +644,24 @@ export class DBLoggable {
             (readResponse.data?.response.completion_tokens ?? 0) +
             (readResponse.data?.response.prompt_tokens ?? 0),
           provider: this.request.provider ?? "",
-        }) ?? 0;
+          prompt_cache_write_tokens:
+            readResponse.data?.response?.prompt_cache_write_tokens ?? 0,
+          prompt_cache_read_tokens:
+            readResponse.data?.response?.prompt_cache_read_tokens ?? 0,
+        });
 
       return ok({
-        cost: cost,
+        cost,
+        model,
+        promptTokens: readResponse.data?.response?.prompt_tokens ?? undefined,
+        completionTokens: readResponse.data?.response?.completion_tokens ?? undefined,
+        promptCacheWriteTokens:
+          readResponse.data?.response?.prompt_cache_write_tokens ?? 0,
+        promptCacheReadTokens:
+          readResponse.data?.response?.prompt_cache_read_tokens ?? 0,
       });
     } catch (error) {
-      return err("Error logging");
+      return err("Error getting auth params");
     }
   }
 
@@ -831,6 +852,8 @@ export class DBLoggable {
     sum_prompt_tokens: number;
     sum_completion_tokens: number;
     sum_tokens: number;
+    prompt_cache_write_tokens: number;
+    prompt_cache_read_tokens: number;
   }): number {
     const model = modelRow.model;
     const promptTokens = modelRow.sum_prompt_tokens;
@@ -841,8 +864,8 @@ export class DBLoggable {
         promptTokens,
         completionTokens,
         provider: modelRow.provider,
-        promptCacheWriteTokens: 0,
-        promptCacheReadTokens: 0,
+        promptCacheWriteTokens: modelRow.prompt_cache_write_tokens,
+        promptCacheReadTokens: modelRow.prompt_cache_read_tokens,
         promptAudioTokens: 0,
         completionAudioTokens: 0,
       }) ?? 0

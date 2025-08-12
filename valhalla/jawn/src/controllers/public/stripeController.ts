@@ -5,6 +5,7 @@ import {
   Get,
   Path,
   Post,
+  Query,
   Request,
   Route,
   Security,
@@ -12,6 +13,7 @@ import {
 } from "tsoa";
 import { StripeManager } from "../../managers/stripe/StripeManager";
 import type { JawnAuthenticatedRequest } from "../../types/request";
+import { isError } from "../../packages/common/result";
 
 export interface UpgradeToProRequest {
   addons?: {
@@ -27,6 +29,11 @@ export interface UpgradeToProRequest {
 export interface UpgradeToTeamBundleRequest {
   ui_mode?: "embedded" | "hosted";
 }
+
+export interface CreateCloudGatewayCheckoutSessionRequest {
+  amount: number;
+}
+
 
 export interface LLMUsage {
   model: string;
@@ -99,6 +106,68 @@ export class StripeController extends Controller {
 
     return result.data;
   }
+
+  @Get("/cloud/credit-balance")
+  public async getCreditBalance(@Request() request: JawnAuthenticatedRequest) {
+    const stripeManager = new StripeManager(request.authParams);
+    const result = await stripeManager.getCreditBalance();
+
+    if (result.error) {
+      this.setStatus(400);
+      throw new Error(result.error);
+    }
+
+    return result.data;
+  }
+
+  @Get("/cloud/credit-balance-transactions")
+  public async getCreditBalanceTransactions(
+    @Request() request: JawnAuthenticatedRequest,
+    @Query() limit?: number,
+    @Query() starting_after?: string,
+  ) {
+    const stripeManager = new StripeManager(request.authParams);
+    if (limit && limit > 100) {
+      this.setStatus(400);
+      throw new Error("Limit must be less than 100");
+    }
+
+    const result = await stripeManager.getCreditBalanceTransactions({
+      limit: limit ?? 10,
+      starting_after,
+    });
+
+    if (result.error) {
+      this.setStatus(400);
+      throw new Error(result.error);
+    }
+
+    return result.data;
+  }
+
+  @Post("/cloud/checkout-session")
+  public async createCloudGatewayCheckoutSession(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body() body: CreateCloudGatewayCheckoutSessionRequest
+  ): Promise<string> {
+    const stripeManager = new StripeManager(request.authParams);
+    if (body.amount < 5 || body.amount > 500) {
+      this.setStatus(400);
+      throw new Error("Amount must be between 5 and 500");
+    }
+    const result = await stripeManager.createCloudGatewayCheckoutSession(
+      request.headers.origin ?? "",
+      body.amount,
+    );
+
+    if (isError(result)) {
+      this.setStatus(400);
+      throw new Error(result.error);
+    }
+
+    return result.data;
+  }
+
 
   @Post("/subscription/new-customer/upgrade-to-pro")
   public async upgradeToPro(
