@@ -137,7 +137,7 @@
     "sonner": "^2.0.1",
     "sql-query-identifier": "^2.8.0",
     "string-similarity-js": "^2.1.4",
-    "stripe": "^17.6.0",
+    "stripe": "^17.7.0",
     "tailwind-merge": "^2.5.2",
     "vaul": "^1.1.2",
     "zustand": "^5.0.3"

@@ -614,6 +614,7 @@ export class LoggingHandler extends AbstractLogHandler {
       prompt_id: context.message.heliconeMeta.promptId ?? "",
       prompt_version: context.message.heliconeMeta.promptVersionId ?? "",
       request_referrer: context.message.log.request.requestReferrer ?? "",
+      is_passthrough_billing: context.message.heliconeMeta.isPassthroughBilling ?? false,
     };
 
     return requestResponseLog;

@@ -117,6 +117,7 @@ export type HeliconeMeta = {
   heliconeManualAccessKey?: string;
   gatewayRouterId?: string;
   gatewayDeploymentTarget?: string;
+  isPassthroughBilling?: boolean;
 };
 
 export type KafkaMessageContents = {

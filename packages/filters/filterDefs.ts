@@ -219,6 +219,8 @@ interface RequestResponseRMTToOperators {
   "helicone-score-feedback": SingleKey<BooleanOperators>; // TODO: make this not a string literal key
   prompt_id: SingleKey<TextOperators>;
   prompt_version: SingleKey<TextOperators>;
+  request_referrer: SingleKey<TextOperators>;
+  is_passthrough_billing: SingleKey<BooleanOperators>;
 }
 export type FilterLeafRequestResponseRMT =
   SingleKey<RequestResponseRMTToOperators>;

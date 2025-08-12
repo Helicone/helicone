@@ -79,7 +79,6 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
       // since we have pricing rates that are separate for audio, input, output, and cached tokens,
       // we need to separate those components out here so that we can correctly calculate the cost.
       const usageData = consolidatedData.usage;
-
       let usage;
       if (usageData) {
         const effectivePromptTokens =

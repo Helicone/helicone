@@ -46,8 +46,6 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
     enabled: !!orgId,
   });
 
-  // Get provider-specific data
-
   // Mutation to create/update provider key
   const updateProviderKey = useMutation({
     mutationFn: async ({
@@ -55,11 +53,13 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
       secretKey,
       keyId,
       config,
+      byokEnabled,
     }: {
       key?: string;
       secretKey?: string;
       keyId: string;
       config?: Record<string, any>;
+      byokEnabled: boolean;
     }) => {
       if (!orgId) throw new Error("No organization selected");
 
@@ -75,6 +75,7 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
           providerKey: key,
           providerSecretKey: secretKey,
           config,
+          byokEnabled,
         },
       });
     },
@@ -96,12 +97,14 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
       secretKey,
       providerKeyName,
       config,
+      byokEnabled,
     }: {
       providerName: string;
       key: string;
       secretKey?: string;
       providerKeyName: string;
       config?: Record<string, any>;
+      byokEnabled: boolean;
     }) => {
       if (!orgId) throw new Error("No organization selected");
       const jawnClient = getJawnClient(orgId);
@@ -114,6 +117,7 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
             providerSecretKey: secretKey,
             providerKeyName,
             config: config || {},
+            byokEnabled,
           },
         });
 

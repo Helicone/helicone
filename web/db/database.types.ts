@@ -1258,6 +1258,42 @@ export type Database = {
         }
         Relationships: []
       }
+      in_app_threads: {
+        Row: {
+          chat: Json
+          created_at: string
+          escalated: boolean
+          id: string
+          metadata: Json
+          org_id: string
+          soft_delete: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          chat: Json
+          created_at?: string
+          escalated?: boolean
+          id?: string
+          metadata: Json
+          org_id: string
+          soft_delete?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          chat?: Json
+          created_at?: string
+          escalated?: boolean
+          id?: string
+          metadata?: Json
+          org_id?: string
+          soft_delete?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       integrations: {
         Row: {
           active: boolean
@@ -1551,6 +1587,39 @@ export type Database = {
           },
         ]
       }
+      ledger: {
+        Row: {
+          created_at: string
+          credit: number
+          debit: number
+          event_created_at: string
+          id: string
+          org_id: string
+          reference_id: string | null
+          reference_type: string | null
+        }
+        Insert: {
+          created_at?: string
+          credit: number
+          debit: number
+          event_created_at: string
+          id?: string
+          org_id: string
+          reference_id?: string | null
+          reference_type?: string | null
+        }
+        Update: {
+          created_at?: string
+          credit?: number
+          debit?: number
+          event_created_at?: string
+          id?: string
+          org_id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+        }
+        Relationships: []
+      }
       online_evaluators: {
         Row: {
           config: Json | null
@@ -1589,6 +1658,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      org_balance: {
+        Row: {
+          ch_credit_sum: number
+          ch_last_req_created_at: number
+          organization_id: string
+          pg_debit_sum: number
+          updated_at: string
+        }
+        Insert: {
+          ch_credit_sum?: number
+          ch_last_req_created_at?: number
+          organization_id: string
+          pg_debit_sum?: number
+          updated_at?: string
+        }
+        Update: {
+          ch_credit_sum?: number
+          ch_last_req_created_at?: number
+          organization_id?: string
+          pg_debit_sum?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       org_rate_limit_tracker: {
         Row: {
@@ -1930,6 +2023,21 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      processed_webhook_events: {
+        Row: {
+          id: string
+          processed_at: string
+        }
+        Insert: {
+          id: string
+          processed_at?: string
+        }
+        Update: {
+          id?: string
+          processed_at?: string
+        }
+        Relationships: []
       }
       prompt_input_keys: {
         Row: {
@@ -2277,6 +2385,7 @@ export type Database = {
       provider_keys: {
         Row: {
           auth_type: string
+          byok_enabled: boolean | null
           config: Json | null
           created_at: string | null
           cuid: string | null
@@ -2293,6 +2402,7 @@ export type Database = {
         }
         Insert: {
           auth_type?: string
+          byok_enabled?: boolean | null
           config?: Json | null
           created_at?: string | null
           cuid?: string | null
@@ -2309,6 +2419,7 @@ export type Database = {
         }
         Update: {
           auth_type?: string
+          byok_enabled?: boolean | null
           config?: Json | null
           created_at?: string | null
           cuid?: string | null
@@ -2990,6 +3101,7 @@ export type Database = {
       decrypted_provider_keys_v2: {
         Row: {
           auth_type: string | null
+          byok_enabled: boolean | null
           config: Json | null
           created_at: string | null
           cuid: string | null
@@ -3008,6 +3120,7 @@ export type Database = {
         }
         Insert: {
           auth_type?: string | null
+          byok_enabled?: boolean | null
           config?: Json | null
           created_at?: string | null
           cuid?: string | null
@@ -3026,6 +3139,7 @@ export type Database = {
         }
         Update: {
           auth_type?: string | null
+          byok_enabled?: boolean | null
           config?: Json | null
           created_at?: string | null
           cuid?: string | null
@@ -3087,8 +3201,8 @@ export type Database = {
       }
       date_count: {
         Args:
+          | { prev_period: string; time_increment: string }
           | { time_increment: string }
-          | { time_increment: string; prev_period: string }
         Returns: Record<string, unknown>[]
       }
       ensure_one_demo_org: {
@@ -3111,12 +3225,14 @@ export type Database = {
       }
       http_delete: {
         Args:
+          | { content: string; content_type: string; uri: string }
           | { uri: string }
+          | { content: string; content_type: string; uri: string }
           | { uri: string; content: string; content_type: string }
         Returns: Database["public"]["CompositeTypes"]["http_response"]
       }
       http_get: {
-        Args: { uri: string } | { uri: string; data: Json }
+        Args: { data: Json; uri: string } | { uri: string } | { uri: string; data: Json }
         Returns: Database["public"]["CompositeTypes"]["http_response"]
       }
       http_head: {
@@ -3135,17 +3251,19 @@ export type Database = {
         }[]
       }
       http_patch: {
-        Args: { uri: string; content: string; content_type: string }
+        Args: { content: string; content_type: string; uri: string } | { uri: string; content: string; content_type: string }
         Returns: Database["public"]["CompositeTypes"]["http_response"]
       }
       http_post: {
         Args:
+          | { content: string; content_type: string; uri: string }
+          | { data: Json; uri: string }
           | { uri: string; content: string; content_type: string }
           | { uri: string; data: Json }
         Returns: Database["public"]["CompositeTypes"]["http_response"]
       }
       http_put: {
-        Args: { uri: string; content: string; content_type: string }
+        Args: { content: string; content_type: string; uri: string } | { uri: string; content: string; content_type: string }
         Returns: Database["public"]["CompositeTypes"]["http_response"]
       }
       http_reset_curlopt: {
@@ -3158,14 +3276,14 @@ export type Database = {
       }
       insert_feedback_and_update_response: {
         Args: {
-          response_id: string
-          feedback_metric_id: number
           boolean_value: boolean
-          numerical_value: number
-          string_value: string
           categorical_value: string
           created_by: string
+          feedback_metric_id: number
           name: string
+          numerical_value: number
+          response_id: string
+          string_value: string
         }
         Returns: number
       }

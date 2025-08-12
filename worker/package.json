@@ -10,6 +10,7 @@
     "dev": "wrangler dev",
     "start": "wrangler dev",
     "test": "vitest",
+    "test:run": "vitest run",
     "test:registry": "vitest registry-ts",
     "cf-typegen": "wrangler types --strict-vars false",
     "lint": "tsc && eslint --ext .js,.jsx,.ts,.tsx ./src --max-warnings=0",
@@ -51,6 +52,7 @@
     "aws4fetch": "^1.0.18",
     "dateformat": "^5.0.3",
     "events": "^3.3.0",
-    "itty-router": "^4.0.13"
+    "itty-router": "^4.0.13",
+    "stripe": "^18.4.0"
   }
 }

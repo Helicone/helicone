@@ -54,11 +54,13 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
   const { setNotification } = useNotification();
   const {
     isSavingKey,
-    isSavedKey,
     addProviderKey,
     updateProviderKey,
     viewDecryptedProviderKey,
   } = useProvider({ provider });
+
+  // Track saved state locally to control when to show "Saved" vs "Update"
+  const [isSavedLocal, setIsSavedLocal] = useState(false);
 
   // ====== State Management with useState ======
   const [keyValue, setKeyValue] = useState("");
@@ -72,6 +74,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
   );
   const [configVisible, setConfigVisible] = useState(false);
   const [configValues, setConfigValues] = useState<Record<string, string>>({});
+  const [byokEnabled, setByokEnabled] = useState(false);
 
   // Ref for the name input to programmatically focus it
   const nameInputRef = React.useRef<HTMLInputElement>(null);
@@ -82,6 +85,13 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
     provider.id === "azure" ||
     provider.id === "aws" ||
     provider.id === "vertex";
+
+  // Track if there are unsaved changes
+  const hasUnsavedChanges =
+    isEditMode &&
+    (keyValue !== "" ||
+      secretKeyValue !== "" ||
+      byokEnabled !== (existingKey?.byok_enabled || false));
 
   // Generate default name for new instances
   const defaultKeyName =
@@ -133,6 +143,11 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
       setConfigValues(initialConfig);
     }
 
+    // Initialize byokEnabled from existing key
+    if (existingKey?.byok_enabled !== undefined) {
+      setByokEnabled(existingKey.byok_enabled);
+    }
+
     // Initialize key name for new instances
     if (!existingKey && isMultipleMode) {
       setKeyName(defaultKeyName);
@@ -141,17 +156,35 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
 
   // Reset key view when saving or after successful save
   useEffect(() => {
-    if (isSavingKey || isSavedKey) {
+    if (isSavingKey) {
       setIsViewingKey(false);
       setDecryptedKey(null);
       setDecryptedSecretKey(null);
     }
 
-    // Notify parent when save is successful (for new instances)
-    if (isSavedKey && !existingKey && onSaveSuccess) {
-      onSaveSuccess();
+    // Set local saved state when save completes
+    if (addProviderKey.isSuccess || updateProviderKey.isSuccess) {
+      setIsSavedLocal(true);
+
+      // Notify parent when save is successful (for new instances)
+      if (!existingKey && onSaveSuccess) {
+        onSaveSuccess();
+      }
     }
-  }, [isSavingKey, isSavedKey, existingKey, onSaveSuccess]);
+  }, [
+    isSavingKey,
+    addProviderKey.isSuccess,
+    updateProviderKey.isSuccess,
+    existingKey,
+    onSaveSuccess,
+  ]);
+
+  // Reset saved state when any changes are made
+  useEffect(() => {
+    if (hasUnsavedChanges) {
+      setIsSavedLocal(false);
+    }
+  }, [hasUnsavedChanges]);
 
   // ====== Event handlers ======
   const handleToggleKeyVisibility = async () => {
@@ -217,6 +250,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
           secretKey: secretKeyValue,
           keyId: existingKey.id,
           config: configValues,
+          byokEnabled,
         });
       } else {
         // Otherwise create a new key using addProviderKey mutation
@@ -226,6 +260,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
           secretKey: secretKeyValue,
           providerKeyName: keyName || defaultKeyName,
           config: configValues,
+          byokEnabled,
         });
       }
     } catch (error) {
@@ -514,13 +549,16 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
 
               <Button
                 onClick={handleSaveKey}
-                disabled={(!keyValue && !isEditMode) || isSavingKey}
+                disabled={
+                  (!keyValue && !isEditMode && !hasUnsavedChanges) ||
+                  isSavingKey
+                }
                 size="sm"
                 className="flex h-7 items-center gap-1 whitespace-nowrap px-2 text-xs"
               >
                 {isSavingKey ? (
                   "Saving..."
-                ) : isSavedKey ? (
+                ) : isSavedLocal && !hasUnsavedChanges ? (
                   <>
                     <Check className="h-3.5 w-3.5" /> Saved
                   </>
@@ -535,6 +573,21 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
                 )}
               </Button>
             </div>
+          </div>
+
+          {/* BYOK toggle */}
+          <div className="mt-2 flex items-center gap-2">
+            <Checkbox
+              id={`byok-${existingKey?.id || instanceIndex}`}
+              checked={byokEnabled}
+              onCheckedChange={(checked) => setByokEnabled(!!checked)}
+            />
+            <Label
+              htmlFor={`byok-${existingKey?.id || instanceIndex}`}
+              className="cursor-pointer text-xs font-normal"
+            >
+              Enable for AI Gateway (BYOK)
+            </Label>
           </div>
 
           {/* Advanced config toggle */}

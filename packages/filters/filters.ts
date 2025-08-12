@@ -275,6 +275,8 @@ const whereKeyMappings: KeyMappings = {
         "request_response_rmt.prompt_cache_write_tokens",
       prompt_id: "request_response_rmt.prompt_id",
       prompt_version: "request_response_rmt.prompt_version",
+      request_referrer: "request_response_rmt.request_referrer",
+      is_passthrough_billing: "request_response_rmt.is_passthrough_billing",
     })(filter, placeValueSafely);
   },
   users_view: easyKeyMappings<"users_view">({}),
