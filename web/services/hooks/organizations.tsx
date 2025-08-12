@@ -14,6 +14,7 @@ import {
   getJawnClient,
 } from "../../lib/clients/jawn";
 import { ORG_ID_COOKIE_KEY } from "../../lib/constants";
+import { OnboardingState } from "./useOrgOnboarding";
 
 const useGetOrgMembers = (orgId: string) => {
   const { data, isLoading, refetch } = $JAWN_API.useQuery(
@@ -137,6 +138,8 @@ const identifyUserOrg = (
     });
   }
 
+  const orgOnboardingStatus = org.onboarding_status as unknown as OnboardingState;
+
   if (org) {
     posthog.group("organization", org.id, {
       name: org.name || "",
@@ -145,6 +148,8 @@ const identifyUserOrg = (
       organization_type: org.organization_type || "",
       date_joined: org.created_at || "",
       has_onboarded: org.has_onboarded || false,
+      has_integrated: orgOnboardingStatus?.hasIntegrated || false,
+      has_completed_quickstart: orgOnboardingStatus?.hasCompletedQuickstart || false,
     });
 
     if (user && env("NEXT_PUBLIC_IS_ON_PREM") !== "true") {
