@@ -1,15 +1,13 @@
 import { $JAWN_API } from "@/lib/clients/jawn";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { useKeys } from "@/components/templates/keys/useKeys";
+import { useProvider } from "@/hooks/useProvider";
 
-export type OnboardingStep =
-  | "ORGANIZATION"
-  | "MEMBERS"
-  | "BILLING"
-  | "REQUEST";
+export type OnboardingStep = "ORGANIZATION" | "MEMBERS" | "BILLING" | "REQUEST";
 
 export type PlanType = "free" | "pro" | "team";
 
@@ -90,12 +88,14 @@ export interface OnboardingState {
     experiments: boolean;
     evals: boolean;
   };
+  hasCompletedQuickstart: boolean;
 }
 
 const defaultOnboardingState: OnboardingState = {
   name: "",
   hasOnboarded: false,
   hasIntegrated: false,
+  hasCompletedQuickstart: false,
   currentStep: "ORGANIZATION",
   selectedTier: "free",
   members: [],
@@ -109,6 +109,8 @@ const defaultOnboardingState: OnboardingState = {
 export const useOrgOnboarding = (orgId: string) => {
   const queryClient = useQueryClient();
   const jawn = useJawnClient();
+  const { keys, refetchKeys } = useKeys();
+  const { providerKeys, refetchProviderKeys } = useProvider();
 
   const draftStore = useDraftOnboardingStore(orgId);
   const {
@@ -144,6 +146,8 @@ export const useOrgOnboarding = (orgId: string) => {
     },
   );
 
+  const hasCompletedQuickstart = onboardingState?.hasCompletedQuickstart ?? false;
+
   useEffect(() => {
     if (
       onboardingState &&
@@ -154,6 +158,34 @@ export const useOrgOnboarding = (orgId: string) => {
     }
   }, []);
 
+  // A cleaner solution for this would be to have the source hooks automatically be
+  // invalidated when a new key is created. This is implemented but NOT working.
+  // 90/10 solution.
+  useEffect(() => {
+    if (!hasCompletedQuickstart) {
+      const keysInterval = setInterval(() => {
+        refetchKeys();
+      }, 5000);
+      
+      const providerKeysInterval = setInterval(() => {
+        refetchProviderKeys();
+      }, 5000);
+
+      return () => {
+        clearInterval(keysInterval);
+        clearInterval(providerKeysInterval);
+      };
+    }
+  }, [hasCompletedQuickstart, refetchKeys, refetchProviderKeys]);
+
+  const hasKeys = useMemo(() => {
+    return !keys?.isLoading && (keys?.data?.data?.data?.length ?? 0) > 0;
+  }, [keys]);
+  
+  const hasProviderKeys = useMemo(() => {
+    return providerKeys && providerKeys.length > 0;
+  }, [providerKeys]);
+
   const currentState = {
     ...onboardingState,
     selectedTier: draftPlan,
@@ -163,8 +195,14 @@ export const useOrgOnboarding = (orgId: string) => {
   const { mutateAsync: saveOnboardingChangesAsync } = useMutation({
     mutationFn: async (newState: Partial<OnboardingState>) => {
       const fullState = {
-        hasOnboarded: newState.hasOnboarded ?? onboardingState?.hasOnboarded ?? false,
-        hasIntegrated: newState.hasIntegrated ?? onboardingState?.hasIntegrated ?? false,
+        hasOnboarded:
+          newState.hasOnboarded ?? onboardingState?.hasOnboarded ?? false,
+        hasIntegrated:
+          newState.hasIntegrated ?? onboardingState?.hasIntegrated ?? false,
+        hasCompletedQuickstart:
+          newState.hasCompletedQuickstart ??
+          onboardingState?.hasCompletedQuickstart ??
+          false,
         currentStep:
           newState.currentStep ??
           onboardingState?.currentStep ??
@@ -208,8 +246,8 @@ export const useOrgOnboarding = (orgId: string) => {
     });
   };
 
-  const completeOnboarding = async () => {
-    await saveOnboardingChangesAsync({ hasOnboarded: true });
+  const updateOnboardingStatus = async (status: Partial<OnboardingState>) => {
+    await saveOnboardingChangesAsync(status);
     clearDraft();
     await queryClient.invalidateQueries({
       queryKey: ["org", orgId, "onboarding"],
@@ -229,6 +267,10 @@ export const useOrgOnboarding = (orgId: string) => {
     draftMembers,
     setDraftMembers,
     updateCurrentStep,
-    completeOnboarding,
+    updateOnboardingStatus,
+    hasKeys,
+    hasProviderKeys,
+    refetchProviderKeys,
+    refetchKeys: keys.refetch,
   };
 };

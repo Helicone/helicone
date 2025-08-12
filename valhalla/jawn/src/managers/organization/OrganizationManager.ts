@@ -67,6 +67,7 @@ export type OnboardingStatus = Partial<{
   selectedTier: string;
   hasOnboarded: boolean;
   hasIntegrated: boolean;
+  hasCompletedQuickstart: boolean;
   members: any[];
   addons: {
     prompts: boolean;

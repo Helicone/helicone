@@ -32,7 +32,9 @@ BEGIN
             'currentStep',
             'ORGANIZATION',
             'members',
-            jsonb_build_array()
+            jsonb_build_array(),
+            'hasCompletedQuickstart',
+            false
         ),
         true,
         false

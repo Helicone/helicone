@@ -107,7 +107,7 @@ export default function OrgDropdown({}: OrgDropdownProps) {
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="flex h-full w-full flex-row justify-start gap-2 px-2 py-2"
+            className="flex h-full w-full flex-row justify-start gap-2 px-2 py-2 hover:bg-sidebar-background"
           >
             <div className="flex flex-col gap-1">
               <div className="flex flex-row items-center gap-2">
@@ -120,7 +120,7 @@ export default function OrgDropdown({}: OrgDropdownProps) {
                     aria-hidden="true"
                   />
                 )}
-                <h3 className="max-w-24 truncate text-left text-sm font-medium">
+                <h3 className="max-w-28 truncate text-left text-sm font-medium">
                   {orgContext?.currentOrg?.name}
                 </h3>
               </div>
