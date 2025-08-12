@@ -26,7 +26,7 @@ const BreadcrumbSeparator = () => (
 
 export const STEP_ROUTES: Record<OnboardingStep, string> = {
   ORGANIZATION: "/onboarding",
-  MEMBERS: "/onboarding",
+  MEMBERS: "/onboarding/members",
   BILLING: "/onboarding/billing",
   REQUEST: "/onboarding/request",
 };
@@ -57,17 +57,9 @@ export const OnboardingHeader = ({ children }: OnboardingHeaderProps) => {
   const billingStep: { label: string; step: OnboardingStep }[] =
     draftPlan !== "free" ? [{ label: "Add billing", step: "BILLING" }] : [];
 
-  const isCreatingOrg =
-    onboardingState?.currentStep === "ORGANIZATION" ||
-    onboardingState?.currentStep === "MEMBERS";
-
   const steps: { label: string; step: OnboardingStep }[] = [
-    {
-      label: "Create an organization",
-      step: isCreatingOrg
-        ? (onboardingState?.currentStep as OnboardingStep)
-        : "ORGANIZATION",
-    },
+    { label: "Create organization", step: "ORGANIZATION" },
+    { label: "Invite members", step: "MEMBERS" },
     ...billingStep,
     { label: "Send a request", step: "REQUEST" },
   ];
