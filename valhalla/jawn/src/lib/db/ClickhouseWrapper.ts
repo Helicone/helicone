@@ -2,7 +2,6 @@ import {
   ClickHouseClient,
   createClient,
   ClickHouseSettings,
-  DataFormat,
 } from "@clickhouse/client";
 import { Result } from "../../packages/common/result";
 import { TestClickhouseClientWrapper } from "./test/TestClickhouseWrapper";
@@ -102,7 +101,11 @@ export class ClickhouseClientWrapper {
   }): Promise<Result<T[], string>> {
     try {
       const query_params = paramsToValues(parameters);
-      if (query.toLowerCase().includes("sql_helicone_organization_id")) {
+      
+      // Check for SQL_helicone_organization_id variations with regex
+      // This catches different cases, underscore variations, and potential injection attempts
+      const forbiddenPattern = /sql[_\s]*helicone[_\s]*organization[_\s]*id/i;
+      if (forbiddenPattern.test(query)) {
         return {
           data: null,
           error: "Query contains 'SQL_helicone_organization_id' keyword, which is not allowed in HQL queries",
