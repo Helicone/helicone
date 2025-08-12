@@ -1,6 +1,7 @@
 import { DurableObject } from "cloudflare:workers";
 import { err, ok, Result } from "../util/results";
 import { StripeManager } from "../managers/StripeManager";
+import { createClient } from "@supabase/supabase-js";
 
 // 10^10 is the scale factor for the balance
 // (which is sent to us by stripe in cents)
@@ -38,9 +39,16 @@ export interface Escrow {
 }
 
 export class Wallet extends DurableObject {
+  private stripeManager: StripeManager;
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
     this.initializeTable();
+    this.stripeManager = new StripeManager(
+      env.STRIPE_WEBHOOK_SECRET,
+      env.STRIPE_SECRET_KEY,
+      env.WALLET,
+      createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY)
+    );
   }
 
   private initializeTable(): void {
@@ -288,7 +296,6 @@ export class Wallet extends DurableObject {
   async updateBalanceIfNeeded(
     orgId: string,
     stripeCustomerId: string,
-    stripeManager: StripeManager
   ): Promise<Result<void, string>> {
     try {
       return await this.ctx.storage.transactionSync(async () => {
@@ -303,7 +310,7 @@ export class Wallet extends DurableObject {
 
         if (timeSinceLastCheck > BALANCE_CHECK_THRESHOLD_MS) {
           const balanceResult =
-            await stripeManager.getCreditBalanceWithRetry(stripeCustomerId);
+            await this.stripeManager.getCreditBalanceWithRetry(stripeCustomerId);
 
           if (balanceResult.data) {
             const scaledBalance = balanceResult.data.balance * SCALE_FACTOR;

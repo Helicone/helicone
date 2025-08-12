@@ -65,7 +65,7 @@ export const authenticate = async (
   const apiKeyManager = new APIKeysManager(store, env);
   const rawAPIKey = await requestWrapper.getRawProviderAuthHeader();
   const hashedAPIKey = await requestWrapper.getProviderAuthHeader();
-  const orgId = await apiKeyManager.getAPIKeyWithFetch(hashedAPIKey ?? "");
+  const orgId = await apiKeyManager.getOrgIdWithFetch(hashedAPIKey ?? "");
 
   return { orgId, rawAPIKey };
 };
@@ -192,7 +192,11 @@ const sendRequest = async (
   parsedBody: any,
   requestWrapper: RequestWrapper,
   providerKey: ProviderKey,
-  forwarder: (targetBaseUrl: string | null, escrowInfo?: EscrowInfo) => Promise<Response>
+  forwarder: (
+    targetBaseUrl: string | null,
+    escrowInfo?: EscrowInfo
+  ) => Promise<Response>,
+  escrowInfo?: EscrowInfo
 ): Promise<Result<Response, Error>> => {
   const body = await buildRequestBody(endpoint, {
     parsedBody,
@@ -222,7 +226,7 @@ const sendRequest = async (
   );
 
   try {
-    const response = await forwarder(targetBaseUrl);
+    const response = await forwarder(targetBaseUrl, escrowInfo);
 
     if (response.ok) {
       return ok(response);
@@ -241,7 +245,10 @@ const sendRequest = async (
 const attemptDirectProviderRequest = async (
   directProviderEndpoint: DirectProviderEndpoint,
   requestWrapper: RequestWrapper,
-  forwarder: (targetBaseUrl: string | null, escrowInfo?: EscrowInfo) => Promise<Response>,
+  forwarder: (
+    targetBaseUrl: string | null,
+    escrowInfo?: EscrowInfo
+  ) => Promise<Response>,
   providerKeysManager: ProviderKeysManager,
   orgId: string,
   parsedBody: any,
@@ -249,28 +256,24 @@ const attemptDirectProviderRequest = async (
   ctx: ExecutionContext
 ): Promise<Result<Response, Error>> => {
   const { provider, modelName } = directProviderEndpoint;
-  const providerKey = await providerKeysManager.getProviderKeyWithFetch(
-    provider,
-    orgId
-  );
+  const guysThisIsNotAKeyObject =
+    await providerKeysManager.getProviderKeyWithFetch(provider, orgId);
 
-  if (!providerKey) {
-    return err({
-      type: "missing_provider_key",
-      message: "Missing/Incorrect provider key",
-      code: 400,
-    });
-  }
-
-  const userEndpointConfig = providerKey.config as UserEndpointConfig;
-
-  // Try to get PTB endpoints first
-  const endpointsResult = registry.getPtbEndpoints(modelName, provider);
-  let endpoints: Endpoint[];
-  if (endpointsResult.data && endpointsResult.data.length > 0) {
-    endpoints = endpointsResult.data;
-  } else {
-    // Fall back to creating a custom endpoint
+  const cloudBillingEnabled =
+    requestWrapper.heliconeHeaders.cloudBillingEnabled;
+  if (!cloudBillingEnabled) {
+    if (!guysThisIsNotAKeyObject) {
+      return err({
+        type: "missing_provider_key",
+        message: "Missing/Incorrect provider key",
+        code: 400,
+      });
+    }
+    const userEndpointConfig =
+      guysThisIsNotAKeyObject.config as UserEndpointConfig;
+    console.debug("passthrough billing not enabled");
+    // TODO: discuss with Justin+Cole the trifecta of:
+    // `.getPtbEndpoints`, `.createFallbackEndpoint`, and `.buildEndpoint`
     const fallback = registry.createFallbackEndpoint(
       modelName,
       provider,
@@ -288,7 +291,7 @@ const attemptDirectProviderRequest = async (
       fallback.data,
       parsedBody,
       requestWrapper,
-      providerKey,
+      guysThisIsNotAKeyObject,
       forwarder
     );
 
@@ -297,6 +300,18 @@ const attemptDirectProviderRequest = async (
     }
 
     return result;
+  }
+
+  const endpointsResult = registry.getPtbEndpoints(modelName, provider);
+  let endpoints: Endpoint[];
+  if (endpointsResult.data && endpointsResult.data.length > 0) {
+    endpoints = endpointsResult.data;
+  } else {
+    return err({
+      type: "model_not_supported",
+      message: `(Provider, Model): (${provider}, ${modelName}) is not supported`,
+      code: 400,
+    });
   }
 
   const modelProviderConfig = registry.getModelProviderConfig(
@@ -312,21 +327,6 @@ const attemptDirectProviderRequest = async (
     });
   }
 
-  const byokEndpoint = registry.buildEndpoint(
-    modelProviderConfig.data,
-    userEndpointConfig
-  );
-
-  if (isErr(byokEndpoint)) {
-    return err({
-      type: "request_failed",
-      message: byokEndpoint.error || "Failed to build BYOK endpoint",
-      code: 500,
-    });
-  }
-
-  const finalEndpoints = [...endpoints, byokEndpoint.data];
-
   const walletId = env.WALLET.idFromName(orgId);
   const walletStub = env.WALLET.get(walletId);
   const disallowList = await walletStub.getDisallowList();
@@ -337,40 +337,61 @@ const attemptDirectProviderRequest = async (
       code: 500,
     });
   }
-  for (const endpoint of finalEndpoints) {
-    let escrowId: string | undefined;
+  for (const endpoint of endpoints) {
     // if cloud billing is enabled, we want to 'reserve' the maximum possible
     // cost of the request in their wallet so that we can avoid overages
-    if (endpoint.ptbEnabled) {
-      const escrowReservation = await reserveEscrow(
-        requestWrapper,
-        env,
-        orgId,
-        endpoint,
-        disallowList.data
-      );
-      if (isErr(escrowReservation)) {
-        return err(escrowReservation.error);
-      }
-      escrowId = escrowReservation.data;
+    if (!endpoint.ptbEnabled) {
+      console.log("ptb is not enabled, using helicone keys");
+      continue;
     }
-  
+    console.log(
+      "cloud billing is enabled, reserving escrow and using helicone keys"
+    );
+    const escrowReservation = await reserveEscrow(
+      requestWrapper,
+      env,
+      orgId,
+      endpoint,
+      disallowList.data
+    );
+    if (isErr(escrowReservation)) {
+      return err(escrowReservation.error);
+    }
+    const escrowInfo = {
+      escrowId: escrowReservation.data.escrowId,
+      provider: endpoint.provider,
+      model: endpoint.providerModelId,
+    };
+    const providerConfiguration =
+      await providerKeysManager.getProviderKeyWithFetch(
+        endpoint.provider,
+        env.HELICONE_ORG_ID
+      );
+    if (!providerConfiguration) {
+      return err({
+        type: "missing_provider_key",
+        message: "Missing/Incorrect provider key",
+        code: 400,
+      });
+    }
+
     const result = await sendRequest(
       endpoint,
       parsedBody,
       requestWrapper,
-      providerKey,
-      forwarder
+      providerConfiguration,
+      forwarder,
+      escrowInfo
     );
 
     if (!isErr(result)) {
       return result;
     }
     // Clean up escrow on error
-    if (escrowId) {
+    if (escrowInfo) {
       ctx.waitUntil(
-        walletStub.cancelEscrow(escrowId).catch((err) => {
-          console.error(`Failed to cancel escrow ${escrowId}:`, err);
+        walletStub.cancelEscrow(escrowInfo.escrowId).catch((err) => {
+          console.error(`Failed to cancel escrow ${escrowInfo.escrowId}:`, err);
         })
       );
     }
@@ -387,7 +408,10 @@ const attemptProvidersRequest = async (
   modelName: string,
   providersEndpoint: EndpointsProviderEndpoint,
   requestWrapper: RequestWrapper,
-  forwarder: (targetBaseUrl: string | null, escrowInfo?: EscrowInfo) => Promise<Response>,
+  forwarder: (
+    targetBaseUrl: string | null,
+    escrowInfo?: EscrowInfo
+  ) => Promise<Response>,
   providerKeysManager: ProviderKeysManager,
   orgId: string,
   parsedBody: any,
@@ -446,7 +470,10 @@ const attemptModelRequest = async ({
 }: {
   model: string;
   requestWrapper: RequestWrapper;
-  forwarder: (targetBaseUrl: string | null, escrowInfo?: EscrowInfo) => Promise<Response>;
+  forwarder: (
+    targetBaseUrl: string | null,
+    escrowInfo?: EscrowInfo
+  ) => Promise<Response>;
   providerKeysManager: ProviderKeysManager;
   orgId: string;
   parsedBody: any;
@@ -500,7 +527,10 @@ export const attemptModelRequestWithFallback = async ({
 }: {
   models: string[];
   requestWrapper: RequestWrapper;
-  forwarder: (targetBaseUrl: string | null, escrowInfo?: EscrowInfo) => Promise<Response>;
+  forwarder: (
+    targetBaseUrl: string | null,
+    escrowInfo?: EscrowInfo
+  ) => Promise<Response>;
   providerKeysManager: ProviderKeysManager;
   promptManager: PromptManager;
   orgId: string;
@@ -587,8 +617,8 @@ const reserveEscrow = async (
   env: Env,
   orgId: string,
   endpoint: Endpoint,
-  disallowList: DisallowListEntry[],
-): Promise<Result<string | undefined, Error>> => {
+  disallowList: DisallowListEntry[]
+): Promise<Result<{ escrowId: string }, Error>> => {
   const walletId = env.WALLET.idFromName(orgId);
   const walletStub = env.WALLET.get(walletId);
 
@@ -617,7 +647,10 @@ const reserveEscrow = async (
         code: 400,
       });
     }
-    if (entry.provider === endpoint.provider && entry.model === endpoint.providerModelId) {
+    if (
+      entry.provider === endpoint.provider &&
+      entry.model === endpoint.providerModelId
+    ) {
       return err({
         type: "request_failed",
         message:
@@ -627,8 +660,7 @@ const reserveEscrow = async (
     }
   }
 
-  const maxPromptCost =
-    endpoint.contextLength * endpoint.pricing.prompt;
+  const maxPromptCost = endpoint.contextLength * endpoint.pricing.prompt;
   const maxCompletionCost =
     endpoint.maxCompletionTokens * endpoint.pricing.completion;
   const worstCaseCost = maxPromptCost + maxCompletionCost;
@@ -647,7 +679,7 @@ const reserveEscrow = async (
     worstCaseCost
   );
 
-  if (escrowResult.error) {
+  if (isErr(escrowResult)) {
     return err({
       type: "request_failed",
       message: escrowResult.error,
@@ -655,5 +687,5 @@ const reserveEscrow = async (
     });
   }
 
-  return ok(escrowResult.data?.escrowId);
+  return ok(escrowResult.data);
 };
