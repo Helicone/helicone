@@ -15,6 +15,8 @@ import { APIKeysStore } from "../../lib/db/APIKeysStore";
 import { APIKeysManager } from "../../lib/managers/APIKeysManager";
 import { ProviderName } from "@helicone-package/cost/models/providers";
 import { BaseOpenAPIRouter } from "../routerFactory";
+import { StripeManager } from "../../lib/managers/StripeManager";
+import { isErr } from "../../lib/util/results";
 const RATE_LIMIT_MS = 1000 * 30;
 
 function getAPIRouterV1(
@@ -508,6 +510,41 @@ function getAPIRouterV1(
     }
   );
 
+  // Credits handler
+  router.get(
+    "/credits",
+    async (
+      _,
+      requestWrapper: RequestWrapper,
+      env: Env,
+      _ctx: ExecutionContext
+    ) => {
+      const client = await createAPIClient(env, _ctx, requestWrapper);
+      const authParams = await client.db.getAuthParams();
+      if (authParams.error !== null) {
+        return client.response.unauthorized();
+      }
+
+      const orgId = authParams.data.organizationId;
+      const walletId = env.WALLET.idFromName(orgId);
+      const walletStub = env.WALLET.get(walletId);
+
+      try {
+        const state = await walletStub.getWalletState(orgId);
+        if (isErr(state)) {
+          return client.response.newError(state.error, 500);
+        } else {
+          return client.response.successJSON(state.data);
+        }
+      } catch (e) {
+        return client.response.newError(
+          e instanceof Error ? e.message : "Failed to fetch credits",
+          500
+        );
+      }
+    }
+  );
+
   router.delete(
     "/alert/:id",
     async (
@@ -533,6 +570,73 @@ function getAPIRouterV1(
       }
 
       return client.response.successJSON({ ok: "true" }, true);
+    }
+  );
+
+  // Stripe Webhook Handler
+  router.post(
+    "/stripe/webhook",
+    async (
+      _,
+      requestWrapper: RequestWrapper,
+      env: Env,
+      _ctx: ExecutionContext
+    ) => {
+      if (!env.STRIPE_WEBHOOK_SECRET) {
+        console.error("STRIPE_WEBHOOK_SECRET not configured");
+        return new Response("Webhook endpoint not configured", { status: 500 });
+      }
+
+      const signature = requestWrapper.headers.get("stripe-signature");
+      if (!signature) {
+        return new Response("Missing stripe-signature header", { status: 400 });
+      }
+
+      const body = await requestWrapper.getRawText();
+      if (!body) {
+        return new Response("Missing request body", { status: 400 });
+      }
+
+      const webhookManager = new StripeManager(
+        env.STRIPE_WEBHOOK_SECRET,
+        env.STRIPE_SECRET_KEY,
+        env.WALLET
+      );
+
+      const { data, error: verifyError } =
+        await webhookManager.verifyAndConstructEvent(body, signature);
+
+      if (verifyError || !data) {
+        console.error("Webhook verification failed:", verifyError);
+        return new Response(verifyError || "Invalid webhook", { status: 400 });
+      }
+
+      const { error: handleError } = await webhookManager.handleEvent(data);
+
+      if (handleError) {
+        console.error("Error handling webhook event:", handleError);
+        return new Response("", { status: 500 });
+      }
+
+      return new Response("", { status: 200 });
+    }
+  );
+
+  router.options(
+    "/stripe/webhook",
+    async (
+      _: unknown,
+      _requestWrapper: RequestWrapper,
+      _env: Env,
+      _ctx: ExecutionContext
+    ) => {
+      return new Response(null, {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "POST",
+          "Access-Control-Allow-Headers": "Content-Type, stripe-signature",
+        },
+      });
     }
   );
 

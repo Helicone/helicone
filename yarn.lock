@@ -17201,6 +17201,13 @@ stripe@17.7.0, stripe@^17.6.0:
     "@types/node" ">=8.1.0"
     qs "^6.11.0"
 
+stripe@^18.4.0:
+  version "18.4.0"
+  resolved "https://registry.yarnpkg.com/stripe/-/stripe-18.4.0.tgz#1c0d5a7ed168f1ecd0f4a80d1e947e615d3eb841"
+  integrity sha512-LKFeDnDYo4U/YzNgx2Lc9PT9XgKN0JNF1iQwZxgkS4lOw5NunWCnzyH5RhTlD3clIZnf54h7nyMWkS8VXPmtTQ==
+  dependencies:
+    qs "^6.11.0"
+
 strnum@^2.1.0:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/strnum/-/strnum-2.1.1.tgz#cf2a6e0cf903728b8b2c4b971b7e36b4e82d46ab"

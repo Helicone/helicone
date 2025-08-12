@@ -8,6 +8,7 @@ logpush = true
 
 durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
+	{ name = "WALLET", class_name = "Wallet" },
 ]
 
 kv_namespaces = [
@@ -78,6 +79,9 @@ EU_S3_BUCKET_NAME = "request-response-storage"
 EU_REQUEST_LOGS_QUEUE_URL = ""
 EU_REQUEST_LOGS_QUEUE_URL_LOW_PRIORITY = ""
 EU_AWS_REGION = "eu-west-1"
+STRIPE_SECRET_KEY = "sk_test_"
+STRIPE_WEBHOOK_SECRET = "whsec_"
+HELICONE_ORG_ID = ""
 
 UPSTASH_KAFKA_URL=""
 UPSTASH_KAFKA_USERNAME=""
@@ -157,6 +161,7 @@ routes = [
 
 durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
+	{ name = "WALLET", class_name = "Wallet" },
 ]
 
 kv_namespaces = [
@@ -230,6 +235,7 @@ kv_namespaces = [
 
 durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
+	{ name = "WALLET", class_name = "Wallet" },
 ]
 
 queues.producers = [
@@ -272,3 +278,7 @@ deleted_classes = ["AtomicAlerter"]
 tag = "v6"
 new_classes = ["InMemoryRateLimiter"]
 deleted_classes = ["AtomicRateLimiter"]
+
+[[migrations]]
+tag = "v7"
+new_sqlite_classes = ["Wallet"]

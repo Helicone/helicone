@@ -5,6 +5,7 @@ import {
   removeFromCache,
   storeInCache,
 } from "../util/cache/secureCache";
+import { RequestWrapper } from "../RequestWrapper";
 
 export class ProviderKeysManager {
   constructor(private store: ProviderKeysStore, private env: Env) {}
