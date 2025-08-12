@@ -84,10 +84,7 @@ const QuickstartPage = () => {
                     rel="noopener noreferrer"
                     className="w-fit"
                   >
-                    <Button
-                      variant="link"
-                      className="flex items-center gap-1"
-                    >
+                    <Button variant="link" className="flex items-center gap-1">
                       View Docs
                       <MoveUpRight size={12} />
                     </Button>
