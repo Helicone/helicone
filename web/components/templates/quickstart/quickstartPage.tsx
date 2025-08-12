@@ -4,6 +4,21 @@ import { useOrg } from "../../layout/org/organizationContext";
 import { useOrgOnboarding } from "../../../services/hooks/useOrgOnboarding";
 import { QuickstartStepCard } from "../../onboarding/QuickstartStep";
 import IntegrationGuide from "./integrationGuide";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../../ui/dropdown-menu";
+import { Button } from "../../ui/button";
+import {
+  ChevronDown,
+  BookOpen,
+  MessageSquare,
+  Mail,
+  MoveUpRight,
+} from "lucide-react";
+import Link from "next/link";
 
 const QuickstartPage = () => {
   const router = useRouter();
@@ -61,6 +76,19 @@ const QuickstartPage = () => {
               {index === 2 && (
                 <div className="mt-1">
                   <IntegrationGuide />
+
+                  <Link
+                    // TODO: Swap for AI Gateway documentation
+                    href="https://docs.helicone.ai"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-fit"
+                  >
+                    <Button variant="link" className="flex items-center gap-1">
+                      View Docs
+                      <MoveUpRight size={12} />
+                    </Button>
+                  </Link>
                 </div>
               )}
             </QuickstartStepCard>
@@ -82,6 +110,52 @@ const QuickstartPage = () => {
             </div>
           </div>
         )}
+
+        <div className="flex flex-col gap-4">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="link" className="group w-fit">
+                Need some help?
+                <ChevronDown
+                  size={16}
+                  className="ml-2 transition-transform group-data-[state=open]:rotate-180"
+                />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem asChild>
+                <Link
+                  href="https://docs.helicone.ai"
+                  target="_blank"
+                  className="flex items-center"
+                >
+                  <BookOpen size={16} className="mr-2" />
+                  Documentation
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link
+                  href="https://discord.com/invite/2TkeWdXNPQ"
+                  target="_blank"
+                  className="flex items-center"
+                >
+                  <MessageSquare size={16} className="mr-2" />
+                  Ask us on Discord
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link
+                  href="/contact"
+                  className="flex items-center"
+                  target="_blank"
+                >
+                  <Mail size={16} className="mr-2" />
+                  Contact Us
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </div>
   );
