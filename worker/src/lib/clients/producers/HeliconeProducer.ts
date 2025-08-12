@@ -35,16 +35,6 @@ export class HeliconeProducer {
     this.VALHALLA_URL = env.VALHALLA_URL;
     this.HELICONE_MANUAL_ACCESS_KEY = env.HELICONE_MANUAL_ACCESS_KEY;
 
-    if (
-      !env.UPSTASH_KAFKA_URL ||
-      !env.UPSTASH_KAFKA_USERNAME ||
-      !env.UPSTASH_KAFKA_PASSWORD
-    ) {
-      console.log(
-        "Required Kafka environment variables are not set, KafkaProducer will not be initialized."
-      );
-      return;
-    }
     this.producer = MessageProducerFactory.createProducer(env);
   }
 
