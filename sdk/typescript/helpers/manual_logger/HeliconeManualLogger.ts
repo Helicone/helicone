@@ -24,7 +24,12 @@ export class HeliconeManualLogger {
   private getLoggingEndpoint(provider?: string): string {
     let endpoint = this.LOGGING_ENDPOINT;
     const key = provider ? String(provider).toUpperCase() : undefined;
-    const route = key === "OPENAI" ? "oai" : key === "ANTHROPIC" ? "anthropic" : key === "GOOGLE" ? "googleapis" : "custom";
+    const providerRoutes = new Map([
+      ['OPENAI', 'oai'],
+      ['ANTHROPIC', 'anthropic'],
+      ['GOOGLE', 'googleapis']
+    ]);
+    const route = key ? (providerRoutes.get(key) || 'custom') : 'custom';
     const knownRouteRegex = /(\/(custom|oai|anthropic|googleapis)\/v1\/log)$/;
     return knownRouteRegex.test(endpoint)
       ? endpoint.replace(knownRouteRegex, `/${route}/v1/log`)
