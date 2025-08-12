@@ -59,7 +59,7 @@ const SidebarQuickstepCard = () => {
       </div>
 
       {hasProviderKeys && hasKeys && orgContext?.currentOrg?.has_integrated && (
-        <div className="mt-2">
+        <div className="mx-2 mt-2">
           <Button
             variant="outline"
             size="xs"

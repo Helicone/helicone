@@ -14,7 +14,6 @@ import {
   getJawnClient,
 } from "../../lib/clients/jawn";
 import { ORG_ID_COOKIE_KEY } from "../../lib/constants";
-import { OnboardingState } from "./useOrgOnboarding";
 
 const useGetOrgMembers = (orgId: string) => {
   const { data, isLoading, refetch } = $JAWN_API.useQuery(
@@ -250,8 +249,8 @@ const useOrgsContextManager = (): OrgContextValue => {
         }
         // semantics are a little confusing here, but we distinguish
         // onboarding (initial welcome), integration (first request), quickstart (steps)
-        const hasCompletedFullOnboarding = selectedOrgsData.state.data?.data?.some((org) => !org.onboarding_status?.hasCompletedQuickstart);
-        if (!hasCompletedFullOnboarding) {
+        const hasNotCompletedFullOnboarding = selectedOrgsData.state.data?.data?.some((org) => !org.onboarding_status?.hasCompletedQuickstart);
+        if (hasNotCompletedFullOnboarding) {
           return 5_000;
         }
         return false;
