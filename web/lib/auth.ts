@@ -98,6 +98,9 @@ export const auth = betterAuth({
       }
     },
   },
+  trustedOrigins: [
+    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
+  ],
   plugins: [
     customSession(async ({ user, session }) => {
       const dbUser = await getUser(user.id);
