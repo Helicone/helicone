@@ -44,13 +44,14 @@ const AddMemberModal = (props: AddMemberModalProps) => {
         orgId,
         email: email.value,
       });
-      
+
       onSuccess && onSuccess();
       setOpen(false);
       // Reset form
       email.value = "";
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to add member";
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to add member";
       setErrorMessage(errorMessage);
     }
   };
@@ -120,7 +121,9 @@ const AddMemberModal = (props: AddMemberModalProps) => {
               Cancel
             </Button>
             <Button type="submit" disabled={addMemberMutation.isPending}>
-              {addMemberMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {addMemberMutation.isPending && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
               Add Member
             </Button>
           </div>
