@@ -35,6 +35,15 @@ export interface paths {
   "/v1/stripe/subscription/free/usage": {
     get: operations["GetFreeUsage"];
   };
+  "/v1/stripe/cloud/credit-balance": {
+    get: operations["GetCreditBalance"];
+  };
+  "/v1/stripe/cloud/credit-balance-transactions": {
+    get: operations["GetCreditBalanceTransactions"];
+  };
+  "/v1/stripe/cloud/checkout-session": {
+    post: operations["CreateCloudGatewayCheckoutSession"];
+  };
   "/v1/stripe/subscription/new-customer/upgrade-to-pro": {
     post: operations["UpgradeToPro"];
   };
@@ -546,2457 +555,65 @@ export interface components {
       error: null;
     };
     "Result_null.string_": components["schemas"]["ResultSuccess_null_"] | components["schemas"]["ResultError_string_"];
-    UpgradeToProRequest: {
-      addons?: {
-        evals?: boolean;
-        experiments?: boolean;
-        prompts?: boolean;
-        alerts?: boolean;
-      };
-      /** Format: double */
-      seats?: number;
-      /** @enum {string} */
-      ui_mode?: "embedded" | "hosted";
+    "stripe.Stripe.Billing.CreditBalanceTransaction.Credit.Amount.Monetary": {
+      /** @description Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase. Must be a [supported currency](https://stripe.com/docs/currencies). */
+      currency: string;
+      /**
+       * Format: double
+       * @description A positive integer representing the amount.
+       */
+      value: number;
     };
-    UpgradeToTeamBundleRequest: {
-      /** @enum {string} */
-      ui_mode?: "embedded" | "hosted";
+    "stripe.Stripe.Billing.CreditBalanceTransaction.Credit.Amount": {
+      /** @description The monetary amount. */
+      monetary: components["schemas"]["stripe.Stripe.Billing.CreditBalanceTransaction.Credit.Amount.Monetary"] | null;
+      /**
+       * @description The type of this amount. We currently only support `monetary` billing credits.
+       * @enum {string}
+       */
+      type: "monetary";
     };
-    LLMUsage: {
-      model: string;
-      provider: string;
-      /** Format: double */
-      prompt_tokens: number;
-      /** Format: double */
-      completion_tokens: number;
-      /** Format: double */
-      total_count: number;
-      /** Format: double */
-      amount: number;
-      description: string;
-      totalCost: {
-        /** Format: double */
-        prompt_token: number;
-        /** Format: double */
-        completion_token: number;
-      };
+    /** @description The Address object. */
+    "stripe.Stripe.Address": {
+      /** @description City/District/Suburb/Town/Village. */
+      city: string | null;
+      /** @description 2-letter country code. */
+      country: string | null;
+      /** @description Address line 1 (Street address/PO Box/Company name). */
+      line1: string | null;
+      /** @description Address line 2 (Apartment/Suite/Unit/Building). */
+      line2: string | null;
+      /** @description ZIP or postal code. */
+      postal_code: string | null;
+      /** @description State/County/Province/Region. */
+      state: string | null;
     };
-Json: JsonObject;
-    "ResultSuccess__40_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-and-_role-string__41_-Array_": {
-      data: (({
-          tier: string | null;
-          subscription_status: string | null;
-          stripe_subscription_item_id: string | null;
-          stripe_subscription_id: string | null;
-          stripe_metadata: components["schemas"]["Json"];
-          stripe_customer_id: string | null;
-          soft_delete: boolean;
-          size: string | null;
-          /** Format: double */
-          request_limit: number | null;
-          referral: string | null;
-          playground_helicone: boolean;
-          /** Format: double */
-          percent_to_log: number | null;
-          owner: string;
-          organization_type: string;
-          org_provider_key: string | null;
-          onboarding_status: components["schemas"]["Json"];
-          name: string;
-          limits: components["schemas"]["Json"] | null;
-          is_personal: boolean;
-          is_main_org: boolean;
-          id: string;
-          icon: string;
-          has_onboarded: boolean;
-          has_integrated: boolean;
-          governance_settings: components["schemas"]["Json"] | null;
-          domain: string | null;
-          created_at: string | null;
-          color: string;
-        }) & {
-          role: string;
-        })[];
-      /** @enum {number|null} */
-      error: null;
+    /** @enum {string} */
+    "stripe.Stripe.CashBalance.Settings.ReconciliationMode": "automatic" | "manual";
+    "stripe.Stripe.CashBalance.Settings": {
+      /** @description The configuration for how funds that land in the customer cash balance are reconciled. */
+      reconciliation_mode: components["schemas"]["stripe.Stripe.CashBalance.Settings.ReconciliationMode"];
+      /** @description A flag to indicate if reconciliation mode returned is the user's default or is specific to this customer cash balance */
+      using_merchant_default: boolean;
     };
-    "Result__40_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-and-_role-string__41_-Array.string_": components["schemas"]["ResultSuccess__40_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-and-_role-string__41_-Array_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_Database-at-public_91_Tables_93_-at-organization_91_Row_93__": {
-      data: {
-        tier: string | null;
-        subscription_status: string | null;
-        stripe_subscription_item_id: string | null;
-        stripe_subscription_id: string | null;
-        stripe_metadata: components["schemas"]["Json"];
-        stripe_customer_id: string | null;
-        soft_delete: boolean;
-        size: string | null;
-        /** Format: double */
-        request_limit: number | null;
-        referral: string | null;
-        playground_helicone: boolean;
-        /** Format: double */
-        percent_to_log: number | null;
-        owner: string;
-        organization_type: string;
-        org_provider_key: string | null;
-        onboarding_status: components["schemas"]["Json"];
-        name: string;
-        limits: components["schemas"]["Json"] | null;
-        is_personal: boolean;
-        is_main_org: boolean;
-        id: string;
-        icon: string;
-        has_onboarded: boolean;
-        has_integrated: boolean;
-        governance_settings: components["schemas"]["Json"] | null;
-        domain: string | null;
-        created_at: string | null;
-        color: string;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Database-at-public_91_Tables_93_-at-organization_91_Row_93_.string_": components["schemas"]["ResultSuccess_Database-at-public_91_Tables_93_-at-organization_91_Row_93__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
-      data: {
-          tier: string;
-          subscription_status: string;
-          stripe_subscription_item_id: string;
-          stripe_subscription_id: string;
-          stripe_metadata: components["schemas"]["Json"];
-          stripe_customer_id: string;
-          soft_delete: boolean;
-          size: string;
-          /** Format: double */
-          request_limit: number;
-          referral: string;
-          playground_helicone: boolean;
-          /** Format: double */
-          percent_to_log: number;
-          owner: string;
-          organization_type: string;
-          org_provider_key: string;
-          onboarding_status: components["schemas"]["Json"];
-          name: string;
-          limits: components["schemas"]["Json"];
-          is_personal: boolean;
-          is_main_org: boolean;
-          id: string;
-          icon: string;
-          has_onboarded: boolean;
-          has_integrated: boolean;
-          governance_settings: components["schemas"]["Json"];
-          domain: string;
-          created_at: string;
-          color: string;
-        }[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_": components["schemas"]["ResultSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__": {
-      data: components["schemas"]["Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    ResultError_unknown_: {
-      /** @enum {number|null} */
-      data: null;
-      error: unknown;
-    };
-    "Result_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_": components["schemas"]["ResultSuccess_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__"] | components["schemas"]["ResultError_unknown_"];
-    ResultSuccess_string_: {
-      data: string;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_string.string_": components["schemas"]["ResultSuccess_string_"] | components["schemas"]["ResultError_string_"];
-    NewOrganizationParams: {
-      tier?: string | null;
-      subscription_status?: string | null;
-      stripe_subscription_item_id?: string | null;
-      stripe_subscription_id?: string | null;
-      stripe_metadata?: components["schemas"]["Json"];
-      stripe_customer_id?: string | null;
-      soft_delete?: boolean;
-      size?: string | null;
-      /** Format: double */
-      request_limit?: number | null;
-      referral?: string | null;
-      playground_helicone?: boolean;
-      /** Format: double */
-      percent_to_log?: number | null;
-      owner: string;
-      organization_type?: string;
-      org_provider_key?: string | null;
-      onboarding_status?: components["schemas"]["Json"];
-      name: string;
-      limits?: components["schemas"]["Json"] | null;
-      is_personal?: boolean;
-      is_main_org?: boolean;
-      id?: string;
-      icon?: string;
-      has_onboarded?: boolean;
-      has_integrated?: boolean;
-      governance_settings?: components["schemas"]["Json"] | null;
-      domain?: string | null;
-      created_at?: string | null;
-      color?: string;
-    };
-    /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-organization_type-or-onboarding_status_": {
-      name: string;
-      color?: string;
-      icon?: string;
-      org_provider_key?: string;
-      limits?: components["schemas"]["Json"];
-      organization_type?: string;
-      onboarding_status?: components["schemas"]["Json"];
-    };
-    UpdateOrganizationParams: components["schemas"]["Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-organization_type-or-onboarding_status_"] & {
-      variant?: string;
-    };
-    "ResultSuccess__temporaryPassword_63_-string_-or-null_": {
-      data: {
-        temporaryPassword?: string;
+    /** @description A customer's `Cash balance` represents real funds. Customers can add funds to their cash balance by sending a bank transfer. These funds can be used for payment and can eventually be paid out to your bank account. */
+    "stripe.Stripe.CashBalance": {
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: "cash_balance";
+      /** @description A hash of all cash balances available to this customer. You cannot delete a customer with any cash balances, even if the balance is 0. Amounts are represented in the [smallest currency unit](https://stripe.com/docs/currencies#zero-decimal). */
+      available: {
+        [key: string]: number;
       } | null;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__temporaryPassword_63_-string_-or-null.string_": components["schemas"]["ResultSuccess__temporaryPassword_63_-string_-or-null_"] | components["schemas"]["ResultError_string_"];
-    UIFilterRowTree: components["schemas"]["UIFilterRowNode"] | components["schemas"]["FilterRow"];
-    UIFilterRowNode: {
-      /** @enum {string} */
-      operator: "and" | "or";
-      rows: components["schemas"]["UIFilterRowTree"][];
-    };
-    FilterRow: {
-      value: string;
-      /** Format: double */
-      operatorIdx: number;
-      /** Format: double */
-      filterMapIdx: number;
-    };
-    OrganizationFilter: {
-      softDelete: boolean;
-      createdAt?: string;
-      filter: components["schemas"]["UIFilterRowTree"][];
-      name: string;
-      id: string;
-    };
-    OrganizationLayout: {
-      filters: components["schemas"]["OrganizationFilter"][];
-      type: string;
-      organization_id: string;
-      id: string;
-    };
-    ResultSuccess_OrganizationLayout_: {
-      data: components["schemas"]["OrganizationLayout"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_OrganizationLayout.string_": components["schemas"]["ResultSuccess_OrganizationLayout_"] | components["schemas"]["ResultError_string_"];
-    OrganizationMember: {
-      org_role: string;
-      member: string;
-      email: string;
-    };
-    "ResultSuccess_OrganizationMember-Array_": {
-      data: components["schemas"]["OrganizationMember"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_OrganizationMember-Array.string_": components["schemas"]["ResultSuccess_OrganizationMember-Array_"] | components["schemas"]["ResultError_string_"];
-    OrganizationOwner: {
-      tier: string;
-      email: string;
-    };
-    "ResultSuccess_OrganizationOwner-Array_": {
-      data: components["schemas"]["OrganizationOwner"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_OrganizationOwner-Array.string_": components["schemas"]["ResultSuccess_OrganizationOwner-Array_"] | components["schemas"]["ResultError_string_"];
-    /** @description Make all properties in T optional */
-    "Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--hasIntegrated-boolean--hasCompletedQuickstart-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___": {
-      currentStep?: string;
-      selectedTier?: string;
-      hasOnboarded?: boolean;
-      hasIntegrated?: boolean;
-      hasCompletedQuickstart?: boolean;
-      members?: unknown[];
-      addons?: {
-        evals: boolean;
-        experiments: boolean;
-        prompts: boolean;
-      };
-    };
-    OnboardingStatus: components["schemas"]["Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--hasIntegrated-boolean--hasCompletedQuickstart-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___"];
-    EvaluatorResult: {
-      id: string;
-      created_at: string;
-      scoring_type: string;
-      llm_template: unknown;
-      organization_id: string;
-      updated_at: string;
-      name: string;
-      code_template: unknown;
-      last_mile_config: unknown;
-    };
-    ResultSuccess_EvaluatorResult_: {
-      data: components["schemas"]["EvaluatorResult"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_EvaluatorResult.string_": components["schemas"]["ResultSuccess_EvaluatorResult_"] | components["schemas"]["ResultError_string_"];
-    CreateEvaluatorParams: {
-      scoring_type: string;
-      llm_template?: unknown;
-      name: string;
-      code_template?: unknown;
-      last_mile_config?: unknown;
-    };
-    "ResultSuccess_EvaluatorResult-Array_": {
-      data: components["schemas"]["EvaluatorResult"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_EvaluatorResult-Array.string_": components["schemas"]["ResultSuccess_EvaluatorResult-Array_"] | components["schemas"]["ResultError_string_"];
-    UpdateEvaluatorParams: {
-      scoring_type?: string;
-      llm_template?: unknown;
-      code_template?: unknown;
-      name?: string;
-      last_mile_config?: unknown;
-    };
-    EvaluatorExperiment: {
-      experiment_name: string;
-      experiment_created_at: string;
-      experiment_id: string;
-    };
-    "ResultSuccess_EvaluatorExperiment-Array_": {
-      data: components["schemas"]["EvaluatorExperiment"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_EvaluatorExperiment-Array.string_": components["schemas"]["ResultSuccess_EvaluatorExperiment-Array_"] | components["schemas"]["ResultError_string_"];
-    OnlineEvaluatorByEvaluatorId: {
-      config: unknown;
-      id: string;
-    };
-    "ResultSuccess_OnlineEvaluatorByEvaluatorId-Array_": {
-      data: components["schemas"]["OnlineEvaluatorByEvaluatorId"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_OnlineEvaluatorByEvaluatorId-Array.string_": components["schemas"]["ResultSuccess_OnlineEvaluatorByEvaluatorId-Array_"] | components["schemas"]["ResultError_string_"];
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.any_": {
-      [key: string]: unknown;
-    };
-    CreateOnlineEvaluatorParams: {
-      config: components["schemas"]["Record_string.any_"];
-    };
-    "ResultSuccess__output-string--traces-string-Array--statusCode_63_-number__": {
-      data: {
-        /** Format: double */
-        statusCode?: number;
-        traces: string[];
-        output: string;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__output-string--traces-string-Array--statusCode_63_-number_.string_": components["schemas"]["ResultSuccess__output-string--traces-string-Array--statusCode_63_-number__"] | components["schemas"]["ResultError_string_"];
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.string_": {
-      [key: string]: string;
-    };
-    TestInput: {
-      promptTemplate?: string;
-      inputs: {
-        autoInputs?: components["schemas"]["Record_string.string_"];
-        inputs: components["schemas"]["Record_string.string_"];
-      };
-      outputBody: string;
-      inputBody: string;
-    };
-    EvaluatorScore: {
-      score: number | boolean;
-    };
-    ResultSuccess_EvaluatorScore_: {
-      data: components["schemas"]["EvaluatorScore"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_EvaluatorScore.string_": components["schemas"]["ResultSuccess_EvaluatorScore_"] | components["schemas"]["ResultError_string_"];
-    EvaluatorScoreResult: components["schemas"]["Result_EvaluatorScore.string_"];
-    EvaluatorConfig: {
-      evaluator_code_template?: string;
-      evaluator_llm_template?: string;
-      evaluator_scoring_type: string;
-    };
-    "ResultSuccess__score-number--input-string--output-string--ground_truth_63_-string__": {
-      data: {
-        ground_truth?: string;
-        output: string;
-        input: string;
-        /** Format: double */
-        score: number;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__score-number--input-string--output-string--ground_truth_63_-string_.string_": components["schemas"]["ResultSuccess__score-number--input-string--output-string--ground_truth_63_-string__"] | components["schemas"]["ResultError_string_"];
-    DataEntry: {
-      /** @enum {string} */
-      _type: "system-prompt";
-    } | {
-      inputKey: string;
-      /** @enum {string} */
-      _type: "prompt-input";
-    } | ({
-      /** @enum {string} */
-      content: "jsonify" | "message";
-      /** @enum {string} */
-      _type: "input-body";
-    }) | ({
-      /** @enum {string} */
-      content: "jsonify" | "message";
-      /** @enum {string} */
-      _type: "output-body";
-    });
-    BaseLastMileConfigForm: {
-      output: components["schemas"]["DataEntry"];
-      input: components["schemas"]["DataEntry"];
-      name: string;
-    };
-    LastMileConfigForm: components["schemas"]["BaseLastMileConfigForm"] & (({
-      /** @enum {string} */
-      _type: "relevance" | "context_relevance";
-    }) | {
-      groundTruth: components["schemas"]["DataEntry"];
-      /** @enum {string} */
-      _type: "faithfulness";
-    });
-    EvaluatorStats: {
-      /** Format: double */
-      averageScore: number;
-      /** Format: double */
-      totalUses: number;
-      /** @enum {string} */
-      recentTrend: "up" | "down" | "stable";
-      scoreDistribution: {
-          /** Format: double */
-          count: number;
-          range: string;
-        }[];
-      timeSeriesData: {
-          /** Format: double */
-          value: number;
-          date: string;
-        }[];
-    };
-    ResultSuccess_EvaluatorStats_: {
-      data: components["schemas"]["EvaluatorStats"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_EvaluatorStats.string_": components["schemas"]["ResultSuccess_EvaluatorStats_"] | components["schemas"]["ResultError_string_"];
-    Prompt2025: {
-      id: string;
-      name: string;
-      tags: string[];
-      created_at: string;
-    };
-    ResultSuccess_Prompt2025_: {
-      data: components["schemas"]["Prompt2025"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Prompt2025.string_": components["schemas"]["ResultSuccess_Prompt2025_"] | components["schemas"]["ResultError_string_"];
-    Prompt2025Input: {
-      request_id: string;
-      version_id: string;
-      inputs: components["schemas"]["Record_string.any_"];
-    };
-    ResultSuccess_Prompt2025Input_: {
-      data: components["schemas"]["Prompt2025Input"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Prompt2025Input.string_": components["schemas"]["ResultSuccess_Prompt2025Input_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_string-Array_": {
-      data: string[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_string-Array.string_": components["schemas"]["ResultSuccess_string-Array_"] | components["schemas"]["ResultError_string_"];
-    PromptCreateResponse: {
-      id: string;
-      versionId: string;
-    };
-    ResultSuccess_PromptCreateResponse_: {
-      data: components["schemas"]["PromptCreateResponse"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_PromptCreateResponse.string_": components["schemas"]["ResultSuccess_PromptCreateResponse_"] | components["schemas"]["ResultError_string_"];
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.number_": {
-      [key: string]: number;
-    };
-    /** @description Simplified interface for the OpenAI Chat request format */
-    OpenAIChatRequest: {
-      model?: string;
-      messages?: ({
-          tool_calls?: {
-              /** @enum {string} */
-              type: "function";
-              function: {
-                arguments: string;
-                name: string;
-              };
-              id: string;
-            }[];
-          tool_call_id?: string;
-          name?: string;
-          content: (string | {
-              image_url?: {
-                url: string;
-              };
-              text?: string;
-              type: string;
-            }[]) | null;
-          role: string;
-        })[];
-      /** Format: double */
-      temperature?: number;
-      /** Format: double */
-      top_p?: number;
-      /** Format: double */
-      max_tokens?: number;
-      /** Format: double */
-      max_completion_tokens?: number;
-      stream?: boolean;
-      stop?: string[] | string;
-      tools?: {
-          function: {
-            parameters: components["schemas"]["Record_string.any_"];
-            description: string;
-            name: string;
-          };
-          /** @enum {string} */
-          type: "function";
-        }[];
-      tool_choice?: {
-        function?: {
-          name: string;
-          /** @enum {string} */
-          type: "function";
-        };
-        type: string;
-      } | ("none" | "auto" | "required");
-      parallel_tool_calls?: boolean;
-      /** @enum {string} */
-      reasoning_effort?: "minimal" | "low" | "medium" | "high";
-      /** @enum {string} */
-      verbosity?: "low" | "medium" | "high";
-      /** Format: double */
-      frequency_penalty?: number;
-      /** Format: double */
-      presence_penalty?: number;
-      logit_bias?: components["schemas"]["Record_string.number_"];
-      logprobs?: boolean;
-      /** Format: double */
-      top_logprobs?: number;
-      /** Format: double */
-      n?: number;
-      modalities?: string[];
-      prediction?: unknown;
-      audio?: unknown;
-      response_format?: {
-        json_schema?: unknown;
-        type: string;
-      };
-      /** Format: double */
-      seed?: number;
-      service_tier?: string;
-      store?: boolean;
-      stream_options?: unknown;
-      metadata?: components["schemas"]["Record_string.string_"];
-      user?: string;
-      function_call?: string | {
-        name: string;
-      };
-      functions?: unknown[];
-    };
-    "ResultSuccess__id-string__": {
-      data: {
-        id: string;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__id-string_.string_": components["schemas"]["ResultSuccess__id-string__"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_number_: {
-      /** Format: double */
-      data: number;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_number.string_": components["schemas"]["ResultSuccess_number_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_Prompt2025-Array_": {
-      data: components["schemas"]["Prompt2025"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Prompt2025-Array.string_": components["schemas"]["ResultSuccess_Prompt2025-Array_"] | components["schemas"]["ResultError_string_"];
-    Prompt2025Version: {
-      id: string;
-      model: string;
-      prompt_id: string;
-      /** Format: double */
-      major_version: number;
-      /** Format: double */
-      minor_version: number;
-      commit_message: string;
-      environment?: string;
-      created_at: string;
-      s3_url?: string;
-    };
-    ResultSuccess_Prompt2025Version_: {
-      data: components["schemas"]["Prompt2025Version"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Prompt2025Version.string_": components["schemas"]["ResultSuccess_Prompt2025Version_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_Prompt2025Version-Array_": {
-      data: components["schemas"]["Prompt2025Version"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Prompt2025Version-Array.string_": components["schemas"]["ResultSuccess_Prompt2025Version-Array_"] | components["schemas"]["ResultError_string_"];
-    PromptVersionCounts: {
-      /** Format: double */
-      totalVersions: number;
-      /** Format: double */
-      majorVersions: number;
-    };
-    ResultSuccess_PromptVersionCounts_: {
-      data: components["schemas"]["PromptVersionCounts"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_PromptVersionCounts.string_": components["schemas"]["ResultSuccess_PromptVersionCounts_"] | components["schemas"]["ResultError_string_"];
-    /** @description Make all properties in T optional */
-    Partial_TextOperators_: {
-      "not-equals"?: string;
-      equals?: string;
-      like?: string;
-      ilike?: string;
-      contains?: string;
-      "not-contains"?: string;
-    };
-    /** @description Make all properties in T optional */
-    Partial_TimestampOperators_: {
-      equals?: string;
-      gte?: string;
-      lte?: string;
-      lt?: string;
-      gt?: string;
-    };
-    /** @description Make all properties in T optional */
-    Partial_RequestTableToOperators_: {
-      prompt?: components["schemas"]["Partial_TextOperators_"];
-      created_at?: components["schemas"]["Partial_TimestampOperators_"];
-      user_id?: components["schemas"]["Partial_TextOperators_"];
-      auth_hash?: components["schemas"]["Partial_TextOperators_"];
-      org_id?: components["schemas"]["Partial_TextOperators_"];
-      id?: components["schemas"]["Partial_TextOperators_"];
-      node_id?: components["schemas"]["Partial_TextOperators_"];
-      model?: components["schemas"]["Partial_TextOperators_"];
-      modelOverride?: components["schemas"]["Partial_TextOperators_"];
-      path?: components["schemas"]["Partial_TextOperators_"];
-      country_code?: components["schemas"]["Partial_TextOperators_"];
-      prompt_id?: components["schemas"]["Partial_TextOperators_"];
-    };
-    /** @description Make all properties in T optional */
-    Partial_NumberOperators_: {
-      /** Format: double */
-      "not-equals"?: number;
-      /** Format: double */
-      equals?: number;
-      /** Format: double */
-      gte?: number;
-      /** Format: double */
-      lte?: number;
-      /** Format: double */
-      lt?: number;
-      /** Format: double */
-      gt?: number;
-    };
-    /** @description Make all properties in T optional */
-    Partial_BooleanOperators_: {
-      equals?: boolean;
-    };
-    /** @description Make all properties in T optional */
-    Partial_FeedbackTableToOperators_: {
-      id?: components["schemas"]["Partial_NumberOperators_"];
-      created_at?: components["schemas"]["Partial_TimestampOperators_"];
-      rating?: components["schemas"]["Partial_BooleanOperators_"];
-      response_id?: components["schemas"]["Partial_TextOperators_"];
-    };
-    /** @description Make all properties in T optional */
-    Partial_ResponseTableToOperators_: {
-      body_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      body_model?: components["schemas"]["Partial_TextOperators_"];
-      body_completion?: components["schemas"]["Partial_TextOperators_"];
-      status?: components["schemas"]["Partial_NumberOperators_"];
-      model?: components["schemas"]["Partial_TextOperators_"];
-    };
-    /** @description Make all properties in T optional */
-    Partial_TimestampOperatorsTyped_: {
-      /** Format: date-time */
-      equals?: string;
-      /** Format: date-time */
-      gte?: string;
-      /** Format: date-time */
-      lte?: string;
-      /** Format: date-time */
-      lt?: string;
-      /** Format: date-time */
-      gt?: string;
-    };
-    /** @description Make all properties in T optional */
-    Partial_VectorOperators_: {
-      contains?: string;
-    };
-    /** @description Make all properties in T optional */
-    Partial_RequestResponseRMTToOperators_: {
-      country_code?: components["schemas"]["Partial_TextOperators_"];
-      latency?: components["schemas"]["Partial_NumberOperators_"];
-      time_to_first_token?: components["schemas"]["Partial_NumberOperators_"];
-      status?: components["schemas"]["Partial_NumberOperators_"];
-      request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
-      response_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
-      model?: components["schemas"]["Partial_TextOperators_"];
-      user_id?: components["schemas"]["Partial_TextOperators_"];
-      organization_id?: components["schemas"]["Partial_TextOperators_"];
-      node_id?: components["schemas"]["Partial_TextOperators_"];
-      job_id?: components["schemas"]["Partial_TextOperators_"];
-      threat?: components["schemas"]["Partial_BooleanOperators_"];
-      request_id?: components["schemas"]["Partial_TextOperators_"];
-      prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      prompt_cache_read_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      prompt_cache_write_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      total_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      target_url?: components["schemas"]["Partial_TextOperators_"];
-      properties?: {
-        [key: string]: components["schemas"]["Partial_TextOperators_"];
-      };
-      search_properties?: {
-        [key: string]: components["schemas"]["Partial_TextOperators_"];
-      };
-      scores?: {
-        [key: string]: components["schemas"]["Partial_TextOperators_"];
-      };
-      scores_column?: components["schemas"]["Partial_TextOperators_"];
-      request_body?: components["schemas"]["Partial_VectorOperators_"];
-      response_body?: components["schemas"]["Partial_VectorOperators_"];
-      cache_enabled?: components["schemas"]["Partial_BooleanOperators_"];
-      cache_reference_id?: components["schemas"]["Partial_TextOperators_"];
-      cached?: components["schemas"]["Partial_BooleanOperators_"];
-      assets?: components["schemas"]["Partial_TextOperators_"];
-      "helicone-score-feedback"?: components["schemas"]["Partial_BooleanOperators_"];
-      prompt_id?: components["schemas"]["Partial_TextOperators_"];
-      prompt_version?: components["schemas"]["Partial_TextOperators_"];
-    };
-    /** @description Make all properties in T optional */
-    Partial_SessionsRequestResponseRMTToOperators_: {
-      session_session_id?: components["schemas"]["Partial_TextOperators_"];
-      session_session_name?: components["schemas"]["Partial_TextOperators_"];
-      session_total_cost?: components["schemas"]["Partial_NumberOperators_"];
-      session_total_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      session_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      session_completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      session_total_requests?: components["schemas"]["Partial_NumberOperators_"];
-      session_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
-      session_latest_request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
-      session_tag?: components["schemas"]["Partial_TextOperators_"];
-    };
-    /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_": {
-      request?: components["schemas"]["Partial_RequestTableToOperators_"];
-      feedback?: components["schemas"]["Partial_FeedbackTableToOperators_"];
-      response?: components["schemas"]["Partial_ResponseTableToOperators_"];
-      properties?: {
-        [key: string]: components["schemas"]["Partial_TextOperators_"];
-      };
-      values?: {
-        [key: string]: components["schemas"]["Partial_TextOperators_"];
-      };
-      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
-      sessions_request_response_rmt?: components["schemas"]["Partial_SessionsRequestResponseRMTToOperators_"];
-    };
-    "FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_"];
-    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_"] | components["schemas"]["RequestFilterBranch"] | "all";
-    RequestFilterBranch: {
-      right: components["schemas"]["RequestFilterNode"];
-      /** @enum {string} */
-      operator: "or" | "and";
-      left: components["schemas"]["RequestFilterNode"];
-    };
-    /** @enum {string} */
-    SortDirection: "asc" | "desc";
-    SortLeafRequest: {
-      /** @enum {boolean} */
-      random?: true;
-      created_at?: components["schemas"]["SortDirection"];
-      cache_created_at?: components["schemas"]["SortDirection"];
-      latency?: components["schemas"]["SortDirection"];
-      last_active?: components["schemas"]["SortDirection"];
-      total_tokens?: components["schemas"]["SortDirection"];
-      completion_tokens?: components["schemas"]["SortDirection"];
-      prompt_tokens?: components["schemas"]["SortDirection"];
-      user_id?: components["schemas"]["SortDirection"];
-      body_model?: components["schemas"]["SortDirection"];
-      is_cached?: components["schemas"]["SortDirection"];
-      request_prompt?: components["schemas"]["SortDirection"];
-      response_text?: components["schemas"]["SortDirection"];
-      properties?: {
-        [key: string]: components["schemas"]["SortDirection"];
-      };
-      values?: {
-        [key: string]: components["schemas"]["SortDirection"];
-      };
-      cost?: components["schemas"]["SortDirection"];
-    };
-    RequestQueryParams: {
-      filter: components["schemas"]["RequestFilterNode"];
-      /** Format: double */
-      offset?: number;
-      /** Format: double */
-      limit?: number;
-      sort?: components["schemas"]["SortLeafRequest"];
-      isCached?: boolean;
-      includeInputs?: boolean;
-      isPartOfExperiment?: boolean;
-      isScored?: boolean;
-    };
-    /** @enum {string} */
-    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "BEDROCK" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "CHUTES" | "LLAMA" | "NVIDIA" | "VERCEL";
-    Provider: components["schemas"]["ProviderName"] | "CUSTOM";
-    /** @enum {string} */
-    LlmType: "chat" | "completion";
-    FunctionCall: {
-      id?: string;
-      name: string;
-      arguments: components["schemas"]["Record_string.any_"];
-    };
-    Message: {
-      ending_event_id?: string;
-      trigger_event_id?: string;
-      start_timestamp?: string;
-      reasoning?: string;
-      deleted?: boolean;
-      contentArray?: components["schemas"]["Message"][];
-      /** Format: double */
-      idx?: number;
-      detail?: string;
-      filename?: string;
-      file_id?: string;
-      file_data?: string;
-      /** @enum {string} */
-      type?: "input_image" | "input_text" | "input_file";
-      audio_data?: string;
-      image_url?: string;
-      timestamp?: string;
-      tool_call_id?: string;
-      tool_calls?: components["schemas"]["FunctionCall"][];
-      mime_type?: string;
-      content?: string;
-      name?: string;
-      instruction?: string;
-      role?: string | ("user" | "assistant" | "system" | "developer");
-      id?: string;
-      /** @enum {string} */
-      _type: "functionCall" | "function" | "image" | "file" | "message" | "autoInput" | "contentArray" | "audio";
-    };
-    Tool: {
-      name: string;
-      description: string;
-      parameters?: components["schemas"]["Record_string.any_"];
-    };
-    HeliconeEventTool: {
-      /** @enum {string} */
-      _type: "tool";
-      toolName: string;
-      input: unknown;
-      [key: string]: unknown;
-    };
-    HeliconeEventVectorDB: {
-      /** @enum {string} */
-      _type: "vector_db";
-      /** @enum {string} */
-      operation: "search" | "insert" | "delete" | "update";
-      text?: string;
-      vector?: number[];
-      /** Format: double */
-      topK?: number;
-      filter?: Record<string, never>;
-      databaseName?: string;
-      [key: string]: unknown;
-    };
-    LLMRequestBody: {
-      llm_type?: components["schemas"]["LlmType"];
-      provider?: string;
-      model?: string;
-      messages?: components["schemas"]["Message"][] | null;
-      prompt?: string | null;
-      instructions?: string | null;
-      /** Format: double */
-      max_tokens?: number | null;
-      /** Format: double */
-      temperature?: number | null;
-      /** Format: double */
-      top_p?: number | null;
-      /** Format: double */
-      seed?: number | null;
-      stream?: boolean | null;
-      /** Format: double */
-      presence_penalty?: number | null;
-      /** Format: double */
-      frequency_penalty?: number | null;
-      stop?: (string[] | string) | null;
-      /** @enum {string|null} */
-      reasoning_effort?: "minimal" | "low" | "medium" | "high" | null;
-      /** @enum {string|null} */
-      verbosity?: "low" | "medium" | "high" | null;
-      tools?: components["schemas"]["Tool"][];
-      parallel_tool_calls?: boolean | null;
-      tool_choice?: {
-        name?: string;
-        /** @enum {string} */
-        type: "none" | "auto" | "any" | "tool";
-      };
-      response_format?: {
-        json_schema?: unknown;
-        type: string;
-      };
-      toolDetails?: components["schemas"]["HeliconeEventTool"];
-      vectorDBDetails?: components["schemas"]["HeliconeEventVectorDB"];
-      input?: string | string[];
-      /** Format: double */
-      n?: number | null;
-      size?: string;
-      quality?: string;
-    };
-    Response: {
-      contentArray?: components["schemas"]["Response"][];
-      detail?: string;
-      filename?: string;
-      file_id?: string;
-      file_data?: string;
-      /** Format: double */
-      idx?: number;
-      audio_data?: string;
-      image_url?: string;
-      timestamp?: string;
-      tool_call_id?: string;
-      tool_calls?: components["schemas"]["FunctionCall"][];
-      text?: string;
-      /** @enum {string} */
-      type: "input_image" | "input_text" | "input_file";
-      name?: string;
-      /** @enum {string} */
-      role: "user" | "assistant" | "system" | "developer";
-      id?: string;
-      /** @enum {string} */
-      _type: "functionCall" | "function" | "image" | "text" | "file" | "contentArray";
-    };
-    LLMResponseBody: {
-      vectorDBDetailsResponse?: {
-        /** @enum {string} */
-        _type: "vector_db";
-        metadata: {
-          timestamp: string;
-          destination_parsed?: boolean;
-          destination?: string;
-        };
-        /** Format: double */
-        actualSimilarity?: number;
-        /** Format: double */
-        similarityThreshold?: number;
-        message: string;
-        status: string;
-      };
-      toolDetailsResponse?: {
-        toolName: string;
-        /** @enum {string} */
-        _type: "tool";
-        metadata: {
-          timestamp: string;
-        };
-        tips: string[];
-        message: string;
-        status: string;
-      };
-      error?: {
-        heliconeMessage: unknown;
-      };
-      model?: string | null;
-      instructions?: string | null;
-      responses?: components["schemas"]["Response"][] | null;
-      messages?: components["schemas"]["Message"][] | null;
-    };
-    LlmSchema: {
-      request: components["schemas"]["LLMRequestBody"];
-      response?: components["schemas"]["LLMResponseBody"] | null;
-    };
-    HeliconeRequest: {
-      response_id: string | null;
-      response_created_at: string | null;
-      response_body?: unknown;
-      /** Format: double */
-      response_status: number;
-      response_model: string | null;
-      request_id: string;
-      request_created_at: string;
-      request_body: unknown;
-      request_path: string;
-      request_user_id: string | null;
-      request_properties: components["schemas"]["Record_string.string_"] | null;
-      request_model: string | null;
-      model_override: string | null;
-      helicone_user: string | null;
-      provider: components["schemas"]["Provider"];
-      /** Format: double */
-      delay_ms: number | null;
-      /** Format: double */
-      time_to_first_token: number | null;
-      /** Format: double */
-      total_tokens: number | null;
-      /** Format: double */
-      prompt_tokens: number | null;
-      /** Format: double */
-      prompt_cache_write_tokens: number | null;
-      /** Format: double */
-      prompt_cache_read_tokens: number | null;
-      /** Format: double */
-      completion_tokens: number | null;
-      /** Format: double */
-      prompt_audio_tokens: number | null;
-      /** Format: double */
-      completion_audio_tokens: number | null;
-      /** Format: double */
-      cost: number | null;
-      prompt_id: string | null;
-      prompt_version: string | null;
-      feedback_created_at?: string | null;
-      feedback_id?: string | null;
-      feedback_rating?: boolean | null;
-      signed_body_url?: string | null;
-      llmSchema: components["schemas"]["LlmSchema"] | null;
-      country_code: string | null;
-      asset_ids: string[] | null;
-      asset_urls: components["schemas"]["Record_string.string_"] | null;
-      scores: components["schemas"]["Record_string.number_"] | null;
-      /** Format: double */
-      costUSD?: number | null;
-      properties: components["schemas"]["Record_string.string_"];
-      assets: string[];
-      target_url: string;
-      model: string;
-      cache_reference_id: string | null;
-      cache_enabled: boolean;
-      updated_at?: string;
-      request_referrer?: string | null;
-    };
-    "ResultSuccess_HeliconeRequest-Array_": {
-      data: components["schemas"]["HeliconeRequest"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_HeliconeRequest-Array.string_": components["schemas"]["ResultSuccess_HeliconeRequest-Array_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_HeliconeRequest_: {
-      data: components["schemas"]["HeliconeRequest"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_HeliconeRequest.string_": components["schemas"]["ResultSuccess_HeliconeRequest_"] | components["schemas"]["ResultError_string_"];
-    HeliconeRequestAsset: {
-      assetUrl: string;
-    };
-    ResultSuccess_HeliconeRequestAsset_: {
-      data: components["schemas"]["HeliconeRequestAsset"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_HeliconeRequestAsset.string_": components["schemas"]["ResultSuccess_HeliconeRequestAsset_"] | components["schemas"]["ResultError_string_"];
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.number-or-boolean-or-undefined_": {
-      [key: string]: number | boolean;
-    };
-    Scores: components["schemas"]["Record_string.number-or-boolean-or-undefined_"];
-    ScoreRequest: {
-      scores: components["schemas"]["Scores"];
-    };
-    "ResultSuccess__hasPrompts-boolean__": {
-      data: {
-        hasPrompts: boolean;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__hasPrompts-boolean_.string_": components["schemas"]["ResultSuccess__hasPrompts-boolean__"] | components["schemas"]["ResultError_string_"];
-    PromptsResult: {
-      id: string;
-      user_defined_id: string;
-      description: string;
-      pretty_name: string;
-      created_at: string;
-      /** Format: double */
-      major_version: number;
-      metadata?: components["schemas"]["Record_string.any_"];
-    };
-    "ResultSuccess_PromptsResult-Array_": {
-      data: components["schemas"]["PromptsResult"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_PromptsResult-Array.string_": components["schemas"]["ResultSuccess_PromptsResult-Array_"] | components["schemas"]["ResultError_string_"];
-    /** @description Make all properties in T optional */
-    Partial_PromptToOperators_: {
-      id?: components["schemas"]["Partial_TextOperators_"];
-      user_defined_id?: components["schemas"]["Partial_TextOperators_"];
-    };
-    /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.prompt_v2_": {
-      prompt_v2?: components["schemas"]["Partial_PromptToOperators_"];
-    };
-    FilterLeafSubset_prompt_v2_: components["schemas"]["Pick_FilterLeaf.prompt_v2_"];
-    PromptsFilterNode: components["schemas"]["FilterLeafSubset_prompt_v2_"] | components["schemas"]["PromptsFilterBranch"] | "all";
-    PromptsFilterBranch: {
-      right: components["schemas"]["PromptsFilterNode"];
-      /** @enum {string} */
-      operator: "or" | "and";
-      left: components["schemas"]["PromptsFilterNode"];
-    };
-    PromptsQueryParams: {
-      filter: components["schemas"]["PromptsFilterNode"];
-    };
-    PromptResult: {
-      id: string;
-      user_defined_id: string;
-      description: string;
-      pretty_name: string;
-      /** Format: double */
-      major_version: number;
-      latest_version_id: string;
-      latest_model_used: string;
-      created_at: string;
-      last_used: string;
-      versions: string[];
-      metadata?: components["schemas"]["Record_string.any_"];
-    };
-    ResultSuccess_PromptResult_: {
-      data: components["schemas"]["PromptResult"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_PromptResult.string_": components["schemas"]["ResultSuccess_PromptResult_"] | components["schemas"]["ResultError_string_"];
-    PromptQueryParams: {
-      timeFilter: {
-        end: string;
-        start: string;
-      };
-    };
-    CreatePromptResponse: {
-      id: string;
-      prompt_version_id: string;
-    };
-    ResultSuccess_CreatePromptResponse_: {
-      data: components["schemas"]["CreatePromptResponse"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_CreatePromptResponse.string_": components["schemas"]["ResultSuccess_CreatePromptResponse_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__metadata-Record_string.any___": {
-      data: {
-        metadata: components["schemas"]["Record_string.any_"];
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__metadata-Record_string.any__.string_": components["schemas"]["ResultSuccess__metadata-Record_string.any___"] | components["schemas"]["ResultError_string_"];
-    PromptEditSubversionLabelParams: {
-      label: string;
-    };
-    PromptEditSubversionTemplateParams: {
-      heliconeTemplate: unknown;
-      experimentId?: string;
-    };
-    PromptVersionResult: {
-      id: string;
-      /** Format: double */
-      minor_version: number;
-      /** Format: double */
-      major_version: number;
-      prompt_v2: string;
-      model: string;
-      helicone_template: string;
-      created_at: string;
-      metadata: components["schemas"]["Record_string.any_"];
-      parent_prompt_version?: string | null;
-      experiment_id?: string | null;
-      updated_at?: string;
-    };
-    ResultSuccess_PromptVersionResult_: {
-      data: components["schemas"]["PromptVersionResult"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_PromptVersionResult.string_": components["schemas"]["ResultSuccess_PromptVersionResult_"] | components["schemas"]["ResultError_string_"];
-    PromptCreateSubversionParams: {
-      newHeliconeTemplate: unknown;
-      isMajorVersion?: boolean;
-      metadata?: components["schemas"]["Record_string.any_"];
-      experimentId?: string;
-      bumpForMajorPromptVersionId?: string;
-    };
-    PromptInputRecord: {
-      id: string;
-      inputs: components["schemas"]["Record_string.string_"];
-      dataset_row_id?: string;
-      source_request: string;
-      prompt_version: string;
-      created_at: string;
-      response_body?: string;
-      request_body?: string;
-      auto_prompt_inputs: unknown[];
-    };
-    "ResultSuccess_PromptInputRecord-Array_": {
-      data: components["schemas"]["PromptInputRecord"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_PromptInputRecord-Array.string_": components["schemas"]["ResultSuccess_PromptInputRecord-Array_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array_": {
-      data: {
-          meta: components["schemas"]["Record_string.any_"];
-          dataset: string;
-          /** Format: double */
-          num_hypotheses: number;
-          created_at: string;
-          id: string;
-        }[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array.string_": components["schemas"]["ResultSuccess__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_PromptVersionResult-Array_": {
-      data: components["schemas"]["PromptVersionResult"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_PromptVersionResult-Array.string_": components["schemas"]["ResultSuccess_PromptVersionResult-Array_"] | components["schemas"]["ResultError_string_"];
-    /** @description Make all properties in T optional */
-    Partial_PromptVersionsToOperators_: {
-      minor_version?: components["schemas"]["Partial_NumberOperators_"];
-      major_version?: components["schemas"]["Partial_NumberOperators_"];
-      id?: components["schemas"]["Partial_TextOperators_"];
-      prompt_v2?: components["schemas"]["Partial_TextOperators_"];
-    };
-    /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.prompts_versions_": {
-      prompts_versions?: components["schemas"]["Partial_PromptVersionsToOperators_"];
-    };
-    FilterLeafSubset_prompts_versions_: components["schemas"]["Pick_FilterLeaf.prompts_versions_"];
-    PromptVersionsFilterNode: components["schemas"]["FilterLeafSubset_prompts_versions_"] | components["schemas"]["PromptVersionsFilterBranch"] | "all";
-    PromptVersionsFilterBranch: {
-      right: components["schemas"]["PromptVersionsFilterNode"];
-      /** @enum {string} */
-      operator: "or" | "and";
-      left: components["schemas"]["PromptVersionsFilterNode"];
-    };
-    PromptVersionsQueryParams: {
-      filter?: components["schemas"]["PromptVersionsFilterNode"];
-      includeExperimentVersions?: boolean;
-    };
-    PromptVersionResultCompiled: {
-      id: string;
-      /** Format: double */
-      minor_version: number;
-      /** Format: double */
-      major_version: number;
-      prompt_v2: string;
-      model: string;
-      prompt_compiled: unknown;
-    };
-    ResultSuccess_PromptVersionResultCompiled_: {
-      data: components["schemas"]["PromptVersionResultCompiled"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_PromptVersionResultCompiled.string_": components["schemas"]["ResultSuccess_PromptVersionResultCompiled_"] | components["schemas"]["ResultError_string_"];
-    PromptVersiosQueryParamsCompiled: {
-      filter?: components["schemas"]["PromptVersionsFilterNode"];
-      includeExperimentVersions?: boolean;
-      inputs: components["schemas"]["Record_string.string_"];
-    };
-    PromptVersionResultFilled: {
-      id: string;
-      /** Format: double */
-      minor_version: number;
-      /** Format: double */
-      major_version: number;
-      prompt_v2: string;
-      model: string;
-      filled_helicone_template: unknown;
-    };
-    ResultSuccess_PromptVersionResultFilled_: {
-      data: components["schemas"]["PromptVersionResultFilled"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_PromptVersionResultFilled.string_": components["schemas"]["ResultSuccess_PromptVersionResultFilled_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__experimentId-string__": {
-      data: {
-        experimentId: string;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__experimentId-string_.string_": components["schemas"]["ResultSuccess__experimentId-string__"] | components["schemas"]["ResultError_string_"];
-    ExperimentV2: {
-      id: string;
-      name: string;
-      original_prompt_version: string;
-      copied_original_prompt_version: string | null;
-      input_keys: string[] | null;
-      created_at: string;
-    };
-    "ResultSuccess_ExperimentV2-Array_": {
-      data: components["schemas"]["ExperimentV2"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ExperimentV2-Array.string_": components["schemas"]["ResultSuccess_ExperimentV2-Array_"] | components["schemas"]["ResultError_string_"];
-    ExperimentV2Output: {
-      id: string;
-      request_id: string;
-      is_original: boolean;
-      prompt_version_id: string;
-      created_at: string;
-      input_record_id: string;
-    };
-    ExperimentV2Row: {
-      id: string;
-      inputs: components["schemas"]["Record_string.string_"];
-      prompt_version: string;
-      requests: components["schemas"]["ExperimentV2Output"][];
-      auto_prompt_inputs: unknown[];
-    };
-    ExtendedExperimentData: {
-      id: string;
-      name: string;
-      original_prompt_version: string;
-      copied_original_prompt_version: string | null;
-      input_keys: string[] | null;
-      created_at: string;
-      rows: components["schemas"]["ExperimentV2Row"][];
-    };
-    ResultSuccess_ExtendedExperimentData_: {
-      data: components["schemas"]["ExtendedExperimentData"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ExtendedExperimentData.string_": components["schemas"]["ResultSuccess_ExtendedExperimentData_"] | components["schemas"]["ResultError_string_"];
-    CreateNewPromptVersionForExperimentParams: {
-      newHeliconeTemplate: unknown;
-      isMajorVersion?: boolean;
-      metadata?: components["schemas"]["Record_string.any_"];
-      experimentId?: string;
-      bumpForMajorPromptVersionId?: string;
-      parentPromptVersionId: string;
-    };
-    ExperimentV2PromptVersion: {
-      created_at: string | null;
-      experiment_id: string | null;
-      helicone_template: components["schemas"]["Json"] | null;
-      id: string;
-      /** Format: double */
-      major_version: number;
-      metadata: components["schemas"]["Json"] | null;
-      /** Format: double */
-      minor_version: number;
-      model: string | null;
-      organization: string;
-      prompt_v2: string;
-      soft_delete: boolean | null;
-    };
-    "ResultSuccess_ExperimentV2PromptVersion-Array_": {
-      data: components["schemas"]["ExperimentV2PromptVersion"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ExperimentV2PromptVersion-Array.string_": components["schemas"]["ResultSuccess_ExperimentV2PromptVersion-Array_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_boolean_: {
-      data: boolean;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_boolean.string_": components["schemas"]["ResultSuccess_boolean_"] | components["schemas"]["ResultError_string_"];
-    ScoreV2: {
-      valueType: string;
-      value: number | string;
-      /** Format: double */
-      max: number;
-      /** Format: double */
-      min: number;
-    };
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.ScoreV2_": {
-      [key: string]: components["schemas"]["ScoreV2"];
-    };
-    "ResultSuccess_Record_string.ScoreV2__": {
-      data: components["schemas"]["Record_string.ScoreV2_"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Record_string.ScoreV2_.string_": components["schemas"]["ResultSuccess_Record_string.ScoreV2__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_ScoreV2-or-null_": {
-      data: components["schemas"]["ScoreV2"] | null;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ScoreV2-or-null.string_": components["schemas"]["ResultSuccess_ScoreV2-or-null_"] | components["schemas"]["ResultError_string_"];
-    HeliconeMeta: {
-      gatewayDeploymentTarget?: string;
-      gatewayRouterId?: string;
-      heliconeManualAccessKey?: string;
-      promptInputs?: components["schemas"]["Record_string.any_"];
-      promptVersionId?: string;
-      promptEnvironment?: string;
-      promptId?: string;
-      lytixHost?: string;
-      lytixKey?: string;
-      posthogHost?: string;
-      posthogApiKey?: string;
-      webhookEnabled: boolean;
-      omitResponseLog: boolean;
-      omitRequestLog: boolean;
-      modelOverride?: string;
-    };
-    /**
-     * @description Parses a string containing custom JSX-like tags and extracts information to produce two outputs:
-     * 1. A version of the string with all JSX tags removed, leaving only the text content.
-     * 2. An object representing a template with self-closing JSX tags and a separate mapping of keys to their
-     *    corresponding text content.
-     *
-     * The function specifically targets `<helicone-prompt-input>` tags, which include a `key` attribute and enclosed text content.
-     * These tags are transformed or removed based on the desired output structure. The process involves regular expressions
-     * to match and manipulate the input string to produce the outputs.
-     *
-     * Parameters:
-     * - input: A string containing the text and JSX-like tags to be parsed.
-     *
-     * Returns:
-     * An object with two properties:
-     * 1. stringWithoutJSXTags: A string where all `<helicone-prompt-input>` tags are removed, and only their text content remains.
-     * 2. templateWithInputs: An object containing:
-     *    - template: A version of the input string where `<helicone-prompt-input>` tags are replaced with self-closing versions,
-     *      preserving the `key` attributes but removing the text content.
-     *    - inputs: An object mapping the `key` attributes to their corresponding text content, effectively extracting
-     *      the data from the original tags.
-     *
-     * Example Usage:
-     * ```ts
-     * const input = `
-     * The scene is <helicone-prompt-input key="scene" >Harry Potter</helicone-prompt-input>.
-     * <helicone-prompt-input key="name" >justin</helicone-prompt-input>  test`;
-     *
-     * const expectedOutput = parseJSXString(input);
-     * console.log(expectedOutput);
-     * ```
-     * The function is useful for preprocessing strings with embedded custom JSX-like tags, extracting useful data,
-     * and preparing templates for further processing or rendering. It demonstrates a practical application of regular
-     * expressions for text manipulation in TypeScript, specifically tailored to a custom JSX-like syntax.
-     */
-    TemplateWithInputs: {
-      template: Record<string, never>;
-      inputs: {
-        [key: string]: string;
-      };
-      autoInputs: unknown[];
-    };
-    Log: {
-      response: {
-        /** Format: double */
-        cachedLatency?: number;
-        /** Format: double */
-        delayMs: number;
-        /** Format: date-time */
-        responseCreatedAt: string;
-        /** Format: double */
-        timeToFirstToken?: number;
-        /** Format: double */
-        bodySize: number;
-        /** Format: double */
-        status: number;
-        id: string;
-      };
-      request: {
-        requestReferrer?: string;
-        cacheReferenceId?: string;
-        cacheControl?: string;
-        /** Format: double */
-        cacheBucketMaxSize?: number;
-        /** Format: double */
-        cacheSeed?: number;
-        cacheEnabled?: boolean;
-        experimentRowIndex?: string;
-        experimentColumnId?: string;
-        heliconeTemplate?: components["schemas"]["TemplateWithInputs"];
-        isStream: boolean;
-        /** Format: date-time */
-        requestCreatedAt: string;
-        countryCode?: string;
-        threat?: boolean;
-        path: string;
-        /** Format: double */
-        bodySize: number;
-        provider: components["schemas"]["Provider"];
-        targetUrl: string;
-        heliconeProxyKeyId?: string;
-        /** Format: double */
-        heliconeApiKeyId?: number;
-        properties: components["schemas"]["Record_string.string_"];
-        promptVersion?: string;
-        promptId?: string;
-        userId: string;
-        id: string;
-      };
-    };
-    KafkaMessageContents: {
-      log: components["schemas"]["Log"];
-      heliconeMeta: components["schemas"]["HeliconeMeta"];
-      authorization: string;
-    };
-    ResultSuccess_any_: {
-      data: unknown;
-      /** @enum {number|null} */
-      error: null;
-    };
-    ResultSuccess_unknown_: {
-      data: unknown;
-      /** @enum {number|null} */
-      error: null;
-    };
-    /** @enum {string} */
-    KeyPermissions: "w" | "rw";
-    GenerateHashQueryParams: {
-      apiKey: string;
-      governance: boolean;
-      keyName: string;
-      permissions: components["schemas"]["KeyPermissions"];
-    };
-    FineTuneResult: {
-      error: string;
-    } | {
-      data: {
-        url: string;
-        fineTuneJob: string;
-      };
-      success: boolean;
-    };
-    FineTuneBodyParams: {
-      providerKeyId: string;
-    };
-    FineTuneBody: {
-      providerKeyId: string;
-    };
-    StoreFilterType: {
-      createdAt?: string;
-      filter: unknown;
-      name: string;
-      id?: string;
-    };
-    "ResultSuccess_StoreFilterType-Array_": {
-      data: components["schemas"]["StoreFilterType"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_StoreFilterType-Array.string_": components["schemas"]["ResultSuccess_StoreFilterType-Array_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_StoreFilterType_: {
-      data: components["schemas"]["StoreFilterType"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_StoreFilterType.string_": components["schemas"]["ResultSuccess_StoreFilterType_"] | components["schemas"]["ResultError_string_"];
-    "ChatCompletionTokenLogprob.TopLogprob": {
-      /** @description The token. */
-      token: string;
-      /**
-       * @description A list of integers representing the UTF-8 bytes representation of the token.
-       * Useful in instances where characters are represented by multiple tokens and
-       * their byte representations must be combined to generate the correct text
-       * representation. Can be `null` if there is no bytes representation for the token.
-       */
-      bytes: number[] | null;
-      /**
-       * Format: double
-       * @description The log probability of this token, if it is within the top 20 most likely
-       * tokens. Otherwise, the value `-9999.0` is used to signify that the token is very
-       * unlikely.
-       */
-      logprob: number;
-    };
-    ChatCompletionTokenLogprob: {
-      /** @description The token. */
-      token: string;
-      /**
-       * @description A list of integers representing the UTF-8 bytes representation of the token.
-       * Useful in instances where characters are represented by multiple tokens and
-       * their byte representations must be combined to generate the correct text
-       * representation. Can be `null` if there is no bytes representation for the token.
-       */
-      bytes: number[] | null;
-      /**
-       * Format: double
-       * @description The log probability of this token, if it is within the top 20 most likely
-       * tokens. Otherwise, the value `-9999.0` is used to signify that the token is very
-       * unlikely.
-       */
-      logprob: number;
-      /**
-       * @description List of the most likely tokens and their log probability, at this token
-       * position. In rare cases, there may be fewer than the number of requested
-       * `top_logprobs` returned.
-       */
-      top_logprobs: components["schemas"]["ChatCompletionTokenLogprob.TopLogprob"][];
-    };
-    /** @description Log probability information for the choice. */
-    "ChatCompletion.Choice.Logprobs": {
-      /** @description A list of message content tokens with log probability information. */
-      content: components["schemas"]["ChatCompletionTokenLogprob"][] | null;
-      /** @description A list of message refusal tokens with log probability information. */
-      refusal: components["schemas"]["ChatCompletionTokenLogprob"][] | null;
-    };
-    /** @description A URL citation when using web search. */
-    "ChatCompletionMessage.Annotation.URLCitation": {
-      /**
-       * Format: double
-       * @description The index of the last character of the URL citation in the message.
-       */
-      end_index: number;
-      /**
-       * Format: double
-       * @description The index of the first character of the URL citation in the message.
-       */
-      start_index: number;
-      /** @description The title of the web resource. */
-      title: string;
-      /** @description The URL of the web resource. */
-      url: string;
-    };
-    /** @description A URL citation when using web search. */
-    "ChatCompletionMessage.Annotation": {
-      /**
-       * @description The type of the URL citation. Always `url_citation`.
-       * @enum {string}
-       */
-      type: "url_citation";
-      /** @description A URL citation when using web search. */
-      url_citation: components["schemas"]["ChatCompletionMessage.Annotation.URLCitation"];
-    };
-    /**
-     * @description If the audio output modality is requested, this object contains data about the
-     * audio response from the model.
-     * [Learn more](https://platform.openai.com/docs/guides/audio).
-     */
-    ChatCompletionAudio: {
-      /** @description Unique identifier for this audio response. */
-      id: string;
-      /**
-       * @description Base64 encoded audio bytes generated by the model, in the format specified in
-       * the request.
-       */
-      data: string;
-      /**
-       * Format: double
-       * @description The Unix timestamp (in seconds) for when this audio response will no longer be
-       * accessible on the server for use in multi-turn conversations.
-       */
-      expires_at: number;
-      /** @description Transcript of the audio generated by the model. */
-      transcript: string;
-    };
-    /** @deprecated */
-    "ChatCompletionMessage.FunctionCall": {
-      /**
-       * @description The arguments to call the function with, as generated by the model in JSON
-       * format. Note that the model does not always generate valid JSON, and may
-       * hallucinate parameters not defined by your function schema. Validate the
-       * arguments in your code before calling your function.
-       */
-      arguments: string;
-      /** @description The name of the function to call. */
-      name: string;
-    };
-    /** @description The function that the model called. */
-    "ChatCompletionMessageFunctionToolCall.Function": {
-      /**
-       * @description The arguments to call the function with, as generated by the model in JSON
-       * format. Note that the model does not always generate valid JSON, and may
-       * hallucinate parameters not defined by your function schema. Validate the
-       * arguments in your code before calling your function.
-       */
-      arguments: string;
-      /** @description The name of the function to call. */
-      name: string;
-    };
-    /** @description A call to a function tool created by the model. */
-    ChatCompletionMessageFunctionToolCall: {
-      /** @description The ID of the tool call. */
-      id: string;
-      /** @description The function that the model called. */
-      function: components["schemas"]["ChatCompletionMessageFunctionToolCall.Function"];
-      /**
-       * @description The type of the tool. Currently, only `function` is supported.
-       * @enum {string}
-       */
-      type: "function";
-    };
-    /** @description The custom tool that the model called. */
-    "ChatCompletionMessageCustomToolCall.Custom": {
-      /** @description The input for the custom tool call generated by the model. */
-      input: string;
-      /** @description The name of the custom tool to call. */
-      name: string;
-    };
-    /** @description A call to a custom tool created by the model. */
-    ChatCompletionMessageCustomToolCall: {
-      /** @description The ID of the tool call. */
-      id: string;
-      /** @description The custom tool that the model called. */
-      custom: components["schemas"]["ChatCompletionMessageCustomToolCall.Custom"];
-      /**
-       * @description The type of the tool. Always `custom`.
-       * @enum {string}
-       */
-      type: "custom";
-    };
-    /** @description A call to a function tool created by the model. */
-    ChatCompletionMessageToolCall: components["schemas"]["ChatCompletionMessageFunctionToolCall"] | components["schemas"]["ChatCompletionMessageCustomToolCall"];
-    /** @description A chat completion message generated by the model. */
-    ChatCompletionMessage: {
-      /** @description The contents of the message. */
-      content: string | null;
-      /** @description The refusal message generated by the model. */
-      refusal: string | null;
-      /**
-       * @description The role of the author of this message.
-       * @enum {string}
-       */
-      role: "assistant";
-      /**
-       * @description Annotations for the message, when applicable, as when using the
-       * [web search tool](https://platform.openai.com/docs/guides/tools-web-search?api-mode=chat).
-       */
-      annotations?: components["schemas"]["ChatCompletionMessage.Annotation"][];
-      /**
-       * @description If the audio output modality is requested, this object contains data about the
-       * audio response from the model.
-       * [Learn more](https://platform.openai.com/docs/guides/audio).
-       */
-      audio?: components["schemas"]["ChatCompletionAudio"] | null;
-      /** @deprecated */
-      function_call?: components["schemas"]["ChatCompletionMessage.FunctionCall"] | null;
-      /** @description The tool calls generated by the model, such as function calls. */
-      tool_calls?: components["schemas"]["ChatCompletionMessageToolCall"][];
-    };
-    "ChatCompletion.Choice": {
-      /**
-       * @description The reason the model stopped generating tokens. This will be `stop` if the model
-       * hit a natural stop point or a provided stop sequence, `length` if the maximum
-       * number of tokens specified in the request was reached, `content_filter` if
-       * content was omitted due to a flag from our content filters, `tool_calls` if the
-       * model called a tool, or `function_call` (deprecated) if the model called a
-       * function.
-       * @enum {string}
-       */
-      finish_reason: "stop" | "length" | "tool_calls" | "content_filter" | "function_call";
-      /**
-       * Format: double
-       * @description The index of the choice in the list of choices.
-       */
-      index: number;
-      /** @description Log probability information for the choice. */
-      logprobs: components["schemas"]["ChatCompletion.Choice.Logprobs"] | null;
-      /** @description A chat completion message generated by the model. */
-      message: components["schemas"]["ChatCompletionMessage"];
-    };
-    /** @description Breakdown of tokens used in a completion. */
-    "CompletionUsage.CompletionTokensDetails": {
-      /**
-       * Format: double
-       * @description When using Predicted Outputs, the number of tokens in the prediction that
-       * appeared in the completion.
-       */
-      accepted_prediction_tokens?: number;
-      /**
-       * Format: double
-       * @description Audio input tokens generated by the model.
-       */
-      audio_tokens?: number;
-      /**
-       * Format: double
-       * @description Tokens generated by the model for reasoning.
-       */
-      reasoning_tokens?: number;
-      /**
-       * Format: double
-       * @description When using Predicted Outputs, the number of tokens in the prediction that did
-       * not appear in the completion. However, like reasoning tokens, these tokens are
-       * still counted in the total completion tokens for purposes of billing, output,
-       * and context window limits.
-       */
-      rejected_prediction_tokens?: number;
-    };
-    /** @description Breakdown of tokens used in the prompt. */
-    "CompletionUsage.PromptTokensDetails": {
-      /**
-       * Format: double
-       * @description Audio input tokens present in the prompt.
-       */
-      audio_tokens?: number;
-      /**
-       * Format: double
-       * @description Cached tokens present in the prompt.
-       */
-      cached_tokens?: number;
-    };
-    /** @description Usage statistics for the completion request. */
-    CompletionUsage: {
-      /**
-       * Format: double
-       * @description Number of tokens in the generated completion.
-       */
-      completion_tokens: number;
-      /**
-       * Format: double
-       * @description Number of tokens in the prompt.
-       */
-      prompt_tokens: number;
-      /**
-       * Format: double
-       * @description Total number of tokens used in the request (prompt + completion).
-       */
-      total_tokens: number;
-      /** @description Breakdown of tokens used in a completion. */
-      completion_tokens_details?: components["schemas"]["CompletionUsage.CompletionTokensDetails"];
-      /** @description Breakdown of tokens used in the prompt. */
-      prompt_tokens_details?: components["schemas"]["CompletionUsage.PromptTokensDetails"];
-    };
-    /**
-     * @description Represents a chat completion response returned by model, based on the provided
-     * input.
-     */
-    ChatCompletion: {
-      /** @description A unique identifier for the chat completion. */
-      id: string;
-      /**
-       * @description A list of chat completion choices. Can be more than one if `n` is greater
-       * than 1.
-       */
-      choices: components["schemas"]["ChatCompletion.Choice"][];
-      /**
-       * Format: double
-       * @description The Unix timestamp (in seconds) of when the chat completion was created.
-       */
-      created: number;
-      /** @description The model used for the chat completion. */
-      model: string;
-      /**
-       * @description The object type, which is always `chat.completion`.
-       * @enum {string}
-       */
-      object: "chat.completion";
-      /**
-       * @description Specifies the processing type used for serving the request.
-       *
-       * - If set to 'auto', then the request will be processed with the service tier
-       *   configured in the Project settings. Unless otherwise configured, the Project
-       *   will use 'default'.
-       * - If set to 'default', then the request will be processed with the standard
-       *   pricing and performance for the selected model.
-       * - If set to '[flex](https://platform.openai.com/docs/guides/flex-processing)' or
-       *   'priority', then the request will be processed with the corresponding service
-       *   tier. [Contact sales](https://openai.com/contact-sales) to learn more about
-       *   Priority processing.
-       * - When not set, the default behavior is 'auto'.
-       *
-       * When the `service_tier` parameter is set, the response body will include the
-       * `service_tier` value based on the processing mode actually used to serve the
-       * request. This response value may be different from the value set in the
-       * parameter.
-       * @enum {string|null}
-       */
-      service_tier?: "auto" | "default" | "flex" | "scale" | "priority" | null;
-      /**
-       * @description This fingerprint represents the backend configuration that the model runs with.
-       *
-       * Can be used in conjunction with the `seed` request parameter to understand when
-       * backend changes have been made that might impact determinism.
-       */
-      system_fingerprint?: string;
-      /** @description Usage statistics for the completion request. */
-      usage?: components["schemas"]["CompletionUsage"];
-    };
-    ResultSuccess_ChatCompletion_: {
-      data: components["schemas"]["ChatCompletion"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ChatCompletion.string_": components["schemas"]["ResultSuccess_ChatCompletion_"] | components["schemas"]["ResultError_string_"];
-    /**
-     * @description Learn about
-     * [text inputs](https://platform.openai.com/docs/guides/text-generation).
-     */
-    ChatCompletionContentPartText: {
-      /** @description The text content. */
-      text: string;
-      /**
-       * @description The type of the content part.
-       * @enum {string}
-       */
-      type: "text";
-    };
-    /**
-     * @description Developer-provided instructions that the model should follow, regardless of
-     * messages sent by the user. With o1 models and newer, `developer` messages
-     * replace the previous `system` messages.
-     */
-    ChatCompletionDeveloperMessageParam: {
-      /** @description The contents of the developer message. */
-      content: string | components["schemas"]["ChatCompletionContentPartText"][];
-      /**
-       * @description The role of the messages author, in this case `developer`.
-       * @enum {string}
-       */
-      role: "developer";
-      /**
-       * @description An optional name for the participant. Provides the model information to
-       * differentiate between participants of the same role.
-       */
-      name?: string;
-    };
-    /**
-     * @description Developer-provided instructions that the model should follow, regardless of
-     * messages sent by the user. With o1 models and newer, use `developer` messages
-     * for this purpose instead.
-     */
-    ChatCompletionSystemMessageParam: {
-      /** @description The contents of the system message. */
-      content: string | components["schemas"]["ChatCompletionContentPartText"][];
-      /**
-       * @description The role of the messages author, in this case `system`.
-       * @enum {string}
-       */
-      role: "system";
-      /**
-       * @description An optional name for the participant. Provides the model information to
-       * differentiate between participants of the same role.
-       */
-      name?: string;
-    };
-    "ChatCompletionContentPartImage.ImageURL": {
-      /** @description Either a URL of the image or the base64 encoded image data. */
-      url: string;
-      /**
-       * @description Specifies the detail level of the image. Learn more in the
-       * [Vision guide](https://platform.openai.com/docs/guides/vision#low-or-high-fidelity-image-understanding).
-       * @enum {string}
-       */
-      detail?: "auto" | "low" | "high";
-    };
-    /** @description Learn about [image inputs](https://platform.openai.com/docs/guides/vision). */
-    ChatCompletionContentPartImage: {
-      image_url: components["schemas"]["ChatCompletionContentPartImage.ImageURL"];
-      /**
-       * @description The type of the content part.
-       * @enum {string}
-       */
-      type: "image_url";
-    };
-    "ChatCompletionContentPartInputAudio.InputAudio": {
-      /** @description Base64 encoded audio data. */
-      data: string;
-      /**
-       * @description The format of the encoded audio data. Currently supports "wav" and "mp3".
-       * @enum {string}
-       */
-      format: "wav" | "mp3";
-    };
-    /** @description Learn about [audio inputs](https://platform.openai.com/docs/guides/audio). */
-    ChatCompletionContentPartInputAudio: {
-      input_audio: components["schemas"]["ChatCompletionContentPartInputAudio.InputAudio"];
-      /**
-       * @description The type of the content part. Always `input_audio`.
-       * @enum {string}
-       */
-      type: "input_audio";
-    };
-    "ChatCompletionContentPart.File.File": {
-      /**
-       * @description The base64 encoded file data, used when passing the file to the model as a
-       * string.
-       */
-      file_data?: string;
-      /** @description The ID of an uploaded file to use as input. */
-      file_id?: string;
-      /** @description The name of the file, used when passing the file to the model as a string. */
-      filename?: string;
-    };
-    /**
-     * @description Learn about [file inputs](https://platform.openai.com/docs/guides/text) for text
-     * generation.
-     */
-    "ChatCompletionContentPart.File": {
-      file: components["schemas"]["ChatCompletionContentPart.File.File"];
-      /**
-       * @description The type of the content part. Always `file`.
-       * @enum {string}
-       */
-      type: "file";
-    };
-    /**
-     * @description Learn about
-     * [text inputs](https://platform.openai.com/docs/guides/text-generation).
-     */
-    ChatCompletionContentPart: components["schemas"]["ChatCompletionContentPartText"] | components["schemas"]["ChatCompletionContentPartImage"] | components["schemas"]["ChatCompletionContentPartInputAudio"] | components["schemas"]["ChatCompletionContentPart.File"];
-    /**
-     * @description Messages sent by an end user, containing prompts or additional context
-     * information.
-     */
-    ChatCompletionUserMessageParam: {
-      /** @description The contents of the user message. */
-      content: string | components["schemas"]["ChatCompletionContentPart"][];
-      /**
-       * @description The role of the messages author, in this case `user`.
-       * @enum {string}
-       */
-      role: "user";
-      /**
-       * @description An optional name for the participant. Provides the model information to
-       * differentiate between participants of the same role.
-       */
-      name?: string;
-    };
-    /**
-     * @description Data about a previous audio response from the model.
-     * [Learn more](https://platform.openai.com/docs/guides/audio).
-     */
-    "ChatCompletionAssistantMessageParam.Audio": {
-      /** @description Unique identifier for a previous audio response from the model. */
-      id: string;
-    };
-    ChatCompletionContentPartRefusal: {
-      /** @description The refusal message generated by the model. */
-      refusal: string;
-      /**
-       * @description The type of the content part.
-       * @enum {string}
-       */
-      type: "refusal";
-    };
-    /** @deprecated */
-    "ChatCompletionAssistantMessageParam.FunctionCall": {
-      /**
-       * @description The arguments to call the function with, as generated by the model in JSON
-       * format. Note that the model does not always generate valid JSON, and may
-       * hallucinate parameters not defined by your function schema. Validate the
-       * arguments in your code before calling your function.
-       */
-      arguments: string;
-      /** @description The name of the function to call. */
-      name: string;
-    };
-    /** @description Messages sent by the model in response to user messages. */
-    ChatCompletionAssistantMessageParam: {
-      /**
-       * @description The role of the messages author, in this case `assistant`.
-       * @enum {string}
-       */
-      role: "assistant";
-      /**
-       * @description Data about a previous audio response from the model.
-       * [Learn more](https://platform.openai.com/docs/guides/audio).
-       */
-      audio?: components["schemas"]["ChatCompletionAssistantMessageParam.Audio"] | null;
-      /**
-       * @description The contents of the assistant message. Required unless `tool_calls` or
-       * `function_call` is specified.
-       */
-      content?: (string | ((components["schemas"]["ChatCompletionContentPartText"] | components["schemas"]["ChatCompletionContentPartRefusal"])[])) | null;
-      /** @deprecated */
-      function_call?: components["schemas"]["ChatCompletionAssistantMessageParam.FunctionCall"] | null;
-      /**
-       * @description An optional name for the participant. Provides the model information to
-       * differentiate between participants of the same role.
-       */
-      name?: string;
-      /** @description The refusal message by the assistant. */
-      refusal?: string | null;
-      /** @description The tool calls generated by the model, such as function calls. */
-      tool_calls?: components["schemas"]["ChatCompletionMessageToolCall"][];
-    };
-    ChatCompletionToolMessageParam: {
-      /** @description The contents of the tool message. */
-      content: string | components["schemas"]["ChatCompletionContentPartText"][];
-      /**
-       * @description The role of the messages author, in this case `tool`.
-       * @enum {string}
-       */
-      role: "tool";
-      /** @description Tool call that this message is responding to. */
-      tool_call_id: string;
-    };
-    /** @deprecated */
-    ChatCompletionFunctionMessageParam: {
-      /** @description The contents of the function message. */
-      content: string | null;
-      /** @description The name of the function to call. */
-      name: string;
-      /**
-       * @description The role of the messages author, in this case `function`.
-       * @enum {string}
-       */
-      role: "function";
-    };
-    /**
-     * @description Developer-provided instructions that the model should follow, regardless of
-     * messages sent by the user. With o1 models and newer, `developer` messages
-     * replace the previous `system` messages.
-     */
-    ChatCompletionMessageParam: components["schemas"]["ChatCompletionDeveloperMessageParam"] | components["schemas"]["ChatCompletionSystemMessageParam"] | components["schemas"]["ChatCompletionUserMessageParam"] | components["schemas"]["ChatCompletionAssistantMessageParam"] | components["schemas"]["ChatCompletionToolMessageParam"] | components["schemas"]["ChatCompletionFunctionMessageParam"];
-    /**
-     * @description The parameters the functions accepts, described as a JSON Schema object. See the
-     * [guide](https://platform.openai.com/docs/guides/function-calling) for examples,
-     * and the
-     * [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for
-     * documentation about the format.
-     *
-     * Omitting `parameters` defines a function with an empty parameter list.
-     */
-    FunctionParameters: {
-      [key: string]: unknown;
-    };
-    FunctionDefinition: {
-      /**
-       * @description The name of the function to be called. Must be a-z, A-Z, 0-9, or contain
-       * underscores and dashes, with a maximum length of 64.
-       */
-      name: string;
-      /**
-       * @description A description of what the function does, used by the model to choose when and
-       * how to call the function.
-       */
-      description?: string;
-      /**
-       * @description The parameters the functions accepts, described as a JSON Schema object. See the
-       * [guide](https://platform.openai.com/docs/guides/function-calling) for examples,
-       * and the
-       * [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for
-       * documentation about the format.
-       *
-       * Omitting `parameters` defines a function with an empty parameter list.
-       */
-      parameters?: components["schemas"]["FunctionParameters"];
-      /**
-       * @description Whether to enable strict schema adherence when generating the function call. If
-       * set to true, the model will follow the exact schema defined in the `parameters`
-       * field. Only a subset of JSON Schema is supported when `strict` is `true`. Learn
-       * more about Structured Outputs in the
-       * [function calling guide](https://platform.openai.com/docs/guides/function-calling).
-       */
-      strict?: boolean | null;
-    };
-    /** @description A function tool that can be used to generate a response. */
-    ChatCompletionFunctionTool: {
-      function: components["schemas"]["FunctionDefinition"];
-      /**
-       * @description The type of the tool. Currently, only `function` is supported.
-       * @enum {string}
-       */
-      type: "function";
-    };
-    /** @description Unconstrained free-form text. */
-    "ChatCompletionCustomTool.Custom.Text": {
-      /**
-       * @description Unconstrained text format. Always `text`.
-       * @enum {string}
-       */
-      type: "text";
-    };
-    /** @description Your chosen grammar. */
-    "ChatCompletionCustomTool.Custom.Grammar.Grammar": {
-      /** @description The grammar definition. */
-      definition: string;
-      /**
-       * @description The syntax of the grammar definition. One of `lark` or `regex`.
-       * @enum {string}
-       */
-      syntax: "lark" | "regex";
-    };
-    /** @description A grammar defined by the user. */
-    "ChatCompletionCustomTool.Custom.Grammar": {
-      /** @description Your chosen grammar. */
-      grammar: components["schemas"]["ChatCompletionCustomTool.Custom.Grammar.Grammar"];
-      /**
-       * @description Grammar format. Always `grammar`.
-       * @enum {string}
-       */
-      type: "grammar";
-    };
-    /** @description Properties of the custom tool. */
-    "ChatCompletionCustomTool.Custom": {
-      /** @description The name of the custom tool, used to identify it in tool calls. */
-      name: string;
-      /** @description Optional description of the custom tool, used to provide more context. */
-      description?: string;
-      /** @description The input format for the custom tool. Default is unconstrained text. */
-      format?: components["schemas"]["ChatCompletionCustomTool.Custom.Text"] | components["schemas"]["ChatCompletionCustomTool.Custom.Grammar"];
-    };
-    /** @description A custom tool that processes input using a specified format. */
-    ChatCompletionCustomTool: {
-      /** @description Properties of the custom tool. */
-      custom: components["schemas"]["ChatCompletionCustomTool.Custom"];
-      /**
-       * @description The type of the custom tool. Always `custom`.
-       * @enum {string}
-       */
-      type: "custom";
-    };
-    /** @description A function tool that can be used to generate a response. */
-    ChatCompletionTool: components["schemas"]["ChatCompletionFunctionTool"] | components["schemas"]["ChatCompletionCustomTool"];
-    /** @description Constrains the tools available to the model to a pre-defined set. */
-    ChatCompletionAllowedTools: {
-      /**
-       * @description Constrains the tools available to the model to a pre-defined set.
-       *
-       * `auto` allows the model to pick from among the allowed tools and generate a
-       * message.
-       *
-       * `required` requires the model to call one or more of the allowed tools.
-       * @enum {string}
-       */
-      mode: "auto" | "required";
-      /**
-       * @description A list of tool definitions that the model should be allowed to call.
-       *
-       * For the Chat Completions API, the list of tool definitions might look like:
-       *
-       * ```json
-       * [
-       *   { "type": "function", "function": { "name": "get_weather" } },
-       *   { "type": "function", "function": { "name": "get_time" } }
-       * ]
-       * ```
-       */
-      tools: {
-          [key: string]: unknown;
-        }[];
-    };
-    /** @description Constrains the tools available to the model to a pre-defined set. */
-    ChatCompletionAllowedToolChoice: {
-      /** @description Constrains the tools available to the model to a pre-defined set. */
-      allowed_tools: components["schemas"]["ChatCompletionAllowedTools"];
-      /**
-       * @description Allowed tool configuration type. Always `allowed_tools`.
-       * @enum {string}
-       */
-      type: "allowed_tools";
-    };
-    "ChatCompletionNamedToolChoice.Function": {
-      /** @description The name of the function to call. */
-      name: string;
-    };
-    /**
-     * @description Specifies a tool the model should use. Use to force the model to call a specific
-     * function.
-     */
-    ChatCompletionNamedToolChoice: {
-      function: components["schemas"]["ChatCompletionNamedToolChoice.Function"];
-      /**
-       * @description For function calling, the type is always `function`.
-       * @enum {string}
-       */
-      type: "function";
-    };
-    "ChatCompletionNamedToolChoiceCustom.Custom": {
-      /** @description The name of the custom tool to call. */
-      name: string;
-    };
-    /**
-     * @description Specifies a tool the model should use. Use to force the model to call a specific
-     * custom tool.
-     */
-    ChatCompletionNamedToolChoiceCustom: {
-      custom: components["schemas"]["ChatCompletionNamedToolChoiceCustom.Custom"];
-      /**
-       * @description For custom tool calling, the type is always `custom`.
-       * @enum {string}
-       */
-      type: "custom";
-    };
-    /**
-     * @description Controls which (if any) tool is called by the model. `none` means the model will
-     * not call any tool and instead generates a message. `auto` means the model can
-     * pick between generating a message or calling one or more tools. `required` means
-     * the model must call one or more tools. Specifying a particular tool via
-     * `{"type": "function", "function": {"name": "my_function"}}` forces the model to
-     * call that tool.
-     *
-     * `none` is the default when no tools are present. `auto` is the default if tools
-     * are present.
-     */
-    ChatCompletionToolChoiceOption: components["schemas"]["ChatCompletionAllowedToolChoice"] | components["schemas"]["ChatCompletionNamedToolChoice"] | components["schemas"]["ChatCompletionNamedToolChoiceCustom"] | ("none" | "auto" | "required");
-    AlertResponse: {
-      alerts: ({
-          updated_at: string | null;
-          /** Format: double */
-          time_window: number;
-          /** Format: double */
-          time_block_duration: number;
-          /** Format: double */
-          threshold: number;
-          status: string;
-          soft_delete: boolean;
-          slack_channels: string[];
-          org_id: string;
-          name: string;
-          /** Format: double */
-          minimum_request_count: number | null;
-          metric: string;
-          id: string;
-          emails: string[];
-          created_at: string | null;
-        })[];
-      history: ({
-          updated_at: string | null;
-          triggered_value: string;
-          status: string;
-          soft_delete: boolean;
-          org_id: string;
-          id: string;
-          created_at: string | null;
-          alert_start_time: string;
-          alert_name: string;
-          alert_metric: string;
-          alert_id: string;
-          alert_end_time: string | null;
-        })[];
-    };
-    ResultSuccess_AlertResponse_: {
-      data: components["schemas"]["AlertResponse"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_AlertResponse.string_": components["schemas"]["ResultSuccess_AlertResponse_"] | components["schemas"]["ResultError_string_"];
-    AlertRequest: {
-      name: string;
-      metric: string;
-      /** Format: double */
-      threshold: number;
-      time_window: string;
-      emails: string[];
-      slack_channels: string[];
-      /** Format: double */
-      minimum_request_count?: number;
-    };
-    "ResultSuccess__active-boolean--created_at-string--id-number--message-string--title-string--updated_at-string_-Array_": {
-      data: {
-          updated_at: string;
-          title: string;
-          message: string;
-          /** Format: double */
-          id: number;
-          created_at: string;
-          active: boolean;
-        }[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__active-boolean--created_at-string--id-number--message-string--title-string--updated_at-string_-Array.string_": components["schemas"]["ResultSuccess__active-boolean--created_at-string--id-number--message-string--title-string--updated_at-string_-Array_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__organization_id-string--name-string--flags-string-Array_-Array_": {
-      data: {
-          flags: string[];
-          name: string;
-          organization_id: string;
-        }[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__organization_id-string--name-string--flags-string-Array_-Array.string_": components["schemas"]["ResultSuccess__organization_id-string--name-string--flags-string-Array_-Array_"] | components["schemas"]["ResultError_string_"];
-    KafkaSettings: {
-      /** Format: double */
-      miniBatchSize: number;
-    };
-    AzureExperiment: {
-      azureBaseUri: string;
-      azureApiVersion: string;
-      azureDeploymentName: string;
-      azureApiKey: string;
-    };
-    ApiKey: {
-      apiKey: string;
-    };
-    Setting: components["schemas"]["KafkaSettings"] | components["schemas"]["AzureExperiment"] | components["schemas"]["ApiKey"];
-    /** @enum {string} */
-    SettingName: "kafka:dlq" | "kafka:log" | "kafka:score" | "kafka:dlq:score" | "kafka:dlq:eu" | "kafka:log:eu" | "kafka:orgs-to-dlq" | "azure:experiment" | "openai:apiKey" | "anthropic:apiKey" | "openrouter:apiKey" | "togetherai:apiKey" | "sqs:request-response-logs" | "sqs:helicone-scores" | "sqs:request-response-logs-dlq" | "sqs:helicone-scores-dlq";
-    /**
-     * @description The **`URL`** interface is used to parse, construct, normalize, and encode URL.
-     *
-     * [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL)
-     * `URL` class is a global reference for `import { URL } from 'node:url'`
-     * https://nodejs.org/api/url.html#the-whatwg-url-api
-     */
-    "url.URL": string;
-    /** @description The Application object. */
-    "stripe.Stripe.Application": {
-      /** @description Unique identifier for the object. */
-      id: string;
-      /**
-       * @description String representing the object's type. Objects of the same type share the same value.
-       * @enum {string}
-       */
-      object: "application";
-      /** @description Always true for a deleted object */
-      deleted?: unknown;
-      /** @description The name of the application. */
-      name: string | null;
-    };
-    /** @description The DeletedApplication object. */
-    "stripe.Stripe.DeletedApplication": {
-      /** @description Unique identifier for the object. */
-      id: string;
-      /**
-       * @description String representing the object's type. Objects of the same type share the same value.
-       * @enum {string}
-       */
-      object: "application";
-      /**
-       * @description Always true for a deleted object
-       * @enum {boolean}
-       */
-      deleted: true;
-      /** @description The name of the application. */
-      name: string | null;
+      /** @description The ID of the customer whose cash balance this object represents. */
+      customer: string;
+      /** @description The ID of the account whose cash balance this object represents. */
+      customer_account?: string | null;
+      /** @description Has the value `true` if the object exists in live mode or the value `false` if the object exists in test mode. */
+      livemode: boolean;
+      settings: components["schemas"]["stripe.Stripe.CashBalance.Settings"];
     };
     "stripe.Stripe.Account.BusinessProfile.AnnualRevenue": {
       /**
@@ -3019,21 +636,6 @@ Json: JsonObject;
       amount: number;
       /** @description Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase. Must be a [supported currency](https://stripe.com/docs/currencies). */
       currency: string;
-    };
-    /** @description The Address object. */
-    "stripe.Stripe.Address": {
-      /** @description City/District/Suburb/Town/Village. */
-      city: string | null;
-      /** @description 2-letter country code. */
-      country: string | null;
-      /** @description Address line 1 (Street address/PO Box/Company name). */
-      line1: string | null;
-      /** @description Address line 2 (Apartment/Suite/Unit/Building). */
-      line2: string | null;
-      /** @description ZIP or postal code. */
-      postal_code: string | null;
-      /** @description State/County/Province/Region. */
-      state: string | null;
     };
     "stripe.Stripe.Account.BusinessProfile": {
       /** @description The applicant's gross annual revenue for its preceding fiscal year. */
@@ -3713,95 +1315,6 @@ Json: JsonObject;
     };
     /** @enum {string} */
     "stripe.Stripe.BankAccount.AvailablePayoutMethod": "instant" | "standard";
-    /** @enum {string} */
-    "stripe.Stripe.CashBalance.Settings.ReconciliationMode": "automatic" | "manual";
-    "stripe.Stripe.CashBalance.Settings": {
-      /** @description The configuration for how funds that land in the customer cash balance are reconciled. */
-      reconciliation_mode: components["schemas"]["stripe.Stripe.CashBalance.Settings.ReconciliationMode"];
-      /** @description A flag to indicate if reconciliation mode returned is the user's default or is specific to this customer cash balance */
-      using_merchant_default: boolean;
-    };
-    /** @description A customer's `Cash balance` represents real funds. Customers can add funds to their cash balance by sending a bank transfer. These funds can be used for payment and can eventually be paid out to your bank account. */
-    "stripe.Stripe.CashBalance": {
-      /**
-       * @description String representing the object's type. Objects of the same type share the same value.
-       * @enum {string}
-       */
-      object: "cash_balance";
-      /** @description A hash of all cash balances available to this customer. You cannot delete a customer with any cash balances, even if the balance is 0. Amounts are represented in the [smallest currency unit](https://stripe.com/docs/currencies#zero-decimal). */
-      available: {
-        [key: string]: number;
-      } | null;
-      /** @description The ID of the customer whose cash balance this object represents. */
-      customer: string;
-      /** @description The ID of the account whose cash balance this object represents. */
-      customer_account?: string | null;
-      /** @description Has the value `true` if the object exists in live mode or the value `false` if the object exists in test mode. */
-      livemode: boolean;
-      settings: components["schemas"]["stripe.Stripe.CashBalance.Settings"];
-    };
-    /**
-     * @description These bank accounts are payment methods on `Customer` objects.
-     *
-     * On the other hand [External Accounts](https://docs.stripe.com/api#external_accounts) are transfer
-     * destinations on `Account` objects for connected accounts.
-     * They can be bank accounts or debit cards as well, and are documented in the links above.
-     *
-     * Related guide: [Bank debits and transfers](https://docs.stripe.com/payments/bank-debits-transfers)
-     */
-    "stripe.Stripe.BankAccount": {
-      /** @description Unique identifier for the object. */
-      id: string;
-      /**
-       * @description String representing the object's type. Objects of the same type share the same value.
-       * @enum {string}
-       */
-      object: "bank_account";
-      /** @description The account this bank account belongs to. Only applicable on Accounts (not customers or recipients) This property is only available when returned as an [External Account](https://docs.stripe.com/api/external_account_bank_accounts/object) where [controller.is_controller](https://docs.stripe.com/api/accounts/object#account_object-controller-is_controller) is `true`. */
-      account?: (string | components["schemas"]["stripe.Stripe.Account"]) | null;
-      /** @description The name of the person or business that owns the bank account. */
-      account_holder_name: string | null;
-      /** @description The type of entity that holds the account. This can be either `individual` or `company`. */
-      account_holder_type: string | null;
-      /** @description The bank account type. This can only be `checking` or `savings` in most countries. In Japan, this can only be `futsu` or `toza`. */
-      account_type: string | null;
-      /** @description A set of available payout methods for this bank account. Only values from this set should be passed as the `method` when creating a payout. */
-      available_payout_methods?: components["schemas"]["stripe.Stripe.BankAccount.AvailablePayoutMethod"][] | null;
-      /** @description Name of the bank associated with the routing number (e.g., `WELLS FARGO`). */
-      bank_name: string | null;
-      /** @description Two-letter ISO code representing the country the bank account is located in. */
-      country: string;
-      /** @description Three-letter [ISO code for the currency](https://stripe.com/docs/payouts) paid out to the bank account. */
-      currency: string;
-      /** @description The ID of the customer that the bank account is associated with. */
-      customer?: (string | components["schemas"]["stripe.Stripe.Customer"] | components["schemas"]["stripe.Stripe.DeletedCustomer"]) | null;
-      /** @description Whether this bank account is the default external account for its currency. */
-      default_for_currency?: boolean | null;
-      /** @description Always true for a deleted object */
-      deleted?: unknown;
-      /** @description Uniquely identifies this particular bank account. You can use this attribute to check whether two bank accounts are the same. */
-      fingerprint: string | null;
-      /** @description Information about the [upcoming new requirements for the bank account](https://stripe.com/docs/connect/custom-accounts/future-requirements), including what information needs to be collected, and by when. */
-      future_requirements?: components["schemas"]["stripe.Stripe.BankAccount.FutureRequirements"] | null;
-      /** @description The last four digits of the bank account number. */
-      last4: string;
-      /** @description Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. */
-      metadata?: components["schemas"]["stripe.Stripe.Metadata"] | null;
-      /** @description Information about the requirements for the bank account, including what information needs to be collected. */
-      requirements?: components["schemas"]["stripe.Stripe.BankAccount.Requirements"] | null;
-      /** @description The routing transit number for the bank account. */
-      routing_number: string | null;
-      /**
-       * @description For bank accounts, possible values are `new`, `validated`, `verified`, `verification_failed`, or `errored`. A bank account that hasn't had any activity or validation performed is `new`. If Stripe can determine that the bank account exists, its status will be `validated`. Note that there often isn't enough information to know (e.g., for smaller credit unions), and the validation is not always run. If customer bank account verification has succeeded, the bank account status will be `verified`. If the verification failed for any reason, such as microdeposit failure, the status will be `verification_failed`. If a payout sent to this bank account fails, we'll set the status to `errored` and will not continue to send [scheduled payouts](https://stripe.com/docs/payouts#payout-schedule) until the bank details are updated.
-       *
-       * For external accounts, possible values are `new`, `errored` and `verification_failed`. If a payout fails, the status is set to `errored` and scheduled payouts are stopped until account details are updated. In the US and India, if we can't [verify the owner of the bank account](https://support.stripe.com/questions/bank-account-ownership-verification), we'll set the status to `verification_failed`. Other validations aren't run against external accounts because they're only used for payouts. This means the other statuses don't apply.
-       */
-      status: string;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Card.AllowRedisplay": "always" | "limited" | "unspecified";
-    /** @enum {string} */
-    "stripe.Stripe.Card.AvailablePayoutMethod": "instant" | "standard";
     /**
      * @description This object represents a customer of your business. Use it to [create recurring charges](https://stripe.com/docs/invoicing/customer), [save payment](https://stripe.com/docs/payments/save-during-payment) and contact information,
      * and track payments that belong to the same customer.
@@ -3904,6 +1417,108 @@ Json: JsonObject;
        */
       deleted: true;
     };
+    /** @enum {string} */
+    "stripe.Stripe.BankAccount.FutureRequirements.Error.Code": "information_missing" | "invalid_address_city_state_postal_code" | "invalid_address_highway_contract_box" | "invalid_address_private_mailbox" | "invalid_business_profile_name" | "invalid_business_profile_name_denylisted" | "invalid_company_name_denylisted" | "invalid_dob_age_over_maximum" | "invalid_dob_age_under_18" | "invalid_dob_age_under_minimum" | "invalid_product_description_length" | "invalid_product_description_url_match" | "invalid_representative_country" | "invalid_signator" | "invalid_statement_descriptor_business_mismatch" | "invalid_statement_descriptor_denylisted" | "invalid_statement_descriptor_length" | "invalid_statement_descriptor_prefix_denylisted" | "invalid_statement_descriptor_prefix_mismatch" | "invalid_street_address" | "invalid_tax_id" | "invalid_tax_id_format" | "invalid_tos_acceptance" | "invalid_url_denylisted" | "invalid_url_format" | "invalid_url_length" | "invalid_url_web_presence_detected" | "invalid_url_website_business_information_mismatch" | "invalid_url_website_empty" | "invalid_url_website_inaccessible" | "invalid_url_website_inaccessible_geoblocked" | "invalid_url_website_inaccessible_password_protected" | "invalid_url_website_incomplete" | "invalid_url_website_incomplete_cancellation_policy" | "invalid_url_website_incomplete_customer_service_details" | "invalid_url_website_incomplete_legal_restrictions" | "invalid_url_website_incomplete_refund_policy" | "invalid_url_website_incomplete_return_policy" | "invalid_url_website_incomplete_terms_and_conditions" | "invalid_url_website_incomplete_under_construction" | "invalid_url_website_other" | "invalid_value_other" | "verification_directors_mismatch" | "verification_document_address_mismatch" | "verification_document_address_missing" | "verification_document_corrupt" | "verification_document_country_not_supported" | "verification_document_directors_mismatch" | "verification_document_dob_mismatch" | "verification_document_duplicate_type" | "verification_document_expired" | "verification_document_failed_copy" | "verification_document_failed_greyscale" | "verification_document_failed_other" | "verification_document_failed_test_mode" | "verification_document_fraudulent" | "verification_document_id_number_mismatch" | "verification_document_id_number_missing" | "verification_document_incomplete" | "verification_document_invalid" | "verification_document_issue_or_expiry_date_missing" | "verification_document_manipulated" | "verification_document_missing_back" | "verification_document_missing_front" | "verification_document_name_mismatch" | "verification_document_name_missing" | "verification_document_nationality_mismatch" | "verification_document_not_readable" | "verification_document_not_signed" | "verification_document_not_uploaded" | "verification_document_photo_mismatch" | "verification_document_too_large" | "verification_document_type_not_supported" | "verification_extraneous_directors" | "verification_failed_address_match" | "verification_failed_authorizer_authority" | "verification_failed_business_iec_number" | "verification_failed_document_match" | "verification_failed_id_number_match" | "verification_failed_keyed_identity" | "verification_failed_keyed_match" | "verification_failed_name_match" | "verification_failed_other" | "verification_failed_representative_authority" | "verification_failed_residential_address" | "verification_failed_tax_id_match" | "verification_failed_tax_id_not_issued" | "verification_legal_entity_structure_mismatch" | "verification_missing_directors" | "verification_missing_executives" | "verification_missing_owners" | "verification_rejected_ownership_exemption_reason" | "verification_requires_additional_memorandum_of_associations" | "verification_requires_additional_proof_of_registration" | "verification_supportability";
+    "stripe.Stripe.BankAccount.FutureRequirements.Error": {
+      /** @description The code for the type of error. */
+      code: components["schemas"]["stripe.Stripe.BankAccount.FutureRequirements.Error.Code"];
+      /** @description An informative message that indicates the error type and provides additional details about the error. */
+      reason: string;
+      /** @description The specific user onboarding requirement field (in the requirements hash) that needs to be resolved. */
+      requirement: string;
+    };
+    "stripe.Stripe.BankAccount.FutureRequirements": {
+      /** @description Fields that need to be collected to keep the external account enabled. If not collected by `current_deadline`, these fields appear in `past_due` as well, and the account is disabled. */
+      currently_due: string[] | null;
+      /** @description Fields that are `currently_due` and need to be collected again because validation or verification failed. */
+      errors: components["schemas"]["stripe.Stripe.BankAccount.FutureRequirements.Error"][] | null;
+      /** @description Fields that weren't collected by `current_deadline`. These fields need to be collected to enable the external account. */
+      past_due: string[] | null;
+      /** @description Fields that might become required depending on the results of verification or review. It's an empty array unless an asynchronous verification is pending. If verification fails, these fields move to `eventually_due`, `currently_due`, or `past_due`. Fields might appear in `eventually_due`, `currently_due`, or `past_due` and in `pending_verification` if verification fails but another verification is still pending. */
+      pending_verification: string[] | null;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.BankAccount.Requirements.Error.Code": "information_missing" | "invalid_address_city_state_postal_code" | "invalid_address_highway_contract_box" | "invalid_address_private_mailbox" | "invalid_business_profile_name" | "invalid_business_profile_name_denylisted" | "invalid_company_name_denylisted" | "invalid_dob_age_over_maximum" | "invalid_dob_age_under_18" | "invalid_dob_age_under_minimum" | "invalid_product_description_length" | "invalid_product_description_url_match" | "invalid_representative_country" | "invalid_signator" | "invalid_statement_descriptor_business_mismatch" | "invalid_statement_descriptor_denylisted" | "invalid_statement_descriptor_length" | "invalid_statement_descriptor_prefix_denylisted" | "invalid_statement_descriptor_prefix_mismatch" | "invalid_street_address" | "invalid_tax_id" | "invalid_tax_id_format" | "invalid_tos_acceptance" | "invalid_url_denylisted" | "invalid_url_format" | "invalid_url_length" | "invalid_url_web_presence_detected" | "invalid_url_website_business_information_mismatch" | "invalid_url_website_empty" | "invalid_url_website_inaccessible" | "invalid_url_website_inaccessible_geoblocked" | "invalid_url_website_inaccessible_password_protected" | "invalid_url_website_incomplete" | "invalid_url_website_incomplete_cancellation_policy" | "invalid_url_website_incomplete_customer_service_details" | "invalid_url_website_incomplete_legal_restrictions" | "invalid_url_website_incomplete_refund_policy" | "invalid_url_website_incomplete_return_policy" | "invalid_url_website_incomplete_terms_and_conditions" | "invalid_url_website_incomplete_under_construction" | "invalid_url_website_other" | "invalid_value_other" | "verification_directors_mismatch" | "verification_document_address_mismatch" | "verification_document_address_missing" | "verification_document_corrupt" | "verification_document_country_not_supported" | "verification_document_directors_mismatch" | "verification_document_dob_mismatch" | "verification_document_duplicate_type" | "verification_document_expired" | "verification_document_failed_copy" | "verification_document_failed_greyscale" | "verification_document_failed_other" | "verification_document_failed_test_mode" | "verification_document_fraudulent" | "verification_document_id_number_mismatch" | "verification_document_id_number_missing" | "verification_document_incomplete" | "verification_document_invalid" | "verification_document_issue_or_expiry_date_missing" | "verification_document_manipulated" | "verification_document_missing_back" | "verification_document_missing_front" | "verification_document_name_mismatch" | "verification_document_name_missing" | "verification_document_nationality_mismatch" | "verification_document_not_readable" | "verification_document_not_signed" | "verification_document_not_uploaded" | "verification_document_photo_mismatch" | "verification_document_too_large" | "verification_document_type_not_supported" | "verification_extraneous_directors" | "verification_failed_address_match" | "verification_failed_authorizer_authority" | "verification_failed_business_iec_number" | "verification_failed_document_match" | "verification_failed_id_number_match" | "verification_failed_keyed_identity" | "verification_failed_keyed_match" | "verification_failed_name_match" | "verification_failed_other" | "verification_failed_representative_authority" | "verification_failed_residential_address" | "verification_failed_tax_id_match" | "verification_failed_tax_id_not_issued" | "verification_legal_entity_structure_mismatch" | "verification_missing_directors" | "verification_missing_executives" | "verification_missing_owners" | "verification_rejected_ownership_exemption_reason" | "verification_requires_additional_memorandum_of_associations" | "verification_requires_additional_proof_of_registration" | "verification_supportability";
+    "stripe.Stripe.BankAccount.Requirements.Error": {
+      /** @description The code for the type of error. */
+      code: components["schemas"]["stripe.Stripe.BankAccount.Requirements.Error.Code"];
+      /** @description An informative message that indicates the error type and provides additional details about the error. */
+      reason: string;
+      /** @description The specific user onboarding requirement field (in the requirements hash) that needs to be resolved. */
+      requirement: string;
+    };
+    "stripe.Stripe.BankAccount.Requirements": {
+      /** @description Fields that need to be collected to keep the external account enabled. If not collected by `current_deadline`, these fields appear in `past_due` as well, and the account is disabled. */
+      currently_due: string[] | null;
+      /** @description Fields that are `currently_due` and need to be collected again because validation or verification failed. */
+      errors: components["schemas"]["stripe.Stripe.BankAccount.Requirements.Error"][] | null;
+      /** @description Fields that weren't collected by `current_deadline`. These fields need to be collected to enable the external account. */
+      past_due: string[] | null;
+      /** @description Fields that might become required depending on the results of verification or review. It's an empty array unless an asynchronous verification is pending. If verification fails, these fields move to `eventually_due`, `currently_due`, or `past_due`. Fields might appear in `eventually_due`, `currently_due`, or `past_due` and in `pending_verification` if verification fails but another verification is still pending. */
+      pending_verification: string[] | null;
+    };
+    /**
+     * @description These bank accounts are payment methods on `Customer` objects.
+     *
+     * On the other hand [External Accounts](https://docs.stripe.com/api#external_accounts) are transfer
+     * destinations on `Account` objects for connected accounts.
+     * They can be bank accounts or debit cards as well, and are documented in the links above.
+     *
+     * Related guide: [Bank debits and transfers](https://docs.stripe.com/payments/bank-debits-transfers)
+     */
+    "stripe.Stripe.BankAccount": {
+      /** @description Unique identifier for the object. */
+      id: string;
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: "bank_account";
+      /** @description The account this bank account belongs to. Only applicable on Accounts (not customers or recipients) This property is only available when returned as an [External Account](https://docs.stripe.com/api/external_account_bank_accounts/object) where [controller.is_controller](https://docs.stripe.com/api/accounts/object#account_object-controller-is_controller) is `true`. */
+      account?: (string | components["schemas"]["stripe.Stripe.Account"]) | null;
+      /** @description The name of the person or business that owns the bank account. */
+      account_holder_name: string | null;
+      /** @description The type of entity that holds the account. This can be either `individual` or `company`. */
+      account_holder_type: string | null;
+      /** @description The bank account type. This can only be `checking` or `savings` in most countries. In Japan, this can only be `futsu` or `toza`. */
+      account_type: string | null;
+      /** @description A set of available payout methods for this bank account. Only values from this set should be passed as the `method` when creating a payout. */
+      available_payout_methods?: components["schemas"]["stripe.Stripe.BankAccount.AvailablePayoutMethod"][] | null;
+      /** @description Name of the bank associated with the routing number (e.g., `WELLS FARGO`). */
+      bank_name: string | null;
+      /** @description Two-letter ISO code representing the country the bank account is located in. */
+      country: string;
+      /** @description Three-letter [ISO code for the currency](https://stripe.com/docs/payouts) paid out to the bank account. */
+      currency: string;
+      /** @description The ID of the customer that the bank account is associated with. */
+      customer?: (string | components["schemas"]["stripe.Stripe.Customer"] | components["schemas"]["stripe.Stripe.DeletedCustomer"]) | null;
+      /** @description Whether this bank account is the default external account for its currency. */
+      default_for_currency?: boolean | null;
+      /** @description Always true for a deleted object */
+      deleted?: unknown;
+      /** @description Uniquely identifies this particular bank account. You can use this attribute to check whether two bank accounts are the same. */
+      fingerprint: string | null;
+      /** @description Information about the [upcoming new requirements for the bank account](https://stripe.com/docs/connect/custom-accounts/future-requirements), including what information needs to be collected, and by when. */
+      future_requirements?: components["schemas"]["stripe.Stripe.BankAccount.FutureRequirements"] | null;
+      /** @description The last four digits of the bank account number. */
+      last4: string;
+      /** @description Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. */
+      metadata?: components["schemas"]["stripe.Stripe.Metadata"] | null;
+      /** @description Information about the requirements for the bank account, including what information needs to be collected. */
+      requirements?: components["schemas"]["stripe.Stripe.BankAccount.Requirements"] | null;
+      /** @description The routing transit number for the bank account. */
+      routing_number: string | null;
+      /**
+       * @description For bank accounts, possible values are `new`, `validated`, `verified`, `verification_failed`, or `errored`. A bank account that hasn't had any activity or validation performed is `new`. If Stripe can determine that the bank account exists, its status will be `validated`. Note that there often isn't enough information to know (e.g., for smaller credit unions), and the validation is not always run. If customer bank account verification has succeeded, the bank account status will be `verified`. If the verification failed for any reason, such as microdeposit failure, the status will be `verification_failed`. If a payout sent to this bank account fails, we'll set the status to `errored` and will not continue to send [scheduled payouts](https://stripe.com/docs/payouts#payout-schedule) until the bank details are updated.
+       *
+       * For external accounts, possible values are `new`, `errored` and `verification_failed`. If a payout fails, the status is set to `errored` and scheduled payouts are stopped until account details are updated. In the US and India, if we can't [verify the owner of the bank account](https://support.stripe.com/questions/bank-account-ownership-verification), we'll set the status to `verification_failed`. Other validations aren't run against external accounts because they're only used for payouts. This means the other statuses don't apply.
+       */
+      status: string;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Card.AllowRedisplay": "always" | "limited" | "unspecified";
+    /** @enum {string} */
+    "stripe.Stripe.Card.AvailablePayoutMethod": "instant" | "standard";
     "stripe.Stripe.Card.Networks": {
       /** @description The preferred network for co-branded cards. Can be `cartes_bancaires`, `mastercard`, `visa` or `invalid_preference` if requested network is not valid for the card. */
       preferred: string | null;
@@ -4002,6 +1617,605 @@ Json: JsonObject;
       /** @description If the card number is tokenized, this is the method that was used. Can be `android_pay` (includes Google Pay), `apple_pay`, `masterpass`, `visa_checkout`, or null. */
       tokenization_method: string | null;
     };
+    "stripe.Stripe.ExternalAccount": components["schemas"]["stripe.Stripe.BankAccount"] | components["schemas"]["stripe.Stripe.Card"];
+    /**
+     * @description A container for paginated lists of objects.
+     * The array of objects is on the `.data` property,
+     * and `.has_more` indicates whether there are additional objects beyond the end of this list.
+     *
+     * Learn more in Stripe's [pagination docs](https://stripe.com/docs/api/pagination?lang=node)
+     * or, when iterating over many items, try [auto-pagination](https://github.com/stripe/stripe-node#auto-pagination) instead.
+     */
+    "stripe.Stripe.ApiList_stripe.Stripe.ExternalAccount_": {
+      /** @enum {string} */
+      object: "list";
+      data: components["schemas"]["stripe.Stripe.ExternalAccount"][];
+      /** @description True if this list has another page of items after this one that can be fetched. */
+      has_more: boolean;
+      /** @description The URL where this list can be accessed. */
+      url: string;
+    };
+    "stripe.Stripe.Account.FutureRequirements.Alternative": {
+      /** @description Fields that can be provided to satisfy all fields in `original_fields_due`. */
+      alternative_fields_due: string[];
+      /** @description Fields that are due and can be satisfied by providing all fields in `alternative_fields_due`. */
+      original_fields_due: string[];
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Account.FutureRequirements.DisabledReason": "action_required.requested_capabilities" | "listed" | "other" | "platform_paused" | "rejected.fraud" | "rejected.incomplete_verification" | "rejected.listed" | "rejected.other" | "rejected.platform_fraud" | "rejected.platform_other" | "rejected.platform_terms_of_service" | "rejected.terms_of_service" | "requirements.past_due" | "requirements.pending_verification" | "under_review";
+    /** @enum {string} */
+    "stripe.Stripe.Account.FutureRequirements.Error.Code": "information_missing" | "invalid_address_city_state_postal_code" | "invalid_address_highway_contract_box" | "invalid_address_private_mailbox" | "invalid_business_profile_name" | "invalid_business_profile_name_denylisted" | "invalid_company_name_denylisted" | "invalid_dob_age_over_maximum" | "invalid_dob_age_under_18" | "invalid_dob_age_under_minimum" | "invalid_product_description_length" | "invalid_product_description_url_match" | "invalid_representative_country" | "invalid_signator" | "invalid_statement_descriptor_business_mismatch" | "invalid_statement_descriptor_denylisted" | "invalid_statement_descriptor_length" | "invalid_statement_descriptor_prefix_denylisted" | "invalid_statement_descriptor_prefix_mismatch" | "invalid_street_address" | "invalid_tax_id" | "invalid_tax_id_format" | "invalid_tos_acceptance" | "invalid_url_denylisted" | "invalid_url_format" | "invalid_url_length" | "invalid_url_web_presence_detected" | "invalid_url_website_business_information_mismatch" | "invalid_url_website_empty" | "invalid_url_website_inaccessible" | "invalid_url_website_inaccessible_geoblocked" | "invalid_url_website_inaccessible_password_protected" | "invalid_url_website_incomplete" | "invalid_url_website_incomplete_cancellation_policy" | "invalid_url_website_incomplete_customer_service_details" | "invalid_url_website_incomplete_legal_restrictions" | "invalid_url_website_incomplete_refund_policy" | "invalid_url_website_incomplete_return_policy" | "invalid_url_website_incomplete_terms_and_conditions" | "invalid_url_website_incomplete_under_construction" | "invalid_url_website_other" | "invalid_value_other" | "verification_directors_mismatch" | "verification_document_address_mismatch" | "verification_document_address_missing" | "verification_document_corrupt" | "verification_document_country_not_supported" | "verification_document_directors_mismatch" | "verification_document_dob_mismatch" | "verification_document_duplicate_type" | "verification_document_expired" | "verification_document_failed_copy" | "verification_document_failed_greyscale" | "verification_document_failed_other" | "verification_document_failed_test_mode" | "verification_document_fraudulent" | "verification_document_id_number_mismatch" | "verification_document_id_number_missing" | "verification_document_incomplete" | "verification_document_invalid" | "verification_document_issue_or_expiry_date_missing" | "verification_document_manipulated" | "verification_document_missing_back" | "verification_document_missing_front" | "verification_document_name_mismatch" | "verification_document_name_missing" | "verification_document_nationality_mismatch" | "verification_document_not_readable" | "verification_document_not_signed" | "verification_document_not_uploaded" | "verification_document_photo_mismatch" | "verification_document_too_large" | "verification_document_type_not_supported" | "verification_extraneous_directors" | "verification_failed_address_match" | "verification_failed_authorizer_authority" | "verification_failed_business_iec_number" | "verification_failed_document_match" | "verification_failed_id_number_match" | "verification_failed_keyed_identity" | "verification_failed_keyed_match" | "verification_failed_name_match" | "verification_failed_other" | "verification_failed_representative_authority" | "verification_failed_residential_address" | "verification_failed_tax_id_match" | "verification_failed_tax_id_not_issued" | "verification_legal_entity_structure_mismatch" | "verification_missing_directors" | "verification_missing_executives" | "verification_missing_owners" | "verification_rejected_ownership_exemption_reason" | "verification_requires_additional_memorandum_of_associations" | "verification_requires_additional_proof_of_registration" | "verification_supportability";
+    "stripe.Stripe.Account.FutureRequirements.Error": {
+      /** @description The code for the type of error. */
+      code: components["schemas"]["stripe.Stripe.Account.FutureRequirements.Error.Code"];
+      /** @description An informative message that indicates the error type and provides additional details about the error. */
+      reason: string;
+      /** @description The specific user onboarding requirement field (in the requirements hash) that needs to be resolved. */
+      requirement: string;
+    };
+    "stripe.Stripe.Account.FutureRequirements": {
+      /** @description Fields that are due and can be satisfied by providing the corresponding alternative fields instead. */
+      alternatives: components["schemas"]["stripe.Stripe.Account.FutureRequirements.Alternative"][] | null;
+      /**
+       * Format: double
+       * @description Date on which `future_requirements` becomes the main `requirements` hash and `future_requirements` becomes empty. After the transition, `currently_due` requirements may immediately become `past_due`, but the account may also be given a grace period depending on its enablement state prior to transitioning.
+       */
+      current_deadline: number | null;
+      /** @description Fields that need to be collected to keep the account enabled. If not collected by `future_requirements[current_deadline]`, these fields will transition to the main `requirements` hash. */
+      currently_due: string[] | null;
+      /** @description This is typed as an enum for consistency with `requirements.disabled_reason`. */
+      disabled_reason: components["schemas"]["stripe.Stripe.Account.FutureRequirements.DisabledReason"] | null;
+      /** @description Fields that are `currently_due` and need to be collected again because validation or verification failed. */
+      errors: components["schemas"]["stripe.Stripe.Account.FutureRequirements.Error"][] | null;
+      /** @description Fields you must collect when all thresholds are reached. As they become required, they appear in `currently_due` as well. */
+      eventually_due: string[] | null;
+      /** @description Fields that weren't collected by `requirements.current_deadline`. These fields need to be collected to enable the capability on the account. New fields will never appear here; `future_requirements.past_due` will always be a subset of `requirements.past_due`. */
+      past_due: string[] | null;
+      /** @description Fields that might become required depending on the results of verification or review. It's an empty array unless an asynchronous verification is pending. If verification fails, these fields move to `eventually_due` or `currently_due`. Fields might appear in `eventually_due` or `currently_due` and in `pending_verification` if verification fails but another verification is still pending. */
+      pending_verification: string[] | null;
+    };
+    "stripe.Stripe.Account.Groups": {
+      /** @description The group the account is in to determine their payments pricing, and null if the account is on customized pricing. [See the Platform pricing tool documentation](https://stripe.com/docs/connect/platform-pricing-tools) for details. */
+      payments_pricing: string | null;
+    };
+    "stripe.Stripe.Person.AdditionalTosAcceptances.Account": {
+      /**
+       * Format: double
+       * @description The Unix timestamp marking when the legal guardian accepted the service agreement.
+       */
+      date: number | null;
+      /** @description The IP address from which the legal guardian accepted the service agreement. */
+      ip: string | null;
+      /** @description The user agent of the browser from which the legal guardian accepted the service agreement. */
+      user_agent: string | null;
+    };
+    "stripe.Stripe.Person.AdditionalTosAcceptances": {
+      /** @description Details on the legal guardian's acceptance of the main Stripe service agreement. */
+      account: components["schemas"]["stripe.Stripe.Person.AdditionalTosAcceptances.Account"] | null;
+    };
+    "stripe.Stripe.Person.AddressKana": {
+      /** @description City/Ward. */
+      city: string | null;
+      /** @description Two-letter country code ([ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)). */
+      country: string | null;
+      /** @description Block/Building number. */
+      line1: string | null;
+      /** @description Building details. */
+      line2: string | null;
+      /** @description ZIP or postal code. */
+      postal_code: string | null;
+      /** @description Prefecture. */
+      state: string | null;
+      /** @description Town/cho-me. */
+      town: string | null;
+    };
+    "stripe.Stripe.Person.AddressKanji": {
+      /** @description City/Ward. */
+      city: string | null;
+      /** @description Two-letter country code ([ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)). */
+      country: string | null;
+      /** @description Block/Building number. */
+      line1: string | null;
+      /** @description Building details. */
+      line2: string | null;
+      /** @description ZIP or postal code. */
+      postal_code: string | null;
+      /** @description Prefecture. */
+      state: string | null;
+      /** @description Town/cho-me. */
+      town: string | null;
+    };
+    "stripe.Stripe.Person.Dob": {
+      /**
+       * Format: double
+       * @description The day of birth, between 1 and 31.
+       */
+      day: number | null;
+      /**
+       * Format: double
+       * @description The month of birth, between 1 and 12.
+       */
+      month: number | null;
+      /**
+       * Format: double
+       * @description The four-digit year of birth.
+       */
+      year: number | null;
+    };
+    "stripe.Stripe.Person.FutureRequirements.Alternative": {
+      /** @description Fields that can be provided to satisfy all fields in `original_fields_due`. */
+      alternative_fields_due: string[];
+      /** @description Fields that are due and can be satisfied by providing all fields in `alternative_fields_due`. */
+      original_fields_due: string[];
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Person.FutureRequirements.Error.Code": "information_missing" | "invalid_address_city_state_postal_code" | "invalid_address_highway_contract_box" | "invalid_address_private_mailbox" | "invalid_business_profile_name" | "invalid_business_profile_name_denylisted" | "invalid_company_name_denylisted" | "invalid_dob_age_over_maximum" | "invalid_dob_age_under_18" | "invalid_dob_age_under_minimum" | "invalid_product_description_length" | "invalid_product_description_url_match" | "invalid_representative_country" | "invalid_signator" | "invalid_statement_descriptor_business_mismatch" | "invalid_statement_descriptor_denylisted" | "invalid_statement_descriptor_length" | "invalid_statement_descriptor_prefix_denylisted" | "invalid_statement_descriptor_prefix_mismatch" | "invalid_street_address" | "invalid_tax_id" | "invalid_tax_id_format" | "invalid_tos_acceptance" | "invalid_url_denylisted" | "invalid_url_format" | "invalid_url_length" | "invalid_url_web_presence_detected" | "invalid_url_website_business_information_mismatch" | "invalid_url_website_empty" | "invalid_url_website_inaccessible" | "invalid_url_website_inaccessible_geoblocked" | "invalid_url_website_inaccessible_password_protected" | "invalid_url_website_incomplete" | "invalid_url_website_incomplete_cancellation_policy" | "invalid_url_website_incomplete_customer_service_details" | "invalid_url_website_incomplete_legal_restrictions" | "invalid_url_website_incomplete_refund_policy" | "invalid_url_website_incomplete_return_policy" | "invalid_url_website_incomplete_terms_and_conditions" | "invalid_url_website_incomplete_under_construction" | "invalid_url_website_other" | "invalid_value_other" | "verification_directors_mismatch" | "verification_document_address_mismatch" | "verification_document_address_missing" | "verification_document_corrupt" | "verification_document_country_not_supported" | "verification_document_directors_mismatch" | "verification_document_dob_mismatch" | "verification_document_duplicate_type" | "verification_document_expired" | "verification_document_failed_copy" | "verification_document_failed_greyscale" | "verification_document_failed_other" | "verification_document_failed_test_mode" | "verification_document_fraudulent" | "verification_document_id_number_mismatch" | "verification_document_id_number_missing" | "verification_document_incomplete" | "verification_document_invalid" | "verification_document_issue_or_expiry_date_missing" | "verification_document_manipulated" | "verification_document_missing_back" | "verification_document_missing_front" | "verification_document_name_mismatch" | "verification_document_name_missing" | "verification_document_nationality_mismatch" | "verification_document_not_readable" | "verification_document_not_signed" | "verification_document_not_uploaded" | "verification_document_photo_mismatch" | "verification_document_too_large" | "verification_document_type_not_supported" | "verification_extraneous_directors" | "verification_failed_address_match" | "verification_failed_authorizer_authority" | "verification_failed_business_iec_number" | "verification_failed_document_match" | "verification_failed_id_number_match" | "verification_failed_keyed_identity" | "verification_failed_keyed_match" | "verification_failed_name_match" | "verification_failed_other" | "verification_failed_representative_authority" | "verification_failed_residential_address" | "verification_failed_tax_id_match" | "verification_failed_tax_id_not_issued" | "verification_legal_entity_structure_mismatch" | "verification_missing_directors" | "verification_missing_executives" | "verification_missing_owners" | "verification_rejected_ownership_exemption_reason" | "verification_requires_additional_memorandum_of_associations" | "verification_requires_additional_proof_of_registration" | "verification_supportability";
+    "stripe.Stripe.Person.FutureRequirements.Error": {
+      /** @description The code for the type of error. */
+      code: components["schemas"]["stripe.Stripe.Person.FutureRequirements.Error.Code"];
+      /** @description An informative message that indicates the error type and provides additional details about the error. */
+      reason: string;
+      /** @description The specific user onboarding requirement field (in the requirements hash) that needs to be resolved. */
+      requirement: string;
+    };
+    "stripe.Stripe.Person.FutureRequirements": {
+      /** @description Fields that are due and can be satisfied by providing the corresponding alternative fields instead. */
+      alternatives: components["schemas"]["stripe.Stripe.Person.FutureRequirements.Alternative"][] | null;
+      /** @description Fields that need to be collected to keep the person's account enabled. If not collected by the account's `future_requirements[current_deadline]`, these fields will transition to the main `requirements` hash, and may immediately become `past_due`, but the account may also be given a grace period depending on the account's enablement state prior to transition. */
+      currently_due: string[];
+      /** @description Fields that are `currently_due` and need to be collected again because validation or verification failed. */
+      errors: components["schemas"]["stripe.Stripe.Person.FutureRequirements.Error"][];
+      /** @description Fields you must collect when all thresholds are reached. As they become required, they appear in `currently_due` as well, and the account's `future_requirements[current_deadline]` becomes set. */
+      eventually_due: string[];
+      /** @description Fields that weren't collected by the account's `requirements.current_deadline`. These fields need to be collected to enable the person's account. New fields will never appear here; `future_requirements.past_due` will always be a subset of `requirements.past_due`. */
+      past_due: string[];
+      /** @description Fields that might become required depending on the results of verification or review. It's an empty array unless an asynchronous verification is pending. If verification fails, these fields move to `eventually_due` or `currently_due`. Fields might appear in `eventually_due` or `currently_due` and in `pending_verification` if verification fails but another verification is still pending. */
+      pending_verification: string[];
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Person.PoliticalExposure": "existing" | "none";
+    "stripe.Stripe.Person.Relationship": {
+      /** @description Whether the person is the authorizer of the account's representative. */
+      authorizer: boolean | null;
+      /** @description Whether the person is a director of the account's legal entity. Directors are typically members of the governing board of the company, or responsible for ensuring the company meets its regulatory obligations. */
+      director: boolean | null;
+      /** @description Whether the person has significant responsibility to control, manage, or direct the organization. */
+      executive: boolean | null;
+      /** @description Whether the person is the legal guardian of the account's representative. */
+      legal_guardian: boolean | null;
+      /** @description Whether the person is an owner of the account's legal entity. */
+      owner: boolean | null;
+      /**
+       * Format: double
+       * @description The percent owned by the person of the account's legal entity.
+       */
+      percent_ownership: number | null;
+      /** @description Whether the person is authorized as the primary representative of the account. This is the person nominated by the business to provide information about themselves, and general information about the account. There can only be one representative at any given time. At the time the account is created, this person should be set to the person responsible for opening the account. */
+      representative: boolean | null;
+      /** @description The person's title (e.g., CEO, Support Engineer). */
+      title: string | null;
+    };
+    "stripe.Stripe.Person.Requirements.Alternative": {
+      /** @description Fields that can be provided to satisfy all fields in `original_fields_due`. */
+      alternative_fields_due: string[];
+      /** @description Fields that are due and can be satisfied by providing all fields in `alternative_fields_due`. */
+      original_fields_due: string[];
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Person.Requirements.Error.Code": "information_missing" | "invalid_address_city_state_postal_code" | "invalid_address_highway_contract_box" | "invalid_address_private_mailbox" | "invalid_business_profile_name" | "invalid_business_profile_name_denylisted" | "invalid_company_name_denylisted" | "invalid_dob_age_over_maximum" | "invalid_dob_age_under_18" | "invalid_dob_age_under_minimum" | "invalid_product_description_length" | "invalid_product_description_url_match" | "invalid_representative_country" | "invalid_signator" | "invalid_statement_descriptor_business_mismatch" | "invalid_statement_descriptor_denylisted" | "invalid_statement_descriptor_length" | "invalid_statement_descriptor_prefix_denylisted" | "invalid_statement_descriptor_prefix_mismatch" | "invalid_street_address" | "invalid_tax_id" | "invalid_tax_id_format" | "invalid_tos_acceptance" | "invalid_url_denylisted" | "invalid_url_format" | "invalid_url_length" | "invalid_url_web_presence_detected" | "invalid_url_website_business_information_mismatch" | "invalid_url_website_empty" | "invalid_url_website_inaccessible" | "invalid_url_website_inaccessible_geoblocked" | "invalid_url_website_inaccessible_password_protected" | "invalid_url_website_incomplete" | "invalid_url_website_incomplete_cancellation_policy" | "invalid_url_website_incomplete_customer_service_details" | "invalid_url_website_incomplete_legal_restrictions" | "invalid_url_website_incomplete_refund_policy" | "invalid_url_website_incomplete_return_policy" | "invalid_url_website_incomplete_terms_and_conditions" | "invalid_url_website_incomplete_under_construction" | "invalid_url_website_other" | "invalid_value_other" | "verification_directors_mismatch" | "verification_document_address_mismatch" | "verification_document_address_missing" | "verification_document_corrupt" | "verification_document_country_not_supported" | "verification_document_directors_mismatch" | "verification_document_dob_mismatch" | "verification_document_duplicate_type" | "verification_document_expired" | "verification_document_failed_copy" | "verification_document_failed_greyscale" | "verification_document_failed_other" | "verification_document_failed_test_mode" | "verification_document_fraudulent" | "verification_document_id_number_mismatch" | "verification_document_id_number_missing" | "verification_document_incomplete" | "verification_document_invalid" | "verification_document_issue_or_expiry_date_missing" | "verification_document_manipulated" | "verification_document_missing_back" | "verification_document_missing_front" | "verification_document_name_mismatch" | "verification_document_name_missing" | "verification_document_nationality_mismatch" | "verification_document_not_readable" | "verification_document_not_signed" | "verification_document_not_uploaded" | "verification_document_photo_mismatch" | "verification_document_too_large" | "verification_document_type_not_supported" | "verification_extraneous_directors" | "verification_failed_address_match" | "verification_failed_authorizer_authority" | "verification_failed_business_iec_number" | "verification_failed_document_match" | "verification_failed_id_number_match" | "verification_failed_keyed_identity" | "verification_failed_keyed_match" | "verification_failed_name_match" | "verification_failed_other" | "verification_failed_representative_authority" | "verification_failed_residential_address" | "verification_failed_tax_id_match" | "verification_failed_tax_id_not_issued" | "verification_legal_entity_structure_mismatch" | "verification_missing_directors" | "verification_missing_executives" | "verification_missing_owners" | "verification_rejected_ownership_exemption_reason" | "verification_requires_additional_memorandum_of_associations" | "verification_requires_additional_proof_of_registration" | "verification_supportability";
+    "stripe.Stripe.Person.Requirements.Error": {
+      /** @description The code for the type of error. */
+      code: components["schemas"]["stripe.Stripe.Person.Requirements.Error.Code"];
+      /** @description An informative message that indicates the error type and provides additional details about the error. */
+      reason: string;
+      /** @description The specific user onboarding requirement field (in the requirements hash) that needs to be resolved. */
+      requirement: string;
+    };
+    "stripe.Stripe.Person.Requirements": {
+      /** @description Fields that are due and can be satisfied by providing the corresponding alternative fields instead. */
+      alternatives: components["schemas"]["stripe.Stripe.Person.Requirements.Alternative"][] | null;
+      /** @description Fields that need to be collected to keep the person's account enabled. If not collected by the account's `current_deadline`, these fields appear in `past_due` as well, and the account is disabled. */
+      currently_due: string[];
+      /** @description Fields that are `currently_due` and need to be collected again because validation or verification failed. */
+      errors: components["schemas"]["stripe.Stripe.Person.Requirements.Error"][];
+      /** @description Fields you must collect when all thresholds are reached. As they become required, they appear in `currently_due` as well, and the account's `current_deadline` becomes set. */
+      eventually_due: string[];
+      /** @description Fields that weren't collected by the account's `current_deadline`. These fields need to be collected to enable the person's account. */
+      past_due: string[];
+      /** @description Fields that might become required depending on the results of verification or review. It's an empty array unless an asynchronous verification is pending. If verification fails, these fields move to `eventually_due`, `currently_due`, or `past_due`. Fields might appear in `eventually_due`, `currently_due`, or `past_due` and in `pending_verification` if verification fails but another verification is still pending. */
+      pending_verification: string[];
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Person.UsCfpbData.EthnicityDetails.Ethnicity": "cuban" | "hispanic_or_latino" | "mexican" | "not_hispanic_or_latino" | "other_hispanic_or_latino" | "prefer_not_to_answer" | "puerto_rican";
+    "stripe.Stripe.Person.UsCfpbData.EthnicityDetails": {
+      /** @description The persons ethnicity */
+      ethnicity: components["schemas"]["stripe.Stripe.Person.UsCfpbData.EthnicityDetails.Ethnicity"][] | null;
+      /** @description Please specify your origin, when other is selected. */
+      ethnicity_other: string | null;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Person.UsCfpbData.RaceDetails.Race": "african_american" | "american_indian_or_alaska_native" | "asian" | "asian_indian" | "black_or_african_american" | "chinese" | "ethiopian" | "filipino" | "guamanian_or_chamorro" | "haitian" | "jamaican" | "japanese" | "korean" | "native_hawaiian" | "native_hawaiian_or_other_pacific_islander" | "nigerian" | "other_asian" | "other_black_or_african_american" | "other_pacific_islander" | "prefer_not_to_answer" | "samoan" | "somali" | "vietnamese" | "white";
+    "stripe.Stripe.Person.UsCfpbData.RaceDetails": {
+      /** @description The persons race. */
+      race: components["schemas"]["stripe.Stripe.Person.UsCfpbData.RaceDetails.Race"][] | null;
+      /** @description Please specify your race, when other is selected. */
+      race_other: string | null;
+    };
+    "stripe.Stripe.Person.UsCfpbData": {
+      /** @description The persons ethnicity details */
+      ethnicity_details: components["schemas"]["stripe.Stripe.Person.UsCfpbData.EthnicityDetails"] | null;
+      /** @description The persons race details */
+      race_details: components["schemas"]["stripe.Stripe.Person.UsCfpbData.RaceDetails"] | null;
+      /** @description The persons self-identified gender */
+      self_identified_gender: string | null;
+    };
+    "stripe.Stripe.Person.Verification.AdditionalDocument": {
+      /** @description The back of an ID returned by a [file upload](https://stripe.com/docs/api#create_file) with a `purpose` value of `identity_document`. */
+      back: (string | components["schemas"]["stripe.Stripe.File"]) | null;
+      /** @description A user-displayable string describing the verification state of this document. For example, if a document is uploaded and the picture is too fuzzy, this may say "Identity document is too unclear to read". */
+      details: string | null;
+      /** @description One of `document_corrupt`, `document_country_not_supported`, `document_expired`, `document_failed_copy`, `document_failed_other`, `document_failed_test_mode`, `document_fraudulent`, `document_failed_greyscale`, `document_incomplete`, `document_invalid`, `document_manipulated`, `document_missing_back`, `document_missing_front`, `document_not_readable`, `document_not_uploaded`, `document_photo_mismatch`, `document_too_large`, or `document_type_not_supported`. A machine-readable code specifying the verification state for this document. */
+      details_code: string | null;
+      /** @description The front of an ID returned by a [file upload](https://stripe.com/docs/api#create_file) with a `purpose` value of `identity_document`. */
+      front: (string | components["schemas"]["stripe.Stripe.File"]) | null;
+    };
+    "stripe.Stripe.Person.Verification.Document": {
+      /** @description The back of an ID returned by a [file upload](https://stripe.com/docs/api#create_file) with a `purpose` value of `identity_document`. */
+      back: (string | components["schemas"]["stripe.Stripe.File"]) | null;
+      /** @description A user-displayable string describing the verification state of this document. For example, if a document is uploaded and the picture is too fuzzy, this may say "Identity document is too unclear to read". */
+      details: string | null;
+      /** @description One of `document_corrupt`, `document_country_not_supported`, `document_expired`, `document_failed_copy`, `document_failed_other`, `document_failed_test_mode`, `document_fraudulent`, `document_failed_greyscale`, `document_incomplete`, `document_invalid`, `document_manipulated`, `document_missing_back`, `document_missing_front`, `document_not_readable`, `document_not_uploaded`, `document_photo_mismatch`, `document_too_large`, or `document_type_not_supported`. A machine-readable code specifying the verification state for this document. */
+      details_code: string | null;
+      /** @description The front of an ID returned by a [file upload](https://stripe.com/docs/api#create_file) with a `purpose` value of `identity_document`. */
+      front: (string | components["schemas"]["stripe.Stripe.File"]) | null;
+    };
+    "stripe.Stripe.Person.Verification": {
+      /** @description A document showing address, either a passport, local ID card, or utility bill from a well-known utility company. */
+      additional_document?: components["schemas"]["stripe.Stripe.Person.Verification.AdditionalDocument"] | null;
+      /** @description A user-displayable string describing the verification state for the person. For example, this may say "Provided identity information could not be verified". */
+      details?: string | null;
+      /** @description One of `document_address_mismatch`, `document_dob_mismatch`, `document_duplicate_type`, `document_id_number_mismatch`, `document_name_mismatch`, `document_nationality_mismatch`, `failed_keyed_identity`, or `failed_other`. A machine-readable code specifying the verification state for the person. */
+      details_code?: string | null;
+      document?: components["schemas"]["stripe.Stripe.Person.Verification.Document"];
+      /** @description The state of verification for the person. Possible values are `unverified`, `pending`, or `verified`. Please refer [guide](https://stripe.com/docs/connect/handling-api-verification) to handle verification updates. */
+      status: string;
+    };
+    /**
+     * @description This is an object representing a person associated with a Stripe account.
+     *
+     * A platform can only access a subset of data in a person for an account where [account.controller.requirement_collection](https://docs.stripe.com/api/accounts/object#account_object-controller-requirement_collection) is `stripe`, which includes Standard and Express accounts, after creating an Account Link or Account Session to start Connect onboarding.
+     *
+     * See the [Standard onboarding](https://docs.stripe.com/connect/standard-accounts) or [Express onboarding](https://docs.stripe.com/connect/express-accounts) documentation for information about prefilling information and account onboarding steps. Learn more about [handling identity verification with the API](https://docs.stripe.com/connect/handling-api-verification#person-information).
+     */
+    "stripe.Stripe.Person": {
+      /** @description Unique identifier for the object. */
+      id: string;
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: "person";
+      /** @description The account the person is associated with. */
+      account: string;
+      additional_tos_acceptances?: components["schemas"]["stripe.Stripe.Person.AdditionalTosAcceptances"];
+      address?: components["schemas"]["stripe.Stripe.Address"];
+      /** @description The Kana variation of the person's address (Japan only). */
+      address_kana?: components["schemas"]["stripe.Stripe.Person.AddressKana"] | null;
+      /** @description The Kanji variation of the person's address (Japan only). */
+      address_kanji?: components["schemas"]["stripe.Stripe.Person.AddressKanji"] | null;
+      /**
+       * Format: double
+       * @description Time at which the object was created. Measured in seconds since the Unix epoch.
+       */
+      created: number;
+      /** @description Always true for a deleted object */
+      deleted?: unknown;
+      dob?: components["schemas"]["stripe.Stripe.Person.Dob"];
+      /** @description The person's email address. Also available for accounts where [controller.requirement_collection](https://docs.stripe.com/api/accounts/object#account_object-controller-requirement_collection) is `stripe`. */
+      email?: string | null;
+      /** @description The person's first name. Also available for accounts where [controller.requirement_collection](https://docs.stripe.com/api/accounts/object#account_object-controller-requirement_collection) is `stripe`. */
+      first_name?: string | null;
+      /** @description The Kana variation of the person's first name (Japan only). Also available for accounts where [controller.requirement_collection](https://docs.stripe.com/api/accounts/object#account_object-controller-requirement_collection) is `stripe`. */
+      first_name_kana?: string | null;
+      /** @description The Kanji variation of the person's first name (Japan only). Also available for accounts where [controller.requirement_collection](https://docs.stripe.com/api/accounts/object#account_object-controller-requirement_collection) is `stripe`. */
+      first_name_kanji?: string | null;
+      /** @description A list of alternate names or aliases that the person is known by. Also available for accounts where [controller.requirement_collection](https://docs.stripe.com/api/accounts/object#account_object-controller-requirement_collection) is `stripe`. */
+      full_name_aliases?: string[];
+      /** @description Information about the [upcoming new requirements for this person](https://stripe.com/docs/connect/custom-accounts/future-requirements), including what information needs to be collected, and by when. */
+      future_requirements?: components["schemas"]["stripe.Stripe.Person.FutureRequirements"] | null;
+      /** @description The person's gender. */
+      gender?: string | null;
+      /** @description Whether the person's `id_number` was provided. True if either the full ID number was provided or if only the required part of the ID number was provided (ex. last four of an individual's SSN for the US indicated by `ssn_last_4_provided`). */
+      id_number_provided?: boolean;
+      /** @description Whether the person's `id_number_secondary` was provided. */
+      id_number_secondary_provided?: boolean;
+      /** @description The person's last name. Also available for accounts where [controller.requirement_collection](https://docs.stripe.com/api/accounts/object#account_object-controller-requirement_collection) is `stripe`. */
+      last_name?: string | null;
+      /** @description The Kana variation of the person's last name (Japan only). Also available for accounts where [controller.requirement_collection](https://docs.stripe.com/api/accounts/object#account_object-controller-requirement_collection) is `stripe`. */
+      last_name_kana?: string | null;
+      /** @description The Kanji variation of the person's last name (Japan only). Also available for accounts where [controller.requirement_collection](https://docs.stripe.com/api/accounts/object#account_object-controller-requirement_collection) is `stripe`. */
+      last_name_kanji?: string | null;
+      /** @description The person's maiden name. */
+      maiden_name?: string | null;
+      /** @description Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. */
+      metadata?: components["schemas"]["stripe.Stripe.Metadata"];
+      /** @description The country where the person is a national. */
+      nationality?: string | null;
+      /** @description The person's phone number. */
+      phone?: string | null;
+      /** @description Indicates if the person or any of their representatives, family members, or other closely related persons, declares that they hold or have held an important public job or function, in any jurisdiction. */
+      political_exposure?: components["schemas"]["stripe.Stripe.Person.PoliticalExposure"];
+      registered_address?: components["schemas"]["stripe.Stripe.Address"];
+      relationship?: components["schemas"]["stripe.Stripe.Person.Relationship"];
+      /** @description Information about the requirements for this person, including what information needs to be collected, and by when. */
+      requirements?: components["schemas"]["stripe.Stripe.Person.Requirements"] | null;
+      /** @description Whether the last four digits of the person's Social Security number have been provided (U.S. only). */
+      ssn_last_4_provided?: boolean;
+      /** @description Demographic data related to the person. */
+      us_cfpb_data?: components["schemas"]["stripe.Stripe.Person.UsCfpbData"] | null;
+      verification?: components["schemas"]["stripe.Stripe.Person.Verification"];
+    };
+    "stripe.Stripe.Account.Requirements.Alternative": {
+      /** @description Fields that can be provided to satisfy all fields in `original_fields_due`. */
+      alternative_fields_due: string[];
+      /** @description Fields that are due and can be satisfied by providing all fields in `alternative_fields_due`. */
+      original_fields_due: string[];
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Account.Requirements.DisabledReason": "action_required.requested_capabilities" | "listed" | "other" | "platform_paused" | "rejected.fraud" | "rejected.incomplete_verification" | "rejected.listed" | "rejected.other" | "rejected.platform_fraud" | "rejected.platform_other" | "rejected.platform_terms_of_service" | "rejected.terms_of_service" | "requirements.past_due" | "requirements.pending_verification" | "under_review";
+    /** @enum {string} */
+    "stripe.Stripe.Account.Requirements.Error.Code": "information_missing" | "invalid_address_city_state_postal_code" | "invalid_address_highway_contract_box" | "invalid_address_private_mailbox" | "invalid_business_profile_name" | "invalid_business_profile_name_denylisted" | "invalid_company_name_denylisted" | "invalid_dob_age_over_maximum" | "invalid_dob_age_under_18" | "invalid_dob_age_under_minimum" | "invalid_product_description_length" | "invalid_product_description_url_match" | "invalid_representative_country" | "invalid_signator" | "invalid_statement_descriptor_business_mismatch" | "invalid_statement_descriptor_denylisted" | "invalid_statement_descriptor_length" | "invalid_statement_descriptor_prefix_denylisted" | "invalid_statement_descriptor_prefix_mismatch" | "invalid_street_address" | "invalid_tax_id" | "invalid_tax_id_format" | "invalid_tos_acceptance" | "invalid_url_denylisted" | "invalid_url_format" | "invalid_url_length" | "invalid_url_web_presence_detected" | "invalid_url_website_business_information_mismatch" | "invalid_url_website_empty" | "invalid_url_website_inaccessible" | "invalid_url_website_inaccessible_geoblocked" | "invalid_url_website_inaccessible_password_protected" | "invalid_url_website_incomplete" | "invalid_url_website_incomplete_cancellation_policy" | "invalid_url_website_incomplete_customer_service_details" | "invalid_url_website_incomplete_legal_restrictions" | "invalid_url_website_incomplete_refund_policy" | "invalid_url_website_incomplete_return_policy" | "invalid_url_website_incomplete_terms_and_conditions" | "invalid_url_website_incomplete_under_construction" | "invalid_url_website_other" | "invalid_value_other" | "verification_directors_mismatch" | "verification_document_address_mismatch" | "verification_document_address_missing" | "verification_document_corrupt" | "verification_document_country_not_supported" | "verification_document_directors_mismatch" | "verification_document_dob_mismatch" | "verification_document_duplicate_type" | "verification_document_expired" | "verification_document_failed_copy" | "verification_document_failed_greyscale" | "verification_document_failed_other" | "verification_document_failed_test_mode" | "verification_document_fraudulent" | "verification_document_id_number_mismatch" | "verification_document_id_number_missing" | "verification_document_incomplete" | "verification_document_invalid" | "verification_document_issue_or_expiry_date_missing" | "verification_document_manipulated" | "verification_document_missing_back" | "verification_document_missing_front" | "verification_document_name_mismatch" | "verification_document_name_missing" | "verification_document_nationality_mismatch" | "verification_document_not_readable" | "verification_document_not_signed" | "verification_document_not_uploaded" | "verification_document_photo_mismatch" | "verification_document_too_large" | "verification_document_type_not_supported" | "verification_extraneous_directors" | "verification_failed_address_match" | "verification_failed_authorizer_authority" | "verification_failed_business_iec_number" | "verification_failed_document_match" | "verification_failed_id_number_match" | "verification_failed_keyed_identity" | "verification_failed_keyed_match" | "verification_failed_name_match" | "verification_failed_other" | "verification_failed_representative_authority" | "verification_failed_residential_address" | "verification_failed_tax_id_match" | "verification_failed_tax_id_not_issued" | "verification_legal_entity_structure_mismatch" | "verification_missing_directors" | "verification_missing_executives" | "verification_missing_owners" | "verification_rejected_ownership_exemption_reason" | "verification_requires_additional_memorandum_of_associations" | "verification_requires_additional_proof_of_registration" | "verification_supportability";
+    "stripe.Stripe.Account.Requirements.Error": {
+      /** @description The code for the type of error. */
+      code: components["schemas"]["stripe.Stripe.Account.Requirements.Error.Code"];
+      /** @description An informative message that indicates the error type and provides additional details about the error. */
+      reason: string;
+      /** @description The specific user onboarding requirement field (in the requirements hash) that needs to be resolved. */
+      requirement: string;
+    };
+    "stripe.Stripe.Account.Requirements": {
+      /** @description Fields that are due and can be satisfied by providing the corresponding alternative fields instead. */
+      alternatives: components["schemas"]["stripe.Stripe.Account.Requirements.Alternative"][] | null;
+      /**
+       * Format: double
+       * @description Date by which the fields in `currently_due` must be collected to keep the account enabled. These fields may disable the account sooner if the next threshold is reached before they are collected.
+       */
+      current_deadline: number | null;
+      /** @description Fields that need to be collected to keep the account enabled. If not collected by `current_deadline`, these fields appear in `past_due` as well, and the account is disabled. */
+      currently_due: string[] | null;
+      /** @description If the account is disabled, this enum describes why. [Learn more about handling verification issues](https://stripe.com/docs/connect/handling-api-verification). */
+      disabled_reason: components["schemas"]["stripe.Stripe.Account.Requirements.DisabledReason"] | null;
+      /** @description Fields that are `currently_due` and need to be collected again because validation or verification failed. */
+      errors: components["schemas"]["stripe.Stripe.Account.Requirements.Error"][] | null;
+      /** @description Fields you must collect when all thresholds are reached. As they become required, they appear in `currently_due` as well, and `current_deadline` becomes set. */
+      eventually_due: string[] | null;
+      /** @description Fields that weren't collected by `current_deadline`. These fields need to be collected to enable the account. */
+      past_due: string[] | null;
+      /** @description Fields that might become required depending on the results of verification or review. It's an empty array unless an asynchronous verification is pending. If verification fails, these fields move to `eventually_due`, `currently_due`, or `past_due`. Fields might appear in `eventually_due`, `currently_due`, or `past_due` and in `pending_verification` if verification fails but another verification is still pending. */
+      pending_verification: string[] | null;
+    };
+    "stripe.Stripe.Account.RiskControls.Charges": {
+      /** @description Whether a pause of the risk control has been requested. */
+      pause_requested: boolean;
+    };
+    "stripe.Stripe.Account.RiskControls.Payouts": {
+      /** @description Whether a pause of the risk control has been requested. */
+      pause_requested: boolean;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Account.RiskControls.RejectedReason": "credit" | "fraud" | "fraud_no_intent_to_fulfill" | "fraud_other" | "fraud_payment_method_casher" | "fraud_payment_method_tester" | "other" | "terms_of_service";
+    "stripe.Stripe.Account.RiskControls": {
+      charges: components["schemas"]["stripe.Stripe.Account.RiskControls.Charges"];
+      payouts: components["schemas"]["stripe.Stripe.Account.RiskControls.Payouts"];
+      /** @description Represents the rejected reason of the account. Empty if account is not rejected, or rejected by Stripe. Please see [this page for more details](https://stripe.com/docs/connect/) */
+      rejected_reason?: components["schemas"]["stripe.Stripe.Account.RiskControls.RejectedReason"] | null;
+    };
+    "stripe.Stripe.Account.Settings.BacsDebitPayments": {
+      /** @description The Bacs Direct Debit display name for this account. For payments made with Bacs Direct Debit, this name appears on the mandate as the statement descriptor. Mobile banking apps display it as the name of the business. To use custom branding, set the Bacs Direct Debit Display Name during or right after creation. Custom branding incurs an additional monthly fee for the platform. The fee appears 5 business days after requesting Bacs. If you don't set the display name before requesting Bacs capability, it's automatically set as "Stripe" and the account is onboarded to Stripe branding, which is free. */
+      display_name: string | null;
+      /** @description The Bacs Direct Debit Service user number for this account. For payments made with Bacs Direct Debit, this number is a unique identifier of the account with our banking partners. */
+      service_user_number: string | null;
+    };
+    "stripe.Stripe.Account.Settings.BankBcaOnboarding": {
+      /** @description Bank BCA business account holder name. */
+      account_holder_name?: string;
+      /** @description Bank BCA business account number. */
+      business_account_number?: string;
+    };
+    "stripe.Stripe.Account.Settings.Branding": {
+      /** @description (ID of a [file upload](https://stripe.com/docs/guides/file-upload)) An icon for the account. Must be square and at least 128px x 128px. */
+      icon: (string | components["schemas"]["stripe.Stripe.File"]) | null;
+      /** @description (ID of a [file upload](https://stripe.com/docs/guides/file-upload)) A logo for the account that will be used in Checkout instead of the icon and without the account's name next to it if provided. Must be at least 128px x 128px. */
+      logo: (string | components["schemas"]["stripe.Stripe.File"]) | null;
+      /** @description A CSS hex color value representing the primary branding color for this account */
+      primary_color: string | null;
+      /** @description A CSS hex color value representing the secondary branding color for this account */
+      secondary_color: string | null;
+    };
+    "stripe.Stripe.Account.Settings.Capital": {
+      /** @description Per-currency mapping of user-selected destination accounts used to pay out loans. */
+      payout_destination?: {
+        [key: string]: string;
+      };
+      /** @description Per-currency mapping of all destination accounts eligible to receive loan payouts. */
+      payout_destination_selector?: {
+        [key: string]: string[];
+      };
+    };
+    "stripe.Stripe.Account.Settings.CardIssuing.TosAcceptance": {
+      /**
+       * Format: double
+       * @description The Unix timestamp marking when the account representative accepted the service agreement.
+       */
+      date: number | null;
+      /** @description The IP address from which the account representative accepted the service agreement. */
+      ip: string | null;
+      /** @description The user agent of the browser from which the account representative accepted the service agreement. */
+      user_agent?: string;
+    };
+    "stripe.Stripe.Account.Settings.CardIssuing": {
+      tos_acceptance?: components["schemas"]["stripe.Stripe.Account.Settings.CardIssuing.TosAcceptance"];
+    };
+    "stripe.Stripe.Account.Settings.CardPayments.DeclineOn": {
+      /** @description Whether Stripe automatically declines charges with an incorrect ZIP or postal code. This setting only applies when a ZIP or postal code is provided and they fail bank verification. */
+      avs_failure: boolean;
+      /** @description Whether Stripe automatically declines charges with an incorrect CVC. This setting only applies when a CVC is provided and it fails bank verification. */
+      cvc_failure: boolean;
+    };
+    "stripe.Stripe.Account.Settings.CardPayments": {
+      decline_on?: components["schemas"]["stripe.Stripe.Account.Settings.CardPayments.DeclineOn"];
+      /** @description The default text that appears on credit card statements when a charge is made. This field prefixes any dynamic `statement_descriptor` specified on the charge. `statement_descriptor_prefix` is useful for maximizing descriptor space for the dynamic portion. */
+      statement_descriptor_prefix: string | null;
+      /** @description The Kana variation of the default text that appears on credit card statements when a charge is made (Japan only). This field prefixes any dynamic `statement_descriptor_suffix_kana` specified on the charge. `statement_descriptor_prefix_kana` is useful for maximizing descriptor space for the dynamic portion. */
+      statement_descriptor_prefix_kana: string | null;
+      /** @description The Kanji variation of the default text that appears on credit card statements when a charge is made (Japan only). This field prefixes any dynamic `statement_descriptor_suffix_kanji` specified on the charge. `statement_descriptor_prefix_kanji` is useful for maximizing descriptor space for the dynamic portion. */
+      statement_descriptor_prefix_kanji: string | null;
+    };
+    "stripe.Stripe.Account.Settings.Dashboard": {
+      /** @description The display name for this account. This is used on the Stripe Dashboard to differentiate between accounts. */
+      display_name: string | null;
+      /** @description The timezone used in the Stripe Dashboard for this account. A list of possible time zone values is maintained at the [IANA Time Zone Database](http://www.iana.org/time-zones). */
+      timezone: string | null;
+    };
+    /**
+     * @description You can add one or multiple tax IDs to a [customer](https://stripe.com/docs/api/customers) or account.
+     * Customer and account tax IDs get displayed on related invoices and credit notes.
+     *
+     * Related guides: [Customer tax identification numbers](https://stripe.com/docs/billing/taxes/tax-ids), [Account tax IDs](https://stripe.com/docs/invoicing/connect#account-tax-ids)
+     */
+    "stripe.Stripe.TaxId": {
+      /** @description Unique identifier for the object. */
+      id: string;
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: "tax_id";
+      /** @description Two-letter ISO code representing the country of the tax ID. */
+      country: string | null;
+      /**
+       * Format: double
+       * @description Time at which the object was created. Measured in seconds since the Unix epoch.
+       */
+      created: number;
+      /** @description ID of the customer. */
+      customer: (string | components["schemas"]["stripe.Stripe.Customer"]) | null;
+      /** @description ID of the account. */
+      customer_account?: string | null;
+      /** @description Always true for a deleted object */
+      deleted?: unknown;
+      /** @description Has the value `true` if the object exists in live mode or the value `false` if the object exists in test mode. */
+      livemode: boolean;
+      /** @description The account or customer the tax ID belongs to. */
+      owner: components["schemas"]["stripe.Stripe.TaxId.Owner"] | null;
+      /** @description Type of the tax ID, one of `ad_nrt`, `ae_trn`, `al_tin`, `am_tin`, `ao_tin`, `ar_cuit`, `au_abn`, `au_arn`, `aw_tin`, `az_tin`, `ba_tin`, `bb_tin`, `bd_bin`, `bf_ifu`, `bg_uic`, `bh_vat`, `bj_ifu`, `bo_tin`, `br_cnpj`, `br_cpf`, `bs_tin`, `by_tin`, `ca_bn`, `ca_gst_hst`, `ca_pst_bc`, `ca_pst_mb`, `ca_pst_sk`, `ca_qst`, `cd_nif`, `ch_uid`, `ch_vat`, `cl_tin`, `cm_niu`, `cn_tin`, `co_nit`, `cr_tin`, `cv_nif`, `de_stn`, `do_rcn`, `ec_ruc`, `eg_tin`, `es_cif`, `et_tin`, `eu_oss_vat`, `eu_vat`, `gb_vat`, `ge_vat`, `gn_nif`, `hk_br`, `hr_oib`, `hu_tin`, `id_npwp`, `il_vat`, `in_gst`, `is_vat`, `jp_cn`, `jp_rn`, `jp_trn`, `ke_pin`, `kg_tin`, `kh_tin`, `kr_brn`, `kz_bin`, `la_tin`, `li_uid`, `li_vat`, `ma_vat`, `md_vat`, `me_pib`, `mk_vat`, `mr_nif`, `mx_rfc`, `my_frp`, `my_itn`, `my_sst`, `ng_tin`, `no_vat`, `no_voec`, `np_pan`, `nz_gst`, `om_vat`, `pe_ruc`, `ph_tin`, `ro_tin`, `rs_pib`, `ru_inn`, `ru_kpp`, `sa_vat`, `sg_gst`, `sg_uen`, `si_tin`, `sn_ninea`, `sr_fin`, `sv_nit`, `th_vat`, `tj_tin`, `tr_tin`, `tw_vat`, `tz_vat`, `ua_vat`, `ug_tin`, `us_ein`, `uy_ruc`, `uz_tin`, `uz_vat`, `ve_rif`, `vn_tin`, `za_vat`, `zm_tin`, or `zw_tin`. Note that some legacy tax IDs have type `unknown` */
+      type: components["schemas"]["stripe.Stripe.TaxId.Type"];
+      /** @description Value of the tax ID. */
+      value: string;
+      /** @description Tax ID verification information. */
+      verification: components["schemas"]["stripe.Stripe.TaxId.Verification"] | null;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Account.Settings.Invoices.HostedPaymentMethodSave": "always" | "never" | "offer";
+    "stripe.Stripe.Account.Settings.Invoices": {
+      /** @description The list of default Account Tax IDs to automatically include on invoices. Account Tax IDs get added when an invoice is finalized. */
+      default_account_tax_ids: ((string | components["schemas"]["stripe.Stripe.TaxId"])[]) | null;
+      /** @description Whether payment methods should be saved when a payment is completed for a one-time invoices on a hosted invoice page. */
+      hosted_payment_method_save: components["schemas"]["stripe.Stripe.Account.Settings.Invoices.HostedPaymentMethodSave"] | null;
+    };
+    "stripe.Stripe.Account.Settings.Payments": {
+      /** @description The default text that appears on credit card statements when a charge is made. This field prefixes any dynamic `statement_descriptor` specified on the charge. */
+      statement_descriptor: string | null;
+      /** @description The Kana variation of `statement_descriptor` used for charges in Japan. Japanese statement descriptors have [special requirements](https://docs.stripe.com/get-started/account/statement-descriptors#set-japanese-statement-descriptors). */
+      statement_descriptor_kana: string | null;
+      /** @description The Kanji variation of `statement_descriptor` used for charges in Japan. Japanese statement descriptors have [special requirements](https://docs.stripe.com/get-started/account/statement-descriptors#set-japanese-statement-descriptors). */
+      statement_descriptor_kanji: string | null;
+      /** @description The Kana variation of `statement_descriptor_prefix` used for card charges in Japan. Japanese statement descriptors have [special requirements](https://docs.stripe.com/get-started/account/statement-descriptors#set-japanese-statement-descriptors). */
+      statement_descriptor_prefix_kana: string | null;
+      /** @description The Kanji variation of `statement_descriptor_prefix` used for card charges in Japan. Japanese statement descriptors have [special requirements](https://docs.stripe.com/get-started/account/statement-descriptors#set-japanese-statement-descriptors). */
+      statement_descriptor_prefix_kanji: string | null;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Account.Settings.Payouts.Schedule.WeeklyPayoutDay": "friday" | "monday" | "saturday" | "sunday" | "thursday" | "tuesday" | "wednesday";
+    "stripe.Stripe.Account.Settings.Payouts.Schedule": {
+      /**
+       * Format: double
+       * @description The number of days charges for the account will be held before being paid out.
+       */
+      delay_days: number;
+      /** @description How frequently funds will be paid out. One of `manual` (payouts only created via API call), `daily`, `weekly`, or `monthly`. */
+      interval: string;
+      /**
+       * Format: double
+       * @description The day of the month funds will be paid out. Only shown if `interval` is monthly. Payouts scheduled between the 29th and 31st of the month are sent on the last day of shorter months.
+       */
+      monthly_anchor?: number;
+      /** @description The days of the month funds will be paid out. Only shown if `interval` is monthly. Payouts scheduled between the 29th and 31st of the month are sent on the last day of shorter months. */
+      monthly_payout_days?: number[];
+      /** @description The day of the week funds will be paid out, of the style 'monday', 'tuesday', etc. Only shown if `interval` is weekly. */
+      weekly_anchor?: string;
+      /** @description The days of the week when available funds are paid out, specified as an array, for example, [`monday`, `tuesday`]. Only shown if `interval` is weekly. */
+      weekly_payout_days?: components["schemas"]["stripe.Stripe.Account.Settings.Payouts.Schedule.WeeklyPayoutDay"][];
+    };
+    "stripe.Stripe.Account.Settings.Payouts": {
+      /** @description A Boolean indicating if Stripe should try to reclaim negative balances from an attached bank account. See [Understanding Connect account balances](https://docs.stripe.com/connect/account-balances) for details. The default value is `false` when [controller.requirement_collection](https://docs.stripe.com/api/accounts/object#account_object-controller-requirement_collection) is `application`, which includes Custom accounts, otherwise `true`. */
+      debit_negative_balances: boolean;
+      schedule: components["schemas"]["stripe.Stripe.Account.Settings.Payouts.Schedule"];
+      /** @description The text that appears on the bank account statement for payouts. If not set, this defaults to the platform's bank descriptor as set in the Dashboard. */
+      statement_descriptor: string | null;
+    };
+    "stripe.Stripe.Account.Settings.SepaDebitPayments": {
+      /** @description SEPA creditor identifier that identifies the company making the payment. */
+      creditor_id?: string;
+    };
+    "stripe.Stripe.Account.Settings.TaxForms": {
+      /** @description Whether the account opted out of receiving their tax forms by postal delivery. */
+      consented_to_paperless_delivery: boolean;
+    };
+    "stripe.Stripe.Account.Settings.Treasury.TosAcceptance": {
+      /**
+       * Format: double
+       * @description The Unix timestamp marking when the account representative accepted the service agreement.
+       */
+      date: number | null;
+      /** @description The IP address from which the account representative accepted the service agreement. */
+      ip: string | null;
+      /** @description The user agent of the browser from which the account representative accepted the service agreement. */
+      user_agent?: string;
+    };
+    "stripe.Stripe.Account.Settings.Treasury": {
+      tos_acceptance?: components["schemas"]["stripe.Stripe.Account.Settings.Treasury.TosAcceptance"];
+    };
+    "stripe.Stripe.Account.Settings": {
+      bacs_debit_payments?: components["schemas"]["stripe.Stripe.Account.Settings.BacsDebitPayments"];
+      bank_bca_onboarding?: components["schemas"]["stripe.Stripe.Account.Settings.BankBcaOnboarding"];
+      branding: components["schemas"]["stripe.Stripe.Account.Settings.Branding"];
+      capital?: components["schemas"]["stripe.Stripe.Account.Settings.Capital"];
+      card_issuing?: components["schemas"]["stripe.Stripe.Account.Settings.CardIssuing"];
+      card_payments: components["schemas"]["stripe.Stripe.Account.Settings.CardPayments"];
+      dashboard: components["schemas"]["stripe.Stripe.Account.Settings.Dashboard"];
+      invoices?: components["schemas"]["stripe.Stripe.Account.Settings.Invoices"];
+      payments: components["schemas"]["stripe.Stripe.Account.Settings.Payments"];
+      payouts?: components["schemas"]["stripe.Stripe.Account.Settings.Payouts"];
+      sepa_debit_payments?: components["schemas"]["stripe.Stripe.Account.Settings.SepaDebitPayments"];
+      tax_forms?: components["schemas"]["stripe.Stripe.Account.Settings.TaxForms"];
+      treasury?: components["schemas"]["stripe.Stripe.Account.Settings.Treasury"];
+    };
+    "stripe.Stripe.Account.TosAcceptance": {
+      /**
+       * Format: double
+       * @description The Unix timestamp marking when the account representative accepted their service agreement
+       */
+      date?: number | null;
+      /** @description The IP address from which the account representative accepted their service agreement */
+      ip?: string | null;
+      /** @description The user's service agreement type */
+      service_agreement?: string;
+      /** @description The user agent of the browser from which the account representative accepted their service agreement */
+      user_agent?: string | null;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Account.Type": "custom" | "express" | "none" | "standard";
     "stripe.Stripe.Source.AchCreditTransfer": {
       account_number?: string | null;
       bank_name?: string | null;
@@ -4826,6 +3040,20 @@ Json: JsonObject;
       card_present?: components["schemas"]["stripe.Stripe.PaymentMethod.Card.GeneratedFrom.PaymentMethodDetails.CardPresent"];
       /** @description The type of payment method transaction-specific details from the transaction that generated this `card` payment method. Always `card_present`. */
       type: string;
+    };
+    /** @description The Application object. */
+    "stripe.Stripe.Application": {
+      /** @description Unique identifier for the object. */
+      id: string;
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: "application";
+      /** @description Always true for a deleted object */
+      deleted?: unknown;
+      /** @description The name of the application. */
+      name: string | null;
     };
     /** @enum {string} */
     "stripe.Stripe.SetupAttempt.FlowDirection": "inbound" | "outbound";
@@ -8709,7 +6937,6 @@ Json: JsonObject;
       /** @description 3D Secure details. */
       three_d_secure: components["schemas"]["stripe.Stripe.Issuing.Authorization.VerificationData.ThreeDSecure"] | null;
     };
-    "stripe.Stripe.ExternalAccount": components["schemas"]["stripe.Stripe.BankAccount"] | components["schemas"]["stripe.Stripe.Card"];
     /** @description The DeletedBankAccount object. */
     "stripe.Stripe.DeletedBankAccount": {
       /** @description Unique identifier for the object. */
@@ -12699,923 +10926,23 @@ Json: JsonObject;
       /** @description The URL where this list can be accessed. */
       url: string;
     };
-    /**
-     * @description Subscriptions allow you to charge a customer on a recurring basis.
-     *
-     * Related guide: [Creating subscriptions](https://stripe.com/docs/billing/subscriptions/creating)
-     */
-    "stripe.Stripe.Subscription": {
+    /** @description The DeletedApplication object. */
+    "stripe.Stripe.DeletedApplication": {
       /** @description Unique identifier for the object. */
       id: string;
       /**
        * @description String representing the object's type. Objects of the same type share the same value.
        * @enum {string}
        */
-      object: "subscription";
-      /** @description ID of the Connect Application that created the subscription. */
-      application: (string | components["schemas"]["stripe.Stripe.Application"] | components["schemas"]["stripe.Stripe.DeletedApplication"]) | null;
+      object: "application";
       /**
-       * Format: double
-       * @description A non-negative decimal between 0 and 100, with at most two decimal places. This represents the percentage of the subscription invoice total that will be transferred to the application owner's Stripe account.
+       * @description Always true for a deleted object
+       * @enum {boolean}
        */
-      application_fee_percent: number | null;
-      automatic_tax: components["schemas"]["stripe.Stripe.Subscription.AutomaticTax"];
-      /**
-       * Format: double
-       * @description The reference point that aligns future [billing cycle](https://stripe.com/docs/subscriptions/billing-cycle) dates. It sets the day of week for `week` intervals, the day of month for `month` and `year` intervals, and the month of year for `year` intervals. The timestamp is in UTC format.
-       */
-      billing_cycle_anchor: number;
-      /** @description The fixed values used to calculate the `billing_cycle_anchor`. */
-      billing_cycle_anchor_config: components["schemas"]["stripe.Stripe.Subscription.BillingCycleAnchorConfig"] | null;
-      /** @description The billing mode of the subscription. */
-      billing_mode: components["schemas"]["stripe.Stripe.Subscription.BillingMode"];
-      /** @description Define thresholds at which an invoice will be sent, and the subscription advanced to a new billing period */
-      billing_thresholds: components["schemas"]["stripe.Stripe.Subscription.BillingThresholds"] | null;
-      /**
-       * Format: double
-       * @description A date in the future at which the subscription will automatically get canceled
-       */
-      cancel_at: number | null;
-      /** @description Whether this subscription will (if `status=active`) or did (if `status=canceled`) cancel at the end of the current billing period. */
-      cancel_at_period_end: boolean;
-      /**
-       * Format: double
-       * @description If the subscription has been canceled, the date of that cancellation. If the subscription was canceled with `cancel_at_period_end`, `canceled_at` will reflect the time of the most recent update request, not the end of the subscription period when the subscription is automatically moved to a canceled state.
-       */
-      canceled_at: number | null;
-      /** @description Details about why this subscription was cancelled */
-      cancellation_details: components["schemas"]["stripe.Stripe.Subscription.CancellationDetails"] | null;
-      /** @description Either `charge_automatically`, or `send_invoice`. When charging automatically, Stripe will attempt to pay this subscription at the end of the cycle using the default source attached to the customer. When sending an invoice, Stripe will email your customer an invoice with payment instructions and mark the subscription as `active`. */
-      collection_method: components["schemas"]["stripe.Stripe.Subscription.CollectionMethod"];
-      /**
-       * Format: double
-       * @description Time at which the object was created. Measured in seconds since the Unix epoch.
-       */
-      created: number;
-      /** @description Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase. Must be a [supported currency](https://stripe.com/docs/currencies). */
-      currency: string;
-      /** @description ID of the customer who owns the subscription. */
-      customer: string | components["schemas"]["stripe.Stripe.Customer"] | components["schemas"]["stripe.Stripe.DeletedCustomer"];
-      /** @description ID of the account who owns the subscription. */
-      customer_account?: string | null;
-      /**
-       * Format: double
-       * @description Number of days a customer has to pay invoices generated by this subscription. This value will be `null` for subscriptions where `collection_method=charge_automatically`.
-       */
-      days_until_due: number | null;
-      /** @description ID of the default payment method for the subscription. It must belong to the customer associated with the subscription. This takes precedence over `default_source`. If neither are set, invoices will use the customer's [invoice_settings.default_payment_method](https://stripe.com/docs/api/customers/object#customer_object-invoice_settings-default_payment_method) or [default_source](https://stripe.com/docs/api/customers/object#customer_object-default_source). */
-      default_payment_method: (string | components["schemas"]["stripe.Stripe.PaymentMethod"]) | null;
-      /** @description ID of the default payment source for the subscription. It must belong to the customer associated with the subscription and be in a chargeable state. If `default_payment_method` is also set, `default_payment_method` will take precedence. If neither are set, invoices will use the customer's [invoice_settings.default_payment_method](https://stripe.com/docs/api/customers/object#customer_object-invoice_settings-default_payment_method) or [default_source](https://stripe.com/docs/api/customers/object#customer_object-default_source). */
-      default_source: (string | components["schemas"]["stripe.Stripe.CustomerSource"]) | null;
-      /** @description The tax rates that will apply to any subscription item that does not have `tax_rates` set. Invoices created will have their `default_tax_rates` populated from the subscription. */
-      default_tax_rates?: components["schemas"]["stripe.Stripe.TaxRate"][] | null;
-      /** @description The subscription's description, meant to be displayable to the customer. Use this field to optionally store an explanation of the subscription for rendering in Stripe surfaces and certain local payment methods UIs. */
-      description: string | null;
-      /** @description The discounts applied to the subscription. Subscription item discounts are applied before subscription discounts. Use `expand[]=discounts` to expand each discount. */
-      discounts: (string | components["schemas"]["stripe.Stripe.Discount"])[];
-      /**
-       * Format: double
-       * @description If the subscription has ended, the date the subscription ended.
-       */
-      ended_at: number | null;
-      invoice_settings: components["schemas"]["stripe.Stripe.Subscription.InvoiceSettings"];
-      /** @description List of subscription items, each with an attached price. */
-      items: components["schemas"]["stripe.Stripe.ApiList_stripe.Stripe.SubscriptionItem_"];
-      /** @description Details of the most recent price migration that failed for the subscription. */
-      last_price_migration_error?: components["schemas"]["stripe.Stripe.Subscription.LastPriceMigrationError"] | null;
-      /** @description The most recent invoice this subscription has generated. */
-      latest_invoice: (string | components["schemas"]["stripe.Stripe.Invoice"]) | null;
-      /** @description Has the value `true` if the object exists in live mode or the value `false` if the object exists in test mode. */
-      livemode: boolean;
-      /** @description Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. */
-      metadata: components["schemas"]["stripe.Stripe.Metadata"];
-      /**
-       * Format: double
-       * @description Specifies the approximate timestamp on which any pending invoice items will be billed according to the schedule provided at `pending_invoice_item_interval`.
-       */
-      next_pending_invoice_item_invoice: number | null;
-      /** @description The account (if any) the charge was made on behalf of for charges associated with this subscription. See the [Connect documentation](https://stripe.com/docs/connect/subscriptions#on-behalf-of) for details. */
-      on_behalf_of: (string | components["schemas"]["stripe.Stripe.Account"]) | null;
-      /** @description If specified, payment collection for this subscription will be paused. Note that the subscription status will be unchanged and will not be updated to `paused`. Learn more about [pausing collection](https://stripe.com/docs/billing/subscriptions/pause-payment). */
-      pause_collection: components["schemas"]["stripe.Stripe.Subscription.PauseCollection"] | null;
-      /** @description Payment settings passed on to invoices created by the subscription. */
-      payment_settings: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings"] | null;
-      /** @description Specifies an interval for how often to bill for any pending invoice items. It is analogous to calling [Create an invoice](https://stripe.com/docs/api#create_invoice) for the given subscription at the specified interval. */
-      pending_invoice_item_interval: components["schemas"]["stripe.Stripe.Subscription.PendingInvoiceItemInterval"] | null;
-      /** @description You can use this [SetupIntent](https://stripe.com/docs/api/setup_intents) to collect user authentication when creating a subscription without immediate payment or updating a subscription's payment method, allowing you to optimize for off-session payments. Learn more in the [SCA Migration Guide](https://stripe.com/docs/billing/migration/strong-customer-authentication#scenario-2). */
-      pending_setup_intent: (string | components["schemas"]["stripe.Stripe.SetupIntent"]) | null;
-      /** @description If specified, [pending updates](https://stripe.com/docs/billing/subscriptions/pending-updates) that will be applied to the subscription once the `latest_invoice` has been paid. */
-      pending_update: components["schemas"]["stripe.Stripe.Subscription.PendingUpdate"] | null;
-      /** @description Time period and invoice for a Subscription billed in advance. */
-      prebilling?: components["schemas"]["stripe.Stripe.Subscription.Prebilling"] | null;
-      /** @description The schedule attached to the subscription */
-      schedule: (string | components["schemas"]["stripe.Stripe.SubscriptionSchedule"]) | null;
-      /**
-       * Format: double
-       * @description Date when the subscription was first created. The date might differ from the `created` date due to backdating.
-       */
-      start_date: number;
-      /**
-       * @description Possible values are `incomplete`, `incomplete_expired`, `trialing`, `active`, `past_due`, `canceled`, `unpaid`, or `paused`.
-       *
-       * For `collection_method=charge_automatically` a subscription moves into `incomplete` if the initial payment attempt fails. A subscription in this status can only have metadata and default_source updated. Once the first invoice is paid, the subscription moves into an `active` status. If the first invoice is not paid within 23 hours, the subscription transitions to `incomplete_expired`. This is a terminal status, the open invoice will be voided and no further invoices will be generated.
-       *
-       * A subscription that is currently in a trial period is `trialing` and moves to `active` when the trial period is over.
-       *
-       * A subscription can only enter a `paused` status [when a trial ends without a payment method](https://stripe.com/docs/billing/subscriptions/trials#create-free-trials-without-payment). A `paused` subscription doesn't generate invoices and can be resumed after your customer adds their payment method. The `paused` status is different from [pausing collection](https://stripe.com/docs/billing/subscriptions/pause-payment), which still generates invoices and leaves the subscription's status unchanged.
-       *
-       * If subscription `collection_method=charge_automatically`, it becomes `past_due` when payment is required but cannot be paid (due to failed payment or awaiting additional user actions). Once Stripe has exhausted all payment retry attempts, the subscription will become `canceled` or `unpaid` (depending on your subscriptions settings).
-       *
-       * If subscription `collection_method=send_invoice` it becomes `past_due` when its invoice is not paid by the due date, and `canceled` or `unpaid` if it is still not paid by an additional deadline after that. Note that when a subscription has a status of `unpaid`, no subsequent invoices will be attempted (invoices will be created, but then immediately automatically closed). After receiving updated payment information from a customer, you may choose to reopen and pay their closed invoices.
-       */
-      status: components["schemas"]["stripe.Stripe.Subscription.Status"];
-      /** @description ID of the test clock this subscription belongs to. */
-      test_clock: (string | components["schemas"]["stripe.Stripe.TestHelpers.TestClock"]) | null;
-      /** @description The account (if any) the subscription's payments will be attributed to for tax reporting, and where funds from each payment will be transferred to for each of the subscription's invoices. */
-      transfer_data: components["schemas"]["stripe.Stripe.Subscription.TransferData"] | null;
-      /**
-       * Format: double
-       * @description If the subscription has a trial, the end of that trial.
-       */
-      trial_end: number | null;
-      /** @description Settings related to subscription trials. */
-      trial_settings: components["schemas"]["stripe.Stripe.Subscription.TrialSettings"] | null;
-      /**
-       * Format: double
-       * @description If the subscription has a trial, the beginning of that trial.
-       */
-      trial_start: number | null;
-    };
-    /**
-     * @description A container for paginated lists of objects.
-     * The array of objects is on the `.data` property,
-     * and `.has_more` indicates whether there are additional objects beyond the end of this list.
-     *
-     * Learn more in Stripe's [pagination docs](https://stripe.com/docs/api/pagination?lang=node)
-     * or, when iterating over many items, try [auto-pagination](https://github.com/stripe/stripe-node#auto-pagination) instead.
-     */
-    "stripe.Stripe.ApiList_stripe.Stripe.Subscription_": {
-      /** @enum {string} */
-      object: "list";
-      data: components["schemas"]["stripe.Stripe.Subscription"][];
-      /** @description True if this list has another page of items after this one that can be fetched. */
-      has_more: boolean;
-      /** @description The URL where this list can be accessed. */
-      url: string;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Customer.Tax.AutomaticTax": "failed" | "not_collecting" | "supported" | "unrecognized_location";
-    /** @enum {string} */
-    "stripe.Stripe.Customer.Tax.Location.Source": "billing_address" | "ip_address" | "payment_method" | "shipping_destination";
-    "stripe.Stripe.Customer.Tax.Location": {
-      /** @description The identified tax country of the customer. */
-      country: string;
-      /** @description The data source used to infer the customer's location. */
-      source: components["schemas"]["stripe.Stripe.Customer.Tax.Location.Source"];
-      /** @description The identified tax state, county, province, or region of the customer. */
-      state: string | null;
-    };
-    "stripe.Stripe.Customer.Tax": {
-      /** @description Surfaces if automatic tax computation is possible given the current customer location information. */
-      automatic_tax: components["schemas"]["stripe.Stripe.Customer.Tax.AutomaticTax"];
-      /** @description A recent IP address of the customer used for tax reporting and tax location inference. */
-      ip_address: string | null;
-      /** @description The identified tax location of the customer. */
-      location: components["schemas"]["stripe.Stripe.Customer.Tax.Location"] | null;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Customer.TaxExempt": "exempt" | "none" | "reverse";
-    /** @enum {string} */
-    "stripe.Stripe.TaxId.Owner.Type": "account" | "application" | "customer" | "self";
-    "stripe.Stripe.TaxId.Owner": {
-      /** @description The account being referenced when `type` is `account`. */
-      account?: string | components["schemas"]["stripe.Stripe.Account"];
-      /** @description The Connect Application being referenced when `type` is `application`. */
-      application?: string | components["schemas"]["stripe.Stripe.Application"];
-      /** @description The customer being referenced when `type` is `customer`. */
-      customer?: string | components["schemas"]["stripe.Stripe.Customer"];
-      /** @description The account being referenced when `type` is `customer`. */
-      customer_account?: string | null;
-      /** @description Type of owner referenced. */
-      type: components["schemas"]["stripe.Stripe.TaxId.Owner.Type"];
-    };
-    /** @enum {string} */
-    "stripe.Stripe.TaxId.Type": "ad_nrt" | "ae_trn" | "al_tin" | "am_tin" | "ao_tin" | "ar_cuit" | "au_abn" | "au_arn" | "aw_tin" | "az_tin" | "ba_tin" | "bb_tin" | "bd_bin" | "bf_ifu" | "bg_uic" | "bh_vat" | "bj_ifu" | "bo_tin" | "br_cnpj" | "br_cpf" | "bs_tin" | "by_tin" | "ca_bn" | "ca_gst_hst" | "ca_pst_bc" | "ca_pst_mb" | "ca_pst_sk" | "ca_qst" | "cd_nif" | "ch_uid" | "ch_vat" | "cl_tin" | "cm_niu" | "cn_tin" | "co_nit" | "cr_tin" | "cv_nif" | "de_stn" | "do_rcn" | "ec_ruc" | "eg_tin" | "es_cif" | "et_tin" | "eu_oss_vat" | "eu_vat" | "gb_vat" | "ge_vat" | "gn_nif" | "hk_br" | "hr_oib" | "hu_tin" | "id_npwp" | "il_vat" | "in_gst" | "is_vat" | "jp_cn" | "jp_rn" | "jp_trn" | "ke_pin" | "kg_tin" | "kh_tin" | "kr_brn" | "kz_bin" | "la_tin" | "li_uid" | "li_vat" | "ma_vat" | "md_vat" | "me_pib" | "mk_vat" | "mr_nif" | "mx_rfc" | "my_frp" | "my_itn" | "my_sst" | "ng_tin" | "no_vat" | "no_voec" | "np_pan" | "nz_gst" | "om_vat" | "pe_ruc" | "ph_tin" | "ro_tin" | "rs_pib" | "ru_inn" | "ru_kpp" | "sa_vat" | "sg_gst" | "sg_uen" | "si_tin" | "sn_ninea" | "sr_fin" | "sv_nit" | "th_vat" | "tj_tin" | "tr_tin" | "tw_vat" | "tz_vat" | "ua_vat" | "ug_tin" | "unknown" | "us_ein" | "uy_ruc" | "uz_tin" | "uz_vat" | "ve_rif" | "vn_tin" | "za_vat" | "zm_tin" | "zw_tin";
-    /** @enum {string} */
-    "stripe.Stripe.TaxId.Verification.Status": "pending" | "unavailable" | "unverified" | "verified";
-    "stripe.Stripe.TaxId.Verification": {
-      /** @description Verification status, one of `pending`, `verified`, `unverified`, or `unavailable`. */
-      status: components["schemas"]["stripe.Stripe.TaxId.Verification.Status"];
-      /** @description Verified address. */
-      verified_address: string | null;
-      /** @description Verified name. */
-      verified_name: string | null;
-    };
-    /**
-     * @description You can add one or multiple tax IDs to a [customer](https://stripe.com/docs/api/customers) or account.
-     * Customer and account tax IDs get displayed on related invoices and credit notes.
-     *
-     * Related guides: [Customer tax identification numbers](https://stripe.com/docs/billing/taxes/tax-ids), [Account tax IDs](https://stripe.com/docs/invoicing/connect#account-tax-ids)
-     */
-    "stripe.Stripe.TaxId": {
-      /** @description Unique identifier for the object. */
-      id: string;
-      /**
-       * @description String representing the object's type. Objects of the same type share the same value.
-       * @enum {string}
-       */
-      object: "tax_id";
-      /** @description Two-letter ISO code representing the country of the tax ID. */
-      country: string | null;
-      /**
-       * Format: double
-       * @description Time at which the object was created. Measured in seconds since the Unix epoch.
-       */
-      created: number;
-      /** @description ID of the customer. */
-      customer: (string | components["schemas"]["stripe.Stripe.Customer"]) | null;
-      /** @description ID of the account. */
-      customer_account?: string | null;
-      /** @description Always true for a deleted object */
-      deleted?: unknown;
-      /** @description Has the value `true` if the object exists in live mode or the value `false` if the object exists in test mode. */
-      livemode: boolean;
-      /** @description The account or customer the tax ID belongs to. */
-      owner: components["schemas"]["stripe.Stripe.TaxId.Owner"] | null;
-      /** @description Type of the tax ID, one of `ad_nrt`, `ae_trn`, `al_tin`, `am_tin`, `ao_tin`, `ar_cuit`, `au_abn`, `au_arn`, `aw_tin`, `az_tin`, `ba_tin`, `bb_tin`, `bd_bin`, `bf_ifu`, `bg_uic`, `bh_vat`, `bj_ifu`, `bo_tin`, `br_cnpj`, `br_cpf`, `bs_tin`, `by_tin`, `ca_bn`, `ca_gst_hst`, `ca_pst_bc`, `ca_pst_mb`, `ca_pst_sk`, `ca_qst`, `cd_nif`, `ch_uid`, `ch_vat`, `cl_tin`, `cm_niu`, `cn_tin`, `co_nit`, `cr_tin`, `cv_nif`, `de_stn`, `do_rcn`, `ec_ruc`, `eg_tin`, `es_cif`, `et_tin`, `eu_oss_vat`, `eu_vat`, `gb_vat`, `ge_vat`, `gn_nif`, `hk_br`, `hr_oib`, `hu_tin`, `id_npwp`, `il_vat`, `in_gst`, `is_vat`, `jp_cn`, `jp_rn`, `jp_trn`, `ke_pin`, `kg_tin`, `kh_tin`, `kr_brn`, `kz_bin`, `la_tin`, `li_uid`, `li_vat`, `ma_vat`, `md_vat`, `me_pib`, `mk_vat`, `mr_nif`, `mx_rfc`, `my_frp`, `my_itn`, `my_sst`, `ng_tin`, `no_vat`, `no_voec`, `np_pan`, `nz_gst`, `om_vat`, `pe_ruc`, `ph_tin`, `ro_tin`, `rs_pib`, `ru_inn`, `ru_kpp`, `sa_vat`, `sg_gst`, `sg_uen`, `si_tin`, `sn_ninea`, `sr_fin`, `sv_nit`, `th_vat`, `tj_tin`, `tr_tin`, `tw_vat`, `tz_vat`, `ua_vat`, `ug_tin`, `us_ein`, `uy_ruc`, `uz_tin`, `uz_vat`, `ve_rif`, `vn_tin`, `za_vat`, `zm_tin`, or `zw_tin`. Note that some legacy tax IDs have type `unknown` */
-      type: components["schemas"]["stripe.Stripe.TaxId.Type"];
-      /** @description Value of the tax ID. */
-      value: string;
-      /** @description Tax ID verification information. */
-      verification: components["schemas"]["stripe.Stripe.TaxId.Verification"] | null;
-    };
-    /**
-     * @description A container for paginated lists of objects.
-     * The array of objects is on the `.data` property,
-     * and `.has_more` indicates whether there are additional objects beyond the end of this list.
-     *
-     * Learn more in Stripe's [pagination docs](https://stripe.com/docs/api/pagination?lang=node)
-     * or, when iterating over many items, try [auto-pagination](https://github.com/stripe/stripe-node#auto-pagination) instead.
-     */
-    "stripe.Stripe.ApiList_stripe.Stripe.TaxId_": {
-      /** @enum {string} */
-      object: "list";
-      data: components["schemas"]["stripe.Stripe.TaxId"][];
-      /** @description True if this list has another page of items after this one that can be fetched. */
-      has_more: boolean;
-      /** @description The URL where this list can be accessed. */
-      url: string;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.TestHelpers.TestClock.Status": "advancing" | "internal_failure" | "ready";
-    "stripe.Stripe.TestHelpers.TestClock.StatusDetails.Advancing": {
-      /**
-       * Format: double
-       * @description The `frozen_time` that the Test Clock is advancing towards.
-       */
-      target_frozen_time: number;
-    };
-    "stripe.Stripe.TestHelpers.TestClock.StatusDetails": {
-      advancing?: components["schemas"]["stripe.Stripe.TestHelpers.TestClock.StatusDetails.Advancing"];
-    };
-    /**
-     * @description A test clock enables deterministic control over objects in testmode. With a test clock, you can create
-     * objects at a frozen time in the past or future, and advance to a specific future time to observe webhooks and state changes. After the clock advances,
-     * you can either validate the current state of your scenario (and test your assumptions), change the current state of your scenario (and test more complex scenarios), or keep advancing forward in time.
-     */
-    "stripe.Stripe.TestHelpers.TestClock": {
-      /** @description Unique identifier for the object. */
-      id: string;
-      /**
-       * @description String representing the object's type. Objects of the same type share the same value.
-       * @enum {string}
-       */
-      object: "test_helpers.test_clock";
-      /**
-       * Format: double
-       * @description Time at which the object was created. Measured in seconds since the Unix epoch.
-       */
-      created: number;
-      /** @description Always true for a deleted object */
-      deleted?: unknown;
-      /**
-       * Format: double
-       * @description Time at which this clock is scheduled to auto delete.
-       */
-      deletes_after: number;
-      /**
-       * Format: double
-       * @description Time at which all objects belonging to this clock are frozen.
-       */
-      frozen_time: number;
-      /** @description Has the value `true` if the object exists in live mode or the value `false` if the object exists in test mode. */
-      livemode: boolean;
-      /** @description The custom name supplied at creation. */
+      deleted: true;
+      /** @description The name of the application. */
       name: string | null;
-      /** @description The status of the Test Clock. */
-      status: components["schemas"]["stripe.Stripe.TestHelpers.TestClock.Status"];
-      status_details: components["schemas"]["stripe.Stripe.TestHelpers.TestClock.StatusDetails"];
     };
-    /** @enum {string} */
-    "stripe.Stripe.BankAccount.FutureRequirements.Error.Code": "information_missing" | "invalid_address_city_state_postal_code" | "invalid_address_highway_contract_box" | "invalid_address_private_mailbox" | "invalid_business_profile_name" | "invalid_business_profile_name_denylisted" | "invalid_company_name_denylisted" | "invalid_dob_age_over_maximum" | "invalid_dob_age_under_18" | "invalid_dob_age_under_minimum" | "invalid_product_description_length" | "invalid_product_description_url_match" | "invalid_representative_country" | "invalid_signator" | "invalid_statement_descriptor_business_mismatch" | "invalid_statement_descriptor_denylisted" | "invalid_statement_descriptor_length" | "invalid_statement_descriptor_prefix_denylisted" | "invalid_statement_descriptor_prefix_mismatch" | "invalid_street_address" | "invalid_tax_id" | "invalid_tax_id_format" | "invalid_tos_acceptance" | "invalid_url_denylisted" | "invalid_url_format" | "invalid_url_length" | "invalid_url_web_presence_detected" | "invalid_url_website_business_information_mismatch" | "invalid_url_website_empty" | "invalid_url_website_inaccessible" | "invalid_url_website_inaccessible_geoblocked" | "invalid_url_website_inaccessible_password_protected" | "invalid_url_website_incomplete" | "invalid_url_website_incomplete_cancellation_policy" | "invalid_url_website_incomplete_customer_service_details" | "invalid_url_website_incomplete_legal_restrictions" | "invalid_url_website_incomplete_refund_policy" | "invalid_url_website_incomplete_return_policy" | "invalid_url_website_incomplete_terms_and_conditions" | "invalid_url_website_incomplete_under_construction" | "invalid_url_website_other" | "invalid_value_other" | "verification_directors_mismatch" | "verification_document_address_mismatch" | "verification_document_address_missing" | "verification_document_corrupt" | "verification_document_country_not_supported" | "verification_document_directors_mismatch" | "verification_document_dob_mismatch" | "verification_document_duplicate_type" | "verification_document_expired" | "verification_document_failed_copy" | "verification_document_failed_greyscale" | "verification_document_failed_other" | "verification_document_failed_test_mode" | "verification_document_fraudulent" | "verification_document_id_number_mismatch" | "verification_document_id_number_missing" | "verification_document_incomplete" | "verification_document_invalid" | "verification_document_issue_or_expiry_date_missing" | "verification_document_manipulated" | "verification_document_missing_back" | "verification_document_missing_front" | "verification_document_name_mismatch" | "verification_document_name_missing" | "verification_document_nationality_mismatch" | "verification_document_not_readable" | "verification_document_not_signed" | "verification_document_not_uploaded" | "verification_document_photo_mismatch" | "verification_document_too_large" | "verification_document_type_not_supported" | "verification_extraneous_directors" | "verification_failed_address_match" | "verification_failed_authorizer_authority" | "verification_failed_business_iec_number" | "verification_failed_document_match" | "verification_failed_id_number_match" | "verification_failed_keyed_identity" | "verification_failed_keyed_match" | "verification_failed_name_match" | "verification_failed_other" | "verification_failed_representative_authority" | "verification_failed_residential_address" | "verification_failed_tax_id_match" | "verification_failed_tax_id_not_issued" | "verification_legal_entity_structure_mismatch" | "verification_missing_directors" | "verification_missing_executives" | "verification_missing_owners" | "verification_rejected_ownership_exemption_reason" | "verification_requires_additional_memorandum_of_associations" | "verification_requires_additional_proof_of_registration" | "verification_supportability";
-    "stripe.Stripe.BankAccount.FutureRequirements.Error": {
-      /** @description The code for the type of error. */
-      code: components["schemas"]["stripe.Stripe.BankAccount.FutureRequirements.Error.Code"];
-      /** @description An informative message that indicates the error type and provides additional details about the error. */
-      reason: string;
-      /** @description The specific user onboarding requirement field (in the requirements hash) that needs to be resolved. */
-      requirement: string;
-    };
-    "stripe.Stripe.BankAccount.FutureRequirements": {
-      /** @description Fields that need to be collected to keep the external account enabled. If not collected by `current_deadline`, these fields appear in `past_due` as well, and the account is disabled. */
-      currently_due: string[] | null;
-      /** @description Fields that are `currently_due` and need to be collected again because validation or verification failed. */
-      errors: components["schemas"]["stripe.Stripe.BankAccount.FutureRequirements.Error"][] | null;
-      /** @description Fields that weren't collected by `current_deadline`. These fields need to be collected to enable the external account. */
-      past_due: string[] | null;
-      /** @description Fields that might become required depending on the results of verification or review. It's an empty array unless an asynchronous verification is pending. If verification fails, these fields move to `eventually_due`, `currently_due`, or `past_due`. Fields might appear in `eventually_due`, `currently_due`, or `past_due` and in `pending_verification` if verification fails but another verification is still pending. */
-      pending_verification: string[] | null;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.BankAccount.Requirements.Error.Code": "information_missing" | "invalid_address_city_state_postal_code" | "invalid_address_highway_contract_box" | "invalid_address_private_mailbox" | "invalid_business_profile_name" | "invalid_business_profile_name_denylisted" | "invalid_company_name_denylisted" | "invalid_dob_age_over_maximum" | "invalid_dob_age_under_18" | "invalid_dob_age_under_minimum" | "invalid_product_description_length" | "invalid_product_description_url_match" | "invalid_representative_country" | "invalid_signator" | "invalid_statement_descriptor_business_mismatch" | "invalid_statement_descriptor_denylisted" | "invalid_statement_descriptor_length" | "invalid_statement_descriptor_prefix_denylisted" | "invalid_statement_descriptor_prefix_mismatch" | "invalid_street_address" | "invalid_tax_id" | "invalid_tax_id_format" | "invalid_tos_acceptance" | "invalid_url_denylisted" | "invalid_url_format" | "invalid_url_length" | "invalid_url_web_presence_detected" | "invalid_url_website_business_information_mismatch" | "invalid_url_website_empty" | "invalid_url_website_inaccessible" | "invalid_url_website_inaccessible_geoblocked" | "invalid_url_website_inaccessible_password_protected" | "invalid_url_website_incomplete" | "invalid_url_website_incomplete_cancellation_policy" | "invalid_url_website_incomplete_customer_service_details" | "invalid_url_website_incomplete_legal_restrictions" | "invalid_url_website_incomplete_refund_policy" | "invalid_url_website_incomplete_return_policy" | "invalid_url_website_incomplete_terms_and_conditions" | "invalid_url_website_incomplete_under_construction" | "invalid_url_website_other" | "invalid_value_other" | "verification_directors_mismatch" | "verification_document_address_mismatch" | "verification_document_address_missing" | "verification_document_corrupt" | "verification_document_country_not_supported" | "verification_document_directors_mismatch" | "verification_document_dob_mismatch" | "verification_document_duplicate_type" | "verification_document_expired" | "verification_document_failed_copy" | "verification_document_failed_greyscale" | "verification_document_failed_other" | "verification_document_failed_test_mode" | "verification_document_fraudulent" | "verification_document_id_number_mismatch" | "verification_document_id_number_missing" | "verification_document_incomplete" | "verification_document_invalid" | "verification_document_issue_or_expiry_date_missing" | "verification_document_manipulated" | "verification_document_missing_back" | "verification_document_missing_front" | "verification_document_name_mismatch" | "verification_document_name_missing" | "verification_document_nationality_mismatch" | "verification_document_not_readable" | "verification_document_not_signed" | "verification_document_not_uploaded" | "verification_document_photo_mismatch" | "verification_document_too_large" | "verification_document_type_not_supported" | "verification_extraneous_directors" | "verification_failed_address_match" | "verification_failed_authorizer_authority" | "verification_failed_business_iec_number" | "verification_failed_document_match" | "verification_failed_id_number_match" | "verification_failed_keyed_identity" | "verification_failed_keyed_match" | "verification_failed_name_match" | "verification_failed_other" | "verification_failed_representative_authority" | "verification_failed_residential_address" | "verification_failed_tax_id_match" | "verification_failed_tax_id_not_issued" | "verification_legal_entity_structure_mismatch" | "verification_missing_directors" | "verification_missing_executives" | "verification_missing_owners" | "verification_rejected_ownership_exemption_reason" | "verification_requires_additional_memorandum_of_associations" | "verification_requires_additional_proof_of_registration" | "verification_supportability";
-    "stripe.Stripe.BankAccount.Requirements.Error": {
-      /** @description The code for the type of error. */
-      code: components["schemas"]["stripe.Stripe.BankAccount.Requirements.Error.Code"];
-      /** @description An informative message that indicates the error type and provides additional details about the error. */
-      reason: string;
-      /** @description The specific user onboarding requirement field (in the requirements hash) that needs to be resolved. */
-      requirement: string;
-    };
-    "stripe.Stripe.BankAccount.Requirements": {
-      /** @description Fields that need to be collected to keep the external account enabled. If not collected by `current_deadline`, these fields appear in `past_due` as well, and the account is disabled. */
-      currently_due: string[] | null;
-      /** @description Fields that are `currently_due` and need to be collected again because validation or verification failed. */
-      errors: components["schemas"]["stripe.Stripe.BankAccount.Requirements.Error"][] | null;
-      /** @description Fields that weren't collected by `current_deadline`. These fields need to be collected to enable the external account. */
-      past_due: string[] | null;
-      /** @description Fields that might become required depending on the results of verification or review. It's an empty array unless an asynchronous verification is pending. If verification fails, these fields move to `eventually_due`, `currently_due`, or `past_due`. Fields might appear in `eventually_due`, `currently_due`, or `past_due` and in `pending_verification` if verification fails but another verification is still pending. */
-      pending_verification: string[] | null;
-    };
-    /**
-     * @description A container for paginated lists of objects.
-     * The array of objects is on the `.data` property,
-     * and `.has_more` indicates whether there are additional objects beyond the end of this list.
-     *
-     * Learn more in Stripe's [pagination docs](https://stripe.com/docs/api/pagination?lang=node)
-     * or, when iterating over many items, try [auto-pagination](https://github.com/stripe/stripe-node#auto-pagination) instead.
-     */
-    "stripe.Stripe.ApiList_stripe.Stripe.ExternalAccount_": {
-      /** @enum {string} */
-      object: "list";
-      data: components["schemas"]["stripe.Stripe.ExternalAccount"][];
-      /** @description True if this list has another page of items after this one that can be fetched. */
-      has_more: boolean;
-      /** @description The URL where this list can be accessed. */
-      url: string;
-    };
-    "stripe.Stripe.Account.FutureRequirements.Alternative": {
-      /** @description Fields that can be provided to satisfy all fields in `original_fields_due`. */
-      alternative_fields_due: string[];
-      /** @description Fields that are due and can be satisfied by providing all fields in `alternative_fields_due`. */
-      original_fields_due: string[];
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Account.FutureRequirements.DisabledReason": "action_required.requested_capabilities" | "listed" | "other" | "platform_paused" | "rejected.fraud" | "rejected.incomplete_verification" | "rejected.listed" | "rejected.other" | "rejected.platform_fraud" | "rejected.platform_other" | "rejected.platform_terms_of_service" | "rejected.terms_of_service" | "requirements.past_due" | "requirements.pending_verification" | "under_review";
-    /** @enum {string} */
-    "stripe.Stripe.Account.FutureRequirements.Error.Code": "information_missing" | "invalid_address_city_state_postal_code" | "invalid_address_highway_contract_box" | "invalid_address_private_mailbox" | "invalid_business_profile_name" | "invalid_business_profile_name_denylisted" | "invalid_company_name_denylisted" | "invalid_dob_age_over_maximum" | "invalid_dob_age_under_18" | "invalid_dob_age_under_minimum" | "invalid_product_description_length" | "invalid_product_description_url_match" | "invalid_representative_country" | "invalid_signator" | "invalid_statement_descriptor_business_mismatch" | "invalid_statement_descriptor_denylisted" | "invalid_statement_descriptor_length" | "invalid_statement_descriptor_prefix_denylisted" | "invalid_statement_descriptor_prefix_mismatch" | "invalid_street_address" | "invalid_tax_id" | "invalid_tax_id_format" | "invalid_tos_acceptance" | "invalid_url_denylisted" | "invalid_url_format" | "invalid_url_length" | "invalid_url_web_presence_detected" | "invalid_url_website_business_information_mismatch" | "invalid_url_website_empty" | "invalid_url_website_inaccessible" | "invalid_url_website_inaccessible_geoblocked" | "invalid_url_website_inaccessible_password_protected" | "invalid_url_website_incomplete" | "invalid_url_website_incomplete_cancellation_policy" | "invalid_url_website_incomplete_customer_service_details" | "invalid_url_website_incomplete_legal_restrictions" | "invalid_url_website_incomplete_refund_policy" | "invalid_url_website_incomplete_return_policy" | "invalid_url_website_incomplete_terms_and_conditions" | "invalid_url_website_incomplete_under_construction" | "invalid_url_website_other" | "invalid_value_other" | "verification_directors_mismatch" | "verification_document_address_mismatch" | "verification_document_address_missing" | "verification_document_corrupt" | "verification_document_country_not_supported" | "verification_document_directors_mismatch" | "verification_document_dob_mismatch" | "verification_document_duplicate_type" | "verification_document_expired" | "verification_document_failed_copy" | "verification_document_failed_greyscale" | "verification_document_failed_other" | "verification_document_failed_test_mode" | "verification_document_fraudulent" | "verification_document_id_number_mismatch" | "verification_document_id_number_missing" | "verification_document_incomplete" | "verification_document_invalid" | "verification_document_issue_or_expiry_date_missing" | "verification_document_manipulated" | "verification_document_missing_back" | "verification_document_missing_front" | "verification_document_name_mismatch" | "verification_document_name_missing" | "verification_document_nationality_mismatch" | "verification_document_not_readable" | "verification_document_not_signed" | "verification_document_not_uploaded" | "verification_document_photo_mismatch" | "verification_document_too_large" | "verification_document_type_not_supported" | "verification_extraneous_directors" | "verification_failed_address_match" | "verification_failed_authorizer_authority" | "verification_failed_business_iec_number" | "verification_failed_document_match" | "verification_failed_id_number_match" | "verification_failed_keyed_identity" | "verification_failed_keyed_match" | "verification_failed_name_match" | "verification_failed_other" | "verification_failed_representative_authority" | "verification_failed_residential_address" | "verification_failed_tax_id_match" | "verification_failed_tax_id_not_issued" | "verification_legal_entity_structure_mismatch" | "verification_missing_directors" | "verification_missing_executives" | "verification_missing_owners" | "verification_rejected_ownership_exemption_reason" | "verification_requires_additional_memorandum_of_associations" | "verification_requires_additional_proof_of_registration" | "verification_supportability";
-    "stripe.Stripe.Account.FutureRequirements.Error": {
-      /** @description The code for the type of error. */
-      code: components["schemas"]["stripe.Stripe.Account.FutureRequirements.Error.Code"];
-      /** @description An informative message that indicates the error type and provides additional details about the error. */
-      reason: string;
-      /** @description The specific user onboarding requirement field (in the requirements hash) that needs to be resolved. */
-      requirement: string;
-    };
-    "stripe.Stripe.Account.FutureRequirements": {
-      /** @description Fields that are due and can be satisfied by providing the corresponding alternative fields instead. */
-      alternatives: components["schemas"]["stripe.Stripe.Account.FutureRequirements.Alternative"][] | null;
-      /**
-       * Format: double
-       * @description Date on which `future_requirements` becomes the main `requirements` hash and `future_requirements` becomes empty. After the transition, `currently_due` requirements may immediately become `past_due`, but the account may also be given a grace period depending on its enablement state prior to transitioning.
-       */
-      current_deadline: number | null;
-      /** @description Fields that need to be collected to keep the account enabled. If not collected by `future_requirements[current_deadline]`, these fields will transition to the main `requirements` hash. */
-      currently_due: string[] | null;
-      /** @description This is typed as an enum for consistency with `requirements.disabled_reason`. */
-      disabled_reason: components["schemas"]["stripe.Stripe.Account.FutureRequirements.DisabledReason"] | null;
-      /** @description Fields that are `currently_due` and need to be collected again because validation or verification failed. */
-      errors: components["schemas"]["stripe.Stripe.Account.FutureRequirements.Error"][] | null;
-      /** @description Fields you must collect when all thresholds are reached. As they become required, they appear in `currently_due` as well. */
-      eventually_due: string[] | null;
-      /** @description Fields that weren't collected by `requirements.current_deadline`. These fields need to be collected to enable the capability on the account. New fields will never appear here; `future_requirements.past_due` will always be a subset of `requirements.past_due`. */
-      past_due: string[] | null;
-      /** @description Fields that might become required depending on the results of verification or review. It's an empty array unless an asynchronous verification is pending. If verification fails, these fields move to `eventually_due` or `currently_due`. Fields might appear in `eventually_due` or `currently_due` and in `pending_verification` if verification fails but another verification is still pending. */
-      pending_verification: string[] | null;
-    };
-    "stripe.Stripe.Account.Groups": {
-      /** @description The group the account is in to determine their payments pricing, and null if the account is on customized pricing. [See the Platform pricing tool documentation](https://stripe.com/docs/connect/platform-pricing-tools) for details. */
-      payments_pricing: string | null;
-    };
-    "stripe.Stripe.Person.AdditionalTosAcceptances.Account": {
-      /**
-       * Format: double
-       * @description The Unix timestamp marking when the legal guardian accepted the service agreement.
-       */
-      date: number | null;
-      /** @description The IP address from which the legal guardian accepted the service agreement. */
-      ip: string | null;
-      /** @description The user agent of the browser from which the legal guardian accepted the service agreement. */
-      user_agent: string | null;
-    };
-    "stripe.Stripe.Person.AdditionalTosAcceptances": {
-      /** @description Details on the legal guardian's acceptance of the main Stripe service agreement. */
-      account: components["schemas"]["stripe.Stripe.Person.AdditionalTosAcceptances.Account"] | null;
-    };
-    "stripe.Stripe.Person.AddressKana": {
-      /** @description City/Ward. */
-      city: string | null;
-      /** @description Two-letter country code ([ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)). */
-      country: string | null;
-      /** @description Block/Building number. */
-      line1: string | null;
-      /** @description Building details. */
-      line2: string | null;
-      /** @description ZIP or postal code. */
-      postal_code: string | null;
-      /** @description Prefecture. */
-      state: string | null;
-      /** @description Town/cho-me. */
-      town: string | null;
-    };
-    "stripe.Stripe.Person.AddressKanji": {
-      /** @description City/Ward. */
-      city: string | null;
-      /** @description Two-letter country code ([ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)). */
-      country: string | null;
-      /** @description Block/Building number. */
-      line1: string | null;
-      /** @description Building details. */
-      line2: string | null;
-      /** @description ZIP or postal code. */
-      postal_code: string | null;
-      /** @description Prefecture. */
-      state: string | null;
-      /** @description Town/cho-me. */
-      town: string | null;
-    };
-    "stripe.Stripe.Person.Dob": {
-      /**
-       * Format: double
-       * @description The day of birth, between 1 and 31.
-       */
-      day: number | null;
-      /**
-       * Format: double
-       * @description The month of birth, between 1 and 12.
-       */
-      month: number | null;
-      /**
-       * Format: double
-       * @description The four-digit year of birth.
-       */
-      year: number | null;
-    };
-    "stripe.Stripe.Person.FutureRequirements.Alternative": {
-      /** @description Fields that can be provided to satisfy all fields in `original_fields_due`. */
-      alternative_fields_due: string[];
-      /** @description Fields that are due and can be satisfied by providing all fields in `alternative_fields_due`. */
-      original_fields_due: string[];
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Person.FutureRequirements.Error.Code": "information_missing" | "invalid_address_city_state_postal_code" | "invalid_address_highway_contract_box" | "invalid_address_private_mailbox" | "invalid_business_profile_name" | "invalid_business_profile_name_denylisted" | "invalid_company_name_denylisted" | "invalid_dob_age_over_maximum" | "invalid_dob_age_under_18" | "invalid_dob_age_under_minimum" | "invalid_product_description_length" | "invalid_product_description_url_match" | "invalid_representative_country" | "invalid_signator" | "invalid_statement_descriptor_business_mismatch" | "invalid_statement_descriptor_denylisted" | "invalid_statement_descriptor_length" | "invalid_statement_descriptor_prefix_denylisted" | "invalid_statement_descriptor_prefix_mismatch" | "invalid_street_address" | "invalid_tax_id" | "invalid_tax_id_format" | "invalid_tos_acceptance" | "invalid_url_denylisted" | "invalid_url_format" | "invalid_url_length" | "invalid_url_web_presence_detected" | "invalid_url_website_business_information_mismatch" | "invalid_url_website_empty" | "invalid_url_website_inaccessible" | "invalid_url_website_inaccessible_geoblocked" | "invalid_url_website_inaccessible_password_protected" | "invalid_url_website_incomplete" | "invalid_url_website_incomplete_cancellation_policy" | "invalid_url_website_incomplete_customer_service_details" | "invalid_url_website_incomplete_legal_restrictions" | "invalid_url_website_incomplete_refund_policy" | "invalid_url_website_incomplete_return_policy" | "invalid_url_website_incomplete_terms_and_conditions" | "invalid_url_website_incomplete_under_construction" | "invalid_url_website_other" | "invalid_value_other" | "verification_directors_mismatch" | "verification_document_address_mismatch" | "verification_document_address_missing" | "verification_document_corrupt" | "verification_document_country_not_supported" | "verification_document_directors_mismatch" | "verification_document_dob_mismatch" | "verification_document_duplicate_type" | "verification_document_expired" | "verification_document_failed_copy" | "verification_document_failed_greyscale" | "verification_document_failed_other" | "verification_document_failed_test_mode" | "verification_document_fraudulent" | "verification_document_id_number_mismatch" | "verification_document_id_number_missing" | "verification_document_incomplete" | "verification_document_invalid" | "verification_document_issue_or_expiry_date_missing" | "verification_document_manipulated" | "verification_document_missing_back" | "verification_document_missing_front" | "verification_document_name_mismatch" | "verification_document_name_missing" | "verification_document_nationality_mismatch" | "verification_document_not_readable" | "verification_document_not_signed" | "verification_document_not_uploaded" | "verification_document_photo_mismatch" | "verification_document_too_large" | "verification_document_type_not_supported" | "verification_extraneous_directors" | "verification_failed_address_match" | "verification_failed_authorizer_authority" | "verification_failed_business_iec_number" | "verification_failed_document_match" | "verification_failed_id_number_match" | "verification_failed_keyed_identity" | "verification_failed_keyed_match" | "verification_failed_name_match" | "verification_failed_other" | "verification_failed_representative_authority" | "verification_failed_residential_address" | "verification_failed_tax_id_match" | "verification_failed_tax_id_not_issued" | "verification_legal_entity_structure_mismatch" | "verification_missing_directors" | "verification_missing_executives" | "verification_missing_owners" | "verification_rejected_ownership_exemption_reason" | "verification_requires_additional_memorandum_of_associations" | "verification_requires_additional_proof_of_registration" | "verification_supportability";
-    "stripe.Stripe.Person.FutureRequirements.Error": {
-      /** @description The code for the type of error. */
-      code: components["schemas"]["stripe.Stripe.Person.FutureRequirements.Error.Code"];
-      /** @description An informative message that indicates the error type and provides additional details about the error. */
-      reason: string;
-      /** @description The specific user onboarding requirement field (in the requirements hash) that needs to be resolved. */
-      requirement: string;
-    };
-    "stripe.Stripe.Person.FutureRequirements": {
-      /** @description Fields that are due and can be satisfied by providing the corresponding alternative fields instead. */
-      alternatives: components["schemas"]["stripe.Stripe.Person.FutureRequirements.Alternative"][] | null;
-      /** @description Fields that need to be collected to keep the person's account enabled. If not collected by the account's `future_requirements[current_deadline]`, these fields will transition to the main `requirements` hash, and may immediately become `past_due`, but the account may also be given a grace period depending on the account's enablement state prior to transition. */
-      currently_due: string[];
-      /** @description Fields that are `currently_due` and need to be collected again because validation or verification failed. */
-      errors: components["schemas"]["stripe.Stripe.Person.FutureRequirements.Error"][];
-      /** @description Fields you must collect when all thresholds are reached. As they become required, they appear in `currently_due` as well, and the account's `future_requirements[current_deadline]` becomes set. */
-      eventually_due: string[];
-      /** @description Fields that weren't collected by the account's `requirements.current_deadline`. These fields need to be collected to enable the person's account. New fields will never appear here; `future_requirements.past_due` will always be a subset of `requirements.past_due`. */
-      past_due: string[];
-      /** @description Fields that might become required depending on the results of verification or review. It's an empty array unless an asynchronous verification is pending. If verification fails, these fields move to `eventually_due` or `currently_due`. Fields might appear in `eventually_due` or `currently_due` and in `pending_verification` if verification fails but another verification is still pending. */
-      pending_verification: string[];
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Person.PoliticalExposure": "existing" | "none";
-    "stripe.Stripe.Person.Relationship": {
-      /** @description Whether the person is the authorizer of the account's representative. */
-      authorizer: boolean | null;
-      /** @description Whether the person is a director of the account's legal entity. Directors are typically members of the governing board of the company, or responsible for ensuring the company meets its regulatory obligations. */
-      director: boolean | null;
-      /** @description Whether the person has significant responsibility to control, manage, or direct the organization. */
-      executive: boolean | null;
-      /** @description Whether the person is the legal guardian of the account's representative. */
-      legal_guardian: boolean | null;
-      /** @description Whether the person is an owner of the account's legal entity. */
-      owner: boolean | null;
-      /**
-       * Format: double
-       * @description The percent owned by the person of the account's legal entity.
-       */
-      percent_ownership: number | null;
-      /** @description Whether the person is authorized as the primary representative of the account. This is the person nominated by the business to provide information about themselves, and general information about the account. There can only be one representative at any given time. At the time the account is created, this person should be set to the person responsible for opening the account. */
-      representative: boolean | null;
-      /** @description The person's title (e.g., CEO, Support Engineer). */
-      title: string | null;
-    };
-    "stripe.Stripe.Person.Requirements.Alternative": {
-      /** @description Fields that can be provided to satisfy all fields in `original_fields_due`. */
-      alternative_fields_due: string[];
-      /** @description Fields that are due and can be satisfied by providing all fields in `alternative_fields_due`. */
-      original_fields_due: string[];
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Person.Requirements.Error.Code": "information_missing" | "invalid_address_city_state_postal_code" | "invalid_address_highway_contract_box" | "invalid_address_private_mailbox" | "invalid_business_profile_name" | "invalid_business_profile_name_denylisted" | "invalid_company_name_denylisted" | "invalid_dob_age_over_maximum" | "invalid_dob_age_under_18" | "invalid_dob_age_under_minimum" | "invalid_product_description_length" | "invalid_product_description_url_match" | "invalid_representative_country" | "invalid_signator" | "invalid_statement_descriptor_business_mismatch" | "invalid_statement_descriptor_denylisted" | "invalid_statement_descriptor_length" | "invalid_statement_descriptor_prefix_denylisted" | "invalid_statement_descriptor_prefix_mismatch" | "invalid_street_address" | "invalid_tax_id" | "invalid_tax_id_format" | "invalid_tos_acceptance" | "invalid_url_denylisted" | "invalid_url_format" | "invalid_url_length" | "invalid_url_web_presence_detected" | "invalid_url_website_business_information_mismatch" | "invalid_url_website_empty" | "invalid_url_website_inaccessible" | "invalid_url_website_inaccessible_geoblocked" | "invalid_url_website_inaccessible_password_protected" | "invalid_url_website_incomplete" | "invalid_url_website_incomplete_cancellation_policy" | "invalid_url_website_incomplete_customer_service_details" | "invalid_url_website_incomplete_legal_restrictions" | "invalid_url_website_incomplete_refund_policy" | "invalid_url_website_incomplete_return_policy" | "invalid_url_website_incomplete_terms_and_conditions" | "invalid_url_website_incomplete_under_construction" | "invalid_url_website_other" | "invalid_value_other" | "verification_directors_mismatch" | "verification_document_address_mismatch" | "verification_document_address_missing" | "verification_document_corrupt" | "verification_document_country_not_supported" | "verification_document_directors_mismatch" | "verification_document_dob_mismatch" | "verification_document_duplicate_type" | "verification_document_expired" | "verification_document_failed_copy" | "verification_document_failed_greyscale" | "verification_document_failed_other" | "verification_document_failed_test_mode" | "verification_document_fraudulent" | "verification_document_id_number_mismatch" | "verification_document_id_number_missing" | "verification_document_incomplete" | "verification_document_invalid" | "verification_document_issue_or_expiry_date_missing" | "verification_document_manipulated" | "verification_document_missing_back" | "verification_document_missing_front" | "verification_document_name_mismatch" | "verification_document_name_missing" | "verification_document_nationality_mismatch" | "verification_document_not_readable" | "verification_document_not_signed" | "verification_document_not_uploaded" | "verification_document_photo_mismatch" | "verification_document_too_large" | "verification_document_type_not_supported" | "verification_extraneous_directors" | "verification_failed_address_match" | "verification_failed_authorizer_authority" | "verification_failed_business_iec_number" | "verification_failed_document_match" | "verification_failed_id_number_match" | "verification_failed_keyed_identity" | "verification_failed_keyed_match" | "verification_failed_name_match" | "verification_failed_other" | "verification_failed_representative_authority" | "verification_failed_residential_address" | "verification_failed_tax_id_match" | "verification_failed_tax_id_not_issued" | "verification_legal_entity_structure_mismatch" | "verification_missing_directors" | "verification_missing_executives" | "verification_missing_owners" | "verification_rejected_ownership_exemption_reason" | "verification_requires_additional_memorandum_of_associations" | "verification_requires_additional_proof_of_registration" | "verification_supportability";
-    "stripe.Stripe.Person.Requirements.Error": {
-      /** @description The code for the type of error. */
-      code: components["schemas"]["stripe.Stripe.Person.Requirements.Error.Code"];
-      /** @description An informative message that indicates the error type and provides additional details about the error. */
-      reason: string;
-      /** @description The specific user onboarding requirement field (in the requirements hash) that needs to be resolved. */
-      requirement: string;
-    };
-    "stripe.Stripe.Person.Requirements": {
-      /** @description Fields that are due and can be satisfied by providing the corresponding alternative fields instead. */
-      alternatives: components["schemas"]["stripe.Stripe.Person.Requirements.Alternative"][] | null;
-      /** @description Fields that need to be collected to keep the person's account enabled. If not collected by the account's `current_deadline`, these fields appear in `past_due` as well, and the account is disabled. */
-      currently_due: string[];
-      /** @description Fields that are `currently_due` and need to be collected again because validation or verification failed. */
-      errors: components["schemas"]["stripe.Stripe.Person.Requirements.Error"][];
-      /** @description Fields you must collect when all thresholds are reached. As they become required, they appear in `currently_due` as well, and the account's `current_deadline` becomes set. */
-      eventually_due: string[];
-      /** @description Fields that weren't collected by the account's `current_deadline`. These fields need to be collected to enable the person's account. */
-      past_due: string[];
-      /** @description Fields that might become required depending on the results of verification or review. It's an empty array unless an asynchronous verification is pending. If verification fails, these fields move to `eventually_due`, `currently_due`, or `past_due`. Fields might appear in `eventually_due`, `currently_due`, or `past_due` and in `pending_verification` if verification fails but another verification is still pending. */
-      pending_verification: string[];
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Person.UsCfpbData.EthnicityDetails.Ethnicity": "cuban" | "hispanic_or_latino" | "mexican" | "not_hispanic_or_latino" | "other_hispanic_or_latino" | "prefer_not_to_answer" | "puerto_rican";
-    "stripe.Stripe.Person.UsCfpbData.EthnicityDetails": {
-      /** @description The persons ethnicity */
-      ethnicity: components["schemas"]["stripe.Stripe.Person.UsCfpbData.EthnicityDetails.Ethnicity"][] | null;
-      /** @description Please specify your origin, when other is selected. */
-      ethnicity_other: string | null;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Person.UsCfpbData.RaceDetails.Race": "african_american" | "american_indian_or_alaska_native" | "asian" | "asian_indian" | "black_or_african_american" | "chinese" | "ethiopian" | "filipino" | "guamanian_or_chamorro" | "haitian" | "jamaican" | "japanese" | "korean" | "native_hawaiian" | "native_hawaiian_or_other_pacific_islander" | "nigerian" | "other_asian" | "other_black_or_african_american" | "other_pacific_islander" | "prefer_not_to_answer" | "samoan" | "somali" | "vietnamese" | "white";
-    "stripe.Stripe.Person.UsCfpbData.RaceDetails": {
-      /** @description The persons race. */
-      race: components["schemas"]["stripe.Stripe.Person.UsCfpbData.RaceDetails.Race"][] | null;
-      /** @description Please specify your race, when other is selected. */
-      race_other: string | null;
-    };
-    "stripe.Stripe.Person.UsCfpbData": {
-      /** @description The persons ethnicity details */
-      ethnicity_details: components["schemas"]["stripe.Stripe.Person.UsCfpbData.EthnicityDetails"] | null;
-      /** @description The persons race details */
-      race_details: components["schemas"]["stripe.Stripe.Person.UsCfpbData.RaceDetails"] | null;
-      /** @description The persons self-identified gender */
-      self_identified_gender: string | null;
-    };
-    "stripe.Stripe.Person.Verification.AdditionalDocument": {
-      /** @description The back of an ID returned by a [file upload](https://stripe.com/docs/api#create_file) with a `purpose` value of `identity_document`. */
-      back: (string | components["schemas"]["stripe.Stripe.File"]) | null;
-      /** @description A user-displayable string describing the verification state of this document. For example, if a document is uploaded and the picture is too fuzzy, this may say "Identity document is too unclear to read". */
-      details: string | null;
-      /** @description One of `document_corrupt`, `document_country_not_supported`, `document_expired`, `document_failed_copy`, `document_failed_other`, `document_failed_test_mode`, `document_fraudulent`, `document_failed_greyscale`, `document_incomplete`, `document_invalid`, `document_manipulated`, `document_missing_back`, `document_missing_front`, `document_not_readable`, `document_not_uploaded`, `document_photo_mismatch`, `document_too_large`, or `document_type_not_supported`. A machine-readable code specifying the verification state for this document. */
-      details_code: string | null;
-      /** @description The front of an ID returned by a [file upload](https://stripe.com/docs/api#create_file) with a `purpose` value of `identity_document`. */
-      front: (string | components["schemas"]["stripe.Stripe.File"]) | null;
-    };
-    "stripe.Stripe.Person.Verification.Document": {
-      /** @description The back of an ID returned by a [file upload](https://stripe.com/docs/api#create_file) with a `purpose` value of `identity_document`. */
-      back: (string | components["schemas"]["stripe.Stripe.File"]) | null;
-      /** @description A user-displayable string describing the verification state of this document. For example, if a document is uploaded and the picture is too fuzzy, this may say "Identity document is too unclear to read". */
-      details: string | null;
-      /** @description One of `document_corrupt`, `document_country_not_supported`, `document_expired`, `document_failed_copy`, `document_failed_other`, `document_failed_test_mode`, `document_fraudulent`, `document_failed_greyscale`, `document_incomplete`, `document_invalid`, `document_manipulated`, `document_missing_back`, `document_missing_front`, `document_not_readable`, `document_not_uploaded`, `document_photo_mismatch`, `document_too_large`, or `document_type_not_supported`. A machine-readable code specifying the verification state for this document. */
-      details_code: string | null;
-      /** @description The front of an ID returned by a [file upload](https://stripe.com/docs/api#create_file) with a `purpose` value of `identity_document`. */
-      front: (string | components["schemas"]["stripe.Stripe.File"]) | null;
-    };
-    "stripe.Stripe.Person.Verification": {
-      /** @description A document showing address, either a passport, local ID card, or utility bill from a well-known utility company. */
-      additional_document?: components["schemas"]["stripe.Stripe.Person.Verification.AdditionalDocument"] | null;
-      /** @description A user-displayable string describing the verification state for the person. For example, this may say "Provided identity information could not be verified". */
-      details?: string | null;
-      /** @description One of `document_address_mismatch`, `document_dob_mismatch`, `document_duplicate_type`, `document_id_number_mismatch`, `document_name_mismatch`, `document_nationality_mismatch`, `failed_keyed_identity`, or `failed_other`. A machine-readable code specifying the verification state for the person. */
-      details_code?: string | null;
-      document?: components["schemas"]["stripe.Stripe.Person.Verification.Document"];
-      /** @description The state of verification for the person. Possible values are `unverified`, `pending`, or `verified`. Please refer [guide](https://stripe.com/docs/connect/handling-api-verification) to handle verification updates. */
-      status: string;
-    };
-    /**
-     * @description This is an object representing a person associated with a Stripe account.
-     *
-     * A platform can only access a subset of data in a person for an account where [account.controller.requirement_collection](https://docs.stripe.com/api/accounts/object#account_object-controller-requirement_collection) is `stripe`, which includes Standard and Express accounts, after creating an Account Link or Account Session to start Connect onboarding.
-     *
-     * See the [Standard onboarding](https://docs.stripe.com/connect/standard-accounts) or [Express onboarding](https://docs.stripe.com/connect/express-accounts) documentation for information about prefilling information and account onboarding steps. Learn more about [handling identity verification with the API](https://docs.stripe.com/connect/handling-api-verification#person-information).
-     */
-    "stripe.Stripe.Person": {
-      /** @description Unique identifier for the object. */
-      id: string;
-      /**
-       * @description String representing the object's type. Objects of the same type share the same value.
-       * @enum {string}
-       */
-      object: "person";
-      /** @description The account the person is associated with. */
-      account: string;
-      additional_tos_acceptances?: components["schemas"]["stripe.Stripe.Person.AdditionalTosAcceptances"];
-      address?: components["schemas"]["stripe.Stripe.Address"];
-      /** @description The Kana variation of the person's address (Japan only). */
-      address_kana?: components["schemas"]["stripe.Stripe.Person.AddressKana"] | null;
-      /** @description The Kanji variation of the person's address (Japan only). */
-      address_kanji?: components["schemas"]["stripe.Stripe.Person.AddressKanji"] | null;
-      /**
-       * Format: double
-       * @description Time at which the object was created. Measured in seconds since the Unix epoch.
-       */
-      created: number;
-      /** @description Always true for a deleted object */
-      deleted?: unknown;
-      dob?: components["schemas"]["stripe.Stripe.Person.Dob"];
-      /** @description The person's email address. Also available for accounts where [controller.requirement_collection](https://docs.stripe.com/api/accounts/object#account_object-controller-requirement_collection) is `stripe`. */
-      email?: string | null;
-      /** @description The person's first name. Also available for accounts where [controller.requirement_collection](https://docs.stripe.com/api/accounts/object#account_object-controller-requirement_collection) is `stripe`. */
-      first_name?: string | null;
-      /** @description The Kana variation of the person's first name (Japan only). Also available for accounts where [controller.requirement_collection](https://docs.stripe.com/api/accounts/object#account_object-controller-requirement_collection) is `stripe`. */
-      first_name_kana?: string | null;
-      /** @description The Kanji variation of the person's first name (Japan only). Also available for accounts where [controller.requirement_collection](https://docs.stripe.com/api/accounts/object#account_object-controller-requirement_collection) is `stripe`. */
-      first_name_kanji?: string | null;
-      /** @description A list of alternate names or aliases that the person is known by. Also available for accounts where [controller.requirement_collection](https://docs.stripe.com/api/accounts/object#account_object-controller-requirement_collection) is `stripe`. */
-      full_name_aliases?: string[];
-      /** @description Information about the [upcoming new requirements for this person](https://stripe.com/docs/connect/custom-accounts/future-requirements), including what information needs to be collected, and by when. */
-      future_requirements?: components["schemas"]["stripe.Stripe.Person.FutureRequirements"] | null;
-      /** @description The person's gender. */
-      gender?: string | null;
-      /** @description Whether the person's `id_number` was provided. True if either the full ID number was provided or if only the required part of the ID number was provided (ex. last four of an individual's SSN for the US indicated by `ssn_last_4_provided`). */
-      id_number_provided?: boolean;
-      /** @description Whether the person's `id_number_secondary` was provided. */
-      id_number_secondary_provided?: boolean;
-      /** @description The person's last name. Also available for accounts where [controller.requirement_collection](https://docs.stripe.com/api/accounts/object#account_object-controller-requirement_collection) is `stripe`. */
-      last_name?: string | null;
-      /** @description The Kana variation of the person's last name (Japan only). Also available for accounts where [controller.requirement_collection](https://docs.stripe.com/api/accounts/object#account_object-controller-requirement_collection) is `stripe`. */
-      last_name_kana?: string | null;
-      /** @description The Kanji variation of the person's last name (Japan only). Also available for accounts where [controller.requirement_collection](https://docs.stripe.com/api/accounts/object#account_object-controller-requirement_collection) is `stripe`. */
-      last_name_kanji?: string | null;
-      /** @description The person's maiden name. */
-      maiden_name?: string | null;
-      /** @description Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. */
-      metadata?: components["schemas"]["stripe.Stripe.Metadata"];
-      /** @description The country where the person is a national. */
-      nationality?: string | null;
-      /** @description The person's phone number. */
-      phone?: string | null;
-      /** @description Indicates if the person or any of their representatives, family members, or other closely related persons, declares that they hold or have held an important public job or function, in any jurisdiction. */
-      political_exposure?: components["schemas"]["stripe.Stripe.Person.PoliticalExposure"];
-      registered_address?: components["schemas"]["stripe.Stripe.Address"];
-      relationship?: components["schemas"]["stripe.Stripe.Person.Relationship"];
-      /** @description Information about the requirements for this person, including what information needs to be collected, and by when. */
-      requirements?: components["schemas"]["stripe.Stripe.Person.Requirements"] | null;
-      /** @description Whether the last four digits of the person's Social Security number have been provided (U.S. only). */
-      ssn_last_4_provided?: boolean;
-      /** @description Demographic data related to the person. */
-      us_cfpb_data?: components["schemas"]["stripe.Stripe.Person.UsCfpbData"] | null;
-      verification?: components["schemas"]["stripe.Stripe.Person.Verification"];
-    };
-    "stripe.Stripe.Account.Requirements.Alternative": {
-      /** @description Fields that can be provided to satisfy all fields in `original_fields_due`. */
-      alternative_fields_due: string[];
-      /** @description Fields that are due and can be satisfied by providing all fields in `alternative_fields_due`. */
-      original_fields_due: string[];
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Account.Requirements.DisabledReason": "action_required.requested_capabilities" | "listed" | "other" | "platform_paused" | "rejected.fraud" | "rejected.incomplete_verification" | "rejected.listed" | "rejected.other" | "rejected.platform_fraud" | "rejected.platform_other" | "rejected.platform_terms_of_service" | "rejected.terms_of_service" | "requirements.past_due" | "requirements.pending_verification" | "under_review";
-    /** @enum {string} */
-    "stripe.Stripe.Account.Requirements.Error.Code": "information_missing" | "invalid_address_city_state_postal_code" | "invalid_address_highway_contract_box" | "invalid_address_private_mailbox" | "invalid_business_profile_name" | "invalid_business_profile_name_denylisted" | "invalid_company_name_denylisted" | "invalid_dob_age_over_maximum" | "invalid_dob_age_under_18" | "invalid_dob_age_under_minimum" | "invalid_product_description_length" | "invalid_product_description_url_match" | "invalid_representative_country" | "invalid_signator" | "invalid_statement_descriptor_business_mismatch" | "invalid_statement_descriptor_denylisted" | "invalid_statement_descriptor_length" | "invalid_statement_descriptor_prefix_denylisted" | "invalid_statement_descriptor_prefix_mismatch" | "invalid_street_address" | "invalid_tax_id" | "invalid_tax_id_format" | "invalid_tos_acceptance" | "invalid_url_denylisted" | "invalid_url_format" | "invalid_url_length" | "invalid_url_web_presence_detected" | "invalid_url_website_business_information_mismatch" | "invalid_url_website_empty" | "invalid_url_website_inaccessible" | "invalid_url_website_inaccessible_geoblocked" | "invalid_url_website_inaccessible_password_protected" | "invalid_url_website_incomplete" | "invalid_url_website_incomplete_cancellation_policy" | "invalid_url_website_incomplete_customer_service_details" | "invalid_url_website_incomplete_legal_restrictions" | "invalid_url_website_incomplete_refund_policy" | "invalid_url_website_incomplete_return_policy" | "invalid_url_website_incomplete_terms_and_conditions" | "invalid_url_website_incomplete_under_construction" | "invalid_url_website_other" | "invalid_value_other" | "verification_directors_mismatch" | "verification_document_address_mismatch" | "verification_document_address_missing" | "verification_document_corrupt" | "verification_document_country_not_supported" | "verification_document_directors_mismatch" | "verification_document_dob_mismatch" | "verification_document_duplicate_type" | "verification_document_expired" | "verification_document_failed_copy" | "verification_document_failed_greyscale" | "verification_document_failed_other" | "verification_document_failed_test_mode" | "verification_document_fraudulent" | "verification_document_id_number_mismatch" | "verification_document_id_number_missing" | "verification_document_incomplete" | "verification_document_invalid" | "verification_document_issue_or_expiry_date_missing" | "verification_document_manipulated" | "verification_document_missing_back" | "verification_document_missing_front" | "verification_document_name_mismatch" | "verification_document_name_missing" | "verification_document_nationality_mismatch" | "verification_document_not_readable" | "verification_document_not_signed" | "verification_document_not_uploaded" | "verification_document_photo_mismatch" | "verification_document_too_large" | "verification_document_type_not_supported" | "verification_extraneous_directors" | "verification_failed_address_match" | "verification_failed_authorizer_authority" | "verification_failed_business_iec_number" | "verification_failed_document_match" | "verification_failed_id_number_match" | "verification_failed_keyed_identity" | "verification_failed_keyed_match" | "verification_failed_name_match" | "verification_failed_other" | "verification_failed_representative_authority" | "verification_failed_residential_address" | "verification_failed_tax_id_match" | "verification_failed_tax_id_not_issued" | "verification_legal_entity_structure_mismatch" | "verification_missing_directors" | "verification_missing_executives" | "verification_missing_owners" | "verification_rejected_ownership_exemption_reason" | "verification_requires_additional_memorandum_of_associations" | "verification_requires_additional_proof_of_registration" | "verification_supportability";
-    "stripe.Stripe.Account.Requirements.Error": {
-      /** @description The code for the type of error. */
-      code: components["schemas"]["stripe.Stripe.Account.Requirements.Error.Code"];
-      /** @description An informative message that indicates the error type and provides additional details about the error. */
-      reason: string;
-      /** @description The specific user onboarding requirement field (in the requirements hash) that needs to be resolved. */
-      requirement: string;
-    };
-    "stripe.Stripe.Account.Requirements": {
-      /** @description Fields that are due and can be satisfied by providing the corresponding alternative fields instead. */
-      alternatives: components["schemas"]["stripe.Stripe.Account.Requirements.Alternative"][] | null;
-      /**
-       * Format: double
-       * @description Date by which the fields in `currently_due` must be collected to keep the account enabled. These fields may disable the account sooner if the next threshold is reached before they are collected.
-       */
-      current_deadline: number | null;
-      /** @description Fields that need to be collected to keep the account enabled. If not collected by `current_deadline`, these fields appear in `past_due` as well, and the account is disabled. */
-      currently_due: string[] | null;
-      /** @description If the account is disabled, this enum describes why. [Learn more about handling verification issues](https://stripe.com/docs/connect/handling-api-verification). */
-      disabled_reason: components["schemas"]["stripe.Stripe.Account.Requirements.DisabledReason"] | null;
-      /** @description Fields that are `currently_due` and need to be collected again because validation or verification failed. */
-      errors: components["schemas"]["stripe.Stripe.Account.Requirements.Error"][] | null;
-      /** @description Fields you must collect when all thresholds are reached. As they become required, they appear in `currently_due` as well, and `current_deadline` becomes set. */
-      eventually_due: string[] | null;
-      /** @description Fields that weren't collected by `current_deadline`. These fields need to be collected to enable the account. */
-      past_due: string[] | null;
-      /** @description Fields that might become required depending on the results of verification or review. It's an empty array unless an asynchronous verification is pending. If verification fails, these fields move to `eventually_due`, `currently_due`, or `past_due`. Fields might appear in `eventually_due`, `currently_due`, or `past_due` and in `pending_verification` if verification fails but another verification is still pending. */
-      pending_verification: string[] | null;
-    };
-    "stripe.Stripe.Account.RiskControls.Charges": {
-      /** @description Whether a pause of the risk control has been requested. */
-      pause_requested: boolean;
-    };
-    "stripe.Stripe.Account.RiskControls.Payouts": {
-      /** @description Whether a pause of the risk control has been requested. */
-      pause_requested: boolean;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Account.RiskControls.RejectedReason": "credit" | "fraud" | "fraud_no_intent_to_fulfill" | "fraud_other" | "fraud_payment_method_casher" | "fraud_payment_method_tester" | "other" | "terms_of_service";
-    "stripe.Stripe.Account.RiskControls": {
-      charges: components["schemas"]["stripe.Stripe.Account.RiskControls.Charges"];
-      payouts: components["schemas"]["stripe.Stripe.Account.RiskControls.Payouts"];
-      /** @description Represents the rejected reason of the account. Empty if account is not rejected, or rejected by Stripe. Please see [this page for more details](https://stripe.com/docs/connect/) */
-      rejected_reason?: components["schemas"]["stripe.Stripe.Account.RiskControls.RejectedReason"] | null;
-    };
-    "stripe.Stripe.Account.Settings.BacsDebitPayments": {
-      /** @description The Bacs Direct Debit display name for this account. For payments made with Bacs Direct Debit, this name appears on the mandate as the statement descriptor. Mobile banking apps display it as the name of the business. To use custom branding, set the Bacs Direct Debit Display Name during or right after creation. Custom branding incurs an additional monthly fee for the platform. The fee appears 5 business days after requesting Bacs. If you don't set the display name before requesting Bacs capability, it's automatically set as "Stripe" and the account is onboarded to Stripe branding, which is free. */
-      display_name: string | null;
-      /** @description The Bacs Direct Debit Service user number for this account. For payments made with Bacs Direct Debit, this number is a unique identifier of the account with our banking partners. */
-      service_user_number: string | null;
-    };
-    "stripe.Stripe.Account.Settings.BankBcaOnboarding": {
-      /** @description Bank BCA business account holder name. */
-      account_holder_name?: string;
-      /** @description Bank BCA business account number. */
-      business_account_number?: string;
-    };
-    "stripe.Stripe.Account.Settings.Branding": {
-      /** @description (ID of a [file upload](https://stripe.com/docs/guides/file-upload)) An icon for the account. Must be square and at least 128px x 128px. */
-      icon: (string | components["schemas"]["stripe.Stripe.File"]) | null;
-      /** @description (ID of a [file upload](https://stripe.com/docs/guides/file-upload)) A logo for the account that will be used in Checkout instead of the icon and without the account's name next to it if provided. Must be at least 128px x 128px. */
-      logo: (string | components["schemas"]["stripe.Stripe.File"]) | null;
-      /** @description A CSS hex color value representing the primary branding color for this account */
-      primary_color: string | null;
-      /** @description A CSS hex color value representing the secondary branding color for this account */
-      secondary_color: string | null;
-    };
-    "stripe.Stripe.Account.Settings.Capital": {
-      /** @description Per-currency mapping of user-selected destination accounts used to pay out loans. */
-      payout_destination?: {
-        [key: string]: string;
-      };
-      /** @description Per-currency mapping of all destination accounts eligible to receive loan payouts. */
-      payout_destination_selector?: {
-        [key: string]: string[];
-      };
-    };
-    "stripe.Stripe.Account.Settings.CardIssuing.TosAcceptance": {
-      /**
-       * Format: double
-       * @description The Unix timestamp marking when the account representative accepted the service agreement.
-       */
-      date: number | null;
-      /** @description The IP address from which the account representative accepted the service agreement. */
-      ip: string | null;
-      /** @description The user agent of the browser from which the account representative accepted the service agreement. */
-      user_agent?: string;
-    };
-    "stripe.Stripe.Account.Settings.CardIssuing": {
-      tos_acceptance?: components["schemas"]["stripe.Stripe.Account.Settings.CardIssuing.TosAcceptance"];
-    };
-    "stripe.Stripe.Account.Settings.CardPayments.DeclineOn": {
-      /** @description Whether Stripe automatically declines charges with an incorrect ZIP or postal code. This setting only applies when a ZIP or postal code is provided and they fail bank verification. */
-      avs_failure: boolean;
-      /** @description Whether Stripe automatically declines charges with an incorrect CVC. This setting only applies when a CVC is provided and it fails bank verification. */
-      cvc_failure: boolean;
-    };
-    "stripe.Stripe.Account.Settings.CardPayments": {
-      decline_on?: components["schemas"]["stripe.Stripe.Account.Settings.CardPayments.DeclineOn"];
-      /** @description The default text that appears on credit card statements when a charge is made. This field prefixes any dynamic `statement_descriptor` specified on the charge. `statement_descriptor_prefix` is useful for maximizing descriptor space for the dynamic portion. */
-      statement_descriptor_prefix: string | null;
-      /** @description The Kana variation of the default text that appears on credit card statements when a charge is made (Japan only). This field prefixes any dynamic `statement_descriptor_suffix_kana` specified on the charge. `statement_descriptor_prefix_kana` is useful for maximizing descriptor space for the dynamic portion. */
-      statement_descriptor_prefix_kana: string | null;
-      /** @description The Kanji variation of the default text that appears on credit card statements when a charge is made (Japan only). This field prefixes any dynamic `statement_descriptor_suffix_kanji` specified on the charge. `statement_descriptor_prefix_kanji` is useful for maximizing descriptor space for the dynamic portion. */
-      statement_descriptor_prefix_kanji: string | null;
-    };
-    "stripe.Stripe.Account.Settings.Dashboard": {
-      /** @description The display name for this account. This is used on the Stripe Dashboard to differentiate between accounts. */
-      display_name: string | null;
-      /** @description The timezone used in the Stripe Dashboard for this account. A list of possible time zone values is maintained at the [IANA Time Zone Database](http://www.iana.org/time-zones). */
-      timezone: string | null;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Account.Settings.Invoices.HostedPaymentMethodSave": "always" | "never" | "offer";
-    "stripe.Stripe.Account.Settings.Invoices": {
-      /** @description The list of default Account Tax IDs to automatically include on invoices. Account Tax IDs get added when an invoice is finalized. */
-      default_account_tax_ids: ((string | components["schemas"]["stripe.Stripe.TaxId"])[]) | null;
-      /** @description Whether payment methods should be saved when a payment is completed for a one-time invoices on a hosted invoice page. */
-      hosted_payment_method_save: components["schemas"]["stripe.Stripe.Account.Settings.Invoices.HostedPaymentMethodSave"] | null;
-    };
-    "stripe.Stripe.Account.Settings.Payments": {
-      /** @description The default text that appears on credit card statements when a charge is made. This field prefixes any dynamic `statement_descriptor` specified on the charge. */
-      statement_descriptor: string | null;
-      /** @description The Kana variation of `statement_descriptor` used for charges in Japan. Japanese statement descriptors have [special requirements](https://docs.stripe.com/get-started/account/statement-descriptors#set-japanese-statement-descriptors). */
-      statement_descriptor_kana: string | null;
-      /** @description The Kanji variation of `statement_descriptor` used for charges in Japan. Japanese statement descriptors have [special requirements](https://docs.stripe.com/get-started/account/statement-descriptors#set-japanese-statement-descriptors). */
-      statement_descriptor_kanji: string | null;
-      /** @description The Kana variation of `statement_descriptor_prefix` used for card charges in Japan. Japanese statement descriptors have [special requirements](https://docs.stripe.com/get-started/account/statement-descriptors#set-japanese-statement-descriptors). */
-      statement_descriptor_prefix_kana: string | null;
-      /** @description The Kanji variation of `statement_descriptor_prefix` used for card charges in Japan. Japanese statement descriptors have [special requirements](https://docs.stripe.com/get-started/account/statement-descriptors#set-japanese-statement-descriptors). */
-      statement_descriptor_prefix_kanji: string | null;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Account.Settings.Payouts.Schedule.WeeklyPayoutDay": "friday" | "monday" | "saturday" | "sunday" | "thursday" | "tuesday" | "wednesday";
-    "stripe.Stripe.Account.Settings.Payouts.Schedule": {
-      /**
-       * Format: double
-       * @description The number of days charges for the account will be held before being paid out.
-       */
-      delay_days: number;
-      /** @description How frequently funds will be paid out. One of `manual` (payouts only created via API call), `daily`, `weekly`, or `monthly`. */
-      interval: string;
-      /**
-       * Format: double
-       * @description The day of the month funds will be paid out. Only shown if `interval` is monthly. Payouts scheduled between the 29th and 31st of the month are sent on the last day of shorter months.
-       */
-      monthly_anchor?: number;
-      /** @description The days of the month funds will be paid out. Only shown if `interval` is monthly. Payouts scheduled between the 29th and 31st of the month are sent on the last day of shorter months. */
-      monthly_payout_days?: number[];
-      /** @description The day of the week funds will be paid out, of the style 'monday', 'tuesday', etc. Only shown if `interval` is weekly. */
-      weekly_anchor?: string;
-      /** @description The days of the week when available funds are paid out, specified as an array, for example, [`monday`, `tuesday`]. Only shown if `interval` is weekly. */
-      weekly_payout_days?: components["schemas"]["stripe.Stripe.Account.Settings.Payouts.Schedule.WeeklyPayoutDay"][];
-    };
-    "stripe.Stripe.Account.Settings.Payouts": {
-      /** @description A Boolean indicating if Stripe should try to reclaim negative balances from an attached bank account. See [Understanding Connect account balances](https://docs.stripe.com/connect/account-balances) for details. The default value is `false` when [controller.requirement_collection](https://docs.stripe.com/api/accounts/object#account_object-controller-requirement_collection) is `application`, which includes Custom accounts, otherwise `true`. */
-      debit_negative_balances: boolean;
-      schedule: components["schemas"]["stripe.Stripe.Account.Settings.Payouts.Schedule"];
-      /** @description The text that appears on the bank account statement for payouts. If not set, this defaults to the platform's bank descriptor as set in the Dashboard. */
-      statement_descriptor: string | null;
-    };
-    "stripe.Stripe.Account.Settings.SepaDebitPayments": {
-      /** @description SEPA creditor identifier that identifies the company making the payment. */
-      creditor_id?: string;
-    };
-    "stripe.Stripe.Account.Settings.TaxForms": {
-      /** @description Whether the account opted out of receiving their tax forms by postal delivery. */
-      consented_to_paperless_delivery: boolean;
-    };
-    "stripe.Stripe.Account.Settings.Treasury.TosAcceptance": {
-      /**
-       * Format: double
-       * @description The Unix timestamp marking when the account representative accepted the service agreement.
-       */
-      date: number | null;
-      /** @description The IP address from which the account representative accepted the service agreement. */
-      ip: string | null;
-      /** @description The user agent of the browser from which the account representative accepted the service agreement. */
-      user_agent?: string;
-    };
-    "stripe.Stripe.Account.Settings.Treasury": {
-      tos_acceptance?: components["schemas"]["stripe.Stripe.Account.Settings.Treasury.TosAcceptance"];
-    };
-    "stripe.Stripe.Account.Settings": {
-      bacs_debit_payments?: components["schemas"]["stripe.Stripe.Account.Settings.BacsDebitPayments"];
-      bank_bca_onboarding?: components["schemas"]["stripe.Stripe.Account.Settings.BankBcaOnboarding"];
-      branding: components["schemas"]["stripe.Stripe.Account.Settings.Branding"];
-      capital?: components["schemas"]["stripe.Stripe.Account.Settings.Capital"];
-      card_issuing?: components["schemas"]["stripe.Stripe.Account.Settings.CardIssuing"];
-      card_payments: components["schemas"]["stripe.Stripe.Account.Settings.CardPayments"];
-      dashboard: components["schemas"]["stripe.Stripe.Account.Settings.Dashboard"];
-      invoices?: components["schemas"]["stripe.Stripe.Account.Settings.Invoices"];
-      payments: components["schemas"]["stripe.Stripe.Account.Settings.Payments"];
-      payouts?: components["schemas"]["stripe.Stripe.Account.Settings.Payouts"];
-      sepa_debit_payments?: components["schemas"]["stripe.Stripe.Account.Settings.SepaDebitPayments"];
-      tax_forms?: components["schemas"]["stripe.Stripe.Account.Settings.TaxForms"];
-      treasury?: components["schemas"]["stripe.Stripe.Account.Settings.Treasury"];
-    };
-    "stripe.Stripe.Account.TosAcceptance": {
-      /**
-       * Format: double
-       * @description The Unix timestamp marking when the account representative accepted their service agreement
-       */
-      date?: number | null;
-      /** @description The IP address from which the account representative accepted their service agreement */
-      ip?: string | null;
-      /** @description The user's service agreement type */
-      service_agreement?: string;
-      /** @description The user agent of the browser from which the account representative accepted their service agreement */
-      user_agent?: string | null;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Account.Type": "custom" | "express" | "none" | "standard";
     /** @enum {string} */
     "stripe.Stripe.Subscription.AutomaticTax.Liability.Type": "account" | "self";
     "stripe.Stripe.Subscription.AutomaticTax.Liability": {
@@ -14357,183 +11684,6 @@ Json: JsonObject;
        */
       type: "price_uniqueness_violation";
     };
-    /** @enum {string} */
-    "stripe.Stripe.Invoice.AmountsDue.Status": "open" | "paid" | "past_due";
-    "stripe.Stripe.Invoice.AmountsDue": {
-      /**
-       * Format: double
-       * @description Incremental amount due for this payment in cents (or local equivalent).
-       */
-      amount: number;
-      /**
-       * Format: double
-       * @description The amount in cents (or local equivalent) that was paid for this payment.
-       */
-      amount_paid: number;
-      /**
-       * Format: double
-       * @description The difference between the payment's amount and amount_paid, in cents (or local equivalent).
-       */
-      amount_remaining: number;
-      /**
-       * Format: double
-       * @description Number of days from when invoice is finalized until the payment is due.
-       */
-      days_until_due: number | null;
-      /** @description An arbitrary string attached to the object. Often useful for displaying to users. */
-      description: string | null;
-      /**
-       * Format: double
-       * @description Date on which a payment plan's payment is due.
-       */
-      due_date: number | null;
-      /**
-       * Format: double
-       * @description Timestamp when the payment was paid.
-       */
-      paid_at: number | null;
-      /** @description The status of the payment, one of `open`, `paid`, or `past_due` */
-      status: components["schemas"]["stripe.Stripe.Invoice.AmountsDue.Status"];
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Invoice.AutomaticTax.DisabledReason": "finalization_requires_location_inputs" | "finalization_system_error";
-    /** @enum {string} */
-    "stripe.Stripe.Invoice.AutomaticTax.Liability.Type": "account" | "self";
-    "stripe.Stripe.Invoice.AutomaticTax.Liability": {
-      /** @description The connected account being referenced when `type` is `account`. */
-      account?: string | components["schemas"]["stripe.Stripe.Account"];
-      /** @description Type of the account referenced. */
-      type: components["schemas"]["stripe.Stripe.Invoice.AutomaticTax.Liability.Type"];
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Invoice.AutomaticTax.Status": "complete" | "failed" | "requires_location_inputs";
-    "stripe.Stripe.Invoice.AutomaticTax": {
-      /** @description If Stripe disabled automatic tax, this enum describes why. */
-      disabled_reason: components["schemas"]["stripe.Stripe.Invoice.AutomaticTax.DisabledReason"] | null;
-      /** @description Whether Stripe automatically computes tax on this invoice. Note that incompatible invoice items (invoice items with manually specified [tax rates](https://stripe.com/docs/api/tax_rates), negative amounts, or `tax_behavior=unspecified`) cannot be added to automatic tax invoices. */
-      enabled: boolean;
-      /** @description The account that's liable for tax. If set, the business address and tax registrations required to perform the tax calculation are loaded from this account. The tax transaction is returned in the report of the connected account. */
-      liability: components["schemas"]["stripe.Stripe.Invoice.AutomaticTax.Liability"] | null;
-      /** @description The tax provider powering automatic tax. */
-      provider: string | null;
-      /** @description The status of the most recent automated tax calculation for this invoice. */
-      status: components["schemas"]["stripe.Stripe.Invoice.AutomaticTax.Status"] | null;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Invoice.BillingReason": "automatic_pending_invoice_item_invoice" | "manual" | "quote_accept" | "subscription" | "subscription_create" | "subscription_cycle" | "subscription_threshold" | "subscription_update" | "upcoming";
-    /** @enum {string} */
-    "stripe.Stripe.Invoice.CollectionMethod": "charge_automatically" | "send_invoice";
-    "stripe.Stripe.Invoice.ConfirmationSecret": {
-      /** @description The client_secret of the payment that Stripe creates for the invoice after finalization. */
-      client_secret: string;
-      /** @description The type of client_secret. Currently this is always payment_intent, referencing the default payment_intent that Stripe creates during invoice finalization */
-      type: string;
-    };
-    "stripe.Stripe.Invoice.CustomField": {
-      /** @description The name of the custom field. */
-      name: string;
-      /** @description The value of the custom field. */
-      value: string;
-    };
-    "stripe.Stripe.Invoice.CustomerShipping": {
-      address?: components["schemas"]["stripe.Stripe.Address"];
-      /** @description The delivery service that shipped a physical product, such as Fedex, UPS, USPS, etc. */
-      carrier?: string | null;
-      /** @description Recipient name. */
-      name?: string;
-      /** @description Recipient phone (including extension). */
-      phone?: string | null;
-      /** @description The tracking number for a physical product, obtained from the delivery service. If multiple tracking numbers were generated for this purchase, please separate them with commas. */
-      tracking_number?: string | null;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Invoice.CustomerTaxExempt": "exempt" | "none" | "reverse";
-    /** @enum {string} */
-    "stripe.Stripe.Invoice.CustomerTaxId.Type": "ad_nrt" | "ae_trn" | "al_tin" | "am_tin" | "ao_tin" | "ar_cuit" | "au_abn" | "au_arn" | "aw_tin" | "az_tin" | "ba_tin" | "bb_tin" | "bd_bin" | "bf_ifu" | "bg_uic" | "bh_vat" | "bj_ifu" | "bo_tin" | "br_cnpj" | "br_cpf" | "bs_tin" | "by_tin" | "ca_bn" | "ca_gst_hst" | "ca_pst_bc" | "ca_pst_mb" | "ca_pst_sk" | "ca_qst" | "cd_nif" | "ch_uid" | "ch_vat" | "cl_tin" | "cm_niu" | "cn_tin" | "co_nit" | "cr_tin" | "cv_nif" | "de_stn" | "do_rcn" | "ec_ruc" | "eg_tin" | "es_cif" | "et_tin" | "eu_oss_vat" | "eu_vat" | "gb_vat" | "ge_vat" | "gn_nif" | "hk_br" | "hr_oib" | "hu_tin" | "id_npwp" | "il_vat" | "in_gst" | "is_vat" | "jp_cn" | "jp_rn" | "jp_trn" | "ke_pin" | "kg_tin" | "kh_tin" | "kr_brn" | "kz_bin" | "la_tin" | "li_uid" | "li_vat" | "ma_vat" | "md_vat" | "me_pib" | "mk_vat" | "mr_nif" | "mx_rfc" | "my_frp" | "my_itn" | "my_sst" | "ng_tin" | "no_vat" | "no_voec" | "np_pan" | "nz_gst" | "om_vat" | "pe_ruc" | "ph_tin" | "ro_tin" | "rs_pib" | "ru_inn" | "ru_kpp" | "sa_vat" | "sg_gst" | "sg_uen" | "si_tin" | "sn_ninea" | "sr_fin" | "sv_nit" | "th_vat" | "tj_tin" | "tr_tin" | "tw_vat" | "tz_vat" | "ua_vat" | "ug_tin" | "unknown" | "us_ein" | "uy_ruc" | "uz_tin" | "uz_vat" | "ve_rif" | "vn_tin" | "za_vat" | "zm_tin" | "zw_tin";
-    "stripe.Stripe.Invoice.CustomerTaxId": {
-      /** @description The type of the tax ID, one of `ad_nrt`, `ar_cuit`, `eu_vat`, `bo_tin`, `br_cnpj`, `br_cpf`, `cn_tin`, `co_nit`, `cr_tin`, `do_rcn`, `ec_ruc`, `eu_oss_vat`, `hr_oib`, `pe_ruc`, `ro_tin`, `rs_pib`, `sv_nit`, `uy_ruc`, `ve_rif`, `vn_tin`, `gb_vat`, `nz_gst`, `au_abn`, `au_arn`, `in_gst`, `no_vat`, `no_voec`, `za_vat`, `ch_vat`, `mx_rfc`, `sg_uen`, `ru_inn`, `ru_kpp`, `ca_bn`, `hk_br`, `es_cif`, `tw_vat`, `th_vat`, `jp_cn`, `jp_rn`, `jp_trn`, `li_uid`, `li_vat`, `my_itn`, `us_ein`, `kr_brn`, `ca_qst`, `ca_gst_hst`, `ca_pst_bc`, `ca_pst_mb`, `ca_pst_sk`, `my_sst`, `sg_gst`, `ae_trn`, `cl_tin`, `sa_vat`, `id_npwp`, `my_frp`, `il_vat`, `ge_vat`, `ua_vat`, `is_vat`, `bg_uic`, `hu_tin`, `si_tin`, `ke_pin`, `tr_tin`, `eg_tin`, `ph_tin`, `al_tin`, `bh_vat`, `kz_bin`, `ng_tin`, `om_vat`, `de_stn`, `ch_uid`, `tz_vat`, `uz_vat`, `uz_tin`, `md_vat`, `ma_vat`, `by_tin`, `ao_tin`, `bs_tin`, `bb_tin`, `cd_nif`, `mr_nif`, `me_pib`, `zw_tin`, `ba_tin`, `gn_nif`, `mk_vat`, `sr_fin`, `sn_ninea`, `am_tin`, `np_pan`, `tj_tin`, `ug_tin`, `zm_tin`, `kh_tin`, `aw_tin`, `az_tin`, `bd_bin`, `bj_ifu`, `et_tin`, `kg_tin`, `la_tin`, `cm_niu`, `cv_nif`, `bf_ifu`, or `unknown` */
-      type: components["schemas"]["stripe.Stripe.Invoice.CustomerTaxId.Type"];
-      /** @description The value of the tax ID. */
-      value: string | null;
-    };
-    /**
-     * @description A (partner) margin represents a specific discount distributed in partner reseller programs to business partners who
-     * resell products and services and earn a discount (margin) for doing so.
-     */
-    "stripe.Stripe.Margin": {
-      /** @description Unique identifier for the object. */
-      id: string;
-      /**
-       * @description String representing the object's type. Objects of the same type share the same value.
-       * @enum {string}
-       */
-      object: "margin";
-      /** @description Whether the margin can be applied to invoices, invoice items, or invoice line items. Defaults to `true`. */
-      active: boolean;
-      /**
-       * Format: double
-       * @description Time at which the object was created. Measured in seconds since the Unix epoch.
-       */
-      created: number;
-      /** @description Has the value `true` if the object exists in live mode or the value `false` if the object exists in test mode. */
-      livemode: boolean;
-      /** @description Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. */
-      metadata: components["schemas"]["stripe.Stripe.Metadata"] | null;
-      /** @description Name of the margin that's displayed on, for example, invoices. */
-      name: string | null;
-      /**
-       * Format: double
-       * @description Percent that will be taken off the subtotal before tax (after all other discounts and promotions) of any invoice to which the margin is applied.
-       */
-      percent_off: number;
-      /**
-       * Format: double
-       * @description Time at which the object was last updated. Measured in seconds since the Unix epoch.
-       */
-      updated: number;
-    };
-    /** @description The DeletedDiscount object. */
-    "stripe.Stripe.DeletedDiscount": {
-      /** @description The ID of the discount object. Discounts cannot be fetched by ID. Use `expand[]=discounts` in API calls to expand discount IDs in an array. */
-      id: string;
-      /**
-       * @description String representing the object's type. Objects of the same type share the same value.
-       * @enum {string}
-       */
-      object: "discount";
-      /** @description The Checkout session that this coupon is applied to, if it is applied to a particular session in payment mode. Will not be present for subscription mode. */
-      checkout_session: string | null;
-      /**
-       * @description A coupon contains information about a percent-off or amount-off discount you
-       * might want to apply to a customer. Coupons may be applied to [subscriptions](https://stripe.com/docs/api#subscriptions), [invoices](https://stripe.com/docs/api#invoices),
-       * [checkout sessions](https://stripe.com/docs/api/checkout/sessions), [quotes](https://stripe.com/docs/api#quotes), and more. Coupons do not work with conventional one-off [charges](https://stripe.com/docs/api#create_charge) or [payment intents](https://stripe.com/docs/api/payment_intents).
-       */
-      coupon: components["schemas"]["stripe.Stripe.Coupon"];
-      /** @description The ID of the customer associated with this discount. */
-      customer: (string | components["schemas"]["stripe.Stripe.Customer"] | components["schemas"]["stripe.Stripe.DeletedCustomer"]) | null;
-      /** @description The ID of the account associated with this discount. */
-      customer_account?: string | null;
-      /**
-       * @description Always true for a deleted object
-       * @enum {boolean}
-       */
-      deleted: true;
-      /** @description The invoice that the discount's coupon was applied to, if it was applied directly to a particular invoice. */
-      invoice: string | null;
-      /** @description The invoice item `id` (or invoice line item `id` for invoice line items of type='subscription') that the discount's coupon was applied to, if it was applied directly to a particular invoice item or invoice line item. */
-      invoice_item: string | null;
-      /** @description The promotion code applied to create this discount. */
-      promotion_code: (string | components["schemas"]["stripe.Stripe.PromotionCode"]) | null;
-      /**
-       * Format: double
-       * @description Date that the coupon was applied.
-       */
-      start: number;
-      /** @description The subscription that this coupon is applied to, if it is applied to a particular subscription. */
-      subscription: string | null;
-      /** @description The subscription item that this coupon is applied to, if it is applied to a particular subscription item. */
-      subscription_item: string | null;
-    };
     /**
      * @description Invoices are statements of amounts owed by a customer, and are either
      * generated one-off, or generated periodically from a subscription.
@@ -14806,6 +11956,1193 @@ Json: JsonObject;
        */
       webhooks_delivered_at: number | null;
     };
+    /** @enum {string} */
+    "stripe.Stripe.Subscription.PauseCollection.Behavior": "keep_as_draft" | "mark_uncollectible" | "void";
+    "stripe.Stripe.Subscription.PauseCollection": {
+      /** @description The payment collection behavior for this subscription while paused. One of `keep_as_draft`, `mark_uncollectible`, or `void`. */
+      behavior: components["schemas"]["stripe.Stripe.Subscription.PauseCollection.Behavior"];
+      /**
+       * Format: double
+       * @description The time after which the subscription will resume collecting payments.
+       */
+      resumes_at: number | null;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.AcssDebit.MandateOptions.TransactionType": "business" | "personal";
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.AcssDebit.MandateOptions": {
+      /** @description Transaction type of the mandate. */
+      transaction_type: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.AcssDebit.MandateOptions.TransactionType"] | null;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.AcssDebit.VerificationMethod": "automatic" | "instant" | "microdeposits";
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.AcssDebit": {
+      mandate_options?: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.AcssDebit.MandateOptions"];
+      /** @description Bank account verification method. */
+      verification_method?: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.AcssDebit.VerificationMethod"];
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Bancontact.PreferredLanguage": "de" | "en" | "fr" | "nl";
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Bancontact": {
+      /** @description Preferred language of the Bancontact authorization page that the customer is redirected to. */
+      preferred_language: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Bancontact.PreferredLanguage"];
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card.MandateOptions.AmountType": "fixed" | "maximum";
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card.MandateOptions": {
+      /**
+       * Format: double
+       * @description Amount to be charged for future payments.
+       */
+      amount: number | null;
+      /** @description One of `fixed` or `maximum`. If `fixed`, the `amount` param refers to the exact amount to be charged in future payments. If `maximum`, the amount charged can be up to the value passed for the `amount` param. */
+      amount_type: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card.MandateOptions.AmountType"] | null;
+      /** @description A description of the mandate or subscription that is meant to be displayed to the customer. */
+      description: string | null;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card.Network": "amex" | "cartes_bancaires" | "diners" | "discover" | "eftpos_au" | "girocard" | "interac" | "jcb" | "link" | "mastercard" | "unionpay" | "unknown" | "visa";
+    /** @enum {string} */
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card.RequestThreeDSecure": "any" | "automatic" | "challenge";
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card": {
+      mandate_options?: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card.MandateOptions"];
+      /** @description Selected network to process this Subscription on. Depends on the available networks of the card attached to the Subscription. Can be only set confirm-time. */
+      network: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card.Network"] | null;
+      /** @description We strongly recommend that you rely on our SCA Engine to automatically prompt your customers for authentication based on risk level and [other requirements](https://stripe.com/docs/strong-customer-authentication). However, if you wish to request 3D Secure based on logic from your own fraud engine, provide this option. Read our guide on [manually requesting 3D Secure](https://stripe.com/docs/payments/3d-secure/authentication-flow#manual-three-ds) for more information on how this configuration interacts with Radar and our SCA Engine. */
+      request_three_d_secure: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card.RequestThreeDSecure"] | null;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.CustomerBalance.BankTransfer.EuBankTransfer.Country": "BE" | "DE" | "ES" | "FR" | "IE" | "NL";
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.CustomerBalance.BankTransfer.EuBankTransfer": {
+      /** @description The desired country code of the bank account information. Permitted values include: `BE`, `DE`, `ES`, `FR`, `IE`, or `NL`. */
+      country: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.CustomerBalance.BankTransfer.EuBankTransfer.Country"];
+    };
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.CustomerBalance.BankTransfer": {
+      eu_bank_transfer?: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.CustomerBalance.BankTransfer.EuBankTransfer"];
+      /** @description The bank transfer type that can be used for funding. Permitted values include: `eu_bank_transfer`, `gb_bank_transfer`, `jp_bank_transfer`, `mx_bank_transfer`, or `us_bank_transfer`. */
+      type: string | null;
+    };
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.CustomerBalance": {
+      bank_transfer?: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.CustomerBalance.BankTransfer"];
+      /**
+       * @description The funding method type to be used when there are not enough funds in the customer balance. Permitted values include: `bank_transfer`.
+       * @enum {string|null}
+       */
+      funding_type: "bank_transfer" | null;
+    };
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.IdBankTransfer": Record<string, never>;
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Konbini": Record<string, never>;
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.SepaDebit": Record<string, never>;
+    /** @enum {string} */
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Upi.MandateOptions.AmountType": "fixed" | "maximum";
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Upi.MandateOptions": {
+      /**
+       * Format: double
+       * @description Amount to be charged for future payments.
+       */
+      amount: number | null;
+      /** @description One of `fixed` or `maximum`. If `fixed`, the `amount` param refers to the exact amount to be charged in future payments. If `maximum`, the amount charged can be up to the value passed for the `amount` param. */
+      amount_type: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Upi.MandateOptions.AmountType"] | null;
+      /** @description A description of the mandate or subscription that is meant to be displayed to the customer. */
+      description: string | null;
+      /**
+       * Format: double
+       * @description End date of the mandate or subscription. If not provided, the mandate will be active until canceled. If provided, end date should be after start date.
+       */
+      end_date: number | null;
+    };
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Upi": {
+      mandate_options?: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Upi.MandateOptions"];
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections.Filters.AccountSubcategory": "checking" | "savings";
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections.Filters": {
+      /** @description The account subcategories to use to filter for possible accounts to link. Valid subcategories are `checking` and `savings`. */
+      account_subcategories?: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections.Filters.AccountSubcategory"][];
+      /** @description The institution to use to filter for possible accounts to link. */
+      institution?: string;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections.Permission": "balances" | "ownership" | "payment_method" | "transactions";
+    /** @enum {string} */
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections.Prefetch": "balances" | "inferred_balances" | "ownership" | "transactions";
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections": {
+      filters?: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections.Filters"];
+      /** @description The list of permissions to request. The `payment_method` permission must be included. */
+      permissions?: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections.Permission"][];
+      /** @description Data features requested to be retrieved upon account creation. */
+      prefetch: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections.Prefetch"][] | null;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.VerificationMethod": "automatic" | "instant" | "microdeposits";
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount": {
+      financial_connections?: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections"];
+      /** @description Bank account verification method. */
+      verification_method?: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.VerificationMethod"];
+    };
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions": {
+      /** @description This sub-hash contains details about the Canadian pre-authorized debit payment method options to pass to invoices created by the subscription. */
+      acss_debit: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.AcssDebit"] | null;
+      /** @description This sub-hash contains details about the Bancontact payment method options to pass to invoices created by the subscription. */
+      bancontact: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Bancontact"] | null;
+      /** @description This sub-hash contains details about the Card payment method options to pass to invoices created by the subscription. */
+      card: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card"] | null;
+      /** @description This sub-hash contains details about the Bank transfer payment method options to pass to invoices created by the subscription. */
+      customer_balance: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.CustomerBalance"] | null;
+      /** @description This sub-hash contains details about the Indonesia bank transfer payment method options to pass to invoices created by the subscription. */
+      id_bank_transfer?: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.IdBankTransfer"] | null;
+      /** @description This sub-hash contains details about the Konbini payment method options to pass to invoices created by the subscription. */
+      konbini: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Konbini"] | null;
+      /** @description This sub-hash contains details about the SEPA Direct Debit payment method options to pass to invoices created by the subscription. */
+      sepa_debit: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.SepaDebit"] | null;
+      /** @description This sub-hash contains details about the UPI payment method options to pass to invoices created by the subscription. */
+      upi?: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Upi"] | null;
+      /** @description This sub-hash contains details about the ACH direct debit payment method options to pass to invoices created by the subscription. */
+      us_bank_account: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount"] | null;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodType": "ach_credit_transfer" | "ach_debit" | "acss_debit" | "affirm" | "amazon_pay" | "au_becs_debit" | "bacs_debit" | "bancontact" | "boleto" | "card" | "cashapp" | "crypto" | "custom" | "customer_balance" | "eps" | "fpx" | "giropay" | "grabpay" | "id_bank_transfer" | "ideal" | "jp_credit_transfer" | "kakao_pay" | "klarna" | "konbini" | "kr_card" | "link" | "multibanco" | "naver_pay" | "nz_bank_account" | "p24" | "payco" | "paynow" | "paypal" | "promptpay" | "revolut_pay" | "sepa_credit_transfer" | "sepa_debit" | "sofort" | "stripe_balance" | "swish" | "upi" | "us_bank_account" | "wechat_pay";
+    /** @enum {string} */
+    "stripe.Stripe.Subscription.PaymentSettings.SaveDefaultPaymentMethod": "off" | "on_subscription";
+    "stripe.Stripe.Subscription.PaymentSettings": {
+      /** @description Payment-method-specific configuration to provide to invoices created by the subscription. */
+      payment_method_options: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions"] | null;
+      /** @description The list of payment method types to provide to every invoice created by the subscription. If not set, Stripe attempts to automatically determine the types to use by looking at the invoice's default payment method, the subscription's default payment method, the customer's default payment method, and your [invoice template settings](https://dashboard.stripe.com/settings/billing/invoice). */
+      payment_method_types: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodType"][] | null;
+      /** @description Configure whether Stripe updates `subscription.default_payment_method` when payment succeeds. Defaults to `off`. */
+      save_default_payment_method: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.SaveDefaultPaymentMethod"] | null;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Subscription.PendingInvoiceItemInterval.Interval": "day" | "month" | "week" | "year";
+    "stripe.Stripe.Subscription.PendingInvoiceItemInterval": {
+      /** @description Specifies invoicing frequency. Either `day`, `week`, `month` or `year`. */
+      interval: components["schemas"]["stripe.Stripe.Subscription.PendingInvoiceItemInterval.Interval"];
+      /**
+       * Format: double
+       * @description The number of intervals between invoices. For example, `interval=month` and `interval_count=3` bills every 3 months. Maximum of one year interval allowed (1 year, 12 months, or 52 weeks).
+       */
+      interval_count: number;
+    };
+    "stripe.Stripe.Subscription.PendingUpdate": {
+      /**
+       * Format: double
+       * @description If the update is applied, determines the date of the first full invoice, and, for plans with `month` or `year` intervals, the day of the month for subsequent invoices. The timestamp is in UTC format.
+       */
+      billing_cycle_anchor: number | null;
+      /**
+       * Format: double
+       * @description The point after which the changes reflected by this update will be discarded and no longer applied.
+       */
+      expires_at: number;
+      /**
+       * Format: double
+       * @description The number of iterations of prebilling to apply.
+       */
+      prebilling_iterations?: number | null;
+      /** @description List of subscription items, each with an attached plan, that will be set if the update is applied. */
+      subscription_items: components["schemas"]["stripe.Stripe.SubscriptionItem"][] | null;
+      /**
+       * Format: double
+       * @description Unix timestamp representing the end of the trial period the customer will get before being charged for the first time, if the update is applied.
+       */
+      trial_end: number | null;
+      /** @description Indicates if a plan's `trial_period_days` should be applied to the subscription. Setting `trial_end` per subscription is preferred, and this defaults to `false`. Setting this flag to `true` together with `trial_end` is not allowed. See [Using trial periods on subscriptions](https://stripe.com/docs/billing/subscriptions/trials) to learn more. */
+      trial_from_plan: boolean | null;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Subscription.Prebilling.UpdateBehavior": "prebill" | "reset";
+    "stripe.Stripe.Subscription.Prebilling": {
+      /** @description ID of the prebilling invoice. */
+      invoice: string | components["schemas"]["stripe.Stripe.Invoice"];
+      /**
+       * Format: double
+       * @description The end of the last period for which the invoice pre-bills.
+       */
+      period_end: number;
+      /**
+       * Format: double
+       * @description The start of the first period for which the invoice pre-bills.
+       */
+      period_start: number;
+      /** @description Whether to cancel or preserve `prebilling` if the subscription is updated during the prebilled period. */
+      update_behavior?: components["schemas"]["stripe.Stripe.Subscription.Prebilling.UpdateBehavior"];
+    };
+    /** @enum {string} */
+    "stripe.Stripe.SubscriptionSchedule.BillingBehavior": "prorate_on_next_phase" | "prorate_up_front";
+    /** @enum {string} */
+    "stripe.Stripe.SubscriptionSchedule.BillingMode.Type": "classic" | "flexible";
+    "stripe.Stripe.SubscriptionSchedule.BillingMode": {
+      /** @description Controls how prorations and invoices for subscriptions are calculated and orchestrated. */
+      type: components["schemas"]["stripe.Stripe.SubscriptionSchedule.BillingMode.Type"];
+      /**
+       * Format: double
+       * @description Details on when the current billing_mode was adopted.
+       */
+      updated_at?: number;
+    };
+    "stripe.Stripe.SubscriptionSchedule.CurrentPhase": {
+      /**
+       * Format: double
+       * @description The end of this phase of the subscription schedule.
+       */
+      end_date: number;
+      /**
+       * Format: double
+       * @description The start of this phase of the subscription schedule.
+       */
+      start_date: number;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.AutomaticTax.Liability.Type": "account" | "self";
+    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.AutomaticTax.Liability": {
+      /** @description The connected account being referenced when `type` is `account`. */
+      account?: string | components["schemas"]["stripe.Stripe.Account"];
+      /** @description Type of the account referenced. */
+      type: components["schemas"]["stripe.Stripe.SubscriptionSchedule.DefaultSettings.AutomaticTax.Liability.Type"];
+    };
+    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.AutomaticTax": {
+      /**
+       * @description If Stripe disabled automatic tax, this enum describes why.
+       * @enum {string|null}
+       */
+      disabled_reason: "requires_location_inputs" | null;
+      /** @description Whether Stripe automatically computes tax on invoices created during this phase. */
+      enabled: boolean;
+      /** @description The account that's liable for tax. If set, the business address and tax registrations required to perform the tax calculation are loaded from this account. The tax transaction is returned in the report of the connected account. */
+      liability: components["schemas"]["stripe.Stripe.SubscriptionSchedule.DefaultSettings.AutomaticTax.Liability"] | null;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.BillingCycleAnchor": "automatic" | "phase_start";
+    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.BillingThresholds": {
+      /**
+       * Format: double
+       * @description Monetary threshold that triggers the subscription to create an invoice
+       */
+      amount_gte: number | null;
+      /** @description Indicates if the `billing_cycle_anchor` should be reset when a threshold is reached. If true, `billing_cycle_anchor` will be updated to the date/time the threshold was last reached; otherwise, the value will remain unchanged. This value may not be `true` if the subscription contains items with plans that have `aggregate_usage=last_ever`. */
+      reset_billing_cycle_anchor: boolean | null;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.CollectionMethod": "charge_automatically" | "send_invoice";
+    /** @enum {string} */
+    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.InvoiceSettings.Issuer.Type": "account" | "self";
+    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.InvoiceSettings.Issuer": {
+      /** @description The connected account being referenced when `type` is `account`. */
+      account?: string | components["schemas"]["stripe.Stripe.Account"];
+      /** @description Type of the account referenced. */
+      type: components["schemas"]["stripe.Stripe.SubscriptionSchedule.DefaultSettings.InvoiceSettings.Issuer.Type"];
+    };
+    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.InvoiceSettings": {
+      /** @description The account tax IDs associated with the subscription schedule. Will be set on invoices generated by the subscription schedule. */
+      account_tax_ids: ((string | components["schemas"]["stripe.Stripe.TaxId"] | components["schemas"]["stripe.Stripe.DeletedTaxId"])[]) | null;
+      /**
+       * Format: double
+       * @description Number of days within which a customer must pay invoices generated by this subscription schedule. This value will be `null` for subscription schedules where `billing=charge_automatically`.
+       */
+      days_until_due: number | null;
+      issuer: components["schemas"]["stripe.Stripe.SubscriptionSchedule.DefaultSettings.InvoiceSettings.Issuer"];
+    };
+    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.TransferData": {
+      /**
+       * Format: double
+       * @description A non-negative decimal between 0 and 100, with at most two decimal places. This represents the percentage of the subscription invoice total that will be transferred to the destination account. By default, the entire amount is transferred to the destination.
+       */
+      amount_percent: number | null;
+      /** @description The account where funds from the payment will be transferred to upon payment success. */
+      destination: string | components["schemas"]["stripe.Stripe.Account"];
+    };
+    "stripe.Stripe.SubscriptionSchedule.DefaultSettings": {
+      /**
+       * Format: double
+       * @description A non-negative decimal between 0 and 100, with at most two decimal places. This represents the percentage of the subscription invoice total that will be transferred to the application owner's Stripe account during this phase of the schedule.
+       */
+      application_fee_percent: number | null;
+      automatic_tax?: components["schemas"]["stripe.Stripe.SubscriptionSchedule.DefaultSettings.AutomaticTax"];
+      /** @description Possible values are `phase_start` or `automatic`. If `phase_start` then billing cycle anchor of the subscription is set to the start of the phase when entering the phase. If `automatic` then the billing cycle anchor is automatically modified as needed when entering the phase. For more information, see the billing cycle [documentation](https://stripe.com/docs/billing/subscriptions/billing-cycle). */
+      billing_cycle_anchor: components["schemas"]["stripe.Stripe.SubscriptionSchedule.DefaultSettings.BillingCycleAnchor"];
+      /** @description Define thresholds at which an invoice will be sent, and the subscription advanced to a new billing period */
+      billing_thresholds: components["schemas"]["stripe.Stripe.SubscriptionSchedule.DefaultSettings.BillingThresholds"] | null;
+      /** @description Either `charge_automatically`, or `send_invoice`. When charging automatically, Stripe will attempt to pay the underlying subscription at the end of each billing cycle using the default source attached to the customer. When sending an invoice, Stripe will email your customer an invoice with payment instructions and mark the subscription as `active`. */
+      collection_method: components["schemas"]["stripe.Stripe.SubscriptionSchedule.DefaultSettings.CollectionMethod"] | null;
+      /** @description ID of the default payment method for the subscription schedule. If not set, invoices will use the default payment method in the customer's invoice settings. */
+      default_payment_method: (string | components["schemas"]["stripe.Stripe.PaymentMethod"]) | null;
+      /** @description Subscription description, meant to be displayable to the customer. Use this field to optionally store an explanation of the subscription for rendering in Stripe surfaces and certain local payment methods UIs. */
+      description: string | null;
+      invoice_settings: components["schemas"]["stripe.Stripe.SubscriptionSchedule.DefaultSettings.InvoiceSettings"];
+      /** @description The account (if any) the charge was made on behalf of for charges associated with the schedule's subscription. See the Connect documentation for details. */
+      on_behalf_of: (string | components["schemas"]["stripe.Stripe.Account"]) | null;
+      /** @description The account (if any) the associated subscription's payments will be attributed to for tax reporting, and where funds from each payment will be transferred to for each of the subscription's invoices. */
+      transfer_data: components["schemas"]["stripe.Stripe.SubscriptionSchedule.DefaultSettings.TransferData"] | null;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.SubscriptionSchedule.EndBehavior": "cancel" | "none" | "release" | "renew";
+    "stripe.Stripe.SubscriptionSchedule.LastPriceMigrationError.FailedTransition": {
+      /** @description The original price to be migrated. */
+      source_price: string;
+      /** @description The intended resulting price of the migration. */
+      target_price: string;
+    };
+    "stripe.Stripe.SubscriptionSchedule.LastPriceMigrationError": {
+      /**
+       * Format: double
+       * @description The time at which the price migration encountered an error.
+       */
+      errored_at: number;
+      /** @description The involved price pairs in each failed transition. */
+      failed_transitions: components["schemas"]["stripe.Stripe.SubscriptionSchedule.LastPriceMigrationError.FailedTransition"][];
+      /**
+       * @description The type of error encountered by the price migration.
+       * @enum {string}
+       */
+      type: "price_uniqueness_violation";
+    };
+    "stripe.Stripe.SubscriptionSchedule.Phase.AddInvoiceItem.Discount.DiscountEnd": {
+      /**
+       * Format: double
+       * @description The discount end timestamp.
+       */
+      timestamp: number | null;
+      /**
+       * @description The discount end type.
+       * @enum {string}
+       */
+      type: "timestamp";
+    };
+    "stripe.Stripe.SubscriptionSchedule.Phase.AddInvoiceItem.Discount": {
+      /** @description ID of the coupon to create a new discount for. */
+      coupon: (string | components["schemas"]["stripe.Stripe.Coupon"]) | null;
+      /** @description ID of an existing discount on the object (or one of its ancestors) to reuse. */
+      discount: (string | components["schemas"]["stripe.Stripe.Discount"]) | null;
+      /** @description Details to determine how long the discount should be applied for. */
+      discount_end?: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.AddInvoiceItem.Discount.DiscountEnd"] | null;
+      /** @description ID of the promotion code to create a new discount for. */
+      promotion_code: (string | components["schemas"]["stripe.Stripe.PromotionCode"]) | null;
+    };
+    /** @description The DeletedPrice object. */
+    "stripe.Stripe.DeletedPrice": {
+      /** @description Unique identifier for the object. */
+      id: string;
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: "price";
+      /**
+       * @description Always true for a deleted object
+       * @enum {boolean}
+       */
+      deleted: true;
+    };
+    "stripe.Stripe.SubscriptionSchedule.Phase.AddInvoiceItem": {
+      /** @description The stackable discounts that will be applied to the item. */
+      discounts: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.AddInvoiceItem.Discount"][];
+      /** @description ID of the price used to generate the invoice item. */
+      price: string | components["schemas"]["stripe.Stripe.Price"] | components["schemas"]["stripe.Stripe.DeletedPrice"];
+      /**
+       * Format: double
+       * @description The quantity of the invoice item.
+       */
+      quantity: number | null;
+      /** @description The tax rates which apply to the item. When set, the `default_tax_rates` do not apply to this item. */
+      tax_rates?: components["schemas"]["stripe.Stripe.TaxRate"][] | null;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.SubscriptionSchedule.Phase.AutomaticTax.Liability.Type": "account" | "self";
+    "stripe.Stripe.SubscriptionSchedule.Phase.AutomaticTax.Liability": {
+      /** @description The connected account being referenced when `type` is `account`. */
+      account?: string | components["schemas"]["stripe.Stripe.Account"];
+      /** @description Type of the account referenced. */
+      type: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.AutomaticTax.Liability.Type"];
+    };
+    "stripe.Stripe.SubscriptionSchedule.Phase.AutomaticTax": {
+      /**
+       * @description If Stripe disabled automatic tax, this enum describes why.
+       * @enum {string|null}
+       */
+      disabled_reason: "requires_location_inputs" | null;
+      /** @description Whether Stripe automatically computes tax on invoices created during this phase. */
+      enabled: boolean;
+      /** @description The account that's liable for tax. If set, the business address and tax registrations required to perform the tax calculation are loaded from this account. The tax transaction is returned in the report of the connected account. */
+      liability: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.AutomaticTax.Liability"] | null;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.SubscriptionSchedule.Phase.BillingCycleAnchor": "automatic" | "phase_start";
+    "stripe.Stripe.SubscriptionSchedule.Phase.BillingThresholds": {
+      /**
+       * Format: double
+       * @description Monetary threshold that triggers the subscription to create an invoice
+       */
+      amount_gte: number | null;
+      /** @description Indicates if the `billing_cycle_anchor` should be reset when a threshold is reached. If true, `billing_cycle_anchor` will be updated to the date/time the threshold was last reached; otherwise, the value will remain unchanged. This value may not be `true` if the subscription contains items with plans that have `aggregate_usage=last_ever`. */
+      reset_billing_cycle_anchor: boolean | null;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.SubscriptionSchedule.Phase.CollectionMethod": "charge_automatically" | "send_invoice";
+    "stripe.Stripe.SubscriptionSchedule.Phase.Discount.DiscountEnd": {
+      /**
+       * Format: double
+       * @description The discount end timestamp.
+       */
+      timestamp: number | null;
+      /**
+       * @description The discount end type.
+       * @enum {string}
+       */
+      type: "timestamp";
+    };
+    "stripe.Stripe.SubscriptionSchedule.Phase.Discount": {
+      /** @description ID of the coupon to create a new discount for. */
+      coupon: (string | components["schemas"]["stripe.Stripe.Coupon"]) | null;
+      /** @description ID of an existing discount on the object (or one of its ancestors) to reuse. */
+      discount: (string | components["schemas"]["stripe.Stripe.Discount"]) | null;
+      /** @description Details to determine how long the discount should be applied for. */
+      discount_end?: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.Discount.DiscountEnd"] | null;
+      /** @description ID of the promotion code to create a new discount for. */
+      promotion_code: (string | components["schemas"]["stripe.Stripe.PromotionCode"]) | null;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.SubscriptionSchedule.Phase.InvoiceSettings.Issuer.Type": "account" | "self";
+    "stripe.Stripe.SubscriptionSchedule.Phase.InvoiceSettings.Issuer": {
+      /** @description The connected account being referenced when `type` is `account`. */
+      account?: string | components["schemas"]["stripe.Stripe.Account"];
+      /** @description Type of the account referenced. */
+      type: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.InvoiceSettings.Issuer.Type"];
+    };
+    "stripe.Stripe.SubscriptionSchedule.Phase.InvoiceSettings": {
+      /** @description The account tax IDs associated with this phase of the subscription schedule. Will be set on invoices generated by this phase of the subscription schedule. */
+      account_tax_ids: ((string | components["schemas"]["stripe.Stripe.TaxId"] | components["schemas"]["stripe.Stripe.DeletedTaxId"])[]) | null;
+      /**
+       * Format: double
+       * @description Number of days within which a customer must pay invoices generated by this subscription schedule. This value will be `null` for subscription schedules where `billing=charge_automatically`.
+       */
+      days_until_due: number | null;
+      /** @description The connected account that issues the invoice. The invoice is presented with the branding and support information of the specified account. */
+      issuer: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.InvoiceSettings.Issuer"] | null;
+    };
+    "stripe.Stripe.SubscriptionSchedule.Phase.Item.BillingThresholds": {
+      /**
+       * Format: double
+       * @description Usage threshold that triggers the subscription to create an invoice
+       */
+      usage_gte: number | null;
+    };
+    "stripe.Stripe.SubscriptionSchedule.Phase.Item.Discount.DiscountEnd": {
+      /**
+       * Format: double
+       * @description The discount end timestamp.
+       */
+      timestamp: number | null;
+      /**
+       * @description The discount end type.
+       * @enum {string}
+       */
+      type: "timestamp";
+    };
+    "stripe.Stripe.SubscriptionSchedule.Phase.Item.Discount": {
+      /** @description ID of the coupon to create a new discount for. */
+      coupon: (string | components["schemas"]["stripe.Stripe.Coupon"]) | null;
+      /** @description ID of an existing discount on the object (or one of its ancestors) to reuse. */
+      discount: (string | components["schemas"]["stripe.Stripe.Discount"]) | null;
+      /** @description Details to determine how long the discount should be applied for. */
+      discount_end?: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.Item.Discount.DiscountEnd"] | null;
+      /** @description ID of the promotion code to create a new discount for. */
+      promotion_code: (string | components["schemas"]["stripe.Stripe.PromotionCode"]) | null;
+    };
+    /** @description The DeletedPlan object. */
+    "stripe.Stripe.DeletedPlan": {
+      /** @description Unique identifier for the object. */
+      id: string;
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: "plan";
+      /**
+       * @description Always true for a deleted object
+       * @enum {boolean}
+       */
+      deleted: true;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.SubscriptionSchedule.Phase.Item.Trial.Type": "free" | "paid";
+    "stripe.Stripe.SubscriptionSchedule.Phase.Item.Trial": {
+      /** @description List of price IDs which, if present on the subscription following a paid trial, constitute opting-in to the paid trial. */
+      converts_to?: string[] | null;
+      /** @description Determines the type of trial for this item. */
+      type: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.Item.Trial.Type"];
+    };
+    "stripe.Stripe.SubscriptionSchedule.Phase.Item": {
+      /** @description Define thresholds at which an invoice will be sent, and the related subscription advanced to a new billing period */
+      billing_thresholds: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.Item.BillingThresholds"] | null;
+      /** @description The discounts applied to the subscription item. Subscription item discounts are applied before subscription discounts. Use `expand[]=discounts` to expand each discount. */
+      discounts: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.Item.Discount"][];
+      /** @description Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an item. Metadata on this item will update the underlying subscription item's `metadata` when the phase is entered. */
+      metadata: components["schemas"]["stripe.Stripe.Metadata"] | null;
+      /** @description ID of the plan to which the customer should be subscribed. */
+      plan: string | components["schemas"]["stripe.Stripe.Plan"] | components["schemas"]["stripe.Stripe.DeletedPlan"];
+      /** @description ID of the price to which the customer should be subscribed. */
+      price: string | components["schemas"]["stripe.Stripe.Price"] | components["schemas"]["stripe.Stripe.DeletedPrice"];
+      /**
+       * Format: double
+       * @description Quantity of the plan to which the customer should be subscribed.
+       */
+      quantity?: number;
+      /** @description The tax rates which apply to this `phase_item`. When set, the `default_tax_rates` on the phase do not apply to this `phase_item`. */
+      tax_rates?: components["schemas"]["stripe.Stripe.TaxRate"][] | null;
+      /** @description Options that configure the trial on the subscription item. */
+      trial?: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.Item.Trial"] | null;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.SubscriptionSchedule.Phase.PauseCollection.Behavior": "keep_as_draft" | "mark_uncollectible" | "void";
+    "stripe.Stripe.SubscriptionSchedule.Phase.PauseCollection": {
+      /** @description The payment collection behavior for this subscription while paused. One of `keep_as_draft`, `mark_uncollectible`, or `void`. */
+      behavior: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.PauseCollection.Behavior"];
+    };
+    /** @enum {string} */
+    "stripe.Stripe.SubscriptionSchedule.Phase.ProrationBehavior": "always_invoice" | "create_prorations" | "none";
+    "stripe.Stripe.SubscriptionSchedule.Phase.TransferData": {
+      /**
+       * Format: double
+       * @description A non-negative decimal between 0 and 100, with at most two decimal places. This represents the percentage of the subscription invoice total that will be transferred to the destination account. By default, the entire amount is transferred to the destination.
+       */
+      amount_percent: number | null;
+      /** @description The account where funds from the payment will be transferred to upon payment success. */
+      destination: string | components["schemas"]["stripe.Stripe.Account"];
+    };
+    /** @enum {string} */
+    "stripe.Stripe.SubscriptionSchedule.Phase.TrialContinuation": "continue" | "none";
+    /** @enum {string} */
+    "stripe.Stripe.SubscriptionSchedule.Phase.TrialSettings.EndBehavior.ProrateUpFront": "defer" | "include";
+    "stripe.Stripe.SubscriptionSchedule.Phase.TrialSettings.EndBehavior": {
+      /** @description Configure how an opt-in following a paid trial is billed when using `billing_behavior: prorate_up_front`. */
+      prorate_up_front: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.TrialSettings.EndBehavior.ProrateUpFront"] | null;
+    };
+    "stripe.Stripe.SubscriptionSchedule.Phase.TrialSettings": {
+      /** @description Defines how the subscription should behave when a trial ends. */
+      end_behavior: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.TrialSettings.EndBehavior"] | null;
+    };
+    "stripe.Stripe.SubscriptionSchedule.Phase": {
+      /** @description A list of prices and quantities that will generate invoice items appended to the next invoice for this phase. */
+      add_invoice_items: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.AddInvoiceItem"][];
+      /**
+       * Format: double
+       * @description A non-negative decimal between 0 and 100, with at most two decimal places. This represents the percentage of the subscription invoice total that will be transferred to the application owner's Stripe account during this phase of the schedule.
+       */
+      application_fee_percent: number | null;
+      automatic_tax?: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.AutomaticTax"];
+      /** @description Possible values are `phase_start` or `automatic`. If `phase_start` then billing cycle anchor of the subscription is set to the start of the phase when entering the phase. If `automatic` then the billing cycle anchor is automatically modified as needed when entering the phase. For more information, see the billing cycle [documentation](https://stripe.com/docs/billing/subscriptions/billing-cycle). */
+      billing_cycle_anchor: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.BillingCycleAnchor"] | null;
+      /** @description Define thresholds at which an invoice will be sent, and the subscription advanced to a new billing period */
+      billing_thresholds: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.BillingThresholds"] | null;
+      /** @description Either `charge_automatically`, or `send_invoice`. When charging automatically, Stripe will attempt to pay the underlying subscription at the end of each billing cycle using the default source attached to the customer. When sending an invoice, Stripe will email your customer an invoice with payment instructions and mark the subscription as `active`. */
+      collection_method: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.CollectionMethod"] | null;
+      /** @description Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase. Must be a [supported currency](https://stripe.com/docs/currencies). */
+      currency: string;
+      /** @description ID of the default payment method for the subscription schedule. It must belong to the customer associated with the subscription schedule. If not set, invoices will use the default payment method in the customer's invoice settings. */
+      default_payment_method: (string | components["schemas"]["stripe.Stripe.PaymentMethod"]) | null;
+      /** @description The default tax rates to apply to the subscription during this phase of the subscription schedule. */
+      default_tax_rates?: components["schemas"]["stripe.Stripe.TaxRate"][] | null;
+      /** @description Subscription description, meant to be displayable to the customer. Use this field to optionally store an explanation of the subscription for rendering in Stripe surfaces and certain local payment methods UIs. */
+      description: string | null;
+      /** @description The stackable discounts that will be applied to the subscription on this phase. Subscription item discounts are applied before subscription discounts. */
+      discounts: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.Discount"][];
+      /**
+       * Format: double
+       * @description The end of this phase of the subscription schedule.
+       */
+      end_date: number;
+      /** @description The invoice settings applicable during this phase. */
+      invoice_settings: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.InvoiceSettings"] | null;
+      /** @description Subscription items to configure the subscription to during this phase of the subscription schedule. */
+      items: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.Item"][];
+      /** @description Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to a phase. Metadata on a schedule's phase will update the underlying subscription's `metadata` when the phase is entered. Updating the underlying subscription's `metadata` directly will not affect the current phase's `metadata`. */
+      metadata: components["schemas"]["stripe.Stripe.Metadata"] | null;
+      /** @description The account (if any) the charge was made on behalf of for charges associated with the schedule's subscription. See the Connect documentation for details. */
+      on_behalf_of: (string | components["schemas"]["stripe.Stripe.Account"]) | null;
+      /** @description If specified, payment collection for this subscription will be paused. Note that the subscription status will be unchanged and will not be updated to `paused`. Learn more about [pausing collection](https://stripe.com/docs/billing/subscriptions/pause-payment). */
+      pause_collection?: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.PauseCollection"] | null;
+      /** @description When transitioning phases, controls how prorations are handled (if any). Possible values are `create_prorations`, `none`, and `always_invoice`. */
+      proration_behavior: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.ProrationBehavior"];
+      /**
+       * Format: double
+       * @description The start of this phase of the subscription schedule.
+       */
+      start_date: number;
+      /** @description The account (if any) the associated subscription's payments will be attributed to for tax reporting, and where funds from each payment will be transferred to for each of the subscription's invoices. */
+      transfer_data: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.TransferData"] | null;
+      /** @description Specify behavior of the trial when crossing schedule phase boundaries */
+      trial_continuation?: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.TrialContinuation"] | null;
+      /**
+       * Format: double
+       * @description When the trial ends within the phase.
+       */
+      trial_end: number | null;
+      /** @description Settings related to any trials on the subscription during this phase. */
+      trial_settings?: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.TrialSettings"] | null;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.SubscriptionSchedule.Prebilling.UpdateBehavior": "prebill" | "reset";
+    "stripe.Stripe.SubscriptionSchedule.Prebilling": {
+      /** @description ID of the prebilling invoice. */
+      invoice: string | components["schemas"]["stripe.Stripe.Invoice"];
+      /**
+       * Format: double
+       * @description The end of the last period for which the invoice pre-bills.
+       */
+      period_end: number;
+      /**
+       * Format: double
+       * @description The start of the first period for which the invoice pre-bills.
+       */
+      period_start: number;
+      /** @description Whether to cancel or preserve `prebilling` if the subscription is updated during the prebilled period. */
+      update_behavior?: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Prebilling.UpdateBehavior"];
+    };
+    /** @enum {string} */
+    "stripe.Stripe.SubscriptionSchedule.Status": "active" | "canceled" | "completed" | "not_started" | "released";
+    /**
+     * @description Subscriptions allow you to charge a customer on a recurring basis.
+     *
+     * Related guide: [Creating subscriptions](https://stripe.com/docs/billing/subscriptions/creating)
+     */
+    "stripe.Stripe.Subscription": {
+      /** @description Unique identifier for the object. */
+      id: string;
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: "subscription";
+      /** @description ID of the Connect Application that created the subscription. */
+      application: (string | components["schemas"]["stripe.Stripe.Application"] | components["schemas"]["stripe.Stripe.DeletedApplication"]) | null;
+      /**
+       * Format: double
+       * @description A non-negative decimal between 0 and 100, with at most two decimal places. This represents the percentage of the subscription invoice total that will be transferred to the application owner's Stripe account.
+       */
+      application_fee_percent: number | null;
+      automatic_tax: components["schemas"]["stripe.Stripe.Subscription.AutomaticTax"];
+      /**
+       * Format: double
+       * @description The reference point that aligns future [billing cycle](https://stripe.com/docs/subscriptions/billing-cycle) dates. It sets the day of week for `week` intervals, the day of month for `month` and `year` intervals, and the month of year for `year` intervals. The timestamp is in UTC format.
+       */
+      billing_cycle_anchor: number;
+      /** @description The fixed values used to calculate the `billing_cycle_anchor`. */
+      billing_cycle_anchor_config: components["schemas"]["stripe.Stripe.Subscription.BillingCycleAnchorConfig"] | null;
+      /** @description The billing mode of the subscription. */
+      billing_mode: components["schemas"]["stripe.Stripe.Subscription.BillingMode"];
+      /** @description Define thresholds at which an invoice will be sent, and the subscription advanced to a new billing period */
+      billing_thresholds: components["schemas"]["stripe.Stripe.Subscription.BillingThresholds"] | null;
+      /**
+       * Format: double
+       * @description A date in the future at which the subscription will automatically get canceled
+       */
+      cancel_at: number | null;
+      /** @description Whether this subscription will (if `status=active`) or did (if `status=canceled`) cancel at the end of the current billing period. */
+      cancel_at_period_end: boolean;
+      /**
+       * Format: double
+       * @description If the subscription has been canceled, the date of that cancellation. If the subscription was canceled with `cancel_at_period_end`, `canceled_at` will reflect the time of the most recent update request, not the end of the subscription period when the subscription is automatically moved to a canceled state.
+       */
+      canceled_at: number | null;
+      /** @description Details about why this subscription was cancelled */
+      cancellation_details: components["schemas"]["stripe.Stripe.Subscription.CancellationDetails"] | null;
+      /** @description Either `charge_automatically`, or `send_invoice`. When charging automatically, Stripe will attempt to pay this subscription at the end of the cycle using the default source attached to the customer. When sending an invoice, Stripe will email your customer an invoice with payment instructions and mark the subscription as `active`. */
+      collection_method: components["schemas"]["stripe.Stripe.Subscription.CollectionMethod"];
+      /**
+       * Format: double
+       * @description Time at which the object was created. Measured in seconds since the Unix epoch.
+       */
+      created: number;
+      /** @description Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase. Must be a [supported currency](https://stripe.com/docs/currencies). */
+      currency: string;
+      /** @description ID of the customer who owns the subscription. */
+      customer: string | components["schemas"]["stripe.Stripe.Customer"] | components["schemas"]["stripe.Stripe.DeletedCustomer"];
+      /** @description ID of the account who owns the subscription. */
+      customer_account?: string | null;
+      /**
+       * Format: double
+       * @description Number of days a customer has to pay invoices generated by this subscription. This value will be `null` for subscriptions where `collection_method=charge_automatically`.
+       */
+      days_until_due: number | null;
+      /** @description ID of the default payment method for the subscription. It must belong to the customer associated with the subscription. This takes precedence over `default_source`. If neither are set, invoices will use the customer's [invoice_settings.default_payment_method](https://stripe.com/docs/api/customers/object#customer_object-invoice_settings-default_payment_method) or [default_source](https://stripe.com/docs/api/customers/object#customer_object-default_source). */
+      default_payment_method: (string | components["schemas"]["stripe.Stripe.PaymentMethod"]) | null;
+      /** @description ID of the default payment source for the subscription. It must belong to the customer associated with the subscription and be in a chargeable state. If `default_payment_method` is also set, `default_payment_method` will take precedence. If neither are set, invoices will use the customer's [invoice_settings.default_payment_method](https://stripe.com/docs/api/customers/object#customer_object-invoice_settings-default_payment_method) or [default_source](https://stripe.com/docs/api/customers/object#customer_object-default_source). */
+      default_source: (string | components["schemas"]["stripe.Stripe.CustomerSource"]) | null;
+      /** @description The tax rates that will apply to any subscription item that does not have `tax_rates` set. Invoices created will have their `default_tax_rates` populated from the subscription. */
+      default_tax_rates?: components["schemas"]["stripe.Stripe.TaxRate"][] | null;
+      /** @description The subscription's description, meant to be displayable to the customer. Use this field to optionally store an explanation of the subscription for rendering in Stripe surfaces and certain local payment methods UIs. */
+      description: string | null;
+      /** @description The discounts applied to the subscription. Subscription item discounts are applied before subscription discounts. Use `expand[]=discounts` to expand each discount. */
+      discounts: (string | components["schemas"]["stripe.Stripe.Discount"])[];
+      /**
+       * Format: double
+       * @description If the subscription has ended, the date the subscription ended.
+       */
+      ended_at: number | null;
+      invoice_settings: components["schemas"]["stripe.Stripe.Subscription.InvoiceSettings"];
+      /** @description List of subscription items, each with an attached price. */
+      items: components["schemas"]["stripe.Stripe.ApiList_stripe.Stripe.SubscriptionItem_"];
+      /** @description Details of the most recent price migration that failed for the subscription. */
+      last_price_migration_error?: components["schemas"]["stripe.Stripe.Subscription.LastPriceMigrationError"] | null;
+      /** @description The most recent invoice this subscription has generated. */
+      latest_invoice: (string | components["schemas"]["stripe.Stripe.Invoice"]) | null;
+      /** @description Has the value `true` if the object exists in live mode or the value `false` if the object exists in test mode. */
+      livemode: boolean;
+      /** @description Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. */
+      metadata: components["schemas"]["stripe.Stripe.Metadata"];
+      /**
+       * Format: double
+       * @description Specifies the approximate timestamp on which any pending invoice items will be billed according to the schedule provided at `pending_invoice_item_interval`.
+       */
+      next_pending_invoice_item_invoice: number | null;
+      /** @description The account (if any) the charge was made on behalf of for charges associated with this subscription. See the [Connect documentation](https://stripe.com/docs/connect/subscriptions#on-behalf-of) for details. */
+      on_behalf_of: (string | components["schemas"]["stripe.Stripe.Account"]) | null;
+      /** @description If specified, payment collection for this subscription will be paused. Note that the subscription status will be unchanged and will not be updated to `paused`. Learn more about [pausing collection](https://stripe.com/docs/billing/subscriptions/pause-payment). */
+      pause_collection: components["schemas"]["stripe.Stripe.Subscription.PauseCollection"] | null;
+      /** @description Payment settings passed on to invoices created by the subscription. */
+      payment_settings: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings"] | null;
+      /** @description Specifies an interval for how often to bill for any pending invoice items. It is analogous to calling [Create an invoice](https://stripe.com/docs/api#create_invoice) for the given subscription at the specified interval. */
+      pending_invoice_item_interval: components["schemas"]["stripe.Stripe.Subscription.PendingInvoiceItemInterval"] | null;
+      /** @description You can use this [SetupIntent](https://stripe.com/docs/api/setup_intents) to collect user authentication when creating a subscription without immediate payment or updating a subscription's payment method, allowing you to optimize for off-session payments. Learn more in the [SCA Migration Guide](https://stripe.com/docs/billing/migration/strong-customer-authentication#scenario-2). */
+      pending_setup_intent: (string | components["schemas"]["stripe.Stripe.SetupIntent"]) | null;
+      /** @description If specified, [pending updates](https://stripe.com/docs/billing/subscriptions/pending-updates) that will be applied to the subscription once the `latest_invoice` has been paid. */
+      pending_update: components["schemas"]["stripe.Stripe.Subscription.PendingUpdate"] | null;
+      /** @description Time period and invoice for a Subscription billed in advance. */
+      prebilling?: components["schemas"]["stripe.Stripe.Subscription.Prebilling"] | null;
+      /** @description The schedule attached to the subscription */
+      schedule: (string | components["schemas"]["stripe.Stripe.SubscriptionSchedule"]) | null;
+      /**
+       * Format: double
+       * @description Date when the subscription was first created. The date might differ from the `created` date due to backdating.
+       */
+      start_date: number;
+      /**
+       * @description Possible values are `incomplete`, `incomplete_expired`, `trialing`, `active`, `past_due`, `canceled`, `unpaid`, or `paused`.
+       *
+       * For `collection_method=charge_automatically` a subscription moves into `incomplete` if the initial payment attempt fails. A subscription in this status can only have metadata and default_source updated. Once the first invoice is paid, the subscription moves into an `active` status. If the first invoice is not paid within 23 hours, the subscription transitions to `incomplete_expired`. This is a terminal status, the open invoice will be voided and no further invoices will be generated.
+       *
+       * A subscription that is currently in a trial period is `trialing` and moves to `active` when the trial period is over.
+       *
+       * A subscription can only enter a `paused` status [when a trial ends without a payment method](https://stripe.com/docs/billing/subscriptions/trials#create-free-trials-without-payment). A `paused` subscription doesn't generate invoices and can be resumed after your customer adds their payment method. The `paused` status is different from [pausing collection](https://stripe.com/docs/billing/subscriptions/pause-payment), which still generates invoices and leaves the subscription's status unchanged.
+       *
+       * If subscription `collection_method=charge_automatically`, it becomes `past_due` when payment is required but cannot be paid (due to failed payment or awaiting additional user actions). Once Stripe has exhausted all payment retry attempts, the subscription will become `canceled` or `unpaid` (depending on your subscriptions settings).
+       *
+       * If subscription `collection_method=send_invoice` it becomes `past_due` when its invoice is not paid by the due date, and `canceled` or `unpaid` if it is still not paid by an additional deadline after that. Note that when a subscription has a status of `unpaid`, no subsequent invoices will be attempted (invoices will be created, but then immediately automatically closed). After receiving updated payment information from a customer, you may choose to reopen and pay their closed invoices.
+       */
+      status: components["schemas"]["stripe.Stripe.Subscription.Status"];
+      /** @description ID of the test clock this subscription belongs to. */
+      test_clock: (string | components["schemas"]["stripe.Stripe.TestHelpers.TestClock"]) | null;
+      /** @description The account (if any) the subscription's payments will be attributed to for tax reporting, and where funds from each payment will be transferred to for each of the subscription's invoices. */
+      transfer_data: components["schemas"]["stripe.Stripe.Subscription.TransferData"] | null;
+      /**
+       * Format: double
+       * @description If the subscription has a trial, the end of that trial.
+       */
+      trial_end: number | null;
+      /** @description Settings related to subscription trials. */
+      trial_settings: components["schemas"]["stripe.Stripe.Subscription.TrialSettings"] | null;
+      /**
+       * Format: double
+       * @description If the subscription has a trial, the beginning of that trial.
+       */
+      trial_start: number | null;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.TestHelpers.TestClock.Status": "advancing" | "internal_failure" | "ready";
+    "stripe.Stripe.TestHelpers.TestClock.StatusDetails.Advancing": {
+      /**
+       * Format: double
+       * @description The `frozen_time` that the Test Clock is advancing towards.
+       */
+      target_frozen_time: number;
+    };
+    "stripe.Stripe.TestHelpers.TestClock.StatusDetails": {
+      advancing?: components["schemas"]["stripe.Stripe.TestHelpers.TestClock.StatusDetails.Advancing"];
+    };
+    /**
+     * @description A test clock enables deterministic control over objects in testmode. With a test clock, you can create
+     * objects at a frozen time in the past or future, and advance to a specific future time to observe webhooks and state changes. After the clock advances,
+     * you can either validate the current state of your scenario (and test your assumptions), change the current state of your scenario (and test more complex scenarios), or keep advancing forward in time.
+     */
+    "stripe.Stripe.TestHelpers.TestClock": {
+      /** @description Unique identifier for the object. */
+      id: string;
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: "test_helpers.test_clock";
+      /**
+       * Format: double
+       * @description Time at which the object was created. Measured in seconds since the Unix epoch.
+       */
+      created: number;
+      /** @description Always true for a deleted object */
+      deleted?: unknown;
+      /**
+       * Format: double
+       * @description Time at which this clock is scheduled to auto delete.
+       */
+      deletes_after: number;
+      /**
+       * Format: double
+       * @description Time at which all objects belonging to this clock are frozen.
+       */
+      frozen_time: number;
+      /** @description Has the value `true` if the object exists in live mode or the value `false` if the object exists in test mode. */
+      livemode: boolean;
+      /** @description The custom name supplied at creation. */
+      name: string | null;
+      /** @description The status of the Test Clock. */
+      status: components["schemas"]["stripe.Stripe.TestHelpers.TestClock.Status"];
+      status_details: components["schemas"]["stripe.Stripe.TestHelpers.TestClock.StatusDetails"];
+    };
+    /**
+     * @description A subscription schedule allows you to create and manage the lifecycle of a subscription by predefining expected changes.
+     *
+     * Related guide: [Subscription schedules](https://stripe.com/docs/billing/subscriptions/subscription-schedules)
+     */
+    "stripe.Stripe.SubscriptionSchedule": {
+      /** @description Unique identifier for the object. */
+      id: string;
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: "subscription_schedule";
+      /** @description ID of the Connect Application that created the schedule. */
+      application: (string | components["schemas"]["stripe.Stripe.Application"] | components["schemas"]["stripe.Stripe.DeletedApplication"]) | null;
+      /** @description Configures when the subscription schedule generates prorations for phase transitions. Possible values are `prorate_on_next_phase` or `prorate_up_front` with the default being `prorate_on_next_phase`. `prorate_on_next_phase` will apply phase changes and generate prorations at transition time. `prorate_up_front` will bill for all phases within the current billing cycle up front. */
+      billing_behavior?: components["schemas"]["stripe.Stripe.SubscriptionSchedule.BillingBehavior"];
+      /** @description The billing mode of the subscription. */
+      billing_mode: components["schemas"]["stripe.Stripe.SubscriptionSchedule.BillingMode"];
+      /**
+       * Format: double
+       * @description Time at which the subscription schedule was canceled. Measured in seconds since the Unix epoch.
+       */
+      canceled_at: number | null;
+      /**
+       * Format: double
+       * @description Time at which the subscription schedule was completed. Measured in seconds since the Unix epoch.
+       */
+      completed_at: number | null;
+      /**
+       * Format: double
+       * @description Time at which the object was created. Measured in seconds since the Unix epoch.
+       */
+      created: number;
+      /** @description Object representing the start and end dates for the current phase of the subscription schedule, if it is `active`. */
+      current_phase: components["schemas"]["stripe.Stripe.SubscriptionSchedule.CurrentPhase"] | null;
+      /** @description ID of the customer who owns the subscription schedule. */
+      customer: string | components["schemas"]["stripe.Stripe.Customer"] | components["schemas"]["stripe.Stripe.DeletedCustomer"];
+      /** @description ID of the account who owns the subscription schedule. */
+      customer_account?: string | null;
+      default_settings: components["schemas"]["stripe.Stripe.SubscriptionSchedule.DefaultSettings"];
+      /** @description Behavior of the subscription schedule and underlying subscription when it ends. Possible values are `release` or `cancel` with the default being `release`. `release` will end the subscription schedule and keep the underlying subscription running. `cancel` will end the subscription schedule and cancel the underlying subscription. */
+      end_behavior: components["schemas"]["stripe.Stripe.SubscriptionSchedule.EndBehavior"];
+      /** @description Details of the most recent price migration that failed for the subscription schedule. */
+      last_price_migration_error?: components["schemas"]["stripe.Stripe.SubscriptionSchedule.LastPriceMigrationError"] | null;
+      /** @description Has the value `true` if the object exists in live mode or the value `false` if the object exists in test mode. */
+      livemode: boolean;
+      /** @description Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. */
+      metadata: components["schemas"]["stripe.Stripe.Metadata"] | null;
+      /** @description Configuration for the subscription schedule's phases. */
+      phases: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase"][];
+      /** @description Time period and invoice for a Subscription billed in advance. */
+      prebilling?: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Prebilling"] | null;
+      /**
+       * Format: double
+       * @description Time at which the subscription schedule was released. Measured in seconds since the Unix epoch.
+       */
+      released_at: number | null;
+      /** @description ID of the subscription once managed by the subscription schedule (if it is released). */
+      released_subscription: string | null;
+      /** @description The present status of the subscription schedule. Possible values are `not_started`, `active`, `completed`, `released`, and `canceled`. You can read more about the different states in our [behavior guide](https://stripe.com/docs/billing/subscriptions/subscription-schedules). */
+      status: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Status"];
+      /** @description ID of the subscription managed by the subscription schedule. */
+      subscription: (string | components["schemas"]["stripe.Stripe.Subscription"]) | null;
+      /** @description ID of the test clock this subscription schedule belongs to. */
+      test_clock: (string | components["schemas"]["stripe.Stripe.TestHelpers.TestClock"]) | null;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Subscription.Status": "active" | "canceled" | "incomplete" | "incomplete_expired" | "past_due" | "paused" | "trialing" | "unpaid";
+    "stripe.Stripe.Subscription.TransferData": {
+      /**
+       * Format: double
+       * @description A non-negative decimal between 0 and 100, with at most two decimal places. This represents the percentage of the subscription invoice total that will be transferred to the destination account. By default, the entire amount is transferred to the destination.
+       */
+      amount_percent: number | null;
+      /** @description The account where funds from the payment will be transferred to upon payment success. */
+      destination: string | components["schemas"]["stripe.Stripe.Account"];
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Subscription.TrialSettings.EndBehavior.MissingPaymentMethod": "cancel" | "create_invoice" | "pause";
+    "stripe.Stripe.Subscription.TrialSettings.EndBehavior": {
+      /** @description Indicates how the subscription should change when the trial ends if the user did not provide a payment method. */
+      missing_payment_method: components["schemas"]["stripe.Stripe.Subscription.TrialSettings.EndBehavior.MissingPaymentMethod"];
+    };
+    "stripe.Stripe.Subscription.TrialSettings": {
+      /** @description Defines how a subscription behaves when a free trial ends. */
+      end_behavior: components["schemas"]["stripe.Stripe.Subscription.TrialSettings.EndBehavior"];
+    };
+    /**
+     * @description A container for paginated lists of objects.
+     * The array of objects is on the `.data` property,
+     * and `.has_more` indicates whether there are additional objects beyond the end of this list.
+     *
+     * Learn more in Stripe's [pagination docs](https://stripe.com/docs/api/pagination?lang=node)
+     * or, when iterating over many items, try [auto-pagination](https://github.com/stripe/stripe-node#auto-pagination) instead.
+     */
+    "stripe.Stripe.ApiList_stripe.Stripe.Subscription_": {
+      /** @enum {string} */
+      object: "list";
+      data: components["schemas"]["stripe.Stripe.Subscription"][];
+      /** @description True if this list has another page of items after this one that can be fetched. */
+      has_more: boolean;
+      /** @description The URL where this list can be accessed. */
+      url: string;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Customer.Tax.AutomaticTax": "failed" | "not_collecting" | "supported" | "unrecognized_location";
+    /** @enum {string} */
+    "stripe.Stripe.Customer.Tax.Location.Source": "billing_address" | "ip_address" | "payment_method" | "shipping_destination";
+    "stripe.Stripe.Customer.Tax.Location": {
+      /** @description The identified tax country of the customer. */
+      country: string;
+      /** @description The data source used to infer the customer's location. */
+      source: components["schemas"]["stripe.Stripe.Customer.Tax.Location.Source"];
+      /** @description The identified tax state, county, province, or region of the customer. */
+      state: string | null;
+    };
+    "stripe.Stripe.Customer.Tax": {
+      /** @description Surfaces if automatic tax computation is possible given the current customer location information. */
+      automatic_tax: components["schemas"]["stripe.Stripe.Customer.Tax.AutomaticTax"];
+      /** @description A recent IP address of the customer used for tax reporting and tax location inference. */
+      ip_address: string | null;
+      /** @description The identified tax location of the customer. */
+      location: components["schemas"]["stripe.Stripe.Customer.Tax.Location"] | null;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Customer.TaxExempt": "exempt" | "none" | "reverse";
+    /**
+     * @description A container for paginated lists of objects.
+     * The array of objects is on the `.data` property,
+     * and `.has_more` indicates whether there are additional objects beyond the end of this list.
+     *
+     * Learn more in Stripe's [pagination docs](https://stripe.com/docs/api/pagination?lang=node)
+     * or, when iterating over many items, try [auto-pagination](https://github.com/stripe/stripe-node#auto-pagination) instead.
+     */
+    "stripe.Stripe.ApiList_stripe.Stripe.TaxId_": {
+      /** @enum {string} */
+      object: "list";
+      data: components["schemas"]["stripe.Stripe.TaxId"][];
+      /** @description True if this list has another page of items after this one that can be fetched. */
+      has_more: boolean;
+      /** @description The URL where this list can be accessed. */
+      url: string;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.TaxId.Owner.Type": "account" | "application" | "customer" | "self";
+    "stripe.Stripe.TaxId.Owner": {
+      /** @description The account being referenced when `type` is `account`. */
+      account?: string | components["schemas"]["stripe.Stripe.Account"];
+      /** @description The Connect Application being referenced when `type` is `application`. */
+      application?: string | components["schemas"]["stripe.Stripe.Application"];
+      /** @description The customer being referenced when `type` is `customer`. */
+      customer?: string | components["schemas"]["stripe.Stripe.Customer"];
+      /** @description The account being referenced when `type` is `customer`. */
+      customer_account?: string | null;
+      /** @description Type of owner referenced. */
+      type: components["schemas"]["stripe.Stripe.TaxId.Owner.Type"];
+    };
+    /** @enum {string} */
+    "stripe.Stripe.TaxId.Type": "ad_nrt" | "ae_trn" | "al_tin" | "am_tin" | "ao_tin" | "ar_cuit" | "au_abn" | "au_arn" | "aw_tin" | "az_tin" | "ba_tin" | "bb_tin" | "bd_bin" | "bf_ifu" | "bg_uic" | "bh_vat" | "bj_ifu" | "bo_tin" | "br_cnpj" | "br_cpf" | "bs_tin" | "by_tin" | "ca_bn" | "ca_gst_hst" | "ca_pst_bc" | "ca_pst_mb" | "ca_pst_sk" | "ca_qst" | "cd_nif" | "ch_uid" | "ch_vat" | "cl_tin" | "cm_niu" | "cn_tin" | "co_nit" | "cr_tin" | "cv_nif" | "de_stn" | "do_rcn" | "ec_ruc" | "eg_tin" | "es_cif" | "et_tin" | "eu_oss_vat" | "eu_vat" | "gb_vat" | "ge_vat" | "gn_nif" | "hk_br" | "hr_oib" | "hu_tin" | "id_npwp" | "il_vat" | "in_gst" | "is_vat" | "jp_cn" | "jp_rn" | "jp_trn" | "ke_pin" | "kg_tin" | "kh_tin" | "kr_brn" | "kz_bin" | "la_tin" | "li_uid" | "li_vat" | "ma_vat" | "md_vat" | "me_pib" | "mk_vat" | "mr_nif" | "mx_rfc" | "my_frp" | "my_itn" | "my_sst" | "ng_tin" | "no_vat" | "no_voec" | "np_pan" | "nz_gst" | "om_vat" | "pe_ruc" | "ph_tin" | "ro_tin" | "rs_pib" | "ru_inn" | "ru_kpp" | "sa_vat" | "sg_gst" | "sg_uen" | "si_tin" | "sn_ninea" | "sr_fin" | "sv_nit" | "th_vat" | "tj_tin" | "tr_tin" | "tw_vat" | "tz_vat" | "ua_vat" | "ug_tin" | "unknown" | "us_ein" | "uy_ruc" | "uz_tin" | "uz_vat" | "ve_rif" | "vn_tin" | "za_vat" | "zm_tin" | "zw_tin";
+    /** @enum {string} */
+    "stripe.Stripe.TaxId.Verification.Status": "pending" | "unavailable" | "unverified" | "verified";
+    "stripe.Stripe.TaxId.Verification": {
+      /** @description Verification status, one of `pending`, `verified`, `unverified`, or `unavailable`. */
+      status: components["schemas"]["stripe.Stripe.TaxId.Verification.Status"];
+      /** @description Verified address. */
+      verified_address: string | null;
+      /** @description Verified name. */
+      verified_name: string | null;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Invoice.AmountsDue.Status": "open" | "paid" | "past_due";
+    "stripe.Stripe.Invoice.AmountsDue": {
+      /**
+       * Format: double
+       * @description Incremental amount due for this payment in cents (or local equivalent).
+       */
+      amount: number;
+      /**
+       * Format: double
+       * @description The amount in cents (or local equivalent) that was paid for this payment.
+       */
+      amount_paid: number;
+      /**
+       * Format: double
+       * @description The difference between the payment's amount and amount_paid, in cents (or local equivalent).
+       */
+      amount_remaining: number;
+      /**
+       * Format: double
+       * @description Number of days from when invoice is finalized until the payment is due.
+       */
+      days_until_due: number | null;
+      /** @description An arbitrary string attached to the object. Often useful for displaying to users. */
+      description: string | null;
+      /**
+       * Format: double
+       * @description Date on which a payment plan's payment is due.
+       */
+      due_date: number | null;
+      /**
+       * Format: double
+       * @description Timestamp when the payment was paid.
+       */
+      paid_at: number | null;
+      /** @description The status of the payment, one of `open`, `paid`, or `past_due` */
+      status: components["schemas"]["stripe.Stripe.Invoice.AmountsDue.Status"];
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Invoice.AutomaticTax.DisabledReason": "finalization_requires_location_inputs" | "finalization_system_error";
+    /** @enum {string} */
+    "stripe.Stripe.Invoice.AutomaticTax.Liability.Type": "account" | "self";
+    "stripe.Stripe.Invoice.AutomaticTax.Liability": {
+      /** @description The connected account being referenced when `type` is `account`. */
+      account?: string | components["schemas"]["stripe.Stripe.Account"];
+      /** @description Type of the account referenced. */
+      type: components["schemas"]["stripe.Stripe.Invoice.AutomaticTax.Liability.Type"];
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Invoice.AutomaticTax.Status": "complete" | "failed" | "requires_location_inputs";
+    "stripe.Stripe.Invoice.AutomaticTax": {
+      /** @description If Stripe disabled automatic tax, this enum describes why. */
+      disabled_reason: components["schemas"]["stripe.Stripe.Invoice.AutomaticTax.DisabledReason"] | null;
+      /** @description Whether Stripe automatically computes tax on this invoice. Note that incompatible invoice items (invoice items with manually specified [tax rates](https://stripe.com/docs/api/tax_rates), negative amounts, or `tax_behavior=unspecified`) cannot be added to automatic tax invoices. */
+      enabled: boolean;
+      /** @description The account that's liable for tax. If set, the business address and tax registrations required to perform the tax calculation are loaded from this account. The tax transaction is returned in the report of the connected account. */
+      liability: components["schemas"]["stripe.Stripe.Invoice.AutomaticTax.Liability"] | null;
+      /** @description The tax provider powering automatic tax. */
+      provider: string | null;
+      /** @description The status of the most recent automated tax calculation for this invoice. */
+      status: components["schemas"]["stripe.Stripe.Invoice.AutomaticTax.Status"] | null;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Invoice.BillingReason": "automatic_pending_invoice_item_invoice" | "manual" | "quote_accept" | "subscription" | "subscription_create" | "subscription_cycle" | "subscription_threshold" | "subscription_update" | "upcoming";
+    /** @enum {string} */
+    "stripe.Stripe.Invoice.CollectionMethod": "charge_automatically" | "send_invoice";
+    "stripe.Stripe.Invoice.ConfirmationSecret": {
+      /** @description The client_secret of the payment that Stripe creates for the invoice after finalization. */
+      client_secret: string;
+      /** @description The type of client_secret. Currently this is always payment_intent, referencing the default payment_intent that Stripe creates during invoice finalization */
+      type: string;
+    };
+    "stripe.Stripe.Invoice.CustomField": {
+      /** @description The name of the custom field. */
+      name: string;
+      /** @description The value of the custom field. */
+      value: string;
+    };
+    "stripe.Stripe.Invoice.CustomerShipping": {
+      address?: components["schemas"]["stripe.Stripe.Address"];
+      /** @description The delivery service that shipped a physical product, such as Fedex, UPS, USPS, etc. */
+      carrier?: string | null;
+      /** @description Recipient name. */
+      name?: string;
+      /** @description Recipient phone (including extension). */
+      phone?: string | null;
+      /** @description The tracking number for a physical product, obtained from the delivery service. If multiple tracking numbers were generated for this purchase, please separate them with commas. */
+      tracking_number?: string | null;
+    };
+    /** @enum {string} */
+    "stripe.Stripe.Invoice.CustomerTaxExempt": "exempt" | "none" | "reverse";
+    /** @enum {string} */
+    "stripe.Stripe.Invoice.CustomerTaxId.Type": "ad_nrt" | "ae_trn" | "al_tin" | "am_tin" | "ao_tin" | "ar_cuit" | "au_abn" | "au_arn" | "aw_tin" | "az_tin" | "ba_tin" | "bb_tin" | "bd_bin" | "bf_ifu" | "bg_uic" | "bh_vat" | "bj_ifu" | "bo_tin" | "br_cnpj" | "br_cpf" | "bs_tin" | "by_tin" | "ca_bn" | "ca_gst_hst" | "ca_pst_bc" | "ca_pst_mb" | "ca_pst_sk" | "ca_qst" | "cd_nif" | "ch_uid" | "ch_vat" | "cl_tin" | "cm_niu" | "cn_tin" | "co_nit" | "cr_tin" | "cv_nif" | "de_stn" | "do_rcn" | "ec_ruc" | "eg_tin" | "es_cif" | "et_tin" | "eu_oss_vat" | "eu_vat" | "gb_vat" | "ge_vat" | "gn_nif" | "hk_br" | "hr_oib" | "hu_tin" | "id_npwp" | "il_vat" | "in_gst" | "is_vat" | "jp_cn" | "jp_rn" | "jp_trn" | "ke_pin" | "kg_tin" | "kh_tin" | "kr_brn" | "kz_bin" | "la_tin" | "li_uid" | "li_vat" | "ma_vat" | "md_vat" | "me_pib" | "mk_vat" | "mr_nif" | "mx_rfc" | "my_frp" | "my_itn" | "my_sst" | "ng_tin" | "no_vat" | "no_voec" | "np_pan" | "nz_gst" | "om_vat" | "pe_ruc" | "ph_tin" | "ro_tin" | "rs_pib" | "ru_inn" | "ru_kpp" | "sa_vat" | "sg_gst" | "sg_uen" | "si_tin" | "sn_ninea" | "sr_fin" | "sv_nit" | "th_vat" | "tj_tin" | "tr_tin" | "tw_vat" | "tz_vat" | "ua_vat" | "ug_tin" | "unknown" | "us_ein" | "uy_ruc" | "uz_tin" | "uz_vat" | "ve_rif" | "vn_tin" | "za_vat" | "zm_tin" | "zw_tin";
+    "stripe.Stripe.Invoice.CustomerTaxId": {
+      /** @description The type of the tax ID, one of `ad_nrt`, `ar_cuit`, `eu_vat`, `bo_tin`, `br_cnpj`, `br_cpf`, `cn_tin`, `co_nit`, `cr_tin`, `do_rcn`, `ec_ruc`, `eu_oss_vat`, `hr_oib`, `pe_ruc`, `ro_tin`, `rs_pib`, `sv_nit`, `uy_ruc`, `ve_rif`, `vn_tin`, `gb_vat`, `nz_gst`, `au_abn`, `au_arn`, `in_gst`, `no_vat`, `no_voec`, `za_vat`, `ch_vat`, `mx_rfc`, `sg_uen`, `ru_inn`, `ru_kpp`, `ca_bn`, `hk_br`, `es_cif`, `tw_vat`, `th_vat`, `jp_cn`, `jp_rn`, `jp_trn`, `li_uid`, `li_vat`, `my_itn`, `us_ein`, `kr_brn`, `ca_qst`, `ca_gst_hst`, `ca_pst_bc`, `ca_pst_mb`, `ca_pst_sk`, `my_sst`, `sg_gst`, `ae_trn`, `cl_tin`, `sa_vat`, `id_npwp`, `my_frp`, `il_vat`, `ge_vat`, `ua_vat`, `is_vat`, `bg_uic`, `hu_tin`, `si_tin`, `ke_pin`, `tr_tin`, `eg_tin`, `ph_tin`, `al_tin`, `bh_vat`, `kz_bin`, `ng_tin`, `om_vat`, `de_stn`, `ch_uid`, `tz_vat`, `uz_vat`, `uz_tin`, `md_vat`, `ma_vat`, `by_tin`, `ao_tin`, `bs_tin`, `bb_tin`, `cd_nif`, `mr_nif`, `me_pib`, `zw_tin`, `ba_tin`, `gn_nif`, `mk_vat`, `sr_fin`, `sn_ninea`, `am_tin`, `np_pan`, `tj_tin`, `ug_tin`, `zm_tin`, `kh_tin`, `aw_tin`, `az_tin`, `bd_bin`, `bj_ifu`, `et_tin`, `kg_tin`, `la_tin`, `cm_niu`, `cv_nif`, `bf_ifu`, or `unknown` */
+      type: components["schemas"]["stripe.Stripe.Invoice.CustomerTaxId.Type"];
+      /** @description The value of the tax ID. */
+      value: string | null;
+    };
+    /**
+     * @description A (partner) margin represents a specific discount distributed in partner reseller programs to business partners who
+     * resell products and services and earn a discount (margin) for doing so.
+     */
+    "stripe.Stripe.Margin": {
+      /** @description Unique identifier for the object. */
+      id: string;
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: "margin";
+      /** @description Whether the margin can be applied to invoices, invoice items, or invoice line items. Defaults to `true`. */
+      active: boolean;
+      /**
+       * Format: double
+       * @description Time at which the object was created. Measured in seconds since the Unix epoch.
+       */
+      created: number;
+      /** @description Has the value `true` if the object exists in live mode or the value `false` if the object exists in test mode. */
+      livemode: boolean;
+      /** @description Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. */
+      metadata: components["schemas"]["stripe.Stripe.Metadata"] | null;
+      /** @description Name of the margin that's displayed on, for example, invoices. */
+      name: string | null;
+      /**
+       * Format: double
+       * @description Percent that will be taken off the subtotal before tax (after all other discounts and promotions) of any invoice to which the margin is applied.
+       */
+      percent_off: number;
+      /**
+       * Format: double
+       * @description Time at which the object was last updated. Measured in seconds since the Unix epoch.
+       */
+      updated: number;
+    };
+    /** @description The DeletedDiscount object. */
+    "stripe.Stripe.DeletedDiscount": {
+      /** @description The ID of the discount object. Discounts cannot be fetched by ID. Use `expand[]=discounts` in API calls to expand discount IDs in an array. */
+      id: string;
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: "discount";
+      /** @description The Checkout session that this coupon is applied to, if it is applied to a particular session in payment mode. Will not be present for subscription mode. */
+      checkout_session: string | null;
+      /**
+       * @description A coupon contains information about a percent-off or amount-off discount you
+       * might want to apply to a customer. Coupons may be applied to [subscriptions](https://stripe.com/docs/api#subscriptions), [invoices](https://stripe.com/docs/api#invoices),
+       * [checkout sessions](https://stripe.com/docs/api/checkout/sessions), [quotes](https://stripe.com/docs/api#quotes), and more. Coupons do not work with conventional one-off [charges](https://stripe.com/docs/api#create_charge) or [payment intents](https://stripe.com/docs/api/payment_intents).
+       */
+      coupon: components["schemas"]["stripe.Stripe.Coupon"];
+      /** @description The ID of the customer associated with this discount. */
+      customer: (string | components["schemas"]["stripe.Stripe.Customer"] | components["schemas"]["stripe.Stripe.DeletedCustomer"]) | null;
+      /** @description The ID of the account associated with this discount. */
+      customer_account?: string | null;
+      /**
+       * @description Always true for a deleted object
+       * @enum {boolean}
+       */
+      deleted: true;
+      /** @description The invoice that the discount's coupon was applied to, if it was applied directly to a particular invoice. */
+      invoice: string | null;
+      /** @description The invoice item `id` (or invoice line item `id` for invoice line items of type='subscription') that the discount's coupon was applied to, if it was applied directly to a particular invoice item or invoice line item. */
+      invoice_item: string | null;
+      /** @description The promotion code applied to create this discount. */
+      promotion_code: (string | components["schemas"]["stripe.Stripe.PromotionCode"]) | null;
+      /**
+       * Format: double
+       * @description Date that the coupon was applied.
+       */
+      start: number;
+      /** @description The subscription that this coupon is applied to, if it is applied to a particular subscription. */
+      subscription: string | null;
+      /** @description The subscription item that this coupon is applied to, if it is applied to a particular subscription item. */
+      subscription_item: string | null;
+    };
     "stripe.Stripe.Invoice.FromInvoice": {
       /** @description The relation between this invoice and the cloned invoice */
       action: string;
@@ -14979,170 +13316,6 @@ Json: JsonObject;
        */
       start: number;
     };
-    "stripe.Stripe.Billing.CreditBalanceTransaction.Credit.Amount.Monetary": {
-      /** @description Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase. Must be a [supported currency](https://stripe.com/docs/currencies). */
-      currency: string;
-      /**
-       * Format: double
-       * @description A positive integer representing the amount.
-       */
-      value: number;
-    };
-    "stripe.Stripe.Billing.CreditBalanceTransaction.Credit.Amount": {
-      /** @description The monetary amount. */
-      monetary: components["schemas"]["stripe.Stripe.Billing.CreditBalanceTransaction.Credit.Amount.Monetary"] | null;
-      /**
-       * @description The type of this amount. We currently only support `monetary` billing credits.
-       * @enum {string}
-       */
-      type: "monetary";
-    };
-    "stripe.Stripe.Billing.CreditBalanceTransaction.Credit.CreditsApplicationInvoiceVoided": {
-      /** @description The invoice to which the reinstated billing credits were originally applied. */
-      invoice: string | components["schemas"]["stripe.Stripe.Invoice"];
-      /** @description The invoice line item to which the reinstated billing credits were originally applied. */
-      invoice_line_item: string;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Billing.CreditBalanceTransaction.Credit.Type": "credits_application_invoice_voided" | "credits_granted";
-    "stripe.Stripe.Billing.CreditBalanceTransaction.Credit": {
-      amount: components["schemas"]["stripe.Stripe.Billing.CreditBalanceTransaction.Credit.Amount"];
-      /** @description Details of the invoice to which the reinstated credits were originally applied. Only present if `type` is `credits_application_invoice_voided`. */
-      credits_application_invoice_voided: components["schemas"]["stripe.Stripe.Billing.CreditBalanceTransaction.Credit.CreditsApplicationInvoiceVoided"] | null;
-      /** @description The type of credit transaction. */
-      type: components["schemas"]["stripe.Stripe.Billing.CreditBalanceTransaction.Credit.Type"];
-    };
-    "stripe.Stripe.Billing.CreditGrant.Amount.Monetary": {
-      /** @description Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase. Must be a [supported currency](https://stripe.com/docs/currencies). */
-      currency: string;
-      /**
-       * Format: double
-       * @description A positive integer representing the amount.
-       */
-      value: number;
-    };
-    "stripe.Stripe.Billing.CreditGrant.Amount": {
-      /** @description The monetary amount. */
-      monetary: components["schemas"]["stripe.Stripe.Billing.CreditGrant.Amount.Monetary"] | null;
-      /**
-       * @description The type of this amount. We currently only support `monetary` billing credits.
-       * @enum {string}
-       */
-      type: "monetary";
-    };
-    "stripe.Stripe.Billing.CreditGrant.ApplicabilityConfig.Scope.Price": {
-      /** @description Unique identifier for the object. */
-      id: string | null;
-    };
-    "stripe.Stripe.Billing.CreditGrant.ApplicabilityConfig.Scope": {
-      /**
-       * @description The price type that credit grants can apply to. We currently only support the `metered` price type. This refers to prices that have a [Billing Meter](https://docs.stripe.com/api/billing/meter) attached to them. Cannot be used in combination with `prices`.
-       * @enum {string}
-       */
-      price_type?: "metered";
-      /** @description The prices that credit grants can apply to. We currently only support `metered` prices. This refers to prices that have a [Billing Meter](https://docs.stripe.com/api/billing/meter) attached to them. Cannot be used in combination with `price_type`. */
-      prices?: components["schemas"]["stripe.Stripe.Billing.CreditGrant.ApplicabilityConfig.Scope.Price"][];
-    };
-    "stripe.Stripe.Billing.CreditGrant.ApplicabilityConfig": {
-      scope: components["schemas"]["stripe.Stripe.Billing.CreditGrant.ApplicabilityConfig.Scope"];
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Billing.CreditGrant.Category": "paid" | "promotional";
-    /**
-     * @description A credit grant is an API resource that documents the allocation of some billing credits to a customer.
-     *
-     * Related guide: [Billing credits](https://docs.stripe.com/billing/subscriptions/usage-based/billing-credits)
-     */
-    "stripe.Stripe.Billing.CreditGrant": {
-      /** @description Unique identifier for the object. */
-      id: string;
-      /**
-       * @description String representing the object's type. Objects of the same type share the same value.
-       * @enum {string}
-       */
-      object: "billing.credit_grant";
-      amount: components["schemas"]["stripe.Stripe.Billing.CreditGrant.Amount"];
-      applicability_config: components["schemas"]["stripe.Stripe.Billing.CreditGrant.ApplicabilityConfig"];
-      /** @description The category of this credit grant. This is for tracking purposes and isn't displayed to the customer. */
-      category: components["schemas"]["stripe.Stripe.Billing.CreditGrant.Category"];
-      /**
-       * Format: double
-       * @description Time at which the object was created. Measured in seconds since the Unix epoch.
-       */
-      created: number;
-      /** @description ID of the customer receiving the billing credits. */
-      customer: string | components["schemas"]["stripe.Stripe.Customer"] | components["schemas"]["stripe.Stripe.DeletedCustomer"];
-      /** @description ID of the account receiving the billing credits */
-      customer_account?: string | null;
-      /**
-       * Format: double
-       * @description The time when the billing credits become effective-when they're eligible for use.
-       */
-      effective_at: number | null;
-      /**
-       * Format: double
-       * @description The time when the billing credits expire. If not present, the billing credits don't expire.
-       */
-      expires_at: number | null;
-      /** @description Has the value `true` if the object exists in live mode or the value `false` if the object exists in test mode. */
-      livemode: boolean;
-      /** @description Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. */
-      metadata: components["schemas"]["stripe.Stripe.Metadata"];
-      /** @description A descriptive name shown in dashboard. */
-      name: string | null;
-      /**
-       * Format: double
-       * @description The priority for applying this credit grant. The highest priority is 0 and the lowest is 100.
-       */
-      priority?: number | null;
-      /** @description ID of the test clock this credit grant belongs to. */
-      test_clock: (string | components["schemas"]["stripe.Stripe.TestHelpers.TestClock"]) | null;
-      /**
-       * Format: double
-       * @description Time at which the object was last updated. Measured in seconds since the Unix epoch.
-       */
-      updated: number;
-      /**
-       * Format: double
-       * @description The time when this credit grant was voided. If not present, the credit grant hasn't been voided.
-       */
-      voided_at: number | null;
-    };
-    "stripe.Stripe.Billing.CreditBalanceTransaction.Debit.Amount.Monetary": {
-      /** @description Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase. Must be a [supported currency](https://stripe.com/docs/currencies). */
-      currency: string;
-      /**
-       * Format: double
-       * @description A positive integer representing the amount.
-       */
-      value: number;
-    };
-    "stripe.Stripe.Billing.CreditBalanceTransaction.Debit.Amount": {
-      /** @description The monetary amount. */
-      monetary: components["schemas"]["stripe.Stripe.Billing.CreditBalanceTransaction.Debit.Amount.Monetary"] | null;
-      /**
-       * @description The type of this amount. We currently only support `monetary` billing credits.
-       * @enum {string}
-       */
-      type: "monetary";
-    };
-    "stripe.Stripe.Billing.CreditBalanceTransaction.Debit.CreditsApplied": {
-      /** @description The invoice to which the billing credits were applied. */
-      invoice: string | components["schemas"]["stripe.Stripe.Invoice"];
-      /** @description The invoice line item to which the billing credits were applied. */
-      invoice_line_item: string;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Billing.CreditBalanceTransaction.Debit.Type": "credits_applied" | "credits_expired" | "credits_voided";
-    "stripe.Stripe.Billing.CreditBalanceTransaction.Debit": {
-      amount: components["schemas"]["stripe.Stripe.Billing.CreditBalanceTransaction.Debit.Amount"];
-      /** @description Details of how the billing credits were applied to an invoice. Only present if `type` is `credits_applied`. */
-      credits_applied: components["schemas"]["stripe.Stripe.Billing.CreditBalanceTransaction.Debit.CreditsApplied"] | null;
-      /** @description The type of debit transaction. */
-      type: components["schemas"]["stripe.Stripe.Billing.CreditBalanceTransaction.Debit.Type"];
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Billing.CreditBalanceTransaction.Type": "credit" | "debit";
     /** @description A credit balance transaction is a resource representing a transaction (either a credit or a debit) against an existing credit grant. */
     "stripe.Stripe.Billing.CreditBalanceTransaction": {
       /** @description Unique identifier for the object. */
@@ -16910,737 +15083,2594 @@ Json: JsonObject;
        */
       type: "tax_rate_details";
     };
-    /** @enum {string} */
-    "stripe.Stripe.Subscription.PauseCollection.Behavior": "keep_as_draft" | "mark_uncollectible" | "void";
-    "stripe.Stripe.Subscription.PauseCollection": {
-      /** @description The payment collection behavior for this subscription while paused. One of `keep_as_draft`, `mark_uncollectible`, or `void`. */
-      behavior: components["schemas"]["stripe.Stripe.Subscription.PauseCollection.Behavior"];
-      /**
-       * Format: double
-       * @description The time after which the subscription will resume collecting payments.
-       */
-      resumes_at: number | null;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.AcssDebit.MandateOptions.TransactionType": "business" | "personal";
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.AcssDebit.MandateOptions": {
-      /** @description Transaction type of the mandate. */
-      transaction_type: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.AcssDebit.MandateOptions.TransactionType"] | null;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.AcssDebit.VerificationMethod": "automatic" | "instant" | "microdeposits";
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.AcssDebit": {
-      mandate_options?: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.AcssDebit.MandateOptions"];
-      /** @description Bank account verification method. */
-      verification_method?: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.AcssDebit.VerificationMethod"];
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Bancontact.PreferredLanguage": "de" | "en" | "fr" | "nl";
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Bancontact": {
-      /** @description Preferred language of the Bancontact authorization page that the customer is redirected to. */
-      preferred_language: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Bancontact.PreferredLanguage"];
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card.MandateOptions.AmountType": "fixed" | "maximum";
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card.MandateOptions": {
-      /**
-       * Format: double
-       * @description Amount to be charged for future payments.
-       */
-      amount: number | null;
-      /** @description One of `fixed` or `maximum`. If `fixed`, the `amount` param refers to the exact amount to be charged in future payments. If `maximum`, the amount charged can be up to the value passed for the `amount` param. */
-      amount_type: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card.MandateOptions.AmountType"] | null;
-      /** @description A description of the mandate or subscription that is meant to be displayed to the customer. */
-      description: string | null;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card.Network": "amex" | "cartes_bancaires" | "diners" | "discover" | "eftpos_au" | "girocard" | "interac" | "jcb" | "link" | "mastercard" | "unionpay" | "unknown" | "visa";
-    /** @enum {string} */
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card.RequestThreeDSecure": "any" | "automatic" | "challenge";
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card": {
-      mandate_options?: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card.MandateOptions"];
-      /** @description Selected network to process this Subscription on. Depends on the available networks of the card attached to the Subscription. Can be only set confirm-time. */
-      network: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card.Network"] | null;
-      /** @description We strongly recommend that you rely on our SCA Engine to automatically prompt your customers for authentication based on risk level and [other requirements](https://stripe.com/docs/strong-customer-authentication). However, if you wish to request 3D Secure based on logic from your own fraud engine, provide this option. Read our guide on [manually requesting 3D Secure](https://stripe.com/docs/payments/3d-secure/authentication-flow#manual-three-ds) for more information on how this configuration interacts with Radar and our SCA Engine. */
-      request_three_d_secure: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card.RequestThreeDSecure"] | null;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.CustomerBalance.BankTransfer.EuBankTransfer.Country": "BE" | "DE" | "ES" | "FR" | "IE" | "NL";
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.CustomerBalance.BankTransfer.EuBankTransfer": {
-      /** @description The desired country code of the bank account information. Permitted values include: `BE`, `DE`, `ES`, `FR`, `IE`, or `NL`. */
-      country: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.CustomerBalance.BankTransfer.EuBankTransfer.Country"];
-    };
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.CustomerBalance.BankTransfer": {
-      eu_bank_transfer?: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.CustomerBalance.BankTransfer.EuBankTransfer"];
-      /** @description The bank transfer type that can be used for funding. Permitted values include: `eu_bank_transfer`, `gb_bank_transfer`, `jp_bank_transfer`, `mx_bank_transfer`, or `us_bank_transfer`. */
-      type: string | null;
-    };
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.CustomerBalance": {
-      bank_transfer?: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.CustomerBalance.BankTransfer"];
-      /**
-       * @description The funding method type to be used when there are not enough funds in the customer balance. Permitted values include: `bank_transfer`.
-       * @enum {string|null}
-       */
-      funding_type: "bank_transfer" | null;
-    };
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.IdBankTransfer": Record<string, never>;
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Konbini": Record<string, never>;
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.SepaDebit": Record<string, never>;
-    /** @enum {string} */
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Upi.MandateOptions.AmountType": "fixed" | "maximum";
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Upi.MandateOptions": {
-      /**
-       * Format: double
-       * @description Amount to be charged for future payments.
-       */
-      amount: number | null;
-      /** @description One of `fixed` or `maximum`. If `fixed`, the `amount` param refers to the exact amount to be charged in future payments. If `maximum`, the amount charged can be up to the value passed for the `amount` param. */
-      amount_type: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Upi.MandateOptions.AmountType"] | null;
-      /** @description A description of the mandate or subscription that is meant to be displayed to the customer. */
-      description: string | null;
-      /**
-       * Format: double
-       * @description End date of the mandate or subscription. If not provided, the mandate will be active until canceled. If provided, end date should be after start date.
-       */
-      end_date: number | null;
-    };
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Upi": {
-      mandate_options?: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Upi.MandateOptions"];
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections.Filters.AccountSubcategory": "checking" | "savings";
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections.Filters": {
-      /** @description The account subcategories to use to filter for possible accounts to link. Valid subcategories are `checking` and `savings`. */
-      account_subcategories?: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections.Filters.AccountSubcategory"][];
-      /** @description The institution to use to filter for possible accounts to link. */
-      institution?: string;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections.Permission": "balances" | "ownership" | "payment_method" | "transactions";
-    /** @enum {string} */
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections.Prefetch": "balances" | "inferred_balances" | "ownership" | "transactions";
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections": {
-      filters?: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections.Filters"];
-      /** @description The list of permissions to request. The `payment_method` permission must be included. */
-      permissions?: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections.Permission"][];
-      /** @description Data features requested to be retrieved upon account creation. */
-      prefetch: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections.Prefetch"][] | null;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.VerificationMethod": "automatic" | "instant" | "microdeposits";
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount": {
-      financial_connections?: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.FinancialConnections"];
-      /** @description Bank account verification method. */
-      verification_method?: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount.VerificationMethod"];
-    };
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions": {
-      /** @description This sub-hash contains details about the Canadian pre-authorized debit payment method options to pass to invoices created by the subscription. */
-      acss_debit: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.AcssDebit"] | null;
-      /** @description This sub-hash contains details about the Bancontact payment method options to pass to invoices created by the subscription. */
-      bancontact: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Bancontact"] | null;
-      /** @description This sub-hash contains details about the Card payment method options to pass to invoices created by the subscription. */
-      card: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Card"] | null;
-      /** @description This sub-hash contains details about the Bank transfer payment method options to pass to invoices created by the subscription. */
-      customer_balance: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.CustomerBalance"] | null;
-      /** @description This sub-hash contains details about the Indonesia bank transfer payment method options to pass to invoices created by the subscription. */
-      id_bank_transfer?: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.IdBankTransfer"] | null;
-      /** @description This sub-hash contains details about the Konbini payment method options to pass to invoices created by the subscription. */
-      konbini: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Konbini"] | null;
-      /** @description This sub-hash contains details about the SEPA Direct Debit payment method options to pass to invoices created by the subscription. */
-      sepa_debit: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.SepaDebit"] | null;
-      /** @description This sub-hash contains details about the UPI payment method options to pass to invoices created by the subscription. */
-      upi?: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.Upi"] | null;
-      /** @description This sub-hash contains details about the ACH direct debit payment method options to pass to invoices created by the subscription. */
-      us_bank_account: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions.UsBankAccount"] | null;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Subscription.PaymentSettings.PaymentMethodType": "ach_credit_transfer" | "ach_debit" | "acss_debit" | "affirm" | "amazon_pay" | "au_becs_debit" | "bacs_debit" | "bancontact" | "boleto" | "card" | "cashapp" | "crypto" | "custom" | "customer_balance" | "eps" | "fpx" | "giropay" | "grabpay" | "id_bank_transfer" | "ideal" | "jp_credit_transfer" | "kakao_pay" | "klarna" | "konbini" | "kr_card" | "link" | "multibanco" | "naver_pay" | "nz_bank_account" | "p24" | "payco" | "paynow" | "paypal" | "promptpay" | "revolut_pay" | "sepa_credit_transfer" | "sepa_debit" | "sofort" | "stripe_balance" | "swish" | "upi" | "us_bank_account" | "wechat_pay";
-    /** @enum {string} */
-    "stripe.Stripe.Subscription.PaymentSettings.SaveDefaultPaymentMethod": "off" | "on_subscription";
-    "stripe.Stripe.Subscription.PaymentSettings": {
-      /** @description Payment-method-specific configuration to provide to invoices created by the subscription. */
-      payment_method_options: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodOptions"] | null;
-      /** @description The list of payment method types to provide to every invoice created by the subscription. If not set, Stripe attempts to automatically determine the types to use by looking at the invoice's default payment method, the subscription's default payment method, the customer's default payment method, and your [invoice template settings](https://dashboard.stripe.com/settings/billing/invoice). */
-      payment_method_types: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.PaymentMethodType"][] | null;
-      /** @description Configure whether Stripe updates `subscription.default_payment_method` when payment succeeds. Defaults to `off`. */
-      save_default_payment_method: components["schemas"]["stripe.Stripe.Subscription.PaymentSettings.SaveDefaultPaymentMethod"] | null;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Subscription.PendingInvoiceItemInterval.Interval": "day" | "month" | "week" | "year";
-    "stripe.Stripe.Subscription.PendingInvoiceItemInterval": {
-      /** @description Specifies invoicing frequency. Either `day`, `week`, `month` or `year`. */
-      interval: components["schemas"]["stripe.Stripe.Subscription.PendingInvoiceItemInterval.Interval"];
-      /**
-       * Format: double
-       * @description The number of intervals between invoices. For example, `interval=month` and `interval_count=3` bills every 3 months. Maximum of one year interval allowed (1 year, 12 months, or 52 weeks).
-       */
-      interval_count: number;
-    };
-    "stripe.Stripe.Subscription.PendingUpdate": {
-      /**
-       * Format: double
-       * @description If the update is applied, determines the date of the first full invoice, and, for plans with `month` or `year` intervals, the day of the month for subsequent invoices. The timestamp is in UTC format.
-       */
-      billing_cycle_anchor: number | null;
-      /**
-       * Format: double
-       * @description The point after which the changes reflected by this update will be discarded and no longer applied.
-       */
-      expires_at: number;
-      /**
-       * Format: double
-       * @description The number of iterations of prebilling to apply.
-       */
-      prebilling_iterations?: number | null;
-      /** @description List of subscription items, each with an attached plan, that will be set if the update is applied. */
-      subscription_items: components["schemas"]["stripe.Stripe.SubscriptionItem"][] | null;
-      /**
-       * Format: double
-       * @description Unix timestamp representing the end of the trial period the customer will get before being charged for the first time, if the update is applied.
-       */
-      trial_end: number | null;
-      /** @description Indicates if a plan's `trial_period_days` should be applied to the subscription. Setting `trial_end` per subscription is preferred, and this defaults to `false`. Setting this flag to `true` together with `trial_end` is not allowed. See [Using trial periods on subscriptions](https://stripe.com/docs/billing/subscriptions/trials) to learn more. */
-      trial_from_plan: boolean | null;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Subscription.Prebilling.UpdateBehavior": "prebill" | "reset";
-    "stripe.Stripe.Subscription.Prebilling": {
-      /** @description ID of the prebilling invoice. */
+    "stripe.Stripe.Billing.CreditBalanceTransaction.Credit.CreditsApplicationInvoiceVoided": {
+      /** @description The invoice to which the reinstated billing credits were originally applied. */
       invoice: string | components["schemas"]["stripe.Stripe.Invoice"];
-      /**
-       * Format: double
-       * @description The end of the last period for which the invoice pre-bills.
-       */
-      period_end: number;
-      /**
-       * Format: double
-       * @description The start of the first period for which the invoice pre-bills.
-       */
-      period_start: number;
-      /** @description Whether to cancel or preserve `prebilling` if the subscription is updated during the prebilled period. */
-      update_behavior?: components["schemas"]["stripe.Stripe.Subscription.Prebilling.UpdateBehavior"];
+      /** @description The invoice line item to which the reinstated billing credits were originally applied. */
+      invoice_line_item: string;
     };
     /** @enum {string} */
-    "stripe.Stripe.SubscriptionSchedule.BillingBehavior": "prorate_on_next_phase" | "prorate_up_front";
-    /** @enum {string} */
-    "stripe.Stripe.SubscriptionSchedule.BillingMode.Type": "classic" | "flexible";
-    "stripe.Stripe.SubscriptionSchedule.BillingMode": {
-      /** @description Controls how prorations and invoices for subscriptions are calculated and orchestrated. */
-      type: components["schemas"]["stripe.Stripe.SubscriptionSchedule.BillingMode.Type"];
-      /**
-       * Format: double
-       * @description Details on when the current billing_mode was adopted.
-       */
-      updated_at?: number;
+    "stripe.Stripe.Billing.CreditBalanceTransaction.Credit.Type": "credits_application_invoice_voided" | "credits_granted";
+    "stripe.Stripe.Billing.CreditBalanceTransaction.Credit": {
+      amount: components["schemas"]["stripe.Stripe.Billing.CreditBalanceTransaction.Credit.Amount"];
+      /** @description Details of the invoice to which the reinstated credits were originally applied. Only present if `type` is `credits_application_invoice_voided`. */
+      credits_application_invoice_voided: components["schemas"]["stripe.Stripe.Billing.CreditBalanceTransaction.Credit.CreditsApplicationInvoiceVoided"] | null;
+      /** @description The type of credit transaction. */
+      type: components["schemas"]["stripe.Stripe.Billing.CreditBalanceTransaction.Credit.Type"];
     };
-    "stripe.Stripe.SubscriptionSchedule.CurrentPhase": {
-      /**
-       * Format: double
-       * @description The end of this phase of the subscription schedule.
-       */
-      end_date: number;
-      /**
-       * Format: double
-       * @description The start of this phase of the subscription schedule.
-       */
-      start_date: number;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.AutomaticTax.Liability.Type": "account" | "self";
-    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.AutomaticTax.Liability": {
-      /** @description The connected account being referenced when `type` is `account`. */
-      account?: string | components["schemas"]["stripe.Stripe.Account"];
-      /** @description Type of the account referenced. */
-      type: components["schemas"]["stripe.Stripe.SubscriptionSchedule.DefaultSettings.AutomaticTax.Liability.Type"];
-    };
-    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.AutomaticTax": {
-      /**
-       * @description If Stripe disabled automatic tax, this enum describes why.
-       * @enum {string|null}
-       */
-      disabled_reason: "requires_location_inputs" | null;
-      /** @description Whether Stripe automatically computes tax on invoices created during this phase. */
-      enabled: boolean;
-      /** @description The account that's liable for tax. If set, the business address and tax registrations required to perform the tax calculation are loaded from this account. The tax transaction is returned in the report of the connected account. */
-      liability: components["schemas"]["stripe.Stripe.SubscriptionSchedule.DefaultSettings.AutomaticTax.Liability"] | null;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.BillingCycleAnchor": "automatic" | "phase_start";
-    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.BillingThresholds": {
-      /**
-       * Format: double
-       * @description Monetary threshold that triggers the subscription to create an invoice
-       */
-      amount_gte: number | null;
-      /** @description Indicates if the `billing_cycle_anchor` should be reset when a threshold is reached. If true, `billing_cycle_anchor` will be updated to the date/time the threshold was last reached; otherwise, the value will remain unchanged. This value may not be `true` if the subscription contains items with plans that have `aggregate_usage=last_ever`. */
-      reset_billing_cycle_anchor: boolean | null;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.CollectionMethod": "charge_automatically" | "send_invoice";
-    /** @enum {string} */
-    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.InvoiceSettings.Issuer.Type": "account" | "self";
-    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.InvoiceSettings.Issuer": {
-      /** @description The connected account being referenced when `type` is `account`. */
-      account?: string | components["schemas"]["stripe.Stripe.Account"];
-      /** @description Type of the account referenced. */
-      type: components["schemas"]["stripe.Stripe.SubscriptionSchedule.DefaultSettings.InvoiceSettings.Issuer.Type"];
-    };
-    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.InvoiceSettings": {
-      /** @description The account tax IDs associated with the subscription schedule. Will be set on invoices generated by the subscription schedule. */
-      account_tax_ids: ((string | components["schemas"]["stripe.Stripe.TaxId"] | components["schemas"]["stripe.Stripe.DeletedTaxId"])[]) | null;
-      /**
-       * Format: double
-       * @description Number of days within which a customer must pay invoices generated by this subscription schedule. This value will be `null` for subscription schedules where `billing=charge_automatically`.
-       */
-      days_until_due: number | null;
-      issuer: components["schemas"]["stripe.Stripe.SubscriptionSchedule.DefaultSettings.InvoiceSettings.Issuer"];
-    };
-    "stripe.Stripe.SubscriptionSchedule.DefaultSettings.TransferData": {
-      /**
-       * Format: double
-       * @description A non-negative decimal between 0 and 100, with at most two decimal places. This represents the percentage of the subscription invoice total that will be transferred to the destination account. By default, the entire amount is transferred to the destination.
-       */
-      amount_percent: number | null;
-      /** @description The account where funds from the payment will be transferred to upon payment success. */
-      destination: string | components["schemas"]["stripe.Stripe.Account"];
-    };
-    "stripe.Stripe.SubscriptionSchedule.DefaultSettings": {
-      /**
-       * Format: double
-       * @description A non-negative decimal between 0 and 100, with at most two decimal places. This represents the percentage of the subscription invoice total that will be transferred to the application owner's Stripe account during this phase of the schedule.
-       */
-      application_fee_percent: number | null;
-      automatic_tax?: components["schemas"]["stripe.Stripe.SubscriptionSchedule.DefaultSettings.AutomaticTax"];
-      /** @description Possible values are `phase_start` or `automatic`. If `phase_start` then billing cycle anchor of the subscription is set to the start of the phase when entering the phase. If `automatic` then the billing cycle anchor is automatically modified as needed when entering the phase. For more information, see the billing cycle [documentation](https://stripe.com/docs/billing/subscriptions/billing-cycle). */
-      billing_cycle_anchor: components["schemas"]["stripe.Stripe.SubscriptionSchedule.DefaultSettings.BillingCycleAnchor"];
-      /** @description Define thresholds at which an invoice will be sent, and the subscription advanced to a new billing period */
-      billing_thresholds: components["schemas"]["stripe.Stripe.SubscriptionSchedule.DefaultSettings.BillingThresholds"] | null;
-      /** @description Either `charge_automatically`, or `send_invoice`. When charging automatically, Stripe will attempt to pay the underlying subscription at the end of each billing cycle using the default source attached to the customer. When sending an invoice, Stripe will email your customer an invoice with payment instructions and mark the subscription as `active`. */
-      collection_method: components["schemas"]["stripe.Stripe.SubscriptionSchedule.DefaultSettings.CollectionMethod"] | null;
-      /** @description ID of the default payment method for the subscription schedule. If not set, invoices will use the default payment method in the customer's invoice settings. */
-      default_payment_method: (string | components["schemas"]["stripe.Stripe.PaymentMethod"]) | null;
-      /** @description Subscription description, meant to be displayable to the customer. Use this field to optionally store an explanation of the subscription for rendering in Stripe surfaces and certain local payment methods UIs. */
-      description: string | null;
-      invoice_settings: components["schemas"]["stripe.Stripe.SubscriptionSchedule.DefaultSettings.InvoiceSettings"];
-      /** @description The account (if any) the charge was made on behalf of for charges associated with the schedule's subscription. See the Connect documentation for details. */
-      on_behalf_of: (string | components["schemas"]["stripe.Stripe.Account"]) | null;
-      /** @description The account (if any) the associated subscription's payments will be attributed to for tax reporting, and where funds from each payment will be transferred to for each of the subscription's invoices. */
-      transfer_data: components["schemas"]["stripe.Stripe.SubscriptionSchedule.DefaultSettings.TransferData"] | null;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.SubscriptionSchedule.EndBehavior": "cancel" | "none" | "release" | "renew";
-    "stripe.Stripe.SubscriptionSchedule.LastPriceMigrationError.FailedTransition": {
-      /** @description The original price to be migrated. */
-      source_price: string;
-      /** @description The intended resulting price of the migration. */
-      target_price: string;
-    };
-    "stripe.Stripe.SubscriptionSchedule.LastPriceMigrationError": {
-      /**
-       * Format: double
-       * @description The time at which the price migration encountered an error.
-       */
-      errored_at: number;
-      /** @description The involved price pairs in each failed transition. */
-      failed_transitions: components["schemas"]["stripe.Stripe.SubscriptionSchedule.LastPriceMigrationError.FailedTransition"][];
-      /**
-       * @description The type of error encountered by the price migration.
-       * @enum {string}
-       */
-      type: "price_uniqueness_violation";
-    };
-    "stripe.Stripe.SubscriptionSchedule.Phase.AddInvoiceItem.Discount.DiscountEnd": {
-      /**
-       * Format: double
-       * @description The discount end timestamp.
-       */
-      timestamp: number | null;
-      /**
-       * @description The discount end type.
-       * @enum {string}
-       */
-      type: "timestamp";
-    };
-    "stripe.Stripe.SubscriptionSchedule.Phase.AddInvoiceItem.Discount": {
-      /** @description ID of the coupon to create a new discount for. */
-      coupon: (string | components["schemas"]["stripe.Stripe.Coupon"]) | null;
-      /** @description ID of an existing discount on the object (or one of its ancestors) to reuse. */
-      discount: (string | components["schemas"]["stripe.Stripe.Discount"]) | null;
-      /** @description Details to determine how long the discount should be applied for. */
-      discount_end?: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.AddInvoiceItem.Discount.DiscountEnd"] | null;
-      /** @description ID of the promotion code to create a new discount for. */
-      promotion_code: (string | components["schemas"]["stripe.Stripe.PromotionCode"]) | null;
-    };
-    /** @description The DeletedPrice object. */
-    "stripe.Stripe.DeletedPrice": {
-      /** @description Unique identifier for the object. */
-      id: string;
-      /**
-       * @description String representing the object's type. Objects of the same type share the same value.
-       * @enum {string}
-       */
-      object: "price";
-      /**
-       * @description Always true for a deleted object
-       * @enum {boolean}
-       */
-      deleted: true;
-    };
-    "stripe.Stripe.SubscriptionSchedule.Phase.AddInvoiceItem": {
-      /** @description The stackable discounts that will be applied to the item. */
-      discounts: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.AddInvoiceItem.Discount"][];
-      /** @description ID of the price used to generate the invoice item. */
-      price: string | components["schemas"]["stripe.Stripe.Price"] | components["schemas"]["stripe.Stripe.DeletedPrice"];
-      /**
-       * Format: double
-       * @description The quantity of the invoice item.
-       */
-      quantity: number | null;
-      /** @description The tax rates which apply to the item. When set, the `default_tax_rates` do not apply to this item. */
-      tax_rates?: components["schemas"]["stripe.Stripe.TaxRate"][] | null;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.SubscriptionSchedule.Phase.AutomaticTax.Liability.Type": "account" | "self";
-    "stripe.Stripe.SubscriptionSchedule.Phase.AutomaticTax.Liability": {
-      /** @description The connected account being referenced when `type` is `account`. */
-      account?: string | components["schemas"]["stripe.Stripe.Account"];
-      /** @description Type of the account referenced. */
-      type: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.AutomaticTax.Liability.Type"];
-    };
-    "stripe.Stripe.SubscriptionSchedule.Phase.AutomaticTax": {
-      /**
-       * @description If Stripe disabled automatic tax, this enum describes why.
-       * @enum {string|null}
-       */
-      disabled_reason: "requires_location_inputs" | null;
-      /** @description Whether Stripe automatically computes tax on invoices created during this phase. */
-      enabled: boolean;
-      /** @description The account that's liable for tax. If set, the business address and tax registrations required to perform the tax calculation are loaded from this account. The tax transaction is returned in the report of the connected account. */
-      liability: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.AutomaticTax.Liability"] | null;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.SubscriptionSchedule.Phase.BillingCycleAnchor": "automatic" | "phase_start";
-    "stripe.Stripe.SubscriptionSchedule.Phase.BillingThresholds": {
-      /**
-       * Format: double
-       * @description Monetary threshold that triggers the subscription to create an invoice
-       */
-      amount_gte: number | null;
-      /** @description Indicates if the `billing_cycle_anchor` should be reset when a threshold is reached. If true, `billing_cycle_anchor` will be updated to the date/time the threshold was last reached; otherwise, the value will remain unchanged. This value may not be `true` if the subscription contains items with plans that have `aggregate_usage=last_ever`. */
-      reset_billing_cycle_anchor: boolean | null;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.SubscriptionSchedule.Phase.CollectionMethod": "charge_automatically" | "send_invoice";
-    "stripe.Stripe.SubscriptionSchedule.Phase.Discount.DiscountEnd": {
-      /**
-       * Format: double
-       * @description The discount end timestamp.
-       */
-      timestamp: number | null;
-      /**
-       * @description The discount end type.
-       * @enum {string}
-       */
-      type: "timestamp";
-    };
-    "stripe.Stripe.SubscriptionSchedule.Phase.Discount": {
-      /** @description ID of the coupon to create a new discount for. */
-      coupon: (string | components["schemas"]["stripe.Stripe.Coupon"]) | null;
-      /** @description ID of an existing discount on the object (or one of its ancestors) to reuse. */
-      discount: (string | components["schemas"]["stripe.Stripe.Discount"]) | null;
-      /** @description Details to determine how long the discount should be applied for. */
-      discount_end?: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.Discount.DiscountEnd"] | null;
-      /** @description ID of the promotion code to create a new discount for. */
-      promotion_code: (string | components["schemas"]["stripe.Stripe.PromotionCode"]) | null;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.SubscriptionSchedule.Phase.InvoiceSettings.Issuer.Type": "account" | "self";
-    "stripe.Stripe.SubscriptionSchedule.Phase.InvoiceSettings.Issuer": {
-      /** @description The connected account being referenced when `type` is `account`. */
-      account?: string | components["schemas"]["stripe.Stripe.Account"];
-      /** @description Type of the account referenced. */
-      type: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.InvoiceSettings.Issuer.Type"];
-    };
-    "stripe.Stripe.SubscriptionSchedule.Phase.InvoiceSettings": {
-      /** @description The account tax IDs associated with this phase of the subscription schedule. Will be set on invoices generated by this phase of the subscription schedule. */
-      account_tax_ids: ((string | components["schemas"]["stripe.Stripe.TaxId"] | components["schemas"]["stripe.Stripe.DeletedTaxId"])[]) | null;
-      /**
-       * Format: double
-       * @description Number of days within which a customer must pay invoices generated by this subscription schedule. This value will be `null` for subscription schedules where `billing=charge_automatically`.
-       */
-      days_until_due: number | null;
-      /** @description The connected account that issues the invoice. The invoice is presented with the branding and support information of the specified account. */
-      issuer: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.InvoiceSettings.Issuer"] | null;
-    };
-    "stripe.Stripe.SubscriptionSchedule.Phase.Item.BillingThresholds": {
-      /**
-       * Format: double
-       * @description Usage threshold that triggers the subscription to create an invoice
-       */
-      usage_gte: number | null;
-    };
-    "stripe.Stripe.SubscriptionSchedule.Phase.Item.Discount.DiscountEnd": {
-      /**
-       * Format: double
-       * @description The discount end timestamp.
-       */
-      timestamp: number | null;
-      /**
-       * @description The discount end type.
-       * @enum {string}
-       */
-      type: "timestamp";
-    };
-    "stripe.Stripe.SubscriptionSchedule.Phase.Item.Discount": {
-      /** @description ID of the coupon to create a new discount for. */
-      coupon: (string | components["schemas"]["stripe.Stripe.Coupon"]) | null;
-      /** @description ID of an existing discount on the object (or one of its ancestors) to reuse. */
-      discount: (string | components["schemas"]["stripe.Stripe.Discount"]) | null;
-      /** @description Details to determine how long the discount should be applied for. */
-      discount_end?: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.Item.Discount.DiscountEnd"] | null;
-      /** @description ID of the promotion code to create a new discount for. */
-      promotion_code: (string | components["schemas"]["stripe.Stripe.PromotionCode"]) | null;
-    };
-    /** @description The DeletedPlan object. */
-    "stripe.Stripe.DeletedPlan": {
-      /** @description Unique identifier for the object. */
-      id: string;
-      /**
-       * @description String representing the object's type. Objects of the same type share the same value.
-       * @enum {string}
-       */
-      object: "plan";
-      /**
-       * @description Always true for a deleted object
-       * @enum {boolean}
-       */
-      deleted: true;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.SubscriptionSchedule.Phase.Item.Trial.Type": "free" | "paid";
-    "stripe.Stripe.SubscriptionSchedule.Phase.Item.Trial": {
-      /** @description List of price IDs which, if present on the subscription following a paid trial, constitute opting-in to the paid trial. */
-      converts_to?: string[] | null;
-      /** @description Determines the type of trial for this item. */
-      type: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.Item.Trial.Type"];
-    };
-    "stripe.Stripe.SubscriptionSchedule.Phase.Item": {
-      /** @description Define thresholds at which an invoice will be sent, and the related subscription advanced to a new billing period */
-      billing_thresholds: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.Item.BillingThresholds"] | null;
-      /** @description The discounts applied to the subscription item. Subscription item discounts are applied before subscription discounts. Use `expand[]=discounts` to expand each discount. */
-      discounts: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.Item.Discount"][];
-      /** @description Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an item. Metadata on this item will update the underlying subscription item's `metadata` when the phase is entered. */
-      metadata: components["schemas"]["stripe.Stripe.Metadata"] | null;
-      /** @description ID of the plan to which the customer should be subscribed. */
-      plan: string | components["schemas"]["stripe.Stripe.Plan"] | components["schemas"]["stripe.Stripe.DeletedPlan"];
-      /** @description ID of the price to which the customer should be subscribed. */
-      price: string | components["schemas"]["stripe.Stripe.Price"] | components["schemas"]["stripe.Stripe.DeletedPrice"];
-      /**
-       * Format: double
-       * @description Quantity of the plan to which the customer should be subscribed.
-       */
-      quantity?: number;
-      /** @description The tax rates which apply to this `phase_item`. When set, the `default_tax_rates` on the phase do not apply to this `phase_item`. */
-      tax_rates?: components["schemas"]["stripe.Stripe.TaxRate"][] | null;
-      /** @description Options that configure the trial on the subscription item. */
-      trial?: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.Item.Trial"] | null;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.SubscriptionSchedule.Phase.PauseCollection.Behavior": "keep_as_draft" | "mark_uncollectible" | "void";
-    "stripe.Stripe.SubscriptionSchedule.Phase.PauseCollection": {
-      /** @description The payment collection behavior for this subscription while paused. One of `keep_as_draft`, `mark_uncollectible`, or `void`. */
-      behavior: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.PauseCollection.Behavior"];
-    };
-    /** @enum {string} */
-    "stripe.Stripe.SubscriptionSchedule.Phase.ProrationBehavior": "always_invoice" | "create_prorations" | "none";
-    "stripe.Stripe.SubscriptionSchedule.Phase.TransferData": {
-      /**
-       * Format: double
-       * @description A non-negative decimal between 0 and 100, with at most two decimal places. This represents the percentage of the subscription invoice total that will be transferred to the destination account. By default, the entire amount is transferred to the destination.
-       */
-      amount_percent: number | null;
-      /** @description The account where funds from the payment will be transferred to upon payment success. */
-      destination: string | components["schemas"]["stripe.Stripe.Account"];
-    };
-    /** @enum {string} */
-    "stripe.Stripe.SubscriptionSchedule.Phase.TrialContinuation": "continue" | "none";
-    /** @enum {string} */
-    "stripe.Stripe.SubscriptionSchedule.Phase.TrialSettings.EndBehavior.ProrateUpFront": "defer" | "include";
-    "stripe.Stripe.SubscriptionSchedule.Phase.TrialSettings.EndBehavior": {
-      /** @description Configure how an opt-in following a paid trial is billed when using `billing_behavior: prorate_up_front`. */
-      prorate_up_front: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.TrialSettings.EndBehavior.ProrateUpFront"] | null;
-    };
-    "stripe.Stripe.SubscriptionSchedule.Phase.TrialSettings": {
-      /** @description Defines how the subscription should behave when a trial ends. */
-      end_behavior: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.TrialSettings.EndBehavior"] | null;
-    };
-    "stripe.Stripe.SubscriptionSchedule.Phase": {
-      /** @description A list of prices and quantities that will generate invoice items appended to the next invoice for this phase. */
-      add_invoice_items: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.AddInvoiceItem"][];
-      /**
-       * Format: double
-       * @description A non-negative decimal between 0 and 100, with at most two decimal places. This represents the percentage of the subscription invoice total that will be transferred to the application owner's Stripe account during this phase of the schedule.
-       */
-      application_fee_percent: number | null;
-      automatic_tax?: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.AutomaticTax"];
-      /** @description Possible values are `phase_start` or `automatic`. If `phase_start` then billing cycle anchor of the subscription is set to the start of the phase when entering the phase. If `automatic` then the billing cycle anchor is automatically modified as needed when entering the phase. For more information, see the billing cycle [documentation](https://stripe.com/docs/billing/subscriptions/billing-cycle). */
-      billing_cycle_anchor: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.BillingCycleAnchor"] | null;
-      /** @description Define thresholds at which an invoice will be sent, and the subscription advanced to a new billing period */
-      billing_thresholds: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.BillingThresholds"] | null;
-      /** @description Either `charge_automatically`, or `send_invoice`. When charging automatically, Stripe will attempt to pay the underlying subscription at the end of each billing cycle using the default source attached to the customer. When sending an invoice, Stripe will email your customer an invoice with payment instructions and mark the subscription as `active`. */
-      collection_method: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.CollectionMethod"] | null;
+    "stripe.Stripe.Billing.CreditGrant.Amount.Monetary": {
       /** @description Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase. Must be a [supported currency](https://stripe.com/docs/currencies). */
       currency: string;
-      /** @description ID of the default payment method for the subscription schedule. It must belong to the customer associated with the subscription schedule. If not set, invoices will use the default payment method in the customer's invoice settings. */
-      default_payment_method: (string | components["schemas"]["stripe.Stripe.PaymentMethod"]) | null;
-      /** @description The default tax rates to apply to the subscription during this phase of the subscription schedule. */
-      default_tax_rates?: components["schemas"]["stripe.Stripe.TaxRate"][] | null;
-      /** @description Subscription description, meant to be displayable to the customer. Use this field to optionally store an explanation of the subscription for rendering in Stripe surfaces and certain local payment methods UIs. */
-      description: string | null;
-      /** @description The stackable discounts that will be applied to the subscription on this phase. Subscription item discounts are applied before subscription discounts. */
-      discounts: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.Discount"][];
       /**
        * Format: double
-       * @description The end of this phase of the subscription schedule.
+       * @description A positive integer representing the amount.
        */
-      end_date: number;
-      /** @description The invoice settings applicable during this phase. */
-      invoice_settings: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.InvoiceSettings"] | null;
-      /** @description Subscription items to configure the subscription to during this phase of the subscription schedule. */
-      items: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.Item"][];
-      /** @description Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to a phase. Metadata on a schedule's phase will update the underlying subscription's `metadata` when the phase is entered. Updating the underlying subscription's `metadata` directly will not affect the current phase's `metadata`. */
-      metadata: components["schemas"]["stripe.Stripe.Metadata"] | null;
-      /** @description The account (if any) the charge was made on behalf of for charges associated with the schedule's subscription. See the Connect documentation for details. */
-      on_behalf_of: (string | components["schemas"]["stripe.Stripe.Account"]) | null;
-      /** @description If specified, payment collection for this subscription will be paused. Note that the subscription status will be unchanged and will not be updated to `paused`. Learn more about [pausing collection](https://stripe.com/docs/billing/subscriptions/pause-payment). */
-      pause_collection?: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.PauseCollection"] | null;
-      /** @description When transitioning phases, controls how prorations are handled (if any). Possible values are `create_prorations`, `none`, and `always_invoice`. */
-      proration_behavior: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.ProrationBehavior"];
+      value: number;
+    };
+    "stripe.Stripe.Billing.CreditGrant.Amount": {
+      /** @description The monetary amount. */
+      monetary: components["schemas"]["stripe.Stripe.Billing.CreditGrant.Amount.Monetary"] | null;
       /**
-       * Format: double
-       * @description The start of this phase of the subscription schedule.
+       * @description The type of this amount. We currently only support `monetary` billing credits.
+       * @enum {string}
        */
-      start_date: number;
-      /** @description The account (if any) the associated subscription's payments will be attributed to for tax reporting, and where funds from each payment will be transferred to for each of the subscription's invoices. */
-      transfer_data: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.TransferData"] | null;
-      /** @description Specify behavior of the trial when crossing schedule phase boundaries */
-      trial_continuation?: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.TrialContinuation"] | null;
+      type: "monetary";
+    };
+    "stripe.Stripe.Billing.CreditGrant.ApplicabilityConfig.Scope.Price": {
+      /** @description Unique identifier for the object. */
+      id: string | null;
+    };
+    "stripe.Stripe.Billing.CreditGrant.ApplicabilityConfig.Scope": {
       /**
-       * Format: double
-       * @description When the trial ends within the phase.
+       * @description The price type that credit grants can apply to. We currently only support the `metered` price type. This refers to prices that have a [Billing Meter](https://docs.stripe.com/api/billing/meter) attached to them. Cannot be used in combination with `prices`.
+       * @enum {string}
        */
-      trial_end: number | null;
-      /** @description Settings related to any trials on the subscription during this phase. */
-      trial_settings?: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase.TrialSettings"] | null;
+      price_type?: "metered";
+      /** @description The prices that credit grants can apply to. We currently only support `metered` prices. This refers to prices that have a [Billing Meter](https://docs.stripe.com/api/billing/meter) attached to them. Cannot be used in combination with `price_type`. */
+      prices?: components["schemas"]["stripe.Stripe.Billing.CreditGrant.ApplicabilityConfig.Scope.Price"][];
+    };
+    "stripe.Stripe.Billing.CreditGrant.ApplicabilityConfig": {
+      scope: components["schemas"]["stripe.Stripe.Billing.CreditGrant.ApplicabilityConfig.Scope"];
     };
     /** @enum {string} */
-    "stripe.Stripe.SubscriptionSchedule.Prebilling.UpdateBehavior": "prebill" | "reset";
-    "stripe.Stripe.SubscriptionSchedule.Prebilling": {
-      /** @description ID of the prebilling invoice. */
-      invoice: string | components["schemas"]["stripe.Stripe.Invoice"];
-      /**
-       * Format: double
-       * @description The end of the last period for which the invoice pre-bills.
-       */
-      period_end: number;
-      /**
-       * Format: double
-       * @description The start of the first period for which the invoice pre-bills.
-       */
-      period_start: number;
-      /** @description Whether to cancel or preserve `prebilling` if the subscription is updated during the prebilled period. */
-      update_behavior?: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Prebilling.UpdateBehavior"];
-    };
-    /** @enum {string} */
-    "stripe.Stripe.SubscriptionSchedule.Status": "active" | "canceled" | "completed" | "not_started" | "released";
+    "stripe.Stripe.Billing.CreditGrant.Category": "paid" | "promotional";
     /**
-     * @description A subscription schedule allows you to create and manage the lifecycle of a subscription by predefining expected changes.
+     * @description A credit grant is an API resource that documents the allocation of some billing credits to a customer.
      *
-     * Related guide: [Subscription schedules](https://stripe.com/docs/billing/subscriptions/subscription-schedules)
+     * Related guide: [Billing credits](https://docs.stripe.com/billing/subscriptions/usage-based/billing-credits)
      */
-    "stripe.Stripe.SubscriptionSchedule": {
+    "stripe.Stripe.Billing.CreditGrant": {
       /** @description Unique identifier for the object. */
       id: string;
       /**
        * @description String representing the object's type. Objects of the same type share the same value.
        * @enum {string}
        */
-      object: "subscription_schedule";
-      /** @description ID of the Connect Application that created the schedule. */
-      application: (string | components["schemas"]["stripe.Stripe.Application"] | components["schemas"]["stripe.Stripe.DeletedApplication"]) | null;
-      /** @description Configures when the subscription schedule generates prorations for phase transitions. Possible values are `prorate_on_next_phase` or `prorate_up_front` with the default being `prorate_on_next_phase`. `prorate_on_next_phase` will apply phase changes and generate prorations at transition time. `prorate_up_front` will bill for all phases within the current billing cycle up front. */
-      billing_behavior?: components["schemas"]["stripe.Stripe.SubscriptionSchedule.BillingBehavior"];
-      /** @description The billing mode of the subscription. */
-      billing_mode: components["schemas"]["stripe.Stripe.SubscriptionSchedule.BillingMode"];
-      /**
-       * Format: double
-       * @description Time at which the subscription schedule was canceled. Measured in seconds since the Unix epoch.
-       */
-      canceled_at: number | null;
-      /**
-       * Format: double
-       * @description Time at which the subscription schedule was completed. Measured in seconds since the Unix epoch.
-       */
-      completed_at: number | null;
+      object: "billing.credit_grant";
+      amount: components["schemas"]["stripe.Stripe.Billing.CreditGrant.Amount"];
+      applicability_config: components["schemas"]["stripe.Stripe.Billing.CreditGrant.ApplicabilityConfig"];
+      /** @description The category of this credit grant. This is for tracking purposes and isn't displayed to the customer. */
+      category: components["schemas"]["stripe.Stripe.Billing.CreditGrant.Category"];
       /**
        * Format: double
        * @description Time at which the object was created. Measured in seconds since the Unix epoch.
        */
       created: number;
-      /** @description Object representing the start and end dates for the current phase of the subscription schedule, if it is `active`. */
-      current_phase: components["schemas"]["stripe.Stripe.SubscriptionSchedule.CurrentPhase"] | null;
-      /** @description ID of the customer who owns the subscription schedule. */
+      /** @description ID of the customer receiving the billing credits. */
       customer: string | components["schemas"]["stripe.Stripe.Customer"] | components["schemas"]["stripe.Stripe.DeletedCustomer"];
-      /** @description ID of the account who owns the subscription schedule. */
+      /** @description ID of the account receiving the billing credits */
       customer_account?: string | null;
-      default_settings: components["schemas"]["stripe.Stripe.SubscriptionSchedule.DefaultSettings"];
-      /** @description Behavior of the subscription schedule and underlying subscription when it ends. Possible values are `release` or `cancel` with the default being `release`. `release` will end the subscription schedule and keep the underlying subscription running. `cancel` will end the subscription schedule and cancel the underlying subscription. */
-      end_behavior: components["schemas"]["stripe.Stripe.SubscriptionSchedule.EndBehavior"];
-      /** @description Details of the most recent price migration that failed for the subscription schedule. */
-      last_price_migration_error?: components["schemas"]["stripe.Stripe.SubscriptionSchedule.LastPriceMigrationError"] | null;
+      /**
+       * Format: double
+       * @description The time when the billing credits become effective-when they're eligible for use.
+       */
+      effective_at: number | null;
+      /**
+       * Format: double
+       * @description The time when the billing credits expire. If not present, the billing credits don't expire.
+       */
+      expires_at: number | null;
       /** @description Has the value `true` if the object exists in live mode or the value `false` if the object exists in test mode. */
       livemode: boolean;
       /** @description Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. */
-      metadata: components["schemas"]["stripe.Stripe.Metadata"] | null;
-      /** @description Configuration for the subscription schedule's phases. */
-      phases: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Phase"][];
-      /** @description Time period and invoice for a Subscription billed in advance. */
-      prebilling?: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Prebilling"] | null;
+      metadata: components["schemas"]["stripe.Stripe.Metadata"];
+      /** @description A descriptive name shown in dashboard. */
+      name: string | null;
       /**
        * Format: double
-       * @description Time at which the subscription schedule was released. Measured in seconds since the Unix epoch.
+       * @description The priority for applying this credit grant. The highest priority is 0 and the lowest is 100.
        */
-      released_at: number | null;
-      /** @description ID of the subscription once managed by the subscription schedule (if it is released). */
-      released_subscription: string | null;
-      /** @description The present status of the subscription schedule. Possible values are `not_started`, `active`, `completed`, `released`, and `canceled`. You can read more about the different states in our [behavior guide](https://stripe.com/docs/billing/subscriptions/subscription-schedules). */
-      status: components["schemas"]["stripe.Stripe.SubscriptionSchedule.Status"];
-      /** @description ID of the subscription managed by the subscription schedule. */
-      subscription: (string | components["schemas"]["stripe.Stripe.Subscription"]) | null;
-      /** @description ID of the test clock this subscription schedule belongs to. */
+      priority?: number | null;
+      /** @description ID of the test clock this credit grant belongs to. */
       test_clock: (string | components["schemas"]["stripe.Stripe.TestHelpers.TestClock"]) | null;
-    };
-    /** @enum {string} */
-    "stripe.Stripe.Subscription.Status": "active" | "canceled" | "incomplete" | "incomplete_expired" | "past_due" | "paused" | "trialing" | "unpaid";
-    "stripe.Stripe.Subscription.TransferData": {
       /**
        * Format: double
-       * @description A non-negative decimal between 0 and 100, with at most two decimal places. This represents the percentage of the subscription invoice total that will be transferred to the destination account. By default, the entire amount is transferred to the destination.
+       * @description Time at which the object was last updated. Measured in seconds since the Unix epoch.
        */
-      amount_percent: number | null;
-      /** @description The account where funds from the payment will be transferred to upon payment success. */
-      destination: string | components["schemas"]["stripe.Stripe.Account"];
+      updated: number;
+      /**
+       * Format: double
+       * @description The time when this credit grant was voided. If not present, the credit grant hasn't been voided.
+       */
+      voided_at: number | null;
+    };
+    "stripe.Stripe.Billing.CreditBalanceTransaction.Debit.Amount.Monetary": {
+      /** @description Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase. Must be a [supported currency](https://stripe.com/docs/currencies). */
+      currency: string;
+      /**
+       * Format: double
+       * @description A positive integer representing the amount.
+       */
+      value: number;
+    };
+    "stripe.Stripe.Billing.CreditBalanceTransaction.Debit.Amount": {
+      /** @description The monetary amount. */
+      monetary: components["schemas"]["stripe.Stripe.Billing.CreditBalanceTransaction.Debit.Amount.Monetary"] | null;
+      /**
+       * @description The type of this amount. We currently only support `monetary` billing credits.
+       * @enum {string}
+       */
+      type: "monetary";
+    };
+    "stripe.Stripe.Billing.CreditBalanceTransaction.Debit.CreditsApplied": {
+      /** @description The invoice to which the billing credits were applied. */
+      invoice: string | components["schemas"]["stripe.Stripe.Invoice"];
+      /** @description The invoice line item to which the billing credits were applied. */
+      invoice_line_item: string;
     };
     /** @enum {string} */
-    "stripe.Stripe.Subscription.TrialSettings.EndBehavior.MissingPaymentMethod": "cancel" | "create_invoice" | "pause";
-    "stripe.Stripe.Subscription.TrialSettings.EndBehavior": {
-      /** @description Indicates how the subscription should change when the trial ends if the user did not provide a payment method. */
-      missing_payment_method: components["schemas"]["stripe.Stripe.Subscription.TrialSettings.EndBehavior.MissingPaymentMethod"];
+    "stripe.Stripe.Billing.CreditBalanceTransaction.Debit.Type": "credits_applied" | "credits_expired" | "credits_voided";
+    "stripe.Stripe.Billing.CreditBalanceTransaction.Debit": {
+      amount: components["schemas"]["stripe.Stripe.Billing.CreditBalanceTransaction.Debit.Amount"];
+      /** @description Details of how the billing credits were applied to an invoice. Only present if `type` is `credits_applied`. */
+      credits_applied: components["schemas"]["stripe.Stripe.Billing.CreditBalanceTransaction.Debit.CreditsApplied"] | null;
+      /** @description The type of debit transaction. */
+      type: components["schemas"]["stripe.Stripe.Billing.CreditBalanceTransaction.Debit.Type"];
     };
-    "stripe.Stripe.Subscription.TrialSettings": {
-      /** @description Defines how a subscription behaves when a free trial ends. */
-      end_behavior: components["schemas"]["stripe.Stripe.Subscription.TrialSettings.EndBehavior"];
+    /** @enum {string} */
+    "stripe.Stripe.Billing.CreditBalanceTransaction.Type": "credit" | "debit";
+    /**
+     * @description A container for paginated lists of objects.
+     * The array of objects is on the `.data` property,
+     * and `.has_more` indicates whether there are additional objects beyond the end of this list.
+     *
+     * Learn more in Stripe's [pagination docs](https://stripe.com/docs/api/pagination?lang=node)
+     * or, when iterating over many items, try [auto-pagination](https://github.com/stripe/stripe-node#auto-pagination) instead.
+     */
+    "stripe.Stripe.ApiList_stripe.Stripe.Billing.CreditBalanceTransaction_": {
+      /** @enum {string} */
+      object: "list";
+      data: components["schemas"]["stripe.Stripe.Billing.CreditBalanceTransaction"][];
+      /** @description True if this list has another page of items after this one that can be fetched. */
+      has_more: boolean;
+      /** @description The URL where this list can be accessed. */
+      url: string;
     };
+    CreateCloudGatewayCheckoutSessionRequest: {
+      /** Format: double */
+      amount: number;
+    };
+    UpgradeToProRequest: {
+      addons?: {
+        evals?: boolean;
+        experiments?: boolean;
+        prompts?: boolean;
+        alerts?: boolean;
+      };
+      /** Format: double */
+      seats?: number;
+      /** @enum {string} */
+      ui_mode?: "embedded" | "hosted";
+    };
+    UpgradeToTeamBundleRequest: {
+      /** @enum {string} */
+      ui_mode?: "embedded" | "hosted";
+    };
+    LLMUsage: {
+      model: string;
+      provider: string;
+      /** Format: double */
+      prompt_tokens: number;
+      /** Format: double */
+      completion_tokens: number;
+      /** Format: double */
+      total_count: number;
+      /** Format: double */
+      amount: number;
+      description: string;
+      totalCost: {
+        /** Format: double */
+        prompt_token: number;
+        /** Format: double */
+        completion_token: number;
+      };
+    };
+Json: JsonObject;
+    "ResultSuccess__40_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-and-_role-string__41_-Array_": {
+      data: (({
+          tier: string | null;
+          subscription_status: string | null;
+          stripe_subscription_item_id: string | null;
+          stripe_subscription_id: string | null;
+          stripe_metadata: components["schemas"]["Json"];
+          stripe_customer_id: string | null;
+          soft_delete: boolean;
+          size: string | null;
+          /** Format: double */
+          request_limit: number | null;
+          referral: string | null;
+          playground_helicone: boolean;
+          /** Format: double */
+          percent_to_log: number | null;
+          owner: string;
+          organization_type: string;
+          org_provider_key: string | null;
+          onboarding_status: components["schemas"]["Json"];
+          name: string;
+          limits: components["schemas"]["Json"] | null;
+          is_personal: boolean;
+          is_main_org: boolean;
+          id: string;
+          icon: string;
+          has_onboarded: boolean;
+          has_integrated: boolean;
+          governance_settings: components["schemas"]["Json"] | null;
+          domain: string | null;
+          created_at: string | null;
+          color: string;
+        }) & {
+          role: string;
+        })[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__40_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-and-_role-string__41_-Array.string_": components["schemas"]["ResultSuccess__40_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-and-_role-string__41_-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_Database-at-public_91_Tables_93_-at-organization_91_Row_93__": {
+      data: {
+        tier: string | null;
+        subscription_status: string | null;
+        stripe_subscription_item_id: string | null;
+        stripe_subscription_id: string | null;
+        stripe_metadata: components["schemas"]["Json"];
+        stripe_customer_id: string | null;
+        soft_delete: boolean;
+        size: string | null;
+        /** Format: double */
+        request_limit: number | null;
+        referral: string | null;
+        playground_helicone: boolean;
+        /** Format: double */
+        percent_to_log: number | null;
+        owner: string;
+        organization_type: string;
+        org_provider_key: string | null;
+        onboarding_status: components["schemas"]["Json"];
+        name: string;
+        limits: components["schemas"]["Json"] | null;
+        is_personal: boolean;
+        is_main_org: boolean;
+        id: string;
+        icon: string;
+        has_onboarded: boolean;
+        has_integrated: boolean;
+        governance_settings: components["schemas"]["Json"] | null;
+        domain: string | null;
+        created_at: string | null;
+        color: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Database-at-public_91_Tables_93_-at-organization_91_Row_93_.string_": components["schemas"]["ResultSuccess_Database-at-public_91_Tables_93_-at-organization_91_Row_93__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
+      data: {
+          tier: string;
+          subscription_status: string;
+          stripe_subscription_item_id: string;
+          stripe_subscription_id: string;
+          stripe_metadata: components["schemas"]["Json"];
+          stripe_customer_id: string;
+          soft_delete: boolean;
+          size: string;
+          /** Format: double */
+          request_limit: number;
+          referral: string;
+          playground_helicone: boolean;
+          /** Format: double */
+          percent_to_log: number;
+          owner: string;
+          organization_type: string;
+          org_provider_key: string;
+          onboarding_status: components["schemas"]["Json"];
+          name: string;
+          limits: components["schemas"]["Json"];
+          is_personal: boolean;
+          is_main_org: boolean;
+          id: string;
+          icon: string;
+          has_onboarded: boolean;
+          has_integrated: boolean;
+          governance_settings: components["schemas"]["Json"];
+          domain: string;
+          created_at: string;
+          color: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_": components["schemas"]["ResultSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__": {
+      data: components["schemas"]["Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    ResultError_unknown_: {
+      /** @enum {number|null} */
+      data: null;
+      error: unknown;
+    };
+    "Result_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_": components["schemas"]["ResultSuccess_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__"] | components["schemas"]["ResultError_unknown_"];
+    ResultSuccess_string_: {
+      data: string;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_string.string_": components["schemas"]["ResultSuccess_string_"] | components["schemas"]["ResultError_string_"];
+    NewOrganizationParams: {
+      tier?: string | null;
+      subscription_status?: string | null;
+      stripe_subscription_item_id?: string | null;
+      stripe_subscription_id?: string | null;
+      stripe_metadata?: components["schemas"]["Json"];
+      stripe_customer_id?: string | null;
+      soft_delete?: boolean;
+      size?: string | null;
+      /** Format: double */
+      request_limit?: number | null;
+      referral?: string | null;
+      playground_helicone?: boolean;
+      /** Format: double */
+      percent_to_log?: number | null;
+      owner: string;
+      organization_type?: string;
+      org_provider_key?: string | null;
+      onboarding_status?: components["schemas"]["Json"];
+      name: string;
+      limits?: components["schemas"]["Json"] | null;
+      is_personal?: boolean;
+      is_main_org?: boolean;
+      id?: string;
+      icon?: string;
+      has_onboarded?: boolean;
+      has_integrated?: boolean;
+      governance_settings?: components["schemas"]["Json"] | null;
+      domain?: string | null;
+      created_at?: string | null;
+      color?: string;
+    };
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-organization_type-or-onboarding_status_": {
+      name: string;
+      color?: string;
+      icon?: string;
+      org_provider_key?: string;
+      limits?: components["schemas"]["Json"];
+      organization_type?: string;
+      onboarding_status?: components["schemas"]["Json"];
+    };
+    UpdateOrganizationParams: components["schemas"]["Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-organization_type-or-onboarding_status_"] & {
+      variant?: string;
+    };
+    "ResultSuccess__temporaryPassword_63_-string_-or-null_": {
+      data: {
+        temporaryPassword?: string;
+      } | null;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__temporaryPassword_63_-string_-or-null.string_": components["schemas"]["ResultSuccess__temporaryPassword_63_-string_-or-null_"] | components["schemas"]["ResultError_string_"];
+    UIFilterRowTree: components["schemas"]["UIFilterRowNode"] | components["schemas"]["FilterRow"];
+    UIFilterRowNode: {
+      /** @enum {string} */
+      operator: "and" | "or";
+      rows: components["schemas"]["UIFilterRowTree"][];
+    };
+    FilterRow: {
+      value: string;
+      /** Format: double */
+      operatorIdx: number;
+      /** Format: double */
+      filterMapIdx: number;
+    };
+    OrganizationFilter: {
+      softDelete: boolean;
+      createdAt?: string;
+      filter: components["schemas"]["UIFilterRowTree"][];
+      name: string;
+      id: string;
+    };
+    OrganizationLayout: {
+      filters: components["schemas"]["OrganizationFilter"][];
+      type: string;
+      organization_id: string;
+      id: string;
+    };
+    ResultSuccess_OrganizationLayout_: {
+      data: components["schemas"]["OrganizationLayout"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_OrganizationLayout.string_": components["schemas"]["ResultSuccess_OrganizationLayout_"] | components["schemas"]["ResultError_string_"];
+    OrganizationMember: {
+      org_role: string;
+      member: string;
+      email: string;
+    };
+    "ResultSuccess_OrganizationMember-Array_": {
+      data: components["schemas"]["OrganizationMember"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_OrganizationMember-Array.string_": components["schemas"]["ResultSuccess_OrganizationMember-Array_"] | components["schemas"]["ResultError_string_"];
+    OrganizationOwner: {
+      tier: string;
+      email: string;
+    };
+    "ResultSuccess_OrganizationOwner-Array_": {
+      data: components["schemas"]["OrganizationOwner"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_OrganizationOwner-Array.string_": components["schemas"]["ResultSuccess_OrganizationOwner-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @description Make all properties in T optional */
+    "Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--hasIntegrated-boolean--hasCompletedQuickstart-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___": {
+      currentStep?: string;
+      selectedTier?: string;
+      hasOnboarded?: boolean;
+      hasIntegrated?: boolean;
+      hasCompletedQuickstart?: boolean;
+      members?: unknown[];
+      addons?: {
+        evals: boolean;
+        experiments: boolean;
+        prompts: boolean;
+      };
+    };
+    OnboardingStatus: components["schemas"]["Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--hasIntegrated-boolean--hasCompletedQuickstart-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___"];
+    EvaluatorResult: {
+      id: string;
+      created_at: string;
+      scoring_type: string;
+      llm_template: unknown;
+      organization_id: string;
+      updated_at: string;
+      name: string;
+      code_template: unknown;
+      last_mile_config: unknown;
+    };
+    ResultSuccess_EvaluatorResult_: {
+      data: components["schemas"]["EvaluatorResult"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_EvaluatorResult.string_": components["schemas"]["ResultSuccess_EvaluatorResult_"] | components["schemas"]["ResultError_string_"];
+    CreateEvaluatorParams: {
+      scoring_type: string;
+      llm_template?: unknown;
+      name: string;
+      code_template?: unknown;
+      last_mile_config?: unknown;
+    };
+    "ResultSuccess_EvaluatorResult-Array_": {
+      data: components["schemas"]["EvaluatorResult"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_EvaluatorResult-Array.string_": components["schemas"]["ResultSuccess_EvaluatorResult-Array_"] | components["schemas"]["ResultError_string_"];
+    UpdateEvaluatorParams: {
+      scoring_type?: string;
+      llm_template?: unknown;
+      code_template?: unknown;
+      name?: string;
+      last_mile_config?: unknown;
+    };
+    EvaluatorExperiment: {
+      experiment_name: string;
+      experiment_created_at: string;
+      experiment_id: string;
+    };
+    "ResultSuccess_EvaluatorExperiment-Array_": {
+      data: components["schemas"]["EvaluatorExperiment"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_EvaluatorExperiment-Array.string_": components["schemas"]["ResultSuccess_EvaluatorExperiment-Array_"] | components["schemas"]["ResultError_string_"];
+    OnlineEvaluatorByEvaluatorId: {
+      config: unknown;
+      id: string;
+    };
+    "ResultSuccess_OnlineEvaluatorByEvaluatorId-Array_": {
+      data: components["schemas"]["OnlineEvaluatorByEvaluatorId"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_OnlineEvaluatorByEvaluatorId-Array.string_": components["schemas"]["ResultSuccess_OnlineEvaluatorByEvaluatorId-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.any_": {
+      [key: string]: unknown;
+    };
+    CreateOnlineEvaluatorParams: {
+      config: components["schemas"]["Record_string.any_"];
+    };
+    "ResultSuccess__output-string--traces-string-Array--statusCode_63_-number__": {
+      data: {
+        /** Format: double */
+        statusCode?: number;
+        traces: string[];
+        output: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__output-string--traces-string-Array--statusCode_63_-number_.string_": components["schemas"]["ResultSuccess__output-string--traces-string-Array--statusCode_63_-number__"] | components["schemas"]["ResultError_string_"];
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.string_": {
+      [key: string]: string;
+    };
+    TestInput: {
+      promptTemplate?: string;
+      inputs: {
+        autoInputs?: components["schemas"]["Record_string.string_"];
+        inputs: components["schemas"]["Record_string.string_"];
+      };
+      outputBody: string;
+      inputBody: string;
+    };
+    EvaluatorScore: {
+      score: number | boolean;
+    };
+    ResultSuccess_EvaluatorScore_: {
+      data: components["schemas"]["EvaluatorScore"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_EvaluatorScore.string_": components["schemas"]["ResultSuccess_EvaluatorScore_"] | components["schemas"]["ResultError_string_"];
+    EvaluatorScoreResult: components["schemas"]["Result_EvaluatorScore.string_"];
+    EvaluatorConfig: {
+      evaluator_code_template?: string;
+      evaluator_llm_template?: string;
+      evaluator_scoring_type: string;
+    };
+    "ResultSuccess__score-number--input-string--output-string--ground_truth_63_-string__": {
+      data: {
+        ground_truth?: string;
+        output: string;
+        input: string;
+        /** Format: double */
+        score: number;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__score-number--input-string--output-string--ground_truth_63_-string_.string_": components["schemas"]["ResultSuccess__score-number--input-string--output-string--ground_truth_63_-string__"] | components["schemas"]["ResultError_string_"];
+    DataEntry: {
+      /** @enum {string} */
+      _type: "system-prompt";
+    } | {
+      inputKey: string;
+      /** @enum {string} */
+      _type: "prompt-input";
+    } | ({
+      /** @enum {string} */
+      content: "jsonify" | "message";
+      /** @enum {string} */
+      _type: "input-body";
+    }) | ({
+      /** @enum {string} */
+      content: "jsonify" | "message";
+      /** @enum {string} */
+      _type: "output-body";
+    });
+    BaseLastMileConfigForm: {
+      output: components["schemas"]["DataEntry"];
+      input: components["schemas"]["DataEntry"];
+      name: string;
+    };
+    LastMileConfigForm: components["schemas"]["BaseLastMileConfigForm"] & (({
+      /** @enum {string} */
+      _type: "relevance" | "context_relevance";
+    }) | {
+      groundTruth: components["schemas"]["DataEntry"];
+      /** @enum {string} */
+      _type: "faithfulness";
+    });
+    EvaluatorStats: {
+      /** Format: double */
+      averageScore: number;
+      /** Format: double */
+      totalUses: number;
+      /** @enum {string} */
+      recentTrend: "up" | "down" | "stable";
+      scoreDistribution: {
+          /** Format: double */
+          count: number;
+          range: string;
+        }[];
+      timeSeriesData: {
+          /** Format: double */
+          value: number;
+          date: string;
+        }[];
+    };
+    ResultSuccess_EvaluatorStats_: {
+      data: components["schemas"]["EvaluatorStats"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_EvaluatorStats.string_": components["schemas"]["ResultSuccess_EvaluatorStats_"] | components["schemas"]["ResultError_string_"];
+    Prompt2025: {
+      id: string;
+      name: string;
+      tags: string[];
+      created_at: string;
+    };
+    ResultSuccess_Prompt2025_: {
+      data: components["schemas"]["Prompt2025"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Prompt2025.string_": components["schemas"]["ResultSuccess_Prompt2025_"] | components["schemas"]["ResultError_string_"];
+    Prompt2025Input: {
+      request_id: string;
+      version_id: string;
+      inputs: components["schemas"]["Record_string.any_"];
+    };
+    ResultSuccess_Prompt2025Input_: {
+      data: components["schemas"]["Prompt2025Input"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Prompt2025Input.string_": components["schemas"]["ResultSuccess_Prompt2025Input_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_string-Array_": {
+      data: string[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_string-Array.string_": components["schemas"]["ResultSuccess_string-Array_"] | components["schemas"]["ResultError_string_"];
+    PromptCreateResponse: {
+      id: string;
+      versionId: string;
+    };
+    ResultSuccess_PromptCreateResponse_: {
+      data: components["schemas"]["PromptCreateResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptCreateResponse.string_": components["schemas"]["ResultSuccess_PromptCreateResponse_"] | components["schemas"]["ResultError_string_"];
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.number_": {
+      [key: string]: number;
+    };
+    /** @description Simplified interface for the OpenAI Chat request format */
+    OpenAIChatRequest: {
+      model?: string;
+      messages?: ({
+          tool_calls?: {
+              /** @enum {string} */
+              type: "function";
+              function: {
+                arguments: string;
+                name: string;
+              };
+              id: string;
+            }[];
+          tool_call_id?: string;
+          name?: string;
+          content: (string | {
+              image_url?: {
+                url: string;
+              };
+              text?: string;
+              type: string;
+            }[]) | null;
+          role: string;
+        })[];
+      /** Format: double */
+      temperature?: number;
+      /** Format: double */
+      top_p?: number;
+      /** Format: double */
+      max_tokens?: number;
+      /** Format: double */
+      max_completion_tokens?: number;
+      stream?: boolean;
+      stop?: string[] | string;
+      tools?: {
+          function: {
+            parameters: components["schemas"]["Record_string.any_"];
+            description: string;
+            name: string;
+          };
+          /** @enum {string} */
+          type: "function";
+        }[];
+      tool_choice?: {
+        function?: {
+          name: string;
+          /** @enum {string} */
+          type: "function";
+        };
+        type: string;
+      } | ("none" | "auto" | "required");
+      parallel_tool_calls?: boolean;
+      /** @enum {string} */
+      reasoning_effort?: "minimal" | "low" | "medium" | "high";
+      /** @enum {string} */
+      verbosity?: "low" | "medium" | "high";
+      /** Format: double */
+      frequency_penalty?: number;
+      /** Format: double */
+      presence_penalty?: number;
+      logit_bias?: components["schemas"]["Record_string.number_"];
+      logprobs?: boolean;
+      /** Format: double */
+      top_logprobs?: number;
+      /** Format: double */
+      n?: number;
+      modalities?: string[];
+      prediction?: unknown;
+      audio?: unknown;
+      response_format?: {
+        json_schema?: unknown;
+        type: string;
+      };
+      /** Format: double */
+      seed?: number;
+      service_tier?: string;
+      store?: boolean;
+      stream_options?: unknown;
+      metadata?: components["schemas"]["Record_string.string_"];
+      user?: string;
+      function_call?: string | {
+        name: string;
+      };
+      functions?: unknown[];
+    };
+    "ResultSuccess__id-string__": {
+      data: {
+        id: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__id-string_.string_": components["schemas"]["ResultSuccess__id-string__"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_number_: {
+      /** Format: double */
+      data: number;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_number.string_": components["schemas"]["ResultSuccess_number_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_Prompt2025-Array_": {
+      data: components["schemas"]["Prompt2025"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Prompt2025-Array.string_": components["schemas"]["ResultSuccess_Prompt2025-Array_"] | components["schemas"]["ResultError_string_"];
+    Prompt2025Version: {
+      id: string;
+      model: string;
+      prompt_id: string;
+      /** Format: double */
+      major_version: number;
+      /** Format: double */
+      minor_version: number;
+      commit_message: string;
+      environment?: string;
+      created_at: string;
+      s3_url?: string;
+    };
+    ResultSuccess_Prompt2025Version_: {
+      data: components["schemas"]["Prompt2025Version"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Prompt2025Version.string_": components["schemas"]["ResultSuccess_Prompt2025Version_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_Prompt2025Version-Array_": {
+      data: components["schemas"]["Prompt2025Version"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Prompt2025Version-Array.string_": components["schemas"]["ResultSuccess_Prompt2025Version-Array_"] | components["schemas"]["ResultError_string_"];
+    PromptVersionCounts: {
+      /** Format: double */
+      totalVersions: number;
+      /** Format: double */
+      majorVersions: number;
+    };
+    ResultSuccess_PromptVersionCounts_: {
+      data: components["schemas"]["PromptVersionCounts"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptVersionCounts.string_": components["schemas"]["ResultSuccess_PromptVersionCounts_"] | components["schemas"]["ResultError_string_"];
+    /** @description Make all properties in T optional */
+    Partial_TextOperators_: {
+      "not-equals"?: string;
+      equals?: string;
+      like?: string;
+      ilike?: string;
+      contains?: string;
+      "not-contains"?: string;
+    };
+    /** @description Make all properties in T optional */
+    Partial_TimestampOperators_: {
+      equals?: string;
+      gte?: string;
+      lte?: string;
+      lt?: string;
+      gt?: string;
+    };
+    /** @description Make all properties in T optional */
+    Partial_RequestTableToOperators_: {
+      prompt?: components["schemas"]["Partial_TextOperators_"];
+      created_at?: components["schemas"]["Partial_TimestampOperators_"];
+      user_id?: components["schemas"]["Partial_TextOperators_"];
+      auth_hash?: components["schemas"]["Partial_TextOperators_"];
+      org_id?: components["schemas"]["Partial_TextOperators_"];
+      id?: components["schemas"]["Partial_TextOperators_"];
+      node_id?: components["schemas"]["Partial_TextOperators_"];
+      model?: components["schemas"]["Partial_TextOperators_"];
+      modelOverride?: components["schemas"]["Partial_TextOperators_"];
+      path?: components["schemas"]["Partial_TextOperators_"];
+      country_code?: components["schemas"]["Partial_TextOperators_"];
+      prompt_id?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_NumberOperators_: {
+      /** Format: double */
+      "not-equals"?: number;
+      /** Format: double */
+      equals?: number;
+      /** Format: double */
+      gte?: number;
+      /** Format: double */
+      lte?: number;
+      /** Format: double */
+      lt?: number;
+      /** Format: double */
+      gt?: number;
+    };
+    /** @description Make all properties in T optional */
+    Partial_BooleanOperators_: {
+      equals?: boolean;
+    };
+    /** @description Make all properties in T optional */
+    Partial_FeedbackTableToOperators_: {
+      id?: components["schemas"]["Partial_NumberOperators_"];
+      created_at?: components["schemas"]["Partial_TimestampOperators_"];
+      rating?: components["schemas"]["Partial_BooleanOperators_"];
+      response_id?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_ResponseTableToOperators_: {
+      body_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      body_model?: components["schemas"]["Partial_TextOperators_"];
+      body_completion?: components["schemas"]["Partial_TextOperators_"];
+      status?: components["schemas"]["Partial_NumberOperators_"];
+      model?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_TimestampOperatorsTyped_: {
+      /** Format: date-time */
+      equals?: string;
+      /** Format: date-time */
+      gte?: string;
+      /** Format: date-time */
+      lte?: string;
+      /** Format: date-time */
+      lt?: string;
+      /** Format: date-time */
+      gt?: string;
+    };
+    /** @description Make all properties in T optional */
+    Partial_VectorOperators_: {
+      contains?: string;
+    };
+    /** @description Make all properties in T optional */
+    Partial_RequestResponseRMTToOperators_: {
+      country_code?: components["schemas"]["Partial_TextOperators_"];
+      latency?: components["schemas"]["Partial_NumberOperators_"];
+      time_to_first_token?: components["schemas"]["Partial_NumberOperators_"];
+      status?: components["schemas"]["Partial_NumberOperators_"];
+      request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      response_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      model?: components["schemas"]["Partial_TextOperators_"];
+      user_id?: components["schemas"]["Partial_TextOperators_"];
+      organization_id?: components["schemas"]["Partial_TextOperators_"];
+      node_id?: components["schemas"]["Partial_TextOperators_"];
+      job_id?: components["schemas"]["Partial_TextOperators_"];
+      threat?: components["schemas"]["Partial_BooleanOperators_"];
+      request_id?: components["schemas"]["Partial_TextOperators_"];
+      prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      prompt_cache_read_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      prompt_cache_write_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      total_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      target_url?: components["schemas"]["Partial_TextOperators_"];
+      properties?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      search_properties?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      scores?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      scores_column?: components["schemas"]["Partial_TextOperators_"];
+      request_body?: components["schemas"]["Partial_VectorOperators_"];
+      response_body?: components["schemas"]["Partial_VectorOperators_"];
+      cache_enabled?: components["schemas"]["Partial_BooleanOperators_"];
+      cache_reference_id?: components["schemas"]["Partial_TextOperators_"];
+      cached?: components["schemas"]["Partial_BooleanOperators_"];
+      assets?: components["schemas"]["Partial_TextOperators_"];
+      "helicone-score-feedback"?: components["schemas"]["Partial_BooleanOperators_"];
+      prompt_id?: components["schemas"]["Partial_TextOperators_"];
+      prompt_version?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_SessionsRequestResponseRMTToOperators_: {
+      session_session_id?: components["schemas"]["Partial_TextOperators_"];
+      session_session_name?: components["schemas"]["Partial_TextOperators_"];
+      session_total_cost?: components["schemas"]["Partial_NumberOperators_"];
+      session_total_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      session_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      session_completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      session_total_requests?: components["schemas"]["Partial_NumberOperators_"];
+      session_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      session_latest_request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      session_tag?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_": {
+      request?: components["schemas"]["Partial_RequestTableToOperators_"];
+      feedback?: components["schemas"]["Partial_FeedbackTableToOperators_"];
+      response?: components["schemas"]["Partial_ResponseTableToOperators_"];
+      properties?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      values?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
+      sessions_request_response_rmt?: components["schemas"]["Partial_SessionsRequestResponseRMTToOperators_"];
+    };
+    "FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_"];
+    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_"] | components["schemas"]["RequestFilterBranch"] | "all";
+    RequestFilterBranch: {
+      right: components["schemas"]["RequestFilterNode"];
+      /** @enum {string} */
+      operator: "or" | "and";
+      left: components["schemas"]["RequestFilterNode"];
+    };
+    /** @enum {string} */
+    SortDirection: "asc" | "desc";
+    SortLeafRequest: {
+      /** @enum {boolean} */
+      random?: true;
+      created_at?: components["schemas"]["SortDirection"];
+      cache_created_at?: components["schemas"]["SortDirection"];
+      latency?: components["schemas"]["SortDirection"];
+      last_active?: components["schemas"]["SortDirection"];
+      total_tokens?: components["schemas"]["SortDirection"];
+      completion_tokens?: components["schemas"]["SortDirection"];
+      prompt_tokens?: components["schemas"]["SortDirection"];
+      user_id?: components["schemas"]["SortDirection"];
+      body_model?: components["schemas"]["SortDirection"];
+      is_cached?: components["schemas"]["SortDirection"];
+      request_prompt?: components["schemas"]["SortDirection"];
+      response_text?: components["schemas"]["SortDirection"];
+      properties?: {
+        [key: string]: components["schemas"]["SortDirection"];
+      };
+      values?: {
+        [key: string]: components["schemas"]["SortDirection"];
+      };
+      cost?: components["schemas"]["SortDirection"];
+    };
+    RequestQueryParams: {
+      filter: components["schemas"]["RequestFilterNode"];
+      /** Format: double */
+      offset?: number;
+      /** Format: double */
+      limit?: number;
+      sort?: components["schemas"]["SortLeafRequest"];
+      isCached?: boolean;
+      includeInputs?: boolean;
+      isPartOfExperiment?: boolean;
+      isScored?: boolean;
+    };
+    /** @enum {string} */
+    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "BEDROCK" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "CHUTES" | "LLAMA" | "NVIDIA" | "VERCEL";
+    Provider: components["schemas"]["ProviderName"] | "CUSTOM";
+    /** @enum {string} */
+    LlmType: "chat" | "completion";
+    FunctionCall: {
+      id?: string;
+      name: string;
+      arguments: components["schemas"]["Record_string.any_"];
+    };
+    Message: {
+      ending_event_id?: string;
+      trigger_event_id?: string;
+      start_timestamp?: string;
+      reasoning?: string;
+      deleted?: boolean;
+      contentArray?: components["schemas"]["Message"][];
+      /** Format: double */
+      idx?: number;
+      detail?: string;
+      filename?: string;
+      file_id?: string;
+      file_data?: string;
+      /** @enum {string} */
+      type?: "input_image" | "input_text" | "input_file";
+      audio_data?: string;
+      image_url?: string;
+      timestamp?: string;
+      tool_call_id?: string;
+      tool_calls?: components["schemas"]["FunctionCall"][];
+      mime_type?: string;
+      content?: string;
+      name?: string;
+      instruction?: string;
+      role?: string | ("user" | "assistant" | "system" | "developer");
+      id?: string;
+      /** @enum {string} */
+      _type: "functionCall" | "function" | "image" | "file" | "message" | "autoInput" | "contentArray" | "audio";
+    };
+    Tool: {
+      name: string;
+      description: string;
+      parameters?: components["schemas"]["Record_string.any_"];
+    };
+    HeliconeEventTool: {
+      /** @enum {string} */
+      _type: "tool";
+      toolName: string;
+      input: unknown;
+      [key: string]: unknown;
+    };
+    HeliconeEventVectorDB: {
+      /** @enum {string} */
+      _type: "vector_db";
+      /** @enum {string} */
+      operation: "search" | "insert" | "delete" | "update";
+      text?: string;
+      vector?: number[];
+      /** Format: double */
+      topK?: number;
+      filter?: Record<string, never>;
+      databaseName?: string;
+      [key: string]: unknown;
+    };
+    LLMRequestBody: {
+      llm_type?: components["schemas"]["LlmType"];
+      provider?: string;
+      model?: string;
+      messages?: components["schemas"]["Message"][] | null;
+      prompt?: string | null;
+      instructions?: string | null;
+      /** Format: double */
+      max_tokens?: number | null;
+      /** Format: double */
+      temperature?: number | null;
+      /** Format: double */
+      top_p?: number | null;
+      /** Format: double */
+      seed?: number | null;
+      stream?: boolean | null;
+      /** Format: double */
+      presence_penalty?: number | null;
+      /** Format: double */
+      frequency_penalty?: number | null;
+      stop?: (string[] | string) | null;
+      /** @enum {string|null} */
+      reasoning_effort?: "minimal" | "low" | "medium" | "high" | null;
+      /** @enum {string|null} */
+      verbosity?: "low" | "medium" | "high" | null;
+      tools?: components["schemas"]["Tool"][];
+      parallel_tool_calls?: boolean | null;
+      tool_choice?: {
+        name?: string;
+        /** @enum {string} */
+        type: "none" | "auto" | "any" | "tool";
+      };
+      response_format?: {
+        json_schema?: unknown;
+        type: string;
+      };
+      toolDetails?: components["schemas"]["HeliconeEventTool"];
+      vectorDBDetails?: components["schemas"]["HeliconeEventVectorDB"];
+      input?: string | string[];
+      /** Format: double */
+      n?: number | null;
+      size?: string;
+      quality?: string;
+    };
+    Response: {
+      contentArray?: components["schemas"]["Response"][];
+      detail?: string;
+      filename?: string;
+      file_id?: string;
+      file_data?: string;
+      /** Format: double */
+      idx?: number;
+      audio_data?: string;
+      image_url?: string;
+      timestamp?: string;
+      tool_call_id?: string;
+      tool_calls?: components["schemas"]["FunctionCall"][];
+      text?: string;
+      /** @enum {string} */
+      type: "input_image" | "input_text" | "input_file";
+      name?: string;
+      /** @enum {string} */
+      role: "user" | "assistant" | "system" | "developer";
+      id?: string;
+      /** @enum {string} */
+      _type: "functionCall" | "function" | "image" | "text" | "file" | "contentArray";
+    };
+    LLMResponseBody: {
+      vectorDBDetailsResponse?: {
+        /** @enum {string} */
+        _type: "vector_db";
+        metadata: {
+          timestamp: string;
+          destination_parsed?: boolean;
+          destination?: string;
+        };
+        /** Format: double */
+        actualSimilarity?: number;
+        /** Format: double */
+        similarityThreshold?: number;
+        message: string;
+        status: string;
+      };
+      toolDetailsResponse?: {
+        toolName: string;
+        /** @enum {string} */
+        _type: "tool";
+        metadata: {
+          timestamp: string;
+        };
+        tips: string[];
+        message: string;
+        status: string;
+      };
+      error?: {
+        heliconeMessage: unknown;
+      };
+      model?: string | null;
+      instructions?: string | null;
+      responses?: components["schemas"]["Response"][] | null;
+      messages?: components["schemas"]["Message"][] | null;
+    };
+    LlmSchema: {
+      request: components["schemas"]["LLMRequestBody"];
+      response?: components["schemas"]["LLMResponseBody"] | null;
+    };
+    HeliconeRequest: {
+      response_id: string | null;
+      response_created_at: string | null;
+      response_body?: unknown;
+      /** Format: double */
+      response_status: number;
+      response_model: string | null;
+      request_id: string;
+      request_created_at: string;
+      request_body: unknown;
+      request_path: string;
+      request_user_id: string | null;
+      request_properties: components["schemas"]["Record_string.string_"] | null;
+      request_model: string | null;
+      model_override: string | null;
+      helicone_user: string | null;
+      provider: components["schemas"]["Provider"];
+      /** Format: double */
+      delay_ms: number | null;
+      /** Format: double */
+      time_to_first_token: number | null;
+      /** Format: double */
+      total_tokens: number | null;
+      /** Format: double */
+      prompt_tokens: number | null;
+      /** Format: double */
+      prompt_cache_write_tokens: number | null;
+      /** Format: double */
+      prompt_cache_read_tokens: number | null;
+      /** Format: double */
+      completion_tokens: number | null;
+      /** Format: double */
+      prompt_audio_tokens: number | null;
+      /** Format: double */
+      completion_audio_tokens: number | null;
+      /** Format: double */
+      cost: number | null;
+      prompt_id: string | null;
+      prompt_version: string | null;
+      feedback_created_at?: string | null;
+      feedback_id?: string | null;
+      feedback_rating?: boolean | null;
+      signed_body_url?: string | null;
+      llmSchema: components["schemas"]["LlmSchema"] | null;
+      country_code: string | null;
+      asset_ids: string[] | null;
+      asset_urls: components["schemas"]["Record_string.string_"] | null;
+      scores: components["schemas"]["Record_string.number_"] | null;
+      /** Format: double */
+      costUSD?: number | null;
+      properties: components["schemas"]["Record_string.string_"];
+      assets: string[];
+      target_url: string;
+      model: string;
+      cache_reference_id: string | null;
+      cache_enabled: boolean;
+      updated_at?: string;
+      request_referrer?: string | null;
+    };
+    "ResultSuccess_HeliconeRequest-Array_": {
+      data: components["schemas"]["HeliconeRequest"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_HeliconeRequest-Array.string_": components["schemas"]["ResultSuccess_HeliconeRequest-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_HeliconeRequest_: {
+      data: components["schemas"]["HeliconeRequest"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_HeliconeRequest.string_": components["schemas"]["ResultSuccess_HeliconeRequest_"] | components["schemas"]["ResultError_string_"];
+    HeliconeRequestAsset: {
+      assetUrl: string;
+    };
+    ResultSuccess_HeliconeRequestAsset_: {
+      data: components["schemas"]["HeliconeRequestAsset"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_HeliconeRequestAsset.string_": components["schemas"]["ResultSuccess_HeliconeRequestAsset_"] | components["schemas"]["ResultError_string_"];
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.number-or-boolean-or-undefined_": {
+      [key: string]: number | boolean;
+    };
+    Scores: components["schemas"]["Record_string.number-or-boolean-or-undefined_"];
+    ScoreRequest: {
+      scores: components["schemas"]["Scores"];
+    };
+    "ResultSuccess__hasPrompts-boolean__": {
+      data: {
+        hasPrompts: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__hasPrompts-boolean_.string_": components["schemas"]["ResultSuccess__hasPrompts-boolean__"] | components["schemas"]["ResultError_string_"];
+    PromptsResult: {
+      id: string;
+      user_defined_id: string;
+      description: string;
+      pretty_name: string;
+      created_at: string;
+      /** Format: double */
+      major_version: number;
+      metadata?: components["schemas"]["Record_string.any_"];
+    };
+    "ResultSuccess_PromptsResult-Array_": {
+      data: components["schemas"]["PromptsResult"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptsResult-Array.string_": components["schemas"]["ResultSuccess_PromptsResult-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @description Make all properties in T optional */
+    Partial_PromptToOperators_: {
+      id?: components["schemas"]["Partial_TextOperators_"];
+      user_defined_id?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_FilterLeaf.prompt_v2_": {
+      prompt_v2?: components["schemas"]["Partial_PromptToOperators_"];
+    };
+    FilterLeafSubset_prompt_v2_: components["schemas"]["Pick_FilterLeaf.prompt_v2_"];
+    PromptsFilterNode: components["schemas"]["FilterLeafSubset_prompt_v2_"] | components["schemas"]["PromptsFilterBranch"] | "all";
+    PromptsFilterBranch: {
+      right: components["schemas"]["PromptsFilterNode"];
+      /** @enum {string} */
+      operator: "or" | "and";
+      left: components["schemas"]["PromptsFilterNode"];
+    };
+    PromptsQueryParams: {
+      filter: components["schemas"]["PromptsFilterNode"];
+    };
+    PromptResult: {
+      id: string;
+      user_defined_id: string;
+      description: string;
+      pretty_name: string;
+      /** Format: double */
+      major_version: number;
+      latest_version_id: string;
+      latest_model_used: string;
+      created_at: string;
+      last_used: string;
+      versions: string[];
+      metadata?: components["schemas"]["Record_string.any_"];
+    };
+    ResultSuccess_PromptResult_: {
+      data: components["schemas"]["PromptResult"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptResult.string_": components["schemas"]["ResultSuccess_PromptResult_"] | components["schemas"]["ResultError_string_"];
+    PromptQueryParams: {
+      timeFilter: {
+        end: string;
+        start: string;
+      };
+    };
+    CreatePromptResponse: {
+      id: string;
+      prompt_version_id: string;
+    };
+    ResultSuccess_CreatePromptResponse_: {
+      data: components["schemas"]["CreatePromptResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_CreatePromptResponse.string_": components["schemas"]["ResultSuccess_CreatePromptResponse_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__metadata-Record_string.any___": {
+      data: {
+        metadata: components["schemas"]["Record_string.any_"];
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__metadata-Record_string.any__.string_": components["schemas"]["ResultSuccess__metadata-Record_string.any___"] | components["schemas"]["ResultError_string_"];
+    PromptEditSubversionLabelParams: {
+      label: string;
+    };
+    PromptEditSubversionTemplateParams: {
+      heliconeTemplate: unknown;
+      experimentId?: string;
+    };
+    PromptVersionResult: {
+      id: string;
+      /** Format: double */
+      minor_version: number;
+      /** Format: double */
+      major_version: number;
+      prompt_v2: string;
+      model: string;
+      helicone_template: string;
+      created_at: string;
+      metadata: components["schemas"]["Record_string.any_"];
+      parent_prompt_version?: string | null;
+      experiment_id?: string | null;
+      updated_at?: string;
+    };
+    ResultSuccess_PromptVersionResult_: {
+      data: components["schemas"]["PromptVersionResult"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptVersionResult.string_": components["schemas"]["ResultSuccess_PromptVersionResult_"] | components["schemas"]["ResultError_string_"];
+    PromptCreateSubversionParams: {
+      newHeliconeTemplate: unknown;
+      isMajorVersion?: boolean;
+      metadata?: components["schemas"]["Record_string.any_"];
+      experimentId?: string;
+      bumpForMajorPromptVersionId?: string;
+    };
+    PromptInputRecord: {
+      id: string;
+      inputs: components["schemas"]["Record_string.string_"];
+      dataset_row_id?: string;
+      source_request: string;
+      prompt_version: string;
+      created_at: string;
+      response_body?: string;
+      request_body?: string;
+      auto_prompt_inputs: unknown[];
+    };
+    "ResultSuccess_PromptInputRecord-Array_": {
+      data: components["schemas"]["PromptInputRecord"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptInputRecord-Array.string_": components["schemas"]["ResultSuccess_PromptInputRecord-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array_": {
+      data: {
+          meta: components["schemas"]["Record_string.any_"];
+          dataset: string;
+          /** Format: double */
+          num_hypotheses: number;
+          created_at: string;
+          id: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array.string_": components["schemas"]["ResultSuccess__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_PromptVersionResult-Array_": {
+      data: components["schemas"]["PromptVersionResult"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptVersionResult-Array.string_": components["schemas"]["ResultSuccess_PromptVersionResult-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @description Make all properties in T optional */
+    Partial_PromptVersionsToOperators_: {
+      minor_version?: components["schemas"]["Partial_NumberOperators_"];
+      major_version?: components["schemas"]["Partial_NumberOperators_"];
+      id?: components["schemas"]["Partial_TextOperators_"];
+      prompt_v2?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_FilterLeaf.prompts_versions_": {
+      prompts_versions?: components["schemas"]["Partial_PromptVersionsToOperators_"];
+    };
+    FilterLeafSubset_prompts_versions_: components["schemas"]["Pick_FilterLeaf.prompts_versions_"];
+    PromptVersionsFilterNode: components["schemas"]["FilterLeafSubset_prompts_versions_"] | components["schemas"]["PromptVersionsFilterBranch"] | "all";
+    PromptVersionsFilterBranch: {
+      right: components["schemas"]["PromptVersionsFilterNode"];
+      /** @enum {string} */
+      operator: "or" | "and";
+      left: components["schemas"]["PromptVersionsFilterNode"];
+    };
+    PromptVersionsQueryParams: {
+      filter?: components["schemas"]["PromptVersionsFilterNode"];
+      includeExperimentVersions?: boolean;
+    };
+    PromptVersionResultCompiled: {
+      id: string;
+      /** Format: double */
+      minor_version: number;
+      /** Format: double */
+      major_version: number;
+      prompt_v2: string;
+      model: string;
+      prompt_compiled: unknown;
+    };
+    ResultSuccess_PromptVersionResultCompiled_: {
+      data: components["schemas"]["PromptVersionResultCompiled"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptVersionResultCompiled.string_": components["schemas"]["ResultSuccess_PromptVersionResultCompiled_"] | components["schemas"]["ResultError_string_"];
+    PromptVersiosQueryParamsCompiled: {
+      filter?: components["schemas"]["PromptVersionsFilterNode"];
+      includeExperimentVersions?: boolean;
+      inputs: components["schemas"]["Record_string.string_"];
+    };
+    PromptVersionResultFilled: {
+      id: string;
+      /** Format: double */
+      minor_version: number;
+      /** Format: double */
+      major_version: number;
+      prompt_v2: string;
+      model: string;
+      filled_helicone_template: unknown;
+    };
+    ResultSuccess_PromptVersionResultFilled_: {
+      data: components["schemas"]["PromptVersionResultFilled"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptVersionResultFilled.string_": components["schemas"]["ResultSuccess_PromptVersionResultFilled_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__experimentId-string__": {
+      data: {
+        experimentId: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__experimentId-string_.string_": components["schemas"]["ResultSuccess__experimentId-string__"] | components["schemas"]["ResultError_string_"];
+    ExperimentV2: {
+      id: string;
+      name: string;
+      original_prompt_version: string;
+      copied_original_prompt_version: string | null;
+      input_keys: string[] | null;
+      created_at: string;
+    };
+    "ResultSuccess_ExperimentV2-Array_": {
+      data: components["schemas"]["ExperimentV2"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ExperimentV2-Array.string_": components["schemas"]["ResultSuccess_ExperimentV2-Array_"] | components["schemas"]["ResultError_string_"];
+    ExperimentV2Output: {
+      id: string;
+      request_id: string;
+      is_original: boolean;
+      prompt_version_id: string;
+      created_at: string;
+      input_record_id: string;
+    };
+    ExperimentV2Row: {
+      id: string;
+      inputs: components["schemas"]["Record_string.string_"];
+      prompt_version: string;
+      requests: components["schemas"]["ExperimentV2Output"][];
+      auto_prompt_inputs: unknown[];
+    };
+    ExtendedExperimentData: {
+      id: string;
+      name: string;
+      original_prompt_version: string;
+      copied_original_prompt_version: string | null;
+      input_keys: string[] | null;
+      created_at: string;
+      rows: components["schemas"]["ExperimentV2Row"][];
+    };
+    ResultSuccess_ExtendedExperimentData_: {
+      data: components["schemas"]["ExtendedExperimentData"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ExtendedExperimentData.string_": components["schemas"]["ResultSuccess_ExtendedExperimentData_"] | components["schemas"]["ResultError_string_"];
+    CreateNewPromptVersionForExperimentParams: {
+      newHeliconeTemplate: unknown;
+      isMajorVersion?: boolean;
+      metadata?: components["schemas"]["Record_string.any_"];
+      experimentId?: string;
+      bumpForMajorPromptVersionId?: string;
+      parentPromptVersionId: string;
+    };
+    ExperimentV2PromptVersion: {
+      created_at: string | null;
+      experiment_id: string | null;
+      helicone_template: components["schemas"]["Json"] | null;
+      id: string;
+      /** Format: double */
+      major_version: number;
+      metadata: components["schemas"]["Json"] | null;
+      /** Format: double */
+      minor_version: number;
+      model: string | null;
+      organization: string;
+      prompt_v2: string;
+      soft_delete: boolean | null;
+    };
+    "ResultSuccess_ExperimentV2PromptVersion-Array_": {
+      data: components["schemas"]["ExperimentV2PromptVersion"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ExperimentV2PromptVersion-Array.string_": components["schemas"]["ResultSuccess_ExperimentV2PromptVersion-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_boolean_: {
+      data: boolean;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_boolean.string_": components["schemas"]["ResultSuccess_boolean_"] | components["schemas"]["ResultError_string_"];
+    ScoreV2: {
+      valueType: string;
+      value: number | string;
+      /** Format: double */
+      max: number;
+      /** Format: double */
+      min: number;
+    };
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.ScoreV2_": {
+      [key: string]: components["schemas"]["ScoreV2"];
+    };
+    "ResultSuccess_Record_string.ScoreV2__": {
+      data: components["schemas"]["Record_string.ScoreV2_"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Record_string.ScoreV2_.string_": components["schemas"]["ResultSuccess_Record_string.ScoreV2__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_ScoreV2-or-null_": {
+      data: components["schemas"]["ScoreV2"] | null;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ScoreV2-or-null.string_": components["schemas"]["ResultSuccess_ScoreV2-or-null_"] | components["schemas"]["ResultError_string_"];
+    HeliconeMeta: {
+      gatewayDeploymentTarget?: string;
+      gatewayRouterId?: string;
+      heliconeManualAccessKey?: string;
+      promptInputs?: components["schemas"]["Record_string.any_"];
+      promptVersionId?: string;
+      promptEnvironment?: string;
+      promptId?: string;
+      lytixHost?: string;
+      lytixKey?: string;
+      posthogHost?: string;
+      posthogApiKey?: string;
+      webhookEnabled: boolean;
+      omitResponseLog: boolean;
+      omitRequestLog: boolean;
+      modelOverride?: string;
+    };
+    /**
+     * @description Parses a string containing custom JSX-like tags and extracts information to produce two outputs:
+     * 1. A version of the string with all JSX tags removed, leaving only the text content.
+     * 2. An object representing a template with self-closing JSX tags and a separate mapping of keys to their
+     *    corresponding text content.
+     *
+     * The function specifically targets `<helicone-prompt-input>` tags, which include a `key` attribute and enclosed text content.
+     * These tags are transformed or removed based on the desired output structure. The process involves regular expressions
+     * to match and manipulate the input string to produce the outputs.
+     *
+     * Parameters:
+     * - input: A string containing the text and JSX-like tags to be parsed.
+     *
+     * Returns:
+     * An object with two properties:
+     * 1. stringWithoutJSXTags: A string where all `<helicone-prompt-input>` tags are removed, and only their text content remains.
+     * 2. templateWithInputs: An object containing:
+     *    - template: A version of the input string where `<helicone-prompt-input>` tags are replaced with self-closing versions,
+     *      preserving the `key` attributes but removing the text content.
+     *    - inputs: An object mapping the `key` attributes to their corresponding text content, effectively extracting
+     *      the data from the original tags.
+     *
+     * Example Usage:
+     * ```ts
+     * const input = `
+     * The scene is <helicone-prompt-input key="scene" >Harry Potter</helicone-prompt-input>.
+     * <helicone-prompt-input key="name" >justin</helicone-prompt-input>  test`;
+     *
+     * const expectedOutput = parseJSXString(input);
+     * console.log(expectedOutput);
+     * ```
+     * The function is useful for preprocessing strings with embedded custom JSX-like tags, extracting useful data,
+     * and preparing templates for further processing or rendering. It demonstrates a practical application of regular
+     * expressions for text manipulation in TypeScript, specifically tailored to a custom JSX-like syntax.
+     */
+    TemplateWithInputs: {
+      template: Record<string, never>;
+      inputs: {
+        [key: string]: string;
+      };
+      autoInputs: unknown[];
+    };
+    Log: {
+      response: {
+        /** Format: double */
+        cachedLatency?: number;
+        /** Format: double */
+        delayMs: number;
+        /** Format: date-time */
+        responseCreatedAt: string;
+        /** Format: double */
+        timeToFirstToken?: number;
+        /** Format: double */
+        bodySize: number;
+        /** Format: double */
+        status: number;
+        id: string;
+      };
+      request: {
+        requestReferrer?: string;
+        cacheReferenceId?: string;
+        cacheControl?: string;
+        /** Format: double */
+        cacheBucketMaxSize?: number;
+        /** Format: double */
+        cacheSeed?: number;
+        cacheEnabled?: boolean;
+        experimentRowIndex?: string;
+        experimentColumnId?: string;
+        heliconeTemplate?: components["schemas"]["TemplateWithInputs"];
+        isStream: boolean;
+        /** Format: date-time */
+        requestCreatedAt: string;
+        countryCode?: string;
+        threat?: boolean;
+        path: string;
+        /** Format: double */
+        bodySize: number;
+        provider: components["schemas"]["Provider"];
+        targetUrl: string;
+        heliconeProxyKeyId?: string;
+        /** Format: double */
+        heliconeApiKeyId?: number;
+        properties: components["schemas"]["Record_string.string_"];
+        promptVersion?: string;
+        promptId?: string;
+        userId: string;
+        id: string;
+      };
+    };
+    KafkaMessageContents: {
+      log: components["schemas"]["Log"];
+      heliconeMeta: components["schemas"]["HeliconeMeta"];
+      authorization: string;
+    };
+    ResultSuccess_any_: {
+      data: unknown;
+      /** @enum {number|null} */
+      error: null;
+    };
+    ResultSuccess_unknown_: {
+      data: unknown;
+      /** @enum {number|null} */
+      error: null;
+    };
+    /** @enum {string} */
+    KeyPermissions: "w" | "rw";
+    GenerateHashQueryParams: {
+      apiKey: string;
+      governance: boolean;
+      keyName: string;
+      permissions: components["schemas"]["KeyPermissions"];
+    };
+    FineTuneResult: {
+      error: string;
+    } | {
+      data: {
+        url: string;
+        fineTuneJob: string;
+      };
+      success: boolean;
+    };
+    FineTuneBodyParams: {
+      providerKeyId: string;
+    };
+    FineTuneBody: {
+      providerKeyId: string;
+    };
+    StoreFilterType: {
+      createdAt?: string;
+      filter: unknown;
+      name: string;
+      id?: string;
+    };
+    "ResultSuccess_StoreFilterType-Array_": {
+      data: components["schemas"]["StoreFilterType"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_StoreFilterType-Array.string_": components["schemas"]["ResultSuccess_StoreFilterType-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_StoreFilterType_: {
+      data: components["schemas"]["StoreFilterType"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_StoreFilterType.string_": components["schemas"]["ResultSuccess_StoreFilterType_"] | components["schemas"]["ResultError_string_"];
+    "ChatCompletionTokenLogprob.TopLogprob": {
+      /** @description The token. */
+      token: string;
+      /**
+       * @description A list of integers representing the UTF-8 bytes representation of the token.
+       * Useful in instances where characters are represented by multiple tokens and
+       * their byte representations must be combined to generate the correct text
+       * representation. Can be `null` if there is no bytes representation for the token.
+       */
+      bytes: number[] | null;
+      /**
+       * Format: double
+       * @description The log probability of this token, if it is within the top 20 most likely
+       * tokens. Otherwise, the value `-9999.0` is used to signify that the token is very
+       * unlikely.
+       */
+      logprob: number;
+    };
+    ChatCompletionTokenLogprob: {
+      /** @description The token. */
+      token: string;
+      /**
+       * @description A list of integers representing the UTF-8 bytes representation of the token.
+       * Useful in instances where characters are represented by multiple tokens and
+       * their byte representations must be combined to generate the correct text
+       * representation. Can be `null` if there is no bytes representation for the token.
+       */
+      bytes: number[] | null;
+      /**
+       * Format: double
+       * @description The log probability of this token, if it is within the top 20 most likely
+       * tokens. Otherwise, the value `-9999.0` is used to signify that the token is very
+       * unlikely.
+       */
+      logprob: number;
+      /**
+       * @description List of the most likely tokens and their log probability, at this token
+       * position. In rare cases, there may be fewer than the number of requested
+       * `top_logprobs` returned.
+       */
+      top_logprobs: components["schemas"]["ChatCompletionTokenLogprob.TopLogprob"][];
+    };
+    /** @description Log probability information for the choice. */
+    "ChatCompletion.Choice.Logprobs": {
+      /** @description A list of message content tokens with log probability information. */
+      content: components["schemas"]["ChatCompletionTokenLogprob"][] | null;
+      /** @description A list of message refusal tokens with log probability information. */
+      refusal: components["schemas"]["ChatCompletionTokenLogprob"][] | null;
+    };
+    /** @description A URL citation when using web search. */
+    "ChatCompletionMessage.Annotation.URLCitation": {
+      /**
+       * Format: double
+       * @description The index of the last character of the URL citation in the message.
+       */
+      end_index: number;
+      /**
+       * Format: double
+       * @description The index of the first character of the URL citation in the message.
+       */
+      start_index: number;
+      /** @description The title of the web resource. */
+      title: string;
+      /** @description The URL of the web resource. */
+      url: string;
+    };
+    /** @description A URL citation when using web search. */
+    "ChatCompletionMessage.Annotation": {
+      /**
+       * @description The type of the URL citation. Always `url_citation`.
+       * @enum {string}
+       */
+      type: "url_citation";
+      /** @description A URL citation when using web search. */
+      url_citation: components["schemas"]["ChatCompletionMessage.Annotation.URLCitation"];
+    };
+    /**
+     * @description If the audio output modality is requested, this object contains data about the
+     * audio response from the model.
+     * [Learn more](https://platform.openai.com/docs/guides/audio).
+     */
+    ChatCompletionAudio: {
+      /** @description Unique identifier for this audio response. */
+      id: string;
+      /**
+       * @description Base64 encoded audio bytes generated by the model, in the format specified in
+       * the request.
+       */
+      data: string;
+      /**
+       * Format: double
+       * @description The Unix timestamp (in seconds) for when this audio response will no longer be
+       * accessible on the server for use in multi-turn conversations.
+       */
+      expires_at: number;
+      /** @description Transcript of the audio generated by the model. */
+      transcript: string;
+    };
+    /** @deprecated */
+    "ChatCompletionMessage.FunctionCall": {
+      /**
+       * @description The arguments to call the function with, as generated by the model in JSON
+       * format. Note that the model does not always generate valid JSON, and may
+       * hallucinate parameters not defined by your function schema. Validate the
+       * arguments in your code before calling your function.
+       */
+      arguments: string;
+      /** @description The name of the function to call. */
+      name: string;
+    };
+    /** @description The function that the model called. */
+    "ChatCompletionMessageFunctionToolCall.Function": {
+      /**
+       * @description The arguments to call the function with, as generated by the model in JSON
+       * format. Note that the model does not always generate valid JSON, and may
+       * hallucinate parameters not defined by your function schema. Validate the
+       * arguments in your code before calling your function.
+       */
+      arguments: string;
+      /** @description The name of the function to call. */
+      name: string;
+    };
+    /** @description A call to a function tool created by the model. */
+    ChatCompletionMessageFunctionToolCall: {
+      /** @description The ID of the tool call. */
+      id: string;
+      /** @description The function that the model called. */
+      function: components["schemas"]["ChatCompletionMessageFunctionToolCall.Function"];
+      /**
+       * @description The type of the tool. Currently, only `function` is supported.
+       * @enum {string}
+       */
+      type: "function";
+    };
+    /** @description The custom tool that the model called. */
+    "ChatCompletionMessageCustomToolCall.Custom": {
+      /** @description The input for the custom tool call generated by the model. */
+      input: string;
+      /** @description The name of the custom tool to call. */
+      name: string;
+    };
+    /** @description A call to a custom tool created by the model. */
+    ChatCompletionMessageCustomToolCall: {
+      /** @description The ID of the tool call. */
+      id: string;
+      /** @description The custom tool that the model called. */
+      custom: components["schemas"]["ChatCompletionMessageCustomToolCall.Custom"];
+      /**
+       * @description The type of the tool. Always `custom`.
+       * @enum {string}
+       */
+      type: "custom";
+    };
+    /** @description A call to a function tool created by the model. */
+    ChatCompletionMessageToolCall: components["schemas"]["ChatCompletionMessageFunctionToolCall"] | components["schemas"]["ChatCompletionMessageCustomToolCall"];
+    /** @description A chat completion message generated by the model. */
+    ChatCompletionMessage: {
+      /** @description The contents of the message. */
+      content: string | null;
+      /** @description The refusal message generated by the model. */
+      refusal: string | null;
+      /**
+       * @description The role of the author of this message.
+       * @enum {string}
+       */
+      role: "assistant";
+      /**
+       * @description Annotations for the message, when applicable, as when using the
+       * [web search tool](https://platform.openai.com/docs/guides/tools-web-search?api-mode=chat).
+       */
+      annotations?: components["schemas"]["ChatCompletionMessage.Annotation"][];
+      /**
+       * @description If the audio output modality is requested, this object contains data about the
+       * audio response from the model.
+       * [Learn more](https://platform.openai.com/docs/guides/audio).
+       */
+      audio?: components["schemas"]["ChatCompletionAudio"] | null;
+      /** @deprecated */
+      function_call?: components["schemas"]["ChatCompletionMessage.FunctionCall"] | null;
+      /** @description The tool calls generated by the model, such as function calls. */
+      tool_calls?: components["schemas"]["ChatCompletionMessageToolCall"][];
+    };
+    "ChatCompletion.Choice": {
+      /**
+       * @description The reason the model stopped generating tokens. This will be `stop` if the model
+       * hit a natural stop point or a provided stop sequence, `length` if the maximum
+       * number of tokens specified in the request was reached, `content_filter` if
+       * content was omitted due to a flag from our content filters, `tool_calls` if the
+       * model called a tool, or `function_call` (deprecated) if the model called a
+       * function.
+       * @enum {string}
+       */
+      finish_reason: "stop" | "length" | "tool_calls" | "content_filter" | "function_call";
+      /**
+       * Format: double
+       * @description The index of the choice in the list of choices.
+       */
+      index: number;
+      /** @description Log probability information for the choice. */
+      logprobs: components["schemas"]["ChatCompletion.Choice.Logprobs"] | null;
+      /** @description A chat completion message generated by the model. */
+      message: components["schemas"]["ChatCompletionMessage"];
+    };
+    /** @description Breakdown of tokens used in a completion. */
+    "CompletionUsage.CompletionTokensDetails": {
+      /**
+       * Format: double
+       * @description When using Predicted Outputs, the number of tokens in the prediction that
+       * appeared in the completion.
+       */
+      accepted_prediction_tokens?: number;
+      /**
+       * Format: double
+       * @description Audio input tokens generated by the model.
+       */
+      audio_tokens?: number;
+      /**
+       * Format: double
+       * @description Tokens generated by the model for reasoning.
+       */
+      reasoning_tokens?: number;
+      /**
+       * Format: double
+       * @description When using Predicted Outputs, the number of tokens in the prediction that did
+       * not appear in the completion. However, like reasoning tokens, these tokens are
+       * still counted in the total completion tokens for purposes of billing, output,
+       * and context window limits.
+       */
+      rejected_prediction_tokens?: number;
+    };
+    /** @description Breakdown of tokens used in the prompt. */
+    "CompletionUsage.PromptTokensDetails": {
+      /**
+       * Format: double
+       * @description Audio input tokens present in the prompt.
+       */
+      audio_tokens?: number;
+      /**
+       * Format: double
+       * @description Cached tokens present in the prompt.
+       */
+      cached_tokens?: number;
+    };
+    /** @description Usage statistics for the completion request. */
+    CompletionUsage: {
+      /**
+       * Format: double
+       * @description Number of tokens in the generated completion.
+       */
+      completion_tokens: number;
+      /**
+       * Format: double
+       * @description Number of tokens in the prompt.
+       */
+      prompt_tokens: number;
+      /**
+       * Format: double
+       * @description Total number of tokens used in the request (prompt + completion).
+       */
+      total_tokens: number;
+      /** @description Breakdown of tokens used in a completion. */
+      completion_tokens_details?: components["schemas"]["CompletionUsage.CompletionTokensDetails"];
+      /** @description Breakdown of tokens used in the prompt. */
+      prompt_tokens_details?: components["schemas"]["CompletionUsage.PromptTokensDetails"];
+    };
+    /**
+     * @description Represents a chat completion response returned by model, based on the provided
+     * input.
+     */
+    ChatCompletion: {
+      /** @description A unique identifier for the chat completion. */
+      id: string;
+      /**
+       * @description A list of chat completion choices. Can be more than one if `n` is greater
+       * than 1.
+       */
+      choices: components["schemas"]["ChatCompletion.Choice"][];
+      /**
+       * Format: double
+       * @description The Unix timestamp (in seconds) of when the chat completion was created.
+       */
+      created: number;
+      /** @description The model used for the chat completion. */
+      model: string;
+      /**
+       * @description The object type, which is always `chat.completion`.
+       * @enum {string}
+       */
+      object: "chat.completion";
+      /**
+       * @description Specifies the processing type used for serving the request.
+       *
+       * - If set to 'auto', then the request will be processed with the service tier
+       *   configured in the Project settings. Unless otherwise configured, the Project
+       *   will use 'default'.
+       * - If set to 'default', then the request will be processed with the standard
+       *   pricing and performance for the selected model.
+       * - If set to '[flex](https://platform.openai.com/docs/guides/flex-processing)' or
+       *   'priority', then the request will be processed with the corresponding service
+       *   tier. [Contact sales](https://openai.com/contact-sales) to learn more about
+       *   Priority processing.
+       * - When not set, the default behavior is 'auto'.
+       *
+       * When the `service_tier` parameter is set, the response body will include the
+       * `service_tier` value based on the processing mode actually used to serve the
+       * request. This response value may be different from the value set in the
+       * parameter.
+       * @enum {string|null}
+       */
+      service_tier?: "auto" | "default" | "flex" | "scale" | "priority" | null;
+      /**
+       * @description This fingerprint represents the backend configuration that the model runs with.
+       *
+       * Can be used in conjunction with the `seed` request parameter to understand when
+       * backend changes have been made that might impact determinism.
+       */
+      system_fingerprint?: string;
+      /** @description Usage statistics for the completion request. */
+      usage?: components["schemas"]["CompletionUsage"];
+    };
+    ResultSuccess_ChatCompletion_: {
+      data: components["schemas"]["ChatCompletion"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ChatCompletion.string_": components["schemas"]["ResultSuccess_ChatCompletion_"] | components["schemas"]["ResultError_string_"];
+    /**
+     * @description Learn about
+     * [text inputs](https://platform.openai.com/docs/guides/text-generation).
+     */
+    ChatCompletionContentPartText: {
+      /** @description The text content. */
+      text: string;
+      /**
+       * @description The type of the content part.
+       * @enum {string}
+       */
+      type: "text";
+    };
+    /**
+     * @description Developer-provided instructions that the model should follow, regardless of
+     * messages sent by the user. With o1 models and newer, `developer` messages
+     * replace the previous `system` messages.
+     */
+    ChatCompletionDeveloperMessageParam: {
+      /** @description The contents of the developer message. */
+      content: string | components["schemas"]["ChatCompletionContentPartText"][];
+      /**
+       * @description The role of the messages author, in this case `developer`.
+       * @enum {string}
+       */
+      role: "developer";
+      /**
+       * @description An optional name for the participant. Provides the model information to
+       * differentiate between participants of the same role.
+       */
+      name?: string;
+    };
+    /**
+     * @description Developer-provided instructions that the model should follow, regardless of
+     * messages sent by the user. With o1 models and newer, use `developer` messages
+     * for this purpose instead.
+     */
+    ChatCompletionSystemMessageParam: {
+      /** @description The contents of the system message. */
+      content: string | components["schemas"]["ChatCompletionContentPartText"][];
+      /**
+       * @description The role of the messages author, in this case `system`.
+       * @enum {string}
+       */
+      role: "system";
+      /**
+       * @description An optional name for the participant. Provides the model information to
+       * differentiate between participants of the same role.
+       */
+      name?: string;
+    };
+    "ChatCompletionContentPartImage.ImageURL": {
+      /** @description Either a URL of the image or the base64 encoded image data. */
+      url: string;
+      /**
+       * @description Specifies the detail level of the image. Learn more in the
+       * [Vision guide](https://platform.openai.com/docs/guides/vision#low-or-high-fidelity-image-understanding).
+       * @enum {string}
+       */
+      detail?: "auto" | "low" | "high";
+    };
+    /** @description Learn about [image inputs](https://platform.openai.com/docs/guides/vision). */
+    ChatCompletionContentPartImage: {
+      image_url: components["schemas"]["ChatCompletionContentPartImage.ImageURL"];
+      /**
+       * @description The type of the content part.
+       * @enum {string}
+       */
+      type: "image_url";
+    };
+    "ChatCompletionContentPartInputAudio.InputAudio": {
+      /** @description Base64 encoded audio data. */
+      data: string;
+      /**
+       * @description The format of the encoded audio data. Currently supports "wav" and "mp3".
+       * @enum {string}
+       */
+      format: "wav" | "mp3";
+    };
+    /** @description Learn about [audio inputs](https://platform.openai.com/docs/guides/audio). */
+    ChatCompletionContentPartInputAudio: {
+      input_audio: components["schemas"]["ChatCompletionContentPartInputAudio.InputAudio"];
+      /**
+       * @description The type of the content part. Always `input_audio`.
+       * @enum {string}
+       */
+      type: "input_audio";
+    };
+    "ChatCompletionContentPart.File.File": {
+      /**
+       * @description The base64 encoded file data, used when passing the file to the model as a
+       * string.
+       */
+      file_data?: string;
+      /** @description The ID of an uploaded file to use as input. */
+      file_id?: string;
+      /** @description The name of the file, used when passing the file to the model as a string. */
+      filename?: string;
+    };
+    /**
+     * @description Learn about [file inputs](https://platform.openai.com/docs/guides/text) for text
+     * generation.
+     */
+    "ChatCompletionContentPart.File": {
+      file: components["schemas"]["ChatCompletionContentPart.File.File"];
+      /**
+       * @description The type of the content part. Always `file`.
+       * @enum {string}
+       */
+      type: "file";
+    };
+    /**
+     * @description Learn about
+     * [text inputs](https://platform.openai.com/docs/guides/text-generation).
+     */
+    ChatCompletionContentPart: components["schemas"]["ChatCompletionContentPartText"] | components["schemas"]["ChatCompletionContentPartImage"] | components["schemas"]["ChatCompletionContentPartInputAudio"] | components["schemas"]["ChatCompletionContentPart.File"];
+    /**
+     * @description Messages sent by an end user, containing prompts or additional context
+     * information.
+     */
+    ChatCompletionUserMessageParam: {
+      /** @description The contents of the user message. */
+      content: string | components["schemas"]["ChatCompletionContentPart"][];
+      /**
+       * @description The role of the messages author, in this case `user`.
+       * @enum {string}
+       */
+      role: "user";
+      /**
+       * @description An optional name for the participant. Provides the model information to
+       * differentiate between participants of the same role.
+       */
+      name?: string;
+    };
+    /**
+     * @description Data about a previous audio response from the model.
+     * [Learn more](https://platform.openai.com/docs/guides/audio).
+     */
+    "ChatCompletionAssistantMessageParam.Audio": {
+      /** @description Unique identifier for a previous audio response from the model. */
+      id: string;
+    };
+    ChatCompletionContentPartRefusal: {
+      /** @description The refusal message generated by the model. */
+      refusal: string;
+      /**
+       * @description The type of the content part.
+       * @enum {string}
+       */
+      type: "refusal";
+    };
+    /** @deprecated */
+    "ChatCompletionAssistantMessageParam.FunctionCall": {
+      /**
+       * @description The arguments to call the function with, as generated by the model in JSON
+       * format. Note that the model does not always generate valid JSON, and may
+       * hallucinate parameters not defined by your function schema. Validate the
+       * arguments in your code before calling your function.
+       */
+      arguments: string;
+      /** @description The name of the function to call. */
+      name: string;
+    };
+    /** @description Messages sent by the model in response to user messages. */
+    ChatCompletionAssistantMessageParam: {
+      /**
+       * @description The role of the messages author, in this case `assistant`.
+       * @enum {string}
+       */
+      role: "assistant";
+      /**
+       * @description Data about a previous audio response from the model.
+       * [Learn more](https://platform.openai.com/docs/guides/audio).
+       */
+      audio?: components["schemas"]["ChatCompletionAssistantMessageParam.Audio"] | null;
+      /**
+       * @description The contents of the assistant message. Required unless `tool_calls` or
+       * `function_call` is specified.
+       */
+      content?: (string | ((components["schemas"]["ChatCompletionContentPartText"] | components["schemas"]["ChatCompletionContentPartRefusal"])[])) | null;
+      /** @deprecated */
+      function_call?: components["schemas"]["ChatCompletionAssistantMessageParam.FunctionCall"] | null;
+      /**
+       * @description An optional name for the participant. Provides the model information to
+       * differentiate between participants of the same role.
+       */
+      name?: string;
+      /** @description The refusal message by the assistant. */
+      refusal?: string | null;
+      /** @description The tool calls generated by the model, such as function calls. */
+      tool_calls?: components["schemas"]["ChatCompletionMessageToolCall"][];
+    };
+    ChatCompletionToolMessageParam: {
+      /** @description The contents of the tool message. */
+      content: string | components["schemas"]["ChatCompletionContentPartText"][];
+      /**
+       * @description The role of the messages author, in this case `tool`.
+       * @enum {string}
+       */
+      role: "tool";
+      /** @description Tool call that this message is responding to. */
+      tool_call_id: string;
+    };
+    /** @deprecated */
+    ChatCompletionFunctionMessageParam: {
+      /** @description The contents of the function message. */
+      content: string | null;
+      /** @description The name of the function to call. */
+      name: string;
+      /**
+       * @description The role of the messages author, in this case `function`.
+       * @enum {string}
+       */
+      role: "function";
+    };
+    /**
+     * @description Developer-provided instructions that the model should follow, regardless of
+     * messages sent by the user. With o1 models and newer, `developer` messages
+     * replace the previous `system` messages.
+     */
+    ChatCompletionMessageParam: components["schemas"]["ChatCompletionDeveloperMessageParam"] | components["schemas"]["ChatCompletionSystemMessageParam"] | components["schemas"]["ChatCompletionUserMessageParam"] | components["schemas"]["ChatCompletionAssistantMessageParam"] | components["schemas"]["ChatCompletionToolMessageParam"] | components["schemas"]["ChatCompletionFunctionMessageParam"];
+    /**
+     * @description The parameters the functions accepts, described as a JSON Schema object. See the
+     * [guide](https://platform.openai.com/docs/guides/function-calling) for examples,
+     * and the
+     * [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for
+     * documentation about the format.
+     *
+     * Omitting `parameters` defines a function with an empty parameter list.
+     */
+    FunctionParameters: {
+      [key: string]: unknown;
+    };
+    FunctionDefinition: {
+      /**
+       * @description The name of the function to be called. Must be a-z, A-Z, 0-9, or contain
+       * underscores and dashes, with a maximum length of 64.
+       */
+      name: string;
+      /**
+       * @description A description of what the function does, used by the model to choose when and
+       * how to call the function.
+       */
+      description?: string;
+      /**
+       * @description The parameters the functions accepts, described as a JSON Schema object. See the
+       * [guide](https://platform.openai.com/docs/guides/function-calling) for examples,
+       * and the
+       * [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for
+       * documentation about the format.
+       *
+       * Omitting `parameters` defines a function with an empty parameter list.
+       */
+      parameters?: components["schemas"]["FunctionParameters"];
+      /**
+       * @description Whether to enable strict schema adherence when generating the function call. If
+       * set to true, the model will follow the exact schema defined in the `parameters`
+       * field. Only a subset of JSON Schema is supported when `strict` is `true`. Learn
+       * more about Structured Outputs in the
+       * [function calling guide](https://platform.openai.com/docs/guides/function-calling).
+       */
+      strict?: boolean | null;
+    };
+    /** @description A function tool that can be used to generate a response. */
+    ChatCompletionFunctionTool: {
+      function: components["schemas"]["FunctionDefinition"];
+      /**
+       * @description The type of the tool. Currently, only `function` is supported.
+       * @enum {string}
+       */
+      type: "function";
+    };
+    /** @description Unconstrained free-form text. */
+    "ChatCompletionCustomTool.Custom.Text": {
+      /**
+       * @description Unconstrained text format. Always `text`.
+       * @enum {string}
+       */
+      type: "text";
+    };
+    /** @description Your chosen grammar. */
+    "ChatCompletionCustomTool.Custom.Grammar.Grammar": {
+      /** @description The grammar definition. */
+      definition: string;
+      /**
+       * @description The syntax of the grammar definition. One of `lark` or `regex`.
+       * @enum {string}
+       */
+      syntax: "lark" | "regex";
+    };
+    /** @description A grammar defined by the user. */
+    "ChatCompletionCustomTool.Custom.Grammar": {
+      /** @description Your chosen grammar. */
+      grammar: components["schemas"]["ChatCompletionCustomTool.Custom.Grammar.Grammar"];
+      /**
+       * @description Grammar format. Always `grammar`.
+       * @enum {string}
+       */
+      type: "grammar";
+    };
+    /** @description Properties of the custom tool. */
+    "ChatCompletionCustomTool.Custom": {
+      /** @description The name of the custom tool, used to identify it in tool calls. */
+      name: string;
+      /** @description Optional description of the custom tool, used to provide more context. */
+      description?: string;
+      /** @description The input format for the custom tool. Default is unconstrained text. */
+      format?: components["schemas"]["ChatCompletionCustomTool.Custom.Text"] | components["schemas"]["ChatCompletionCustomTool.Custom.Grammar"];
+    };
+    /** @description A custom tool that processes input using a specified format. */
+    ChatCompletionCustomTool: {
+      /** @description Properties of the custom tool. */
+      custom: components["schemas"]["ChatCompletionCustomTool.Custom"];
+      /**
+       * @description The type of the custom tool. Always `custom`.
+       * @enum {string}
+       */
+      type: "custom";
+    };
+    /** @description A function tool that can be used to generate a response. */
+    ChatCompletionTool: components["schemas"]["ChatCompletionFunctionTool"] | components["schemas"]["ChatCompletionCustomTool"];
+    /** @description Constrains the tools available to the model to a pre-defined set. */
+    ChatCompletionAllowedTools: {
+      /**
+       * @description Constrains the tools available to the model to a pre-defined set.
+       *
+       * `auto` allows the model to pick from among the allowed tools and generate a
+       * message.
+       *
+       * `required` requires the model to call one or more of the allowed tools.
+       * @enum {string}
+       */
+      mode: "auto" | "required";
+      /**
+       * @description A list of tool definitions that the model should be allowed to call.
+       *
+       * For the Chat Completions API, the list of tool definitions might look like:
+       *
+       * ```json
+       * [
+       *   { "type": "function", "function": { "name": "get_weather" } },
+       *   { "type": "function", "function": { "name": "get_time" } }
+       * ]
+       * ```
+       */
+      tools: {
+          [key: string]: unknown;
+        }[];
+    };
+    /** @description Constrains the tools available to the model to a pre-defined set. */
+    ChatCompletionAllowedToolChoice: {
+      /** @description Constrains the tools available to the model to a pre-defined set. */
+      allowed_tools: components["schemas"]["ChatCompletionAllowedTools"];
+      /**
+       * @description Allowed tool configuration type. Always `allowed_tools`.
+       * @enum {string}
+       */
+      type: "allowed_tools";
+    };
+    "ChatCompletionNamedToolChoice.Function": {
+      /** @description The name of the function to call. */
+      name: string;
+    };
+    /**
+     * @description Specifies a tool the model should use. Use to force the model to call a specific
+     * function.
+     */
+    ChatCompletionNamedToolChoice: {
+      function: components["schemas"]["ChatCompletionNamedToolChoice.Function"];
+      /**
+       * @description For function calling, the type is always `function`.
+       * @enum {string}
+       */
+      type: "function";
+    };
+    "ChatCompletionNamedToolChoiceCustom.Custom": {
+      /** @description The name of the custom tool to call. */
+      name: string;
+    };
+    /**
+     * @description Specifies a tool the model should use. Use to force the model to call a specific
+     * custom tool.
+     */
+    ChatCompletionNamedToolChoiceCustom: {
+      custom: components["schemas"]["ChatCompletionNamedToolChoiceCustom.Custom"];
+      /**
+       * @description For custom tool calling, the type is always `custom`.
+       * @enum {string}
+       */
+      type: "custom";
+    };
+    /**
+     * @description Controls which (if any) tool is called by the model. `none` means the model will
+     * not call any tool and instead generates a message. `auto` means the model can
+     * pick between generating a message or calling one or more tools. `required` means
+     * the model must call one or more tools. Specifying a particular tool via
+     * `{"type": "function", "function": {"name": "my_function"}}` forces the model to
+     * call that tool.
+     *
+     * `none` is the default when no tools are present. `auto` is the default if tools
+     * are present.
+     */
+    ChatCompletionToolChoiceOption: components["schemas"]["ChatCompletionAllowedToolChoice"] | components["schemas"]["ChatCompletionNamedToolChoice"] | components["schemas"]["ChatCompletionNamedToolChoiceCustom"] | ("none" | "auto" | "required");
+    AlertResponse: {
+      alerts: ({
+          updated_at: string | null;
+          /** Format: double */
+          time_window: number;
+          /** Format: double */
+          time_block_duration: number;
+          /** Format: double */
+          threshold: number;
+          status: string;
+          soft_delete: boolean;
+          slack_channels: string[];
+          org_id: string;
+          name: string;
+          /** Format: double */
+          minimum_request_count: number | null;
+          metric: string;
+          id: string;
+          emails: string[];
+          created_at: string | null;
+        })[];
+      history: ({
+          updated_at: string | null;
+          triggered_value: string;
+          status: string;
+          soft_delete: boolean;
+          org_id: string;
+          id: string;
+          created_at: string | null;
+          alert_start_time: string;
+          alert_name: string;
+          alert_metric: string;
+          alert_id: string;
+          alert_end_time: string | null;
+        })[];
+    };
+    ResultSuccess_AlertResponse_: {
+      data: components["schemas"]["AlertResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_AlertResponse.string_": components["schemas"]["ResultSuccess_AlertResponse_"] | components["schemas"]["ResultError_string_"];
+    AlertRequest: {
+      name: string;
+      metric: string;
+      /** Format: double */
+      threshold: number;
+      time_window: string;
+      emails: string[];
+      slack_channels: string[];
+      /** Format: double */
+      minimum_request_count?: number;
+    };
+    "ResultSuccess__active-boolean--created_at-string--id-number--message-string--title-string--updated_at-string_-Array_": {
+      data: {
+          updated_at: string;
+          title: string;
+          message: string;
+          /** Format: double */
+          id: number;
+          created_at: string;
+          active: boolean;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__active-boolean--created_at-string--id-number--message-string--title-string--updated_at-string_-Array.string_": components["schemas"]["ResultSuccess__active-boolean--created_at-string--id-number--message-string--title-string--updated_at-string_-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__organization_id-string--name-string--flags-string-Array_-Array_": {
+      data: {
+          flags: string[];
+          name: string;
+          organization_id: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__organization_id-string--name-string--flags-string-Array_-Array.string_": components["schemas"]["ResultSuccess__organization_id-string--name-string--flags-string-Array_-Array_"] | components["schemas"]["ResultError_string_"];
+    KafkaSettings: {
+      /** Format: double */
+      miniBatchSize: number;
+    };
+    AzureExperiment: {
+      azureBaseUri: string;
+      azureApiVersion: string;
+      azureDeploymentName: string;
+      azureApiKey: string;
+    };
+    ApiKey: {
+      apiKey: string;
+    };
+    Setting: components["schemas"]["KafkaSettings"] | components["schemas"]["AzureExperiment"] | components["schemas"]["ApiKey"];
+    /** @enum {string} */
+    SettingName: "kafka:dlq" | "kafka:log" | "kafka:score" | "kafka:dlq:score" | "kafka:dlq:eu" | "kafka:log:eu" | "kafka:orgs-to-dlq" | "azure:experiment" | "openai:apiKey" | "anthropic:apiKey" | "openrouter:apiKey" | "togetherai:apiKey" | "sqs:request-response-logs" | "sqs:helicone-scores" | "sqs:request-response-logs-dlq" | "sqs:helicone-scores-dlq";
+    /**
+     * @description The **`URL`** interface is used to parse, construct, normalize, and encode URL.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL)
+     * `URL` class is a global reference for `import { URL } from 'node:url'`
+     * https://nodejs.org/api/url.html#the-whatwg-url-api
+     */
+    "url.URL": string;
     /** @description Construct a type with a set of properties K of type T */
     "Record_string.stripe.Stripe.Discount_": {
       [key: string]: components["schemas"]["stripe.Stripe.Discount"];
@@ -17654,8 +17684,6 @@ Json: JsonObject;
        * @enum {string}
        */
       object: "invoice";
-      /** @description The status of the invoice, one of `draft`, `open`, `paid`, `uncollectible`, or `void`. [Learn more](https://stripe.com/docs/billing/invoices/workflow#workflow-overview) */
-      status: components["schemas"]["stripe.Stripe.Invoice.Status"];
       /** @description ID of the Connect Application that created the invoice. */
       application: string | components["schemas"]["stripe.Stripe.Application"] | components["schemas"]["stripe.Stripe.DeletedApplication"];
       /** @description Payments for this invoice */
@@ -17665,6 +17693,8 @@ Json: JsonObject;
       issuer: components["schemas"]["stripe.Stripe.Invoice.Issuer"];
       /** @description The ID of the customer who will be billed. */
       customer: string | components["schemas"]["stripe.Stripe.Customer"] | components["schemas"]["stripe.Stripe.DeletedCustomer"];
+      /** @description The status of the invoice, one of `draft`, `open`, `paid`, `uncollectible`, or `void`. [Learn more](https://stripe.com/docs/billing/invoices/workflow#workflow-overview) */
+      status: components["schemas"]["stripe.Stripe.Invoice.Status"];
       /** @description The country of the business associated with this invoice, most often the business creating the invoice. */
       account_country: string;
       /** @description The public name of the business associated with this invoice, most often the business creating the invoice. */
@@ -18091,6 +18121,50 @@ export interface operations {
       200: {
         content: {
           "application/json": number;
+        };
+      };
+    };
+  };
+  GetCreditBalance: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            /** Format: double */
+            balance: number;
+          };
+        };
+      };
+    };
+  };
+  GetCreditBalanceTransactions: {
+    parameters: {
+      query?: {
+        limit?: number;
+        starting_after?: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["stripe.Stripe.ApiList_stripe.Stripe.Billing.CreditBalanceTransaction_"];
+        };
+      };
+    };
+  };
+  CreateCloudGatewayCheckoutSession: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateCloudGatewayCheckoutSessionRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": string;
         };
       };
     };

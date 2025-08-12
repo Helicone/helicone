@@ -3,6 +3,8 @@ import { ok, err, Result } from "../util/results";
 import { Wallet } from "../durableObjects/Wallet";
 import retry from "async-retry";
 import { isError } from "../../../../packages/common/result";
+import { SupabaseClient } from "@supabase/supabase-js";
+import { Database } from "../../../supabase/database.types";
 
 export const STRIPE_INPUT_TOKEN_EVENT_NAME = "cloud_gateway_input_tokens";
 export const STRIPE_OUTPUT_TOKEN_EVENT_NAME = "cloud_gateway_output_tokens";
@@ -14,11 +16,13 @@ export class StripeManager {
   private stripeSecretKey: string;
   private wallet: DurableObjectNamespace<Wallet>;
   private stripe: Stripe;
+  private supabaseClient: SupabaseClient<Database>;
 
   constructor(
     webhookSecret: string,
     stripeSecretKey: string,
-    wallet: DurableObjectNamespace<Wallet>
+    wallet: DurableObjectNamespace<Wallet>,
+    supabaseClient: SupabaseClient<Database>
   ) {
     this.webhookSecret = webhookSecret;
     this.stripeSecretKey = stripeSecretKey;
@@ -27,6 +31,7 @@ export class StripeManager {
       apiVersion: "2025-07-30.basil",
       httpClient: Stripe.createFetchHttpClient(),
     });
+    this.supabaseClient = supabaseClient;
   }
 
   async verifyAndConstructEvent(
@@ -55,12 +60,10 @@ export class StripeManager {
       console.log(`Received Stripe webhook event: ${event.type}`);
 
       switch (event.type) {
-        // TODO(ENG-2693): there is also `billing.credit_grant_transaction.created`,
-        // docs are unclear on the difference between the two.
-        case "billing.credit_grant.created":
-          return await this.handleCreditGrantCreated(
+        case "payment_intent.succeeded":
+          return await this.handlePaymentIntentSucceeded(
             event.id,
-            event.data.object as Stripe.Billing.CreditGrant
+            event.data.object as Stripe.PaymentIntent
           );
 
         default:
@@ -244,48 +247,83 @@ export class StripeManager {
     }
   }
 
-  private async handleCreditGrantCreated(
+  private async handlePaymentIntentSucceeded(
     eventId: string,
-    creditGrant: Stripe.Billing.CreditGrant
+    paymentIntent: Stripe.PaymentIntent
   ): Promise<Result<void, string>> {
     console.debug(
-      `Processing credit grant created: ${creditGrant.id}`,
-      JSON.stringify(creditGrant)
+      `Processing payment intent succeeded: ${paymentIntent.id}`,
+      JSON.stringify(paymentIntent)
     );
 
-    if (!creditGrant.amount.monetary) {
+    if (paymentIntent.currency.toUpperCase() !== "USD") {
       console.debug(
-        `Credit grant monetary object is null, skipping: ${creditGrant.id}`
+        `Payment intent currency is not USD, skipping: ${paymentIntent.id}`
       );
       return ok(undefined);
     }
-    if (creditGrant.amount.monetary.currency.toUpperCase() !== "USD") {
+    let customerId;
+    if (typeof paymentIntent.customer === "string") {
+      customerId = paymentIntent.customer;
+    } else if (
+      typeof paymentIntent.customer === "object" &&
+      paymentIntent.customer !== null &&
+      "id" in paymentIntent.customer
+    ) {
+      customerId = paymentIntent.customer.id;
+    } else {
       console.debug(
-        `Credit grant currency is not USD, skipping: ${creditGrant.id}`
+        `Payment intent customer is not a string or object with id, skipping: ${paymentIntent.id}`
       );
-      return ok(undefined);
-    }
-    if (!creditGrant.metadata?.orgId) {
-      console.debug(
-        `Credit grant metadata orgId is null, skipping: ${creditGrant.id}`
-      );
-      return ok(undefined);
+      return err("Unable to get Stripe customer id from payment intent");
     }
 
-    const orgId = creditGrant.metadata.orgId;
-    const amount = creditGrant.amount.monetary.value;
+    const orgId = await this.supabaseClient
+      .from("organization")
+      .select("id")
+      .eq("stripe_customer_id", customerId)
+      .eq("soft_delete", false)
+      .single();
 
-    const walletId = this.wallet.idFromName(orgId);
+    if (!orgId.data?.id) {
+      return err("Unable to get org id from payment intent");
+    }
+
+    const walletId = this.wallet.idFromName(orgId.data?.id);
     const walletStub = this.wallet.get(walletId);
+    const amount = paymentIntent.amount_received;
 
     try {
-      const newBalance = await walletStub.addBalance(orgId, amount, eventId);
+      const newBalance = await walletStub.addBalance(orgId.data?.id, amount, eventId);
+      const creditGrantResult = await this.stripe.billing.creditGrants.create({
+        name: 'Cloud Gateway Token Usage Credits',
+        customer: customerId,
+        amount: {
+          monetary: {
+            currency: 'usd',
+            value: amount,
+          },
+          type: 'monetary',
+        },
+        applicability_config: {
+          scope: {
+            price_type: 'metered',
+          },
+        },
+        category: 'paid',
+      });
+      if (creditGrantResult.lastResponse.statusCode >= 400) {
+        console.error(
+          `Failed to create credit grant for payment intent ${paymentIntent.id}: ${creditGrantResult.lastResponse.statusCode}`
+        );
+        return err(`Failed to create credit grant for payment intent ${paymentIntent.id}: ${creditGrantResult.lastResponse.statusCode}`);
+      }
       console.log(
-        `Added ${amount} to wallet for org ${orgId} due to event ${eventId}. New balance: ${newBalance}`
+        `Added ${amount} to wallet for org ${orgId.data?.id} due to event ${eventId}`
       );
       return ok(undefined);
     } catch (e) {
-      const errorMessage = `Failed to process credit grant ${creditGrant.id} for org ${orgId} with amount ${amount}: ${e instanceof Error ? e.message : "Unknown error"}`;
+      const errorMessage = `Failed to process payment intent ${paymentIntent.id} for org ${orgId.data?.id} with amount ${amount}: ${e instanceof Error ? e.message : "Unknown error"}`;
       console.error(errorMessage);
       return err(errorMessage);
     }

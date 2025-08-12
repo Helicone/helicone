@@ -6834,10 +6834,17 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node@*", "@types/node@>=13.7.0", "@types/node@>=18.0.0", "@types/node@>=8.1.0":
+"@types/node@*", "@types/node@>=13.7.0", "@types/node@>=18.0.0":
   version "24.2.1"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-24.2.1.tgz#83e41543f0a518e006594bb394e2cd961de56727"
   integrity sha512-DRh5K+ka5eJic8CjH7td8QpYEV6Zo10gfRkjHCO3weqZHWDtAaSTFtl4+VMqOJ4N5jcuhZ9/l+yy8rVgw7BQeQ==
+  dependencies:
+    undici-types "~7.10.0"
+
+"@types/node@>=8.1.0":
+  version "24.3.0"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-24.3.0.tgz#89b09f45cb9a8ee69466f18ee5864e4c3eb84dec"
+  integrity sha512-aPTXCrfwnDLj4VvXrm+UUCQjNEvJgNA8s5F1cvwQU+3KNltTOkBm1j30uNLyqqPNe7gE3KFzImYoZEfLhp4Yow==
   dependencies:
     undici-types "~7.10.0"
 
@@ -17193,10 +17200,10 @@ strip-literal@^3.0.0:
   dependencies:
     js-tokens "^9.0.1"
 
-stripe@18.4.0:
-  version "18.4.0"
-  resolved "https://registry.yarnpkg.com/stripe/-/stripe-18.4.0.tgz#1c0d5a7ed168f1ecd0f4a80d1e947e615d3eb841"
-  integrity sha512-LKFeDnDYo4U/YzNgx2Lc9PT9XgKN0JNF1iQwZxgkS4lOw5NunWCnzyH5RhTlD3clIZnf54h7nyMWkS8VXPmtTQ==
+stripe@18.5.0-beta.2:
+  version "18.5.0-beta.2"
+  resolved "https://registry.yarnpkg.com/stripe/-/stripe-18.5.0-beta.2.tgz#36149a0475a5793314b20879cd61a2372bc5338d"
+  integrity sha512-McAjKIiI3XayXwjSJ6JjT2sz/gzIp4QsRY+3s5kFnkVzYJR9rWzkWCkJwXXLxcibRv2IOEZ5SWFmLvHE60czmw==
   dependencies:
     qs "^6.11.0"
 

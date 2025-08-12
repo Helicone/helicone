@@ -107,7 +107,7 @@ export class StripeManager extends BaseManager {
   constructor(authParams: AuthParams) {
     super(authParams);
     this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-      apiVersion: "2025-07-30.basil",
+      apiVersion: "2025-07-30.preview",
     });
   }
 
@@ -1228,6 +1228,143 @@ WHERE (${builtFilter.filter})`,
       return ok(subscription);
     } catch (error: any) {
       return err(`Error retrieving subscription: ${error.message}`);
+    }
+  }
+
+  public async getCreditBalance(): Promise<Result<{ balance: number }, string>> {
+    try {
+      const organization = await this.getOrganization();
+
+      if (organization.error) {
+        return err(organization.error);
+      }
+
+      if (!organization.data) {
+        return err("Organization not found");
+      }
+
+      if (!organization.data.stripe_customer_id) {
+        // No Stripe customer ID, return 0 balance
+        return ok({ balance: 0 });
+      }
+
+      // Get credit balance from Stripe
+      const creditBalanceSummary = await this.stripe.billing.creditBalanceSummary.retrieve({
+        customer: organization.data.stripe_customer_id,
+        filter: {
+          type: "applicability_scope",
+          applicability_scope: {
+            price_type: "metered",
+          },
+        },
+      });
+
+      let totalBalance = 0;
+      if (
+        creditBalanceSummary.balances &&
+        Array.isArray(creditBalanceSummary.balances)
+      ) {
+        for (const balance of creditBalanceSummary.balances) {
+          if (
+            balance.available_balance?.type === "monetary" &&
+            balance.available_balance?.monetary?.currency === "usd" &&
+            typeof balance.available_balance?.monetary?.value === "number"
+          ) {
+            totalBalance += balance.available_balance.monetary.value;
+          }
+        }
+      }
+
+      return ok({ balance: totalBalance });
+    } catch (error: any) {
+      return err(`Error retrieving credit balance: ${error.message}`);
+    }
+  }
+
+  public async getCreditBalanceTransactions(params: {
+    limit?: number;
+    starting_after?: string;
+  }): Promise<Result<Stripe.ApiList<Stripe.Billing.CreditBalanceTransaction>, string>> {
+    try {
+      const organization = await this.getOrganization();
+
+      if (organization.error) {
+        return err(organization.error);
+      }
+
+      if (!organization.data) {
+        return err("Organization not found");
+      }
+
+      if (!organization.data.stripe_customer_id) {
+        // No Stripe customer ID, return empty list
+        return ok({
+          object: 'list',
+          data: [],
+          has_more: false,
+          url: '/v1/billing/credit_balance_transactions'
+        } as Stripe.ApiList<Stripe.Billing.CreditBalanceTransaction>);
+      }
+
+      // Get credit balance transactions from Stripe
+      const transactions = await this.stripe.billing.creditBalanceTransactions.list({
+        customer: organization.data.stripe_customer_id,
+        limit: params.limit,
+        starting_after: params.starting_after,
+      });
+
+      return ok(transactions);
+    } catch (error: any) {
+      return err(`Error retrieving credit balance transactions: ${error.message}`);
+    }
+  }
+
+  public async createCloudGatewayCheckoutSession(
+    origin: string,
+    amount: number,
+  ): Promise<Result<string, string>> {
+    try {
+      const customerId = await this.getOrCreateStripeCustomer();
+      if (customerId.error || !customerId.data) {
+        return err("Error getting or creating stripe customer");
+      }
+
+      const tokenUsageProductId = process.env.STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT;
+      if (!tokenUsageProductId) {
+        return err("STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT_ID environment variable is not set");
+      }
+
+      try {
+        const unitAmount = amount * 100;
+        const checkoutResult = await this.stripe.checkout.sessions.create({
+          customer: customerId.data,
+          success_url: `${origin}/settings/credits`,
+          cancel_url: `${origin}/settings/credits`,
+          mode: "payment",
+          line_items: [{
+            price_data: {
+                currency: "usd", 
+                unit_amount: unitAmount,
+                product: tokenUsageProductId,
+            },
+            quantity: 1,
+          }],
+          metadata: {
+            orgId: this.authParams.organizationId,
+            type: "cloud-gateway-tokens",
+          },
+        })
+
+        if (checkoutResult.lastResponse.statusCode !== 200) {
+          return err("Stripe did not return a session URL");
+        }
+
+        return ok(checkoutResult.url ?? "");
+      } catch (error: any) {
+        return err(`Error creating cloud gateway checkout session: ${error.message}`);
+      }
+    } catch (error: any) {
+      return err(`Error creating cloud gateway checkout session: ${error.message}`);
     }
   }
 

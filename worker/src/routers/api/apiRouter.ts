@@ -17,7 +17,7 @@ import { ProviderName } from "@helicone-package/cost/models/providers";
 import { BaseOpenAPIRouter } from "../routerFactory";
 import { StripeManager } from "../../lib/managers/StripeManager";
 import { isErr } from "../../lib/util/results";
-const RATE_LIMIT_MS = 1000 * 30;
+import { createSupabaseClient } from "../../lib/util/helpers";
 
 function getAPIRouterV1(
   router: OpenAPIRouterType<
@@ -510,7 +510,10 @@ function getAPIRouterV1(
     }
   );
 
-  // Credits handler
+  // Credits handler, mostly intended for debugging, that returns:
+  // - the balance in cents (eg `balance: 500 === $5`)
+  // - the total escrow in cents (eg `totalEscrow: 100 === $1`)
+  // - the disallow list.
   router.get(
     "/credits",
     async (
@@ -597,10 +600,13 @@ function getAPIRouterV1(
         return new Response("Missing request body", { status: 400 });
       }
 
+      const supabaseClient = createSupabaseClient(env);
+
       const webhookManager = new StripeManager(
         env.STRIPE_WEBHOOK_SECRET,
         env.STRIPE_SECRET_KEY,
-        env.WALLET
+        env.WALLET,
+        supabaseClient
       );
 
       const { data, error: verifyError } =

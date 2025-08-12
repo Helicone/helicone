@@ -5,6 +5,7 @@ import { DBWrapper } from "../db/DBWrapper";
 import {
   checkRateLimit,
   updateRateLimitCounter,
+  RateLimitProps,
 } from "../clients/KVRateLimiterClient";
 import { RequestWrapper } from "../RequestWrapper";
 import { ResponseBuilder } from "../ResponseBuilder";
@@ -504,20 +505,18 @@ async function log(
     proxyRequest?.requestWrapper.heliconeHeaders.cloudBillingEnabled;
   // finalize the escrow
   if (cloudBillingEnabled && res.data && escrowInfo && orgData.stripeCustomerId) {
-    const stripeManager = new StripeManager(
-      env.STRIPE_WEBHOOK_SECRET,
-      env.STRIPE_SECRET_KEY,
-      env.WALLET
-    );
-    
-    const updateResult = await walletStub.updateBalanceIfNeeded(
-      orgData.organizationId,
-      orgData.stripeCustomerId,
-      stripeManager
-    );
-    if (isError(updateResult)) {
-      console.error("Error updating wallet balance", updateResult.error);
-      // TODO: add alerts
+  
+    try {
+      const updateResult = await walletStub.updateBalanceIfNeeded(
+        orgData.organizationId,
+        orgData.stripeCustomerId,
+      );
+      if (isError(updateResult)) {
+        console.error("Error updating wallet balance", updateResult.error);
+        // TODO: add alerts
+      }
+    } catch (error) {
+      console.error("Error updating wallet balance", error);
     }
     
     const cost = res.data.cost;
@@ -546,14 +545,16 @@ async function log(
   if (cachedResponse === undefined || cachedResponse === null) {
     if (proxyRequest && finalRateLimitOptions && !orgError) {
       try {
-        await updateRateLimitCounter({
+        const rateLimitProps: RateLimitProps = {
           organizationId: orgData?.organizationId,
           heliconeProperties:
             proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
           rateLimitKV: env.RATE_LIMIT_KV,
           rateLimitOptions: finalRateLimitOptions,
           userId: proxyRequest.userId,
-        });
+          cost: res.data?.cost ?? 0,
+        };
+        await updateRateLimitCounter(rateLimitProps);
       } catch (error) {
         console.error("Error updating rate limit counter", error);
       }
@@ -573,7 +574,8 @@ async function log(
       const stripeManager = new StripeManager(
         env.STRIPE_WEBHOOK_SECRET,
         env.STRIPE_SECRET_KEY,
-        env.WALLET
+        env.WALLET,
+        createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY)
       );
       const meterEvent = await stripeManager.emitTokenUsage(
         orgData.stripeCustomerId,
