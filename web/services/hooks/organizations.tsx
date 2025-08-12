@@ -247,7 +247,10 @@ const useOrgsContextManager = (): OrgContextValue => {
         ) {
           return 1_000;
         }
-        if (selectedOrgsData.state.data?.data?.some((org) => !org.has_onboarded)) {
+        // semantics are a little confusing here, but we distinguish
+        // onboarding (initial welcome), integration (first request), quickstart (steps)
+        const hasNotCompletedFullOnboarding = selectedOrgsData.state.data?.data?.some((org) => !org.onboarding_status?.hasCompletedQuickstart);
+        if (hasNotCompletedFullOnboarding) {
           return 5_000;
         }
         return false;
