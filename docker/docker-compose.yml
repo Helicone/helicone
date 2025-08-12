@@ -35,8 +35,7 @@ services:
         soft: 262144
         hard: 262144
     environment:
-      CLICKHOUSE_USER: default
-      # CLICKHOUSE_PASSWORD: "password"
+      CLICKHOUSE_DEFAULT_USER: default
     restart: unless-stopped
     healthcheck:
       test:
@@ -117,7 +116,6 @@ services:
       FLYWAY_PASSWORD: testpassword
       CLICKHOUSE_HOST: http://clickhouse:8123
       CLICKHOUSE_USER: default
-      # CLICKHOUSE_PASSWORD: "password"
     volumes:
       - ../supabase:/app/supabase
       - ../clickhouse:/app/clickhouse
@@ -156,7 +154,7 @@ services:
         {
           "CLICKHOUSE_HOST": "http://clickhouse:8123",
           "CLICKHOUSE_USER": "default",
-          "CLICKHOUSE_PASSWORD": "password",
+          "CLICKHOUSE_PASSWORD": "",
           "CLICKHOUSE_HQL_USER": "hql_user",
           "CLICKHOUSE_HQL_PASSWORD": ""
         }
@@ -186,7 +184,7 @@ services:
       DATABASE_URL: postgres://postgres:testpassword@db:5432/helicone_test
       CLICKHOUSE_HOST: http://clickhouse:8123
       CLICKHOUSE_USER: default
-      CLICKHOUSE_PASSWORD: "password"
+      CLICKHOUSE_PASSWORD: ""
       VERCEL_ENV: ${VERCEL_ENV:-development}
       SMTP_HOST: mailhog
       SMTP_PORT: 1025
@@ -229,7 +227,7 @@ services:
         {
           "CLICKHOUSE_HOST": "http://clickhouse:8123",
           "CLICKHOUSE_USER": "default",
-          "CLICKHOUSE_PASSWORD": "password",
+          "CLICKHOUSE_PASSWORD": "",
           "CLICKHOUSE_HQL_USER": "hql_user",
           "CLICKHOUSE_HQL_PASSWORD": ""
         }
@@ -265,6 +263,7 @@ services:
       DATABASE_URL: postgres://postgres:testpassword@db:5432/helicone_test
       CLICKHOUSE_HOST: http://clickhouse:8123
       CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: ""
       VERCEL_ENV: ${VERCEL_ENV:-development}
       SMTP_HOST: mailhog
       SMTP_PORT: 1025
