@@ -10,7 +10,7 @@ const IntegrationGuide = () => {
       className="w-full rounded-lg bg-background"
       onClick={(e) => e.stopPropagation()}
     >
-      <div className="p-4">
+      <div className="p-4 pb-2">
         <Tabs defaultValue="curl" className="w-full">
           <div className="mb-2 flex items-center justify-between">
             <TabsList className="w-auto">
