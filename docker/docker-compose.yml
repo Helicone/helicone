@@ -265,7 +265,6 @@ services:
       DATABASE_URL: postgres://postgres:testpassword@db:5432/helicone_test
       CLICKHOUSE_HOST: http://clickhouse:8123
       CLICKHOUSE_USER: default
-      CLICKHOUSE_PASSWORD: "password"
       VERCEL_ENV: ${VERCEL_ENV:-development}
       SMTP_HOST: mailhog
       SMTP_PORT: 1025
