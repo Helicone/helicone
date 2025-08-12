@@ -53,7 +53,7 @@ export class SQSProducerImpl implements MessageProducer {
 
         return ok(null);
       } catch (error: any) {
-        console.log(`SQS attempt ${attempts + 1} failed: ${error.message}`);
+        console.error(`SQS attempt ${attempts + 1} failed: ${error.message}`);
         attempts++;
         if (attempts < maxAttempts) {
           await new Promise((resolve) => setTimeout(resolve, timeout));
