@@ -7,11 +7,7 @@ import { persist } from "zustand/middleware";
 import { useKeys } from "@/components/templates/keys/useKeys";
 import { useProvider } from "@/hooks/useProvider";
 
-export type OnboardingStep =
-  | "ORGANIZATION"
-  | "MEMBERS"
-  | "BILLING"
-  | "REQUEST";
+export type OnboardingStep = "ORGANIZATION" | "MEMBERS" | "BILLING" | "REQUEST";
 
 export type PlanType = "free" | "pro" | "team";
 
@@ -114,7 +110,7 @@ export const useOrgOnboarding = (orgId: string) => {
   const queryClient = useQueryClient();
   const jawn = useJawnClient();
   const { keys } = useKeys();
-  const { providerKeys } = useProvider();
+  const { providerKeys, refetchProviderKeys } = useProvider();
 
   const draftStore = useDraftOnboardingStore(orgId);
   const {
@@ -160,7 +156,7 @@ export const useOrgOnboarding = (orgId: string) => {
     }
   }, []);
 
-  const hasKeys = !keys?.isLoading && ((keys?.data?.data?.data?.length ?? 0) > 0);
+  const hasKeys = !keys?.isLoading && (keys?.data?.data?.data?.length ?? 0) > 0;
   const hasProviderKeys = providerKeys && providerKeys.length > 0;
 
   const currentState = {
@@ -172,9 +168,14 @@ export const useOrgOnboarding = (orgId: string) => {
   const { mutateAsync: saveOnboardingChangesAsync } = useMutation({
     mutationFn: async (newState: Partial<OnboardingState>) => {
       const fullState = {
-        hasOnboarded: newState.hasOnboarded ?? onboardingState?.hasOnboarded ?? false,
-        hasIntegrated: newState.hasIntegrated ?? onboardingState?.hasIntegrated ?? false,
-        hasCompletedQuickstart: newState.hasCompletedQuickstart ?? onboardingState?.hasCompletedQuickstart ?? false,
+        hasOnboarded:
+          newState.hasOnboarded ?? onboardingState?.hasOnboarded ?? false,
+        hasIntegrated:
+          newState.hasIntegrated ?? onboardingState?.hasIntegrated ?? false,
+        hasCompletedQuickstart:
+          newState.hasCompletedQuickstart ??
+          onboardingState?.hasCompletedQuickstart ??
+          false,
         currentStep:
           newState.currentStep ??
           onboardingState?.currentStep ??
@@ -242,5 +243,7 @@ export const useOrgOnboarding = (orgId: string) => {
     updateOnboardingStatus,
     hasKeys,
     hasProviderKeys,
+    refetchProviderKeys,
+    refetchKeys: keys.refetch,
   };
 };

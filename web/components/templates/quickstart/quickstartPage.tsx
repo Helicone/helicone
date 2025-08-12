@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { H1, P } from "../../ui/typography";
+import { H2, P } from "../../ui/typography";
 import { useOrg } from "../../layout/org/organizationContext";
 import { useOrgOnboarding } from "../../../services/hooks/useOrgOnboarding";
 import { QuickstartStepCard } from "../../onboarding/QuickstartStep";
@@ -16,17 +16,17 @@ const QuickstartPage = () => {
     {
       title: "Add provider key",
       description: "Add key",
-      onClick: () => router.push("/providers"),
+      link: "/settings/providers",
     },
     {
       title: "Create Helicone API key",
       description: "Create key",
-      onClick: () => router.push("/settings/api-keys"),
+      link: "/settings/api-keys",
     },
     {
       title: "Integrate",
       description: "Gateway dashboard",
-      onClick: () => router.push("/gateway"),
+      link: "/settings/ai-gateway",
     },
   ];
 
@@ -35,14 +35,14 @@ const QuickstartPage = () => {
 
   return (
     <div className="flex flex-col gap-8 p-6">
-      <div className="mx-auto mt-4 max-w-2xl text-center">
-        <H1>Quickstart</H1>
-        <P className="text-muted-foreground">
+      <div className="mx-auto mt-4 w-full max-w-4xl items-start">
+        <H2>Quickstart</H2>
+        <P className="mt-2 text-sm text-muted-foreground">
           Get started with Helicone in 3 simple steps
         </P>
       </div>
 
-      <div className="mx-auto flex w-full max-w-2xl flex-col gap-4">
+      <div className="mx-auto flex w-full max-w-4xl flex-col gap-4">
         {steps.map((step, index) => {
           const isCompleted =
             (index === 0 && hasProviderKeys) ||
@@ -55,11 +55,11 @@ const QuickstartPage = () => {
               stepNumber={index + 1}
               title={step.title}
               isCompleted={isCompleted ?? false}
-              onClick={step.onClick}
+              link={step.link}
               rightContent={step.description}
             >
               {index === 2 && (
-                <div className="mt-4">
+                <div className="mt-1">
                   <IntegrationGuide />
                 </div>
               )}
