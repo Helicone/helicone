@@ -410,9 +410,8 @@ describe("HQL Security Tests", () => {
       });
 
       // Should error due to resource limits
-      if (!result.data || result.data.length === 0) {
-        expect(result.error || result.data?.length === 0).toBeTruthy();
-      }
+      expect(result.error).toBeTruthy();
+      expect(result.data).toBeFalsy();
     });
   });
 

@@ -57,10 +57,10 @@ export class TestClickhouseClientWrapper {
     }
   }
 
-  async dbQuery<T>(
+  async dbQuery<RowType>(
     query: string,
     parameters: (number | string | boolean | Date)[]
-  ): Promise<Result<T[], string>> {
+  ): Promise<Result<RowType[], string>> {
     try {
       const query_params = this.paramsToValues(parameters);
 
@@ -72,7 +72,7 @@ export class TestClickhouseClientWrapper {
           wait_end_of_query: 1,
         },
       });
-      return { data: await queryResult.json<T>(), error: null };
+      return { data: await queryResult.json<RowType>(), error: null };
     } catch (err) {
       return {
         data: null,
@@ -81,10 +81,10 @@ export class TestClickhouseClientWrapper {
     }
   }
 
-  async dbQueryHql<T>(
+  async dbQueryHql<RowType>(
     query: string,
     parameters: (number | string | boolean | Date)[]
-  ): Promise<Result<T[], string>> {
+  ): Promise<Result<RowType[], string>> {
     try {
       const query_params = this.paramsToValues(parameters);
 
@@ -96,7 +96,7 @@ export class TestClickhouseClientWrapper {
           wait_end_of_query: 1,
         },
       });
-      return { data: await queryResult.json<T>(), error: null };
+      return { data: await queryResult.json<RowType>(), error: null };
     } catch (err) {
       return {
         data: null,
@@ -105,7 +105,7 @@ export class TestClickhouseClientWrapper {
     }
   }
 
-  async queryWithContext<T>({
+  async queryWithContext<RowType>({
     query,
     organizationId,
     parameters,
@@ -113,13 +113,16 @@ export class TestClickhouseClientWrapper {
     query: string;
     organizationId: string;
     parameters: (number | string | boolean | Date)[];
-  }): Promise<Result<T[], string>> {
+  }): Promise<Result<RowType[], string>> {
     try {
       const query_params = this.paramsToValues(parameters);
-      if (query.toLowerCase().includes("settings")) {
+      // Align security check with production: block attempts to reference or set our org-id context
+      const forbiddenPattern = /sql[_\s]*helicone[_\s]*organization[_\s]*id/i;
+      if (forbiddenPattern.test(query)) {
         return {
           data: null,
-          error: "Query contains 'settings' keyword, which is not allowed in HQL queries",
+          error:
+            "Query contains 'SQL_helicone_organization_id' keyword, which is not allowed in HQL queries",
         };
       }
 
@@ -137,6 +140,12 @@ export class TestClickhouseClientWrapper {
           // CRITICAL: Set readonly=1 to prevent query from overriding settings
           // This makes ALL settings immutable for this query
           readonly: 1,
+          // Align protective limits with production wrapper
+          max_execution_time: 30,
+          max_memory_usage: "1000000000",
+          max_rows_to_read: "10000000",
+          max_result_rows: "10000",
+          allow_ddl: 0,
         } as any,
       };
 
@@ -149,10 +158,10 @@ export class TestClickhouseClientWrapper {
       
       if (isDDL) {
         // DDL commands don't return data
-        return { data: [] as T[], error: null };
+        return { data: [] as RowType[], error: null };
       } else {
-        const jsonData = await queryResult.json<T>();
-        return { data: jsonData as unknown as T[], error: null };
+        const rows = (await queryResult.json<RowType>()) as unknown as RowType[];
+        return { data: rows, error: null };
       }
     } catch (err) {
       console.error("Error executing HQL query with context: ", query, organizationId, parameters);
