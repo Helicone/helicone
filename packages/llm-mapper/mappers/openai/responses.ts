@@ -218,18 +218,83 @@ const convertRequestInputToMessages = (
     ];
   }
 
-  return input
-    .map((msg, msgIdx) => {
+  const messages: Message[] = [];
+  const toolCalls: any[] = [];
+  let lastAssistantMessage: Message | null = null;
+
+  input.forEach((msg: any, msgIdx) => {
+    // Handle function calls - group them into tool_calls array
+    if (msg.type === "function_call") {
+      const toolCall = {
+        id: msg.id || msg.call_id || `req-tool-${msgIdx}`,
+        name: msg.name,
+        arguments: msg.arguments,
+        type: "function"
+      };
+      
+      // Find or create an assistant message to attach tool calls to
+      if (!lastAssistantMessage || lastAssistantMessage.role !== "assistant") {
+        lastAssistantMessage = {
+          _type: "message",
+          role: "assistant",
+          content: "", // Assistant messages with tool calls can have empty content
+          id: `req-msg-assistant-${msgIdx}`,
+          tool_calls: []
+        };
+        messages.push(lastAssistantMessage);
+      }
+      
+      lastAssistantMessage.tool_calls = lastAssistantMessage.tool_calls || [];
+      lastAssistantMessage.tool_calls.push(toolCall);
+      return;
+    }
+    
+    // Handle function call outputs (tool results in the new format)
+    if (msg.type === "function_call_output") {
+      messages.push({
+        _type: "function",
+        tool_call_id: msg.call_id || `req-tool-result-${msgIdx}`,
+        content: msg.output,
+        role: "tool",
+        id: `req-msg-tool-${msgIdx}`,
+      } as Message);
+      return;
+    }
+
+    // Handle regular messages with role and content (type="message" in the new format)
+    if ((msg.type === "message" || msg.role) && msg.content !== undefined) {
       if (typeof msg.content === "string") {
-        return {
+        let content = msg.content;
+        
+        // Try to parse content if it looks like JSON (common in OpenAI Responses API)
+        if (content.startsWith("[{") && content.endsWith("}]")) {
+          try {
+            const parsed = JSON.parse(content.replace(/'/g, '"')); // Replace single quotes with double quotes
+            if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].type === 'text') {
+              content = parsed[0].text || content;
+            }
+          } catch (e) {
+            // If parsing fails, keep original content
+          }
+        }
+        
+        const message = {
           _type: "message",
           role: msg.role,
           type: "input_text",
-          content: msg.content,
+          content: content,
           id: `req-msg-${msgIdx}`,
         } as Message;
+        messages.push(message);
+        
+        // Update lastAssistantMessage if this is an assistant message
+        if (msg.role === "assistant") {
+          lastAssistantMessage = message;
+        }
+        
+        return;
       } else if (Array.isArray(msg.content)) {
-        const contentArray = msg.content.map((content, contentIdx) => {
+        const contentArray = msg.content.map((content: any, contentIdx: number) => {
           const baseResponse: Message = {
             _type: typeMap[content.type] || "message",
             role: msg.role,
@@ -251,26 +316,67 @@ const convertRequestInputToMessages = (
           return baseResponse;
         });
 
-        return {
+        messages.push({
           _type: "contentArray",
           role: msg.role,
           id: `req-msg-${msgIdx}`,
           contentArray,
-        };
+        });
+        return;
       }
+    }
+  });
 
-      return null;
-    })
-    .filter(Boolean) as Message[];
+  return messages;
 };
 
 const toExternalRequest = (
   responses: Message[]
 ): OpenAIResponseRequest["input"] => {
   if (!responses) return [];
-  return responses.map(({ role, _type, content, contentArray }) => {
+  
+  const result: any[] = [];
+  
+  responses.forEach((msg: any) => {
+    // Handle function results
+    if (msg._type === "function") {
+      result.push({
+        type: "function_call_output",
+        call_id: msg.tool_call_id,
+        output: msg.content,
+      });
+      return;
+    }
+
+    // Handle regular messages
+    const { role, _type, content, contentArray, tool_calls } = msg;
     const validRole =
       (role as "user" | "assistant" | "system" | "developer") || "user";
+    
+    // If this message has tool calls, add them as separate function_call items
+    if (tool_calls && Array.isArray(tool_calls) && tool_calls.length > 0) {
+      // First add the message itself (if it has content)
+      if (content) {
+        result.push({
+          type: "message",
+          role: validRole,
+          content: content,
+        });
+      }
+      
+      // Then add each tool call as a separate function_call item
+      tool_calls.forEach((toolCall: any) => {
+        result.push({
+          type: "function_call",
+          id: toolCall.id,
+          call_id: toolCall.id,
+          name: toolCall.name,
+          arguments: toolCall.arguments,
+        });
+      });
+      return;
+    }
+    
     if (_type === "contentArray" && contentArray) {
       const textContent = contentArray.filter(
         (c): c is Message & { _type: "message" } => c._type === "message"
@@ -283,16 +389,17 @@ const toExternalRequest = (
       );
 
       if (textContent.length > 0) {
-        return {
+        result.push({
+          type: "message",
           role: validRole,
           content: textContent.map((c) => ({
             type: "input_text",
             text: c.content ?? "",
           })),
-        };
-      }
-      if (imageContent.length > 0) {
-        return {
+        });
+      } else if (imageContent.length > 0) {
+        result.push({
+          type: "message",
           role: validRole,
           content: imageContent.map((c) => ({
             type: "input_image",
@@ -300,10 +407,10 @@ const toExternalRequest = (
             image_url: c.image_url,
             file_id: c.file_id,
           })),
-        };
-      }
-      if (fileContent.length > 0) {
-        return {
+        });
+      } else if (fileContent.length > 0) {
+        result.push({
+          type: "message",
           role: validRole,
           content: fileContent.map((c) => ({
             type: "input_file",
@@ -311,18 +418,20 @@ const toExternalRequest = (
             file_id: c.file_id,
             filename: c.filename,
           })),
-        };
+        });
       }
-      return {
-        role: validRole,
-        content: "",
-      };
+      return;
     }
-    return {
+    
+    // Regular message
+    result.push({
+      type: "message",
       role: validRole,
       content: content || "",
-    };
+    });
   });
+  
+  return result;
 };
 
 const convertTools = (
@@ -461,10 +570,34 @@ export const openaiResponseMapper = new MapperBuilder<OpenAIResponseRequest>(
  * Convert response to internal Message format
  */
 const convertResponse = (responseBody: any): Message[] => {
+  const messages: Message[] = [];
+
+  // Handle consolidated response from streamed OpenAI /v1/responses call
+  // This format has responseBody.item instead of responseBody.output
+  if (responseBody?.item?.content && Array.isArray(responseBody.item.content)) {
+    const item = responseBody.item;
+    let messageText = "";
+    
+    // Find the 'output_text' item in the content array
+    const textContent = item.content.find(
+      (c: any) => c.type === "output_text"
+    );
+    if (textContent && textContent.text) {
+      messageText = textContent.text;
+    }
+
+    messages.push({
+      _type: "message",
+      role: item.role || "assistant",
+      content: messageText,
+      id: item.id || "resp-msg-0",
+    });
+    
+    return messages;
+  }
+
   // Check for the 'output' array specific to the Responses API
   if (!responseBody || !Array.isArray(responseBody.output)) return [];
-
-  const messages: Message[] = [];
 
   // Iterate through the output array
   responseBody.output.forEach((outputItem: any, index: number) => {
