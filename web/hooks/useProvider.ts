@@ -24,7 +24,7 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
   const providerKeysQueryKey = ["provider-keys", orgId];
 
   // Query to fetch provider keys
-  const { data: providerKeysData } = useQuery({
+  const { data: providerKeysData, refetch: refetchProviderKeys } = useQuery({
     queryKey: providerKeysQueryKey,
     queryFn: async () => {
       if (!orgId) return [] as ProviderKey[];
@@ -201,5 +201,6 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
     isSavingKey: updateProviderKey.isPending || addProviderKey.isPending,
     isSavedKey: updateProviderKey.isSuccess || addProviderKey.isSuccess,
     viewDecryptedProviderKey,
+    refetchProviderKeys,
   };
 };
