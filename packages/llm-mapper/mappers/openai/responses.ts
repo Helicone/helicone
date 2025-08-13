@@ -112,7 +112,7 @@ export const getRequestText = (requestBody: OpenAIResponseRequest): string => {
       if (Array.isArray(content)) {
         // Prefer text content if available
         const textItems = content.filter(
-          (c: any) => c?.type === "input_text" && typeof c?.text === "string",
+          (c: any) => c?.type === "input_text" && typeof c?.text === "string"
         );
         if (textItems.length > 0) {
           return textItems.map((c: any) => c.text).join(" ");
@@ -146,7 +146,7 @@ export const getRequestText = (requestBody: OpenAIResponseRequest): string => {
  */
 export const getResponseText = (
   responseBody: any,
-  statusCode: number = 200,
+  statusCode: number = 200
 ): string => {
   try {
     if (statusCode === 0 || statusCode === null) {
@@ -155,15 +155,13 @@ export const getResponseText = (
 
     if (responseBody?.error) {
       // Prefer message if present; else stringify the error object
-      return (
-        responseBody.error?.message ?? JSON.stringify(responseBody.error)
-      );
+      return responseBody.error?.message ?? JSON.stringify(responseBody.error);
     }
 
     // Responses API returns an `output` array with message items
     if (Array.isArray(responseBody?.output)) {
       const firstMessage = responseBody.output.find(
-        (item: any) => item?.type === "message",
+        (item: any) => item?.type === "message"
       );
       const content = firstMessage?.content;
       if (Array.isArray(content)) {
@@ -175,10 +173,14 @@ export const getResponseText = (
     }
 
     // A consolidated response from a streamed OpenAI /v1/responses call
-    if (responseBody?.item?.content && Array.isArray(responseBody.item.content) && responseBody.item.content.length) {
+    if (
+      responseBody?.item?.content &&
+      Array.isArray(responseBody.item.content) &&
+      responseBody.item.content.length
+    ) {
       const contentArray = responseBody.item.content;
       const textContent = contentArray.find(
-        (c: any) => c?.type === "output_text",
+        (c: any) => c?.type === "output_text"
       );
       if (textContent?.text) {
         return textContent.text;
@@ -228,9 +230,9 @@ const convertRequestInputToMessages = (
         id: msg.id || msg.call_id || `req-tool-${msgIdx}`,
         name: msg.name,
         arguments: msg.arguments,
-        type: "function"
+        type: "function",
       };
-      
+
       // Find or create an assistant message to attach tool calls to
       if (!lastAssistantMessage || lastAssistantMessage.role !== "assistant") {
         lastAssistantMessage = {
@@ -238,15 +240,15 @@ const convertRequestInputToMessages = (
           role: "assistant",
           content: "", // Assistant messages with tool calls can have empty content
           id: `req-msg-assistant-${msgIdx}`,
-          tool_calls: []
+          tool_calls: [],
         };
         messages.push(lastAssistantMessage);
       }
-      
-      lastAssistantMessage.tool_calls.push(toolCall);
+
+      lastAssistantMessage.tool_calls?.push(toolCall);
       return;
     }
-    
+
     // Handle function call outputs (tool results in the new format)
     if (msg.type === "function_call_output") {
       messages.push({
@@ -263,22 +265,30 @@ const convertRequestInputToMessages = (
     if ((msg.type === "message" || msg.role) && msg.content !== undefined) {
       if (typeof msg.content === "string") {
         let content = msg.content;
-        
+
         // Try to parse content if it looks like OpenAI Responses API format with single quotes
-        if (content.startsWith("[{") && content.endsWith("}]") && content.includes("'type'")) {
+        if (
+          content.startsWith("[{") &&
+          content.endsWith("}]") &&
+          content.includes("'type'")
+        ) {
           try {
             // Only replace quotes if this looks like the specific OpenAI Responses format
             // This is safer than a global replace and targets the specific case we're handling
             const normalized = content.replace(/'/g, '"');
             const parsed = JSON.parse(normalized);
-            if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].type === 'text') {
+            if (
+              Array.isArray(parsed) &&
+              parsed.length > 0 &&
+              parsed[0].type === "text"
+            ) {
               content = parsed[0].text || content;
             }
           } catch (e) {
             // If parsing fails, keep original content
           }
         }
-        
+
         const message = {
           _type: "message",
           role: msg.role,
@@ -287,35 +297,37 @@ const convertRequestInputToMessages = (
           id: `req-msg-${msgIdx}`,
         } as Message;
         messages.push(message);
-        
+
         // Update lastAssistantMessage if this is an assistant message
         if (msg.role === "assistant") {
           lastAssistantMessage = message;
         }
-        
+
         return;
       } else if (Array.isArray(msg.content)) {
-        const contentArray = msg.content.map((content: any, contentIdx: number) => {
-          const baseResponse: Message = {
-            _type: typeMap[content.type] || "message",
-            role: msg.role,
-            type: content.type,
-            id: `req-msg-${msgIdx}-${contentIdx}`,
-          };
+        const contentArray = msg.content.map(
+          (content: any, contentIdx: number) => {
+            const baseResponse: Message = {
+              _type: typeMap[content.type] || "message",
+              role: msg.role,
+              type: content.type,
+              id: `req-msg-${msgIdx}-${contentIdx}`,
+            };
 
-          if (content.type === "input_text" && content.text) {
-            baseResponse.content = content.text;
-          } else if (content.type === "input_image") {
-            baseResponse.detail = content.detail;
-            baseResponse.image_url = content.image_url;
-          } else if (content.type === "input_file") {
-            baseResponse.file_data = content.file_data;
-            baseResponse.file_id = content.file_id;
-            baseResponse.filename = content.filename;
+            if (content.type === "input_text" && content.text) {
+              baseResponse.content = content.text;
+            } else if (content.type === "input_image") {
+              baseResponse.detail = content.detail;
+              baseResponse.image_url = content.image_url;
+            } else if (content.type === "input_file") {
+              baseResponse.file_data = content.file_data;
+              baseResponse.file_id = content.file_id;
+              baseResponse.filename = content.filename;
+            }
+
+            return baseResponse;
           }
-
-          return baseResponse;
-        });
+        );
 
         messages.push({
           _type: "contentArray",
@@ -335,9 +347,9 @@ const toExternalRequest = (
   responses: Message[]
 ): OpenAIResponseRequest["input"] => {
   if (!responses) return [];
-  
+
   const result: any[] = [];
-  
+
   responses.forEach((msg: any) => {
     // Handle function results
     if (msg._type === "function") {
@@ -353,7 +365,7 @@ const toExternalRequest = (
     const { role, _type, content, contentArray, tool_calls } = msg;
     const validRole =
       (role as "user" | "assistant" | "system" | "developer") || "user";
-    
+
     // If this message has tool calls, add them as separate function_call items
     if (tool_calls && Array.isArray(tool_calls) && tool_calls.length > 0) {
       // First add the message itself (if it has content)
@@ -364,7 +376,7 @@ const toExternalRequest = (
           content: content,
         });
       }
-      
+
       // Then add each tool call as a separate function_call item
       tool_calls.forEach((toolCall: any) => {
         result.push({
@@ -377,53 +389,53 @@ const toExternalRequest = (
       });
       return;
     }
-    
+
     if (_type === "contentArray" && contentArray) {
       const textContent = contentArray.filter(
-        (c): c is Message & { _type: "message" } => c._type === "message"
+        (c: any): c is Message & { _type: "message" } => c._type === "message"
       );
       const imageContent = contentArray.filter(
-        (c): c is Message & { _type: "image" } => c._type === "image"
+        (c: any): c is Message & { _type: "image" } => c._type === "image"
       );
       const fileContent = contentArray.filter(
-        (c): c is Message & { _type: "file" } => c._type === "file"
+        (c: any): c is Message & { _type: "file" } => c._type === "file"
       );
 
       if (textContent.length > 0) {
         result.push({
           type: "message",
           role: validRole,
-          content: textContent.map((c) => ({
+          content: textContent.map((c: any) => ({
             type: "input_text",
-            text: c.content ?? "",
+            text: c?.content ?? "",
           })),
         });
       } else if (imageContent.length > 0) {
         result.push({
           type: "message",
           role: validRole,
-          content: imageContent.map((c) => ({
+          content: imageContent.map((c: any) => ({
             type: "input_image",
-            detail: (c.detail ?? "auto") as "high" | "low" | "auto",
-            image_url: c.image_url,
-            file_id: c.file_id,
+            detail: (c?.detail ?? "auto") as "high" | "low" | "auto",
+            image_url: c?.image_url,
+            file_id: c?.file_id,
           })),
         });
       } else if (fileContent.length > 0) {
         result.push({
           type: "message",
           role: validRole,
-          content: fileContent.map((c) => ({
+          content: fileContent.map((c: any) => ({
             type: "input_file",
-            file_data: c.content,
-            file_id: c.file_id,
-            filename: c.filename,
+            file_data: c?.content,
+            file_id: c?.file_id,
+            filename: c?.filename,
           })),
         });
       }
       return;
     }
-    
+
     // Regular message
     result.push({
       type: "message",
@@ -431,7 +443,7 @@ const toExternalRequest = (
       content: content || "",
     });
   });
-  
+
   return result;
 };
 
@@ -526,16 +538,19 @@ const toExternalToolChoice = (
   return "auto";
 };
 
-function convertToReasoningEffort(reasoning?: OpenAIResponseRequest["reasoning"]): LlmSchema["request"]["reasoning_effort"] {
+function convertToReasoningEffort(
+  reasoning?: OpenAIResponseRequest["reasoning"]
+): LlmSchema["request"]["reasoning_effort"] {
   if (!reasoning) return undefined;
   return reasoning.effort;
 }
 
-function convertFromReasoningEffort(reasoning_effort: LlmSchema["request"]["reasoning_effort"]): OpenAIResponseRequest["reasoning"] {
+function convertFromReasoningEffort(
+  reasoning_effort: LlmSchema["request"]["reasoning_effort"]
+): OpenAIResponseRequest["reasoning"] {
   if (!reasoning_effort) return undefined;
   return { effort: reasoning_effort };
 }
-
 
 export const openaiResponseMapper = new MapperBuilder<OpenAIResponseRequest>(
   "openai-response"
@@ -554,7 +569,12 @@ export const openaiResponseMapper = new MapperBuilder<OpenAIResponseRequest>(
   .map("stream", "stream")
   .map("max_output_tokens", "max_tokens")
   .map("parallel_tool_calls", "parallel_tool_calls")
-  .mapWithTransform("reasoning", "reasoning_effort", convertToReasoningEffort, convertFromReasoningEffort)
+  .mapWithTransform(
+    "reasoning",
+    "reasoning_effort",
+    convertToReasoningEffort,
+    convertFromReasoningEffort
+  )
   .mapWithTransform("tools", "tools", convertTools, toExternalTools)
   .mapWithTransform(
     "tool_choice",
@@ -578,11 +598,9 @@ const convertResponse = (responseBody: any): Message[] => {
   if (responseBody?.item?.content && Array.isArray(responseBody.item.content)) {
     const item = responseBody.item;
     let messageText = "";
-    
+
     // Find the 'output_text' item in the content array
-    const textContent = item.content.find(
-      (c: any) => c.type === "output_text"
-    );
+    const textContent = item.content.find((c: any) => c.type === "output_text");
     if (textContent && textContent.text) {
       messageText = textContent.text;
     }
@@ -593,7 +611,7 @@ const convertResponse = (responseBody: any): Message[] => {
       content: messageText,
       id: item.id || "resp-msg-0",
     });
-    
+
     return messages;
   }
 
