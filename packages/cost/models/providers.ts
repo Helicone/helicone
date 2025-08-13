@@ -2,6 +2,7 @@
  * Provider configurations for URL and model ID building
  */
 
+import { err, ok, Result } from "@/common/result";
 import type {
   ProviderConfig,
   Endpoint,
@@ -161,8 +162,6 @@ export const providers = {
   },
 } satisfies Record<ProviderName, ProviderConfig>;
 
-import { Result, ok, err } from "../../common/result";
-
 // Helper function to get provider config
 export function getProvider(providerName: string): Result<ProviderConfig> {
   const provider =
@@ -172,6 +171,39 @@ export function getProvider(providerName: string): Result<ProviderConfig> {
 
   return provider ? ok(provider) : err(`Unknown provider: ${providerName}`);
 }
+
+// TODO: Remove once we normalize provider names in provider_keys table.
+export const dbProviderToProvider = (provider: string): ProviderName | null => {
+  if (provider === "openai" || provider === "OpenAI") {
+    return "openai";
+  }
+  if (provider === "Anthropic") {
+    return "anthropic";
+  }
+  if (provider === "AWS Bedrock") {
+    return "bedrock";
+  }
+  if (provider === "Vertex AI") {
+    return "vertex";
+  }
+  return null;
+};
+
+export const providerToDbProvider = (provider: ProviderName): string => {
+  if (provider === "openai") {
+    return "OpenAI";
+  }
+  if (provider === "anthropic") {
+    return "Anthropic";
+  }
+  if (provider === "bedrock") {
+    return "AWS Bedrock";
+  }
+  if (provider === "vertex") {
+    return "Vertex AI";
+  }
+  return provider;
+};
 
 // Helper function to build URL for an endpoint
 export function buildEndpointUrl(
