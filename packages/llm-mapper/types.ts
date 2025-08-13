@@ -71,7 +71,8 @@ export interface LLMRequestBody {
   presence_penalty?: number | null;
   frequency_penalty?: number | null;
   stop?: string[] | string | null; // stop_sequences for Anthropic
-  reasoning_effort?: "low" | "medium" | "high" | null;
+  reasoning_effort?: "minimal" | "low" | "medium" | "high" | null;
+  verbosity?: "low" | "medium" | "high" | null; // for OpenAI (started in GPT 5)
 
   // Internal Tools
   tools?: Tool[];

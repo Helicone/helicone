@@ -47,7 +47,8 @@ export interface OpenAIChatRequest {
     | "required"
     | { type: string; function?: { type: "function"; name: string } };
   parallel_tool_calls?: boolean;
-  reasoning_effort?: "low" | "medium" | "high";
+  reasoning_effort?: "minimal" | "low" | "medium" | "high";
+  verbosity?: "low" | "medium" | "high";
   frequency_penalty?: number;
   presence_penalty?: number;
   logit_bias?: Record<string, number>;
@@ -121,11 +122,12 @@ const convertRequestMessages = (
 
   return messages.map((msg, idx): Message => {
     if (msg.tool_calls || (msg as any).function_call) {
-      const convertedToolCalls = msg.tool_calls?.map((toolCall) => ({
-        id: toolCall.id,
-        name: toolCall.function.name,
-        arguments: JSON.parse(toolCall.function.arguments || "{}"),
-      })) || [];
+      const convertedToolCalls =
+        msg.tool_calls?.map((toolCall) => ({
+          id: toolCall.id,
+          name: toolCall.function.name,
+          arguments: JSON.parse(toolCall.function.arguments || "{}"),
+        })) || [];
 
       return {
         _type: "functionCall",
@@ -374,6 +376,7 @@ export const openaiChatMapper = new MapperBuilder<OpenAIChatRequest>(
   )
   .map("parallel_tool_calls", "parallel_tool_calls")
   .map("reasoning_effort", "reasoning_effort")
+  .map("verbosity", "verbosity")
   .map("frequency_penalty", "frequency_penalty")
   .map("presence_penalty", "presence_penalty")
   .map("n", "n")

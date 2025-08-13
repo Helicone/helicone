@@ -112,6 +112,7 @@ export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
       frequency_penalty: undefined,
       presence_penalty: undefined,
       stop: [],
+      reasoning_effort: undefined,
     },
   },
 };

@@ -41,7 +41,10 @@ interface OpenAIResponseRequest {
   parallel_tool_calls?: boolean;
   previous_response_id?: string;
   reasoning?: {
-    effort?: "low" | "medium" | "high";
+    effort?: "low" | "medium" | "high" | "minimal";
+  };
+  text?: {
+    verbosity?: "low" | "medium" | "high";
   };
   store?: boolean;
   stream?: boolean;
@@ -552,6 +555,20 @@ function convertFromReasoningEffort(
   return { effort: reasoning_effort };
 }
 
+function convertToVerbosity(
+  text?: OpenAIResponseRequest["text"]
+): LlmSchema["request"]["verbosity"] {
+  if (!text) return undefined;
+  return text.verbosity;
+}
+
+function convertFromVerbosity(
+  verbosity: LlmSchema["request"]["verbosity"]
+): OpenAIResponseRequest["text"] {
+  if (!verbosity) return undefined;
+  return { verbosity };
+}
+
 export const openaiResponseMapper = new MapperBuilder<OpenAIResponseRequest>(
   "openai-response"
 )
@@ -574,6 +591,12 @@ export const openaiResponseMapper = new MapperBuilder<OpenAIResponseRequest>(
     "reasoning_effort",
     convertToReasoningEffort,
     convertFromReasoningEffort
+  )
+  .mapWithTransform(
+    "text",
+    "verbosity",
+    convertToVerbosity,
+    convertFromVerbosity
   )
   .mapWithTransform("tools", "tools", convertTools, toExternalTools)
   .mapWithTransform(

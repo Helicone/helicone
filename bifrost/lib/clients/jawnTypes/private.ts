@@ -1092,7 +1092,9 @@ Json: JsonObject;
       } | ("none" | "auto" | "required");
       parallel_tool_calls?: boolean;
       /** @enum {string} */
-      reasoning_effort?: "low" | "medium" | "high";
+      reasoning_effort?: "minimal" | "low" | "medium" | "high";
+      /** @enum {string} */
+      verbosity?: "low" | "medium" | "high";
       /** Format: double */
       frequency_penalty?: number;
       /** Format: double */
@@ -1463,7 +1465,9 @@ Json: JsonObject;
       frequency_penalty?: number | null;
       stop?: (string[] | string) | null;
       /** @enum {string|null} */
-      reasoning_effort?: "low" | "medium" | "high" | null;
+      reasoning_effort?: "minimal" | "low" | "medium" | "high" | null;
+      /** @enum {string|null} */
+      verbosity?: "low" | "medium" | "high" | null;
       tools?: components["schemas"]["Tool"][];
       parallel_tool_calls?: boolean | null;
       tool_choice?: {
