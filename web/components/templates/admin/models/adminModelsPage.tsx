@@ -26,9 +26,7 @@ import {
   type Model,
   type ModelEndpoint,
   type AuthorMetadata,
-  type Result,
 } from "@helicone-package/cost/models";
-
 
 export default function AdminModelsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -51,23 +49,23 @@ export default function AdminModelsPage() {
         modelVersions: {} as Record<string, string[]>,
       };
     }
-    
+
     const models = modelsResult.data;
     const endpoints: Record<string, ModelEndpoint[]> = {};
     const authors: Record<string, AuthorMetadata> = {};
-    
+
     Object.keys(models).forEach((modelId) => {
       const endpointsResult = registry.getModelEndpoints(modelId);
       endpoints[modelId] = endpointsResult.data || [];
     });
-    
+
     Object.values(models).forEach((model) => {
       if (!authors[model.author]) {
         authors[model.author] = { modelCount: 0, supported: true };
       }
       authors[model.author].modelCount++;
     });
-    
+
     return {
       models,
       endpoints,
@@ -164,7 +162,6 @@ export default function AdminModelsPage() {
 
     return { baseModels: bases, variantsByBase: variants };
   }, [filteredModels, registryData]);
-
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -448,7 +445,9 @@ export default function AdminModelsPage() {
       <ModelDetailsDialog
         model={selectedModel}
         modelKey={selectedModelKey}
-        endpoints={selectedModelKey ? registryData.endpoints[selectedModelKey] || [] : []}
+        endpoints={
+          selectedModelKey ? registryData.endpoints[selectedModelKey] || [] : []
+        }
         open={isDetailsOpen}
         onOpenChange={setIsDetailsOpen}
       />

@@ -147,7 +147,9 @@ export function ModelDetailsDialog({
                               <div className="flex items-center gap-2">
                                 <CheckCircle className="h-4 w-4 text-green-600" />
                                 <div>
-                                  <P className="font-medium">{endpoint.providerModelId}</P>
+                                  <P className="font-medium">
+                                    {endpoint.providerModelId}
+                                  </P>
                                   <div className="mt-1 flex items-center gap-2">
                                     <Globe className="h-3 w-3 text-muted-foreground" />
                                     <Small className="font-mono text-muted-foreground">
@@ -319,7 +321,9 @@ export function ModelDetailsDialog({
                       <div className="flex items-center gap-2">
                         <XCircle className="h-4 w-4 text-red-600" />
                         <div>
-                          <P className="font-medium">{endpoint.providerModelId}</P>
+                          <P className="font-medium">
+                            {endpoint.providerModelId}
+                          </P>
                           <Small className="font-mono text-muted-foreground">
                             {endpoint.region || "default"}
                           </Small>
