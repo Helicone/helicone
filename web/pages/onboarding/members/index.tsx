@@ -108,15 +108,6 @@ export default function OnboardingMembersPage() {
     router.push("/onboarding/request");
   };
 
-  const handleSkip = () => {
-    setNotification(
-      "You can always invite members later from settings.",
-      "info",
-    );
-    updateCurrentStep("REQUEST");
-    router.push("/onboarding/request");
-  };
-
   if (isLoading) {
     return (
       <div className="flex min-h-screen w-full flex-col items-center">
@@ -154,14 +145,7 @@ export default function OnboardingMembersPage() {
 
           <MembersStep />
 
-          <div className="flex justify-between gap-4">
-            <Button
-              variant="outline"
-              onClick={handleSkip}
-              disabled={isSendingInvites}
-            >
-              Skip for now
-            </Button>
+          <div className="flex justify-end gap-4">
             <Button
               variant="action"
               onClick={handleContinue}
