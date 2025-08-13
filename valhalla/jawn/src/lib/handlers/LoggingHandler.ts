@@ -55,6 +55,7 @@ export type BatchPayload = {
   orgsToMarkAsIntegrated: Set<string>;
 };
 
+const HELICONE_PLAYGROUND_USER_ID = "helicone_playground";
 const avgTokenLength = 4;
 const maxContentLength = 2_000_000;
 const maxResponseLength = 100_000;
@@ -112,7 +113,7 @@ export class LoggingHandler extends AbstractLogHandler {
         this.mapRequestResponseVersionedCH(context);
 
       if (
-        requestMapped.user_id !== "helicone_playground" &&
+        requestMapped.user_id !== HELICONE_PLAYGROUND_USER_ID &&
         context.orgParams &&
         !context.orgParams.has_integrated &&
         context.orgParams.id

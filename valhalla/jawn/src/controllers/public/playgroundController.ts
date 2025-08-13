@@ -50,7 +50,7 @@ export class PlaygroundController extends Controller {
   public async generate(
     @Body()
     bodyParams: OpenAIChatRequest & {
-      useAIGateway?: boolean
+      useAIGateway?: boolean;
       logRequest?: boolean;
     },
     @Request() request: JawnAuthenticatedRequest
