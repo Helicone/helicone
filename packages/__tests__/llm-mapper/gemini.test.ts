@@ -104,10 +104,12 @@ describe("mapGeminiPro", () => {
         {
           _type: "message",
           content: "What's in this image?",
+          role: "user",
         },
         {
           _type: "image",
-          image_url: `data:image/png;base64, ${imageData}`,
+          image_url: `data:image/png;base64,${imageData}`,
+          role: "user",
         },
       ],
       _type: "contentArray",

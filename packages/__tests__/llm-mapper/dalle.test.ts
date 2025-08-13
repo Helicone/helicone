@@ -30,7 +30,10 @@ describe("mapDalleRequest", () => {
       model: "dall-e-3",
       prompt: "A beautiful image of a cat",
       quality: "standard",
-      response_format: "b64_json",
+      response_format: {
+        type: "b64_json",
+        json_schema: {},
+      },
       size: "1024x1024",
     });
 

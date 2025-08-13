@@ -125,10 +125,7 @@ const getRequestMessages = (contents: any[]): Message[] => {
         return {
           _type: "contentArray",
           role: content.role || "user",
-          contentArray: mappedParts.map((part: Message) => ({
-            ...part,
-            role: undefined, // Role is defined on the parent contentArray message
-          })),
+          contentArray: mappedParts, // Keep the role on individual parts
         };
       }
     })

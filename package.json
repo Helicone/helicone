@@ -19,6 +19,7 @@
   },
   "version": "0.1.0",
   "devDependencies": {
-    "husky": "^9.1.7"
+    "husky": "^9.1.7",
+    "ts-jest": "^29.4.1"
   }
 }
