@@ -270,15 +270,17 @@ const attemptDirectProviderRequest = async (
     providerModelId = modelName;
   } else {
     endpoint = endpointResult.data;
+    // Extract config once with proper typing
+    const config = providerKey.config as {
+      region?: string;
+      crossRegion?: string;
+      projectId?: string;
+    } | null | undefined;
+    
     const modelIdResult = buildModelId(endpoint, {
-      region:
-        (providerKey.config as { region?: string })?.region ?? "us-west-1",
-      crossRegion:
-        (providerKey.config as { crossRegion?: string })?.crossRegion ===
-        "true",
-      projectId:
-        (providerKey.config as { projectId?: string })?.projectId ??
-        undefined,
+      region: config?.region ?? "us-west-1",
+      crossRegion: config?.crossRegion === "true",
+      projectId: config?.projectId,
     });
     providerModelId = modelIdResult.error || !modelIdResult.data ? modelName : modelIdResult.data;
   }
