@@ -107,7 +107,7 @@ export default function OrgDropdown({}: OrgDropdownProps) {
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="flex h-full w-full flex-row justify-start gap-2 px-2 py-2"
+            className="flex h-full w-full flex-row justify-start gap-2 px-2 py-2 hover:bg-sidebar-background"
           >
             <div className="flex flex-row gap-2">
               {currentIcon && (

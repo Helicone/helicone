@@ -11,11 +11,15 @@ import { Small } from "@/components/ui/typography";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { DiffHighlight } from "@/components/templates/welcome/diffHighlight";
 
-export const getRouterCode = (baseUrl: string, language: string) => {
+export const getRouterCode = (language: string, apiKey?: string) => {
+  const baseUrl = process.env.NEXT_PUBLIC_CLOUD_GATEWAY_BASE_URL
+    ? `${process.env.NEXT_PUBLIC_CLOUD_GATEWAY_BASE_URL}/v1`
+    : "https://ai-gateway.helicone.ai";
+
   if (language === "curl") {
     return `curl ${baseUrl}/chat/completions \\
   -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer YOUR_HELICONE_API_KEY" \\
+  -H "Authorization: Bearer ${apiKey ?? "YOUR_HELICONE_API_KEY"}" \\
   -d '{
     "model": "gpt-4o-mini/openai",
     "messages": [
@@ -29,7 +33,7 @@ export const getRouterCode = (baseUrl: string, language: string) => {
     return `import OpenAI from 'openai';
 
 const openai = new OpenAI({
-  apiKey: 'YOUR_HELICONE_API_KEY',
+  apiKey: '${apiKey ?? "YOUR_HELICONE_API_KEY"}',
   baseURL: '${baseUrl}',
 });
 
@@ -46,7 +50,7 @@ const completion = await openai.chat.completions.create({
     return `from openai import OpenAI
 
 client = OpenAI(
-  api_key="YOUR_HELICONE_API_KEY",
+  api_key="${apiKey ?? "YOUR_HELICONE_API_KEY"}",
   base_url="${baseUrl}",
 )
 
