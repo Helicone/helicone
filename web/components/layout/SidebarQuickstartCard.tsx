@@ -33,24 +33,24 @@ const SidebarQuickstepCard = () => {
       <div className="space-y-1 px-3">
         <QuickstartStep
           stepNumber={1}
-          isCompleted={hasProviderKeys}
-          isActive={!hasProviderKeys}
+          isCompleted={hasKeys ?? false}
+          isActive={!hasKeys}
         >
-          Add provider key
+          Create Helicone API key
         </QuickstartStep>
         <QuickstartStep
           stepNumber={2}
-          isCompleted={hasKeys}
-          isActive={hasProviderKeys && !hasKeys}
+          isCompleted={hasProviderKeys}
+          isActive={hasKeys === true && !hasProviderKeys}
         >
-          Create Helicone API key
+          Add provider key
         </QuickstartStep>
         <QuickstartStep
           stepNumber={3}
           isCompleted={!!orgContext?.currentOrg?.has_integrated}
           isActive={
+            hasKeys === true &&
             hasProviderKeys &&
-            hasKeys &&
             !orgContext?.currentOrg?.has_integrated
           }
         >
@@ -58,7 +58,7 @@ const SidebarQuickstepCard = () => {
         </QuickstartStep>
       </div>
 
-      {hasProviderKeys && hasKeys && orgContext?.currentOrg?.has_integrated && (
+      {orgContext?.currentOrg?.has_integrated && (
         <div className="mx-2 mt-2">
           <Button
             variant="outline"

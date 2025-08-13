@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { H2, P } from "../../ui/typography";
 import { useOrg } from "../../layout/org/organizationContext";
@@ -17,26 +18,62 @@ import {
   MessageSquare,
   Mail,
   MoveUpRight,
+  Copy,
 } from "lucide-react";
 import Link from "next/link";
+import { useKeys } from "@/components/templates/keys/useKeys";
+import { useLocalStorage } from "@/services/hooks/localStorage";
+import useNotification from "@/components/shared/notification/useNotification";
 
 const QuickstartPage = () => {
   const router = useRouter();
   const org = useOrg();
+  const { setNotification } = useNotification();
+  const { addKey } = useKeys();
+  const [quickstartKey, setQuickstartKey] = useLocalStorage<string | undefined>(
+    `${org?.currentOrg?.id}_quickstartKey`,
+    undefined,
+  );
+  const [isCreatingKey, setIsCreatingKey] = useState(false);
+
   const { hasKeys, hasProviderKeys, updateOnboardingStatus } = useOrgOnboarding(
     org?.currentOrg?.id ?? "",
   );
 
+  useEffect(() => {
+    if (hasKeys === false) {
+      setQuickstartKey(undefined);
+    }
+  }, [hasKeys]);
+
+  const handleCreateKey = async () => {
+    try {
+      setIsCreatingKey(true);
+      const { apiKey } = await addKey.mutateAsync({
+        permission: "rw",
+        keyName: "Quickstart",
+        isEu: false,
+      });
+      if (apiKey) {
+        setQuickstartKey(apiKey);
+      }
+    } catch (error) {
+      console.error("Failed to create API key:", error);
+    } finally {
+      setIsCreatingKey(false);
+    }
+  };
+
   const steps = [
-    {
-      title: "Add provider key",
-      description: "Add key",
-      link: "/settings/providers",
-    },
     {
       title: "Create Helicone API key",
       description: "Create key",
       link: "/settings/api-keys",
+    },
+    {
+      title: "Add provider key",
+      description: "Add key",
+      link: "/settings/providers",
     },
     {
       title: "Integrate",
@@ -44,9 +81,6 @@ const QuickstartPage = () => {
       link: "/settings/ai-gateway",
     },
   ];
-
-  const allStepsCompleted =
-    hasProviderKeys && hasKeys && org?.currentOrg?.has_integrated;
 
   return (
     <div className="flex flex-col gap-8 p-6">
@@ -60,8 +94,8 @@ const QuickstartPage = () => {
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-4">
         {steps.map((step, index) => {
           const isCompleted =
-            (index === 0 && hasProviderKeys) ||
-            (index === 1 && hasKeys) ||
+            (index === 0 && hasKeys) ||
+            (index === 1 && hasProviderKeys) ||
             (index === 2 && org?.currentOrg?.has_integrated);
 
           return (
@@ -73,9 +107,44 @@ const QuickstartPage = () => {
               link={step.link}
               rightContent={step.description}
             >
+              {index === 0 && (
+                <div className="mt-4">
+                  {quickstartKey ? (
+                    <div className="rounded-sm border border-border bg-muted/30 p-2">
+                      <div className="flex items-center gap-2">
+                        <code className="font-mono flex-1 break-all rounded-sm px-2 py-1 text-sm">
+                          {quickstartKey}
+                        </code>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            navigator.clipboard.writeText(quickstartKey);
+                            setNotification("Copied to clipboard", "success");
+                          }}
+                          className="h-auto p-1"
+                        >
+                          <Copy size={14} />
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        onClick={handleCreateKey}
+                        disabled={isCreatingKey}
+                        className="w-fit"
+                        variant="outline"
+                      >
+                        {isCreatingKey ? "Creating..." : "Create API Key"}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
               {index === 2 && (
                 <div className="mt-1">
-                  <IntegrationGuide />
+                  <IntegrationGuide apiKey={quickstartKey} />
 
                   <Link
                     // TODO: Swap for AI Gateway documentation
@@ -95,10 +164,11 @@ const QuickstartPage = () => {
           );
         })}
 
-        {allStepsCompleted && (
+        {org?.currentOrg?.has_integrated && (
           <div
             onClick={async () => {
               await updateOnboardingStatus({ hasCompletedQuickstart: true });
+              setQuickstartKey(undefined);
               router.push("/dashboard");
             }}
             className="cursor-pointer rounded-lg border border-border bg-primary py-1 transition-colors duration-150 hover:bg-primary/90"

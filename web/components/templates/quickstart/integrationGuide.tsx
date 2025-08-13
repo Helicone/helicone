@@ -2,9 +2,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DiffHighlight } from "@/components/templates/welcome/diffHighlight";
 import { getRouterCode } from "../gateway/routerUseDialog";
 
-const baseUrl = `${process.env.NEXT_PUBLIC_CLOUD_GATEWAY_BASE_URL}/v1`;
+interface IntegrationGuideProps {
+  apiKey?: string;
+}
 
-const IntegrationGuide = () => {
+const IntegrationGuide = ({ apiKey }: IntegrationGuideProps) => {
   return (
     <div
       className="w-full rounded-lg bg-background"
@@ -22,7 +24,7 @@ const IntegrationGuide = () => {
 
           <TabsContent value="curl" className="mt-2">
             <DiffHighlight
-              code={getRouterCode(baseUrl, "curl")}
+              code={getRouterCode("curl", apiKey)}
               language="bash"
               newLines={[]}
               oldLines={[]}
@@ -35,7 +37,7 @@ const IntegrationGuide = () => {
 
           <TabsContent value="javascript" className="mt-2">
             <DiffHighlight
-              code={getRouterCode(baseUrl, "javascript")}
+              code={getRouterCode("javascript", apiKey)}
               language="typescript"
               newLines={[]}
               oldLines={[]}
@@ -48,7 +50,7 @@ const IntegrationGuide = () => {
 
           <TabsContent value="python" className="mt-2">
             <DiffHighlight
-              code={getRouterCode(baseUrl, "python")}
+              code={getRouterCode("python", apiKey)}
               language="python"
               newLines={[]}
               oldLines={[]}
