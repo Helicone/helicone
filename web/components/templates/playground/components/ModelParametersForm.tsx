@@ -547,7 +547,7 @@ export default function ModelParametersForm({
                 value={parameters.reasoning_effort ?? undefined}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Response Format" />
+                  <SelectValue placeholder="Reasoning Effort" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">None</SelectItem>
