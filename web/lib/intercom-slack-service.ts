@@ -1,4 +1,5 @@
 import { dbExecute } from "./api/db/dbExecute";
+import { logger } from "@/lib/telemetry/logger";
 
 interface MessageMapping {
   id: string;
@@ -23,7 +24,7 @@ export class IntercomSlackService {
     slackThreadTs: string,
     slackMessageTs: string,
   ): Promise<void> {
-    console.error("Storing message mapping with dbExecute...");
+    logger.debug("Storing message mapping with dbExecute...");
     const result = await dbExecute(
       `INSERT INTO intercom_slack_mappings 
        (intercom_conversation_id, intercom_message_id, slack_channel_id, slack_thread_ts, slack_message_ts) 
@@ -38,11 +39,11 @@ export class IntercomSlackService {
     );
 
     if (result.error) {
-      console.error("Database error:", result.error);
+      logger.error(result, "Database error");
       throw new Error(`Failed to store message mapping: ${result.error}`);
     }
 
-    console.error("Message mapping stored successfully");
+    logger.debug("Message mapping stored successfully");
   }
 
   async getMessageMappingBySlackThread(
