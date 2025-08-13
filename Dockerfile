@@ -19,13 +19,9 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Flyway directly
-RUN wget -q -O flyway.tar.gz https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/10.5.0/flyway-commandline-10.5.0.tar.gz \
-    && mkdir -p /opt/flyway \
-    && tar -xzf flyway.tar.gz -C /opt/flyway --strip-components=1 \
-    && rm flyway.tar.gz \
-    && ln -s /opt/flyway/flyway /usr/local/bin/flyway \
-    && flyway -v
+# Install Atlas CLI for migrations
+RUN curl -sSf https://atlasgo.sh | sh
+ENV PATH="/root/bin:/usr/local/bin:${PATH}"
 
 # Install Python dependencies
 RUN pip3 install --no-cache-dir requests clickhouse-driver tabulate yarl
@@ -33,22 +29,9 @@ RUN pip3 install --no-cache-dir requests clickhouse-driver tabulate yarl
 # Create supervisord directories and copy configuration
 RUN mkdir -p /var/log/supervisor
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
-ENV FLYWAY_URL=jdbc:postgresql://localhost:5432/helicone_test
-ENV FLYWAY_USER=postgres
-ENV FLYWAY_PASSWORD=password
-ENV FLYWAY_LOCATIONS=filesystem:/app/supabase/migrations,filesystem:/app/supabase/migrations_without_supabase
-ENV FLYWAY_SQL_MIGRATION_PREFIX=
-ENV FLYWAY_SQL_MIGRATION_SEPARATOR=_
-ENV FLYWAY_SQL_MIGRATION_SUFFIXES=.sql
-
-
-COPY ./supabase/migrations /app/supabase/migrations
-COPY ./supabase/migrations_without_supabase /app/supabase/migrations_without_supabase
+COPY ./postgres/migrations /app/postgres/migrations
 COPY ./clickhouse/migrations /app/clickhouse/migrations
 COPY ./clickhouse/seeds /app/clickhouse/seeds
-COPY ./clickhouse/ch_hcone.py /app/clickhouse/ch_hcone.py
-RUN chmod +x /app/clickhouse/ch_hcone.py
 
 RUN service postgresql start && \
     su - postgres -c "createdb helicone_test" && \
@@ -75,11 +58,15 @@ COPY valhalla/jawn/package.json ./valhalla/jawn/package.json
 
 # Copy packages directory structure and package.json files
 COPY packages ./packages
+# TODO Terrible hack to remove all non-package files from the packages directory that should be re-written
 RUN find packages -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" -o -name "*.json" ! -name "package.json" | xargs rm -f 2>/dev/null || true
 
 # Install root dependencies first with cache mount
 RUN --mount=type=cache,target=/root/.yarn \
     yarn install --frozen-lockfile
+
+# Ensure type declarations needed for the monorepo build are available at the workspace root
+RUN yarn add -W -D @types/js-yaml
 
 # Install jawn dependencies
 WORKDIR /app/valhalla/jawn
@@ -108,9 +95,19 @@ RUN find /app -name ".env.*" -exec rm {} \;
 
 # Install web-specific dependencies and build
 WORKDIR /app/web
+# Reduce memory pressure during Next.js build
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_DISABLE_SOURCEMAPS=1
+ENV NEXT_DISABLE_ESLINT=1
+ENV NEXT_SKIP_TYPE_CHECK=1
+ENV NODE_OPTIONS=--max-old-space-size=2048
+
+# Install deps and build with caching to lower peak RAM usage
 RUN --mount=type=cache,target=/root/.yarn \
-    yarn install --frozen-lockfile \
-    && DISABLE_ESLINT=true yarn build
+    yarn install --frozen-lockfile
+
+RUN --mount=type=cache,target=/app/web/.next/cache \
+    yarn build
 
 # --------------------------------------------------------------------------------------------------------------------
 
@@ -141,15 +138,15 @@ RUN set -eu; \
 # Create MinIO data directory
 RUN mkdir -p /data
 
+# Runtime configuration: pass credentials at container runtime, not baked into image
 ENV POSTGRES_DB=helicone_test
 ENV POSTGRES_USER=postgres
-ENV POSTGRES_PASSWORD=password
 ENV CLICKHOUSE_DEFAULT_USER=default
 
-ENV CLICKHOUSE_HOST=http://localhost:8123
+# Default ClickHouse URL for Atlas migrations (can be overridden at runtime)
+ENV CLICKHOUSE_URL=clickhouse://default:@localhost:9000
 
-ENV MINIO_ROOT_USER=minioadmin
-ENV MINIO_ROOT_PASSWORD=minioadmin
+ENV CLICKHOUSE_HOST=http://localhost:8123
 
 
 # Use supervisord as entrypoint

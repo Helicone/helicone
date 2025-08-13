@@ -1,1 +1,0 @@
-GRANT SELECT ON default.request_response_rmt TO read_only_to_request_response_rmt;

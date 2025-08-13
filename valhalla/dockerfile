@@ -1,3 +1,5 @@
+# TODO This dockerfile should be replaced completely within docker/dockerfiles/Dockerfile.jawn, keeping now for backwards compatibility
+
 # This docker file must be built using the context of it's parent directory
 # docker build -t valhalla .. -f dockerfile
 

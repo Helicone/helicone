@@ -117,7 +117,7 @@ className="bg-background text-foreground border-border"
   ├── cost/            # Cost calculations
   ├── llm-mapper/      # Provider mappings
   └── prompts/         # Prompt management
-/supabase/             # Database migrations
+/postgres/             # Database migrations
 /clickhouse/           # Analytics DB setup
 ```
 
@@ -144,7 +144,7 @@ className="bg-background text-foreground border-border"
 4. Follow design system for UI components
 
 ### Database Changes
-1. Add migrations in `/supabase/migrations/`
+1. Add migrations in `/postgres/migrations/`
 2. Update types and managers accordingly
 3. Test with proper RLS policies
 
