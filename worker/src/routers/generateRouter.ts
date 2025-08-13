@@ -430,7 +430,7 @@ type PromptMetadata = {
  * @param details Optional additional details about the error
  * @returns Response object with standardized error format
  */
-function createErrorResponse(
+export function createErrorResponse(
   message: string,
   code: string,
   status: number,
