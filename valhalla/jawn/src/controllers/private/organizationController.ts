@@ -288,10 +288,6 @@ export class OrganizationController extends Controller {
       if (userCount.error) {
         return err(userCount.error ?? "Error updating pro user count");
       }
-    } else {
-      return err(
-        "Your current tier does not allow adding members. Please upgrade to Pro to add members."
-      );
     }
 
     const result = await organizationManager.addMember(
