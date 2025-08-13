@@ -2,7 +2,10 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { H2, P } from "../../ui/typography";
 import { useOrg } from "../../layout/org/organizationContext";
-import { OnboardingState, useOrgOnboarding } from "../../../services/hooks/useOrgOnboarding";
+import {
+  OnboardingState,
+  useOrgOnboarding,
+} from "../../../services/hooks/useOrgOnboarding";
 import { QuickstartStepCard } from "../../onboarding/QuickstartStep";
 import IntegrationGuide from "./integrationGuide";
 import {
@@ -42,12 +45,14 @@ const QuickstartPage = () => {
 
   useEffect(() => {
     if (org?.currentOrg?.onboarding_status) {
-      const hasCompletedQuickstart = (org?.currentOrg?.onboarding_status as unknown as OnboardingState).hasCompletedQuickstart;
+      const hasCompletedQuickstart = (
+        org?.currentOrg?.onboarding_status as unknown as OnboardingState
+      ).hasCompletedQuickstart;
       if (hasCompletedQuickstart) {
         router.push("/dashboard");
       }
     }
-    
+
     if (hasKeys === false) {
       setQuickstartKey(undefined);
     }

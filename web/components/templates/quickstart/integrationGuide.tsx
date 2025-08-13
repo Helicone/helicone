@@ -13,27 +13,14 @@ const IntegrationGuide = ({ apiKey }: IntegrationGuideProps) => {
       onClick={(e) => e.stopPropagation()}
     >
       <div className="p-4 pb-2">
-        <Tabs defaultValue="curl" className="w-full">
+        <Tabs defaultValue="javascript" className="w-full">
           <div className="mb-2 flex items-center justify-between">
             <TabsList className="w-auto">
-              <TabsTrigger value="curl">cURL</TabsTrigger>
               <TabsTrigger value="javascript">JavaScript</TabsTrigger>
               <TabsTrigger value="python">Python</TabsTrigger>
+              <TabsTrigger value="curl">cURL</TabsTrigger>
             </TabsList>
           </div>
-
-          <TabsContent value="curl" className="mt-2">
-            <DiffHighlight
-              code={getRouterCode("curl", apiKey)}
-              language="bash"
-              newLines={[]}
-              oldLines={[]}
-              minHeight={false}
-              maxHeight={false}
-              textSize="sm"
-              marginTop={false}
-            />
-          </TabsContent>
 
           <TabsContent value="javascript" className="mt-2">
             <DiffHighlight
@@ -52,6 +39,19 @@ const IntegrationGuide = ({ apiKey }: IntegrationGuideProps) => {
             <DiffHighlight
               code={getRouterCode("python", apiKey)}
               language="python"
+              newLines={[]}
+              oldLines={[]}
+              minHeight={false}
+              maxHeight={false}
+              textSize="sm"
+              marginTop={false}
+            />
+          </TabsContent>
+
+          <TabsContent value="curl" className="mt-2">
+            <DiffHighlight
+              code={getRouterCode("curl", apiKey)}
+              language="bash"
               newLines={[]}
               oldLines={[]}
               minHeight={false}
