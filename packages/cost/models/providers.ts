@@ -2,7 +2,7 @@
  * Provider configurations for URL and model ID building
  */
 
-import { err, ok, Result } from "@/common/result";
+import { err, ok, Result } from "../../common/result";
 import type {
   ProviderConfig,
   Endpoint,
