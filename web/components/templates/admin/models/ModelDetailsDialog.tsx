@@ -13,6 +13,7 @@ import { CheckCircle, XCircle, DollarSign, Clock, Globe } from "lucide-react";
 
 interface ModelDetailsDialogProps {
   model: Model | null;
+  modelKey: string;
   endpoints: ModelEndpoint[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -20,6 +21,7 @@ interface ModelDetailsDialogProps {
 
 export function ModelDetailsDialog({
   model,
+  modelKey,
   endpoints,
   open,
   onOpenChange,
@@ -64,7 +66,7 @@ export function ModelDetailsDialog({
           <div className="space-y-4">
             <div>
               <Small className="text-muted-foreground">Model ID</Small>
-              <P className="font-mono">{model.id}</P>
+              <P className="font-mono">{modelKey}</P>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -145,11 +147,13 @@ export function ModelDetailsDialog({
                               <div className="flex items-center gap-2">
                                 <CheckCircle className="h-4 w-4 text-green-600" />
                                 <div>
-                                  <P className="font-medium">{endpoint.name}</P>
+                                  <P className="font-medium">
+                                    {endpoint.providerModelId}
+                                  </P>
                                   <div className="mt-1 flex items-center gap-2">
                                     <Globe className="h-3 w-3 text-muted-foreground" />
                                     <Small className="font-mono text-muted-foreground">
-                                      {endpoint.tag}
+                                      {endpoint.region || "default"}
                                     </Small>
                                   </div>
                                 </div>
@@ -317,9 +321,11 @@ export function ModelDetailsDialog({
                       <div className="flex items-center gap-2">
                         <XCircle className="h-4 w-4 text-red-600" />
                         <div>
-                          <P className="font-medium">{endpoint.name}</P>
+                          <P className="font-medium">
+                            {endpoint.providerModelId}
+                          </P>
                           <Small className="font-mono text-muted-foreground">
-                            {endpoint.tag}
+                            {endpoint.region || "default"}
                           </Small>
                         </div>
                       </div>

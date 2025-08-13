@@ -3,7 +3,10 @@ import {
   buildModelId,
   getEndpoint,
   getProvider,
+  ModelName,
   ProviderConfig,
+  getModelEndpoints,
+  type Endpoint,
 } from "@helicone-package/cost/models";
 import { RequestWrapper } from "../RequestWrapper";
 import { APIKeysManager } from "../managers/APIKeysManager";
@@ -17,9 +20,7 @@ import { SignatureV4 } from "@smithy/signature-v4";
 import { Sha256 } from "@aws-crypto/sha256-js";
 import { HttpRequest } from "@smithy/protocol-http";
 import { getEndpoints, ModelEndpoint } from "@helicone-package/cost/models";
-import providers, {
-  ProviderName,
-} from "@helicone-package/cost/models/providers";
+import { ProviderName } from "@helicone-package/cost/models/types";
 import { PromptManager } from "../managers/PromptManager";
 
 type Error = {
@@ -72,7 +73,7 @@ type DirectProviderEndpoint = {
 
 type EndpointsProviderEndpoint = {
   type: "endpoints";
-  endpoints: ModelEndpoint[];
+  endpoints: Endpoint[];
 };
 
 type ValidateModelStringResult = Result<
@@ -83,20 +84,25 @@ type ValidateModelStringResult = Result<
 const validateModelString = (model: string): ValidateModelStringResult => {
   const modelParts = model.split("/");
   if (modelParts.length !== 2) {
-    const endpoints = getEndpoints(model);
-    if (endpoints.length === 0) {
+    const endpointsResult = getModelEndpoints(model);
+    if (
+      endpointsResult.error ||
+      !endpointsResult.data ||
+      endpointsResult.data.length === 0
+    ) {
       return err({
         type: "invalid_format",
         message: "Invalid model",
         code: 400,
       });
     }
-    return ok({ type: "endpoints", endpoints });
+    return ok({ type: "endpoints", endpoints: endpointsResult.data });
   }
 
-  const [modelName, provider] = [modelParts[0], getProvider(modelParts[1])];
+  const [modelName, providerName] = modelParts;
+  const providerResult = getProvider(providerName);
 
-  if (!provider) {
+  if (providerResult.error || !providerResult.data) {
     return err({
       type: "invalid_format",
       message: "Invalid model",
@@ -106,9 +112,9 @@ const validateModelString = (model: string): ValidateModelStringResult => {
 
   return ok({
     type: "direct",
-    provider: modelParts[1] as ProviderName,
+    provider: providerName as ProviderName,
     modelName,
-    providerConfig: provider,
+    providerConfig: providerResult.data,
   });
 };
 
@@ -174,13 +180,15 @@ const authenticateRequest = async (
   providerKey: ProviderKey,
   model: string,
   body: string,
-  heliconeHeaders: HeliconeHeaders
+  heliconeHeaders: HeliconeHeaders,
+  targetBaseUrl: string | null
 ) => {
   requestWrapper.resetObject();
   requestWrapper.setHeader(
     "Helicone-Auth",
     requestWrapper.getAuthorization() ?? ""
   );
+  requestWrapper.setUrl(targetBaseUrl ?? requestWrapper.url.toString());
   if (providerKey.provider === "bedrock") {
     if (providerKey.auth_type === "key") {
       await signBedrockRequest(requestWrapper, providerKey, model, body);
@@ -252,36 +260,47 @@ const attemptDirectProviderRequest = async (
     });
   }
 
-  let endpoint = getEndpoint(modelName, provider);
-  const providerModelId =
-    (endpoint
-      ? buildModelId(endpoint, {
-          region:
-            (providerKey.config as { region?: string })?.region ?? "us-west-1",
-          crossRegion:
-            (providerKey.config as { crossRegion?: string })?.crossRegion ===
-            "true",
-          projectId:
-            (providerKey.config as { projectId?: string })?.projectId ??
-            undefined,
-        })
-      : modelName) ?? "";
+  const endpointResult = getEndpoint(modelName, provider);
+  let endpoint: Endpoint;
+  let providerModelId: string;
 
-  if (!endpoint) {
+  if (endpointResult.error || !endpointResult.data) {
     // backwards compatibility if someone passes the explicit model id used by the provider
     endpoint = {
       providerModelId: modelName,
+      modelId: modelName as ModelName,
+      ptbEnabled: false,
       provider,
       pricing: {
         prompt: 0,
         completion: 0,
-        cacheRead: 0,
-        cacheWrite: 0,
       },
       contextLength: 0,
       maxCompletionTokens: 0,
       supportedParameters: [],
     };
+    providerModelId = modelName;
+  } else {
+    endpoint = endpointResult.data;
+    // Extract config once with proper typing
+    const config = providerKey.config as
+      | {
+          region?: string;
+          crossRegion?: string;
+          projectId?: string;
+        }
+      | null
+      | undefined;
+
+    const modelIdResult = buildModelId(endpoint, {
+      region: config?.region ?? "us-west-1",
+      crossRegion: config?.crossRegion === "true",
+      projectId: config?.projectId,
+    });
+    providerModelId =
+      modelIdResult.error || !modelIdResult.data
+        ? modelName
+        : modelIdResult.data;
   }
 
   const body = prepareRequestBody(
@@ -292,40 +311,45 @@ const attemptDirectProviderRequest = async (
   );
 
   requestWrapper.setBody(body);
+
+  // Extract config once with proper typing
+  const config = providerKey.config as
+    | {
+        region?: string;
+        crossRegion?: string;
+        projectId?: string;
+        deploymentName?: string;
+        resourceName?: string;
+      }
+    | null
+    | undefined;
+
+  const targetBaseUrlResult = buildEndpointUrl(endpoint, {
+    region: config?.region ?? "us-west-1",
+    crossRegion: config?.crossRegion === "true",
+    projectId: config?.projectId,
+    deploymentName: config?.deploymentName,
+    resourceName: config?.resourceName,
+  });
+
+  if (targetBaseUrlResult.error || !targetBaseUrlResult.data) {
+    return err({
+      type: "request_failed",
+      message: targetBaseUrlResult.error || "Failed to get target base URL",
+      code: 500,
+    });
+  }
+
+  const targetBaseUrl = targetBaseUrlResult.data;
+
   await authenticateRequest(
     requestWrapper,
     providerKey,
     providerModelId,
     body,
-    requestWrapper.heliconeHeaders
+    requestWrapper.heliconeHeaders,
+    targetBaseUrl
   );
-
-  const targetBaseUrl = endpoint
-    ? buildEndpointUrl(endpoint, {
-        region:
-          (providerKey.config as { region?: string })?.region ?? "us-west-1",
-        crossRegion:
-          (providerKey.config as { crossRegion?: string })?.crossRegion ===
-          "true",
-        projectId:
-          (providerKey.config as { projectId?: string })?.projectId ??
-          undefined,
-        deploymentName:
-          (providerKey.config as { deploymentName?: string })?.deploymentName ??
-          undefined,
-        resourceName:
-          (providerKey.config as { resourceName?: string })?.resourceName ??
-          undefined,
-      })
-    : null;
-
-  if (!targetBaseUrl) {
-    return err({
-      type: "request_failed",
-      message: "Failed to get target base URL",
-      code: 500,
-    });
-  }
 
   try {
     const response = await forwarder(targetBaseUrl);
@@ -365,8 +389,8 @@ const attemptEndpointsProviderRequest = async (
 
   let error: Error | null = null;
   for (const endpoint of endpoints) {
-    const provider = getProvider(endpoint.provider);
-    if (!provider) {
+    const providerResult = getProvider(endpoint.provider);
+    if (providerResult.error || !providerResult.data) {
       continue;
     }
 
@@ -375,7 +399,7 @@ const attemptEndpointsProviderRequest = async (
         type: "direct",
         provider: endpoint.provider as ProviderName,
         modelName,
-        providerConfig: provider,
+        providerConfig: providerResult.data,
       },
       requestWrapper,
       forwarder,

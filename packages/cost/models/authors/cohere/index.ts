@@ -1,20 +1,7 @@
 /**
- * Cohere author data aggregation
+ * Cohere author exports
  */
 
-import { type AuthorData } from '../../types';
-import cohereModels, { type CohereModelName } from './models';
-import cohereEndpoints from './endpoints';
-import cohereMetadata from './metadata';
-
-export const cohere: AuthorData = {
-  metadata: {
-    ...cohereMetadata,
-    modelCount: Object.keys(cohereModels).length,
-  },
-  models: cohereModels,
-  endpoints: cohereEndpoints,
-};
-
-export type { CohereModelName };
-export default cohere;
+export { cohereMetadata } from "./metadata";
+export { cohereModels, type CohereModelName } from "./models";
+export { cohereEndpoints, type CohereEndpointId } from "./endpoints";

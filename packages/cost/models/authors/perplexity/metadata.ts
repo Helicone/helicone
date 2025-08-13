@@ -2,11 +2,10 @@
  * Perplexity metadata
  */
 
-import { type AuthorMetadata } from '../../types';
+import type { AuthorMetadata } from "../../types";
+import { perplexityModels } from "./models";
 
-export const perplexityMetadata: AuthorMetadata = {
-  modelCount: 6,
+export const perplexityMetadata = {
+  modelCount: Object.keys(perplexityModels).length,
   supported: true,
-};
-
-export default perplexityMetadata;
+} satisfies AuthorMetadata;

@@ -1,12 +1,11 @@
 /**
- * Moonshotai metadata
+ * MoonshotAI metadata
  */
 
-import { type AuthorMetadata } from '../../types';
+import type { AuthorMetadata } from "../../types";
+import { moonshotaiModels } from "./models";
 
-export const moonshotaiMetadata: AuthorMetadata = {
-  modelCount: 5,
+export const moonshotaiMetadata = {
+  modelCount: Object.keys(moonshotaiModels).length,
   supported: true,
-};
-
-export default moonshotaiMetadata;
+} satisfies AuthorMetadata;

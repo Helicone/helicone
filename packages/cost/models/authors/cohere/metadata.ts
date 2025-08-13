@@ -2,11 +2,15 @@
  * Cohere metadata
  */
 
-import { type AuthorMetadata } from '../../types';
+import type { AuthorMetadata } from "../../types";
 
-export const cohereMetadata: AuthorMetadata = {
-  modelCount: 9,
+export const cohereMetadata = {
+  modelCount: 8,
   supported: true,
-};
-
-export default cohereMetadata;
+  name: "Cohere",
+  slug: "cohere",
+  description:
+    "Enterprise AI models for RAG, tool use, and multilingual applications",
+  website: "https://cohere.com",
+  apiUrl: "https://api.cohere.ai/v1",
+} satisfies AuthorMetadata;

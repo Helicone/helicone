@@ -1,12 +1,11 @@
 /**
- * Metallama metadata
+ * Meta-Llama metadata
  */
 
-import { type AuthorMetadata } from '../../types';
+import type { AuthorMetadata } from "../../types";
+import { metaLlamaModels } from "./models";
 
-export const metaLlamaMetadata: AuthorMetadata = {
-  modelCount: 20,
+export const metaLlamaMetadata = {
+  modelCount: Object.keys(metaLlamaModels).length,
   supported: true,
-};
-
-export default metaLlamaMetadata;
+} satisfies AuthorMetadata;
