@@ -826,23 +826,23 @@ const CalculatorInfo: React.FC<CalculatorInfoProps> = ({ model, provider }) => {
             <p className="text-slate-500 mb-4">
               Access the same pricing data used in this calculator programmatically through our API endpoint. Perfect for integrating cost calculations into your applications, scripts, or automated workflows.
             </p>
-            
+
             <div className="space-y-6">
               <div>
                 <h4 className="font-semibold text-slate-700 mb-3">Basic Usage</h4>
                 <div className="bg-slate-900 p-4 rounded-md">
                   <pre className="text-green-400 text-sm overflow-x-auto">
                     <code>{`# Get all models with costs per 1 million tokens
-curl "https://helicone.ai/api/llm-costs"
+curl "https://www.helicone.ai/api/llm-costs"
 
 # Get costs for a specific provider
-curl "https://helicone.ai/api/llm-costs?provider=openai"
+curl "https://www.helicone.ai/api/llm-costs?provider=openai"
 
 # Search for models containing "gpt"
-curl "https://helicone.ai/api/llm-costs?model=gpt"
+curl "https://www.helicone.ai/api/llm-costs?model=gpt"
 
 # Combine filters
-curl "https://helicone.ai/api/llm-costs?provider=anthropic&model=claude"`}</code>
+curl "https://www.helicone.ai/api/llm-costs?provider=anthropic&model=claude"`}</code>
                   </pre>
                 </div>
               </div>
@@ -852,10 +852,10 @@ curl "https://helicone.ai/api/llm-costs?provider=anthropic&model=claude"`}</code
                 <div className="bg-slate-900 p-4 rounded-md">
                   <pre className="text-green-400 text-sm overflow-x-auto">
                     <code>{`# Get data as JSON (default)
-curl "https://helicone.ai/api/llm-costs?provider=openai"
+curl "https://www.helicone.ai/api/llm-costs?provider=openai"
 
 # Get data as CSV for spreadsheets
-curl "https://helicone.ai/api/llm-costs?provider=openai&format=csv" \\
+curl "https://www.helicone.ai/api/llm-costs?provider=openai&format=csv" \\
   --output llm-costs-per-1m.csv`}</code>
                   </pre>
                 </div>
