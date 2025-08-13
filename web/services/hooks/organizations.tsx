@@ -168,6 +168,67 @@ const identifyUserOrg = (
   }
 };
 
+const useAddOrgMemberMutation = () => {
+  const queryClient = useQueryClient();
+  const { setNotification } = useNotification();
+  
+  return useMutation({
+    mutationFn: async ({
+      orgId,
+      email,
+    }: {
+      orgId: string;
+      email: string;
+    }) => {
+      const jawn = getJawnClient(orgId);
+      const { data, error } = await jawn.POST(
+        "/v1/organization/{organizationId}/add_member",
+        {
+          params: {
+            path: {
+              organizationId: orgId,
+            },
+          },
+          body: {
+            email,
+          },
+        },
+      );
+
+      if (error || data?.error) {
+        throw new Error(data?.error ? JSON.stringify(data.error) : String(error));
+      }
+
+      return data;
+    },
+    onSuccess: (_, variables) => {
+      setNotification("Member added successfully", "success");
+      
+      queryClient.invalidateQueries({
+        queryKey: ["get", "/v1/organization/{organizationId}/members", { params: { path: { organizationId: variables.orgId } } }],
+      });
+      
+      queryClient.invalidateQueries({
+        predicate: (query) => {
+          const queryKey = query.queryKey;
+          return (
+            queryKey.includes("/v1/organization") ||
+            queryKey.includes("organization") ||
+            queryKey.includes("Organizations")
+          );
+        },
+        refetchType: "all",
+      });
+    },
+    onError: (error) => {
+      setNotification(
+        error instanceof Error ? error.message : "Failed to add member",
+        "error"
+      );
+    },
+  });
+};
+
 export const useUpdateOrgMutation = () => {
   const queryClient = useQueryClient();
   const { user } = useHeliconeAuthClient();
@@ -316,6 +377,7 @@ const useOrgsContextManager = (): OrgContextValue => {
 
 export {
   setOrgCookie,
+  useAddOrgMemberMutation,
   useGetOrg,
   useGetOrgMembers,
   useGetOrgOwner,
