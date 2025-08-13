@@ -1,7 +1,7 @@
 import { Small } from "@/components/ui/typography";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Plus } from "lucide-react";
 
 import FoldedHeader from "@/components/shared/FoldedHeader";
 import {
@@ -312,6 +312,16 @@ const PromptsPage = (props: PromptsPageProps) => {
                       className="pl-9"
                     />
                   </div>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => {
+                      router.push("/playground");
+                    }}
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span className="ml-2 text-sm">Create Prompt</span>
+                  </Button>
                   <TagsFilter
                     tags={tags}
                     selectedTags={selectedTags}

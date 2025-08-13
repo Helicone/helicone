@@ -108,6 +108,7 @@ export type HeliconeMeta = {
   lytixKey?: string;
   lytixHost?: string;
   promptId?: string;
+  promptEnvironment?: string;
   promptVersionId?: string;
   promptInputs?: Record<string, any>;
   heliconeManualAccessKey?: string;

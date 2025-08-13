@@ -10677,12 +10677,15 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_": {
+			"ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array_": {
 				"properties": {
 					"data": {
 						"items": {
 							"properties": {
 								"user_id": {
+									"type": "string"
+								},
+								"updated_at": {
 									"type": "string"
 								},
 								"temp_key": {
@@ -10716,6 +10719,7 @@
 							},
 							"required": [
 								"user_id",
+								"updated_at",
 								"temp_key",
 								"soft_delete",
 								"organization_id",
@@ -10745,10 +10749,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array.string_": {
+			"Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_"
+						"$ref": "#/components/schemas/ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -12346,6 +12350,54 @@
 								},
 								"required": [
 									"promptVersionId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt-2025/query/environment-version": {
+			"post": {
+				"operationId": "GetPrompt2025EnvironmentVersion",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Prompt2025Version.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt2025"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"environment": {
+										"type": "string"
+									},
+									"promptId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"environment",
+									"promptId"
 								],
 								"type": "object"
 							}
@@ -16105,6 +16157,9 @@
 									},
 									{
 										"properties": {
+											"logRequest": {
+												"type": "boolean"
+											},
 											"useAIGateway": {
 												"type": "boolean"
 											}
@@ -19460,7 +19515,38 @@
 						"description": "Ok",
 						"content": {
 							"application/json": {
-								"schema": {}
+								"schema": {
+									"anyOf": [
+										{
+											"properties": {
+												"providerName": {
+													"type": "string",
+													"enum": [
+														"openai",
+														"anthropic",
+														"bedrock",
+														"vertex"
+													]
+												}
+											},
+											"required": [
+												"providerName"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"error": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"error"
+											],
+											"type": "object"
+										}
+									]
+								}
 							}
 						}
 					}
@@ -19543,11 +19629,15 @@
 									"anyOf": [
 										{
 											"properties": {
+												"providerName": {
+													"type": "string"
+												},
 												"id": {
 													"type": "string"
 												}
 											},
 											"required": [
+												"providerName",
 												"id"
 											],
 											"type": "object"
@@ -19743,7 +19833,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array.string_"
+									"$ref": "#/components/schemas/Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array.string_"
 								}
 							}
 						}
@@ -19770,6 +19860,9 @@
 									"anyOf": [
 										{
 											"properties": {
+												"hashedKey": {
+													"type": "string"
+												},
 												"apiKey": {
 													"type": "string"
 												},
@@ -19778,6 +19871,7 @@
 												}
 											},
 											"required": [
+												"hashedKey",
 												"apiKey",
 												"id"
 											],
@@ -19920,7 +20014,32 @@
 						"description": "Ok",
 						"content": {
 							"application/json": {
-								"schema": {}
+								"schema": {
+									"anyOf": [
+										{
+											"properties": {
+												"hashedKey": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"hashedKey"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"error": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"error"
+											],
+											"type": "object"
+										}
+									]
+								}
 							}
 						}
 					}
@@ -19953,15 +20072,30 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"properties": {
-										"error": {
-											"type": "string"
+									"anyOf": [
+										{
+											"properties": {
+												"hashedKey": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"hashedKey"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"error": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"error"
+											],
+											"type": "object"
 										}
-									},
-									"required": [
-										"error"
-									],
-									"type": "object"
+									]
 								}
 							}
 						}

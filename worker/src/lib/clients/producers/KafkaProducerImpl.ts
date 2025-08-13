@@ -1,5 +1,4 @@
 import { Kafka } from "@upstash/kafka";
-import { Env } from "../../..";
 import { MessageData, MessageProducer } from "./types";
 import { err, ok, Result } from "../../util/results";
 

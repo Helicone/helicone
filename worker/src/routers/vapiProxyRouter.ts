@@ -1,4 +1,3 @@
-import { Env } from "..";
 import { proxyForwarder } from "../lib/HeliconeProxyRequest/ProxyForwarder";
 import { RequestWrapper } from "../lib/RequestWrapper";
 import { BaseRouter } from "./routerFactory";
@@ -37,7 +36,7 @@ export const getVapiProxyRouter = (router: BaseRouter) => {
       env: Env,
       ctx: ExecutionContext
     ) => {
-      return await proxyForwarder(requestWrapper, env, ctx, "VAPI");
+      return await proxyForwarder(requestWrapper, env, ctx, "VAPI" as any);
     }
   );
 

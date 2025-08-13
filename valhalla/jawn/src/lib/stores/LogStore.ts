@@ -122,13 +122,16 @@ export class LogStore {
         }
 
         if (
-          payload.orgsToMarkAsOnboarded &&
-          payload.orgsToMarkAsOnboarded.size > 0
+          payload.orgsToMarkAsIntegrated &&
+          payload.orgsToMarkAsIntegrated.size > 0
         ) {
           try {
-            for (const orgId of payload.orgsToMarkAsOnboarded) {
+            for (const orgId of payload.orgsToMarkAsIntegrated) {
               await t.none(
-                `UPDATE organization SET has_onboarded = true WHERE id = $1 AND has_onboarded = false`,
+                `UPDATE organization 
+                SET has_integrated = true,
+                has_onboarded = true
+                WHERE id = $1 AND has_integrated = false`,
                 [orgId]
               );
             }
@@ -220,7 +223,7 @@ export class LogStore {
 
     try {
       const cs = new pgp.helpers.ColumnSet(
-        ['request_id', 'version_id', 'inputs'],
+        ['request_id', 'version_id', 'inputs', 'environment'],
         { table: 'prompts_2025_inputs' }
       );
       

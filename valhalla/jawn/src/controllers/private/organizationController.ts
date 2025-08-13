@@ -288,10 +288,6 @@ export class OrganizationController extends Controller {
       if (userCount.error) {
         return err(userCount.error ?? "Error updating pro user count");
       }
-    } else {
-      return err(
-        "Your current tier does not allow adding members. Please upgrade to Pro to add members."
-      );
     }
 
     const result = await organizationManager.addMember(
@@ -550,7 +546,6 @@ export class OrganizationController extends Controller {
     requestBody: {
       onboarding_status: OnboardingStatus;
       name: string;
-      has_onboarded: boolean;
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
@@ -559,8 +554,7 @@ export class OrganizationController extends Controller {
     const result = await organizationManager.updateOnboardingStatus(
       request.authParams.organizationId ?? "",
       requestBody.onboarding_status,
-      requestBody.name,
-      requestBody.has_onboarded
+      requestBody.name
     );
 
     if (result.error) {

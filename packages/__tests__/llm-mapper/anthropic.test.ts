@@ -101,9 +101,19 @@ describe("mapGeminiPro", () => {
     // Test request message handling
     expect(result.schema.request.messages![0]).toEqual({
       role: "user",
-      content: "What's in this image?",
-      _type: "image",
-      image_url: imageData,
+      _type: "contentArray",
+      contentArray: [
+        {
+          _type: "message",
+          content: "What's in this image?",
+          role: "user",
+        },
+        {
+          _type: "image",
+          image_url: `data:image/png;base64,${imageData}`,
+          role: "user",
+        },
+      ],
     });
 
     // Test response message handling

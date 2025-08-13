@@ -43,6 +43,7 @@ import {
   Check,
   ChevronsUpDown,
   Crown,
+  Copy,
 } from "lucide-react";
 import {
   Tooltip,
@@ -54,6 +55,7 @@ import { cn } from "@/lib/utils";
 import { useGetPromptEnvironments } from "@/services/hooks/prompts";
 import { Input } from "@/components/ui/input";
 import EnvironmentPill from "./EnvironmentPill";
+import useNotification from "@/components/shared/notification/useNotification";
 
 type Prompt2025Version = components["schemas"]["Prompt2025Version"];
 
@@ -84,6 +86,7 @@ const PromptVersionCard = ({
   const [isEnvironmentDropdownOpen, setIsEnvironmentDropdownOpen] =
     useState(false);
 
+  const { setNotification } = useNotification();
   const { data: environments = [], isLoading: isLoadingEnvironments } =
     useGetPromptEnvironments();
 
@@ -99,6 +102,16 @@ const PromptVersionCard = ({
       setIsEnvironmentDialogOpen(false);
       setSelectedEnvironment(undefined);
       setCustomEnvironment("");
+    }
+  };
+
+  const handleCopyVersionId = async () => {
+    try {
+      await navigator.clipboard.writeText(version.id);
+      setNotification("Version ID copied to clipboard", "success");
+    } catch (err) {
+      console.error("Failed to copy version ID:", err);
+      setNotification("Failed to copy version ID", "error");
     }
   };
 
@@ -119,6 +132,25 @@ const PromptVersionCard = ({
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-1 transition-opacity">
+          <Tooltip delayDuration={100}>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCopyVersionId();
+                }}
+              >
+                <Copy className="h-4 w-4 text-muted-foreground" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Copy Version ID</p>
+            </TooltipContent>
+          </Tooltip>
+
           <Tooltip delayDuration={100}>
             <TooltipTrigger asChild>
               <Button

@@ -1,4 +1,3 @@
-import { Env } from "../..";
 
 export class SentryManager {
   sentryAPIKey: string;

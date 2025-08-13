@@ -1,4 +1,3 @@
-import { Env } from "../..";
 import { AuthParams } from "../dbLogger/DBLoggable";
 import { Result, err, ok } from "../util/results";
 

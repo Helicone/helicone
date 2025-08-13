@@ -7,6 +7,10 @@ import { Result, err, ok } from "../../packages/common/result";
 import { hashAuth } from "../../utils/hash";
 import { BaseManager } from "../BaseManager";
 import { DecryptedProviderKey } from "../VaultManager";
+import {
+  dbProviderToProvider,
+  ProviderName,
+} from "@helicone-package/cost/models/providers";
 
 type HashedPasswordRow = {
   hashed_password: string;
@@ -52,14 +56,14 @@ export class KeyManager extends BaseManager {
   async updateAPIKey(
     apiKeyId: number,
     updateData: { api_key_name: string }
-  ): Promise<Result<null, string>> {
+  ): Promise<Result<{ hashedKey: string }, string>> {
     try {
-      const result = await dbExecute(
+      const result = await dbExecute<{ api_key_hash: string }>(
         `UPDATE helicone_api_keys
          SET api_key_name = $1,
              updated_at = now()
          WHERE id = $2
-         AND organization_id = $3`,
+         AND organization_id = $3 RETURNING api_key_hash`,
         [updateData.api_key_name, apiKeyId, this.authParams.organizationId]
       );
 
@@ -67,7 +71,11 @@ export class KeyManager extends BaseManager {
         return err(result.error);
       }
 
-      return ok(null);
+      if (!result.data || result.data.length === 0) {
+        return err("API key not found");
+      }
+
+      return ok({ hashedKey: result.data[0].api_key_hash });
     } catch (error) {
       return err(`Failed to update API key: ${error}`);
     }
@@ -76,14 +84,16 @@ export class KeyManager extends BaseManager {
   /**
    * Soft delete an API key
    */
-  async deleteAPIKey(apiKeyId: number): Promise<Result<any, string>> {
+  async deleteAPIKey(
+    apiKeyId: number
+  ): Promise<Result<{ hashedKey: string }, string>> {
     try {
-      const result = await dbExecute(
+      const result = await dbExecute<{ api_key_hash: string }>(
         `UPDATE helicone_api_keys
          SET soft_delete = true,
              updated_at = now()
          WHERE id = $1
-         AND organization_id = $2`,
+         AND organization_id = $2 RETURNING api_key_hash`,
         [apiKeyId, this.authParams.organizationId]
       );
 
@@ -91,7 +101,11 @@ export class KeyManager extends BaseManager {
         return err(result.error);
       }
 
-      return ok(null);
+      if (!result.data || result.data.length === 0) {
+        return err("API key not found");
+      }
+
+      return ok({ hashedKey: result.data[0].api_key_hash });
     } catch (error) {
       return err(`Failed to delete API key: ${error}`);
     }
@@ -100,8 +114,28 @@ export class KeyManager extends BaseManager {
   /**
    * Delete a provider key
    */
-  async deleteProviderKey(providerKeyId: string): Promise<Result<any, string>> {
+  async deleteProviderKey(
+    providerKeyId: string
+  ): Promise<Result<{ providerName: ProviderName | null }, string>> {
     try {
+      const providerName = await dbExecute<{ provider_name: string }>(
+        `SELECT provider_name
+         FROM provider_keys
+         WHERE id = $1
+         LIMIT 1`,
+        [providerKeyId]
+      );
+
+      if (
+        providerName.error ||
+        !providerName.data ||
+        providerName.data.length === 0
+      ) {
+        return err("Provider key not found");
+      }
+
+      const provider = dbProviderToProvider(providerName.data[0].provider_name);
+
       const result = await dbExecute(
         `DELETE FROM provider_keys
          WHERE id = $1
@@ -113,7 +147,7 @@ export class KeyManager extends BaseManager {
         return err(result.error);
       }
 
-      return ok(null);
+      return ok({ providerName: provider });
     } catch (error) {
       return err(`Failed to delete provider key: ${error}`);
     }
@@ -125,7 +159,9 @@ export class KeyManager extends BaseManager {
   async createNormalKey(
     keyName: string,
     keyPermissions: "rw" | "r" | "w" | "g" = "rw"
-  ): Promise<Result<{ id: string; apiKey: string }, string>> {
+  ): Promise<
+    Result<{ id: string; apiKey: string; hashedKey: string }, string>
+  > {
     try {
       const IS_EU = process.env.AWS_REGION === "eu-west-1";
       const apiKey = `sk-helicone${IS_EU ? "-eu" : ""}-${generateApiKey({
@@ -168,6 +204,7 @@ export class KeyManager extends BaseManager {
       return ok({
         id: String(result.data[0].id),
         apiKey: apiKey,
+        hashedKey,
       });
     } catch (error) {
       return err(`Failed to create normal key: ${error}`);
@@ -277,7 +314,7 @@ export class KeyManager extends BaseManager {
     providerKey?: string;
     providerSecretKey?: string;
     config?: Record<string, string>;
-  }): Promise<Result<{ id: string }, string>> {
+  }): Promise<Result<{ id: string; providerName: string }, string>> {
     try {
       const { providerKeyId, providerKey, providerSecretKey, config } = params;
 
@@ -317,12 +354,15 @@ export class KeyManager extends BaseManager {
       values.push(providerKeyId, this.authParams.organizationId);
 
       // Update the key
-      const result = await dbExecute<{ id: string }>(
+      const result = await dbExecute<{
+        id: string;
+        provider_name: string;
+      }>(
         `UPDATE provider_keys
          SET ${updateParts.join(", ")}
          WHERE id = $${paramIndex++}
          AND org_id = $${paramIndex}
-         RETURNING id`,
+         RETURNING id, provider_name`,
         values
       );
 
@@ -330,7 +370,10 @@ export class KeyManager extends BaseManager {
         return err(`Failed to update provider key: ${result.error}`);
       }
 
-      return ok({ id: result.data[0].id });
+      return ok({
+        id: result.data[0].id,
+        providerName: result.data[0].provider_name,
+      });
     } catch (error) {
       return err(`Failed to update provider key: ${error}`);
     }

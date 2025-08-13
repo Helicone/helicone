@@ -112,6 +112,9 @@ export interface paths {
   "/v1/prompt-2025/query/version": {
     post: operations["GetPrompt2025Version"];
   };
+  "/v1/prompt-2025/query/environment-version": {
+    post: operations["GetPrompt2025EnvironmentVersion"];
+  };
   "/v1/prompt-2025/query/versions": {
     post: operations["GetPrompt2025Versions"];
   };
@@ -4126,6 +4129,24 @@ export interface operations {
       };
     };
   };
+  GetPrompt2025EnvironmentVersion: {
+    requestBody: {
+      content: {
+        "application/json": {
+          environment: string;
+          promptId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025Version.string_"];
+        };
+      };
+    };
+  };
   GetPrompt2025Versions: {
     requestBody: {
       content: {
@@ -6955,7 +6976,12 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": unknown;
+          "application/json": ({
+            /** @enum {string} */
+            providerName: "openai" | "anthropic" | "bedrock" | "vertex";
+          }) | {
+            error: string;
+          };
         };
       };
     };
@@ -6980,6 +7006,7 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            providerName: string;
             id: string;
           } | {
             error: string;
@@ -7050,6 +7077,7 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            hashedKey: string;
             apiKey: string;
             id: string;
           } | {
@@ -7092,7 +7120,11 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": unknown;
+          "application/json": {
+            hashedKey: string;
+          } | {
+            error: string;
+          };
         };
       };
     };
@@ -7115,6 +7147,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            hashedKey: string;
+          } | {
             error: string;
           };
         };

@@ -2,7 +2,6 @@ import { z } from "zod";
 
 import { Path, Str } from "@cloudflare/itty-router-openapi";
 import { IRequest } from "itty-router";
-import { Env } from "../../../../..";
 import { RequestWrapper } from "../../../../../lib/RequestWrapper";
 import { AuthParams } from "../../../../../lib/dbLogger/DBLoggable";
 import { APIClient } from "../../../../lib/apiClient";

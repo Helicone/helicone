@@ -112,6 +112,9 @@ export interface paths {
   "/v1/prompt-2025/query/version": {
     post: operations["GetPrompt2025Version"];
   };
+  "/v1/prompt-2025/query/environment-version": {
+    post: operations["GetPrompt2025EnvironmentVersion"];
+  };
   "/v1/prompt-2025/query/versions": {
     post: operations["GetPrompt2025Versions"];
   };
@@ -3474,9 +3477,10 @@ Json: JsonObject;
       id: string;
       name: string;
     };
-    "ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_": {
+    "ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array_": {
       data: {
           user_id: string;
+          updated_at: string;
           temp_key: boolean;
           soft_delete: boolean;
           organization_id: string;
@@ -3491,7 +3495,7 @@ Json: JsonObject;
       /** @enum {number|null} */
       error: null;
     };
-    "Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array.string_": components["schemas"]["ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_"] | components["schemas"]["ResultError_string_"];
+    "Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array.string_": components["schemas"]["ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array_": {
       data: {
           updated_at: string;
@@ -4114,6 +4118,24 @@ export interface operations {
       content: {
         "application/json": {
           promptVersionId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025Version.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025EnvironmentVersion: {
+    requestBody: {
+      content: {
+        "application/json": {
+          environment: string;
+          promptId: string;
         };
       };
     };
@@ -5593,6 +5615,7 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["OpenAIChatRequest"] & {
+          logRequest?: boolean;
           useAIGateway?: boolean;
         };
       };
@@ -6955,7 +6978,12 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": unknown;
+          "application/json": ({
+            /** @enum {string} */
+            providerName: "openai" | "anthropic" | "bedrock" | "vertex";
+          }) | {
+            error: string;
+          };
         };
       };
     };
@@ -6980,6 +7008,7 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            providerName: string;
             id: string;
           } | {
             error: string;
@@ -7030,7 +7059,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array.string_"];
+          "application/json": components["schemas"]["Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array.string_"];
         };
       };
     };
@@ -7050,6 +7079,7 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            hashedKey: string;
             apiKey: string;
             id: string;
           } | {
@@ -7092,7 +7122,11 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": unknown;
+          "application/json": {
+            hashedKey: string;
+          } | {
+            error: string;
+          };
         };
       };
     };
@@ -7115,6 +7149,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            hashedKey: string;
+          } | {
             error: string;
           };
         };

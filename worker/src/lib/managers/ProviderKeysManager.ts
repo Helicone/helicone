@@ -1,7 +1,10 @@
-import { Env } from "../..";
 import { ProviderName } from "@helicone-package/cost/models/providers";
 import { ProviderKey, ProviderKeysStore } from "../db/ProviderKeysStore";
-import { getFromCache, storeInCache } from "../util/cache/secureCache";
+import {
+  getFromKVCacheOnly,
+  removeFromCache,
+  storeInCache,
+} from "../util/cache/secureCache";
 
 export class ProviderKeysManager {
   constructor(private store: ProviderKeysStore, private env: Env) {}
@@ -18,17 +21,39 @@ export class ProviderKeysManager {
           );
         })
       );
-      // await storeInCache(`provider_keys_${provider}`, JSON.stringify(providerKeys), this.env);
     } else {
       console.error("No provider keys found");
     }
+  }
+
+  async setProviderKey(
+    provider: ProviderName,
+    orgId: string,
+    key: ProviderKey
+  ) {
+    if (this.env.ENVIRONMENT !== "development") {
+      return;
+    }
+
+    await storeInCache(
+      `provider_keys_${provider}_${orgId}`,
+      JSON.stringify(key),
+      this.env
+    );
+  }
+
+  async deleteProviderKey(provider: ProviderName, orgId: string) {
+    if (this.env.ENVIRONMENT !== "development") {
+      return;
+    }
+    await removeFromCache(`provider_keys_${provider}_${orgId}`, this.env);
   }
 
   async getProviderKey(
     provider: ProviderName,
     orgId: string
   ): Promise<ProviderKey | null> {
-    const key = await getFromCache(
+    const key = await getFromKVCacheOnly(
       `provider_keys_${provider}_${orgId}`,
       this.env
     );
