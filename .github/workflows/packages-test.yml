@@ -26,10 +26,10 @@ jobs:
         with:
           node-version: "20"
           cache: "yarn"
-          cache-dependency-path: worker/yarn.lock
+          cache-dependency-path: packages/yarn.lock
 
       - name: Install dependencies
-        run: yarn install
+        run: yarn install --frozen-lockfile
         working-directory: packages
 
       - name: Run llm-mapper tests
