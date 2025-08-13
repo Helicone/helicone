@@ -33,5 +33,5 @@ jobs:
         working-directory: packages
 
       - name: Run llm-mapper tests
-        run: npx jest __tests__/llm-mapper/
+        run: npx jest __tests__/
         working-directory: packages
