@@ -125,7 +125,6 @@ const convertMappedLLMRequestToOpenAIChatRequest = (
   selectedModel: string,
   responseFormat: ResponseFormat,
 ): OpenAIChatRequest => {
-  console.log("mappedContent lolcute", mappedContent);
   const openaiRequest = openaiChatMapper.toExternal({
     ...mappedContent.schema.request,
     tools: tools && tools.length > 0 ? tools : undefined,
