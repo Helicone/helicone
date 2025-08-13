@@ -1,6 +1,6 @@
 import { OpenAPIRoute } from "@cloudflare/itty-router-openapi";
 import { IRequest } from "itty-router";
-import { Env, Provider } from "../../.";
+import { Provider } from "../../.";
 import { RequestWrapper } from "../../lib/RequestWrapper";
 import { ClickhouseClientWrapper } from "../../lib/db/ClickhouseWrapper";
 import { AuthParams } from "../../lib/dbLogger/DBLoggable";

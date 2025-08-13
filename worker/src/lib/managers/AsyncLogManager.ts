@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { Env, Provider } from "../..";
+import { Provider } from "../..";
 import { DBWrapper } from "../db/DBWrapper";
 import { HeliconeHeaders } from "../models/HeliconeHeaders";
 import { RequestWrapper } from "../RequestWrapper";

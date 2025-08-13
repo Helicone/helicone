@@ -1,4 +1,4 @@
-import { Env, Provider } from "../..";
+import { Provider } from "../..";
 import { DBLoggable } from "../dbLogger/DBLoggable";
 import { handleProxyRequest } from "../HeliconeProxyRequest/ProxyRequestHandler";
 import { HeliconeProxyRequestMapper } from "../models/HeliconeProxyRequest";

@@ -18,97 +18,8 @@ import { APIKeysManager } from "./lib/managers/APIKeysManager";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
-export type Provider = ProviderName | "CUSTOM" | "VAPI";
+export type Provider = ProviderName | "CUSTOM";
 
-export interface EU_Env {
-  EU_CLICKHOUSE_HOST: string;
-  EU_CLICKHOUSE_USER: string;
-  EU_CLICKHOUSE_PASSWORD: string;
-  EU_S3_BUCKET_NAME: string;
-  EU_SUPABASE_SERVICE_ROLE_KEY: string;
-  EU_SUPABASE_URL: string;
-  EU_UPSTASH_KAFKA_PASSWORD: string;
-  EU_UPSTASH_KAFKA_URL: string;
-  EU_UPSTASH_KAFKA_USERNAME: string;
-  EU_SECURE_CACHE: KVNamespace;
-  EU_REQUEST_LOGS_QUEUE_URL: string;
-  EU_REQUEST_LOGS_QUEUE_URL_LOW_PRIORITY: string;
-  EU_AWS_REGION?: "eu-west-1";
-}
-export interface BASE_Env {
-  SUPABASE_SERVICE_ROLE_KEY: string;
-  SUPABASE_URL: string;
-  TOKENIZER_COUNT_API: string;
-  TOKEN_COUNT_URL: string;
-  RATE_LIMIT_KV: KVNamespace;
-  CACHE_KV: KVNamespace;
-  REQUEST_AND_RESPONSE_QUEUE_KV: KVNamespace;
-  UTILITY_KV: KVNamespace;
-  CLICKHOUSE_HOST: string;
-  CLICKHOUSE_USER: string;
-  CLICKHOUSE_PASSWORD: string;
-  WORKER_TYPE:
-    | "OPENAI_PROXY"
-    | "ANTHROPIC_PROXY"
-    | "HELICONE_API"
-    | "GATEWAY_API"
-    | "CUSTOMER_GATEWAY"
-    | "GENERATE_API"
-    | "VAPI_PROXY"
-    | "AI_GATEWAY_API";
-  TOKEN_CALC_URL: string;
-  VAULT_ENABLED: string;
-  STORAGE_URL: string;
-  FALLBACK_QUEUE: Queue<unknown>;
-  LOOPS_API_KEY: string;
-  POSTHOG_API_KEY: string;
-  REQUEST_CACHE_KEY: string;
-  SECURE_CACHE: KVNamespace;
-  RATE_LIMITER: DurableObjectNamespace;
-  OPENAI_API_KEY: string;
-  OPENAI_ORG_ID: string;
-  CUSTOMER_GATEWAY_URL?: string;
-  VALHALLA_URL: string;
-  ALERTER: DurableObjectNamespace;
-  RESEND_API_KEY: string;
-  PROMPTARMOR_API_KEY: string;
-  DATADOG_ENABLED: string;
-  DATADOG_API_KEY: string;
-  DATADOG_ENDPOINT: string;
-  GATEWAY_TARGET?: string;
-  S3_ENABLED: string;
-
-  UPSTASH_KAFKA_URL: string;
-  UPSTASH_KAFKA_USERNAME: string;
-  UPSTASH_KAFKA_API_KEY: string;
-  UPSTASH_KAFKA_PASSWORD: string;
-  HELICONE_MANUAL_ACCESS_KEY: string;
-  ORG_IDS?: string;
-  PERCENT_LOG_KAFKA?: string;
-  SENTRY_API_KEY: string;
-  SENTRY_PROJECT_ID: string;
-  WORKER_DEFINED_REDIRECT_URL?: string;
-
-  // AWS Configuration + S3
-
-  // TODO REPLACE WITH AWS
-  S3_ACCESS_KEY: string;
-  S3_SECRET_KEY: string;
-  S3_REGION?: "us-west-2" | "eu-west-1";
-
-  S3_ENDPOINT: string;
-  S3_BUCKET_NAME: string;
-
-  AWS_REGION: "us-west-2" | "eu-west-1";
-  AWS_ACCESS_KEY_ID?: string;
-  AWS_SECRET_ACCESS_KEY?: string;
-  REQUEST_LOGS_QUEUE_URL?: string;
-  REQUEST_LOGS_QUEUE_URL_LOW_PRIORITY?: string;
-
-  QUEUE_PROVIDER?: "kafka" | "sqs" | "dual";
-  APP_URL?: string;
-}
-export type Env = BASE_Env & EU_Env;
 
 export async function hash(key: string): Promise<string> {
   const encoder = new TextEncoder();
@@ -145,9 +56,6 @@ async function modifyEnvBasedOnPath(
       CLICKHOUSE_PASSWORD: env.EU_CLICKHOUSE_PASSWORD,
       SUPABASE_SERVICE_ROLE_KEY: env.EU_SUPABASE_SERVICE_ROLE_KEY,
       SUPABASE_URL: env.EU_SUPABASE_URL,
-      UPSTASH_KAFKA_PASSWORD: env.EU_UPSTASH_KAFKA_PASSWORD,
-      UPSTASH_KAFKA_URL: env.EU_UPSTASH_KAFKA_URL,
-      UPSTASH_KAFKA_USERNAME: env.EU_UPSTASH_KAFKA_USERNAME,
       S3_BUCKET_NAME: env.EU_S3_BUCKET_NAME,
       SECURE_CACHE: env.EU_SECURE_CACHE,
       REQUEST_LOGS_QUEUE_URL: env.EU_REQUEST_LOGS_QUEUE_URL,

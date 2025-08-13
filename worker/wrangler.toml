@@ -1,12 +1,10 @@
 name = "helicone-worker-dev"
 main = "src/index.ts"
-compatibility_date = "2022-11-29"
+compatibility_date = "2025-08-03"
 compatibility_flags = [
-	"transformstream_enable_standard_constructor",
-	"streams_enable_constructors",
+	"nodejs_compat_v2"
 ]
 logpush = true
-node_compat = true
 
 durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
@@ -22,6 +20,10 @@ kv_namespaces = [
 	{ binding = "EU_SECURE_CACHE", id = "a0243398352c4ea996e5bf4008938285", preview_id = "9d7e936c78be456c8c7e296a15215837" },
 ]
 
+queues.producers = [
+	{ binding = "FALLBACK_QUEUE", queue = "fallback-queue-dev" },
+]
+
 [vars]
 SUPABASE_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
 SUPABASE_URL = "http://localhost:54321"
@@ -35,6 +37,7 @@ TOKEN_COUNT_URL = "https://tokens.helicone.ai/anthropic/count_tokens"
 WORKER_TYPE = "OPENAI_PROXY"
 VAULT_ENABLED = "true"
 REQUEST_CACHE_KEY = "9984c295ec7d0f506b8af65e9d60773480eb0c9347a6bd8a2b08fb57b5117701"
+REQUEST_CACHE_KEY_2 = "9984c295ec7d0f506b8af65e9d60773480eb0c9347a6bd8a2b08fb57b5117701"
 VALHALLA_URL = "http://localhost:8585"
 S3_ENDPOINT = "http://localhost:9000"
 S3_ACCESS_KEY = "minioadmin"
@@ -42,6 +45,43 @@ S3_SECRET_KEY = "minioadmin"
 S3_BUCKET_NAME = "request-response-storage"
 HELICONE_MANUAL_ACCESS_KEY = "Q2xH5Cwid/gAmuLv8QWhgcpNXA4DG1Dxe0ypQTJ8oEA="
 APP_URL = "https://us.helicone.ai"
+ENVIRONMENT = "development"
+TOKENIZER_COUNT_API = "https://tokens.helicone.ai/anthropic/count_tokens"
+TOKEN_CALC_URL = "https://tokens.helicone.ai/anthropic/count_tokens"
+STORAGE_URL = "http://localhost:9000"
+LOOPS_API_KEY = ""
+POSTHOG_API_KEY = ""
+OPENAI_API_KEY = ""
+OPENAI_ORG_ID = ""
+CUSTOMER_GATEWAY_URL = ""
+RESEND_API_KEY = ""
+PROMPTARMOR_API_KEY = ""
+DATADOG_ENABLED = "false"
+DATADOG_API_KEY = ""
+DATADOG_ENDPOINT = ""
+GATEWAY_TARGET = ""
+S3_ENABLED = "true"
+S3_REGION = "us-west-2"
+SENTRY_API_KEY = ""
+SENTRY_PROJECT_ID = ""
+WORKER_DEFINED_REDIRECT_URL = ""
+AWS_REGION = "us-west-2"
+AWS_ACCESS_KEY_ID = ""
+AWS_SECRET_ACCESS_KEY = ""
+REQUEST_LOGS_QUEUE_URL = ""
+REQUEST_LOGS_QUEUE_URL_LOW_PRIORITY = ""
+ORG_IDS = ""
+EU_CLICKHOUSE_HOST = "http://localhost:18123"
+EU_CLICKHOUSE_USER = "default"
+EU_CLICKHOUSE_PASSWORD = ""
+EU_S3_BUCKET_NAME = "request-response-storage"
+EU_REQUEST_LOGS_QUEUE_URL = ""
+EU_REQUEST_LOGS_QUEUE_URL_LOW_PRIORITY = ""
+EU_AWS_REGION = "eu-west-1"
+
+UPSTASH_KAFKA_URL=""
+UPSTASH_KAFKA_USERNAME=""
+UPSTASH_KAFKA_PASSWORD=""
 
 [triggers]
 crons = ["* * * * *", "0 * * * *", "0 10 * * mon", "*/5 * * * *"]
@@ -142,6 +182,8 @@ CLICKHOUSE_HOST = "https://p76qbrlulo.us-east-1.aws.clickhouse.cloud:8443"
 VAULT_ENABLED = "true"
 DATADOG_ENABLED = "true"
 QUEUE_PROVIDER = "sqs"
+ENVIRONMENT = "production"
+APP_URL = "https://us.helicone.ai"
 
 
 [env.production_staging]
@@ -194,11 +236,14 @@ queues.producers = [
 	{ binding = "FALLBACK_QUEUE", queue = "fallback-queue-staging" },
 ]
 
+# Environment-specific variables only (inherit most from top-level [vars])
 [env.production_staging.vars]
 SUPABASE_URL = "https://bolqqmqbrciybnypvklh.supabase.co"
 CLICKHOUSE_HOST = "https://p76qbrlulo.us-east-1.aws.clickhouse.cloud:8443"
 VAULT_ENABLED = "true"
-QUEUE_PROVIDER = "dual"
+QUEUE_PROVIDER = "sqs"
+ENVIRONMENT = "production"
+APP_URL = "https://us.helicone.ai"
 
 [env.production_staging.triggers]
 crons = []

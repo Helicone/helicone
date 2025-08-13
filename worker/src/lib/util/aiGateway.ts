@@ -1,4 +1,3 @@
-import { Env } from "../..";
 import {
   buildEndpointUrl,
   buildModelId,
@@ -20,10 +19,16 @@ import { ProviderKey } from "../db/ProviderKeysStore";
 import { SignatureV4 } from "@smithy/signature-v4";
 import { Sha256 } from "@aws-crypto/sha256-js";
 import { HttpRequest } from "@smithy/protocol-http";
+import { getEndpoints, ModelEndpoint } from "@helicone-package/cost/models";
 import { ProviderName } from "@helicone-package/cost/models/types";
+import { PromptManager } from "../managers/PromptManager";
 
 type Error = {
-  type: "invalid_format" | "missing_provider_key" | "request_failed";
+  type:
+    | "invalid_format"
+    | "missing_provider_key"
+    | "request_failed"
+    | "invalid_prompt";
   message: string;
   code: number;
 };
@@ -52,10 +57,11 @@ export const authenticate = async (
   store: APIKeysStore
 ) => {
   const apiKeyManager = new APIKeysManager(store, env);
+  const rawAPIKey = await requestWrapper.getRawProviderAuthHeader();
   const hashedAPIKey = await requestWrapper.getProviderAuthHeader();
   const orgId = await apiKeyManager.getAPIKeyWithFetch(hashedAPIKey ?? "");
 
-  return orgId;
+  return { orgId, rawAPIKey };
 };
 
 type DirectProviderEndpoint = {
@@ -79,7 +85,11 @@ const validateModelString = (model: string): ValidateModelStringResult => {
   const modelParts = model.split("/");
   if (modelParts.length !== 2) {
     const endpointsResult = getModelEndpoints(model);
-    if (endpointsResult.error || !endpointsResult.data || endpointsResult.data.length === 0) {
+    if (
+      endpointsResult.error ||
+      !endpointsResult.data ||
+      endpointsResult.data.length === 0
+    ) {
       return err({
         type: "invalid_format",
         message: "Invalid model",
@@ -251,7 +261,7 @@ const attemptDirectProviderRequest = async (
   const endpointResult = getEndpoint(modelName, provider);
   let endpoint: Endpoint;
   let providerModelId: string;
-  
+
   if (endpointResult.error || !endpointResult.data) {
     // backwards compatibility if someone passes the explicit model id used by the provider
     endpoint = {
@@ -271,18 +281,24 @@ const attemptDirectProviderRequest = async (
   } else {
     endpoint = endpointResult.data;
     // Extract config once with proper typing
-    const config = providerKey.config as {
-      region?: string;
-      crossRegion?: string;
-      projectId?: string;
-    } | null | undefined;
-    
+    const config = providerKey.config as
+      | {
+          region?: string;
+          crossRegion?: string;
+          projectId?: string;
+        }
+      | null
+      | undefined;
+
     const modelIdResult = buildModelId(endpoint, {
       region: config?.region ?? "us-west-1",
       crossRegion: config?.crossRegion === "true",
       projectId: config?.projectId,
     });
-    providerModelId = modelIdResult.error || !modelIdResult.data ? modelName : modelIdResult.data;
+    providerModelId =
+      modelIdResult.error || !modelIdResult.data
+        ? modelName
+        : modelIdResult.data;
   }
 
   const body = prepareRequestBody(
@@ -302,13 +318,16 @@ const attemptDirectProviderRequest = async (
   );
 
   // Extract config once with proper typing
-  const config = providerKey.config as {
-    region?: string;
-    crossRegion?: string;
-    projectId?: string;
-    deploymentName?: string;
-    resourceName?: string;
-  } | null | undefined;
+  const config = providerKey.config as
+    | {
+        region?: string;
+        crossRegion?: string;
+        projectId?: string;
+        deploymentName?: string;
+        resourceName?: string;
+      }
+    | null
+    | undefined;
 
   const targetBaseUrlResult = buildEndpointUrl(endpoint, {
     region: config?.region ?? "us-west-1",
@@ -325,7 +344,7 @@ const attemptDirectProviderRequest = async (
       code: 500,
     });
   }
-  
+
   const targetBaseUrl = targetBaseUrlResult.data;
 
   try {
@@ -450,6 +469,7 @@ export const attemptModelRequestWithFallback = async ({
   requestWrapper,
   forwarder,
   providerKeysManager,
+  promptManager,
   orgId,
   parsedBody,
 }: {
@@ -457,6 +477,7 @@ export const attemptModelRequestWithFallback = async ({
   requestWrapper: RequestWrapper;
   forwarder: (targetBaseUrl: string | null) => Promise<Response>;
   providerKeysManager: ProviderKeysManager;
+  promptManager: PromptManager;
   orgId: string;
   parsedBody: any;
 }): Promise<Result<Response, Error>> => {
@@ -466,6 +487,39 @@ export const attemptModelRequestWithFallback = async ({
       message: "No models provided",
       code: 400,
     });
+  }
+
+  if (parsedBody.prompt_id) {
+    const result = await promptManager.getMergedPromptBody(parsedBody, orgId);
+    if (isErr(result)) {
+      return err({
+        type: "invalid_prompt",
+        message: result.error,
+        code: 400,
+      });
+    }
+
+    if (result.data.errors && result.data.errors.length > 0) {
+      return err({
+        type: "invalid_prompt",
+        message: result.data.errors
+          .map(
+            (error) =>
+              `Variable '${error.variable}' is '${error.expected}' but got '${error.value}'`
+          )
+          .join("\n"),
+        code: 400,
+      });
+    }
+
+    requestWrapper.setPrompt2025Settings({
+      promptId: parsedBody.prompt_id,
+      promptVersionId: result.data.promptVersionId,
+      inputs: parsedBody.inputs,
+      environment: parsedBody.environment,
+    });
+
+    parsedBody = result.data.body;
   }
 
   let error: Error | null = null;

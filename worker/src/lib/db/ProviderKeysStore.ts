@@ -1,6 +1,10 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { ProviderName } from "@helicone-package/cost/models/providers";
 import { Database, Json } from "../../../supabase/database.types";
+import {
+  dbProviderToProvider,
+  providerToDbProvider,
+} from "@helicone-package/cost/models/providers";
 
 export type ProviderKey = {
   provider: ProviderName;
@@ -17,38 +21,6 @@ export type ProviderKey = {
    */
   auth_type: "key" | "session_token";
   config: Json | null;
-};
-
-const dbProviderToProvider = (provider: string): ProviderName | null => {
-  if (provider === "openai" || provider === "OpenAI") {
-    return "openai";
-  }
-  if (provider === "Anthropic") {
-    return "anthropic";
-  }
-  if (provider === "AWS Bedrock") {
-    return "bedrock";
-  }
-  if (provider === "Vertex AI") {
-    return "vertex";
-  }
-  return null;
-};
-
-const providerToDbProvider = (provider: ProviderName): string => {
-  if (provider === "openai") {
-    return "OpenAI";
-  }
-  if (provider === "anthropic") {
-    return "Anthropic";
-  }
-  if (provider === "bedrock") {
-    return "AWS Bedrock";
-  }
-  if (provider === "vertex") {
-    return "Vertex AI";
-  }
-  return provider;
 };
 
 export class ProviderKeysStore {

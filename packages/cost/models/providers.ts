@@ -165,10 +165,11 @@ import { Result, ok, err } from "../../common/result";
 
 // Helper function to get provider config
 export function getProvider(providerName: string): Result<ProviderConfig> {
-  const provider = providerName in providers
-    ? providers[providerName as ProviderName]
-    : undefined;
-  
+  const provider =
+    providerName in providers
+      ? providers[providerName as ProviderName]
+      : undefined;
+
   return provider ? ok(provider) : err(`Unknown provider: ${providerName}`);
 }
 
@@ -197,7 +198,7 @@ export function buildEndpointUrl(
     const url = provider.buildUrl(endpoint, config);
     return ok(url);
   } catch (error) {
-    return err(error instanceof Error ? error.message : 'Failed to build URL');
+    return err(error instanceof Error ? error.message : "Failed to build URL");
   }
 }
 
@@ -215,7 +216,7 @@ export function buildModelId(
   if (!provider) {
     return err(`Provider data is null for: ${endpoint.provider}`);
   }
-  
+
   if (!provider.buildModelId) {
     return ok(endpoint.providerModelId);
   }
@@ -230,6 +231,8 @@ export function buildModelId(
     const modelId = provider.buildModelId(endpoint, config);
     return ok(modelId);
   } catch (error) {
-    return err(error instanceof Error ? error.message : 'Failed to build model ID');
+    return err(
+      error instanceof Error ? error.message : "Failed to build model ID"
+    );
   }
 }

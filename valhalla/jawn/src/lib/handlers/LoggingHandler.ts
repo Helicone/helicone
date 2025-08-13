@@ -52,9 +52,10 @@ export type BatchPayload = {
     scores: Record<string, number | boolean | undefined>;
     evaluatorIds: Record<string, string>;
   }[];
-  orgsToMarkAsOnboarded: Set<string>;
+  orgsToMarkAsIntegrated: Set<string>;
 };
 
+const HELICONE_PLAYGROUND_USER_ID = "helicone_playground";
 const avgTokenLength = 4;
 const maxContentLength = 2_000_000;
 const maxResponseLength = 100_000;
@@ -88,7 +89,7 @@ export class LoggingHandler extends AbstractLogHandler {
 
       experimentCellValues: [],
       scores: [],
-      orgsToMarkAsOnboarded: new Set<string>(),
+      orgsToMarkAsIntegrated: new Set<string>(),
     };
   }
 
@@ -111,8 +112,13 @@ export class LoggingHandler extends AbstractLogHandler {
       const requestResponseVersionedCHMapped =
         this.mapRequestResponseVersionedCH(context);
 
-      if (context.orgParams && context.orgParams.has_onboarded === false) {
-        this.batchPayload.orgsToMarkAsOnboarded.add(context.orgParams.id);
+      if (
+        requestMapped.user_id !== HELICONE_PLAYGROUND_USER_ID &&
+        context.orgParams &&
+        !context.orgParams.has_integrated &&
+        context.orgParams.id
+      ) {
+        this.batchPayload.orgsToMarkAsIntegrated.add(context.orgParams.id);
       }
 
       // Sanitize request_body to prevent JSON parsing errors in Clickhouse
@@ -480,6 +486,7 @@ export class LoggingHandler extends AbstractLogHandler {
     const request_id = context.message.log.request.id;
     const version_id = context.message.heliconeMeta.promptVersionId;
     const inputs = context.message.heliconeMeta.promptInputs;
+    const environment = context.message.heliconeMeta.promptEnvironment;
 
     if (!version_id || !inputs) {
       return null;
@@ -489,6 +496,7 @@ export class LoggingHandler extends AbstractLogHandler {
       request_id,
       version_id,
       inputs,
+      environment,
     };
 
     return promptInputsLog;

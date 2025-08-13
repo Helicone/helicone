@@ -198,6 +198,9 @@ export interface paths {
   "/v1/prompt-2025/query/version": {
     post: operations["GetPrompt2025Version"];
   };
+  "/v1/prompt-2025/query/environment-version": {
+    post: operations["GetPrompt2025EnvironmentVersion"];
+  };
   "/v1/prompt-2025/query/versions": {
     post: operations["GetPrompt2025Versions"];
   };
@@ -1961,6 +1964,7 @@ Json: JsonObject;
       heliconeManualAccessKey?: string;
       promptInputs?: components["schemas"]["Record_string.any_"];
       promptVersionId?: string;
+      promptEnvironment?: string;
       promptId?: string;
       lytixHost?: string;
       lytixKey?: string;
@@ -16579,6 +16583,24 @@ export interface operations {
       content: {
         "application/json": {
           promptVersionId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025Version.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025EnvironmentVersion: {
+    requestBody: {
+      content: {
+        "application/json": {
+          environment: string;
+          promptId: string;
         };
       };
     };

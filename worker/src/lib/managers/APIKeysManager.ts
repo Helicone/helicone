@@ -1,7 +1,6 @@
-import { Env } from "../..";
 import { APIKeysStore } from "../db/APIKeysStore";
 import {
-  getFromCache,
+  getFromKVCacheOnly,
   removeFromCache,
   storeInCache,
 } from "../util/cache/secureCache";
@@ -30,8 +29,23 @@ export class APIKeysManager {
     }
   }
 
+  async setAPIKey(
+    apiKeyHash: string,
+    organizationId: string,
+    softDelete?: boolean
+  ) {
+    if (this.env.ENVIRONMENT !== "development") {
+      return;
+    }
+    if (softDelete) {
+      await removeFromCache(`api_keys_${apiKeyHash}`, this.env);
+      return;
+    }
+    await storeInCache(`api_keys_${apiKeyHash}`, organizationId, this.env);
+  }
+
   async getAPIKey(apiKeyHash: string): Promise<string | null> {
-    const key = await getFromCache(`api_keys_${apiKeyHash}`, this.env);
+    const key = await getFromKVCacheOnly(`api_keys_${apiKeyHash}`, this.env);
     if (!key) {
       return null;
     }
@@ -42,7 +56,7 @@ export class APIKeysManager {
    * @returns the organization id or null if the api key is not found
    */
   async getAPIKeyWithFetch(apiKeyHash: string): Promise<string | null> {
-    const key = await getFromCache(`api_keys_${apiKeyHash}`, this.env);
+    const key = await getFromKVCacheOnly(`api_keys_${apiKeyHash}`, this.env);
     if (!key) {
       const key = await this.store.getAPIKeyWithFetch(apiKeyHash);
       if (!key) {

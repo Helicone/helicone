@@ -1,5 +1,4 @@
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
-import { Env } from "../..";
 import { Database } from "../../../supabase/database.types";
 import { safePut } from "../safePut";
 
