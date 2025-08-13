@@ -33,6 +33,7 @@ export default function RequestPage() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [hasCompleted, setHasCompleted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isCompleting, setIsCompleting] = useState(false);
   const abortController = useRef<AbortController | null>(null);
   const { updateCurrentStep, updateOnboardingStatus } = useOrgOnboarding(
     org?.currentOrg?.id ?? "",
@@ -119,7 +120,7 @@ export default function RequestPage() {
 
   const handleViewDashboard = async () => {
     await updateOnboardingStatus({ hasOnboarded: true });
-    router.push("/quickstart");
+    setIsCompleting(true);
   };
 
   return (
@@ -203,9 +204,19 @@ export default function RequestPage() {
               variant="action"
               className="w-full"
               onClick={handleViewDashboard}
+              disabled={isCompleting}
             >
-              View in Dashboard
-              <ArrowRight size={16} className="ml-2" />
+              {isCompleting ? (
+                <>
+                  <Loader size={16} className="mr-2 animate-spin" />
+                  Completing onboarding...
+                </>
+              ) : (
+                <>
+                  View in Dashboard
+                  <ArrowRight size={16} className="ml-2" />
+                </>
+              )}
             </Button>
           )}
         </div>
