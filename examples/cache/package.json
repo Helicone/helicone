@@ -15,6 +15,6 @@
     "@helicone/prompts": "^1.0.10",
     "dateformat": "^5.0.3",
     "dotenv": "^16.4.5",
-    "openai": "^5.12.2"
+    "openai": "^5.2.0"
   }
 }

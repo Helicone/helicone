@@ -284,7 +284,6 @@ export const mapOpenAIRequest: MapperFn<any, any> = ({
     verbosity: request.verbosity,
   };
 
-  console.log("responseeeeee", response);
   const llmSchema: LlmSchema = {
     request: requestToReturn,
     response: getLLMSchemaResponse(response),

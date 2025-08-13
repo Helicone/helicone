@@ -165,7 +165,6 @@ export async function generate<T extends object | undefined = undefined>(
 ): Promise<GenerateResponse> {
   const currentOrgId = Cookies.get(ORG_ID_COOKIE_KEY);
   const jwtToken = getHeliconeCookie().data?.jwtToken ?? "";
-  console.log("params in generate", params);
   const response = await fetch(
     `${env("NEXT_PUBLIC_HELICONE_JAWN_SERVICE")}/v1/playground/generate`,
     {

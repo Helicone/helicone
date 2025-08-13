@@ -765,7 +765,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       abortController.current = new AbortController();
 
       try {
-        console.log("mappedContent before templating", mappedContent);
         const templatedMappedContent =
           createTemplatedMappedContent(mappedContent);
 

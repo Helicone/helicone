@@ -119,7 +119,6 @@ const getUnsanitizedMappedContent = ({
       statusCode: heliconeRequest.response_status,
       model: heliconeRequest.model,
     });
-    console.log("result", result);
   } catch (e) {
     result = {
       preview: {
