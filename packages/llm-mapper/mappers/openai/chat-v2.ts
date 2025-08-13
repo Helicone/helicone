@@ -416,6 +416,7 @@ export const mapOpenAIRequestV2 = ({
     ...request,
     model: model || request.model,
   });
+  console.log(mappedRequest);
 
   // Create the LlmSchema structure
   const schema: LlmSchema = {

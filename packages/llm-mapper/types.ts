@@ -163,6 +163,7 @@ export type Message = {
   idx?: number; // Index of an auto prompt input message
   contentArray?: Message[];
   deleted?: boolean; // For realtime API (conversation.item.delete)
+  reasoning?: string; // For reasoning models
 
   // For realtime API
   start_timestamp?: string; // For realtime API (creation)

@@ -199,6 +199,7 @@ const processSingleImage = (msg: any): Message => {
 const processTextMessage = (msg: any): Message => {
   return {
     content: getFormattedMessageContent(msg.content) || "",
+    reasoning: msg.reasoning || "",
     role: msg.role || "user",
     _type: getContentType(msg as any),
   };
@@ -279,8 +280,11 @@ export const mapOpenAIRequest: MapperFn<any, any> = ({
     })),
     stop: request.stop,
     response_format: request.response_format,
+    reasoning_effort: request.reasoning_effort,
+    verbosity: request.verbosity,
   };
 
+  console.log("responseeeeee", response);
   const llmSchema: LlmSchema = {
     request: requestToReturn,
     response: getLLMSchemaResponse(response),

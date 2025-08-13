@@ -928,7 +928,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Message": {
         "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"ending_event_id":{"dataType":"string"},"trigger_event_id":{"dataType":"string"},"start_timestamp":{"dataType":"string"},"deleted":{"dataType":"boolean"},"contentArray":{"dataType":"array","array":{"dataType":"refAlias","ref":"Message"}},"idx":{"dataType":"double"},"detail":{"dataType":"string"},"filename":{"dataType":"string"},"file_id":{"dataType":"string"},"file_data":{"dataType":"string"},"type":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["input_image"]},{"dataType":"enum","enums":["input_text"]},{"dataType":"enum","enums":["input_file"]}]},"audio_data":{"dataType":"string"},"image_url":{"dataType":"string"},"timestamp":{"dataType":"string"},"tool_call_id":{"dataType":"string"},"tool_calls":{"dataType":"array","array":{"dataType":"refObject","ref":"FunctionCall"}},"mime_type":{"dataType":"string"},"content":{"dataType":"string"},"name":{"dataType":"string"},"instruction":{"dataType":"string"},"role":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":["user"]},{"dataType":"enum","enums":["assistant"]},{"dataType":"enum","enums":["system"]},{"dataType":"enum","enums":["developer"]}]},"id":{"dataType":"string"},"_type":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["functionCall"]},{"dataType":"enum","enums":["function"]},{"dataType":"enum","enums":["image"]},{"dataType":"enum","enums":["file"]},{"dataType":"enum","enums":["message"]},{"dataType":"enum","enums":["autoInput"]},{"dataType":"enum","enums":["contentArray"]},{"dataType":"enum","enums":["audio"]}],"required":true}},"validators":{}},
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"ending_event_id":{"dataType":"string"},"trigger_event_id":{"dataType":"string"},"start_timestamp":{"dataType":"string"},"reasoning":{"dataType":"string"},"deleted":{"dataType":"boolean"},"contentArray":{"dataType":"array","array":{"dataType":"refAlias","ref":"Message"}},"idx":{"dataType":"double"},"detail":{"dataType":"string"},"filename":{"dataType":"string"},"file_id":{"dataType":"string"},"file_data":{"dataType":"string"},"type":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["input_image"]},{"dataType":"enum","enums":["input_text"]},{"dataType":"enum","enums":["input_file"]}]},"audio_data":{"dataType":"string"},"image_url":{"dataType":"string"},"timestamp":{"dataType":"string"},"tool_call_id":{"dataType":"string"},"tool_calls":{"dataType":"array","array":{"dataType":"refObject","ref":"FunctionCall"}},"mime_type":{"dataType":"string"},"content":{"dataType":"string"},"name":{"dataType":"string"},"instruction":{"dataType":"string"},"role":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":["user"]},{"dataType":"enum","enums":["assistant"]},{"dataType":"enum","enums":["system"]},{"dataType":"enum","enums":["developer"]}]},"id":{"dataType":"string"},"_type":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["functionCall"]},{"dataType":"enum","enums":["function"]},{"dataType":"enum","enums":["image"]},{"dataType":"enum","enums":["file"]},{"dataType":"enum","enums":["message"]},{"dataType":"enum","enums":["autoInput"]},{"dataType":"enum","enums":["contentArray"]},{"dataType":"enum","enums":["audio"]}],"required":true}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Tool": {
@@ -2185,7 +2185,7 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ChatCompletionMessageFunctionToolCall.Function": {
+    "ChatCompletionMessageToolCall.Function": {
         "dataType": "refObject",
         "properties": {
             "arguments": {"dataType":"string","required":true},
@@ -2194,38 +2194,14 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ChatCompletionMessageFunctionToolCall": {
+    "ChatCompletionMessageToolCall": {
         "dataType": "refObject",
         "properties": {
             "id": {"dataType":"string","required":true},
-            "function": {"ref":"ChatCompletionMessageFunctionToolCall.Function","required":true},
+            "function": {"ref":"ChatCompletionMessageToolCall.Function","required":true},
             "type": {"dataType":"enum","enums":["function"],"required":true},
         },
         "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ChatCompletionMessageCustomToolCall.Custom": {
-        "dataType": "refObject",
-        "properties": {
-            "input": {"dataType":"string","required":true},
-            "name": {"dataType":"string","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ChatCompletionMessageCustomToolCall": {
-        "dataType": "refObject",
-        "properties": {
-            "id": {"dataType":"string","required":true},
-            "custom": {"ref":"ChatCompletionMessageCustomToolCall.Custom","required":true},
-            "type": {"dataType":"enum","enums":["custom"],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ChatCompletionMessageToolCall": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"ChatCompletionMessageFunctionToolCall"},{"ref":"ChatCompletionMessageCustomToolCall"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ChatCompletionMessage": {
@@ -2237,7 +2213,7 @@ const models: TsoaRoute.Models = {
             "annotations": {"dataType":"array","array":{"dataType":"refObject","ref":"ChatCompletionMessage.Annotation"}},
             "audio": {"dataType":"union","subSchemas":[{"ref":"ChatCompletionAudio"},{"dataType":"enum","enums":[null]}]},
             "function_call": {"dataType":"union","subSchemas":[{"ref":"ChatCompletionMessage.FunctionCall"},{"dataType":"enum","enums":[null]}]},
-            "tool_calls": {"dataType":"array","array":{"dataType":"refAlias","ref":"ChatCompletionMessageToolCall"}},
+            "tool_calls": {"dataType":"array","array":{"dataType":"refObject","ref":"ChatCompletionMessageToolCall"}},
         },
         "additionalProperties": false,
     },
@@ -2293,7 +2269,7 @@ const models: TsoaRoute.Models = {
             "created": {"dataType":"double","required":true},
             "model": {"dataType":"string","required":true},
             "object": {"dataType":"enum","enums":["chat.completion"],"required":true},
-            "service_tier": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["auto"]},{"dataType":"enum","enums":["default"]},{"dataType":"enum","enums":["flex"]},{"dataType":"enum","enums":["scale"]},{"dataType":"enum","enums":["priority"]},{"dataType":"enum","enums":[null]}]},
+            "service_tier": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["auto"]},{"dataType":"enum","enums":["default"]},{"dataType":"enum","enums":["flex"]},{"dataType":"enum","enums":[null]}]},
             "system_fingerprint": {"dataType":"string"},
             "usage": {"ref":"CompletionUsage"},
         },

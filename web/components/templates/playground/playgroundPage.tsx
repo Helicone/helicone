@@ -113,6 +113,7 @@ export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
       presence_penalty: undefined,
       stop: [],
       reasoning_effort: undefined,
+      verbosity: undefined,
     },
   },
 };
@@ -124,6 +125,7 @@ const convertMappedLLMRequestToOpenAIChatRequest = (
   selectedModel: string,
   responseFormat: ResponseFormat,
 ): OpenAIChatRequest => {
+  console.log("mappedContent lolcute", mappedContent);
   const openaiRequest = openaiChatMapper.toExternal({
     ...mappedContent.schema.request,
     tools: tools && tools.length > 0 ? tools : undefined,
@@ -309,6 +311,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
             ? promptVersionData.promptBody.stop.join(",")
             : promptVersionData.promptBody.stop
           : undefined,
+        reasoning_effort: promptVersionData.promptBody.reasoning_effort,
+        verbosity: promptVersionData.promptBody.verbosity,
       });
 
       const storedResponseFormat = convertedContent?.schema.request
@@ -331,6 +335,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     frequency_penalty: undefined,
     presence_penalty: undefined,
     stop: undefined,
+    reasoning_effort: undefined,
+    verbosity: undefined,
   });
 
   const [responseFormat, setResponseFormat] = useState<ResponseFormat>({
@@ -394,6 +400,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         frequency_penalty: undefined,
         presence_penalty: undefined,
         stop: undefined,
+        reasoning_effort: undefined,
+        verbosity: undefined,
       });
       setMappedContent(DEFAULT_EMPTY_CHAT);
       setDefaultContent(DEFAULT_EMPTY_CHAT);
@@ -444,6 +452,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               ? contentWithIds.schema.request.stop.join(",")
               : contentWithIds.schema.request.stop
             : undefined,
+          reasoning_effort: contentWithIds.schema.request.reasoning_effort,
+          verbosity: contentWithIds.schema.request.verbosity,
         });
       } else {
         setTools(mappedContent?.schema.request.tools ?? []);
@@ -458,6 +468,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               ? mappedContent?.schema.request.stop.join(",")
               : mappedContent?.schema.request.stop
             : undefined,
+          reasoning_effort: mappedContent?.schema.request.reasoning_effort,
+          verbosity: mappedContent?.schema.request.verbosity,
         });
         setSelectedModel(mappedContent.model);
       }
@@ -753,6 +765,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       abortController.current = new AbortController();
 
       try {
+        console.log("mappedContent before templating", mappedContent);
         const templatedMappedContent =
           createTemplatedMappedContent(mappedContent);
 

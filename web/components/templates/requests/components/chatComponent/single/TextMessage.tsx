@@ -6,6 +6,8 @@ import MarkdownEditor from "@/components/shared/markdownEditor";
 import { Mode } from "@/store/requestRenderModeStore";
 import dynamic from "next/dynamic";
 import { markdownComponents } from "@/components/shared/prompts/ResponsePanel";
+import { BrainIcon } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Dynamically import ReactMarkdown with no SSR
 const ReactMarkdown = dynamic(() => import("react-markdown"), {
@@ -17,6 +19,7 @@ interface TextMessageProps {
   isPartOfContentArray?: boolean;
   parentIndex?: number;
   displayContent: string;
+  displayReasoning: string;
   chatMode: ChatMode;
   mappedRequest: MappedLLMRequest;
   messageIndex?: number;
@@ -27,6 +30,7 @@ export default function TextMessage({
   isPartOfContentArray,
   parentIndex,
   displayContent,
+  displayReasoning,
   chatMode,
   mappedRequest,
   messageIndex,
@@ -36,7 +40,16 @@ export default function TextMessage({
   if (isJson(displayContent) && chatMode !== "PLAYGROUND_INPUT") {
     return (
       <div className="text-sm">
-        <JsonRenderer data={JSON.parse(displayContent)} />
+        <JsonRenderer
+          data={
+            displayReasoning
+              ? {
+                  content: JSON.parse(displayContent),
+                  reasoning: JSON.parse(displayReasoning),
+                }
+              : JSON.parse(displayContent)
+          }
+        />
       </div>
     );
   }
@@ -101,11 +114,37 @@ export default function TextMessage({
       disabled={chatMode !== "PLAYGROUND_INPUT"}
     />
   ) : (
-    <ReactMarkdown
-      components={markdownComponents}
-      className="w-full whitespace-pre-wrap break-words text-sm"
-    >
-      {displayContent}
-    </ReactMarkdown>
+    <>
+      {displayReasoning && !displayContent && (
+        <div className="border-l-2 border-l-muted-foreground bg-muted py-2 pl-2 text-sm text-slate-400 dark:text-slate-700">
+          <div className="flex animate-pulse items-center gap-2">
+            <BrainIcon className="h-4 w-4" />
+            <span className="font-medium">Thinking...</span>
+          </div>
+          <ReactMarkdown
+            components={markdownComponents}
+            className="w-full whitespace-pre-wrap break-words text-sm"
+          >
+            {displayReasoning}
+          </ReactMarkdown>
+        </div>
+      )}
+      {displayContent ? (
+        <ReactMarkdown
+          components={markdownComponents}
+          className="w-full whitespace-pre-wrap break-words text-sm"
+        >
+          {displayContent}
+        </ReactMarkdown>
+      ) : !displayReasoning ? (
+        <div className="flex flex-col gap-2">
+          <Skeleton className="h-4 w-full animate-pulse" />
+          <Skeleton className="h-4 w-full animate-pulse" />
+          <Skeleton className="h-4 w-2/3 animate-pulse" />
+        </div>
+      ) : (
+        <></>
+      )}
+    </>
   );
 }

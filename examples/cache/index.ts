@@ -20,8 +20,9 @@ async function main() {
   const chatCompletion = await openai.chat.completions
     .create(
       {
-        model: "gpt-5-mini",
-        verbosity: "high",
+        model: "openai/gpt-5-mini",
+        reasoning_effort: "low",
+        // verbosity: "high",
         messages: [
           // {
           //   role: "system",
