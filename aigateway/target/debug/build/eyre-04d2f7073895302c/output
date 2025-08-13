@@ -1,0 +1,2 @@
+cargo:rustc-cfg=track_caller
+cargo:rustc-cfg=stable

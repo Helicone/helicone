@@ -1,0 +1,4 @@
+cargo:rerun-if-env-changed=DEP_AWS_LC_0_29_0_INCLUDE
+cargo:rerun-if-env-changed=DEP_AWS_LC_0_29_0_LIBCRYPTO
+cargo:rerun-if-env-changed=DEP_AWS_LC_0_29_0_ROOT
+cargo:rerun-if-env-changed=DEP_AWS_LC_0_29_0_CONF

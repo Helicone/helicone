@@ -1,0 +1,30 @@
+error[E0407]: method `backtrace` is not a member of trait `Error`
+  --> /Users/juliettech.eth/code/helicone/helicone/aigateway/target/debug/build/eyre-04d2f7073895302c/out/probe.rs:19:9
+   |
+19 | /         fn backtrace(&self) -> Option<&Backtrace> {
+20 | |             let backtrace = Backtrace::capture();
+21 | |             match backtrace.status() {
+22 | |                 BacktraceStatus::Captured | BacktraceStatus::Disabled | _ => {}
+23 | |             }
+24 | |             unimplemented!()
+25 | |         }
+   | |_________^ not a member of trait `Error`
+
+error[E0554]: `#![feature]` may not be used on the stable release channel
+ --> /Users/juliettech.eth/code/helicone/helicone/aigateway/target/debug/build/eyre-04d2f7073895302c/out/probe.rs:2:5
+  |
+2 |     #![feature(backtrace)]
+  |     ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: the feature `backtrace` has been stable since 1.65.0 and no longer requires an attribute to enable
+ --> /Users/juliettech.eth/code/helicone/helicone/aigateway/target/debug/build/eyre-04d2f7073895302c/out/probe.rs:2:16
+  |
+2 |     #![feature(backtrace)]
+  |                ^^^^^^^^^
+  |
+  = note: `#[warn(stable_features)]` on by default
+
+error: aborting due to 2 previous errors; 1 warning emitted
+
+Some errors have detailed explanations: E0407, E0554.
+For more information about an error, try `rustc --explain E0407`.
