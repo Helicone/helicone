@@ -25,12 +25,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
-          cache-dependency-path: packages/package-lock.json
+          cache: "yarn"
+          cache-dependency-path: worker/yarn.lock
 
       - name: Install dependencies
-        run: npm ci
+        run: yarn install
         working-directory: packages
 
       - name: Run llm-mapper tests
         run: npx jest __tests__/llm-mapper/
+        working-directory: packages
