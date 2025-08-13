@@ -15,7 +15,7 @@ export const providers = {
     id: "anthropic",
     baseUrl: "https://api.anthropic.com",
     auth: "api-key",
-    buildUrl: () => "https://api.anthropic.com/v1/messages",
+    buildUrl: () => "https://api.anthropic.com/v1/chat/completions",
     buildModelId: (endpoint) => endpoint.providerModelId,
     pricingPages: [
       "https://docs.anthropic.com/en/docs/build-with-claude/pricing",

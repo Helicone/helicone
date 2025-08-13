@@ -180,13 +180,15 @@ const authenticateRequest = async (
   providerKey: ProviderKey,
   model: string,
   body: string,
-  heliconeHeaders: HeliconeHeaders
+  heliconeHeaders: HeliconeHeaders,
+  targetBaseUrl: string | null
 ) => {
   requestWrapper.resetObject();
   requestWrapper.setHeader(
     "Helicone-Auth",
     requestWrapper.getAuthorization() ?? ""
   );
+  requestWrapper.setUrl(targetBaseUrl ?? requestWrapper.url.toString());
   if (providerKey.provider === "bedrock") {
     if (providerKey.auth_type === "key") {
       await signBedrockRequest(requestWrapper, providerKey, model, body);
@@ -309,13 +311,6 @@ const attemptDirectProviderRequest = async (
   );
 
   requestWrapper.setBody(body);
-  await authenticateRequest(
-    requestWrapper,
-    providerKey,
-    providerModelId,
-    body,
-    requestWrapper.heliconeHeaders
-  );
 
   // Extract config once with proper typing
   const config = providerKey.config as
@@ -346,6 +341,15 @@ const attemptDirectProviderRequest = async (
   }
 
   const targetBaseUrl = targetBaseUrlResult.data;
+
+  await authenticateRequest(
+    requestWrapper,
+    providerKey,
+    providerModelId,
+    body,
+    requestWrapper.heliconeHeaders,
+    targetBaseUrl
+  );
 
   try {
     const response = await forwarder(targetBaseUrl);
