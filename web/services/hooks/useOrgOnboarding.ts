@@ -179,7 +179,10 @@ export const useOrgOnboarding = (orgId: string) => {
   }, [hasCompletedQuickstart, refetchKeys, refetchProviderKeys]);
 
   const hasKeys = useMemo(() => {
-    return !keys?.isLoading && (keys?.data?.data?.data?.length ?? 0) > 0;
+    if (keys?.isLoading) {
+      return undefined;
+    }
+    return (keys?.data?.data?.data?.length ?? 0) > 0;
   }, [keys]);
   
   const hasProviderKeys = useMemo(() => {
