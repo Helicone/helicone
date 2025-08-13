@@ -241,7 +241,8 @@ const attemptDirectProviderRequest = async (
   const { provider, modelName } = directProviderEndpoint;
   const providerKey = await providerKeysManager.getProviderKeyWithFetch(
     provider,
-    orgId
+    orgId,
+    requestWrapper,
   );
 
   if (!providerKey) {

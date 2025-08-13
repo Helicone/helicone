@@ -5,6 +5,7 @@ import {
   removeFromCache,
   storeInCache,
 } from "../util/cache/secureCache";
+import { RequestWrapper } from "../RequestWrapper";
 
 export class ProviderKeysManager {
   constructor(private store: ProviderKeysStore, private env: Env) {}
@@ -65,8 +66,13 @@ export class ProviderKeysManager {
 
   async getProviderKeyWithFetch(
     provider: ProviderName,
-    orgId: string
+    orgId: string,
+    requestWrapper: RequestWrapper
   ): Promise<ProviderKey | null> {
+    if (requestWrapper.heliconeHeaders.cloudBillingEnabled) {
+      orgId = this.env.HELICONE_ORG_ID;
+    }
+
     const key = await this.getProviderKey(provider, orgId);
     if (!key) {
       const key = await this.store.getProviderKeyWithFetch(provider, orgId);
