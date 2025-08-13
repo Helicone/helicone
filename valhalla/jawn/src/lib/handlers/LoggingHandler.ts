@@ -480,6 +480,7 @@ export class LoggingHandler extends AbstractLogHandler {
     const request_id = context.message.log.request.id;
     const version_id = context.message.heliconeMeta.promptVersionId;
     const inputs = context.message.heliconeMeta.promptInputs;
+    const environment = context.message.heliconeMeta.promptEnvironment;
 
     if (!version_id || !inputs) {
       return null;
@@ -489,6 +490,7 @@ export class LoggingHandler extends AbstractLogHandler {
       request_id,
       version_id,
       inputs,
+      environment,
     };
 
     return promptInputsLog;

@@ -1,0 +1,28 @@
+name: Worker Build Precheck
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+    branches:
+      - "**"
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  worker-build-precheck:
+    name: Worker Build Precheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "yarn"
+          cache-dependency-path: worker/yarn.lock
+      - name: Install
+        working-directory: worker
+        run: yarn install
+      - name: Build
+        working-directory: worker
+        run: yarn tsc

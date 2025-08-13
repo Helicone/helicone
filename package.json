@@ -8,14 +8,14 @@
     "valhalla/jawn",
     "worker"
   ],
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build:web": "yarn workspace helicone build",
     "prepare": "husky",
     "lint": "sh -c 's=0; yarn -s workspace helicone run lint || s=1; yarn -s workspace bifrost run lint || s=1; exit $s'",
     "lint:fix": "sh -c 's=0; yarn -s workspace helicone run lint-fix || s=1; yarn -s workspace bifrost run lint-fix || s=1; exit $s'"
-  },
-  "engines": {
-    "node": "=20"
   },
   "version": "0.1.0",
   "devDependencies": {

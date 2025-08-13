@@ -1,4 +1,3 @@
-import { Env } from "../..";
 import {
   buildEndpointUrl,
   buildModelId,
@@ -21,9 +20,14 @@ import { getEndpoints, ModelEndpoint } from "@helicone-package/cost/models";
 import providers, {
   ProviderName,
 } from "@helicone-package/cost/models/providers";
+import { PromptManager } from "../managers/PromptManager";
 
 type Error = {
-  type: "invalid_format" | "missing_provider_key" | "request_failed";
+  type:
+    | "invalid_format"
+    | "missing_provider_key"
+    | "request_failed"
+    | "invalid_prompt";
   message: string;
   code: number;
 };
@@ -52,10 +56,11 @@ export const authenticate = async (
   store: APIKeysStore
 ) => {
   const apiKeyManager = new APIKeysManager(store, env);
+  const rawAPIKey = await requestWrapper.getRawProviderAuthHeader();
   const hashedAPIKey = await requestWrapper.getProviderAuthHeader();
   const orgId = await apiKeyManager.getAPIKeyWithFetch(hashedAPIKey ?? "");
 
-  return orgId;
+  return { orgId, rawAPIKey };
 };
 
 type DirectProviderEndpoint = {
@@ -444,6 +449,7 @@ export const attemptModelRequestWithFallback = async ({
   requestWrapper,
   forwarder,
   providerKeysManager,
+  promptManager,
   orgId,
   parsedBody,
 }: {
@@ -451,6 +457,7 @@ export const attemptModelRequestWithFallback = async ({
   requestWrapper: RequestWrapper;
   forwarder: (targetBaseUrl: string | null) => Promise<Response>;
   providerKeysManager: ProviderKeysManager;
+  promptManager: PromptManager;
   orgId: string;
   parsedBody: any;
 }): Promise<Result<Response, Error>> => {
@@ -460,6 +467,39 @@ export const attemptModelRequestWithFallback = async ({
       message: "No models provided",
       code: 400,
     });
+  }
+
+  if (parsedBody.prompt_id) {
+    const result = await promptManager.getMergedPromptBody(parsedBody, orgId);
+    if (isErr(result)) {
+      return err({
+        type: "invalid_prompt",
+        message: result.error,
+        code: 400,
+      });
+    }
+
+    if (result.data.errors && result.data.errors.length > 0) {
+      return err({
+        type: "invalid_prompt",
+        message: result.data.errors
+          .map(
+            (error) =>
+              `Variable '${error.variable}' is '${error.expected}' but got '${error.value}'`
+          )
+          .join("\n"),
+        code: 400,
+      });
+    }
+
+    requestWrapper.setPrompt2025Settings({
+      promptId: parsedBody.prompt_id,
+      promptVersionId: result.data.promptVersionId,
+      inputs: parsedBody.inputs,
+      environment: parsedBody.environment,
+    });
+
+    parsedBody = result.data.body;
   }
 
   let error: Error | null = null;

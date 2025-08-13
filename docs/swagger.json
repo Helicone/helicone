@@ -12354,6 +12354,54 @@
 				}
 			}
 		},
+		"/v1/prompt-2025/query/environment-version": {
+			"post": {
+				"operationId": "GetPrompt2025EnvironmentVersion",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Prompt2025Version.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt2025"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"environment": {
+										"type": "string"
+									},
+									"promptId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"environment",
+									"promptId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/prompt-2025/query/versions": {
 			"post": {
 				"operationId": "GetPrompt2025Versions",
@@ -19460,7 +19508,38 @@
 						"description": "Ok",
 						"content": {
 							"application/json": {
-								"schema": {}
+								"schema": {
+									"anyOf": [
+										{
+											"properties": {
+												"providerName": {
+													"type": "string",
+													"enum": [
+														"openai",
+														"anthropic",
+														"bedrock",
+														"vertex"
+													]
+												}
+											},
+											"required": [
+												"providerName"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"error": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"error"
+											],
+											"type": "object"
+										}
+									]
+								}
 							}
 						}
 					}
@@ -19543,11 +19622,15 @@
 									"anyOf": [
 										{
 											"properties": {
+												"providerName": {
+													"type": "string"
+												},
 												"id": {
 													"type": "string"
 												}
 											},
 											"required": [
+												"providerName",
 												"id"
 											],
 											"type": "object"
@@ -19770,6 +19853,9 @@
 									"anyOf": [
 										{
 											"properties": {
+												"hashedKey": {
+													"type": "string"
+												},
 												"apiKey": {
 													"type": "string"
 												},
@@ -19778,6 +19864,7 @@
 												}
 											},
 											"required": [
+												"hashedKey",
 												"apiKey",
 												"id"
 											],
@@ -19920,7 +20007,32 @@
 						"description": "Ok",
 						"content": {
 							"application/json": {
-								"schema": {}
+								"schema": {
+									"anyOf": [
+										{
+											"properties": {
+												"hashedKey": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"hashedKey"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"error": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"error"
+											],
+											"type": "object"
+										}
+									]
+								}
 							}
 						}
 					}
@@ -19953,15 +20065,30 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"properties": {
-										"error": {
-											"type": "string"
+									"anyOf": [
+										{
+											"properties": {
+												"hashedKey": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"hashedKey"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"error": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"error"
+											],
+											"type": "object"
 										}
-									},
-									"required": [
-										"error"
-									],
-									"type": "object"
+									]
 								}
 							}
 						}

@@ -1,5 +1,4 @@
 import { SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
-import { Env } from "../../..";
 import { MessageData, MessageProducer } from "./types";
 import { Result, err, ok } from "../../util/results";
 
@@ -53,7 +52,7 @@ export class SQSProducerImpl implements MessageProducer {
 
         return ok(null);
       } catch (error: any) {
-        console.log(`SQS attempt ${attempts + 1} failed: ${error.message}`);
+        console.error(`SQS attempt ${attempts + 1} failed: ${error.message}`);
         attempts++;
         if (attempts < maxAttempts) {
           await new Promise((resolve) => setTimeout(resolve, timeout));

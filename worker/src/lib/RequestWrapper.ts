@@ -3,7 +3,7 @@
 // without modifying the request object itself.
 // This also allows us to not have to redefine other objects repetitively like URL.
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
-import { Env, hash } from "..";
+import { hash } from "..";
 import { Database } from "../../supabase/database.types";
 import { HeliconeAuth } from "./db/DBWrapper";
 import {
@@ -14,7 +14,6 @@ import { HeliconeHeaders } from "./models/HeliconeHeaders";
 import { getAndStoreInCache } from "./util/cache/secureCache";
 import { Result, err, map, mapPostgrestErr, ok } from "./util/results";
 import { Sha256 } from "@aws-crypto/sha256-js";
-import { CfProperties } from "@cloudflare/workers-types";
 import { parseJSXObject } from "@helicone/prompts";
 import { HttpRequest } from "@smithy/protocol-http";
 import { SignatureV4 } from "@smithy/signature-v4";
@@ -26,6 +25,7 @@ export type RequestHandlerType =
   | "logging"
   | "feedback";
 
+// LEGACY PROMPTS
 export type PromptSettings =
   | {
       promptId: string;
@@ -40,6 +40,13 @@ export type PromptSettings =
       promptInputs?: Record<string, string>;
     };
 
+export type Prompt2025Settings = {
+  promptId?: string;
+  promptVersionId?: string;
+  environment?: string;
+  promptInputs?: Record<string, any>;
+}
+
 export class RequestWrapper {
   private authorization: string | undefined;
   url: URL;
@@ -51,6 +58,7 @@ export class RequestWrapper {
   baseURLOverride: string | null;
   cf: CfProperties | undefined;
   promptSettings: PromptSettings;
+  prompt2025Settings: Prompt2025Settings; // I'm sorry. Will clean whenever we can remove old promtps.
   extraHeaders: Headers | null = null;
 
   private cachedText: string | null = null;
@@ -136,6 +144,7 @@ export class RequestWrapper {
     this.headers = this.mutatedAuthorizationHeaders(request);
     this.heliconeHeaders = new HeliconeHeaders(this.headers);
     this.promptSettings = this.getPromptSettings();
+    this.prompt2025Settings = {}; // initialized later, if a prompt is used.
     this.injectPromptProperties();
     this.baseURLOverride = null;
     this.cf = request.cf;
@@ -461,6 +470,14 @@ export class RequestWrapper {
     return ok(null);
   }
 
+  async getRawProviderAuthHeader(): Promise<string | undefined> {
+    let auth = this.authorization;
+    if (auth?.startsWith("Bearer ")) {
+      auth = auth.split(" ")[1];
+    }
+    return auth;
+  }
+
   async getProviderAuthHeader(): Promise<string | undefined> {
     return this.authorization ? await hash(this.authorization) : undefined;
   }
@@ -583,6 +600,26 @@ export class RequestWrapper {
     this.promptSettings = {
       ...this.promptSettings,
       promptInputs: inputs,
+    };
+  }
+
+  /**
+   * Sets prompts settings (new prompts)
+   * @param promptVersionId The version id of the prompt
+   * @param environment The environment of the prompt
+   * @param inputs The inputs to associate with the prompt
+   */
+  setPrompt2025Settings(params: {
+    promptId: string,
+    promptVersionId: string,
+    inputs: Record<string, any>,
+    environment?: string
+  }): void {
+    this.prompt2025Settings = {
+      promptId: params.promptId,
+      promptVersionId: params.promptVersionId,
+      promptInputs: params.inputs,
+      environment: params.environment,
     };
   }
 
@@ -716,6 +753,7 @@ export async function getProviderKeyFromProxy(
     }
   }
 
+  // @ts-ignore - RPC function not included in generated database types
   const verified = await supabaseClient.rpc("verify_helicone_proxy_key", {
     api_key: proxyKey,
     stored_hashed_key: storedProxyKey.data.helicone_proxy_key,
