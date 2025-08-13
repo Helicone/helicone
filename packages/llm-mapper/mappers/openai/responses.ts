@@ -219,7 +219,6 @@ const convertRequestInputToMessages = (
   }
 
   const messages: Message[] = [];
-  const toolCalls: any[] = [];
   let lastAssistantMessage: Message | null = null;
 
   input.forEach((msg: any, msgIdx) => {
@@ -244,7 +243,6 @@ const convertRequestInputToMessages = (
         messages.push(lastAssistantMessage);
       }
       
-      lastAssistantMessage.tool_calls = lastAssistantMessage.tool_calls || [];
       lastAssistantMessage.tool_calls.push(toolCall);
       return;
     }
@@ -266,10 +264,13 @@ const convertRequestInputToMessages = (
       if (typeof msg.content === "string") {
         let content = msg.content;
         
-        // Try to parse content if it looks like JSON (common in OpenAI Responses API)
-        if (content.startsWith("[{") && content.endsWith("}]")) {
+        // Try to parse content if it looks like OpenAI Responses API format with single quotes
+        if (content.startsWith("[{") && content.endsWith("}]") && content.includes("'type'")) {
           try {
-            const parsed = JSON.parse(content.replace(/'/g, '"')); // Replace single quotes with double quotes
+            // Only replace quotes if this looks like the specific OpenAI Responses format
+            // This is safer than a global replace and targets the specific case we're handling
+            const normalized = content.replace(/'/g, '"');
+            const parsed = JSON.parse(normalized);
             if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].type === 'text') {
               content = parsed[0].text || content;
             }

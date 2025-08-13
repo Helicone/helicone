@@ -1,4 +1,4 @@
-import { Message } from "@/llm-mapper/types";
+import { Message } from "../../llm-mapper/types";
 import {
   getRequestText,
   getResponseText,
@@ -22,10 +22,10 @@ describe("OpenAI Responses API Mapper", () => {
         model: "gpt-4",
         input: [
           {
-            role: "user",
+            role: "user" as const,
             content: [
               {
-                type: "input_text",
+                type: "input_text" as const,
                 text: "[REDACTED QUESTION]",
               },
             ],
