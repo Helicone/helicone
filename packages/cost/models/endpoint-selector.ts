@@ -14,7 +14,13 @@ export function selectEndpoints(
   modelName: ModelName,
   filters: EndpointFilters = {}
 ): Endpoint[] {
-  const endpoints = registry.getModelEndpoints(modelName);
+  const endpointsResult = registry.getModelEndpoints(modelName);
+
+  if (endpointsResult.error || !endpointsResult.data) {
+    return [];
+  }
+
+  const endpoints = endpointsResult.data;
 
   if (endpoints.length === 0) {
     return [];
