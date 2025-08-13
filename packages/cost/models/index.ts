@@ -7,6 +7,9 @@
 // Export all types
 export * from "./types";
 
+// Re-export Result type from common package
+export * from "../../common/result";
+
 // Export registry and convenience functions
 export {
   registry,
@@ -19,6 +22,10 @@ export {
   getProviderModels,
   hasPtbSupport,
 } from "./registry";
+
+// Backward compatibility aliases for worker
+export { getModelEndpoints as getEndpoints } from "./registry";
+export type { Endpoint as ModelEndpoint } from "./types";
 
 // Export provider utilities
 export { getProvider, buildEndpointUrl, buildModelId } from "./providers";

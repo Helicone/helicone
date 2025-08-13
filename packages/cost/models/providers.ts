@@ -161,51 +161,75 @@ export const providers = {
   },
 } satisfies Record<ProviderName, ProviderConfig>;
 
+import { Result, ok, err } from "../../common/result";
+
 // Helper function to get provider config
-export function getProvider(
-  providerName: ProviderName
-): ProviderConfig | undefined {
-  return providers[providerName];
+export function getProvider(providerName: string): Result<ProviderConfig> {
+  const provider = providerName in providers
+    ? providers[providerName as ProviderName]
+    : undefined;
+  
+  return provider ? ok(provider) : err(`Unknown provider: ${providerName}`);
 }
 
 // Helper function to build URL for an endpoint
 export function buildEndpointUrl(
   endpoint: Endpoint,
   userConfig: UserConfig = {}
-): string {
-  const provider = getProvider(endpoint.provider);
-  if (!provider) {
-    throw new Error(`Unknown provider: ${endpoint.provider}`);
+): Result<string> {
+  const providerResult = getProvider(endpoint.provider);
+  if (providerResult.error) {
+    return err(providerResult.error);
   }
 
-  // Merge endpoint region with user config
-  const config: UserConfig = {
-    ...userConfig,
-    region: userConfig.region || endpoint.region,
-  };
+  const provider = providerResult.data;
+  if (!provider) {
+    return err(`Provider data is null for: ${endpoint.provider}`);
+  }
 
-  return provider.buildUrl(endpoint, config);
+  try {
+    // Merge endpoint region with user config
+    const config: UserConfig = {
+      ...userConfig,
+      region: userConfig.region || endpoint.region,
+    };
+
+    const url = provider.buildUrl(endpoint, config);
+    return ok(url);
+  } catch (error) {
+    return err(error instanceof Error ? error.message : 'Failed to build URL');
+  }
 }
 
 // Helper function to build model ID for an endpoint
 export function buildModelId(
   endpoint: Endpoint,
   userConfig: UserConfig = {}
-): string {
-  const provider = getProvider(endpoint.provider);
+): Result<string> {
+  const providerResult = getProvider(endpoint.provider);
+  if (providerResult.error) {
+    return err(providerResult.error);
+  }
+
+  const provider = providerResult.data;
   if (!provider) {
-    throw new Error(`Unknown provider: ${endpoint.provider}`);
+    return err(`Provider data is null for: ${endpoint.provider}`);
   }
-
+  
   if (!provider.buildModelId) {
-    return endpoint.providerModelId;
+    return ok(endpoint.providerModelId);
   }
 
-  // Merge endpoint region with user config
-  const config: UserConfig = {
-    ...userConfig,
-    region: userConfig.region || endpoint.region,
-  };
+  try {
+    // Merge endpoint region with user config
+    const config: UserConfig = {
+      ...userConfig,
+      region: userConfig.region || endpoint.region,
+    };
 
-  return provider.buildModelId(endpoint, config);
+    const modelId = provider.buildModelId(endpoint, config);
+    return ok(modelId);
+  } catch (error) {
+    return err(error instanceof Error ? error.message : 'Failed to build model ID');
+  }
 }

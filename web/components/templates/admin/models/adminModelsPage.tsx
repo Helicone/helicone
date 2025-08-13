@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { H1, P } from "@/components/ui/typography";
@@ -21,18 +21,14 @@ import { Search, GitBranch } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { ModelDetailsDialog } from "./ModelDetailsDialog";
-import type {
-  Model,
-  ModelEndpoint,
-  AuthorInfo,
+import {
+  registry,
+  type Model,
+  type ModelEndpoint,
+  type AuthorMetadata,
+  type Result,
 } from "@helicone-package/cost/models";
 
-interface RegistryData {
-  models: Record<string, Model>;
-  endpoints: Record<string, ModelEndpoint[]>;
-  authors: Record<string, AuthorInfo>;
-  modelVersions: Record<string, string[]>;
-}
 
 export default function AdminModelsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -41,33 +37,56 @@ export default function AdminModelsPage() {
   const [showVariants, setShowVariants] = useState(false);
   const [showDisabled, setShowDisabled] = useState(false);
   const [selectedModel, setSelectedModel] = useState<Model | null>(null);
+  const [selectedModelKey, setSelectedModelKey] = useState<string>("");
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [registryData, setRegistryData] = useState<RegistryData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    fetch("/api/admin/models")
-      .then((res) => res.json())
-      .then((data) => {
-        setRegistryData(data);
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        console.error("Failed to load models:", error);
-        setIsLoading(false);
-      });
+  // Get registry data directly from the package
+  const registryData = useMemo(() => {
+    const modelsResult = registry.getAllModelsWithIds();
+    if (modelsResult.error || !modelsResult.data) {
+      // Return empty data if error
+      return {
+        models: {},
+        endpoints: {},
+        authors: {},
+        modelVersions: {} as Record<string, string[]>,
+      };
+    }
+    
+    const models = modelsResult.data;
+    const endpoints: Record<string, ModelEndpoint[]> = {};
+    const authors: Record<string, AuthorMetadata> = {};
+    
+    Object.keys(models).forEach((modelId) => {
+      const endpointsResult = registry.getModelEndpoints(modelId);
+      endpoints[modelId] = endpointsResult.data || [];
+    });
+    
+    Object.values(models).forEach((model) => {
+      if (!authors[model.author]) {
+        authors[model.author] = { modelCount: 0, supported: true };
+      }
+      authors[model.author].modelCount++;
+    });
+    
+    return {
+      models,
+      endpoints,
+      authors,
+      modelVersions: {} as Record<string, string[]>,
+    };
   }, []);
 
   const handleModelClick = (modelKey: string) => {
-    if (registryData) {
-      setSelectedModel(registryData.models[modelKey]);
+    const model = registryData.models[modelKey];
+    if (model) {
+      setSelectedModel(model);
+      setSelectedModelKey(modelKey);
       setIsDetailsOpen(true);
     }
   };
 
   // Get unique providers from endpoints
   const allProviders = useMemo(() => {
-    if (!registryData) return [];
     const providers = new Set<string>();
     Object.values(registryData.endpoints).forEach((endpointList) => {
       endpointList.forEach((endpoint) => {
@@ -79,17 +98,14 @@ export default function AdminModelsPage() {
 
   // Get all authors
   const allAuthors = useMemo(() => {
-    if (!registryData) return [];
     return Object.keys(registryData.authors).sort();
   }, [registryData]);
 
   // Filter models based on search and filters
   const filteredModels = useMemo(() => {
-    if (!registryData) return [];
-
     return Object.entries(registryData.models).filter(([modelKey, model]) => {
       const matchesSearch = searchQuery
-        ? model.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        ? modelKey.toLowerCase().includes(searchQuery.toLowerCase()) ||
           model.name.toLowerCase().includes(searchQuery.toLowerCase())
         : true;
 
@@ -129,7 +145,7 @@ export default function AdminModelsPage() {
       // Check if this is a variant
       let isVariant = false;
       for (const [baseKey, versionList] of Object.entries(
-        registryData?.modelVersions || {},
+        registryData.modelVersions || {},
       )) {
         if (versionList.includes(modelKey)) {
           isVariant = true;
@@ -149,21 +165,6 @@ export default function AdminModelsPage() {
     return { baseModels: bases, variantsByBase: variants };
   }, [filteredModels, registryData]);
 
-  if (isLoading) {
-    return (
-      <div className="flex h-96 items-center justify-center">
-        <div className="text-muted-foreground">Loading models...</div>
-      </div>
-    );
-  }
-
-  if (!registryData) {
-    return (
-      <div className="flex h-96 items-center justify-center">
-        <div className="text-red-500">Failed to load models</div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -304,12 +305,8 @@ export default function AdminModelsPage() {
             <TableBody>
               {baseModels.map(([modelKey, model]) => {
                 const endpoints = registryData.endpoints[modelKey] || [];
-                const isDisabled =
-                  endpoints.length === 0 ||
-                  endpoints.every((ep) => ep.status !== 0);
-                const costs = endpoints
-                  .filter((ep) => ep.status === 0)
-                  .map((ep) => ep.pricing.prompt);
+                const isDisabled = endpoints.length === 0;
+                const costs = endpoints.map((ep) => ep.pricing.prompt);
                 const minCost = costs.length > 0 ? Math.min(...costs) : 0;
                 const maxCost = costs.length > 0 ? Math.max(...costs) : 0;
 
@@ -323,9 +320,11 @@ export default function AdminModelsPage() {
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <div>
-                            <div className="font-medium">{model.name}</div>
+                            <div className="font-medium">
+                              {model.name.replace(/^[^:]+:\s*/, "")}
+                            </div>
                             <div className="text-xs text-muted-foreground">
-                              {model.id}
+                              {modelKey}
                             </div>
                           </div>
                           {isDisabled && (
@@ -367,12 +366,10 @@ export default function AdminModelsPage() {
                       variantsByBase[modelKey]?.map(([variantKey, variant]) => {
                         const variantEndpoints =
                           registryData.endpoints[variantKey] || [];
-                        const isVariantDisabled =
-                          variantEndpoints.length === 0 ||
-                          variantEndpoints.every((ep) => ep.status !== 0);
-                        const variantCosts = variantEndpoints
-                          .filter((ep) => ep.status === 0)
-                          .map((ep) => ep.pricing.prompt);
+                        const isVariantDisabled = variantEndpoints.length === 0;
+                        const variantCosts = variantEndpoints.map(
+                          (ep) => ep.pricing.prompt,
+                        );
                         const variantMinCost =
                           variantCosts.length > 0
                             ? Math.min(...variantCosts)
@@ -394,10 +391,10 @@ export default function AdminModelsPage() {
                                 <div className="flex items-center gap-2">
                                   <div>
                                     <div className="font-medium">
-                                      {variant.name}
+                                      {variant.name.replace(/^[^:]+:\s*/, "")}
                                     </div>
                                     <div className="text-xs text-muted-foreground">
-                                      {variant.id}
+                                      {variantKey}
                                     </div>
                                   </div>
                                   {isVariantDisabled && (
@@ -450,9 +447,8 @@ export default function AdminModelsPage() {
 
       <ModelDetailsDialog
         model={selectedModel}
-        endpoints={
-          selectedModel ? registryData.endpoints[selectedModel.id] : []
-        }
+        modelKey={selectedModelKey}
+        endpoints={selectedModelKey ? registryData.endpoints[selectedModelKey] || [] : []}
         open={isDetailsOpen}
         onOpenChange={setIsDetailsOpen}
       />

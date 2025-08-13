@@ -13,6 +13,7 @@ import type {
 import { buildIndexes } from "./build-indexes";
 import { buildEndpointUrl, buildModelId } from "./providers";
 import type { UserConfig } from "./types";
+import { Result, ok, err } from "../../common/result";
 
 // Import all models and endpoints from authors
 import { anthropicModels, anthropicEndpoints } from "./authors/anthropic";
@@ -67,79 +68,101 @@ const allModels: Record<ModelName, Model> = {
 const indexes: ModelIndexes = buildIndexes(allEndpoints);
 
 export class ModelRegistry {
-  getModel(modelId: ModelName): Model | undefined {
-    return allModels[modelId];
+  getModel(modelId: string): Result<Model> {
+    const model = allModels[modelId as ModelName];
+    return model ? ok(model) : err(`Model not found: ${modelId}`);
   }
 
-  getAllModels(): Model[] {
-    return Object.values(allModels);
+  getAllModels(): Result<Model[]> {
+    return ok(Object.values(allModels));
+  }
+
+  getAllModelIds(): Result<string[]> {
+    return ok(Object.keys(allModels));
+  }
+
+  getAllModelsWithIds(): Result<Record<string, Model>> {
+    return ok(allModels);
   }
 
   /**
    * Get endpoint by model, provider, and optional region
    */
   getEndpoint(
-    model: ModelName,
-    provider: ProviderName,
+    model: string, // ModelName
+    provider: string, // ProviderName
     region?: string
-  ): Endpoint | undefined {
+  ): Result<Endpoint> {
     // Try exact match with region
     if (region) {
       const exactId = `${model}:${provider}:${region}` as EndpointId;
       const exact = allEndpoints[exactId];
-      if (exact) return exact;
+      if (exact) return ok(exact);
     }
 
     // Fall back to provider without region
     const providerId = `${model}:${provider}` as EndpointId;
     const providerEndpoint = allEndpoints[providerId];
-    if (providerEndpoint) return providerEndpoint;
+    if (providerEndpoint) return ok(providerEndpoint);
 
     // Fall back to searching through model+provider endpoints
-    const endpoints = indexes.byModelProvider.get(`${model}:${provider}`);
-    return endpoints?.[0];
+    const endpoints = indexes.byModelProvider.get(
+      `${model as ModelName}:${provider as ProviderName}`
+    );
+
+    return endpoints?.[0]
+      ? ok(endpoints[0])
+      : err(
+          `Endpoint not found: ${model}:${provider}${region ? `:${region}` : ""}`
+        );
   }
 
   /**
    * Get all endpoints for a model (sorted by cost, cheapest first)
    */
-  getModelEndpoints(model: ModelName): Endpoint[] {
-    return indexes.byModel.get(model) || [];
+  getModelEndpoints(model: string): Result<Endpoint[]> {
+    const endpoints = indexes.byModel.get(model as ModelName) || [];
+    return ok(endpoints); // Always return success with empty array if not found
   }
 
   /**
    * Get PTB-enabled endpoints for a model (sorted by cost, cheapest first)
    */
-  getPtbEndpoints(model: ModelName): Endpoint[] {
-    return indexes.byModelPtb.get(model) || [];
+  getPtbEndpoints(model: string): Result<Endpoint[]> {
+    const endpoints = indexes.byModelPtb.get(model as ModelName) || [];
+    return ok(endpoints); // Always return success with empty array if not found
   }
 
   /**
    * Get BYOK endpoints for a model filtered by user's available providers
    */
-  getByokEndpoints(
-    model: ModelName,
-    userProviders: ProviderName[]
-  ): Endpoint[] {
-    const allEndpoints = this.getModelEndpoints(model);
-    const providerSet = new Set(userProviders);
-    return allEndpoints.filter((e) => providerSet.has(e.provider));
+  getByokEndpoints(model: string, userProviders: string[]): Result<Endpoint[]> {
+    const endpointsResult = this.getModelEndpoints(model);
+    if (endpointsResult.error || !endpointsResult.data) return endpointsResult;
+
+    const providerSet = new Set(userProviders as ProviderName[]);
+    const filtered = endpointsResult.data.filter((e: Endpoint) =>
+      providerSet.has(e.provider)
+    );
+    return ok(filtered);
   }
 
-  getProviderModels(provider: ProviderName): ModelName[] {
-    return indexes.providerToModels.get(provider) || [];
+  getProviderModels(provider: string): Result<ModelName[]> {
+    const models = indexes.providerToModels.get(provider as ProviderName) || [];
+    return ok(models); // Always return success with empty array if not found
   }
 
-  buildUrl(endpoint: Endpoint, userConfig?: UserConfig): string {
+  buildUrl(endpoint: Endpoint, userConfig?: UserConfig): Result<string> {
     return buildEndpointUrl(endpoint, userConfig);
   }
 
-  buildModelId(endpoint: Endpoint, userConfig?: UserConfig): string {
+  buildModelId(endpoint: Endpoint, userConfig?: UserConfig): Result<string> {
     return buildModelId(endpoint, userConfig);
   }
 
-  hasPtbSupport(model: ModelName): boolean {
-    return indexes.byModelPtb.has(model);
+  hasPtbSupport(model: string): Result<boolean> {
+    const hasSupport = indexes.byModelPtb.has(model as ModelName);
+    return ok(hasSupport);
   }
 }
 
@@ -150,6 +173,8 @@ export const registry = new ModelRegistry();
 export const {
   getModel,
   getAllModels,
+  getAllModelIds,
+  getAllModelsWithIds,
   getEndpoint,
   getModelEndpoints,
   getPtbEndpoints,
