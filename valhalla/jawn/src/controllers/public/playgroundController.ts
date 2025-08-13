@@ -50,7 +50,8 @@ export class PlaygroundController extends Controller {
   public async generate(
     @Body()
     bodyParams: OpenAIChatRequest & {
-      useAIGateway?: boolean;
+      useAIGateway?: boolean
+      logRequest?: boolean;
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<
@@ -83,6 +84,7 @@ export class PlaygroundController extends Controller {
           featureFlags.data && featureFlags.data.length > 0;
 
         if (!hasAccessToAIGateway) {
+          this.setStatus(403);
           return err(
             "You do not have access to the AI Gateway. Please contact support to enable this feature."
           );
@@ -93,8 +95,10 @@ export class PlaygroundController extends Controller {
         return err(`Failed to get organization: ${org.error}`);
       }
 
+      const shouldGenerateTempKey =
+        org.data?.[0]?.playground_helicone || bodyParams.logRequest;
       const tempKey =
-        !useAIGateway && org.data?.[0]?.playground_helicone
+        !useAIGateway && shouldGenerateTempKey
           ? await generateTempHeliconeAPIKey(request.authParams.organizationId)
           : await getHeliconeDefaultTempKey(request.authParams.organizationId);
 
@@ -142,7 +146,7 @@ export class PlaygroundController extends Controller {
           apiKey: useAIGateway ? secretKey : openRouterKey,
           defaultHeaders: {
             "Helicone-Auth": `Bearer ${secretKey}`,
-            "Helicone-User-Id": request.authParams.organizationId,
+            "Helicone-User-Id": "helicone_playground",
             ...(!selfKey && {
               // 5 requests per user per year
               "Helicone-RateLimit-Policy": "5;w=31536000;s=user",
