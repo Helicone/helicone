@@ -2,12 +2,10 @@
  * Amazon metadata
  */
 
-import { type AuthorMetadata } from '../../types';
+import type { AuthorMetadata } from "../../types";
+import { amazonModels } from "./models";
 
-export const amazonMetadata: AuthorMetadata = {
-  modelCount: 3,
+export const amazonMetadata = {
+  modelCount: Object.keys(amazonModels).length,
   supported: true,
-  baseUrl: "https://bedrock-runtime.{{region}}.amazonaws.com",
-};
-
-export default amazonMetadata;
+} satisfies AuthorMetadata;

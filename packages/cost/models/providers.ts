@@ -1,29 +1,178 @@
-import type { ModelEndpoint } from "./types";
+/**
+ * Provider configurations for URL and model ID building
+ */
 
-export interface ProviderEndpoint {
-  path: string;
-  method?: "GET" | "POST" | "PUT" | "DELETE";
-  description?: string;
+import { err, ok, Result } from "../../common/result";
+import type {
+  ProviderConfig,
+  Endpoint,
+  UserConfig,
+  ProviderName,
+} from "./types";
+
+export const providers = {
+  anthropic: {
+    id: "anthropic",
+    baseUrl: "https://api.anthropic.com",
+    auth: "api-key",
+    buildUrl: () => "https://api.anthropic.com/v1/chat/completions",
+    buildModelId: (endpoint) => endpoint.providerModelId,
+    pricingPages: [
+      "https://docs.anthropic.com/en/docs/build-with-claude/pricing",
+    ],
+    modelPages: [
+      "https://docs.anthropic.com/en/docs/about-claude/models/all-models",
+    ],
+  },
+
+  openai: {
+    id: "openai",
+    baseUrl: "https://api.openai.com",
+    auth: "api-key",
+    buildUrl: () => "https://api.openai.com/v1/chat/completions",
+    buildModelId: (endpoint) => endpoint.providerModelId,
+    pricingPages: ["https://openai.com/api/pricing"],
+    modelPages: ["https://platform.openai.com/docs/models"],
+  },
+
+  bedrock: {
+    id: "bedrock",
+    baseUrl: "https://bedrock-runtime.{region}.amazonaws.com",
+    auth: "aws-signature",
+    requiredConfig: ["region"],
+    buildUrl: (endpoint, config) => {
+      const region = config.region || endpoint.region || "us-west-2";
+      const modelId = endpoint.providerModelId;
+      return `https://bedrock-runtime.${region}.amazonaws.com/model/${modelId}/invoke`;
+    },
+    buildModelId: (endpoint, config) => {
+      // Handle cross-region access
+      if (config.crossRegion && config.region) {
+        // Extract base model ID without region prefix
+        const baseModelId = endpoint.providerModelId.replace(/^[a-z]{2}\./, "");
+        const regionPrefix = config.region.split("-")[0];
+        return `${regionPrefix}.${baseModelId}`;
+      }
+      return endpoint.providerModelId;
+    },
+    pricingPages: ["https://aws.amazon.com/bedrock/pricing/"],
+    modelPages: [
+      "https://docs.aws.amazon.com/bedrock/latest/userguide/model-ids.html",
+    ],
+  },
+
+  vertex: {
+    id: "vertex",
+    baseUrl: "https://aiplatform.googleapis.com",
+    auth: "oauth",
+    requiredConfig: ["projectId", "region"],
+    buildUrl: (endpoint, config) => {
+      const { projectId, region } = config;
+      if (!projectId || !region) {
+        throw new Error("Vertex AI requires projectId and region");
+      }
+      const modelId = endpoint.providerModelId;
+      return `https://aiplatform.googleapis.com/v1/projects/${projectId}/locations/${region}/publishers/anthropic/models/${modelId}:streamRawPredict`;
+    },
+    buildModelId: (endpoint) => endpoint.providerModelId,
+    pricingPages: [
+      "https://cloud.google.com/vertex-ai/generative-ai/pricing",
+      "https://ai.google.dev/pricing",
+    ],
+    modelPages: [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/models",
+    ],
+  },
+
+  "azure-openai": {
+    id: "azure-openai",
+    baseUrl: "https://{resourceName}.openai.azure.com",
+    auth: "api-key",
+    requiredConfig: ["resourceName", "deploymentName"],
+    buildUrl: (endpoint, config) => {
+      const { resourceName, deploymentName } = config;
+      if (!resourceName || !deploymentName) {
+        throw new Error(
+          "Azure OpenAI requires resourceName and deploymentName"
+        );
+      }
+      const apiVersion = "2024-02-15-preview";
+      return `https://${resourceName}.openai.azure.com/openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`;
+    },
+    buildModelId: (endpoint) => endpoint.providerModelId,
+    pricingPages: [
+      "https://azure.microsoft.com/en-us/pricing/details/cognitive-services/openai-service/",
+    ],
+    modelPages: [
+      "https://learn.microsoft.com/azure/ai-services/openai/concepts/models",
+    ],
+  },
+
+  perplexity: {
+    id: "perplexity",
+    baseUrl: "https://api.perplexity.ai",
+    auth: "api-key",
+    buildUrl: () => "https://api.perplexity.ai/chat/completions",
+    buildModelId: (endpoint) => endpoint.providerModelId,
+    pricingPages: ["https://docs.perplexity.ai/guides/pricing"],
+    modelPages: ["https://docs.perplexity.ai/guides/models"],
+  },
+
+  groq: {
+    id: "groq",
+    baseUrl: "https://api.groq.com/openai/v1",
+    auth: "api-key",
+    buildUrl: () => "https://api.groq.com/openai/v1/chat/completions",
+    buildModelId: (endpoint) => endpoint.providerModelId,
+    pricingPages: [
+      "https://console.groq.com/pricing",
+      "https://groq.com/pricing/",
+    ],
+    modelPages: ["https://console.groq.com/docs/models"],
+  },
+
+  deepseek: {
+    id: "deepseek",
+    baseUrl: "https://api.deepseek.com",
+    auth: "api-key",
+    buildUrl: () => "https://api.deepseek.com/chat/completions",
+    buildModelId: (endpoint) => endpoint.providerModelId,
+    pricingPages: ["https://api-docs.deepseek.com/"],
+    modelPages: ["https://api-docs.deepseek.com/"],
+  },
+
+  cohere: {
+    id: "cohere",
+    baseUrl: "https://api.cohere.ai",
+    auth: "api-key",
+    buildUrl: () => "https://api.cohere.ai/v1/chat",
+    buildModelId: (endpoint) => endpoint.providerModelId,
+    pricingPages: ["https://cohere.com/pricing"],
+    modelPages: ["https://docs.cohere.com/docs/models"],
+  },
+
+  xai: {
+    id: "xai",
+    baseUrl: "https://api.x.ai",
+    auth: "api-key",
+    buildUrl: () => "https://api.x.ai/v1/chat/completions",
+    buildModelId: (endpoint) => endpoint.providerModelId,
+    pricingPages: ["https://docs.x.ai/docs/pricing"],
+    modelPages: ["https://docs.x.ai/docs/models"],
+  },
+} satisfies Record<ProviderName, ProviderConfig>;
+
+// Helper function to get provider config
+export function getProvider(providerName: string): Result<ProviderConfig> {
+  const provider =
+    providerName in providers
+      ? providers[providerName as ProviderName]
+      : undefined;
+
+  return provider ? ok(provider) : err(`Unknown provider: ${providerName}`);
 }
 
-export interface ProviderConfig {
-  name: string;
-  baseUrl: string;
-  auth: "api-key" | "oauth" | "aws-signature" | "azure-ad";
-  requiresProjectId?: boolean;
-  requiresRegion?: boolean;
-  requiresDeploymentName?: boolean;
-  regions?: readonly string[];
-  apiVersion?: string;
-  endpoints: Readonly<Record<string, ProviderEndpoint | string>>;
-  buildModelId?: (endpoint: ModelEndpoint, options?: any) => string;
-  buildUrl?: (
-    baseUrl: string,
-    endpoint: ModelEndpoint,
-    options?: any
-  ) => string;
-}
-
+// TODO: Remove once we normalize provider names in provider_keys table.
 export const dbProviderToProvider = (provider: string): ProviderName | null => {
   if (provider === "openai" || provider === "OpenAI") {
     return "openai";
@@ -56,236 +205,66 @@ export const providerToDbProvider = (provider: ProviderName): string => {
   return provider;
 };
 
-// Define provider names type from the actual providers object
-export type ProviderName = keyof typeof providers;
-export const providers = {
-  openai: {
-    name: "OpenAI",
-    baseUrl: "https://api.openai.com",
-    auth: "api-key",
-    endpoints: {},
-    buildModelId: (endpoint) => endpoint.providerModelId || "",
-    buildUrl: (baseUrl) => `${baseUrl}/v1/chat/completions`,
-  },
-  anthropic: {
-    name: "Anthropic",
-    baseUrl: "https://api.anthropic.com",
-    auth: "api-key",
-    endpoints: {
-      chat: "/v1/messages",
-      complete: "/v1/complete",
-    },
-    buildModelId: (endpoint) => endpoint.providerModelId || "",
-    buildUrl: (baseUrl) => `${baseUrl}/v1/messages`,
-  },
-  bedrock: {
-    name: "Amazon Bedrock",
-    baseUrl: "https://bedrock-runtime.{region}.amazonaws.com",
-    auth: "aws-signature",
-    requiresRegion: true,
-    regions: [
-      "us-east-1",
-      "us-east-2",
-      "us-west-1",
-      "us-west-2",
-      "ap-south-1",
-      "ap-northeast-1",
-      "ap-northeast-2",
-      "ap-southeast-1",
-      "ap-southeast-2",
-      "ca-central-1",
-      "eu-central-1",
-      "eu-west-1",
-      "eu-west-2",
-      "eu-west-3",
-      "sa-east-1",
-    ],
-    endpoints: {},
-    buildModelId: (endpoint, options) => {
-      // Handle dynamic region for BYOK
-      if (
-        endpoint.supportsDynamicRegion &&
-        options?.region &&
-        endpoint.baseModelId
-      ) {
-        if (options.crossRegion) {
-          const regionPrefix = options.region.split("-")[0];
-          return `${regionPrefix}.${endpoint.baseModelId}`;
-        }
-        return endpoint.baseModelId;
-      }
-      return endpoint.providerModelId || "";
-    },
-    buildUrl: (baseUrl, endpoint, options) => {
-      const url = options?.region
-        ? baseUrl.replace("{region}", options.region)
-        : baseUrl;
-      // Inline the model ID logic to avoid circular reference
-      let modelId: string;
-      if (
-        endpoint.supportsDynamicRegion &&
-        options?.region &&
-        endpoint.baseModelId
-      ) {
-        if (options.crossRegion) {
-          const regionPrefix = options.region.split("-")[0];
-          modelId = `${regionPrefix}.${endpoint.baseModelId}`;
-        } else {
-          modelId = endpoint.baseModelId;
-        }
-      } else {
-        modelId = endpoint.providerModelId || "";
-      }
-      return `${url}/model/${modelId}/invoke`;
-    },
-  },
-  vertex: {
-    name: "Google Vertex AI",
-    baseUrl: "https://aiplatform.googleapis.com",
-    auth: "oauth",
-    requiresProjectId: true,
-    requiresRegion: true,
-    endpoints: {},
-    buildModelId: (endpoint) => endpoint.providerModelId || "",
-    buildUrl: (baseUrl, endpoint, options) => {
-      const { projectId, region } = options || {};
-      const modelId = endpoint.providerModelId || "";
-      return `${baseUrl}/v1/projects/${projectId}/locations/${region}/publishers/anthropic/models/${modelId}:streamRawPredict`;
-    },
-  },
-  // openai: {
-  //   name: "OpenAI",
-  //   baseUrl: "https://api.openai.com",
-  //   auth: "api-key",
-  //   endpoints: {
-  //     chat: "/v1/chat/completions",
-  //     completions: "/v1/completions",
-  //     embeddings: "/v1/embeddings",
-  //   },
-  // },
-  // "vertex-regional": {
-  //   name: "Google Vertex AI (Regional)",
-  //   baseUrl: "https://{region}-aiplatform.googleapis.com",
-  //   auth: "oauth",
-  //   requiresProjectId: true,
-  //   requiresRegion: true,
-  //   endpoints: {
-  //     anthropic: {
-  //       path: "/v1/projects/{projectId}/locations/{region}/publishers/anthropic/models/{model}:streamRawPredict",
-  //       description: "Anthropic models with regional endpoint",
-  //     },
-  //     google: {
-  //       path: "/v1/projects/{projectId}/locations/{region}/publishers/google/models/{model}:generateContent",
-  //       description: "Google models with regional endpoint",
-  //     },
-  //   },
-  // },
+// Helper function to build URL for an endpoint
+export function buildEndpointUrl(
+  endpoint: Endpoint,
+  userConfig: UserConfig = {}
+): Result<string> {
+  const providerResult = getProvider(endpoint.provider);
+  if (providerResult.error) {
+    return err(providerResult.error);
+  }
 
-  // "azure-openai": {
-  //   name: "Azure OpenAI",
-  //   baseUrl: "https://{resourceName}.openai.azure.com",
-  //   auth: "api-key",
-  //   requiresDeploymentName: true,
-  //   apiVersion: "2024-02-15-preview",
-  //   endpoints: {
-  //     chat: "/openai/deployments/{deploymentName}/chat/completions?api-version={apiVersion}",
-  //     completions:
-  //       "/openai/deployments/{deploymentName}/completions?api-version={apiVersion}",
-  //     embeddings:
-  //       "/openai/deployments/{deploymentName}/embeddings?api-version={apiVersion}",
-  //   },
-  // },
+  const provider = providerResult.data;
+  if (!provider) {
+    return err(`Provider data is null for: ${endpoint.provider}`);
+  }
 
-  // openrouter: {
-  //   name: "OpenRouter",
-  //   baseUrl: "https://openrouter.ai",
-  //   auth: "api-key",
-  //   endpoints: {
-  //     chat: "/api/v1/chat/completions",
-  //   },
-  // },
+  try {
+    // Merge endpoint region with user config
+    const config: UserConfig = {
+      ...userConfig,
+      region: userConfig.region || endpoint.region,
+    };
 
-  // together: {
-  //   name: "Together AI",
-  //   baseUrl: "https://api.together.xyz",
-  //   auth: "api-key",
-  //   endpoints: {
-  //     chat: "/v1/chat/completions",
-  //     completions: "/v1/completions",
-  //     images: "/v1/images/generations",
-  //   },
-  // },
+    const url = provider.buildUrl(endpoint, config);
+    return ok(url);
+  } catch (error) {
+    return err(error instanceof Error ? error.message : "Failed to build URL");
+  }
+}
 
-  // groq: {
-  //   name: "Groq",
-  //   baseUrl: "https://api.groq.com",
-  //   auth: "api-key",
-  //   endpoints: {
-  //     chat: "/openai/v1/chat/completions",
-  //   },
-  // },
+// Helper function to build model ID for an endpoint
+export function buildModelId(
+  endpoint: Endpoint,
+  userConfig: UserConfig = {}
+): Result<string> {
+  const providerResult = getProvider(endpoint.provider);
+  if (providerResult.error) {
+    return err(providerResult.error);
+  }
 
-  // perplexity: {
-  //   name: "Perplexity",
-  //   baseUrl: "https://api.perplexity.ai",
-  //   auth: "api-key",
-  //   endpoints: {
-  //     chat: "/chat/completions",
-  //   },
-  // },
+  const provider = providerResult.data;
+  if (!provider) {
+    return err(`Provider data is null for: ${endpoint.provider}`);
+  }
 
-  // cohere: {
-  //   name: "Cohere",
-  //   baseUrl: "https://api.cohere.ai",
-  //   auth: "api-key",
-  //   endpoints: {
-  //     chat: "/v1/chat",
-  //     generate: "/v1/generate",
-  //     embed: "/v1/embed",
-  //     rerank: "/v1/rerank",
-  //   },
-  // },
+  if (!provider.buildModelId) {
+    return ok(endpoint.providerModelId);
+  }
 
-  // mistral: {
-  //   name: "Mistral AI",
-  //   baseUrl: "https://api.mistral.ai",
-  //   auth: "api-key",
-  //   endpoints: {
-  //     chat: "/v1/chat/completions",
-  //     embeddings: "/v1/embeddings",
-  //     fim: "/v1/fim/completions",
-  //   },
-  // },
+  try {
+    // Merge endpoint region with user config
+    const config: UserConfig = {
+      ...userConfig,
+      region: userConfig.region || endpoint.region,
+    };
 
-  // deepseek: {
-  //   name: "DeepSeek",
-  //   baseUrl: "https://api.deepseek.com",
-  //   auth: "api-key",
-  //   endpoints: {
-  //     chat: "/chat/completions",
-  //     betaChat: "/beta/chat/completions",
-  //   },
-  // },
-
-  // fireworks: {
-  //   name: "Fireworks AI",
-  //   baseUrl: "https://api.fireworks.ai",
-  //   auth: "api-key",
-  //   endpoints: {
-  //     chat: "/inference/v1/chat/completions",
-  //     completions: "/inference/v1/completions",
-  //   },
-  // },
-
-  // replicate: {
-  //   name: "Replicate",
-  //   baseUrl: "https://api.replicate.com",
-  //   auth: "api-key",
-  //   endpoints: {
-  //     predictions: "/v1/predictions",
-  //     models: "/v1/models/{owner}/{name}/predictions",
-  //   },
-  // },
-} as const satisfies Record<string, ProviderConfig>;
-
-export default providers;
+    const modelId = provider.buildModelId(endpoint, config);
+    return ok(modelId);
+  } catch (error) {
+    return err(
+      error instanceof Error ? error.message : "Failed to build model ID"
+    );
+  }
+}

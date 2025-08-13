@@ -1,12 +1,16 @@
 /**
- * Anthropic metadata
+ * Anthropic author metadata
  */
 
-import { type AuthorMetadata } from '../../types';
+import type { AuthorMetadata } from "../../types";
+import { anthropicModels } from "./index";
 
-export const anthropicMetadata: AuthorMetadata = {
-  modelCount: 17, // Will be calculated dynamically
+export const anthropicMetadata = {
+  name: "Anthropic",
+  slug: "anthropic",
+  description: "Creator of the Claude family of models",
+  website: "https://www.anthropic.com",
+  apiUrl: "https://api.anthropic.com",
   supported: true,
-};
-
-export default anthropicMetadata;
+  modelCount: Object.keys(anthropicModels).length,
+} satisfies AuthorMetadata;

@@ -1,0 +1,37 @@
+name: Packages Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "packages/**"
+      - ".github/workflows/packages-test.yml"
+
+jobs:
+  packages-test:
+    name: Packages Jest Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+          cache-dependency-path: yarn.lock
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+        working-directory: packages
+
+      - name: Run llm-mapper tests
+        run: npx jest __tests__/
+        working-directory: packages

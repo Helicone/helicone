@@ -177,7 +177,10 @@ describe("Vector DB Mapper", () => {
     );
     expect(result.preview.request).toContain("Operation: delete");
     expect(result.preview.request).toContain(
-      'Filter: {"category":"outdated","older_than":"2023-01-01"}'
+      `Filter: {
+  "category": "outdated",
+  "older_than": "2023-01-01"
+}`
     );
     expect(result.preview.response).toBe(response.message);
   });

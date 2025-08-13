@@ -1,7 +1,7 @@
 aiohappyeyeballs==2.4.3 ; python_full_version >= "3.11.0" and python_version < "4" \
     --hash=sha256:75cf88a15106a5002a8eb1dab212525c00d1f4c0fa96e551c9fbe6f09a621586 \
     --hash=sha256:8a7a83727b2756f394ab2895ea0765a0a8c475e3c71e98d43d76f22b4b435572
-aiohttp==3.10.10 ; python_full_version >= "3.11.0" and python_version < "4" \
+aiohttp==3.10.11 ; python_full_version >= "3.11.0" and python_version < "4" \
     --hash=sha256:007ec22fbc573e5eb2fb7dec4198ef8f6bf2fe4ce20020798b2eb5d0abda6138 \
     --hash=sha256:00819de9e45d42584bed046314c40ea7e9aea95411b38971082cad449392b08c \
     --hash=sha256:01948b1d570f83ee7bbf5a60ea2375a89dfb09fd419170e7f5af029510033d24 \

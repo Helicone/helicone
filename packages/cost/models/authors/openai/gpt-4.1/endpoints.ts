@@ -1,0 +1,81 @@
+import type { Endpoint } from "../../../types";
+
+export const endpoints = {
+  "gpt-4.1:openai": {
+    modelId: "gpt-4.1",
+    provider: "openai",
+    providerModelId: "gpt-4.1",
+    pricing: {
+      prompt: 2,
+      completion: 8,
+      cacheRead: 0.5,
+    },
+    contextLength: 1047576,
+    maxCompletionTokens: 32768,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "seed",
+      "max_tokens",
+      "response_format",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+    ],
+    ptbEnabled: true,
+  },
+  "gpt-4.1-mini:openai": {
+    modelId: "gpt-4.1-mini",
+    provider: "openai",
+    providerModelId: "gpt-4.1-mini",
+    pricing: {
+      prompt: 0.25,
+      completion: 1,
+      cacheRead: 0.1,
+    },
+    contextLength: 1047576,
+    maxCompletionTokens: 32768,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "seed",
+      "max_tokens",
+      "response_format",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+    ],
+    ptbEnabled: true,
+  },
+  "gpt-4.1-nano:openai": {
+    modelId: "gpt-4.1-nano",
+    provider: "openai",
+    providerModelId: "gpt-4.1-nano",
+    pricing: {
+      prompt: 0.1,
+      completion: 0.4,
+      cacheRead: 0.05,
+    },
+    contextLength: 1047576,
+    maxCompletionTokens: 32768,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "seed",
+      "max_tokens",
+      "response_format",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+    ],
+    ptbEnabled: true,
+  },
+} satisfies Record<string, Endpoint>;
+
+export type EndpointId = keyof typeof endpoints;

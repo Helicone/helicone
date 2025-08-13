@@ -28,8 +28,12 @@ const getMessageContent = (message: any) => {
 const anthropicMessageToMessage = (message: any, role?: string): Message => {
   const messageRole = role || message.role;
 
-  // Handle AWS Bedrock format with content array containing text objects
-  if (Array.isArray(message.content) && message.content[0]?.text) {
+  // Handle AWS Bedrock format with content array containing only text objects
+  if (
+    Array.isArray(message.content) &&
+    message.content.length > 0 &&
+    message.content.every((c: any) => c.text && !c.type)
+  ) {
     return {
       content: message.content.map((c: any) => c.text).join(" "),
       role: messageRole,

@@ -1,12 +1,16 @@
 /**
- * Google metadata
+ * Google provider metadata
  */
 
-import { type AuthorMetadata } from '../../types';
+import type { AuthorMetadata } from "../../types";
+import { googleModels } from "./index";
 
-export const googleMetadata: AuthorMetadata = {
-  modelCount: 25,
+export const googleMetadata = {
+  modelCount: Object.keys(googleModels).length,
   supported: true,
-};
-
-export default googleMetadata;
+  name: "Google",
+  slug: "google",
+  description: "Google's Gemini models via Vertex AI",
+  website: "https://cloud.google.com/vertex-ai",
+  apiUrl: "https://{region}-aiplatform.googleapis.com/v1",
+} satisfies AuthorMetadata;
