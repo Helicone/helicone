@@ -109,25 +109,26 @@ export default function OrgDropdown({}: OrgDropdownProps) {
             variant="ghost"
             className="flex h-full w-full flex-row justify-start gap-2 px-2 py-2"
           >
-            <div className="flex flex-col gap-1">
-              <div className="flex flex-row items-center gap-2">
-                {currentIcon && (
+            <div className="flex flex-row gap-2">
+              {currentIcon && (
+                <div className="flex items-center">
                   <currentIcon.icon
                     className={clsx(
                       `text-${currentColor?.name}-500`,
-                      "h-4 w-4 flex-shrink-0",
+                      "h-5 w-5 flex-shrink-0",
                     )}
                     aria-hidden="true"
                   />
-                )}
+                </div>
+              )}
+              <div className="flex flex-col gap-1">
                 <h3 className="max-w-24 truncate text-left text-sm font-medium">
                   {orgContext?.currentOrg?.name}
                 </h3>
+                <p className="max-w-[6rem] truncate text-xs font-medium text-slate-400">
+                  {heliconeAuthClient.user?.email}
+                </p>
               </div>
-
-              <p className="ml-6 max-w-[6rem] truncate text-xs font-medium text-slate-400">
-                {heliconeAuthClient.user?.email}
-              </p>
             </div>
           </Button>
         </DropdownMenuTrigger>
