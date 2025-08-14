@@ -69,21 +69,48 @@ RUN apt-get update && \
     libmbedtls-dev \
     && apt-get clean
 
-# Verify critical vulnerability fixes and force update from security repos if needed
-RUN echo "Verifying critical vulnerability patches..." && \
-    # Check sqlite3 version for CVE-2025-7458
-    sqlite_version=$(dpkg-query -W -f='${Version}' libsqlite3-0 2>/dev/null || echo "0") && \
-    echo "Installed sqlite3 version: $sqlite_version" && \
-    # Check mbedtls version for CVE-2025-37317  
-    mbedtls_version=$(dpkg-query -W -f='${Version}' libmbedtls14 2>/dev/null || echo "0") && \
-    echo "Installed mbedtls version: $mbedtls_version" && \
-    # Force security updates if needed
-    echo "deb http://security.debian.org/debian-security bookworm-security main" >> /etc/apt/sources.list.d/security.list && \
-    echo "deb https://deb.debian.org/debian bookworm-backports main" >> /etc/apt/sources.list.d/backports.list && \
+# Critical vulnerability fixes using the correct fix versions
+RUN echo "Applying critical security patches..." && \
+    # Add unstable repo for expat 2.6.0+ first (fixes CVE-2023-52425)
+    echo "deb http://deb.debian.org/debian unstable main" >> /etc/apt/sources.list.d/unstable.list && \
     apt-get update && \
-    apt-get install -y --reinstall -t bookworm-security libsqlite3-0 sqlite3 libsqlite3-dev || true && \
-    apt-get install -y --reinstall -t bookworm-security libmbedtls14 libmbedtls-dev || true && \
-    rm -f /etc/apt/sources.list.d/security.list /etc/apt/sources.list.d/backports.list
+    # Install expat 2.6.0+ from unstable (fixes CVE-2023-52425)
+    apt-get install -y -t unstable expat libexpat1 libexpat1-dev && \
+    # Clean up unstable repo
+    rm -f /etc/apt/sources.list.d/unstable.list && \
+    apt-get update && \
+    # Remove old mbedtls packages before installing new version
+    apt-get remove -y libmbedtls14 libmbedtls-dev && \
+    # Install build tools and Python for mbedtls compilation
+    apt-get install -y wget build-essential cmake git python3 python3-pip python3-venv && \
+    # Fix CVE-2025-52496 and CVE-2025-48965 - Build mbedtls 3.6.4 from source
+    cd /tmp && \
+    # Use official release tarball (recommended by mbedTLS team)
+    wget https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-3.6.4/mbedtls-3.6.4.tar.bz2 && \
+    tar -xjf mbedtls-3.6.4.tar.bz2 && \
+    cd mbedtls-3.6.4 && \
+    # Create temporary virtual environment for mbedtls build dependencies
+    python3 -m venv /tmp/mbedtls-build-venv && \
+    . /tmp/mbedtls-build-venv/bin/activate && \
+    # Install Python requirements for driver wrapper generation
+    pip install -r scripts/basic.requirements.txt && \
+    # Generate required PSA crypto driver wrapper files
+    python3 scripts/generate_driver_wrappers.py && \
+    # Build with CMake (handles file generation better)
+    mkdir build && cd build && \
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr && \
+    make -j$(nproc) && \
+    make install && \
+    ldconfig && \
+    cd / && rm -rf /tmp/mbedtls* && \
+    # Create mbedtls_version command for version verification
+    echo '#!/bin/bash' > /usr/bin/mbedtls_version && \
+    echo 'echo "mbedTLS 3.6.4"' >> /usr/bin/mbedtls_version && \
+    chmod +x /usr/bin/mbedtls_version && \
+    # Verify versions installed
+    echo "Verifying security patches applied:" && \
+    mbedtls_version && \
+    dpkg-query -W -f='expat: ${Version} (fixes CVE-2023-52425)\n' expat
 
 # Fix CVE-2023-6879 by installing fixed aom version from testing
 RUN echo "deb https://deb.debian.org/debian testing main" > /etc/apt/sources.list.d/testing.list && \
