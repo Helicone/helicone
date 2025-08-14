@@ -7,6 +7,7 @@ import {
   ProviderConfig,
   getModelEndpoints,
   type Endpoint,
+  authenticateRequest as authenticateProviderRequest,
 } from "@helicone-package/cost/models";
 import { RequestWrapper } from "../RequestWrapper";
 import { APIKeysManager } from "../managers/APIKeysManager";
@@ -16,9 +17,6 @@ import { ProviderKeysManager } from "../managers/ProviderKeysManager";
 import { toAnthropic } from "../clients/llmmapper/providers/openai/request/toAnthropic";
 import { HeliconeHeaders } from "../models/HeliconeHeaders";
 import { ProviderKey } from "../db/ProviderKeysStore";
-import { SignatureV4 } from "@smithy/signature-v4";
-import { Sha256 } from "@aws-crypto/sha256-js";
-import { HttpRequest } from "@smithy/protocol-http";
 import { getEndpoints, ModelEndpoint } from "@helicone-package/cost/models";
 import { ProviderName } from "@helicone-package/cost/models/types";
 import { PromptManager } from "../managers/PromptManager";
@@ -118,68 +116,14 @@ const validateModelString = (model: string): ValidateModelStringResult => {
   });
 };
 
-const signBedrockRequest = async (
-  requestWrapper: RequestWrapper,
-  providerKey: ProviderKey,
-  model: string,
-  body: string,
-  targetBaseUrl: string | null
-) => {
-  const awsAccessKey = providerKey.decrypted_provider_key;
-  const awsSecretKey = providerKey.decrypted_provider_secret_key;
-  const config = providerKey.config as { region?: string } | null | undefined;
-  const awsRegion = config?.region ?? "us-west-1";
-  const sigv4 = new SignatureV4({
-    service: "bedrock",
-    region: awsRegion,
-    credentials: {
-      accessKeyId: awsAccessKey ?? "",
-      secretAccessKey: awsSecretKey ?? "",
-      // ...(awsSessionToken ? { sessionToken: awsSessionToken } : {}),
-    },
-    sha256: Sha256,
-  });
-
-  const headers = new Headers();
-
-  const forwardToHost = "bedrock-runtime." + awsRegion + ".amazonaws.com";
-
-  // Required headers for AWS requests
-  headers.set("host", forwardToHost);
-  headers.set("content-type", "application/json");
-
-  const url = new URL(requestWrapper.url.toString());
-  const request = new HttpRequest({
-    method: requestWrapper.getMethod(),
-    protocol: url.protocol,
-    hostname: forwardToHost,
-    path: url.pathname + url.search,
-    headers: Object.fromEntries(headers.entries()),
-    body,
-  });
-
-  const signedRequest = await sigv4.sign(request);
-
-  // Create new headers with the signed values
-  const newHeaders = new Headers();
-
-  // Add all the signed AWS headers
-  for (const [key, value] of Object.entries(signedRequest.headers)) {
-    if (value) {
-      newHeaders.set(key, value.toString());
-    }
-  }
-  requestWrapper.remapHeaders(newHeaders);
-  return;
-};
-
 const authenticateRequest = async (
   requestWrapper: RequestWrapper,
   providerKey: ProviderKey,
   model: string,
   body: string,
   heliconeHeaders: HeliconeHeaders,
-  targetBaseUrl: string | null
+  targetBaseUrl: string | null,
+  endpoint: Endpoint
 ) => {
   requestWrapper.resetObject();
   requestWrapper.setHeader(
@@ -187,32 +131,38 @@ const authenticateRequest = async (
     requestWrapper.getAuthorization() ?? ""
   );
   requestWrapper.setUrl(targetBaseUrl ?? requestWrapper.url.toString());
-  if (providerKey.provider === "bedrock") {
-    if (providerKey.auth_type === "key") {
-      await signBedrockRequest(
-        requestWrapper,
-        providerKey,
-        model,
-        body,
-        targetBaseUrl
-      );
-      return;
-    } else if (providerKey.auth_type === "session_token") {
-      // TODO: manage session token based auth for aws bedrock
-    }
+
+  // Use the unified authenticate function from the cost package
+  const authResult = await authenticateProviderRequest(endpoint, {
+    config: (providerKey.config as any) || {},
+    apiKey: providerKey.decrypted_provider_key,
+    secretKey: providerKey.decrypted_provider_secret_key || undefined,
+    bodyMapping: heliconeHeaders.gatewayConfig.bodyMapping,
+    requestMethod: requestWrapper.getMethod(),
+    requestUrl: targetBaseUrl ?? requestWrapper.url.toString(),
+    requestBody: body,
+  });
+
+  if (authResult.error) {
+    throw new Error(`Authentication failed: ${authResult.error}`);
   }
 
-  if (
-    providerKey.provider === "anthropic" &&
-    heliconeHeaders.gatewayConfig.bodyMapping === "NO_MAPPING"
-  ) {
-    requestWrapper.setHeader("x-api-key", providerKey.decrypted_provider_key);
-  } else {
-    requestWrapper.setHeader(
-      "Authorization",
-      `Bearer ${providerKey.decrypted_provider_key}`
-    );
+  for (const [key, value] of Object.entries(authResult.data?.headers || {})) {
+    requestWrapper.setHeader(key, value);
   }
+  // // For Bedrock, we need to replace all headers with the signed ones
+  // if (providerKey.provider === "bedrock") {
+  //   const newHeaders = new Headers();
+  //   for (const [key, value] of Object.entries(authResult.data?.headers || {})) {
+  //     newHeaders.set(key, value);
+  //   }
+  //   requestWrapper.remapHeaders(newHeaders);
+  // } else {
+  //   // For other providers, just set the auth headers
+  //   for (const [key, value] of Object.entries(authResult.data?.headers || {})) {
+  //     requestWrapper.setHeader(key, value);
+  //   }
+  // }
 };
 
 const prepareRequestBody = (
@@ -357,7 +307,8 @@ const attemptDirectProviderRequest = async (
     providerModelId,
     body,
     requestWrapper.heliconeHeaders,
-    targetBaseUrl
+    targetBaseUrl,
+    endpoint
   );
 
   try {
