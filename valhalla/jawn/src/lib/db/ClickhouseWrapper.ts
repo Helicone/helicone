@@ -60,10 +60,10 @@ export class ClickhouseClientWrapper {
     }
   }
 
-  async dbQuery<RowType>(
+  async dbQuery<T>(
     query: string,
     parameters: (number | string | boolean | Date)[]
-  ): Promise<Result<RowType[], string>> {
+  ): Promise<Result<T[], string>> {
     try {
       const query_params = paramsToValues(parameters);
 
@@ -79,7 +79,7 @@ export class ClickhouseClientWrapper {
           wait_end_of_query: 1,
         },
       });
-      return { data: await queryResult.json<RowType>(), error: null };
+      return { data: await queryResult.json<T>(), error: null };
     } catch (err) {
       console.error("Error executing Clickhouse query: ", query, parameters);
       console.error(err);
@@ -101,14 +101,15 @@ export class ClickhouseClientWrapper {
   }): Promise<Result<RowType[], string>> {
     try {
       const query_params = paramsToValues(parameters);
-      
+
       // Check for SQL_helicone_organization_id variations with regex
       // This catches different cases, underscore variations, and potential injection attempts
       const forbiddenPattern = /sql[_\s]*helicone[_\s]*organization[_\s]*id/i;
       if (forbiddenPattern.test(query)) {
         return {
           data: null,
-          error: "Query contains 'SQL_helicone_organization_id' keyword, which is not allowed in HQL queries",
+          error:
+            "Query contains 'SQL_helicone_organization_id' keyword, which is not allowed in HQL queries",
         };
       }
 
@@ -118,10 +119,10 @@ export class ClickhouseClientWrapper {
         format: "JSONEachRow",
         clickhouse_settings: {
           wait_end_of_query: 1,
-          max_execution_time: 30, 
-          max_memory_usage: "1000000000", 
-          max_rows_to_read: "10000000", 
-          max_result_rows: "10000", 
+          max_execution_time: 30,
+          max_memory_usage: "1000000000",
+          max_rows_to_read: "10000000",
+          max_result_rows: "10000",
           SQL_helicone_organization_id: organizationId,
           readonly: "1",
           allow_ddl: 0,
@@ -129,7 +130,12 @@ export class ClickhouseClientWrapper {
       });
       return { data: await queryResult.json<RowType>(), error: null };
     } catch (err) {
-      console.error("Error executing HQL query with context: ", query, organizationId, parameters);
+      console.error(
+        "Error executing HQL query with context: ",
+        query,
+        organizationId,
+        parameters
+      );
       console.error(err);
       return {
         data: null,
