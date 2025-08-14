@@ -261,9 +261,7 @@ const DesktopSidebar = ({
               <div className="flex flex-col">
                 {/* Quickstart Card - Only show if organization hasn't integrated */}
                 {onboardingStatus?.hasCompletedQuickstart === false &&
-                  !isCollapsed && (
-                    <SidebarQuickstepCard />
-                  )}
+                  !isCollapsed && <SidebarQuickstepCard />}
 
                 <div
                   ref={navItemsRef}

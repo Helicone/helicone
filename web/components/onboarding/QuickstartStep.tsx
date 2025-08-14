@@ -59,9 +59,7 @@ export const QuickstartStepCard = ({
     <div
       className={cn(
         "cursor-pointer rounded border border-border px-4 py-4 transition-colors duration-150",
-        // isCompleted ?
         "bg-background hover:bg-background",
-        // : "bg-card hover:bg-muted/50",
       )}
     >
       <Link href={link}>
@@ -70,9 +68,7 @@ export const QuickstartStepCard = ({
             <div
               className={cn(
                 "flex h-5 w-5 items-center justify-center rounded-full text-xs",
-                // isCompleted ?
                 "bg-muted text-muted-foreground",
-                // : "bg-primary text-primary-foreground",
               )}
             >
               {stepNumber}
