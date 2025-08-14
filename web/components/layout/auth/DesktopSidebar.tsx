@@ -262,11 +262,7 @@ const DesktopSidebar = ({
                 {/* Quickstart Card - Only show if organization hasn't integrated */}
                 {onboardingStatus?.hasCompletedQuickstart === false &&
                   !isCollapsed && (
-                    <SidebarQuickstepCard
-                    // hasKeys={hasKeys}
-                    // hasProviderKeys={hasProviderKeys}
-                    // updateOnboardingStatus={updateOnboardingStatus}
-                    />
+                    <SidebarQuickstepCard />
                   )}
 
                 <div
