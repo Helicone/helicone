@@ -10,6 +10,9 @@ import type {
   ProviderName,
 } from "./types";
 
+// Export ProviderName for use in other modules
+export type { ProviderName } from "./types";
+
 export const providers = {
   anthropic: {
     id: "anthropic",

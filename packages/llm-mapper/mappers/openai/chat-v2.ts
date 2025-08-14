@@ -83,10 +83,10 @@ const getRequestText = (messages: OpenAIChatRequest["messages"]): string => {
   } else if (Array.isArray(lastMessage.content)) {
     return (
       lastMessage.content
-        .map((c: any) =>
-          typeof c === "string" ? c : c.type === "text" ? c.text : ""
+        .map((c: string | { type: string; text?: string }) =>
+          typeof c === "string" ? c : c.type === "text" ? c.text || "" : ""
         )
-        .filter((text) => !!text) // Remove empty strings
+        .filter((text: string) => !!text) // Remove empty strings
         .join(" ") + " "
     ); // Add trailing space to match expected test output
   }

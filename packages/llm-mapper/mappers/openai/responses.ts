@@ -102,6 +102,12 @@ export const getRequestText = (requestBody: OpenAIResponseRequest): string => {
 
     if (Array.isArray(input) && input.length > 0) {
       const lastItem = input[input.length - 1];
+      
+      // Skip function_call_output items as they don't have extractable text
+      if ((lastItem as any)?.type === "function_call_output") {
+        return "";
+      }
+      
       const content = (lastItem as any)?.content;
 
       // Content can be a string or an array of typed items
@@ -150,6 +156,16 @@ export const getResponseText = (
 ): string => {
   try {
     if (statusCode === 0 || statusCode === null) {
+      return "";
+    }
+
+    // Handle null, undefined, or empty objects
+    if (responseBody === null || responseBody === undefined) {
+      return "";
+    }
+
+    // Handle empty object
+    if (typeof responseBody === "object" && Object.keys(responseBody).length === 0) {
       return "";
     }
 
