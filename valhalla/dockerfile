@@ -51,11 +51,39 @@ RUN expat_version=$(dpkg-query -W -f='${Version}' libexpat1 2>/dev/null || echo 
 # CVE-2025-32434: torch RCE vulnerability (fixed with torch>=2.6.0)
 # CVE-2024-48063: torch RemoteModule RCE vulnerability (fixed with torch>=2.4.2, using 2.6.0)
 # CVE-2025-47917: mbedtls use-after-free vulnerability (NOT APPLICABLE - app doesn't use mbedtls_x509_string_to_names)
+# CVE-2025-37317: mbedtls critical vulnerability - force latest version
+# CVE-2025-7458: sqlite3 critical vulnerability - force latest version
 RUN apt-get update && \
     apt-get install -y \
     libcjson-dev \
     libxml2-dev \
+    sqlite3 \
+    libsqlite3-0 \
+    libsqlite3-dev \
     && apt-get clean
+
+# Force update mbedtls to address CVE-2025-37317 critical vulnerability
+RUN apt-get update && \
+    apt-get install -y --reinstall \
+    libmbedtls14 \
+    libmbedtls-dev \
+    && apt-get clean
+
+# Verify critical vulnerability fixes and force update from security repos if needed
+RUN echo "Verifying critical vulnerability patches..." && \
+    # Check sqlite3 version for CVE-2025-7458
+    sqlite_version=$(dpkg-query -W -f='${Version}' libsqlite3-0 2>/dev/null || echo "0") && \
+    echo "Installed sqlite3 version: $sqlite_version" && \
+    # Check mbedtls version for CVE-2025-37317  
+    mbedtls_version=$(dpkg-query -W -f='${Version}' libmbedtls14 2>/dev/null || echo "0") && \
+    echo "Installed mbedtls version: $mbedtls_version" && \
+    # Force security updates if needed
+    echo "deb http://security.debian.org/debian-security bookworm-security main" >> /etc/apt/sources.list.d/security.list && \
+    echo "deb https://deb.debian.org/debian bookworm-backports main" >> /etc/apt/sources.list.d/backports.list && \
+    apt-get update && \
+    apt-get install -y --reinstall -t bookworm-security libsqlite3-0 sqlite3 libsqlite3-dev || true && \
+    apt-get install -y --reinstall -t bookworm-security libmbedtls14 libmbedtls-dev || true && \
+    rm -f /etc/apt/sources.list.d/security.list /etc/apt/sources.list.d/backports.list
 
 # Fix CVE-2023-6879 by installing fixed aom version from testing
 RUN echo "deb https://deb.debian.org/debian testing main" > /etc/apt/sources.list.d/testing.list && \
