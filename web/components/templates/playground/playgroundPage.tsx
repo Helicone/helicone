@@ -239,9 +239,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   );
 
   const { data: promptVersionData, isLoading: isPromptVersionLoading } =
-    useGetPromptVersion(
-      promptVersionId || requestPromptVersionId || undefined,
-    );
+    useGetPromptVersion(promptVersionId || requestPromptVersionId || undefined);
 
   const promptInputsQuery = useGetPromptInputs(
     requestPromptId || "",

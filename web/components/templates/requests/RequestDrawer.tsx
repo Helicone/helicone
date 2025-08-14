@@ -51,7 +51,6 @@ import { getUSDateFromString } from "@/components/shared/utils/utils";
 import { JsonRenderer } from "./components/chatComponent/single/JsonRenderer";
 import { useGetPromptVersion } from "@/services/hooks/prompts";
 import PromptVersionPill from "@/components/templates/prompts2025/PromptVersionPill";
-import EnvironmentPill from "@/components/templates/prompts2025/EnvironmentPill";
 
 const RequestDescTooltip = (props: {
   displayText: string;
@@ -144,7 +143,10 @@ export default function RequestDrawer(props: RequestDivProps) {
     [request?.heliconeMetadata.promptVersion],
   );
 
-  const currentPromptData = useGetPromptVersion(newPromptVersionId || undefined, false);
+  const currentPromptData = useGetPromptVersion(
+    newPromptVersionId || undefined,
+    false,
+  );
   console.log("currentPromptData", currentPromptData?.data);
 
   const promptInputsQuery = useGetPromptInputs(
@@ -642,7 +644,10 @@ export default function RequestDrawer(props: RequestDivProps) {
               {/* Prompt */}
               {specialProperties.promptId && (
                 <RequestDescTooltip
-                  displayText={currentPromptData?.data?.prompt?.name || specialProperties.promptId}
+                  displayText={
+                    currentPromptData?.data?.prompt?.name ||
+                    specialProperties.promptId
+                  }
                   icon={<ScrollTextIcon className="h-4 w-4" />}
                   copyText={specialProperties.promptId}
                   href={
@@ -815,19 +820,28 @@ export default function RequestDrawer(props: RequestDivProps) {
                         <div className="h-4 w-px bg-border" />
                         <span className="text-sm font-medium text-muted-foreground">
                           {currentPromptData.data.prompt.name.length > 15
-                            ? currentPromptData.data.prompt.name.substring(0, 12) + "..."
+                            ? currentPromptData.data.prompt.name.substring(
+                                0,
+                                12,
+                              ) + "..."
                             : currentPromptData.data.prompt.name}
                         </span>
                       </>
                     )}
                     {currentPromptData?.data?.promptVersion && (
                       <PromptVersionPill
-                        majorVersion={currentPromptData.data.promptVersion.major_version}
-                        minorVersion={currentPromptData.data.promptVersion.minor_version}
+                        majorVersion={
+                          currentPromptData.data.promptVersion.major_version
+                        }
+                        minorVersion={
+                          currentPromptData.data.promptVersion.minor_version
+                        }
                       />
                     )}
                   </div>
-                  <Link href={`/playground?promptVersionId=${newPromptVersionId}`}>
+                  <Link
+                    href={`/playground?promptVersionId=${newPromptVersionId}`}
+                  >
                     <Button
                       variant="outline"
                       size="sm"
