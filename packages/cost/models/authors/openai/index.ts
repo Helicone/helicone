@@ -6,6 +6,7 @@
 import type { Model, Endpoint, EndpointKey } from "../../types";
 
 // Import models
+import { models as gpt5Models } from "./gpt-5/models";
 import { models as gpt4oModels } from "./gpt-4o/models";
 import { models as o3Models } from "./o3/models";
 import { models as o4Models } from "./o4/models";
@@ -14,6 +15,7 @@ import { models as gpt41Models } from "./gpt-4.1/models";
 import { models as gpt4Models } from "./gpt-4/models";
 
 // Import endpoints
+import { endpoints as gpt5Endpoints } from "./gpt-5/endpoints";
 import { endpoints as gpt4oEndpoints } from "./gpt-4o/endpoints";
 import { endpoints as o3Endpoints } from "./o3/endpoints";
 import { endpoints as o4Endpoints } from "./o4/endpoints";
@@ -23,6 +25,7 @@ import { endpoints as gpt4Endpoints } from "./gpt-4/endpoints";
 
 // Aggregate models
 export const openaiModels = {
+  ...gpt5Models,
   ...gpt4oModels,
   ...o3Models,
   ...o4Models,
@@ -33,6 +36,7 @@ export const openaiModels = {
 
 // Aggregate endpoints
 export const openaiEndpoints = {
+  ...gpt5Endpoints,
   ...gpt4oEndpoints,
   ...o3Endpoints,
   ...o4Endpoints,

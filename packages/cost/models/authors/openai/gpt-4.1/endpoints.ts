@@ -31,8 +31,8 @@ export const endpoints = {
     provider: "openai",
     providerModelId: "gpt-4.1-mini",
     pricing: {
-      prompt: 0.25,
-      completion: 1,
+      prompt: 0.4,
+      completion: 1.6,
       cacheRead: 0.1,
     },
     contextLength: 1047576,
@@ -58,7 +58,7 @@ export const endpoints = {
     pricing: {
       prompt: 0.1,
       completion: 0.4,
-      cacheRead: 0.05,
+      cacheRead: 0.025,
     },
     contextLength: 1047576,
     maxCompletionTokens: 32768,

@@ -178,7 +178,7 @@ export interface Model {
 export interface ModelPricing {
   prompt: number;
   completion: number;
-  image?: number;
+  image1k?: number; // Cost per 1000 images (estimated based on typical image size)
   cacheRead?: number;
   cacheWrite?:
     | number

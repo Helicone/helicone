@@ -8,7 +8,6 @@ export const endpoints = {
     pricing: {
       prompt: 15,
       completion: 60,
-      image: 0.021675,
       cacheRead: 7.5,
     },
     contextLength: 200000,
@@ -27,9 +26,8 @@ export const endpoints = {
     provider: "openai",
     providerModelId: "o1-pro",
     pricing: {
-      prompt: 15,
-      completion: 60,
-      cacheRead: 7.5,
+      prompt: 150,
+      completion: 600,
     },
     contextLength: 200000,
     maxCompletionTokens: 100000,
