@@ -150,24 +150,15 @@ export class HeliconeSqlManager {
         return err(validatedSql.error);
       }
 
-      // Create CTEs for each table with organization_id filter
-      const cteStatements = CLICKHOUSE_TABLES.map(
-        (table) =>
-          `${table} AS (SELECT * FROM ${table} WHERE organization_id = { val_0: UUID } )`
-      ).join(", ");
-
-      // Wrap the user's SQL with CTEs
-      const sqlWithCtes = `
-      WITH ${cteStatements}
-      ${firstSql}
-    `;
-
       const start = Date.now();
 
-      const result = await clickhouseDb.dbQueryHql<ExecuteSqlResponse["rows"]>(
-        sqlWithCtes,
-        [this.authParams.organizationId]
-      );
+      // Use the new context-aware query method that passes organization ID
+      // Row-level security will automatically filter data based on organization
+      const result = await clickhouseDb.queryWithContext<ExecuteSqlResponse["rows"]>({
+        query: firstSql,
+        organizationId: this.authParams.organizationId,
+        parameters: [], // No additional parameters needed since org filtering is handled by row policy
+      });
 
       const elapsedMilliseconds = Date.now() - start;
       if (result.error) {
