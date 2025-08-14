@@ -9,6 +9,7 @@ import type {
   UserConfig,
   ProviderName,
 } from "./types";
+export type { ProviderName } from "./types";
 
 export const providers = {
   anthropic: {

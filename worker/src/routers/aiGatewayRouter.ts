@@ -172,7 +172,7 @@ async function checkCloudBilling(
   walletStub: DurableObjectStub<Wallet>
 ): Promise<CloudBillingCheckResult> {
   const walletState = await walletStub.getWalletState(orgId);
-  const balanceInCents = Math.floor((walletState.balance ?? 0) / SCALE_FACTOR);
+  const balanceInCents = walletState.balance;
   if (balanceInCents <= 10) {
     return {
       shouldAllowRequest: false,

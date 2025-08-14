@@ -6,7 +6,7 @@ import {
   checkRateLimit,
   updateRateLimitCounter,
 } from "../clients/KVRateLimiterClient";
-import { Prompt2025Settings, RequestWrapper } from "../RequestWrapper";
+import { RequestWrapper } from "../RequestWrapper";
 import { ResponseBuilder } from "../ResponseBuilder";
 import { getCachedResponse, saveToCache } from "../util/cache/cacheFunctions";
 import { CacheSettings, getCacheSettings } from "../util/cache/cacheSettings";
@@ -31,6 +31,8 @@ import { RequestResponseManager } from "../managers/RequestResponseManager";
 import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
 import { RateLimitManager } from "../managers/RateLimitManager";
 import { SentryManager } from "../managers/SentryManager";
+import { STRIPE_INPUT_TOKEN_EVENT_NAME, StripeManager } from "../managers/StripeManager";
+import { isError } from "../../../../packages/common/result";
 
 export async function proxyForwarder(
   request: RequestWrapper,
@@ -418,17 +420,47 @@ export async function proxyForwarder(
         });
       }
 
+      console.log("post processing response....");
+      console.log("res.data ", res.data);
+
       if (orgData?.organizationId) {
+        // TODO: more durable/reliable way to handle orgData being null
         const walletDO = env.WALLET.get(env.WALLET.idFromName(orgData?.organizationId));
         const cloudBillingEnabled = proxyRequest?.requestWrapper.heliconeHeaders.cloudBillingEnabled;
         const cost = res.data?.cost ?? 0;
+        console.log("cloudBillingEnabled", cloudBillingEnabled);
         if (cloudBillingEnabled) {
+          console.log("going to try to deduct baalance");
           if (cost === 0) {
             walletDO.addUnknownCost(proxyRequest.requestId);
           } else {
-            walletDO.deductBalance(orgData?.organizationId, cost);
+            const costInCents = cost * 100;
+            console.log("costInCents", costInCents);
+            walletDO.deductBalance(orgData?.organizationId, costInCents);
           }
-          // emit stripe event
+          
+          if (res.data && orgData.stripeCustomerId) {
+            const stripeManager = new StripeManager(
+              env.STRIPE_WEBHOOK_SECRET,
+              env.STRIPE_SECRET_KEY,
+              env.WALLET
+            );
+            const meterEvent = await stripeManager.emitTokenUsage(
+              orgData.stripeCustomerId,
+              res.data
+            );
+            if (isError(meterEvent)) {
+              console.error("Error emitting token usage", meterEvent.error);
+            } else {
+              console.log("successfully emitted token usage");
+            }
+          } else if (res.data) {
+            // TODO: more durable/reliable way to handle this
+            console.error("No stripe customer id found");
+          } else {
+            // TODO: more durable/reliable way to handle this
+            console.error("No data to emit token usage");
+          }
         }
       }
     }

@@ -77,6 +77,7 @@ export interface AuthParams {
   accessDict: {
     cache: boolean;
   };
+  stripeCustomerId?: string;
 }
 
 export function dbLoggableRequestFromProxyRequest(
@@ -559,6 +560,11 @@ export class DBLoggable {
     Result<
       {
         cost: number;
+        model: string;
+        promptTokens: number;
+        completionTokens: number;
+        promptCacheWriteTokens: number;
+        promptCacheReadTokens: number;
       } | null,
       string
     >
@@ -625,10 +631,17 @@ export class DBLoggable {
             (readResponse.data?.response.completion_tokens ?? 0) +
             (readResponse.data?.response.prompt_tokens ?? 0),
           provider: this.request.provider ?? "",
+          prompt_cache_write_tokens: readResponse.data?.response?.prompt_cache_write_tokens ?? 0,
+          prompt_cache_read_tokens: readResponse.data?.response?.prompt_cache_read_tokens ?? 0,
         }) ?? 0;
 
       return ok({
-        cost: cost,
+        cost,
+        model,
+        promptTokens: readResponse.data?.response?.prompt_tokens ?? 0,
+        completionTokens: readResponse.data?.response?.completion_tokens ?? 0,
+        promptCacheWriteTokens: readResponse.data?.response?.prompt_cache_write_tokens ?? 0,
+        promptCacheReadTokens: readResponse.data?.response?.prompt_cache_read_tokens ?? 0,
       });
     } catch (error) {
       return err("Error logging");
@@ -820,6 +833,8 @@ export class DBLoggable {
     sum_prompt_tokens: number;
     sum_completion_tokens: number;
     sum_tokens: number;
+    prompt_cache_write_tokens: number;
+    prompt_cache_read_tokens: number;
   }): number {
     const model = modelRow.model;
     const promptTokens = modelRow.sum_prompt_tokens;
@@ -830,8 +845,8 @@ export class DBLoggable {
         promptTokens,
         completionTokens,
         provider: modelRow.provider,
-        promptCacheWriteTokens: 0,
-        promptCacheReadTokens: 0,
+        promptCacheWriteTokens: modelRow.prompt_cache_write_tokens,
+        promptCacheReadTokens: modelRow.prompt_cache_read_tokens,
         promptAudioTokens: 0,
         completionAudioTokens: 0,
       }) ?? 0

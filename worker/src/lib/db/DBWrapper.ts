@@ -186,6 +186,7 @@ export class DBWrapper {
   private async _getAuthParamsInternal(): Promise<
     Result<InternalAuthParams, string>
   > {
+    console.log("getAuthParamsInternal", this.auth._type);
     switch (this.auth._type) {
       case "jwt":
         if (!this.auth.orgId) {
@@ -231,6 +232,7 @@ export class DBWrapper {
       accessDict: {
         cache: true,
       },
+      stripeCustomerId: org.data.stripe_customer_id ?? undefined,
     });
   }
 
@@ -244,7 +246,6 @@ export class DBWrapper {
       this.env,
       async () => await this._getAuthParams()
     );
-
     if (!authParams || authParams.error || !authParams.data) {
       return err(authParams?.error || "Invalid authentication.");
     }
