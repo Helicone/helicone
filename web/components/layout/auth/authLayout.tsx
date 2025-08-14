@@ -56,9 +56,9 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const orgContext = useOrg();
 
   useEffect(() => {
-    if (!orgContext?.currentOrg?.has_onboarded) {
+    if (orgContext?.currentOrg?.has_onboarded === false) {
       router.push("/onboarding");
-    } else if (!orgContext?.currentOrg?.has_integrated) {
+    } else if (!orgContext?.currentOrg?.has_integrated === false) {
       router.push("/quickstart");
     }
   }, [orgContext?.currentOrg?.has_integrated]);
