@@ -130,7 +130,7 @@ export const getRequestText = (requestBody: OpenAIResponseRequest): string => {
         return JSON.stringify(content[0] ?? "");
       }
 
-      return "";
+      return JSON.stringify(lastItem);
     }
 
     return "";
@@ -196,7 +196,7 @@ export const getResponseText = (
       return responseBody.text;
     }
 
-    return "";
+    return JSON.stringify(responseBody);
   } catch (error) {
     console.error("Error parsing response text (Responses API):", error);
     return "error_parsing_response";
