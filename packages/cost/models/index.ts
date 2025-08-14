@@ -28,4 +28,9 @@ export { getModelEndpoints as getEndpoints } from "./registry";
 export type { Endpoint as ModelEndpoint } from "./types";
 
 // Export provider utilities
-export { getProvider, buildEndpointUrl, buildModelId } from "./providers";
+export {
+  getProvider,
+  buildEndpointUrl,
+  buildModelId,
+  authenticateRequest,
+} from "./providers";
