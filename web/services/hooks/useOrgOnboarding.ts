@@ -205,7 +205,7 @@ export const useOrgOnboarding = (orgId: string) => {
         hasCompletedQuickstart:
           newState.hasCompletedQuickstart ??
           onboardingState?.hasCompletedQuickstart ??
-          false,
+          undefined, // leave undefined as this is only defined in organizations in newest onboarding flow
         currentStep:
           newState.currentStep ??
           onboardingState?.currentStep ??
