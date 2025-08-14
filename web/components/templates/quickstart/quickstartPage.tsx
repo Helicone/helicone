@@ -285,11 +285,12 @@ const QuickstartPage = () => {
       </div>
 
       <Dialog open={isProviderModalOpen} onOpenChange={setIsProviderModalOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-h-[80vh] max-w-4xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add Provider Keys</DialogTitle>
             <DialogDescription>
-              Configure your API keys for different LLM providers to start making requests.
+              Configure your API keys for different LLM providers to start
+              making requests.
             </DialogDescription>
           </DialogHeader>
           <ProviderKeySettings />
