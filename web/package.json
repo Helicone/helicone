@@ -105,7 +105,7 @@
     "node-sql-parser": "^5.3.10",
     "nodemailer": "^6.10.1",
     "octokit": "^3.1.2",
-    "openai": "^4.78.1",
+    "openai": "^5.12.2",
     "openapi-fetch": "^0.9.3",
     "openapi-react-query": "^0.3.1",
     "papaparse": "^5.5.2",
