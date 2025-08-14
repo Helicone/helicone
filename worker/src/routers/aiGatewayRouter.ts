@@ -17,7 +17,7 @@ import { PromptManager } from "../lib/managers/PromptManager";
 import { HeliconePromptManager } from "@helicone-package/prompts/HeliconePromptManager";
 import { PromptStore } from "../lib/db/PromptStore";
 import { createErrorResponse } from "./generateRouter";
-import { SCALE_FACTOR } from "../lib/durableObjects/Wallet";
+import { SCALE_FACTOR, Wallet } from "../lib/durableObjects/Wallet";
 
 export const getAIGatewayRouter = (router: BaseRouter) => {
   router.all(
@@ -42,7 +42,6 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
         );
       }
 
-
       const isEU = requestWrapper.isEU();
       const supabaseClient = isEU
         ? createClient<Database>(
@@ -64,18 +63,23 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
         return new Response("Invalid API key", { status: 401 });
       }
 
-      const cloudBillingEnabled = requestWrapper.heliconeHeaders.cloudBillingEnabled;
+      const cloudBillingEnabled =
+        requestWrapper.heliconeHeaders.cloudBillingEnabled;
       let inflightRequestId = crypto.randomUUID();
       if (cloudBillingEnabled) {
         const walletId = env.WALLET.idFromName(orgId);
         const walletStub = env.WALLET.get(walletId);
         const billingCheck = await checkCloudBilling(orgId, walletStub);
         if (!billingCheck.shouldAllowRequest) {
-          return createErrorResponse(billingCheck.reason, "CLOUD_BILLING_ERROR", 429);
+          return createErrorResponse(
+            billingCheck.reason,
+            "CLOUD_BILLING_ERROR",
+            429
+          );
         }
-        
+
         // we do not want to re-using the helicone requestId, since we allow that
-        // being specified externally, which we do NOT want here. 
+        // being specified externally, which we do NOT want here.
         await walletStub.addInflightRequest(inflightRequestId);
       }
 
@@ -111,10 +115,13 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
       if (cloudBillingEnabled) {
         const walletId = env.WALLET.idFromName(orgId);
         const walletStub = env.WALLET.get(walletId);
-        
+
         ctx.waitUntil(
           walletStub.removeInflightRequest(inflightRequestId).catch((err) => {
-            console.error(`Failed to remove inflight request ${inflightRequestId}:`, err);
+            console.error(
+              `Failed to remove inflight request ${inflightRequestId}:`,
+              err
+            );
           })
         );
       }
@@ -139,51 +146,65 @@ interface CloudBillingCheckResult {
   inflightCount: number;
 }
 
+function getMaxInflightAllowed(balanceInCents: number): number {
+  // Thresholds (amounts are in cents)
+  const TEN_DOLLARS = 1_000;
+  const TWENTY_DOLLARS = 2_000;
+  const ONE_HUNDRED_DOLLARS = 10_000;
+  const FIVE_HUNDRED_DOLLARS = 50_000;
+
+  const MAX_INFLIGHT_UNDER_TEN = 0;
+  const MAX_INFLIGHT_UNDER_TWENTY = 5;
+  const MAX_INFLIGHT_UNDER_HUNDRED = 10;
+  const MAX_INFLIGHT_UNDER_FIVE_HUNDRED = 100;
+  const MAX_INFLIGHT_OVER_FIVE_HUNDRED = 500;
+
+  if (balanceInCents < TEN_DOLLARS) return MAX_INFLIGHT_UNDER_TEN;
+  if (balanceInCents < TWENTY_DOLLARS) return MAX_INFLIGHT_UNDER_TWENTY;
+  if (balanceInCents < ONE_HUNDRED_DOLLARS) return MAX_INFLIGHT_UNDER_HUNDRED;
+  if (balanceInCents < FIVE_HUNDRED_DOLLARS)
+    return MAX_INFLIGHT_UNDER_FIVE_HUNDRED;
+  return MAX_INFLIGHT_OVER_FIVE_HUNDRED;
+}
+
 async function checkCloudBilling(
   orgId: string,
-  walletStub: any
+  walletStub: DurableObjectStub<Wallet>
 ): Promise<CloudBillingCheckResult> {
-  // all amounts below are in cents
-  const { balance, inflightCount } = await walletStub.getBalanceAndInflightCount(orgId);
-  
-  // If balance is null (no wallet entry yet), treat as 0
-  const balanceInCents = Math.floor((balance ?? 0) / SCALE_FACTOR);
-  let shouldAllowRequest = false;
-  let reason = "";
-
-  if (balanceInCents <= 1) {
-    shouldAllowRequest = false;
-    reason = "Balance too low, at or below 1 cent";
-  } else if (balanceInCents < 1000) {
-    // Less than $10 (1000 cents): only allow if no inflight requests
-    shouldAllowRequest = inflightCount === 0;
-    reason = inflightCount > 0
-      ? `Balance too low (${balanceInCents} cents). Must have no active requests when balance is under $10.`
-      : "";
-  } else if (balanceInCents < 10000) {
-    // $10-$100 (1000-9999 cents): allow up to 10 inflight requests
-    shouldAllowRequest = inflightCount < 10;
-    reason = inflightCount >= 10
-      ? `Too many active requests (${inflightCount}/10 allowed) for balance of $${(balanceInCents/100).toFixed(2)}.`
-      : "";
-  } else if (balanceInCents < 50000) {
-    // $100-$500 (10000-49999 cents): allow up to 100 inflight requests
-    shouldAllowRequest = inflightCount < 100;
-    reason = inflightCount >= 100
-      ? `Too many active requests (${inflightCount}/100 allowed) for balance of $${(balanceInCents/100).toFixed(2)}.`
-      : "";
-  } else {
-    // Over $500 (50000+ cents): allow up to 1000 inflight requests
-    shouldAllowRequest = inflightCount < 1000;
-    reason = inflightCount >= 1000
-      ? `Too many active requests (${inflightCount}/1000 allowed).`
-      : "";
+  const walletState = await walletStub.getWalletState(orgId);
+  const balanceInCents = Math.floor((walletState.balance ?? 0) / SCALE_FACTOR);
+  if (balanceInCents <= 10) {
+    return {
+      shouldAllowRequest: false,
+      reason: "Balance too low",
+      balance: walletState.balance,
+      inflightCount: walletState.inflightCount,
+    };
+    // TODO(ENG-2693): allow request based off max possible total cost of the model,
+    // assuming max output tokens + actual input tokens (heuristically estimate?)
   }
 
+  let maxInflightAllowed = getMaxInflightAllowed(balanceInCents);
+  if (walletState.unknownCostCount > 0) {
+    maxInflightAllowed = Math.floor(maxInflightAllowed / 2);
+    const allowed = walletState.inflightCount <= maxInflightAllowed;
+    return {
+      shouldAllowRequest: allowed,
+      reason: allowed
+        ? ""
+        : `Unknown cost detected. Please report this support@helicone.ai. Reduced limits (${maxInflightAllowed} inflight requests) enforced.`,
+      balance: walletState.balance,
+      inflightCount: walletState.inflightCount,
+    };
+  }
+
+  const allowed = walletState.inflightCount <= maxInflightAllowed;
   return {
-    shouldAllowRequest,
-    reason,
-    balance,
-    inflightCount
+    shouldAllowRequest: allowed,
+    reason: allowed
+      ? ""
+      : `Too many active requests (${walletState.inflightCount}/${maxInflightAllowed} allowed)`,
+    balance: walletState.balance,
+    inflightCount: walletState.inflightCount,
   };
 }
