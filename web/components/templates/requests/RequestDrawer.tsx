@@ -147,7 +147,6 @@ export default function RequestDrawer(props: RequestDivProps) {
     newPromptVersionId || undefined,
     false,
   );
-  console.log("currentPromptData", currentPromptData?.data);
 
   const promptInputsQuery = useGetPromptInputs(
     newPromptId || "",
