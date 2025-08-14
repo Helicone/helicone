@@ -30,7 +30,7 @@ export async function getTotalFeedback(
         FROM request_response_rmt
         WHERE (
           (${filterString})
-          AND rating IS NOT NULL
+          AND has(scores, 'helicone-score-feedback')
         )
       )
       SELECT coalesce(sum(count), 0) as count

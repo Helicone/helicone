@@ -32,9 +32,12 @@ export class ClickhouseClientWrapper {
     });
   }
 
-  async dbInsertClickhouse<T extends keyof ClickhouseDB["Tables"]>(
+  async dbInsertClickhouse<
+    T extends keyof ClickhouseDB["Tables"],
+    P extends Partial<ClickhouseDB["Tables"][T]>
+  >(
     table: T,
-    values: ClickhouseDB["Tables"][T][]
+    values: P[]
   ): Promise<Result<string, string>> {
     try {
       const queryResult = await this.clickHouseClient.insert({

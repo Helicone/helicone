@@ -124,6 +124,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
 
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
   const [selectedDataIndex, setSelectedDataIndex] = useState<number>();
+  const [refreshKey, setRefreshKey] = useState(0);
   const [page, setPage] = useState<number>(currentPage);
   const [advancedFilters, setAdvancedFilters] =
     useState<UIFilterRowTree>(getRootFilterNode());
@@ -674,6 +675,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
             <UnauthorizedView currentTier={currentTier || ""} />
           ) : (
             <ThemedTable
+              key={refreshKey}
               id="requests-table"
               tableRef={tableRef}
               activeColumns={activeColumns}
@@ -792,6 +794,10 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                 }
               }
             }}
+            onRefresh={() => {
+              refetch();
+              setRefreshKey((k) => k + 1);
+            }}
           />
         </ResizablePanel>
       </ResizablePanelGroup>
@@ -826,6 +832,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
       />
 
       <ThemedTable
+        key={refreshKey}
         id="requests-table"
         defaultData={requests}
         activeColumns={activeColumns}

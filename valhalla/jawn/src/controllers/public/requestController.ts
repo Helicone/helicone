@@ -207,7 +207,7 @@ export class RequestController extends Controller {
     if (requestFeedback.error) {
       this.setStatus(500);
     } else {
-      this.setStatus(201);
+      this.setStatus(200);
     }
     return requestFeedback;
   }

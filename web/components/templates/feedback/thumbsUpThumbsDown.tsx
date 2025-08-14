@@ -10,9 +10,10 @@ interface FeedbackActionProps {
   id: string;
   type: "request" | "session";
   defaultValue: boolean | null;
+  onSubmitted?: () => void;
 }
 
-const FeedbackAction = ({ id, type, defaultValue }: FeedbackActionProps) => {
+const FeedbackAction = ({ id, type, defaultValue, onSubmitted }: FeedbackActionProps) => {
   const [feedbackState, setFeedbackState] = useState<{
     rating: boolean | null;
   }>({ rating: defaultValue });
@@ -34,6 +35,7 @@ const FeedbackAction = ({ id, type, defaultValue }: FeedbackActionProps) => {
             rating: rating,
           });
           setNotification("Feedback submitted", "success");
+          onSubmitted?.();
         }
       })
       .catch((err) => {

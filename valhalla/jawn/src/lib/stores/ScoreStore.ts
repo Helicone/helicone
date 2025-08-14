@@ -168,15 +168,23 @@ export class ScoreStore extends BaseStore {
       uniqueRequestResponseLogs
     );
 
+    // Build a map of incoming scores keyed by requestId-organizationId to avoid index misalignment
+    const incomingScoresMap = new Map<string, Score[]>();
+    for (const v of newVersions) {
+      const key = `${v.requestId}-${v.organizationId}`;
+      incomingScoresMap.set(key, v.mappedScores);
+    }
+
     const res = await clickhouseDb.dbInsertClickhouse(
       "request_response_rmt",
-      filteredRequestResponseLogs.flatMap((row, index) => {
-        const newVersion = newVersions[index];
+      filteredRequestResponseLogs.flatMap((row) => {
+        const mapKey = `${row.request_id}-${row.organization_id}`;
+        const mappedScores = incomingScoresMap.get(mapKey) ?? [];
 
         // Merge existing scores with new scores
         const combinedScores = {
           ...(row.scores || {}),
-          ...newVersion.mappedScores.reduce((acc, score) => {
+          ...mappedScores.reduce((acc, score) => {
             if (!Number.isInteger(score.score_attribute_value)) {
               console.log(
                 `Skipping score ${score.score_attribute_key} with value ${score.score_attribute_value}`
@@ -231,6 +239,7 @@ export class ScoreStore extends BaseStore {
             scores: validScores,
             cache_enabled: row.cache_enabled,
             cache_reference_id: row.cache_reference_id,
+            cost: row.cost,
           },
         ];
       })

@@ -110,6 +110,7 @@ interface RequestDivProps {
   request?: MappedLLMRequest;
   showCollapse?: boolean;
   onRequestSelect?: (request_id: string) => void;
+  onRefresh?: () => void;
 }
 export default function RequestDrawer(props: RequestDivProps) {
   const {
@@ -118,6 +119,7 @@ export default function RequestDrawer(props: RequestDivProps) {
     request,
     showCollapse = true,
     onRequestSelect,
+    onRefresh,
   } = props;
 
   const { setNotification } = useNotification();
@@ -907,6 +909,7 @@ export default function RequestDrawer(props: RequestDivProps) {
                     : false
                   : null
               }
+              onSubmitted={onRefresh}
             />
           </div>
         </footer>

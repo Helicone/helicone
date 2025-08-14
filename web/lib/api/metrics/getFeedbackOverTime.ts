@@ -16,7 +16,7 @@ export async function getFeedbackOverTime(
     negativeFeedback: number;
   }>(
     data,
-    "SUM(CASE WHEN rating = 1 THEN 1 ELSE 0 END) as positiveFeedback, SUM(CASE WHEN rating = 0 THEN 1 ELSE 0 END) as negativeFeedback",
+    "SUM(CASE WHEN has(scores, 'helicone-score-feedback') AND scores['helicone-score-feedback'] = 1 THEN 1 ELSE 0 END) as positiveFeedback, SUM(CASE WHEN has(scores, 'helicone-score-feedback') AND scores['helicone-score-feedback'] = 0 THEN 1 ELSE 0 END) as negativeFeedback",
   );
 
   return resultMap(res, (resData) =>
