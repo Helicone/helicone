@@ -350,7 +350,7 @@ export async function proxyForwarder(
   async function log(
     loggable: DBLoggable,
     S3_ENABLED?: Env["S3_ENABLED"],
-    incurRateLimit = true,
+    isCacheMiss = true,
     cachedResponse?: Response,
     cacheSettings?: CacheSettings
   ) {
@@ -403,7 +403,7 @@ export async function proxyForwarder(
       console.error("Error logging", res.error);
     }
 
-    if (incurRateLimit) {
+    if (isCacheMiss) {
       const db = new DBWrapper(env, auth);
       const { data: orgData, error: orgError } = await db.getAuthParams();
       if (proxyRequest && finalRateLimitOptions && !orgError) {
@@ -416,6 +416,20 @@ export async function proxyForwarder(
           userId: proxyRequest.userId,
           cost: res.data?.cost ?? 0,
         });
+      }
+
+      if (orgData?.organizationId) {
+        const walletDO = env.WALLET.get(env.WALLET.idFromName(orgData?.organizationId));
+        const cloudBillingEnabled = proxyRequest?.requestWrapper.heliconeHeaders.cloudBillingEnabled;
+        const cost = res.data?.cost ?? 0;
+        if (cloudBillingEnabled) {
+          if (cost === 0) {
+            walletDO.addUnknownCost(proxyRequest.requestId);
+          } else {
+            walletDO.deductBalance(orgData?.organizationId, cost);
+          }
+          // emit stripe event
+        }
       }
     }
   }
