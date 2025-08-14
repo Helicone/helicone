@@ -15,7 +15,8 @@ import { APIKeysStore } from "../../lib/db/APIKeysStore";
 import { APIKeysManager } from "../../lib/managers/APIKeysManager";
 import { ProviderName } from "@helicone-package/cost/models/providers";
 import { BaseOpenAPIRouter } from "../routerFactory";
-import { StripeWebhookManager } from "../../lib/managers/StripeWebhookManager";
+import { StripeManager } from "../../lib/managers/StripeManager";
+import { SCALE_FACTOR } from "../../lib/durableObjects/Wallet";
 const RATE_LIMIT_MS = 1000 * 30;
 
 function getAPIRouterV1(
@@ -509,6 +510,39 @@ function getAPIRouterV1(
     }
   );
 
+  // Credits handler
+  router.get(
+    "/credits",
+    async (
+      _,
+      requestWrapper: RequestWrapper,
+      env: Env,
+      _ctx: ExecutionContext
+    ) => {
+      const client = await createAPIClient(env, _ctx, requestWrapper);
+      const authParams = await client.db.getAuthParams();
+      if (authParams.error !== null) {
+        return client.response.unauthorized();
+      }
+
+      const orgId = authParams.data.organizationId;
+      const walletId = env.WALLET.idFromName(orgId);
+      const walletStub = env.WALLET.get(walletId);
+
+      try {
+        const state = await walletStub.getWalletState(orgId);
+        return client.response.successJSON({
+          balance: state.balance,
+        });
+      } catch (e) {
+        return client.response.newError(
+          e instanceof Error ? e.message : "Failed to fetch credits",
+          500
+        );
+      }
+    }
+  );
+
   router.delete(
     "/alert/:id",
     async (
@@ -561,7 +595,7 @@ function getAPIRouterV1(
         return new Response("Missing request body", { status: 400 });
       }
 
-      const webhookManager = new StripeWebhookManager(
+      const webhookManager = new StripeManager(
         env.STRIPE_WEBHOOK_SECRET,
         env.STRIPE_SECRET_KEY,
         env.WALLET

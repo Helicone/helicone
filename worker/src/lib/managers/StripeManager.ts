@@ -1,11 +1,18 @@
 import Stripe from "stripe";
 import { ok, err, Result } from "../util/results";
 import { Wallet } from "../durableObjects/Wallet";
+import retry from "async-retry";
+import { isError } from "../../../../packages/common/result";
 
-export class StripeWebhookManager {
+export const STRIPE_INPUT_TOKEN_EVENT_NAME = "cloud_gateway_input_tokens";
+export const STRIPE_OUTPUT_TOKEN_EVENT_NAME = "cloud_gateway_output_tokens";
+export const STRIPE_CACHED_TOKEN_EVENT_NAME = "cloud_gateway_cached_token_usage";
+
+export class StripeManager {
   private webhookSecret: string;
   private stripeSecretKey: string;
   private wallet: DurableObjectNamespace<Wallet>;
+  private stripe: Stripe;
 
   constructor(
     webhookSecret: string, 
@@ -15,6 +22,10 @@ export class StripeWebhookManager {
     this.webhookSecret = webhookSecret;
     this.stripeSecretKey = stripeSecretKey;
     this.wallet = wallet;
+    this.stripe = new Stripe(this.stripeSecretKey, {
+      apiVersion: "2025-07-30.basil",
+      httpClient: Stripe.createFetchHttpClient(),
+    });
   }
 
   async verifyAndConstructEvent(
@@ -22,12 +33,7 @@ export class StripeWebhookManager {
     signature: string
   ): Promise<Result<Stripe.Event, string>> {
     try {
-      const stripe = new Stripe(this.stripeSecretKey, {
-        apiVersion: "2025-07-30.basil",
-        httpClient: Stripe.createFetchHttpClient(),
-      });
-
-      const event = await stripe.webhooks.constructEventAsync(
+      const event = await this.stripe.webhooks.constructEventAsync(
         body,
         signature,
         this.webhookSecret
@@ -66,6 +72,88 @@ export class StripeWebhookManager {
       const errorMessage = `Error handling webhook event: ${
         e instanceof Error ? e.message : "Unknown error"
       }`;
+      console.error(errorMessage);
+      return err(errorMessage);
+    }
+  }
+
+  async emitTokenUsage(
+    stripeCustomerId: string,
+    usage: {
+      model: string,
+      promptTokens: number;
+      completionTokens: number;
+      promptCacheWriteTokens: number;
+      promptCacheReadTokens: number;
+    }
+  ): Promise<Result<void, string>> {
+    const inputTokenEvent = await this.emitMeterEventWithRetry(
+      STRIPE_INPUT_TOKEN_EVENT_NAME,
+      {
+        stripe_customer_id: stripeCustomerId,
+        model: usage.model,
+        value: usage.promptTokens.toString(),
+      },
+    );
+    if (isError(inputTokenEvent)) {
+      console.error("Error emitting input token usage event", inputTokenEvent.error);
+    }
+    const outputTokenEvent = await this.emitMeterEventWithRetry(
+      STRIPE_OUTPUT_TOKEN_EVENT_NAME,
+      {
+        stripe_customer_id: stripeCustomerId,
+        model: usage.model,
+        value: usage.promptTokens.toString(),
+      },
+    );
+    if (isError(outputTokenEvent)) {
+      console.error("Error emitting output token usage event", outputTokenEvent.error);
+    }
+    const cachedTokenEvent = await this.emitMeterEventWithRetry(
+      STRIPE_CACHED_TOKEN_EVENT_NAME,
+      {
+        stripe_customer_id: stripeCustomerId,
+        model: usage.model,
+        value: (usage.promptCacheReadTokens + usage.promptCacheWriteTokens).toString(),
+      },
+    );
+    if (isError(cachedTokenEvent)) {
+      console.error("Error emitting cached token usage event", cachedTokenEvent.error);
+    }
+    return ok(undefined);
+  }
+
+  private async emitMeterEventWithRetry(
+    eventName: string,
+    payload: Record<string, string>
+  ): Promise<Result<Stripe.Response<Stripe.V2.Billing.MeterEvent>, string>> {
+    try {
+      const meterEvent = await retry<Stripe.Response<Stripe.V2.Billing.MeterEvent>>(
+        async () => {
+          const result = await this.stripe.v2.billing.meterEvents.create({
+            event_name: eventName,
+            payload,
+          });
+
+          const code = result?.lastResponse?.statusCode;
+          if (typeof code === "number" && (code === 429 || (code >= 500 && code < 600))) {
+            throw new Error(`Retryable status code: ${code}`);
+          }
+
+          return result;
+        },
+        {
+          retries: 5,
+          factor: 2,
+          minTimeout: 250,
+          maxTimeout: 6000,
+          randomize: true,
+        }
+      );
+
+      return ok(meterEvent);
+    } catch (e) {
+      const errorMessage = `Failed to emit meter event with retry: ${e instanceof Error ? e.message : "Unknown error"}`;
       console.error(errorMessage);
       return err(errorMessage);
     }

@@ -181,8 +181,9 @@ export class Wallet extends DurableObject {
           .exec<{ count: number }>("SELECT COUNT(*) as count FROM unknown_costs WHERE requested_at > ?", Date.now() - UNKNOWN_COST_WINDOW_MS)
           .one();
 
+        const balanceInCents = Math.floor((balanceResult.value?.balance ?? 0) / SCALE_FACTOR);
         return {
-          balance: balanceResult.value?.balance ?? 0,
+          balance: balanceInCents,
           inflightCount: inflightResult?.count ?? 0,
           unknownCostCount: unknownCostResult?.count ?? 0
         };

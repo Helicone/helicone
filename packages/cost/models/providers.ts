@@ -14,6 +14,7 @@ import type {
   AuthContext,
   AuthResult,
 } from "./types";
+export type { ProviderName } from "./types";
 
 export const providers = {
   anthropic: {
