@@ -2,7 +2,6 @@ import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProF
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useLocalStorage } from "@/services/hooks/localStorage";
-import { OnboardingState } from "@/services/hooks/useOrgOnboarding";
 import {
   Bars3Icon,
   ChevronLeftIcon,
@@ -18,7 +17,6 @@ import OrgDropdown from "../orgDropdown";
 import SidebarHelpDropdown from "../SidebarHelpDropdown";
 import NavItem from "./NavItem";
 import { ChangelogItem } from "./types";
-import SidebarQuickstepCard from "../SidebarQuickstartCard";
 
 export interface NavigationItem {
   name: string;
@@ -43,8 +41,6 @@ const DesktopSidebar = ({
 }: SidebarProps) => {
   const orgContext = useOrg();
   const router = useRouter();
-  const onboardingStatus = orgContext?.currentOrg
-    ?.onboarding_status as unknown as OnboardingState;
 
   const [isCollapsed, setIsCollapsed] = useLocalStorage(
     "isSideBarCollapsed",
@@ -259,16 +255,6 @@ const DesktopSidebar = ({
             <div className="mb-2 flex h-full flex-1 flex-col justify-between overflow-y-auto">
               {/* Navigation items */}
               <div className="flex flex-col">
-                {/* Quickstart Card - Only show if organization hasn't integrated */}
-                {onboardingStatus?.hasCompletedQuickstart === false &&
-                  !isCollapsed && (
-                    <SidebarQuickstepCard
-                    // hasKeys={hasKeys}
-                    // hasProviderKeys={hasProviderKeys}
-                    // updateOnboardingStatus={updateOnboardingStatus}
-                    />
-                  )}
-
                 <div
                   ref={navItemsRef}
                   data-collapsed={isCollapsed}

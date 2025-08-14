@@ -66,8 +66,8 @@ export default function RequestsEmptyState({
 
     // Default fallback to onboarding flow
     const currentStep = onboardingState?.currentStep || "ORGANIZATION";
-    if (currentStep === "REQUEST") {
-      router.push("/onboarding/request");
+    if (currentStep === "EVENT") {
+      router.push("/onboarding/integrate");
     } else {
       router.push(STEP_ROUTES[currentStep]);
     }

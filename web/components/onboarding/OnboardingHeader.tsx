@@ -26,8 +26,10 @@ const BreadcrumbSeparator = () => (
 
 export const STEP_ROUTES: Record<OnboardingStep, string> = {
   ORGANIZATION: "/onboarding",
-  MEMBERS: "/onboarding/members",
-  REQUEST: "/onboarding/request",
+  MEMBERS: "/onboarding",
+  BILLING: "/onboarding/billing",
+  INTEGRATION: "/onboarding/integrate",
+  EVENT: "/onboarding/event",
 };
 
 interface OnboardingHeaderProps {
@@ -53,10 +55,23 @@ export const OnboardingHeader = ({ children }: OnboardingHeaderProps) => {
     }
   }, [org?.currentOrg?.has_onboarded, isLoading, router]);
 
+  const billingStep: { label: string; step: OnboardingStep }[] =
+    draftPlan !== "free" ? [{ label: "Add billing", step: "BILLING" }] : [];
+
+  const isCreatingOrg =
+    onboardingState?.currentStep === "ORGANIZATION" ||
+    onboardingState?.currentStep === "MEMBERS";
+
   const steps: { label: string; step: OnboardingStep }[] = [
-    { label: "Create organization", step: "ORGANIZATION" },
-    { label: "Invite members", step: "MEMBERS" },
-    { label: "Send a request", step: "REQUEST" },
+    {
+      label: "Create an organization",
+      step: isCreatingOrg
+        ? (onboardingState?.currentStep as OnboardingStep)
+        : "ORGANIZATION",
+    },
+    ...billingStep,
+    { label: "Get integrated", step: "INTEGRATION" },
+    { label: "Send an event", step: "EVENT" },
   ];
 
   const currentStepIndex = steps.findIndex(

@@ -158,7 +158,6 @@ export async function generate<T extends object | undefined = undefined>(
     };
     schema?: z.ZodType<object>;
     useAIGateway?: boolean;
-    logRequest?: boolean;
   },
 ): Promise<GenerateResponse> {
   const currentOrgId = Cookies.get(ORG_ID_COOKIE_KEY);
@@ -180,7 +179,6 @@ export async function generate<T extends object | undefined = undefined>(
         response_format: params.response_format,
         model: params.model,
         useAIGateway: params.useAIGateway,
-        logRequest: params.logRequest,
       }),
       headers: {
         "helicone-authorization": JSON.stringify({

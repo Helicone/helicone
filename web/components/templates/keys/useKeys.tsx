@@ -114,7 +114,6 @@ export const useKeys = () => {
     keys,
     deleteKey,
     editKey,
-    refetchKeys: keys.refetch,
   };
 };
 

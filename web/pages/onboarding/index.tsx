@@ -53,8 +53,8 @@ export default function OnboardingPage() {
       "success",
     );
 
-    updateCurrentStep("MEMBERS");
-    router.push("/onboarding/members");
+    updateCurrentStep("INTEGRATION");
+    router.push("/onboarding/integrate");
   };
 
   if (subscription.isLoading || isLoading) {

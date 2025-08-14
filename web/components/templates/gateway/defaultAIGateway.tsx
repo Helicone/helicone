@@ -14,6 +14,8 @@ import { getRouterCode } from "./routerUseDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DiffHighlight } from "@/components/templates/welcome/diffHighlight";
 
+const baseUrl = `${process.env.NEXT_PUBLIC_CLOUD_GATEWAY_BASE_URL}/v1`;
+
 const DefaultAIGateway = ({ setTabValue }: { setTabValue: () => void }) => {
   return (
     <div className="flex h-full flex-col">
@@ -101,7 +103,7 @@ const DefaultAIGateway = ({ setTabValue }: { setTabValue: () => void }) => {
 
             <TabsContent value="curl" className="mt-2">
               <DiffHighlight
-                code={getRouterCode("curl")}
+                code={getRouterCode(baseUrl, "curl")}
                 language="bash"
                 newLines={[]}
                 oldLines={[]}
@@ -114,7 +116,7 @@ const DefaultAIGateway = ({ setTabValue }: { setTabValue: () => void }) => {
 
             <TabsContent value="javascript" className="mt-2">
               <DiffHighlight
-                code={getRouterCode("javascript")}
+                code={getRouterCode(baseUrl, "javascript")}
                 language="typescript"
                 newLines={[]}
                 oldLines={[]}
@@ -127,7 +129,7 @@ const DefaultAIGateway = ({ setTabValue }: { setTabValue: () => void }) => {
 
             <TabsContent value="python" className="mt-2">
               <DiffHighlight
-                code={getRouterCode("python")}
+                code={getRouterCode(baseUrl, "python")}
                 language="python"
                 newLines={[]}
                 oldLines={[]}
