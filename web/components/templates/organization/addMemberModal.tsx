@@ -8,9 +8,10 @@ import {
 import { InfoBox } from "@/components/ui/helicone/infoBox";
 import { Input } from "@/components/ui/input";
 import { Muted, Small } from "@/components/ui/typography";
-import { useAddOrgMemberMutation } from "@/services/hooks/organizations";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
+import { getJawnClient } from "../../../lib/clients/jawn";
+import useNotification from "../../shared/notification/useNotification";
 
 interface AddMemberModalProps {
   orgId: string;
@@ -23,37 +24,55 @@ interface AddMemberModalProps {
 const AddMemberModal = (props: AddMemberModalProps) => {
   const { orgId, open, setOpen, onSuccess } = props;
 
-  const [errorMessage, setErrorMessage] = useState("");
-  const addMemberMutation = useAddOrgMemberMutation();
+  const [isLoading, setIsLoading] = useState(false);
 
+  const { setNotification } = useNotification();
+  const jawn = getJawnClient(orgId);
+
+  const [errorMessage, setErrorMessage] = useState("");
   const onSubmitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setErrorMessage("");
+    setIsLoading(true);
 
     const email = e.currentTarget.elements.namedItem(
       "email",
     ) as HTMLInputElement;
 
     if (!email || !email.value) {
-      setErrorMessage("Please enter a valid email address.");
+      setNotification("Failed to add member. Please try again.", "error");
+      setErrorMessage("Failed to add member. Please try again.");
       return;
     }
 
-    try {
-      await addMemberMutation.mutateAsync({
-        orgId,
-        email: email.value,
-      });
-
+    const { data, error: addMemberError } = await jawn.POST(
+      "/v1/organization/{organizationId}/add_member",
+      {
+        params: {
+          path: {
+            organizationId: orgId,
+          },
+        },
+        body: {
+          email: email.value,
+        },
+      },
+    );
+    if (data?.error || addMemberError) {
+      const errorMessage = data?.error || addMemberError;
+      setNotification(
+        errorMessage ? JSON.stringify(errorMessage) : "error adding memeber",
+        "error",
+      );
+      setErrorMessage(
+        errorMessage ? JSON.stringify(errorMessage) : "error adding memeber",
+      );
+      console.error(addMemberError);
+    } else {
+      setNotification("Member added successfully", "success");
       onSuccess && onSuccess();
       setOpen(false);
-      // Reset form
-      email.value = "";
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to add member";
-      setErrorMessage(errorMessage);
     }
+    setIsLoading(false);
   };
 
   return (
@@ -120,10 +139,8 @@ const AddMemberModal = (props: AddMemberModalProps) => {
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={addMemberMutation.isPending}>
-              {addMemberMutation.isPending && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
+            <Button type="submit" disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Add Member
             </Button>
           </div>
