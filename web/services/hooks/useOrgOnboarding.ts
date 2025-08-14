@@ -199,13 +199,12 @@ export const useOrgOnboarding = (orgId: string) => {
     mutationFn: async (newState: Partial<OnboardingState>) => {
       const fullState = {
         hasOnboarded:
-          newState.hasOnboarded ?? onboardingState?.hasOnboarded ?? false,
+          newState.hasOnboarded ?? onboardingState?.hasOnboarded,
         hasIntegrated:
-          newState.hasIntegrated ?? onboardingState?.hasIntegrated ?? false,
+          newState.hasIntegrated ?? onboardingState?.hasIntegrated,
         hasCompletedQuickstart:
           newState.hasCompletedQuickstart ??
-          onboardingState?.hasCompletedQuickstart ??
-          undefined, // leave undefined as this is only defined in organizations in newest onboarding flow
+          onboardingState?.hasCompletedQuickstart,
         currentStep:
           newState.currentStep ??
           onboardingState?.currentStep ??
