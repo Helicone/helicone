@@ -260,9 +260,7 @@ export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
     accessorKey: "promptId",
     header: "Prompt ID",
     cell: (info) => {
-      const promptId = info.row.original.heliconeMetadata.customProperties?.[
-        "Helicone-Prompt-Id"
-      ] as string;
+      const promptId = info.row.original.heliconeMetadata.promptId;
       return <span>{promptId}</span>;
     },
   },

@@ -32,7 +32,7 @@ import { ModelParameters } from "@/lib/api/llm/generate";
 import {
   useCreatePrompt,
   usePushPromptVersion,
-  useGetPromptVersionWithBody,
+  useGetPromptVersion,
   useGetPromptInputs,
 } from "@/services/hooks/prompts";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
@@ -46,6 +46,7 @@ import { ResponseFormat, ResponseFormatType, VariableInput } from "./types";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import Link from "next/link";
 import EnvironmentPill from "@/components/templates/prompts2025/EnvironmentPill";
+import PromptVersionPill from "@/components/templates/prompts2025/PromptVersionPill";
 
 export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
   _type: "openai-chat",
@@ -240,9 +241,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   );
 
   const { data: promptVersionData, isLoading: isPromptVersionLoading } =
-    useGetPromptVersionWithBody(
-      promptVersionId || requestPromptVersionId || undefined,
-    );
+    useGetPromptVersion(promptVersionId || requestPromptVersionId || undefined);
 
   const promptInputsQuery = useGetPromptInputs(
     requestPromptId || "",
@@ -912,11 +911,10 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                       ? promptVersionData.prompt.name.substring(0, 27) + "..."
                       : promptVersionData.prompt.name}
                   </Small>
-                  <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20">
-                    {promptVersionData.promptVersion.minor_version === 0
-                      ? `v${promptVersionData.promptVersion.major_version}`
-                      : `v${promptVersionData.promptVersion.major_version}.${promptVersionData.promptVersion.minor_version}`}
-                  </span>
+                  <PromptVersionPill
+                    majorVersion={promptVersionData.promptVersion.major_version}
+                    minorVersion={promptVersionData.promptVersion.minor_version}
+                  />
                   {promptVersionData.promptVersion.environment && (
                     <EnvironmentPill
                       environment={promptVersionData.promptVersion.environment}
