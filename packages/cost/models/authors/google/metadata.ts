@@ -3,10 +3,8 @@
  */
 
 import type { AuthorMetadata } from "../../types";
-import { googleModels } from "./index";
 
 export const googleMetadata = {
-  modelCount: Object.keys(googleModels).length,
   supported: true,
   name: "Google",
   slug: "google",

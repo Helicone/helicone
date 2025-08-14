@@ -5,7 +5,6 @@
 import type { AuthorMetadata } from "../../types";
 
 export const groqMetadata = {
-  modelCount: 9,
   supported: true,
   name: "Groq",
   slug: "groq",

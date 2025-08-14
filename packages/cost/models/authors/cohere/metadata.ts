@@ -5,7 +5,6 @@
 import type { AuthorMetadata } from "../../types";
 
 export const cohereMetadata = {
-  modelCount: 8,
   supported: true,
   name: "Cohere",
   slug: "cohere",

@@ -5,7 +5,6 @@
 import type { AuthorMetadata } from "../../types";
 
 export const deepseekMetadata = {
-  modelCount: 2,
   supported: true,
   name: "DeepSeek",
   slug: "deepseek",

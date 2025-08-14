@@ -66,7 +66,6 @@ export type EndpointId =
  * Author metadata type
  */
 export interface AuthorMetadata {
-  modelCount: number;
   supported: boolean;
   name?: string;
   slug?: string;

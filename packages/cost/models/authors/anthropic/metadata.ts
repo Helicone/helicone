@@ -3,7 +3,6 @@
  */
 
 import type { AuthorMetadata } from "../../types";
-import { anthropicModels } from "./index";
 
 export const anthropicMetadata = {
   name: "Anthropic",
@@ -12,5 +11,4 @@ export const anthropicMetadata = {
   website: "https://www.anthropic.com",
   apiUrl: "https://api.anthropic.com",
   supported: true,
-  modelCount: Object.keys(anthropicModels).length,
 } satisfies AuthorMetadata;

@@ -1,0 +1,277 @@
+---
+title: "AI Gateway"
+sidebarTitle: "AI Gateway"
+description: "A unified API that intelligently routes requests between different LLM providers"
+---
+
+## What is the AI Gateway?
+
+The Helicone AI Gateway is a unified API endpoint that intelligently routes your LLM requests to the appropriate provider. Instead of managing multiple SDKs and endpoints for different providers (OpenAI, Anthropic, Bedrock, etc.), you use a single endpoint that handles all the complexity for you.
+
+### How It Works
+
+When you make a request to the AI Gateway:
+
+1. **Model Resolution**: The gateway looks up the model in our registry to find available providers
+2. **Provider Selection**: It intelligently selects a provider based on:
+   - **BYOK (Bring Your Own Key)**: Prioritizes providers where you've added your own API keys
+   - **Cost Optimization**: Sorts remaining providers by cost (lowest first)
+   - **Availability**: Routes around providers that are down or rate-limited
+3. **Request Routing**: Transforms and forwards your request to the selected provider
+4. **Response Handling**: Returns the response in a unified format, regardless of provider
+
+<Note>
+**Coming Soon**: Pass-through billing will allow you to use the gateway without adding provider keys. For now, you must add your provider API keys to your Helicone dashboard under Settings → Vault.
+</Note>
+
+## Key Features
+
+### Automatic Provider Selection
+
+When you request a model without specifying a provider, the gateway automatically finds the best available option:
+
+```typescript
+// Request "gpt-4o" - gateway finds the best provider
+model: "gpt-4o"
+// Could route to: OpenAI, Azure, or any provider offering this model
+```
+
+### Explicit Provider Routing
+
+Need a specific provider? Be explicit in your model specification:
+
+```typescript
+// Force routing to a specific provider
+model: "claude-3-5-sonnet/anthropic"
+model: "gpt-4o/azure"
+model: "us.anthropic.claude-3-7-sonnet-20250219-v1:0/bedrock"
+```
+
+### Automatic Fallbacks
+
+Ensure high availability with comma-separated fallback models:
+
+```typescript
+// Try multiple providers in order
+model: "claude-3-5-sonnet/anthropic,claude-3-5-sonnet/bedrock,gpt-4o/openai"
+```
+
+If the first provider fails (timeout, rate limit, error), the gateway automatically tries the next one.
+
+### Quick Start Example
+
+```typescript
+import { OpenAI } from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.HELICONE_API_KEY,
+  baseURL: "https://ai-gateway.helicone.ai",
+});
+
+// Make a request - automatically traced
+const completion = await openai.chat.completions.create({
+  model: "claude-3.5-sonnet",  // Model name
+  messages: [
+    { role: "user", content: "Hello, world!" }
+  ],
+  max_tokens: 100
+});
+```
+
+## Model and Provider Specification
+
+The AI Gateway supports multiple formats for specifying models and providers:
+
+### Simple Model Name
+```typescript
+// Gateway automatically maps to the appropriate provider
+model: "claude-3.5-sonnet"
+model: "gpt-4o"
+model: "gemini-1.5-pro"
+```
+
+### Explicit Provider Specification
+```typescript
+// Format: model/provider
+model: "claude-3-7-sonnet-20250219/anthropic"
+model: "us.anthropic.claude-3-7-sonnet-20250219-v1:0/bedrock"
+model: "gpt-4o/azure"
+```
+
+## Fallback Configuration
+
+The AI Gateway supports automatic fallbacks across multiple providers for high availability:
+
+### Comma-Separated Fallbacks
+```typescript
+const completion = await openai.chat.completions.create({
+  // Try Bedrock first, then fallback to Anthropic if it fails
+  model: "us.anthropic.claude-3-7-sonnet-20250219-v1:0/bedrock,claude-3-7-sonnet-20250219/anthropic",
+  messages: [
+    { role: "user", content: "What is 2 + 2?" }
+  ],
+  max_tokens: 50
+});
+```
+
+The gateway will automatically:
+- Try the first model/provider
+- If it fails (timeout, rate limit, error), try the next one
+- Log which provider ultimately served the request
+- Track success/failure rates for each provider
+
+## Environment Variables
+
+Configure your environment variables for the AI Gateway:
+
+```bash
+# Required
+HELICONE_API_KEY=your-helicone-api-key
+
+# Optional - defaults to Helicone cloud
+HELICONE_BASE_URL=https://ai-gateway.helicone.ai
+```
+
+## Provider API Keys
+
+When using the cloud-hosted AI Gateway, you'll need to configure your provider API keys in the Helicone dashboard:
+
+1. Go to your [Helicone Dashboard](https://helicone.ai)
+2. Navigate to **Settings** → **Vault**
+3. Add your provider API keys (OpenAI, Anthropic, etc.)
+4. The gateway will automatically use these keys when routing requests
+
+## Tracing Features
+
+When using the AI Gateway, you automatically get:
+
+### Request Logging
+- Full request and response payloads
+- Token usage and costs
+- Latency metrics
+- Provider routing information
+
+### Headers and Metadata
+The gateway automatically adds tracing headers to responses:
+- `helicone-provider`: Shows which provider served the request
+- `helicone-provider-req-id`: Provider's request ID for debugging
+- `helicone-fallback-index`: Which fallback was used (if any)
+
+### Custom Properties
+Add custom properties to your traces for better organization:
+
+```typescript
+const completion = await openai.chat.completions.create({
+  model: "gpt-4o",
+  messages: [{ role: "user", content: "Hello" }],
+  // Custom headers for tracing
+  headers: {
+    "Helicone-Property-Environment": "production",
+    "Helicone-Property-UserId": "user-123",
+    "Helicone-Property-Feature": "chat"
+  }
+});
+```
+
+## Self-Hosted Configuration
+
+If you're self-hosting the AI Gateway, enable observability in your configuration:
+
+```yaml
+# ai-gateway-config.yaml
+helicone:
+  features: observability  # Enable tracing
+  base-url: "https://api.helicone.ai"  # Or your self-hosted Helicone instance
+
+routers:
+  production:
+    # Your router configuration
+    load-balance:
+      chat:
+        strategy: provider-latency
+        providers:
+          - openai
+          - anthropic
+```
+
+Set the environment variable when running the gateway:
+```bash
+export HELICONE_CONTROL_PLANE_API_KEY=your-api-key
+./ai-gateway
+```
+
+## Advanced Tracing Options
+
+### Session Tracking
+Group related requests into sessions:
+
+```typescript
+const completion = await openai.chat.completions.create({
+  model: "gpt-4o",
+  messages: messages,
+  headers: {
+    "Helicone-Session-Id": "session-abc-123",
+    "Helicone-Session-Name": "Customer Support Chat",
+    "Helicone-Session-Path": "/support/chat"
+  }
+});
+```
+
+### Prompt Management
+Use prompt IDs for version tracking:
+
+```typescript
+const completion = await openai.chat.completions.create({
+  model: "gpt-4o",
+  messages: messages,
+  headers: {
+    "Helicone-Prompt-Id": "customer-support-v2"
+  }
+});
+```
+
+### Rate Limiting Traces
+When rate limiting is enabled, the gateway logs:
+- Rate limit hits and rejections
+- Remaining capacity
+- API key usage patterns
+
+## Monitoring Dashboard
+
+View your traces in the Helicone dashboard:
+
+1. **Requests Tab**: See all individual requests with filters
+2. **Sessions**: View grouped request sessions
+3. **Analytics**: Track usage, costs, and performance metrics
+4. **Alerts**: Set up alerts for errors or usage thresholds
+
+## Best Practices
+
+1. **Use Semantic Properties**: Add meaningful custom properties for easier filtering
+2. **Group by Sessions**: Use session IDs for related requests (e.g., a conversation)
+3. **Monitor Fallbacks**: Track fallback usage to optimize provider selection
+4. **Set Up Alerts**: Configure alerts for high error rates or unexpected costs
+5. **Use Prompt IDs**: Version your prompts for A/B testing and rollbacks
+
+## Troubleshooting
+
+### Requests Not Appearing
+- Verify your `HELICONE_API_KEY` is correct
+- Check that the base URL is set to `https://ai-gateway.helicone.ai`
+- Ensure your API key has the correct permissions
+
+### Provider Errors
+- Verify provider API keys are configured in the Vault
+- Check the model name format is correct
+- Review fallback configuration if primary provider fails
+
+### Missing Metadata
+- Ensure custom headers follow the `Helicone-Property-*` format
+- Check that session IDs are consistent across related requests
+
+## Next Steps
+
+- [Configure Load Balancing](/ai-gateway/concepts/loadbalancing) for optimal routing
+- [Set Up Caching](/ai-gateway/concepts/cache) to reduce costs
+- [Implement Rate Limiting](/ai-gateway/concepts/rate-limiting) for usage control
+- [View the Full Configuration Reference](/ai-gateway/config)

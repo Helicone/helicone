@@ -232,6 +232,7 @@
           {
             "group": "Cloud AI Gateway",
             "pages": [
+              "observability/tracing/ai-gateway",
               "features/advanced-usage/cloud-ai-gateway-overview",
               "features/advanced-usage/custom-rate-limits",
               "getting-started/integration-method/gateway-fallbacks",
