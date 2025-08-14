@@ -22,6 +22,8 @@ import {
   Mail,
   MoveUpRight,
   Copy,
+  Loader,
+  Check,
 } from "lucide-react";
 import Link from "next/link";
 import { useKeys } from "@/components/templates/keys/useKeys";
@@ -157,6 +159,19 @@ const QuickstartPage = () => {
               {index === 2 && (
                 <div className="mt-1">
                   <IntegrationGuide apiKey={quickstartKey} />
+
+                  <div className={`my-2 rounded-sm border border-border p-3 mx-4 ${org?.currentOrg?.has_integrated ? 'bg-confirmative/10' : 'bg-muted/30'}`}>
+                    <div className="flex items-center gap-2">
+                      {org?.currentOrg?.has_integrated ? (
+                        <Check size={16} className="text-confirmative" />
+                      ) : (
+                        <Loader size={16} className="animate-spin text-muted-foreground" />
+                      )}
+                      <span className={`text-sm ${org?.currentOrg?.has_integrated ? 'text-confirmative' : 'text-muted-foreground'}`}>
+                        {org?.currentOrg?.has_integrated ? 'Requests detected!' : 'Listening for requests...'}
+                      </span>
+                    </div>
+                  </div>
 
                   <Link
                     // TODO: Swap for AI Gateway documentation
