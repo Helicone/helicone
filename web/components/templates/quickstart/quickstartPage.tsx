@@ -29,6 +29,14 @@ import Link from "next/link";
 import { useKeys } from "@/components/templates/keys/useKeys";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import useNotification from "@/components/shared/notification/useNotification";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "../../ui/dialog";
+import { ProviderKeySettings } from "../settings/providerKeySettings";
 
 const QuickstartPage = () => {
   const router = useRouter();
@@ -40,6 +48,7 @@ const QuickstartPage = () => {
     undefined,
   );
   const [isCreatingKey, setIsCreatingKey] = useState(false);
+  const [isProviderModalOpen, setIsProviderModalOpen] = useState(false);
 
   const { hasKeys, hasProviderKeys, updateOnboardingStatus } = useOrgOnboarding(
     org?.currentOrg?.id ?? "",
@@ -156,6 +165,17 @@ const QuickstartPage = () => {
                   )}
                 </div>
               )}
+              {index === 1 && (
+                <div className="mt-4">
+                  <Button
+                    onClick={() => setIsProviderModalOpen(true)}
+                    className="w-fit"
+                    variant="outline"
+                  >
+                    Add Provider Key
+                  </Button>
+                </div>
+              )}
               {index === 2 && (
                 <div className="mt-1">
                   <IntegrationGuide apiKey={quickstartKey} />
@@ -190,7 +210,7 @@ const QuickstartPage = () => {
                     className="w-fit"
                   >
                     <Button variant="link" className="flex items-center gap-1">
-                      View Docs
+                      Using another SDK?
                       <MoveUpRight size={12} />
                     </Button>
                   </Link>
@@ -263,6 +283,18 @@ const QuickstartPage = () => {
           </DropdownMenu>
         </div>
       </div>
+
+      <Dialog open={isProviderModalOpen} onOpenChange={setIsProviderModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add Provider Keys</DialogTitle>
+            <DialogDescription>
+              Configure your API keys for different LLM providers to start making requests.
+            </DialogDescription>
+          </DialogHeader>
+          <ProviderKeySettings />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
