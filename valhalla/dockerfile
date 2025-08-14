@@ -18,16 +18,31 @@ RUN . venv/bin/activate && pip3 install --upgrade pip>=23.3 setuptools>=70.0.0
 RUN apt-get update && apt-get install -y supervisor
 
 # Apply security updates and fix system library vulnerabilities
-# CVE-2023-52425: expat vulnerability
+# CVE-2023-52425: expat vulnerability - Force install latest patched version
 # CVE-2025-4802: glibc vulnerability  
 # CVE-2025-6020: pam vulnerability
 # CVE-2025-52496, CVE-2025-48965, CVE-2025-47917: mbedtls vulnerabilities
 RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
-    libexpat1 \
+    libexpat1-dev \
+    expat \
     libpam0g \
+    libpam-modules \
     libmbedtls14 \
+    libc6 \
     && apt-get autoremove -y && apt-get clean
+
+# Verify expat version to ensure CVE-2023-52425 is patched
+RUN expat_version=$(dpkg-query -W -f='${Version}' libexpat1 2>/dev/null || echo "0") && \
+    echo "Installed expat version: $expat_version" && \
+    # Force reinstall if version is still vulnerable
+    if dpkg --compare-versions "$expat_version" lt "2.5.0-2"; then \
+        echo "Expat version is vulnerable, forcing update from security repos"; \
+        echo "deb http://security.debian.org/debian-security bookworm-security main" >> /etc/apt/sources.list.d/security.list && \
+        apt-get update && \
+        apt-get install -y --reinstall libexpat1 libexpat1-dev expat && \
+        rm -f /etc/apt/sources.list.d/security.list; \
+    fi
 
 # Install latest versions to address security vulnerabilities
 # CVE-2023-26819: libcjson vulnerability (fixed with libcjson-dev update)
@@ -36,7 +51,6 @@ RUN apt-get update && apt-get upgrade -y && \
 # CVE-2025-32434: torch RCE vulnerability (fixed with torch>=2.6.0)
 # CVE-2024-48063: torch RemoteModule RCE vulnerability (fixed with torch>=2.4.2, using 2.6.0)
 # CVE-2025-47917: mbedtls use-after-free vulnerability (NOT APPLICABLE - app doesn't use mbedtls_x509_string_to_names)
-# Force rebuild to ensure vulnerability fixes are deployed - 2025-08-11
 RUN apt-get update && \
     apt-get install -y \
     libcjson-dev \
@@ -73,6 +87,11 @@ RUN . venv/bin/activate && \
 
 RUN . venv/bin/activate && \
     pip3 install regex numpy packaging requests tqdm filelock typing-extensions
+
+# Ensure latest secure versions are installed after all other dependencies
+# CVE-2024-56326: Force upgrade Jinja2 to 3.1.6+ to address sandbox escape vulnerability
+RUN . venv/bin/activate && \
+    pip3 install --upgrade "Jinja2>=3.1.6" "setuptools>=78.1.1"
 
 
 RUN apt install curl -y
