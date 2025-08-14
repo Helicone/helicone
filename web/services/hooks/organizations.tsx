@@ -14,6 +14,7 @@ import {
   getJawnClient,
 } from "../../lib/clients/jawn";
 import { ORG_ID_COOKIE_KEY } from "../../lib/constants";
+import { OnboardingState } from "./useOrgOnboarding";
 
 const useGetOrgMembers = (orgId: string) => {
   const { data, isLoading, refetch } = $JAWN_API.useQuery(
@@ -137,6 +138,8 @@ const identifyUserOrg = (
     });
   }
 
+  const orgOnboardingStatus = org.onboarding_status as unknown as OnboardingState;
+
   if (org) {
     posthog.group("organization", org.id, {
       name: org.name || "",
@@ -145,6 +148,8 @@ const identifyUserOrg = (
       organization_type: org.organization_type || "",
       date_joined: org.created_at || "",
       has_onboarded: org.has_onboarded || false,
+      has_integrated: orgOnboardingStatus?.hasIntegrated || false,
+      has_completed_quickstart: orgOnboardingStatus?.hasCompletedQuickstart || false,
     });
 
     if (user && env("NEXT_PUBLIC_IS_ON_PREM") !== "true") {
@@ -166,6 +171,67 @@ const identifyUserOrg = (
       }
     }
   }
+};
+
+const useAddOrgMemberMutation = () => {
+  const queryClient = useQueryClient();
+  const { setNotification } = useNotification();
+  
+  return useMutation({
+    mutationFn: async ({
+      orgId,
+      email,
+    }: {
+      orgId: string;
+      email: string;
+    }) => {
+      const jawn = getJawnClient(orgId);
+      const { data, error } = await jawn.POST(
+        "/v1/organization/{organizationId}/add_member",
+        {
+          params: {
+            path: {
+              organizationId: orgId,
+            },
+          },
+          body: {
+            email,
+          },
+        },
+      );
+
+      if (error || data?.error) {
+        throw new Error(data?.error ? JSON.stringify(data.error) : String(error));
+      }
+
+      return data;
+    },
+    onSuccess: (_, variables) => {
+      setNotification("Member added successfully", "success");
+      
+      queryClient.invalidateQueries({
+        queryKey: ["get", "/v1/organization/{organizationId}/members", { params: { path: { organizationId: variables.orgId } } }],
+      });
+      
+      queryClient.invalidateQueries({
+        predicate: (query) => {
+          const queryKey = query.queryKey;
+          return (
+            queryKey.includes("/v1/organization") ||
+            queryKey.includes("organization") ||
+            queryKey.includes("Organizations")
+          );
+        },
+        refetchType: "all",
+      });
+    },
+    onError: (error) => {
+      setNotification(
+        error instanceof Error ? error.message : "Failed to add member",
+        "error"
+      );
+    },
+  });
 };
 
 export const useUpdateOrgMutation = () => {
@@ -247,6 +313,12 @@ const useOrgsContextManager = (): OrgContextValue => {
         ) {
           return 1_000;
         }
+        // semantics are a little confusing here, but we distinguish
+        // onboarding (initial welcome), integration (first request), quickstart (steps)
+        const hasNotCompletedFullOnboarding = selectedOrgsData.state.data?.data?.some((org) => !org.onboarding_status?.hasCompletedQuickstart);
+        if (hasNotCompletedFullOnboarding) {
+          return 5_000;
+        }
         return false;
       },
       refetchIntervalInBackground: false,
@@ -310,6 +382,7 @@ const useOrgsContextManager = (): OrgContextValue => {
 
 export {
   setOrgCookie,
+  useAddOrgMemberMutation,
   useGetOrg,
   useGetOrgMembers,
   useGetOrgOwner,
