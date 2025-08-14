@@ -121,6 +121,7 @@ export const GeoMetricMap = ({
             });
           }}
         >
+          {/* @ts-expect-error - react-simple-maps types are not compatible with React 18 */}
           <ComposableMap
             width={800}
             height={400}
@@ -130,19 +131,23 @@ export const GeoMetricMap = ({
             }}
             className="w-full h-full"
           >
+            {/* @ts-expect-error - react-simple-maps types are not compatible with React 18 */}
             <Sphere
               stroke="#E4E5E6"
               strokeWidth={0.5}
               id={"sphere1"}
               fill={"#ffffff"}
             />
+            {/* @ts-expect-error - react-simple-maps types are not compatible with React 18 */}
             <Graticule stroke="#E4E5E6" strokeWidth={0.5} />
             {data.length > 0 && (
+              /* @ts-expect-error - react-simple-maps types are not compatible with React 18 */
               <Geographies geography={geoUrl}>
                 {({ geographies }) =>
                   geographies.map((geo) => {
                     const country = data.find((d: any) => d.id === geo.id);
                     return (
+                      /* @ts-expect-error - react-simple-maps types are not compatible with React 18 */
                       <Geography
                         key={geo.rsmKey}
                         geography={geo}
