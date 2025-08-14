@@ -49,6 +49,9 @@ import ScrollableBadges from "./ScrollableBadges";
 import StatusBadge from "./statusBadge";
 import { getUSDateFromString } from "@/components/shared/utils/utils";
 import { JsonRenderer } from "./components/chatComponent/single/JsonRenderer";
+import { useGetPromptVersion } from "@/services/hooks/prompts";
+import PromptVersionPill from "@/components/templates/prompts2025/PromptVersionPill";
+import EnvironmentPill from "@/components/templates/prompts2025/EnvironmentPill";
 
 const RequestDescTooltip = (props: {
   displayText: string;
@@ -140,6 +143,9 @@ export default function RequestDrawer(props: RequestDivProps) {
     () => request?.heliconeMetadata.promptVersion ?? null,
     [request?.heliconeMetadata.promptVersion],
   );
+
+  const currentPromptData = useGetPromptVersion(newPromptVersionId || undefined, false);
+  console.log("currentPromptData", currentPromptData?.data);
 
   const promptInputsQuery = useGetPromptInputs(
     newPromptId || "",
@@ -636,7 +642,7 @@ export default function RequestDrawer(props: RequestDivProps) {
               {/* Prompt */}
               {specialProperties.promptId && (
                 <RequestDescTooltip
-                  displayText={specialProperties.promptId}
+                  displayText={currentPromptData?.data?.prompt?.name || specialProperties.promptId}
                   icon={<ScrollTextIcon className="h-4 w-4" />}
                   copyText={specialProperties.promptId}
                   href={
@@ -801,8 +807,36 @@ export default function RequestDrawer(props: RequestDivProps) {
           <div className="h-full w-full overflow-auto bg-card p-3">
             {hasNewPromptData && promptInputsQuery.data && (
               <div className="mb-4 rounded-lg border border-border bg-sidebar-background">
-                <div className="flex h-12 flex-row items-center justify-between rounded-t-lg bg-white p-4 shadow-sm dark:bg-black">
-                  <h2 className="text-sm font-medium">Prompt Input</h2>
+                <div className="flex h-12 flex-row items-center justify-between rounded-t-lg bg-white p-4 pr-2 shadow-sm dark:bg-black">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-sm font-medium">Prompt Input</h2>
+                    {currentPromptData?.data?.prompt?.name && (
+                      <>
+                        <div className="h-4 w-px bg-border" />
+                        <span className="text-sm font-medium text-muted-foreground">
+                          {currentPromptData.data.prompt.name.length > 15
+                            ? currentPromptData.data.prompt.name.substring(0, 12) + "..."
+                            : currentPromptData.data.prompt.name}
+                        </span>
+                      </>
+                    )}
+                    {currentPromptData?.data?.promptVersion && (
+                      <PromptVersionPill
+                        majorVersion={currentPromptData.data.promptVersion.major_version}
+                        minorVersion={currentPromptData.data.promptVersion.minor_version}
+                      />
+                    )}
+                  </div>
+                  <Link href={`/playground?promptVersionId=${newPromptVersionId}`}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex flex-row items-center gap-1.5"
+                    >
+                      <Eye className="h-4 w-4" />
+                      View
+                    </Button>
+                  </Link>
                 </div>
                 <div className="max-h-60 overflow-auto border-t border-border bg-sidebar-background p-4 text-sm">
                   <JsonRenderer
