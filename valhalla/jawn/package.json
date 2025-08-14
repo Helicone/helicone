@@ -1,5 +1,6 @@
 {
   "name": "helicone-api",
+  "//": "Security packages already updated: h11@0.16.0, form-data@4.0.4 - awaiting Dependabot rescan",
   "scripts": {
     "start": "ts-node src/index.ts",
     "serve": "node dist/valhalla/jawn/src/index.js",
