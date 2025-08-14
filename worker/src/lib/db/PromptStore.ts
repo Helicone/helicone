@@ -11,19 +11,26 @@ export class PromptStore {
     orgId: string
   ): Promise<Result<string, string>> {
     const { prompt_id, version_id, environment } = params;
+
     if (environment) {
-      const versionId = await this.getEnvironmentVersionId(prompt_id, environment, orgId);
-      if (!versionId) return err("Invalid prompt environment");
-      return ok(versionId);
+      const envVersionId = await this.getEnvironmentVersionId(prompt_id, environment, orgId);
+      if (envVersionId) {
+        return ok(envVersionId);
+      }
     }
+
     if (version_id) {
-      const versionId = await this.getVersionById(version_id, orgId);
-      if (!versionId) return err("Invalid prompt version");
-      return ok(versionId);
+      const specificVersionId = await this.getVersionById(version_id, orgId);
+      if (specificVersionId) {
+        return ok(specificVersionId);
+      }
     }
-    const versionId = await this.getProductionVersionId(prompt_id, orgId);
-    if (!versionId) return err("Invalid prompt ID");
-    return ok(versionId);
+
+    const productionVersionId = await this.getProductionVersionId(prompt_id, orgId);
+    if (!productionVersionId) {
+      return err("Invalid prompt ID - no valid version found");
+    }
+    return ok(productionVersionId);
   }
 
   private async getEnvironmentVersionId(
