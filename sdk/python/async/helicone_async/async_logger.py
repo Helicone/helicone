@@ -26,9 +26,15 @@ class HeliconeAsyncLogger:
             raise Exception(
                 "The Helicone API Key must be set either by passing api_key to the class or by setting the HELICONE_API_KEY environment variable."
             )
-        self.api_key = api_key
 
-        self.base_url = base_url
+        self.api_key = api_key
+        if base_url is None:
+            if api_key.startswith("sk-helicone-eu-"):
+                self.base_url = "https://eu.api.helicone.ai/v1/trace/log-python"
+        else:
+            self.base_url = base_url
+
+
 
     def init(self) -> None:
         self.exporter = OTLPSpanExporter(
