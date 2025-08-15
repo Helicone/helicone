@@ -17,6 +17,7 @@ import { ProviderName } from "@helicone-package/cost/models/providers";
 import { BaseOpenAPIRouter } from "../routerFactory";
 import { StripeManager } from "../../lib/managers/StripeManager";
 import { SCALE_FACTOR } from "../../lib/durableObjects/Wallet";
+import { isErr } from "../../lib/util/results";
 const RATE_LIMIT_MS = 1000 * 30;
 
 function getAPIRouterV1(
@@ -531,9 +532,11 @@ function getAPIRouterV1(
 
       try {
         const state = await walletStub.getWalletState(orgId);
-        return client.response.successJSON({
-          balance: state.balance,
-        });
+        if (isErr(state)) {
+          return client.response.newError(state.error, 500);
+        } else {
+          return client.response.successJSON(state.data);
+        }
       } catch (e) {
         return client.response.newError(
           e instanceof Error ? e.message : "Failed to fetch credits",

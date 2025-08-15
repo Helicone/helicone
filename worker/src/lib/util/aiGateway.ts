@@ -20,13 +20,16 @@ import { ProviderKey } from "../db/ProviderKeysStore";
 import { getEndpoints, ModelEndpoint } from "@helicone-package/cost/models";
 import { ProviderName } from "@helicone-package/cost/models/types";
 import { PromptManager } from "../managers/PromptManager";
+import { costOf } from "@helicone-package/cost";
+import { Wallet } from "../durableObjects/Wallet";
 
 type Error = {
   type:
     | "invalid_format"
     | "missing_provider_key"
     | "request_failed"
-    | "invalid_prompt";
+    | "invalid_prompt"
+    | "model_not_supported";
   message: string;
   code: number;
 };
@@ -197,19 +200,30 @@ const prepareRequestBody = (
   }
 };
 
+export type EscrowInfo = {
+  escrowId: string;
+  provider: string;
+  model: string;
+};
+
 const attemptDirectProviderRequest = async (
   directProviderEndpoint: DirectProviderEndpoint,
   requestWrapper: RequestWrapper,
-  forwarder: (targetBaseUrl: string | null) => Promise<Response>,
+  forwarder: (
+    targetBaseUrl: string | null,
+    escrowInfo?: EscrowInfo
+  ) => Promise<Response>,
   providerKeysManager: ProviderKeysManager,
   orgId: string,
-  parsedBody: any
+  parsedBody: any,
+  env: Env,
+  ctx: ExecutionContext
 ): Promise<Result<Response, Error>> => {
   const { provider, modelName } = directProviderEndpoint;
   const providerKey = await providerKeysManager.getProviderKeyWithFetch(
     provider,
     orgId,
-    requestWrapper,
+    requestWrapper
   );
 
   if (!providerKey) {
@@ -302,6 +316,82 @@ const attemptDirectProviderRequest = async (
 
   const targetBaseUrl = targetBaseUrlResult.data;
 
+  let escrowId: string | undefined;
+  // if cloud billing is enabled, we want to 'reserve' the maximum possible
+  // cost of the request in their wallet so that we can avoid overages
+  if (requestWrapper.heliconeHeaders.cloudBillingEnabled) {
+    const walletId = env.WALLET.idFromName(orgId);
+    const walletStub = env.WALLET.get(walletId);
+
+    const costStructure = costOf({
+      model: providerModelId,
+      provider: provider,
+    });
+    if (
+      !costStructure ||
+      endpoint.contextLength === 0 ||
+      endpoint.maxCompletionTokens === 0 ||
+      costStructure.prompt_token === 0 ||
+      costStructure.completion_token === 0
+    ) {
+      return err({
+        type: "model_not_supported",
+        message: `No cost structure found for (provider, model): (${provider}, ${providerModelId})`,
+        code: 400,
+      });
+    }
+    const state = await walletStub.getWalletState(orgId);
+    if (isErr(state)) {
+      return err({
+        type: "request_failed",
+        message: state.error,
+        code: 500,
+      });
+    }
+    for (const entry of state.data.disallowList) {
+      if (entry.provider === null || entry.model === null) {
+        return err({
+          type: "request_failed",
+          message: "Currently cloud billing is disabled for this org. Please contact support@helicone.ai for help",
+          code: 400,
+        });
+      }
+      if (entry.provider === provider && entry.model === providerModelId) {
+        return err({
+          type: "request_failed",
+          message: "Currently cloud billing is disabled for this model and provider. Please contact support@helicone.ai for help",
+          code: 400,
+        });
+      }
+    }
+
+    // Estimate Cmax: total maximum worst case possible cost of a model request
+    // TODO: ask Cole if we need to get the scale factor from the dynamic data
+    const maxPromptCost =
+      (endpoint.contextLength * costStructure.prompt_token) / 1_000_000;
+    const maxCompletionCost =
+      (endpoint.maxCompletionTokens * costStructure.completion_token) /
+      1_000_000;
+    const worstCaseCost = (maxPromptCost + maxCompletionCost);
+
+    const requestId = requestWrapper.heliconeHeaders.requestId;
+    const escrowResult = await walletStub.reserveCostInEscrow(
+      orgId,
+      requestId,
+      worstCaseCost
+    );
+
+    if (escrowResult.error) {
+      return err({
+        type: "request_failed",
+        message: escrowResult.error,
+        code: 429,
+      });
+    }
+
+    escrowId = escrowResult.data?.escrowId;
+  }
+
   await authenticateRequest(
     requestWrapper,
     providerKey,
@@ -313,10 +403,22 @@ const attemptDirectProviderRequest = async (
   );
 
   try {
-    const response = await forwarder(targetBaseUrl);
+    const escrowInfo = escrowId ? { escrowId, provider, model: providerModelId } : undefined;
+    const response = await forwarder(targetBaseUrl, escrowInfo);
 
     if (response.ok) {
       return ok(response);
+    }
+
+    // Clean up escrow on error
+    if (escrowId) {
+      const walletId = env.WALLET.idFromName(orgId);
+      const walletStub = env.WALLET.get(walletId);
+      ctx.waitUntil(
+        walletStub.cancelEscrow(escrowId).catch((err) => {
+          console.error(`Failed to cancel escrow ${escrowId}:`, err);
+        })
+      );
     }
 
     try {
@@ -349,10 +451,15 @@ const attemptEndpointsProviderRequest = async (
   modelName: string,
   endpointsProviderEndpoint: EndpointsProviderEndpoint,
   requestWrapper: RequestWrapper,
-  forwarder: (targetBaseUrl: string | null) => Promise<Response>,
+  forwarder: (
+    targetBaseUrl: string | null,
+    escrowInfo?: EscrowInfo
+  ) => Promise<Response>,
   providerKeysManager: ProviderKeysManager,
   orgId: string,
-  parsedBody: any
+  parsedBody: any,
+  env: Env,
+  ctx: ExecutionContext
 ): Promise<Result<Response, Error>> => {
   const { endpoints } = endpointsProviderEndpoint;
 
@@ -374,7 +481,9 @@ const attemptEndpointsProviderRequest = async (
       forwarder,
       providerKeysManager,
       orgId,
-      parsedBody
+      parsedBody,
+      env,
+      ctx
     );
 
     if (!isErr(result)) {
@@ -399,13 +508,20 @@ const attemptModelRequest = async ({
   providerKeysManager,
   orgId,
   parsedBody,
+  env,
+  ctx,
 }: {
   model: string;
   requestWrapper: RequestWrapper;
-  forwarder: (targetBaseUrl: string | null) => Promise<Response>;
+  forwarder: (
+    targetBaseUrl: string | null,
+    escrowInfo?: EscrowInfo
+  ) => Promise<Response>;
   providerKeysManager: ProviderKeysManager;
   orgId: string;
   parsedBody: any;
+  env: Env;
+  ctx: ExecutionContext;
 }): Promise<Result<Response, Error>> => {
   const result = validateModelString(model);
   if (isErr(result)) {
@@ -419,7 +535,9 @@ const attemptModelRequest = async ({
       forwarder,
       providerKeysManager,
       orgId,
-      parsedBody
+      parsedBody,
+      env,
+      ctx
     );
     return directProviderRequestResult;
   }
@@ -431,7 +549,9 @@ const attemptModelRequest = async ({
     forwarder,
     providerKeysManager,
     orgId,
-    parsedBody
+    parsedBody,
+    env,
+    ctx
   );
 
   return endpointsProviderRequestResult;
@@ -445,14 +565,21 @@ export const attemptModelRequestWithFallback = async ({
   promptManager,
   orgId,
   parsedBody,
+  env,
+  ctx,
 }: {
   models: string[];
   requestWrapper: RequestWrapper;
-  forwarder: (targetBaseUrl: string | null) => Promise<Response>;
+  forwarder: (
+    targetBaseUrl: string | null,
+    escrowInfo?: EscrowInfo
+  ) => Promise<Response>;
   providerKeysManager: ProviderKeysManager;
   promptManager: PromptManager;
   orgId: string;
   parsedBody: any;
+  env: Env;
+  ctx: ExecutionContext;
 }): Promise<Result<Response, Error>> => {
   if (models.length === 0) {
     return err({
@@ -504,6 +631,8 @@ export const attemptModelRequestWithFallback = async ({
       providerKeysManager,
       orgId,
       parsedBody,
+      env,
+      ctx,
     });
     if (!isErr(result)) {
       return result;

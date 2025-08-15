@@ -5,18 +5,33 @@ import { err, ok, Result } from "../util/results";
 // (which is sent to us by stripe in cents)
 export const SCALE_FACTOR = 10_000_000_000;
 
-// lookback period to rate limit users for
-// unknown costs. 30 seconds in milliseconds
-const UNKNOWN_COST_WINDOW_MS = 30 * 1000;
+// Escrow expiry period - 5 minutes
+const ESCROW_EXPIRY_MS = 5 * 60 * 1000;
+// minimum wallet balance to start an escrow: 5 cents, scaled
+const MINIMUM_RESERVE = 5 * SCALE_FACTOR;
 
 export interface WalletState {
-  // USD cents * SCALED_FACTOR
+  // local balance in USD cents
   balance: number;
-  // number of requests in flight
-  inflightCount: number;
-  // number of requests with unknown cost due to
-  // not being able to parse the cost from the response
-  unknownCostCount: number;
+  // sum of escrows for in-flight requests (in USD cents)
+  totalEscrow: number;
+  // list of requests that we were unable to parse the cost from and therefore were unable to record token usage for
+  disallowList: DisallowListEntry[];
+}
+
+export interface DisallowListEntry {
+  id: string;
+  helicone_request_id: string;
+  provider: string | null;
+  model: string | null;
+}
+
+export interface Escrow {
+  id: string;
+  // amount in USD cents
+  amount: number;
+  createdAt: number;
+  requestId: string;
 }
 
 export class Wallet extends DurableObject {
@@ -35,19 +50,22 @@ export class Wallet extends DurableObject {
         id TEXT PRIMARY KEY,
         processed_at INTEGER NOT NULL
       );
-      -- used to gate/limit the user from making too many requests
-      -- via abusive spam that overspends their credits
-      CREATE TABLE IF NOT EXISTS inflight_requests (
+      -- used to prevent scenarios where we are able to record
+      -- token usage, eg, we are unable to parse the response body
+      -- and extract the tokens used.
+      CREATE TABLE IF NOT EXISTS disallow_list (
         id TEXT PRIMARY KEY,
-        requested_at INTEGER NOT NULL
+        helicone_request_id TEXT NOT NULL,
+        requested_at INTEGER NOT NULL,
+        provider TEXT,
+        model TEXT
       );
-      -- used to gate/limit the user from making too many requests
-      -- when we cant parse the cost from the response.
-      -- we could potentially truncate this table everytime we sync
-      -- the durable object balance with stripe
-      CREATE TABLE IF NOT EXISTS unknown_costs (
-        helicone_request_id TEXT PRIMARY KEY,
-        requested_at INTEGER NOT NULL
+      -- Escrows for pre-authorization of requests
+      CREATE TABLE IF NOT EXISTS escrows (
+        id TEXT PRIMARY KEY,
+        amount INTEGER NOT NULL,
+        created_at INTEGER NOT NULL,
+        request_id TEXT NOT NULL
       );
     `);
   }
@@ -88,76 +106,19 @@ export class Wallet extends DurableObject {
     }
   }
 
-  deductBalance(orgId: string, amount: number): Result<void, string> {
-    try {
-      if (amount <= 0) {
-        return err("Amount must be positive");
-      }
-
-      this.ctx.storage.transactionSync(() => {
-        const scaledAmount = amount * SCALE_FACTOR;
-        const result = this.ctx.storage.sql.exec(
-          "UPDATE wallet SET balance = balance - ? WHERE orgId = ?",
-          scaledAmount,
-          orgId
-        );
-
-        if (result.rowsWritten === 0) {
-          throw new Error(`Failed to update balance for org ${orgId}`);
-        }
-      });
-
-      return ok(undefined);
-    } catch (error) {
-      return err(error instanceof Error ? error.message : "Unknown error");
-    }
-  }
-
-  addInflightRequest(requestId: string): Result<void, string> {
+  addToDisallowList(heliconeRequestId: string, provider?: string, model?: string): Result<void, string> {
     try {
       const result = this.ctx.storage.sql.exec(
-        "INSERT INTO inflight_requests (id, requested_at) VALUES (?, ?) ON CONFLICT(id) DO NOTHING",
-        requestId,
-        Date.now()
-      );
-      
-      if (result.rowsWritten === 0) {
-        return err(`Request ${requestId} already exists`);
-      }
-      
-      return ok(undefined);
-    } catch (error) {
-      return err(error instanceof Error ? error.message : "Unknown error");
-    }
-  }
-
-  removeInflightRequest(requestId: string): Result<void, string> {
-    try {
-      const result = this.ctx.storage.sql.exec(
-        "DELETE FROM inflight_requests WHERE id = ?",
-        requestId
-      );
-      
-      if (result.rowsWritten === 0) {
-        return err(`Request ${requestId} not found`);
-      }
-      
-      return ok(undefined);
-    } catch (error) {
-      return err(error instanceof Error ? error.message : "Unknown error");
-    }
-  }
-
-  addUnknownCost(heliconeRequestId: string): Result<void, string> {
-    try {
-      const result = this.ctx.storage.sql.exec(
-        "INSERT INTO unknown_costs (helicone_request_id, requested_at) VALUES (?, ?) ON CONFLICT(helicone_request_id) DO NOTHING",
+        "INSERT INTO disallow_list (id, helicone_request_id, requested_at, provider, model) VALUES (?, ?, ?, ?, ?)",
+        crypto.randomUUID(),
         heliconeRequestId,
-        Date.now()
+        Date.now(),
+        provider,
+        model
       );
 
       if (result.rowsWritten === 0) {
-        return err(`Unknown cost entry ${heliconeRequestId} already exists`);
+        return err("Unable to add to disallow list");
       }
 
       return ok(undefined);
@@ -166,34 +127,158 @@ export class Wallet extends DurableObject {
     }
   }
 
-  getWalletState(orgId: string): WalletState {
+  getDisallowList(): Result<DisallowListEntry[], string> {
+    try {
+      const result = this.ctx.storage.sql.exec<{
+        id: string;
+        helicone_request_id: string;
+        provider: string | null;
+        model: string | null;
+      }>(
+        "SELECT id, helicone_request_id, provider, model FROM disallow_list"
+      ).toArray();
+
+      return ok(result);
+    } catch (error) {
+      return err(error instanceof Error ? error.message : "Unknown error");
+    }
+  }
+
+  getWalletState(orgId: string): Result<WalletState, string> {
     try {
       return this.ctx.storage.transactionSync(() => {
-        const balanceResult = this.ctx.storage.sql
+        const balance = this.ctx.storage.sql
           .exec<{ balance: number }>("SELECT balance FROM wallet WHERE orgId = ?", orgId)
-          .next();
+          .one().balance;
+
+        const disallowList = this.ctx.storage.sql.exec<{
+          id: string;
+          helicone_request_id: string;
+          provider: string | null;
+          model: string | null;
+        }>(
+          "SELECT id, helicone_request_id, provider, model FROM disallow_list"
+        ).toArray();
+
+        const escrowSum = this.ctx.storage.sql
+          .exec<{ total: number }>("SELECT SUM(amount) as total FROM escrows")
+          .one().total;
+
+        return ok({
+          balance: balance / SCALE_FACTOR,
+          totalEscrow: escrowSum / SCALE_FACTOR,
+          disallowList,
+        });
+      });
+    } catch (error) {
+      return err(error instanceof Error ? error.message : "Unknown error");
+    }
+  }
+
+  reserveCostInEscrow(
+    orgId: string,
+    requestId: string,
+    amountToReserve: number,
+  ): Result<{ escrowId: string }, string> {
+    const amountToReserveScaled = amountToReserve * SCALE_FACTOR;
+    try {
+      return this.ctx.storage.transactionSync(() => {
+        const balance = this.ctx.storage.sql
+          .exec<{ balance: number }>("SELECT balance FROM wallet WHERE orgId = ?", orgId)
+          .one().balance;
         
-        const inflightResult = this.ctx.storage.sql
-          .exec<{ count: number }>("SELECT COUNT(*) as count FROM inflight_requests")
-          .one();
-        
-        const unknownCostResult = this.ctx.storage.sql
-          .exec<{ count: number }>("SELECT COUNT(*) as count FROM unknown_costs WHERE requested_at > ?", Date.now() - UNKNOWN_COST_WINDOW_MS)
+        const escrowSum = this.ctx.storage.sql
+          .exec<{ total: number }>("SELECT SUM(amount) as total FROM escrows")
+          .one().total;
+
+        if (balance - escrowSum - amountToReserveScaled < MINIMUM_RESERVE) {
+          return err(`Insufficient balance for escrow. Available: ${(balance - escrowSum) / SCALE_FACTOR} cents, needed: ${amountToReserve} cents`);
+        }
+
+        const escrowId = crypto.randomUUID();
+        // we don't want to re-use the official Helicone request id (at least, not by itself),
+        // since we also support users specifying that id, which would allow them to circumvent
+        // escrow if they re-supply old request ids.
+        this.ctx.storage.sql.exec(
+          "INSERT INTO escrows (id, amount, created_at, request_id) VALUES (?, ?, ?, ?)",
+          escrowId,
+          amountToReserveScaled,
+          Date.now(),
+          requestId,
+        );
+
+        return ok({ escrowId });
+      });
+    } catch (error) {
+      return err(error instanceof Error ? error.message : "Unknown error");
+    }
+  }
+
+  finalizeEscrow(
+    orgId: string,
+    escrowId: string,
+    actualCost: number
+  ): Result<void, string> {
+    const actualCostScaled = actualCost * SCALE_FACTOR;
+    try {
+      return this.ctx.storage.transactionSync(() => {
+        const escrowResult = this.ctx.storage.sql
+          .exec<{ amount: number; request_id: string }>(
+            "SELECT amount, request_id FROM escrows WHERE id = ?",
+            escrowId
+          )
           .one();
 
-        const balanceInCents = Math.floor((balanceResult.value?.balance ?? 0) / SCALE_FACTOR);
-        return {
-          balance: balanceInCents,
-          inflightCount: inflightResult?.count ?? 0,
-          unknownCostCount: unknownCostResult?.count ?? 0
-        };
+        this.ctx.storage.sql.exec(
+          "UPDATE wallet SET balance = balance - ? WHERE orgId = ?",
+          orgId,
+          actualCostScaled
+        );
+        this.ctx.storage.sql.exec(
+          "DELETE FROM escrows WHERE id = ?",
+          escrowId
+        );
+
+        return ok(undefined);
       });
-    } catch (_error) {
-      return {
-        balance: 0,
-        inflightCount: 0,
-        unknownCostCount: 0,
-      };
+    } catch (error) {
+      return err(error instanceof Error ? error.message : "Unknown error");
+    }
+  }
+
+  cancelEscrow(escrowId: string): Result<void, string> {
+    try {
+      const result = this.ctx.storage.sql.exec(
+        "DELETE FROM escrows WHERE id = ?",
+        escrowId
+      );
+      
+      if (result.rowsWritten === 0) {
+        return err(`Escrow ${escrowId} not found`);
+      }
+      
+      return ok(undefined);
+    } catch (error) {
+      return err(error instanceof Error ? error.message : "Unknown error");
+    }
+  }
+
+  // Stub function to get source of truth balance
+  // TODO: Update this to fetch real balance from Stripe/external source
+  async getSourceOfTruthBalance(orgId: string): Promise<Result<number, string>> {
+    // For now, return a stub value of $10.00 (1000 cents)
+    return ok(1000);
+  }
+
+  cleanupExpiredEscrows(): Result<number, string> {
+    try {
+      const result = this.ctx.storage.sql.exec(
+        "DELETE FROM escrows WHERE created_at < ?",
+        Date.now() - ESCROW_EXPIRY_MS
+      );
+      return ok(result.rowsWritten ?? 0);
+    } catch (error) {
+      return err(error instanceof Error ? error.message : "Unknown error");
     }
   }
 }
