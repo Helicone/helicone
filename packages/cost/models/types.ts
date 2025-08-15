@@ -158,7 +158,7 @@ export type StandardParameter =
 
 // ============= Endpoint Types =============
 
-export type EndpointKey<TModelName extends string> = `${TModelName}:${string}`;
+export type EndpointKey<TModelName extends string, TProviderName extends string> = `${TModelName}:${TProviderName}`;
 
 // ============= Model Definition =============
 
@@ -199,7 +199,7 @@ export interface EndpointPerformance {
   tokensPerSecond?: number; // Generation speed
 }
 
-export interface DeploymentConfig {
+export interface EndpointConfig {
   providerModelId: string;
   pricing?: ModelPricing;
   ptbEnabled?: boolean;
@@ -208,20 +208,26 @@ export interface DeploymentConfig {
   version?: string;
 }
 
-export interface Endpoint {
+export interface ModelConfigBase {
   modelId: ModelName;
   provider: ProviderName;
-  version?: string;
-
-  baseModelId: string;
   pricing: ModelPricing;
   contextLength: number;
   maxCompletionTokens: number;
   supportedParameters: StandardParameter[];
-
   ptbEnabled: boolean;
+  version?: string;
+}
 
-  deployments?: Record<string, DeploymentConfig>;
+export interface ModelProviderConfig extends ModelConfigBase {
+  baseModelId: string;
+  endpoints?: Record<string, EndpointConfig>;
+}
+
+export interface Endpoint extends ModelConfigBase {
+  providerModelId: string;
+  endpointId?: string;
+  configId: string;
 }
 
 // ============= Provider Configuration =============
@@ -248,14 +254,17 @@ export interface ProviderConfig {
 // ============= Index Types (Build-time generated) =============
 
 export interface ModelIndexes {
-  // Model → All endpoints
+  // Model → All endpoints (expanded from configs)
   byModel: Map<ModelName, Endpoint[]>;
   // Model → PTB-enabled endpoints
   byModelPtb: Map<ModelName, Endpoint[]>;
   // Model + Provider → Endpoints
   byModelProvider: Map<`${ModelName}:${ProviderName}`, Endpoint[]>;
   // Direct endpoint lookup by ID
-  byId: Map<string, Endpoint>; // Endpoint IDs are dynamic strings
+  byId: Map<string, Endpoint>;
   // Provider → All models it serves
   providerToModels: Map<ProviderName, ModelName[]>;
+  
+  // BYOK: Model + Provider → Base config (for dynamic endpoint building)
+  byModelProviderConfig: Map<`${ModelName}:${ProviderName}`, ModelProviderConfig>;
 }

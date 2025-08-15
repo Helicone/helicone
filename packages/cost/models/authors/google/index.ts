@@ -3,7 +3,7 @@
  * Combines all models and endpoints from subdirectories
  */
 
-import type { Model, Endpoint, EndpointKey } from "../../types";
+import type { Model, ModelProviderConfig } from "../../types";
 
 // Import models
 import { models as gemini25Models } from "./gemini-2.5/models";
@@ -27,7 +27,7 @@ export const googleEndpoints = {
   ...gemini25Endpoints,
   ...gemini20Endpoints,
   ...gemini15Endpoints,
-} satisfies Record<EndpointKey<GoogleModelName>, Endpoint>;
+} satisfies Record<string, ModelProviderConfig>;
 
 // Export types
 export type GoogleModelName = keyof typeof googleModels;

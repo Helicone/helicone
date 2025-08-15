@@ -1,4 +1,4 @@
-import type { Endpoint } from "../../../types";
+import type { ModelProviderConfig } from "../../../types";
 
 export const endpoints = {
   "gpt-4o:openai": {
@@ -127,6 +127,6 @@ export const endpoints = {
     supportedParameters: ["max_tokens", "response_format"],
     ptbEnabled: true,
   },
-} satisfies Record<string, Endpoint>;
+} satisfies Record<string, ModelProviderConfig>;
 
 export type EndpointId = keyof typeof endpoints;

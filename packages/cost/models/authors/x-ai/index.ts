@@ -3,7 +3,7 @@
  * Combines all models and endpoints from subdirectories
  */
 
-import type { Model, Endpoint, EndpointKey } from "../../types";
+import type { Model, Endpoint } from "../../types";
 
 // Import models
 import { models as grok4Models } from "./grok-4/models";
@@ -27,7 +27,7 @@ export const xAiEndpoints = {
   ...grok4Endpoints,
   ...grok3Endpoints,
   ...grok2Endpoints,
-} satisfies Record<EndpointKey<XAIModelName>, Endpoint>;
+} satisfies Record<string, ModelProviderConfig>;
 
 // Export types
 export type XAIModelName = keyof typeof xAiModels;

@@ -1,4 +1,4 @@
-import type { Endpoint } from "../../../types";
+import type { ModelProviderConfig } from "../../../types";
 
 export const endpoints = {
   "o1:openai": {
@@ -56,6 +56,6 @@ export const endpoints = {
     supportedParameters: ["seed", "max_tokens"],
     ptbEnabled: true,
   },
-} satisfies Record<string, Endpoint>;
+} satisfies Record<string, ModelProviderConfig>;
 
 export type EndpointId = keyof typeof endpoints;

@@ -2,8 +2,7 @@
  * DeepSeek endpoint configurations
  */
 
-import type { Endpoint, EndpointKey } from "../../types";
-import type { DeepSeekModelName } from "./models";
+import type { ModelProviderConfig } from "../../types";
 
 export const deepseekEndpoints = {
   // "deepseek-chat:deepseek": {
@@ -52,6 +51,6 @@ export const deepseekEndpoints = {
   //   ],
   //   ptbEnabled: false,
   // },
-} satisfies Record<EndpointKey<DeepSeekModelName>, Endpoint>;
+} satisfies Record<string, ModelProviderConfig>;
 
-export type DeepSeekEndpointId = EndpointKey<DeepSeekModelName>;
+export type DeepSeekEndpointId = string;

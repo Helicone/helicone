@@ -1,9 +1,9 @@
-import type { Endpoint } from "../../../types";
+import type { ModelProviderConfig } from "../../../types";
 
 export const endpoints = {
   "o3:openai": {
     modelId: "o3",
-    provider: "openai", 
+    provider: "openai",
     baseModelId: "o3-2025-04-16",
     pricing: {
       prompt: 2,
@@ -80,6 +80,6 @@ export const endpoints = {
     ],
     ptbEnabled: true,
   },
-} satisfies Record<string, Endpoint>;
+} satisfies Record<string, ModelProviderConfig>;
 
 export type EndpointId = keyof typeof endpoints;

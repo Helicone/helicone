@@ -2,8 +2,7 @@
  * Cohere endpoint configurations
  */
 
-import type { Endpoint, EndpointKey } from "../../types";
-import { CohereModelName } from "./models";
+import type { ModelProviderConfig } from "../../types";
 
 export const cohereEndpoints = {
   // // Removed speculative/estimated models until verified
@@ -198,6 +197,6 @@ export const cohereEndpoints = {
   //   ],
   //   ptbEnabled: false,
   // },
-} satisfies Record<EndpointKey<CohereModelName>, Endpoint>;
+} satisfies Record<string, ModelProviderConfig>;
 
 export type CohereEndpointId = keyof typeof cohereEndpoints;

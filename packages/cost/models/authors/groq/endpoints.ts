@@ -2,8 +2,7 @@
  * Groq endpoint definitions with accurate pricing
  */
 
-import type { Endpoint, EndpointKey } from "../../types";
-import { GroqModelName } from "./models";
+import type { ModelProviderConfig } from "../../types";
 
 export const groqEndpoints = {
   // "llama-3.3-70b-versatile:groq": {
@@ -140,6 +139,6 @@ export const groqEndpoints = {
   //   ptbEnabled: false,
   // },
   // voice/ASR models removed (Helicone does not support voice)
-} satisfies Record<EndpointKey<GroqModelName>, Endpoint>;
+} satisfies Record<string, ModelProviderConfig>;
 
 export type GroqEndpointId = keyof typeof groqEndpoints;

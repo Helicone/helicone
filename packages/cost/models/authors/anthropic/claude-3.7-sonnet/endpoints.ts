@@ -1,4 +1,4 @@
-import type { Endpoint } from "../../../types";
+import type { ModelProviderConfig } from "../../../types";
 
 export const endpoints = {
   "claude-3.7-sonnet:anthropic": {
@@ -49,12 +49,12 @@ export const endpoints = {
       "stop",
     ],
     ptbEnabled: true,
-    deployments: {
-      "global": {
+    endpoints: {
+      global: {
         providerModelId: "claude-3-7-sonnet@20250219",
       },
     },
   },
-} satisfies Record<string, Endpoint>;
+} satisfies Record<string, ModelProviderConfig>;
 
 export type EndpointId = keyof typeof endpoints;

@@ -2,7 +2,7 @@
  * Amazon endpoint configurations
  */
 
-import type { Endpoint, EndpointKey } from "../../types";
+import type { ModelProviderConfig, EndpointKey, ProviderName } from "../../types";
 import { AmazonModelName } from "./models";
 
 export const amazonEndpoints = {
@@ -66,6 +66,6 @@ export const amazonEndpoints = {
   //   ],
   //   ptbEnabled: false,
   // },
-} satisfies Record<EndpointKey<AmazonModelName>, Endpoint>;
+} satisfies Record<string, ModelProviderConfig>;
 
 export type AmazonEndpointId = keyof typeof amazonEndpoints;

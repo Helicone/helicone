@@ -2,12 +2,8 @@
  * Nvidia endpoint configurations
  */
 
-import type { Endpoint, EndpointKey } from "../../types";
-import { NvidiaModelName } from "./models";
+import type { ModelProviderConfig } from "../../types";
 
-export const nvidiaEndpoints = {} satisfies Record<
-  EndpointKey<NvidiaModelName>,
-  Endpoint
->;
+export const nvidiaEndpoints = {} satisfies Record<string, ModelProviderConfig>;
 
 export type NvidiaEndpointId = keyof typeof nvidiaEndpoints;

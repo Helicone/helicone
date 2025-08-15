@@ -1,4 +1,4 @@
-import type { Endpoint } from "../../../types";
+import type { ModelProviderConfig } from "../../../types";
 
 export const endpoints = {
   "claude-3.5-haiku:anthropic": {
@@ -51,13 +51,13 @@ export const endpoints = {
       "stop",
     ],
     ptbEnabled: false,
-    deployments: {
-      "global": {
+    endpoints: {
+      global: {
         providerModelId: "claude-3-5-haiku@20241022",
       },
     },
   },
-  
+
   // Bedrock not currently supported
   // "claude-3.5-haiku:bedrock": {
   //   modelId: "claude-3.5-haiku",
@@ -85,12 +85,12 @@ export const endpoints = {
   //     "stop",
   //   ],
   //   ptbEnabled: true,
-  //   deployments: {
+  //   endpoints: {
   //     "us-west-2": {
   //       providerModelId: "us.anthropic.claude-3-5-haiku-20241022-v1:0",
   //     },
   //   },
   // },
-} satisfies Record<string, Endpoint>;
+} satisfies Record<string, ModelProviderConfig>;
 
 export type EndpointId = keyof typeof endpoints;

@@ -2,8 +2,7 @@
  * Perplexity endpoint configurations
  */
 
-import type { Endpoint, EndpointKey } from "../../types";
-import type { PerplexityModelName } from "./models";
+import type { ModelProviderConfig } from "../../types";
 
 export const perplexityEndpoints = {
   // "sonar-reasoning-pro:perplexity": {
@@ -90,6 +89,6 @@ export const perplexityEndpoints = {
   //   ],
   //   ptbEnabled: true,
   // },
-} satisfies Record<EndpointKey<PerplexityModelName>, Endpoint>;
+} satisfies Record<string, ModelProviderConfig>;
 
 export type PerplexityEndpointId = keyof typeof perplexityEndpoints;
