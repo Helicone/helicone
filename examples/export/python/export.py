@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 from dataclasses import dataclass, asdict
 import requests
 import json
@@ -14,12 +14,12 @@ HELICONE_API_KEY = os.getenv("HELICONE_API_KEY")
 
 @dataclass
 class RequestProperties:
-    convoid: str | None
-    flagmsg: str | None
-    function: str | None
-    ratingnum: str | None
-    agent: str | None
-    rawquery: str | None
+    convoid: Union[str, None]
+    flagmsg: Union[str, None]
+    function: Union[str, None]
+    ratingnum: Union[str, None]
+    agent: Union[str, None]
+    rawquery: Union[str, None]
 
 
 @dataclass
@@ -146,17 +146,29 @@ async def fetch_signed_body_async(session: aiohttp.ClientSession, url: str) -> D
     return content
 
 
-async def fetch_all_signed_bodies(data: List[ResponseData]):
-    async with aiohttp.ClientSession() as session:
-        tasks = [fetch_signed_body_async(
-            session, d.signed_body_url) for d in data]
-        for d, task in zip(data, asyncio.as_completed(tasks)):
-            try:
-                d.signed_body_content = await task
-            except Exception as e:
-                print(
-                    f"Failed to fetch or decode signed_body_url for response_id {d.response_id}: {e}")
-                raise e
+async def fetch_all_signed_bodies(
+    data: List["ResponseData"]
+) -> None:
+    """
+    Fetches signed request/response bodies for a list of ResponseData objects
+    and attaches the request and response content to each object.
+
+    Parameters
+    ----------
+    data : list of ResponseData
+        List of ResponseData objects containing signed_body_url attributes.
+    """
+    async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
+        tasks = [fetch_signed_body_async(session, d.signed_body_url) for d in data]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        for d, result in zip(data, results):
+            if isinstance(result, Exception):
+                print(f"Failed to fetch or decode signed_body_url for response_id {d.response_id}: {result}")
+                raise result
+            else:
+                # d.signed_body_content = results
+                d.request_body = result['request']
+                d.response_body = result['response']
 
 
 def write_data_to_csv(data: List[ResponseData], file_name: str):
