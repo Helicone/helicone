@@ -51,7 +51,7 @@ export const endpoints = {
       "stop",
     ],
     ptbEnabled: false,
-    regions: {
+    deployments: {
       "global": {
         providerModelId: "claude-3-5-haiku@20241022",
       },
@@ -85,7 +85,7 @@ export const endpoints = {
   //     "stop",
   //   ],
   //   ptbEnabled: true,
-  //   regions: {
+  //   deployments: {
   //     "us-west-2": {
   //       providerModelId: "us.anthropic.claude-3-5-haiku-20241022-v1:0",
   //     },

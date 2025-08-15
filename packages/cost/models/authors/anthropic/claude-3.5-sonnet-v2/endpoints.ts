@@ -55,7 +55,7 @@ export const endpoints = {
   //     "stop",
   //   ],
   //   ptbEnabled: true,
-  //   regions: {
+  //   deployments: {
   //     "us-west-2": {
   //       providerModelId: "us.anthropic.claude-3-5-sonnet-20241022-v2:0",
   //     },
@@ -88,7 +88,7 @@ export const endpoints = {
       "stop",
     ],
     ptbEnabled: true,
-    regions: {
+    deployments: {
       global: {
         providerModelId: "claude-3-5-sonnet-v2@20241022",
       },

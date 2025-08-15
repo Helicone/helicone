@@ -49,7 +49,7 @@ export const endpoints = {
       "stop",
     ],
     ptbEnabled: true,
-    regions: {
+    deployments: {
       "global": {
         providerModelId: "claude-3-7-sonnet@20250219",
       },

@@ -199,7 +199,7 @@ export interface EndpointPerformance {
   tokensPerSecond?: number; // Generation speed
 }
 
-export interface RegionConfig {
+export interface DeploymentConfig {
   providerModelId: string;
   pricing?: ModelPricing;
   ptbEnabled?: boolean;
@@ -221,7 +221,7 @@ export interface Endpoint {
 
   ptbEnabled: boolean;
 
-  regions?: Record<string, RegionConfig>;
+  deployments?: Record<string, DeploymentConfig>;
 }
 
 // ============= Provider Configuration =============
