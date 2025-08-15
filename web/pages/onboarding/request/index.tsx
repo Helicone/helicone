@@ -161,24 +161,36 @@ export default function RequestPage() {
           </Select>
 
           {!hasCompleted && (
-            <Button
-              variant="action"
-              className="w-full"
-              onClick={onSendRequest}
-              disabled={!prompt.trim() || isStreaming}
-            >
-              {isStreaming ? (
+            <>
+              <Button
+                variant="action"
+                className="w-full"
+                onClick={onSendRequest}
+                disabled={!prompt.trim() || isStreaming}
+              >
                 <>
-                  <Loader size={16} className="mr-2 animate-spin" />
-                  Generating...
+                  {isStreaming || isCompleting ? (
+                    <Loader size={16} className="mr-2 animate-spin" />
+                  ) : (
+                    <Play size={16} className="mr-2" />
+                  )}
+                  {isCompleting
+                    ? "Skipping..."
+                    : isStreaming
+                      ? "Generating..."
+                      : "Send Request"}
                 </>
-              ) : (
-                <>
-                  <Play size={16} className="mr-2" />
-                  Send Request
-                </>
-              )}
-            </Button>
+              </Button>
+
+              <div className="flex justify-end">
+                <Muted
+                  className="cursor-pointer text-xs hover:underline"
+                  onClick={handleViewDashboard}
+                >
+                  Skip to dashboard
+                </Muted>
+              </div>
+            </>
           )}
 
           {(response || error) && (
