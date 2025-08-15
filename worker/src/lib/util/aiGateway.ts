@@ -20,6 +20,7 @@ import { PromptManager } from "../managers/PromptManager";
 import { ProviderKeysManager } from "../managers/ProviderKeysManager";
 import { HeliconeHeaders } from "../models/HeliconeHeaders";
 import { err, isErr, ok, Result } from "./results";
+import { createFallbackEndpoint } from "@helicone-package/cost/models/registry";
 
 type Error = {
   type:
@@ -31,19 +32,39 @@ type Error = {
   code: number;
 };
 
+type ProviderConfigType =
+  | {
+      region?: string;
+      location?: string;
+      crossRegion?: string;
+      projectId?: string;
+      deploymentName?: string;
+      resourceName?: string;
+    }
+  | null
+  | undefined;
+
+const DEFAULT_REGION = "us-west-1";
+
+const enableStreamUsage = async (requestWrapper: RequestWrapper) => {
+  const jsonBody = (await requestWrapper.getJson()) as Record<string, unknown>;
+  const bodyWithUsage = {
+    ...jsonBody,
+    stream_options: {
+      ...((jsonBody.stream_options as Record<string, unknown>) || {}),
+      include_usage: true,
+    },
+  };
+  return JSON.stringify(bodyWithUsage);
+};
+
 export const getBody = async (requestWrapper: RequestWrapper) => {
   if (requestWrapper.getMethod() === "GET") {
     return null;
   }
 
   if (requestWrapper.heliconeHeaders.featureFlags.streamUsage) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const jsonBody = (await requestWrapper.getJson()) as any;
-    if (!jsonBody["stream_options"]) {
-      jsonBody["stream_options"] = {};
-    }
-    jsonBody["stream_options"]["include_usage"] = true;
-    return JSON.stringify(jsonBody);
+    return enableStreamUsage(requestWrapper);
   }
 
   return await requestWrapper.getText();
@@ -152,6 +173,30 @@ const authenticateRequest = async (
   }
 };
 
+const parseErrorResponse = async (
+  response: Response
+): Promise<Result<never, Error>> => {
+  try {
+    const responseBody = await response.json();
+    const errorMessage =
+      (responseBody as { message?: string })?.message ??
+      (responseBody as { error?: { message?: string } })?.error?.message ??
+      response.statusText;
+
+    return err({
+      type: "request_failed",
+      message: errorMessage,
+      code: response.status,
+    });
+  } catch {
+    return err({
+      type: "request_failed",
+      message: response.statusText,
+      code: response.status,
+    });
+  }
+};
+
 const attemptDirectProviderRequest = async (
   directProviderEndpoint: DirectProviderEndpoint,
   requestWrapper: RequestWrapper,
@@ -175,39 +220,20 @@ const attemptDirectProviderRequest = async (
   }
 
   const endpointResult = getEndpoint(modelName, provider);
-  let endpoint: Endpoint;
+  const endpoint =
+    endpointResult.error || !endpointResult.data
+      ? createFallbackEndpoint(modelName, provider)
+      : endpointResult.data;
+
+  const config = providerKey.config as ProviderConfigType;
+
   let providerModelId: string;
 
-  if (endpointResult.error || !endpointResult.data) {
-    // backwards compatibility if someone passes the explicit model id used by the provider
-    endpoint = {
-      providerModelId: modelName,
-      modelId: modelName as ModelName,
-      ptbEnabled: false,
-      provider,
-      pricing: {
-        prompt: 0,
-        completion: 0,
-      },
-      contextLength: 0,
-      maxCompletionTokens: 0,
-      supportedParameters: [],
-    };
+  if (isErr(endpointResult)) {
     providerModelId = modelName;
   } else {
-    endpoint = endpointResult.data;
-    // Extract config once with proper typing
-    const config = providerKey.config as
-      | {
-          region?: string;
-          crossRegion?: string;
-          projectId?: string;
-        }
-      | null
-      | undefined;
-
     const modelIdResult = buildModelId(endpoint, {
-      region: config?.region ?? "us-west-1",
+      region: config?.region ?? DEFAULT_REGION,
       crossRegion: config?.crossRegion === "true",
       projectId: config?.projectId,
     });
@@ -216,6 +242,7 @@ const attemptDirectProviderRequest = async (
         ? modelName
         : modelIdResult.data;
   }
+
   const body = await buildRequestBody(endpoint, {
     parsedBody,
     model: providerModelId,
@@ -224,7 +251,7 @@ const attemptDirectProviderRequest = async (
     toAnthropic: toAnthropic,
   });
 
-  if (body.error || !body.data) {
+  if (isErr(body) || !body.data) {
     return err({
       type: "request_failed",
       message: body.error || "Failed to build request body",
@@ -234,21 +261,8 @@ const attemptDirectProviderRequest = async (
 
   requestWrapper.setBody(body.data);
 
-  // Extract config once with proper typing
-  const config = providerKey.config as
-    | {
-        region?: string;
-        location?: string;
-        crossRegion?: string;
-        projectId?: string;
-        deploymentName?: string;
-        resourceName?: string;
-      }
-    | null
-    | undefined;
-
   const targetBaseUrlResult = buildEndpointUrl(endpoint, {
-    region: config?.region ?? config?.location ?? "us-west-1",
+    region: config?.region ?? config?.location ?? DEFAULT_REGION,
     crossRegion: config?.crossRegion === "true",
     projectId: config?.projectId,
     deploymentName: config?.deploymentName,
@@ -282,23 +296,7 @@ const attemptDirectProviderRequest = async (
       return ok(response);
     }
 
-    try {
-      const responseBody = await response.json();
-      return err({
-        type: "request_failed",
-        message:
-          (responseBody as { message?: string })?.message ??
-          (responseBody as { error?: { message?: string } })?.error?.message ??
-          response.statusText,
-        code: response.status,
-      });
-    } catch (error) {
-      return err({
-        type: "request_failed",
-        message: response.statusText,
-        code: response.status,
-      });
-    }
+    return await parseErrorResponse(response);
   } catch (error) {
     return err({
       type: "request_failed",
@@ -322,7 +320,7 @@ const attemptEndpointsProviderRequest = async (
   let error: Error | null = null;
   for (const endpoint of endpoints) {
     const providerResult = getProvider(endpoint.provider);
-    if (providerResult.error || !providerResult.data) {
+    if (isErr(providerResult) || !providerResult.data) {
       continue;
     }
 

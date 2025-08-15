@@ -117,6 +117,22 @@ export class ModelRegistry {
         );
   }
 
+  createFallbackEndpoint(modelName: string, provider: ProviderName): Endpoint {
+    return {
+      providerModelId: modelName,
+      modelId: modelName as ModelName,
+      ptbEnabled: false,
+      provider,
+      pricing: {
+        prompt: 0,
+        completion: 0,
+      },
+      contextLength: 0,
+      maxCompletionTokens: 0,
+      supportedParameters: [],
+    };
+  }
+
   /**
    * Get all endpoints for a model (sorted by cost, cheapest first)
    */
@@ -176,6 +192,7 @@ export const {
   getAllModelIds,
   getAllModelsWithIds,
   getEndpoint,
+  createFallbackEndpoint,
   getModelEndpoints,
   getPtbEndpoints,
   getByokEndpoints,
