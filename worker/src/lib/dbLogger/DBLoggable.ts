@@ -10,7 +10,11 @@ import { RequestResponseManager } from "../managers/RequestResponseManager";
 import { AsyncLogModel } from "../models/AsyncLog";
 import { HeliconeHeaders } from "../models/HeliconeHeaders";
 import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
-import { Prompt2025Settings, PromptSettings, RequestWrapper } from "../RequestWrapper";
+import {
+  Prompt2025Settings,
+  PromptSettings,
+  RequestWrapper,
+} from "../RequestWrapper";
 import { INTERNAL_ERRORS } from "../util/constants";
 import { withTimeout } from "../util/helpers";
 import { Result, err, ok } from "../util/results";
@@ -215,7 +219,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
         : new Date(new Date().getTime() + 1000),
       timeToFirstToken: async () =>
         asyncLogModel.timing
-          ? Number(asyncLogModel.timing.timeToFirstToken) ?? null
+          ? (Number(asyncLogModel.timing.timeToFirstToken) ?? null)
           : null,
     },
     tokenCalcUrl: env.VALHALLA_URL,
@@ -225,7 +229,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
 // Represents an object that can be logged to the database
 export class DBLoggable {
   private response: DBLoggableProps["response"];
-  private request: DBLoggableProps["request"];
+  request: DBLoggableProps["request"];
   private timing: DBLoggableProps["timing"];
   private provider: Provider;
   private tokenCalcUrl: string;
@@ -561,8 +565,8 @@ export class DBLoggable {
       {
         cost: number;
         model: string;
-        promptTokens: number;
-        completionTokens: number;
+        promptTokens?: number;
+        completionTokens?: number;
         promptCacheWriteTokens: number;
         promptCacheReadTokens: number;
       } | null,
@@ -603,15 +607,19 @@ export class DBLoggable {
         console.error(`Error checking rate limit: ${e}`);
       }
 
-      await this.useKafka(
-        db,
-        authParams,
-        S3_ENABLED,
-        orgRateLimit,
-        requestHeaders,
-        cachedHeaders,
-        cacheSettings
-      );
+      try {
+        await this.useKafka(
+          db,
+          authParams,
+          S3_ENABLED,
+          orgRateLimit,
+          requestHeaders,
+          cachedHeaders,
+          cacheSettings
+        );
+      } catch (e) {
+        console.error(`Error logging: ${e}`);
+      }
 
       // THIS IS ONLY USED FOR COST CALCULATION ON RATELIMITING
       const readResponse = await this.readResponse();
@@ -631,20 +639,24 @@ export class DBLoggable {
             (readResponse.data?.response.completion_tokens ?? 0) +
             (readResponse.data?.response.prompt_tokens ?? 0),
           provider: this.request.provider ?? "",
-          prompt_cache_write_tokens: readResponse.data?.response?.prompt_cache_write_tokens ?? 0,
-          prompt_cache_read_tokens: readResponse.data?.response?.prompt_cache_read_tokens ?? 0,
-        }) ?? 0;
+          prompt_cache_write_tokens:
+            readResponse.data?.response?.prompt_cache_write_tokens ?? 0,
+          prompt_cache_read_tokens:
+            readResponse.data?.response?.prompt_cache_read_tokens ?? 0,
+        });
 
       return ok({
         cost,
         model,
-        promptTokens: readResponse.data?.response?.prompt_tokens ?? 0,
-        completionTokens: readResponse.data?.response?.completion_tokens ?? 0,
-        promptCacheWriteTokens: readResponse.data?.response?.prompt_cache_write_tokens ?? 0,
-        promptCacheReadTokens: readResponse.data?.response?.prompt_cache_read_tokens ?? 0,
+        promptTokens: readResponse.data?.response?.prompt_tokens ?? undefined,
+        completionTokens: readResponse.data?.response?.completion_tokens ?? undefined,
+        promptCacheWriteTokens:
+          readResponse.data?.response?.prompt_cache_write_tokens ?? 0,
+        promptCacheReadTokens:
+          readResponse.data?.response?.prompt_cache_read_tokens ?? 0,
       });
     } catch (error) {
-      return err("Error logging");
+      return err("Error getting auth params");
     }
   }
 

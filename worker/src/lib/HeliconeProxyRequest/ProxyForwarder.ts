@@ -31,14 +31,16 @@ import { RequestResponseManager } from "../managers/RequestResponseManager";
 import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
 import { RateLimitManager } from "../managers/RateLimitManager";
 import { SentryManager } from "../managers/SentryManager";
-import { STRIPE_INPUT_TOKEN_EVENT_NAME, StripeManager } from "../managers/StripeManager";
+import { StripeManager } from "../managers/StripeManager";
 import { isError } from "../../../../packages/common/result";
+import { EscrowInfo } from "../util/aiGateway";
 
 export async function proxyForwarder(
   request: RequestWrapper,
   env: Env,
   ctx: ExecutionContext,
-  provider: Provider
+  provider: Provider,
+  escrowInfo?: EscrowInfo
 ): Promise<Response> {
   const { data: proxyRequest, error: proxyRequestError } =
     await new HeliconeProxyRequestMapper(
@@ -100,10 +102,14 @@ export async function proxyForwarder(
             ctx.waitUntil(
               log(
                 loggable,
-                "false", // don't push body to S3
-                false, // don't rate limit cache hit
+                request,
+                proxyRequest,
+                env,
+                ctx,
+                "false", // S3_ENABLED
                 cachedResponse,
-                cacheSettings // send them cache settings hehe
+                cacheSettings,
+                escrowInfo
               )
             );
 
@@ -213,7 +219,19 @@ export async function proxyForwarder(
           responseBuilder.setHeader(key, value);
         });
 
-        ctx.waitUntil(log(loggable));
+        ctx.waitUntil(
+          log(
+            loggable,
+            request,
+            proxyRequest,
+            env,
+            ctx,
+            undefined,
+            undefined,
+            undefined,
+            escrowInfo
+          )
+        );
 
         const responseContent = {
           body: JSON.stringify({
@@ -271,7 +289,19 @@ export async function proxyForwarder(
         });
       }
 
-      ctx.waitUntil(log(moderationRes.loggable));
+      ctx.waitUntil(
+        log(
+          moderationRes.loggable,
+          request,
+          proxyRequest,
+          env,
+          ctx,
+          undefined,
+          undefined,
+          undefined,
+          escrowInfo
+        )
+      );
 
       if (moderationRes.isModerated) {
         return moderationRes.response;
@@ -329,7 +359,7 @@ export async function proxyForwarder(
                 await sentryManager.sendError(
                   "Failed to save to cache",
                   error instanceof Error
-                    ? error.stack ?? error.message
+                    ? (error.stack ?? error.message)
                     : String(error)
                 );
                 console.error("Failed to save to cache:", error);
@@ -349,66 +379,165 @@ export async function proxyForwarder(
     responseBuilder.setHeader("Helicone-Cache", "MISS");
   }
 
-  async function log(
-    loggable: DBLoggable,
-    S3_ENABLED?: Env["S3_ENABLED"],
-    isCacheMiss = true,
-    cachedResponse?: Response,
-    cacheSettings?: CacheSettings
+  if (
+    request?.heliconeHeaders?.heliconeAuth ||
+    request?.heliconeHeaders.heliconeAuthV2 ||
+    request.heliconeProxyKeyId
   ) {
-    const { data: auth, error: authError } = await request.auth();
-
-    if (authError !== null) {
-      console.error("Error getting auth", authError);
-      return;
-    }
-    const supabase = createClient(
-      env.SUPABASE_URL,
-      env.SUPABASE_SERVICE_ROLE_KEY
+    ctx.waitUntil(
+      log(
+        loggable,
+        request,
+        proxyRequest,
+        env,
+        ctx,
+        undefined,
+        undefined,
+        undefined,
+        escrowInfo
+      )
     );
-    const res = await loggable.log(
-      {
-        clickhouse: new ClickhouseClientWrapper(env),
-        supabase: supabase,
-        dbWrapper: new DBWrapper(env, auth),
-        queue: new RequestResponseStore(
-          createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-          new DBQueryTimer(ctx, {
-            enabled: (env.DATADOG_ENABLED ?? "false") === "true",
-            apiKey: env.DATADOG_API_KEY,
-            endpoint: env.DATADOG_ENDPOINT,
-          }),
-          new Valhalla(env.VALHALLA_URL, auth),
-          new ClickhouseClientWrapper(env),
-          env.FALLBACK_QUEUE,
-          env.REQUEST_AND_RESPONSE_QUEUE_KV
+  }
+
+  return responseBuilder.build({
+    body: response.body,
+    inheritFrom: response,
+    status: response.status,
+  });
+}
+
+function parseLatestMessage(
+  proxyRequest: HeliconeProxyRequest
+): Result<LatestMessage, string> {
+  try {
+    return {
+      error: null,
+      data: JSON.parse(
+        proxyRequest.bodyText ?? ""
+      ).messages.pop() as LatestMessage,
+    };
+  } catch (error) {
+    console.error("Error parsing latest message:", error);
+    return {
+      error: "Failed to parse the latest message.",
+      data: null,
+    };
+  }
+}
+
+type LatestMessage = {
+  role?: string;
+  content?: string;
+};
+
+async function log(
+  loggable: DBLoggable,
+  request: RequestWrapper,
+  proxyRequest: HeliconeProxyRequest,
+  env: Env,
+  ctx: ExecutionContext,
+  S3_ENABLED?: Env["S3_ENABLED"],
+  cachedResponse?: Response,
+  cacheSettings?: CacheSettings,
+  escrowInfo?: EscrowInfo
+) {
+  const { data: auth, error: authError } = await request.auth();
+
+  if (authError !== null) {
+    console.error("Error getting auth", authError);
+    return;
+  }
+  const supabase = createClient(
+    env.SUPABASE_URL,
+    env.SUPABASE_SERVICE_ROLE_KEY
+  );
+  const res = await loggable.log(
+    {
+      clickhouse: new ClickhouseClientWrapper(env),
+      supabase: supabase,
+      dbWrapper: new DBWrapper(env, auth),
+      queue: new RequestResponseStore(
+        createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+        new DBQueryTimer(ctx, {
+          enabled: (env.DATADOG_ENABLED ?? "false") === "true",
+          apiKey: env.DATADOG_API_KEY,
+          endpoint: env.DATADOG_ENDPOINT,
+        }),
+        new Valhalla(env.VALHALLA_URL, auth),
+        new ClickhouseClientWrapper(env),
+        env.FALLBACK_QUEUE,
+        env.REQUEST_AND_RESPONSE_QUEUE_KV
+      ),
+      requestResponseManager: new RequestResponseManager(
+        new S3Client(
+          env.S3_ACCESS_KEY ?? "",
+          env.S3_SECRET_KEY ?? "",
+          env.S3_ENDPOINT ?? "",
+          env.S3_BUCKET_NAME ?? "",
+          env.S3_REGION ?? "us-west-2"
         ),
-        requestResponseManager: new RequestResponseManager(
-          new S3Client(
-            env.S3_ACCESS_KEY ?? "",
-            env.S3_SECRET_KEY ?? "",
-            env.S3_ENDPOINT ?? "",
-            env.S3_BUCKET_NAME ?? "",
-            env.S3_REGION ?? "us-west-2"
-          ),
-          createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY)
-        ),
-        producer: new HeliconeProducer(env),
-      },
-      S3_ENABLED ?? env.S3_ENABLED ?? "true",
-      proxyRequest?.requestWrapper.heliconeHeaders,
-      cachedResponse ? cachedResponse.headers : undefined,
-      cacheSettings ?? undefined
+        createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY)
+      ),
+      producer: new HeliconeProducer(env),
+    },
+    S3_ENABLED ?? env.S3_ENABLED ?? "true",
+    proxyRequest?.requestWrapper.heliconeHeaders,
+    cachedResponse ? cachedResponse.headers : undefined,
+    cacheSettings ?? undefined
+  );
+  const finalRateLimitOptions = proxyRequest.rateLimitOptions;
+
+  if (res.error !== null) {
+    console.error("Error logging", res.error);
+  }
+  const db = new DBWrapper(env, auth);
+  const { data: orgData, error: orgError } = await db.getAuthParams();
+  if (!orgData) {
+    console.error(
+      "Could not get org data for request w/ id: ",
+      proxyRequest.requestId
     );
+    return;
+  }
+  // regardless of cache status, finalize the escrow
+  const walletId = env.WALLET.idFromName(orgData.organizationId);
+  const walletStub = env.WALLET.get(walletId);
 
-    if (res.error !== null) {
-      console.error("Error logging", res.error);
+  const cloudBillingEnabled =
+    proxyRequest?.requestWrapper.heliconeHeaders.cloudBillingEnabled;
+  if (cloudBillingEnabled && res.data && escrowInfo) {
+    const cost = res.data.cost;
+    try {
+      const result = await walletStub.finalizeEscrow(orgData.organizationId, escrowInfo.escrowId, cost);
+      if (result.error) {
+        console.error(
+          `Failed to finalize escrow ${escrowInfo.escrowId}:`,
+          result.error
+        );
+      } else {
+        console.debug(
+          `Escrow ${escrowInfo.escrowId} finalized: charged ${cost}`
+        );
+      }
+    } catch (error) {
+      console.error(`Error finalizing escrow ${escrowInfo.escrowId}:`, error);
     }
+  } else if (cloudBillingEnabled) {
+    if (!escrowInfo) {
+      console.error("No escrow info, could not finalize escrow");
+      // this means there's a bug in our worker code and we need to fix it,
+      // in order to prevent users abusing this bug and spending our cloud
+      // credits without us being able to charge them. to prevent abuse we
+      // temporarily block their org from using cloud billing until we fix
+      // the bug and purge the disallow list
+      await walletStub.addToDisallowList(proxyRequest.requestId);
+    }
+  }
 
-    if (isCacheMiss) {
-      const db = new DBWrapper(env, auth);
-      const { data: orgData, error: orgError } = await db.getAuthParams();
-      if (proxyRequest && finalRateLimitOptions && !orgError) {
+  // if not a cached response, incur rate limits
+  if (cachedResponse === undefined || cachedResponse === null) {
+    if (proxyRequest && finalRateLimitOptions && !orgError) {
+      try {
         await updateRateLimitCounter({
           organizationId: orgData?.organizationId,
           heliconeProperties:
@@ -418,89 +547,53 @@ export async function proxyForwarder(
           userId: proxyRequest.userId,
           cost: res.data?.cost ?? 0,
         });
-      }
-
-      console.log("post processing response....");
-      console.log("res.data ", res.data);
-
-      if (orgData?.organizationId) {
-        // TODO: more durable/reliable way to handle orgData being null
-        const walletDO = env.WALLET.get(env.WALLET.idFromName(orgData?.organizationId));
-        const cloudBillingEnabled = proxyRequest?.requestWrapper.heliconeHeaders.cloudBillingEnabled;
-        const cost = res.data?.cost ?? 0;
-        console.log("cloudBillingEnabled", cloudBillingEnabled);
-        if (cloudBillingEnabled) {
-          console.log("going to try to deduct baalance");
-          if (cost === 0) {
-            walletDO.addUnknownCost(proxyRequest.requestId);
-          } else {
-            const costInCents = cost * 100;
-            console.log("costInCents", costInCents);
-            walletDO.deductBalance(orgData?.organizationId, costInCents);
-          }
-          
-          if (res.data && orgData.stripeCustomerId) {
-            const stripeManager = new StripeManager(
-              env.STRIPE_WEBHOOK_SECRET,
-              env.STRIPE_SECRET_KEY,
-              env.WALLET
-            );
-            const meterEvent = await stripeManager.emitTokenUsage(
-              orgData.stripeCustomerId,
-              res.data
-            );
-            if (isError(meterEvent)) {
-              console.error("Error emitting token usage", meterEvent.error);
-            } else {
-              console.log("successfully emitted token usage");
-            }
-          } else if (res.data) {
-            // TODO: more durable/reliable way to handle this
-            console.error("No stripe customer id found");
-          } else {
-            // TODO: more durable/reliable way to handle this
-            console.error("No data to emit token usage");
-          }
-        }
+      } catch (error) {
+        console.error("Error updating rate limit counter", error);
       }
     }
-  }
 
-  if (
-    request?.heliconeHeaders?.heliconeAuth ||
-    request?.heliconeHeaders.heliconeAuthV2 ||
-    request.heliconeProxyKeyId
-  ) {
-    ctx.waitUntil(log(loggable));
-  }
+    console.log("post processing response....");
+    console.log("res.data ", res.data);
 
-  return responseBuilder.build({
-    body: response.body,
-    inheritFrom: response,
-    status: response.status,
-  });
-
-  function parseLatestMessage(
-    proxyRequest: HeliconeProxyRequest
-  ): Result<LatestMessage, string> {
-    try {
-      return {
-        error: null,
-        data: JSON.parse(
-          proxyRequest.bodyText ?? ""
-        ).messages.pop() as LatestMessage,
-      };
-    } catch (error) {
-      console.error("Error parsing latest message:", error);
-      return {
-        error: "Failed to parse the latest message.",
-        data: null,
-      };
+    // and emit stripe token usage if applicable
+    if (
+      cloudBillingEnabled &&
+      orgData.stripeCustomerId &&
+      res.data &&
+      res.data.promptTokens &&
+      res.data.completionTokens
+    ) {
+      const stripeManager = new StripeManager(
+        env.STRIPE_WEBHOOK_SECRET,
+        env.STRIPE_SECRET_KEY,
+        env.WALLET
+      );
+      const meterEvent = await stripeManager.emitTokenUsage(
+        orgData.stripeCustomerId,
+        {
+          model: res.data.model,
+          promptTokens: res.data.promptTokens,
+          completionTokens: res.data.completionTokens,
+          promptCacheWriteTokens: res.data.promptCacheWriteTokens,
+          promptCacheReadTokens: res.data.promptCacheReadTokens,
+        }
+      );
+      if (isError(meterEvent)) {
+        console.error("Error emitting token usage", meterEvent.error);
+      } else {
+        console.log("successfully emitted token usage");
+      }
+    } else if (cloudBillingEnabled) {
+      if (!orgData.stripeCustomerId) {
+        console.error("could not emit token usage to stripe");
+        await walletStub.addToDisallowList(proxyRequest.requestId);
+      } else if (!escrowInfo) {
+        // already added to disallow list, this branch is a type guard to
+        // allow accessing escrowInfo.provider and escrowInfo.model
+      } else {
+        console.error("could not parse token usage");
+        await walletStub.addToDisallowList(proxyRequest.requestId, escrowInfo.provider, escrowInfo.model);
+      }
     }
   }
 }
-
-type LatestMessage = {
-  role?: string;
-  content?: string;
-};

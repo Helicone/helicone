@@ -9,6 +9,7 @@ import {
   providers,
 } from "@helicone-package/cost/providers/mappings";
 import { BaseRouter } from "./routerFactory";
+import { EscrowInfo } from "../lib/util/aiGateway";
 
 function validateURL(url: string) {
   try {
@@ -165,10 +166,11 @@ function getProviderFromTargetUrl(targetBaseUrl: string | null): Provider {
   return targetBaseUrlLowerCase as Provider;
 }
 
-const gatewayForwarder = async (
+export const gatewayForwarder = async (
   targetProps: {
     targetBaseUrl: string | null;
     setBaseURLOverride: (url: string) => void;
+    escrowInfo?: EscrowInfo;
   },
   requestWrapper: RequestWrapper,
   env: Env,
@@ -189,7 +191,8 @@ const gatewayForwarder = async (
     requestWrapper,
     env,
     ctx,
-    provderResults.provider
+    provderResults.provider,
+    targetProps.escrowInfo
   );
 };
 
@@ -279,5 +282,3 @@ export const getGatewayAPIRouter = (router: BaseRouter) => {
   return router;
 };
 
-// Export the gatewayForwarder so the generate router can reuse its logic
-export { gatewayForwarder };
