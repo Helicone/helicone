@@ -498,7 +498,7 @@ export async function buildRequestBody(
     return ok(result);
   } catch (error) {
     return err(
-      error instanceof Error ? error.message : "Failed to authenticate request"
+      error instanceof Error ? error.message : "Failed to build request body"
     );
   }
 }
