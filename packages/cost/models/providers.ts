@@ -13,6 +13,7 @@ import type {
   ProviderName,
   AuthContext,
   AuthResult,
+  RequestBodyContext,
 } from "./types";
 
 export const providers = {
@@ -80,9 +81,15 @@ export const providers = {
       if (!context.apiKey || !context.secretKey) {
         throw new Error("Bedrock requires both apiKey and secretKey");
       }
-      
-      if (!context.requestMethod || !context.requestUrl || !context.requestBody) {
-        throw new Error("Bedrock authentication requires requestMethod, requestUrl, and requestBody");
+
+      if (
+        !context.requestMethod ||
+        !context.requestUrl ||
+        !context.requestBody
+      ) {
+        throw new Error(
+          "Bedrock authentication requires requestMethod, requestUrl, and requestBody"
+        );
       }
 
       const awsRegion = context.config.region || "us-west-1";
@@ -98,7 +105,7 @@ export const providers = {
 
       const headers = new Headers();
       const forwardToHost = `bedrock-runtime.${awsRegion}.amazonaws.com`;
-      
+
       // Required headers for AWS requests
       headers.set("host", forwardToHost);
       headers.set("content-type", "application/json");
@@ -124,6 +131,23 @@ export const providers = {
       }
 
       return { headers: signedHeaders };
+    },
+    buildRequestBody: (context) => {
+      if (context.model.includes("claude-")) {
+        const anthropicBody =
+          context.bodyMapping === "OPENAI"
+            ? context.toAnthropic(context.parsedBody)
+            : context.parsedBody;
+        const updatedBody = {
+          ...anthropicBody,
+          anthropic_version: "bedrock-2023-05-31",
+          model: undefined,
+        };
+        return JSON.stringify(updatedBody);
+      }
+
+      // TODO: we haven't had to use this yet so check it out once when we do
+      return JSON.stringify(context.parsedBody);
     },
     pricingPages: ["https://aws.amazon.com/bedrock/pricing/"],
     modelPages: [
@@ -151,6 +175,23 @@ export const providers = {
           Authorization: `Bearer ${context.apiKey || ""}`,
         },
       };
+    },
+    buildRequestBody: (context) => {
+      if (context.model.includes("claude-")) {
+        const anthropicBody =
+          context.bodyMapping === "OPENAI"
+            ? context.toAnthropic(context.parsedBody)
+            : context.parsedBody;
+        const updatedBody = {
+          ...anthropicBody,
+          anthropic_version: "vertex-2023-10-16",
+          model: undefined,
+        };
+        return JSON.stringify(updatedBody);
+      }
+
+      // TODO: we haven't had to use this yet so check it out once when we do
+      return JSON.stringify(context.parsedBody);
     },
     pricingPages: [
       "https://cloud.google.com/vertex-ai/generative-ai/pricing",
@@ -421,6 +462,39 @@ export async function authenticateRequest(
       endpoint,
     };
     const result = await provider.authenticate(authContext);
+    return ok(result);
+  } catch (error) {
+    return err(
+      error instanceof Error ? error.message : "Failed to authenticate request"
+    );
+  }
+}
+
+export async function buildRequestBody(
+  endpoint: Endpoint,
+  context: RequestBodyContext
+): Promise<Result<string>> {
+  const providerResult = getProvider(endpoint.provider);
+  if (providerResult.error) {
+    return err(providerResult.error);
+  }
+
+  const provider = providerResult.data;
+  if (!provider) {
+    return err(`Provider data is null for: ${endpoint.provider}`);
+  }
+
+  if (!provider.buildRequestBody) {
+    return ok(
+      JSON.stringify({
+        ...context.parsedBody,
+        model: context.model,
+      })
+    );
+  }
+
+  try {
+    const result = await provider.buildRequestBody(context);
     return ok(result);
   } catch (error) {
     return err(

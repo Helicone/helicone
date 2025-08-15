@@ -244,6 +244,14 @@ export interface AuthResult {
   headers: Record<string, string>;
 }
 
+export interface RequestBodyContext {
+  parsedBody: any;
+  model: string;
+  provider: ProviderName;
+  bodyMapping: "OPENAI" | "NO_MAPPING";
+  toAnthropic: (body: any) => any;
+}
+
 export interface ProviderConfig {
   id: ProviderName;
   baseUrl: string;
@@ -251,6 +259,7 @@ export interface ProviderConfig {
   buildUrl: (endpoint: Endpoint, config: UserConfig) => string;
   buildModelId?: (endpoint: Endpoint, config: UserConfig) => string;
   authenticate?: (context: AuthContext) => Promise<AuthResult> | AuthResult;
+  buildRequestBody?: (context: RequestBodyContext) => Promise<string> | string;
   requiredConfig?: Array<keyof UserConfig>;
   pricingPages?: string[];
   modelPages?: string[];
