@@ -125,8 +125,6 @@ export interface Endpoint extends BaseConfig {
   provider: ProviderName;
   providerModelId: string;
   supportedParameters: StandardParameter[];
-  endpointKey: string;
-  deployment?: string;
 }
 
 export interface UserEndpointConfig {

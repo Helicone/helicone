@@ -54,9 +54,7 @@ export const endpoints = {
     ],
     ptbEnabled: false,
     endpointConfigs: {
-      global: {
-        providerModelId: "claude-3-5-haiku@20241022",
-      },
+      global: {},
     },
   },
 

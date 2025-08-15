@@ -4,26 +4,23 @@ import type { Endpoint, ModelProviderConfig, EndpointConfig } from "./types";
 
 function mergeConfigs(
   base: ModelProviderConfig,
-  deployment: EndpointConfig,
-  deploymentKey: EndpointId
+  endpointConfig: EndpointConfig
 ): Endpoint {
   return {
     provider: base.provider,
-    providerModelId: deployment.providerModelId ?? base.providerModelId,
-    pricing: deployment.pricing ?? base.pricing,
-    contextLength: deployment.contextLength ?? base.contextLength,
+    providerModelId: endpointConfig.providerModelId ?? base.providerModelId,
+    pricing: endpointConfig.pricing ?? base.pricing,
+    contextLength: endpointConfig.contextLength ?? base.contextLength,
     maxCompletionTokens:
-      deployment.maxCompletionTokens ?? base.maxCompletionTokens,
-    ptbEnabled: deployment.ptbEnabled ?? base.ptbEnabled,
-    version: deployment.version ?? base.version,
+      endpointConfig.maxCompletionTokens ?? base.maxCompletionTokens,
+    ptbEnabled: endpointConfig.ptbEnabled ?? base.ptbEnabled,
+    version: endpointConfig.version ?? base.version,
     supportedParameters: base.supportedParameters,
-    endpointKey: deploymentKey,
-    deployment: deploymentKey.split(":")[2],
   };
 }
 
 export function buildIndexes(
-  endpointConfigs: Record<string, ModelProviderConfig>
+  modelProviderConfigs: Record<string, ModelProviderConfig>
 ): {
   endpointConfigIdToEndpointConfig: Map<
     ModelProviderConfigId,
@@ -49,11 +46,11 @@ export function buildIndexes(
     new Map();
   const modelToProviders: Map<ModelName, Set<ProviderName>> = new Map();
 
-  for (const [configKey, config] of Object.entries(endpointConfigs)) {
+  for (const [configKey, config] of Object.entries(modelProviderConfigs)) {
     const typedConfigKey = configKey as ModelProviderConfigId;
     const [modelName, provider] = configKey.split(":") as [
       ModelName,
-      ProviderName
+      ProviderName,
     ];
 
     // Store base config for BYOK
@@ -82,7 +79,7 @@ export function buildIndexes(
       config.endpointConfigs
     )) {
       const endpointKey = `${configKey}:${deploymentId}` as EndpointId;
-      const endpoint = mergeConfigs(config, deploymentConfig, endpointKey);
+      const endpoint = mergeConfigs(config, deploymentConfig);
       endpointIdToEndpoint.set(endpointKey, endpoint);
 
       // Add to PTB index if enabled

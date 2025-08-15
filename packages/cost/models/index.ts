@@ -17,17 +17,24 @@ export {
   getAllModels,
   getAllModelIds,
   getAllModelsWithIds,
-  getPtbEndpoint,
   getPtbEndpoints,
+  getPtbEndpointById,
+  getPtbEndpointsByModel,
   getPtbEndpointsByProvider,
   getProviderModels,
   getModelProviderConfig,
   getModelProviderConfigs,
+  type ModelName,
+  type ModelProviderConfigId,
+  type EndpointId,
 } from "./registry";
 
-// Backward compatibility aliases for worker
-export { getPtbEndpoints as getEndpoints } from "./registry";
-export type { Endpoint as ModelProvider } from "./types";
+export type { Endpoint, ModelProviderConfig, ProviderConfig } from "./types";
 
 // Export provider utilities
-export { getProvider, buildEndpointUrl, buildModelId } from "./providers";
+export {
+  getProvider,
+  buildEndpointUrl,
+  buildModelId,
+  type ProviderName,
+} from "./providers";

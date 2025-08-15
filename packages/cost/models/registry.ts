@@ -66,18 +66,37 @@ export class ModelRegistry {
     return ok(allModels);
   }
 
-  getPtbEndpoint(
+  getPtbEndpointById(
     model: string,
     provider: string,
     endpointConfigId: string = "*"
   ): Result<Endpoint> {
     const endpointId = `${model}:${provider}:${endpointConfigId}`;
     const endpoint = indexes.endpointIdToEndpoint.get(endpointId as EndpointId);
-
     return endpoint ? ok(endpoint) : err(`Endpoint not found: ${endpointId}`);
   }
 
-  getPtbEndpoints(model: string): Result<Endpoint[]> {
+  getPtbEndpoints(
+    model: string, // Model name (gpt-4o, claude-3-5-haiku, etc)
+    provider?: string, // Provider name (openai, anthropic, etc)
+    endpointConfigId?: string // Deployment/region name (us-east-1, etc)
+  ): Result<Endpoint[]> {
+    // Case 1: Model + Provider + EndpointConfigId - return specific endpoint as array
+    if (provider && endpointConfigId) {
+      const result = this.getPtbEndpointById(model, provider, endpointConfigId);
+      return result.error ? result : ok([result.data!]);
+    }
+
+    // Case 2: Model + Provider - return all endpoints for that provider
+    if (provider) {
+      return this.getPtbEndpointsByProvider(model, provider);
+    }
+
+    // Case 3: Model only - return all PTB endpoints
+    return this.getPtbEndpointsByModel(model);
+  }
+
+  getPtbEndpointsByModel(model: string): Result<Endpoint[]> {
     const endpoints = indexes.modelToPtbEndpoints.get(model as ModelName) || [];
     return ok(endpoints);
   }
@@ -140,8 +159,9 @@ export const {
   getAllModels,
   getAllModelIds,
   getAllModelsWithIds,
-  getPtbEndpoint,
   getPtbEndpoints,
+  getPtbEndpointById,
+  getPtbEndpointsByModel,
   getPtbEndpointsByProvider,
   getProviderModels,
   getModelProviderConfig,
