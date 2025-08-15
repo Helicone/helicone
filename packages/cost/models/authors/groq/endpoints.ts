@@ -9,7 +9,7 @@ export const groqEndpoints = {
   // "llama-3.3-70b-versatile:groq": {
   //   modelId: "llama-3.3-70b-versatile",
   //   provider: "groq",
-  //   providerModelId: "llama-3.3-70b-versatile",
+  //   baseModelId: "llama-3.3-70b-versatile",
   //   pricing: {
   //     prompt: 0, // TODO: set from Groq official pricing
   //     completion: 0,
@@ -28,7 +28,7 @@ export const groqEndpoints = {
   // "llama-3.1-8b-instant:groq": {
   //   modelId: "llama-3.1-8b-instant",
   //   provider: "groq",
-  //   providerModelId: "llama-3.1-8b-instant",
+  //   baseModelId: "llama-3.1-8b-instant",
   //   pricing: {
   //     prompt: 0,
   //     completion: 0,
@@ -47,7 +47,7 @@ export const groqEndpoints = {
   // "llama-guard-4-12b:groq": {
   //   modelId: "llama-guard-4-12b",
   //   provider: "groq",
-  //   providerModelId: "meta-llama/llama-guard-4-12b",
+  //   baseModelId: "meta-llama/llama-guard-4-12b",
   //   pricing: {
   //     prompt: 0,
   //     completion: 0,
@@ -66,7 +66,7 @@ export const groqEndpoints = {
   // "deepseek-r1-distill-llama-70b:groq": {
   //   modelId: "deepseek-r1-distill-llama-70b",
   //   provider: "groq",
-  //   providerModelId: "deepseek-r1-distill-llama-70b",
+  //   baseModelId: "deepseek-r1-distill-llama-70b",
   //   pricing: {
   //     prompt: 0,
   //     completion: 0,
@@ -85,7 +85,7 @@ export const groqEndpoints = {
   // "llama-4-maverick-17b-128e-instruct:groq": {
   //   modelId: "llama-4-maverick-17b-128e-instruct",
   //   provider: "groq",
-  //   providerModelId: "meta-llama/llama-4-maverick-17b-128e-instruct",
+  //   baseModelId: "meta-llama/llama-4-maverick-17b-128e-instruct",
   //   pricing: {
   //     prompt: 0,
   //     completion: 0,
@@ -104,7 +104,7 @@ export const groqEndpoints = {
   // "llama-4-scout-17b-16e-instruct:groq": {
   //   modelId: "llama-4-scout-17b-16e-instruct",
   //   provider: "groq",
-  //   providerModelId: "meta-llama/llama-4-scout-17b-16e-instruct",
+  //   baseModelId: "meta-llama/llama-4-scout-17b-16e-instruct",
   //   pricing: {
   //     prompt: 0,
   //     completion: 0,
@@ -123,7 +123,7 @@ export const groqEndpoints = {
   // "qwen3-32b:groq": {
   //   modelId: "qwen3-32b",
   //   provider: "groq",
-  //   providerModelId: "qwen/qwen3-32b",
+  //   baseModelId: "qwen/qwen3-32b",
   //   pricing: {
   //     prompt: 0,
   //     completion: 0,

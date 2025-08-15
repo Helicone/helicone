@@ -10,7 +10,7 @@ export const cohereEndpoints = {
   // /* "command-a-03-2025:cohere": {
   //   modelId: "command-a-03-2025",
   //   provider: "cohere",
-  //   providerModelId: "command-a-03-2025",
+  //   baseModelId: "command-a-03-2025",
   //   pricing: {
   //     prompt: 3.0, // USD per million tokens (estimated flagship pricing)
   //     completion: 15.0, // USD per million tokens (estimated flagship pricing)
@@ -32,7 +32,7 @@ export const cohereEndpoints = {
   // "command-r-plus:cohere": {
   //   modelId: "command-r-plus",
   //   provider: "cohere",
-  //   providerModelId: "command-r-plus",
+  //   baseModelId: "command-r-plus",
   //   pricing: {
   //     prompt: 2.5, // USD per million tokens
   //     completion: 10.0, // USD per million tokens
@@ -54,7 +54,7 @@ export const cohereEndpoints = {
   // "command-r:cohere": {
   //   modelId: "command-r",
   //   provider: "cohere",
-  //   providerModelId: "command-r",
+  //   baseModelId: "command-r",
   //   pricing: {
   //     prompt: 0.5, // USD per million tokens
   //     completion: 1.5, // USD per million tokens
@@ -76,7 +76,7 @@ export const cohereEndpoints = {
   // "command-light:cohere": {
   //   modelId: "command-light",
   //   provider: "cohere",
-  //   providerModelId: "command-light",
+  //   baseModelId: "command-light",
   //   pricing: {
   //     prompt: 0.3, // USD per million tokens
   //     completion: 0.6, // USD per million tokens
@@ -96,7 +96,7 @@ export const cohereEndpoints = {
   // "c4ai-aya-expanse-32b:cohere": {
   //   modelId: "c4ai-aya-expanse-32b",
   //   provider: "cohere",
-  //   providerModelId: "c4ai-aya-expanse-32b",
+  //   baseModelId: "c4ai-aya-expanse-32b",
   //   pricing: {
   //     prompt: 0.5, // USD per million tokens
   //     completion: 1.5, // USD per million tokens
@@ -116,7 +116,7 @@ export const cohereEndpoints = {
   // "c4ai-aya-expanse-8b:cohere": {
   //   modelId: "c4ai-aya-expanse-8b",
   //   provider: "cohere",
-  //   providerModelId: "c4ai-aya-expanse-8b",
+  //   baseModelId: "c4ai-aya-expanse-8b",
   //   pricing: {
   //     prompt: 0.5, // USD per million tokens
   //     completion: 1.5, // USD per million tokens
@@ -136,7 +136,7 @@ export const cohereEndpoints = {
   // /* "embed-english-v3.0:cohere": {
   //   modelId: "embed-english-v3.0",
   //   provider: "cohere",
-  //   providerModelId: "embed-english-v3.0",
+  //   baseModelId: "embed-english-v3.0",
   //   pricing: {
   //     prompt: 0.1, // USD per million tokens (estimated embedding pricing)
   //     completion: 0.0, // Embedding models don't have completion tokens
@@ -149,7 +149,7 @@ export const cohereEndpoints = {
   // /* "embed-multilingual-v3.0:cohere": {
   //   modelId: "embed-multilingual-v3.0",
   //   provider: "cohere",
-  //   providerModelId: "embed-multilingual-v3.0",
+  //   baseModelId: "embed-multilingual-v3.0",
   //   pricing: {
   //     prompt: 0.1, // USD per million tokens (estimated embedding pricing)
   //     completion: 0.0, // Embedding models don't have completion tokens
@@ -163,7 +163,7 @@ export const cohereEndpoints = {
   // "command-r-plus:bedrock": {
   //   modelId: "command-r-plus",
   //   provider: "bedrock",
-  //   providerModelId: "cohere.command-r-plus-v1:0",
+  //   baseModelId: "cohere.command-r-plus-v1:0",
   //   pricing: {
   //     prompt: 3.0, // USD per million tokens (Bedrock pricing)
   //     completion: 15.0, // USD per million tokens (Bedrock pricing)
@@ -182,7 +182,7 @@ export const cohereEndpoints = {
   // "command-r:bedrock": {
   //   modelId: "command-r",
   //   provider: "bedrock",
-  //   providerModelId: "cohere.command-r-v1:0",
+  //   baseModelId: "cohere.command-r-v1:0",
   //   pricing: {
   //     prompt: 0.5, // USD per million tokens (Bedrock pricing)
   //     completion: 1.5, // USD per million tokens (Bedrock pricing)

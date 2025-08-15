@@ -4,7 +4,7 @@ export const endpoints = {
   "claude-3.7-sonnet:anthropic": {
     modelId: "claude-3.7-sonnet",
     provider: "anthropic",
-    providerModelId: "claude-3-7-sonnet-20250219",
+    baseModelId: "claude-3-7-sonnet-20250219",
     version: "20250219",
     pricing: {
       prompt: 3,
@@ -26,11 +26,10 @@ export const endpoints = {
     ptbEnabled: true,
   },
 
-  "claude-3.7-sonnet:vertex:global": {
+  "claude-3.7-sonnet:vertex": {
     modelId: "claude-3.7-sonnet",
     provider: "vertex",
-    region: "global",
-    providerModelId: "claude-3-7-sonnet@20250219",
+    baseModelId: "claude-3-7-sonnet@20250219",
     version: "vertex-2023-10-16",
     pricing: {
       prompt: 3,
@@ -50,6 +49,11 @@ export const endpoints = {
       "stop",
     ],
     ptbEnabled: true,
+    regions: {
+      "global": {
+        providerModelId: "claude-3-7-sonnet@20250219",
+      },
+    },
   },
 } satisfies Record<string, Endpoint>;
 

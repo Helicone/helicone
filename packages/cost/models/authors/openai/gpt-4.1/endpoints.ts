@@ -4,7 +4,7 @@ export const endpoints = {
   "gpt-4.1:openai": {
     modelId: "gpt-4.1",
     provider: "openai",
-    providerModelId: "gpt-4.1",
+    baseModelId: "gpt-4.1",
     pricing: {
       prompt: 2,
       completion: 8,
@@ -29,7 +29,7 @@ export const endpoints = {
   "gpt-4.1-mini:openai": {
     modelId: "gpt-4.1-mini",
     provider: "openai",
-    providerModelId: "gpt-4.1-mini",
+    baseModelId: "gpt-4.1-mini",
     pricing: {
       prompt: 0.25,
       completion: 1,
@@ -54,7 +54,7 @@ export const endpoints = {
   "gpt-4.1-nano:openai": {
     modelId: "gpt-4.1-nano",
     provider: "openai",
-    providerModelId: "gpt-4.1-nano",
+    baseModelId: "gpt-4.1-nano",
     pricing: {
       prompt: 0.1,
       completion: 0.4,

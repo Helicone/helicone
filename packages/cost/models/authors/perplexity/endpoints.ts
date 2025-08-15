@@ -9,7 +9,7 @@ export const perplexityEndpoints = {
   // "sonar-reasoning-pro:perplexity": {
   //   modelId: "sonar-reasoning-pro",
   //   provider: "perplexity",
-  //   providerModelId: "sonar-reasoning-pro",
+  //   baseModelId: "sonar-reasoning-pro",
   //   pricing: {
   //     prompt: 2,
   //     completion: 8,
@@ -31,7 +31,7 @@ export const perplexityEndpoints = {
   // "sonar-pro:perplexity": {
   //   modelId: "sonar-pro",
   //   provider: "perplexity",
-  //   providerModelId: "sonar-pro",
+  //   baseModelId: "sonar-pro",
   //   pricing: {
   //     prompt: 3,
   //     completion: 15,
@@ -51,7 +51,7 @@ export const perplexityEndpoints = {
   // "sonar:perplexity": {
   //   modelId: "sonar",
   //   provider: "perplexity",
-  //   providerModelId: "sonar",
+  //   baseModelId: "sonar",
   //   pricing: {
   //     prompt: 1,
   //     completion: 5,
@@ -71,7 +71,7 @@ export const perplexityEndpoints = {
   // "sonar-reasoning:perplexity": {
   //   modelId: "sonar-reasoning",
   //   provider: "perplexity",
-  //   providerModelId: "sonar-reasoning",
+  //   baseModelId: "sonar-reasoning",
   //   pricing: {
   //     prompt: 1,
   //     completion: 5,

@@ -199,24 +199,29 @@ export interface EndpointPerformance {
   tokensPerSecond?: number; // Generation speed
 }
 
-// ============= Endpoint Definition (The Core Type) =============
+export interface RegionConfig {
+  providerModelId: string;
+  pricing?: ModelPricing;
+  ptbEnabled?: boolean;
+  contextLength?: number;
+  maxCompletionTokens?: number;
+  version?: string;
+}
 
 export interface Endpoint {
-  // Identity
-  modelId: ModelName; // e.g., "claude-3.5-sonnet"
-  provider: ProviderName; // e.g., "bedrock"
-  region?: string; // e.g., "us-west-2"
-  version?: string; // e.g., "20250514"
+  modelId: ModelName;
+  provider: ProviderName;
+  version?: string;
 
-  // Configuration
-  providerModelId: string; // e.g., "us.anthropic.claude-3-5-sonnet-20241022-v2:0"
+  baseModelId: string;
   pricing: ModelPricing;
   contextLength: number;
   maxCompletionTokens: number;
   supportedParameters: StandardParameter[];
 
-  // Availability
-  ptbEnabled: boolean; // Can Helicone use this for pass-through billing?
+  ptbEnabled: boolean;
+
+  regions?: Record<string, RegionConfig>;
 }
 
 // ============= Provider Configuration =============

@@ -4,7 +4,7 @@ export const endpoints = {
   "o1:openai": {
     modelId: "o1",
     provider: "openai",
-    providerModelId: "o1",
+    baseModelId: "o1",
     pricing: {
       prompt: 15,
       completion: 60,
@@ -25,7 +25,7 @@ export const endpoints = {
   "o1-pro:openai": {
     modelId: "o1-pro",
     provider: "openai",
-    providerModelId: "o1-pro",
+    baseModelId: "o1-pro",
     pricing: {
       prompt: 15,
       completion: 60,
@@ -45,7 +45,7 @@ export const endpoints = {
   "o1-mini:openai": {
     modelId: "o1-mini",
     provider: "openai",
-    providerModelId: "o1-mini",
+    baseModelId: "o1-mini",
     pricing: {
       prompt: 1.1,
       completion: 4.4,

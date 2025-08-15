@@ -4,7 +4,7 @@ export const endpoints = {
   "gpt-4o:openai": {
     modelId: "gpt-4o",
     provider: "openai",
-    providerModelId: "gpt-4o",
+    baseModelId: "gpt-4o",
     pricing: {
       prompt: 2.5,
       completion: 10,
@@ -29,7 +29,7 @@ export const endpoints = {
   "gpt-4o:extended:openai": {
     modelId: "gpt-4o:extended",
     provider: "openai",
-    providerModelId: "gpt-4o-2024-08-06",
+    baseModelId: "gpt-4o-2024-08-06",
     pricing: {
       prompt: 2.5,
       completion: 10,
@@ -54,7 +54,7 @@ export const endpoints = {
   "gpt-4o-mini:openai": {
     modelId: "gpt-4o-mini",
     provider: "openai",
-    providerModelId: "gpt-4o-mini",
+    baseModelId: "gpt-4o-mini",
     pricing: {
       prompt: 0.15,
       completion: 0.6,
@@ -79,7 +79,7 @@ export const endpoints = {
   "chatgpt-4o-latest:openai": {
     modelId: "chatgpt-4o-latest",
     provider: "openai",
-    providerModelId: "chatgpt-4o-latest",
+    baseModelId: "chatgpt-4o-latest",
     pricing: {
       prompt: 5,
       completion: 20,
@@ -104,7 +104,7 @@ export const endpoints = {
   "gpt-4o-mini-search-preview:openai": {
     modelId: "gpt-4o-mini-search-preview",
     provider: "openai",
-    providerModelId: "gpt-4o-mini-search-preview",
+    baseModelId: "gpt-4o-mini-search-preview",
     pricing: {
       prompt: 0.15,
       completion: 0.6,
@@ -117,7 +117,7 @@ export const endpoints = {
   "gpt-4o-search-preview:openai": {
     modelId: "gpt-4o-search-preview",
     provider: "openai",
-    providerModelId: "gpt-4o-search-preview",
+    baseModelId: "gpt-4o-search-preview",
     pricing: {
       prompt: 2.5,
       completion: 10,

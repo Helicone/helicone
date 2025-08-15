@@ -4,7 +4,7 @@ export const endpoints = {
   "claude-3.5-haiku:anthropic": {
     modelId: "claude-3.5-haiku",
     provider: "anthropic",
-    providerModelId: "claude-3-5-haiku-20241022",
+    baseModelId: "claude-3-5-haiku-20241022",
     pricing: {
       prompt: 0.8,
       completion: 4,
@@ -29,11 +29,10 @@ export const endpoints = {
     ptbEnabled: true,
   },
 
-  "claude-3.5-haiku:vertex:global": {
+  "claude-3.5-haiku:vertex": {
     modelId: "claude-3.5-haiku",
     provider: "vertex",
-    region: "global",
-    providerModelId: "claude-3-5-haiku@20241022",
+    baseModelId: "claude-3-5-haiku@20241022",
     pricing: {
       prompt: 0.8,
       completion: 4,
@@ -52,13 +51,18 @@ export const endpoints = {
       "stop",
     ],
     ptbEnabled: false,
+    regions: {
+      "global": {
+        providerModelId: "claude-3-5-haiku@20241022",
+      },
+    },
   },
-
-  // "claude-3.5-haiku:bedrock:us-west-2": {
+  
+  // Bedrock not currently supported
+  // "claude-3.5-haiku:bedrock": {
   //   modelId: "claude-3.5-haiku",
   //   provider: "bedrock",
-  //   region: "us-west-2",
-  //   providerModelId: "us.anthropic.claude-3-5-haiku-20241022-v1:0",
+  //   baseModelId: "{region}.anthropic.claude-3-5-haiku-20241022-v1:0",
   //   pricing: {
   //     prompt: 0.8,
   //     completion: 4,
@@ -81,6 +85,11 @@ export const endpoints = {
   //     "stop",
   //   ],
   //   ptbEnabled: true,
+  //   regions: {
+  //     "us-west-2": {
+  //       providerModelId: "us.anthropic.claude-3-5-haiku-20241022-v1:0",
+  //     },
+  //   },
   // },
 } satisfies Record<string, Endpoint>;
 

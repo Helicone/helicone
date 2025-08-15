@@ -4,7 +4,7 @@ export const endpoints = {
   "o3:openai": {
     modelId: "o3",
     provider: "openai", 
-    providerModelId: "o3-2025-04-16",
+    baseModelId: "o3-2025-04-16",
     pricing: {
       prompt: 2,
       completion: 8,
@@ -24,7 +24,7 @@ export const endpoints = {
   "o3-pro:openai": {
     modelId: "o3-pro",
     provider: "openai",
-    providerModelId: "o3-pro-2025-06-10",
+    baseModelId: "o3-pro-2025-06-10",
     pricing: {
       prompt: 20,
       completion: 80,
@@ -43,7 +43,7 @@ export const endpoints = {
   "o3-mini:openai": {
     modelId: "o3-mini",
     provider: "openai",
-    providerModelId: "o3-mini",
+    baseModelId: "o3-mini",
     pricing: {
       prompt: 1.1,
       completion: 4.4,
@@ -63,7 +63,7 @@ export const endpoints = {
   "o3-mini-high:openai": {
     modelId: "o3-mini-high",
     provider: "openai",
-    providerModelId: "o3-mini-high",
+    baseModelId: "o3-mini-high",
     pricing: {
       prompt: 1.1,
       completion: 4.4,

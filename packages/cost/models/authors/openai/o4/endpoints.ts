@@ -4,7 +4,7 @@ export const endpoints = {
   "o4-mini:openai": {
     modelId: "o4-mini",
     provider: "openai",
-    providerModelId: "o4-mini",
+    baseModelId: "o4-mini",
     pricing: {
       prompt: 1.1,
       completion: 4.4,
@@ -24,7 +24,7 @@ export const endpoints = {
   "o4-mini-high:openai": {
     modelId: "o4-mini-high",
     provider: "openai",
-    providerModelId: "o4-mini-high-2025-04-16",
+    baseModelId: "o4-mini-high-2025-04-16",
     pricing: {
       prompt: 1.1,
       completion: 4.4,

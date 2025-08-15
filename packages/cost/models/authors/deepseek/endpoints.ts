@@ -9,7 +9,7 @@ export const deepseekEndpoints = {
   // "deepseek-chat:deepseek": {
   //   modelId: "deepseek-chat",
   //   provider: "deepseek",
-  //   providerModelId: "deepseek-chat",
+  //   baseModelId: "deepseek-chat",
   //   pricing: {
   //     prompt: 0.27, // USD per million tokens (cache miss, standard rate)
   //     completion: 1.1, // USD per million tokens (standard rate)
@@ -34,7 +34,7 @@ export const deepseekEndpoints = {
   // "deepseek-reasoner:deepseek": {
   //   modelId: "deepseek-reasoner",
   //   provider: "deepseek",
-  //   providerModelId: "deepseek-reasoner",
+  //   baseModelId: "deepseek-reasoner",
   //   pricing: {
   //     prompt: 0.55, // USD per million tokens (cache miss, standard rate)
   //     completion: 2.19, // USD per million tokens (standard rate)

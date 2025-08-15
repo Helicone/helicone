@@ -4,7 +4,7 @@ export const endpoints = {
   "gpt-4:openai": {
     modelId: "gpt-4",
     provider: "openai",
-    providerModelId: "gpt-4",
+    baseModelId: "gpt-4",
     pricing: {
       prompt: 30,
       completion: 60,
