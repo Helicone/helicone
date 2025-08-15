@@ -21,7 +21,7 @@ export function costOf({
 }: {
   model: string;
   provider: string;
-}) {
+}): ModelRow["cost"] | null {
   const modelLower = model?.toLowerCase();
 
   if (!modelLower) {
@@ -50,7 +50,7 @@ export function costOf({
     }
   });
 
-  return cost?.cost;
+  return cost?.cost ?? null;
 }
 
 export function costOfPrompt({
@@ -77,7 +77,7 @@ export function costOfPrompt({
   images?: number;
   perCall?: number;
   multiple?: number;
-}) {
+}): number | null {
   const cost = costOf({ model, provider });
   if (!cost) {
     return null;
