@@ -15,17 +15,19 @@ export {
   registry,
   getModel,
   getAllModels,
-  getPtbEndpoint as getEndpoint,
-  getModelEndpoints,
+  getAllModelIds,
+  getAllModelsWithIds,
+  getPtbEndpoint,
   getPtbEndpoints,
-  getByokEndpoints,
+  getPtbEndpointsByProvider,
   getProviderModels,
-  hasPtbSupport,
+  getModelProviderConfig,
+  getModelProviderConfigs,
 } from "./registry";
 
 // Backward compatibility aliases for worker
-export { getModelEndpoints as getEndpoints } from "./registry";
-export type { Endpoint as ModelEndpoint } from "./types";
+export { getPtbEndpoints as getEndpoints } from "./registry";
+export type { Endpoint as ModelProvider } from "./types";
 
 // Export provider utilities
 export { getProvider, buildEndpointUrl, buildModelId } from "./providers";

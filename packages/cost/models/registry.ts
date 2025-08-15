@@ -92,7 +92,8 @@ export class ModelRegistry {
   }
 
   getProviderModels(provider: string): Result<Set<ModelName>> {
-    const models = indexes.providerToModels.get(provider as ProviderName) || new Set();
+    const models =
+      indexes.providerToModels.get(provider as ProviderName) || new Set();
     return ok(models);
   }
 
@@ -124,9 +125,10 @@ export class ModelRegistry {
       indexes.modelToEndpointConfigs.get(model as ModelName) || [];
     return ok(configs);
   }
-  
+
   getModelProviders(model: string): Result<Set<ProviderName>> {
-    const providers = indexes.modelToProviders.get(model as ModelName) || new Set();
+    const providers =
+      indexes.modelToProviders.get(model as ModelName) || new Set();
     return ok(providers);
   }
 }
@@ -138,7 +140,7 @@ export const {
   getAllModels,
   getAllModelIds,
   getAllModelsWithIds,
-  getPtbEndpoint: getEndpoint,
+  getPtbEndpoint,
   getPtbEndpoints,
   getPtbEndpointsByProvider,
   getProviderModels,
