@@ -197,6 +197,11 @@ const sanitizeMappedContent = (
           ? message.content
           : JSON.stringify(message.content)
         : "",
+      reasoning: message.reasoning
+        ? typeof message.reasoning === "string"
+          ? message.reasoning
+          : JSON.stringify(message.reasoning)
+        : "",
     };
   };
 

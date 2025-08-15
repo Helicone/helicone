@@ -37,4 +37,5 @@ export {
   buildEndpointUrl,
   buildModelId,
   type ProviderName,
+  authenticateRequest,
 } from "./providers";

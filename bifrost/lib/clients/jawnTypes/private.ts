@@ -1092,7 +1092,9 @@ Json: JsonObject;
       } | ("none" | "auto" | "required");
       parallel_tool_calls?: boolean;
       /** @enum {string} */
-      reasoning_effort?: "low" | "medium" | "high";
+      reasoning_effort?: "minimal" | "low" | "medium" | "high";
+      /** @enum {string} */
+      verbosity?: "low" | "medium" | "high";
       /** Format: double */
       frequency_penalty?: number;
       /** Format: double */
@@ -1392,6 +1394,7 @@ Json: JsonObject;
       ending_event_id?: string;
       trigger_event_id?: string;
       start_timestamp?: string;
+      reasoning?: string;
       deleted?: boolean;
       contentArray?: components["schemas"]["Message"][];
       /** Format: double */
@@ -1463,7 +1466,9 @@ Json: JsonObject;
       frequency_penalty?: number | null;
       stop?: (string[] | string) | null;
       /** @enum {string|null} */
-      reasoning_effort?: "low" | "medium" | "high" | null;
+      reasoning_effort?: "minimal" | "low" | "medium" | "high" | null;
+      /** @enum {string|null} */
+      verbosity?: "low" | "medium" | "high" | null;
       tools?: components["schemas"]["Tool"][];
       parallel_tool_calls?: boolean | null;
       tool_choice?: {
@@ -2949,7 +2954,7 @@ Json: JsonObject;
     /** @enum {string} */
     SettingName: "kafka:dlq" | "kafka:log" | "kafka:score" | "kafka:dlq:score" | "kafka:dlq:eu" | "kafka:log:eu" | "kafka:orgs-to-dlq" | "azure:experiment" | "openai:apiKey" | "anthropic:apiKey" | "openrouter:apiKey" | "togetherai:apiKey" | "sqs:request-response-logs" | "sqs:helicone-scores" | "sqs:request-response-logs-dlq" | "sqs:helicone-scores-dlq";
     /**
-     * @description The URL interface represents an object providing static methods used for creating object URLs.
+     * @description The **`URL`** interface is used to parse, construct, normalize, and encode URL.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL)
      * `URL` class is a global reference for `import { URL } from 'node:url'`

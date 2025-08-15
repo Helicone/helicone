@@ -22,11 +22,21 @@ import {
   Mail,
   MoveUpRight,
   Copy,
+  Loader,
+  Check,
 } from "lucide-react";
 import Link from "next/link";
 import { useKeys } from "@/components/templates/keys/useKeys";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import useNotification from "@/components/shared/notification/useNotification";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "../../ui/dialog";
+import { ProviderKeySettings } from "../settings/providerKeySettings";
 
 const QuickstartPage = () => {
   const router = useRouter();
@@ -38,6 +48,7 @@ const QuickstartPage = () => {
     undefined,
   );
   const [isCreatingKey, setIsCreatingKey] = useState(false);
+  const [isProviderModalOpen, setIsProviderModalOpen] = useState(false);
 
   const { hasKeys, hasProviderKeys, updateOnboardingStatus } = useOrgOnboarding(
     org?.currentOrg?.id ?? "",
@@ -154,9 +165,42 @@ const QuickstartPage = () => {
                   )}
                 </div>
               )}
+              {index === 1 && (
+                <div className="mt-4">
+                  <Button
+                    onClick={() => setIsProviderModalOpen(true)}
+                    className="w-fit"
+                    variant="outline"
+                  >
+                    Add Provider Key
+                  </Button>
+                </div>
+              )}
               {index === 2 && (
                 <div className="mt-1">
                   <IntegrationGuide apiKey={quickstartKey} />
+
+                  <div
+                    className={`mx-4 my-2 rounded-sm border border-border p-3 ${org?.currentOrg?.has_integrated ? "bg-confirmative/10" : "bg-muted/30"}`}
+                  >
+                    <div className="flex items-center gap-2">
+                      {org?.currentOrg?.has_integrated ? (
+                        <Check size={16} className="text-confirmative" />
+                      ) : (
+                        <Loader
+                          size={16}
+                          className="animate-spin text-muted-foreground"
+                        />
+                      )}
+                      <span
+                        className={`text-sm ${org?.currentOrg?.has_integrated ? "text-confirmative" : "text-muted-foreground"}`}
+                      >
+                        {org?.currentOrg?.has_integrated
+                          ? "Requests detected!"
+                          : "Listening for requests..."}
+                      </span>
+                    </div>
+                  </div>
 
                   <Link
                     // TODO: Swap for AI Gateway documentation
@@ -166,7 +210,7 @@ const QuickstartPage = () => {
                     className="w-fit"
                   >
                     <Button variant="link" className="flex items-center gap-1">
-                      View Docs
+                      Using another SDK?
                       <MoveUpRight size={12} />
                     </Button>
                   </Link>
@@ -239,6 +283,19 @@ const QuickstartPage = () => {
           </DropdownMenu>
         </div>
       </div>
+
+      <Dialog open={isProviderModalOpen} onOpenChange={setIsProviderModalOpen}>
+        <DialogContent className="max-h-[80vh] max-w-4xl overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add Provider Keys</DialogTitle>
+            <DialogDescription>
+              Configure your API keys for different LLM providers to start
+              making requests.
+            </DialogDescription>
+          </DialogHeader>
+          <ProviderKeySettings />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

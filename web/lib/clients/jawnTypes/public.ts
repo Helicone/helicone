@@ -1200,7 +1200,9 @@ export interface components {
       } | ("none" | "auto" | "required");
       parallel_tool_calls?: boolean;
       /** @enum {string} */
-      reasoning_effort?: "low" | "medium" | "high";
+      reasoning_effort?: "minimal" | "low" | "medium" | "high";
+      /** @enum {string} */
+      verbosity?: "low" | "medium" | "high";
       /** Format: double */
       frequency_penalty?: number;
       /** Format: double */
@@ -1402,6 +1404,7 @@ export interface components {
       ending_event_id?: string;
       trigger_event_id?: string;
       start_timestamp?: string;
+      reasoning?: string;
       deleted?: boolean;
       contentArray?: components["schemas"]["Message"][];
       /** Format: double */
@@ -1473,7 +1476,9 @@ export interface components {
       frequency_penalty?: number | null;
       stop?: (string[] | string) | null;
       /** @enum {string|null} */
-      reasoning_effort?: "low" | "medium" | "high" | null;
+      reasoning_effort?: "minimal" | "low" | "medium" | "high" | null;
+      /** @enum {string|null} */
+      verbosity?: "low" | "medium" | "high" | null;
       tools?: components["schemas"]["Tool"][];
       parallel_tool_calls?: boolean | null;
       tool_choice?: {
