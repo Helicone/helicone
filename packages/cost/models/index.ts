@@ -15,7 +15,7 @@ export {
   registry,
   getModel,
   getAllModels,
-  getEndpoint,
+  getPtbEndpoint as getEndpoint,
   getModelEndpoints,
   getPtbEndpoints,
   getByokEndpoints,

@@ -3,7 +3,7 @@
  * Combines all models and endpoints from subdirectories
  */
 
-import type { Model, Endpoint } from "../../types";
+import type { ModelConfig, ModelProviderConfig } from "../../types";
 
 // Import models
 import { models as gpt4oModels } from "./gpt-4o/models";
@@ -29,10 +29,10 @@ export const openaiModels = {
   ...o1Models,
   ...gpt41Models,
   ...gpt4Models,
-} satisfies Record<string, Model>;
+} satisfies Record<string, ModelConfig>;
 
 // Aggregate endpoints
-export const openaiEndpoints = {
+export const openaiEndpointConfig = {
   ...gpt4oEndpoints,
   ...o3Endpoints,
   ...o4Endpoints,
@@ -40,10 +40,6 @@ export const openaiEndpoints = {
   ...gpt41Endpoints,
   ...gpt4Endpoints,
 } satisfies Record<string, ModelProviderConfig>;
-
-// Export types
-export type OpenAIModelName = keyof typeof openaiModels;
-export type OpenAIEndpointId = keyof typeof openaiEndpoints;
 
 // Re-export metadata
 export { openaiMetadata } from "./metadata";

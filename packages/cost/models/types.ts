@@ -1,70 +1,5 @@
-/**
- * Core type definitions for the flat model registry
- */
+import { ProviderName } from "./providers";
 
-// ============= Model Name Types =============
-
-// Import all model name types from authors
-import { AmazonModelName, type AmazonEndpointId } from "./authors/amazon";
-import { AnthropicModelName, AnthropicEndpointId } from "./authors/anthropic";
-import { CohereModelName, type CohereEndpointId } from "./authors/cohere";
-import { DeepSeekModelName, type DeepSeekEndpointId } from "./authors/deepseek";
-import { GoogleModelName, type GoogleEndpointId } from "./authors/google";
-import { GroqModelName, type GroqEndpointId } from "./authors/groq";
-import {
-  MetaLlamaModelName,
-  type MetaLlamaEndpointId,
-} from "./authors/meta-llama";
-import { MistralModelName, type MistralEndpointId } from "./authors/mistralai";
-import {
-  MoonshotModelName,
-  type MoonshotEndpointId,
-} from "./authors/moonshotai";
-import { NvidiaModelName, type NvidiaEndpointId } from "./authors/nvidia";
-import { OpenAIModelName, type OpenAIEndpointId } from "./authors/openai";
-import {
-  PerplexityModelName,
-  type PerplexityEndpointId,
-} from "./authors/perplexity";
-import { XAIModelName, type XAIEndpointId } from "./authors/x-ai";
-
-// Union of all model names
-export type ModelName =
-  | AnthropicModelName
-  | OpenAIModelName
-  | PerplexityModelName
-  | XAIModelName
-  | AmazonModelName
-  | CohereModelName
-  | DeepSeekModelName
-  | GoogleModelName
-  | GroqModelName
-  | MetaLlamaModelName
-  | MistralModelName
-  | MoonshotModelName
-  | NvidiaModelName;
-
-// Union of all endpoint IDs
-export type EndpointId =
-  | AnthropicEndpointId
-  | OpenAIEndpointId
-  | PerplexityEndpointId
-  | XAIEndpointId
-  | AmazonEndpointId
-  | CohereEndpointId
-  | DeepSeekEndpointId
-  | GoogleEndpointId
-  | GroqEndpointId
-  | MetaLlamaEndpointId
-  | MistralEndpointId
-  | MoonshotEndpointId
-  | NvidiaEndpointId;
-
-// ============= Base Types =============
-
-/**
- * Author metadata type
- */
 export interface AuthorMetadata {
   modelCount: number;
   supported: boolean;
@@ -94,21 +29,6 @@ export const AUTHORS = [
 
 export type AuthorName = (typeof AUTHORS)[number];
 
-export const PROVIDERS = [
-  "anthropic",
-  "openai",
-  "perplexity",
-  "vertex",
-  "bedrock",
-  "azure-openai",
-  "xai",
-  "groq",
-  "deepseek",
-  "cohere",
-] as const;
-
-export type ProviderName = (typeof PROVIDERS)[number];
-
 export type Modality =
   | "text"
   | "text->text"
@@ -130,50 +50,26 @@ export type Tokenizer =
   | "Grok";
 
 export type StandardParameter =
-  // Common parameters
   | "max_tokens"
   | "temperature"
   | "top_p"
   | "top_k"
   | "stop"
   | "stream"
-  // Advanced parameters
   | "frequency_penalty"
   | "presence_penalty"
   | "repetition_penalty"
   | "seed"
-  // Tool use
   | "tools"
   | "tool_choice"
   | "functions"
   | "function_call"
-  // Reasoning/thinking
   | "reasoning"
   | "include_reasoning"
   | "thinking"
-  // Response format
   | "response_format"
   | "json_mode"
   | "truncate";
-
-// ============= Endpoint Types =============
-
-export type EndpointKey<TModelName extends string, TProviderName extends string> = `${TModelName}:${TProviderName}`;
-
-// ============= Model Definition =============
-
-export interface Model {
-  name: string;
-  author: AuthorName;
-  description: string;
-  contextLength: number;
-  maxOutputTokens: number;
-  created: string;
-  modality: Modality;
-  tokenizer: Tokenizer;
-}
-
-// ============= Pricing =============
 
 export interface ModelPricing {
   prompt: number;
@@ -190,49 +86,50 @@ export interface ModelPricing {
   thinking?: number;
 }
 
-// ============= Performance Metrics (Optional) =============
-
-export interface EndpointPerformance {
-  latencyP50?: number; // Median latency in ms
-  latencyP99?: number; // 99th percentile latency in ms
-  timeToFirstToken?: number; // TTFT in ms
-  tokensPerSecond?: number; // Generation speed
+export interface ModelConfig {
+  name: string;
+  author: AuthorName;
+  description: string;
+  contextLength: number;
+  maxOutputTokens: number;
+  created: string;
+  modality: Modality;
+  tokenizer: Tokenizer;
 }
 
-export interface EndpointConfig {
-  providerModelId: string;
-  pricing?: ModelPricing;
-  ptbEnabled?: boolean;
-  contextLength?: number;
-  maxCompletionTokens?: number;
-  version?: string;
-}
-
-export interface ModelConfigBase {
-  modelId: ModelName;
-  provider: ProviderName;
+interface BaseConfig {
   pricing: ModelPricing;
   contextLength: number;
   maxCompletionTokens: number;
-  supportedParameters: StandardParameter[];
   ptbEnabled: boolean;
   version?: string;
 }
 
-export interface ModelProviderConfig extends ModelConfigBase {
-  baseModelId: string;
-  endpoints?: Record<string, EndpointConfig>;
-}
-
-export interface Endpoint extends ModelConfigBase {
+export interface ModelProviderConfig extends BaseConfig {
   providerModelId: string;
-  endpointId?: string;
-  configId: string;
+  provider: ProviderName;
+  supportedParameters: StandardParameter[];
+  endpointConfigs: Record<string, EndpointConfig>;
 }
 
-// ============= Provider Configuration =============
+export interface EndpointConfig {
+  providerModelId?: string;
+  pricing?: ModelPricing;
+  contextLength?: number;
+  maxCompletionTokens?: number;
+  ptbEnabled?: boolean;
+  version?: string;
+}
 
-export interface UserConfig {
+export interface Endpoint extends BaseConfig {
+  provider: ProviderName;
+  providerModelId: string;
+  supportedParameters: StandardParameter[];
+  endpointKey: string;
+  deployment?: string;
+}
+
+export interface UserEndpointConfig {
   region?: string;
   projectId?: string;
   deploymentName?: string;
@@ -241,30 +138,17 @@ export interface UserConfig {
 }
 
 export interface ProviderConfig {
-  id: ProviderName;
   baseUrl: string;
   auth: "api-key" | "oauth" | "aws-signature" | "azure-ad";
-  buildUrl: (endpoint: Endpoint, config: UserConfig) => string;
-  buildModelId?: (endpoint: Endpoint, config: UserConfig) => string;
-  requiredConfig?: Array<keyof UserConfig>;
+  buildUrl: (
+    endpoint: ModelProviderConfig,
+    config: UserEndpointConfig
+  ) => string;
+  buildModelId?: (
+    endpoint: ModelProviderConfig,
+    config: UserEndpointConfig
+  ) => string;
+  requiredConfig?: Array<keyof UserEndpointConfig>;
   pricingPages?: string[];
   modelPages?: string[];
-}
-
-// ============= Index Types (Build-time generated) =============
-
-export interface ModelIndexes {
-  // Model → All endpoints (expanded from configs)
-  byModel: Map<ModelName, Endpoint[]>;
-  // Model → PTB-enabled endpoints
-  byModelPtb: Map<ModelName, Endpoint[]>;
-  // Model + Provider → Endpoints
-  byModelProvider: Map<`${ModelName}:${ProviderName}`, Endpoint[]>;
-  // Direct endpoint lookup by ID
-  byId: Map<string, Endpoint>;
-  // Provider → All models it serves
-  providerToModels: Map<ProviderName, ModelName[]>;
-  
-  // BYOK: Model + Provider → Base config (for dynamic endpoint building)
-  byModelProviderConfig: Map<`${ModelName}:${ProviderName}`, ModelProviderConfig>;
 }

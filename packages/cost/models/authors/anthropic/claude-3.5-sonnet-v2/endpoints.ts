@@ -1,10 +1,11 @@
+import { ProviderName } from "@/cost/models/providers";
 import type { ModelProviderConfig } from "../../../types";
+import { Claude35SonnetV2ModelName } from "./model";
 
 export const endpoints = {
   "claude-3.5-sonnet-v2:anthropic": {
-    modelId: "claude-3.5-sonnet-v2",
+    providerModelId: "claude-3-5-sonnet-20241022",
     provider: "anthropic",
-    baseModelId: "claude-3-5-sonnet-20241022",
     pricing: {
       prompt: 3,
       completion: 15,
@@ -27,12 +28,14 @@ export const endpoints = {
       "stop",
     ],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
 
   // "claude-3.5-sonnet-v2:bedrock": {
   //   modelId: "claude-3.5-sonnet-v2",
   //   provider: "bedrock",
-  //   baseModelId: "{region}.anthropic.claude-3-5-sonnet-20241022-v2:0",
   //   pricing: {
   //     prompt: 3,
   //     completion: 15,
@@ -55,7 +58,7 @@ export const endpoints = {
   //     "stop",
   //   ],
   //   ptbEnabled: true,
-  //   endpoints: {
+  //   deployments: {
   //     "us-west-2": {
   //       providerModelId: "us.anthropic.claude-3-5-sonnet-20241022-v2:0",
   //     },
@@ -66,9 +69,8 @@ export const endpoints = {
   // },
 
   "claude-3.5-sonnet-v2:vertex": {
-    modelId: "claude-3.5-sonnet-v2",
+    providerModelId: "claude-3-5-sonnet-v2@20241022",
     provider: "vertex",
-    baseModelId: "claude-3-5-sonnet-v2@20241022",
     version: "vertex-2023-10-16",
     pricing: {
       prompt: 3,
@@ -88,12 +90,12 @@ export const endpoints = {
       "stop",
     ],
     ptbEnabled: true,
-    endpoints: {
+    endpointConfigs: {
       global: {
         providerModelId: "claude-3-5-sonnet-v2@20241022",
       },
     },
   },
-} satisfies Record<string, ModelProviderConfig>;
-
-export type EndpointId = keyof typeof endpoints;
+} satisfies Partial<
+  Record<`${Claude35SonnetV2ModelName}:${ProviderName}`, ModelProviderConfig>
+>;

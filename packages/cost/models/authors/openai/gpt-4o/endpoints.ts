@@ -1,10 +1,11 @@
+import { ProviderName } from "@/cost/models/providers";
 import type { ModelProviderConfig } from "../../../types";
+import { GPT4oModelName } from "./models";
 
 export const endpoints = {
   "gpt-4o:openai": {
-    modelId: "gpt-4o",
+    providerModelId: "gpt-4o",
     provider: "openai",
-    baseModelId: "gpt-4o",
     pricing: {
       prompt: 2.5,
       completion: 10,
@@ -25,11 +26,13 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
   "gpt-4o:extended:openai": {
-    modelId: "gpt-4o:extended",
+    providerModelId: "gpt-4o-2024-08-06",
     provider: "openai",
-    baseModelId: "gpt-4o-2024-08-06",
     pricing: {
       prompt: 2.5,
       completion: 10,
@@ -50,11 +53,13 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
   "gpt-4o-mini:openai": {
-    modelId: "gpt-4o-mini",
+    providerModelId: "gpt-4o-mini",
     provider: "openai",
-    baseModelId: "gpt-4o-mini",
     pricing: {
       prompt: 0.15,
       completion: 0.6,
@@ -75,11 +80,13 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
   "chatgpt-4o-latest:openai": {
-    modelId: "chatgpt-4o-latest",
+    providerModelId: "chatgpt-4o-latest",
     provider: "openai",
-    baseModelId: "chatgpt-4o-latest",
     pricing: {
       prompt: 5,
       completion: 20,
@@ -100,11 +107,13 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
   "gpt-4o-mini-search-preview:openai": {
-    modelId: "gpt-4o-mini-search-preview",
+    providerModelId: "gpt-4o-mini-search-preview",
     provider: "openai",
-    baseModelId: "gpt-4o-mini-search-preview",
     pricing: {
       prompt: 0.15,
       completion: 0.6,
@@ -113,11 +122,13 @@ export const endpoints = {
     maxCompletionTokens: 16384,
     supportedParameters: ["max_tokens", "response_format"],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
   "gpt-4o-search-preview:openai": {
-    modelId: "gpt-4o-search-preview",
+    providerModelId: "gpt-4o-search-preview",
     provider: "openai",
-    baseModelId: "gpt-4o-search-preview",
     pricing: {
       prompt: 2.5,
       completion: 10,
@@ -126,7 +137,10 @@ export const endpoints = {
     maxCompletionTokens: 16384,
     supportedParameters: ["max_tokens", "response_format"],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
-} satisfies Record<string, ModelProviderConfig>;
-
-export type EndpointId = keyof typeof endpoints;
+} satisfies Partial<
+  Record<`${GPT4oModelName}:${ProviderName}`, ModelProviderConfig>
+>;

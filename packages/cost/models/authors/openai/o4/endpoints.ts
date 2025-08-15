@@ -1,10 +1,11 @@
+import { ProviderName } from "@/cost/models/providers";
 import type { ModelProviderConfig } from "../../../types";
+import { O4ModelName } from "./models";
 
 export const endpoints = {
   "o4-mini:openai": {
-    modelId: "o4-mini",
+    providerModelId: "o4-mini",
     provider: "openai",
-    baseModelId: "o4-mini",
     pricing: {
       prompt: 1.1,
       completion: 4.4,
@@ -20,11 +21,13 @@ export const endpoints = {
       "response_format",
     ],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
   "o4-mini-high:openai": {
-    modelId: "o4-mini-high",
+    providerModelId: "o4-mini-high-2025-04-16",
     provider: "openai",
-    baseModelId: "o4-mini-high-2025-04-16",
     pricing: {
       prompt: 1.1,
       completion: 4.4,
@@ -40,7 +43,10 @@ export const endpoints = {
       "response_format",
     ],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
-} satisfies Record<string, ModelProviderConfig>;
-
-export type EndpointId = keyof typeof endpoints;
+} satisfies Partial<
+  Record<`${O4ModelName}:${ProviderName}`, ModelProviderConfig>
+>;

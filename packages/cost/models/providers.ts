@@ -3,20 +3,19 @@
  */
 
 import { err, ok, Result } from "../../common/result";
-import type {
+import {
+  ModelProviderConfig,
   ProviderConfig,
-  Endpoint,
-  UserConfig,
-  ProviderName,
+  UserEndpointConfig,
 } from "./types";
 
 export const providers = {
   anthropic: {
-    id: "anthropic",
     baseUrl: "https://api.anthropic.com",
     auth: "api-key",
     buildUrl: () => "https://api.anthropic.com/v1/chat/completions",
-    buildModelId: (endpoint) => endpoint.providerModelId,
+    buildModelId: (endpointConfig: ModelProviderConfig) =>
+      endpointConfig.providerModelId,
     pricingPages: [
       "https://docs.anthropic.com/en/docs/build-with-claude/pricing",
     ],
@@ -26,34 +25,42 @@ export const providers = {
   },
 
   openai: {
-    id: "openai",
     baseUrl: "https://api.openai.com",
     auth: "api-key",
     buildUrl: () => "https://api.openai.com/v1/chat/completions",
-    buildModelId: (endpoint) => endpoint.providerModelId,
+    buildModelId: (endpointConfig: ModelProviderConfig) =>
+      endpointConfig.providerModelId,
     pricingPages: ["https://openai.com/api/pricing"],
     modelPages: ["https://platform.openai.com/docs/models"],
   },
 
   bedrock: {
-    id: "bedrock",
     baseUrl: "https://bedrock-runtime.{region}.amazonaws.com",
     auth: "aws-signature",
     requiredConfig: ["region"],
-    buildUrl: (endpoint, config) => {
-      const region = config.region || endpoint.region || "us-west-2";
-      const modelId = endpoint.providerModelId;
+    buildUrl: (
+      endpointConfig: ModelProviderConfig,
+      userConfig: UserEndpointConfig
+    ) => {
+      const region = userConfig.region || "us-east-1";
+      const modelId = endpointConfig.providerModelId;
       return `https://bedrock-runtime.${region}.amazonaws.com/model/${modelId}/invoke`;
     },
-    buildModelId: (endpoint, config) => {
+    buildModelId: (
+      endpointConfig: ModelProviderConfig,
+      userConfig: UserEndpointConfig
+    ) => {
       // Handle cross-region access
-      if (config.crossRegion && config.region) {
+      if (userConfig.crossRegion && userConfig.region) {
         // Extract base model ID without region prefix
-        const baseModelId = endpoint.providerModelId.replace(/^[a-z]{2}\./, "");
-        const regionPrefix = config.region.split("-")[0];
+        const baseModelId = endpointConfig.providerModelId.replace(
+          /^[a-z]{2}\./,
+          ""
+        );
+        const regionPrefix = userConfig.region.split("-")[0];
         return `${regionPrefix}.${baseModelId}`;
       }
-      return endpoint.providerModelId;
+      return endpointConfig.providerModelId;
     },
     pricingPages: ["https://aws.amazon.com/bedrock/pricing/"],
     modelPages: [
@@ -62,19 +69,22 @@ export const providers = {
   },
 
   vertex: {
-    id: "vertex",
     baseUrl: "https://aiplatform.googleapis.com",
     auth: "oauth",
     requiredConfig: ["projectId", "region"],
-    buildUrl: (endpoint, config) => {
-      const { projectId, region } = config;
+    buildUrl: (
+      endpointConfig: ModelProviderConfig,
+      userConfig: UserEndpointConfig
+    ) => {
+      const { projectId, region } = userConfig;
       if (!projectId || !region) {
         throw new Error("Vertex AI requires projectId and region");
       }
-      const modelId = endpoint.providerModelId;
+      const modelId = endpointConfig.providerModelId;
       return `https://aiplatform.googleapis.com/v1/projects/${projectId}/locations/${region}/publishers/anthropic/models/${modelId}:streamRawPredict`;
     },
-    buildModelId: (endpoint) => endpoint.providerModelId,
+    buildModelId: (endpointConfig: ModelProviderConfig) =>
+      endpointConfig.providerModelId,
     pricingPages: [
       "https://cloud.google.com/vertex-ai/generative-ai/pricing",
       "https://ai.google.dev/pricing",
@@ -85,12 +95,14 @@ export const providers = {
   },
 
   "azure-openai": {
-    id: "azure-openai",
     baseUrl: "https://{resourceName}.openai.azure.com",
     auth: "api-key",
     requiredConfig: ["resourceName", "deploymentName"],
-    buildUrl: (endpoint, config) => {
-      const { resourceName, deploymentName } = config;
+    buildUrl: (
+      endpointConfig: ModelProviderConfig,
+      userConfig: UserEndpointConfig
+    ) => {
+      const { resourceName, deploymentName } = userConfig;
       if (!resourceName || !deploymentName) {
         throw new Error(
           "Azure OpenAI requires resourceName and deploymentName"
@@ -99,7 +111,8 @@ export const providers = {
       const apiVersion = "2024-02-15-preview";
       return `https://${resourceName}.openai.azure.com/openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`;
     },
-    buildModelId: (endpoint) => endpoint.providerModelId,
+    buildModelId: (endpointConfig: ModelProviderConfig) =>
+      endpointConfig.providerModelId,
     pricingPages: [
       "https://azure.microsoft.com/en-us/pricing/details/cognitive-services/openai-service/",
     ],
@@ -109,21 +122,21 @@ export const providers = {
   },
 
   perplexity: {
-    id: "perplexity",
     baseUrl: "https://api.perplexity.ai",
     auth: "api-key",
     buildUrl: () => "https://api.perplexity.ai/chat/completions",
-    buildModelId: (endpoint) => endpoint.providerModelId,
+    buildModelId: (endpointConfig: ModelProviderConfig) =>
+      endpointConfig.providerModelId,
     pricingPages: ["https://docs.perplexity.ai/guides/pricing"],
     modelPages: ["https://docs.perplexity.ai/guides/models"],
   },
 
   groq: {
-    id: "groq",
     baseUrl: "https://api.groq.com/openai/v1",
     auth: "api-key",
     buildUrl: () => "https://api.groq.com/openai/v1/chat/completions",
-    buildModelId: (endpoint) => endpoint.providerModelId,
+    buildModelId: (endpointConfig: ModelProviderConfig) =>
+      endpointConfig.providerModelId,
     pricingPages: [
       "https://console.groq.com/pricing",
       "https://groq.com/pricing/",
@@ -132,37 +145,38 @@ export const providers = {
   },
 
   deepseek: {
-    id: "deepseek",
     baseUrl: "https://api.deepseek.com",
     auth: "api-key",
     buildUrl: () => "https://api.deepseek.com/chat/completions",
-    buildModelId: (endpoint) => endpoint.providerModelId,
+    buildModelId: (endpointConfig: ModelProviderConfig) =>
+      endpointConfig.providerModelId,
     pricingPages: ["https://api-docs.deepseek.com/"],
     modelPages: ["https://api-docs.deepseek.com/"],
   },
 
   cohere: {
-    id: "cohere",
     baseUrl: "https://api.cohere.ai",
     auth: "api-key",
     buildUrl: () => "https://api.cohere.ai/v1/chat",
-    buildModelId: (endpoint) => endpoint.providerModelId,
+    buildModelId: (endpointConfig: ModelProviderConfig) =>
+      endpointConfig.providerModelId,
     pricingPages: ["https://cohere.com/pricing"],
     modelPages: ["https://docs.cohere.com/docs/models"],
   },
 
   xai: {
-    id: "xai",
     baseUrl: "https://api.x.ai",
     auth: "api-key",
     buildUrl: () => "https://api.x.ai/v1/chat/completions",
-    buildModelId: (endpoint) => endpoint.providerModelId,
+    buildModelId: (endpointConfig: ModelProviderConfig) =>
+      endpointConfig.providerModelId,
     pricingPages: ["https://docs.x.ai/docs/pricing"],
     modelPages: ["https://docs.x.ai/docs/models"],
   },
-} satisfies Record<ProviderName, ProviderConfig>;
+} satisfies Record<string, ProviderConfig>;
 
-// Helper function to get provider config
+export type ProviderName = keyof typeof providers;
+
 export function getProvider(providerName: string): Result<ProviderConfig> {
   const provider =
     providerName in providers
@@ -207,27 +221,27 @@ export const providerToDbProvider = (provider: ProviderName): string => {
 
 // Helper function to build URL for an endpoint
 export function buildEndpointUrl(
-  endpoint: Endpoint,
-  userConfig: UserConfig = {}
+  endpointConfig: ModelProviderConfig,
+  userConfig: UserEndpointConfig = {}
 ): Result<string> {
-  const providerResult = getProvider(endpoint.provider);
+  const providerResult = getProvider(endpointConfig.provider);
   if (providerResult.error) {
     return err(providerResult.error);
   }
 
   const provider = providerResult.data;
   if (!provider) {
-    return err(`Provider data is null for: ${endpoint.provider}`);
+    return err(`Provider data is null for: ${endpointConfig.provider}`);
   }
 
   try {
-    // Merge endpoint region with user config
-    const config: UserConfig = {
+    // Merge endpoint deployment/region with user config
+    const config: UserEndpointConfig = {
       ...userConfig,
-      region: userConfig.region || endpoint.region,
+      region: userConfig.region,
     };
 
-    const url = provider.buildUrl(endpoint, config);
+    const url = provider.buildUrl(endpointConfig, userConfig);
     return ok(url);
   } catch (error) {
     return err(error instanceof Error ? error.message : "Failed to build URL");
@@ -236,31 +250,31 @@ export function buildEndpointUrl(
 
 // Helper function to build model ID for an endpoint
 export function buildModelId(
-  endpoint: Endpoint,
-  userConfig: UserConfig = {}
+  endpointConfig: ModelProviderConfig,
+  userConfig: UserEndpointConfig = {}
 ): Result<string> {
-  const providerResult = getProvider(endpoint.provider);
+  const providerResult = getProvider(endpointConfig.provider);
   if (providerResult.error) {
     return err(providerResult.error);
   }
 
   const provider = providerResult.data;
   if (!provider) {
-    return err(`Provider data is null for: ${endpoint.provider}`);
+    return err(`Provider data is null for: ${endpointConfig.provider}`);
   }
 
   if (!provider.buildModelId) {
-    return ok(endpoint.providerModelId);
+    return ok(endpointConfig.providerModelId);
   }
 
   try {
-    // Merge endpoint region with user config
-    const config: UserConfig = {
+    // Merge endpoint deployment/region with user config
+    const config: UserEndpointConfig = {
       ...userConfig,
-      region: userConfig.region || endpoint.region,
+      region: userConfig.region,
     };
 
-    const modelId = provider.buildModelId(endpoint, config);
+    const modelId = provider.buildModelId(endpointConfig, config);
     return ok(modelId);
   } catch (error) {
     return err(

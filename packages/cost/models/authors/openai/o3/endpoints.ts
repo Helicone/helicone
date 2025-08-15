@@ -1,10 +1,11 @@
+import { ProviderName } from "@/cost/models/providers";
 import type { ModelProviderConfig } from "../../../types";
+import { O3ModelName } from "./models";
 
 export const endpoints = {
   "o3:openai": {
-    modelId: "o3",
+    providerModelId: "o3-2025-04-16",
     provider: "openai",
-    baseModelId: "o3-2025-04-16",
     pricing: {
       prompt: 2,
       completion: 8,
@@ -20,11 +21,13 @@ export const endpoints = {
       "response_format",
     ],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
   "o3-pro:openai": {
-    modelId: "o3-pro",
+    providerModelId: "o3-pro-2025-06-10",
     provider: "openai",
-    baseModelId: "o3-pro-2025-06-10",
     pricing: {
       prompt: 20,
       completion: 80,
@@ -39,11 +42,13 @@ export const endpoints = {
       "response_format",
     ],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
   "o3-mini:openai": {
-    modelId: "o3-mini",
+    providerModelId: "o3-mini",
     provider: "openai",
-    baseModelId: "o3-mini",
     pricing: {
       prompt: 1.1,
       completion: 4.4,
@@ -59,11 +64,13 @@ export const endpoints = {
       "response_format",
     ],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
   "o3-mini-high:openai": {
-    modelId: "o3-mini-high",
+    providerModelId: "o3-mini-high",
     provider: "openai",
-    baseModelId: "o3-mini-high",
     pricing: {
       prompt: 1.1,
       completion: 4.4,
@@ -79,7 +86,10 @@ export const endpoints = {
       "response_format",
     ],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
-} satisfies Record<string, ModelProviderConfig>;
-
-export type EndpointId = keyof typeof endpoints;
+} satisfies Partial<
+  Record<`${O3ModelName}:${ProviderName}`, ModelProviderConfig>
+>;

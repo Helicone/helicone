@@ -1,10 +1,11 @@
+import { ProviderName } from "@/cost/models/providers";
 import type { ModelProviderConfig } from "../../../types";
+import { GPT4ModelName } from "./models";
 
 export const endpoints = {
   "gpt-4:openai": {
-    modelId: "gpt-4",
+    providerModelId: "gpt-4",
     provider: "openai",
-    baseModelId: "gpt-4",
     pricing: {
       prompt: 30,
       completion: 60,
@@ -24,7 +25,10 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
-} satisfies Record<string, ModelProviderConfig>;
-
-export type EndpointId = keyof typeof endpoints;
+} satisfies Partial<
+  Record<`${GPT4ModelName}:${ProviderName}`, ModelProviderConfig>
+>;

@@ -1,7 +1,7 @@
-import type { Model } from "../../../types";
+import type { ModelConfig } from "../../../types";
 
 export const models = {
-  "o1": {
+  o1: {
     name: "OpenAI: o1",
     author: "openai",
     description:
@@ -34,4 +34,6 @@ export const models = {
     modality: "text->text",
     tokenizer: "GPT",
   },
-} satisfies Record<string, Model>;
+} satisfies Record<string, ModelConfig>;
+
+export type O1ModelName = keyof typeof models;

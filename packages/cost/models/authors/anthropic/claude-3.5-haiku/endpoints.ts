@@ -1,10 +1,11 @@
+import { ProviderName } from "@/cost/models/providers";
 import type { ModelProviderConfig } from "../../../types";
+import { Claude35HaikuModelName } from "./model";
 
 export const endpoints = {
   "claude-3.5-haiku:anthropic": {
-    modelId: "claude-3.5-haiku",
     provider: "anthropic",
-    baseModelId: "claude-3-5-haiku-20241022",
+    providerModelId: "claude-3-5-haiku-20241022",
     pricing: {
       prompt: 0.8,
       completion: 4,
@@ -27,12 +28,13 @@ export const endpoints = {
       "stop",
     ],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
-
   "claude-3.5-haiku:vertex": {
-    modelId: "claude-3.5-haiku",
     provider: "vertex",
-    baseModelId: "claude-3-5-haiku@20241022",
+    providerModelId: "claude-3-5-haiku@20241022",
     pricing: {
       prompt: 0.8,
       completion: 4,
@@ -51,7 +53,7 @@ export const endpoints = {
       "stop",
     ],
     ptbEnabled: false,
-    endpoints: {
+    endpointConfigs: {
       global: {
         providerModelId: "claude-3-5-haiku@20241022",
       },
@@ -62,7 +64,6 @@ export const endpoints = {
   // "claude-3.5-haiku:bedrock": {
   //   modelId: "claude-3.5-haiku",
   //   provider: "bedrock",
-  //   baseModelId: "{region}.anthropic.claude-3-5-haiku-20241022-v1:0",
   //   pricing: {
   //     prompt: 0.8,
   //     completion: 4,
@@ -85,12 +86,12 @@ export const endpoints = {
   //     "stop",
   //   ],
   //   ptbEnabled: true,
-  //   endpoints: {
+  //   deployments: {
   //     "us-west-2": {
   //       providerModelId: "us.anthropic.claude-3-5-haiku-20241022-v1:0",
   //     },
   //   },
   // },
-} satisfies Record<string, ModelProviderConfig>;
-
-export type EndpointId = keyof typeof endpoints;
+} satisfies Partial<
+  Record<`${Claude35HaikuModelName}:${ProviderName}`, ModelProviderConfig>
+>;
