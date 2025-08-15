@@ -218,7 +218,7 @@ const attemptDirectProviderRequest = async (
   }
   const body = await buildRequestBody(endpoint, {
     parsedBody,
-    model: modelName,
+    model: providerModelId,
     provider,
     bodyMapping: requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
     toAnthropic: toAnthropic,
