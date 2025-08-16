@@ -60,9 +60,12 @@ export class DemoController extends Controller {
       };
     }
 
-    setTimeout(() => {
-      tempAPIKey.data?.cleanup();
-    }, 1000 * 60 * 15);
+    setTimeout(
+      () => {
+        tempAPIKey.data?.cleanup();
+      },
+      1000 * 60 * 15
+    );
 
     // dont include cache seed or enabled if cache is disabled
     const defaultHeaders: Record<string, string> = {};
@@ -80,8 +83,8 @@ export class DemoController extends Controller {
           process.env.VERCEL_ENV === "production"
             ? "https://oai.helicone.ai/v1"
             : process.env.HELICONE_WORKER_URL
-            ? `${process.env.HELICONE_WORKER_URL}/v1`
-            : "http://localhost:8787/v1",
+              ? `${process.env.HELICONE_WORKER_URL}/v1`
+              : "http://localhost:8787/v1",
         defaultHeaders: {
           ...defaultHeaders,
           "Helicone-Auth": `Bearer ${apiKey}`,

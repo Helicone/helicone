@@ -23,6 +23,19 @@ jobs:
       - name: Install
         working-directory: worker
         run: yarn install
+      - name: Check types are up-to-date
+        working-directory: worker
+        run: |
+          # Generate types and check if there are any changes
+          yarn cf-typegen
+          if git diff --exit-code worker-configuration.d.ts; then
+            echo "✅ worker-configuration.d.ts is up-to-date"
+          else
+            echo "❌ worker-configuration.d.ts is outdated!"
+            echo "Please run 'yarn cf-typegen' in the worker directory and commit the changes."
+            git diff worker-configuration.d.ts
+            exit 1
+          fi
       - name: Build
         working-directory: worker
         run: yarn tsc

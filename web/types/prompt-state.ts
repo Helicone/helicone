@@ -24,7 +24,7 @@ export interface StateParameters {
   provider: Provider;
   model: string;
   temperature?: number;
-  reasoning_effort?: "low" | "medium" | "high";
+  reasoning_effort?: "minimal" | "low" | "medium" | "high";
   max_tokens?: number;
   tools?: Tool[];
   stop?: string[];

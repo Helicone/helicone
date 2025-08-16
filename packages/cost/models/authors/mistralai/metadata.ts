@@ -1,12 +1,11 @@
 /**
- * Mistralai metadata
+ * MistralAI metadata
  */
 
-import { type AuthorMetadata } from '../../types';
+import type { AuthorMetadata } from "../../types";
+import { mistralaiModels } from "./models";
 
-export const mistralaiMetadata: AuthorMetadata = {
-  modelCount: 35,
+export const mistralaiMetadata = {
+  modelCount: Object.keys(mistralaiModels).length,
   supported: true,
-};
-
-export default mistralaiMetadata;
+} satisfies AuthorMetadata;

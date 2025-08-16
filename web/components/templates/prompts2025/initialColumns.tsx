@@ -5,6 +5,7 @@ import { ColumnConfig } from "@/components/shared/table/simpleTable";
 import { PromptWithVersions } from "@/services/hooks/prompts";
 import TagsSummary from "./TagsSummary";
 import { Button } from "@/components/ui/button";
+import PromptVersionPill from "./PromptVersionPill";
 
 export const getInitialColumns = (
   onPlaygroundActionClick: (promptVersionId: string) => void,
@@ -46,18 +47,12 @@ export const getInitialColumns = (
       header: "Version",
       sortable: true,
       minSize: 100,
-      render: (item) => {
-        const versionDisplay =
-          item.productionVersion.minor_version === 0
-            ? `v${item.productionVersion.major_version}`
-            : `v${item.productionVersion.major_version}.${item.productionVersion.minor_version}`;
-
-        return (
-          <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20">
-            {versionDisplay}
-          </span>
-        );
-      },
+      render: (item) => (
+        <PromptVersionPill
+          majorVersion={item.productionVersion.major_version}
+          minorVersion={item.productionVersion.minor_version}
+        />
+      ),
     },
     {
       key: "totalVersions" as keyof PromptWithVersions,

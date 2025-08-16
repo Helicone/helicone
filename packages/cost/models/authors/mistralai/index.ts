@@ -1,20 +1,7 @@
 /**
- * Mistralai author data aggregation
+ * MistralAI author exports
  */
 
-import { type AuthorData } from '../../types';
-import mistralaiModels, { type MistralModelName } from './models';
-import mistralaiEndpoints from './endpoints';
-import mistralaiMetadata from './metadata';
-
-export const mistralai: AuthorData = {
-  metadata: {
-    ...mistralaiMetadata,
-    modelCount: Object.keys(mistralaiModels).length,
-  },
-  models: mistralaiModels,
-  endpoints: mistralaiEndpoints,
-};
-
-export type { MistralModelName };
-export default mistralai;
+export { mistralaiMetadata } from "./metadata";
+export { mistralaiModels, type MistralModelName } from "./models";
+export { mistralaiEndpoints, type MistralEndpointId } from "./endpoints";

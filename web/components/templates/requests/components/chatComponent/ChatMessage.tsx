@@ -179,6 +179,7 @@ const renderToolMessage = (
 };
 
 const MESSAGE_LENGTH_THRESHOLD = 1000; // Characters before truncating
+const REASONING_LENGTH_THRESHOLD = 1000; // Characters before truncating
 
 const ImageContent: React.FC<{
   message: Message;
@@ -257,6 +258,7 @@ const renderImageContent = (
 const renderTextContent = (
   message: Message,
   displayContent: string,
+  displayReasoning: string,
   chatMode: ChatMode,
   mappedRequest: MappedLLMRequest,
   messageIndex: number,
@@ -274,6 +276,7 @@ const renderTextContent = (
       isPartOfContentArray={options.isPartOfContentArray || false}
       parentIndex={options.parentIndex}
       displayContent={displayContent}
+      displayReasoning={displayReasoning}
       chatMode={chatMode}
       mappedRequest={mappedRequest}
       messageIndex={messageIndex}
@@ -331,6 +334,7 @@ const renderContentByType = (
   message: Message,
   messageType: MessageType,
   displayContent: string,
+  displayReasoning: string,
   chatMode: ChatMode,
   mappedRequest: MappedLLMRequest,
   messageIndex: number,
@@ -380,6 +384,7 @@ const renderContentByType = (
       return renderTextContent(
         message,
         displayContent,
+        displayReasoning,
         chatMode,
         mappedRequest,
         messageIndex,
@@ -735,12 +740,18 @@ export default function ChatMessage({
   };
 
   const content = message.content ?? JSON.stringify(message.tool_calls) ?? "";
+  const reasoning = message.reasoning ?? "";
   const isLongMessage = content.length > MESSAGE_LENGTH_THRESHOLD;
+  const isLongReasoning = reasoning.length > REASONING_LENGTH_THRESHOLD;
   const isExpanded = expandedMessages[messageIndex];
   const displayContent =
     isLongMessage && !isExpanded
       ? content.slice(0, MESSAGE_LENGTH_THRESHOLD) + "..."
       : content;
+  const displayReasoning =
+    isLongReasoning && !isExpanded
+      ? reasoning.slice(0, REASONING_LENGTH_THRESHOLD) + "..."
+      : reasoning;
 
   const messageType = getMessageType(message);
 
@@ -819,6 +830,7 @@ export default function ChatMessage({
                     content,
                     contentType,
                     content.content || "",
+                    content.reasoning || "",
                     chatMode,
                     mappedRequest,
                     index,
@@ -840,6 +852,7 @@ export default function ChatMessage({
             message,
             messageType,
             displayContent,
+            displayReasoning,
             chatMode,
             mappedRequest,
             messageIndex,

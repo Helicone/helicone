@@ -57,10 +57,10 @@ export class TestClickhouseClientWrapper {
     }
   }
 
-  async dbQuery<T>(
+  async dbQuery<RowType>(
     query: string,
     parameters: (number | string | boolean | Date)[]
-  ): Promise<Result<T[], string>> {
+  ): Promise<Result<RowType[], string>> {
     try {
       const query_params = this.paramsToValues(parameters);
 
@@ -72,7 +72,7 @@ export class TestClickhouseClientWrapper {
           wait_end_of_query: 1,
         },
       });
-      return { data: await queryResult.json<T[]>(), error: null };
+      return { data: await queryResult.json<RowType>(), error: null };
     } catch (err) {
       return {
         data: null,
@@ -81,10 +81,10 @@ export class TestClickhouseClientWrapper {
     }
   }
 
-  async dbQueryHql<T>(
+  async dbQueryHql<RowType>(
     query: string,
     parameters: (number | string | boolean | Date)[]
-  ): Promise<Result<T[], string>> {
+  ): Promise<Result<RowType[], string>> {
     try {
       const query_params = this.paramsToValues(parameters);
 
@@ -96,8 +96,76 @@ export class TestClickhouseClientWrapper {
           wait_end_of_query: 1,
         },
       });
-      return { data: await queryResult.json<T[]>(), error: null };
+      return { data: await queryResult.json<RowType>(), error: null };
     } catch (err) {
+      return {
+        data: null,
+        error: JSON.stringify(err),
+      };
+    }
+  }
+
+  async queryWithContext<RowType>({
+    query,
+    organizationId,
+    parameters,
+  }: {
+    query: string;
+    organizationId: string;
+    parameters: (number | string | boolean | Date)[];
+  }): Promise<Result<RowType[], string>> {
+    try {
+      const query_params = this.paramsToValues(parameters);
+      // Align security check with production: block attempts to reference or set our org-id context
+      const forbiddenPattern = /sql[_\s]*helicone[_\s]*organization[_\s]*id/i;
+      if (forbiddenPattern.test(query)) {
+        return {
+          data: null,
+          error:
+            "Query contains 'SQL_helicone_organization_id' keyword, which is not allowed in HQL queries",
+        };
+      }
+
+      // Check if this is a DDL command that doesn't return data
+      const isDDL = /^\s*(grant|revoke|create\s+(user|role)|alter\s+(user|role)|drop\s+(user|role))/i.test(query);
+
+      const queryOptions: any = {
+        query,
+        query_params,
+        clickhouse_settings: {
+          wait_end_of_query: 1,
+          // Set the organization context for row-level security
+          // Custom settings must be prefixed with SQL_
+          SQL_helicone_organization_id: organizationId,
+          // CRITICAL: Set readonly=1 to prevent query from overriding settings
+          // This makes ALL settings immutable for this query
+          readonly: 1,
+          // Align protective limits with production wrapper
+          max_execution_time: 30,
+          max_memory_usage: "1000000000",
+          max_rows_to_read: "10000000",
+          max_result_rows: "10000",
+          allow_ddl: 0,
+        } as any,
+      };
+
+      // Only add format for queries that return data
+      if (!isDDL) {
+        queryOptions.format = "JSONEachRow";
+      }
+
+      const queryResult = await this.clickHouseHqlClient.query(queryOptions);
+      
+      if (isDDL) {
+        // DDL commands don't return data
+        return { data: [] as RowType[], error: null };
+      } else {
+        const rows = (await queryResult.json<RowType>()) as unknown as RowType[];
+        return { data: rows, error: null };
+      }
+    } catch (err) {
+      console.error("Error executing HQL query with context: ", query, organizationId, parameters);
+      console.error(err);
       return {
         data: null,
         error: JSON.stringify(err),
@@ -349,7 +417,7 @@ export class TestClickhouseClientWrapper {
 
 // Export a singleton instance for tests
 export const testClickhouseDb = new TestClickhouseClientWrapper({
-  CLICKHOUSE_HOST: "http://localhost:18124",
+  CLICKHOUSE_HOST: "http://localhost:18123",
   CLICKHOUSE_USER: process.env.CLICKHOUSE_USER || "default",
   CLICKHOUSE_PASSWORD: process.env.CLICKHOUSE_PASSWORD || "",
   CLICKHOUSE_HQL_USER: process.env.CLICKHOUSE_HQL_USER || "hql_user",

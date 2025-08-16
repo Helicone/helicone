@@ -81,7 +81,7 @@
   .dark {
     /* Background Colors */
     --background: 0 0% 0%; /* hsl(229 84% 5%) */
-    --foreground: 210 40% 98%;
+    --foreground: 210 40% 98%; /* hsl(210, 40%, 98%) */
     --card: 229 84% 5%;
     --card-foreground: 210 40% 98%;
     --popover: 229 84% 5%;

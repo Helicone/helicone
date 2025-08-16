@@ -1,12 +1,13 @@
 /**
- * Mistral AI endpoint configurations
+ * MistralAI endpoint configurations
  */
 
-import type { ModelEndpoint } from "../../types";
-import type { MistralModelName } from "./models";
+import type { Endpoint, EndpointKey } from "../../types";
+import { MistralModelName } from "./models";
 
-export const mistralaiEndpoints = {
-  // TODO: Add endpoints for mistral models
-} satisfies Record<MistralModelName, ModelEndpoint[]>;
+export const mistralaiEndpoints = {} satisfies Record<
+  EndpointKey<MistralModelName>,
+  Endpoint
+>;
 
-export default mistralaiEndpoints;
+export type MistralEndpointId = keyof typeof mistralaiEndpoints;

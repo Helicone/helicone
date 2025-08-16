@@ -1,0 +1,1 @@
+DROP VIEW IF EXISTS public.decrypted_provider_keys;

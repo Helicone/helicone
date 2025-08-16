@@ -1,36 +1,32 @@
 /**
- * Deepseek model definitions
+ * DeepSeek model definitions
  */
 
-import { type Model } from '../../types';
-
-/**
- * DeepSeek model names
- */
-export type DeepSeekModelName =
-  // | "deepseek-r1-distill-qwen-7b"  // TODO: Add endpoints
-  // | "deepseek-r1-0528-qwen3-8b:free"  // TODO: Add endpoints
-  // | "deepseek-r1-0528-qwen3-8b"  // TODO: Add endpoints
-  // | "deepseek-r1-0528:free"  // TODO: Add endpoints
-  // | "deepseek-r1-0528"  // TODO: Add endpoints
-  // | "deepseek-prover-v2"  // TODO: Add endpoints
-  // | "deepseek-v3-base"  // TODO: Add endpoints
-  // | "deepseek-chat-v3-0324:free"  // TODO: Add endpoints
-  // | "deepseek-chat-v3-0324"  // TODO: Add endpoints
-  // | "deepseek-r1-distill-llama-8b"  // TODO: Add endpoints
-  // | "deepseek-r1-distill-qwen-1.5b"  // TODO: Add endpoints
-  // | "deepseek-r1-distill-qwen-32b"  // TODO: Add endpoints
-  // | "deepseek-r1-distill-qwen-14b:free"  // TODO: Add endpoints
-  // | "deepseek-r1-distill-qwen-14b"  // TODO: Add endpoints
-  // | "deepseek-r1-distill-llama-70b:free"  // TODO: Add endpoints
-  // | "deepseek-r1-distill-llama-70b"  // TODO: Add endpoints
-  // | "deepseek-r1:free"  // TODO: Add endpoints
-  // | "deepseek-r1"  // TODO: Add endpoints
-  // | "deepseek-chat"  // TODO: Add endpoints
-  never;
+import type { Model } from "../../types";
 
 export const deepseekModels = {
-  // TODO: Add models when endpoints are available
-} satisfies Record<DeepSeekModelName, Model>;
+  // "deepseek-chat": {
+  //   name: "DeepSeek: DeepSeek-V3 Chat",
+  //   author: "deepseek",
+  //   description:
+  //     "DeepSeek-V3 is a powerful generalist AI model trained on 15 trillion tokens. Features 64K context length with support for function calling, JSON output, and advanced reasoning capabilities. Cost-effective frontier AI model.",
+  //   contextLength: 65536,
+  //   maxOutputTokens: 8192,
+  //   created: "2024-12-26T00:00:00.000Z",
+  //   modality: "text->text",
+  //   tokenizer: "DeepSeek",
+  // },
+  // "deepseek-reasoner": {
+  //   name: "DeepSeek: DeepSeek-R1 Reasoner",
+  //   author: "deepseek",
+  //   description:
+  //     "DeepSeek-R1 is specialized for advanced reasoning tasks with extended thinking capabilities. Features 64K context length with up to 64K output tokens for complex problem solving and step-by-step reasoning.",
+  //   contextLength: 65536,
+  //   maxOutputTokens: 65536,
+  //   created: "2024-12-26T00:00:00.000Z",
+  //   modality: "text->text",
+  //   tokenizer: "DeepSeek",
+  // },
+} satisfies Record<string, Model>;
 
-export default deepseekModels;
+export type DeepSeekModelName = keyof typeof deepseekModels;

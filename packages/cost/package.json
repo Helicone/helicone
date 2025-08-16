@@ -3,9 +3,10 @@
   "types": "./",
   "sideEffects": false,
   "version": "1.0.0",
-  "scripts": {
-    "sync-openrouter": "tsx models/scripts/sync-openrouter.ts",
-    "build-registry": "tsx models/scripts/build-registry.ts"
+  "dependencies": {
+    "@smithy/signature-v4": "^4.2.3",
+    "@aws-crypto/sha256-js": "^5.2.0",
+    "@smithy/protocol-http": "^4.1.7"
   },
   "devDependencies": {
     "tsx": "^4.0.0"

@@ -21,6 +21,21 @@ export class HeliconeManualLogger {
     this.LOGGING_ENDPOINT = opts.loggingEndpoint || this.LOGGING_ENDPOINT;
   }
 
+  private getLoggingEndpoint(provider?: string): string {
+    let endpoint = this.LOGGING_ENDPOINT;
+    const key = provider ? String(provider).toUpperCase() : undefined;
+    const providerRoutes = new Map([
+      ['OPENAI', 'oai'],
+      ['ANTHROPIC', 'anthropic'],
+      ['GOOGLE', 'googleapis']
+    ]);
+    const route = key ? (providerRoutes.get(key) || 'custom') : 'custom';
+    const knownRouteRegex = /(\/(custom|oai|anthropic|googleapis)\/v1\/log)$/;
+    return knownRouteRegex.test(endpoint)
+      ? endpoint.replace(knownRouteRegex, `/${route}/v1/log`)
+      : endpoint.replace(/\/$/, "") + `/${route}/v1/log`;
+  }
+
   /**
    * Creates a log builder for more flexible stream handling with error management
    * @param request - The request object to log
@@ -44,7 +59,8 @@ export class HeliconeManualLogger {
   public async logRequest<T>(
     request: HeliconeLogRequest,
     operation: (resultRecorder: HeliconeResultRecorder) => Promise<T>,
-    additionalHeaders?: Record<string, string>
+    additionalHeaders?: Record<string, string>,
+    provider?: string
   ): Promise<T> {
     const startTime = Date.now();
     const resultRecorder = new HeliconeResultRecorder();
@@ -58,6 +74,7 @@ export class HeliconeManualLogger {
         endTime,
         additionalHeaders,
         status: 200,
+        provider,
       });
 
       return result;
@@ -197,6 +214,7 @@ export class HeliconeManualLogger {
       additionalHeaders?: Record<string, string>;
       timeToFirstToken?: number;
       status?: number;
+      provider?: string;
     }
   ): Promise<void> {
     const { startTime, endTime, additionalHeaders, status = 200 } = options;
@@ -248,11 +266,12 @@ export class HeliconeManualLogger {
         providerRequest,
         providerResponse,
         timing,
+        provider: options.provider,
       }),
     };
 
     try {
-      const response = await fetch(this.LOGGING_ENDPOINT, fetchOptions);
+      const response = await fetch(this.getLoggingEndpoint(options.provider), fetchOptions);
       if (!response.ok) {
         console.error(
           "Error making request to Helicone log endpoint:",

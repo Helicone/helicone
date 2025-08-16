@@ -1,12 +1,13 @@
 /**
- * Moonshot AI endpoint configurations
+ * MoonshotAI endpoint configurations
  */
 
-import type { ModelEndpoint } from "../../types";
-import type { MoonshotModelName } from "./models";
+import type { Endpoint, EndpointKey } from "../../types";
+import { MoonshotModelName } from "./models";
 
-export const moonshotaiEndpoints = {
-  // TODO: Add endpoints for moonshot ai models
-} satisfies Record<MoonshotModelName, ModelEndpoint[]>;
+export const moonshotaiEndpoints = {} satisfies Record<
+  EndpointKey<MoonshotModelName>,
+  Endpoint
+>;
 
-export default moonshotaiEndpoints;
+export type MoonshotEndpointId = keyof typeof moonshotaiEndpoints;

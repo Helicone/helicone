@@ -169,7 +169,7 @@ export const useDeletePromptVersion = () => {
   );
 };
 
-export const useGetPromptVersionWithBody = (promptVersionId?: string) => {
+export const useGetPromptVersion = (promptVersionId?: string, withBody: boolean = true) => {
   return useQuery<{
     promptVersion: Prompt2025Version;
     promptBody?: OpenAIChatRequest;
@@ -218,7 +218,7 @@ export const useGetPromptVersionWithBody = (promptVersionId?: string) => {
       const promptVersion = result.data.data;
       let promptBody: OpenAIChatRequest | undefined;
 
-      if (promptVersion.s3_url) {
+      if (promptVersion.s3_url && withBody) {
         try {
           const s3Response = await fetch(promptVersion.s3_url);
           if (s3Response.ok) {

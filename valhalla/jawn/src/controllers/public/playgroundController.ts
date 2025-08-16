@@ -140,9 +140,7 @@ export class PlaygroundController extends Controller {
         >
       >(async (secretKey) => {
         const openai = new OpenAI({
-          baseURL: useAIGateway
-            ? `https://test.gateway.helicone.ai/ai`
-            : `https://openrouter.helicone.ai/api/v1/`,
+          baseURL: `https://openrouter.helicone.ai/api/v1/`,
           apiKey: useAIGateway ? secretKey : openRouterKey,
           defaultHeaders: {
             "Helicone-Auth": `Bearer ${secretKey}`,
@@ -169,6 +167,8 @@ export class PlaygroundController extends Controller {
               stream: params.stream !== undefined,
               response_format: params.response_format,
               tools: params.tools,
+              reasoning_effort: params.reasoning_effort,
+              verbosity: params.verbosity,
             } as any,
             {
               signal: abortController.signal,

@@ -1,0 +1,4 @@
+{
+  "title": "Control Reasoning Effort in Playground and better feedback on thinking models",
+  "description": "Added advanced reasoning effort controls, and improved thinking model support to the Helicone Playground. Users can now fine-tune how models think and respond with new parameters for better control over AI interactions."
+}
