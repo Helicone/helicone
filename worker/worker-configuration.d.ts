@@ -73,6 +73,27 @@ declare namespace Cloudflare {
 }
 interface Env extends Cloudflare.Env {}
 
+// Add missing types
+declare class ExecutionContext {
+	waitUntil(promise: Promise<any>): void;
+	passThroughOnException(): void;
+}
+
+interface MessageBatch<T> {
+	queue: string;
+	messages: Array<{
+		id: string;
+		timestamp: number;
+		body: T;
+	}>;
+}
+
+declare class ScheduledController {
+	readonly scheduledTime: number;
+	readonly cron: string;
+	noRetry(): void;
+}
+
 // Begin runtime types
 /*! *****************************************************************************
 Copyright (c) Cloudflare. All rights reserved.
