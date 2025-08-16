@@ -1,4 +1,4 @@
-import type { Model } from "../../../types";
+import type { ModelConfig } from "../../../types";
 
 export const models = {
   "o4-mini": {
@@ -23,4 +23,6 @@ export const models = {
     modality: "text+image->text",
     tokenizer: "GPT",
   },
-} satisfies Record<string, Model>;
+} satisfies Record<string, ModelConfig>;
+
+export type O4ModelName = keyof typeof models;

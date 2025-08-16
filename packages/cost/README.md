@@ -1,6 +1,6 @@
 # Cost Package
 
-The Cost package provides pricing calculations for LLM providers supported by Helicone. It contains cost models for various AI/ML service providers and calculates token-based pricing.
+The Cost package provides pricing calculations and model registry for LLM providers supported by Helicone. It contains cost models for various AI/ML service providers and manages both Pass-Through Billing (PTB) and Bring Your Own Key (BYOK) scenarios.
 
 ## Architecture
 
@@ -11,68 +11,216 @@ The Cost package provides pricing calculations for LLM providers supported by He
 - **`providers/mappings.ts`** - Provider URL patterns and cost mappings
 - **`costCalc.ts`** - Cost calculation utilities and constants
 
-### Model Registry
+## Model Registry v2
 
-The model registry provides a comprehensive database of AI models with their metadata, pricing, and endpoint information. Data is synced from OpenRouter API and organized by author.
+The model registry provides a comprehensive, type-safe database of AI models with their metadata, pricing, and endpoint configurations. It supports O(1) lookups for efficient access patterns.
 
-#### Structure
+### Core Concepts
+
+- **ModelProviderConfig**: Base configuration for a model/provider combination with pricing, context limits, and parameters
+- **EndpointConfig**: Deployment-specific overrides (e.g., regional deployments, different versions)
+- **Endpoint**: Fully resolved configuration merging base + deployment configs
+- **PTB (Pass-Through Billing)**: Helicone handles billing, requires `ptbEnabled: true`
+- **BYOK (Bring Your Own Key)**: Users provide their own API keys, uses base configs
+
+### Structure
 
 ```
 models/
-├── authors/          # Model data organized by author
+├── authors/              # Model data organized by author
 │   ├── anthropic/
-│   │   ├── models.json
-│   │   ├── endpoints.json
-│   │   └── metadata.json
-│   └── openai/
-│       ├── models.json
-│       ├── endpoints.json
-│       └── metadata.json
-├── index.ts          # Auto-generated registry index
-├── model-versions.json
-└── scripts/
-    ├── sync-openrouter.ts  # Sync data from OpenRouter
-    └── build-registry.ts   # Build combined index
+│   │   ├── claude-3.5-sonnet/
+│   │   │   ├── models.ts
+│   │   │   └── endpoints.ts
+│   │   └── index.ts
+│   ├── openai/
+│   │   ├── gpt-4/
+│   │   │   ├── models.ts
+│   │   │   └── endpoints.ts
+│   │   └── index.ts
+│   └── [other-authors]/
+├── registry.ts           # Main registry with API methods
+├── build-indexes.ts      # Index builder for O(1) lookups
+├── types.ts             # Core type definitions
+└── providers.ts         # Provider configurations
 ```
 
-#### Scripts
+## PTB (Pass-Through Billing) Flows
 
-```bash
-# Sync latest model data from OpenRouter
-yarn sync-openrouter
+PTB endpoints are pre-configured deployments where Helicone handles the billing.
 
-# Build registry index from author folders
-yarn build-registry
+### Flow 1: Model Only
+```typescript
+// User provides just model name
+const endpointsResult = getPtbEndpoints("claude-3.5-haiku");
+// Returns: All PTB endpoints for this model, sorted by cost (cheapest first)
+// [anthropic:*, bedrock:us-east-1, bedrock:us-west-2, vertex:us-central1]
 ```
 
-### Provider Structure
+### Flow 2: Model + Provider
+```typescript
+// User specifies model and provider
+const endpointsResult = getPtbEndpointsByProvider("claude-3.5-haiku", "bedrock");
+// Returns: All PTB endpoints for this model/provider combo, sorted by cost
+// [bedrock:us-east-1, bedrock:us-west-2]
+```
 
-Each provider has its own directory under `providers/` containing:
+### Flow 3: Model + Provider + Deployment
+```typescript
+// User specifies exact deployment
+const endpointResult = getPtbEndpoint("claude-3.5-haiku", "bedrock", "us-west-2");
+// Returns: Specific PTB endpoint or error if not found/not PTB-enabled
+```
 
-- `index.ts` - Main cost definitions for the provider
-- Additional files for specific model categories (e.g., `chat/`, `completion/`)
+## BYOK (Bring Your Own Key) Flows
 
-## Model Registry API
+BYOK allows users to use their own API keys with their chosen deployments.
+
+### Flow 1: Model Only
+```typescript
+// Get all providers supporting this model
+const providersResult = getModelProviders("claude-3.5-haiku");
+// Returns: Set<ProviderName> for efficient DB queries
+// Set { "anthropic", "bedrock", "vertex" }
+
+// Query DB: WHERE model = ? AND provider IN (?)
+const userKeys = await db.query({
+  model: "claude-3.5-haiku",
+  provider: Array.from(providersResult.value)
+});
+```
+
+### Flow 2: Model + Provider
+```typescript
+// Get specific config for building BYOK endpoint
+const configResult = getModelProviderConfig("claude-3.5-haiku", "bedrock");
+// Returns: ModelProviderConfig with base config and available deployments
+
+// Build endpoint URL and model ID
+const url = buildEndpointUrl(configResult.value, {
+  region: userProvidedRegion
+});
+const modelId = buildModelId(configResult.value, {
+  region: userProvidedRegion
+});
+```
+
+### Flow 3: Model + Provider + User Config
+```typescript
+// Get all configs to build BYOK endpoints
+const configsResult = getModelProviderConfigs("claude-3.5-haiku");
+// Returns: ModelProviderConfig[] for all providers
+
+// Build custom endpoints based on user's keys
+const byokEndpoints = configsResult.value
+  .filter(config => userHasKeysFor(config.provider))
+  .map(config => ({
+    url: buildEndpointUrl(config, userConfig),
+    modelId: buildModelId(config, userConfig),
+    pricing: config.pricing,
+    contextLength: config.contextLength
+  }));
+```
+
+## API Reference
+
+### PTB Functions
 
 ```typescript
-import {
-  registry,
-  getModel,
-  getEndpoints,
-  getAuthor,
-} from "@helicone-package/cost/models";
+// Get specific PTB endpoint
+getPtbEndpoint(model: string, provider: string, deployment?: string): Result<Endpoint>
 
-// Get a specific model
-const model = getModel("claude-3.5-sonnet");
+// Get all PTB endpoints for a model
+getPtbEndpoints(model: string): Result<Endpoint[]>
 
-// Get all endpoints for a model
-const endpoints = getEndpoints("claude-3.5-sonnet");
+// Get PTB endpoints for model/provider
+getPtbEndpointsByProvider(model: string, provider: string): Result<Endpoint[]>
+```
 
-// Get author information
-const author = getAuthor("anthropic");
+### BYOK Functions
 
-// Access all data
-const { models, endpoints, authors, modelVersions } = registry;
+```typescript
+// Get base config for BYOK
+getModelProviderConfig(model: string, provider: string): Result<ModelProviderConfig>
+
+// Get all configs for a model
+getModelProviderConfigs(model: string): Result<ModelProviderConfig[]>
+
+// Get providers supporting a model (returns Set for efficient DB queries)
+getModelProviders(model: string): Result<Set<ProviderName>>
+
+// Build endpoint URL
+buildEndpointUrl(config: ModelProviderConfig, userConfig?: UserEndpointConfig): Result<string>
+
+// Build model ID
+buildModelId(config: ModelProviderConfig, userConfig?: UserEndpointConfig): Result<string>
+```
+
+### Model Functions
+
+```typescript
+// Get model metadata
+getModel(modelId: string): Result<ModelConfig>
+
+// Get all models
+getAllModels(): Result<ModelConfig[]>
+
+// Get provider's models
+getProviderModels(provider: string): Result<Set<ModelName>>
+```
+
+## Key Design Principles
+
+1. **O(1) Lookups**: All primary access patterns use Map-based indexes for constant time access
+2. **Type Safety**: Full TypeScript types with intellisense support for model names, providers, and deployments
+3. **Progressive Enhancement**: PTB endpoints inherit from base configs with deployment-specific overrides
+4. **Cost Optimization**: PTB endpoints are automatically sorted by cost (cheapest first)
+5. **Efficient DB Queries**: Returns Sets instead of arrays where appropriate for `IN` queries
+6. **Clear Separation**: PTB (resolved endpoints) vs BYOK (base configs) have distinct APIs
+
+## Data Structure
+
+### ModelProviderConfig
+```typescript
+interface ModelProviderConfig {
+  providerModelId: string;
+  provider: ProviderName;
+  pricing: ModelPricing;
+  contextLength: number;
+  maxCompletionTokens: number;
+  ptbEnabled: boolean;
+  supportedParameters: StandardParameter[];
+  endpointConfigs: Record<string, EndpointConfig>;
+  version?: string;
+}
+```
+
+### EndpointConfig (Deployment Override)
+```typescript
+interface EndpointConfig {
+  providerModelId?: string;
+  pricing?: ModelPricing;
+  contextLength?: number;
+  maxCompletionTokens?: number;
+  ptbEnabled?: boolean;
+  version?: string;
+}
+```
+
+### Endpoint (Resolved)
+```typescript
+interface Endpoint {
+  provider: ProviderName;
+  providerModelId: string;
+  pricing: ModelPricing;
+  contextLength: number;
+  maxCompletionTokens: number;
+  ptbEnabled: boolean;
+  supportedParameters: StandardParameter[];
+  endpointKey: string;
+  deployment?: string;
+  version?: string;
+}
 ```
 
 ---
