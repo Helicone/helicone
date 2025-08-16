@@ -66,8 +66,6 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
           role: "assistant",
           content: "",
         };
-        updatedMessages = [...updatedMessages, assistantMessage];
-        setMessages(updatedMessages);
 
         const request: OpenAIChatRequest = {
           model: "gpt-4o-mini",
@@ -92,6 +90,10 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
             onUpdate: async (result) => {
               try {
                 const parsedResponse = JSON.parse(result.fullContent);
+                console.log("updating message with idx", assistantMessageIdx);
+                if (!updatedMessages[assistantMessageIdx]) {
+                  updatedMessages = [...updatedMessages, parsedResponse];
+                }
                 updatedMessages = updatedMessages.map((msg, idx) =>
                   idx === assistantMessageIdx ? parsedResponse : msg,
                 );
@@ -114,6 +116,8 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
                 tool_call_id: toolCall.id,
                 content: toolResult.message,
               };
+              console.log("adding tool result message");
+              console.log(updatedMessages);
               updatedMessages = [...updatedMessages, toolResultMessage];
               setMessages(updatedMessages);
             }
@@ -122,6 +126,8 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
           shouldContinue = false;
         }
       }
+      console.log("final messages");
+      console.log(updatedMessages);
     } catch (error) {
       console.error("Chat error:", error);
     } finally {
