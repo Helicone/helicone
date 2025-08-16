@@ -94,6 +94,20 @@ declare class ScheduledController {
 	noRetry(): void;
 }
 
+// Add missing Headers interface
+interface Headers {
+    append(name: string, value: string): void;
+    delete(name: string): void;
+    get(name: string): string | null;
+    has(name: string): boolean;
+    set(name: string, value: string): void;
+    forEach(callbackfn: (value: string, key: string, parent: Headers) => void, thisArg?: any): void;
+    entries(): IterableIterator<[string, string]>;
+    keys(): IterableIterator<string>;
+    values(): IterableIterator<string>;
+    [Symbol.iterator](): IterableIterator<[string, string]>;
+}
+
 // Add missing Request and Response types
 interface Request {
     url: string;
@@ -108,6 +122,7 @@ interface Request {
     mode?: RequestMode;
     referrer?: string;
     referrerPolicy?: ReferrerPolicy;
+    cf?: CfProperties;
     clone(): Request;
     arrayBuffer(): Promise<ArrayBuffer>;
     blob(): Promise<Blob>;
@@ -132,6 +147,26 @@ interface Response {
     formData(): Promise<FormData>;
     json(): Promise<any>;
     text(): Promise<string>;
+}
+
+// Add missing CfProperties interface
+interface CfProperties {
+    asn: number;
+    colo: string;
+    country: string;
+    httpProtocol: string;
+    requestPriority: string;
+    tlsCipher: string;
+    tlsVersion: string;
+    city?: string;
+    clientTcpRtt?: number;
+    continent?: string;
+    latitude?: string;
+    longitude?: string;
+    postalCode?: string;
+    region?: string;
+    regionCode?: string;
+    timezone?: string;
 }
 
 // Begin runtime types
