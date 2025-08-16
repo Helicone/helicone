@@ -45,129 +45,16 @@ models/
 └── providers.ts         # Provider configurations
 ```
 
-## PTB (Pass-Through Billing) Flows
+## Request Processing Flows
 
-PTB endpoints are pre-configured deployments where Helicone handles the billing.
+For detailed explanations of how PTB (Pass-Through Billing) and BYOK (Bring Your Own Key) flows work, including the priority system and all implementation details, see [FLOWS.md](./FLOWS.md).
 
-### Flow 1: Model Only
-```typescript
-// User provides just model name
-const endpointsResult = getPtbEndpoints("claude-3.5-haiku");
-// Returns: All PTB endpoints for this model, sorted by cost (cheapest first)
-// [anthropic:*, bedrock:us-east-1, bedrock:us-west-2, vertex:us-central1]
-```
+### Quick Summary
 
-### Flow 2: Model + Provider
-```typescript
-// User specifies model and provider
-const endpointsResult = getPtbEndpointsByProvider("claude-3.5-haiku", "bedrock");
-// Returns: All PTB endpoints for this model/provider combo, sorted by cost
-// [bedrock:us-east-1, bedrock:us-west-2]
-```
-
-### Flow 3: Model + Provider + Deployment
-```typescript
-// User specifies exact deployment
-const endpointResult = getPtbEndpoint("claude-3.5-haiku", "bedrock", "us-west-2");
-// Returns: Specific PTB endpoint or error if not found/not PTB-enabled
-```
-
-## BYOK (Bring Your Own Key) Flows
-
-BYOK allows users to use their own API keys with their chosen deployments.
-
-### Flow 1: Model Only
-```typescript
-// Get all providers supporting this model
-const providersResult = getModelProviders("claude-3.5-haiku");
-// Returns: Set<ProviderName> for efficient DB queries
-// Set { "anthropic", "bedrock", "vertex" }
-
-// Query DB: WHERE model = ? AND provider IN (?)
-const userKeys = await db.query({
-  model: "claude-3.5-haiku",
-  provider: Array.from(providersResult.value)
-});
-```
-
-### Flow 2: Model + Provider
-```typescript
-// Get specific config for building BYOK endpoint
-const configResult = getModelProviderConfig("claude-3.5-haiku", "bedrock");
-// Returns: ModelProviderConfig with base config and available deployments
-
-// Build endpoint URL and model ID
-const url = buildEndpointUrl(configResult.value, {
-  region: userProvidedRegion
-});
-const modelId = buildModelId(configResult.value, {
-  region: userProvidedRegion
-});
-```
-
-### Flow 3: Model + Provider + User Config
-```typescript
-// Get all configs to build BYOK endpoints
-const configsResult = getModelProviderConfigs("claude-3.5-haiku");
-// Returns: ModelProviderConfig[] for all providers
-
-// Build custom endpoints based on user's keys
-const byokEndpoints = configsResult.value
-  .filter(config => userHasKeysFor(config.provider))
-  .map(config => ({
-    url: buildEndpointUrl(config, userConfig),
-    modelId: buildModelId(config, userConfig),
-    pricing: config.pricing,
-    contextLength: config.contextLength
-  }));
-```
-
-## API Reference
-
-### PTB Functions
-
-```typescript
-// Get specific PTB endpoint
-getPtbEndpoint(model: string, provider: string, deployment?: string): Result<Endpoint>
-
-// Get all PTB endpoints for a model
-getPtbEndpoints(model: string): Result<Endpoint[]>
-
-// Get PTB endpoints for model/provider
-getPtbEndpointsByProvider(model: string, provider: string): Result<Endpoint[]>
-```
-
-### BYOK Functions
-
-```typescript
-// Get base config for BYOK
-getModelProviderConfig(model: string, provider: string): Result<ModelProviderConfig>
-
-// Get all configs for a model
-getModelProviderConfigs(model: string): Result<ModelProviderConfig[]>
-
-// Get providers supporting a model (returns Set for efficient DB queries)
-getModelProviders(model: string): Result<Set<ProviderName>>
-
-// Build endpoint URL
-buildEndpointUrl(config: ModelProviderConfig, userConfig?: UserEndpointConfig): Result<string>
-
-// Build model ID
-buildModelId(config: ModelProviderConfig, userConfig?: UserEndpointConfig): Result<string>
-```
-
-### Model Functions
-
-```typescript
-// Get model metadata
-getModel(modelId: string): Result<ModelConfig>
-
-// Get all models
-getAllModels(): Result<ModelConfig[]>
-
-// Get provider's models
-getProviderModels(provider: string): Result<Set<ModelName>>
-```
+- **PTB**: Helicone manages API keys and handles billing
+- **BYOK**: Users provide their own API keys and are billed directly
+- **Priority**: BYOK always takes precedence over PTB when available
+- **BYOK-Only Mode**: Users can disable PTB fallback for specific providers
 
 ## Key Design Principles
 
@@ -181,6 +68,7 @@ getProviderModels(provider: string): Result<Set<ModelName>>
 ## Data Structure
 
 ### ModelProviderConfig
+
 ```typescript
 interface ModelProviderConfig {
   providerModelId: string;
@@ -196,6 +84,7 @@ interface ModelProviderConfig {
 ```
 
 ### EndpointConfig (Deployment Override)
+
 ```typescript
 interface EndpointConfig {
   providerModelId?: string;
@@ -208,6 +97,7 @@ interface EndpointConfig {
 ```
 
 ### Endpoint (Resolved)
+
 ```typescript
 interface Endpoint {
   provider: ProviderName;

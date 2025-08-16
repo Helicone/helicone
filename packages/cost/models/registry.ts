@@ -9,7 +9,8 @@ import type {
   UserEndpointConfig,
 } from "./types";
 import { buildIndexes, ModelIndexes } from "./build-indexes";
-import { buildEndpointUrl, buildModelId, type ProviderName } from "./providers";
+import { buildEndpointUrl, buildModelId } from "./provider-helpers";
+import { ProviderName } from "./providers";
 import { Result, ok, err } from "../../common/result";
 import { ModelName, ModelProviderConfigId, EndpointId } from "./registry-types";
 

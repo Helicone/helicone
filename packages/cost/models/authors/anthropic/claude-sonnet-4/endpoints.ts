@@ -29,7 +29,6 @@ export const endpoints = {
       "*": {},
     },
   },
-
   "claude-sonnet-4:vertex": {
     provider: "vertex",
     providerModelId: "claude-sonnet-4@20250514",
