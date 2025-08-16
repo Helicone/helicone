@@ -3,7 +3,6 @@ import { useRouter } from "next/router";
 import { OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
 import { promptsTools } from "@/lib/agent/tools";
 
-
 type Tool = NonNullable<OpenAIChatRequest["tools"]>[0];
 type ToolCallResult = {
   success: boolean;
@@ -35,10 +34,12 @@ const getToolsForRoute = (pathname: string): HeliconeAgentTool[] => {
     tools.push(...promptsTools);
   }
 
-  // CONTEXT TOOLS
-
   return tools;
 };
+
+// TODO: utils to get contexts
+
+
 
 export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
