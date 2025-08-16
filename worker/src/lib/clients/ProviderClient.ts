@@ -152,7 +152,7 @@ export async function callProviderWithRetry(
           const response = await callProvider(callProps);
           return response;
         } catch (e) {
-          console.log(`Retry attempt ${attempt}. Error: ${error}`);
+          console.log(`Retry attempt ${attempt}. Error: ${e}`);
           // If we reach the maximum number of attempts, bail with the error
           if (attempt >= retryOptions.attempts) {
             bail(e as Error);

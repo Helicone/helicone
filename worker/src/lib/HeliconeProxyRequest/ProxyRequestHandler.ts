@@ -142,7 +142,7 @@ export async function handleProxyRequest(
   );
 
   if (interceptor) {
-    interceptor.onComplete = (completedStream) => {
+    interceptor.onComplete = (completedStream: CompletedStream) => {
       loggable.status = getStatus(response.status, completedStream.reason);
       loggable.responseBody = completedStream.body;
       loggable.responseHeaders = Object.fromEntries(response.headers.entries());

@@ -15,7 +15,6 @@ import { RequestResponseStore } from "../db/RequestResponseStore";
 import { Valhalla } from "../db/valhalla";
 import {
   handleProxyRequest,
-  handleThreatProxyRequest,
 } from "./ProxyRequestHandler";
 import { checkPromptSecurity } from "../clients/PromptSecurityClient";
 import { DBLoggable } from "../dbLogger/DBLoggable";
