@@ -58,4 +58,4 @@ const MessageRenderer = ({ message }: MessageRendererProps) => {
   );
 };
 
-export default MessageRenderer; 
+export default MessageRenderer;
