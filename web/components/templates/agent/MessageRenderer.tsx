@@ -20,9 +20,14 @@ const MessageRenderer = ({ message }: MessageRendererProps) => {
   if (message.role === "tool") {
     return (
       <div className="w-full">
-        <div className="w-full rounded-lg bg-muted px-3 py-2 text-sm text-foreground">
-          {typeof message.content === "string" && message.content}
-        </div>
+        <details className="w-full">
+          <summary className="cursor-pointer text-sm text-muted-foreground">
+            Response
+          </summary>
+          <div className="mt-2 rounded-lg bg-muted px-3 py-2 text-xs text-foreground">
+            {typeof message.content === "string" && message.content}
+          </div>
+        </details>
       </div>
     );
   }
@@ -37,9 +42,6 @@ const MessageRenderer = ({ message }: MessageRendererProps) => {
               {message.tool_calls.map((tool) => (
                 <div key={tool.id} className="rounded-md bg-accent p-2">
                   <div className="font-medium">Tool: {tool.function.name}</div>
-                  <div className="mt-1 text-xs text-muted-foreground">
-                    {tool.function.arguments}
-                  </div>
                 </div>
               ))}
             </div>
