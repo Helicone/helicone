@@ -169,6 +169,72 @@ interface CfProperties {
     timezone?: string;
 }
 
+// Add missing KVNamespace interface
+interface KVNamespace {
+    get(key: string, options?: { type?: "text" | "json" | "arrayBuffer" | "stream"; cacheTtl?: number }): Promise<any>;
+    put(key: string, value: string | ArrayBuffer | ReadableStream, options?: { expiration?: number; expirationTtl?: number; metadata?: any }): Promise<void>;
+    delete(key: string): Promise<void>;
+    list(options?: { prefix?: string; limit?: number; cursor?: string }): Promise<{ keys: { name: string; expiration?: number; metadata?: any }[]; list_complete: boolean; cursor?: string }>;
+}
+
+// Add missing DurableObjectState interface
+interface DurableObjectState {
+    id: DurableObjectId;
+    storage: DurableObjectStorage;
+    waitUntil(promise: Promise<any>): void;
+}
+
+// Add missing DurableObjectId interface
+interface DurableObjectId {
+    toString(): string;
+    equals(other: DurableObjectId): boolean;
+    name?: string;
+}
+
+// Add missing DurableObjectStorage interface
+interface DurableObjectStorage {
+    get<T = any>(key: string, options?: { allowConcurrency?: boolean; noCache?: boolean }): Promise<T | undefined>;
+    get<T = any>(keys: string[], options?: { allowConcurrency?: boolean; noCache?: boolean }): Promise<Map<string, T>>;
+    put<T>(key: string, value: T, options?: { allowUnconfirmed?: boolean; noCache?: boolean }): Promise<void>;
+    put<T>(entries: Record<string, T>, options?: { allowUnconfirmed?: boolean; noCache?: boolean }): Promise<void>;
+    delete(key: string, options?: { allowUnconfirmed?: boolean; noCache?: boolean }): Promise<boolean>;
+    delete(keys: string[], options?: { allowUnconfirmed?: boolean; noCache?: boolean }): Promise<number>;
+    list(options?: { start?: string; end?: string; prefix?: string; reverse?: boolean; limit?: number; allowConcurrency?: boolean; noCache?: boolean }): Promise<Map<string, any>>;
+    transaction<T>(closure: (txn: DurableObjectTransaction) => Promise<T>): Promise<T>;
+    deleteAll(options?: { allowUnconfirmed?: boolean }): Promise<void>;
+    sync(): Promise<void>;
+}
+
+// Add missing DurableObjectTransaction interface
+interface DurableObjectTransaction {
+    get<T = any>(key: string): Promise<T | undefined>;
+    get<T = any>(keys: string[]): Promise<Map<string, T>>;
+    put<T>(key: string, value: T): Promise<void>;
+    put<T>(entries: Record<string, T>): Promise<void>;
+    delete(key: string): Promise<boolean>;
+    delete(keys: string[]): Promise<number>;
+    list(options?: { start?: string; end?: string; prefix?: string; reverse?: boolean; limit?: number }): Promise<Map<string, any>>;
+    rollback(): void;
+}
+
+// Add missing BodyInit type
+type BodyInit = ReadableStream | ArrayBuffer | ArrayBufferView | string | URLSearchParams | FormData | null;
+
+// Add missing RequestInit type
+interface RequestInit {
+    method?: string;
+    headers?: HeadersInit;
+    body?: BodyInit;
+    redirect?: RequestRedirect;
+    integrity?: string;
+    signal?: AbortSignal;
+    credentials?: RequestCredentials;
+    mode?: RequestMode;
+    referrer?: string;
+    referrerPolicy?: ReferrerPolicy;
+    cf?: any;
+}
+
 // Begin runtime types
 /*! *****************************************************************************
 Copyright (c) Cloudflare. All rights reserved.
