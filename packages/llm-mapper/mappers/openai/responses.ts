@@ -105,6 +105,12 @@ export const getRequestText = (requestBody: OpenAIResponseRequest): string => {
 
     if (Array.isArray(input) && input.length > 0) {
       const lastItem = input[input.length - 1];
+      
+      // Handle function_call_output items - they don't have extractable text
+      if ((lastItem as any)?.type === "function_call_output") {
+        return "";
+      }
+      
       const content = (lastItem as any)?.content;
 
       // Content can be a string or an array of typed items
@@ -155,6 +161,16 @@ export const getResponseText = (
     if (statusCode === 0 || statusCode === null) {
       return "";
     }
+    
+    // Handle null/undefined inputs
+    if (responseBody === null || responseBody === undefined) {
+      return "";
+    }
+    
+    // Handle empty objects
+    if (typeof responseBody === "object" && Object.keys(responseBody).length === 0) {
+      return "";
+    }
 
     if (responseBody?.error) {
       // Prefer message if present; else stringify the error object
@@ -199,7 +215,15 @@ export const getResponseText = (
       return responseBody.text;
     }
 
-    return JSON.stringify(responseBody);
+    // Safe JSON.stringify to handle circular references
+    try {
+      return JSON.stringify(responseBody);
+    } catch (stringifyError) {
+      if (stringifyError instanceof Error && stringifyError.message.includes('circular')) {
+        return "error_circular_reference";
+      }
+      throw stringifyError;
+    }
   } catch (error) {
     console.error("Error parsing response text (Responses API):", error);
     return "error_parsing_response";
