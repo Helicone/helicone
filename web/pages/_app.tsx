@@ -118,7 +118,10 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
               </DndProvider>
             </NotificationProvider>
             {process.env.NODE_ENV === "development" && (
-              <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
+              <ReactQueryDevtools
+                initialIsOpen={false}
+                buttonPosition="bottom-left"
+              />
             )}
           </QueryClientProvider>
         </SupabaseProvider>
