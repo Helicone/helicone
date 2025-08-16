@@ -57,10 +57,10 @@ export class TestClickhouseClientWrapper {
     }
   }
 
-  async dbQuery<RowType>(
+  async dbQuery<T>(
     query: string,
     parameters: (number | string | boolean | Date)[]
-  ): Promise<Result<RowType[], string>> {
+  ): Promise<Result<T[], string>> {
     try {
       const query_params = this.paramsToValues(parameters);
 
@@ -72,7 +72,7 @@ export class TestClickhouseClientWrapper {
           wait_end_of_query: 1,
         },
       });
-      return { data: await queryResult.json<RowType>(), error: null };
+      return { data: await queryResult.json<T[]>(), error: null };
     } catch (err) {
       return {
         data: null,
@@ -81,10 +81,10 @@ export class TestClickhouseClientWrapper {
     }
   }
 
-  async dbQueryHql<RowType>(
+  async dbQueryHql<T>(
     query: string,
     parameters: (number | string | boolean | Date)[]
-  ): Promise<Result<RowType[], string>> {
+  ): Promise<Result<T[], string>> {
     try {
       const query_params = this.paramsToValues(parameters);
 
@@ -96,7 +96,7 @@ export class TestClickhouseClientWrapper {
           wait_end_of_query: 1,
         },
       });
-      return { data: await queryResult.json<RowType>(), error: null };
+      return { data: await queryResult.json<T[]>(), error: null };
     } catch (err) {
       return {
         data: null,
@@ -105,7 +105,7 @@ export class TestClickhouseClientWrapper {
     }
   }
 
-  async queryWithContext<RowType>({
+  async queryWithContext<T>({
     query,
     organizationId,
     parameters,
@@ -113,7 +113,7 @@ export class TestClickhouseClientWrapper {
     query: string;
     organizationId: string;
     parameters: (number | string | boolean | Date)[];
-  }): Promise<Result<RowType[], string>> {
+  }): Promise<Result<T[], string>> {
     try {
       const query_params = this.paramsToValues(parameters);
       // Align security check with production: block attempts to reference or set our org-id context
@@ -158,9 +158,9 @@ export class TestClickhouseClientWrapper {
       
       if (isDDL) {
         // DDL commands don't return data
-        return { data: [] as RowType[], error: null };
+        return { data: [] as T[], error: null };
       } else {
-        const rows = (await queryResult.json<RowType>()) as unknown as RowType[];
+        const rows = await queryResult.json<T[]>();
         return { data: rows, error: null };
       }
     } catch (err) {

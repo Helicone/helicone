@@ -79,7 +79,7 @@ export class ClickhouseClientWrapper {
           wait_end_of_query: 1,
         },
       });
-      return { data: await queryResult.json<T>(), error: null };
+      return { data: await queryResult.json<T[]>(), error: null };
     } catch (err) {
       console.error("Error executing Clickhouse query: ", query, parameters);
       console.error(err);
@@ -90,7 +90,7 @@ export class ClickhouseClientWrapper {
     }
   }
 
-  async queryWithContext<RowType>({
+  async queryWithContext<T>({
     query,
     organizationId,
     parameters,
@@ -98,7 +98,7 @@ export class ClickhouseClientWrapper {
     query: string;
     organizationId: string;
     parameters: (number | string | boolean | Date)[];
-  }): Promise<Result<RowType[], string>> {
+  }): Promise<Result<T[], string>> {
     try {
       const query_params = paramsToValues(parameters);
 
@@ -128,7 +128,7 @@ export class ClickhouseClientWrapper {
           allow_ddl: 0,
         } as ClickHouseSettings,
       });
-      return { data: await queryResult.json<RowType>(), error: null };
+      return { data: await queryResult.json<T[]>(), error: null };
     } catch (err) {
       console.error(
         "Error executing HQL query with context: ",
