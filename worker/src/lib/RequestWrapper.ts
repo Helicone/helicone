@@ -45,7 +45,7 @@ export type Prompt2025Settings = {
   promptVersionId?: string;
   environment?: string;
   promptInputs?: Record<string, any>;
-}
+};
 
 export class RequestWrapper {
   private authorization: string | undefined;
@@ -60,6 +60,7 @@ export class RequestWrapper {
   promptSettings: PromptSettings;
   prompt2025Settings: Prompt2025Settings; // I'm sorry. Will clean whenever we can remove old promtps.
   extraHeaders: Headers | null = null;
+  requestReferrer: string | undefined;
 
   private cachedText: string | null = null;
   private bodyKeyOverride: object | null = null;
@@ -138,7 +139,10 @@ export class RequestWrapper {
     this.injectPromptProperties();
   }
 
-  private constructor(private request: Request, private env: Env) {
+  private constructor(
+    private request: Request,
+    private env: Env
+  ) {
     this.url = new URL(request.url);
     this.originalUrl = new URL(request.url);
     this.headers = this.mutatedAuthorizationHeaders(request);
@@ -220,6 +224,10 @@ export class RequestWrapper {
 
   setBaseURLOverride(url: string): void {
     this.baseURLOverride = url;
+  }
+
+  setRequestReferrer(referrer: string): void {
+    this.requestReferrer = referrer;
   }
 
   async auth(): Promise<Result<HeliconeAuth, string>> {
@@ -610,10 +618,10 @@ export class RequestWrapper {
    * @param inputs The inputs to associate with the prompt
    */
   setPrompt2025Settings(params: {
-    promptId: string,
-    promptVersionId: string,
-    inputs: Record<string, any>,
-    environment?: string
+    promptId: string;
+    promptVersionId: string;
+    inputs: Record<string, any>;
+    environment?: string;
   }): void {
     this.prompt2025Settings = {
       promptId: params.promptId,
