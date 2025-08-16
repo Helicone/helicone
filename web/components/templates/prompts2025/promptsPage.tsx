@@ -284,7 +284,6 @@ const PromptsPage = (props: PromptsPageProps) => {
       const promptInfo = prompts.map((prompt) => {
         return `Name: ${prompt.prompt.name} (ID: ${prompt.prompt.id})\n}`;
       });
-      console.log(promptInfo);
       return {
         success: true,
         message: "PROMPTS: " + JSON.stringify(promptInfo),
@@ -298,6 +297,27 @@ const PromptsPage = (props: PromptsPageProps) => {
         return {
           success: true,
           message: `Successfully selected prompt: ${prompt.prompt.name} (${prompt.prompt.id})`,
+        };
+      }
+      return {
+        success: false,
+        message: `Prompt does not exist with ID ${args.id}`,
+      };
+    });
+
+    setToolHandler("get-prompt-versions", async (args: { id: string }) => {
+      const prompt = prompts.find((p) => p.prompt.id === args.id);
+      if (prompt) {
+        const promptVersions = prompt.versions.map((version) => {
+          return `
+          Version: ${version.major_version}.${version.minor_version} (ID: ${version.id})
+          Environment: ${version.environment}
+          Commit Message: ${version.commit_message}\n
+          `;
+        });
+        return {
+          success: true,
+          message: `PROMPT VERSIONS: ${JSON.stringify(promptVersions)}`,
         };
       }
       return {
