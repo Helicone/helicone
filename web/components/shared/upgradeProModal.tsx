@@ -78,7 +78,7 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
     const result = await stripe.redirectToCheckout({ sessionId });
 
     if (result.error) {
-      logger.error("Stripe checkout failed", { error: result.error.message });
+      logger.error({ error: result.error.message }, "Stripe checkout failed");
     }
   }
 

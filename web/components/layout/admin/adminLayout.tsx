@@ -32,7 +32,7 @@ export default function AdminLayout(props: { children: React.ReactNode }) {
       // Set state based on localStorage, or default to true if not found
       setSidebarOpen(savedState === null ? true : savedState === "true");
     } catch (e) {
-      logger.error("Error accessing localStorage", { error: e });
+      logger.error(e, "Error accessing localStorage");
       // Default to open if localStorage fails
       setSidebarOpen(true);
     }
@@ -46,7 +46,7 @@ export default function AdminLayout(props: { children: React.ReactNode }) {
       // Save to localStorage whenever it changes
       localStorage.setItem(SIDEBAR_STATE_KEY, String(open));
     } catch (e) {
-      logger.error("Error saving to localStorage", { error: e });
+      logger.error(e, "Error saving to localStorage");
     }
   };
 

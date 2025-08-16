@@ -170,7 +170,7 @@ export default function ScrollableBadges({
         setPendingItems((prev) =>
           (prev as SingleValueItem[]).filter((item) => item !== newValue),
         );
-        logger.error("Error adding item", { error });
+        logger.error(error, "Error adding item");
       }
     } else {
       if (!newKey || !newValue) return;
@@ -192,7 +192,7 @@ export default function ScrollableBadges({
             (item) => !(item.key === newKey && item.value === newValue),
           ),
         );
-        logger.error("Error adding item", { error });
+        logger.error(error, "Error adding item");
       }
     }
   };
