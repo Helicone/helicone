@@ -94,6 +94,46 @@ declare class ScheduledController {
 	noRetry(): void;
 }
 
+// Add missing Request and Response types
+interface Request {
+    url: string;
+    method: string;
+    headers: Headers;
+    body?: ReadableStream | null;
+    bodyUsed: boolean;
+    redirect?: RequestRedirect;
+    integrity?: string;
+    cache?: RequestCache;
+    credentials?: RequestCredentials;
+    mode?: RequestMode;
+    referrer?: string;
+    referrerPolicy?: ReferrerPolicy;
+    clone(): Request;
+    arrayBuffer(): Promise<ArrayBuffer>;
+    blob(): Promise<Blob>;
+    formData(): Promise<FormData>;
+    json(): Promise<any>;
+    text(): Promise<string>;
+}
+
+interface Response {
+    readonly headers: Headers;
+    readonly ok: boolean;
+    readonly redirected: boolean;
+    readonly status: number;
+    readonly statusText: string;
+    readonly type: ResponseType;
+    readonly url: string;
+    readonly body: ReadableStream | null;
+    readonly bodyUsed: boolean;
+    clone(): Response;
+    arrayBuffer(): Promise<ArrayBuffer>;
+    blob(): Promise<Blob>;
+    formData(): Promise<FormData>;
+    json(): Promise<any>;
+    text(): Promise<string>;
+}
+
 // Begin runtime types
 /*! *****************************************************************************
 Copyright (c) Cloudflare. All rights reserved.
