@@ -332,6 +332,17 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
     ],
     table: "request_response_rmt",
   },
+  {
+    id: "feedback_rating",
+    label: "Feedback",
+    type: "boolean",
+    operators: ["is"],
+    valueOptions: [
+      { label: "Positive", value: true },
+      { label: "Negative", value: false },
+    ],
+    table: "request_response_rmt",
+  },
 
   // Datetime fields
   {
