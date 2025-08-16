@@ -100,7 +100,9 @@ export async function dbExecute<T>(
     process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "development"
       ? {
           rejectUnauthorized: true,
-          ca: process.env.SUPABASE_SSL_CERT_CONTENTS!.split("\\n").join("\n"),
+          ca: process.env.SUPABASE_SSL_CERT_CONTENTS
+            ? process.env.SUPABASE_SSL_CERT_CONTENTS.split("\\n").join("\n")
+            : undefined,
         }
       : undefined;
 
