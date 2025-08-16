@@ -191,8 +191,6 @@ const sendRequest = async (
     toAnthropic: toAnthropic,
   });
 
-  console.log("body in sendRequest", JSON.stringify(body));
-
   if (isErr(body) || !body.data) {
     return err({
       type: "request_failed",
@@ -204,8 +202,6 @@ const sendRequest = async (
   requestWrapper.setBody(body.data);
 
   const targetBaseUrl = endpoint.baseUrl;
-
-  console.log("targetBaseUrl in sendRequest", targetBaseUrl);
 
   await authenticateRequest(
     requestWrapper,
@@ -242,13 +238,10 @@ const attemptDirectProviderRequest = async (
   parsedBody: any
 ): Promise<Result<Response, Error>> => {
   const { provider, modelName } = directProviderEndpoint;
-  console.log("provider in attemptDirectProviderRequest", provider);
-  console.log("orgId in attemptDirectProviderRequest", orgId);
   const providerKey = await providerKeysManager.getProviderKeyWithFetch(
     provider,
     orgId
   );
-  console.log("providerKey in attemptDirectProviderRequest", providerKey);
 
   if (!providerKey) {
     return err({
@@ -315,11 +308,6 @@ const attemptDirectProviderRequest = async (
     userEndpointConfig
   );
 
-  console.log(
-    "byokEndpoint in attemptDirectProviderRequest",
-    JSON.stringify(byokEndpoint)
-  );
-
   if (isErr(byokEndpoint)) {
     return err({
       type: "request_failed",
@@ -330,10 +318,6 @@ const attemptDirectProviderRequest = async (
 
   // const finalEndpoints = [byokEndpoint.data, ...endpoints]; // Do this when we have Passthrough Billing
   const finalEndpoints = [byokEndpoint.data];
-  console.log(
-    "finalEndpoints in attemptDirectProviderRequest",
-    JSON.stringify(finalEndpoints)
-  );
 
   for (const endpoint of finalEndpoints) {
     const result = await sendRequest(
@@ -347,8 +331,6 @@ const attemptDirectProviderRequest = async (
     if (!isErr(result)) {
       return result;
     }
-
-    console.log("got an error in the request", result.error);
   }
 
   return err({
@@ -371,7 +353,6 @@ const attemptProvidersRequest = async (
 
   let error: Error | null = null;
   for (const provider of providers) {
-    console.log("trying provider", provider);
     const providerResult = getProvider(provider);
     if (isErr(providerResult) || !providerResult.data) {
       continue;
