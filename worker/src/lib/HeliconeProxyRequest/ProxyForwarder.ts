@@ -98,7 +98,7 @@ export async function proxyForwarder(
             ctx.waitUntil(
               log(
                 loggable,
-                "false", // don't push body to S3
+                "false", // don't push body to S3 (keep as string "false" to match expected type)
                 false, // don't rate limit cache hit
                 cachedResponse,
                 cacheSettings // send them cache settings hehe

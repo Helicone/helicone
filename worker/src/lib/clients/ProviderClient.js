@@ -1,0 +1,129 @@
+import retry from "async-retry";
+import { llmmapper } from "./llmmapper/llmmapper";
+export function callPropsFromProxyRequest(proxyRequest) {
+    return {
+        apiBase: proxyRequest.api_base,
+        body: proxyRequest.bodyText,
+        headers: proxyRequest.requestWrapper.getHeaders(),
+        method: proxyRequest.requestWrapper.getMethod(),
+        increaseTimeout: proxyRequest.requestWrapper.heliconeHeaders.featureFlags.increaseTimeout,
+        originalUrl: proxyRequest.requestWrapper.url,
+        extraHeaders: proxyRequest.requestWrapper.extraHeaders,
+    };
+}
+function removeHeliconeHeaders(request) {
+    const newHeaders = new Headers();
+    for (const [key, value] of request.entries()) {
+        if (!key.toLowerCase().startsWith("helicone-")) {
+            newHeaders.set(key, value);
+        }
+    }
+    return newHeaders;
+}
+function joinHeaders(h1, h2) {
+    const newHeaders = new Headers();
+    for (const [key, value] of h1.entries()) {
+        newHeaders.set(key, value);
+    }
+    for (const [key, value] of h2.entries()) {
+        newHeaders.set(key, value);
+    }
+    return newHeaders;
+}
+async function callWithMapper(targetUrl, init) {
+    if (targetUrl.host === "gateway.llmmapper.com") {
+        try {
+            if ("body" in init) {
+                const headers = {};
+                init.headers.forEach((value, key) => {
+                    headers[key] = value;
+                });
+                return await llmmapper(targetUrl, {
+                    body: init.body,
+                    headers: headers,
+                });
+            }
+            else {
+                return new Response("Unsupported, must have body", { status: 404 });
+            }
+        }
+        catch (e) {
+            return new Response("Helicone LLMMapper gateway error" + JSON.stringify(e), {
+                status: 10_502,
+            });
+        }
+    }
+    else {
+        return await fetch(targetUrl.href, init);
+    }
+}
+export async function callProvider(props) {
+    const { headers, method, apiBase, body, increaseTimeout, originalUrl } = props;
+    const targetUrl = buildTargetUrl(originalUrl, apiBase);
+    const removedHeaders = removeHeliconeHeaders(headers);
+    let headersWithExtra = removedHeaders;
+    if (props.extraHeaders) {
+        headersWithExtra = joinHeaders(removedHeaders, props.extraHeaders);
+    }
+    if (originalUrl.host.includes("localhost") ||
+        originalUrl.host.includes("127.0.0.1")) {
+        headersWithExtra.set("Accept-Encoding", "Identity");
+    }
+    const baseInit = { method, headers: headersWithExtra };
+    const init = method === "GET" ? { ...baseInit } : { ...baseInit, body };
+    let response;
+    if (increaseTimeout) {
+        const controller = new AbortController();
+        const signal = controller.signal;
+        setTimeout(() => controller.abort(), 1000 * 60 * 30);
+        response = await fetch(targetUrl.href, {
+            ...init,
+            signal,
+        });
+    }
+    else {
+        response = await callWithMapper(targetUrl, init);
+    }
+    return response;
+}
+export function buildTargetUrl(originalUrl, apiBase) {
+    const apiBaseUrl = new URL(apiBase.replace(/\/$/, ""));
+    return new URL(`${apiBaseUrl.origin}${originalUrl.pathname}${originalUrl.search}`);
+}
+export async function callProviderWithRetry(callProps, retryOptions) {
+    let lastResponse;
+    try {
+        // Use async-retry to call the forwardRequestToOpenAi function with exponential backoff
+        await retry(async (bail, attempt) => {
+            try {
+                const res = await callProvider(callProps);
+                lastResponse = res;
+                // Throw an error if the status code is 429 or 5xx
+                if (res.status === 429 || (res.status < 600 && res.status >= 500)) {
+                    throw new Error(`Status code ${res.status}`);
+                }
+                return res;
+            }
+            catch (e) {
+                // If we reach the maximum number of retries, bail with the error
+                if (attempt >= retryOptions.retries) {
+                    bail(e);
+                }
+                // Otherwise, retry with exponential backoff
+                throw e;
+            }
+        }, {
+            ...retryOptions,
+            onRetry: (error, attempt) => {
+                console.log(`Retry attempt ${attempt}. Error: ${error}`);
+            },
+        });
+    }
+    catch (e) {
+        console.warn(`Retried ${retryOptions.retries} times but still failed. Error: ${e}`);
+    }
+    if (lastResponse === undefined) {
+        throw new Error("500 An error occured while retrying your requests");
+    }
+    return lastResponse;
+}

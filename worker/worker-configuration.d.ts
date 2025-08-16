@@ -19,7 +19,7 @@ declare namespace Cloudflare {
 		CLICKHOUSE_PASSWORD: "";
 		PROVIDER: "OPENAI";
 		TOKEN_COUNT_URL: "https://tokens.helicone.ai/anthropic/count_tokens";
-		WORKER_TYPE: "OPENAI_PROXY";
+		WORKER_TYPE: "OPENAI_PROXY" | "AI_GATEWAY_API" | "GATEWAY_API" | "GENERATE_API" | "ANTHROPIC_PROXY" | "HELICONE_API" | "CUSTOMER_GATEWAY";
 		VAULT_ENABLED: "true";
 		REQUEST_CACHE_KEY: "9984c295ec7d0f506b8af65e9d60773480eb0c9347a6bd8a2b08fb57b5117701";
 		REQUEST_CACHE_KEY_2: "9984c295ec7d0f506b8af65e9d60773480eb0c9347a6bd8a2b08fb57b5117701";
@@ -44,13 +44,13 @@ declare namespace Cloudflare {
 		DATADOG_ENABLED: "false" | "true";
 		DATADOG_API_KEY: "";
 		DATADOG_ENDPOINT: "";
-		GATEWAY_TARGET: "";
+		GATEWAY_TARGET: string;
 		S3_ENABLED: "true";
-		S3_REGION: "us-west-2";
+		S3_REGION: "us-west-2" | "eu-west-1";
 		SENTRY_API_KEY: "";
 		SENTRY_PROJECT_ID: "";
-		WORKER_DEFINED_REDIRECT_URL: "";
-		AWS_REGION: "us-west-2";
+		WORKER_DEFINED_REDIRECT_URL: string;
+		AWS_REGION: "us-west-2" | "eu-west-1";
 		AWS_ACCESS_KEY_ID: "";
 		AWS_SECRET_ACCESS_KEY: "";
 		REQUEST_LOGS_QUEUE_URL: "";

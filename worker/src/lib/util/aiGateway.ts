@@ -169,7 +169,7 @@ const authenticateRequest = async (
   }
 
   for (const [key, value] of Object.entries(authResult.data?.headers || {})) {
-    requestWrapper.setHeader(key, value);
+    requestWrapper.setHeader(key, String(value));
   }
 };
 

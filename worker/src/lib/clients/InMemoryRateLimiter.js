@@ -1,0 +1,33 @@
+export class InMemoryRateLimiter {
+    state;
+    transactions = [];
+    windowSizeSeconds;
+    maxCount;
+    constructor(state) {
+        this.state = state;
+        // Default is free tier
+        this.windowSizeSeconds = 60;
+        this.maxCount = 1000;
+    }
+    async fetch(request) {
+        const { windowSizeSeconds, maxCount } = await request.json();
+        this.windowSizeSeconds = windowSizeSeconds;
+        this.maxCount = maxCount;
+        const now = Date.now();
+        this.transactions = this.transactions.filter((t) => t > now - this.windowSizeSeconds * 1000);
+        let isRateLimited = false;
+        if (this.transactions.length <= this.maxCount) {
+            // Not rate limited
+            this.transactions.push(now);
+        }
+        else {
+            // Rate limited
+            isRateLimited = true;
+        }
+        return new Response(JSON.stringify({ isRateLimited }), {
+            headers: {
+                "content-type": "application/json;charset=UTF-8",
+            },
+        });
+    }
+}

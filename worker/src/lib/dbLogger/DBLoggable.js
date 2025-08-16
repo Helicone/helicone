@@ -1,0 +1,573 @@
+import { getTokenCount } from "../clients/TokenCounterClient";
+import { INTERNAL_ERRORS } from "../util/constants";
+import { withTimeout } from "../util/helpers";
+import { err, ok } from "../util/results";
+import { anthropicAIStream, getModel, } from "./streamParsers/anthropicStreamParser";
+import { parseOpenAIStream } from "./streamParsers/openAIStreamParser";
+import { parseVercelStream } from "./streamParsers/vercelStreamParser";
+import { costOfPrompt } from "@helicone-package/cost";
+import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
+export function dbLoggableRequestFromProxyRequest(proxyRequest, requestStartTime) {
+    return {
+        requestId: proxyRequest.requestId,
+        heliconeProxyKeyId: proxyRequest.heliconeProxyKeyId,
+        promptSettings: proxyRequest.requestWrapper.promptSettings,
+        prompt2025Settings: proxyRequest.requestWrapper.prompt2025Settings,
+        heliconeTemplate: proxyRequest.heliconePromptTemplate ?? undefined,
+        userId: proxyRequest.userId,
+        startTime: requestStartTime,
+        bodyText: proxyRequest.bodyText ?? undefined,
+        path: proxyRequest.requestWrapper.url.href,
+        targetUrl: proxyRequest.targetUrl.href,
+        properties: proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
+        isStream: proxyRequest.isStream,
+        omitLog: proxyRequest.omitOptions.omitRequest,
+        provider: proxyRequest.provider,
+        nodeId: proxyRequest.nodeId,
+        modelOverride: proxyRequest.requestWrapper.heliconeHeaders.modelOverride ?? undefined,
+        threat: proxyRequest.threat ?? null,
+        flaggedForModeration: proxyRequest.flaggedForModeration ?? null,
+        request_ip: null,
+        country_code: proxyRequest.requestWrapper.cf?.country ?? null,
+    };
+}
+function getResponseBodyFromJSON(json) {
+    // This will mock the response as if it came from OpenAI
+    if (json.streamed_data) {
+        const streamedData = json.streamed_data;
+        return {
+            body: streamedData.map((d) => "data: " + JSON.stringify(d)),
+            endTime: new Date(),
+        };
+    }
+    return { body: [JSON.stringify(json)], endTime: new Date() };
+}
+export async function dbLoggableRequestFromAsyncLogModel(props) {
+    const { requestWrapper, env, asyncLogModel, providerRequestHeaders, providerResponseHeaders, provider, heliconeTemplate, } = props;
+    return new DBLoggable({
+        request: {
+            requestId: providerRequestHeaders.requestId ?? crypto.randomUUID(),
+            promptSettings: providerRequestHeaders.promptHeaders?.promptId
+                ? {
+                    promptId: providerRequestHeaders.promptHeaders.promptId,
+                    promptVersion: providerRequestHeaders.promptHeaders.promptVersion ?? "",
+                    promptMode: "production",
+                }
+                : {
+                    promptId: undefined,
+                    promptVersion: "",
+                    promptMode: "deactivated",
+                },
+            prompt2025Settings: requestWrapper.prompt2025Settings,
+            userId: providerRequestHeaders.userId ?? undefined,
+            startTime: asyncLogModel.timing
+                ? new Date(asyncLogModel.timing.startTime.seconds * 1000 +
+                    asyncLogModel.timing.startTime.milliseconds)
+                : new Date(),
+            bodyText: JSON.stringify(asyncLogModel.providerRequest.json),
+            path: asyncLogModel.providerRequest.url,
+            targetUrl: asyncLogModel.providerRequest.url,
+            properties: providerRequestHeaders.heliconeProperties,
+            isStream: asyncLogModel.providerRequest.json?.stream == true,
+            omitLog: false,
+            provider,
+            nodeId: requestWrapper.getNodeId(),
+            modelOverride: requestWrapper.heliconeHeaders.modelOverride ?? undefined,
+            threat: null,
+            flaggedForModeration: null,
+            request_ip: null,
+            country_code: requestWrapper.cf?.country ?? null,
+            heliconeTemplate: heliconeTemplate ?? undefined,
+        },
+        response: {
+            responseId: crypto.randomUUID(),
+            getResponseBody: async () => {
+                if (asyncLogModel.providerResponse.textBody) {
+                    return {
+                        body: [asyncLogModel.providerResponse.textBody],
+                        endTime: new Date(),
+                    };
+                }
+                return getResponseBodyFromJSON(asyncLogModel.providerResponse.json);
+            },
+            responseHeaders: providerResponseHeaders,
+            status: async () => asyncLogModel.providerResponse.status,
+            omitLog: false,
+        },
+        timing: {
+            startTime: asyncLogModel.timing
+                ? new Date(asyncLogModel.timing.startTime.seconds * 1000 +
+                    asyncLogModel.timing.startTime.milliseconds)
+                : new Date(),
+            endTime: asyncLogModel.timing
+                ? new Date(asyncLogModel.timing.endTime.seconds * 1000 +
+                    asyncLogModel.timing.endTime.milliseconds)
+                : new Date(new Date().getTime() + 1000),
+            timeToFirstToken: async () => asyncLogModel.timing
+                ? Number(asyncLogModel.timing.timeToFirstToken) ?? null
+                : null,
+        },
+        tokenCalcUrl: env.VALHALLA_URL,
+    });
+}
+// Represents an object that can be logged to the database
+export class DBLoggable {
+    response;
+    request;
+    timing;
+    provider;
+    tokenCalcUrl;
+    constructor(props) {
+        this.response = props.response;
+        this.request = props.request;
+        this.timing = props.timing;
+        this.provider = props.request.provider;
+        this.tokenCalcUrl = props.tokenCalcUrl;
+    }
+    async waitForResponse() {
+        return await this.response.getResponseBody();
+    }
+    getTimingStart() {
+        return this.timing.startTime.getTime();
+    }
+    async tokenCounter(text) {
+        return getTokenCount(text, this.provider, this.tokenCalcUrl);
+    }
+    async parseResponse(responseBody, status
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ) {
+        let result = responseBody;
+        const isStream = this.request.isStream;
+        const responseStatus = await this.response.status();
+        const requestBody = this.request.bodyText;
+        const tokenCounter = (t) => this.tokenCounter(t);
+        if (isStream && status === INTERNAL_ERRORS["Cancelled"]) {
+            // Remove last line of stream from result
+            result = result.split("\n").slice(0, -1).join("\n");
+        }
+        const HTTPSErrorRange = responseStatus >= 400 && responseStatus < 600;
+        const HTTPSRedirect = responseStatus >= 300 && responseStatus < 400;
+        try {
+            if (HTTPSErrorRange || HTTPSRedirect) {
+                return ok(JSON.parse(result));
+            }
+            else if (!isStream && this.provider === "ANTHROPIC" && requestBody) {
+                const responseJson = JSON.parse(result);
+                if (getModel(requestBody ?? "{}").includes("claude-3")) {
+                    if (!responseJson?.usage?.output_tokens ||
+                        !responseJson?.usage?.input_tokens) {
+                        return ok(responseJson);
+                    }
+                    else {
+                        return ok({
+                            ...responseJson,
+                            usage: {
+                                total_tokens: responseJson?.usage?.output_tokens +
+                                    responseJson?.usage?.input_tokens,
+                                prompt_tokens: responseJson?.usage?.input_tokens,
+                                completion_tokens: responseJson?.usage?.output_tokens,
+                                helicone_calculated: true,
+                            },
+                        });
+                    }
+                }
+                else {
+                    const prompt = JSON.parse(requestBody)?.prompt ?? "";
+                    const completion = responseJson?.completion ?? "";
+                    const completionTokens = await tokenCounter(completion);
+                    const promptTokens = await tokenCounter(prompt);
+                    return ok({
+                        ...responseJson,
+                        usage: {
+                            total_tokens: promptTokens + completionTokens,
+                            prompt_tokens: promptTokens,
+                            completion_tokens: completionTokens,
+                            helicone_calculated: true,
+                        },
+                    });
+                }
+            }
+            else if (!isStream && this.provider === "GOOGLE") {
+                const responseJson = JSON.parse(result);
+                let usageMetadataItem;
+                if (Array.isArray(responseJson)) {
+                    usageMetadataItem = responseJson.find((item) => item.usageMetadata);
+                }
+                else {
+                    usageMetadataItem = responseJson.usageMetadata
+                        ? responseJson
+                        : undefined;
+                }
+                return ok({
+                    usage: {
+                        total_tokens: usageMetadataItem?.usageMetadata?.totalTokenCount,
+                        prompt_tokens: usageMetadataItem?.usageMetadata?.promptTokenCount,
+                        completion_tokens: (usageMetadataItem?.usageMetadata?.thoughtsTokenCount ?? 0) +
+                            (usageMetadataItem?.usageMetadata?.candidatesTokenCount ?? 0),
+                        helicone_calculated: false,
+                    },
+                });
+            }
+            else if (isStream && this.provider === "ANTHROPIC") {
+                return anthropicAIStream(result, tokenCounter, requestBody);
+            }
+            else if (isStream) {
+                return parseOpenAIStream(result, tokenCounter, requestBody);
+            }
+            else if (this.provider === "VERCEL" &&
+                result.includes("data: {") &&
+                result.includes('"type":')) {
+                // Vercel streams detected by response body pattern
+                return parseVercelStream(result);
+            }
+            else {
+                return ok(JSON.parse(result));
+            }
+        }
+        catch (e) {
+            console.log("Error parsing response 1", e);
+            return {
+                data: null,
+                error: "error parsing response, " + e + ", " + result,
+            };
+        }
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    tryJsonParse(text) {
+        try {
+            return JSON.parse(text);
+        }
+        catch (e) {
+            return {
+                error: "error parsing response, " + e + ", " + text,
+            };
+        }
+    }
+    getUsage(parsedResponse) {
+        if (typeof parsedResponse !== "object" ||
+            parsedResponse === null ||
+            !("usage" in parsedResponse)) {
+            return {
+                prompt_tokens: undefined,
+                completion_tokens: undefined,
+            };
+        }
+        const response = parsedResponse;
+        const usage = response.usage;
+        return {
+            prompt_tokens: usage?.prompt_tokens ?? usage?.input_tokens ?? usage?.inputTokens,
+            completion_tokens: usage?.completion_tokens ?? usage?.output_tokens ?? usage?.outputTokens,
+        };
+    }
+    async getStatus() {
+        return await this.response.status();
+    }
+    async getResponse() {
+        const { body: responseBody, endTime: responseEndTime } = await this.response.getResponseBody();
+        const endTime = this.timing.endTime ?? responseEndTime;
+        const delay_ms = endTime.getTime() - this.timing.startTime.getTime();
+        const timeToFirstToken = this.request.isStream
+            ? await this.timing.timeToFirstToken()
+            : null;
+        const status = await this.response.status();
+        const parsedResponse = await this.parseResponse(responseBody.join(""), status);
+        const isStream = this.request.isStream;
+        const usage = this.getUsage(parsedResponse.data);
+        if (!isStream &&
+            this.provider === "GOOGLE" &&
+            parsedResponse.error === null) {
+            const body = this.tryJsonParse(responseBody.join(""));
+            const model = body?.model ?? body?.body?.model ?? undefined;
+            return {
+                response: {
+                    id: this.response.responseId,
+                    created_at: endTime.toISOString(),
+                    request: this.request.requestId,
+                    body: this.response.omitLog // TODO: Remove in favor of S3 storage
+                        ? {
+                            usage: parsedResponse.data?.usage,
+                            model,
+                        }
+                        : body,
+                    status: await this.response.status(),
+                    completion_tokens: usage.completion_tokens,
+                    prompt_tokens: usage.prompt_tokens,
+                    time_to_first_token: timeToFirstToken,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    model: model,
+                    delay_ms,
+                },
+                body: this.response.omitLog
+                    ? {
+                        usage: parsedResponse.data?.usage,
+                        model,
+                    }
+                    : body,
+            };
+        }
+        return parsedResponse.error === null
+            ? {
+                response: {
+                    id: this.response.responseId,
+                    created_at: endTime.toISOString(),
+                    request: this.request.requestId,
+                    body: this.response.omitLog // TODO: Remove in favor of S3 storage
+                        ? {
+                            usage: parsedResponse.data?.usage,
+                            model: parsedResponse.data?.model ??
+                                parsedResponse.data?.providerMetadata?.gateway?.routing
+                                    ?.originalModelId,
+                        }
+                        : parsedResponse.data,
+                    status: await this.response.status(),
+                    completion_tokens: usage.completion_tokens,
+                    prompt_tokens: usage.prompt_tokens,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    model: parsedResponse.data?.model ??
+                        parsedResponse.data?.providerMetadata?.gateway?.routing
+                            ?.originalModelId ??
+                        undefined,
+                    delay_ms,
+                    time_to_first_token: timeToFirstToken,
+                },
+                body: this.response.omitLog
+                    ? {
+                        usage: parsedResponse.data?.usage,
+                        model: parsedResponse.data?.model,
+                    }
+                    : parsedResponse.data,
+            }
+            : {
+                response: {
+                    id: this.response.responseId,
+                    request: this.request.requestId,
+                    created_at: endTime.toISOString(),
+                    body: {
+                        // TODO: Remove in favor of S3 storage
+                        helicone_error: "error parsing response",
+                        parse_response_error: parsedResponse.error,
+                        body: parsedResponse.data,
+                    },
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    model: parsedResponse.data?.model ??
+                        parsedResponse.data?.providerMetadata?.gateway?.routing
+                            ?.originalModelId ??
+                        undefined,
+                    status: await this.response.status(),
+                },
+                body: {
+                    helicone_error: "error parsing response",
+                    parse_response_error: parsedResponse.error,
+                    body: parsedResponse.data,
+                },
+            };
+    }
+    async readResponse() {
+        try {
+            const { response } = await withTimeout(this.getResponse(), 1000 * 60 * 30); // 30 minutes
+            return ok({
+                response,
+            });
+        }
+        catch (e) {
+            return err("error getting response, " + e);
+        }
+    }
+    isSuccessResponse = (status) => status != null && status >= 200 && status <= 299;
+    async log(db, S3_ENABLED, requestHeaders, cachedHeaders, cacheSettings) {
+        try {
+            const { data: authParams, error } = await db.dbWrapper.getAuthParams();
+            if (error || !authParams?.organizationId) {
+                return err(`Auth failed! ${error}`);
+            }
+            let orgRateLimit = false;
+            try {
+                const org = await db.dbWrapper.getOrganization();
+                if (org.error !== null) {
+                    return err(org.error);
+                }
+                const tier = org.data?.tier;
+                const rateLimiter = await db.dbWrapper.getRateLimiter();
+                if (rateLimiter.error !== null) {
+                    return rateLimiter;
+                }
+                // TODO: Add an early exit if we really want to rate limit in the future
+                const rateLimit = await rateLimiter.data.checkRateLimit(tier);
+                if (rateLimit.data?.isRateLimited) {
+                    orgRateLimit = true;
+                }
+                if (rateLimit.error) {
+                    console.error(`Error checking rate limit: ${rateLimit.error}`);
+                }
+            }
+            catch (e) {
+                console.error(`Error checking rate limit: ${e}`);
+            }
+            await this.useKafka(db, authParams, S3_ENABLED, orgRateLimit, requestHeaders, cachedHeaders, cacheSettings);
+            // THIS IS ONLY USED FOR COST CALCULATION ON RATELIMITING
+            const readResponse = await this.readResponse();
+            const model = this.request.modelOverride ??
+                readResponse.data?.response.model ??
+                "not-found";
+            const cost = this.modelCost({
+                model: model,
+                sum_completion_tokens: readResponse.data?.response?.completion_tokens ?? 0,
+                sum_prompt_tokens: readResponse.data?.response?.prompt_tokens ?? 0,
+                sum_tokens: (readResponse.data?.response.completion_tokens ?? 0) +
+                    (readResponse.data?.response.prompt_tokens ?? 0),
+                provider: this.request.provider ?? "",
+            }) ?? 0;
+            return ok({
+                cost: cost,
+            });
+        }
+        catch (error) {
+            return err("Error logging");
+        }
+    }
+    async useKafka(db, authParams, S3_ENABLED, orgRateLimit, requestHeaders, cachedHeaders, cacheSettings) {
+        if (!authParams?.organizationId ||
+            // Must be helicone api key or proxy key
+            !requestHeaders?.heliconeAuthV2 ||
+            (!requestHeaders?.heliconeAuthV2?.token &&
+                !this.request.heliconeProxyKeyId)) {
+            return err(`Auth failed! ${authParams?.organizationId}`);
+        }
+        const org = await db.dbWrapper.getOrganization();
+        if (org.error !== null) {
+            return err(org.error);
+        }
+        const { body: rawResponseBody, endTime: responseEndTime } = await this.response.getResponseBody();
+        if (S3_ENABLED === "true") {
+            const s3Result = await db.requestResponseManager.storeRequestResponseRaw({
+                organizationId: authParams.organizationId,
+                requestId: this.request.requestId,
+                requestBody: this.request.bodyText ?? "{}",
+                responseBody: rawResponseBody.join(""),
+            });
+            if (s3Result.error) {
+                console.error(`Error storing request response in S3: ${s3Result.error}`);
+            }
+        }
+        const endTime = this.timing.endTime ?? responseEndTime;
+        let timeToFirstToken = (await this.timing.timeToFirstToken()) ?? undefined;
+        if (Number.isNaN(timeToFirstToken)) {
+            timeToFirstToken = undefined;
+        }
+        const cacheReferenceId = cacheSettings?.shouldReadFromCache && cachedHeaders
+            ? cachedHeaders.get("Helicone-Id")
+            : DEFAULT_UUID;
+        const kafkaMessage = {
+            id: this.request.requestId,
+            authorization: requestHeaders.heliconeAuthV2.token,
+            heliconeMeta: {
+                modelOverride: requestHeaders.modelOverride ?? undefined,
+                omitRequestLog: requestHeaders.omitHeaders.omitRequest,
+                omitResponseLog: requestHeaders.omitHeaders.omitResponse,
+                webhookEnabled: requestHeaders.webhookEnabled,
+                posthogApiKey: requestHeaders.posthogKey ?? undefined,
+                lytixKey: requestHeaders.lytixKey ?? undefined,
+                lytixHost: requestHeaders.lytixHost ?? undefined,
+                posthogHost: requestHeaders.posthogHost ?? undefined,
+                heliconeManualAccessKey: requestHeaders.heliconeManualAccessKey ?? undefined,
+                promptId: this.request.prompt2025Settings.promptId,
+                promptVersionId: this.request.prompt2025Settings.promptVersionId,
+                promptInputs: this.request.prompt2025Settings.promptInputs,
+                promptEnvironment: this.request.prompt2025Settings.environment,
+            },
+            log: {
+                request: {
+                    id: this.request.requestId,
+                    userId: this.request.userId ?? "",
+                    promptId: this.request.promptSettings.promptMode === "production"
+                        ? this.request.promptSettings.promptId
+                        : "",
+                    cacheReferenceId: cacheReferenceId ?? DEFAULT_UUID,
+                    cacheEnabled: requestHeaders.cacheHeaders.cacheEnabled ?? undefined,
+                    cacheSeed: requestHeaders.cacheHeaders.cacheSeed ?? undefined,
+                    cacheBucketMaxSize: requestHeaders.cacheHeaders.cacheBucketMaxSize ?? undefined,
+                    cacheControl: requestHeaders.cacheHeaders.cacheControl ?? undefined,
+                    promptVersion: this.request.promptSettings.promptVersion,
+                    properties: this.request.properties,
+                    heliconeApiKeyId: authParams.heliconeApiKeyId, // If undefined, proxy key id must be present
+                    heliconeProxyKeyId: this.request.heliconeProxyKeyId ?? undefined,
+                    targetUrl: this.request.targetUrl,
+                    provider: this.request.provider,
+                    bodySize: this.request.bodyText?.length ?? 0,
+                    path: this.request.path,
+                    threat: this.request.threat ?? undefined,
+                    countryCode: this.request.country_code ?? undefined,
+                    requestCreatedAt: this.request.startTime ?? new Date(),
+                    isStream: this.request.isStream,
+                    heliconeTemplate: this.request.heliconeTemplate ?? undefined,
+                    experimentColumnId: requestHeaders.experimentHeaders.columnId ?? undefined,
+                    experimentRowIndex: requestHeaders.experimentHeaders.rowIndex ?? undefined,
+                },
+                response: {
+                    id: this.response.responseId,
+                    status: await this.response.status(),
+                    bodySize: rawResponseBody.length,
+                    timeToFirstToken,
+                    responseCreatedAt: endTime,
+                    delayMs: endTime.getTime() - this.timing.startTime.getTime(),
+                    cachedLatency: cacheReferenceId == DEFAULT_UUID
+                        ? 0
+                        : (() => {
+                            try {
+                                return Number(cachedHeaders?.get("Helicone-Cache-Latency") ?? 0);
+                            }
+                            catch {
+                                return 0;
+                            }
+                        })(),
+                },
+            },
+        };
+        if (orgRateLimit) {
+            console.log(`Setting lower priority for org ${authParams.organizationId} because of rate limit`);
+            db.producer.setLowerPriority();
+        }
+        await db.producer.sendMessage(kafkaMessage);
+        return ok(null);
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    tryParseBody(body, bodyType) {
+        try {
+            return JSON.parse(body);
+        }
+        catch (e) {
+            console.error(`Error parsing ${bodyType} body: ${e}`);
+            return {
+                helicone_error: `error parsing ${bodyType} body: ${e}`,
+                parse_response_error: e,
+                body: body,
+            };
+        }
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    omitBody(omitBody, body, model) {
+        return omitBody
+            ? {
+                model: model,
+            }
+            : body;
+    }
+    calculateModel(requestModel, responseModel, modelOverride) {
+        return modelOverride ?? responseModel ?? requestModel ?? "not-found";
+    }
+    modelCost(modelRow) {
+        const model = modelRow.model;
+        const promptTokens = modelRow.sum_prompt_tokens;
+        const completionTokens = modelRow.sum_completion_tokens;
+        return (costOfPrompt({
+            model,
+            promptTokens,
+            completionTokens,
+            provider: modelRow.provider,
+            promptCacheWriteTokens: 0,
+            promptCacheReadTokens: 0,
+            promptAudioTokens: 0,
+            completionAudioTokens: 0,
+        }) ?? 0);
+    }
+}

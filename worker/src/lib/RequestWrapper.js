@@ -1,0 +1,551 @@
+// This request wrapper allows us to mock the request object in tests.
+// It also allows us to add additional functionality to the request object
+// without modifying the request object itself.
+// This also allows us to not have to redefine other objects repetitively like URL.
+import { createClient } from "@supabase/supabase-js";
+import { hash } from "..";
+import { checkLimits, checkLimitsSingle, } from "./managers/UsageLimitManager.ts";
+import { HeliconeHeaders } from "./models/HeliconeHeaders";
+import { getAndStoreInCache } from "./util/cache/secureCache";
+import { err, map, mapPostgrestErr, ok } from "./util/results";
+import { Sha256 } from "@aws-crypto/sha256-js";
+import { parseJSXObject } from "@helicone/prompts";
+import { HttpRequest } from "@smithy/protocol-http";
+import { SignatureV4 } from "@smithy/signature-v4";
+import { HELICONE_API_KEY_REGEX } from "./util/apiKeyRegex";
+export class RequestWrapper {
+    request;
+    env;
+    authorization;
+    url;
+    originalUrl;
+    heliconeHeaders;
+    providerAuth;
+    headers;
+    heliconeProxyKeyId;
+    baseURLOverride;
+    cf;
+    promptSettings;
+    prompt2025Settings; // I'm sorry. Will clean whenever we can remove old promtps.
+    extraHeaders = null;
+    cachedText = null;
+    bodyKeyOverride = null;
+    /*
+    We allow the Authorization header to take both the provider key and the helicone auth key comma seprated.
+    like this (Bearer sk-123, Beaer helicone-sk-123)
+    */
+    mutatedAuthorizationHeaders(request) {
+        const HELICONE_KEY_ID = "sk-helicone-";
+        const HELICONE_PUBLIC_KEY_ID = "pk-helicone-";
+        const headers = new Headers(request.headers);
+        const authorization = request.headers.get("Authorization");
+        if (!authorization ||
+            !authorization.includes(",") ||
+            !authorization.includes(HELICONE_KEY_ID) ||
+            !authorization.includes(HELICONE_PUBLIC_KEY_ID)) {
+            if (!headers.has("helicone-auth")) {
+                try {
+                    const url = new URL(request.url);
+                    const urlPath = url.pathname;
+                    const pathParts = urlPath.split("/");
+                    const apiKeyIndex = pathParts.findIndex((part) => part.startsWith("sk-helicone") || part.startsWith("pk-helicone"));
+                    if (apiKeyIndex > -1 && apiKeyIndex < pathParts.length) {
+                        const potentialApiKey = pathParts[apiKeyIndex];
+                        headers.set("helicone-auth", `Bearer ${potentialApiKey}`);
+                        pathParts.splice(apiKeyIndex, 1);
+                        this.url.pathname = pathParts.join("/");
+                    }
+                    return headers;
+                }
+                catch (error) {
+                    console.error(`Failed retrieving API key from path: ${error}`);
+                    return request.headers;
+                }
+            }
+            return request.headers;
+        }
+        if (headers.has("helicone-auth")) {
+            throw new Error("Cannot have both helicone-auth and Helicone Authorization headers");
+        }
+        const authorizationKeys = authorization.split(",").map((x) => x.trim());
+        const heliconeAuth = authorizationKeys.find((x) => x.includes(HELICONE_KEY_ID) || x.includes(HELICONE_PUBLIC_KEY_ID));
+        const providerAuth = authorizationKeys.find((x) => !x.includes(HELICONE_KEY_ID) || !x.includes(HELICONE_PUBLIC_KEY_ID));
+        if (providerAuth) {
+            headers.set("Authorization", providerAuth);
+        }
+        if (heliconeAuth) {
+            headers.set("helicone-auth", heliconeAuth);
+        }
+        return headers;
+    }
+    resetObject() {
+        this.url = new URL(this.originalUrl);
+        this.headers = this.mutatedAuthorizationHeaders(this.request);
+        this.heliconeHeaders = new HeliconeHeaders(this.headers);
+        this.promptSettings = this.getPromptSettings();
+        this.injectPromptProperties();
+    }
+    constructor(request, env) {
+        this.request = request;
+        this.env = env;
+        this.url = new URL(request.url);
+        this.originalUrl = new URL(request.url);
+        this.headers = this.mutatedAuthorizationHeaders(request);
+        this.heliconeHeaders = new HeliconeHeaders(this.headers);
+        this.promptSettings = this.getPromptSettings();
+        this.prompt2025Settings = {}; // initialized later, if a prompt is used.
+        this.injectPromptProperties();
+        this.baseURLOverride = null;
+        this.cf = request.cf;
+    }
+    injectPromptProperties() {
+        const promptId = this.promptSettings.promptId;
+        if (promptId) {
+            this.injectCustomProperty(`Helicone-Prompt-Id`, promptId);
+        }
+    }
+    injectCustomProperty(key, value) {
+        this.heliconeHeaders.heliconeProperties[key] = value;
+    }
+    getPromptMode(promptId, promptMode) {
+        const validPromptModes = ["production", "testing", "deactivated"];
+        if (promptMode && !validPromptModes.includes(promptMode)) {
+            throw new Error("Invalid prompt mode");
+        }
+        if (promptMode) {
+            return promptMode;
+        }
+        if (!promptMode && promptId) {
+            return "production";
+        }
+        return "deactivated";
+    }
+    getPromptSettings() {
+        const promptId = this.heliconeHeaders.promptHeaders.promptId ?? undefined;
+        const promptVersion = this.heliconeHeaders.promptHeaders.promptVersion ?? "";
+        const promptMode = this.getPromptMode(promptId, this.heliconeHeaders.promptHeaders.promptMode ?? undefined);
+        // Initialize with undefined promptInputs - will be set explicitly via setPromptInputs
+        return {
+            promptId,
+            promptVersion,
+            promptMode,
+            promptInputs: undefined,
+        };
+    }
+    static async create(request, env) {
+        const requestWrapper = new RequestWrapper(request, env);
+        const authorization = await requestWrapper.setAuthorization(env);
+        if (authorization.error) {
+            return { data: null, error: authorization.error };
+        }
+        return { data: requestWrapper, error: null };
+    }
+    getNodeId() {
+        return this.heliconeHeaders.nodeId;
+    }
+    setBaseURLOverride(url) {
+        this.baseURLOverride = url;
+    }
+    async auth() {
+        if (!this.heliconeHeaders.heliconeAuthV2?._type) {
+            return err("invalid auth key");
+        }
+        const tokenType = this.heliconeHeaders.heliconeAuthV2._type;
+        const token = this.heliconeHeaders.heliconeAuthV2.token;
+        if (tokenType === "jwt") {
+            return ok({
+                _type: "jwt",
+                token,
+                orgId: this.heliconeHeaders.heliconeAuthV2.orgId,
+            });
+        }
+        else if (tokenType === "bearer" && this.heliconeProxyKeyId) {
+            return ok({
+                _type: "bearerProxy",
+                token,
+            });
+        }
+        else if (tokenType === "bearer") {
+            const res = await this.validateHeliconeAuthHeader(this.heliconeHeaders.heliconeAuthV2.token ?? this.authorization);
+            if (res.error) {
+                return err(res.error);
+            }
+            return ok({ _type: "bearer", token });
+        }
+        throw new Error("Unreachable");
+    }
+    setBodyKeyOverride(bodyKeyOverride) {
+        this.bodyKeyOverride = bodyKeyOverride;
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    overrideBody(body, override) {
+        for (const [key, value] of Object.entries(override)) {
+            if (key in body && typeof value !== "object") {
+                body[key] = value;
+            }
+            else {
+                body[key] = this.overrideBody(body[key], value);
+            }
+        }
+        return body;
+    }
+    async getRawText() {
+        if (this.cachedText) {
+            return this.cachedText;
+        }
+        this.cachedText = await this.request.text();
+        return this.cachedText;
+    }
+    shouldFormatPrompt() {
+        return (this.promptSettings.promptMode === "production" ||
+            this.promptSettings.promptMode === "testing");
+    }
+    isEU() {
+        const url = new URL(this.getUrl());
+        const host = url.host;
+        const hostParts = host.split(".");
+        const auth = this.heliconeHeaders.heliconeAuthV2?.token;
+        return !!hostParts.includes("eu") || !!auth?.includes("helicone-eu");
+    }
+    async getText() {
+        let text = await this.getRawText();
+        if (this.bodyKeyOverride) {
+            try {
+                const bodyJson = await JSON.parse(text);
+                const bodyOverrideJson = await JSON.parse(JSON.stringify(this.bodyKeyOverride));
+                const body = this.overrideBody(bodyJson, bodyOverrideJson);
+                text = JSON.stringify(body);
+            }
+            catch (e) {
+                throw new Error("Could not stringify bodyKeyOverride");
+            }
+        }
+        else if (this.shouldFormatPrompt()) {
+            const { objectWithoutJSXTags } = parseJSXObject(JSON.parse(text));
+            return JSON.stringify(objectWithoutJSXTags);
+        }
+        return text;
+    }
+    async getJson() {
+        try {
+            return JSON.parse(await this.getText());
+        }
+        catch (e) {
+            console.error("RequestWrapper.getJson", e, await this.getText());
+            return {};
+        }
+    }
+    async getFormData() {
+        const contentType = this.headers.get("content-type");
+        if (!contentType || !contentType.includes("multipart/form-data")) {
+            return err("Content type must be multipart/form-data");
+        }
+        const formData = await this.request.formData();
+        return ok(formData);
+    }
+    getBody() {
+        return this.request.body;
+    }
+    getHeaders() {
+        return this.headers;
+    }
+    remapHeaders(headers) {
+        this.headers = headers;
+    }
+    setHeader(key, value) {
+        this.headers.set(key, value);
+    }
+    getMethod() {
+        return this.request.method;
+    }
+    getUrl() {
+        return this.request.url;
+    }
+    setUrl(url) {
+        this.url = new URL(url);
+    }
+    async signAWSRequest({ region, forwardToHost, }) {
+        // Extract model from URL path
+        const pathParts = this.url.pathname.split("/");
+        const model = decodeURIComponent(pathParts.at(-2) ?? "");
+        const awsAccessKey = this.headers.get("aws-access-key");
+        const awsSecretKey = this.headers.get("aws-secret-key");
+        const awsSessionToken = this.headers.get("aws-session-token");
+        const service = "bedrock";
+        const sigv4 = new SignatureV4({
+            service,
+            region,
+            credentials: {
+                accessKeyId: awsAccessKey ?? "",
+                secretAccessKey: awsSecretKey ?? "",
+                ...(awsSessionToken ? { sessionToken: awsSessionToken } : {}),
+            },
+            sha256: Sha256,
+        });
+        const headers = new Headers();
+        // Required headers for AWS requests
+        headers.set("host", forwardToHost);
+        headers.set("content-type", "application/json");
+        // Include only AWS-specific headers needed for authentication
+        const awsHeaders = [
+            "x-amz-date",
+            "x-amz-security-token",
+            "x-amz-content-sha256",
+            "x-amz-target",
+            // Add any other required x-amz headers for your specific use case
+        ];
+        for (const [key, value] of this.headers.entries()) {
+            if (awsHeaders.includes(key.toLowerCase())) {
+                headers.set(key, value);
+            }
+        }
+        const url = new URL(this.url.toString());
+        const request = new HttpRequest({
+            method: this.request.method,
+            protocol: url.protocol,
+            hostname: forwardToHost,
+            path: url.pathname + url.search,
+            headers: Object.fromEntries(headers.entries()),
+            body: await this.getRawText(),
+        });
+        const signedRequest = await sigv4.sign(request);
+        // Create new headers with the signed values
+        const newHeaders = new Headers();
+        // Only copy over the essential headers
+        newHeaders.set("host", forwardToHost);
+        newHeaders.set("content-type", "application/json");
+        // Add model override header if model was found
+        if (model) {
+            this.heliconeHeaders.setModelOverride(model);
+        }
+        // Add all the signed AWS headers
+        for (const [key, value] of Object.entries(signedRequest.headers)) {
+            if (value) {
+                newHeaders.set(key, value.toString());
+            }
+        }
+        this.remapHeaders(newHeaders);
+    }
+    removeBedrock() {
+        const newUrl = new URL(this.url);
+        newUrl.pathname = newUrl.pathname
+            .split("/v1/")[1]
+            .split("/")
+            .slice(1)
+            .join("/");
+        this.setUrl(newUrl.toString());
+    }
+    async validateHeliconeAuthHeader(heliconeAuth) {
+        if (!heliconeAuth) {
+            return { data: null, error: null };
+        }
+        if (!heliconeAuth.includes("Bearer ")) {
+            return { data: null, error: "Must included Bearer in API Key" };
+        }
+        const apiKey = heliconeAuth.replace("Bearer ", "").trim();
+        if (!HELICONE_API_KEY_REGEX.some((pattern) => pattern.test(apiKey))) {
+            return err("API Key is not well formed");
+        }
+        return ok(null);
+    }
+    async getRawProviderAuthHeader() {
+        let auth = this.authorization;
+        if (auth?.startsWith("Bearer ")) {
+            auth = auth.split(" ")[1];
+        }
+        return auth;
+    }
+    async getProviderAuthHeader() {
+        return this.authorization ? await hash(this.authorization) : undefined;
+    }
+    async getUserId() {
+        const userId = this.heliconeHeaders.userId ||
+            (await this.getJson()).user;
+        return userId;
+    }
+    getAuthorization() {
+        return this.authorization || undefined;
+    }
+    setProviderAuthKey(key) {
+        this.providerAuth = key;
+    }
+    async setAuthorization(env) {
+        if (this.authorization) {
+            return { data: this.authorization, error: null };
+        }
+        const authKey = this.headers.get("Authorization") ?? // Openai
+            this.headers.get("x-api-key") ?? // Anthropic
+            this.headers.get("api-key") ?? // Azure
+            undefined;
+        // If using proxy key, get the real key from vault
+        if (authKey?.includes("-cp-")) {
+            const { data, error } = await this.getProviderKeyFromCustomerPortalKey(authKey, env);
+            if (error || !data || !data.providerKey) {
+                return err(`Provider key not found using Customer Portal Key. Error: ${error}`);
+            }
+            this.extraHeaders = new Headers();
+            this.extraHeaders.set("helicone-organization-id", data.heliconeOrgId);
+            this.extraHeaders.set("helicone-request-id", this.heliconeHeaders.requestId);
+            this.authorization = data.providerKey;
+            const headers = new Headers(this.headers);
+            headers.set("Authorization", `Bearer ${this.authorization}`);
+            this.headers = headers;
+            this.heliconeHeaders.heliconeAuthV2 = {
+                token: authKey,
+                _type: "bearer",
+            };
+            this.heliconeHeaders.heliconeAuth = authKey;
+        }
+        else if (this.env.VAULT_ENABLED &&
+            (authKey?.startsWith("Bearer sk-helicone-proxy") ||
+                authKey?.startsWith("Bearer pk-helicone-proxy"))) {
+            const { data, error } = await this.getProviderKeyFromProxy(authKey, env);
+            if (error || !data || !data.providerKey || !data.proxyKeyId) {
+                return err(`Proxy key not found. Error: ${error}`);
+            }
+            const providerKeyRow = data;
+            this.heliconeProxyKeyId = providerKeyRow.proxyKeyId;
+            this.authorization = providerKeyRow.providerKey;
+            const headers = new Headers(this.headers);
+            headers.set("Authorization", `Bearer ${this.authorization}`);
+            this.headers = headers;
+        }
+        else {
+            this.authorization = authKey;
+            return { data: this.authorization, error: null };
+        }
+        return { data: this.authorization, error: null };
+    }
+    async getProviderKeyFromProxy(authKey, env) {
+        const supabaseClient = createClient(this.env.SUPABASE_URL, this.env.SUPABASE_SERVICE_ROLE_KEY);
+        return getProviderKeyFromProxyCache(authKey, env, supabaseClient);
+    }
+    async getProviderKeyFromCustomerPortalKey(authKey, env) {
+        const supabaseClient = createClient(this.env.SUPABASE_URL, this.env.SUPABASE_SERVICE_ROLE_KEY);
+        return await getAndStoreInCache(`getProxy-CP-${authKey}`, env, async () => await getProviderKeyFromPortalKey(authKey, env, supabaseClient));
+    }
+    /**
+     * Sets prompt inputs directly on the promptSettings object
+     * @param inputs The inputs to associate with the prompt
+     */
+    setPromptInputs(inputs) {
+        this.promptSettings = {
+            ...this.promptSettings,
+            promptInputs: inputs,
+        };
+    }
+    /**
+     * Sets prompts settings (new prompts)
+     * @param promptVersionId The version id of the prompt
+     * @param environment The environment of the prompt
+     * @param inputs The inputs to associate with the prompt
+     */
+    setPrompt2025Settings(params) {
+        this.prompt2025Settings = {
+            promptId: params.promptId,
+            promptVersionId: params.promptVersionId,
+            promptInputs: params.inputs,
+            environment: params.environment,
+        };
+    }
+    setBody(body) {
+        this.cachedText = body;
+    }
+}
+export async function getProviderKeyFromProxyCache(authKey, env, supabaseClient) {
+    return await getAndStoreInCache(`getProxyKey-${authKey}`, env, async () => await getProviderKeyFromProxy(authKey, env, supabaseClient));
+}
+export async function getProviderKeyFromPortalKey(authKey, env, supabaseClient) {
+    const apiKey = await supabaseClient
+        .from("helicone_api_keys")
+        .select("*")
+        .eq("api_key_hash", await hash(authKey))
+        .single();
+    const organization = await supabaseClient
+        .from("organization")
+        .select("*")
+        .eq("id", apiKey.data?.organization_id ?? "")
+        .single();
+    const providerKeyId = await supabaseClient
+        .from("provider_keys")
+        .select("*")
+        .eq("id", organization.data?.org_provider_key ?? "")
+        .single();
+    const check = await checkLimitsSingle(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (organization.data?.limits)["cost"], 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (organization.data?.limits)["requests"], "month", apiKey.data?.organization_id ?? "", env);
+    if (check.error) {
+        return err(check.error);
+    }
+    else {
+        console.log("check.data", check.data);
+    }
+    const providerKey = await supabaseClient
+        .from("decrypted_provider_keys_v2")
+        .select("decrypted_provider_key")
+        .eq("id", providerKeyId.data?.id ?? "")
+        .eq("soft_delete", false)
+        .single();
+    return map(mapPostgrestErr(providerKey), (x) => ({
+        providerKey: x.decrypted_provider_key ?? "",
+        heliconeOrgId: apiKey.data?.organization_id ?? "",
+    }));
+}
+export async function getProviderKeyFromProxy(authKey, env, supabaseClient) {
+    const proxyKey = authKey?.replace("Bearer ", "").trim();
+    const regex = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/;
+    const match = proxyKey.match(regex);
+    if (!match) {
+        return {
+            data: null,
+            error: "Proxy key id not found",
+        };
+    }
+    const proxyKeyId = match[0];
+    //TODO figure out how to make this into one query with this syntax
+    // https://supabase.com/docs/guides/api/joins-and-nesting
+    const [storedProxyKey, limits] = await Promise.all([
+        supabaseClient
+            .from("helicone_proxy_keys")
+            .select("*")
+            .eq("id", proxyKeyId)
+            .eq("soft_delete", false)
+            .single(),
+        supabaseClient
+            .from("helicone_proxy_key_limits")
+            .select("*")
+            .eq("helicone_proxy_key", proxyKeyId),
+    ]);
+    if (storedProxyKey.error || !storedProxyKey.data) {
+        return err("Proxy key not found in storedProxyKey");
+    }
+    if (limits.data && limits.data.length > 0) {
+        if (!(await checkLimits(limits.data, env))) {
+            return err("Limits are not valid");
+        }
+    }
+    // @ts-ignore - RPC function not included in generated database types
+    const verified = await supabaseClient.rpc("verify_helicone_proxy_key", {
+        api_key: proxyKey,
+        stored_hashed_key: storedProxyKey.data.helicone_proxy_key,
+    });
+    if (verified.error || !verified.data) {
+        return err("Proxy key not verified");
+    }
+    const providerKey = await supabaseClient
+        .from("decrypted_provider_keys_v2")
+        .select("decrypted_provider_key")
+        .eq("id", storedProxyKey.data.provider_key_id)
+        .eq("soft_delete", false)
+        .single();
+    if (providerKey.error || !providerKey.data?.decrypted_provider_key) {
+        return err("Provider key not found");
+    }
+    return ok({
+        providerKey: providerKey.data.decrypted_provider_key,
+        proxyKeyId: storedProxyKey.data.id,
+        organizationId: storedProxyKey.data.org_id,
+    });
+}

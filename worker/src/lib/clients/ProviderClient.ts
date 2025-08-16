@@ -148,17 +148,13 @@ export async function callProviderWithRetry(
     await retry(
       async (bail, attempt) => {
         try {
-          const res = await callProvider(callProps);
-
-          lastResponse = res;
-          // Throw an error if the status code is 429 or 5xx
-          if (res.status === 429 || (res.status < 600 && res.status >= 500)) {
-            throw new Error(`Status code ${res.status}`);
-          }
-          return res;
+          // Attempt to call the provider
+          const response = await callProvider(callProps);
+          return response;
         } catch (e) {
-          // If we reach the maximum number of retries, bail with the error
-          if (attempt >= retryOptions.retries) {
+          console.log(`Retry attempt ${attempt}. Error: ${error}`);
+          // If we reach the maximum number of attempts, bail with the error
+          if (attempt >= retryOptions.attempts) {
             bail(e as Error);
           }
           // Otherwise, retry with exponential backoff
@@ -166,15 +162,14 @@ export async function callProviderWithRetry(
         }
       },
       {
-        ...retryOptions,
-        onRetry: (error, attempt) => {
-          console.log(`Retry attempt ${attempt}. Error: ${error}`);
-        },
+        retries: retryOptions.attempts,
+        factor: retryOptions.backoff,
+        maxTimeout: retryOptions.maxTimeout,
       }
     );
   } catch (e) {
-    console.warn(
-      `Retried ${retryOptions.retries} times but still failed. Error: ${e}`
+    throw new Error(
+      `Retried ${retryOptions.attempts} times but still failed. Error: ${e}`
     );
   }
 

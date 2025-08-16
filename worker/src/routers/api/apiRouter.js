@@ -1,0 +1,268 @@
+import { isValidStatus, validateRun } from "../../lib/models/Runs";
+import { validateHeliconeNode } from "../../lib/models/Tasks";
+import { validateAlertCreate } from "../../lib/util/validators/alertValidators";
+import { logAsync } from "../../lib/managers/AsyncLogManager";
+import { createAPIClient } from "../../api/lib/apiClient";
+import { createClient } from "@supabase/supabase-js";
+import { ProviderKeysManager } from "../../lib/managers/ProviderKeysManager";
+import { ProviderKeysStore } from "../../lib/db/ProviderKeysStore";
+import { APIKeysStore } from "../../lib/db/APIKeysStore";
+import { APIKeysManager } from "../../lib/managers/APIKeysManager";
+const RATE_LIMIT_MS = 1000 * 30;
+function getAPIRouterV1(router) {
+    router.post("/mock-set-api-key", async (_, requestWrapper, env, ctx) => {
+        if (env.ENVIRONMENT !== "development") {
+            return new Response("not allowed", { status: 403 });
+        }
+        const data = await requestWrapper.getJson();
+        if (!data) {
+            return new Response("invalid request", { status: 400 });
+        }
+        const supabaseClientUS = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+        const supabaseClientEU = createClient(env.EU_SUPABASE_URL, env.EU_SUPABASE_SERVICE_ROLE_KEY);
+        const apiKeysManagerUS = new APIKeysManager(new APIKeysStore(supabaseClientUS), env);
+        await apiKeysManagerUS.setAPIKey(data.apiKeyHash, data.orgId, data.softDelete);
+        const apiKeysManagerEU = new APIKeysManager(new APIKeysStore(supabaseClientEU), env);
+        await apiKeysManagerEU.setAPIKey(data.apiKeyHash, data.orgId, data.softDelete);
+        return new Response("ok", { status: 200 });
+    });
+    router.post("/mock-set-provider-key", async (_, requestWrapper, env, ctx) => {
+        if (env.ENVIRONMENT !== "development") {
+            return new Response("not allowed", { status: 403 });
+        }
+        const data = await requestWrapper.getJson();
+        const supabaseClientUS = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+        const supabaseClientEU = createClient(env.EU_SUPABASE_URL, env.EU_SUPABASE_SERVICE_ROLE_KEY);
+        const providerKey = {
+            provider: data.provider,
+            org_id: data.orgId,
+            decrypted_provider_key: data.decryptedProviderKey,
+            decrypted_provider_secret_key: data.decryptedProviderSecretKey,
+            auth_type: data.authType,
+            config: data.config,
+        };
+        const providerKeysManagerUS = new ProviderKeysManager(new ProviderKeysStore(supabaseClientUS), env);
+        await providerKeysManagerUS.setProviderKey(data.provider, data.orgId, providerKey);
+        const providerKeysManagerEU = new ProviderKeysManager(new ProviderKeysStore(supabaseClientEU), env);
+        await providerKeysManagerEU.setProviderKey(data.provider, data.orgId, providerKey);
+        return new Response("ok", { status: 200 });
+    });
+    router.post("/mock-delete-provider-key", async (_, requestWrapper, env, _ctx) => {
+        if (env.ENVIRONMENT !== "development") {
+            return new Response("not allowed", { status: 403 });
+        }
+        const data = await requestWrapper.getJson();
+        const supabaseClientUS = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+        const supabaseClientEU = createClient(env.EU_SUPABASE_URL, env.EU_SUPABASE_SERVICE_ROLE_KEY);
+        const providerKeysManagerUS = new ProviderKeysManager(new ProviderKeysStore(supabaseClientUS), env);
+        await providerKeysManagerUS.deleteProviderKey(data.providerName, data.orgId);
+        const providerKeysManagerEU = new ProviderKeysManager(new ProviderKeysStore(supabaseClientEU), env);
+        await providerKeysManagerEU.deleteProviderKey(data.providerName, data.orgId);
+        return new Response("ok", { status: 200 });
+    });
+    router.post("/job", async (_, requestWrapper, env, _ctx) => {
+        const client = await createAPIClient(env, _ctx, requestWrapper);
+        const authParams = await client.db.getAuthParams();
+        if (authParams.error !== null) {
+            return client.response.unauthorized();
+        }
+        const job = await requestWrapper.getJson();
+        if (!job) {
+            return client.response.newError("Invalid run", 400);
+        }
+        const isValidRun = validateRun(job);
+        if (isValidRun.error) {
+            return client.response.newError(isValidRun.error, 400);
+        }
+        const { data, error } = await client.queue.addJob({
+            custom_properties: job.customProperties ?? {},
+            description: job.description ?? "",
+            name: job.name ?? "",
+            timeout_seconds: job.timeoutSeconds ?? 60,
+            status: "PENDING",
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            id: job.id ?? crypto.randomUUID(),
+            org_id: authParams.data?.organizationId,
+        });
+        if (error) {
+            return client.response.newError(error, 500);
+        }
+        return client.response.successJSON({ data });
+    });
+    router.patch("/job/:id/status", async ({ params: { id } }, requestWrapper, env, _ctx) => {
+        const client = await createAPIClient(env, _ctx, requestWrapper);
+        const authParams = await client.db.getAuthParams();
+        if (authParams.error !== null) {
+            return client.response.unauthorized();
+        }
+        const { data: job, error: jobError } = await client.db.getJobById(id);
+        if (jobError) {
+            return client.response.newError(jobError, 500);
+        }
+        if (!job) {
+            return client.response.newError("Job not found", 404);
+        }
+        if (job?.org_id !== authParams.data.organizationId) {
+            return client.response.unauthorized();
+        }
+        const status = (await requestWrapper.getJson()).status ?? "";
+        if (!isValidStatus(status)) {
+            return client.response.newError("Invalid status", 400);
+        }
+        const { data, error } = await client.queue.updateJobStatus(id, status);
+        if (error) {
+            return client.response.newError(error, 500);
+        }
+        return client.response.successJSON({ data });
+    });
+    router.post("/node", async (_, requestWrapper, env, _ctx) => {
+        const client = await createAPIClient(env, _ctx, requestWrapper);
+        const authParams = await client.db.getAuthParams();
+        if (authParams.error !== null) {
+            return client.response.unauthorized();
+        }
+        const node = await requestWrapper.getJson();
+        if (!node) {
+            return client.response.newError("Invalid task", 400);
+        }
+        const isValidTask = validateHeliconeNode(node);
+        if (isValidTask.error) {
+            return client.response.newError(isValidTask.error, 400);
+        }
+        const { data, error } = await client.queue.addNode({
+            custom_properties: node.customProperties ?? {},
+            description: node.description ?? "",
+            name: node.name ?? "",
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            id: node.id ?? crypto.randomUUID(),
+            org_id: authParams.data.organizationId,
+            job: node.job,
+        }, { parent_job_id: node.parentJobId });
+        if (error) {
+            return client.response.newError(error, 500);
+        }
+        return client.response.successJSON({ data });
+    });
+    router.patch("/node/:id/status", async ({ params: { id } }, requestWrapper, env, _ctx) => {
+        const client = await createAPIClient(env, _ctx, requestWrapper);
+        const authParams = await client.db.getAuthParams();
+        if (authParams.error !== null) {
+            return client.response.unauthorized();
+        }
+        const { data: job, error: jobError } = await client.db.getNodeById(id);
+        if (jobError) {
+            return client.response.newError(jobError, 500);
+        }
+        if (!job) {
+            return client.response.newError("Node not found", 404);
+        }
+        if (job?.org_id !== authParams.data.organizationId) {
+            return client.response.unauthorized();
+        }
+        const status = (await requestWrapper.getJson()).status ?? "";
+        if (!isValidStatus(status)) {
+            return client.response.newError("Invalid status", 400);
+        }
+        const { data, error } = await client.queue.updateNodeStatus(id, status);
+        if (error) {
+            return client.response.newError(error, 500);
+        }
+        return client.response.successJSON({ data });
+    });
+    router.post("/custom/v1/log", async (_, requestWrapper, env, ctx) => {
+        return await logAsync(requestWrapper, env, ctx, "CUSTOM");
+    });
+    router.post("/oai/v1/log", async (_, requestWrapper, env, ctx) => {
+        return await logAsync(requestWrapper, env, ctx, "OPENAI");
+    });
+    router.post("/googleapis/v1/log", async (_, requestWrapper, env, ctx) => {
+        return await logAsync(requestWrapper, env, ctx, "GOOGLE");
+    });
+    router.post("/anthropic/v1/log", async (_, requestWrapper, env, ctx) => {
+        return await logAsync(requestWrapper, env, ctx, "ANTHROPIC");
+    });
+    router.put("/v1/request/:id/property", async ({ params: { id } }, requestWrapper, _env, _ctx) => {
+        const newProperty = await requestWrapper.getJson();
+        const auth = await requestWrapper.auth();
+        if (auth.error) {
+            return new Response(auth.error, { status: 401 });
+        }
+        if (auth.data?._type !== "bearer") {
+            return new Response("Invalid token type.", { status: 401 });
+        }
+        const result = await fetch(`https://api.helicone.ai/v1/request/${id}/property`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: auth.data.token,
+            },
+            body: JSON.stringify(newProperty),
+        });
+        if (!result.ok) {
+            return new Response(`error ${await result.text()}`, {
+                status: 500,
+            });
+        }
+        return new Response(JSON.stringify({
+            ok: "true",
+        }), {
+            status: 200,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+    });
+    router.post("/alerts", async (_, requestWrapper, env, _ctx) => {
+        const client = await createAPIClient(env, _ctx, requestWrapper);
+        const { data: authParams, error: authError } = await client.db.getAuthParams();
+        if (authError !== null) {
+            return client.response.unauthorized();
+        }
+        const requestData = await requestWrapper.getJson();
+        const alert = {
+            ...requestData,
+            status: "resolved",
+            org_id: authParams.organizationId,
+        };
+        const { error: validateError } = validateAlertCreate(alert);
+        if (validateError !== null) {
+            return client.response.newError(validateError, 400);
+        }
+        const { data: alertRow, error: alertError } = await client.db.insertAlert(alert);
+        if (alertError || !alertRow) {
+            return client.response.newError(alertError, 500);
+        }
+        return client.response.successJSON({ ok: "true" }, true);
+    });
+    router.delete("/alert/:id", async ({ params: { id } }, requestWrapper, env, _ctx) => {
+        const client = await createAPIClient(env, _ctx, requestWrapper);
+        const { data: authParams, error } = await client.db.getAuthParams();
+        if (error !== null) {
+            return client.response.unauthorized();
+        }
+        const { error: deleteErr } = await client.db.deleteAlert(id, authParams.organizationId);
+        if (deleteErr) {
+            return client.response.newError(deleteErr, 500);
+        }
+        return client.response.successJSON({ ok: "true" }, true);
+    });
+    router.options("*", async (_, _requestWrapper, _env, _ctx) => {
+        return new Response(null, {
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "DELETE, POST, GET, PUT",
+                "Access-Control-Allow-Headers": "Content-Type, helicone-jwt, helicone-org-id",
+            },
+        });
+    });
+}
+export const getAPIRouter = (router) => {
+    getAPIRouterV1(router);
+    // Proxy only + proxy forwarder
+    router.all("*", async (_, _requestWrapper, _env, _ctx) => {
+        return new Response("invalid path", { status: 400 });
+    });
+    return router;
+};

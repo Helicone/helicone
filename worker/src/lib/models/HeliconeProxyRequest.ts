@@ -1,23 +1,19 @@
 // This will store all of the information coming from the client.
 
-import { Provider } from "@helicone-package/llm-mapper/types";
-import { approvedDomains } from "@helicone-package/cost/providers/mappings";
+import { Provider } from "../clients/ProviderClient";
+import { IHeliconeHeaders } from "../util/heliconeHeaders";
+import { Env } from "../types";
 import { RequestWrapper } from "../RequestWrapper";
 import { buildTargetUrl } from "../clients/ProviderClient";
 import { Result, ok } from "../util/results";
-import { IHeliconeHeaders } from "./HeliconeHeaders";
-
-import { parseJSXObject } from "@helicone/prompts";
-import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 import { MAPPERS } from "@helicone-package/llm-mapper/utils/getMappedContent";
 import { getMapperType } from "@helicone-package/llm-mapper/utils/getMapperType";
 import { RateLimitOptions } from "../clients/KVRateLimiterClient";
 import { RateLimitOptionsBuilder } from "../util/rateLimitOptions";
 
 export type RetryOptions = {
-  retries: number; // number of times to retry the request
-  factor: number; // exponential backoff factor
-  minTimeout: number; // minimum amount of time to wait before retrying (in milliseconds)
+  attempts: number; // number of attempts to retry
+  backoff: number; // backoff factor (in milliseconds)
   maxTimeout: number; // maximum amount of time to wait before retrying (in milliseconds)
 };
 
@@ -27,7 +23,7 @@ type Nullable<T> = T | null;
 // This neatly formats and holds all of the state that a request can come into Helicone
 export interface HeliconeProxyRequest {
   provider: Provider;
-  tokenCalcUrl: Env["TOKEN_COUNT_URL"];
+  tokenCalcUrl: string; // Changed from Env["TOKEN_COUNT_URL"] to string
   rateLimitOptions: Nullable<RateLimitOptions>;
   isRateLimitedKey: boolean;
   retryOptions: IHeliconeHeaders["retryHeaders"];

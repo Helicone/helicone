@@ -1,0 +1,177 @@
+// This will store all of the information coming from the client.
+import { approvedDomains } from "@helicone-package/cost/providers/mappings";
+import { buildTargetUrl } from "../clients/ProviderClient";
+import { ok } from "../util/results";
+import { parseJSXObject } from "@helicone/prompts";
+import { MAPPERS } from "@helicone-package/llm-mapper/utils/getMappedContent";
+import { getMapperType } from "@helicone-package/llm-mapper/utils/getMapperType";
+import { RateLimitOptionsBuilder } from "../util/rateLimitOptions";
+const providerBaseUrlMappings = {
+    OPENAI: "https://api.openai.com",
+    ANTHROPIC: "https://api.anthropic.com",
+    CUSTOM: "",
+};
+// Helps map a RequestWrapper -> HeliconProxyRequest
+export class HeliconeProxyRequestMapper {
+    request;
+    provider;
+    env;
+    tokenCalcUrl;
+    heliconeErrors = [];
+    constructor(request, provider, env) {
+        this.request = request;
+        this.provider = provider;
+        this.env = env;
+        this.tokenCalcUrl = env.VALHALLA_URL;
+    }
+    async getHeliconeTemplate() {
+        if (this.request.heliconeHeaders.promptHeaders.promptId) {
+            try {
+                const rawJson = JSON.parse(await this.request.getRawText());
+                // Get the mapper type based on the request
+                const mapperType = getMapperType({
+                    model: rawJson.model,
+                    provider: this.provider,
+                    path: this.request.url.pathname,
+                });
+                // Map the request using the appropriate mapper
+                const mapper = MAPPERS[mapperType];
+                if (!mapper) {
+                    console.error(`No mapper found for type ${mapperType}`);
+                    return null;
+                }
+                const mappedResult = mapper({
+                    request: rawJson,
+                    response: { choices: [] },
+                    statusCode: 200,
+                    model: rawJson.model,
+                });
+                // parseJSX only on the messages to avoid tools from being touched
+                const parsedJSXMessages = parseJSXObject(JSON.parse(JSON.stringify(mappedResult.schema.request.messages)));
+                const templateWithInputs = {
+                    inputs: this.request.promptSettings.promptInputs ??
+                        parsedJSXMessages.templateWithInputs.inputs,
+                    autoInputs: parsedJSXMessages.templateWithInputs.autoInputs,
+                    template: {
+                        ...mappedResult.schema.request,
+                        messages: parsedJSXMessages.templateWithInputs.template,
+                    },
+                };
+                return templateWithInputs;
+            }
+            catch (error) {
+                console.error("Error in getHeliconeTemplate:", error);
+                return null;
+            }
+        }
+        return null;
+    }
+    async tryToProxyRequest() {
+        const startTime = new Date();
+        const { data: api_base, error: api_base_error } = this.getApiBase();
+        if (api_base_error !== null) {
+            return { data: null, error: api_base_error };
+        }
+        const targetUrl = buildTargetUrl(this.request.url, api_base);
+        const requestJson = await this.requestJson();
+        let isStream = requestJson.stream === true;
+        if (this.provider === "GOOGLE") {
+            const queryParams = new URLSearchParams(targetUrl.search);
+            // alt = sse is how Gemini determines if a request is a stream
+            isStream = isStream || queryParams.get("alt") === "sse";
+        }
+        return {
+            data: {
+                heliconePromptTemplate: await this.getHeliconeTemplate(),
+                rateLimitOptions: this.rateLimitOptions(),
+                isRateLimitedKey: this.request.heliconeHeaders.heliconeAuthV2?.keyType ===
+                    "rate-limited",
+                requestJson: requestJson,
+                retryOptions: this.request.heliconeHeaders.retryHeaders,
+                provider: this.provider,
+                tokenCalcUrl: this.tokenCalcUrl,
+                providerAuthHash: await this.request.getProviderAuthHeader(),
+                omitOptions: this.request.heliconeHeaders.omitHeaders,
+                heliconeProxyKeyId: this.request.heliconeProxyKeyId,
+                heliconeProperties: this.request.heliconeHeaders.heliconeProperties,
+                userId: await this.request.getUserId(),
+                heliconeErrors: this.heliconeErrors,
+                api_base,
+                isStream: isStream,
+                bodyText: await this.getBody(),
+                startTime,
+                url: this.request.url,
+                requestId: this.request.heliconeHeaders.requestId ?? crypto.randomUUID(),
+                requestWrapper: this.request,
+                nodeId: this.request.heliconeHeaders.nodeId ?? null,
+                targetUrl,
+                cf: this.request.cf ?? undefined,
+            },
+            error: null,
+        };
+    }
+    async getBody() {
+        if (this.request.getMethod() === "GET") {
+            return null;
+        }
+        if (this.request.heliconeHeaders.featureFlags.streamUsage) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const jsonBody = (await this.request.getJson());
+            if (!jsonBody["stream_options"]) {
+                jsonBody["stream_options"] = {};
+            }
+            jsonBody["stream_options"]["include_usage"] = true;
+            return JSON.stringify(jsonBody);
+        }
+        return await this.request.getText();
+    }
+    validateApiConfiguration(api_base) {
+        return (api_base === undefined ||
+            approvedDomains.some((domain) => domain.test(api_base)));
+    }
+    getApiBase() {
+        if (this.request.baseURLOverride) {
+            return ok(this.request.baseURLOverride);
+        }
+        const api_base = this.request.heliconeHeaders.openaiBaseUrl ??
+            this.request.heliconeHeaders.targetBaseUrl;
+        if (api_base && !this.validateApiConfiguration(api_base)) {
+            // return new Response(`Invalid API base "${api_base}"`, {
+            return {
+                data: null,
+                error: `Invalid API base "${api_base}"`,
+            };
+        }
+        // this is kind of legacy stuff. the correct way to add providers is to add it to `modifyEnvBasedOnPath` (04/28/2024)
+        if (api_base) {
+            return { data: api_base, error: null };
+        }
+        else if (this.provider === "CUSTOM" ||
+            this.provider === "ANTHROPIC" ||
+            this.provider === "OPENAI") {
+            return {
+                data: providerBaseUrlMappings[this.provider],
+                error: null,
+            };
+        }
+        else {
+            return {
+                data: null,
+                error: `Invalid provider "${this.provider}"`,
+            };
+        }
+    }
+    rateLimitOptions() {
+        const rateLimitOptions = new RateLimitOptionsBuilder(this.request.heliconeHeaders.rateLimitPolicy).build();
+        if (rateLimitOptions.error) {
+            rateLimitOptions.error = `Invalid rate limit policy: ${rateLimitOptions.error}`;
+            this.heliconeErrors.push(rateLimitOptions.error);
+        }
+        return rateLimitOptions.data ?? null;
+    }
+    async requestJson() {
+        return this.request.getMethod() === "POST"
+            ? await this.request.getJson()
+            : {};
+    }
+}
