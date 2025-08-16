@@ -259,9 +259,6 @@ const whereKeyMappings: KeyMappings = {
       prompt_cache_read_tokens: "request_response_rmt.prompt_cache_read_tokens",
       prompt_cache_write_tokens:
         "request_response_rmt.prompt_cache_write_tokens",
-      gateway_router_id: "request_response_rmt.gateway_router_id",
-      gateway_deployment_target:
-        "request_response_rmt.gateway_deployment_target",
       prompt_id: "request_response_rmt.prompt_id",
       prompt_version: "request_response_rmt.prompt_version",
     })(filter, placeValueSafely);

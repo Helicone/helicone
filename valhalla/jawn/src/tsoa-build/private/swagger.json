@@ -3175,12 +3175,6 @@
 					"helicone-score-feedback": {
 						"$ref": "#/components/schemas/Partial_BooleanOperators_"
 					},
-					"gateway_router_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"gateway_deployment_target": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
 					"prompt_id": {
 						"$ref": "#/components/schemas/Partial_TextOperators_"
 					},
@@ -4297,11 +4291,7 @@
 					"updated_at": {
 						"type": "string"
 					},
-					"gateway_router_id": {
-						"type": "string",
-						"nullable": true
-					},
-					"gateway_deployment_target": {
+					"request_referrer": {
 						"type": "string",
 						"nullable": true
 					}
@@ -6017,6 +6007,9 @@
 					},
 					"request": {
 						"properties": {
+							"requestReferrer": {
+								"type": "string"
+							},
 							"cacheReferenceId": {
 								"type": "string"
 							},
