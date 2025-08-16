@@ -204,6 +204,93 @@ export type EscrowInfo = {
   model: string;
 };
 
+const reserveEscrow = async (
+  requestWrapper: RequestWrapper,
+  env: Env,
+  orgId: string,
+  endpoint: Endpoint,
+  provider: ProviderName,
+  providerModelId: string
+): Promise<Result<string | undefined, Error>> => {
+  const walletId = env.WALLET.idFromName(orgId);
+  const walletStub = env.WALLET.get(walletId);
+
+  const costStructure = costOf({
+    model: providerModelId,
+    provider: provider,
+  });
+  if (
+    !costStructure ||
+    endpoint.contextLength === 0 ||
+    endpoint.maxCompletionTokens === 0 ||
+    costStructure.prompt_token === 0 ||
+    costStructure.completion_token === 0
+  ) {
+    return err({
+      type: "model_not_supported",
+      message: `No cost structure found for (provider, model): (${provider}, ${providerModelId})`,
+      code: 400,
+    });
+  }
+
+  const state = await walletStub.getDisallowList();
+  if (isErr(state)) {
+    return err({
+      type: "request_failed",
+      message: state.error,
+      code: 500,
+    });
+  }
+  for (const entry of state.data) {
+    if (entry.provider === null || entry.model === null) {
+      return err({
+        type: "request_failed",
+        message:
+          "Currently cloud billing is disabled for this org. Please contact support@helicone.ai for help",
+        code: 400,
+      });
+    }
+    if (entry.provider === provider && entry.model === providerModelId) {
+      return err({
+        type: "request_failed",
+        message:
+          "Currently cloud billing is disabled for this model and provider. Please contact support@helicone.ai for help",
+        code: 400,
+      });
+    }
+  }
+
+  const maxPromptCost =
+    (endpoint.contextLength * costStructure.prompt_token) / 1_000_000;
+  const maxCompletionCost =
+    (endpoint.maxCompletionTokens * costStructure.completion_token) / 1_000_000;
+  const worstCaseCost = maxPromptCost + maxCompletionCost;
+  if (worstCaseCost <= 0) {
+    return err({
+      type: "request_failed",
+      message: `Invalid cost structure found for (provider, model): (${provider}, ${providerModelId})`,
+      code: 500,
+    });
+  }
+
+  const requestId = requestWrapper.heliconeHeaders.requestId;
+  const escrowResult = await walletStub.reserveCostInEscrow(
+    orgId,
+    requestId,
+    worstCaseCost
+  );
+
+  if (escrowResult.error) {
+    return err({
+      type: "request_failed",
+      message: escrowResult.error,
+      code: 429,
+    });
+  }
+
+  return ok(escrowResult.data?.escrowId);
+};
+
 const attemptDirectProviderRequest = async (
   directProviderEndpoint: DirectProviderEndpoint,
   requestWrapper: RequestWrapper,
@@ -318,83 +405,18 @@ const attemptDirectProviderRequest = async (
   // if cloud billing is enabled, we want to 'reserve' the maximum possible
   // cost of the request in their wallet so that we can avoid overages
   if (requestWrapper.heliconeHeaders.cloudBillingEnabled) {
-    const walletId = env.WALLET.idFromName(orgId);
-    const walletStub = env.WALLET.get(walletId);
-
-    const costStructure = costOf({
-      model: providerModelId,
-      provider: provider,
-    });
-    if (
-      !costStructure ||
-      endpoint.contextLength === 0 ||
-      endpoint.maxCompletionTokens === 0 ||
-      costStructure.prompt_token === 0 ||
-      costStructure.completion_token === 0
-    ) {
-      return err({
-        type: "model_not_supported",
-        message: `No cost structure found for (provider, model): (${provider}, ${providerModelId})`,
-        code: 400,
-      });
-    }
-    const state = await walletStub.getDisallowList();
-    if (isErr(state)) {
-      return err({
-        type: "request_failed",
-        message: state.error,
-        code: 500,
-      });
-    }
-    for (const entry of state.data) {
-      if (entry.provider === null || entry.model === null) {
-        return err({
-          type: "request_failed",
-          message: "Currently cloud billing is disabled for this org. Please contact support@helicone.ai for help",
-          code: 400,
-        });
-      }
-      if (entry.provider === provider && entry.model === providerModelId) {
-        return err({
-          type: "request_failed",
-          message: "Currently cloud billing is disabled for this model and provider. Please contact support@helicone.ai for help",
-          code: 400,
-        });
-      }
-    }
-
-    // Estimate Cmax: total maximum worst case possible cost of a model request
-    // TODO: ask Cole if we need to get the scale factor from the dynamic data
-    const maxPromptCost =
-      (endpoint.contextLength * costStructure.prompt_token) / 1_000_000;
-    const maxCompletionCost =
-      (endpoint.maxCompletionTokens * costStructure.completion_token) /
-      1_000_000;
-    const worstCaseCost = (maxPromptCost + maxCompletionCost);
-    if (worstCaseCost <= 0) {
-      return err({
-        type: "request_failed",
-        message: `Invalid cost structure found for (provider, model): (${provider}, ${providerModelId})`,
-        code: 500,
-      });
-    }
-
-    const requestId = requestWrapper.heliconeHeaders.requestId;
-    const escrowResult = await walletStub.reserveCostInEscrow(
+    const escrowReservation = await reserveEscrow(
+      requestWrapper,
+      env,
       orgId,
-      requestId,
-      worstCaseCost
+      endpoint,
+      provider,
+      providerModelId
     );
-
-    if (escrowResult.error) {
-      return err({
-        type: "request_failed",
-        message: escrowResult.error,
-        code: 429,
-      });
+    if (isErr(escrowReservation)) {
+      return err(escrowReservation.error);
     }
-
-    escrowId = escrowResult.data?.escrowId;
+    escrowId = escrowReservation.data;
   }
 
   await authenticateRequest(
@@ -408,7 +430,9 @@ const attemptDirectProviderRequest = async (
   );
 
   try {
-    const escrowInfo = escrowId ? { escrowId, provider, model: providerModelId } : undefined;
+    const escrowInfo = escrowId
+      ? { escrowId, provider, model: providerModelId }
+      : undefined;
     const response = await forwarder(targetBaseUrl, escrowInfo);
 
     if (response.ok) {
