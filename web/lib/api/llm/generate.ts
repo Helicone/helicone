@@ -42,7 +42,7 @@ export interface GenerateParams {
     onCompletion: () => void;
   };
   useAIGateway?: boolean;
-  endpoint?: 'playground' | 'agent';
+  endpoint?: "playground" | "agent";
 }
 
 export type GenerateResponse = {
@@ -164,14 +164,14 @@ export async function generate<T extends object | undefined = undefined>(
     schema?: z.ZodType<object>;
     useAIGateway?: boolean;
     logRequest?: boolean;
-    endpoint?: 'playground' | 'agent';
-  }
+    endpoint?: "playground" | "agent";
+  },
 ): Promise<GenerateResponse> {
   const currentOrgId = Cookies.get(ORG_ID_COOKIE_KEY);
   const jwtToken = getHeliconeCookie().data?.jwtToken ?? "";
-  
-  const apiEndpoint = params.endpoint === 'agent' ? 'agent' : 'playground';
-  
+
+  const apiEndpoint = params.endpoint === "agent" ? "agent" : "playground";
+
   const response = await fetch(
     `${env("NEXT_PUBLIC_HELICONE_JAWN_SERVICE")}/v1/${apiEndpoint}/generate`,
     {
