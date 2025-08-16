@@ -172,9 +172,15 @@ interface CfProperties {
 // Add missing KVNamespace interface
 interface KVNamespace {
     get(key: string, options?: { type?: "text" | "json" | "arrayBuffer" | "stream"; cacheTtl?: number }): Promise<any>;
-    put(key: string, value: string | ArrayBuffer | ReadableStream<Uint8Array>, options?: { expiration?: number; expirationTtl?: number; metadata?: any }): Promise<void>;
+    put(key: string, value: string | ArrayBuffer | ReadableStream<Uint8Array>, options?: KVNamespacePutOptions): Promise<void>;
     delete(key: string): Promise<void>;
     list(options?: { prefix?: string; limit?: number; cursor?: string }): Promise<{ keys: { name: string; expiration?: number; metadata?: any }[]; list_complete: boolean; cursor?: string }>;
+}
+
+interface KVNamespacePutOptions {
+    expiration?: number;
+    expirationTtl?: number;
+    metadata?: any;
 }
 
 // Add missing DurableObjectState interface
@@ -253,6 +259,26 @@ interface ReadableStream<R = any> {
     getReader(): ReadableStreamDefaultReader<R>;
     cancel(reason?: any): Promise<void>;
     locked: boolean;
+}
+
+// Add ReadableStreamDefaultReader interface
+interface ReadableStreamDefaultReader<R = any> {
+    read(): Promise<ReadableStreamReadResult<R>>;
+    releaseLock(): void;
+    closed: Promise<void>;
+    cancel(reason?: any): Promise<void>;
+}
+
+// Add ReadableStreamReadResult interface
+interface ReadableStreamReadResult<T> {
+    done: boolean;
+    value: T | undefined;
+}
+
+// Add Queue interface
+interface Queue {
+    send(message: any): Promise<void>;
+    sendBatch(messages: any[]): Promise<void>;
 }
 
 // Begin runtime types
