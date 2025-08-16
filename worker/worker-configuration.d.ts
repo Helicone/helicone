@@ -67,7 +67,7 @@ declare namespace Cloudflare {
 		UPSTASH_KAFKA_USERNAME: "";
 		UPSTASH_KAFKA_PASSWORD: "";
 		QUEUE_PROVIDER: "sqs";
-		RATE_LIMITER: DurableObjectNamespace<import("./src/index").InMemoryRateLimiter>;
+		RATE_LIMITER: DurableObjectNamespace<any>;
 		FALLBACK_QUEUE: Queue;
 	}
 }
@@ -113,7 +113,7 @@ interface Request {
     url: string;
     method: string;
     headers: Headers;
-    body?: ReadableStream | null;
+    body?: ReadableStream<Uint8Array> | null;
     bodyUsed: boolean;
     redirect?: RequestRedirect;
     integrity?: string;
@@ -139,7 +139,7 @@ interface Response {
     readonly statusText: string;
     readonly type: ResponseType;
     readonly url: string;
-    readonly body: ReadableStream | null;
+    readonly body: ReadableStream<Uint8Array> | null;
     readonly bodyUsed: boolean;
     clone(): Response;
     arrayBuffer(): Promise<ArrayBuffer>;
@@ -172,7 +172,7 @@ interface CfProperties {
 // Add missing KVNamespace interface
 interface KVNamespace {
     get(key: string, options?: { type?: "text" | "json" | "arrayBuffer" | "stream"; cacheTtl?: number }): Promise<any>;
-    put(key: string, value: string | ArrayBuffer | ReadableStream, options?: { expiration?: number; expirationTtl?: number; metadata?: any }): Promise<void>;
+    put(key: string, value: string | ArrayBuffer | ReadableStream<Uint8Array>, options?: { expiration?: number; expirationTtl?: number; metadata?: any }): Promise<void>;
     delete(key: string): Promise<void>;
     list(options?: { prefix?: string; limit?: number; cursor?: string }): Promise<{ keys: { name: string; expiration?: number; metadata?: any }[]; list_complete: boolean; cursor?: string }>;
 }
@@ -218,7 +218,7 @@ interface DurableObjectTransaction {
 }
 
 // Add missing BodyInit type
-type BodyInit = ReadableStream | ArrayBuffer | ArrayBufferView | string | URLSearchParams | FormData | null;
+type BodyInit = ReadableStream<Uint8Array> | ArrayBuffer | ArrayBufferView | string | URLSearchParams | FormData | null;
 
 // Add missing RequestInit type
 interface RequestInit {
@@ -233,6 +233,26 @@ interface RequestInit {
     referrer?: string;
     referrerPolicy?: ReferrerPolicy;
     cf?: any;
+    aws?: any;
+}
+
+// Add missing Blob interface
+interface Blob {
+    readonly size: number;
+    readonly type: string;
+    arrayBuffer(): Promise<ArrayBuffer>;
+    slice(start?: number, end?: number, contentType?: string): Blob;
+    text(): Promise<string>;
+    stream(): ReadableStream<Uint8Array>;
+}
+
+// Add ReadableStream extensions
+interface ReadableStream<R = any> {
+    pipeThrough<T>(transform: { writable: WritableStream<R>; readable: ReadableStream<T> }): ReadableStream<T>;
+    pipeTo(destination: WritableStream<R>): Promise<void>;
+    getReader(): ReadableStreamDefaultReader<R>;
+    cancel(reason?: any): Promise<void>;
+    locked: boolean;
 }
 
 // Begin runtime types
