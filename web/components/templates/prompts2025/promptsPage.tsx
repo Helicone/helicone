@@ -276,10 +276,36 @@ const PromptsPage = (props: PromptsPageProps) => {
       setSearch(args.query);
       return {
         success: true,
-        message: `Searched for prompts: "${args.query}"`,
+        message: `Successfully searched for prompts: "${args.query}"`,
       };
     });
-  }, []);
+
+    setToolHandler("get-prompts", async () => {
+      const promptInfo = prompts.map((prompt) => {
+        return `Name: ${prompt.prompt.name} (ID: ${prompt.prompt.id})\n}`;
+      });
+      console.log(promptInfo);
+      return {
+        success: true,
+        message: "PROMPTS: " + JSON.stringify(promptInfo),
+      };
+    });
+
+    setToolHandler("select-prompt", async (args: { id: string }) => {
+      const prompt = prompts.find((p) => p.prompt.id === args.id);
+      if (prompt) {
+        handleRowSelect(prompt);
+        return {
+          success: true,
+          message: `Successfully selected prompt: ${prompt.prompt.name} (${prompt.prompt.id})`,
+        };
+      }
+      return {
+        success: false,
+        message: `Prompt does not exist with ID ${args.id}`,
+      };
+    });
+  }, [prompts]);
 
   return (
     <main className="flex h-screen w-full animate-fade-in flex-col">
