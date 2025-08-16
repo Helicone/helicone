@@ -51,21 +51,27 @@ export const useEvaluatorStats = (evaluatorId: string) => {
 
         // Check for error response
         if (responseData?.error) {
-          logger.warn({ 
-            evaluatorId, 
-            error: responseData.error, 
-            orgId: org?.currentOrg?.id 
-          }, "API error for evaluator stats");
+          logger.warn(
+            {
+              evaluatorId,
+              error: responseData.error,
+              orgId: org?.currentOrg?.id,
+            },
+            "API error for evaluator stats",
+          );
           return DEFAULT_STATS;
         }
 
         // Check if data is missing or null
         if (!responseData?.data?.data) {
-          logger.warn({ 
-            evaluatorId, 
-            orgId: org?.currentOrg?.id,
-            hasData: !!responseData?.data 
-          }, "No stats data returned for evaluator");
+          logger.warn(
+            {
+              evaluatorId,
+              orgId: org?.currentOrg?.id,
+              hasData: !!responseData?.data,
+            },
+            "No stats data returned for evaluator",
+          );
           return DEFAULT_STATS;
         }
 
@@ -90,11 +96,14 @@ export const useEvaluatorStats = (evaluatorId: string) => {
 
         return processedData;
       } catch (error) {
-        logger.error({ 
-          error, 
-          evaluatorId, 
-          orgId: org?.currentOrg?.id 
-        }, "Exception fetching stats for evaluator");
+        logger.error(
+          {
+            error,
+            evaluatorId,
+            orgId: org?.currentOrg?.id,
+          },
+          "Exception fetching stats for evaluator",
+        );
         return DEFAULT_STATS;
       }
     },

@@ -86,7 +86,8 @@ export default function EvaluatorsList() {
                 counts.set(evaluator.id, response.data.data.length);
               }
             } catch (error) {
-              logger.error({ error: result.error },
+              logger.error(
+                { error: result.error },
                 `Error fetching online evaluators for ${evaluator.id}:`,
                 error,
               );

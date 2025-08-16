@@ -85,7 +85,10 @@ const GenerateAPIKey = ({
 
       if (!res.response.ok) {
         setNotification("Failed to generate API key", "error");
-        logger.error({ response: await res.response.text() }, "Failed to generate API key");
+        logger.error(
+          { response: await res.response.text() },
+          "Failed to generate API key",
+        );
       }
 
       setApiKey(generatedApiKey);

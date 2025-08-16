@@ -69,7 +69,7 @@ function messageReducer(previous: any, item: any): any {
           if (index === undefined) {
             logger.error(
               { value: value[i] },
-              "Reducer: Array element in delta missing index"
+              "Reducer: Array element in delta missing index",
             );
             // Attempt to append if index missing, might be wrong
             accArray.push(chunkTool);
@@ -89,7 +89,7 @@ function messageReducer(previous: any, item: any): any {
         // Handle other types or mismatches if necessary
         logger.warn(
           { key, accumulatorType: typeof acc[key], deltaType: typeof value },
-          `Reducer: Unhandled type mismatch for key '${key}'`
+          `Reducer: Unhandled type mismatch for key '${key}'`,
         );
         // Default behavior: overwrite accumulator with delta value
         acc[key] = value;
@@ -184,7 +184,7 @@ export async function processStream(
       } catch (error) {
         logger.error(
           { error, chunkString },
-          "[processStream] Error parsing JSON chunk or processing delta"
+          "[processStream] Error parsing JSON chunk or processing delta",
         );
         // Optional: Treat parse errors as raw content?
         // state.content += chunkString; // Be cautious with this
@@ -223,7 +223,7 @@ export async function processStream(
     // Return the state as it was when the error occurred, might be incomplete
     logger.warn(
       { callbackState },
-      "[processStream] Returning state possibly incomplete due to error"
+      "[processStream] Returning state possibly incomplete due to error",
     );
     // Attempt to extract final state even on error, might be partial
     // Use the accumulated message directly

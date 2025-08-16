@@ -144,7 +144,7 @@ export const Realtime: React.FC<RealtimeProps> = ({
             { startIndex, messageCount: sortedMessages.length },
             `Message index ${startIndex} is out of range (0-${
               sortedMessages.length - 1
-            })`
+            })`,
           );
           // Fall back to showing all messages if index is out of range
           return sortedMessages;
@@ -861,7 +861,10 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
       // Data from backend is already WAV
       return `data:audio/wav;base64,${convertedWavData}`;
     } catch (e) {
-      logger.error({ error: e }, "Error creating audio source from converted data");
+      logger.error(
+        { error: e },
+        "Error creating audio source from converted data",
+      );
       // Error should be handled during conversion or playback attempt
       return "";
     }

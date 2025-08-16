@@ -105,7 +105,7 @@ export async function generate<T extends object | undefined = undefined>(
           if (buffer.trim()) {
             logger.warn(
               { buffer },
-              "[generate] Stream ended with unprocessed buffer content"
+              "[generate] Stream ended with unprocessed buffer content",
             );
             // Attempt to process remaining buffer as if it were a complete event
             const potentialEvents = buffer.split("\n\n");
@@ -119,7 +119,7 @@ export async function generate<T extends object | undefined = undefined>(
                   } catch (parseError) {
                     logger.error(
                       { parseError, jsonString },
-                      "[generate] Error parsing final buffer JSON"
+                      "[generate] Error parsing final buffer JSON",
                     );
                   }
                 }
@@ -145,7 +145,7 @@ export async function generate<T extends object | undefined = undefined>(
               } catch (parseError) {
                 logger.error(
                   { parseError, event },
-                  "[generate] Error parsing event JSON"
+                  "[generate] Error parsing event JSON",
                 );
                 // Decide how to handle parse errors, e.g., skip or log
               }
@@ -199,7 +199,10 @@ export async function generate<T extends object | undefined = undefined>(
         calls: "", // Schemas typically don't involve calls in this flow
       };
     } catch (parseError) {
-      logger.error({ parseError }, "[generate] Failed to parse schema response");
+      logger.error(
+        { parseError },
+        "[generate] Failed to parse schema response",
+      );
       // Fall back to standard response if parsing fails
     }
   }

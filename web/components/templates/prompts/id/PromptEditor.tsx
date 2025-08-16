@@ -600,7 +600,10 @@ export default function PromptEditor({
           "success",
         );
       } catch (error) {
-        logger.error({ error, versionId: version.id }, "Error promoting version");
+        logger.error(
+          { error, versionId: version.id },
+          "Error promoting version",
+        );
         setNotification("Failed to promote version", "error");
       }
     },

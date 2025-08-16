@@ -1,6 +1,5 @@
 import React from "react";
 import { DiffHighlight } from "@/components/templates/welcome/diffHighlight";
-import { logger } from "@/lib/telemetry/logger";
 
 type CodeExampleType = {
   code: string;

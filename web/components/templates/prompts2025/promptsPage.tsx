@@ -114,7 +114,10 @@ const PromptsPage = (props: PromptsPageProps) => {
 
     if (result.error) {
       setNotification("Error renaming prompt", "error");
-      logger.error({ error: result.error, promptId, newName }, "Error renaming prompt");
+      logger.error(
+        { error: result.error, promptId, newName },
+        "Error renaming prompt",
+      );
     } else {
       setNotification("Prompt renamed successfully", "success");
     }
@@ -135,7 +138,10 @@ const PromptsPage = (props: PromptsPageProps) => {
 
     if (result.error) {
       setNotification("Error setting environment", "error");
-      logger.error({ error: result.error, promptId, promptVersionId, environment }, "Error setting environment");
+      logger.error(
+        { error: result.error, promptId, promptVersionId, environment },
+        "Error setting environment",
+      );
     } else {
       setNotification("Environment set successfully", "success");
     }
@@ -153,7 +159,10 @@ const PromptsPage = (props: PromptsPageProps) => {
 
       if (result.error) {
         setNotification("Error deleting prompt", "error");
-        logger.error({ error: result.error, promptId }, "Error deleting prompt");
+        logger.error(
+          { error: result.error, promptId },
+          "Error deleting prompt",
+        );
       } else {
         setNotification("Prompt deleted successfully", "success");
         if (selectedPrompt?.prompt.id === promptId) {
@@ -182,13 +191,23 @@ const PromptsPage = (props: PromptsPageProps) => {
 
       if (result.error) {
         setNotification("Error deleting prompt version", "error");
-        logger.error({ error: result.error, promptVersionId, promptId: selectedPrompt.prompt.id }, "Error deleting prompt version");
+        logger.error(
+          {
+            error: result.error,
+            promptVersionId,
+            promptId: selectedPrompt.prompt.id,
+          },
+          "Error deleting prompt version",
+        );
       } else {
         setNotification("Prompt version deleted successfully", "success");
       }
     } catch (error) {
       setNotification("Error deleting prompt version", "error");
-      logger.error({ error, promptVersionId, promptId: selectedPrompt?.prompt.id }, "Error deleting prompt version");
+      logger.error(
+        { error, promptVersionId, promptId: selectedPrompt?.prompt.id },
+        "Error deleting prompt version",
+      );
     }
   };
 

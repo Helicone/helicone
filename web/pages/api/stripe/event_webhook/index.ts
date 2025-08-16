@@ -280,7 +280,10 @@ const PricingVersionOld = {
         logger.info({ org }, "Organization updated successfully");
       }
     } else {
-      logger.info({ customerId: subscriptionUpdated.customer }, "No fields to update for organization with customer ID");
+      logger.info(
+        { customerId: subscriptionUpdated.customer },
+        "No fields to update for organization with customer ID",
+      );
     }
 
     await sendSubscriptionCanceledEvent(subscriptionUpdated);
@@ -533,7 +536,10 @@ async function createSlackChannelAndInviteMembers(
     );
 
   if (orgMembersError) {
-    logger.error({ error: orgMembersError }, "Failed to fetch organization members");
+    logger.error(
+      { error: orgMembersError },
+      "Failed to fetch organization members",
+    );
   }
 
   const emails = await Promise.all(
@@ -692,7 +698,10 @@ const TeamVersion20250130 = {
       );
 
     if (orgDataError) {
-      logger.error({ error: orgDataError }, "Failed to fetch organization data");
+      logger.error(
+        { error: orgDataError },
+        "Failed to fetch organization data",
+      );
     }
 
     const orgData =
@@ -851,7 +860,10 @@ const InvoiceHandlers = {
         );
 
         if (experimentUsage.error || !experimentUsage.data) {
-          logger.error({ error: experimentUsage.error }, "Error getting experiment usage");
+          logger.error(
+            { error: experimentUsage.error },
+            "Error getting experiment usage",
+          );
           return;
         }
 
@@ -862,7 +874,10 @@ const InvoiceHandlers = {
         );
 
         if (evaluatorUsage.error || !evaluatorUsage.data) {
-          logger.error({ error: evaluatorUsage.error }, "Error getting evaluator usage");
+          logger.error(
+            { error: evaluatorUsage.error },
+            "Error getting evaluator usage",
+          );
           return;
         }
 
@@ -874,7 +889,10 @@ const InvoiceHandlers = {
             });
 
             if (!totalCost) {
-              logger.error({ model: usage.model, provider: usage.provider }, "No cost found for model/provider");
+              logger.error(
+                { model: usage.model, provider: usage.provider },
+                "No cost found for model/provider",
+              );
               continue;
             }
 
@@ -906,7 +924,10 @@ const InvoiceHandlers = {
             });
 
             if (!totalCost) {
-              logger.error({ model: usage.model, provider: usage.provider }, "No cost found for model/provider");
+              logger.error(
+                { model: usage.model, provider: usage.provider },
+                "No cost found for model/provider",
+              );
               continue;
             }
 

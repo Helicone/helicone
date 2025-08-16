@@ -33,11 +33,14 @@ const SignIn = ({
   useEffect(() => {
     // Prevent infinite loops by limiting redirects
     if (redirectCount >= 3) {
-      logger.error("Too many redirects detected. Stopping to prevent infinite loop.", {
-        redirectCount,
-        unauthorized,
-        userId: heliconeAuthClient?.user?.id
-      });
+      logger.error(
+        "Too many redirects detected. Stopping to prevent infinite loop.",
+        {
+          redirectCount,
+          unauthorized,
+          userId: heliconeAuthClient?.user?.id,
+        },
+      );
       return;
     }
 

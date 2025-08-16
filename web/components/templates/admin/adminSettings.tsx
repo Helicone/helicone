@@ -177,7 +177,10 @@ const AdminSettings = () => {
       setEditableSetting(null);
       refetch();
     } catch (error) {
-      logger.error({ error, settingName: editableSetting.name }, "Failed to parse or save settings");
+      logger.error(
+        { error, settingName: editableSetting.name },
+        "Failed to parse or save settings",
+      );
     }
   };
 
@@ -201,7 +204,10 @@ const AdminSettings = () => {
       setShowNewSettingForm(false);
       refetch();
     } catch (error) {
-      logger.error({ error, settingName: newSetting.name }, "Failed to parse or save new setting");
+      logger.error(
+        { error, settingName: newSetting.name },
+        "Failed to parse or save new setting",
+      );
     }
   };
 

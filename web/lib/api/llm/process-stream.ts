@@ -112,11 +112,14 @@ export async function processStream(
         fullMessage = messageReducer(fullMessage, chunkJson);
         callbackState.fullContent = JSON.stringify(fullMessage, null, 2);
       } catch (error) {
-        logger.error({
-          error,
-          chunkString,
-          chunkLength: chunkString.length
-        }, "[processStream] Error parsing JSON chunk or processing delta");
+        logger.error(
+          {
+            error,
+            chunkString,
+            chunkLength: chunkString.length,
+          },
+          "[processStream] Error parsing JSON chunk or processing delta",
+        );
         // Optional: Treat parse errors as raw content?
         // state.content += chunkString; // Be cautious with this
       }
@@ -137,15 +140,21 @@ export async function processStream(
   } catch (error) {
     // Catch errors during reader.read() or reader.cancel()
     if (error instanceof Error && error.name === "AbortError") {
-      logger.info({ signal: !!signal }, "[processStream] Stream reading aborted");
+      logger.info(
+        { signal: !!signal },
+        "[processStream] Stream reading aborted",
+      );
     } else {
       logger.error({ error }, "[processStream] Error reading from stream");
     }
     // Return the state as it was when the error occurred, might be incomplete
-    logger.warn({
-      callbackState,
-      contentLength: callbackState.fullContent.length
-    }, "[processStream] Returning state possibly incomplete due to error");
+    logger.warn(
+      {
+        callbackState,
+        contentLength: callbackState.fullContent.length,
+      },
+      "[processStream] Returning state possibly incomplete due to error",
+    );
     return {
       error: error,
       fullContent: callbackState.fullContent,

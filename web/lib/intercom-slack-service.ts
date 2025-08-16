@@ -85,7 +85,10 @@ export class IntercomSlackService {
     if (result.error) {
       logger.error({ error: result.error }, "Failed to clear invalid mapping");
     } else {
-      logger.info({ conversationId: intercomConversationId }, "Cleared invalid mapping for conversation");
+      logger.info(
+        { conversationId: intercomConversationId },
+        "Cleared invalid mapping for conversation",
+      );
     }
   }
 
@@ -135,7 +138,10 @@ export class IntercomSlackService {
       logger.debug({ response: channelTestData }, "Channel test response");
 
       if (!channelTestData.ok) {
-        logger.error({ error: channelTestData.error }, "Channel access test failed");
+        logger.error(
+          { error: channelTestData.error },
+          "Channel access test failed",
+        );
       }
     } catch (error) {
       logger.error({ error }, "Error testing channel access");
@@ -235,7 +241,10 @@ export class IntercomSlackService {
         slackPayload.thread_ts = threadTs;
         logger.debug({ threadTs }, "Adding thread_ts for reply");
       } else {
-        logger.warn({ threadTs }, "Invalid thread_ts format, treating as new message");
+        logger.warn(
+          { threadTs },
+          "Invalid thread_ts format, treating as new message",
+        );
         // Clear invalid mapping and treat as new message
         threadTs = undefined;
       }
@@ -258,7 +267,10 @@ export class IntercomSlackService {
       const errorText = await response.text();
       logger.error({ response: errorText }, "Slack error response");
       logger.error({ channelId: slackChannelId }, "Channel ID used");
-      logger.error({ tokenPrefix: slackBotToken?.substring(0, 20) }, "Bot token (first 20 chars)");
+      logger.error(
+        { tokenPrefix: slackBotToken?.substring(0, 20) },
+        "Bot token (first 20 chars)",
+      );
       throw new Error(
         `Failed to send Slack message: ${response.statusText} - ${errorText}`,
       );
@@ -299,7 +311,10 @@ export class IntercomSlackService {
     logger.debug("Starting Intercom reply");
     logger.debug({ conversationId }, "Conversation ID");
     logger.debug({ message }, "Message");
-    logger.debug({ tokenPrefix: intercomAccessToken.substring(0, 20) + "..." }, "Access Token");
+    logger.debug(
+      { tokenPrefix: intercomAccessToken.substring(0, 20) + "..." },
+      "Access Token",
+    );
 
     const intercomApiUrl = `https://api.intercom.io/conversations/${conversationId}/reply`;
 

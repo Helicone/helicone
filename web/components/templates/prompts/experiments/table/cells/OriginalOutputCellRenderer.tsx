@@ -51,7 +51,10 @@ export const OriginalOutputCellRenderer = ({
             }
             // Add any other properties you need to extract here
           } catch (e) {
-            logger.error("Failed to parse tool call arguments", { error: e, toolCall });
+            logger.error("Failed to parse tool call arguments", {
+              error: e,
+              toolCall,
+            });
             continue;
           }
         }

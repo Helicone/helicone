@@ -27,7 +27,10 @@ export class PosthogClient {
     organizationId?: string,
   ): Promise<boolean> {
     if (!this.isEnabled || !this.apiKey) {
-      logger.warn({ eventName, userId, organizationId }, "[PostHog Disabled] Would have sent event");
+      logger.warn(
+        { eventName, userId, organizationId },
+        "[PostHog Disabled] Would have sent event",
+      );
       return false;
     }
 
@@ -53,17 +56,23 @@ export class PosthogClient {
       const success = response.status === 200;
       if (!success) {
         const responseText = await response.text();
-        logger.error({ 
-          status: response.status, 
-          responseText, 
-          eventName, 
-          userId, 
-          organizationId 
-        }, "PostHog API error");
+        logger.error(
+          {
+            status: response.status,
+            responseText,
+            eventName,
+            userId,
+            organizationId,
+          },
+          "PostHog API error",
+        );
       }
       return success;
     } catch (error) {
-      logger.error({ error, eventName, userId, organizationId }, "PostHog capture error");
+      logger.error(
+        { error, eventName, userId, organizationId },
+        "PostHog capture error",
+      );
       return false;
     }
   }

@@ -88,12 +88,15 @@ export const auth = betterAuth({
         }
       } catch (error) {
         logger.error({ error }, "Error sending verification email");
-        logger.error({
-          host: process.env.SMTP_HOST,
-          port: process.env.SMTP_PORT,
-          secure: process.env.SMTP_SECURE === "true",
-          hasAuth: !process.env.SMTP_HOST?.includes("mailhog"),
-        }, "SMTP Config");
+        logger.error(
+          {
+            host: process.env.SMTP_HOST,
+            port: process.env.SMTP_PORT,
+            secure: process.env.SMTP_SECURE === "true",
+            hasAuth: !process.env.SMTP_HOST?.includes("mailhog"),
+          },
+          "SMTP Config",
+        );
         // Optionally, re-throw the error or handle it as needed
         // throw error;
       }

@@ -92,13 +92,19 @@ async function handler({
   );
 
   if (newProxyMapping.error !== null) {
-    logger.error({ error: newProxyMapping.error, proxyKeyId, providerKeyId }, "Failed to insert proxy key mapping");
+    logger.error(
+      { error: newProxyMapping.error, proxyKeyId, providerKeyId },
+      "Failed to insert proxy key mapping",
+    );
     res.status(500).json({ error: newProxyMapping.error, data: null });
     return;
   }
 
   if (newProxyMapping.data === null) {
-    logger.error({ proxyKeyId, providerKeyId }, "Failed to insert proxy key mapping, no data returned");
+    logger.error(
+      { proxyKeyId, providerKeyId },
+      "Failed to insert proxy key mapping, no data returned",
+    );
     res.status(500).json({
       error: "Failed to insert proxy key mapping, no data returned",
       data: null,

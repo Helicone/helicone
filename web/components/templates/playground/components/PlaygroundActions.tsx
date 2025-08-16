@@ -46,11 +46,14 @@ const PlaygroundActions = ({
 }: PlaygroundActionsProps) => {
   const organization = useOrg();
   const resetToDefault = () => {
-    logger.debug({
-      defaultContent: !!defaultContent,
-      mappedContent: !!mappedContent,
-      requestId,
-    }, "Reset triggered");
+    logger.debug(
+      {
+        defaultContent: !!defaultContent,
+        mappedContent: !!mappedContent,
+        requestId,
+      },
+      "Reset triggered",
+    );
 
     if (defaultContent) {
       logger.debug("Setting to default content");

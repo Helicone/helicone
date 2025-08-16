@@ -25,7 +25,10 @@ export async function generateStream(
           // Pass through the raw chunk exactly as received
           await writer.write(encoder.encode(chunk));
         } catch (error) {
-          logger.error({ error, chunkLength: chunk.length }, "[generateStream] Error writing chunk");
+          logger.error(
+            { error, chunkLength: chunk.length },
+            "[generateStream] Error writing chunk",
+          );
           await writer.abort(error);
           throw error;
         }

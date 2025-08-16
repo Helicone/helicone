@@ -102,7 +102,10 @@ export const DeleteOrgModal = (props: DeleteOrgModalProps) => {
               );
 
               if (deleteOrgError) {
-                logger.error({ error: deleteOrgError }, "Error deleting organization");
+                logger.error(
+                  { error: deleteOrgError },
+                  "Error deleting organization",
+                );
                 setNotification("Error deleting organization", "error");
               } else {
                 orgContext?.refetchOrgs();

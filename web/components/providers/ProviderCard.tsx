@@ -332,7 +332,10 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
         });
       }
     } catch (error) {
-      logger.error({ error, providerName: provider.name, isEditMode }, "Error saving provider key");
+      logger.error(
+        { error, providerName: provider.name, isEditMode },
+        "Error saving provider key",
+      );
       setNotification("Failed to save provider key", "error");
     }
   };

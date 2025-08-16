@@ -60,7 +60,10 @@ export function useEvaluatorDetails(
       onSuccess();
     },
     onError: (error: any) => {
-      logger.error({ error, evaluatorId: evaluator.id }, "Error creating online evaluator");
+      logger.error(
+        { error, evaluatorId: evaluator.id },
+        "Error creating online evaluator",
+      );
       setNotification("Error creating online evaluator", "error");
     },
   });
@@ -91,7 +94,10 @@ export function useEvaluatorDetails(
       onlineEvaluators.refetch();
     },
     onError: (error: any) => {
-      logger.error({ error, evaluatorId: evaluator.id }, "Error deleting online evaluator");
+      logger.error(
+        { error, evaluatorId: evaluator.id },
+        "Error deleting online evaluator",
+      );
       setNotification("Error deleting online evaluator", "error");
     },
   });

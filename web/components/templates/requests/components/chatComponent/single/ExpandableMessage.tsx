@@ -40,7 +40,10 @@ export const ExpandableMessage: React.FC<ExpandableMessageProps> = ({
 
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        logger.debug({ scrollHeight: entry.target.scrollHeight }, "New scroll height");
+        logger.debug(
+          { scrollHeight: entry.target.scrollHeight },
+          "New scroll height",
+        );
         if (
           entry.target.scrollHeight > (parentRef.current?.clientHeight ?? 0)
         ) {

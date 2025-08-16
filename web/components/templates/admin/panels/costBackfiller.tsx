@@ -211,7 +211,10 @@ const CostBackfiller = () => {
       toast.success("Row counts retrieved successfully!");
     } catch (error) {
       toast.error("Failed to check row counts");
-      logger.error("Failed to check row counts", { error, selectedModelsCount: selectedModels.length });
+      logger.error("Failed to check row counts", {
+        error,
+        selectedModelsCount: selectedModels.length,
+      });
     }
   };
 
@@ -248,7 +251,10 @@ const CostBackfiller = () => {
       }
     } catch (error) {
       toast.error("Failed to generate query preview");
-      logger.error("Failed to generate query preview", { error, selectedModelsCount: selectedModels.length });
+      logger.error("Failed to generate query preview", {
+        error,
+        selectedModelsCount: selectedModels.length,
+      });
     }
   };
 
@@ -291,7 +297,10 @@ const CostBackfiller = () => {
       const errorMessage = `Failed to execute cost backfill: ${error instanceof Error ? error.message : "Unknown error"}`;
       setBackfillError(errorMessage);
       toast.error("Failed to execute cost backfill");
-      logger.error("Failed to execute cost backfill", { error, selectedModelsCount: selectedModels.length });
+      logger.error("Failed to execute cost backfill", {
+        error,
+        selectedModelsCount: selectedModels.length,
+      });
     }
   };
 

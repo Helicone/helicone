@@ -195,7 +195,9 @@ const ImageContent: React.FC<{
   if (message.content && message.mime_type?.startsWith("image/")) {
     imageSrc = `data:${message.mime_type};base64,${message.content}`;
   } else if (message.content && !message.mime_type) {
-    logger.warn("Image message missing mime_type, assuming image/png", { message });
+    logger.warn("Image message missing mime_type, assuming image/png", {
+      message,
+    });
     imageSrc = `data:image/png;base64,${message.content}`;
   }
 
