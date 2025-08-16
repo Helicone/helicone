@@ -7,8 +7,8 @@ export const endpoints = {
     providerModelId: "gpt-4",
     provider: "openai",
     pricing: {
-      prompt: 30,
-      completion: 60,
+      prompt: 0.00003,
+      completion: 0.00006,
     },
     contextLength: 8191,
     maxCompletionTokens: 4096,
