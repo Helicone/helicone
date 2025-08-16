@@ -1,17 +1,10 @@
-import {
-  Body,
-  Controller,
-  Post,
-  Request,
-  Route,
-  Security,
-  Tags,
-} from "tsoa";
+import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
 import { Result, err, ok } from "../../packages/common/result";
 import { type JawnAuthenticatedRequest } from "../../types/request";
 import { type OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
 import OpenAI from "openai";
 import { getHeliconeDefaultTempKey } from "../../lib/experiment/tempKeys/tempAPIKey";
+import { ENVIRONMENT } from "../../lib/clients/constant";
 
 @Route("v1/agent")
 @Tags("Agent")
@@ -36,8 +29,10 @@ export class AgentController extends Controller {
       // Extract and ignore useAIGateway and logRequest for agent endpoint
       // Done so its the exact interface as v1/playground/generate
       const { useAIGateway, logRequest, ...params } = bodyParams;
-      
-      const tempKey = await getHeliconeDefaultTempKey(request.authParams.organizationId);
+
+      const tempKey = await getHeliconeDefaultTempKey(
+        request.authParams.organizationId
+      );
 
       if (tempKey.error || !tempKey.data) {
         throw new Error(
@@ -53,9 +48,16 @@ export class AgentController extends Controller {
         >
       >(async (secretKey) => {
         const openai = new OpenAI({
-          baseURL: `http://localhost:8793/v1/`,
-          // baseURL: `https://ai-gateway.helicone.ai/v1/`,
+          // baseURL: `http://localhost:8793/v1/`,
+          baseURL: `https://ai-gateway.helicone.ai/v1/`,
           apiKey: secretKey,
+          defaultHeaders: {
+            "Helicone-Property-Environment": ENVIRONMENT,
+            "Helicone-Property-OrganizationId":
+              request.authParams.organizationId,
+            "Helicone-User-Id": request.authParams.userId,
+            "Helicone-Property-Is-Agent": "true",
+          },
         });
         const abortController = new AbortController();
 
@@ -174,4 +176,4 @@ export class AgentController extends Controller {
       return err("Failed to generate response");
     }
   }
-} 
+}
