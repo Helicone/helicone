@@ -44,7 +44,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
       timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsStreaming(true);
 
@@ -55,16 +55,18 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
       content: "",
       timestamp: new Date(),
     };
-    setMessages(prev => [...prev, assistantMessage]);
+    setMessages((prev) => [...prev, assistantMessage]);
 
     try {
       abortController.current = new AbortController();
 
-      const heliconeMessages: Message[] = messages.concat(userMessage).map(msg => ({
-        _type: "message" as const,
-        role: msg.role,
-        content: msg.content,
-      }));
+      const heliconeMessages: Message[] = messages
+        .concat(userMessage)
+        .map((msg) => ({
+          _type: "message" as const,
+          role: msg.role,
+          content: msg.content,
+        }));
 
       console.log("📤 Sending to agent endpoint:", {
         model: "gpt-4o-mini",
@@ -96,23 +98,21 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
               const parsedResponse = JSON.parse(result.fullContent);
               const content = parsedResponse.content || "";
               console.log("✅ Extracted content:", content);
-              
-              setMessages(prev => 
-                prev.map(msg => 
-                  msg.id === assistantMessageId 
-                    ? { ...msg, content }
-                    : msg
-                )
+
+              setMessages((prev) =>
+                prev.map((msg) =>
+                  msg.id === assistantMessageId ? { ...msg, content } : msg,
+                ),
               );
             } catch (error) {
               console.error("❌ Failed to parse response:", error);
               console.log("📄 Raw content:", result.fullContent);
-              setMessages(prev => 
-                prev.map(msg => 
-                  msg.id === assistantMessageId 
+              setMessages((prev) =>
+                prev.map((msg) =>
+                  msg.id === assistantMessageId
                     ? { ...msg, content: result.fullContent }
-                    : msg
-                )
+                    : msg,
+                ),
               );
             }
           },
@@ -123,12 +123,15 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
       console.log("✅ Stream processing completed");
     } catch (error) {
       console.error("❌ Chat error:", error);
-      setMessages(prev => 
-        prev.map(msg => 
-          msg.id === assistantMessageId 
-            ? { ...msg, content: "Sorry, something went wrong. Please try again." }
-            : msg
-        )
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === assistantMessageId
+            ? {
+                ...msg,
+                content: "Sorry, something went wrong. Please try again.",
+              }
+            : msg,
+        ),
       );
     } finally {
       setIsStreaming(false);
@@ -151,46 +154,46 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between p-4 border-b border-border">
+    <div className="flex h-full flex-col">
+      <div className="flex items-center justify-between border-b border-border p-4">
         <h2 className="text-lg font-semibold">Agent Chat</h2>
         <button
           onClick={onClose}
-          className="text-muted-foreground hover:text-foreground text-xl leading-none"
+          className="text-xl leading-none text-muted-foreground hover:text-foreground"
         >
           ×
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 space-y-4 overflow-y-auto p-4">
         {messages.length === 0 && (
-          <div className="text-center text-muted-foreground text-sm">
+          <div className="text-center text-sm text-muted-foreground">
             Start a conversation with the AI agent
           </div>
         )}
-        
+
         {messages.map((message) => (
           <div key={message.id} className="w-full">
             {message.role === "user" ? (
-              <div className="w-full bg-primary text-primary-foreground rounded-lg px-3 py-2 text-sm">
+              <div className="w-full rounded-lg bg-primary px-3 py-2 text-sm text-primary-foreground">
                 <div className="whitespace-pre-wrap">{message.content}</div>
                 {message.content && (
-                  <div className="text-xs opacity-70 mt-1">
-                    {message.timestamp.toLocaleTimeString([], { 
-                      hour: '2-digit', 
-                      minute: '2-digit' 
+                  <div className="mt-1 text-xs opacity-70">
+                    {message.timestamp.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
                     })}
                   </div>
                 )}
               </div>
             ) : (
-              <div className="w-full text-foreground text-sm">
+              <div className="w-full text-sm text-foreground">
                 <div className="whitespace-pre-wrap">{message.content}</div>
                 {message.content && (
-                  <div className="text-xs text-muted-foreground mt-1">
-                    {message.timestamp.toLocaleTimeString([], { 
-                      hour: '2-digit', 
-                      minute: '2-digit' 
+                  <div className="mt-1 text-xs text-muted-foreground">
+                    {message.timestamp.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
                     })}
                   </div>
                 )}
@@ -198,7 +201,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
             )}
           </div>
         ))}
-        
+
         {isStreaming && (
           <div className="flex justify-center">
             <Button
@@ -211,11 +214,11 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
             </Button>
           </div>
         )}
-        
+
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="p-4 border-t border-border">
+      <div className="border-t border-border p-4">
         <div className="flex gap-2">
           <Input
             value={input}
@@ -233,7 +236,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
             <Send className="h-4 w-4" />
           </Button>
         </div>
-        <div className="text-xs text-muted-foreground mt-1">
+        <div className="mt-1 text-xs text-muted-foreground">
           Press Enter to send • Cmd+I to toggle
         </div>
       </div>
@@ -241,4 +244,4 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
   );
 };
 
-export default AgentChat; 
+export default AgentChat;
