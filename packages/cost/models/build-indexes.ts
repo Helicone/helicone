@@ -1,27 +1,39 @@
-import { ProviderName } from "./providers";
-import { ModelProviderConfigId, EndpointId, ModelName } from "./registry";
+import { buildEndpointUrl, ProviderName } from "./providers";
+import { ModelProviderConfigId, EndpointId, ModelName } from "./registry-types";
 import type { Endpoint, ModelProviderConfig, EndpointConfig } from "./types";
 
 function mergeConfigs(
-  base: ModelProviderConfig,
-  endpointConfig: EndpointConfig
+  modelProviderConfig: ModelProviderConfig,
+  endpointConfig: EndpointConfig,
+  deploymentId: string
 ): Endpoint {
+  const baseUrl = buildEndpointUrl(modelProviderConfig, {
+    region: deploymentId,
+    location: deploymentId,
+    projectId: endpointConfig.projectId,
+    deploymentName: endpointConfig.deploymentName,
+    resourceName: endpointConfig.resourceName,
+    crossRegion: endpointConfig.crossRegion,
+  });
+
   return {
-    provider: base.provider,
-    providerModelId: endpointConfig.providerModelId ?? base.providerModelId,
-    pricing: endpointConfig.pricing ?? base.pricing,
-    contextLength: endpointConfig.contextLength ?? base.contextLength,
+    baseUrl: baseUrl.data ?? "",
+    provider: modelProviderConfig.provider,
+    providerModelId:
+      endpointConfig.providerModelId ?? modelProviderConfig.providerModelId,
+    pricing: endpointConfig.pricing ?? modelProviderConfig.pricing,
+    contextLength:
+      endpointConfig.contextLength ?? modelProviderConfig.contextLength,
     maxCompletionTokens:
-      endpointConfig.maxCompletionTokens ?? base.maxCompletionTokens,
-    ptbEnabled: endpointConfig.ptbEnabled ?? base.ptbEnabled,
-    version: endpointConfig.version ?? base.version,
-    supportedParameters: base.supportedParameters,
+      endpointConfig.maxCompletionTokens ??
+      modelProviderConfig.maxCompletionTokens,
+    ptbEnabled: endpointConfig.ptbEnabled ?? modelProviderConfig.ptbEnabled,
+    version: endpointConfig.version ?? modelProviderConfig.version,
+    supportedParameters: modelProviderConfig.supportedParameters,
   };
 }
 
-export function buildIndexes(
-  modelProviderConfigs: Record<string, ModelProviderConfig>
-): {
+export interface ModelIndexes {
   endpointConfigIdToEndpointConfig: Map<
     ModelProviderConfigId,
     ModelProviderConfig
@@ -32,7 +44,11 @@ export function buildIndexes(
   providerToModels: Map<ProviderName, Set<ModelName>>;
   modelToEndpointConfigs: Map<ModelName, ModelProviderConfig[]>;
   modelToProviders: Map<ModelName, Set<ProviderName>>;
-} {
+}
+
+export function buildIndexes(
+  modelProviderConfigs: Record<string, ModelProviderConfig>
+): ModelIndexes {
   const endpointIdToEndpoint: Map<EndpointId, Endpoint> = new Map();
   const endpointConfigIdToEndpointConfig: Map<
     ModelProviderConfigId,
@@ -79,7 +95,7 @@ export function buildIndexes(
       config.endpointConfigs
     )) {
       const endpointKey = `${configKey}:${deploymentId}` as EndpointId;
-      const endpoint = mergeConfigs(config, deploymentConfig);
+      const endpoint = mergeConfigs(config, deploymentConfig, deploymentId);
       endpointIdToEndpoint.set(endpointKey, endpoint);
 
       // Add to PTB index if enabled

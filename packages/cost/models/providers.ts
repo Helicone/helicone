@@ -67,21 +67,33 @@ export const providers = {
     ) => {
       const region = userConfig.region || "us-east-1";
       const modelId = endpointConfig.providerModelId;
-      return `https://bedrock-runtime.${region}.amazonaws.com/model/${modelId}/invoke`;
+
+      let finalModelId;
+      if (
+        userConfig.crossRegion &&
+        userConfig.region &&
+        endpointConfig.crossRegion
+      ) {
+        const regionPrefix = userConfig.region.split("-")[0];
+        finalModelId = `${regionPrefix}.${endpointConfig.providerModelId}`;
+      } else {
+        finalModelId = modelId;
+      }
+
+      return `https://bedrock-runtime.${region}.amazonaws.com/model/${finalModelId}/invoke`;
     },
     buildModelId: (
       endpointConfig: ModelProviderConfig,
       userConfig: UserEndpointConfig
     ) => {
       // Handle cross-region access
-      if (userConfig.crossRegion && userConfig.region) {
-        // Extract base model ID without region prefix
-        const baseModelId = endpointConfig.providerModelId.replace(
-          /^[a-z]{2}\./,
-          ""
-        );
+      if (
+        userConfig.crossRegion &&
+        userConfig.region &&
+        endpointConfig.crossRegion
+      ) {
         const regionPrefix = userConfig.region.split("-")[0];
-        return `${regionPrefix}.${baseModelId}`;
+        return `${regionPrefix}.${endpointConfig.providerModelId}`;
       }
       return endpointConfig.providerModelId;
     },
@@ -140,8 +152,8 @@ export const providers = {
 
       return { headers: signedHeaders };
     },
-    buildRequestBody: (context) => {
-      if (context.model.includes("claude-")) {
+    buildRequestBody: (endpoint, context) => {
+      if (endpoint.providerModelId.includes("claude-")) {
         const anthropicBody =
           context.bodyMapping === "OPENAI"
             ? context.toAnthropic(context.parsedBody)
@@ -185,8 +197,8 @@ export const providers = {
         },
       };
     },
-    buildRequestBody: (context) => {
-      if (context.model.includes("claude-")) {
+    buildRequestBody: (endpoint, context) => {
+      if (endpoint.providerModelId.includes("claude-")) {
         const anthropicBody =
           context.bodyMapping === "OPENAI"
             ? context.toAnthropic(context.parsedBody)
@@ -493,13 +505,13 @@ export async function buildRequestBody(
     return ok(
       JSON.stringify({
         ...context.parsedBody,
-        model: context.model,
+        model: endpoint.providerModelId,
       })
     );
   }
 
   try {
-    const result = await provider.buildRequestBody(context);
+    const result = await provider.buildRequestBody(endpoint, context);
     return ok(result);
   } catch (error) {
     return err(

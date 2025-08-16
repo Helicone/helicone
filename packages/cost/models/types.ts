@@ -110,9 +110,10 @@ export interface ModelProviderConfig extends BaseConfig {
   provider: ProviderName;
   supportedParameters: StandardParameter[];
   endpointConfigs: Record<string, EndpointConfig>;
+  crossRegion?: boolean;
 }
 
-export interface EndpointConfig {
+export interface EndpointConfig extends UserEndpointConfig {
   providerModelId?: string;
   pricing?: ModelPricing;
   contextLength?: number;
@@ -122,6 +123,7 @@ export interface EndpointConfig {
 }
 
 export interface Endpoint extends BaseConfig {
+  baseUrl: string;
   provider: ProviderName;
   providerModelId: string;
   supportedParameters: StandardParameter[];
@@ -129,6 +131,7 @@ export interface Endpoint extends BaseConfig {
 
 export interface UserEndpointConfig {
   region?: string;
+  location?: string;
   projectId?: string;
   deploymentName?: string;
   resourceName?: string;
@@ -152,8 +155,6 @@ export interface AuthResult {
 
 export interface RequestBodyContext {
   parsedBody: any;
-  model: string;
-  provider: ProviderName;
   bodyMapping: "OPENAI" | "NO_MAPPING";
   toAnthropic: (body: any) => any;
 }
@@ -171,7 +172,10 @@ export interface ProviderConfig {
   ) => string;
   requiredConfig?: Array<keyof UserEndpointConfig>;
   authenticate?: (context: AuthContext) => Promise<AuthResult> | AuthResult;
-  buildRequestBody?: (context: RequestBodyContext) => Promise<string> | string;
+  buildRequestBody?: (
+    endpoint: Endpoint,
+    context: RequestBodyContext
+  ) => Promise<string> | string;
   pricingPages?: string[];
   modelPages?: string[];
 }

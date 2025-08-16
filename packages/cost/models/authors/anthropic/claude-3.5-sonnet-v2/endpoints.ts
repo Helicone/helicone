@@ -32,6 +32,36 @@ export const endpoints = {
       "*": {},
     },
   },
+  // "claude-3.5-sonnet-v2:bedrock": {
+  //   providerModelId: "anthropic.claude-3-5-sonnet-20241022-v2:0",
+  //   provider: "bedrock",
+  //   crossRegion: true,
+  //   pricing: {
+  //     prompt: 3,
+  //     completion: 15,
+  //     cacheRead: 0.3,
+  //     cacheWrite: {
+  //       "5m": 3.75,
+  //       "1h": 6,
+  //       default: 3.75,
+  //     },
+  //   },
+  //   contextLength: 200000,
+  //   maxCompletionTokens: 8192,
+  //   supportedParameters: [
+  //     "tools",
+  //     "tool_choice",
+  //     "max_tokens",
+  //     "temperature",
+  //     "top_p",
+  //     "top_k",
+  //     "stop",
+  //   ],
+  //   ptbEnabled: true,
+  //   endpointConfigs: {
+  //     "*": {},
+  //   },
+  // },
 
   // "claude-3.5-sonnet-v2:bedrock": {
   //   modelId: "claude-3.5-sonnet-v2",
