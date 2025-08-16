@@ -27,7 +27,7 @@ type Nullable<T> = T | null;
 // This neatly formats and holds all of the state that a request can come into Helicone
 export interface HeliconeProxyRequest {
   provider: Provider;
-  tokenCalcUrl: Env["TOKEN_COUNT_URL"];
+  tokenCalcUrl: string;
   rateLimitOptions: Nullable<RateLimitOptions>;
   isRateLimitedKey: boolean;
   retryOptions: IHeliconeHeaders["retryHeaders"];
