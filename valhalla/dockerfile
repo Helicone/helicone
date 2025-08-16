@@ -147,6 +147,8 @@ RUN echo "Applying additional medium-priority security patches..." && \
     # Add testing repo for latest packages
     echo "deb https://deb.debian.org/debian testing main" > /etc/apt/sources.list.d/medium-security.list && \
     apt-get update && \
+    # Remove conflicting libssl3 first, then install new versions
+    apt-get remove -y libssl3 || true && \
     # Update system packages to fix medium-priority CVEs
     apt-get install -y -t testing \
         krb5-user \
@@ -156,7 +158,7 @@ RUN echo "Applying additional medium-priority security patches..." && \
         libssh-4 \
         libssh-dev \
         openssl \
-        libssl3 \
+        libssl3t64 \
         libssl-dev \
         libopenjp2-7 \
         libopenjp2-7-dev && \
@@ -198,11 +200,11 @@ RUN . venv/bin/activate && \
     pip3 install --upgrade \
         "Jinja2>=3.1.6" \
         "setuptools>=78.1.1" \
-        "requests>=2.33.0" \
-        "urllib3>=2.5.0" \
-        "starlette>=0.47.2" \
-        "h11>=0.16.0" \
-        "aiohttp>=3.12.14" && \
+        "requests>=2.32.4" \
+        "urllib3>=2.0.0" \
+        "starlette>=0.27.0" \
+        "h11>=0.14.0" \
+        "aiohttp>=3.9.0" && \
     echo "Python package vulnerabilities patched"
 
 
