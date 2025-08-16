@@ -165,6 +165,7 @@
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "@typescript-eslint/typescript-estree": "^6.21.0",
+    "@tanstack/react-query-devtools": "5.71.10",
     "autoprefixer": "^10.4.16",
     "cross-env": "^7.0.3",
     "dotenv-cli": "^8.0.0",
