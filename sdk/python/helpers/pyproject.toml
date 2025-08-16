@@ -8,8 +8,9 @@ homepage = "https://www.helicone.ai"
 repository = "https://github.com/Helicone/helicone/tree/main/sdk/python/helpers"
 
 [tool.poetry.dependencies]
-python = "^3.8"
-requests = "^2.32.3"
+python = "^3.9"
+requests = "^2.32.4"
+urllib3 = "^2.5.0"
 httpx = "^0.28.0"
 h11 = ">=0.16.0"
 
