@@ -211,10 +211,13 @@ const CostBackfiller = () => {
       toast.success("Row counts retrieved successfully!");
     } catch (error) {
       toast.error("Failed to check row counts");
-      logger.error({
-        error,
-        selectedModelsCount: selectedModels.length,
-      }, "Failed to check row counts");
+      logger.error(
+        {
+          error,
+          selectedModelsCount: selectedModels.length,
+        },
+        "Failed to check row counts",
+      );
     }
   };
 
