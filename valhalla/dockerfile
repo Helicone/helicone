@@ -223,16 +223,7 @@ RUN find /usr/src/app/valhalla/jawn -name ".env.*" -exec rm {} \;
 ENV PORT=8585
 
 RUN yarn
-# Note: Node.js package vulnerabilities are addressed in package.json files
-# - form-data@^4.0.4 (CVE-2025-7783) 
-# - express-openapi-validator@^5.5.8 (multer DoS fix)
-# - cross-spawn@^7.0.6 (CVE-2024-21538)
-# - brace-expansion@^2.1.0 (CVE-2025-5889)
-# - tsup@^8.6.0 (CVE-2024-53384)
-# Additional vulnerabilities fixed in web/package.json:
-# - next@^15.2.4 (CVE-2025-30218, CVE-2025-48068)
-# - better-auth@^1.2.10 (CVE-2025-53535)
-# - prismjs@^1.30.0 (CVE-2024-53382)
+
 RUN yarn build
 COPY ./valhalla/prompt_security/main.py /usr/src/app/valhalla/prompt_security/main.py
 COPY ./valhalla/prompt_security/run_service.sh /usr/src/app/valhalla/prompt_security/run_service.sh
