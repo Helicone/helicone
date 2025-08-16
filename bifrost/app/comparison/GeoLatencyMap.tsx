@@ -2,13 +2,8 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { components } from "@/lib/clients/jawnTypes/public";
-import {
-  ComposableMap,
-  Geographies,
-  Geography,
-  Graticule,
-  Sphere,
-} from "react-simple-maps";
+import dynamic from "next/dynamic";
+import type { ComponentType } from "react";
 import { scaleLinear } from "d3-scale";
 import ISO31661 from "iso-3166-1";
 import { useState } from "react";
@@ -21,6 +16,43 @@ import { formatLatency, formatPercentage } from "../utils/formattingUtils";
 import { MetricType } from "./GeographicMetricSection";
 
 const geoUrl = "/countries-50m.json";
+
+// Load react-simple-maps components client-side to avoid type/runtime issues
+const ComposableMap = dynamic(
+  () =>
+    import("react-simple-maps").then(
+      (m) => m.ComposableMap as unknown as ComponentType<any>
+    ),
+  { ssr: false }
+);
+const Geographies = dynamic(
+  () =>
+    import("react-simple-maps").then(
+      (m) => m.Geographies as unknown as ComponentType<any>
+    ),
+  { ssr: false }
+);
+const Geography = dynamic(
+  () =>
+    import("react-simple-maps").then(
+      (m) => m.Geography as unknown as ComponentType<any>
+    ),
+  { ssr: false }
+);
+const Graticule = dynamic(
+  () =>
+    import("react-simple-maps").then(
+      (m) => m.Graticule as unknown as ComponentType<any>
+    ),
+  { ssr: false }
+);
+const Sphere = dynamic(
+  () =>
+    import("react-simple-maps").then(
+      (m) => m.Sphere as unknown as ComponentType<any>
+    ),
+  { ssr: false }
+);
 
 interface GeoMetricMapProps {
   model: components["schemas"]["Model"];
@@ -143,8 +175,8 @@ export const GeoMetricMap = ({
             {data.length > 0 && (
               /* @ts-expect-error - react-simple-maps types are not compatible with React 18 */
               <Geographies geography={geoUrl}>
-                {({ geographies }) =>
-                  geographies.map((geo) => {
+                {({ geographies }: { geographies: any[] }) =>
+                  geographies.map((geo: any) => {
                     const country = data.find((d: any) => d.id === geo.id);
                     return (
                       /* @ts-expect-error - react-simple-maps types are not compatible with React 18 */
