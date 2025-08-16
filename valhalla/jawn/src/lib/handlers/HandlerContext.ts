@@ -50,6 +50,7 @@ export type Log = {
     cacheBucketMaxSize?: number;
     cacheControl?: string;
     cacheReferenceId?: string;
+    requestReferrer?: string;
   };
   response: {
     id: string;
@@ -196,10 +197,10 @@ export const toHeliconeRequest = (context: HandlerContext): HeliconeRequest => {
 
     /// NOTE: Unfortunately our codebase is running two prompts systems in parallel.
     // This used to track the legacy feature, but its now the new one.
-    // It does not matter: 
+    // It does not matter:
     // - this function is used to pull request and response bodies (no overlap with prompt IDs)
     // - evals, which is deprecated and does not seem to access this field.
-    // When the legacy prompts and evals is deprecated, we should strongly consider refactoring and/or deleting this function. 
+    // When the legacy prompts and evals is deprecated, we should strongly consider refactoring and/or deleting this function.
     prompt_id: context.message.heliconeMeta.promptId ?? null, // TRACKS LEGACY PROMPTS ID
     prompt_version: context.message.heliconeMeta.promptVersionId ?? null, // TRACKS LEGACY PROMPT VERSION ID
     llmSchema: null,
@@ -213,5 +214,6 @@ export const toHeliconeRequest = (context: HandlerContext): HeliconeRequest => {
     model: context.processedLog.model ?? "",
     cache_reference_id: context.message.log.request.cacheReferenceId ?? null,
     cache_enabled: context.message.log.request.cacheEnabled ?? false,
+    request_referrer: context.message.log.request.requestReferrer ?? null,
   };
 };

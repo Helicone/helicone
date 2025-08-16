@@ -54,6 +54,7 @@ export type Log = {
     cacheBucketMaxSize?: number;
     cacheControl?: string;
     cacheReferenceId?: string;
+    requestReferrer?: string;
   };
   response: {
     id: string;

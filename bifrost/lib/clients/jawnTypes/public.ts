@@ -829,8 +829,6 @@ export interface components {
       cached?: components["schemas"]["Partial_BooleanOperators_"];
       assets?: components["schemas"]["Partial_TextOperators_"];
       "helicone-score-feedback"?: components["schemas"]["Partial_BooleanOperators_"];
-      gateway_router_id?: components["schemas"]["Partial_TextOperators_"];
-      gateway_deployment_target?: components["schemas"]["Partial_TextOperators_"];
       prompt_id?: components["schemas"]["Partial_TextOperators_"];
       prompt_version?: components["schemas"]["Partial_TextOperators_"];
     };
@@ -1617,8 +1615,7 @@ export interface components {
       cache_reference_id: string | null;
       cache_enabled: boolean;
       updated_at?: string;
-      gateway_router_id?: string | null;
-      gateway_deployment_target?: string | null;
+      request_referrer?: string | null;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];

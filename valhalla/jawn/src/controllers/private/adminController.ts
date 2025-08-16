@@ -21,7 +21,11 @@ import { Setting } from "../../utils/settings";
 import type { SettingName } from "../../utils/settings";
 import Stripe from "stripe";
 import { AdminManager } from "../../managers/admin/AdminManager";
-import { ModelWithProvider, clickhouseModelFilter, clickhousePriceCalcNonAggregated } from "@helicone-package/cost";
+import {
+  ModelWithProvider,
+  clickhouseModelFilter,
+  clickhousePriceCalcNonAggregated,
+} from "@helicone-package/cost";
 
 import { err, ok, Result } from "../../packages/common/result";
 
@@ -1340,7 +1344,7 @@ export class AdminController extends Controller {
     return result.data;
   }
 
-  @Post('/backfill-costs-preview')
+  @Post("/backfill-costs-preview")
   public async backfillCostsPreview(
     @Request() request: JawnAuthenticatedRequest,
     @Body()
@@ -1366,10 +1370,10 @@ export class AdminController extends Controller {
       response_created_at <= ${body.toDate ? `toDateTime64('${body.toDate}', 3)` : "now()"}
       ${body.fromDate ? `AND response_created_at >= toDateTime64('${body.fromDate}', 3)` : ""}
       AND ${clickhouseModelFilter(body.models)}
-      AND ${body.hasCosts ? 'cost > 0' : 'cost = 0'} AND (prompt_tokens > 0 OR completion_tokens > 0)
+      AND ${body.hasCosts ? "cost > 0" : "cost = 0"} AND (prompt_tokens > 0 OR completion_tokens > 0)
     )
     GROUP BY model, provider
-    ORDER BY count DESC`
+    ORDER BY count DESC`;
 
     const result = await clickhouseDb.dbQuery<{
       model: string;
@@ -1382,12 +1386,15 @@ export class AdminController extends Controller {
     }
 
     const results = result.data || [];
-    const totalCount = results.reduce((sum, row) => sum + parseInt(row.count), 0);
+    const totalCount = results.reduce(
+      (sum, row) => sum + parseInt(row.count),
+      0
+    );
 
-    return { 
+    return {
       query,
       results,
-      totalCount
+      totalCount,
     };
   }
 
@@ -1408,9 +1415,10 @@ export class AdminController extends Controller {
       throw new Error(result.error);
     }
 
-    return { 
+    return {
       query,
-      message: "Deduplication completed successfully. This operation may take some time to fully process."
+      message:
+        "Deduplication completed successfully. This operation may take some time to fully process.",
     };
   }
 
@@ -1475,7 +1483,7 @@ export class AdminController extends Controller {
       ${body.fromDate ? `AND response_created_at >= toDateTime64('${body.fromDate}', 3)` : ""}
       AND ${clickhouseModelFilter(body.models)}
     )
-    `
+    `;
 
     if (!body.confirmed) {
       return { query };
