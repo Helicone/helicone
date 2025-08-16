@@ -3,26 +3,26 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { generateStream } from "@/lib/api/llm/generate-stream";
 import { processStream } from "@/lib/api/llm/process-stream";
-import { Message } from "@helicone-package/llm-mapper/types";
+import { OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
 import { Send } from "lucide-react";
+import { useHeliconeAgent } from "./HeliconeAgentContext";
+import MessageRenderer from "./MessageRenderer";
 
-interface ChatMessage {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-  timestamp: Date;
-}
+type Message = NonNullable<OpenAIChatRequest["messages"]>[0];
+type Tool = NonNullable<OpenAIChatRequest["tools"]>[0];
+type ToolCall = NonNullable<Message["tool_calls"]>[0];
 
 interface AgentChatProps {
   onClose: () => void;
 }
 
 const AgentChat = ({ onClose }: AgentChatProps) => {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const abortController = useRef<AbortController | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { tools, executeTool } = useHeliconeAgent();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -32,107 +32,97 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
     scrollToBottom();
   }, [messages]);
 
+  const handleToolCall = async (toolCall: ToolCall) => {
+    const result = await executeTool(toolCall.function.name, JSON.parse(toolCall.function.arguments));
+    return result;
+  }
+
   const sendMessage = async () => {
     if (!input.trim() || isStreaming) return;
 
-    console.log("🚀 Sending message:", input.trim());
-
-    const userMessage: ChatMessage = {
-      id: Date.now().toString(),
+    const userMessage: Message = {
       role: "user",
       content: input.trim(),
-      timestamp: new Date(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    let updatedMessages = messages;
+    updatedMessages = [...updatedMessages, userMessage];
+    
+    setMessages(updatedMessages);
     setInput("");
-    setIsStreaming(true);
-
-    const assistantMessageId = (Date.now() + 1).toString();
-    const assistantMessage: ChatMessage = {
-      id: assistantMessageId,
-      role: "assistant",
-      content: "",
-      timestamp: new Date(),
-    };
-    setMessages((prev) => [...prev, assistantMessage]);
 
     try {
       abortController.current = new AbortController();
 
-      const heliconeMessages: Message[] = messages
-        .concat(userMessage)
-        .map((msg) => ({
-          _type: "message" as const,
-          role: msg.role,
-          content: msg.content,
-        }));
+      let shouldContinue = true;
+      while (shouldContinue) {
+        setIsStreaming(true);
 
-      console.log("📤 Sending to agent endpoint:", {
-        model: "gpt-4o-mini",
-        messages: heliconeMessages,
-        endpoint: "agent",
-      });
+        const assistantMessageIdx = updatedMessages.length;
+        const assistantMessage: Message = {
+          role: "assistant",
+          content: "",
+        };
+        updatedMessages = [...updatedMessages, assistantMessage];
+        setMessages(updatedMessages);
 
-      const stream = await generateStream({
-        provider: "OPENAI",
-        model: "gpt-4o-mini",
-        messages: heliconeMessages,
-        temperature: 0.7,
-        maxTokens: 1000,
-        endpoint: "agent",
-        signal: abortController.current.signal,
-      });
+        const request: OpenAIChatRequest = {
+          model: "gpt-4o-mini",
+          messages: updatedMessages,
+          temperature: 0.7,
+          max_tokens: 1000,
+          tools: tools.map(({ handler, ...tool }) => tool),
+        };
 
-      console.log("📡 Stream received, processing...");
+        const stream = await generateStream({
+          ...request,
+          endpoint: "agent",
+          signal: abortController.current.signal,
+        } as any);
 
-      await processStream(
-        stream,
-        {
-          initialState: {
-            fullContent: "",
-          },
-          onUpdate: (result) => {
-            console.log("📨 Stream update:", result);
-            try {
-              const parsedResponse = JSON.parse(result.fullContent);
-              const content = parsedResponse.content || "";
-              console.log("✅ Extracted content:", content);
-
-              setMessages((prev) =>
-                prev.map((msg) =>
-                  msg.id === assistantMessageId ? { ...msg, content } : msg,
-                ),
-              );
-            } catch (error) {
-              console.error("❌ Failed to parse response:", error);
-              console.log("📄 Raw content:", result.fullContent);
-              setMessages((prev) =>
-                prev.map((msg) =>
-                  msg.id === assistantMessageId
-                    ? { ...msg, content: result.fullContent }
+        const result = await processStream(
+          stream,
+          {
+            initialState: {
+              fullContent: "",
+            },
+            onUpdate: async (result) => {
+              try {
+                const parsedResponse = JSON.parse(result.fullContent);
+                updatedMessages = updatedMessages.map((msg, idx) =>
+                  idx === assistantMessageIdx
+                    ? parsedResponse
                     : msg,
-                ),
-              );
-            }
-          },
-        },
-        abortController.current.signal,
-      );
-
-      console.log("✅ Stream processing completed");
-    } catch (error) {
-      console.error("❌ Chat error:", error);
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === assistantMessageId
-            ? {
-                ...msg,
-                content: "Sorry, something went wrong. Please try again.",
+                );
+                setMessages(updatedMessages);
+              } catch (error) {
+                console.error("Failed to parse response:", error);
               }
-            : msg,
-        ),
-      );
+            },
+          },
+          abortController.current.signal,
+        );
+
+        const parsedResponse = JSON.parse(result.fullContent) as Message;
+        if (parsedResponse.tool_calls) {
+          for (const toolCall of parsedResponse.tool_calls) {
+            const toolResult = await handleToolCall(toolCall);
+            if (toolResult.success) {
+              const toolResultMessage: Message = {
+                role: "tool",
+                tool_call_id: toolCall.id,
+                content: toolResult.message,
+              };
+              updatedMessages = [...updatedMessages, toolResultMessage];
+              setMessages(updatedMessages);
+            }
+          }
+        } else {
+          shouldContinue = false;
+        }
+      }
+    } catch (error) {
+      console.error("Chat error:", error);
     } finally {
       setIsStreaming(false);
       abortController.current = null;
@@ -169,37 +159,16 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
         {messages.length === 0 && (
           <div className="text-center text-sm text-muted-foreground">
             Start a conversation with the AI agent
-          </div>
-        )}
-
-        {messages.map((message) => (
-          <div key={message.id} className="w-full">
-            {message.role === "user" ? (
-              <div className="w-full rounded-lg bg-primary px-3 py-2 text-sm text-primary-foreground">
-                <div className="whitespace-pre-wrap">{message.content}</div>
-                {message.content && (
-                  <div className="mt-1 text-xs opacity-70">
-                    {message.timestamp.toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="w-full text-sm text-foreground">
-                <div className="whitespace-pre-wrap">{message.content}</div>
-                {message.content && (
-                  <div className="mt-1 text-xs text-muted-foreground">
-                    {message.timestamp.toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </div>
-                )}
+            {tools.length > 0 && (
+              <div className="mt-2">
+                <div className="text-xs">Available tools: {tools.map(t => t.function.name).join(", ")}</div>
               </div>
             )}
           </div>
+        )}
+
+        {messages.map((message, index) => (
+          <MessageRenderer key={index} message={message} />
         ))}
 
         {isStreaming && (
