@@ -17,7 +17,7 @@ export function oaiStream2antStream(
         .pipeThrough(new TextDecoderStream())
         .pipeThrough(
           new TransformStream({
-            transform(chunk) {
+            transform(chunk: Uint8Array, controller: TransformStreamDefaultController<Uint8Array>) {
               currentMessage += chunk;
               const messages = currentMessage.split("\n\n");
 
@@ -61,7 +61,7 @@ export function oaiStream2antStream(
   })
     .pipeThrough(
       new TransformStream({
-        transform(chunk, controller) {
+        transform(chunk: Uint8Array, controller: TransformStreamDefaultController<Uint8Array>) {
           controller.enqueue(chunk);
         },
       })

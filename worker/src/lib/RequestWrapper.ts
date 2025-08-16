@@ -333,7 +333,7 @@ export class RequestWrapper {
   }
 
   getBody(): ReadableStream<Uint8Array> | null {
-    return this.request.body;
+    return this.request.body || null;
   }
 
   getHeaders(): Headers {
@@ -590,6 +590,27 @@ export class RequestWrapper {
       async () =>
         await getProviderKeyFromPortalKey(authKey, env, supabaseClient)
     );
+  }
+
+  private getHeliconeApiKey(): Result<string, string> {
+    const authHeader = this.getHeader("authorization");
+    if (authHeader) {
+      const parts = authHeader.split(" ");
+      if (parts.length === 2) {
+        const token = parts[1];
+        const isHeliconeKey = token
+          .split(".")
+          .some(
+            // Add explicit type annotation for the part parameter
+            (part: string) =>
+              part.startsWith("sk-helicone") || part.startsWith("pk-helicone")
+          );
+        if (isHeliconeKey) {
+          return ok(token);
+        }
+      }
+    }
+    return err("No Helicone API key found");
   }
 
   /**

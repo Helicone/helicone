@@ -52,7 +52,10 @@ export class ReadableInterceptor {
     const reader = stream.getReader();
 
     const readable = new ReadableStream({
-      async pull(controller) {
+      async start() {
+        // ... existing code ...
+      },
+      async pull(controller: ReadableStreamDefaultController<Uint8Array>) {
         try {
           const { done, value } = await reader.read();
           if (done) {
@@ -70,8 +73,7 @@ export class ReadableInterceptor {
           controller.error(error);
         }
       },
-
-      cancel(reason) {
+      cancel(reason: any) {
         console.error("Stream was canceled:", reason);
         stream.cancel(reason);
         onDone("cancel");

@@ -128,7 +128,7 @@ export async function handleProxyRequest(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let buffer: any = null;
     const transformer = new TransformStream({
-      transform(chunk, controller) {
+      transform(chunk: Uint8Array, controller: TransformStreamDefaultController<Uint8Array>) {
         if (chunk.length < 50) {
           buffer = chunk;
         } else {
