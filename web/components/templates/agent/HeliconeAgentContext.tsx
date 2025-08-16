@@ -39,8 +39,6 @@ const getToolsForRoute = (pathname: string): HeliconeAgentTool[] => {
 
 // TODO: utils to get contexts
 
-
-
 export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
