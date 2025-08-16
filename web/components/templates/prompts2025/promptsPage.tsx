@@ -274,7 +274,10 @@ const PromptsPage = (props: PromptsPageProps) => {
   useEffect(() => {
     setToolHandler("search-prompts", async (args: { query: string }) => {
       setSearch(args.query);
-      return { success: true, message: `Searched for prompts: "${args.query}"` };
+      return {
+        success: true,
+        message: `Searched for prompts: "${args.query}"`,
+      };
     });
   }, []);
 

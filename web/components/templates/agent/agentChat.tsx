@@ -33,9 +33,12 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
   }, [messages]);
 
   const handleToolCall = async (toolCall: ToolCall) => {
-    const result = await executeTool(toolCall.function.name, JSON.parse(toolCall.function.arguments));
+    const result = await executeTool(
+      toolCall.function.name,
+      JSON.parse(toolCall.function.arguments),
+    );
     return result;
-  }
+  };
 
   const sendMessage = async () => {
     if (!input.trim() || isStreaming) return;
@@ -47,7 +50,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
 
     let updatedMessages = messages;
     updatedMessages = [...updatedMessages, userMessage];
-    
+
     setMessages(updatedMessages);
     setInput("");
 
@@ -90,9 +93,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
               try {
                 const parsedResponse = JSON.parse(result.fullContent);
                 updatedMessages = updatedMessages.map((msg, idx) =>
-                  idx === assistantMessageIdx
-                    ? parsedResponse
-                    : msg,
+                  idx === assistantMessageIdx ? parsedResponse : msg,
                 );
                 setMessages(updatedMessages);
               } catch (error) {
@@ -161,7 +162,10 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
             Start a conversation with the AI agent
             {tools.length > 0 && (
               <div className="mt-2">
-                <div className="text-xs">Available tools: {tools.map(t => t.function.name).join(", ")}</div>
+                <div className="text-xs">
+                  Available tools:{" "}
+                  {tools.map((t) => t.function.name).join(", ")}
+                </div>
               </div>
             )}
           </div>
