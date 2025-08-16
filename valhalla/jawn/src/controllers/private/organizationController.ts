@@ -239,8 +239,9 @@ export class OrganizationController extends Controller {
       return err(`Error checking existing members: ${members.error}`);
     }
 
+    // Add null check for email before calling toLowerCase()
     const isExistingMember = members.data?.some(
-      (member) => member.email.toLowerCase() === requestBody.email.toLowerCase()
+      (member) => member.email?.toLowerCase() === requestBody.email.toLowerCase()
     );
 
     if (isExistingMember) {

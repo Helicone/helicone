@@ -415,7 +415,7 @@ export class OrganizationManager extends BaseManager {
     }
     if (filterHeliconeEmails && ENVIRONMENT === "production") {
       return ok(
-        members.filter((member) => !member.email.endsWith("@helicone.ai"))
+        members.filter((member) => member.email && !member.email.endsWith("@helicone.ai"))
           .length
       );
     } else {
