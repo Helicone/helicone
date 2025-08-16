@@ -53,7 +53,8 @@ export class AgentController extends Controller {
         >
       >(async (secretKey) => {
         const openai = new OpenAI({
-          baseURL: `https://ai-gateway.helicone.ai/v1/`,
+          baseURL: `http://localhost:8793/v1/`,
+          // baseURL: `https://ai-gateway.helicone.ai/v1/`,
           apiKey: secretKey,
         });
         const abortController = new AbortController();
@@ -158,15 +159,6 @@ export class AgentController extends Controller {
 
             if (error instanceof OpenAI.APIError) {
               this.setStatus(400);
-              if (error.error.metadata?.raw) {
-                try {
-                  const raw = JSON.parse(error.error.metadata?.raw || "{}");
-                  if (raw.error?.message) {
-                    return err(raw.error?.message);
-                  }
-                } catch (err) {}
-              }
-
               return err(error.error.message);
             }
             this.setStatus(500);

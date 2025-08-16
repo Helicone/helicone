@@ -32,6 +32,7 @@ import { SimpleTable } from "@/components/shared/table/simpleTable";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import { getInitialColumns } from "./initialColumns";
 import TagsFilter from "./TagsFilter";
+import { useHeliconeAgent } from "@/components/templates/agent/HeliconeAgentContext";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -54,6 +55,7 @@ const PromptsPage = (props: PromptsPageProps) => {
   const { setNotification } = useNotification();
   const drawerRef = useRef<any>(null);
   const [drawerSize, setDrawerSize] = useLocalStorage("prompt-drawer-size", 40);
+  const { setToolHandler } = useHeliconeAgent();
 
   const { data: tags = [], isLoading: isLoadingTags } = useGetPromptTags();
   const { data, isLoading } = useGetPromptsWithVersions(
@@ -268,6 +270,13 @@ const PromptsPage = (props: PromptsPageProps) => {
   };
 
   const columns = getInitialColumns(handlePlaygroundActionClick);
+
+  useEffect(() => {
+    setToolHandler("search-prompts", async (args: { query: string }) => {
+      setSearch(args.query);
+      return { success: true, message: `Searched for prompts: "${args.query}"` };
+    });
+  }, []);
 
   return (
     <main className="flex h-screen w-full animate-fade-in flex-col">

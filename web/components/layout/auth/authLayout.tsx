@@ -16,6 +16,7 @@ import MainContent, { BannerType } from "./MainContent";
 import Sidebar from "./Sidebar";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 import AgentChat from "@/components/templates/agent/agentChat";
+import { HeliconeAgentProvider } from "@/components/templates/agent/HeliconeAgentContext";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -122,58 +123,60 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const sidebarRef = useRef<HTMLDivElement>(null);
 
   return (
-    <MetaData title={currentPage}>
-      <div>
-        <DemoModal />
+    <HeliconeAgentProvider>
+      <MetaData title={currentPage}>
+        <div>
+          <DemoModal />
 
-        <Row className="flex-col md:flex-row">
-          <div className="w-full md:w-min">
-            <Sidebar
-              sidebarRef={sidebarRef}
-              changelog={
-                changelog
-                  ? changelog.slice(0, 2).map((item) => ({
-                      title: item.title || "",
-                      image: item.enclosure,
-                      description: item.description || "",
-                      link: item.link || "",
-                      content: item.content || "",
-                      "content:encoded": item["content:encoded"] || "",
-                      "content:encodedSnippet":
-                        item["content:encodedSnippet"] || "",
-                      contentSnippet: item.contentSnippet || "",
-                      isoDate: item.isoDate || "",
-                      pubDate: item.pubDate || "",
-                    }))
-                  : []
-              }
-              setOpen={setOpen}
-            />
-          </div>
-          <div
-            className={`relative max-w-full flex-grow overflow-hidden transition-all duration-300 ${
-              chatWindowOpen ? "mr-96" : ""
-            }`}
-            key={orgContext?.currentOrg?.id}
-          >
-            <MainContent banner={banner} pathname={pathname}>
-              <ErrorBoundary>{children}</ErrorBoundary>
-            </MainContent>
-          </div>
+          <Row className="flex-col md:flex-row">
+            <div className="w-full md:w-min">
+              <Sidebar
+                sidebarRef={sidebarRef}
+                changelog={
+                  changelog
+                    ? changelog.slice(0, 2).map((item) => ({
+                        title: item.title || "",
+                        image: item.enclosure,
+                        description: item.description || "",
+                        link: item.link || "",
+                        content: item.content || "",
+                        "content:encoded": item["content:encoded"] || "",
+                        "content:encodedSnippet":
+                          item["content:encodedSnippet"] || "",
+                        contentSnippet: item.contentSnippet || "",
+                        isoDate: item.isoDate || "",
+                        pubDate: item.pubDate || "",
+                      }))
+                    : []
+                }
+                setOpen={setOpen}
+              />
+            </div>
+            <div
+              className={`relative max-w-full flex-grow overflow-hidden transition-all duration-300 ${
+                chatWindowOpen ? "mr-96" : ""
+              }`}
+              key={orgContext?.currentOrg?.id}
+            >
+              <MainContent banner={banner} pathname={pathname}>
+                <ErrorBoundary>{children}</ErrorBoundary>
+              </MainContent>
+            </div>
 
-          <div
-            className={`fixed right-0 top-0 z-50 h-full w-96 border-l border-border bg-background transition-transform duration-300 ease-in-out ${
-              chatWindowOpen ? "translate-x-0" : "translate-x-full"
-            }`}
-          >
-            <AgentChat onClose={() => setChatWindowOpen(false)} />
-          </div>
-        </Row>
-      </div>
+            <div
+              className={`fixed right-0 top-0 z-50 h-full w-96 border-l border-border bg-background transition-transform duration-300 ease-in-out ${
+                chatWindowOpen ? "translate-x-0" : "translate-x-full"
+              }`}
+            >
+              <AgentChat onClose={() => setChatWindowOpen(false)} />
+            </div>
+          </Row>
+        </div>
 
-      <UpgradeProModal open={open} setOpen={setOpen} />
-      {/* <AcceptTermsModal /> */}
-    </MetaData>
+        <UpgradeProModal open={open} setOpen={setOpen} />
+        {/* <AcceptTermsModal /> */}
+      </MetaData>
+    </HeliconeAgentProvider>
   );
 };
 
