@@ -46,7 +46,11 @@ export class HeliconeAsyncLogger {
 
   constructor(opts: IHeliconeAsyncLoggerOptions) {
     this.apiKey = opts.apiKey;
-    this.baseUrl = opts.baseUrl ?? "https://api.helicone.ai/v1/trace/log";
+    this.baseUrl =
+      opts.baseUrl ??
+      (opts.apiKey.startsWith("sk-helicone-eu-")
+        ? "https://eu.api.helicone.ai/v1/trace/log"
+        : "https://api.helicone.ai/v1/trace/log");
     this.openAI = opts.providers?.openAI ?? undefined;
     this.anthropic = opts.providers?.anthropic ?? undefined;
     this.cohere = opts.providers?.cohere ?? undefined;

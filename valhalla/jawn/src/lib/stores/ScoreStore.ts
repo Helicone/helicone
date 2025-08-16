@@ -131,6 +131,7 @@ export class ScoreStore extends BaseStore {
       return err("No query params");
     }
 
+    // TODO Use final instead of hand rolling deduplication
     let rowContents = resultMap(
       await clickhouseDb.dbQuery<RequestResponseRMT>(
         `
@@ -231,6 +232,7 @@ export class ScoreStore extends BaseStore {
             scores: validScores,
             cache_enabled: row.cache_enabled,
             cache_reference_id: row.cache_reference_id,
+            cost: row.cost,
           },
         ];
       })

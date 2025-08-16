@@ -62,6 +62,8 @@ export default function ModelParametersForm({
     frequency_penalty: undefined,
     presence_penalty: undefined,
     stop: undefined,
+    reasoning_effort: undefined,
+    verbosity: undefined,
   },
   onParametersChange,
   responseFormat,
@@ -189,7 +191,7 @@ export default function ModelParametersForm({
                   <TooltipTrigger>
                     <InfoIcon className="h-3 w-3 text-muted-foreground" />
                   </TooltipTrigger>
-                  <TooltipContent align="start">
+                  <TooltipContent className="max-w-xs">
                     You will be able to see your playground requests on the
                     requests and dashboards page.
                   </TooltipContent>
@@ -254,7 +256,7 @@ export default function ModelParametersForm({
                     <TooltipTrigger>
                       <InfoIcon className="h-4 w-4 text-muted-foreground" />
                     </TooltipTrigger>
-                    <TooltipContent>
+                    <TooltipContent className="max-w-xs">
                       Controls randomness: Lower values are more deterministic,
                       higher values more random.
                     </TooltipContent>
@@ -305,7 +307,7 @@ export default function ModelParametersForm({
                     <TooltipTrigger>
                       <InfoIcon className="h-4 w-4 text-muted-foreground" />
                     </TooltipTrigger>
-                    <TooltipContent>
+                    <TooltipContent className="max-w-xs">
                       Maximum number of tokens to generate in the response.
                     </TooltipContent>
                   </Tooltip>
@@ -339,7 +341,7 @@ export default function ModelParametersForm({
                     <TooltipTrigger>
                       <InfoIcon className="h-4 w-4 text-muted-foreground" />
                     </TooltipTrigger>
-                    <TooltipContent>
+                    <TooltipContent className="max-w-xs">
                       Controls diversity via nucleus sampling: 0.5 means half of
                       all likelihood-weighted options are considered.
                     </TooltipContent>
@@ -388,7 +390,7 @@ export default function ModelParametersForm({
                     <TooltipTrigger>
                       <InfoIcon className="h-4 w-4 text-muted-foreground" />
                     </TooltipTrigger>
-                    <TooltipContent>
+                    <TooltipContent className="max-w-xs">
                       Reduces repetition of token sequences based on their
                       frequency.
                     </TooltipContent>
@@ -442,7 +444,7 @@ export default function ModelParametersForm({
                     <TooltipTrigger>
                       <InfoIcon className="h-4 w-4 text-muted-foreground" />
                     </TooltipTrigger>
-                    <TooltipContent>
+                    <TooltipContent className="max-w-xs">
                       Reduces repetition of token sequences based on their
                       presence in the text.
                     </TooltipContent>
@@ -496,7 +498,7 @@ export default function ModelParametersForm({
                     <TooltipTrigger>
                       <InfoIcon className="h-4 w-4 text-muted-foreground" />
                     </TooltipTrigger>
-                    <TooltipContent>
+                    <TooltipContent className="max-w-xs">
                       Sequences where the API will stop generating further
                       tokens.
                     </TooltipContent>
@@ -519,6 +521,79 @@ export default function ModelParametersForm({
                 disabled={parameters.stop === undefined}
               />
             </div>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="reasoning_effort">Reasoning Effort</Label>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <InfoIcon className="h-4 w-4 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      Works only with reasoning models. Guides the model on how
+                      many reasoning tokens to generate before creating a
+                      response to the prompt.
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              </div>
+              <Select
+                onValueChange={(value) => {
+                  updateParameter(
+                    "reasoning_effort",
+                    value === "none" ? undefined : value,
+                  );
+                }}
+                value={parameters.reasoning_effort ?? undefined}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Reasoning Effort" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None</SelectItem>
+                  <SelectItem value="minimal">Minimal</SelectItem>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {/* TODO: Add verbosity back in when it starts working with openrouter */}
+            {/* <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="verbosity">Verbosity</Label>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <InfoIcon className="h-4 w-4 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      Works only with reasoning models. Lets you hint the model
+                      to be more or less expansive in its replies.
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              </div>
+              <Select
+                onValueChange={(value) => {
+                  updateParameter(
+                    "verbosity",
+                    value === "none" ? undefined : value,
+                  );
+                }}
+                value={parameters.verbosity ?? undefined}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Verbosity" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None</SelectItem>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                </SelectContent>
+              </Select>
+            </div> */}
             <Dialog
               open={isOpenRouterDialogOpen}
               onOpenChange={setIsOpenRouterDialogOpen}

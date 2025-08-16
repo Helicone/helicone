@@ -1200,7 +1200,9 @@ export interface components {
       } | ("none" | "auto" | "required");
       parallel_tool_calls?: boolean;
       /** @enum {string} */
-      reasoning_effort?: "low" | "medium" | "high";
+      reasoning_effort?: "minimal" | "low" | "medium" | "high";
+      /** @enum {string} */
+      verbosity?: "low" | "medium" | "high";
       /** Format: double */
       frequency_penalty?: number;
       /** Format: double */
@@ -1402,6 +1404,7 @@ export interface components {
       ending_event_id?: string;
       trigger_event_id?: string;
       start_timestamp?: string;
+      reasoning?: string;
       deleted?: boolean;
       contentArray?: components["schemas"]["Message"][];
       /** Format: double */
@@ -1473,7 +1476,9 @@ export interface components {
       frequency_penalty?: number | null;
       stop?: (string[] | string) | null;
       /** @enum {string|null} */
-      reasoning_effort?: "low" | "medium" | "high" | null;
+      reasoning_effort?: "minimal" | "low" | "medium" | "high" | null;
+      /** @enum {string|null} */
+      verbosity?: "low" | "medium" | "high" | null;
       tools?: components["schemas"]["Tool"][];
       parallel_tool_calls?: boolean | null;
       tool_choice?: {
@@ -3499,9 +3504,10 @@ Json: JsonObject;
       id: string;
       name: string;
     };
-    "ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_": {
+    "ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array_": {
       data: {
           user_id: string;
+          updated_at: string;
           temp_key: boolean;
           soft_delete: boolean;
           organization_id: string;
@@ -3516,7 +3522,7 @@ Json: JsonObject;
       /** @enum {number|null} */
       error: null;
     };
-    "Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array.string_": components["schemas"]["ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_"] | components["schemas"]["ResultError_string_"];
+    "Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array.string_": components["schemas"]["ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array_": {
       data: {
           updated_at: string;
@@ -5636,6 +5642,7 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["OpenAIChatRequest"] & {
+          logRequest?: boolean;
           useAIGateway?: boolean;
         };
       };
@@ -7079,7 +7086,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array.string_"];
+          "application/json": components["schemas"]["Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array.string_"];
         };
       };
     };

@@ -1,27 +1,26 @@
 import {
+  type Endpoint,
+  authenticateRequest as authenticateProviderRequest,
   buildEndpointUrl,
   buildModelId,
   getEndpoint,
+  getModelEndpoints,
   getProvider,
   ModelName,
   ProviderConfig,
-  getModelEndpoints,
-  type Endpoint,
 } from "@helicone-package/cost/models";
-import { RequestWrapper } from "../RequestWrapper";
-import { APIKeysManager } from "../managers/APIKeysManager";
-import { APIKeysStore } from "../db/APIKeysStore";
-import { err, isErr, ok, Result } from "./results";
-import { ProviderKeysManager } from "../managers/ProviderKeysManager";
-import { toAnthropic } from "../clients/llmmapper/providers/openai/request/toAnthropic";
-import { HeliconeHeaders } from "../models/HeliconeHeaders";
-import { ProviderKey } from "../db/ProviderKeysStore";
-import { SignatureV4 } from "@smithy/signature-v4";
-import { Sha256 } from "@aws-crypto/sha256-js";
-import { HttpRequest } from "@smithy/protocol-http";
-import { getEndpoints, ModelEndpoint } from "@helicone-package/cost/models";
+import { buildRequestBody } from "@helicone-package/cost/models/providers";
 import { ProviderName } from "@helicone-package/cost/models/types";
+import { RequestWrapper } from "../RequestWrapper";
+import { toAnthropic } from "../clients/llmmapper/providers/openai/request/toAnthropic";
+import { APIKeysStore } from "../db/APIKeysStore";
+import { ProviderKey } from "../db/ProviderKeysStore";
+import { APIKeysManager } from "../managers/APIKeysManager";
 import { PromptManager } from "../managers/PromptManager";
+import { ProviderKeysManager } from "../managers/ProviderKeysManager";
+import { HeliconeHeaders } from "../models/HeliconeHeaders";
+import { err, isErr, ok, Result } from "./results";
+import { createFallbackEndpoint } from "@helicone-package/cost/models/registry";
 
 type Error = {
   type:
@@ -33,19 +32,39 @@ type Error = {
   code: number;
 };
 
+type ProviderConfigType =
+  | {
+      region?: string;
+      location?: string;
+      crossRegion?: string;
+      projectId?: string;
+      deploymentName?: string;
+      resourceName?: string;
+    }
+  | null
+  | undefined;
+
+const DEFAULT_REGION = "us-west-1";
+
+const enableStreamUsage = async (requestWrapper: RequestWrapper) => {
+  const jsonBody = (await requestWrapper.getJson()) as Record<string, unknown>;
+  const bodyWithUsage = {
+    ...jsonBody,
+    stream_options: {
+      ...((jsonBody.stream_options as Record<string, unknown>) || {}),
+      include_usage: true,
+    },
+  };
+  return JSON.stringify(bodyWithUsage);
+};
+
 export const getBody = async (requestWrapper: RequestWrapper) => {
   if (requestWrapper.getMethod() === "GET") {
     return null;
   }
 
   if (requestWrapper.heliconeHeaders.featureFlags.streamUsage) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const jsonBody = (await requestWrapper.getJson()) as any;
-    if (!jsonBody["stream_options"]) {
-      jsonBody["stream_options"] = {};
-    }
-    jsonBody["stream_options"]["include_usage"] = true;
-    return JSON.stringify(jsonBody);
+    return enableStreamUsage(requestWrapper);
   }
 
   return await requestWrapper.getText();
@@ -118,70 +137,14 @@ const validateModelString = (model: string): ValidateModelStringResult => {
   });
 };
 
-const signBedrockRequest = async (
-  requestWrapper: RequestWrapper,
-  providerKey: ProviderKey,
-  model: string,
-  body: string
-) => {
-  const awsAccessKey = providerKey.decrypted_provider_key;
-  const awsSecretKey = providerKey.decrypted_provider_secret_key;
-  const config = providerKey.config as { region?: string } | null | undefined;
-  const awsRegion = config?.region ?? "us-west-1";
-  requestWrapper.setUrl(
-    `https://bedrock-runtime.${awsRegion}.amazonaws.com/model/${model}/invoke`
-  );
-  const sigv4 = new SignatureV4({
-    service: "bedrock",
-    region: awsRegion,
-    credentials: {
-      accessKeyId: awsAccessKey ?? "",
-      secretAccessKey: awsSecretKey ?? "",
-      // ...(awsSessionToken ? { sessionToken: awsSessionToken } : {}),
-    },
-    sha256: Sha256,
-  });
-
-  const headers = new Headers();
-
-  const forwardToHost = "bedrock-runtime." + awsRegion + ".amazonaws.com";
-
-  // Required headers for AWS requests
-  headers.set("host", forwardToHost);
-  headers.set("content-type", "application/json");
-
-  const url = new URL(requestWrapper.url.toString());
-  const request = new HttpRequest({
-    method: requestWrapper.getMethod(),
-    protocol: url.protocol,
-    hostname: forwardToHost,
-    path: url.pathname + url.search,
-    headers: Object.fromEntries(headers.entries()),
-    body,
-  });
-
-  const signedRequest = await sigv4.sign(request);
-
-  // Create new headers with the signed values
-  const newHeaders = new Headers();
-
-  // Add all the signed AWS headers
-  for (const [key, value] of Object.entries(signedRequest.headers)) {
-    if (value) {
-      newHeaders.set(key, value.toString());
-    }
-  }
-  requestWrapper.remapHeaders(newHeaders);
-  return;
-};
-
 const authenticateRequest = async (
   requestWrapper: RequestWrapper,
   providerKey: ProviderKey,
   model: string,
   body: string,
   heliconeHeaders: HeliconeHeaders,
-  targetBaseUrl: string | null
+  targetBaseUrl: string | null,
+  endpoint: Endpoint
 ) => {
   requestWrapper.resetObject();
   requestWrapper.setHeader(
@@ -189,52 +152,48 @@ const authenticateRequest = async (
     requestWrapper.getAuthorization() ?? ""
   );
   requestWrapper.setUrl(targetBaseUrl ?? requestWrapper.url.toString());
-  if (providerKey.provider === "bedrock") {
-    if (providerKey.auth_type === "key") {
-      await signBedrockRequest(requestWrapper, providerKey, model, body);
-      return;
-    } else if (providerKey.auth_type === "session_token") {
-      // TODO: manage session token based auth for aws bedrock
-    }
+
+  // Use the unified authenticate function from the cost package
+  const authResult = await authenticateProviderRequest(endpoint, {
+    config: (providerKey.config as any) || {},
+    apiKey: providerKey.decrypted_provider_key,
+    secretKey: providerKey.decrypted_provider_secret_key || undefined,
+    bodyMapping: heliconeHeaders.gatewayConfig.bodyMapping,
+    requestMethod: requestWrapper.getMethod(),
+    requestUrl: targetBaseUrl ?? requestWrapper.url.toString(),
+    requestBody: body,
+  });
+
+  if (authResult.error) {
+    throw new Error(`Authentication failed: ${authResult.error}`);
   }
 
-  if (
-    providerKey.provider === "anthropic" &&
-    heliconeHeaders.gatewayConfig.bodyMapping === "NO_MAPPING"
-  ) {
-    requestWrapper.setHeader("x-api-key", providerKey.decrypted_provider_key);
-  } else {
-    requestWrapper.setHeader(
-      "Authorization",
-      `Bearer ${providerKey.decrypted_provider_key}`
-    );
+  for (const [key, value] of Object.entries(authResult.data?.headers || {})) {
+    requestWrapper.setHeader(key, value);
   }
 };
 
-const prepareRequestBody = (
-  parsedBody: any,
-  model: string,
-  provider: ProviderName,
-  heliconeHeaders: HeliconeHeaders
-): string => {
-  if (model.includes("claude-") && provider === "bedrock") {
-    const anthropicBody =
-      heliconeHeaders.gatewayConfig.bodyMapping === "OPENAI"
-        ? toAnthropic(parsedBody)
-        : parsedBody;
-    const updatedBody = {
-      ...anthropicBody,
-      ...(provider === "bedrock"
-        ? { anthropic_version: "bedrock-2023-05-31", model: undefined }
-        : { model: model }),
-    };
-    return JSON.stringify(updatedBody);
-  } else {
-    const updatedBody = {
-      ...parsedBody,
-      model: model,
-    };
-    return JSON.stringify(updatedBody);
+const parseErrorResponse = async (
+  response: Response
+): Promise<Result<never, Error>> => {
+  try {
+    const responseBody = await response.json();
+    const errorMessage =
+      (responseBody as { message?: string })?.message ??
+      (responseBody as { error?: { message?: string } })?.error?.message ??
+      response.statusText;
+
+    return err({
+      type: "request_failed",
+      message: errorMessage,
+      code: response.status,
+    });
+  } catch {
+    return err({
+      type: "request_failed",
+      message: response.statusText,
+      code: response.status,
+    });
   }
 };
 
@@ -261,39 +220,20 @@ const attemptDirectProviderRequest = async (
   }
 
   const endpointResult = getEndpoint(modelName, provider);
-  let endpoint: Endpoint;
+  const endpoint =
+    endpointResult.error || !endpointResult.data
+      ? createFallbackEndpoint(modelName, provider)
+      : endpointResult.data;
+
+  const config = providerKey.config as ProviderConfigType;
+
   let providerModelId: string;
 
-  if (endpointResult.error || !endpointResult.data) {
-    // backwards compatibility if someone passes the explicit model id used by the provider
-    endpoint = {
-      providerModelId: modelName,
-      modelId: modelName as ModelName,
-      ptbEnabled: false,
-      provider,
-      pricing: {
-        prompt: 0,
-        completion: 0,
-      },
-      contextLength: 0,
-      maxCompletionTokens: 0,
-      supportedParameters: [],
-    };
+  if (isErr(endpointResult)) {
     providerModelId = modelName;
   } else {
-    endpoint = endpointResult.data;
-    // Extract config once with proper typing
-    const config = providerKey.config as
-      | {
-          region?: string;
-          crossRegion?: string;
-          projectId?: string;
-        }
-      | null
-      | undefined;
-
     const modelIdResult = buildModelId(endpoint, {
-      region: config?.region ?? "us-west-1",
+      region: config?.region ?? DEFAULT_REGION,
       crossRegion: config?.crossRegion === "true",
       projectId: config?.projectId,
     });
@@ -303,29 +243,26 @@ const attemptDirectProviderRequest = async (
         : modelIdResult.data;
   }
 
-  const body = prepareRequestBody(
+  const body = await buildRequestBody(endpoint, {
     parsedBody,
-    providerModelId,
+    model: providerModelId,
     provider,
-    requestWrapper.heliconeHeaders
-  );
+    bodyMapping: requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
+    toAnthropic: toAnthropic,
+  });
 
-  requestWrapper.setBody(body);
+  if (isErr(body) || !body.data) {
+    return err({
+      type: "request_failed",
+      message: body.error || "Failed to build request body",
+      code: 500,
+    });
+  }
 
-  // Extract config once with proper typing
-  const config = providerKey.config as
-    | {
-        region?: string;
-        crossRegion?: string;
-        projectId?: string;
-        deploymentName?: string;
-        resourceName?: string;
-      }
-    | null
-    | undefined;
+  requestWrapper.setBody(body.data);
 
   const targetBaseUrlResult = buildEndpointUrl(endpoint, {
-    region: config?.region ?? "us-west-1",
+    region: config?.region ?? config?.location ?? DEFAULT_REGION,
     crossRegion: config?.crossRegion === "true",
     projectId: config?.projectId,
     deploymentName: config?.deploymentName,
@@ -346,9 +283,10 @@ const attemptDirectProviderRequest = async (
     requestWrapper,
     providerKey,
     providerModelId,
-    body,
+    body.data,
     requestWrapper.heliconeHeaders,
-    targetBaseUrl
+    targetBaseUrl,
+    endpoint
   );
 
   try {
@@ -358,15 +296,7 @@ const attemptDirectProviderRequest = async (
       return ok(response);
     }
 
-    const responseBody = await response.json();
-    return err({
-      type: "request_failed",
-      message:
-        (responseBody as { message?: string })?.message ??
-        (responseBody as { error?: { message?: string } })?.error?.message ??
-        response.statusText,
-      code: response.status,
-    });
+    return await parseErrorResponse(response);
   } catch (error) {
     return err({
       type: "request_failed",
@@ -390,7 +320,7 @@ const attemptEndpointsProviderRequest = async (
   let error: Error | null = null;
   for (const endpoint of endpoints) {
     const providerResult = getProvider(endpoint.provider);
-    if (providerResult.error || !providerResult.data) {
+    if (isErr(providerResult) || !providerResult.data) {
       continue;
     }
 

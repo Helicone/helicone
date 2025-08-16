@@ -15,6 +15,8 @@ export interface ModelParameters {
   frequency_penalty: number | null | undefined;
   presence_penalty: number | null | undefined;
   stop: string | null | undefined;
+  reasoning_effort?: "low" | "medium" | "high" | "minimal" | null | undefined;
+  verbosity?: "low" | "medium" | "high" | null | undefined;
 }
 
 export interface GenerateParams {
@@ -31,7 +33,8 @@ export interface GenerateParams {
   schema?: object extends object ? z.ZodType<object> : never;
   signal?: AbortSignal;
   includeReasoning?: boolean;
-  reasoning_effort?: "low" | "medium" | "high";
+  reasoning_effort?: "low" | "medium" | "high" | "minimal";
+  verbosity?: "low" | "medium" | "high";
   response_format?: { type: "json_schema"; json_schema?: object };
   stream?: {
     onChunk: (chunk: string) => void;
@@ -158,6 +161,7 @@ export async function generate<T extends object | undefined = undefined>(
     };
     schema?: z.ZodType<object>;
     useAIGateway?: boolean;
+    logRequest?: boolean;
   },
 ): Promise<GenerateResponse> {
   const currentOrgId = Cookies.get(ORG_ID_COOKIE_KEY);
@@ -178,7 +182,10 @@ export async function generate<T extends object | undefined = undefined>(
         tools: params.tools,
         response_format: params.response_format,
         model: params.model,
+        reasoning_effort: params.reasoning_effort,
+        verbosity: params.verbosity,
         useAIGateway: params.useAIGateway,
+        logRequest: params.logRequest,
       }),
       headers: {
         "helicone-authorization": JSON.stringify({

@@ -229,12 +229,37 @@ export interface UserConfig {
   crossRegion?: boolean;
 }
 
+export interface AuthContext {
+  endpoint: Endpoint;
+  config: UserConfig;
+  apiKey?: string;
+  secretKey?: string;
+  bodyMapping?: "OPENAI" | "NO_MAPPING";
+  requestMethod?: string;
+  requestUrl?: string;
+  requestBody?: string;
+}
+
+export interface AuthResult {
+  headers: Record<string, string>;
+}
+
+export interface RequestBodyContext {
+  parsedBody: any;
+  model: string;
+  provider: ProviderName;
+  bodyMapping: "OPENAI" | "NO_MAPPING";
+  toAnthropic: (body: any) => any;
+}
+
 export interface ProviderConfig {
   id: ProviderName;
   baseUrl: string;
   auth: "api-key" | "oauth" | "aws-signature" | "azure-ad";
   buildUrl: (endpoint: Endpoint, config: UserConfig) => string;
   buildModelId?: (endpoint: Endpoint, config: UserConfig) => string;
+  authenticate?: (context: AuthContext) => Promise<AuthResult> | AuthResult;
+  buildRequestBody?: (context: RequestBodyContext) => Promise<string> | string;
   requiredConfig?: Array<keyof UserConfig>;
   pricingPages?: string[];
   modelPages?: string[];
