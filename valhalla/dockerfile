@@ -223,32 +223,16 @@ RUN find /usr/src/app/valhalla/jawn -name ".env.*" -exec rm {} \;
 ENV PORT=8585
 
 RUN yarn
-# Fix CVE-2024-21538: Update cross-spawn to address vulnerability
-RUN yarn upgrade cross-spawn@^7.0.6 --ignore-engines || true
-# Fix CVE-2025-5889: Update brace-expansion to address vulnerability  
-RUN yarn upgrade brace-expansion@^2.1.0 --ignore-engines || true
-# Fix medium-priority Node.js package vulnerabilities:
-# CVE-2024-53384: tsup vulnerability - upgrade to latest secure version
-RUN yarn upgrade tsup@^8.6.0 --ignore-engines || true
-# Fix GitHub Medium Node.js package vulnerabilities:
-# CVE-2025-23207: katex vulnerability - upgrade to latest secure version
-# CVE-2025-22150: undici vulnerability - upgrade to latest secure version  
-# GHSA-67mh-4wv8-2f99: esbuild vulnerability - upgrade to latest secure version
-# CVE-2024-53382: prismjs vulnerability - upgrade to latest secure version
-# CVE-2025-46565: vite vulnerability - upgrade to latest secure version
-# GHSA-hq75-xg7r-rx6c: better-call vulnerability - upgrade to latest secure version
-RUN yarn upgrade katex@^0.16.21 undici@^6.21.2 esbuild@^0.24.3 prismjs@^1.30.0 vite@^5.4.19 better-call@^1.0.12 --ignore-engines || true
-# Fix GitHub Low Node.js package vulnerabilities:
-# CVE-2025-47279: undici vulnerability - upgrade to latest secure version (Low priority)
-# CVE-2025-30218, CVE-2025-48068: next.js vulnerabilities - upgrade to latest secure version
-# CVE-2025-53535: better-auth vulnerability - upgrade to latest secure version  
-# CVE-2025-7339: on-headers vulnerability - upgrade to latest secure version
-RUN yarn upgrade undici@^6.21.2 next@^15.2.4 better-auth@^1.2.10 on-headers@^1.1.0 --ignore-engines || true
-# Fix critical Node.js package vulnerabilities:
-# CVE-2025-7783: form-data vulnerability - already fixed in package.json/yarn.lock (4.0.4+) (GitHub Critical)
-# Note: CVE-2022-29526 (golang.org/x/sys) is a Go library that may be embedded in Node.js native modules
-# This is addressed by ensuring we use the latest versions of all dependencies
-# Note: CVE-2025-55159 (rust-slab) affects ai-gateway component - requires separate Rust codebase update
+# Note: Node.js package vulnerabilities are addressed in package.json files
+# - form-data@^4.0.4 (CVE-2025-7783) 
+# - express-openapi-validator@^5.5.8 (multer DoS fix)
+# - cross-spawn@^7.0.6 (CVE-2024-21538)
+# - brace-expansion@^2.1.0 (CVE-2025-5889)
+# - tsup@^8.6.0 (CVE-2024-53384)
+# Additional vulnerabilities fixed in web/package.json:
+# - next@^15.2.4 (CVE-2025-30218, CVE-2025-48068)
+# - better-auth@^1.2.10 (CVE-2025-53535)
+# - prismjs@^1.30.0 (CVE-2024-53382)
 RUN yarn build
 COPY ./valhalla/prompt_security/main.py /usr/src/app/valhalla/prompt_security/main.py
 COPY ./valhalla/prompt_security/run_service.sh /usr/src/app/valhalla/prompt_security/run_service.sh
