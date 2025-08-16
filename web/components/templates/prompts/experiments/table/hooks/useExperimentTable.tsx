@@ -2,6 +2,7 @@ import { useOrg } from "@/components/layout/org/organizationContext";
 import { getJawnClient } from "../../../../../../lib/clients/jawn";
 import { placeAssetIdValues } from "../../../../../../services/lib/requestTraverseHelper";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { logger } from "@/lib/telemetry/logger";
 
 export type ExperimentTable = {
   id: string;
@@ -68,7 +69,7 @@ export const fetchRequestResponseBody = async (request_response: any) => {
       return content;
     }
   } catch (error) {
-    console.error("Error fetching response body:", error);
+    logger.error({ error }, "Error fetching response body");
   }
   return null;
 };

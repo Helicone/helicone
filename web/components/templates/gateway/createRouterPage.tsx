@@ -13,6 +13,7 @@ import { H3, Small } from "@/components/ui/typography";
 import FoldedHeader from "@/components/shared/FoldedHeader";
 import { useFeatureFlag } from "@/services/hooks/admin";
 import { useOrg } from "@/components/layout/org/organizationContext";
+import { logger } from "@/lib/telemetry/logger";
 import Link from "next/link";
 import RouterConfigForm from "./RouterConfigForm";
 import { useRouterConfig } from "./useRouterConfig";
@@ -65,7 +66,7 @@ const CreateRouterPage = () => {
       );
     } catch (error) {
       setNotification("Failed to create router", "error");
-      console.error("Error creating router:", error);
+      logger.error({ error }, "Error creating router");
     }
   };
 

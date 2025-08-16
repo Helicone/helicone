@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { logger } from "@/lib/telemetry/logger";
 import {
   Tooltip,
   TooltipContent,
@@ -169,7 +170,7 @@ export default function ScrollableBadges({
         setPendingItems((prev) =>
           (prev as SingleValueItem[]).filter((item) => item !== newValue),
         );
-        console.error("Error adding item:", error);
+        logger.error(error, "Error adding item");
       }
     } else {
       if (!newKey || !newValue) return;
@@ -191,7 +192,7 @@ export default function ScrollableBadges({
             (item) => !(item.key === newKey && item.value === newValue),
           ),
         );
-        console.error("Error adding item:", error);
+        logger.error(error, "Error adding item");
       }
     }
   };

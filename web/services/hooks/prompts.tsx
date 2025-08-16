@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { $JAWN_API } from "../../lib/clients/jawn";
 import type { components } from "../../lib/clients/jawnTypes/public";
 import type { OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
+import { logger } from "@/lib/telemetry/logger";
 
 type Prompt2025 = components["schemas"]["Prompt2025"];
 type Prompt2025Version = components["schemas"]["Prompt2025Version"];
@@ -62,7 +63,7 @@ export const useGetPromptEnvironments = () => {
     queryFn: async () => {
       const result = await $JAWN_API.GET("/v1/prompt-2025/environments", {});
       if (result.error || !result.data?.data) {
-        console.error("Error fetching prompt environments:", result.error);
+        logger.error({ error: result.error }, "Error fetching prompt environments");
         return [];
       }
       return result.data.data;
@@ -76,7 +77,7 @@ export const useGetPromptTags = () => {
     queryFn: async () => {
       const result = await $JAWN_API.GET("/v1/prompt-2025/tags", {});
       if (result.error || !result.data?.data) {
-        console.error("Error fetching prompt tags:", result.error);
+        logger.error({ error: result.error }, "Error fetching prompt tags");
         return [];
       }
       return result.data.data;
@@ -110,7 +111,7 @@ export const useGetPromptInputs = (
       );
 
       if (result.error || !result.data?.data) {
-        console.error("Error fetching prompt inputs:", result.error);
+        logger.error({ error: result.error }, "Error fetching prompt inputs");
         return null;
       }
 
@@ -185,7 +186,7 @@ export const useGetPromptVersion = (promptVersionId?: string, withBody: boolean 
       });
 
       if (result.error || !result.data?.data) {
-        console.error("Error fetching prompt version with body:", result.error);
+        logger.error({ error: result.error }, "Error fetching prompt version with body");
         return {
           promptVersion: {} as Prompt2025Version,
           promptBody: undefined,
@@ -205,7 +206,7 @@ export const useGetPromptVersion = (promptVersionId?: string, withBody: boolean 
       );
 
       if (promptResult.error || !promptResult.data?.data) {
-        console.error("Error fetching prompt:", promptResult.error);
+        logger.error({ error: promptResult.error }, "Error fetching prompt");
         return {
           promptVersion: {} as Prompt2025Version,
           promptBody: undefined,
@@ -223,10 +224,10 @@ export const useGetPromptVersion = (promptVersionId?: string, withBody: boolean 
           if (s3Response.ok) {
             promptBody = (await s3Response.json()) as OpenAIChatRequest;
           } else {
-            console.error("Failed to fetch from S3 URL:", s3Response.status);
+            logger.error({ status: s3Response.status }, "Failed to fetch from S3 URL");
           }
         } catch (error) {
-          console.error("Error fetching prompt body from S3:", error);
+          logger.error({ error }, "Error fetching prompt body from S3");
         }
       }
 
@@ -260,7 +261,7 @@ export const useGetPromptVersions = (
       );
 
       if (versionsResult.error || !versionsResult.data?.data) {
-        console.error("Error fetching prompt versions:", versionsResult.error);
+        logger.error({ error: versionsResult.error }, "Error fetching prompt versions");
         return [];
       }
 
@@ -292,7 +293,7 @@ export const useGetPromptsWithVersions = (
       });
 
       if (promptsResult.error || !promptsResult.data?.data) {
-        console.error("Error fetching prompts:", promptsResult.error);
+        logger.error({ error: promptsResult.error }, "Error fetching prompts");
         return {
           prompts: [],
           totalCount: 0,
@@ -338,10 +339,7 @@ export const useGetPromptsWithVersions = (
             productionVersionResult.error ||
             !productionVersionResult.data?.data
           ) {
-            console.error(
-              `Error fetching versions for prompt ${prompt.id}:`,
-              versionsResult.error,
-            );
+            logger.error({ promptId: prompt.id, error: versionsResult.error }, "Error fetching versions for prompt");
             return {
               prompt,
               totalVersions: 0,
@@ -374,10 +372,7 @@ export const useGetPromptsWithVersions = (
         {},
       );
       if (totalPromptsResult.error || !totalPromptsResult.data?.data) {
-        console.error(
-          "Error fetching total prompts:",
-          totalPromptsResult.error,
-        );
+        logger.error({ error: totalPromptsResult.error }, "Error fetching total prompts");
         return {
           prompts: [],
           totalCount: 0,

@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { dbExecute } from "../../../../lib/api/db/dbExecute";
 import { resultMap } from "@/packages/common/result";
+import { logger } from "@/lib/telemetry/logger";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-02-24.acacia",
@@ -34,7 +35,7 @@ export default async function handler(
     );
 
     if (orgError !== null) {
-      console.error(orgError);
+      logger.error({ error: orgError }, "Unable to find org");
       res.status(400).send(`Unable to find org: ${orgError}`);
       return;
     }

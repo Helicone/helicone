@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useRouter } from "next/router";
+import { logger } from "@/lib/telemetry/logger";
 import { useState } from "react";
 import { getJawnClient } from "../../../lib/clients/jawn";
 import { Input } from "@/components/ui/input";
@@ -101,7 +102,10 @@ export const DeleteOrgModal = (props: DeleteOrgModalProps) => {
               );
 
               if (deleteOrgError) {
-                console.error(deleteOrgError);
+                logger.error(
+                  { error: deleteOrgError },
+                  "Error deleting organization",
+                );
                 setNotification("Error deleting organization", "error");
               } else {
                 orgContext?.refetchOrgs();

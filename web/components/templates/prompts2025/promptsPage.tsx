@@ -2,6 +2,7 @@ import { Small } from "@/components/ui/typography";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Plus } from "lucide-react";
+import { logger } from "@/lib/telemetry/logger";
 
 import FoldedHeader from "@/components/shared/FoldedHeader";
 import {
@@ -99,7 +100,7 @@ const PromptsPage = (props: PromptsPageProps) => {
   const renamePrompt = useRenamePrompt();
 
   const handleRenamePrompt = async (promptId: string, newName: string) => {
-    console.log("renaming prompt", promptId, newName);
+    logger.info({ promptId, newName }, "Renaming prompt");
     const result = await renamePrompt.mutateAsync({
       params: {
         path: {
@@ -113,7 +114,10 @@ const PromptsPage = (props: PromptsPageProps) => {
 
     if (result.error) {
       setNotification("Error renaming prompt", "error");
-      console.error("Error renaming prompt", result.error);
+      logger.error(
+        { error: result.error, promptId, newName },
+        "Error renaming prompt",
+      );
     } else {
       setNotification("Prompt renamed successfully", "success");
     }
@@ -134,7 +138,10 @@ const PromptsPage = (props: PromptsPageProps) => {
 
     if (result.error) {
       setNotification("Error setting environment", "error");
-      console.error("Error setting environment", result.error);
+      logger.error(
+        { error: result.error, promptId, promptVersionId, environment },
+        "Error setting environment",
+      );
     } else {
       setNotification("Environment set successfully", "success");
     }
@@ -152,7 +159,10 @@ const PromptsPage = (props: PromptsPageProps) => {
 
       if (result.error) {
         setNotification("Error deleting prompt", "error");
-        console.error("Error deleting prompt", result.error);
+        logger.error(
+          { error: result.error, promptId },
+          "Error deleting prompt",
+        );
       } else {
         setNotification("Prompt deleted successfully", "success");
         if (selectedPrompt?.prompt.id === promptId) {
@@ -162,7 +172,7 @@ const PromptsPage = (props: PromptsPageProps) => {
       }
     } catch (error) {
       setNotification("Error deleting prompt", "error");
-      console.error("Error deleting prompt", error);
+      logger.error({ error, promptId }, "Error deleting prompt");
     }
   };
 
@@ -181,13 +191,23 @@ const PromptsPage = (props: PromptsPageProps) => {
 
       if (result.error) {
         setNotification("Error deleting prompt version", "error");
-        console.error("Error deleting prompt version", result.error);
+        logger.error(
+          {
+            error: result.error,
+            promptVersionId,
+            promptId: selectedPrompt.prompt.id,
+          },
+          "Error deleting prompt version",
+        );
       } else {
         setNotification("Prompt version deleted successfully", "success");
       }
     } catch (error) {
       setNotification("Error deleting prompt version", "error");
-      console.error("Error deleting prompt version", error);
+      logger.error(
+        { error, promptVersionId, promptId: selectedPrompt?.prompt.id },
+        "Error deleting prompt version",
+      );
     }
   };
 

@@ -3,6 +3,7 @@ import useNotification from "@/components/shared/notification/useNotification";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { Provider, ProviderKey } from "@/types/provider";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { logger } from "@/lib/telemetry/logger";
 
 interface UseProviderParams {
   // If a provider is specified, the hook will work in "provider-specific" mode
@@ -33,7 +34,7 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
       const response = await jawnClient.GET("/v1/api-keys/provider-keys", {});
 
       if (response && "error" in response) {
-        console.error("Failed to fetch provider keys:", response.error);
+        logger.error({ error: response.error, orgId }, "Failed to fetch provider keys");
         return [] as ProviderKey[];
       }
 
@@ -120,7 +121,7 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
         if (response.error) throw new Error(response);
         return response.data;
       } catch (error) {
-        console.error("Error adding provider key:", error);
+        logger.error({ error, providerName, providerKeyName, orgId }, "Error adding provider key");
         throw error;
       }
     },
@@ -157,7 +158,7 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
       );
 
       if (response && "error" in response) {
-        console.error("Failed to fetch decrypted key:", response.error);
+        logger.error({ error: response.error, keyId, orgId }, "Failed to fetch decrypted key");
         return null;
       }
 
@@ -178,7 +179,7 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
 
       return null;
     } catch (error) {
-      console.error("Error viewing decrypted key:", error);
+      logger.error({ error, keyId, orgId }, "Error viewing decrypted key");
       return null;
     }
   };

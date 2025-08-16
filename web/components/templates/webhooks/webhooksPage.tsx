@@ -8,6 +8,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useOrg } from "../../layout/org/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
+import { logger } from "@/lib/telemetry/logger";
 import { getUSDateFromString } from "../../shared/utils/utils";
 import AddWebhookForm from "./addWebhookForm";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
@@ -120,7 +121,7 @@ const WebhooksPage = (props: WebhooksPageProps) => {
 
         return response;
       } catch (error: any) {
-        console.error("Webhook creation error:", error);
+        logger.error({ error }, "Webhook creation error");
         throw new Error(error.message || "Failed to create webhook");
       }
     },

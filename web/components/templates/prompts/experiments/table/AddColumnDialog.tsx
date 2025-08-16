@@ -7,6 +7,7 @@ import { FlaskConicalIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import PromptPlayground, { PromptObject } from "../../id/promptPlayground";
 import { useJawnClient } from "@/lib/clients/jawnHook";
+import { logger } from "@/lib/telemetry/logger";
 
 const AddColumnDialog = ({
   isOpen,
@@ -136,7 +137,7 @@ const AddColumnDialog = ({
               });
 
               if (result.error || !result.data) {
-                console.error(result);
+                logger.error({ result }, "Error occurred");
                 return;
               }
 

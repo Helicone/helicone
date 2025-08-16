@@ -3,6 +3,7 @@ import { customSession } from "better-auth/plugins";
 import { getUser } from "@/packages/common/toImplement/server/useBetterAuthClient";
 import { Pool } from "pg";
 import nodemailer from "nodemailer";
+import { logger } from "@/lib/telemetry/logger";
 
 // Create a reusable transporter object using the default SMTP transport
 // Configure for MailHog in development, or your actual email service in production
@@ -42,7 +43,7 @@ export const auth = betterAuth({
     sendOnSignUp: true,
     // Define the function to send the verification email
     sendVerificationEmail: async ({ user, url }, request) => {
-      console.log("Sending verification email to", user.email);
+      logger.info({ email: user.email }, "Sending verification email");
       // Define your email content using the provided HTML template
       const emailHtml = `
 <div style="width: 100%; background-color: #ffffff">
@@ -80,19 +81,22 @@ export const auth = betterAuth({
           html: emailHtml, // html body
         });
 
-        console.log("Verification email sent: %s", info.messageId);
+        logger.info({ messageId: info.messageId }, "Verification email sent");
         // In development, you can also log the URL for easy access:
         if (process.env.NODE_ENV === "development") {
-          console.log("Verification URL: ", url);
+          logger.info({ url }, "Verification URL");
         }
       } catch (error) {
-        console.error("Error sending verification email:", error);
-        console.error("SMTP Config:", {
-          host: process.env.SMTP_HOST,
-          port: process.env.SMTP_PORT,
-          secure: process.env.SMTP_SECURE === "true",
-          hasAuth: !process.env.SMTP_HOST?.includes("mailhog"),
-        });
+        logger.error({ error }, "Error sending verification email");
+        logger.error(
+          {
+            host: process.env.SMTP_HOST,
+            port: process.env.SMTP_PORT,
+            secure: process.env.SMTP_SECURE === "true",
+            hasAuth: !process.env.SMTP_HOST?.includes("mailhog"),
+          },
+          "SMTP Config",
+        );
         // Optionally, re-throw the error or handle it as needed
         // throw error;
       }
@@ -103,7 +107,7 @@ export const auth = betterAuth({
     customSession(async ({ user, session }) => {
       const dbUser = await getUser(user.id);
       if (dbUser.error || !dbUser.data) {
-        console.warn("could not fetch authUserId from db");
+        logger.warn("could not fetch authUserId from db");
         return {
           user,
           session,

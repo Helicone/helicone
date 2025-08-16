@@ -1,6 +1,7 @@
 import { Row } from "@/components/layout/common";
 import Header from "@/components/shared/Header";
 import LivePill from "@/components/shared/LivePill";
+import { logger } from "@/lib/telemetry/logger";
 import ViewColumns from "@/components/shared/themed/table/columns/viewColumns";
 import ThemedTimeFilter from "@/components/shared/themed/themedTimeFilter";
 import { Button } from "@/components/ui/button";
@@ -384,7 +385,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
           filterMapIdx === -1 ||
           operatorIdx === -1
         ) {
-          console.log("Invalid filter map or operator index", {
+          logger.warn("Invalid filter map or operator index", {
             filterLabel,
             operator,
           });
@@ -413,7 +414,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
         return result;
       }
     } catch (error) {
-      console.error("Error decoding advanced filters:", error);
+      logger.error("Error decoding advanced filters", { error });
     }
 
     return getRootFilterNode();

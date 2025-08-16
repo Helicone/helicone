@@ -12,6 +12,7 @@ import {
   UserGroupIcon,
 } from "@heroicons/react/20/solid";
 import { Course, CourseParams, CourseQuiz, CourseSection } from "./types";
+import { logger } from "@/lib/telemetry/logger";
 
 type CourseParts =
   | "overview"
@@ -110,7 +111,7 @@ export const CourseGenerator: React.FC = () => {
         }));
       }
     } catch (error) {
-      console.error("Error generating course:", error);
+      logger.error({ error, sessionId, params }, "Error generating course");
     } finally {
       setIsGenerating(false);
       setCurrentStep("");
@@ -292,16 +293,20 @@ export const CourseGenerator: React.FC = () => {
         const parsedArguments = JSON.parse(toolCall.function.arguments);
         return parsedArguments;
       } catch (parseError: any) {
-        console.error(
-          `Error parsing arguments for ${part}:`,
-          toolCall.function.arguments,
+        logger.error(
+          {
+            parseError,
+            part,
+            arguments: toolCall.function.arguments,
+          },
+          `Error parsing arguments for ${part}`,
         );
         throw new Error(
           `Failed to parse arguments for ${part}: ${JSON.stringify(parseError)}`,
         );
       }
     } catch (error) {
-      console.error(`Error generating ${part}:`, error);
+      logger.error({ error, part, sessionId }, `Error generating ${part}`);
       throw error;
     }
   };

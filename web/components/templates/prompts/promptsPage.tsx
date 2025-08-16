@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { logger } from "@/lib/telemetry/logger";
 import { Input } from "@/components/ui/input";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { cn } from "@/lib/utils";
@@ -82,7 +83,7 @@ const PromptsPage = (props: PromptsPageProps) => {
         router.push(`/prompts/${newPrompt.id}`);
       }
     } catch (error) {
-      console.error("Error creating prompt:", error);
+      logger.error({ error }, "Error creating prompt");
     }
   };
 

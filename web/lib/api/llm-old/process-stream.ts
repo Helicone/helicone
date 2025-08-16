@@ -3,6 +3,8 @@
  * that is compatible with the PromptState response type.
  */
 
+import { logger } from "@/lib/telemetry/logger";
+
 interface StreamProcessorOptions {
   onUpdate: (response: {
     content: string;
@@ -65,9 +67,9 @@ function messageReducer(previous: any, item: any): any {
         for (let i = 0; i < value.length; i++) {
           const { index, ...chunkTool } = value[i];
           if (index === undefined) {
-            console.error(
+            logger.error(
+              { value: value[i] },
               "Reducer: Array element in delta missing index",
-              value[i],
             );
             // Attempt to append if index missing, might be wrong
             accArray.push(chunkTool);
@@ -85,10 +87,9 @@ function messageReducer(previous: any, item: any): any {
         acc[key] = reduce(acc[key], value);
       } else {
         // Handle other types or mismatches if necessary
-        console.warn(
-          `Reducer: Unhandled type mismatch for key '${key}'. Accumulator: ${typeof acc[
-            key
-          ]}, Delta: ${typeof value}`,
+        logger.warn(
+          { key, accumulatorType: typeof acc[key], deltaType: typeof value },
+          `Reducer: Unhandled type mismatch for key '${key}'`,
         );
         // Default behavior: overwrite accumulator with delta value
         acc[key] = value;
@@ -181,11 +182,9 @@ export async function processStream(
           callbackState.calls = "";
         }
       } catch (error) {
-        console.error(
-          "[processStream] Error parsing JSON chunk or processing delta:",
-          error,
-          "Chunk:",
-          chunkString,
+        logger.error(
+          { error, chunkString },
+          "[processStream] Error parsing JSON chunk or processing delta",
         );
         // Optional: Treat parse errors as raw content?
         // state.content += chunkString; // Be cautious with this
@@ -217,14 +216,14 @@ export async function processStream(
   } catch (error) {
     // Catch errors during reader.read() or reader.cancel()
     if (error instanceof Error && error.name === "AbortError") {
-      console.log("[processStream] Stream reading aborted.");
+      logger.info("[processStream] Stream reading aborted.");
     } else {
-      console.error("[processStream] Error reading from stream:", error);
+      logger.error({ error }, "[processStream] Error reading from stream");
     }
     // Return the state as it was when the error occurred, might be incomplete
-    console.warn(
-      "[processStream] Returning state possibly incomplete due to error:",
-      callbackState,
+    logger.warn(
+      { callbackState },
+      "[processStream] Returning state possibly incomplete due to error",
     );
     // Attempt to extract final state even on error, might be partial
     // Use the accumulated message directly

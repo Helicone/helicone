@@ -15,7 +15,7 @@ const CodeExamples = {
   const { request_id, request_body, response_body } = req.body;
 
   // Do something with the data!
-  console.log("LLM Log: ", request_body, response_body);
+  logger.info({ request_body, response_body }, "LLM Log");
 
   // Your business logic here...
   return res.status(200).json({ success: true });

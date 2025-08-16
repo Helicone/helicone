@@ -7,6 +7,7 @@ import {
 import { Result } from "@/packages/common/result";
 import { DecryptedProviderKey } from "../../../services/lib/keys";
 import { Permission } from "../../../services/lib/user";
+import { logger } from "@/lib/telemetry/logger";
 
 async function handler({
   req,
@@ -46,7 +47,7 @@ async function handler({
   );
 
   if (error) {
-    console.error("Failed to insert provider key", error);
+    logger.error({ error }, "Failed to insert provider key");
     res.status(500).json({ error: error, data: null });
     return;
   }

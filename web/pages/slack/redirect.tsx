@@ -1,6 +1,7 @@
 import AuthLayout from "@/components/layout/auth/authLayout";
 import { Button } from "@/components/ui/button";
 import { dbExecute } from "@/lib/api/db/dbExecute";
+import { logger } from "@/lib/telemetry/logger";
 import { GetServerSidePropsContext } from "next";
 import Link from "next/link";
 import { ReactElement } from "react";
@@ -89,7 +90,7 @@ export const getServerSideProps = async (
     if (data.ok) {
       responseData = data;
     } else {
-      console.error("Failed to get access token", data);
+      logger.error("Failed to get access token", { data });
       return {
         props: {
           error: "Failed to get access token",
@@ -97,7 +98,7 @@ export const getServerSideProps = async (
       };
     }
   } catch (error) {
-    console.error("Failed to get access token", error);
+    logger.error("Failed to get access token", { error });
     return {
       props: {
         error: "Failed to get access token",

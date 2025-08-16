@@ -13,6 +13,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { logger } from "@/lib/telemetry/logger";
 import {
   Dialog,
   DialogContent,
@@ -110,7 +111,7 @@ const PromptVersionCard = ({
       await navigator.clipboard.writeText(version.id);
       setNotification("Version ID copied to clipboard", "success");
     } catch (err) {
-      console.error("Failed to copy version ID:", err);
+      logger.error({ error: err }, "Failed to copy version ID");
       setNotification("Failed to copy version ID", "error");
     }
   };

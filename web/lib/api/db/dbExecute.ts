@@ -2,6 +2,7 @@ import { Client } from "pg";
 import { Result } from "@/packages/common/result";
 import { createClient as clickhouseCreateClient } from "@clickhouse/client";
 import dateFormat from "dateformat";
+import { logger } from "@/lib/telemetry/logger";
 
 export function paramsToValues(params: (number | string | boolean | Date)[]) {
   return params
@@ -30,7 +31,7 @@ export function printRunnableQuery(
     .map(([key, value]) => `SET param_${key} = '${value}';`)
     .join("\n");
 
-  console.log(`\n\n${setParams}\n\n${query}\n\n`);
+  logger.info({ setParams, query }, "Runnable query");
 }
 
 export async function dbQueryClickhouse<T>(
@@ -77,8 +78,7 @@ export async function dbQueryClickhouse<T>(
     });
     return { data: await queryResult.json<T[]>(), error: null };
   } catch (err) {
-    console.error("Error executing query: ", query, parameters);
-    console.error(err);
+    logger.error({ query, parameters, error: err }, "Error executing query");
     return {
       data: null,
       error: JSON.stringify(err),
@@ -118,8 +118,7 @@ export async function dbExecute<T>(
 
     return { data: result.rows, error: null };
   } catch (err) {
-    console.error("Error executing query: ", query, parameters);
-    console.error(err);
+    logger.error({ query, parameters, error: err }, "Error executing query");
     await client.end();
     return { data: null, error: JSON.stringify(err) };
   }
