@@ -499,13 +499,28 @@ async function log(
     );
     return;
   }
-  // regardless of cache status, finalize the escrow
   const walletId = env.WALLET.idFromName(orgData.organizationId);
   const walletStub = env.WALLET.get(walletId);
-
   const cloudBillingEnabled =
     proxyRequest?.requestWrapper.heliconeHeaders.cloudBillingEnabled;
-  if (cloudBillingEnabled && res.data && escrowInfo) {
+  // finalize the escrow
+  if (cloudBillingEnabled && res.data && escrowInfo && orgData.stripeCustomerId) {
+    const stripeManager = new StripeManager(
+      env.STRIPE_WEBHOOK_SECRET,
+      env.STRIPE_SECRET_KEY,
+      env.WALLET
+    );
+    
+    const updateResult = await walletStub.updateBalanceIfNeeded(
+      orgData.organizationId,
+      orgData.stripeCustomerId,
+      stripeManager
+    );
+    if (isError(updateResult)) {
+      console.error("Error updating wallet balance", updateResult.error);
+      // TODO: add alerts
+    }
+    
     const cost = res.data.cost;
     try {
       const result = await walletStub.finalizeEscrow(orgData.organizationId, escrowInfo.escrowId, cost);
@@ -514,10 +529,6 @@ async function log(
           `Failed to finalize escrow ${escrowInfo.escrowId}:`,
           result.error
         );
-      } else {
-        console.debug(
-          `Escrow ${escrowInfo.escrowId} finalized: charged ${cost}`
-        );
       }
     } catch (error) {
       console.error(`Error finalizing escrow ${escrowInfo.escrowId}:`, error);
@@ -525,11 +536,9 @@ async function log(
   } else if (cloudBillingEnabled) {
     if (!escrowInfo) {
       console.error("No escrow info, could not finalize escrow");
-      // this means there's a bug in our worker code and we need to fix it,
-      // in order to prevent users abusing this bug and spending our cloud
-      // credits without us being able to charge them. to prevent abuse we
-      // temporarily block their org from using cloud billing until we fix
-      // the bug and purge the disallow list
+      // TODO: add alerts
+    } else if (!orgData.stripeCustomerId) {
+      console.error("No stripe customer id for org ", orgData.organizationId);
       await walletStub.addToDisallowList(proxyRequest.requestId);
     }
   }
@@ -580,6 +589,7 @@ async function log(
       );
       if (isError(meterEvent)) {
         console.error("Error emitting token usage", meterEvent.error);
+        // TODO: add alerts
       } else {
         console.log("successfully emitted token usage");
       }

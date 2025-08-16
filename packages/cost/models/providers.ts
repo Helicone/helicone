@@ -14,7 +14,6 @@ import type {
   AuthContext,
   AuthResult,
 } from "./types";
-export type { ProviderName } from "./types";
 
 export const providers = {
   anthropic: {
@@ -81,9 +80,15 @@ export const providers = {
       if (!context.apiKey || !context.secretKey) {
         throw new Error("Bedrock requires both apiKey and secretKey");
       }
-      
-      if (!context.requestMethod || !context.requestUrl || !context.requestBody) {
-        throw new Error("Bedrock authentication requires requestMethod, requestUrl, and requestBody");
+
+      if (
+        !context.requestMethod ||
+        !context.requestUrl ||
+        !context.requestBody
+      ) {
+        throw new Error(
+          "Bedrock authentication requires requestMethod, requestUrl, and requestBody"
+        );
       }
 
       const awsRegion = context.config.region || "us-west-1";
@@ -99,7 +104,7 @@ export const providers = {
 
       const headers = new Headers();
       const forwardToHost = `bedrock-runtime.${awsRegion}.amazonaws.com`;
-      
+
       // Required headers for AWS requests
       headers.set("host", forwardToHost);
       headers.set("content-type", "application/json");

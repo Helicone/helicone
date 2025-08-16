@@ -6,7 +6,8 @@ import { isError } from "../../../../packages/common/result";
 
 export const STRIPE_INPUT_TOKEN_EVENT_NAME = "cloud_gateway_input_tokens";
 export const STRIPE_OUTPUT_TOKEN_EVENT_NAME = "cloud_gateway_output_tokens";
-export const STRIPE_CACHED_TOKEN_EVENT_NAME = "cloud_gateway_cached_token_usage";
+export const STRIPE_CACHED_TOKEN_EVENT_NAME =
+  "cloud_gateway_cached_token_usage";
 
 export class StripeManager {
   private webhookSecret: string;
@@ -15,7 +16,7 @@ export class StripeManager {
   private stripe: Stripe;
 
   constructor(
-    webhookSecret: string, 
+    webhookSecret: string,
     stripeSecretKey: string,
     wallet: DurableObjectNamespace<Wallet>
   ) {
@@ -63,7 +64,9 @@ export class StripeManager {
           );
 
         default:
-          console.log(`Skipping processing of unknown event type: ${event.type}`);
+          console.log(
+            `Skipping processing of unknown event type: ${event.type}`
+          );
           break;
       }
 
@@ -77,10 +80,76 @@ export class StripeManager {
     }
   }
 
+  async getCreditBalance(
+    stripeCustomerId: string
+  ): Promise<{ balance: number }> {
+    const creditBalanceSummary =
+      await this.stripe.billing.creditBalanceSummary.retrieve({
+        customer: stripeCustomerId,
+        filter: {
+          type: "applicability_scope",
+          applicability_scope: {
+            price_type: "metered",
+          },
+        },
+      });
+
+    if (
+      500 <= creditBalanceSummary.lastResponse.statusCode &&
+      creditBalanceSummary.lastResponse.statusCode < 600
+    ) {
+      throw new Error(
+        `Failed to get credit balance: ${creditBalanceSummary.lastResponse.statusCode}`
+      );
+    }
+
+    let totalBalance = 0;
+    if (
+      creditBalanceSummary.balances &&
+      Array.isArray(creditBalanceSummary.balances)
+    ) {
+      for (const balance of creditBalanceSummary.balances) {
+        if (
+          balance.available_balance?.type === "monetary" &&
+          balance.available_balance?.monetary?.currency === "usd" &&
+          typeof balance.available_balance?.monetary?.value === "number"
+        ) {
+          totalBalance += balance.available_balance.monetary.value;
+        }
+      }
+    }
+
+    return { balance: totalBalance };
+  }
+
+  async getCreditBalanceWithRetry(
+    stripeCustomerId: string
+  ): Promise<Result<{ balance: number }, string>> {
+    try {
+      const balance = await retry<{ balance: number }>(
+        async () => {
+          return await this.getCreditBalance(stripeCustomerId);
+        },
+        {
+          retries: 3,
+          factor: 2,
+          minTimeout: 500,
+          maxTimeout: 5000,
+          randomize: true,
+        }
+      );
+
+      return ok(balance);
+    } catch (e) {
+      console.error(`Failed to get credit balance with retry: ${e}`);
+      return err(e instanceof Error ? e.message : "Unknown error");
+    }
+  }
+
   async emitTokenUsage(
     stripeCustomerId: string,
     usage: {
-      model: string,
+      model: string;
       promptTokens: number;
       completionTokens: number;
       promptCacheWriteTokens: number;
@@ -93,10 +162,13 @@ export class StripeManager {
         stripe_customer_id: stripeCustomerId,
         model: usage.model,
         value: usage.promptTokens.toString(),
-      },
+      }
     );
     if (isError(inputTokenEvent)) {
-      console.error("Error emitting input token usage event", inputTokenEvent.error);
+      console.error(
+        "Error emitting input token usage event",
+        inputTokenEvent.error
+      );
     }
     const outputTokenEvent = await this.emitMeterEventWithRetry(
       STRIPE_OUTPUT_TOKEN_EVENT_NAME,
@@ -104,21 +176,29 @@ export class StripeManager {
         stripe_customer_id: stripeCustomerId,
         model: usage.model,
         value: usage.promptTokens.toString(),
-      },
+      }
     );
     if (isError(outputTokenEvent)) {
-      console.error("Error emitting output token usage event", outputTokenEvent.error);
+      console.error(
+        "Error emitting output token usage event",
+        outputTokenEvent.error
+      );
     }
     const cachedTokenEvent = await this.emitMeterEventWithRetry(
       STRIPE_CACHED_TOKEN_EVENT_NAME,
       {
         stripe_customer_id: stripeCustomerId,
         model: usage.model,
-        value: (usage.promptCacheReadTokens + usage.promptCacheWriteTokens).toString(),
-      },
+        value: (
+          usage.promptCacheReadTokens + usage.promptCacheWriteTokens
+        ).toString(),
+      }
     );
     if (isError(cachedTokenEvent)) {
-      console.error("Error emitting cached token usage event", cachedTokenEvent.error);
+      console.error(
+        "Error emitting cached token usage event",
+        cachedTokenEvent.error
+      );
     }
     return ok(undefined);
   }
@@ -128,7 +208,9 @@ export class StripeManager {
     payload: Record<string, string>
   ): Promise<Result<Stripe.Response<Stripe.V2.Billing.MeterEvent>, string>> {
     try {
-      const meterEvent = await retry<Stripe.Response<Stripe.V2.Billing.MeterEvent>>(
+      const meterEvent = await retry<
+        Stripe.Response<Stripe.V2.Billing.MeterEvent>
+      >(
         async () => {
           const result = await this.stripe.v2.billing.meterEvents.create({
             event_name: eventName,
@@ -136,7 +218,10 @@ export class StripeManager {
           });
 
           const code = result?.lastResponse?.statusCode;
-          if (typeof code === "number" && (code === 429 || (code >= 500 && code < 600))) {
+          if (
+            typeof code === "number" &&
+            (code === 429 || (code >= 500 && code < 600))
+          ) {
             throw new Error(`Retryable status code: ${code}`);
           }
 
@@ -169,18 +254,24 @@ export class StripeManager {
     );
 
     if (!creditGrant.amount.monetary) {
-      console.debug(`Credit grant monetary object is null, skipping: ${creditGrant.id}`);
+      console.debug(
+        `Credit grant monetary object is null, skipping: ${creditGrant.id}`
+      );
       return ok(undefined);
     }
     if (creditGrant.amount.monetary.currency.toUpperCase() !== "USD") {
-      console.debug(`Credit grant currency is not USD, skipping: ${creditGrant.id}`);
+      console.debug(
+        `Credit grant currency is not USD, skipping: ${creditGrant.id}`
+      );
       return ok(undefined);
     }
     if (!creditGrant.metadata?.orgId) {
-      console.debug(`Credit grant metadata orgId is null, skipping: ${creditGrant.id}`);
+      console.debug(
+        `Credit grant metadata orgId is null, skipping: ${creditGrant.id}`
+      );
       return ok(undefined);
     }
-    
+
     const orgId = creditGrant.metadata.orgId;
     const amount = creditGrant.amount.monetary.value;
 
@@ -189,7 +280,9 @@ export class StripeManager {
 
     try {
       const newBalance = await walletStub.addBalance(orgId, amount, eventId);
-      console.log(`Added ${amount} to wallet for org ${orgId} due to event ${eventId}. New balance: ${newBalance}`);
+      console.log(
+        `Added ${amount} to wallet for org ${orgId} due to event ${eventId}. New balance: ${newBalance}`
+      );
       return ok(undefined);
     } catch (e) {
       const errorMessage = `Failed to process credit grant ${creditGrant.id} for org ${orgId} with amount ${amount}: ${e instanceof Error ? e.message : "Unknown error"}`;
