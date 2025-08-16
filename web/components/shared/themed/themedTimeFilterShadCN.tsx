@@ -119,6 +119,11 @@ export function ThemedTimeFilterShadCN({
 
       setDate(newDate);
       onDateChange(newDate);
+    } else if (newDate?.to) {
+      // Handle case where only end date is selected
+      setIsInvertedRange(false);
+      setDate(newDate);
+      onDateChange(newDate);
     }
   };
 
@@ -141,7 +146,16 @@ export function ThemedTimeFilterShadCN({
     handleDateChange({ from, to: now });
   };
 
-  const formatDateDisplay = (from: Date, to: Date) => {
+  const formatDateDisplay = (from: Date | undefined, to: Date | undefined) => {
+    if (!from && to) {
+      // Only end date is selected
+      return `Until ${format(to, "LLL d, yyyy HH:mm")}`;
+    }
+    
+    if (!from || !to) {
+      return "Pick a date and time";
+    }
+    
     if (from.toDateString() === to.toDateString()) {
       // Same day
       return `${format(from, "LLL d, yyyy")} ${format(
@@ -214,10 +228,7 @@ export function ThemedTimeFilterShadCN({
             size="md_sleek"
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {date?.from &&
-            date?.to &&
-            isValidDate(date?.from) &&
-            isValidDate(date?.to) ? (
+            {date?.to ? (
               <>
                 {formatDateDisplay(date.from, date.to)}
                 {isInvertedRange && (
@@ -299,6 +310,24 @@ export function ThemedTimeFilterShadCN({
               selected={date}
               onSelect={(newDate) => {
                 if (newDate?.from || newDate?.to) {
+                  // Check if user is trying to select a date earlier than the existing end date
+                  if (date?.to && newDate?.from && newDate.from > date.to) {
+                    // If trying to select a start date that's after the end date,
+                    // keep only the later date (the new from date becomes the to date)
+                    const newDateRange = {
+                      from: undefined,
+                      to: new Date(
+                        newDate.from.getFullYear(),
+                        newDate.from.getMonth(),
+                        newDate.from.getDate(),
+                        date?.to?.getHours() ?? 23,
+                        date?.to?.getMinutes() ?? 59,
+                      )
+                    };
+                    handleDateChange(newDateRange satisfies DateRange);
+                    return;
+                  }
+                  
                   const newDateRange = {
                     from: newDate?.from
                       ? new Date(
@@ -336,7 +365,10 @@ export function ThemedTimeFilterShadCN({
               <div className="flex justify-between gap-2">
                 <Input
                   type="date"
-                  className="ml-auto w-min rounded-md border-gray-300 text-xs"
+                  className={cn(
+                    "ml-auto w-min rounded-md border-gray-300 text-xs",
+                    !date?.from ? "opacity-50" : ""
+                  )}
                   value={date1Value}
                   onChange={(e) => {
                     setDate1Value(e.target.value);
@@ -348,7 +380,10 @@ export function ThemedTimeFilterShadCN({
                 />
                 <Input
                   type="time"
-                  className="ml-auto w-min rounded-md border-gray-300 text-xs"
+                  className={cn(
+                    "ml-auto w-min rounded-md border-gray-300 text-xs",
+                    !date?.from ? "opacity-50" : ""
+                  )}
                   value={time1Value}
                   onChange={(e) => {
                     setTime1Value(e.target.value);
@@ -372,7 +407,7 @@ export function ThemedTimeFilterShadCN({
                   onChange={(e) => {
                     setDate2Value(e.target.value);
                     const newTo = new Date(e.target.value);
-                    if (isValidDate(newTo) && date?.from) {
+                    if (isValidDate(newTo)) {
                       handleDateChange({ ...date, to: newTo });
                     }
                   }}
@@ -384,7 +419,7 @@ export function ThemedTimeFilterShadCN({
                   onChange={(e) => {
                     setTime2Value(e.target.value);
                     const newTo = new Date(e.target.value);
-                    if (isValidDate(newTo) && date?.from) {
+                    if (isValidDate(newTo)) {
                       let [hours, minutes] = e.target.value.split(":");
 
                       if (hours && minutes) {
