@@ -10317,7 +10317,7 @@ expect@^29.7.0:
     jest-message-util "^29.7.0"
     jest-util "^29.7.0"
 
-express-openapi-validator@^5.3.7:
+express-openapi-validator@^5.5.8:
   version "5.5.8"
   resolved "https://registry.yarnpkg.com/express-openapi-validator/-/express-openapi-validator-5.5.8.tgz#45e6226acdac92caa89f623bbcfd48c158f69ebf"
   integrity sha512-JNokdK39oGS174eEUhjJrzB3sfI2HMxOmSvPkbbZ6Q7XqywIlEFreZF99BtbTiTjZ7jZIknqFB1528xkVdNPcQ==
