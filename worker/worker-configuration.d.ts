@@ -281,6 +281,14 @@ interface Queue {
     sendBatch(messages: any[]): Promise<void>;
 }
 
+// Add CryptoKey interface
+interface CryptoKey {
+    readonly algorithm: any;
+    readonly extractable: boolean;
+    readonly type: string;
+    readonly usages: string[];
+}
+
 // Begin runtime types
 /*! *****************************************************************************
 Copyright (c) Cloudflare. All rights reserved.
