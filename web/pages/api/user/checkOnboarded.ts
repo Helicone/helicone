@@ -3,6 +3,7 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
+import { logger } from "@/lib/telemetry/logger";
 import { getRequestCountClickhouse } from "../../../lib/api/request/request";
 import { Result } from "@/packages/common/result";
 
@@ -14,10 +15,10 @@ async function checkAndUpdateOrgs(orgId: string): Promise<boolean> {
       [orgId],
     );
     if (error) {
-      console.error("Error updating org", error);
+      logger.error("Error updating org", { error });
       return false;
     }
-    console.log("Updated org", orgId);
+    logger.info("Updated org", { orgId });
     return true;
   }
   return false;

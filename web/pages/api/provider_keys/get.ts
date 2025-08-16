@@ -8,6 +8,7 @@ import {
   getDecryptedProviderKeysByOrgId,
 } from "../../../services/lib/keys";
 import { Role } from "../../../services/lib/user";
+import { logger } from "@/lib/telemetry/logger";
 
 async function handler({
   req,
@@ -23,7 +24,7 @@ async function handler({
   );
 
   if (error || keys === null) {
-    console.error("Failed to retrieve provider keys", error);
+    logger.error({ error }, "Failed to retrieve provider keys");
     res.status(500).json({ error: error, data: null });
     return;
   }

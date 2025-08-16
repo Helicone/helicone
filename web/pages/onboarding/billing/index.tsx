@@ -9,6 +9,7 @@ import { useDraftOnboardingStore } from "@/services/hooks/useOrgOnboarding";
 import { TeamPlanCheckout } from "@/components/onboarding/Checkout/TeamPlanCheckout";
 import { ProPlanCheckout } from "@/components/onboarding/Checkout/ProPlanCheckout";
 import useNotification from "@/components/shared/notification/useNotification";
+import { logger } from "@/lib/telemetry/logger";
 
 export default function BillingPage() {
   const org = useOrg();
@@ -109,7 +110,7 @@ export default function BillingPage() {
           setClientSecret(result.data);
         }
       } catch (error) {
-        console.error("Error creating checkout session:", error);
+        logger.error({ error }, "Error creating checkout session");
       } finally {
         setIsCreatingCheckout(false);
       }

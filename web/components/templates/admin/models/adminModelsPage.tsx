@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { logger } from "@/lib/telemetry/logger";
 import {
   Select,
   SelectContent,
@@ -53,7 +54,7 @@ export default function AdminModelsPage() {
         setIsLoading(false);
       })
       .catch((error) => {
-        console.error("Failed to load models:", error);
+        logger.error({ error }, "Failed to load models");
         setIsLoading(false);
       });
   }, []);

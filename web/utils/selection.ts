@@ -1,3 +1,5 @@
+import { logger } from "@/lib/telemetry/logger";
+
 export type SelectionInfo = {
   selectionStart: number;
   selectionEnd: number;
@@ -66,7 +68,7 @@ export function createSelectionRange(
       preRect: pre.getBoundingClientRect(),
     };
   } catch (error) {
-    console.error("Error setting range:", error);
+    logger.error("Error setting range", { error });
     return null;
   }
 }

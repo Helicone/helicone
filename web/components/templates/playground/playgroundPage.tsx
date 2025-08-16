@@ -46,6 +46,7 @@ import { ResponseFormat, ResponseFormatType, VariableInput } from "./types";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import Link from "next/link";
 import EnvironmentPill from "@/components/templates/prompts2025/EnvironmentPill";
+import { logger } from "@/lib/telemetry/logger";
 
 export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
   _type: "openai-chat",
@@ -534,7 +535,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         setNotification(`Prompt created successfully!`, "success");
       }
     } catch (error) {
-      console.error("Failed to save prompt:", error);
+      logger.error({ error, promptName, tagsCount: tags.length }, "Failed to save prompt");
       setNotification("Failed to save prompt", "error");
     }
   };
@@ -580,7 +581,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         setNotification(`Prompt version saved successfully!`, "success");
       }
     } catch (error) {
-      console.error("Failed to save prompt version:", error);
+      logger.error({ error, promptId: promptVersionData?.prompt?.id, newMajorVersion, environment }, "Failed to save prompt version");
       setNotification("Failed to save prompt version", "error");
     }
   };
@@ -787,7 +788,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
 
         if (result && result.error) {
           setError(result.error.message);
-          console.error("error", result.error);
+          logger.error({ error: result.error, selectedModel }, "Stream processing error");
         }
       } catch (error) {
         if (error instanceof Error) {
@@ -795,7 +796,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
             setError("Request was cancelled");
             setNotification("Request was cancelled", "error");
           } else {
-            console.error("Error:", error);
+            logger.error({ error, selectedModel }, "Error during playground run");
             setError(
               error.message ||
                 "An error occurred while generating the response",

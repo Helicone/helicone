@@ -1,6 +1,7 @@
 import { ReactElement, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import AuthLayout from "../../components/layout/auth/authLayout";
+import { logger } from "@/lib/telemetry/logger";
 import AuthHeader from "@/components/shared/authHeader";
 import { Card } from "@/components/ui/card";
 import { useEvaluators } from "@/components/templates/evals/EvaluatorHook";
@@ -184,7 +185,7 @@ const EvaluatorDetail = () => {
             includedVariables: extractedIncludedVariables,
           });
         } catch (e) {
-          console.error("Error parsing template:", e);
+          logger.error("Error parsing template", { error: e });
           // Set defaults if parsing fails
           setEvaluatorFormValues({
             name: evaluator.name || "",
@@ -233,7 +234,7 @@ const EvaluatorDetail = () => {
         existingEvaluatorId: id as string,
       });
     } catch (error) {
-      console.error("Error updating evaluator:", error);
+      logger.error("Error updating evaluator", { error });
       notification.setNotification("Failed to update evaluator", "error");
     }
   };

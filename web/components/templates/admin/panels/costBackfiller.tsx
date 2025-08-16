@@ -19,6 +19,7 @@ import {
   useDeduplicateRequestResponse,
 } from "@/services/hooks/admin";
 import { toast } from "sonner";
+import { logger } from "@/lib/telemetry/logger";
 
 interface SelectableModelWithProvider extends ModelWithProvider {
   selected: boolean;
@@ -210,7 +211,7 @@ const CostBackfiller = () => {
       toast.success("Row counts retrieved successfully!");
     } catch (error) {
       toast.error("Failed to check row counts");
-      console.error(error);
+      logger.error("Failed to check row counts", { error, selectedModelsCount: selectedModels.length });
     }
   };
 
@@ -247,7 +248,7 @@ const CostBackfiller = () => {
       }
     } catch (error) {
       toast.error("Failed to generate query preview");
-      console.error(error);
+      logger.error("Failed to generate query preview", { error, selectedModelsCount: selectedModels.length });
     }
   };
 
@@ -290,7 +291,7 @@ const CostBackfiller = () => {
       const errorMessage = `Failed to execute cost backfill: ${error instanceof Error ? error.message : "Unknown error"}`;
       setBackfillError(errorMessage);
       toast.error("Failed to execute cost backfill");
-      console.error(error);
+      logger.error("Failed to execute cost backfill", { error, selectedModelsCount: selectedModels.length });
     }
   };
 
@@ -304,7 +305,7 @@ const CostBackfiller = () => {
       }
     } catch (error) {
       toast.error("Failed to deduplicate request response table");
-      console.error(error);
+      logger.error("Failed to deduplicate request response table", { error });
     }
   };
 

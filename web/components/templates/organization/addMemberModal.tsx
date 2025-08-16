@@ -12,6 +12,7 @@ import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { getJawnClient } from "../../../lib/clients/jawn";
 import useNotification from "../../shared/notification/useNotification";
+import { logger } from "@/lib/telemetry/logger";
 
 interface AddMemberModalProps {
   orgId: string;
@@ -66,7 +67,7 @@ const AddMemberModal = (props: AddMemberModalProps) => {
       setErrorMessage(
         errorMessage ? JSON.stringify(errorMessage) : "error adding memeber",
       );
-      console.error(addMemberError);
+      logger.error({ error: addMemberError }, "Error adding member");
     } else {
       setNotification("Member added successfully", "success");
       onSuccess && onSuccess();

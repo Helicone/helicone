@@ -8,6 +8,7 @@ import PublicMetaData from "../components/layout/public/publicMetaData";
 import useNotification from "../components/shared/notification/useNotification";
 import AuthForm from "../components/templates/auth/authForm";
 import { Result } from "@/packages/common/result";
+import { logger } from "@/lib/telemetry/logger";
 
 const SignIn = ({
   customerPortal,
@@ -32,9 +33,11 @@ const SignIn = ({
   useEffect(() => {
     // Prevent infinite loops by limiting redirects
     if (redirectCount >= 3) {
-      console.error(
-        "Too many redirects detected. Stopping to prevent infinite loop.",
-      );
+      logger.error("Too many redirects detected. Stopping to prevent infinite loop.", {
+        redirectCount,
+        unauthorized,
+        userId: heliconeAuthClient?.user?.id
+      });
       return;
     }
 
@@ -104,7 +107,7 @@ const SignIn = ({
 
               if (error) {
                 setNotification(error, "error");
-                console.error(error);
+                logger.error("Email sign in failed", { error, email });
                 return;
               }
               setNotification("Success. Redirecting...", "success");
@@ -116,7 +119,7 @@ const SignIn = ({
               });
               if (error) {
                 setNotification("Error logging in. Please try again.", "error");
-                console.error(error);
+                logger.error("Google OAuth sign in failed", { error });
                 return;
               }
               setNotification("Successfully signed in.", "success");
@@ -127,7 +130,7 @@ const SignIn = ({
               });
               if (error) {
                 setNotification("Error logging in. Please try again.", "error");
-                console.error(error);
+                logger.error("GitHub OAuth sign in failed", { error });
                 return;
               }
               setNotification("Successfully signed in.", "success");

@@ -28,6 +28,7 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Result } from "@/packages/common/result";
 import { useRouter } from "next/navigation";
+import { logger } from "@/lib/telemetry/logger";
 import { useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
 import { H1, Small, Muted } from "@/components/ui/typography";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
@@ -136,7 +137,7 @@ export function CodeIntegrationPage({
 
       if (!res.response.ok) {
         setNotification("Failed to generate API key", "error");
-        console.error(await res.response.text());
+        logger.error({ response: await res.response.text() }, "Failed to generate API key");
       }
 
       setApiKey(generatedApiKey);

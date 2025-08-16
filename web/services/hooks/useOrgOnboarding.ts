@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { logger } from "@/lib/telemetry/logger";
 
 export type OnboardingStep =
   | "ORGANIZATION"
@@ -184,7 +185,7 @@ export const useOrgOnboarding = (orgId: string) => {
       );
 
       if (error) {
-        console.error("Update failed:", error);
+        logger.error({ error }, "Update failed");
         throw error;
       }
 

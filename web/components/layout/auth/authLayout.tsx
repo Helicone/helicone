@@ -8,6 +8,7 @@ import { useMemo, useRef, useState, useEffect } from "react";
 import { useChangelog } from "../../../services/hooks/admin";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import { Row } from "../common";
+import { logger } from "@/lib/telemetry/logger";
 import { useOrg } from "../org/organizationContext";
 import MetaData from "../public/authMetaData";
 import DemoModal from "./DemoModal";
@@ -35,7 +36,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
           router.push("/signin?unauthorized=true");
         }
       } catch (error) {
-        console.error("Authentication error:", error);
+        logger.error({ error }, "Authentication error");
         router.push("/signin?unauthorized=true");
       }
     };

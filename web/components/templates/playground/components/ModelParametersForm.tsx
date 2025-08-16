@@ -8,6 +8,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { logger } from "@/lib/telemetry/logger";
 import {
   Select,
   SelectContent,
@@ -146,7 +147,7 @@ export default function ModelParametersForm({
 
   // Auto-open OpenRouter dialog when the specific error occurs
   useEffect(() => {
-    console.log("error", error);
+    logger.error({ error }, "Error occurred");
     if (
       error &&
       error.includes(

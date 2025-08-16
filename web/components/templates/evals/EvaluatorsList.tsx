@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import { H2 } from "@/components/ui/typography";
 import Link from "next/link";
+import { logger } from "@/lib/telemetry/logger";
 import { LineChart, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -85,7 +86,7 @@ export default function EvaluatorsList() {
                 counts.set(evaluator.id, response.data.data.length);
               }
             } catch (error) {
-              console.error(
+              logger.error({ error: result.error },
                 `Error fetching online evaluators for ${evaluator.id}:`,
                 error,
               );

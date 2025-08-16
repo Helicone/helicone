@@ -13,6 +13,7 @@ import { removeLeadingWhitespace } from "../../shared/utils/utils";
 
 import RoleButton from "./new/roleButton";
 import useNotification from "../../shared/notification/useNotification";
+import { logger } from "@/lib/telemetry/logger";
 import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import { enforceString } from "../../../lib/helpers/typeEnforcers";
 import AddFileButton from "./new/addFileButton";
@@ -121,7 +122,7 @@ export const PrettyInput = ({
             <MarkdownEditor
               text={selectedProperties?.[keyName] || ""}
               setText={(text) => {
-                console.log(text);
+                logger.debug({ text }, "Text content");
               }}
               disabled={true}
               language="markdown"

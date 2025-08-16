@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { PlayIcon } from "@heroicons/react/24/outline";
+import { logger } from "@/lib/telemetry/logger";
 import {
   Popover,
   PopoverContent,
@@ -50,7 +51,7 @@ export const OriginalOutputCellRenderer = ({
             }
             // Add any other properties you need to extract here
           } catch (e) {
-            console.error("Failed to parse tool call arguments:", e);
+            logger.error("Failed to parse tool call arguments", { error: e, toolCall });
             continue;
           }
         }

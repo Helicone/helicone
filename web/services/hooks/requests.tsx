@@ -9,6 +9,7 @@ import { placeAssetIdValues } from "../lib/requestTraverseHelper";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
 import { MAX_EXPORT_ROWS } from "@/lib/constants";
 import { TSessions } from "@/components/templates/sessions/sessionsPage";
+import { logger } from "@/lib/telemetry/logger";
 
 function formatDateForClickHouse(date: Date): string {
   return date.toISOString().slice(0, 19).replace("T", " ");
@@ -148,9 +149,7 @@ export const useGetRequestsWithBodies = (
             try {
               const contentResponse = await fetch(request.signed_body_url);
               if (!contentResponse.ok) {
-                console.error(
-                  `Error fetching request body: ${contentResponse.status}`,
-                );
+                logger.error({ status: contentResponse.status }, "Error fetching request body");
                 return request;
               }
 
@@ -173,13 +172,13 @@ export const useGetRequestsWithBodies = (
                 response_body: content.response,
               };
             } catch (error) {
-              console.error("Error processing request body:", error);
+              logger.error({ error }, "Error processing request body");
               return request;
             }
           }) ?? [],
         );
       } catch (error) {
-        console.error("Error processing requests with bodies:", error);
+        logger.error({ error }, "Error processing requests with bodies");
         return [];
       }
     },
@@ -351,9 +350,7 @@ const getRequestBodiesBySession = async (sessions: TSessions[]) => {
         try {
           const contentResponse = await fetch(request.signed_body_url);
           if (!contentResponse.ok) {
-            console.error(
-              `Error fetching request body: ${contentResponse.status}`,
-            );
+            logger.error({ status: contentResponse.status }, "Error fetching request body");
             return request;
           }
 
@@ -375,13 +372,13 @@ const getRequestBodiesBySession = async (sessions: TSessions[]) => {
             response_body: content.response,
           };
         } catch (error) {
-          console.error("Error processing request body:", error);
+          logger.error({ error }, "Error processing request body");
           return request;
         }
       }),
     );
   } catch (error) {
-    console.error("Error fetching requests by session IDs with bodies:", error);
+    logger.error({ error }, "Error fetching requests by session IDs with bodies");
     throw error;
   }
 };

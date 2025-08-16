@@ -24,6 +24,7 @@ import { Muted, Small } from "@/components/ui/typography";
 import { Label } from "../ui/label";
 import { Checkbox } from "../ui/checkbox";
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/telemetry/logger";
 
 // ====== Types ======
 interface ProviderCardProps {
@@ -245,7 +246,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
           payload: existingKey.config as Record<string, string>,
         });
       } catch (error) {
-        console.error("Error parsing config:", error);
+        logger.error({ error, existingKey }, "Error parsing config");
       }
     }
   }, [existingKey]);
@@ -275,7 +276,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
         };
         dispatch({ type: "SET_DECRYPTED_KEY", payload: key });
       } catch (error) {
-        console.error("Error viewing key:", error);
+        logger.error({ error, keyId: existingKey.id }, "Error viewing key");
         setNotification("Failed to retrieve key", "error");
         dispatch({ type: "HIDE_KEY" });
       }
@@ -323,7 +324,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
         });
       }
     } catch (error) {
-      console.error("Error saving provider key:", error);
+      logger.error({ error, providerName: provider.name, isEditMode }, "Error saving provider key");
       setNotification("Failed to save provider key", "error");
     }
   };
