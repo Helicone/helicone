@@ -630,6 +630,9 @@ export interface paths {
     get: operations["GetAlertBanners"];
     patch: operations["UpdateAlertBannerActive"];
   };
+  "/v1/agent/generate": {
+    post: operations["Generate"];
+  };
 }
 
 export type webhooks = Record<string, never>;
