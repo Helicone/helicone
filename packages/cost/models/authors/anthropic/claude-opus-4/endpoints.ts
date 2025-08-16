@@ -1,10 +1,11 @@
-import type { Endpoint } from "../../../types";
+import { ProviderName } from "@/cost/models/providers";
+import type { ModelProviderConfig } from "../../../types";
+import { ClaudeOpus4ModelName } from "./model";
 
 export const endpoints = {
   "claude-opus-4:anthropic": {
-    modelId: "claude-opus-4",
-    provider: "anthropic",
     providerModelId: "claude-opus-4-20250514",
+    provider: "anthropic",
     version: "20250514",
     pricing: {
       prompt: 15,
@@ -24,13 +25,14 @@ export const endpoints = {
       "tool_choice",
     ],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
 
-  "claude-opus-4:vertex:global": {
-    modelId: "claude-opus-4",
-    provider: "vertex",
-    region: "global",
+  "claude-opus-4:vertex": {
     providerModelId: "claude-opus-4@20250514",
+    provider: "vertex",
     version: "vertex-2023-10-16",
     pricing: {
       prompt: 15,
@@ -50,7 +52,12 @@ export const endpoints = {
       "tool_choice",
     ],
     ptbEnabled: true,
+    endpointConfigs: {
+      global: {
+        providerModelId: "claude-opus-4@20250514",
+      },
+    },
   },
-} satisfies Record<string, Endpoint>;
-
-export type EndpointId = keyof typeof endpoints;
+} satisfies Partial<
+  Record<`${ClaudeOpus4ModelName}:${ProviderName}`, ModelProviderConfig>
+>;

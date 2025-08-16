@@ -327,7 +327,7 @@ export async function proxyForwarder(
                 await sentryManager.sendError(
                   "Failed to save to cache",
                   error instanceof Error
-                    ? error.stack ?? error.message
+                    ? (error.stack ?? error.message)
                     : String(error)
                 );
                 console.error("Failed to save to cache:", error);

@@ -7,10 +7,10 @@ import { SignatureV4 } from "@smithy/signature-v4";
 import { Sha256 } from "@aws-crypto/sha256-js";
 import { HttpRequest } from "@smithy/protocol-http";
 import type {
-  ProviderConfig,
   Endpoint,
-  UserConfig,
-  ProviderName,
+  ModelProviderConfig,
+  ProviderConfig,
+  UserEndpointConfig,
   AuthContext,
   AuthResult,
   RequestBodyContext,
@@ -18,11 +18,11 @@ import type {
 
 export const providers = {
   anthropic: {
-    id: "anthropic",
     baseUrl: "https://api.anthropic.com",
     auth: "api-key",
     buildUrl: () => "https://api.anthropic.com/v1/chat/completions",
-    buildModelId: (endpoint) => endpoint.providerModelId,
+    buildModelId: (endpointConfig: ModelProviderConfig) =>
+      endpointConfig.providerModelId,
     authenticate: (context) => {
       const headers: Record<string, string> = {};
       if (context.bodyMapping === "NO_MAPPING") {
@@ -41,11 +41,11 @@ export const providers = {
   },
 
   openai: {
-    id: "openai",
     baseUrl: "https://api.openai.com",
     auth: "api-key",
     buildUrl: () => "https://api.openai.com/v1/chat/completions",
-    buildModelId: (endpoint) => endpoint.providerModelId,
+    buildModelId: (endpointConfig: ModelProviderConfig) =>
+      endpointConfig.providerModelId,
     authenticate: (context) => {
       return {
         headers: {
@@ -58,24 +58,44 @@ export const providers = {
   },
 
   bedrock: {
-    id: "bedrock",
     baseUrl: "https://bedrock-runtime.{region}.amazonaws.com",
     auth: "aws-signature",
     requiredConfig: ["region"],
-    buildUrl: (endpoint, config) => {
-      const region = config.region || endpoint.region || "us-west-2";
-      const modelId = endpoint.providerModelId;
-      return `https://bedrock-runtime.${region}.amazonaws.com/model/${modelId}/invoke`;
-    },
-    buildModelId: (endpoint, config) => {
-      // Handle cross-region access
-      if (config.crossRegion && config.region) {
-        // Extract base model ID without region prefix
-        const baseModelId = endpoint.providerModelId.replace(/^[a-z]{2}\./, "");
-        const regionPrefix = config.region.split("-")[0];
-        return `${regionPrefix}.${baseModelId}`;
+    buildUrl: (
+      endpointConfig: ModelProviderConfig,
+      userConfig: UserEndpointConfig
+    ) => {
+      const region = userConfig.region || "us-east-1";
+      const modelId = endpointConfig.providerModelId;
+
+      let finalModelId;
+      if (
+        userConfig.crossRegion &&
+        userConfig.region &&
+        endpointConfig.crossRegion
+      ) {
+        const regionPrefix = userConfig.region.split("-")[0];
+        finalModelId = `${regionPrefix}.${endpointConfig.providerModelId}`;
+      } else {
+        finalModelId = modelId;
       }
-      return endpoint.providerModelId;
+
+      return `https://bedrock-runtime.${region}.amazonaws.com/model/${finalModelId}/invoke`;
+    },
+    buildModelId: (
+      endpointConfig: ModelProviderConfig,
+      userConfig: UserEndpointConfig
+    ) => {
+      // Handle cross-region access
+      if (
+        userConfig.crossRegion &&
+        userConfig.region &&
+        endpointConfig.crossRegion
+      ) {
+        const regionPrefix = userConfig.region.split("-")[0];
+        return `${regionPrefix}.${endpointConfig.providerModelId}`;
+      }
+      return endpointConfig.providerModelId;
     },
     authenticate: async (context) => {
       if (!context.apiKey || !context.secretKey) {
@@ -132,8 +152,8 @@ export const providers = {
 
       return { headers: signedHeaders };
     },
-    buildRequestBody: (context) => {
-      if (context.model.includes("claude-")) {
+    buildRequestBody: (endpoint, context) => {
+      if (endpoint.providerModelId.includes("claude-")) {
         const anthropicBody =
           context.bodyMapping === "OPENAI"
             ? context.toAnthropic(context.parsedBody)
@@ -156,11 +176,12 @@ export const providers = {
   },
 
   vertex: {
-    id: "vertex",
     baseUrl: "https://{region}-aiplatform.googleapis.com",
     auth: "oauth",
     requiredConfig: ["projectId", "region"],
-    buildModelId: (endpoint) => endpoint.providerModelId || "",
+    buildModelId: (endpointConfig: ModelProviderConfig) =>
+      endpointConfig.providerModelId,
+
     buildUrl: (endpoint, options) => {
       const { projectId, region } = options || {};
       const modelId = endpoint.providerModelId || "";
@@ -176,8 +197,8 @@ export const providers = {
         },
       };
     },
-    buildRequestBody: (context) => {
-      if (context.model.includes("claude-")) {
+    buildRequestBody: (endpoint, context) => {
+      if (endpoint.providerModelId.includes("claude-")) {
         const anthropicBody =
           context.bodyMapping === "OPENAI"
             ? context.toAnthropic(context.parsedBody)
@@ -203,12 +224,14 @@ export const providers = {
   },
 
   "azure-openai": {
-    id: "azure-openai",
     baseUrl: "https://{resourceName}.openai.azure.com",
     auth: "api-key",
     requiredConfig: ["resourceName", "deploymentName"],
-    buildUrl: (endpoint, config) => {
-      const { resourceName, deploymentName } = config;
+    buildUrl: (
+      endpointConfig: ModelProviderConfig,
+      userConfig: UserEndpointConfig
+    ) => {
+      const { resourceName, deploymentName } = userConfig;
       if (!resourceName || !deploymentName) {
         throw new Error(
           "Azure OpenAI requires resourceName and deploymentName"
@@ -217,7 +240,8 @@ export const providers = {
       const apiVersion = "2024-02-15-preview";
       return `https://${resourceName}.openai.azure.com/openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`;
     },
-    buildModelId: (endpoint) => endpoint.providerModelId,
+    buildModelId: (endpointConfig: ModelProviderConfig) =>
+      endpointConfig.providerModelId,
     authenticate: (context) => {
       return {
         headers: {
@@ -234,11 +258,11 @@ export const providers = {
   },
 
   perplexity: {
-    id: "perplexity",
     baseUrl: "https://api.perplexity.ai",
     auth: "api-key",
     buildUrl: () => "https://api.perplexity.ai/chat/completions",
-    buildModelId: (endpoint) => endpoint.providerModelId,
+    buildModelId: (endpointConfig: ModelProviderConfig) =>
+      endpointConfig.providerModelId,
     authenticate: (context) => {
       return {
         headers: {
@@ -251,11 +275,11 @@ export const providers = {
   },
 
   groq: {
-    id: "groq",
     baseUrl: "https://api.groq.com/openai/v1",
     auth: "api-key",
     buildUrl: () => "https://api.groq.com/openai/v1/chat/completions",
-    buildModelId: (endpoint) => endpoint.providerModelId,
+    buildModelId: (endpointConfig: ModelProviderConfig) =>
+      endpointConfig.providerModelId,
     authenticate: (context) => {
       return {
         headers: {
@@ -271,11 +295,11 @@ export const providers = {
   },
 
   deepseek: {
-    id: "deepseek",
     baseUrl: "https://api.deepseek.com",
     auth: "api-key",
     buildUrl: () => "https://api.deepseek.com/chat/completions",
-    buildModelId: (endpoint) => endpoint.providerModelId,
+    buildModelId: (endpointConfig: ModelProviderConfig) =>
+      endpointConfig.providerModelId,
     authenticate: (context) => {
       return {
         headers: {
@@ -288,11 +312,11 @@ export const providers = {
   },
 
   cohere: {
-    id: "cohere",
     baseUrl: "https://api.cohere.ai",
     auth: "api-key",
     buildUrl: () => "https://api.cohere.ai/v1/chat",
-    buildModelId: (endpoint) => endpoint.providerModelId,
+    buildModelId: (endpointConfig: ModelProviderConfig) =>
+      endpointConfig.providerModelId,
     authenticate: (context) => {
       return {
         headers: {
@@ -305,11 +329,11 @@ export const providers = {
   },
 
   xai: {
-    id: "xai",
     baseUrl: "https://api.x.ai",
     auth: "api-key",
     buildUrl: () => "https://api.x.ai/v1/chat/completions",
-    buildModelId: (endpoint) => endpoint.providerModelId,
+    buildModelId: (endpointConfig: ModelProviderConfig) =>
+      endpointConfig.providerModelId,
     authenticate: (context) => {
       return {
         headers: {
@@ -320,10 +344,9 @@ export const providers = {
     pricingPages: ["https://docs.x.ai/docs/pricing"],
     modelPages: ["https://docs.x.ai/docs/models"],
   },
-} satisfies Record<ProviderName, ProviderConfig>;
+} satisfies Record<string, ProviderConfig>;
 
-// Re-export ProviderName type for convenience
-export type { ProviderName } from "./types";
+export type ProviderName = keyof typeof providers;
 
 // Helper function to get provider config
 export function getProvider(providerName: string): Result<ProviderConfig> {
@@ -370,27 +393,21 @@ export const providerToDbProvider = (provider: ProviderName): string => {
 
 // Helper function to build URL for an endpoint
 export function buildEndpointUrl(
-  endpoint: Endpoint,
-  userConfig: UserConfig = {}
+  endpointConfig: ModelProviderConfig,
+  userConfig: UserEndpointConfig = {}
 ): Result<string> {
-  const providerResult = getProvider(endpoint.provider);
+  const providerResult = getProvider(endpointConfig.provider);
   if (providerResult.error) {
     return err(providerResult.error);
   }
 
   const provider = providerResult.data;
   if (!provider) {
-    return err(`Provider data is null for: ${endpoint.provider}`);
+    return err(`Provider data is null for: ${endpointConfig.provider}`);
   }
 
   try {
-    // Merge endpoint region with user config
-    const config: UserConfig = {
-      ...userConfig,
-      region: userConfig.region || endpoint.region,
-    };
-
-    const url = provider.buildUrl(endpoint, config);
+    const url = provider.buildUrl(endpointConfig, userConfig);
     return ok(url);
   } catch (error) {
     return err(error instanceof Error ? error.message : "Failed to build URL");
@@ -399,31 +416,31 @@ export function buildEndpointUrl(
 
 // Helper function to build model ID for an endpoint
 export function buildModelId(
-  endpoint: Endpoint,
-  userConfig: UserConfig = {}
+  endpointConfig: ModelProviderConfig,
+  userConfig: UserEndpointConfig = {}
 ): Result<string> {
-  const providerResult = getProvider(endpoint.provider);
+  const providerResult = getProvider(endpointConfig.provider);
   if (providerResult.error) {
     return err(providerResult.error);
   }
 
   const provider = providerResult.data;
   if (!provider) {
-    return err(`Provider data is null for: ${endpoint.provider}`);
+    return err(`Provider data is null for: ${endpointConfig.provider}`);
   }
 
   if (!provider.buildModelId) {
-    return ok(endpoint.providerModelId);
+    return ok(endpointConfig.providerModelId);
   }
 
   try {
-    // Merge endpoint region with user config
-    const config: UserConfig = {
+    // Merge endpoint deployment/region with user config
+    const config: UserEndpointConfig = {
       ...userConfig,
-      region: userConfig.region || endpoint.region,
+      region: userConfig.region,
     };
 
-    const modelId = provider.buildModelId(endpoint, config);
+    const modelId = provider.buildModelId(endpointConfig, config);
     return ok(modelId);
   } catch (error) {
     return err(
@@ -488,13 +505,13 @@ export async function buildRequestBody(
     return ok(
       JSON.stringify({
         ...context.parsedBody,
-        model: context.model,
+        model: endpoint.providerModelId,
       })
     );
   }
 
   try {
-    const result = await provider.buildRequestBody(context);
+    const result = await provider.buildRequestBody(endpoint, context);
     return ok(result);
   } catch (error) {
     return err(

@@ -1,7 +1,7 @@
 aiohappyeyeballs==2.4.3 ; python_full_version >= "3.11.0" and python_version < "4" \
     --hash=sha256:75cf88a15106a5002a8eb1dab212525c00d1f4c0fa96e551c9fbe6f09a621586 \
     --hash=sha256:8a7a83727b2756f394ab2895ea0765a0a8c475e3c71e98d43d76f22b4b435572
-aiohttp==3.10.11 ; python_full_version >= "3.11.0" and python_version < "4" \
+aiohttp==3.12.14 ; python_full_version >= "3.11.0" and python_version < "4" \
     --hash=sha256:007ec22fbc573e5eb2fb7dec4198ef8f6bf2fe4ce20020798b2eb5d0abda6138 \
     --hash=sha256:00819de9e45d42584bed046314c40ea7e9aea95411b38971082cad449392b08c \
     --hash=sha256:01948b1d570f83ee7bbf5a60ea2375a89dfb09fd419170e7f5af029510033d24 \
@@ -393,9 +393,9 @@ importlib-metadata==8.4.0 ; python_full_version >= "3.11.0" and python_version <
 inflection==0.5.1 ; python_full_version >= "3.11.0" and python_version < "4" \
     --hash=sha256:1a29730d366e996aaacffb2f1f1cb9593dc38e2ddd30c91250c6dde09ea9b417 \
     --hash=sha256:f38b2b640938a4f35ade69ac3d053042959b62a0f1076a5bbaa1b9526605a8a2
-jinja2==3.1.4 ; python_full_version >= "3.11.0" and python_version < "4" \
-    --hash=sha256:4a3aee7acbbe7303aede8e9648d13b8bf88a429282aa6122a993f0ac800cb369 \
-    --hash=sha256:bc5dd2abb727a5319567b7a813e6a2e7318c39f4f487cfe6c89c6f9c7d25197d
+jinja2==3.1.6 ; python_full_version >= "3.11.0" and python_version < "4" \
+    --hash=sha256:1cdbbe4a235b2ba2a21ec1bf46d5a82c0e3c95b4abb3b77feb07aa88cd9d3ce2 \
+    --hash=sha256:54f42bf2f3e4b3e166b70e5cae7c35b7a4e98b2ace6b6b12b2b4e9ae0f37e4a5
 jiter==0.6.1 ; python_full_version >= "3.11.0" and python_version < "4" \
     --hash=sha256:03a025b52009f47e53ea619175d17e4ded7c035c6fbd44935cb3ada11e1fd592 \
     --hash=sha256:08be33db6dcc374c9cc19d3633af5e47961a7b10d4c61710bd39e48d52a35824 \
@@ -853,7 +853,7 @@ propcache==0.2.0 ; python_full_version >= "3.11.0" and python_version < "4" \
     --hash=sha256:fa1076244f54bb76e65e22cb6910365779d5c3d71d1f18b275f1dfc7b0d71b4d \
     --hash=sha256:fc2db02409338bf36590aa985a461b2c96fce91f8e7e0f14c50c5fcc4f229016 \
     --hash=sha256:ffcad6c564fe6b9b8916c1aefbb37a362deebf9394bd2974e9d84232e3e08504
-protobuf==4.25.5 ; python_full_version >= "3.11.0" and python_version < "4" \
+protobuf==4.25.8 ; python_full_version >= "3.11.0" and python_version < "4" \
     --hash=sha256:0aebecb809cae990f8129ada5ca273d9d670b76d9bfc9b1809f0a9c02b7dbf41 \
     --hash=sha256:4be0571adcbe712b282a330c6e89eae24281344429ae95c6d85e79e84780f5ea \
     --hash=sha256:5e61fd921603f58d2f5acb2806a929b4675f8874ff5f330b7d6f7e2e784bbcd8 \
@@ -1110,7 +1110,7 @@ regex==2024.9.11 ; python_full_version >= "3.11.0" and python_version < "4" \
     --hash=sha256:f8404bf61298bb6f8224bb9176c1424548ee1181130818fcd2cbffddc768bed8 \
     --hash=sha256:f9268774428ec173654985ce55fc6caf4c6d11ade0f6f914d48ef4719eb05ebb \
     --hash=sha256:faa3c142464efec496967359ca99696c896c591c56c53506bac1ad465f66e919
-requests==2.32.3 ; python_full_version >= "3.11.0" and python_version < "4" \
+requests==2.32.4 ; python_full_version >= "3.11.0" and python_version < "4" \
     --hash=sha256:55365417734eb18255590a9ff9eb97e9e1da868d4ccd6402399eaf68af20a760 \
     --hash=sha256:70761cfe03c773ceb22aa2f671b4757976145175cdfca038c02654d061d6dcc6
 setuptools==78.1.1  # Security: CVE-2024-6345, CVE-2025-47273 ; python_full_version >= "3.11.0" and python_version < "4" \
@@ -1267,7 +1267,7 @@ traceloop-sdk==0.33.1 ; python_full_version >= "3.11.0" and python_version < "4"
 typing-extensions==4.12.2 ; python_full_version >= "3.11.0" and python_version < "4" \
     --hash=sha256:04e5ca0351e0f3f85c6853954072df659d0d13fac324d0072316b67d7794700d \
     --hash=sha256:1a7ead55c7e559dd4dee8856e3a88b41225abfe1ce8df57b7c13915fe121ffb8
-urllib3==2.2.3 ; python_full_version >= "3.11.0" and python_version < "4" \
+urllib3==2.5.0 ; python_full_version >= "3.11.0" and python_version < "4" \
     --hash=sha256:ca899ca043dcb1bafa3e262d73aa25c465bfb49e0bd9dd5d59f1d0acba2f8fac \
     --hash=sha256:e7d814a81dad81e6caf2ec9fdedb284ecc9c73076b62654547cc64ccdcae26e9
 wrapt==1.16.0 ; python_full_version >= "3.11.0" and python_version < "4" \

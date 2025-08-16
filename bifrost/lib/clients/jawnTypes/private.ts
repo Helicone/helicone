@@ -1303,8 +1303,6 @@ Json: JsonObject;
       cached?: components["schemas"]["Partial_BooleanOperators_"];
       assets?: components["schemas"]["Partial_TextOperators_"];
       "helicone-score-feedback"?: components["schemas"]["Partial_BooleanOperators_"];
-      gateway_router_id?: components["schemas"]["Partial_TextOperators_"];
-      gateway_deployment_target?: components["schemas"]["Partial_TextOperators_"];
       prompt_id?: components["schemas"]["Partial_TextOperators_"];
       prompt_version?: components["schemas"]["Partial_TextOperators_"];
     };
@@ -1607,8 +1605,7 @@ Json: JsonObject;
       cache_reference_id: string | null;
       cache_enabled: boolean;
       updated_at?: string;
-      gateway_router_id?: string | null;
-      gateway_deployment_target?: string | null;
+      request_referrer?: string | null;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
@@ -2045,6 +2042,7 @@ Json: JsonObject;
         id: string;
       };
       request: {
+        requestReferrer?: string;
         cacheReferenceId?: string;
         cacheControl?: string;
         /** Format: double */

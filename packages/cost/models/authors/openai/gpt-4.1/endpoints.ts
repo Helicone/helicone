@@ -1,10 +1,11 @@
-import type { Endpoint } from "../../../types";
+import { ProviderName } from "@/cost/models/providers";
+import type { ModelProviderConfig } from "../../../types";
+import { GPT41ModelName } from "./models";
 
 export const endpoints = {
   "gpt-4.1:openai": {
-    modelId: "gpt-4.1",
-    provider: "openai",
     providerModelId: "gpt-4.1",
+    provider: "openai",
     pricing: {
       prompt: 2,
       completion: 8,
@@ -25,11 +26,13 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
   "gpt-4.1-mini:openai": {
-    modelId: "gpt-4.1-mini",
-    provider: "openai",
     providerModelId: "gpt-4.1-mini",
+    provider: "openai",
     pricing: {
       prompt: 0.25,
       completion: 1,
@@ -50,11 +53,13 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
   "gpt-4.1-nano:openai": {
-    modelId: "gpt-4.1-nano",
-    provider: "openai",
     providerModelId: "gpt-4.1-nano",
+    provider: "openai",
     pricing: {
       prompt: 0.1,
       completion: 0.4,
@@ -75,7 +80,10 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
-} satisfies Record<string, Endpoint>;
-
-export type EndpointId = keyof typeof endpoints;
+} satisfies Partial<
+  Record<`${GPT41ModelName}:${ProviderName}`, ModelProviderConfig>
+>;

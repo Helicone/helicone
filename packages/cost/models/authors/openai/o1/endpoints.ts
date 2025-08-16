@@ -1,8 +1,9 @@
-import type { Endpoint } from "../../../types";
+import { ProviderName } from "@/cost/models/providers";
+import type { ModelProviderConfig } from "../../../types";
+import { O1ModelName } from "./models";
 
 export const endpoints = {
   "o1:openai": {
-    modelId: "o1",
     provider: "openai",
     providerModelId: "o1",
     pricing: {
@@ -21,9 +22,11 @@ export const endpoints = {
       "response_format",
     ],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
   "o1-pro:openai": {
-    modelId: "o1-pro",
     provider: "openai",
     providerModelId: "o1-pro",
     pricing: {
@@ -41,9 +44,11 @@ export const endpoints = {
       "response_format",
     ],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
   "o1-mini:openai": {
-    modelId: "o1-mini",
     provider: "openai",
     providerModelId: "o1-mini",
     pricing: {
@@ -55,7 +60,10 @@ export const endpoints = {
     maxCompletionTokens: 65536,
     supportedParameters: ["seed", "max_tokens"],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
-} satisfies Record<string, Endpoint>;
-
-export type EndpointId = keyof typeof endpoints;
+} satisfies Partial<
+  Record<`${O1ModelName}:${ProviderName}`, ModelProviderConfig>
+>;
