@@ -158,24 +158,3 @@ export interface RequestBodyContext {
   bodyMapping: "OPENAI" | "NO_MAPPING";
   toAnthropic: (body: any) => any;
 }
-
-export interface ProviderConfig {
-  baseUrl: string;
-  auth: "api-key" | "oauth" | "aws-signature" | "azure-ad";
-  buildUrl: (
-    endpoint: ModelProviderConfig,
-    config: UserEndpointConfig
-  ) => string;
-  buildModelId?: (
-    endpoint: ModelProviderConfig,
-    config: UserEndpointConfig
-  ) => string;
-  requiredConfig?: Array<keyof UserEndpointConfig>;
-  authenticate?: (context: AuthContext) => Promise<AuthResult> | AuthResult;
-  buildRequestBody?: (
-    endpoint: Endpoint,
-    context: RequestBodyContext
-  ) => Promise<string> | string;
-  pricingPages?: string[];
-  modelPages?: string[];
-}
