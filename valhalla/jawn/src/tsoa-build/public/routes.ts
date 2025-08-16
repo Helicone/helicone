@@ -67,6 +67,8 @@ import { CustomerController } from './../../controllers/public/customerControlle
 import { ApiKeyController } from './../../controllers/public/apiKeyController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { AlertBannerController } from './../../controllers/public/alertBannerController';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { AgentController } from './../../controllers/public/agentController';
 import { expressAuthentication } from './../../authentication';
 // @ts-ignore - no great way to install types from subpackage
 import type { Request as ExRequest, Response as ExResponse, RequestHandler, Router } from 'express';
@@ -10696,6 +10698,38 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getAlertBanners',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAgentController_generate: Record<string, TsoaRoute.ParameterSchema> = {
+                bodyParams: {"in":"body","name":"bodyParams","required":true,"dataType":"intersection","subSchemas":[{"ref":"OpenAIChatRequest"},{"dataType":"nestedObjectLiteral","nestedProperties":{"logRequest":{"dataType":"boolean"},"useAIGateway":{"dataType":"boolean"}}}]},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.post('/v1/agent/generate',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(AgentController)),
+            ...(fetchMiddlewares<RequestHandler>(AgentController.prototype.generate)),
+
+            async function AgentController_generate(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAgentController_generate, request, response });
+
+                const controller = new AgentController();
+
+              await templateService.apiHandler({
+                methodName: 'generate',
                 controller,
                 response,
                 next,

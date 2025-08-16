@@ -15,6 +15,7 @@ import DemoModal from "./DemoModal";
 import MainContent, { BannerType } from "./MainContent";
 import Sidebar from "./Sidebar";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+import AgentChat from "@/components/templates/agent/agentChat";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -26,8 +27,25 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const { pathname } = router;
 
   const [open, setOpen] = useState(false);
+  const [chatWindowOpen, setChatWindowOpen] = useState(false);
 
   const auth = useHeliconeAuthClient();
+  
+  // Handle Command+I keyboard shortcut
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key === 'i') {
+        event.preventDefault();
+        setChatWindowOpen(prev => !prev);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -133,12 +151,22 @@ const AuthLayout = (props: AuthLayoutProps) => {
             />
           </div>
           <div
-            className="relative max-w-full flex-grow overflow-hidden"
+            className={`relative max-w-full flex-grow overflow-hidden transition-all duration-300 ${
+              chatWindowOpen ? 'mr-96' : ''
+            }`}
             key={orgContext?.currentOrg?.id}
           >
             <MainContent banner={banner} pathname={pathname}>
               <ErrorBoundary>{children}</ErrorBoundary>
             </MainContent>
+          </div>
+          
+          <div
+            className={`fixed right-0 top-0 h-full w-96 bg-background border-l border-border transition-transform duration-300 ease-in-out z-50 ${
+              chatWindowOpen ? 'translate-x-0' : 'translate-x-full'
+            }`}
+          >
+            <AgentChat onClose={() => setChatWindowOpen(false)} />
           </div>
         </Row>
       </div>

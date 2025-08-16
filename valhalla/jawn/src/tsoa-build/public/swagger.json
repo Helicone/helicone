@@ -20285,6 +20285,57 @@
 				"security": [],
 				"parameters": []
 			}
+		},
+		"/v1/agent/generate": {
+			"post": {
+				"operationId": "Generate",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ChatCompletion-or-_content-string--reasoning-string--calls-any_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Agent"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"allOf": [
+									{
+										"$ref": "#/components/schemas/OpenAIChatRequest"
+									},
+									{
+										"properties": {
+											"logRequest": {
+												"type": "boolean"
+											},
+											"useAIGateway": {
+												"type": "boolean"
+											}
+										},
+										"type": "object"
+									}
+								]
+							}
+						}
+					}
+				}
+			}
 		}
 	},
 	"servers": [
