@@ -46,4 +46,22 @@ export const promptsTools = [
       },
     },
   },
+  {
+    type: "function" as const,
+    function: {
+      name: "get-prompt-versions",
+      description:
+        "Gets the versions and accompanying metadata of a prompt given an ID.",
+      parameters: {
+        type: "object",
+        properties: {
+          id: {
+            type: "string",
+            description: "The ID of the prompt to get versions for",
+          },
+        },
+        required: ["id"],
+      },
+    },
+  },
 ];
