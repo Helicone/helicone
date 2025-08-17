@@ -1,15 +1,15 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { generateStream } from "@/lib/api/llm/generate-stream";
 import { processStream } from "@/lib/api/llm/process-stream";
 import { OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
 import { Send } from "lucide-react";
 import { useHeliconeAgent } from "./HeliconeAgentContext";
 import MessageRenderer from "./MessageRenderer";
+import { SessionDropdown } from "./SessionDropdown";
 
 type Message = NonNullable<OpenAIChatRequest["messages"]>[0];
-type Tool = NonNullable<OpenAIChatRequest["tools"]>[0];
 type ToolCall = NonNullable<Message["tool_calls"]>[0];
 
 interface AgentChatProps {
@@ -17,12 +17,23 @@ interface AgentChatProps {
 }
 
 const AgentChat = ({ onClose }: AgentChatProps) => {
-  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const abortController = useRef<AbortController | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { tools, executeTool } = useHeliconeAgent();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  
+  const {
+    tools,
+    executeTool,
+    sessions,
+    currentSession,
+    currentSessionId,
+    messages,
+    createNewSession,
+    updateCurrentSessionMessages,
+    switchToSession,
+  } = useHeliconeAgent();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -31,6 +42,30 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Auto-resize textarea based on content
+  const adjustTextareaHeight = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    // Reset height to auto to get the correct scrollHeight
+    textarea.style.height = 'auto';
+    
+    // Calculate the number of lines based on scrollHeight
+    const lineHeight = parseInt(getComputedStyle(textarea).lineHeight);
+    const lines = Math.ceil(textarea.scrollHeight / lineHeight);
+    
+    // Limit to max 5 lines
+    const maxLines = 5;
+    const actualLines = Math.min(lines, maxLines);
+    
+    // Set the height based on the number of lines
+    textarea.style.height = `${actualLines * lineHeight}px`;
+  };
+
+  useEffect(() => {
+    adjustTextareaHeight();
+  }, [input]);
 
   const handleToolCall = async (toolCall: ToolCall) => {
     const result = await executeTool(
@@ -48,10 +83,8 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
       content: input.trim(),
     };
 
-    let updatedMessages = messages;
-    updatedMessages = [...updatedMessages, userMessage];
-
-    setMessages(updatedMessages);
+    let updatedMessages = [...messages, userMessage];
+    updateCurrentSessionMessages(updatedMessages);
     setInput("");
 
     try {
@@ -62,6 +95,12 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
         setIsStreaming(true);
 
         const assistantMessageIdx = updatedMessages.length;
+        const assistantMessage: Message = {
+          role: "assistant",
+          content: "",
+        };
+        updatedMessages = [...updatedMessages, assistantMessage];
+        updateCurrentSessionMessages(updatedMessages);
 
         const request: OpenAIChatRequest = {
           model: "gpt-4o-mini",
@@ -92,7 +131,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
                 updatedMessages = updatedMessages.map((msg, idx) =>
                   idx === assistantMessageIdx ? parsedResponse : msg,
                 );
-                setMessages(updatedMessages);
+                updateCurrentSessionMessages(updatedMessages);
               } catch (error) {
                 console.error("Failed to parse response:", error);
               }
@@ -112,7 +151,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
                 content: toolResult.message,
               };
               updatedMessages = [...updatedMessages, toolResultMessage];
-              setMessages(updatedMessages);
+              updateCurrentSessionMessages(updatedMessages);
             }
           }
         } else {
@@ -132,6 +171,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
       e.preventDefault();
       sendMessage();
     }
+    // Shift+Enter will naturally create a new line in textarea
   };
 
   const stopGeneration = () => {
@@ -144,7 +184,13 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between border-b border-border p-4">
-        <h2 className="text-lg font-semibold">Agent Chat</h2>
+        <SessionDropdown
+          sessions={sessions}
+          currentSession={currentSession}
+          currentSessionId={currentSessionId}
+          onCreateSession={createNewSession}
+          onSwitchSession={switchToSession}
+        />
         <button
           onClick={onClose}
           className="text-xl leading-none text-muted-foreground hover:text-foreground"
@@ -189,25 +235,29 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
       </div>
 
       <div className="border-t border-border p-4">
-        <div className="flex gap-2">
-          <Input
+        <div className="flex gap-2 items-end">
+          <Textarea
+            ref={textareaRef}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Type your message..."
             disabled={isStreaming}
-            className="flex-1"
+            className="flex-1 resize-none overflow-y-auto"
+            style={{ minHeight: '40px' }}
+            rows={1}
           />
           <Button
             onClick={sendMessage}
             disabled={!input.trim() || isStreaming}
             size="sm"
+            className="shrink-0"
           >
             <Send className="h-4 w-4" />
           </Button>
         </div>
         <div className="mt-1 text-xs text-muted-foreground">
-          Press Enter to send • Cmd+I to toggle
+          Press Enter to send • Shift+Enter for new line • Cmd+I to toggle
         </div>
       </div>
     </div>
