@@ -99,7 +99,7 @@ export function buildModelId(
     // Merge endpoint deployment/region with user config
     const config: UserEndpointConfig = {
       ...userConfig,
-      region: userConfig.region,
+      region: userConfig?.region || "",
     };
 
     const modelId = provider.buildModelId(endpointConfig, config);
