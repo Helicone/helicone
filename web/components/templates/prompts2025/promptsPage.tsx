@@ -285,7 +285,7 @@ const PromptsPage = (props: PromptsPageProps) => {
       };
     });
 
-    setToolHandler("get-prompt-versions", async (args: { id: string }) => {
+    setToolHandler("prompts-get_versions", async (args: { id: string }) => {
       const prompt = prompts.find((p) => p.prompt.id === args.id);
       if (prompt) {
         const promptVersions = prompt.versions.map((version) => {
