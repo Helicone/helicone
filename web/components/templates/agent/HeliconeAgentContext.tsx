@@ -5,6 +5,7 @@ import {
   universalTools,
   promptsTools,
   playgroundTools,
+  filtersTools,
 } from "@/lib/agent/tools";
 
 type Tool = NonNullable<OpenAIChatRequest["tools"]>[0];
@@ -56,6 +57,10 @@ const getToolsForRoute = (pathname: string): HeliconeAgentTool[] => {
     tools.push(...promptsTools);
   } else if (pathname === "/playground") {
     tools.push(...playgroundTools);
+  }
+
+  if (pathname === "/requests") {
+    tools.push(...filtersTools);
   }
 
   return tools;
