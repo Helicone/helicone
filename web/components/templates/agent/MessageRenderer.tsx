@@ -5,7 +5,7 @@ import { useState } from "react";
 import { ImageModal } from "../requests/components/chatComponent/single/images/ImageModal";
 
 const markdownStyling =
-  "w-full text-[13px] prose-p:my-2 prose-h1:mt-2 prose-h2:mt-2 prose-h3:mt-2 prose-h3:mb-1";
+  "w-full text-[13px] prose-p:my-2 prose-h1:mt-2 prose-h2:mt-2 prose-h3:mt-2 prose-h3:mb-1 prose-a:text-brand prose-a:underline";
 const ReactMarkdown = dynamic(() => import("react-markdown"), {
   ssr: false,
   loading: () => <div className="h-4 w-full animate-pulse rounded bg-muted" />,
