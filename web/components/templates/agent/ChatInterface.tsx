@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { QueuedMessage } from "./agentChat";
+import { cn } from "@/lib/utils";
 
 interface ChatInterfaceProps {
   messageQueue: QueuedMessage[];
@@ -120,23 +121,32 @@ const ChatInterface = forwardRef<{ focus: () => void }, ChatInterfaceProps>(
     return (
       <div className="mx-2 mb-2 flex flex-col items-center">
         {messageQueue.length > 0 && (
-          <div className="w-[calc(100%-2rem)] rounded-t-lg border-x border-t border-border bg-card p-2 text-xs">
+          <div
+            className={cn(
+              "w-[calc(100%-2rem)] rounded-t-lg border-x border-t border-border bg-card text-xs",
+              isAccordionOpen ? "p-2" : "px-2 pt-2",
+            )}
+          >
             <div className="flex flex-col gap-2">
               <div
                 className="flex cursor-pointer items-center gap-2 text-muted-foreground"
                 onClick={() => setIsAccordionOpen(!isAccordionOpen)}
               >
-                {isAccordionOpen ? (
-                  <ChevronDown size={16} />
-                ) : (
-                  <ChevronDown
-                    size={16}
-                    className="-rotate-90 transition-transform duration-300"
-                  />
-                )}
+                <ChevronDown
+                  size={16}
+                  className={cn(
+                    "transition-transform duration-300",
+                    isAccordionOpen ? "rotate-0" : "-rotate-90",
+                  )}
+                />
                 {messageQueue.length ?? "0"} Queued
               </div>
-              <div className="ml-1 flex flex-col gap-2">
+              <div
+                className={cn(
+                  "ml-1 flex flex-col gap-2 overflow-hidden transition-all duration-300",
+                  isAccordionOpen ? "max-h-96" : "max-h-0",
+                )}
+              >
                 {messageQueue.map((message) => (
                   <div key={message.id} className="flex items-center gap-2">
                     <div className="flex items-center gap-2">

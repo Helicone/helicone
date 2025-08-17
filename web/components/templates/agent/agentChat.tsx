@@ -312,6 +312,37 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
           <MessageRenderer key={index} message={message} />
         ))}
 
+        {/* Show queued messages */}
+        {/* {messageQueue.length > 0 && (
+          <div className="space-y-2">
+            {messageQueue.map((queuedMessage) => (
+              <div
+                key={queuedMessage.id}
+                className="flex items-center gap-2 rounded-lg border border-border bg-muted/50 p-3"
+              >
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                <div className="flex-1">
+                  <div className="text-sm font-medium text-foreground">
+                    Queued message
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {queuedMessage.content ||
+                      `${queuedMessage.images.length} image(s)`}
+                  </div>
+                </div>
+                <Button
+                  onClick={() => removeFromQueue(queuedMessage.id)}
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0"
+                >
+                  <XIcon className="h-3 w-3" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        )} */}
+
         {isStreaming && (
           <div className="flex justify-center">
             <Button
