@@ -144,7 +144,6 @@ export async function proxyForwarder(
             rateLimitKV: env.RATE_LIMIT_KV,
             rateLimitOptions: finalRateLimitOptions,
             userId: proxyRequest.userId,
-            cost: 0,
           });
 
           responseBuilder.addRateLimitHeaders(
@@ -327,7 +326,7 @@ export async function proxyForwarder(
                 await sentryManager.sendError(
                   "Failed to save to cache",
                   error instanceof Error
-                    ? (error.stack ?? error.message)
+                    ? error.stack ?? error.message
                     : String(error)
                 );
                 console.error("Failed to save to cache:", error);
@@ -414,7 +413,6 @@ export async function proxyForwarder(
           rateLimitKV: env.RATE_LIMIT_KV,
           rateLimitOptions: finalRateLimitOptions,
           userId: proxyRequest.userId,
-          cost: res.data?.cost ?? 0,
         });
       }
     }

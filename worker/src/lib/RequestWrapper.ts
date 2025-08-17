@@ -139,10 +139,7 @@ export class RequestWrapper {
     this.injectPromptProperties();
   }
 
-  private constructor(
-    private request: Request,
-    private env: Env
-  ) {
+  private constructor(private request: Request, private env: Env) {
     this.url = new URL(request.url);
     this.originalUrl = new URL(request.url);
     this.headers = this.mutatedAuthorizationHeaders(request);
@@ -690,9 +687,9 @@ export async function getProviderKeyFromPortalKey(
 
   const check = await checkLimitsSingle(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (organization.data?.limits as any)["cost"],
+    (organization.data?.limits as any)?.["cost"] ?? -1,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (organization.data?.limits as any)["requests"],
+    (organization.data?.limits as any)?.["requests"] ?? -1,
     "month",
     apiKey.data?.organization_id ?? "",
     env
