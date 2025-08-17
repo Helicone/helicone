@@ -120,7 +120,7 @@ export const promptsTools = [
   {
     type: "function" as const,
     function: {
-      name: "prompts-get-versions",
+      name: "prompts-get_versions",
       description:
         "Gets the versions and accompanying metadata of a prompt given an ID.",
       parameters: {

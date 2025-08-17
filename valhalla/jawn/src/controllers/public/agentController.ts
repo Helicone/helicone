@@ -18,6 +18,9 @@ export class AgentController extends Controller {
     bodyParams: OpenAIChatRequest & {
       useAIGateway?: boolean; // ignored
       logRequest?: boolean; // ignored
+      prompt_id?: string;
+      environment?: string;
+      inputs?: any;
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<
@@ -81,7 +84,9 @@ export class AgentController extends Controller {
               verbosity: params.verbosity,
 
               // Helicone Prompt Params
-              prompt_id: process.env.HELI_AGENT_PROMPT_ID,
+              prompt_id: bodyParams.prompt_id ?? process.env.HELI_AGENT_PROMPT_ID,
+              environment: bodyParams.environment,
+              inputs: bodyParams.inputs,
             } as HeliconeChatCreateParams,
             {
               signal: abortController.signal,

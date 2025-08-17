@@ -7,6 +7,7 @@ import { useHeliconeAgent } from "./HeliconeAgentContext";
 import MessageRenderer from "./MessageRenderer";
 import { SessionDropdown } from "./SessionDropdown";
 import ChatInterface from "./ChatInterface";
+import { useRouter } from "next/router";
 
 type Message = NonNullable<OpenAIChatRequest["messages"]>[0];
 type ToolCall = NonNullable<Message["tool_calls"]>[0];
@@ -16,8 +17,10 @@ interface AgentChatProps {
 }
 
 const AgentChat = ({ onClose }: AgentChatProps) => {
+  const router = useRouter();
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
+  const [selectedModel, setSelectedModel] = useState("gpt-4o");
   const abortController = useRef<AbortController | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -72,7 +75,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
         const assistantMessageIdx = updatedMessages.length;
 
         const request: OpenAIChatRequest = {
-          model: "gpt-4o",
+          model: selectedModel,
           messages: updatedMessages,
           temperature: 0.7,
           max_tokens: 1000,
@@ -81,6 +84,9 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
 
         const stream = await generateStream({
           ...request,
+          inputs: {
+            page: router.pathname,
+          },
           endpoint: "agent",
           signal: abortController.current.signal,
         } as any);
@@ -202,6 +208,8 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
         onSendMessage={sendMessage}
         isStreaming={isStreaming}
         onStopGeneration={stopGeneration}
+        selectedModel={selectedModel}
+        onModelChange={setSelectedModel}
       />
     </div>
   );

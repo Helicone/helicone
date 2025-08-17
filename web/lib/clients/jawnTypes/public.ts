@@ -5928,6 +5928,9 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["OpenAIChatRequest"] & {
+          inputs?: unknown;
+          environment?: string;
+          prompt_id?: string;
           logRequest?: boolean;
           useAIGateway?: boolean;
         };
