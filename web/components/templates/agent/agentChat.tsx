@@ -8,6 +8,7 @@ import MessageRenderer from "./MessageRenderer";
 import { SessionDropdown } from "./SessionDropdown";
 import ChatInterface from "./ChatInterface";
 import { useRouter } from "next/router";
+import { AlertCircle } from "lucide-react";
 
 type Message = NonNullable<OpenAIChatRequest["messages"]>[0];
 type ToolCall = NonNullable<Message["tool_calls"]>[0];
@@ -27,14 +28,9 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
   const {
     tools,
     executeTool,
-    sessions,
-    currentSession,
-    currentSessionId,
     messages,
-    createNewSession,
     updateCurrentSessionMessages,
-    switchToSession,
-    deleteSession,
+    escalateSession,
   } = useHeliconeAgent();
 
   const scrollToBottom = () => {
@@ -167,14 +163,8 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between border-b border-border p-4">
-        <SessionDropdown
-          sessions={sessions}
-          currentSession={currentSession}
-          currentSessionId={currentSessionId}
-          onCreateSession={createNewSession}
-          onSwitchSession={switchToSession}
-          onDeleteSession={deleteSession}
-        />
+        <SessionDropdown />
+        <button onClick={() => escalateSession()} className="flex items-center gap-2">Escalate <AlertCircle className="w-4 h-4" /></button>
         <button
           onClick={onClose}
           className="text-xl leading-none text-muted-foreground hover:text-foreground"
@@ -227,6 +217,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
         selectedModel={selectedModel}
         onModelChange={setSelectedModel}
       />
+      
     </div>
   );
 };
