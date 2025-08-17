@@ -306,25 +306,29 @@ export class AgentController extends Controller {
   ): Promise<Result<string, string>> {
     const { query } = bodyParams;
 
-    const response = await fetch(`https://docs.helicone.ai/mcp`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json, text/event-stream",
-        "Access-Control-Allow-Origin": "*",
-      },
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        id: 1,
-        method: "tools/call", // Fixed: was "tool/call", should be "tools/call"
-        params: {
-          name: "Search", // Fixed: moved name to correct level
-          arguments: {
-            query,
-          },
+    try {
+      const response = await fetch(`https://docs.helicone.ai/mcp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json, text/event-stream",
+          "Access-Control-Allow-Origin": "*",
         },
-      }),
-    });
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          id: 1,
+          method: "tools/call", // Fixed: was "tool/call", should be "tools/call"
+          params: {
+            name: "Search", // Fixed: moved name to correct level
+            arguments: {
+              query,
+            },
+          },
+        }),
+      });
+    } catch (error) {
+      return err("Failed to connect to documentation search service");
+    }
 
     // Handle SSE response format
     const responseText = await response.text();
