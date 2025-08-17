@@ -23,7 +23,6 @@ const models = [
   { id: "gpt-4o/openai", label: "GPT-4o", provider: "OpenAI" },
   { id: "gpt-4o-mini/openai", label: "GPT-4o-mini", provider: "OpenAI" },
 ];
-
 const ChatInterface = ({
   input,
   setInput,
