@@ -646,6 +646,9 @@ export interface paths {
   "/v1/agent/threads": {
     get: operations["GetAllThreads"];
   };
+  "/v1/agent/mcp/search": {
+    post: operations["SearchDocs"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -7573,6 +7576,23 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_ThreadSummary-Array.string_"];
+        };
+      };
+    };
+  };
+  SearchDocs: {
+    requestBody: {
+      content: {
+        "application/json": {
+          query: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string.string_"];
         };
       };
     };
