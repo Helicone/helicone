@@ -32,6 +32,45 @@ export const universalTools = [
   },
 ];
 
+export const hqlTools = [
+  {
+    type: "function" as const,
+    function: {
+      name: "hql-get-schema",
+      description:
+        "Gets the schema of the HQL database. This is the schema of the tables and columns that are available to query.",
+      parameters: {},
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "hql-write-query",
+      description:
+        "Writes a Clickhouse query based on the provided schema. Will also ask for confirmation if the user wants to run the query.",
+      parameters: {
+        type: "object",
+        properties: {
+          query: {
+            type: "string",
+            description: "The HQL query to execute",
+          },
+        },
+      },
+      required: ["query"],
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "hql-run-query",
+      description:
+        "Executes a query on the HQL database once we receive confirmation on the written query.",
+      parameters: {},
+    },
+  },
+];
+
 // TOOLS ON /playground
 export const playgroundTools = [
   {
