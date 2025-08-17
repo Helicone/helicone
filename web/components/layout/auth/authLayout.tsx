@@ -29,6 +29,8 @@ const AuthLayout = (props: AuthLayoutProps) => {
 
   const [open, setOpen] = useState(false);
   const [chatWindowOpen, setChatWindowOpen] = useState(true);
+  const [chatWidth, setChatWidth] = useState(384); // 384px = 24rem = w-96
+  const [isResizing, setIsResizing] = useState(false);
 
   const auth = useHeliconeAuthClient();
 
@@ -46,6 +48,38 @@ const AuthLayout = (props: AuthLayoutProps) => {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
+
+  // Handle resize functionality
+  useEffect(() => {
+    if (!chatWindowOpen) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizing) return;
+
+      const newWidth = window.innerWidth - e.clientX;
+      const minWidth = 300; // Minimum width
+      const maxWidth = window.innerWidth * 0.8; // Maximum 80% of screen width
+
+      if (newWidth >= minWidth && newWidth <= maxWidth) {
+        setChatWidth(newWidth);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+    };
+
+    if (isResizing) {
+      // TODO: this is pretty ugly given this is a react app, figure out a better way to handle resizing
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isResizing, chatWindowOpen]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -152,25 +186,36 @@ const AuthLayout = (props: AuthLayoutProps) => {
                 setOpen={setOpen}
               />
             </div>
+
             <div
-              className={`relative max-w-full flex-grow overflow-hidden transition-all duration-300 ${
-                chatWindowOpen ? "mr-96" : ""
-              }`}
+              className="relative max-w-full flex-grow overflow-hidden"
               key={orgContext?.currentOrg?.id}
             >
               <MainContent banner={banner} pathname={pathname}>
                 <ErrorBoundary>{children}</ErrorBoundary>
               </MainContent>
             </div>
+          </Row>
 
+          {/* Floating Resizable Chat Window */}
+          {chatWindowOpen && (
             <div
-              className={`fixed right-0 top-0 z-50 h-full w-96 border-l border-border bg-background transition-transform duration-300 ease-in-out ${
-                chatWindowOpen ? "translate-x-0" : "translate-x-full"
-              }`}
+              className="fixed right-0 top-0 z-50 h-full border-l border-border bg-background transition-transform duration-300 ease-in-out"
+              style={{ width: `${chatWidth}px` }}
             >
+              {/* Resize Handle */}
+              <div
+                className="absolute left-0 top-0 h-full w-0.5 cursor-col-resize select-none bg-border transition-colors hover:bg-primary"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsResizing(true);
+                }}
+              />
+
               <AgentChat onClose={() => setChatWindowOpen(false)} />
             </div>
-          </Row>
+          )}
         </div>
 
         <UpgradeProModal open={open} setOpen={setOpen} />
