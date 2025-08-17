@@ -1,7 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
-import { promptsTools, playgroundTools } from "@/lib/agent/tools";
+import {
+  universalTools,
+  promptsTools,
+  playgroundTools,
+} from "@/lib/agent/tools";
 
 type Tool = NonNullable<OpenAIChatRequest["tools"]>[0];
 type Message = NonNullable<OpenAIChatRequest["messages"]>[0];
@@ -45,7 +49,7 @@ const HeliconeAgentContext = createContext<
 >(undefined);
 
 const getToolsForRoute = (pathname: string): HeliconeAgentTool[] => {
-  const tools: HeliconeAgentTool[] = [];
+  const tools: HeliconeAgentTool[] = universalTools;
 
   // PATH SPECIFIC TOOLS
   if (pathname === "/prompts") {
@@ -79,6 +83,15 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     const routeTools = getToolsForRoute(router.pathname);
     setTools(routeTools);
+
+    // Universal Tool Handlers
+    setToolHandler("navigate", async (args: { page: string }) => {
+      router.push(args.page);
+      return {
+        success: true,
+        message: "Successfully navigated to " + args.page,
+      };
+    });
   }, [router.pathname]);
 
   // Initialize with first session if none exist

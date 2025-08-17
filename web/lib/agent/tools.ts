@@ -1,5 +1,37 @@
 // TOOLS ALLOWING THE AGENT TO INTERACT WITH HELICONE
 
+export const universalTools = [
+  {
+    type: "function" as const,
+    function: {
+      name: "navigate",
+      description: "Navigates to a specific page within the Helicone platform.",
+      parameters: {
+        type: "object",
+        properties: {
+          page: {
+            type: "string",
+            description: "The page to navigate to",
+            enum: [
+              "/dashboard",
+              "/requests",
+              "/sessions",
+              "/properties",
+              "/users",
+              "/cache",
+              "/rate-limit",
+              "/prompts",
+              "/datasets",
+              "/playground",
+            ],
+          },
+        },
+        required: ["page"],
+      },
+    },
+  },
+];
+
 // TOOLS ON /playground
 export const playgroundTools = [
   {
