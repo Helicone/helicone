@@ -28,7 +28,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const { pathname } = router;
 
   const [open, setOpen] = useState(false);
-  const [chatWindowOpen, setChatWindowOpen] = useState(false);
+  const [chatWindowOpen, setChatWindowOpen] = useState(true);
 
   const auth = useHeliconeAuthClient();
 
