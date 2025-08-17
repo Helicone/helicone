@@ -10931,6 +10931,9 @@
 					"updated_at": {
 						"type": "string",
 						"format": "date-time"
+					},
+					"soft_delete": {
+						"type": "boolean"
 					}
 				},
 				"required": [
@@ -10942,7 +10945,8 @@
 					"created_at",
 					"escalated",
 					"metadata",
-					"updated_at"
+					"updated_at",
+					"soft_delete"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -11540,6 +11544,9 @@
 					},
 					"last_message": {
 						"type": "string"
+					},
+					"soft_delete": {
+						"type": "boolean"
 					}
 				},
 				"required": [
@@ -21227,45 +21234,6 @@
 					}
 				],
 				"parameters": []
-			}
-		},
-		"/v1/agent/thread": {
-			"post": {
-				"operationId": "CreateNewThread",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_InAppThread.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Agent"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"metadata": {}
-								},
-								"type": "object"
-							}
-						}
-					}
-				}
 			}
 		}
 	},

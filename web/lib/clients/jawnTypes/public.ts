@@ -646,9 +646,6 @@ export interface paths {
   "/v1/agent/threads": {
     get: operations["GetAllThreads"];
   };
-  "/v1/agent/thread": {
-    post: operations["CreateNewThread"];
-  };
 }
 
 export type webhooks = Record<string, never>;
@@ -3568,6 +3565,7 @@ Json: JsonObject;
       metadata: unknown;
       /** Format: date-time */
       updated_at: string;
+      soft_delete: boolean;
     };
     ResultSuccess_InAppThread_: {
       data: components["schemas"]["InAppThread"];
@@ -3816,6 +3814,7 @@ Json: JsonObject;
       message_count: number;
       first_message?: string;
       last_message?: string;
+      soft_delete?: boolean;
     };
     "ResultSuccess_ThreadSummary-Array_": {
       data: components["schemas"]["ThreadSummary"][];
@@ -7579,23 +7578,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_ThreadSummary-Array.string_"];
-        };
-      };
-    };
-  };
-  CreateNewThread: {
-    requestBody: {
-      content: {
-        "application/json": {
-          metadata?: unknown;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_InAppThread.string_"];
         };
       };
     };

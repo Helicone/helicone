@@ -298,21 +298,4 @@ export class AgentController extends Controller {
 
     return ok(result.data!);
   }
-
-  @Post("/thread")
-  public async createNewThread(
-    @Body() bodyParams: { metadata?: any },
-    @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<InAppThread, string>> {
-    const threadsManager = new InAppThreadsManager(request.authParams);
-
-    const result = await threadsManager.createNewThread(bodyParams.metadata);
-
-    if (result.error) {
-      this.setStatus(400);
-      return err(result.error);
-    }
-
-    return ok(result.data!);
-  }
 }
