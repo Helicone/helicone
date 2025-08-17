@@ -134,11 +134,7 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [thread]);
 
-  const { mutate: deleteThread } = $JAWN_API.useMutation("delete", "/v1/agent/thread/{sessionId}", {
-    onSuccess: () => {
-      refetchThreads();
-    }
-  });
+
   const { mutate: escalateThread } = $JAWN_API.useMutation("post", "/v1/agent/thread/{sessionId}/escalate", {
     onSuccess: () => {
       refetchThreads();
