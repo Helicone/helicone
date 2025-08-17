@@ -278,14 +278,27 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         content_array_index: number;
         text: string;
       }) => {
+        if (!mappedContent) {
+          return {
+            success: false,
+            message: "No mapped content available",
+          };
+        }
+
         const message =
-          mappedContent?.schema.request.messages?.[args.message_index];
+          mappedContent.schema.request.messages?.[args.message_index];
         if (!message) {
           return {
             success: false,
             message: "Message not found",
           };
         }
+
+        const updatedMappedContent = { ...mappedContent };
+        const updatedMessages = [
+          ...(mappedContent.schema.request.messages || []),
+        ];
+        const updatedMessage = { ...message };
 
         if (message._type === "contentArray") {
           if (
@@ -298,14 +311,28 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
             };
           }
 
-          message.contentArray[args.content_array_index] = {
+          const updatedContentArray = [...message.contentArray];
+          updatedContentArray[args.content_array_index] = {
             _type: "message",
             role: message.role,
             content: args.text,
           } as Message;
+
+          updatedMessage.contentArray = updatedContentArray;
         } else {
-          message.content = args.text;
+          updatedMessage.content = args.text;
         }
+
+        updatedMessages[args.message_index] = updatedMessage;
+        updatedMappedContent.schema = {
+          ...updatedMappedContent.schema,
+          request: {
+            ...updatedMappedContent.schema.request,
+            messages: updatedMessages,
+          },
+        };
+
+        setMappedContent(updatedMappedContent);
 
         return {
           success: true,
@@ -313,7 +340,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         };
       },
     );
-  }, [mappedContent, setToolHandler]);
+  }, [mappedContent]);
 
   useEffect(() => {
     if (!requestId && !promptVersionId) {
