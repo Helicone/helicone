@@ -17,10 +17,9 @@ export const universalTools = [
         },
         required: ["page"],
       },
-    }
-  }
-]
-
+    },
+  },
+];
 
 // TOOLS ON /playground
 export const playgroundTools = [

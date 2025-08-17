@@ -1,7 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import router, { useRouter } from "next/router";
+import { useRouter } from "next/router";
 import { OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
-import { universalTools, promptsTools, playgroundTools } from "@/lib/agent/tools";
+import {
+  universalTools,
+  promptsTools,
+  playgroundTools,
+} from "@/lib/agent/tools";
 
 type Tool = NonNullable<OpenAIChatRequest["tools"]>[0];
 type ToolCallResult = {
@@ -53,7 +57,6 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     const routeTools = getToolsForRoute(router.pathname);
     setTools(routeTools);
-
 
     // Universal Tool Handlers
     setToolHandler("navigate", async (args: { page: string }) => {
