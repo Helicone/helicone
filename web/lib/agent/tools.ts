@@ -65,7 +65,7 @@ export const hqlTools = [
     function: {
       name: "hql-run-query",
       description:
-        "Executes a query on the HQL database once we receieve confirmation on the written query.",
+        "Executes a query on the HQL database once we receive confirmation on the written query.",
       parameters: {},
     },
   },
