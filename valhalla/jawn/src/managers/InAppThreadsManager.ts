@@ -6,7 +6,6 @@ import OpenAI from "openai";
 
 export interface InAppThread {
   id: string;
-  session_id: string;
   chat: any; // JSONB content
   user_id: string;
   org_id: string;
@@ -19,7 +18,6 @@ export interface InAppThread {
 
 export interface ThreadSummary {
   id: string;
-  session_id: string;
   created_at: Date;
   updated_at: Date;
   escalated: boolean;
@@ -52,7 +50,7 @@ export class InAppThreadsManager extends BaseManager {
       // Check if thread exists
       const existingThreadResult = await dbExecute<InAppThread>(
         `SELECT * FROM in_app_threads 
-         WHERE session_id = $1 AND org_id = $2`,
+         WHERE id = $1 AND org_id = $2`,
         [sessionId, this.authParams.organizationId]
       );
 
@@ -71,7 +69,7 @@ export class InAppThreadsManager extends BaseManager {
            SET chat = $1::jsonb, 
                metadata = $2::jsonb,
                updated_at = NOW()
-           WHERE session_id = $3 AND org_id = $4
+           WHERE id = $3 AND org_id = $4
            RETURNING *`,
           [
             JSON.stringify({ messages }),
@@ -94,7 +92,7 @@ export class InAppThreadsManager extends BaseManager {
         // Create new thread
         const insertResult = await dbExecute<InAppThread>(
           `INSERT INTO in_app_threads 
-           (session_id, chat, user_id, org_id, metadata, escalated)
+           (id, chat, user_id, org_id, metadata, escalated)
            VALUES ($1, $2::jsonb, $3, $4, $5::jsonb, false)
            RETURNING *`,
           [
@@ -150,7 +148,7 @@ export class InAppThreadsManager extends BaseManager {
         `UPDATE in_app_threads 
          SET escalated = true,
              updated_at = NOW()
-         WHERE session_id = $1 AND org_id = $2
+         WHERE id = $1 AND org_id = $2
          RETURNING *`,
         [sessionId, this.authParams.organizationId]
       );
@@ -174,7 +172,6 @@ export class InAppThreadsManager extends BaseManager {
       const threadsResult = await dbExecute<any>(
         `SELECT 
           id,
-          session_id,
           created_at,
           updated_at,
           escalated,

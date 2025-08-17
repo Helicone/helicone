@@ -3580,7 +3580,6 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "id": {"dataType":"string","required":true},
-            "session_id": {"dataType":"string","required":true},
             "chat": {"dataType":"any","required":true},
             "user_id": {"dataType":"string","required":true},
             "org_id": {"dataType":"string","required":true},
@@ -3789,7 +3788,6 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "id": {"dataType":"string","required":true},
-            "session_id": {"dataType":"string","required":true},
             "created_at": {"dataType":"datetime","required":true},
             "updated_at": {"dataType":"datetime","required":true},
             "escalated": {"dataType":"boolean","required":true},

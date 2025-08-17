@@ -10910,9 +10910,6 @@
 					"id": {
 						"type": "string"
 					},
-					"session_id": {
-						"type": "string"
-					},
 					"chat": {},
 					"user_id": {
 						"type": "string"
@@ -10938,7 +10935,6 @@
 				},
 				"required": [
 					"id",
-					"session_id",
 					"chat",
 					"user_id",
 					"org_id",
@@ -11521,9 +11517,6 @@
 					"id": {
 						"type": "string"
 					},
-					"session_id": {
-						"type": "string"
-					},
 					"created_at": {
 						"type": "string",
 						"format": "date-time"
@@ -11551,7 +11544,6 @@
 				},
 				"required": [
 					"id",
-					"session_id",
 					"created_at",
 					"updated_at",
 					"escalated",
