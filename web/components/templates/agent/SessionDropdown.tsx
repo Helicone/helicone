@@ -26,8 +26,8 @@ export function SessionDropdown() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="gap-2">
-          <span className="font-semibold">Agent Chat</span>
+        <Button variant="ghost" className="gap-2">
+          <span className="font-medium">Agent Chat</span>
           {currentSession && (
             <span className="text-xs text-muted-foreground">
               ({currentSession.name})
@@ -36,7 +36,10 @@ export function SessionDropdown() {
           <ChevronDown className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-64">
+      <DropdownMenuContent
+        align="start"
+        className="h-full max-h-[300px] w-64 overflow-y-auto"
+      >
         <DropdownMenuItem onClick={createNewSession} className="gap-2">
           <Plus className="h-4 w-4" />
           <span>New conversation</span>

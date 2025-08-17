@@ -69,10 +69,37 @@ function getTableFromField(field: FieldSpec): string {
 /**
  * Converts a new FilterExpression to the legacy FilterNode format
  *
- * @param filter - The new filter expression to convert
+ * @param filter - The new filter expression to convert (can be object, string, or null)
  * @returns The equivalent legacy filter node
  */
-export function toFilterNode(filter: FilterExpression): FilterNode {
+export function toFilterNode(
+  filter: FilterExpression | string | null,
+): FilterNode {
+  // Handle null or undefined filter
+  if (!filter) {
+    return "all";
+  }
+
+  // Handle string input (JSON string)
+  if (typeof filter === "string") {
+    try {
+      filter = JSON.parse(filter) as FilterExpression;
+    } catch (error) {
+      console.error("Failed to parse filter JSON string:", filter);
+      throw new Error("Invalid filter JSON string: " + filter);
+    }
+  }
+
+  // Ensure filter is an object with a type property
+  if (
+    typeof filter !== "object" ||
+    !filter ||
+    typeof filter.type !== "string"
+  ) {
+    console.error("Invalid filter object:", filter);
+    throw new Error("Invalid filter object: " + JSON.stringify(filter));
+  }
+
   // Handle "all" expression
   if (filter.type === "all") {
     return "all";
@@ -81,6 +108,19 @@ export function toFilterNode(filter: FilterExpression): FilterNode {
   // Handle condition expression
   if (filter.type === "condition") {
     const condition = filter as ConditionExpression;
+
+    // Validate condition structure
+    if (
+      !condition.field ||
+      !condition.operator ||
+      condition.value === undefined
+    ) {
+      console.error("Invalid condition structure:", condition);
+      throw new Error(
+        "Invalid condition structure: " + JSON.stringify(condition),
+      );
+    }
+
     const table = getTableFromField(condition.field);
     const operator = operatorMap[condition.operator] || condition.operator;
 
@@ -159,6 +199,14 @@ export function toFilterNode(filter: FilterExpression): FilterNode {
   if (filter.type === "and") {
     const andExpr = filter as AndExpression;
 
+    // Validate AND expression structure
+    if (!Array.isArray(andExpr.expressions)) {
+      console.error("Invalid AND expression structure:", andExpr);
+      throw new Error(
+        "Invalid AND expression structure: " + JSON.stringify(andExpr),
+      );
+    }
+
     // If there are no expressions, return "all"
     if (andExpr.expressions.length === 0) {
       return "all";
@@ -192,6 +240,14 @@ export function toFilterNode(filter: FilterExpression): FilterNode {
   if (filter.type === "or") {
     const orExpr = filter as OrExpression;
 
+    // Validate OR expression structure
+    if (!Array.isArray(orExpr.expressions)) {
+      console.error("Invalid OR expression structure:", orExpr);
+      throw new Error(
+        "Invalid OR expression structure: " + JSON.stringify(orExpr),
+      );
+    }
+
     // If there are no expressions, return "all"
     if (orExpr.expressions.length === 0) {
       return "all";
@@ -221,5 +277,6 @@ export function toFilterNode(filter: FilterExpression): FilterNode {
     return result;
   }
 
-  throw new Error("Unknown filter type: " + filter);
+  console.error("Unknown filter type:", filter);
+  throw new Error("Unknown filter type: " + JSON.stringify(filter));
 }
