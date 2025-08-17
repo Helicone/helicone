@@ -43,6 +43,11 @@ export interface GenerateParams {
   };
   useAIGateway?: boolean;
   endpoint?: "playground" | "agent";
+
+  // helicone prompt params
+  prompt_id?: string;
+  environment?: string;
+  inputs?: any;
 }
 
 export type GenerateResponse = {
@@ -165,6 +170,9 @@ export async function generate<T extends object | undefined = undefined>(
     useAIGateway?: boolean;
     logRequest?: boolean;
     endpoint?: "playground" | "agent";
+    prompt_id?: string;
+    environment?: string;
+    inputs?: any;
   },
 ): Promise<GenerateResponse> {
   const currentOrgId = Cookies.get(ORG_ID_COOKIE_KEY);
@@ -192,6 +200,9 @@ export async function generate<T extends object | undefined = undefined>(
         verbosity: params.verbosity,
         useAIGateway: params.useAIGateway,
         logRequest: params.logRequest,
+        prompt_id: params.prompt_id,
+        environment: params.environment,
+        inputs: params.inputs,
       }),
       headers: {
         "helicone-authorization": JSON.stringify({

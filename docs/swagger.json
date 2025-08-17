@@ -21002,6 +21002,13 @@
 									},
 									{
 										"properties": {
+											"inputs": {},
+											"environment": {
+												"type": "string"
+											},
+											"prompt_id": {
+												"type": "string"
+											},
 											"logRequest": {
 												"type": "boolean"
 											},
