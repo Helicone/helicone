@@ -326,30 +326,34 @@ export class AgentController extends Controller {
           },
         }),
       });
+
+      // Handle SSE response format
+      const responseText = await response.text();
+
+      let finalResponse = "";
+
+      // Parse SSE data
+      const lines = responseText.trim().split("\n");
+      for (const line of lines) {
+        if (line.startsWith("data: ")) {
+          try {
+            const data = JSON.parse(line.substring(6)); // Remove 'data: ' prefix
+            if (data.result) {
+              finalResponse += JSON.stringify(data.result.content, null, 2);
+            }
+
+            if (data.error) {
+              return err(data.error.message);
+            }
+          } catch (error) {
+            console.error("Error parsing JSON:", error);
+          }
+        }
+      }
+
+      return ok(finalResponse);
     } catch (error) {
       return err("Failed to connect to documentation search service");
     }
-
-    // Handle SSE response format
-    const responseText = await response.text();
-
-    let finalResponse = "";
-
-    // Parse SSE data
-    const lines = responseText.trim().split("\n");
-    for (const line of lines) {
-      if (line.startsWith("data: ")) {
-        const data = JSON.parse(line.substring(6)); // Remove 'data: ' prefix
-        if (data.result) {
-          finalResponse += JSON.stringify(data.result.content, null, 2);
-        }
-
-        if (data.error) {
-          return err(data.error.message);
-        }
-      }
-    }
-
-    return ok(finalResponse);
   }
 }
