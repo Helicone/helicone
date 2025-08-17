@@ -164,6 +164,21 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [router.pathname]);
 
   useEffect(() => {
+    setToolHandler("search-helicone-docs", async (args: { query: string }) => {
+      const response = await $JAWN_API.POST("/v1/agent/mcp/search", {
+        body: {
+          query: args.query,
+        },
+      });
+
+      return {
+        success: true,
+        message: JSON.stringify(response.data),
+      };
+    });
+  }, []);
+
+  useEffect(() => {
     setToolHandler("navigate", async (args: { page: string }) => {
       router.push(args.page);
       return {
