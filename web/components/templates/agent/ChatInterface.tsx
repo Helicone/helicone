@@ -20,9 +20,11 @@ interface ChatInterfaceProps {
 }
 
 const models = [
-  { id: "gpt-4o/openai", label: "GPT-4o", provider: "OpenAI" },
-  { id: "gpt-4o-mini/openai", label: "GPT-4o-mini", provider: "OpenAI" },
+  { id: "gpt-4o/openai", label: "GPT-4o" },
+  { id: "gpt-4o-mini/openai", label: "GPT-4o-mini" },
+  { id: "claude-3.7-sonnet/anthropic", label: "Claude 3.7 Sonnet" },
 ];
+
 const ChatInterface = ({
   input,
   setInput,
@@ -64,8 +66,8 @@ const ChatInterface = ({
   const currentModel = models.find((m) => m.id === selectedModel) || models[0];
 
   return (
-    <div className="border-t border-border p-2 pt-4">
-      <div className="flex items-end gap-2">
+    <div className="mx-2 mb-2">
+      <div className="rounded-lg border border-border bg-background p-1">
         <Textarea
           ref={textareaRef}
           value={input}
@@ -75,50 +77,45 @@ const ChatInterface = ({
           onKeyDown={handleKeyDown}
           placeholder="Type your message..."
           disabled={isStreaming}
-          className="flex-1 resize-none overflow-y-auto"
-          style={{ minHeight: "40px" }}
+          className="w-full resize-none border-0 bg-transparent p-2 text-[13px] focus-visible:ring-0 focus-visible:ring-offset-0"
+          style={{ minHeight: "24px" }}
           rows={1}
         />
-        <Button
-          onClick={isStreaming ? onStopGeneration : onSendMessage}
-          disabled={!isStreaming && !input.trim()}
-          size="sm"
-          className="shrink-0"
-        >
-          {isStreaming ? (
-            <Square className="h-4 w-4" />
-          ) : (
-            <Send className="h-4 w-4" />
-          )}
-        </Button>
-      </div>
-      <div className="mt-2 flex items-center justify-between">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 gap-1 px-2 text-xs"
-            >
-              <span>{currentModel.label}</span>
-              <ChevronDown className="h-3 w-3" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-40">
-            {models.map((model) => (
-              <DropdownMenuItem
-                key={model.id}
-                onClick={() => onModelChange(model.id)}
-                className="flex flex-col items-start gap-0 p-2"
+
+        <div className="mt-1 flex items-center justify-between">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 gap-1 px-2 text-[13px] text-muted-foreground hover:text-foreground"
               >
-                <span className="text-sm font-medium">{model.label}</span>
-                <span className="text-xs text-muted-foreground">
-                  {model.provider}
-                </span>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+                <span>{currentModel.label}</span>
+                <ChevronDown size={14} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-40">
+              {models.map((model) => (
+                <DropdownMenuItem
+                  key={model.id}
+                  onClick={() => onModelChange(model.id)}
+                  className="flex flex-col items-start gap-0 px-2 py-1"
+                >
+                  <span className="text-sm">{model.label}</span>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <Button
+            onClick={isStreaming ? onStopGeneration : onSendMessage}
+            disabled={!isStreaming && !input.trim()}
+            size="sm"
+            className="h-8 w-8 p-0"
+          >
+            {isStreaming ? <Square size={16} /> : <Send size={16} />}
+          </Button>
+        </div>
       </div>
     </div>
   );

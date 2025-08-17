@@ -7,8 +7,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChatSession, useHeliconeAgent } from "./HeliconeAgentContext";
-
+import { useHeliconeAgent } from "./HeliconeAgentContext";
 
 export function SessionDropdown() {
   const {
@@ -38,21 +37,17 @@ export function SessionDropdown() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-64">
-        <DropdownMenuItem
-          onClick={createNewSession}
-          className="gap-2"
-        >
+        <DropdownMenuItem onClick={createNewSession} className="gap-2">
           <Plus className="h-4 w-4" />
           <span>New conversation</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
 
-        {sessions.length === 0  && (
+        {sessions.length === 0 && (
           <div className="p-2 text-center text-sm text-muted-foreground">
             No conversations yet
           </div>
         )}
-
 
         {sessions.map((session) => (
           <DropdownMenuItem

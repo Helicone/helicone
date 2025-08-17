@@ -43,7 +43,10 @@ interface HeliconeAgentContextType {
   currentSessionId: string | null;
   messages: Message[];
   createNewSession: () => void;
-  updateCurrentSessionMessages: (messages: Message[], saveToDB: boolean) => void;
+  updateCurrentSessionMessages: (
+    messages: Message[],
+    saveToDB: boolean,
+  ) => void;
   switchToSession: (sessionId: string) => void;
   deleteSession: (sessionId: string) => void;
 }
@@ -79,13 +82,21 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
   const [toolHandlers, setToolHandlers] = useState<
     Map<string, (args: any) => Promise<any> | any>
   >(new Map());
-  const { data: threads, refetch: refetchThreads } = $JAWN_API.useQuery("get", "/v1/agent/threads", {});
-  const { mutate: upsertThreadMessage } = $JAWN_API.useMutation("post", "/v1/agent/thread/{sessionId}/message", {
-    onSuccess: () => {
-      refetchThreads();
-    }
-  });
-  
+  const { data: threads, refetch: refetchThreads } = $JAWN_API.useQuery(
+    "get",
+    "/v1/agent/threads",
+    {},
+  );
+  const { mutate: upsertThreadMessage } = $JAWN_API.useMutation(
+    "post",
+    "/v1/agent/thread/{sessionId}/message",
+    {
+      onSuccess: () => {
+        refetchThreads();
+      },
+    },
+  );
+
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -95,18 +106,26 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, []);
 
-  const { data: thread } = $JAWN_API.useQuery("get", "/v1/agent/thread/{sessionId}", {
-    params: { path: { sessionId: currentSessionId || "" } },
-  }, {
-    enabled: !!currentSessionId,
-  });
+  const { data: thread } = $JAWN_API.useQuery(
+    "get",
+    "/v1/agent/thread/{sessionId}",
+    {
+      params: { path: { sessionId: currentSessionId || "" } },
+    },
+    {
+      enabled: !!currentSessionId,
+    },
+  );
 
-  const { mutate: deleteThread } = $JAWN_API.useMutation("delete", "/v1/agent/thread/{sessionId}", {
-    onSuccess: () => {
-      refetchThreads();
-    }
-  });
-
+  const { mutate: deleteThread } = $JAWN_API.useMutation(
+    "delete",
+    "/v1/agent/thread/{sessionId}",
+    {
+      onSuccess: () => {
+        refetchThreads();
+      },
+    },
+  );
 
   useEffect(() => {
     const routeTools = getToolsForRoute(router.pathname);
@@ -123,8 +142,6 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
     });
   }, [router]);
 
-
-
   const setToolHandler = (
     toolName: string,
     handler: (args: any) => Promise<any> | any,
@@ -139,8 +156,9 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Hello, how can I help you today?",
-    }
+      content:
+        "Hello! I'm Heli, your Helicone assistant. How can I help you today?",
+    },
   ]);
   useEffect(() => {
     if ((thread?.data?.chat as any)?.messages) {
@@ -162,13 +180,14 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
         tools,
         setToolHandler,
         executeTool,
-        sessions: threads?.data?.map((thread) => ({
-          id: thread.id,
-          name: thread.last_message ?? thread.id,
-          messages: [],
-          createdAt: new Date(thread.created_at),
-          escalated: thread.escalated,
-        })) ?? [],
+        sessions:
+          threads?.data?.map((thread) => ({
+            id: thread.id,
+            name: thread.last_message ?? thread.id,
+            messages: [],
+            createdAt: new Date(thread.created_at),
+            escalated: thread.escalated,
+          })) ?? [],
         currentSession: undefined,
         currentSessionId: null,
         messages: messages,
@@ -178,7 +197,7 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
             {
               role: "assistant",
               content: "Hello, how can I help you today?",
-            }
+            },
           ];
           upsertThreadMessage({
             params: {
@@ -213,14 +232,11 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
             });
           }
           setMessages(messages);
-     
         },
         switchToSession: (sessionId: string) => {
-
           setCurrentSessionId(sessionId);
         },
         deleteSession: (sessionId: string) => {
-
           deleteThread({
             params: {
               path: {
