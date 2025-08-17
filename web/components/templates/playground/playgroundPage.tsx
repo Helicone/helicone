@@ -47,6 +47,7 @@ import { useLocalStorage } from "@/services/hooks/localStorage";
 import Link from "next/link";
 import EnvironmentPill from "@/components/templates/prompts2025/EnvironmentPill";
 import PromptVersionPill from "@/components/templates/prompts2025/PromptVersionPill";
+import { useHeliconeAgent } from "@/components/templates/agent/HeliconeAgentContext";
 
 export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
   _type: "openai-chat",
@@ -211,6 +212,7 @@ const convertOpenAIChatRequestToMappedLLMRequest = (
 };
 
 const PlaygroundPage = (props: PlaygroundPageProps) => {
+  const { setToolHandler } = useHeliconeAgent();
   const { requestId, promptVersionId } = props;
   const { setNotification } = useNotification();
   const router = useRouter();
@@ -260,6 +262,58 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   const [mappedContent, setMappedContent] = useState<MappedLLMRequest | null>(
     null,
   );
+
+  useEffect(() => {
+    setToolHandler("get-messages", () => {
+      return {
+        success: true,
+        message: JSON.stringify(mappedContent?.schema.request.messages ?? []),
+      };
+    });
+
+    setToolHandler(
+      "edit-playground-message",
+      async (args: {
+        message_index: number;
+        content_array_index: number;
+        text: string;
+      }) => {
+        const message =
+          mappedContent?.schema.request.messages?.[args.message_index];
+        if (!message) {
+          return {
+            success: false,
+            message: "Message not found",
+          };
+        }
+
+        if (message._type === "contentArray") {
+          if (
+            !message.contentArray ||
+            args.content_array_index >= message.contentArray.length
+          ) {
+            return {
+              success: false,
+              message: "Content array index out of bounds",
+            };
+          }
+
+          message.contentArray[args.content_array_index] = {
+            _type: "message",
+            role: message.role,
+            content: args.text,
+          } as Message;
+        } else {
+          message.content = args.text;
+        }
+
+        return {
+          success: true,
+          message: "Message edited successfully",
+        };
+      },
+    );
+  }, [mappedContent, setToolHandler]);
 
   useEffect(() => {
     if (!requestId && !promptVersionId) {

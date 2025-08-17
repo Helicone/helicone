@@ -62,12 +62,6 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
         setIsStreaming(true);
 
         const assistantMessageIdx = updatedMessages.length;
-        const assistantMessage: Message = {
-          role: "assistant",
-          content: "",
-        };
-        updatedMessages = [...updatedMessages, assistantMessage];
-        setMessages(updatedMessages);
 
         const request: OpenAIChatRequest = {
           model: "gpt-4o-mini",
@@ -92,6 +86,9 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
             onUpdate: async (result) => {
               try {
                 const parsedResponse = JSON.parse(result.fullContent);
+                if (!updatedMessages[assistantMessageIdx]) {
+                  updatedMessages = [...updatedMessages, parsedResponse];
+                }
                 updatedMessages = updatedMessages.map((msg, idx) =>
                   idx === assistantMessageIdx ? parsedResponse : msg,
                 );
