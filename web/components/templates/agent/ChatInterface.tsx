@@ -7,7 +7,14 @@ import {
 } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Square, ChevronDown, ImagePlus, X, ArrowUp } from "lucide-react";
+import {
+  Square,
+  ChevronDown,
+  ImagePlus,
+  X,
+  ArrowUp,
+  Trash2Icon,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,6 +36,8 @@ interface ChatInterfaceProps {
   uploadedImages: File[];
   setUploadedImages: (images: File[]) => void;
   messageQueueLength?: number;
+  onForcePushMessage?: (messageId: string) => Promise<void>;
+  onRemoveFromQueue?: (messageId: string) => void;
 }
 
 const models = [
@@ -51,7 +60,8 @@ const ChatInterface = forwardRef<{ focus: () => void }, ChatInterfaceProps>(
       onModelChange,
       uploadedImages,
       setUploadedImages,
-      messageQueueLength = 0,
+      onForcePushMessage,
+      onRemoveFromQueue,
     },
     ref,
   ) => {
@@ -148,12 +158,34 @@ const ChatInterface = forwardRef<{ focus: () => void }, ChatInterfaceProps>(
                 )}
               >
                 {messageQueue.map((message) => (
-                  <div key={message.id} className="flex items-center gap-2">
+                  <div
+                    key={message.id}
+                    className="group flex items-center justify-between gap-2"
+                  >
                     <div className="flex items-center gap-2">
                       <div className="h-2.5 w-2.5 rounded-full border border-primary" />
                       <span className="text-xs text-secondary-foreground">
                         {message.content}
                       </span>
+                    </div>
+
+                    <div className="flex items-center opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => onRemoveFromQueue?.(message.id)}
+                      >
+                        <Trash2Icon className="h-3 w-3 text-muted-foreground" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => onForcePushMessage?.(message.id)}
+                      >
+                        <ArrowUp className="h-3 w-3 text-muted-foreground" />
+                      </Button>
                     </div>
                   </div>
                 ))}

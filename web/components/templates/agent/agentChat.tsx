@@ -9,6 +9,7 @@ import { SessionDropdown } from "./SessionDropdown";
 import ChatInterface from "./ChatInterface";
 import { useRouter } from "next/router";
 import { AlertCircle, XIcon } from "lucide-react";
+import { v4 as uuidv4 } from "uuid";
 
 type Message = NonNullable<OpenAIChatRequest["messages"]>[0];
 type ToolCall = NonNullable<Message["tool_calls"]>[0];
@@ -249,7 +250,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
     if (isStreaming) {
       // Queue the message if currently streaming
       const queuedMessage: QueuedMessage = {
-        id: Date.now().toString(),
+        id: uuidv4(),
         content: input.trim(),
         images: [...uploadedImages],
         timestamp: new Date(),
@@ -274,6 +275,28 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
 
   const removeFromQueue = (messageId: string) => {
     setMessageQueue((prev) => prev.filter((msg) => msg.id !== messageId));
+  };
+
+  const forcePushMessageFromQueue = async (messageId: string) => {
+    // Find the message in the queue
+    const messageIndex = messageQueue.findIndex((msg) => msg.id === messageId);
+    if (messageIndex === -1) return;
+
+    const messageToPush = messageQueue[messageIndex];
+
+    // Stop current generation if streaming
+    if (isStreaming) {
+      stopGeneration();
+    }
+
+    // Remove the message from the queue
+    setMessageQueue((prev) => prev.filter((msg) => msg.id !== messageId));
+
+    // Wait a bit for the streaming to fully stop
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    // Force push the message to the chat
+    await sendMessageInternal(messageToPush.content, messageToPush.images);
   };
 
   return (
@@ -371,7 +394,8 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
         onModelChange={setSelectedModel}
         uploadedImages={uploadedImages}
         setUploadedImages={setUploadedImages}
-        messageQueueLength={messageQueue.length}
+        onForcePushMessage={forcePushMessageFromQueue}
+        onRemoveFromQueue={removeFromQueue}
       />
     </div>
   );
