@@ -646,9 +646,6 @@ export interface paths {
   "/v1/agent/threads": {
     get: operations["GetAllThreads"];
   };
-  "/v1/agent/thread": {
-    post: operations["CreateNewThread"];
-  };
 }
 
 export type webhooks = Record<string, never>;
@@ -3555,7 +3552,6 @@ Json: JsonObject;
     "Result__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array.string_": components["schemas"]["ResultSuccess__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array_"] | components["schemas"]["ResultError_string_"];
     InAppThread: {
       id: string;
-      session_id: string;
       chat: unknown;
       user_id: string;
       org_id: string;
@@ -3565,6 +3561,7 @@ Json: JsonObject;
       metadata: unknown;
       /** Format: date-time */
       updated_at: string;
+      soft_delete: boolean;
     };
     ResultSuccess_InAppThread_: {
       data: components["schemas"]["InAppThread"];
@@ -3803,7 +3800,6 @@ Json: JsonObject;
     "Result__success-boolean_.string_": components["schemas"]["ResultSuccess__success-boolean__"] | components["schemas"]["ResultError_string_"];
     ThreadSummary: {
       id: string;
-      session_id: string;
       /** Format: date-time */
       created_at: string;
       /** Format: date-time */
@@ -3813,6 +3809,7 @@ Json: JsonObject;
       message_count: number;
       first_message?: string;
       last_message?: string;
+      soft_delete?: boolean;
     };
     "ResultSuccess_ThreadSummary-Array_": {
       data: components["schemas"]["ThreadSummary"][];
@@ -7576,23 +7573,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_ThreadSummary-Array.string_"];
-        };
-      };
-    };
-  };
-  CreateNewThread: {
-    requestBody: {
-      content: {
-        "application/json": {
-          metadata?: unknown;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_InAppThread.string_"];
         };
       };
     };

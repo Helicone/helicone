@@ -1,12 +1,13 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { useRouter } from "next/router";
-import { OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
 import {
-  universalTools,
-  promptsTools,
-  playgroundTools,
   filtersTools,
+  playgroundTools,
+  promptsTools,
+  universalTools,
 } from "@/lib/agent/tools";
+import { $JAWN_API } from "@/lib/clients/jawn";
+import { OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
+import { useRouter } from "next/router";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 type Tool = NonNullable<OpenAIChatRequest["tools"]>[0];
 type Message = NonNullable<OpenAIChatRequest["messages"]>[0];
@@ -25,6 +26,7 @@ export interface ChatSession {
   name: string;
   messages: Message[];
   createdAt: Date;
+  escalated: boolean;
 }
 
 interface HeliconeAgentContextType {
@@ -41,7 +43,7 @@ interface HeliconeAgentContextType {
   currentSessionId: string | null;
   messages: Message[];
   createNewSession: () => void;
-  updateCurrentSessionMessages: (messages: Message[]) => void;
+  updateCurrentSessionMessages: (messages: Message[], saveToDB: boolean) => void;
   switchToSession: (sessionId: string) => void;
   deleteSession: (sessionId: string) => void;
 }
@@ -77,14 +79,34 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
   const [toolHandlers, setToolHandlers] = useState<
     Map<string, (args: any) => Promise<any> | any>
   >(new Map());
-
-  // Session management state
-  const [sessions, setSessions] = useState<ChatSession[]>([]);
+  const { data: threads, refetch: refetchThreads } = $JAWN_API.useQuery("get", "/v1/agent/threads", {});
+  const { mutate: upsertThreadMessage } = $JAWN_API.useMutation("post", "/v1/agent/thread/{sessionId}/message", {
+    onSuccess: () => {
+      refetchThreads();
+    }
+  });
+  
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
 
-  // Get current session and messages
-  const currentSession = sessions.find((s) => s.id === currentSessionId);
-  const messages = currentSession?.messages || [];
+  useEffect(() => {
+    if (!currentSessionId) {
+      const sessionId = crypto.randomUUID();
+      setCurrentSessionId(sessionId);
+    }
+  }, []);
+
+  const { data: thread } = $JAWN_API.useQuery("get", "/v1/agent/thread/{sessionId}", {
+    params: { path: { sessionId: currentSessionId || "" } },
+  }, {
+    enabled: !!currentSessionId,
+  });
+
+  const { mutate: deleteThread } = $JAWN_API.useMutation("delete", "/v1/agent/thread/{sessionId}", {
+    onSuccess: () => {
+      refetchThreads();
+    }
+  });
+
 
   useEffect(() => {
     const routeTools = getToolsForRoute(router.pathname);
@@ -101,42 +123,7 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
     });
   }, [router]);
 
-  // Initialize with first session if none exist
-  useEffect(() => {
-    if (sessions.length === 0) {
-      createNewSession();
-    }
-  }, []);
 
-  const createNewSession = () => {
-    const newSession: ChatSession = {
-      id: Date.now().toString(),
-      name: `Chat ${sessions.length + 1}`,
-      messages: [],
-      createdAt: new Date(),
-    };
-    setSessions((prev) => [...prev, newSession]);
-    setCurrentSessionId(newSession.id);
-  };
-
-  const updateCurrentSessionMessages = (newMessages: Message[]) => {
-    if (!currentSessionId) return;
-    setSessions((prev) =>
-      prev.map((session) =>
-        session.id === currentSessionId
-          ? { ...session, messages: newMessages }
-          : session,
-      ),
-    );
-  };
-
-  const switchToSession = (sessionId: string) => {
-    setCurrentSessionId(sessionId);
-  };
-
-  const deleteSession = (sessionId: string) => {
-    // TODO
-  };
 
   const setToolHandler = (
     toolName: string,
@@ -149,6 +136,17 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
       ),
     );
   };
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      role: "assistant",
+      content: "Hello, how can I help you today?",
+    }
+  ]);
+  useEffect(() => {
+    if ((thread?.data?.chat as any)?.messages) {
+      setMessages((thread?.data?.chat as any)?.messages);
+    }
+  }, [thread]);
 
   const executeTool = async (toolName: string, args: any) => {
     const handler = toolHandlers.get(toolName);
@@ -164,14 +162,73 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
         tools,
         setToolHandler,
         executeTool,
-        sessions,
-        currentSession,
-        currentSessionId,
-        messages,
-        createNewSession,
-        updateCurrentSessionMessages,
-        switchToSession,
-        deleteSession,
+        sessions: threads?.data?.map((thread) => ({
+          id: thread.id,
+          name: thread.last_message ?? thread.id,
+          messages: [],
+          createdAt: new Date(thread.created_at),
+          escalated: thread.escalated,
+        })) ?? [],
+        currentSession: undefined,
+        currentSessionId: null,
+        messages: messages,
+        createNewSession: () => {
+          const newSessionId = crypto.randomUUID();
+          const newChatMessages = [
+            {
+              role: "assistant",
+              content: "Hello, how can I help you today?",
+            }
+          ];
+          upsertThreadMessage({
+            params: {
+              path: {
+                sessionId: newSessionId,
+              },
+            },
+            body: {
+              messages: newChatMessages as any,
+              metadata: {
+                posthogSession: "test",
+              },
+            },
+          });
+          setMessages(newChatMessages);
+          setCurrentSessionId(newSessionId);
+        },
+        updateCurrentSessionMessages: (messages, saveToDB) => {
+          if (saveToDB && currentSessionId) {
+            upsertThreadMessage({
+              params: {
+                path: {
+                  sessionId: currentSessionId || "",
+                },
+              },
+              body: {
+                messages: messages as any,
+                metadata: {
+                  posthogSession: "test",
+                },
+              },
+            });
+          }
+          setMessages(messages);
+     
+        },
+        switchToSession: (sessionId: string) => {
+
+          setCurrentSessionId(sessionId);
+        },
+        deleteSession: (sessionId: string) => {
+
+          deleteThread({
+            params: {
+              path: {
+                sessionId: sessionId,
+              },
+            },
+          });
+        },
       }}
     >
       {children}

@@ -3579,7 +3579,6 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "id": {"dataType":"string","required":true},
-            "session_id": {"dataType":"string","required":true},
             "chat": {"dataType":"any","required":true},
             "user_id": {"dataType":"string","required":true},
             "org_id": {"dataType":"string","required":true},
@@ -3587,6 +3586,7 @@ const models: TsoaRoute.Models = {
             "escalated": {"dataType":"boolean","required":true},
             "metadata": {"dataType":"any","required":true},
             "updated_at": {"dataType":"datetime","required":true},
+            "soft_delete": {"dataType":"boolean","required":true},
         },
         "additionalProperties": false,
     },
@@ -3787,13 +3787,13 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "id": {"dataType":"string","required":true},
-            "session_id": {"dataType":"string","required":true},
             "created_at": {"dataType":"datetime","required":true},
             "updated_at": {"dataType":"datetime","required":true},
             "escalated": {"dataType":"boolean","required":true},
             "message_count": {"dataType":"double","required":true},
             "first_message": {"dataType":"string"},
             "last_message": {"dataType":"string"},
+            "soft_delete": {"dataType":"boolean"},
         },
         "additionalProperties": false,
     },
@@ -11127,38 +11127,6 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getThread',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: undefined,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsAgentController_createNewThread: Record<string, TsoaRoute.ParameterSchema> = {
-                bodyParams: {"in":"body","name":"bodyParams","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"metadata":{"dataType":"any"}}},
-                request: {"in":"request","name":"request","required":true,"dataType":"object"},
-        };
-        app.post('/v1/agent/thread',
-            authenticateMiddleware([{"api_key":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(AgentController)),
-            ...(fetchMiddlewares<RequestHandler>(AgentController.prototype.createNewThread)),
-
-            async function AgentController_createNewThread(request: ExRequest, response: ExResponse, next: any) {
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsAgentController_createNewThread, request, response });
-
-                const controller = new AgentController();
-
-              await templateService.apiHandler({
-                methodName: 'createNewThread',
                 controller,
                 response,
                 next,
