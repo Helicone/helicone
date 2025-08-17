@@ -16,6 +16,7 @@ import Sidebar from "./Sidebar";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 import AgentChat from "@/components/templates/agent/agentChat";
 import { HeliconeAgentProvider } from "@/components/templates/agent/HeliconeAgentContext";
+import { useLocalStorage } from "@/services/hooks/localStorage";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -27,7 +28,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const { pathname } = router;
 
   const [open, setOpen] = useState(false);
-  const [chatWindowOpen, setChatWindowOpen] = useState(false);
+  const [chatWindowOpen, setChatWindowOpen] = useLocalStorage("chatWindowOpen", false);
 
   const auth = useHeliconeAuthClient();
 
