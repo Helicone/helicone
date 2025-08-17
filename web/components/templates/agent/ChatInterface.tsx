@@ -249,7 +249,7 @@ const ChatInterface = forwardRef<{ focus: () => void }, ChatInterfaceProps>(
                     >
                       <div className="flex items-center gap-2">
                         <div className="h-2.5 w-2.5 rounded-full border border-primary" />
-                        <span className="text-subdued-foreground text-xs">
+                        <span className="text-xs text-subdued-foreground">
                           {message.content}
                         </span>
                       </div>
