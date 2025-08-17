@@ -6,7 +6,6 @@ import OpenAI from "openai";
 
 export interface InAppThread {
   id: string;
-  session_id: string;
   chat: any; // JSONB content
   user_id: string;
   org_id: string;
@@ -14,17 +13,18 @@ export interface InAppThread {
   escalated: boolean;
   metadata: any; // JSONB content
   updated_at: Date;
+  soft_delete: boolean;
 }
 
 export interface ThreadSummary {
   id: string;
-  session_id: string;
   created_at: Date;
   updated_at: Date;
   escalated: boolean;
   message_count: number;
   first_message?: string;
   last_message?: string;
+  soft_delete?: boolean;
 }
 
 export interface UpsertThreadMessageParams {
@@ -50,12 +50,14 @@ export class InAppThreadsManager extends BaseManager {
       // Check if thread exists
       const existingThreadResult = await dbExecute<InAppThread>(
         `SELECT * FROM in_app_threads 
-         WHERE session_id = $1 AND org_id = $2`,
+         WHERE id = $1 AND org_id = $2`,
         [sessionId, this.authParams.organizationId]
       );
 
       if (existingThreadResult.error) {
-        return err(`Failed to check existing thread: ${existingThreadResult.error}`);
+        return err(
+          `Failed to check existing thread: ${existingThreadResult.error}`
+        );
       }
 
       const existingThread = existingThreadResult.data?.[0];
@@ -67,13 +69,13 @@ export class InAppThreadsManager extends BaseManager {
            SET chat = $1::jsonb, 
                metadata = $2::jsonb,
                updated_at = NOW()
-           WHERE session_id = $3 AND org_id = $4
+           WHERE id = $3 AND org_id = $4
            RETURNING *`,
           [
             JSON.stringify({ messages }),
             JSON.stringify(metadata),
             sessionId,
-            this.authParams.organizationId
+            this.authParams.organizationId,
           ]
         );
 
@@ -90,15 +92,15 @@ export class InAppThreadsManager extends BaseManager {
         // Create new thread
         const insertResult = await dbExecute<InAppThread>(
           `INSERT INTO in_app_threads 
-           (session_id, chat, user_id, org_id, metadata, escalated)
+           (id, chat, user_id, org_id, metadata, escalated)
            VALUES ($1, $2::jsonb, $3, $4, $5::jsonb, false)
            RETURNING *`,
           [
             sessionId,
             JSON.stringify({ messages }),
-            this.authParams.userId ?? '',
+            this.authParams.userId ?? "",
             this.authParams.organizationId,
-            JSON.stringify(metadata)
+            JSON.stringify(metadata),
           ]
         );
 
@@ -120,8 +122,11 @@ export class InAppThreadsManager extends BaseManager {
   async deleteThread(sessionId: string): Promise<Result<boolean, string>> {
     try {
       const deleteResult = await dbExecute(
-        `DELETE FROM in_app_threads 
-         WHERE session_id = $1 AND org_id = $2`,
+        `UPDATE in_app_threads 
+         SET soft_delete = true,
+             updated_at = NOW()
+         WHERE id = $1 AND org_id = $2
+         RETURNING *`,
         [sessionId, this.authParams.organizationId]
       );
 
@@ -135,13 +140,15 @@ export class InAppThreadsManager extends BaseManager {
     }
   }
 
-  async escalateThread(sessionId: string): Promise<Result<InAppThread, string>> {
+  async escalateThread(
+    sessionId: string
+  ): Promise<Result<InAppThread, string>> {
     try {
       const updateResult = await dbExecute<InAppThread>(
         `UPDATE in_app_threads 
          SET escalated = true,
              updated_at = NOW()
-         WHERE session_id = $1 AND org_id = $2
+         WHERE id = $1 AND org_id = $2
          RETURNING *`,
         [sessionId, this.authParams.organizationId]
       );
@@ -165,7 +172,6 @@ export class InAppThreadsManager extends BaseManager {
       const threadsResult = await dbExecute<any>(
         `SELECT 
           id,
-          session_id,
           created_at,
           updated_at,
           escalated,
@@ -173,7 +179,7 @@ export class InAppThreadsManager extends BaseManager {
           chat->'messages'->0->>'content' as first_message,
           chat->'messages'->-1->>'content' as last_message
          FROM in_app_threads 
-         WHERE org_id = $1 AND user_id = $2
+         WHERE org_id = $1 AND user_id = $2 AND soft_delete = false
          ORDER BY updated_at DESC`,
         [this.authParams.organizationId, this.authParams.userId]
       );
@@ -192,7 +198,7 @@ export class InAppThreadsManager extends BaseManager {
     try {
       const threadResult = await dbExecute<InAppThread>(
         `SELECT * FROM in_app_threads 
-         WHERE session_id = $1 AND org_id = $2`,
+         WHERE id = $1 AND org_id = $2 AND soft_delete = false`,
         [sessionId, this.authParams.organizationId]
       );
 
@@ -205,38 +211,6 @@ export class InAppThreadsManager extends BaseManager {
       }
 
       return ok(threadResult.data[0]);
-    } catch (error) {
-      return err(`Unexpected error: ${error}`);
-    }
-  }
-
-  async createNewThread(metadata?: any): Promise<Result<InAppThread, string>> {
-    try {
-      const sessionId = crypto.randomUUID();
-      
-      const insertResult = await dbExecute<InAppThread>(
-        `INSERT INTO in_app_threads 
-         (session_id, chat, user_id, org_id, metadata, escalated)
-         VALUES ($1, $2::jsonb, $3, $4, $5::jsonb, false)
-         RETURNING *`,
-        [
-          sessionId,
-          JSON.stringify({ messages: [] }),
-          this.authParams.userId ?? '',
-          this.authParams.organizationId,
-          JSON.stringify(metadata || {})
-        ]
-      );
-
-      if (insertResult.error) {
-        return err(`Failed to create thread: ${insertResult.error}`);
-      }
-
-      if (!insertResult.data?.[0]) {
-        return err("Failed to create thread: No data returned");
-      }
-
-      return ok(insertResult.data[0]);
     } catch (error) {
       return err(`Unexpected error: ${error}`);
     }
