@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { QueuedMessage } from "./agentChat";
 import { cn } from "@/lib/utils";
+import { ImageModal } from "../requests/components/chatComponent/single/images/ImageModal";
 
 interface ChatInterfaceProps {
   messageQueue: QueuedMessage[];
@@ -67,6 +68,11 @@ const ChatInterface = forwardRef<{ focus: () => void }, ChatInterfaceProps>(
   ) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isDragOver, setIsDragOver] = useState(false);
+    const [selectedImage, setSelectedImage] = useState<{
+      src: string;
+      alt: string;
+    } | null>(null);
 
     useImperativeHandle(ref, () => ({
       focus: () => {
@@ -108,6 +114,30 @@ const ChatInterface = forwardRef<{ focus: () => void }, ChatInterfaceProps>(
       // Shift+Enter will naturally create a new line in textarea
     };
 
+    const handlePaste = async (e: React.ClipboardEvent) => {
+      const items = Array.from(e.clipboardData.items);
+
+      for (const item of items) {
+        if (item.type.startsWith("image/")) {
+          e.preventDefault();
+          const file = item.getAsFile();
+          if (file) {
+            // Check if it's a supported image type
+            const supportedTypes = [
+              "image/png",
+              "image/jpeg",
+              "image/jpg",
+              "image/gif",
+              "image/webp",
+            ];
+            if (supportedTypes.includes(file.type)) {
+              setUploadedImages([...uploadedImages, file]);
+            }
+          }
+        }
+      }
+    };
+
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = Array.from(e.target.files || []);
       if (files.length > 0) {
@@ -118,9 +148,63 @@ const ChatInterface = forwardRef<{ focus: () => void }, ChatInterfaceProps>(
       }
     };
 
+    const handleDragOver = (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragOver(true);
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      // Only set drag over to false if we're leaving the container entirely
+      if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+        setIsDragOver(false);
+      }
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragOver(false);
+
+      const files = Array.from(e.dataTransfer.files);
+      const imageFiles = files.filter(
+        (file) =>
+          file.type.startsWith("image/") &&
+          [
+            "image/png",
+            "image/jpeg",
+            "image/jpg",
+            "image/gif",
+            "image/webp",
+          ].includes(file.type),
+      );
+
+      if (imageFiles.length > 0) {
+        setUploadedImages([...uploadedImages, ...imageFiles]);
+      }
+    };
+
     const removeImage = (index: number) => {
       const newImages = uploadedImages.filter((_, i) => i !== index);
       setUploadedImages(newImages);
+    };
+
+    const handleImageClick = (image: File, index: number) => {
+      const imageUrl = URL.createObjectURL(image);
+      setSelectedImage({
+        src: imageUrl,
+        alt: `Upload ${index + 1}`,
+      });
+    };
+
+    const handleCloseImageModal = () => {
+      if (selectedImage) {
+        // Clean up the object URL to prevent memory leaks
+        URL.revokeObjectURL(selectedImage.src);
+      }
+      setSelectedImage(null);
     };
 
     const currentModel =
@@ -129,170 +213,192 @@ const ChatInterface = forwardRef<{ focus: () => void }, ChatInterfaceProps>(
     const [isAccordionOpen, setIsAccordionOpen] = useState(true);
 
     return (
-      <div className="mx-2 mb-2 flex flex-col items-center">
-        {messageQueue.length > 0 && (
+      <>
+        <div className="mx-2 mb-2 flex flex-col items-center">
+          {messageQueue.length > 0 && (
+            <div
+              className={cn(
+                "w-[calc(100%-2rem)] rounded-t-lg border-x border-t border-border bg-card text-xs",
+                isAccordionOpen ? "p-2" : "px-2 pt-2",
+              )}
+            >
+              <div className="flex flex-col gap-2">
+                <div
+                  className="flex cursor-pointer items-center gap-2 text-muted-foreground"
+                  onClick={() => setIsAccordionOpen(!isAccordionOpen)}
+                >
+                  <ChevronDown
+                    size={16}
+                    className={cn(
+                      "transition-transform duration-300",
+                      isAccordionOpen ? "rotate-0" : "-rotate-90",
+                    )}
+                  />
+                  {messageQueue.length ?? "0"} Queued
+                </div>
+                <div
+                  className={cn(
+                    "ml-1 flex flex-col gap-2 overflow-hidden transition-all duration-300",
+                    isAccordionOpen ? "max-h-96" : "max-h-0",
+                  )}
+                >
+                  {messageQueue.map((message) => (
+                    <div
+                      key={message.id}
+                      className="group flex items-center justify-between gap-2"
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className="h-2.5 w-2.5 rounded-full border border-primary" />
+                        <span className="text-subdued-foreground text-xs">
+                          {message.content}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => onRemoveFromQueue?.(message.id)}
+                        >
+                          <Trash2Icon className="h-3 w-3 text-muted-foreground" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => onForcePushMessage?.(message.id)}
+                        >
+                          <ArrowUp className="h-3 w-3 text-muted-foreground" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
           <div
             className={cn(
-              "w-[calc(100%-2rem)] rounded-t-lg border-x border-t border-border bg-card text-xs",
-              isAccordionOpen ? "p-2" : "px-2 pt-2",
+              "w-full rounded-lg border border-border bg-card px-1.5 py-1 transition-colors duration-200",
+              isDragOver && "border-primary bg-primary/5",
             )}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
           >
-            <div className="flex flex-col gap-2">
-              <div
-                className="flex cursor-pointer items-center gap-2 text-muted-foreground"
-                onClick={() => setIsAccordionOpen(!isAccordionOpen)}
-              >
-                <ChevronDown
-                  size={16}
-                  className={cn(
-                    "transition-transform duration-300",
-                    isAccordionOpen ? "rotate-0" : "-rotate-90",
-                  )}
-                />
-                {messageQueue.length ?? "0"} Queued
-              </div>
-              <div
-                className={cn(
-                  "ml-1 flex flex-col gap-2 overflow-hidden transition-all duration-300",
-                  isAccordionOpen ? "max-h-96" : "max-h-0",
-                )}
-              >
-                {messageQueue.map((message) => (
-                  <div
-                    key={message.id}
-                    className="group flex items-center justify-between gap-2"
-                  >
-                    <div className="flex items-center gap-2">
-                      <div className="h-2.5 w-2.5 rounded-full border border-primary" />
-                      <span className="text-xs text-secondary-foreground">
-                        {message.content}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6"
-                        onClick={() => onRemoveFromQueue?.(message.id)}
-                      >
-                        <Trash2Icon className="h-3 w-3 text-muted-foreground" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6"
-                        onClick={() => onForcePushMessage?.(message.id)}
-                      >
-                        <ArrowUp className="h-3 w-3 text-muted-foreground" />
-                      </Button>
-                    </div>
+            {uploadedImages.length > 0 && (
+              <div className="flex flex-wrap gap-2 border-b border-border p-2">
+                {uploadedImages.map((image, index) => (
+                  <div key={index} className="relative">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={URL.createObjectURL(image)}
+                      alt={`Upload ${index + 1}`}
+                      className="h-16 w-16 cursor-pointer rounded-md object-cover transition-opacity hover:opacity-80"
+                      onClick={() => handleImageClick(image, index)}
+                    />
+                    <button
+                      onClick={() => removeImage(index)}
+                      className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      <X size={12} />
+                    </button>
                   </div>
                 ))}
               </div>
-            </div>
-          </div>
-        )}
-        <div className="w-full rounded-lg border border-border bg-card px-1.5 py-1">
-          {uploadedImages.length > 0 && (
-            <div className="flex flex-wrap gap-2 border-b border-border p-2">
-              {uploadedImages.map((image, index) => (
-                <div key={index} className="relative">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={URL.createObjectURL(image)}
-                    alt={`Upload ${index + 1}`}
-                    className="h-16 w-16 rounded-md object-cover"
-                  />
-                  <button
-                    onClick={() => removeImage(index)}
-                    className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            )}
+
+            <Textarea
+              ref={textareaRef}
+              value={input}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                setInput(e.target.value)
+              }
+              onKeyDown={handleKeyDown}
+              onPaste={handlePaste}
+              placeholder={
+                isStreaming
+                  ? "Type your message (will be queued)..."
+                  : isDragOver
+                    ? "Drop images here..."
+                    : "Type your message..."
+              }
+              className="w-full resize-none border-0 bg-transparent p-2 text-[13px] focus-visible:ring-0 focus-visible:ring-offset-0"
+              style={{ minHeight: "24px" }}
+              rows={1}
+            />
+
+            <div className="mt-1 flex items-center justify-between">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 gap-1 rounded-full bg-muted px-3 py-0 text-[13px] text-muted-foreground hover:text-foreground"
                   >
-                    <X size={12} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
+                    <span>{currentModel.label}</span>
+                    <ChevronDown size={14} />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-40">
+                  {models.map((model) => (
+                    <DropdownMenuItem
+                      key={model.id}
+                      onClick={() => onModelChange(model.id)}
+                      className="flex flex-col items-start gap-0 px-2 py-1"
+                    >
+                      <span className="text-sm">{model.label}</span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-          <Textarea
-            ref={textareaRef}
-            value={input}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-              setInput(e.target.value)
-            }
-            onKeyDown={handleKeyDown}
-            placeholder={
-              isStreaming
-                ? "Type your message (will be queued)..."
-                : "Type your message..."
-            }
-            className="w-full resize-none border-0 bg-transparent p-2 text-[13px] focus-visible:ring-0 focus-visible:ring-offset-0"
-            style={{ minHeight: "24px" }}
-            rows={1}
-          />
-
-          <div className="mt-1 flex items-center justify-between">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+              <div className="flex items-center gap-1">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
+                  multiple
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
                 <Button
+                  onClick={() => fileInputRef.current?.click()}
                   variant="ghost"
                   size="sm"
-                  className="h-6 gap-1 rounded-full bg-muted px-3 py-0 text-[13px] text-muted-foreground hover:text-foreground"
+                  className="h-8 w-8 p-0 text-muted-foreground"
                 >
-                  <span>{currentModel.label}</span>
-                  <ChevronDown size={14} />
+                  <ImagePlus size={16} />
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-40">
-                {models.map((model) => (
-                  <DropdownMenuItem
-                    key={model.id}
-                    onClick={() => onModelChange(model.id)}
-                    className="flex flex-col items-start gap-0 px-2 py-1"
-                  >
-                    <span className="text-sm">{model.label}</span>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <div className="flex items-center gap-1">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
-                multiple
-                onChange={handleImageUpload}
-                className="hidden"
-              />
-              <Button
-                onClick={() => fileInputRef.current?.click()}
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0 text-muted-foreground"
-              >
-                <ImagePlus size={16} />
-              </Button>
-              <Button
-                onClick={isStreaming ? onStopGeneration : onSendMessage}
-                disabled={
-                  !isStreaming && !input.trim() && uploadedImages.length === 0
-                }
-                size="sm"
-                variant="ghost"
-                className="relative h-6 w-6 rounded-full bg-muted p-0"
-              >
-                {isStreaming ? (
-                  <Square className="h-3 w-3 text-muted-foreground" />
-                ) : (
-                  <ArrowUp className="h-3 w-3 text-muted-foreground" />
-                )}
-              </Button>
+                <Button
+                  onClick={isStreaming ? onStopGeneration : onSendMessage}
+                  disabled={
+                    !isStreaming && !input.trim() && uploadedImages.length === 0
+                  }
+                  size="sm"
+                  variant="ghost"
+                  className="relative h-6 w-6 rounded-full bg-muted p-0"
+                >
+                  {isStreaming ? (
+                    <Square className="h-3 w-3 text-muted-foreground" />
+                  ) : (
+                    <ArrowUp className="h-3 w-3 text-muted-foreground" />
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+
+        {/* Image Modal */}
+        <ImageModal
+          isOpen={selectedImage !== null}
+          onClose={handleCloseImageModal}
+          imageSrc={selectedImage?.src || ""}
+          alt={selectedImage?.alt || ""}
+        />
+      </>
     );
   },
 );

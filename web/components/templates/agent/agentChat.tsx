@@ -331,8 +331,8 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
           </div>
         )}
 
-        {messages.map((message, index) => (
-          <MessageRenderer key={index} message={message} />
+        {messages.map((message) => (
+          <MessageRenderer key={uuidv4()} message={message} />
         ))}
 
         {/* Show queued messages */}
