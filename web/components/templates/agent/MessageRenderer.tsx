@@ -119,7 +119,7 @@ const MessageRenderer = ({ message }: MessageRendererProps) => {
               {message.tool_calls.map((tool) => (
                 <div
                   key={tool.id}
-                  className="text-subdued-foreground flex flex-col gap-2 text-xs font-medium"
+                  className="flex flex-col gap-2 text-xs font-medium text-subdued-foreground"
                 >
                   <div className="font-medium">
                     <span className="font-bold">Tool</span>:{" "}
