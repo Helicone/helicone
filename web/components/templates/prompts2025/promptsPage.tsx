@@ -272,7 +272,7 @@ const PromptsPage = (props: PromptsPageProps) => {
   const columns = getInitialColumns(handlePlaygroundActionClick);
 
   useEffect(() => {
-    setToolHandler("search-prompts", async (args: { query: string }) => {
+    setToolHandler("prompts-search", async (args: { query: string }) => {
       setSearch(args.query);
       return {
         success: true,
@@ -280,7 +280,7 @@ const PromptsPage = (props: PromptsPageProps) => {
       };
     });
 
-    setToolHandler("get-prompts", async () => {
+    setToolHandler("prompts-get", async () => {
       const promptInfo = prompts.map((prompt) => {
         return `Name: ${prompt.prompt.name} (ID: ${prompt.prompt.id})\n}`;
       });
@@ -290,7 +290,7 @@ const PromptsPage = (props: PromptsPageProps) => {
       };
     });
 
-    setToolHandler("select-prompt", async (args: { id: string }) => {
+    setToolHandler("prompts-select", async (args: { id: string }) => {
       const prompt = prompts.find((p) => p.prompt.id === args.id);
       if (prompt) {
         handleRowSelect(prompt);

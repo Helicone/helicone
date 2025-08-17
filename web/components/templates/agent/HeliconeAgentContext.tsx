@@ -43,6 +43,7 @@ interface HeliconeAgentContextType {
   createNewSession: () => void;
   updateCurrentSessionMessages: (messages: Message[]) => void;
   switchToSession: (sessionId: string) => void;
+  deleteSession: (sessionId: string) => void;
 }
 
 const HeliconeAgentContext = createContext<
@@ -50,7 +51,7 @@ const HeliconeAgentContext = createContext<
 >(undefined);
 
 const getToolsForRoute = (pathname: string): HeliconeAgentTool[] => {
-  const tools: HeliconeAgentTool[] = universalTools;
+  const tools: HeliconeAgentTool[] = [...universalTools];
 
   // PATH SPECIFIC TOOLS
   if (pathname === "/prompts") {
@@ -88,8 +89,9 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     const routeTools = getToolsForRoute(router.pathname);
     setTools(routeTools);
+  }, [router.pathname]);
 
-    // Universal Tool Handlers
+  useEffect(() => {
     setToolHandler("navigate", async (args: { page: string }) => {
       router.push(args.page);
       return {
@@ -97,7 +99,7 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
         message: "Successfully navigated to " + args.page,
       };
     });
-  }, [router.pathname]);
+  }, [router]);
 
   // Initialize with first session if none exist
   useEffect(() => {
@@ -130,6 +132,10 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const switchToSession = (sessionId: string) => {
     setCurrentSessionId(sessionId);
+  };
+
+  const deleteSession = (sessionId: string) => {
+    // TODO
   };
 
   const setToolHandler = (
@@ -165,6 +171,7 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
         createNewSession,
         updateCurrentSessionMessages,
         switchToSession,
+        deleteSession,
       }}
     >
       {children}
