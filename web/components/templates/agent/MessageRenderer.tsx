@@ -2,7 +2,8 @@ import { OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/c
 import dynamic from "next/dynamic";
 import { markdownComponents } from "@/components/shared/prompts/ResponsePanel";
 
-// Dynamically import ReactMarkdown with no SSR
+const markdownStyling =
+  "w-full text-[13px] prose-p:my-2 prose-h1:mt-2 prose-h2:mt-2 prose-h3:mt-2 prose-h3:mb-1";
 const ReactMarkdown = dynamic(() => import("react-markdown"), {
   ssr: false,
   loading: () => <div className="h-4 w-full animate-pulse rounded bg-muted" />,
@@ -18,14 +19,9 @@ const MessageRenderer = ({ message }: MessageRendererProps) => {
   if (message.role === "user") {
     return (
       <div className="w-full">
-        <div className="w-full rounded-lg bg-primary px-3 py-2 text-sm text-primary-foreground">
+        <div className="w-full rounded-lg bg-primary px-3 py-2 text-primary-foreground">
           {typeof message.content === "string" && (
-            <ReactMarkdown
-              components={markdownComponents}
-              className="w-full whitespace-pre-wrap break-words text-sm"
-            >
-              {message.content}
-            </ReactMarkdown>
+            <span className="text-[13px]">{message.content}</span>
           )}
         </div>
       </div>
@@ -36,10 +32,10 @@ const MessageRenderer = ({ message }: MessageRendererProps) => {
     return (
       <div className="w-full">
         <details className="w-full">
-          <summary className="cursor-pointer text-sm text-muted-foreground">
+          <summary className="cursor-pointer text-[13px] text-muted-foreground">
             Response
           </summary>
-          <div className="mt-2 rounded-lg bg-muted px-3 py-2 text-xs text-foreground">
+          <div className="mt-2 rounded-lg bg-muted px-3 py-2 text-[13px] text-foreground">
             {typeof message.content === "string" && message.content}
           </div>
         </details>
@@ -54,7 +50,7 @@ const MessageRenderer = ({ message }: MessageRendererProps) => {
           {typeof message.content === "string" && (
             <ReactMarkdown
               components={markdownComponents}
-              className="w-full whitespace-pre-wrap break-words text-sm"
+              className={markdownStyling}
             >
               {message.content}
             </ReactMarkdown>
@@ -62,7 +58,10 @@ const MessageRenderer = ({ message }: MessageRendererProps) => {
           {message.tool_calls && (
             <div className="mt-2 space-y-2">
               {message.tool_calls.map((tool) => (
-                <div key={tool.id} className="rounded-md bg-accent p-2">
+                <div
+                  key={tool.id}
+                  className="rounded-md bg-accent p-2 text-[13px]"
+                >
                   <div className="font-medium">Tool: {tool.function.name}</div>
                 </div>
               ))}
@@ -79,7 +78,7 @@ const MessageRenderer = ({ message }: MessageRendererProps) => {
         {typeof message.content === "string" && (
           <ReactMarkdown
             components={markdownComponents}
-            className="w-full whitespace-pre-wrap break-words text-sm"
+            className={markdownStyling}
           >
             {message.content}
           </ReactMarkdown>

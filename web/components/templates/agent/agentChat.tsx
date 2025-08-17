@@ -109,7 +109,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
               }
             },
             onComplete: async (result) => {
-              try{
+              try {
                 const parsedResponse = JSON.parse(result.fullContent);
                 if (!updatedMessages[assistantMessageIdx]) {
                   updatedMessages = [...updatedMessages, parsedResponse];
@@ -176,15 +176,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
       <div className="flex-1 space-y-4 overflow-y-auto p-4">
         {messages.length === 0 && (
           <div className="text-center text-sm text-muted-foreground">
-            Start a conversation with the AI agent
-            {tools.length > 0 && (
-              <div className="mt-2">
-                <div className="text-xs">
-                  Available tools:{" "}
-                  {tools.map((t) => t.function.name).join(", ")}
-                </div>
-              </div>
-            )}
+            Start a conversation with Heli, our AI agent.
           </div>
         )}
 

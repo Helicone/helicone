@@ -79,7 +79,10 @@ export const playgroundTools = [
       name: "playground-get_messages",
       description:
         "Gets the messages in the playground with IDs for each message. Always use this before editing a message to get the ID. Returns a JSON string of the messages.",
-      parameters: {},
+      parameters: {
+        type: "object",
+        properties: {},
+      },
     },
   },
   {
@@ -115,7 +118,7 @@ export const promptsTools = [
   {
     type: "function" as const,
     function: {
-      name: "search-prompts",
+      name: "prompts-search",
       description: "Search for prompts by name or content",
       parameters: {
         type: "object",
@@ -135,7 +138,10 @@ export const promptsTools = [
       name: "prompts-get",
       description:
         "Gets the information of the prompts currently viewable in the prompts page.",
-      parameters: {},
+      parameters: {
+        type: "object",
+        properties: {},
+      },
     },
   },
   {
@@ -182,7 +188,10 @@ export const filtersTools = [
     function: {
       name: "save-current-filter",
       description: "Save the filter which is currently set in the page.",
-      parameters: {},
+      parameters: {
+        type: "object",
+        properties: {},
+      },
     },
   },
   {
@@ -191,7 +200,10 @@ export const filtersTools = [
       name: "get-filter-args",
       description:
         "Get the available filter definitions for the requests page. This should be called before setting any filters to understand what filters are available.",
-      parameters: {},
+      parameters: {
+        type: "object",
+        properties: {},
+      },
     },
   },
   {

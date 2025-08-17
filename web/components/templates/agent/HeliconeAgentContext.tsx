@@ -181,7 +181,8 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Hello, how can I help you today?",
+      content:
+        "Hello! I'm Heli, your Helicone assistant. How can I help you today?",
     },
   ]);
   useEffect(() => {
