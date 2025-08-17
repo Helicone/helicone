@@ -42,8 +42,8 @@ export function SessionDropdown({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-64">
-        <DropdownMenuItem 
-          onClick={onCreateSession} 
+        <DropdownMenuItem
+          onClick={onCreateSession}
           className="gap-2"
           disabled={isLoading}
         >
@@ -51,7 +51,7 @@ export function SessionDropdown({
           <span>New conversation</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        
+
         {sessions.length === 0 && !isLoading && (
           <div className="p-2 text-center text-sm text-muted-foreground">
             No conversations yet
@@ -63,7 +63,7 @@ export function SessionDropdown({
             Loading...
           </div>
         )}
-        
+
         {sessions.map((session) => (
           <DropdownMenuItem
             key={session.session_id}
@@ -75,11 +75,13 @@ export function SessionDropdown({
           >
             <div className="flex-1 overflow-hidden">
               <div className="flex items-center gap-1">
-                <span className={
-                  currentSessionId === session.session_id 
-                    ? "font-semibold text-sm truncate" 
-                    : "text-sm truncate"
-                }>
+                <span
+                  className={
+                    currentSessionId === session.session_id
+                      ? "truncate text-sm font-semibold"
+                      : "truncate text-sm"
+                  }
+                >
                   {session.name}
                 </span>
                 {session.escalated && (
