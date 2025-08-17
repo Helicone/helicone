@@ -8,10 +8,17 @@ import MessageRenderer from "./MessageRenderer";
 import { SessionDropdown } from "./SessionDropdown";
 import ChatInterface from "./ChatInterface";
 import { useRouter } from "next/router";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, XIcon } from "lucide-react";
 
 type Message = NonNullable<OpenAIChatRequest["messages"]>[0];
 type ToolCall = NonNullable<Message["tool_calls"]>[0];
+
+export interface QueuedMessage {
+  id: string;
+  content: string;
+  images: File[];
+  timestamp: Date;
+}
 
 interface AgentChatProps {
   onClose: () => void;
@@ -23,8 +30,10 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
   const [isStreaming, setIsStreaming] = useState(false);
   const [selectedModel, setSelectedModel] = useState("gpt-4o");
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
+  const [messageQueue, setMessageQueue] = useState<QueuedMessage[]>([]);
   const abortController = useRef<AbortController | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatInterfaceRef = useRef<{ focus: () => void }>(null);
 
   const {
     tools,
@@ -41,6 +50,32 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Focus the chat input when component mounts
+  useEffect(() => {
+    chatInterfaceRef.current?.focus();
+  }, []);
+
+  // Process message queue when streaming stops
+  useEffect(() => {
+    if (!isStreaming && messageQueue.length > 0) {
+      processMessageQueue();
+    }
+  }, [isStreaming, messageQueue.length]);
+
+  const processMessageQueue = async () => {
+    if (messageQueue.length === 0) return;
+
+    const nextMessage = messageQueue[0];
+    setMessageQueue((prev) => prev.slice(1));
+
+    // // Set the input to the queued message content
+    // setInput(nextMessage.content);
+    // setUploadedImages(nextMessage.images);
+
+    // Send the message
+    await sendMessageInternal(nextMessage.content, nextMessage.images);
+  };
 
   const handleToolCall = async (toolCall: ToolCall) => {
     const result = await executeTool(
@@ -63,22 +98,23 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
     });
   };
 
-  const sendMessage = async () => {
-    if ((!input.trim() && uploadedImages.length === 0) || isStreaming) return;
-
+  const sendMessageInternal = async (
+    messageContent: string,
+    images: File[],
+  ) => {
     let userMessage: Message;
 
-    if (uploadedImages.length > 0) {
+    if (images.length > 0) {
       const content: any[] = [];
 
-      if (input.trim()) {
+      if (messageContent.trim()) {
         content.push({
           type: "text",
-          text: input.trim(),
+          text: messageContent.trim(),
         });
       }
 
-      for (const image of uploadedImages) {
+      for (const image of images) {
         try {
           const base64 = await convertImageToBase64(image);
           content.push({
@@ -99,14 +135,12 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
     } else {
       userMessage = {
         role: "user",
-        content: input.trim(),
+        content: messageContent.trim(),
       };
     }
 
     let updatedMessages = [...messages, userMessage];
     updateCurrentSessionMessages(updatedMessages, true);
-    setInput("");
-    setUploadedImages([]);
 
     try {
       abortController.current = new AbortController();
@@ -197,6 +231,37 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
     } finally {
       setIsStreaming(false);
       abortController.current = null;
+      // Focus the input after streaming is complete
+      setTimeout(() => {
+        chatInterfaceRef.current?.focus();
+      }, 0);
+    }
+  };
+
+  const sendMessage = async () => {
+    if (!input.trim() && uploadedImages.length === 0) return;
+
+    // Focus the input after sending the message
+    setTimeout(() => {
+      chatInterfaceRef.current?.focus();
+    }, 0);
+
+    if (isStreaming) {
+      // Queue the message if currently streaming
+      const queuedMessage: QueuedMessage = {
+        id: Date.now().toString(),
+        content: input.trim(),
+        images: [...uploadedImages],
+        timestamp: new Date(),
+      };
+      setMessageQueue((prev) => [...prev, queuedMessage]);
+      setInput("");
+      setUploadedImages([]);
+    } else {
+      // Send immediately if not streaming
+      await sendMessageInternal(input.trim(), uploadedImages);
+      setInput("");
+      setUploadedImages([]);
     }
   };
 
@@ -207,25 +272,36 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
     }
   };
 
+  const removeFromQueue = (messageId: string) => {
+    setMessageQueue((prev) => prev.filter((msg) => msg.id !== messageId));
+  };
+
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between border-b border-border p-4">
+    <div className="flex h-full w-full flex-col">
+      <div className="flex w-full items-center justify-between border-b border-border px-1 py-3">
         <SessionDropdown />
-        <button
-          onClick={() => escalateSession()}
-          className="flex items-center gap-2"
-        >
-          Escalate <AlertCircle className="h-4 w-4" />
-        </button>
-        <button
-          onClick={onClose}
-          className="text-xl leading-none text-muted-foreground hover:text-foreground"
-        >
-          ×
-        </button>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={() => escalateSession()}
+            className="flex items-center gap-2"
+            variant="outline"
+            // size="sm_sleek"
+          >
+            <span className="text-sm"> Escalate</span>{" "}
+            <AlertCircle className="h-3 w-3" />
+          </Button>
+          <Button
+            onClick={onClose}
+            // className="h-5 w-5"
+            variant="ghost"
+            size="icon"
+          >
+            <XIcon className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
-      <div className="flex-1 space-y-4 overflow-y-auto p-4">
+      <div className="flex-1 space-y-2 overflow-y-auto p-4">
         {messages.length === 0 && (
           <div className="text-center text-sm text-muted-foreground">
             Start a conversation with Heli, our AI agent.
@@ -253,6 +329,8 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
       </div>
 
       <ChatInterface
+        messageQueue={messageQueue}
+        ref={chatInterfaceRef}
         input={input}
         setInput={setInput}
         onSendMessage={sendMessage}
@@ -262,6 +340,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
         onModelChange={setSelectedModel}
         uploadedImages={uploadedImages}
         setUploadedImages={setUploadedImages}
+        messageQueueLength={messageQueue.length}
       />
     </div>
   );

@@ -19,7 +19,8 @@ const MessageRenderer = ({ message }: MessageRendererProps) => {
   if (message.role === "user") {
     return (
       <div className="w-full">
-        <div className="w-full rounded-lg bg-primary px-3 py-2 text-primary-foreground">
+        {/* <div className="w-full rounded-lg border border-blue-100 bg-sidebar-background px-2.5 py-1 text-foreground "> */}
+        <div className="w-full rounded-lg border border-blue-200 bg-blue-100 px-2.5 py-1 text-foreground dark:border-blue-800 dark:bg-blue-900/50">
           {typeof message.content === "string" ? (
             <span className="text-[13px]">{message.content}</span>
           ) : Array.isArray(message.content) ? (
