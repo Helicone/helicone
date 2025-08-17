@@ -50,6 +50,7 @@ interface HeliconeAgentContextType {
   ) => void;
   switchToSession: (sessionId: string) => void;
   deleteSession: (sessionId: string) => void;
+  escalateSession: () => void;
 }
 
 const HeliconeAgentContext = createContext<
@@ -111,16 +112,39 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, []);
 
-  const { data: thread } = $JAWN_API.useQuery(
-    "get",
-    "/v1/agent/thread/{sessionId}",
-    {
-      params: { path: { sessionId: currentSessionId || "" } },
+  const [escalated, setEscalated] = useState<boolean>(false);
+  const { data: thread, refetch: refetchThread } = $JAWN_API.useQuery("get", "/v1/agent/thread/{sessionId}", {
+    params: {
+      path: {
+        sessionId: currentSessionId || "",
+      },
     },
-    {
-      enabled: !!currentSessionId,
-    },
-  );
+  }, {
+    enabled: !!currentSessionId,
+    refetchInterval: escalated ? 2_500 : undefined,
+ 
+  });
+  
+
+  useEffect(() => {
+    if (thread?.data?.escalated) {
+      setEscalated(true);
+    } else {
+      setEscalated(false);
+    }
+  }, [thread]);
+
+  const { mutate: deleteThread } = $JAWN_API.useMutation("delete", "/v1/agent/thread/{sessionId}", {
+    onSuccess: () => {
+      refetchThreads();
+    }
+  });
+  const { mutate: escalateThread } = $JAWN_API.useMutation("post", "/v1/agent/thread/{sessionId}/escalate", {
+    onSuccess: () => {
+      refetchThreads();
+      refetchThread();
+    }
+  });
 
   const { mutate: deleteThread } = $JAWN_API.useMutation(
     "delete",
@@ -195,6 +219,15 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
         currentSession: undefined,
         currentSessionId: null,
         messages: messages,
+        escalateSession: () => {
+          escalateThread({
+            params: {
+              path: {
+                sessionId: currentSessionId || "",
+              },
+            },
+          });
+        },
         createNewSession: () => {
           const newSessionId = crypto.randomUUID();
           const newChatMessages = [
