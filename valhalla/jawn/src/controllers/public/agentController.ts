@@ -5,6 +5,7 @@ import { type OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/ope
 import OpenAI from "openai";
 import { getHeliconeDefaultTempKey } from "../../lib/experiment/tempKeys/tempAPIKey";
 import { ENVIRONMENT } from "../../lib/clients/constant";
+import { HeliconeChatCreateParams } from "@helicone-package/prompts/types";
 
 @Route("v1/agent")
 @Tags("Agent")
@@ -77,7 +78,10 @@ export class AgentController extends Controller {
               tools: params.tools,
               reasoning_effort: params.reasoning_effort,
               verbosity: params.verbosity,
-            } as any,
+
+              // Helicone Prompt Params
+              prompt_id: process.env.HELI_AGENT_PROMPT_ID,
+            } as HeliconeChatCreateParams,
             {
               signal: abortController.signal,
             }
