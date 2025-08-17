@@ -37,7 +37,7 @@ export const playgroundTools = [
   {
     type: "function" as const,
     function: {
-      name: "get-messages",
+      name: "playground-get_messages",
       description:
         "Gets the messages in the playground with IDs for each message. Always use this before editing a message to get the ID. Returns a JSON string of the messages.",
       parameters: {},
@@ -46,7 +46,7 @@ export const playgroundTools = [
   {
     type: "function" as const,
     function: {
-      name: "edit-playground-message",
+      name: "playground-edit_message",
       description: "Inputs text to edit a certain message in the playground.",
       parameters: {
         type: "object",
@@ -93,7 +93,7 @@ export const promptsTools = [
   {
     type: "function" as const,
     function: {
-      name: "get-prompts",
+      name: "prompts-get",
       description:
         "Gets the information of the prompts currently viewable in the prompts page.",
       parameters: {},
@@ -102,7 +102,7 @@ export const promptsTools = [
   {
     type: "function" as const,
     function: {
-      name: "select-prompt",
+      name: "prompts-select",
       description:
         "Given an ID, opens a window showing the user details of the prompt. The window contains information like versions, environments, and metadata.",
       parameters: {
@@ -120,7 +120,7 @@ export const promptsTools = [
   {
     type: "function" as const,
     function: {
-      name: "get-prompt-versions",
+      name: "prompts-get-versions",
       description:
         "Gets the versions and accompanying metadata of a prompt given an ID.",
       parameters: {
