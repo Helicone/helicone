@@ -13,6 +13,7 @@ import { PiBrainBold, PiChatsBold, PiToolboxBold } from "react-icons/pi";
 import type { Components } from "react-markdown";
 import ReactMarkdown from "react-markdown";
 import GlassHeader from "../universal/GlassHeader";
+import { DiffHighlight } from "@/components/templates/welcome/diffHighlight";
 
 interface ResponsePanelProps {
   response?: { content: string; reasoning: string; calls: string };
@@ -144,23 +145,18 @@ export const markdownComponents: Components = {
     }
 
     return (
-      <div className="my-4 w-full overflow-hidden rounded-lg border border-border bg-muted/50 shadow-sm">
-        {/* Code header with language indicator */}
-        {language && (
-          <div className="flex items-center justify-between border-b border-border px-4 py-2">
-            <span className="text-xs font-medium text-muted-foreground">
-              {language}
-            </span>
-          </div>
-        )}
-
-        {/* Code content */}
-        <div className="relative">
-          <pre className="font-mono overflow-x-auto p-4 text-sm text-secondary">
-            <code className="block">{children}</code>
-          </pre>
-        </div>
-      </div>
+      <DiffHighlight
+        code={String(children).replace(/\n$/, "")}
+        language={language}
+        newLines={[]}
+        oldLines={[]}
+        minHeight={false}
+        maxHeight={false}
+        textSize="sm"
+        className="rounded-lg bg-[#1a1b26] [&_pre]:py-4"
+        preClassName="p-4"
+        marginTop={false}
+      />
     );
   },
   // Add styling for other markdown elements

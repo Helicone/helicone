@@ -28,6 +28,7 @@ interface DiffHighlightProps {
   textSize?: "sm" | "md" | "lg";
   className?: string;
   marginTop?: boolean;
+  preClassName?: string;
 }
 
 export function DiffHighlight(props: DiffHighlightProps) {
@@ -37,12 +38,15 @@ export function DiffHighlight(props: DiffHighlightProps) {
     textSize = "md",
     className,
     marginTop = true,
+    preClassName,
   } = props;
 
   const { setNotification } = useNotification();
 
   return (
-    <div className={clsx("ph-no-capture w-full overflow-auto", className)}>
+    <div
+      className={clsx("ph-no-capture relative w-full overflow-auto", className)}
+    >
       <Prism
         {...defaultProps}
         code={props.code.trim()}
@@ -51,27 +55,28 @@ export function DiffHighlight(props: DiffHighlightProps) {
       >
         {({ className, style, tokens, getLineProps, getTokenProps }) => (
           <>
+            <button
+              className="absolute right-4 top-4 z-50"
+              onClick={() => {
+                setNotification("Copied to clipboard", "success");
+                navigator.clipboard.writeText(props.code);
+              }}
+            >
+              <ClipboardIcon className="h-5 w-5 text-gray-500" />
+            </button>
             <pre
               className={clsx(
                 textSize === "sm" && "text-xs",
                 textSize === "md" && "text-xs md:text-sm",
                 textSize === "lg" && "text-md md:text-lg",
                 minHeight ? "min-h-[300px] md:min-h-[300px]" : "",
-                "relative space-y-0.5 overflow-auto rounded-xl p-6",
+                "relative space-y-0.5 overflow-auto rounded-xl",
+                preClassName,
                 maxHeight ? "max-h-[240px]" : "",
                 marginTop && "mt-3",
               )}
               style={style}
             >
-              <button
-                className="absolute right-4 top-4 z-50"
-                onClick={() => {
-                  setNotification("Copied to clipboard", "success");
-                  navigator.clipboard.writeText(props.code);
-                }}
-              >
-                <ClipboardIcon className="h-5 w-5 text-gray-500" />
-              </button>
               {tokens.map((line, i) => {
                 const { key: _, ...lineProps } = getLineProps({ line, key: i });
                 const lineNumber = i;
