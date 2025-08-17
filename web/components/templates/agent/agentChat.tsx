@@ -95,12 +95,6 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
         setIsStreaming(true);
 
         const assistantMessageIdx = updatedMessages.length;
-        const assistantMessage: Message = {
-          role: "assistant",
-          content: "",
-        };
-        updatedMessages = [...updatedMessages, assistantMessage];
-        updateCurrentSessionMessages(updatedMessages);
 
         const request: OpenAIChatRequest = {
           model: "gpt-4o-mini",
