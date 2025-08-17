@@ -271,37 +271,48 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       };
     });
 
-    setToolHandler("edit-playground-message", async (args: { message_index: number, content_array_index: number, text: string }) => {
-      const message = mappedContent?.schema.request.messages?.[args.message_index];
-      if (!message) {
-        return {
-          success: false,
-          message: "Message not found"
-        };
-      }
-
-      if (message._type === "contentArray") {
-        if (!message.contentArray || args.content_array_index >= message.contentArray.length) {
+    setToolHandler(
+      "edit-playground-message",
+      async (args: {
+        message_index: number;
+        content_array_index: number;
+        text: string;
+      }) => {
+        const message =
+          mappedContent?.schema.request.messages?.[args.message_index];
+        if (!message) {
           return {
             success: false,
-            message: "Content array index out of bounds"
+            message: "Message not found",
           };
         }
 
-        message.contentArray[args.content_array_index] = {
-          _type: "message",
-          role: message.role,
-          content: args.text
-        } as Message;
-      } else {
-        message.content = args.text;
-      }
+        if (message._type === "contentArray") {
+          if (
+            !message.contentArray ||
+            args.content_array_index >= message.contentArray.length
+          ) {
+            return {
+              success: false,
+              message: "Content array index out of bounds",
+            };
+          }
 
-      return {
-        success: true,
-        message: "Message edited successfully"
-      };
-    });
+          message.contentArray[args.content_array_index] = {
+            _type: "message",
+            role: message.role,
+            content: args.text,
+          } as Message;
+        } else {
+          message.content = args.text;
+        }
+
+        return {
+          success: true,
+          message: "Message edited successfully",
+        };
+      },
+    );
   }, [mappedContent, setToolHandler]);
 
   useEffect(() => {

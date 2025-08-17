@@ -6,7 +6,8 @@ export const playgroundTools = [
     type: "function" as const,
     function: {
       name: "get-messages",
-      description: "Gets the messages in the playground with IDs for each message. Always use this before editing a message to get the ID. Returns a JSON string of the messages.",
+      description:
+        "Gets the messages in the playground with IDs for each message. Always use this before editing a message to get the ID. Returns a JSON string of the messages.",
       parameters: {},
     },
   },
@@ -24,7 +25,8 @@ export const playgroundTools = [
           },
           content_array_index: {
             type: "number",
-            description: "For messages that are content arrays, this is the index of the content array to edit",
+            description:
+              "For messages that are content arrays, this is the index of the content array to edit",
           },
           text: {
             type: "string",
@@ -33,9 +35,9 @@ export const playgroundTools = [
         },
         required: ["message_index", "text"],
       },
-    }
-  }
-]
+    },
+  },
+];
 
 // TOOLS ON /prompts
 export const promptsTools = [
