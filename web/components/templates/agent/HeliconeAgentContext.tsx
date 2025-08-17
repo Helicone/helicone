@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
-import { promptsTools } from "@/lib/agent/tools";
+import { promptsTools, playgroundTools } from "@/lib/agent/tools";
 
 type Tool = NonNullable<OpenAIChatRequest["tools"]>[0];
 type ToolCallResult = {
@@ -32,6 +32,8 @@ const getToolsForRoute = (pathname: string): HeliconeAgentTool[] => {
   // PATH SPECIFIC TOOLS
   if (pathname === "/prompts") {
     tools.push(...promptsTools);
+  } else if (pathname === "/playground") {
+    tools.push(...playgroundTools);
   }
 
   return tools;
