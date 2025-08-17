@@ -299,7 +299,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           ...(mappedContent.schema.request.messages || []),
         ];
         const updatedMessage = { ...message };
-
         if (message._type === "contentArray") {
           if (
             !message.contentArray ||
@@ -333,7 +332,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         };
 
         setMappedContent(updatedMappedContent);
-
         return {
           success: true,
           message: "Message edited successfully",
