@@ -33,7 +33,7 @@ interface HeliconeAgentContextType {
     handler: (args: any) => Promise<ToolCallResult> | ToolCallResult,
   ) => void;
   executeTool: (toolName: string, args: any) => Promise<ToolCallResult>;
-  
+
   // Session management
   sessions: ChatSession[];
   currentSession: ChatSession | undefined;
@@ -71,13 +71,13 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
   const [toolHandlers, setToolHandlers] = useState<
     Map<string, (args: any) => Promise<any> | any>
   >(new Map());
-  
+
   // Session management state
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
-  
+
   // Get current session and messages
-  const currentSession = sessions.find(s => s.id === currentSessionId);
+  const currentSession = sessions.find((s) => s.id === currentSessionId);
   const messages = currentSession?.messages || [];
 
   useEffect(() => {
@@ -108,17 +108,19 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
       messages: [],
       createdAt: new Date(),
     };
-    setSessions(prev => [...prev, newSession]);
+    setSessions((prev) => [...prev, newSession]);
     setCurrentSessionId(newSession.id);
   };
 
   const updateCurrentSessionMessages = (newMessages: Message[]) => {
     if (!currentSessionId) return;
-    setSessions(prev => prev.map(session => 
-      session.id === currentSessionId 
-        ? { ...session, messages: newMessages }
-        : session
-    ));
+    setSessions((prev) =>
+      prev.map((session) =>
+        session.id === currentSessionId
+          ? { ...session, messages: newMessages }
+          : session,
+      ),
+    );
   };
 
   const switchToSession = (sessionId: string) => {
@@ -147,9 +149,9 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <HeliconeAgentContext.Provider
-      value={{ 
-        tools, 
-        setToolHandler, 
+      value={{
+        tools,
+        setToolHandler,
         executeTool,
         sessions,
         currentSession,

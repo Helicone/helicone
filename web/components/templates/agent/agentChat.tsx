@@ -22,7 +22,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
   const abortController = useRef<AbortController | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  
+
   const {
     tools,
     executeTool,
@@ -49,16 +49,16 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
     if (!textarea) return;
 
     // Reset height to auto to get the correct scrollHeight
-    textarea.style.height = 'auto';
-    
+    textarea.style.height = "auto";
+
     // Calculate the number of lines based on scrollHeight
     const lineHeight = parseInt(getComputedStyle(textarea).lineHeight);
     const lines = Math.ceil(textarea.scrollHeight / lineHeight);
-    
+
     // Limit to max 5 lines
     const maxLines = 5;
     const actualLines = Math.min(lines, maxLines);
-    
+
     // Set the height based on the number of lines
     textarea.style.height = `${actualLines * lineHeight}px`;
   };
@@ -229,16 +229,18 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
       </div>
 
       <div className="border-t border-border p-4">
-        <div className="flex gap-2 items-end">
+        <div className="flex items-end gap-2">
           <Textarea
             ref={textareaRef}
             value={input}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setInput(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+              setInput(e.target.value)
+            }
             onKeyDown={handleKeyDown}
             placeholder="Type your message..."
             disabled={isStreaming}
             className="flex-1 resize-none overflow-y-auto"
-            style={{ minHeight: '40px' }}
+            style={{ minHeight: "40px" }}
             rows={1}
           />
           <Button
