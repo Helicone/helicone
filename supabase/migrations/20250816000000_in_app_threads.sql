@@ -1,6 +1,5 @@
-create table "public"."in_app_threads" (
+create table if not exists "public"."in_app_threads" (
     "id" uuid not null default gen_random_uuid(),
-    "session_id" uuid not null,
     "chat" jsonb not null,
     "user_id" uuid not null,
     "org_id" uuid not null,
@@ -8,6 +7,7 @@ create table "public"."in_app_threads" (
     "escalated" boolean not null default false,
     "metadata" jsonb not null,
     "updated_at" timestamp with time zone not null default now(),
+    "soft_delete" boolean not null default false,
     constraint "in_app_threads_pkey" primary key ("id")
 );
 
@@ -18,8 +18,7 @@ revoke all on table "public"."in_app_threads" from service_role;
 revoke all on table "public"."in_app_threads" from anon;
 
 
--- Create btree on session_id
-create index in_app_threads_session_id_idx on "public"."in_app_threads" using btree (session_id);
+create index in_app_threads_soft_delete_idx on "public"."in_app_threads" using btree (soft_delete);
 
 -- btree on user_id and org_id
 create index in_app_threads_user_id_org_id_idx on "public"."in_app_threads" using btree (user_id, org_id);

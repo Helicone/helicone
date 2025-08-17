@@ -62,7 +62,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
     };
 
     let updatedMessages = [...messages, userMessage];
-    updateCurrentSessionMessages(updatedMessages);
+    updateCurrentSessionMessages(updatedMessages, true);
     setInput("");
 
     try {
@@ -73,6 +73,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
         setIsStreaming(true);
 
         const assistantMessageIdx = updatedMessages.length;
+        updateCurrentSessionMessages(updatedMessages, false);
 
         const request: OpenAIChatRequest = {
           model: selectedModel,
@@ -106,7 +107,21 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
                 updatedMessages = updatedMessages.map((msg, idx) =>
                   idx === assistantMessageIdx ? parsedResponse : msg,
                 );
-                updateCurrentSessionMessages(updatedMessages);
+                updateCurrentSessionMessages(updatedMessages, false);
+              } catch (error) {
+                console.error("Failed to parse response:", error);
+              }
+            },
+            onComplete: async (result) => {
+              try{
+                const parsedResponse = JSON.parse(result.fullContent);
+                if (!updatedMessages[assistantMessageIdx]) {
+                  updatedMessages = [...updatedMessages, parsedResponse];
+                }
+                updatedMessages = updatedMessages.map((msg, idx) =>
+                  idx === assistantMessageIdx ? parsedResponse : msg,
+                );
+                updateCurrentSessionMessages(updatedMessages, true);
               } catch (error) {
                 console.error("Failed to parse response:", error);
               }
@@ -126,13 +141,14 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
                 content: toolResult.message,
               };
               updatedMessages = [...updatedMessages, toolResultMessage];
-              updateCurrentSessionMessages(updatedMessages);
+              updateCurrentSessionMessages(updatedMessages, false);
             }
           }
         } else {
           shouldContinue = false;
         }
       }
+      updateCurrentSessionMessages(updatedMessages, true);
     } catch (error) {
       console.error("Chat error:", error);
     } finally {

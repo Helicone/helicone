@@ -7,27 +7,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChatSession } from "./HeliconeAgentContext";
+import { ChatSession, useHeliconeAgent } from "./HeliconeAgentContext";
 
-interface SessionDropdownProps {
-  sessions: ChatSession[];
-  currentSession: ChatSession | undefined;
-  currentSessionId: string | null;
-  onCreateSession: () => void;
-  onSwitchSession: (sessionId: string) => void;
-  onDeleteSession: (sessionId: string) => void;
-  isLoading?: boolean;
-}
 
-export function SessionDropdown({
-  sessions,
-  currentSession,
-  currentSessionId,
-  onCreateSession,
-  onSwitchSession,
-  onDeleteSession,
-  isLoading = false,
-}: SessionDropdownProps) {
+export function SessionDropdown() {
+  const {
+    tools,
+    executeTool,
+    sessions,
+    currentSession,
+    currentSessionId,
+    messages,
+    createNewSession,
+    updateCurrentSessionMessages,
+    switchToSession,
+    deleteSession,
+  } = useHeliconeAgent();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -43,41 +39,35 @@ export function SessionDropdown({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-64">
         <DropdownMenuItem
-          onClick={onCreateSession}
+          onClick={createNewSession}
           className="gap-2"
-          disabled={isLoading}
         >
           <Plus className="h-4 w-4" />
           <span>New conversation</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
 
-        {sessions.length === 0 && !isLoading && (
+        {sessions.length === 0  && (
           <div className="p-2 text-center text-sm text-muted-foreground">
             No conversations yet
           </div>
         )}
 
-        {isLoading && (
-          <div className="p-2 text-center text-sm text-muted-foreground">
-            Loading...
-          </div>
-        )}
 
         {sessions.map((session) => (
           <DropdownMenuItem
-            key={session.session_id}
+            key={session.id}
             className="group flex items-start gap-2 p-2"
             onSelect={(e) => {
               e.preventDefault();
-              onSwitchSession(session.session_id);
+              switchToSession(session.id);
             }}
           >
             <div className="flex-1 overflow-hidden">
               <div className="flex items-center gap-1">
                 <span
                   className={
-                    currentSessionId === session.session_id
+                    currentSessionId === session.id
                       ? "truncate text-sm font-semibold"
                       : "truncate text-sm"
                   }
@@ -97,7 +87,7 @@ export function SessionDropdown({
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
-                onDeleteSession(session.session_id);
+                deleteSession(session.id);
               }}
               size="sm"
               variant="ghost"

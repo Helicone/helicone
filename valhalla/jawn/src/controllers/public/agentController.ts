@@ -1,4 +1,15 @@
-import { Body, Controller, Delete, Get, Path, Post, Request, Route, Security, Tags } from "tsoa";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Path,
+  Post,
+  Request,
+  Route,
+  Security,
+  Tags,
+} from "tsoa";
 import { Result, err, ok } from "../../packages/common/result";
 import { type JawnAuthenticatedRequest } from "../../types/request";
 import { type OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
@@ -6,7 +17,11 @@ import OpenAI from "openai";
 import { getHeliconeDefaultTempKey } from "../../lib/experiment/tempKeys/tempAPIKey";
 import { ENVIRONMENT } from "../../lib/clients/constant";
 import { HeliconeChatCreateParams } from "@helicone-package/prompts/types";
-import { InAppThreadsManager, InAppThread, ThreadSummary } from "../../managers/InAppThreadsManager";
+import {
+  InAppThreadsManager,
+  InAppThread,
+  ThreadSummary,
+} from "../../managers/InAppThreadsManager";
 
 @Route("v1/agent")
 @Tags("Agent")
@@ -84,7 +99,8 @@ export class AgentController extends Controller {
               verbosity: params.verbosity,
 
               // Helicone Prompt Params
-              prompt_id: bodyParams.prompt_id ?? process.env.HELI_AGENT_PROMPT_ID,
+              prompt_id:
+                bodyParams.prompt_id ?? process.env.HELI_AGENT_PROMPT_ID,
               environment: bodyParams.environment,
               inputs: bodyParams.inputs,
             } as HeliconeChatCreateParams,
@@ -201,7 +217,7 @@ export class AgentController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<InAppThread, string>> {
     const threadsManager = new InAppThreadsManager(request.authParams);
-    
+
     const result = await threadsManager.upsertThreadMessage({
       sessionId,
       messages: bodyParams.messages,
@@ -222,7 +238,7 @@ export class AgentController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<{ success: boolean }, string>> {
     const threadsManager = new InAppThreadsManager(request.authParams);
-    
+
     const result = await threadsManager.deleteThread(sessionId);
 
     if (result.error) {
@@ -239,7 +255,7 @@ export class AgentController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<InAppThread, string>> {
     const threadsManager = new InAppThreadsManager(request.authParams);
-    
+
     const result = await threadsManager.escalateThread(sessionId);
 
     if (result.error) {
@@ -255,7 +271,7 @@ export class AgentController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<ThreadSummary[], string>> {
     const threadsManager = new InAppThreadsManager(request.authParams);
-    
+
     const result = await threadsManager.getAllThreads();
 
     if (result.error) {
@@ -272,28 +288,11 @@ export class AgentController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<InAppThread, string>> {
     const threadsManager = new InAppThreadsManager(request.authParams);
-    
+
     const result = await threadsManager.getThread(sessionId);
 
     if (result.error) {
       this.setStatus(404);
-      return err(result.error);
-    }
-
-    return ok(result.data!);
-  }
-
-  @Post("/thread")
-  public async createNewThread(
-    @Body() bodyParams: { metadata?: any },
-    @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<InAppThread, string>> {
-    const threadsManager = new InAppThreadsManager(request.authParams);
-    
-    const result = await threadsManager.createNewThread(bodyParams.metadata);
-
-    if (result.error) {
-      this.setStatus(400);
       return err(result.error);
     }
 
