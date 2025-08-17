@@ -234,7 +234,7 @@ export function ThemedTimeFilterShadCN({
           align="start"
         >
           {/* Predefined ranges */}
-          <span className="pt-4 text-sm font-semibold">Quick Select:</span>
+          <span className="pt-4 text-xs font-semibold">Quick Select:</span>
           <div className="grid grid-cols-6 gap-2">
             {predefinedRanges.map((range) => (
               <Button
@@ -249,7 +249,7 @@ export function ThemedTimeFilterShadCN({
           </div>
 
           {/* Custom time range selector */}
-          <span className="pt-4 text-sm font-semibold">Custom Range:</span>
+          <span className="pt-4 text-xs font-semibold">Custom Range:</span>
           <div className="grid gap-2">
             <div className="flex items-center gap-2">
               <Input
@@ -290,7 +290,7 @@ export function ThemedTimeFilterShadCN({
             </div>
           </div>
 
-          <span className="pt-4 text-sm font-semibold">Date Picker:</span>
+          <span className="pt-4 text-xs font-semibold">Date Picker:</span>
           <div className="grid gap-4">
             <Calendar
               initialFocus

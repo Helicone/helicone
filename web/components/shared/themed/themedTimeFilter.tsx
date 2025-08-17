@@ -124,9 +124,9 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
                   ? "border border-sky-300 bg-sky-200 dark:border-sky-700 dark:bg-sky-800"
                   : "border-gray-300 bg-white hover:bg-sky-50 dark:border-gray-700 dark:bg-black dark:hover:bg-sky-900",
                 idx === timeFilterOptions.length - 1 ? "rounded-r-lg" : "",
-                !custom && idx === 0
-                  ? "relative inline-flex items-center rounded-l-lg border px-3 py-1.5 text-sm font-medium focus:z-10 focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400"
-                  : "relative -ml-px inline-flex items-center border px-3 py-1.5 text-sm font-medium focus:z-10 focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400",
+                              !custom && idx === 0
+                ? "relative inline-flex items-center rounded-l-lg border px-3 py-1.5 text-xs font-medium focus:z-10 focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400"
+                : "relative -ml-px inline-flex items-center border px-3 py-1.5 text-xs font-medium focus:z-10 focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400",
               )}
             >
               {option.value}
@@ -149,8 +149,8 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
                 : "border-gray-300 bg-white hover:bg-sky-50 dark:border-gray-700 dark:bg-black dark:hover:bg-sky-900",
               idx === timeFilterOptions.length - 1 ? "rounded-r-lg" : "",
               !custom && idx === 0
-                ? "relative inline-flex items-center rounded-l-lg border px-3 py-1.5 text-sm font-medium focus:z-10 focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400"
-                : "relative -ml-px inline-flex items-center border px-3 py-1.5 text-sm font-medium focus:z-10 focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400",
+                ? "relative inline-flex items-center rounded-l-lg border px-3 py-1.5 text-xs font-medium focus:z-10 focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400"
+                : "relative -ml-px inline-flex items-center border px-3 py-1.5 text-xs font-medium focus:z-10 focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400",
             )}
           >
             {option.value}
