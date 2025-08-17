@@ -298,4 +298,62 @@ export class AgentController extends Controller {
 
     return ok(result.data!);
   }
+
+  @Post("/mcp/search")
+  public async searchDocs(
+    @Body() bodyParams: { query: string },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<string, string>> {
+    const { query } = bodyParams;
+
+    try {
+      const response = await fetch(`https://docs.helicone.ai/mcp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json, text/event-stream",
+          "Access-Control-Allow-Origin": "*",
+        },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          id: 1,
+          method: "tools/call", // Fixed: was "tool/call", should be "tools/call"
+          params: {
+            name: "Search", // Fixed: moved name to correct level
+            arguments: {
+              query,
+            },
+          },
+        }),
+      });
+
+      // Handle SSE response format
+      const responseText = await response.text();
+
+      let finalResponse = "";
+
+      // Parse SSE data
+      const lines = responseText.trim().split("\n");
+      for (const line of lines) {
+        if (line.startsWith("data: ")) {
+          try {
+            const data = JSON.parse(line.substring(6)); // Remove 'data: ' prefix
+            if (data.result) {
+              finalResponse += JSON.stringify(data.result.content, null, 2);
+            }
+
+            if (data.error) {
+              return err(data.error.message);
+            }
+          } catch (error) {
+            console.error("Error parsing JSON:", error);
+          }
+        }
+      }
+
+      return ok(finalResponse);
+    } catch (error) {
+      return err("Failed to connect to documentation search service");
+    }
+  }
 }

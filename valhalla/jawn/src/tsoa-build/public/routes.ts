@@ -11138,6 +11138,38 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAgentController_searchDocs: Record<string, TsoaRoute.ParameterSchema> = {
+                bodyParams: {"in":"body","name":"bodyParams","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"query":{"dataType":"string","required":true}}},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.post('/v1/agent/mcp/search',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(AgentController)),
+            ...(fetchMiddlewares<RequestHandler>(AgentController.prototype.searchDocs)),
+
+            async function AgentController_searchDocs(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAgentController_searchDocs, request, response });
+
+                const controller = new AgentController();
+
+              await templateService.apiHandler({
+                methodName: 'searchDocs',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 

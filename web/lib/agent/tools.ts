@@ -4,6 +4,24 @@ export const universalTools = [
   {
     type: "function" as const,
     function: {
+      name: "search-helicone-docs",
+      description:
+        "Search across the Helicone OSS LLM Observability documentation to find relevant information, code examples, API references, and guides. Use this tool when you need to answer questions about Helicone OSS LLM Observability, find specific documentation, understand how features work, or locate implementation details. The search returns contextual content with titles and direct links to the documentation pages.",
+      parameters: {
+        type: "object",
+        properties: {
+          query: {
+            type: "string",
+            description: "A query to search the content with.",
+          },
+        },
+      },
+      required: ["query"],
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
       name: "navigate",
       description: "Navigates to a specific page within the Helicone platform.",
       parameters: {
