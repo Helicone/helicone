@@ -97,7 +97,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
         const assistantMessageIdx = updatedMessages.length;
 
         const request: OpenAIChatRequest = {
-          model: "gpt-4o-mini",
+          model: "gpt-4o-mini/openai",
           messages: updatedMessages,
           temperature: 0.7,
           max_tokens: 1000,
