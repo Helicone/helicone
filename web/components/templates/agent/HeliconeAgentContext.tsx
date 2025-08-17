@@ -8,6 +8,8 @@ import {
 } from "@/lib/agent/tools";
 
 type Tool = NonNullable<OpenAIChatRequest["tools"]>[0];
+type Message = NonNullable<OpenAIChatRequest["messages"]>[0];
+
 type ToolCallResult = {
   success: boolean;
   message: string;
@@ -17,6 +19,13 @@ interface HeliconeAgentTool extends Tool {
   handler?: (args: any) => Promise<ToolCallResult> | ToolCallResult;
 }
 
+export interface ChatSession {
+  id: string;
+  name: string;
+  messages: Message[];
+  createdAt: Date;
+}
+
 interface HeliconeAgentContextType {
   tools: HeliconeAgentTool[];
   setToolHandler: (
@@ -24,6 +33,15 @@ interface HeliconeAgentContextType {
     handler: (args: any) => Promise<ToolCallResult> | ToolCallResult,
   ) => void;
   executeTool: (toolName: string, args: any) => Promise<ToolCallResult>;
+  
+  // Session management
+  sessions: ChatSession[];
+  currentSession: ChatSession | undefined;
+  currentSessionId: string | null;
+  messages: Message[];
+  createNewSession: () => void;
+  updateCurrentSessionMessages: (messages: Message[]) => void;
+  switchToSession: (sessionId: string) => void;
 }
 
 const HeliconeAgentContext = createContext<
@@ -53,6 +71,14 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
   const [toolHandlers, setToolHandlers] = useState<
     Map<string, (args: any) => Promise<any> | any>
   >(new Map());
+  
+  // Session management state
+  const [sessions, setSessions] = useState<ChatSession[]>([]);
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  
+  // Get current session and messages
+  const currentSession = sessions.find(s => s.id === currentSessionId);
+  const messages = currentSession?.messages || [];
 
   useEffect(() => {
     const routeTools = getToolsForRoute(router.pathname);
@@ -67,6 +93,37 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
       };
     });
   }, [router.pathname]);
+
+  // Initialize with first session if none exist
+  useEffect(() => {
+    if (sessions.length === 0) {
+      createNewSession();
+    }
+  }, []);
+
+  const createNewSession = () => {
+    const newSession: ChatSession = {
+      id: Date.now().toString(),
+      name: `Chat ${sessions.length + 1}`,
+      messages: [],
+      createdAt: new Date(),
+    };
+    setSessions(prev => [...prev, newSession]);
+    setCurrentSessionId(newSession.id);
+  };
+
+  const updateCurrentSessionMessages = (newMessages: Message[]) => {
+    if (!currentSessionId) return;
+    setSessions(prev => prev.map(session => 
+      session.id === currentSessionId 
+        ? { ...session, messages: newMessages }
+        : session
+    ));
+  };
+
+  const switchToSession = (sessionId: string) => {
+    setCurrentSessionId(sessionId);
+  };
 
   const setToolHandler = (
     toolName: string,
@@ -90,7 +147,18 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <HeliconeAgentContext.Provider
-      value={{ tools, setToolHandler, executeTool }}
+      value={{ 
+        tools, 
+        setToolHandler, 
+        executeTool,
+        sessions,
+        currentSession,
+        currentSessionId,
+        messages,
+        createNewSession,
+        updateCurrentSessionMessages,
+        switchToSession,
+      }}
     >
       {children}
     </HeliconeAgentContext.Provider>
