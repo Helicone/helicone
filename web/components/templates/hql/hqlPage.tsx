@@ -26,6 +26,7 @@ import {
   createExecuteQueryMutation,
 } from "./constants";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { useHeliconeAgent } from "../agent/HeliconeAgentContext";
 
 function HQLPage() {
   const organization = useOrg();
@@ -59,9 +60,10 @@ function HQLPage() {
   });
   const [queryLoading, setQueryLoading] = useState(false);
   const [queryError, setQueryError] = useState<string | null>(null);
-  const { mutate: handleExecuteQuery } = useMutation(
-    createExecuteQueryMutation(setResult, setQueryError, setQueryLoading),
-  );
+  const { mutate: handleExecuteQuery, mutateAsync: handleExecuteQueryAsync } =
+    useMutation(
+      createExecuteQueryMutation(setResult, setQueryError, setQueryLoading),
+    );
 
   // a hack to get the latest query in the editor
   const latestQueryRef = useRef(currentQuery);
@@ -80,6 +82,44 @@ function HQLPage() {
         enabled: !!currentQuery.id,
       },
     );
+
+  const { setToolHandler } = useHeliconeAgent();
+
+  useEffect(() => {
+    setToolHandler("hql-get-schema", async () => {
+      return {
+        success: true,
+        message: JSON.stringify(clickhouseSchemas.data),
+      };
+    });
+  }, [clickhouseSchemas.data]);
+
+  useEffect(() => {
+    setToolHandler("hql-write-query", async ({ query }) => {
+      setCurrentQuery({
+        id: undefined,
+        name: "Untitled query",
+        sql: query,
+      });
+      return {
+        success: true,
+        message: "Query written successfully",
+      };
+    });
+  }, []);
+
+  useEffect(() => {
+    setToolHandler("hql-run-query", async () => {
+      const response = await handleExecuteQueryAsync(currentQuery.sql);
+      return {
+        success: !response.error && !response.data.error,
+        message:
+          response.error ||
+          response.data.error ||
+          JSON.stringify((response?.data?.data || response?.data) ?? {}),
+      };
+    });
+  }, [currentQuery.sql]);
 
   useEffect(() => {
     if (savedQueryDetails?.data) {
@@ -207,7 +247,7 @@ function HQLPage() {
     latestQueryRef.current = currentQuery;
   }, [currentQuery]);
 
-  if (!hasAccessToHQL) {
+  if (!hasAccessToHQL?.data) {
     return <div>You do not have access to HQL</div>;
   }
 
@@ -258,7 +298,7 @@ function HQLPage() {
             />
             <Editor
               defaultLanguage="sql"
-              defaultValue={currentQuery.sql}
+              value={currentQuery.sql}
               onMount={async (editor, monaco) => {
                 editorRef.current = editor;
                 const model = editor.getModel();

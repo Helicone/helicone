@@ -1,6 +1,7 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 
 export const useClickhouseSchemas = () => {
   const org = useOrg();
@@ -22,8 +23,12 @@ export const useClickhouseSchemas = () => {
     refetchInterval: false,
   });
 
+  const memoizedData = useMemo(() => {
+    return data?.data?.data || [];
+  }, [data?.data?.data]);
+
   return {
-    data: data?.data?.data || [],
+    data: memoizedData,
     refetch,
     isLoading,
     isRefetching,
@@ -54,8 +59,12 @@ export const useExecuteSql = (unsanitizedSql: string) => {
     refetchInterval: false,
   });
 
+  const memoizedData = useMemo(() => {
+    return data?.data?.data || [];
+  }, [data?.data?.data]);
+
   return {
-    data: data?.data?.data || [],
+    data: memoizedData,
     refetch,
     isLoading,
     isRefetching,
