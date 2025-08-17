@@ -55,7 +55,9 @@ export class InAppThreadsManager extends BaseManager {
       );
 
       if (existingThreadResult.error) {
-        return err(`Failed to check existing thread: ${existingThreadResult.error}`);
+        return err(
+          `Failed to check existing thread: ${existingThreadResult.error}`
+        );
       }
 
       const existingThread = existingThreadResult.data?.[0];
@@ -73,7 +75,7 @@ export class InAppThreadsManager extends BaseManager {
             JSON.stringify({ messages }),
             JSON.stringify(metadata),
             sessionId,
-            this.authParams.organizationId
+            this.authParams.organizationId,
           ]
         );
 
@@ -96,9 +98,9 @@ export class InAppThreadsManager extends BaseManager {
           [
             sessionId,
             JSON.stringify({ messages }),
-            this.authParams.userId ?? '',
+            this.authParams.userId ?? "",
             this.authParams.organizationId,
-            JSON.stringify(metadata)
+            JSON.stringify(metadata),
           ]
         );
 
@@ -121,7 +123,7 @@ export class InAppThreadsManager extends BaseManager {
     try {
       const deleteResult = await dbExecute(
         `DELETE FROM in_app_threads 
-         WHERE session_id = $1 AND org_id = $2`,
+         WHERE id = $1 AND org_id = $2`,
         [sessionId, this.authParams.organizationId]
       );
 
@@ -135,7 +137,9 @@ export class InAppThreadsManager extends BaseManager {
     }
   }
 
-  async escalateThread(sessionId: string): Promise<Result<InAppThread, string>> {
+  async escalateThread(
+    sessionId: string
+  ): Promise<Result<InAppThread, string>> {
     try {
       const updateResult = await dbExecute<InAppThread>(
         `UPDATE in_app_threads 
@@ -192,7 +196,7 @@ export class InAppThreadsManager extends BaseManager {
     try {
       const threadResult = await dbExecute<InAppThread>(
         `SELECT * FROM in_app_threads 
-         WHERE session_id = $1 AND org_id = $2`,
+         WHERE id = $1 AND org_id = $2`,
         [sessionId, this.authParams.organizationId]
       );
 
@@ -213,7 +217,7 @@ export class InAppThreadsManager extends BaseManager {
   async createNewThread(metadata?: any): Promise<Result<InAppThread, string>> {
     try {
       const sessionId = crypto.randomUUID();
-      
+
       const insertResult = await dbExecute<InAppThread>(
         `INSERT INTO in_app_threads 
          (session_id, chat, user_id, org_id, metadata, escalated)
@@ -222,9 +226,9 @@ export class InAppThreadsManager extends BaseManager {
         [
           sessionId,
           JSON.stringify({ messages: [] }),
-          this.authParams.userId ?? '',
+          this.authParams.userId ?? "",
           this.authParams.organizationId,
-          JSON.stringify(metadata || {})
+          JSON.stringify(metadata || {}),
         ]
       );
 

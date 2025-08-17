@@ -1,6 +1,5 @@
 create table "public"."in_app_threads" (
     "id" uuid not null default gen_random_uuid(),
-    "session_id" uuid not null,
     "chat" jsonb not null,
     "user_id" uuid not null,
     "org_id" uuid not null,
