@@ -1,13 +1,12 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { generateStream } from "@/lib/api/llm/generate-stream";
 import { processStream } from "@/lib/api/llm/process-stream";
 import { OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
-import { Send } from "lucide-react";
 import { useHeliconeAgent } from "./HeliconeAgentContext";
 import MessageRenderer from "./MessageRenderer";
 import { SessionDropdown } from "./SessionDropdown";
+import ChatInterface from "./ChatInterface";
 
 type Message = NonNullable<OpenAIChatRequest["messages"]>[0];
 type ToolCall = NonNullable<Message["tool_calls"]>[0];
@@ -21,7 +20,6 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
   const [isStreaming, setIsStreaming] = useState(false);
   const abortController = useRef<AbortController | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const {
     tools,
@@ -33,6 +31,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
     createNewSession,
     updateCurrentSessionMessages,
     switchToSession,
+    deleteSession,
   } = useHeliconeAgent();
 
   const scrollToBottom = () => {
@@ -42,30 +41,6 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-
-  // Auto-resize textarea based on content
-  const adjustTextareaHeight = () => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-
-    // Reset height to auto to get the correct scrollHeight
-    textarea.style.height = "auto";
-
-    // Calculate the number of lines based on scrollHeight
-    const lineHeight = parseInt(getComputedStyle(textarea).lineHeight);
-    const lines = Math.ceil(textarea.scrollHeight / lineHeight);
-
-    // Limit to max 5 lines
-    const maxLines = 5;
-    const actualLines = Math.min(lines, maxLines);
-
-    // Set the height based on the number of lines
-    textarea.style.height = `${actualLines * lineHeight}px`;
-  };
-
-  useEffect(() => {
-    adjustTextareaHeight();
-  }, [input]);
 
   const handleToolCall = async (toolCall: ToolCall) => {
     const result = await executeTool(
@@ -97,7 +72,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
         const assistantMessageIdx = updatedMessages.length;
 
         const request: OpenAIChatRequest = {
-          model: "gpt-4o-mini/openai",
+          model: "gpt-4o",
           messages: updatedMessages,
           temperature: 0.7,
           max_tokens: 1000,
@@ -160,14 +135,6 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-    // Shift+Enter will naturally create a new line in textarea
-  };
-
   const stopGeneration = () => {
     if (abortController.current) {
       abortController.current.abort();
@@ -184,6 +151,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
           currentSessionId={currentSessionId}
           onCreateSession={createNewSession}
           onSwitchSession={switchToSession}
+          onDeleteSession={deleteSession}
         />
         <button
           onClick={onClose}
@@ -228,34 +196,13 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="border-t border-border p-4">
-        <div className="flex items-end gap-2">
-          <Textarea
-            ref={textareaRef}
-            value={input}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-              setInput(e.target.value)
-            }
-            onKeyDown={handleKeyDown}
-            placeholder="Type your message..."
-            disabled={isStreaming}
-            className="flex-1 resize-none overflow-y-auto"
-            style={{ minHeight: "40px" }}
-            rows={1}
-          />
-          <Button
-            onClick={sendMessage}
-            disabled={!input.trim() || isStreaming}
-            size="sm"
-            className="shrink-0"
-          >
-            <Send className="h-4 w-4" />
-          </Button>
-        </div>
-        <div className="mt-1 text-xs text-muted-foreground">
-          Press Enter to send • Shift+Enter for new line • Cmd+I to toggle
-        </div>
-      </div>
+      <ChatInterface
+        input={input}
+        setInput={setInput}
+        onSendMessage={sendMessage}
+        isStreaming={isStreaming}
+        onStopGeneration={stopGeneration}
+      />
     </div>
   );
 };

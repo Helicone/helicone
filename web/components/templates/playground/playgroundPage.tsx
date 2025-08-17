@@ -264,7 +264,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   );
 
   useEffect(() => {
-    setToolHandler("get-messages", () => {
+    setToolHandler("playground-get_messages", () => {
       return {
         success: true,
         message: JSON.stringify(mappedContent?.schema.request.messages ?? []),
@@ -272,7 +272,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     });
 
     setToolHandler(
-      "edit-playground-message",
+      "playground-edit_message",
       async (args: {
         message_index: number;
         content_array_index: number;
