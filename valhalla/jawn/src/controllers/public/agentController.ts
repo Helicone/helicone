@@ -1,10 +1,11 @@
-import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
+import { Body, Controller, Delete, Get, Path, Post, Request, Route, Security, Tags } from "tsoa";
 import { Result, err, ok } from "../../packages/common/result";
 import { type JawnAuthenticatedRequest } from "../../types/request";
 import { type OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
 import OpenAI from "openai";
 import { getHeliconeDefaultTempKey } from "../../lib/experiment/tempKeys/tempAPIKey";
 import { ENVIRONMENT } from "../../lib/clients/constant";
+import { InAppThreadsManager, InAppThread, ThreadSummary } from "../../managers/InAppThreadsManager";
 
 @Route("v1/agent")
 @Tags("Agent")
@@ -175,5 +176,118 @@ export class AgentController extends Controller {
       this.setStatus(500);
       return err("Failed to generate response");
     }
+  }
+
+  @Post("/thread/{sessionId}/message")
+  public async upsertThreadMessage(
+    @Path() sessionId: string,
+    @Body()
+    bodyParams: {
+      messages: OpenAI.Chat.ChatCompletionMessageParam[];
+      metadata: {
+        posthogSession?: string;
+        [key: string]: any;
+      };
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<InAppThread, string>> {
+    const threadsManager = new InAppThreadsManager(request.authParams);
+    
+    const result = await threadsManager.upsertThreadMessage({
+      sessionId,
+      messages: bodyParams.messages,
+      metadata: bodyParams.metadata,
+    });
+
+    if (result.error) {
+      this.setStatus(400);
+      return err(result.error);
+    }
+
+    return ok(result.data!);
+  }
+
+  @Delete("/thread/{sessionId}")
+  public async deleteThread(
+    @Path() sessionId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<{ success: boolean }, string>> {
+    const threadsManager = new InAppThreadsManager(request.authParams);
+    
+    const result = await threadsManager.deleteThread(sessionId);
+
+    if (result.error) {
+      this.setStatus(400);
+      return err(result.error);
+    }
+
+    return ok({ success: result.data! });
+  }
+
+  @Post("/thread/{sessionId}/escalate")
+  public async escalateThread(
+    @Path() sessionId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<InAppThread, string>> {
+    const threadsManager = new InAppThreadsManager(request.authParams);
+    
+    const result = await threadsManager.escalateThread(sessionId);
+
+    if (result.error) {
+      this.setStatus(400);
+      return err(result.error);
+    }
+
+    return ok(result.data!);
+  }
+
+  @Get("/threads")
+  public async getAllThreads(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<ThreadSummary[], string>> {
+    const threadsManager = new InAppThreadsManager(request.authParams);
+    
+    const result = await threadsManager.getAllThreads();
+
+    if (result.error) {
+      this.setStatus(400);
+      return err(result.error);
+    }
+
+    return ok(result.data!);
+  }
+
+  @Get("/thread/{sessionId}")
+  public async getThread(
+    @Path() sessionId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<InAppThread, string>> {
+    const threadsManager = new InAppThreadsManager(request.authParams);
+    
+    const result = await threadsManager.getThread(sessionId);
+
+    if (result.error) {
+      this.setStatus(404);
+      return err(result.error);
+    }
+
+    return ok(result.data!);
+  }
+
+  @Post("/thread")
+  public async createNewThread(
+    @Body() bodyParams: { metadata?: any },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<InAppThread, string>> {
+    const threadsManager = new InAppThreadsManager(request.authParams);
+    
+    const result = await threadsManager.createNewThread(bodyParams.metadata);
+
+    if (result.error) {
+      this.setStatus(400);
+      return err(result.error);
+    }
+
+    return ok(result.data!);
   }
 }
