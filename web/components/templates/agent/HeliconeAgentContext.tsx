@@ -113,18 +113,21 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const [escalated, setEscalated] = useState<boolean>(false);
-  const { data: thread, refetch: refetchThread } = $JAWN_API.useQuery("get", "/v1/agent/thread/{sessionId}", {
-    params: {
-      path: {
-        sessionId: currentSessionId || "",
+  const { data: thread, refetch: refetchThread } = $JAWN_API.useQuery(
+    "get",
+    "/v1/agent/thread/{sessionId}",
+    {
+      params: {
+        path: {
+          sessionId: currentSessionId || "",
+        },
       },
     },
-  }, {
-    enabled: !!currentSessionId,
-    refetchInterval: escalated ? 2_500 : undefined,
- 
-  });
-  
+    {
+      enabled: !!currentSessionId,
+      refetchInterval: escalated ? 2_500 : undefined,
+    },
+  );
 
   useEffect(() => {
     if (thread?.data?.escalated) {
@@ -134,13 +137,16 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [thread]);
 
-
-  const { mutate: escalateThread } = $JAWN_API.useMutation("post", "/v1/agent/thread/{sessionId}/escalate", {
-    onSuccess: () => {
-      refetchThreads();
-      refetchThread();
-    }
-  });
+  const { mutate: escalateThread } = $JAWN_API.useMutation(
+    "post",
+    "/v1/agent/thread/{sessionId}/escalate",
+    {
+      onSuccess: () => {
+        refetchThreads();
+        refetchThread();
+      },
+    },
+  );
 
   const { mutate: deleteThread } = $JAWN_API.useMutation(
     "delete",
