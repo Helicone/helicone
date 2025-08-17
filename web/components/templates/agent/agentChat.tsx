@@ -22,6 +22,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [selectedModel, setSelectedModel] = useState("gpt-4o");
+  const [uploadedImages, setUploadedImages] = useState<File[]>([]);
   const abortController = useRef<AbortController | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -49,17 +50,63 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
     return result;
   };
 
-  const sendMessage = async () => {
-    if (!input.trim() || isStreaming) return;
+  const convertImageToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+        const base64 = result.split(",")[1];
+        resolve(base64);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
 
-    const userMessage: Message = {
-      role: "user",
-      content: input.trim(),
-    };
+  const sendMessage = async () => {
+    if ((!input.trim() && uploadedImages.length === 0) || isStreaming) return;
+
+    let userMessage: Message;
+
+    if (uploadedImages.length > 0) {
+      const content: any[] = [];
+
+      if (input.trim()) {
+        content.push({
+          type: "text",
+          text: input.trim(),
+        });
+      }
+
+      for (const image of uploadedImages) {
+        try {
+          const base64 = await convertImageToBase64(image);
+          content.push({
+            type: "image_url",
+            image_url: {
+              url: `data:${image.type};base64,${base64}`,
+            },
+          });
+        } catch (error) {
+          console.error("Failed to convert image to base64:", error);
+        }
+      }
+
+      userMessage = {
+        role: "user",
+        content: content,
+      };
+    } else {
+      userMessage = {
+        role: "user",
+        content: input.trim(),
+      };
+    }
 
     let updatedMessages = [...messages, userMessage];
     updateCurrentSessionMessages(updatedMessages, true);
     setInput("");
+    setUploadedImages([]);
 
     try {
       abortController.current = new AbortController();
@@ -164,7 +211,12 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between border-b border-border p-4">
         <SessionDropdown />
-        <button onClick={() => escalateSession()} className="flex items-center gap-2">Escalate <AlertCircle className="w-4 h-4" /></button>
+        <button
+          onClick={() => escalateSession()}
+          className="flex items-center gap-2"
+        >
+          Escalate <AlertCircle className="h-4 w-4" />
+        </button>
         <button
           onClick={onClose}
           className="text-xl leading-none text-muted-foreground hover:text-foreground"
@@ -208,8 +260,9 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
         onStopGeneration={stopGeneration}
         selectedModel={selectedModel}
         onModelChange={setSelectedModel}
+        uploadedImages={uploadedImages}
+        setUploadedImages={setUploadedImages}
       />
-      
     </div>
   );
 };

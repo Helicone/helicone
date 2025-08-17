@@ -20,10 +20,35 @@ const MessageRenderer = ({ message }: MessageRendererProps) => {
     return (
       <div className="w-full">
         <div className="w-full rounded-lg bg-primary px-3 py-2 text-primary-foreground">
-          {typeof message.content === "string" && (
+          {typeof message.content === "string" ? (
             <span className="text-[13px]">{message.content}</span>
-          )}
+          ) : Array.isArray(message.content) ? (
+            <div className="space-y-2">
+              {message.content
+                .filter((item: any) => item.type === "text")
+                .map((item: any, index: number) => (
+                  <span key={index} className="text-[13px]">
+                    {item.text}
+                  </span>
+                ))}
+            </div>
+          ) : null}
         </div>
+
+        {Array.isArray(message.content) && (
+          <div className="mt-2 flex flex-wrap gap-1">
+            {message.content
+              .filter((item: any) => item.type === "image_url")
+              .map((item: any, index: number) => (
+                <img
+                  key={index}
+                  src={item.image_url.url}
+                  alt={`Image ${index + 1}`}
+                  className="h-8 w-8 rounded border border-border object-cover"
+                />
+              ))}
+          </div>
+        )}
       </div>
     );
   }
