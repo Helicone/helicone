@@ -7004,7 +7004,7 @@ export interface operations {
         content: {
           "application/json": ({
             /** @enum {string} */
-            providerName: "anthropic" | "openai" | "perplexity" | "vertex" | "bedrock" | "azure-openai" | "xai" | "groq" | "deepseek" | "cohere";
+            providerName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure-openai" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai";
           }) | {
             error: string;
           };
