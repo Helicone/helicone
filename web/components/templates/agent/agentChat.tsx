@@ -187,7 +187,11 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
           inputs: {
             page: router.pathname,
             model: selectedModel.split(",")[0],
-            date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+            date: new Date().toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            }),
           },
           endpoint: "agent",
           signal: abortController.current.signal,
