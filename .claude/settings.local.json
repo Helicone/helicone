@@ -29,7 +29,8 @@
       "Bash(rm:*)",
       "Bash(npx prettier:*)",
       "Bash(npx tsc:*)",
-      "Bash(npx jest:*)"
+      "Bash(npx jest:*)",
+      "Bash(docker buildx build:*)"
     ],
     "deny": []
   }
