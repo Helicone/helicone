@@ -1,4 +1,4 @@
-import { ProviderName } from "@/cost/models/providers";
+import { ProviderName } from "../../../providers";
 import type { ModelProviderConfig } from "../../../types";
 import { O4ModelName } from "./models";
 
