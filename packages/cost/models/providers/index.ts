@@ -8,6 +8,7 @@ import { GroqProvider } from "./groq";
 import { DeepSeekProvider } from "./deepseek";
 import { CohereProvider } from "./cohere";
 import { XAIProvider } from "./xai";
+import { GoogleProvider } from "./google";
 
 // Create singleton instances (stateless, so safe to share)
 export const providers = {
@@ -21,6 +22,7 @@ export const providers = {
   deepseek: new DeepSeekProvider(),
   cohere: new CohereProvider(),
   xai: new XAIProvider(),
+  google: new GoogleProvider(),
 } as const;
 
 export type ProviderName = keyof typeof providers;

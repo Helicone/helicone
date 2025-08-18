@@ -90,7 +90,11 @@ const validateModelString = (model: string): ValidateModelStringResult => {
   const modelParts = model.split("/");
   if (modelParts.length !== 2) {
     const providersResult = registry.getModelProviders(model);
-    if (providersResult.error || !providersResult.data) {
+    if (
+      providersResult.error ||
+      !providersResult.data ||
+      providersResult.data.size === 0
+    ) {
       return err({
         type: "invalid_format",
         message: "Invalid model",
@@ -146,7 +150,11 @@ const authenticateRequest = async (
   });
 
   if (authResult.error) {
-    throw new Error(`Authentication failed: ${authResult.error}`);
+    return err({
+      type: "request_failed",
+      message: `Authentication failed: ${authResult.error}`,
+      code: 401,
+    });
   }
 
   for (const [key, value] of Object.entries(authResult.data?.headers || {})) {

@@ -37,6 +37,9 @@ export const dbProviderToProvider = (provider: string): ProviderName | null => {
   if (provider === "Groq") {
     return "groq";
   }
+  if (provider === "Google AI (Gemini)") {
+    return "google";
+  }
   return null;
 };
 
@@ -55,6 +58,9 @@ export const providerToDbProvider = (provider: ProviderName): string => {
   }
   if (provider === "groq") {
     return "Groq";
+  }
+  if (provider === "google") {
+    return "Google AI (Gemini)";
   }
   return provider;
 };

@@ -46,6 +46,16 @@ export const providers: Provider[] = [
     apiKeyPlaceholder: "...",
     relevanceScore: 85,
   },
+  {
+    id: "google",
+    name: "Google AI (Gemini)",
+    logoUrl: "/assets/home/providers/gemini.webp",
+    description: "Configure your Gemini API Keys",
+    docsUrl: "https://docs.helicone.ai/integrations/gemini/api/curl",
+    apiKeyLabel: "Gemini API Key",
+    apiKeyPlaceholder: "...",
+    relevanceScore: 84,
+  },
   // {
   //   id: "google",
   //   name: "Google AI (Gemini)",
@@ -179,6 +189,7 @@ export const providers: Provider[] = [
     apiKeyLabel: "OpenRouter API Key",
     apiKeyPlaceholder: "...",
     relevanceScore: 35,
+    note: "We don't support OpenRouter in our AI Gateway but you can use it with our Playground.",
   },
   // {
   //   id: "hyperbolic",
