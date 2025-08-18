@@ -1,9 +1,10 @@
 import {
   buildRequestBody,
   getProvider,
-  ProviderName,
   authenticateRequest as authenticateProviderRequest,
-} from "@helicone-package/cost/models/providers";
+} from "@helicone-package/cost/models/provider-helpers";
+import { ProviderName } from "@helicone-package/cost/models/providers";
+import { BaseProvider } from "@helicone-package/cost/models/providers/base";
 import { RequestWrapper } from "../RequestWrapper";
 import { toAnthropic } from "../clients/llmmapper/providers/openai/request/toAnthropic";
 import { APIKeysStore } from "../db/APIKeysStore";
@@ -16,7 +17,6 @@ import { err, isErr, ok, Result } from "./results";
 import { registry } from "@helicone-package/cost/models/registry";
 import {
   Endpoint,
-  ProviderConfig,
   UserEndpointConfig,
 } from "@helicone-package/cost/models/types";
 
@@ -72,7 +72,7 @@ export const authenticate = async (
 type DirectProviderEndpoint = {
   type: "direct";
   provider: ProviderName;
-  providerConfig: ProviderConfig;
+  providerConfig: BaseProvider;
   modelName: string;
 };
 

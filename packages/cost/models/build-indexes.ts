@@ -1,4 +1,5 @@
-import { buildEndpointUrl, ProviderName } from "./providers";
+import { buildEndpointUrl } from "./provider-helpers";
+import { ProviderName } from "./providers";
 import { ModelProviderConfigId, EndpointId, ModelName } from "./registry-types";
 import type { Endpoint, ModelProviderConfig, EndpointConfig } from "./types";
 

@@ -19598,14 +19598,14 @@
 													"enum": [
 														"anthropic",
 														"openai",
-														"perplexity",
-														"vertex",
 														"bedrock",
+														"vertex",
 														"azure-openai",
-														"xai",
+														"perplexity",
 														"groq",
 														"deepseek",
-														"cohere"
+														"cohere",
+														"xai"
 													]
 												}
 											},

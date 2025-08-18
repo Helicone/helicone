@@ -4,7 +4,7 @@ import { Database, Json } from "../../../supabase/database.types";
 import {
   dbProviderToProvider,
   providerToDbProvider,
-} from "@helicone-package/cost/models/providers";
+} from "@helicone-package/cost/models/provider-helpers";
 
 export type ProviderKey = {
   provider: ProviderName;
