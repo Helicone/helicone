@@ -62,6 +62,35 @@ export const endpoints = {
       },
     },
   },
+  "claude-opus-4-1:bedrock": {
+    provider: "bedrock",
+    providerModelId: "anthropic.claude-opus-4-1-20250805-v1:0",
+    version: "20250805",
+    crossRegion: true,
+    pricing: {
+      prompt: 0.000015,
+      completion: 0.000075,
+      cacheRead: 0.0000015,
+      cacheWrite: 0.00001875,
+    },
+    contextLength: 200000,
+    maxCompletionTokens: 32000,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "stop",
+      "reasoning",
+      "include_reasoning",
+      "tools",
+      "tool_choice",
+      "top_p",
+      "top_k",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "us-east-1": {},
+    },
+  },
 } satisfies Partial<
   Record<`${ClaudeOpus41ModelName}:${ProviderName}`, ModelProviderConfig>
 >;
