@@ -74,9 +74,6 @@ export type StandardParameter =
   | "logit_bias"
   | "logprobs"
   | "top_logprobs"
-  | "top_k"
-  | "top_p"
-  | "stop"
   | "structured_outputs";
 
 export interface ModelPricing {
