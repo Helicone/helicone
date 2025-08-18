@@ -5,7 +5,7 @@ export const models = {
     name: "OpenAI: gpt-oss-120b",
     author: "google",
     description:
-      "gpt-oss-120b is an open-weight, 117B-parameter Mixture-of-Experts (MoE) language model from OpenAI designed for high-reasoning, agentic, and general-purpose production use cases. It activates 5.1B parameters per forward pass and is optimized to run on a single H100 GPU with native MXFP4 quantization. The model supports configurable reasoning depth, full chain-of-thought access, and native tool use, including function calling, browsing, and structured output generation.",
+      "gpt-oss-120b is OpenAI's most powerful open-weight model, which fits into a single H100 GPU (117B parameters with 5.1B active parameters).",
     contextLength: 131000,
     maxOutputTokens: 131000,
     created: "2025-08-05T10:17:11",
@@ -16,7 +16,7 @@ export const models = {
     name: "OpenAI: gpt-oss-20b",
     author: "google",
     description:
-      "gpt-oss-20b is an open-weight 21B parameter model released by OpenAI under the Apache 2.0 license. It uses a Mixture-of-Experts (MoE) architecture with 3.6B active parameters per forward pass, optimized for lower-latency inference and deployability on consumer or single-GPU hardware. The model is trained in OpenAI’s Harmony response format and supports reasoning level configuration, fine-tuning, and agentic capabilities including function calling, tool use, and structured outputs.",
+      "gpt-oss-20b is OpenAI's medium-sized open-weight model for low latency, local, or specialized use-cases (21B parameters with 3.6B active parameters).",
     contextLength: 131000,
     maxOutputTokens: 131000,
     created: "2025-08-05T10:17:09",
