@@ -19,7 +19,7 @@ import {
   setAPIKey,
   setProviderKey,
 } from "../../lib/refetchKeys";
-import { dbProviderToProvider } from "@helicone-package/cost/models/providers";
+import { dbProviderToProvider } from "@helicone-package/cost/models/provider-helpers";
 
 @Route("v1/api-keys")
 @Tags("API Key")
