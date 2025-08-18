@@ -207,7 +207,7 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
     {
       role: "assistant",
       content:
-        "Hello! I'm Heli, your Helicone assistant. How can I help you today?",
+        "Hello! I'm Helix, your Helicone assistant. How can I help you today?",
     },
   ]);
   useEffect(() => {
