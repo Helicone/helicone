@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { MappedLLMRequest, Message } from "@helicone-package/llm-mapper/types";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { LuPlus } from "react-icons/lu";
 import ChatMessage from "./chatComponent/ChatMessage";
 import {
@@ -20,6 +20,7 @@ import {
 } from "@dnd-kit/sortable";
 import { GripVertical } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
+import { useHeliconeAgent } from "@/components/templates/agent/HeliconeAgentContext";
 
 export type ChatMode = "PLAYGROUND_INPUT" | "PLAYGROUND_OUTPUT" | "DEFAULT";
 
@@ -37,6 +38,8 @@ export default function Chat({
   const [expandedMessages, setExpandedMessages] = useState<
     Record<number, boolean>
   >({});
+
+  const { setToolHandler } = useHeliconeAgent();
 
   const messages = useMemo(() => {
     const requestMessages = mappedRequest.schema.request?.messages ?? [];
@@ -128,6 +131,18 @@ export default function Chat({
       },
     });
   };
+
+  useEffect(() => {
+    if (mode === "PLAYGROUND_INPUT") {
+      setToolHandler("playground-add_blank_message", () => {
+        addMessage();
+        return {
+          success: true,
+          message: "Message added",
+        };
+      });
+    }
+  }, [mode]);
 
   const renderMessages = () => {
     if (mode === "PLAYGROUND_INPUT") {

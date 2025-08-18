@@ -186,20 +186,31 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
           ...request,
           inputs: {
             page: router.pathname,
+            model: selectedModel.split(",")[0],
+            date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
           },
           endpoint: "agent",
           signal: abortController.current.signal,
         } as any);
 
+        const emptyAssistantMessage: Message = {
+          role: "assistant",
+          content: "",
+        };
+
         const result = await processStream(
           stream,
           {
             initialState: {
-              fullContent: "",
+              fullContent: JSON.stringify(emptyAssistantMessage),
             },
             onUpdate: async (result) => {
               try {
                 const parsedResponse = JSON.parse(result.fullContent);
+                // ensure content is set
+                if (!parsedResponse.content) {
+                  parsedResponse.content = "";
+                }
                 if (!updatedMessages[assistantMessageIdx]) {
                   updatedMessages = [...updatedMessages, parsedResponse];
                 }
@@ -216,6 +227,10 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
             onComplete: async (result) => {
               try {
                 const parsedResponse = JSON.parse(result.fullContent);
+                // ensure content is set
+                if (!parsedResponse.content) {
+                  parsedResponse.content = "";
+                }
                 if (!updatedMessages[assistantMessageIdx]) {
                   updatedMessages = [...updatedMessages, parsedResponse];
                 }
@@ -243,15 +258,13 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
         if (parsedResponse.tool_calls) {
           for (const toolCall of parsedResponse.tool_calls) {
             const toolResult = await handleToolCall(toolCall);
-            if (toolResult.success) {
-              const toolResultMessage: Message = {
-                role: "tool",
-                tool_call_id: toolCall.id,
-                content: toolResult.message,
-              };
-              updatedMessages = [...updatedMessages, toolResultMessage];
-              updateCurrentSessionMessages(updatedMessages, false);
-            }
+            const toolResultMessage: Message = {
+              role: "tool",
+              tool_call_id: toolCall.id,
+              content: toolResult.message,
+            };
+            updatedMessages = [...updatedMessages, toolResultMessage];
+            updateCurrentSessionMessages(updatedMessages, false);
           }
         } else {
           shouldContinue = false;
@@ -367,7 +380,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
       <div className="flex-1 space-y-2 overflow-y-auto px-3 py-1">
         {messages.length === 0 && (
           <div className="text-center text-sm text-muted-foreground">
-            Start a conversation with Heli, our AI agent.
+            Start a conversation with Helix, our AI agent.
           </div>
         )}
 

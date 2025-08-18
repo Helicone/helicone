@@ -144,6 +144,17 @@ export const playgroundTools = [
       },
     },
   },
+  {
+    type: "function" as const,
+    function: {
+      name: "playground-add_blank_message",
+      description: "Adds a blank message to the playground messages.",
+      parameters: {
+        type: "object",
+        properties: {},
+      },
+    },
+  },
 ];
 
 // TOOLS ON /prompts
