@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { logger } from "@/lib/telemetry/logger";
 import { Checkbox } from "@/components/ui/checkbox";
 
 import {
@@ -172,7 +173,7 @@ export const EvaluatorForm = ({
         openAIFunction: openAITemplate,
       });
     } catch (error) {
-      console.error("Error with evaluator:", error);
+      logger.error({ error }, "Error with evaluator");
       // Error handling is done at the parent component level
     }
   };

@@ -9,6 +9,7 @@ import useNotification from "@/components/shared/notification/useNotification";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { logger } from "@/lib/telemetry/logger";
 import {
   Select,
   SelectContent,
@@ -120,7 +121,7 @@ export default function OpenPipeFineTuneButton(
       setNotification("Fine-tune job created successfully!", "success");
       setIsSheetOpen(false); // Close the sheet after successful completion
     } catch (error) {
-      console.error("Error in fine-tuning process:", error);
+      logger.error({ error }, "Error in fine-tuning process");
       addLog(`Error: ${error}`);
       setNotification(
         "Error in fine-tuning process. Please try again.",

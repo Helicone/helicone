@@ -1,6 +1,7 @@
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { useQuery } from "@tanstack/react-query";
+import { logger } from "@/lib/telemetry/logger";
 
 export interface EvaluatorStats {
   averageScore: number;
@@ -50,15 +51,27 @@ export const useEvaluatorStats = (evaluatorId: string) => {
 
         // Check for error response
         if (responseData?.error) {
-          console.warn(
-            `API error for evaluator ${evaluatorId}: ${responseData.error}`,
+          logger.warn(
+            {
+              evaluatorId,
+              error: responseData.error,
+              orgId: org?.currentOrg?.id,
+            },
+            "API error for evaluator stats",
           );
           return DEFAULT_STATS;
         }
 
         // Check if data is missing or null
         if (!responseData?.data?.data) {
-          console.warn(`No stats data returned for evaluator ${evaluatorId}`);
+          logger.warn(
+            {
+              evaluatorId,
+              orgId: org?.currentOrg?.id,
+              hasData: !!responseData?.data,
+            },
+            "No stats data returned for evaluator",
+          );
           return DEFAULT_STATS;
         }
 
@@ -83,9 +96,13 @@ export const useEvaluatorStats = (evaluatorId: string) => {
 
         return processedData;
       } catch (error) {
-        console.error(
-          `Exception fetching stats for evaluator ${evaluatorId}:`,
-          error,
+        logger.error(
+          {
+            error,
+            evaluatorId,
+            orgId: org?.currentOrg?.id,
+          },
+          "Exception fetching stats for evaluator",
         );
         return DEFAULT_STATS;
       }

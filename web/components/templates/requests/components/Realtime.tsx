@@ -1,5 +1,6 @@
 import GlassHeader from "@/components/shared/universal/GlassHeader";
 import { JsonRenderer } from "@/components/templates/requests/components/chatComponent/single/JsonRenderer";
+import { logger } from "@/lib/telemetry/logger";
 import {
   Tooltip,
   TooltipContent,
@@ -139,7 +140,8 @@ export const Realtime: React.FC<RealtimeProps> = ({
           // Otherwise just get the single message at startIndex
           return [sortedMessages[startIndex]];
         } else {
-          console.warn(
+          logger.warn(
+            { startIndex, messageCount: sortedMessages.length },
             `Message index ${startIndex} is out of range (0-${
               sortedMessages.length - 1
             })`,
@@ -777,7 +779,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
         setConversionStatus("success");
       } catch (err: any) {
         if (isCancelled) return; // Don't update if component unmounted
-        console.error("Error converting audio:", err);
+        logger.error({ error: err }, "Error converting audio");
         setErrorMessage(`Conversion failed: ${err.message}`);
         setConversionStatus("error");
       }
@@ -807,7 +809,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
         // Reset error specific to playback attempt
         setErrorMessage(null);
         audioRef.current.play().catch((err) => {
-          console.error("Standard audio playback failed:", err);
+          logger.error({ error: err }, "Standard audio playback failed");
           const playErrorMsg = `Playback error: ${
             err.message || "Unknown error"
           }`;
@@ -859,7 +861,10 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
       // Data from backend is already WAV
       return `data:audio/wav;base64,${convertedWavData}`;
     } catch (e) {
-      console.error("Error creating audio source from converted data:", e);
+      logger.error(
+        { error: e },
+        "Error creating audio source from converted data",
+      );
       // Error should be handled during conversion or playback attempt
       return "";
     }
@@ -903,7 +908,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
       ? `Audio Error ${err.code}: ${err.message}`
       : "Error loading audio";
 
-    console.error("Audio element error:", errorMsg);
+    logger.error({ errorMsg, audioError: err }, "Audio element error");
     setErrorMessage(errorMsg);
     setConversionStatus("error");
     setIsPlaying(false);

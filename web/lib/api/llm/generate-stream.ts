@@ -1,4 +1,5 @@
 import { generate, GenerateParams } from "./generate";
+import { logger } from "@/lib/telemetry/logger";
 
 export async function generateStream(
   params: GenerateParams,
@@ -24,7 +25,10 @@ export async function generateStream(
           // Pass through the raw chunk exactly as received
           await writer.write(encoder.encode(chunk));
         } catch (error) {
-          console.error("[generateStream] Error writing chunk:", error);
+          logger.error(
+            { error, chunkLength: chunk.length },
+            "[generateStream] Error writing chunk",
+          );
           await writer.abort(error);
           throw error;
         }
@@ -35,12 +39,12 @@ export async function generateStream(
           await writer.close();
         } catch (error) {
           // If we can't close, the stream is probably already closed or errored
-          console.debug("[generateStream] Could not close stream:", error);
+          logger.debug({ error }, "[generateStream] Could not close stream");
         }
       },
     },
   }).catch(async (error) => {
-    console.error("[generateStream] Streaming error:", error);
+    logger.error({ error }, "[generateStream] Streaming error");
     await writer.abort(error);
   });
 

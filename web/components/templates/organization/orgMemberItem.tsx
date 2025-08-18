@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { logger } from "@/lib/telemetry/logger";
 
 interface OrgMemberItemProps {
   index: number;
@@ -89,7 +90,10 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
                   );
                   if (error) {
                     setNotification("Error updating member", "error");
-                    console.error(error);
+                    logger.error(
+                      { error, memberId: orgMember.member, role },
+                      "Error updating member",
+                    );
                   } else {
                     setNotification("Successfully updated member", "success");
                   }
@@ -172,7 +176,10 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
                   );
                   if (error) {
                     setNotification("Error leaving organization", "error");
-                    console.error(error);
+                    logger.error(
+                      { error, orgId, memberId: orgMember.member },
+                      "Error leaving organization",
+                    );
                   } else {
                     setNotification(
                       "Successfully left organization",
@@ -231,7 +238,10 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
                 );
                 if (error) {
                   setNotification("Error removing member", "error");
-                  console.error(error);
+                  logger.error(
+                    { error, orgId, memberId: orgMember.member },
+                    "Error removing member",
+                  );
                 } else {
                   setNotification("Member removed successfully", "success");
                 }
