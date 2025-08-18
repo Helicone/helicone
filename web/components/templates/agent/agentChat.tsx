@@ -8,7 +8,7 @@ import MessageRenderer from "./MessageRenderer";
 import { SessionDropdown } from "./SessionDropdown";
 import ChatInterface from "./ChatInterface";
 import { useRouter } from "next/router";
-import { AlertCircle, XIcon } from "lucide-react";
+import { UserIcon, XIcon } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 
 type Message = NonNullable<OpenAIChatRequest["messages"]>[0];
@@ -42,6 +42,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
     messages,
     updateCurrentSessionMessages,
     escalateSession,
+    currentSession,
   } = useHeliconeAgent();
 
   const scrollToBottom = () => {
@@ -306,25 +307,25 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
         <div className="flex items-center gap-2">
           <Button
             onClick={() => escalateSession()}
-            className="flex items-center gap-2"
             variant="outline"
-            // size="sm_sleek"
+            size="sm"
+            className="flex items-center gap-2 border-border bg-background hover:bg-muted"
           >
-            <span className="text-sm"> Escalate</span>{" "}
-            <AlertCircle className="h-3 w-3" />
+            <UserIcon className="h-3.5 w-3.5" />
+            <span className="text-sm">Talk to a human</span>
           </Button>
           <Button
             onClick={onClose}
-            // className="h-5 w-5"
             variant="ghost"
-            size="icon"
+            size="sm"
+            className="h-8 w-8 p-0 hover:bg-muted"
           >
             <XIcon className="h-4 w-4" />
           </Button>
         </div>
       </div>
 
-      <div className="flex-1 space-y-2 overflow-y-auto p-4">
+      <div className="flex-1 space-y-2 overflow-y-auto px-3 py-1">
         {messages.length === 0 && (
           <div className="text-center text-sm text-muted-foreground">
             Start a conversation with Heli, our AI agent.
@@ -335,49 +336,18 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
           <MessageRenderer key={uuidv4()} message={message} />
         ))}
 
-        {/* Show queued messages */}
-        {/* {messageQueue.length > 0 && (
-          <div className="space-y-2">
-            {messageQueue.map((queuedMessage) => (
-              <div
-                key={queuedMessage.id}
-                className="flex items-center gap-2 rounded-lg border border-border bg-muted/50 p-3"
-              >
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <div className="text-sm font-medium text-foreground">
-                    Queued message
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {queuedMessage.content ||
-                      `${queuedMessage.images.length} image(s)`}
-                  </div>
-                </div>
-                <Button
-                  onClick={() => removeFromQueue(queuedMessage.id)}
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 p-0"
-                >
-                  <XIcon className="h-3 w-3" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        )} */}
-
-        {isStreaming && (
+        {/* {(isStreaming || true) && (
           <div className="flex justify-center">
             <Button
               onClick={stopGeneration}
               variant="outline"
-              size="sm"
+              size="sm_sleek"
               className="text-xs"
             >
               Stop generating
             </Button>
           </div>
-        )}
+        )} */}
 
         <div ref={messagesEndRef} />
       </div>
