@@ -19,7 +19,7 @@ export interface BannerType {
 
 const MainContent = ({ children, banner, pathname }: MainContentProps) => {
   return (
-    <div className={clsx("flex flex-1 flex-col")}>
+    <div className={clsx("flex flex-1 flex-col overflow-y-auto")}>
       <main className="flex-1">
         {banner && (
           <div className="bg-slate-50">
@@ -53,8 +53,10 @@ const MainContent = ({ children, banner, pathname }: MainContentProps) => {
             </div>
           </div>
         )}
-        <div className={clsx("h-full min-h-screen bg-background")}>
-          <div className="mr-auto min-h-screen w-full" key={`${pathname}`}>
+        <div
+          className={clsx("h-full max-h-screen overflow-y-auto bg-background")}
+        >
+          <div className="mr-auto w-full" key={`${pathname}`}>
             {children}
           </div>
         </div>

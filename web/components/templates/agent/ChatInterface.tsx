@@ -14,6 +14,7 @@ import {
   X,
   ArrowUp,
   Trash2Icon,
+  ChevronUpIcon,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -24,6 +25,11 @@ import {
 import { QueuedMessage } from "./agentChat";
 import { cn } from "@/lib/utils";
 import { ImageModal } from "../requests/components/chatComponent/single/images/ImageModal";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ChatInterfaceProps {
   messageQueue: QueuedMessage[];
@@ -110,6 +116,11 @@ const ChatInterface = forwardRef<{ focus: () => void }, ChatInterfaceProps>(
         setTimeout(() => {
           textareaRef.current?.focus();
         }, 0);
+      }
+
+      if (e.key === "C" && e.ctrlKey && isStreaming) {
+        e.preventDefault();
+        onStopGeneration();
       }
       // Shift+Enter will naturally create a new line in textarea
     };
@@ -335,10 +346,10 @@ const ChatInterface = forwardRef<{ focus: () => void }, ChatInterfaceProps>(
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-6 gap-1 rounded-full bg-muted px-3 py-0 text-[13px] text-muted-foreground hover:text-foreground"
+                    className="h-6 items-center gap-1 rounded-full bg-muted px-3 py-0 text-xs text-muted-foreground hover:text-foreground"
                   >
                     <span>{currentModel.label}</span>
-                    <ChevronDown size={14} />
+                    <ChevronUpIcon size={12} />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-40">
@@ -348,7 +359,7 @@ const ChatInterface = forwardRef<{ focus: () => void }, ChatInterfaceProps>(
                       onClick={() => onModelChange(model.id)}
                       className="flex flex-col items-start gap-0 px-2 py-1"
                     >
-                      <span className="text-sm">{model.label}</span>
+                      <span className="text-xs">{model.label}</span>
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
@@ -371,21 +382,40 @@ const ChatInterface = forwardRef<{ focus: () => void }, ChatInterfaceProps>(
                 >
                   <ImagePlus size={16} />
                 </Button>
-                <Button
-                  onClick={isStreaming ? onStopGeneration : onSendMessage}
-                  disabled={
-                    !isStreaming && !input.trim() && uploadedImages.length === 0
-                  }
-                  size="sm"
-                  variant="ghost"
-                  className="relative h-6 w-6 rounded-full bg-muted p-0"
-                >
-                  {isStreaming ? (
-                    <Square className="h-3 w-3 text-muted-foreground" />
-                  ) : (
-                    <ArrowUp className="h-3 w-3 text-muted-foreground" />
-                  )}
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      onClick={
+                        isStreaming &&
+                        !input.trim() &&
+                        uploadedImages.length === 0
+                          ? onStopGeneration
+                          : onSendMessage
+                      }
+                      disabled={
+                        !isStreaming &&
+                        !input.trim() &&
+                        uploadedImages.length === 0
+                      }
+                      size="sm"
+                      variant="ghost"
+                      className="relative h-6 w-6 rounded-full bg-muted p-0"
+                    >
+                      {isStreaming &&
+                      !input.trim() &&
+                      uploadedImages.length === 0 ? (
+                        <Square className="h-3 w-3 text-muted-foreground" />
+                      ) : (
+                        <ArrowUp className="h-3 w-3 text-muted-foreground" />
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="text-xs">
+                    {isStreaming && !input.trim() && uploadedImages.length === 0
+                      ? "Stop"
+                      : "Send"}
+                  </TooltipContent>
+                </Tooltip>
               </div>
             </div>
           </div>

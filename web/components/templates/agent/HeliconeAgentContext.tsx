@@ -67,7 +67,11 @@ const getToolsForRoute = (pathname: string): HeliconeAgentTool[] => {
     tools.push(...playgroundTools);
   }
 
-  if (pathname === "/requests") {
+  if (
+    pathname === "/requests" ||
+    pathname === "/sessions" ||
+    pathname === "/users"
+  ) {
     tools.push(...filtersTools);
   }
 
@@ -215,10 +219,28 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
   const executeTool = async (toolName: string, args: any) => {
     const handler = toolHandlers.get(toolName);
     if (!handler) {
-      throw new Error(`No handler found for tool: ${toolName}`);
+      // throw new Error(`No handler found for tool: ${toolName}`);
+      console.error(`No handler found for tool: ${toolName}`);
+      return {
+        success: false,
+        message: `No handler found for tool: ${toolName}`,
+      };
     }
-    return await handler(args);
+    try {
+      return await handler(args);
+    } catch (error) {
+      console.error(error);
+      return {
+        success: false,
+        message: `Error executing tool: ${toolName}`,
+      };
+    }
   };
+
+  const currentSession =
+    threads?.data && threads?.data.length > 0
+      ? threads?.data.find((thread) => thread.id === currentSessionId)
+      : undefined;
 
   return (
     <HeliconeAgentContext.Provider
@@ -234,8 +256,14 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
             createdAt: new Date(thread.created_at),
             escalated: thread.escalated,
           })) ?? [],
-        currentSession: undefined,
-        currentSessionId: null,
+        currentSession: {
+          id: currentSession?.id ?? "",
+          name: currentSession?.last_message ?? currentSession?.id ?? "",
+          messages: [],
+          createdAt: new Date(currentSession?.created_at ?? ""),
+          escalated: currentSession?.escalated ?? false,
+        },
+        currentSessionId,
         messages: messages,
         escalateSession: () => {
           escalateThread({

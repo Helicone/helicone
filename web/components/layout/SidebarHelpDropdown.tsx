@@ -55,7 +55,7 @@ const SidebarHelpDropdown = ({
   useEffect(() => {
     if (pathname?.includes("dashboard")) {
       // Only want to show on dashboard for now
-      Intercom({ app_id: INTERCOM_APP_ID, hide_default_launcher: false });
+      Intercom({ app_id: INTERCOM_APP_ID, hide_default_launcher: true });
     } else {
       Intercom({ app_id: INTERCOM_APP_ID, hide_default_launcher: true });
     }
