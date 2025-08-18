@@ -66,7 +66,10 @@ export const hqlTools = [
       name: "hql-get-schema",
       description:
         "Gets the schema of the HQL database. This is the schema of the tables and columns that are available to query.",
-      parameters: {},
+      parameters: {
+        type: "object",
+        properties: {},
+      },
     },
   },
   {
@@ -93,7 +96,10 @@ export const hqlTools = [
       name: "hql-run-query",
       description:
         "Executes a query on the HQL database once we receive confirmation on the written query.",
-      parameters: {},
+      parameters: {
+        type: "object",
+        properties: {}
+      },
     },
   },
 ];
