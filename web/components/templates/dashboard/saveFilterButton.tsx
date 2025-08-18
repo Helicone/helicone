@@ -3,7 +3,7 @@ import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
 import { v4 as uuidv4 } from "uuid";
-import { UIFilterRow } from "@helicone-package/filters/types";
+import { UIFilterRow, UIFilterRowTree } from "@helicone-package/filters/types";
 import { SingleFilterDef } from "@helicone-package/filters/frontendFilterDefs";
 import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
 import { useOrg } from "../../layout/org/organizationContext";
@@ -57,12 +57,26 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
     return JSON.stringify(encode(filters));
   };
 
+  const normalizeFilterTree = (node: UIFilterRowTree): UIFilterRowTree => {
+    if (isFilterRowNode(node)) {
+      return {
+        operator: node.operator,
+        rows: node.rows.map(normalizeFilterTree),
+      };
+    }
+    return {
+      filterMapIdx: node.filterMapIdx,
+      operatorIdx: node.operatorIdx,
+      value: String(node.value),
+    };
+  };
+
   const onSaveFilter = async (name: string) => {
     if (filters) {
       const saveFilter: OrganizationFilter = {
         id: uuidv4(),
         name: name,
-        filter: [filters],
+        filter: [normalizeFilterTree(filters)],
         createdAt: new Date().toISOString(),
         softDelete: false,
       };

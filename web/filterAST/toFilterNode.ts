@@ -84,6 +84,24 @@ export function toFilterNode(filter: FilterExpression): FilterNode {
     const table = getTableFromField(condition.field);
     const operator = operatorMap[condition.operator] || condition.operator;
 
+    // Special-case mapping for feedback: map to scores["helicone-score-feedback"] equals "1"/"0"
+    if (
+      table === "request_response_rmt" &&
+      condition.field.column === ("feedback_rating" as any)
+    ) {
+      const result: FilterLeaf = {
+        [table]: {
+          scores: {
+            ["helicone-score-feedback"]: {
+              [operator]: condition.value === true ? "1" : "0",
+            },
+          },
+        },
+      };
+
+      return result;
+    }
+
     // Handle property with key
     if (
       condition.field.subtype === "property" &&
