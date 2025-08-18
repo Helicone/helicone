@@ -187,7 +187,7 @@ export class AgentController extends Controller {
 
             if (error instanceof OpenAI.APIError) {
               this.setStatus(400);
-              return err(error.error.message);
+              return err(error.message);
             }
             this.setStatus(500);
             return err(error.message);
