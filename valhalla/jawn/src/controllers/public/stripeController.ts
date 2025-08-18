@@ -282,13 +282,33 @@ export class StripeController extends Controller {
       throw new Error(result.error);
     }
 
+    // Safely extract discount in the expected shape due to major version upgrade
+    let discount = null;
+    const rawDiscount = result.data?.discounts?.[0] ?? null;
+    if (
+      rawDiscount &&
+      typeof rawDiscount === "object" &&
+      "coupon" in rawDiscount &&
+      rawDiscount.coupon &&
+      typeof rawDiscount.coupon === "object"
+    ) {
+      discount = {
+        coupon: {
+          name: rawDiscount.coupon.name,
+          percent_off: rawDiscount.coupon.percent_off,
+          amount_off: rawDiscount.coupon.amount_off
+        },
+      };
+    }
+
+    const tax = result.data?.total_taxes?.reduce((acc, tax) => acc + tax.amount, 0) ?? 0;
     return {
       currency: result.data?.currency ?? null,
       next_payment_attempt: result.data?.next_payment_attempt ?? null,
       lines: result.data?.lines ?? null,
-      discount: result.data?.discount ?? null,
+      discount,
       subtotal: result.data?.subtotal ?? 0,
-      tax: result.data?.tax ?? null,
+      tax,
       total: result.data?.total ?? 0,
       experiments_usage: result.data?.experiments_usage ?? [],
       evaluators_usage: result.data?.evaluators_usage ?? [],
@@ -346,11 +366,28 @@ export class StripeController extends Controller {
 
     if (!result.data) return null;
 
+    // Use schedule.current_phase for current_period_start and current_period_end
+    let current_period_start: number;
+    let current_period_end: number;
+    if (
+      result.data.schedule &&
+      typeof result.data.schedule === "object" &&
+      "current_phase" in result.data.schedule &&
+      result.data.schedule.current_phase
+    ) {
+      current_period_start = result.data.schedule.current_phase.start_date;
+      current_period_end = result.data.schedule.current_phase.end_date;
+    } else {
+      // fallback to 0 if not available
+      current_period_start = 0;
+      current_period_end = 0;
+    }
+
     return {
       status: result.data.status,
       cancel_at_period_end: result.data.cancel_at_period_end,
-      current_period_end: result.data.current_period_end,
-      current_period_start: result.data.current_period_start,
+      current_period_end,
+      current_period_start,
       id: result.data.id,
       trial_end: result.data.trial_end,
       items: result.data.items.data.map((item) => ({

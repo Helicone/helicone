@@ -66,7 +66,7 @@
     "protobufjs": "^7.4.0",
     "rate-limit-redis": "^4.2.0",
     "sorted-btree": "^1.8.1",
-    "stripe": "17.7.0",
+    "stripe": "18.4.0",
     "swagger-ui-express": "^5.0.0",
     "tiktoken": "^1.0.15",
     "tsup": "^8.5.0",
