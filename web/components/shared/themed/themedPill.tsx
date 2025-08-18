@@ -7,7 +7,7 @@
  *
  * @example
  * // Example usage of ThemedPill component
- * <ThemedPill label="Example Pill" onDelete={() => console.log('Pill deleted')} />
+ * <ThemedPill label="Example Pill" onDelete={() => logger.info('Pill deleted')} />
  */
 export const ThemedPill = ({
   onDelete,

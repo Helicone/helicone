@@ -7,6 +7,7 @@ import { getHeliconeCookie } from "@/lib/cookies";
 import { ORG_ID_COOKIE_KEY } from "@/lib/constants";
 import Cookies from "js-cookie";
 import { OpenAI } from "openai";
+import { logger } from "@/lib/telemetry/logger";
 
 export interface ModelParameters {
   temperature: number | null | undefined;
@@ -142,7 +143,7 @@ async function handleNonStreamResponse(
         calls: "",
       };
     } catch (error) {
-      console.error("[generate] Failed to parse schema response:", error);
+      logger.error({ error }, "[generate] Failed to parse schema response");
     }
   }
 

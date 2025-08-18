@@ -1,6 +1,7 @@
 import MarkdownEditor from "@/components/shared/markdownEditor";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/telemetry/logger";
 import { useRequestRenderModeStore } from "@/store/requestRenderModeStore";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -194,7 +195,12 @@ const ImageContent: React.FC<{
   if (message.content && message.mime_type?.startsWith("image/")) {
     imageSrc = `data:${message.mime_type};base64,${message.content}`;
   } else if (message.content && !message.mime_type) {
-    console.warn("Image message missing mime_type, assuming image/png");
+    logger.warn(
+      {
+        message,
+      },
+      "Image message missing mime_type, assuming image/png",
+    );
     imageSrc = `data:image/png;base64,${message.content}`;
   }
 
@@ -511,7 +517,12 @@ export default function ChatMessage({
       }
     };
     reader.onerror = (error) => {
-      console.error("FileReader error:", error);
+      logger.error(
+        {
+          error,
+        },
+        "FileReader error",
+      );
     };
     reader.readAsDataURL(file);
     setPendingFileAction(null);

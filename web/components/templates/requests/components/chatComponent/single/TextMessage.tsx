@@ -45,7 +45,9 @@ export default function TextMessage({
             displayReasoning
               ? {
                   content: JSON.parse(displayContent),
-                  reasoning: JSON.parse(displayReasoning),
+                  reasoning: isJson(displayReasoning)
+                    ? JSON.parse(displayReasoning)
+                    : displayReasoning,
                 }
               : JSON.parse(displayContent)
           }

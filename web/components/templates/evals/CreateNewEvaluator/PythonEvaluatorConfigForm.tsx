@@ -13,6 +13,7 @@ import { useEvalPanelStore } from "../store/evalPanelStore";
 import { CompositeOption, TestFunction } from "../testing/types";
 import { useEvalFormStore } from "../store/evalFormStore";
 import { useEvalConfigStore } from "../store/evalConfigStore";
+import { logger } from "@/lib/telemetry/logger";
 import { H3, Muted } from "@/components/ui/typography";
 import { Separator } from "@/components/ui/separator";
 
@@ -139,7 +140,7 @@ export const PythonEvaluatorConfigForm: React.FC<{
         }
       }
     } catch (error) {
-      console.error("Error submitting Python evaluator:", error);
+      logger.error({ error }, "Error submitting Python evaluator");
       notification.setNotification("An error occurred", "error");
     }
   };

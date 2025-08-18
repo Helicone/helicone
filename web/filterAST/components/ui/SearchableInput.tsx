@@ -14,6 +14,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { logger } from "@/lib/telemetry/logger";
 
 export type SearchableInputOption = {
   label: string;
@@ -72,7 +73,7 @@ export const SearchableInput: React.FC<SearchableInputProps> = ({
             setOpen(true);
           })
           .catch((error) => {
-            console.error("Search error:", error);
+            logger.error({ error }, "Search error");
             setOptions([]);
           })
           .finally(() => {

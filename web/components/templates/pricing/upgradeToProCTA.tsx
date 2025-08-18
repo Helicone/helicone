@@ -7,6 +7,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useCostForPrompts } from "./hooks";
 import { ContactCTA } from "./contactCTA";
+import { logger } from "@/lib/telemetry/logger";
 
 export const UpgradeToProCTA = ({
   defaultPrompts = false,
@@ -108,7 +109,7 @@ export const UpgradeToProCTA = ({
             if (result.data) {
               window.open(result.data, "_blank");
             } else {
-              console.error("No URL returned from upgrade mutation");
+              logger.error("No URL returned from upgrade mutation");
             }
           }
         }}

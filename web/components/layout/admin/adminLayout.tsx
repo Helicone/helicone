@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 import { useOrg } from "../org/organizationContext";
 import MetaData from "../public/authMetaData";
+import { logger } from "@/lib/telemetry/logger";
 import { H4 } from "@/components/ui/typography";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AdminSidebar } from "./adminSidebar";
@@ -31,7 +32,7 @@ export default function AdminLayout(props: { children: React.ReactNode }) {
       // Set state based on localStorage, or default to true if not found
       setSidebarOpen(savedState === null ? true : savedState === "true");
     } catch (e) {
-      console.error("Error accessing localStorage:", e);
+      logger.error(e, "Error accessing localStorage");
       // Default to open if localStorage fails
       setSidebarOpen(true);
     }
@@ -45,7 +46,7 @@ export default function AdminLayout(props: { children: React.ReactNode }) {
       // Save to localStorage whenever it changes
       localStorage.setItem(SIDEBAR_STATE_KEY, String(open));
     } catch (e) {
-      console.error("Error saving to localStorage:", e);
+      logger.error(e, "Error saving to localStorage");
     }
   };
 

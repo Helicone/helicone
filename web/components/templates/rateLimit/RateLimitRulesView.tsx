@@ -7,6 +7,7 @@ import { useOrg } from "@/components/layout/org/organizationContext";
 import { $JAWN_API } from "@/lib/clients/jawn";
 import { components } from "@/lib/clients/jawnTypes/private";
 import useNotification from "@/components/shared/notification/useNotification";
+import { logger } from "@/lib/telemetry/logger";
 import {
   Table,
   TableHeader,
@@ -161,7 +162,7 @@ const RateLimitRulesView = (props: RateLimitRulesViewProps) => {
       );
     } catch (error) {
       // Log the actual error object for debugging
-      console.error("Failed to delete rate limit rule:", error);
+      logger.error({ error }, "Failed to delete rate limit rule");
       setNotification(
         `Failed to delete rule: ${
           error instanceof Error ? error.message : "Unknown error"

@@ -4,6 +4,7 @@ import { GenerateParams } from "@/lib/api/llm-old/generate";
 import { getOpenAIKeyFromAdmin } from "@/lib/clients/settings";
 import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
+import { logger } from "@/lib/telemetry/logger";
 
 // Cache for the OpenAI client to avoid recreating it on every request
 let openaiClient: OpenAI | null = null;
@@ -189,7 +190,7 @@ async function handler({ req, res, userData }: HandlerWrapperOptions<any>) {
         }
       } catch (error) {
         // Handle stream interruption gracefully
-        console.error("[API Stream] Stream error:", error); // Log the error
+        logger.error({ error }, "[API Stream] Stream error"); // Log the error
         if (
           error instanceof Error &&
           (error.name === "ResponseAborted" || error.name === "AbortError")
@@ -216,7 +217,7 @@ async function handler({ req, res, userData }: HandlerWrapperOptions<any>) {
     if (!content && !calls) {
       // Check if both content and calls are missing
       // Consider if an empty response should be an error or just empty strings
-      console.warn(
+      logger.warn(
         "[API] LLM call resulted in empty content and no tool calls.",
       );
       // Returning empty object might be fine depending on requirements
@@ -232,7 +233,7 @@ async function handler({ req, res, userData }: HandlerWrapperOptions<any>) {
     ) {
       return res.json({ content: "" });
     }
-    console.error("Generation error:", error);
+    logger.error({ error }, "Generation error");
     return res.status(500).json({ error: "Failed to generate response" });
   }
 }

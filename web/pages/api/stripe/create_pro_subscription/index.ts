@@ -3,6 +3,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { dbExecute } from "../../../../lib/api/db/dbExecute";
+import { logger } from "@/lib/telemetry/logger";
 import { resultMap } from "@/packages/common/result";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -36,7 +37,12 @@ export default async function handler(
     );
 
     if (orgError !== null) {
-      console.error(orgError);
+      logger.error(
+        {
+          orgError,
+        },
+        "Unable to find org",
+      );
       res.status(400).send(`Unable to find org: ${orgError}`);
       return;
     }
@@ -57,7 +63,12 @@ export default async function handler(
       );
 
       if (updateError !== null) {
-        console.error(updateError);
+        logger.error(
+          {
+            updateError,
+          },
+          "Unable to update org",
+        );
         res.status(400).send(`Unable to update org: ${updateError}`);
         return;
       }
