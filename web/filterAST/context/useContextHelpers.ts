@@ -110,7 +110,12 @@ export const useContextHelpers = ({
           id: filterId,
         };
       } else {
-        logger.error("Filter not found", { filterId });
+        logger.error(
+          {
+            filterId,
+          },
+          "Filter not found",
+        );
         return;
       }
     }

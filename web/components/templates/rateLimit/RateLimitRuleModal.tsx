@@ -142,7 +142,12 @@ const RateLimitRuleModal = ({
       }
 
       if (resp.error || !resp.data?.data) {
-        logger.error("Failed to save rate limit rule", { error: resp.error });
+        logger.error(
+          {
+            error: resp.error,
+          },
+          "Failed to save rate limit rule",
+        );
         throw new Error(
           resp.error || "An error occurred while saving the rule.",
         );

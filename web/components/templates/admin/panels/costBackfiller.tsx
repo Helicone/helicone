@@ -254,10 +254,13 @@ const CostBackfiller = () => {
       }
     } catch (error) {
       toast.error("Failed to generate query preview");
-      logger.error("Failed to generate query preview", {
-        error,
-        selectedModelsCount: selectedModels.length,
-      });
+      logger.error(
+        {
+          error,
+          selectedModelsCount: selectedModels.length,
+        },
+        "Failed to generate query preview",
+      );
     }
   };
 
@@ -300,10 +303,13 @@ const CostBackfiller = () => {
       const errorMessage = `Failed to execute cost backfill: ${error instanceof Error ? error.message : "Unknown error"}`;
       setBackfillError(errorMessage);
       toast.error("Failed to execute cost backfill");
-      logger.error("Failed to execute cost backfill", {
-        error,
-        selectedModelsCount: selectedModels.length,
-      });
+      logger.error(
+        {
+          error,
+          selectedModelsCount: selectedModels.length,
+        },
+        "Failed to execute cost backfill",
+      );
     }
   };
 
@@ -317,7 +323,12 @@ const CostBackfiller = () => {
       }
     } catch (error) {
       toast.error("Failed to deduplicate request response table");
-      logger.error("Failed to deduplicate request response table", { error });
+      logger.error(
+        {
+          error,
+        },
+        "Failed to deduplicate request response table",
+      );
     }
   };
 

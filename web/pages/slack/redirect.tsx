@@ -90,7 +90,12 @@ export const getServerSideProps = async (
     if (data.ok) {
       responseData = data;
     } else {
-      logger.error("Failed to get access token", { data });
+      logger.error(
+        {
+          data,
+        },
+        "Failed to get access token",
+      );
       return {
         props: {
           error: "Failed to get access token",
@@ -98,7 +103,12 @@ export const getServerSideProps = async (
       };
     }
   } catch (error) {
-    logger.error("Failed to get access token", { error });
+    logger.error(
+      {
+        error,
+      },
+      "Failed to get access token",
+    );
     return {
       props: {
         error: "Failed to get access token",

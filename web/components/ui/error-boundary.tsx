@@ -58,13 +58,24 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public static getDerivedStateFromError(error: Error): State {
-    logger.error("getDerivedStateFromError", { error });
+    logger.error(
+      {
+        error,
+      },
+      "getDerivedStateFromError",
+    );
     return { hasError: true, error, errorInfo: null };
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     this.setState({ errorInfo, hasError: true, error });
-    logger.error("Uncaught error", { error, errorInfo });
+    logger.error(
+      {
+        error,
+        errorInfo,
+      },
+      "Uncaught error",
+    );
 
     // Add PostHog event
     posthog.capture("error_boundary_triggered", {

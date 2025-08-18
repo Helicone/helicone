@@ -17,7 +17,13 @@ export function useURLParams<T>(
       try {
         setStoredValue(JSON.parse(stored));
       } catch (e) {
-        logger.error("Failed to parse URL param", { key, error: e });
+        logger.error(
+          {
+            key,
+            error: e,
+          },
+          "Failed to parse URL param",
+        );
         if (onNothingStored) onNothingStored(setStoredValue);
       }
     } else if (onNothingStored) {

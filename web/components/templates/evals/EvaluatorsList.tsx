@@ -87,9 +87,11 @@ export default function EvaluatorsList() {
               }
             } catch (error) {
               logger.error(
-                { error: result.error },
+                {
+                  error: error,
+                  evaluatorId: evaluator.id,
+                },
                 `Error fetching online evaluators for ${evaluator.id}:`,
-                error,
               );
             }
           });

@@ -15,10 +15,15 @@ async function checkAndUpdateOrgs(orgId: string): Promise<boolean> {
       [orgId],
     );
     if (error) {
-      logger.error("Error updating org", { error });
+      logger.error(
+        {
+          error,
+        },
+        "Error updating org",
+      );
       return false;
     }
-    logger.info("Updated org", { orgId });
+    logger.info({ orgId }, "Updated org");
     return true;
   }
   return false;

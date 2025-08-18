@@ -351,7 +351,12 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
                   queryKey: ["promptTemplate", promptVersionId],
                 });
                 if (result.error || !result.data) {
-                  logger.error("Failed to get prompt template", { result });
+                  logger.error(
+                    {
+                      result,
+                    },
+                    "Failed to get prompt template",
+                  );
                   return;
                 }
 
@@ -450,7 +455,12 @@ const PromptColumnHeader = ({
 
       setLabelData(result.data?.data?.metadata?.label as string);
       if (result.error || !result.data) {
-        logger.error("Failed to run experiment", { result });
+        logger.error(
+          {
+            result,
+          },
+          "Failed to run experiment",
+        );
         return;
       }
     }

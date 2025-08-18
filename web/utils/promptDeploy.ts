@@ -216,10 +216,10 @@ async function main() {
       }
     });
     
-    logger.info("Generated response:");
-    logger.info({ response }, "Response");
+    console.log("Generated response:");
+    console.log({ response }, "Response");
   } catch (error) {
-    logger.error("Error generating response", { error });
+    console.error("Error generating response", { error }, "Error generating response");
   }
 }
 

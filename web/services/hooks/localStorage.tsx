@@ -23,7 +23,13 @@ export function useLocalStorage<T>(
           window.localStorage.setItem(orgKey, JSON.stringify(valueToStore)); // Use orgKey
         }
       } catch (error) {
-        logger.error("Failed to save to localStorage", { error, key: orgKey });
+        logger.error(
+          {
+            error,
+            key: orgKey,
+          },
+          "Failed to save to localStorage",
+        );
       }
     },
     [orgKey, storedValue], // Updated dependency to orgKey

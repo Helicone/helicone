@@ -37,7 +37,12 @@ export default async function handler(
     );
 
     if (orgError !== null) {
-      logger.error("Unable to find org", { orgError });
+      logger.error(
+        {
+          orgError,
+        },
+        "Unable to find org",
+      );
       res.status(400).send(`Unable to find org: ${orgError}`);
       return;
     }
@@ -58,7 +63,12 @@ export default async function handler(
       );
 
       if (updateError !== null) {
-        logger.error("Unable to update org", { updateError });
+        logger.error(
+          {
+            updateError,
+          },
+          "Unable to update org",
+        );
         res.status(400).send(`Unable to update org: ${updateError}`);
         return;
       }

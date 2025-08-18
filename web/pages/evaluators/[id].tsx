@@ -185,7 +185,12 @@ const EvaluatorDetail = () => {
             includedVariables: extractedIncludedVariables,
           });
         } catch (e) {
-          logger.error("Error parsing template", { error: e });
+          logger.error(
+            {
+              error: e,
+            },
+            "Error parsing template",
+          );
           // Set defaults if parsing fails
           setEvaluatorFormValues({
             name: evaluator.name || "",
@@ -234,7 +239,12 @@ const EvaluatorDetail = () => {
         existingEvaluatorId: id as string,
       });
     } catch (error) {
-      logger.error("Error updating evaluator", { error });
+      logger.error(
+        {
+          error,
+        },
+        "Error updating evaluator",
+      );
       notification.setNotification("Failed to update evaluator", "error");
     }
   };

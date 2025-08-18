@@ -42,7 +42,12 @@ const useExperiments = (
 
   const frontEndExperiments = experiments.map((experiment) => {
     const hypothesis = experiment.hypotheses.at(0) ?? null;
-    logger.info("Hypothesis runs", { runs: hypothesis?.runs });
+    logger.info(
+      {
+        runs: hypothesis?.runs,
+      },
+      "Hypothesis runs",
+    );
     return {
       id: experiment.id,
       datasetId: experiment.dataset.id,

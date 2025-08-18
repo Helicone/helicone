@@ -34,12 +34,12 @@ const SignIn = ({
     // Prevent infinite loops by limiting redirects
     if (redirectCount >= 3) {
       logger.error(
-        "Too many redirects detected. Stopping to prevent infinite loop.",
         {
           redirectCount,
           unauthorized,
           userId: heliconeAuthClient?.user?.id,
         },
+        "Too many redirects detected. Stopping to prevent infinite loop.",
       );
       return;
     }
@@ -110,7 +110,13 @@ const SignIn = ({
 
               if (error) {
                 setNotification(error, "error");
-                logger.error("Email sign in failed", { error, email });
+                logger.error(
+                  {
+                    error,
+                    email,
+                  },
+                  "Email sign in failed",
+                );
                 return;
               }
               setNotification("Success. Redirecting...", "success");
@@ -122,7 +128,12 @@ const SignIn = ({
               });
               if (error) {
                 setNotification("Error logging in. Please try again.", "error");
-                logger.error("Google OAuth sign in failed", { error });
+                logger.error(
+                  {
+                    error,
+                  },
+                  "Google OAuth sign in failed",
+                );
                 return;
               }
               setNotification("Successfully signed in.", "success");
@@ -133,7 +144,12 @@ const SignIn = ({
               });
               if (error) {
                 setNotification("Error logging in. Please try again.", "error");
-                logger.error("GitHub OAuth sign in failed", { error });
+                logger.error(
+                  {
+                    error,
+                  },
+                  "GitHub OAuth sign in failed",
+                );
                 return;
               }
               setNotification("Successfully signed in.", "success");

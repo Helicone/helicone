@@ -426,7 +426,12 @@ export default function RequestDrawer(props: RequestDivProps) {
           setNotification("Error adding label", "error");
         }
       } catch (err) {
-        logger.error("Failed to add request property", { error: err });
+        logger.error(
+          {
+            error: err,
+          },
+          "Failed to add request property",
+        );
         setNotification(`Error adding label: ${err}`, "error");
       }
     },
@@ -466,7 +471,12 @@ export default function RequestDrawer(props: RequestDivProps) {
           setNotification("Error adding score", "error");
         }
       } catch (err) {
-        logger.error("Failed to add request property", { error: err });
+        logger.error(
+          {
+            error: err,
+          },
+          "Failed to add request property",
+        );
         setNotification(`Error adding score: ${err}`, "error");
       }
     },

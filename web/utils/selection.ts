@@ -68,7 +68,12 @@ export function createSelectionRange(
       preRect: pre.getBoundingClientRect(),
     };
   } catch (error) {
-    logger.error("Error setting range", { error });
+    logger.error(
+      {
+        error,
+      },
+      "Error setting range",
+    );
     return null;
   }
 }

@@ -47,7 +47,12 @@ export function transformFilter(filter: any): UIFilterRowTree {
     }
   }
 
-  logger.error("Invalid filter structure", { filter });
+  logger.error(
+    {
+      filter,
+    },
+    "Invalid filter structure",
+  );
   return { operator: "and", rows: [] };
 }
 

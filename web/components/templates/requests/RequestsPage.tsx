@@ -385,10 +385,13 @@ export default function RequestsPage(props: RequestsPageV2Props) {
           filterMapIdx === -1 ||
           operatorIdx === -1
         ) {
-          logger.warn("Invalid filter map or operator index", {
-            filterLabel,
-            operator,
-          });
+          logger.warn(
+            {
+              filterLabel,
+              operator,
+            },
+            "Invalid filter map or operator index",
+          );
           return getRootFilterNode();
         }
 
@@ -414,7 +417,12 @@ export default function RequestsPage(props: RequestsPageV2Props) {
         return result;
       }
     } catch (error) {
-      logger.error("Error decoding advanced filters", { error });
+      logger.error(
+        {
+          error,
+        },
+        "Error decoding advanced filters",
+      );
     }
 
     return getRootFilterNode();
