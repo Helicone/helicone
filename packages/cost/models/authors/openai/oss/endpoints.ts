@@ -7,8 +7,8 @@ export const endpoints = {
     providerModelId: "openai/gpt-oss-120b",
     provider: "groq",
     pricing: {
-      prompt: 7.2e-8,
-      completion: 2.8e-7,
+      prompt: 0.00000015,
+      completion: 0.00000075,
       request: 0.0,
       image: 0.0,
       audio: 0.0,
@@ -47,8 +47,8 @@ export const endpoints = {
     providerModelId: "openai/gpt-oss-20b",
     provider: "groq",
     pricing: {
-      prompt: 4e-8,
-      completion: 1.5e-7,
+      prompt: 0.0000001,
+      completion: 0.0000005,
       request: 0.0,
       image: 0.0,
       audio: 0.0,
