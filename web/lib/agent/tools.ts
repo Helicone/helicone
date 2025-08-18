@@ -98,7 +98,7 @@ export const hqlTools = [
         "Executes a query on the HQL database once we receive confirmation on the written query.",
       parameters: {
         type: "object",
-        properties: {}
+        properties: {},
       },
     },
   },
