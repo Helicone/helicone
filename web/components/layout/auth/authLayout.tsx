@@ -15,8 +15,13 @@ import DemoModal from "./DemoModal";
 import MainContent, { BannerType } from "./MainContent";
 import Sidebar from "./Sidebar";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
-import AgentChat from "@/components/templates/agent/agentChat";
 import { HeliconeAgentProvider } from "@/components/templates/agent/HeliconeAgentContext";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
+import AgentChat from "@/components/templates/agent/agentChat";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -28,11 +33,17 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const { pathname } = router;
 
   const [open, setOpen] = useState(false);
-  const [chatWindowOpen, setChatWindowOpen] = useState(true);
-  const [chatWidth, setChatWidth] = useState(384); // 384px = 24rem = w-96
-  const [isResizing, setIsResizing] = useState(false);
+  const [chatWindowOpen, setChatWindowOpen] = useState(false);
+  const agentChatPanelRef = useRef<any>(null);
 
   const auth = useHeliconeAuthClient();
+
+  const handleResizableHandleDoubleClick = () => {
+    if (agentChatPanelRef.current) {
+      // Reset the agent chat panel to its default size (35)
+      agentChatPanelRef.current.resize(35);
+    }
+  };
 
   // Handle Command+I keyboard shortcut
   useEffect(() => {
@@ -48,38 +59,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
-
-  // Handle resize functionality
-  useEffect(() => {
-    if (!chatWindowOpen) return;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isResizing) return;
-
-      const newWidth = window.innerWidth - e.clientX;
-      const minWidth = 300; // Minimum width
-      const maxWidth = window.innerWidth * 0.8; // Maximum 80% of screen width
-
-      if (newWidth >= minWidth && newWidth <= maxWidth) {
-        setChatWidth(newWidth);
-      }
-    };
-
-    const handleMouseUp = () => {
-      setIsResizing(false);
-    };
-
-    if (isResizing) {
-      // TODO: this is pretty ugly given this is a react app, figure out a better way to handle resizing
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
-    }
-
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [isResizing, chatWindowOpen]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -191,31 +170,43 @@ const AuthLayout = (props: AuthLayoutProps) => {
               className="relative max-w-full flex-grow overflow-hidden"
               key={orgContext?.currentOrg?.id}
             >
-              <MainContent banner={banner} pathname={pathname}>
-                <ErrorBoundary>{children}</ErrorBoundary>
-              </MainContent>
+              <ResizablePanelGroup
+                direction="horizontal"
+                className="h-full max-h-screen w-full"
+              >
+                <ResizablePanel
+                  defaultSize={chatWindowOpen ? 65 : 100}
+                  minSize={30}
+                  className="relative h-full"
+                >
+                  <MainContent banner={banner} pathname={pathname}>
+                    <ErrorBoundary>{children}</ErrorBoundary>
+                  </MainContent>
+                </ResizablePanel>
+
+                {chatWindowOpen && (
+                  <>
+                    <ResizableHandle
+                      withHandle
+                      onDoubleClick={handleResizableHandleDoubleClick}
+                    />
+                    <ResizablePanel
+                      ref={agentChatPanelRef}
+                      defaultSize={35}
+                      minSize={20}
+                      maxSize={50}
+                      collapsible={true}
+                      collapsedSize={0}
+                      onCollapse={() => setChatWindowOpen(false)}
+                      className="h-full max-h-screen border-l border-border bg-background"
+                    >
+                      <AgentChat onClose={() => setChatWindowOpen(false)} />
+                    </ResizablePanel>
+                  </>
+                )}
+              </ResizablePanelGroup>
             </div>
           </Row>
-
-          {/* Floating Resizable Chat Window */}
-          {chatWindowOpen && (
-            <div
-              className="fixed right-0 top-0 z-50 h-full border-l border-border bg-background transition-transform duration-300 ease-in-out"
-              style={{ width: `${chatWidth}px` }}
-            >
-              {/* Resize Handle */}
-              <div
-                className="absolute left-0 top-0 h-full w-0.5 cursor-col-resize select-none bg-border transition-colors hover:bg-primary"
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setIsResizing(true);
-                }}
-              />
-
-              <AgentChat onClose={() => setChatWindowOpen(false)} />
-            </div>
-          )}
         </div>
 
         <UpgradeProModal open={open} setOpen={setOpen} />
@@ -224,5 +215,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
     </HeliconeAgentProvider>
   );
 };
+
+// export default AuthLayout;
 
 export default AuthLayout;
