@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+
 import { generateStream } from "@/lib/api/llm/generate-stream";
 import { processStream } from "@/lib/api/llm/process-stream";
 import { OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
@@ -29,7 +31,11 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
   const router = useRouter();
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
-  const [selectedModel, setSelectedModel] = useState("gpt-4o");
+  const [isWaitingForFirstResponse, setIsWaitingForFirstResponse] =
+    useState(false);
+  const [selectedModel, setSelectedModel] = useState(
+    "claude-3.7-sonnet, gpt-4o, gpt-4o-mini",
+  );
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
   const [messageQueue, setMessageQueue] = useState<QueuedMessage[]>([]);
   const abortController = useRef<AbortController | null>(null);
@@ -44,6 +50,18 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
     escalateSession,
     currentSession,
   } = useHeliconeAgent();
+
+  const addErrorMessage = (
+    updatedMessages: Message[],
+    errorMessage: string,
+  ) => {
+    const errorMsg: Message = {
+      role: "assistant",
+      content: `Something went wrong: ${errorMessage}. Please try again or create a new chat.`,
+    };
+    updatedMessages = [...updatedMessages, errorMsg];
+    return updatedMessages;
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -104,6 +122,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
     messageContent: string,
     images: File[],
   ) => {
+    let errorSetInCurrentMessages = false;
     let userMessage: Message;
 
     if (images.length > 0) {
@@ -150,6 +169,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
       let shouldContinue = true;
       while (shouldContinue) {
         setIsStreaming(true);
+        setIsWaitingForFirstResponse(true);
 
         const assistantMessageIdx = updatedMessages.length;
         updateCurrentSessionMessages(updatedMessages, false);
@@ -187,8 +207,10 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
                   idx === assistantMessageIdx ? parsedResponse : msg,
                 );
                 updateCurrentSessionMessages(updatedMessages, false);
+                setIsWaitingForFirstResponse(false);
               } catch (error) {
                 console.error("Failed to parse response:", error);
+                shouldContinue = false;
               }
             },
             onComplete: async (result) => {
@@ -201,8 +223,16 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
                   idx === assistantMessageIdx ? parsedResponse : msg,
                 );
                 updateCurrentSessionMessages(updatedMessages, true);
+                setIsWaitingForFirstResponse(false);
               } catch (error) {
                 console.error("Failed to parse response:", error);
+                if (errorSetInCurrentMessages) return;
+                updatedMessages = addErrorMessage(
+                  updatedMessages,
+                  "Failed to parse response from the AI",
+                );
+                errorSetInCurrentMessages = true;
+                updateCurrentSessionMessages(updatedMessages, true);
               }
             },
           },
@@ -230,8 +260,16 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
       updateCurrentSessionMessages(updatedMessages, true);
     } catch (error) {
       console.error("Chat error:", error);
+      if (errorSetInCurrentMessages) return;
+      updatedMessages = addErrorMessage(
+        updatedMessages,
+        "An error occurred while processing your message",
+      );
+      errorSetInCurrentMessages = true;
+      updateCurrentSessionMessages(updatedMessages, true);
     } finally {
       setIsStreaming(false);
+      setIsWaitingForFirstResponse(false);
       abortController.current = null;
       // Focus the input after streaming is complete
       setTimeout(() => {
@@ -271,6 +309,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
     if (abortController.current) {
       abortController.current.abort();
       setIsStreaming(false);
+      setIsWaitingForFirstResponse(false);
     }
   };
 
@@ -335,6 +374,18 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
         {messages.map((message) => (
           <MessageRenderer key={uuidv4()} message={message} />
         ))}
+
+        {isWaitingForFirstResponse && (
+          <div className="w-full">
+            <div className="w-full text-sm text-foreground">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-4 w-5/6" />
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* {(isStreaming || true) && (
           <div className="flex justify-center">
