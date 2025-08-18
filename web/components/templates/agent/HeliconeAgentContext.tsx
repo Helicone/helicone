@@ -300,6 +300,7 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
         },
         updateCurrentSessionMessages: (messages, saveToDB) => {
           if (saveToDB && currentSessionId) {
+            console.log("Saving to DB", messages, currentSessionId);
             upsertThreadMessage({
               params: {
                 path: {
@@ -313,6 +314,8 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
                 },
               },
             });
+          } else {
+            console.log("Not saving to DB", messages, currentSessionId);
           }
           setMessages(messages);
         },

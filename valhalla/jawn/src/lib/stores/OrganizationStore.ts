@@ -153,10 +153,10 @@ export class OrganizationStore extends BaseStore {
 
       const sql = `
         UPDATE organization 
-        SET ${updateFields.join(', ')}
+        SET ${updateFields.join(", ")}
         WHERE id = $${paramIndex} 
         RETURNING id`;
-      
+
       params.push(organizationId);
 
       // Execute the query
@@ -599,7 +599,7 @@ export class OrganizationStore extends BaseStore {
 
   async updateOnboardingStatus(
     onboardingStatus: OnboardingStatus,
-    name: string,
+    name: string
   ): Promise<Result<string, string>> {
     const hasOnboarded = onboardingStatus.hasOnboarded ?? false;
     const hasIntegrated = onboardingStatus.hasIntegrated ?? false;

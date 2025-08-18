@@ -103,17 +103,23 @@ const MessageRenderer = ({ message }: MessageRendererProps) => {
   }
 
   if (message.role === "assistant") {
+    const isHumanAssistant = message.name;
+    
     return (
       <div className="w-full">
-        <div className="w-full text-sm text-foreground">
+        <div className={`w-full ${isHumanAssistant ? 'rounded-lg border border-green-200 bg-green-100 px-2.5 py-1 text-foreground dark:border-green-950 dark:bg-green-900/20' : 'text-sm text-foreground'}`}>
           {typeof message.content === "string" && (
-            <ReactMarkdown
-              components={markdownComponents}
-              className={markdownStyling}
-            >
-              {message.content}
-            </ReactMarkdown>
-          )}
+            isHumanAssistant ? (
+              <span className="text-[13px]">{message.content}</span>
+            ) : (
+              <ReactMarkdown
+                components={markdownComponents}
+                className={markdownStyling}
+              >
+                {message.content}
+              </ReactMarkdown>
+            )
+          )} 
           {message.tool_calls && (
             <div className="mt-2 space-y-2">
               {message.tool_calls.map((tool) => (
@@ -130,6 +136,23 @@ const MessageRenderer = ({ message }: MessageRendererProps) => {
             </div>
           )}
         </div>
+        {isHumanAssistant && (
+          <div className="mt-1.5 flex items-center gap-1 text-xs text-muted-foreground">
+            <svg
+              className="h-3 w-3"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <span>{message.name}</span>
+          </div>
+        )}
       </div>
     );
   }

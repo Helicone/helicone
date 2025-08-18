@@ -45,7 +45,7 @@ export type Prompt2025Settings = {
   promptVersionId?: string;
   environment?: string;
   promptInputs?: Record<string, any>;
-}
+};
 
 export class RequestWrapper {
   private authorization: string | undefined;
@@ -610,10 +610,10 @@ export class RequestWrapper {
    * @param inputs The inputs to associate with the prompt
    */
   setPrompt2025Settings(params: {
-    promptId: string,
-    promptVersionId: string,
-    inputs: Record<string, any>,
-    environment?: string
+    promptId: string;
+    promptVersionId: string;
+    inputs: Record<string, any>;
+    environment?: string;
   }): void {
     this.prompt2025Settings = {
       promptId: params.promptId,

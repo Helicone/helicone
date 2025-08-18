@@ -3,6 +3,102 @@ import { Result, ok, err } from "../packages/common/result";
 import { dbExecute } from "../lib/shared/db/dbExecute";
 import { AuthParams } from "../packages/common/auth/types";
 import OpenAI from "openai";
+import { WebClient } from "@slack/web-api";
+import { App, KnownEventFromType } from "@slack/bolt";
+type SlackKnownEventFromType = KnownEventFromType<"message">;
+
+const app = new App({
+  token: process.env.HELICONE_IN_APP_SLACK_BOT_TOKEN,
+  appToken: process.env.HELICONE_IN_APP_SLACK_APP_TOKEN, // needed for Socket Mode
+  socketMode: true, // or false if using HTTP request URL
+});
+
+// Hi future Helicone employee reading this code, I am sorry for the bad code...
+// Basically, this is bad because we have anywhere between 5-10 Jawns instances, and they all need to share the same Slack bot token
+// So we will technically get 10 events each time. so this function needs to just make sure it can handle the same event multiple times
+let inited = false;
+if (!inited) {
+  console.log("Initializing Slack bot");
+  app.event("message", async ({ event, client, logger }) => {
+    if (!("thread_ts" in event) || !event.thread_ts) return;
+    if (event.type !== "message") return;
+
+    console.log("Event", event);
+    const text = event.text;
+
+    type MessageThreadTs = OpenAI.Chat.ChatCompletionMessageParam & {
+      event_ts: string;
+    };
+
+    // To get the user's first name, you need to fetch the user's profile using the Slack Web API.
+    // Example:
+    let firstName: string | undefined = undefined;
+    if (event.user) {
+      try {
+        const userInfo = await client.users.info({ user: event.user });
+        // @ts-ignore
+        firstName = userInfo.user?.profile?.first_name;
+        console.log("User's first name:", firstName);
+      } catch (error) {
+        console.error("Error fetching user info:", error);
+      }
+    }
+
+    const message: MessageThreadTs = {
+      role: "assistant",
+      content: text,
+      event_ts: event.event_ts,
+      name: firstName,
+    };
+
+    const thread = await dbExecute<InAppThread>(
+      `SELECT * FROM in_app_threads WHERE metadata->>'slack_thread_ts' = $1`,
+      [event.thread_ts]
+    );
+    if (thread.error) {
+      console.error("Error fetching thread", thread.error);
+      return;
+    }
+    const messages = thread.data?.[0]?.chat?.messages;
+    if (!Array.isArray(messages)) {
+      console.error("Thread messages is not an array", messages);
+      return;
+    }
+    console.log("processing message", message);
+
+    const messageExists = messages.find(
+      (t: MessageThreadTs) => t.event_ts === event.event_ts
+    );
+
+    if (!messageExists) {
+      console.log("Message does not exist, adding it");
+      const newMessages = [...messages, message];
+      const newChat = {
+        messages: newMessages,
+      };
+      console.log("Message", message);
+      const updateResult = await dbExecute(
+        `UPDATE in_app_threads SET chat = $1 WHERE id = $2`,
+        [JSON.stringify(newChat), thread.data![0]!.id]
+      );
+      if (updateResult.error) {
+        console.error("Error updating thread", updateResult.error);
+        return;
+      }
+      console.log("Message added");
+    } else {
+      console.log("Message already exists, skipping");
+    }
+  });
+  app.start();
+  process.on("SIGINT", () => {
+    app.stop();
+  });
+  process.on("SIGTERM", () => {
+    app.stop();
+  });
+  inited = true;
+}
 
 export interface InAppThread {
   id: string;
@@ -67,7 +163,7 @@ export class InAppThreadsManager extends BaseManager {
         const updateResult = await dbExecute<InAppThread>(
           `UPDATE in_app_threads 
            SET chat = $1::jsonb, 
-               metadata = $2::jsonb,
+               metadata = COALESCE(metadata, '{}'::jsonb) || $2::jsonb,
                updated_at = NOW()
            WHERE id = $3 AND org_id = $4
            RETURNING *`,
@@ -143,15 +239,39 @@ export class InAppThreadsManager extends BaseManager {
   async escalateThread(
     sessionId: string
   ): Promise<Result<InAppThread, string>> {
+    const client = new WebClient(process.env.HELICONE_IN_APP_SLACK_BOT_TOKEN);
+
     try {
+      const res = await client.chat.postMessage({
+        channel: process.env.HELICONE_IN_APP_SLACK_CHANNEL!,
+        text: "Hello from the bot",
+        blocks: [
+          {
+            type: "section",
+            text: { type: "mrkdwn", text: "Hello from the *bot*" },
+          },
+        ],
+      });
+
+      const threadTs = res.ts;
       const updateResult = await dbExecute<InAppThread>(
         `UPDATE in_app_threads 
          SET escalated = true,
-             updated_at = NOW()
-         WHERE id = $1 AND org_id = $2
+             updated_at = NOW(),
+             metadata = jsonb_set(
+               COALESCE(metadata, '{}'::jsonb),
+               '{slack_thread_ts}',
+               to_jsonb($3::text)
+             )
+         WHERE id = $1 AND org_id = $2 AND escalated = false
          RETURNING *`,
-        [sessionId, this.authParams.organizationId]
+        // If no row is updated, it means it was already escalated
+        [sessionId, this.authParams.organizationId, threadTs]
       );
+
+      if (updateResult.data?.[0]) {
+        return ok(updateResult.data[0]);
+      }
 
       if (updateResult.error) {
         return err(`Failed to escalate thread: ${updateResult.error}`);

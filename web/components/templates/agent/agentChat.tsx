@@ -143,6 +143,9 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
 
     let updatedMessages = [...messages, userMessage];
     updateCurrentSessionMessages(updatedMessages, true);
+    if (currentSession?.escalated) {
+      return;
+    }
 
     try {
       abortController.current = new AbortController();
@@ -302,6 +305,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
 
   return (
     <div className="flex h-full w-full flex-col">
+      
       <div className="flex w-full items-center justify-between border-b border-border px-1 py-3">
         <SessionDropdown />
         <div className="flex items-center gap-2">
@@ -309,10 +313,11 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
             onClick={() => escalateSession()}
             variant="outline"
             size="sm"
+            disabled={currentSession?.escalated}
             className="flex items-center gap-2 border-border bg-background hover:bg-muted"
           >
             <UserIcon className="h-3.5 w-3.5" />
-            <span className="text-sm">Talk to a human</span>
+            {currentSession?.escalated ? "Please wait while we connect you to a human" : "Talk to a human"}
           </Button>
           <Button
             onClick={onClose}

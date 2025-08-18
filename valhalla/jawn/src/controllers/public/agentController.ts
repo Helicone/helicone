@@ -208,7 +208,7 @@ export class AgentController extends Controller {
     @Path() sessionId: string,
     @Body()
     bodyParams: {
-      messages: OpenAI.Chat.ChatCompletionMessageParam[];
+      messages: any[];
       metadata: {
         posthogSession?: string;
         [key: string]: any;
@@ -229,6 +229,7 @@ export class AgentController extends Controller {
       return err(result.error);
     }
 
+    console.log("Upserted thread message", result.data);
     return ok(result.data!);
   }
 
