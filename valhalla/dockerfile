@@ -19,8 +19,8 @@ RUN apt-get update && apt-get install -y supervisor
 
 # Apply security updates and fix system library vulnerabilities
 # CVE-2023-52425: expat vulnerability - Force install latest patched version
-# CVE-2025-4802: glibc vulnerability - Force install latest patched version
-# CVE-2025-6020: pam vulnerability - Force install latest patched version
+# CVE-2025-4802: glibc vulnerability  
+# CVE-2025-6020: pam vulnerability
 # CVE-2025-52496, CVE-2025-48965, CVE-2025-47917: mbedtls vulnerabilities
 RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
@@ -28,12 +28,8 @@ RUN apt-get update && apt-get upgrade -y && \
     expat \
     libpam0g \
     libpam-modules \
-    libpam-runtime \
-    libpam-cap \
     libmbedtls14 \
     libc6 \
-    libc6-dev \
-    libc-bin \
     && apt-get autoremove -y && apt-get clean
 
 # Verify expat version to ensure CVE-2023-52425 is patched
@@ -170,34 +166,6 @@ RUN echo "Applying additional medium-priority security patches..." && \
     rm /etc/apt/sources.list.d/medium-security.list && \
     apt-get update && \
     echo "Medium-priority system library vulnerabilities patched"
-
-# Additional fixes for remaining high-priority vulnerabilities
-# Force update to latest Debian packages to address CVE-2025-4802 (glibc) and CVE-2025-6020 (pam)
-RUN echo "Applying final high-priority security patches..." && \
-    # Add testing/unstable repos for latest security patches
-    echo "deb https://deb.debian.org/debian testing main" > /etc/apt/sources.list.d/final-security.list && \
-    echo "deb https://deb.debian.org/debian unstable main" >> /etc/apt/sources.list.d/final-security.list && \
-    apt-get update && \
-    # Force install latest glibc to fix CVE-2025-4802
-    apt-get install -y -t testing \
-        libc6 \
-        libc6-dev \
-        libc-bin \
-        libc-devtools && \
-    # Force install latest PAM to fix CVE-2025-6020  
-    apt-get install -y -t testing \
-        libpam0g \
-        libpam-modules \
-        libpam-modules-bin \
-        libpam-runtime \
-        libpam-cap && \
-    # Clean up security repos
-    rm /etc/apt/sources.list.d/final-security.list && \
-    apt-get update && \
-    echo "Final high-priority vulnerabilities patched" && \
-    # Verify versions
-    dpkg-query -W -f='glibc: ${Version} (fixes CVE-2025-4802)\n' libc6 && \
-    dpkg-query -W -f='pam: ${Version} (fixes CVE-2025-6020)\n' libpam0g
 
 COPY ./valhalla/prompt_security/requirements.txt ./
 # Fix critical torch vulnerabilities CVE-2025-32434, CVE-2024-48063
