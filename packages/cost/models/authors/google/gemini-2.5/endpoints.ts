@@ -32,7 +32,7 @@ export const endpoints = {
       "tools",
       "top_p",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "*": {},
     },
@@ -66,7 +66,7 @@ export const endpoints = {
       "tools",
       "top_p",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "*": {},
     },
@@ -100,7 +100,7 @@ export const endpoints = {
       "tools",
       "top_p",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "*": {},
     },
@@ -134,7 +134,7 @@ export const endpoints = {
       "tools",
       "top_p",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "*": {},
     },
@@ -168,7 +168,7 @@ export const endpoints = {
       "tools",
       "top_p",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "*": {},
     },
@@ -198,7 +198,7 @@ export const endpoints = {
       "tools",
       "top_p",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "*": {},
     },
