@@ -8,6 +8,7 @@ import {
 import { P, XSmall } from "@/components/ui/typography";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useJawnClient } from "@/lib/clients/jawnHook";
+import { logger } from "@/lib/telemetry/logger";
 import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
 import { useGetPromptInputs } from "@/services/hooks/prompts";
 import { useLocalStorage } from "@/services/hooks/localStorage";
@@ -425,7 +426,12 @@ export default function RequestDrawer(props: RequestDivProps) {
           setNotification("Error adding label", "error");
         }
       } catch (err) {
-        console.error(err);
+        logger.error(
+          {
+            error: err,
+          },
+          "Failed to add request property",
+        );
         setNotification(`Error adding label: ${err}`, "error");
       }
     },
@@ -465,7 +471,12 @@ export default function RequestDrawer(props: RequestDivProps) {
           setNotification("Error adding score", "error");
         }
       } catch (err) {
-        console.error(err);
+        logger.error(
+          {
+            error: err,
+          },
+          "Failed to add request property",
+        );
         setNotification(`Error adding score: ${err}`, "error");
       }
     },

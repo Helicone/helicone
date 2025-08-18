@@ -3,6 +3,7 @@ import { ReactElement, useEffect } from "react";
 import AuthLayout from "../components/layout/auth/authLayout";
 import RequestsPage from "../components/templates/requests/RequestsPage";
 import { SortDirection } from "../services/lib/sorts/requests/sorts";
+import { logger } from "@/lib/telemetry/logger";
 
 // Got this ugly hack from https://stackoverflow.com/questions/21926083/failed-to-execute-removechild-on-node
 const jsToRun = `
@@ -11,7 +12,7 @@ if (typeof Node === 'function' && Node.prototype) {
   Node.prototype.removeChild = function(child) {
     if (child.parentNode !== this) {
       if (console) {
-        console.error('Cannot remove a child from a different parent', child, this);
+        logger.error({ child: child.toString(), parent: this.toString() }, 'Cannot remove a child from a different parent');
       }
       return child;
     }
@@ -22,7 +23,7 @@ if (typeof Node === 'function' && Node.prototype) {
   Node.prototype.insertBefore = function(newNode, referenceNode) {
     if (referenceNode && referenceNode.parentNode !== this) {
       if (console) {
-        console.error('Cannot insert before a reference node from a different parent', referenceNode, this);
+        logger.error({ referenceNode: referenceNode.toString(), parent: this.toString() }, 'Cannot insert before a reference node from a different parent');
       }
       return newNode;
     }
@@ -50,7 +51,7 @@ const RequestsV2 = (props: RequestsV2Props) => {
       if (document.documentElement.className.match("translated")) {
         eval(jsToRun);
       } else {
-        console.log("Page untranslate");
+        logger.info("Page untranslate");
       }
     });
 

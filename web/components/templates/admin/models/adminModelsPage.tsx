@@ -21,12 +21,11 @@ import { Search, GitBranch } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { ModelDetailsDialog } from "./ModelDetailsDialog";
-import {
-  registry,
-  type Model,
-  type ModelEndpoint,
-  type AuthorMetadata,
-} from "@helicone-package/cost/models";
+import { registry } from "@helicone-package/cost/models/registry";
+import type {
+  ModelConfig as Model,
+  Endpoint as ModelEndpoint,
+} from "@helicone-package/cost/models/types";
 
 export default function AdminModelsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -43,19 +42,24 @@ export default function AdminModelsPage() {
     if (modelsResult.error || !modelsResult.data) {
       // Return empty data if error
       return {
-        models: {},
-        endpoints: {},
-        authors: {},
+        models: {} as Record<string, Model>,
+        endpoints: {} as Record<string, ModelEndpoint[]>,
+        authors: {} as Record<
+          string,
+          { modelCount: number; supported: boolean }
+        >,
         modelVersions: {} as Record<string, string[]>,
       };
     }
 
-    const models = modelsResult.data;
+    const models = modelsResult.data as Record<string, Model>;
     const endpoints: Record<string, ModelEndpoint[]> = {};
-    const authors: Record<string, AuthorMetadata> = {};
+    const authors: Record<string, { modelCount: number; supported: boolean }> =
+      {};
 
     Object.keys(models).forEach((modelId) => {
-      const endpointsResult = registry.getModelEndpoints(modelId);
+      // Get all PTB endpoints for this model
+      const endpointsResult = registry.getPtbEndpoints(modelId);
       endpoints[modelId] = endpointsResult.data || [];
     });
 
@@ -111,7 +115,9 @@ export default function AdminModelsPage() {
       const matchesProvider =
         selectedProvider === "all"
           ? true
-          : endpoints.some((ep) => ep.provider === selectedProvider);
+          : endpoints.some(
+              (ep: ModelEndpoint) => ep.provider === selectedProvider,
+            );
 
       const matchesAuthor =
         selectedAuthor === "all" ? true : model.author === selectedAuthor;
@@ -303,7 +309,9 @@ export default function AdminModelsPage() {
               {baseModels.map(([modelKey, model]) => {
                 const endpoints = registryData.endpoints[modelKey] || [];
                 const isDisabled = endpoints.length === 0;
-                const costs = endpoints.map((ep) => ep.pricing.prompt);
+                const costs = endpoints.map(
+                  (ep: ModelEndpoint) => ep.pricing.prompt,
+                );
                 const minCost = costs.length > 0 ? Math.min(...costs) : 0;
                 const maxCost = costs.length > 0 ? Math.max(...costs) : 0;
 
@@ -337,14 +345,16 @@ export default function AdminModelsPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
-                          {endpoints.slice(0, 3).map((endpoint, idx) => (
-                            <span
-                              key={idx}
-                              className="inline-flex items-center rounded-md bg-muted px-2 py-1 text-xs"
-                            >
-                              {endpoint.provider}
-                            </span>
-                          ))}
+                          {endpoints
+                            .slice(0, 3)
+                            .map((endpoint: ModelEndpoint, idx: number) => (
+                              <span
+                                key={idx}
+                                className="inline-flex items-center rounded-md bg-muted px-2 py-1 text-xs"
+                              >
+                                {endpoint.provider}
+                              </span>
+                            ))}
                           {endpoints.length > 3 && (
                             <span className="text-xs text-muted-foreground">
                               +{endpoints.length - 3} more
@@ -365,7 +375,7 @@ export default function AdminModelsPage() {
                           registryData.endpoints[variantKey] || [];
                         const isVariantDisabled = variantEndpoints.length === 0;
                         const variantCosts = variantEndpoints.map(
-                          (ep) => ep.pricing.prompt,
+                          (ep: ModelEndpoint) => ep.pricing.prompt,
                         );
                         const variantMinCost =
                           variantCosts.length > 0
@@ -410,14 +420,16 @@ export default function AdminModelsPage() {
                               <div className="flex items-center gap-1">
                                 {variantEndpoints
                                   .slice(0, 3)
-                                  .map((endpoint, idx) => (
-                                    <span
-                                      key={idx}
-                                      className="inline-flex items-center rounded-md bg-muted px-2 py-1 text-xs"
-                                    >
-                                      {endpoint.provider}
-                                    </span>
-                                  ))}
+                                  .map(
+                                    (endpoint: ModelEndpoint, idx: number) => (
+                                      <span
+                                        key={idx}
+                                        className="inline-flex items-center rounded-md bg-muted px-2 py-1 text-xs"
+                                      >
+                                        {endpoint.provider}
+                                      </span>
+                                    ),
+                                  )}
                                 {variantEndpoints.length > 3 && (
                                   <span className="text-xs text-muted-foreground">
                                     +{variantEndpoints.length - 3} more

@@ -13,6 +13,7 @@ import { FlaskConicalIcon, PlusIcon, Trash2, WrenchIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Tool } from "@helicone-package/llm-mapper/types";
 import MarkdownEditor from "@/components/shared/markdownEditor";
+import { logger } from "@/lib/telemetry/logger";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import clsx from "clsx";
 import {
@@ -352,7 +353,7 @@ export default function ToolsConfigurationModal({
                   }
                   setToolsDialogOpen(false);
                 } catch (error) {
-                  console.error("Invalid JSON");
+                  logger.error("Invalid JSON");
                 }
               }}
             >

@@ -193,8 +193,6 @@ export async function getRequestsClickhouseNoSort(
       target_url,
       cache_reference_id,
       cache_enabled,
-      gateway_router_id,
-      gateway_deployment_target,
       cost / ${COST_PRECISION_MULTIPLIER} as cost,
       prompt_id,
       prompt_version,

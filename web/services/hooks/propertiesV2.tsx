@@ -10,6 +10,7 @@ import { getPropertyParamsV2 } from "../lib/propertyParamsV2";
 import { useDebounce } from "./debounce";
 import { getJawnClient } from "../../lib/clients/jawn";
 import { useOrg } from "../../components/layout/org/organizationContext";
+import { logger } from "@/lib/telemetry/logger";
 
 function useGetPropertiesV2<T extends "properties" | "request_response_rmt">(
   getPropertyFilters: (
@@ -59,7 +60,7 @@ function useGetPropertiesV2<T extends "properties" | "request_response_rmt">(
       }
       const values = await getPropertyParamsV2(property, search);
       if (values.error !== null) {
-        console.error(values.error);
+        logger.error({ error: values.error }, "Error getting property values");
         return getPropertyFilters(allProperties, []);
       }
       return getPropertyFilters(

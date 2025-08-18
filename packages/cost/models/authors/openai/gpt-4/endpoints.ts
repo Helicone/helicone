@@ -1,13 +1,14 @@
-import type { Endpoint } from "../../../types";
+import { ProviderName } from "../../../providers";
+import type { ModelProviderConfig } from "../../../types";
+import { GPT4ModelName } from "./models";
 
 export const endpoints = {
   "gpt-4:openai": {
-    modelId: "gpt-4",
-    provider: "openai",
     providerModelId: "gpt-4",
+    provider: "openai",
     pricing: {
-      prompt: 30,
-      completion: 60,
+      prompt: 0.00003,
+      completion: 0.00006,
     },
     contextLength: 8191,
     maxCompletionTokens: 4096,
@@ -24,7 +25,10 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
-} satisfies Record<string, Endpoint>;
-
-export type EndpointId = keyof typeof endpoints;
+} satisfies Partial<
+  Record<`${GPT4ModelName}:${ProviderName}`, ModelProviderConfig>
+>;

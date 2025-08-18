@@ -11,6 +11,7 @@ import {
 import { XSmall } from "@/components/ui/typography";
 import Link from "next/link";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { logger } from "@/lib/telemetry/logger";
 import {
   LuCheck,
   LuExternalLink,
@@ -124,7 +125,7 @@ export default function ScrollableBadges({
           (item) => !(item.key === newKey && item.value === newValue),
         ),
       );
-      console.error("Error adding item:", error);
+      logger.error({ error }, "Error adding item");
     }
   };
 

@@ -45,7 +45,7 @@ export type Prompt2025Settings = {
   promptVersionId?: string;
   environment?: string;
   promptInputs?: Record<string, any>;
-}
+};
 
 export class RequestWrapper {
   private authorization: string | undefined;
@@ -60,6 +60,7 @@ export class RequestWrapper {
   promptSettings: PromptSettings;
   prompt2025Settings: Prompt2025Settings; // I'm sorry. Will clean whenever we can remove old promtps.
   extraHeaders: Headers | null = null;
+  requestReferrer: string | undefined;
 
   private cachedText: string | null = null;
   private bodyKeyOverride: object | null = null;
@@ -220,6 +221,10 @@ export class RequestWrapper {
 
   setBaseURLOverride(url: string): void {
     this.baseURLOverride = url;
+  }
+
+  setRequestReferrer(referrer: string): void {
+    this.requestReferrer = referrer;
   }
 
   async auth(): Promise<Result<HeliconeAuth, string>> {
@@ -610,10 +615,10 @@ export class RequestWrapper {
    * @param inputs The inputs to associate with the prompt
    */
   setPrompt2025Settings(params: {
-    promptId: string,
-    promptVersionId: string,
-    inputs: Record<string, any>,
-    environment?: string
+    promptId: string;
+    promptVersionId: string;
+    inputs: Record<string, any>;
+    environment?: string;
   }): void {
     this.prompt2025Settings = {
       promptId: params.promptId,
@@ -682,9 +687,9 @@ export async function getProviderKeyFromPortalKey(
 
   const check = await checkLimitsSingle(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (organization.data?.limits as any)["cost"],
+    (organization.data?.limits as any)?.["cost"] ?? -1,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (organization.data?.limits as any)["requests"],
+    (organization.data?.limits as any)?.["requests"] ?? -1,
     "month",
     apiKey.data?.organization_id ?? "",
     env

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useOrg } from "../../../components/layout/org/organizationContext";
 import { $JAWN_API, getJawnClient } from "../../../lib/clients/jawn";
+import { logger } from "@/lib/telemetry/logger";
 
 const useExperiments = (
   req: { page: number; pageSize: number },
@@ -41,7 +42,12 @@ const useExperiments = (
 
   const frontEndExperiments = experiments.map((experiment) => {
     const hypothesis = experiment.hypotheses.at(0) ?? null;
-    console.log(hypothesis?.runs);
+    logger.info(
+      {
+        runs: hypothesis?.runs,
+      },
+      "Hypothesis runs",
+    );
     return {
       id: experiment.id,
       datasetId: experiment.dataset.id,

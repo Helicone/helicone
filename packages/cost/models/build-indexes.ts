@@ -1,83 +1,139 @@
-/**
- * Build-time index generation
- * Creates O(1) lookup maps from flat endpoint arrays
- */
+import { buildEndpointUrl } from "./provider-helpers";
+import { ProviderName } from "./providers";
+import { ModelProviderConfigId, EndpointId, ModelName } from "./registry-types";
+import type { Endpoint, ModelProviderConfig, EndpointConfig } from "./types";
 
-import type { ModelName, ProviderName, ModelIndexes, Endpoint } from "./types";
+function mergeConfigs(
+  modelProviderConfig: ModelProviderConfig,
+  endpointConfig: EndpointConfig,
+  deploymentId: string
+): Endpoint {
+  const baseUrl = buildEndpointUrl(modelProviderConfig, {
+    region: deploymentId,
+    location: deploymentId,
+    projectId: endpointConfig.projectId,
+    deploymentName: endpointConfig.deploymentName,
+    resourceName: endpointConfig.resourceName,
+    crossRegion: endpointConfig.crossRegion,
+  });
+
+  return {
+    baseUrl: baseUrl.data ?? "",
+    provider: modelProviderConfig.provider,
+    providerModelId:
+      endpointConfig.providerModelId ?? modelProviderConfig.providerModelId,
+    pricing: endpointConfig.pricing ?? modelProviderConfig.pricing,
+    contextLength:
+      endpointConfig.contextLength ?? modelProviderConfig.contextLength,
+    maxCompletionTokens:
+      endpointConfig.maxCompletionTokens ??
+      modelProviderConfig.maxCompletionTokens,
+    ptbEnabled: endpointConfig.ptbEnabled ?? modelProviderConfig.ptbEnabled,
+    version: endpointConfig.version ?? modelProviderConfig.version,
+    supportedParameters: modelProviderConfig.supportedParameters,
+  };
+}
+
+export interface ModelIndexes {
+  endpointConfigIdToEndpointConfig: Map<
+    ModelProviderConfigId,
+    ModelProviderConfig
+  >;
+  endpointIdToEndpoint: Map<EndpointId, Endpoint>;
+  modelToPtbEndpoints: Map<ModelName, Endpoint[]>;
+  modelProviderIdToPtbEndpoints: Map<ModelProviderConfigId, Endpoint[]>;
+  providerToModels: Map<ProviderName, Set<ModelName>>;
+  modelToEndpointConfigs: Map<ModelName, ModelProviderConfig[]>;
+  modelToProviders: Map<ModelName, Set<ProviderName>>;
+}
 
 export function buildIndexes(
-  endpoints: Record<string, Endpoint>
+  modelProviderConfigs: Record<string, ModelProviderConfig>
 ): ModelIndexes {
-  const byModel = new Map<ModelName, Endpoint[]>();
-  const byModelPtb = new Map<ModelName, Endpoint[]>();
-  const byModelProvider = new Map<`${ModelName}:${ProviderName}`, Endpoint[]>();
-  const byId = new Map<string, Endpoint>();
-  const providerToModels = new Map<ProviderName, ModelName[]>();
+  const endpointIdToEndpoint: Map<EndpointId, Endpoint> = new Map();
+  const endpointConfigIdToEndpointConfig: Map<
+    ModelProviderConfigId,
+    ModelProviderConfig
+  > = new Map();
+  const modelToPtbEndpoints: Map<ModelName, Endpoint[]> = new Map();
+  const endpointConfigIdToPtbEndpoints: Map<ModelProviderConfigId, Endpoint[]> =
+    new Map();
+  const providerToModels: Map<ProviderName, Set<ModelName>> = new Map();
+  const modelToEndpointConfigs: Map<ModelName, ModelProviderConfig[]> =
+    new Map();
+  const modelToProviders: Map<ModelName, Set<ProviderName>> = new Map();
 
-  // Single pass through all endpoints
-  for (const [id, endpoint] of Object.entries(endpoints)) {
-    // Index by ID
-    byId.set(id, endpoint);
+  for (const [configKey, config] of Object.entries(modelProviderConfigs)) {
+    const typedConfigKey = configKey as ModelProviderConfigId;
+    const [modelName, provider] = configKey.split(":") as [
+      ModelName,
+      ProviderName,
+    ];
 
-    // Index by model
-    if (!byModel.has(endpoint.modelId)) {
-      byModel.set(endpoint.modelId, []);
+    // Store base config for BYOK
+    endpointConfigIdToEndpointConfig.set(typedConfigKey, config);
+
+    // Track provider to models mapping
+    if (!providerToModels.has(provider)) {
+      providerToModels.set(provider, new Set());
     }
-    byModel.get(endpoint.modelId)!.push(endpoint);
+    providerToModels.get(provider)!.add(modelName);
 
-    // Index PTB-enabled endpoints
-    if (endpoint.ptbEnabled) {
-      if (!byModelPtb.has(endpoint.modelId)) {
-        byModelPtb.set(endpoint.modelId, []);
+    // Track model to endpoint configs mapping
+    if (!modelToEndpointConfigs.has(modelName)) {
+      modelToEndpointConfigs.set(modelName, []);
+    }
+    modelToEndpointConfigs.get(modelName)!.push(config);
+
+    // Track model to providers mapping
+    if (!modelToProviders.has(modelName)) {
+      modelToProviders.set(modelName, new Set());
+    }
+    modelToProviders.get(modelName)!.add(provider);
+
+    // Create an endpoint for each deployment
+    for (const [deploymentId, deploymentConfig] of Object.entries(
+      config.endpointConfigs
+    )) {
+      const endpointKey = `${configKey}:${deploymentId}` as EndpointId;
+      const endpoint = mergeConfigs(config, deploymentConfig, deploymentId);
+      endpointIdToEndpoint.set(endpointKey, endpoint);
+
+      // Add to PTB index if enabled
+      if (endpoint.ptbEnabled) {
+        if (!modelToPtbEndpoints.has(modelName)) {
+          modelToPtbEndpoints.set(modelName, []);
+        }
+        modelToPtbEndpoints.get(modelName)!.push(endpoint);
+
+        // Also index by model:provider
+        if (!endpointConfigIdToPtbEndpoints.has(typedConfigKey)) {
+          endpointConfigIdToPtbEndpoints.set(typedConfigKey, []);
+        }
+        endpointConfigIdToPtbEndpoints.get(typedConfigKey)!.push(endpoint);
       }
-      byModelPtb.get(endpoint.modelId)!.push(endpoint);
-    }
-
-    // Index by model + provider
-    const modelProviderKey =
-      `${endpoint.modelId}:${endpoint.provider}` as `${ModelName}:${ProviderName}`;
-    if (!byModelProvider.has(modelProviderKey)) {
-      byModelProvider.set(modelProviderKey, []);
-    }
-    byModelProvider.get(modelProviderKey)!.push(endpoint);
-
-    // Track provider -> models (with deduplication)
-    if (!providerToModels.has(endpoint.provider)) {
-      providerToModels.set(endpoint.provider, []);
-    }
-    const models = providerToModels.get(endpoint.provider)!;
-    if (!models.includes(endpoint.modelId)) {
-      models.push(endpoint.modelId);
     }
   }
 
-  // Sort all arrays by cost (cheapest first)
+  // Sort endpoints by cost (ascending)
   const sortByCost = (a: Endpoint, b: Endpoint) => {
     const aCost = a.pricing.prompt + a.pricing.completion;
     const bCost = b.pricing.prompt + b.pricing.completion;
     return aCost - bCost;
   };
 
-  // Sort each model's endpoints by cost
-  byModel.forEach((endpoints) => {
-    endpoints.sort(sortByCost);
-  });
-
-  // Sort PTB endpoints by cost
-  byModelPtb.forEach((endpoints) => {
-    endpoints.sort(sortByCost);
-  });
-
-  // Sort model+provider endpoints by cost
-  byModelProvider.forEach((endpoints) => {
-    endpoints.sort(sortByCost);
-  });
+  modelToPtbEndpoints.forEach((endpoints) => endpoints.sort(sortByCost));
+  endpointConfigIdToPtbEndpoints.forEach((endpoints) =>
+    endpoints.sort(sortByCost)
+  );
 
   return {
-    byModel,
-    byModelPtb,
-    byModelProvider,
-    byId,
+    endpointConfigIdToEndpointConfig,
+    endpointIdToEndpoint,
+    modelToPtbEndpoints,
+    modelProviderIdToPtbEndpoints: endpointConfigIdToPtbEndpoints,
     providerToModels,
+    modelToEndpointConfigs,
+    modelToProviders,
   };
 }

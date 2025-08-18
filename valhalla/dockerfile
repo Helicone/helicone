@@ -115,7 +115,7 @@ RUN echo "Applying critical security patches..." && \
 # Fix CVE-2023-6879 by installing fixed aom version from testing
 RUN echo "deb https://deb.debian.org/debian testing main" > /etc/apt/sources.list.d/testing.list && \
     apt-get update && \
-    apt-get install -y -t testing libaom3=3.12.1-1 && \
+    apt-get install -y -t testing libaom3 && \
     rm /etc/apt/sources.list.d/testing.list && \
     apt-get update
 

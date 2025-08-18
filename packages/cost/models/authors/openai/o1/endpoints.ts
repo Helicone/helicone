@@ -1,15 +1,16 @@
-import type { Endpoint } from "../../../types";
+import { ProviderName } from "../../../providers";
+import type { ModelProviderConfig } from "../../../types";
+import { O1ModelName } from "./models";
 
 export const endpoints = {
   "o1:openai": {
-    modelId: "o1",
     provider: "openai",
     providerModelId: "o1",
     pricing: {
-      prompt: 15,
-      completion: 60,
-      image: 0.021675,
-      cacheRead: 7.5,
+      prompt: 0.000015,
+      completion: 0.00006,
+      image: 0.000000021675,
+      cacheRead: 0.0000075,
     },
     contextLength: 200000,
     maxCompletionTokens: 100000,
@@ -21,15 +22,17 @@ export const endpoints = {
       "response_format",
     ],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
   "o1-pro:openai": {
-    modelId: "o1-pro",
     provider: "openai",
     providerModelId: "o1-pro",
     pricing: {
-      prompt: 15,
-      completion: 60,
-      cacheRead: 7.5,
+      prompt: 0.000015,
+      completion: 0.00006,
+      cacheRead: 0.0000075,
     },
     contextLength: 200000,
     maxCompletionTokens: 100000,
@@ -41,21 +44,26 @@ export const endpoints = {
       "response_format",
     ],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
   "o1-mini:openai": {
-    modelId: "o1-mini",
     provider: "openai",
     providerModelId: "o1-mini",
     pricing: {
-      prompt: 1.1,
-      completion: 4.4,
-      cacheRead: 0.55,
+      prompt: 0.0000011,
+      completion: 0.0000044,
+      cacheRead: 0.00000055,
     },
     contextLength: 128000,
     maxCompletionTokens: 65536,
     supportedParameters: ["seed", "max_tokens"],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
-} satisfies Record<string, Endpoint>;
-
-export type EndpointId = keyof typeof endpoints;
+} satisfies Partial<
+  Record<`${O1ModelName}:${ProviderName}`, ModelProviderConfig>
+>;

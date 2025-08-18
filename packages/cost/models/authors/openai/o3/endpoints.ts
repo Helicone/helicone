@@ -1,14 +1,15 @@
-import type { Endpoint } from "../../../types";
+import { ProviderName } from "../../../providers";
+import type { ModelProviderConfig } from "../../../types";
+import { O3ModelName } from "./models";
 
 export const endpoints = {
   "o3:openai": {
-    modelId: "o3",
-    provider: "openai", 
     providerModelId: "o3-2025-04-16",
+    provider: "openai",
     pricing: {
-      prompt: 2,
-      completion: 8,
-      cacheRead: 0.5,
+      prompt: 0.000002,
+      completion: 0.000008,
+      cacheRead: 0.0000005,
     },
     contextLength: 200000,
     maxCompletionTokens: 100000,
@@ -20,14 +21,16 @@ export const endpoints = {
       "response_format",
     ],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
   "o3-pro:openai": {
-    modelId: "o3-pro",
-    provider: "openai",
     providerModelId: "o3-pro-2025-06-10",
+    provider: "openai",
     pricing: {
-      prompt: 20,
-      completion: 80,
+      prompt: 0.00002,
+      completion: 0.00008,
     },
     contextLength: 200000,
     maxCompletionTokens: 100000,
@@ -39,15 +42,17 @@ export const endpoints = {
       "response_format",
     ],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
   "o3-mini:openai": {
-    modelId: "o3-mini",
-    provider: "openai",
     providerModelId: "o3-mini",
+    provider: "openai",
     pricing: {
-      prompt: 1.1,
-      completion: 4.4,
-      cacheRead: 0.55,
+      prompt: 0.0000011,
+      completion: 0.0000044,
+      cacheRead: 0.00000055,
     },
     contextLength: 200000,
     maxCompletionTokens: 100000,
@@ -59,15 +64,17 @@ export const endpoints = {
       "response_format",
     ],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
   "o3-mini-high:openai": {
-    modelId: "o3-mini-high",
-    provider: "openai",
     providerModelId: "o3-mini-high",
+    provider: "openai",
     pricing: {
-      prompt: 1.1,
-      completion: 4.4,
-      cacheRead: 0.55,
+      prompt: 0.0000011,
+      completion: 0.0000044,
+      cacheRead: 0.00000055,
     },
     contextLength: 200000,
     maxCompletionTokens: 100000,
@@ -79,7 +86,10 @@ export const endpoints = {
       "response_format",
     ],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
-} satisfies Record<string, Endpoint>;
-
-export type EndpointId = keyof typeof endpoints;
+} satisfies Partial<
+  Record<`${O3ModelName}:${ProviderName}`, ModelProviderConfig>
+>;

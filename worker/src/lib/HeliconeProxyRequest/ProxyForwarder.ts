@@ -144,7 +144,6 @@ export async function proxyForwarder(
             rateLimitKV: env.RATE_LIMIT_KV,
             rateLimitOptions: finalRateLimitOptions,
             userId: proxyRequest.userId,
-            cost: 0,
           });
 
           responseBuilder.addRateLimitHeaders(
@@ -414,7 +413,6 @@ export async function proxyForwarder(
           rateLimitKV: env.RATE_LIMIT_KV,
           rateLimitOptions: finalRateLimitOptions,
           userId: proxyRequest.userId,
-          cost: res.data?.cost ?? 0,
         });
       }
     }

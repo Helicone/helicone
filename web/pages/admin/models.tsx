@@ -1,11 +1,9 @@
-import AdminModelsPage from "@/components/templates/admin/models/adminModelsPage";
 import { ReactElement } from "react";
 import AdminLayout from "../../components/layout/admin/adminLayout";
+import AdminModelsPage from "../../components/templates/admin/models/adminModelsPage";
 import { withAdminSSR } from "../../lib/api/handlerWrappers";
 
-interface AdminModelsProps {}
-
-const AdminModels = (props: AdminModelsProps) => {
+const AdminModels = () => {
   return <AdminModelsPage />;
 };
 

@@ -1,6 +1,7 @@
 import { FilterState } from "@/filterAST/store/filterStore";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
+import { logger } from "@/lib/telemetry/logger";
 import { FilterExpression } from "../filterAst";
 import { StoreFilterType, useFilterCrud } from "../hooks/useFilterCrud";
 import useNotification from "@/components/shared/notification/useNotification";
@@ -109,7 +110,12 @@ export const useContextHelpers = ({
           id: filterId,
         };
       } else {
-        console.error("Filter not found");
+        logger.error(
+          {
+            filterId,
+          },
+          "Filter not found",
+        );
         return;
       }
     }
