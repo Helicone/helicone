@@ -17193,7 +17193,14 @@ strip-literal@^3.0.0:
   dependencies:
     js-tokens "^9.0.1"
 
-stripe@17.7.0, stripe@^17.6.0:
+stripe@18.4.0:
+  version "18.4.0"
+  resolved "https://registry.yarnpkg.com/stripe/-/stripe-18.4.0.tgz#1c0d5a7ed168f1ecd0f4a80d1e947e615d3eb841"
+  integrity sha512-LKFeDnDYo4U/YzNgx2Lc9PT9XgKN0JNF1iQwZxgkS4lOw5NunWCnzyH5RhTlD3clIZnf54h7nyMWkS8VXPmtTQ==
+  dependencies:
+    qs "^6.11.0"
+
+stripe@^17.6.0:
   version "17.7.0"
   resolved "https://registry.yarnpkg.com/stripe/-/stripe-17.7.0.tgz#7816be2559e6f58bf4c005758fe20be78cdbf995"
   integrity sha512-aT2BU9KkizY9SATf14WhhYVv2uOapBWX0OFWF4xvcj1mPaNotlSc2CsxpS4DS46ZueSppmCF5BX1sNYBtwBvfw==

@@ -107,7 +107,7 @@ export class StripeManager extends BaseManager {
   constructor(authParams: AuthParams) {
     super(authParams);
     this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-      apiVersion: "2025-02-24.acacia",
+      apiVersion: "2025-07-30.basil",
     });
   }
 
@@ -874,7 +874,7 @@ WHERE (${builtFilter.filter})`,
     const subscription = subscriptionResult.data;
 
     try {
-      const upcomingInvoice = await this.stripe.invoices.retrieveUpcoming({
+      const upcomingInvoice = await this.stripe.invoices.createPreview({
         customer: subscription.customer as string,
         subscription: subscription.id,
         expand: ["lines.data.price.product"],
@@ -1143,7 +1143,11 @@ WHERE (${builtFilter.filter})`,
       };
 
       if (this.shouldApplyCoupon()) {
-        updateParams.coupon = EARLY_ADOPTER_COUPON;
+        updateParams.discounts = [
+          {
+            coupon: EARLY_ADOPTER_COUPON,
+          },
+        ];
       }
 
       await this.stripe.subscriptions.update(subscription.id, updateParams);
@@ -1227,30 +1231,6 @@ WHERE (${builtFilter.filter})`,
     }
   }
 
-  public async reportUsageToStripe(
-    customerId: string,
-    usage: number
-  ): Promise<Result<null, string>> {
-    try {
-      // Assuming you have a usage item ID for each customer
-      const usageRecordParams: Stripe.SubscriptionItemCreateUsageRecordParams =
-        {
-          quantity: usage,
-          timestamp: Math.floor(Date.now() / 1000),
-          action: "set",
-        };
-
-      await this.stripe.subscriptionItems.createUsageRecord(
-        "si_1234", // Replace with actual subscription item ID
-        usageRecordParams
-      );
-
-      return ok(null);
-    } catch (error: any) {
-      return err(`Error reporting usage to Stripe: ${error.message}`);
-    }
-  }
-
   public async handleStripeWebhook(
     body: any,
     signature: string
@@ -1268,30 +1248,12 @@ WHERE (${builtFilter.filter})`,
         // Add your logic here to process the invoice
       }
 
-      if (event.type === "invoice.upcoming") {
-        const invoice = event.data.object as Stripe.Invoice;
-        const customerId = invoice.customer as string;
-
-        // Get usage from your system
-        // You'll need to implement this method or use an appropriate service
-        const usage = await this.getCustomerUsage(customerId);
-
-        if (usage) {
-          await this.reportUsageToStripe(customerId, usage);
-        }
-      }
-
       return ok(null);
     } catch (error: any) {
       return err(`Error processing webhook: ${error.message}`);
     }
   }
 
-  private async getCustomerUsage(customerId: string): Promise<number | null> {
-    // Implement this method to get the customer's usage
-    // This might involve querying your database or other services
-    return null;
-  }
   public async updateProUserCount(
     count: number
   ): Promise<Result<null, string>> {
