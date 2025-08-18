@@ -153,10 +153,10 @@ export class OrganizationStore extends BaseStore {
 
       const sql = `
         UPDATE organization 
-        SET ${updateFields.join(', ')}
+        SET ${updateFields.join(", ")}
         WHERE id = $${paramIndex} 
         RETURNING id`;
-      
+
       params.push(organizationId);
 
       // Execute the query
@@ -332,7 +332,7 @@ export class OrganizationStore extends BaseStore {
     organizationId: string
   ): Promise<Result<OrganizationMember[], string>> {
     const query = `
-      select email, member, org_role from organization_member om 
+      select distinct on (om.member) email, member, org_role from organization_member om 
         left join auth.users u on u.id = om.member
         where om.organization = $1
     `;
@@ -599,7 +599,7 @@ export class OrganizationStore extends BaseStore {
 
   async updateOnboardingStatus(
     onboardingStatus: OnboardingStatus,
-    name: string,
+    name: string
   ): Promise<Result<string, string>> {
     const hasOnboarded = onboardingStatus.hasOnboarded ?? false;
     const hasIntegrated = onboardingStatus.hasIntegrated ?? false;
