@@ -223,7 +223,7 @@ function errorHandler(
     console.warn(`Caught Validation Error for ${req.path}:`, err.fields);
     return res.status(422).json({
       message: "Validation Failed",
-      details: err?.fields,
+      details: err.fields,
     });
   }
   if (err instanceof Error) {
