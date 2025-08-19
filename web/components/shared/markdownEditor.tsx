@@ -42,9 +42,15 @@ const MonacoMarkdownEditor = (props: MarkdownEditorProps) => {
 
   // Update theme when currentTheme changes
   useEffect(() => {
-    if (editorRef.current && typeof window !== 'undefined' && (window as any).monaco) {
+    if (
+      editorRef.current &&
+      typeof window !== "undefined" &&
+      (window as any).monaco
+    ) {
       const monaco = (window as any).monaco;
-      monaco.editor.setTheme(currentTheme === "dark" ? "custom-dark" : "custom-light");
+      monaco.editor.setTheme(
+        currentTheme === "dark" ? "custom-dark" : "custom-light",
+      );
     }
   }, [currentTheme]);
 
@@ -58,28 +64,30 @@ const MonacoMarkdownEditor = (props: MarkdownEditorProps) => {
         onMount={(editor) => {
           editorRef.current = editor;
           editor.onDidContentSizeChange(() => updateHeight(editor));
-          
+
           // Define custom theme with transparent background
-          if (typeof window !== 'undefined' && (window as any).monaco) {
+          if (typeof window !== "undefined" && (window as any).monaco) {
             const monaco = (window as any).monaco;
-            monaco.editor.defineTheme('custom-dark', {
-              base: 'vs-dark',
+            monaco.editor.defineTheme("custom-dark", {
+              base: "vs-dark",
               inherit: true,
               rules: [],
               colors: {
-                'editor.background': '#00000000', // Transparent background
-              }
+                "editor.background": "#00000000", // Transparent background
+              },
             });
-            monaco.editor.defineTheme('custom-light', {
-              base: 'vs',
+            monaco.editor.defineTheme("custom-light", {
+              base: "vs",
               inherit: true,
               rules: [],
               colors: {
-                'editor.background': '#00000000', // Transparent background
-              }
+                "editor.background": "#00000000", // Transparent background
+              },
             });
             // Apply the custom theme
-            monaco.editor.setTheme(currentTheme === "dark" ? "custom-dark" : "custom-light");
+            monaco.editor.setTheme(
+              currentTheme === "dark" ? "custom-dark" : "custom-light",
+            );
           }
         }}
         options={{
@@ -95,8 +103,8 @@ const MonacoMarkdownEditor = (props: MarkdownEditorProps) => {
           scrollbar: {
             alwaysConsumeMouseWheel: false, // Prevents scroll lock - allows scroll to bubble up to parent
             handleMouseWheel: true,
-            vertical: 'auto',
-            horizontal: 'auto',
+            vertical: "auto",
+            horizontal: "auto",
           },
           ...(monacoOptions ?? {}),
         }}
