@@ -58,6 +58,24 @@ import { strings } from "/snippets/strings.mdx";
     });
     ```
 
+    ```javascript Groq
+    const groq = createOpenAI({
+      baseURL: "https://groq.helicone.ai/openai/v1",
+      apiKey: process.env.GROQ_API_KEY,
+      headers: {
+        "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+      },
+    });
+
+    // Use openai to make API calls
+    const response = await generateText({
+      model: groq("llama-3.3-70b-versatile"),
+      prompt: "Hello world",
+    });
+
+    console.log(response);
+    ```
+
     ```javascript Google Gemini
     import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
