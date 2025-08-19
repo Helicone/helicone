@@ -138,7 +138,10 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   const orgContext = useOrg();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [drawerSize, setDrawerSize] = useLocalStorage("request-drawer-size", 0);
+  const [drawerSize, setDrawerSize] = useLocalStorage(
+    "request-drawer-size",
+    initialRequestId ? 33 : 0,
+  );
   const [isLive, setIsLive] = useLocalStorage("isLive-RequestPage", false);
   const { unauthorized, currentTier } = useGetUnauthorized(userId || "");
   const initialRequest = useGetRequestWithBodies(initialRequestId || "");
