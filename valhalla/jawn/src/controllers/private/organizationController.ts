@@ -224,7 +224,7 @@ export class OrganizationController extends Controller {
     requestBody: { email: string },
     @Path() organizationId: string,
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<null, string>> {
+  ): Promise<Result<{ temporaryPassword?: string } | null, string>> {
     const organizationManager = new OrganizationManager(request.authParams);
     const org = await organizationManager.getOrg();
     if (org.error || !org.data) {
@@ -240,7 +240,7 @@ export class OrganizationController extends Controller {
     }
 
     const isExistingMember = members.data?.some(
-      (member) => member.email.toLowerCase() === requestBody.email.toLowerCase()
+      (member) => member.email?.toLowerCase() === requestBody.email.toLowerCase()
     );
 
     if (isExistingMember) {
@@ -300,7 +300,7 @@ export class OrganizationController extends Controller {
       return err(result.error ?? "Error adding member to organization");
     } else {
       this.setStatus(201);
-      return ok(null);
+      return ok(result.data);
     }
   }
 

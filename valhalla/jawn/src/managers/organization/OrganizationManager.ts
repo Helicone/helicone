@@ -6,6 +6,7 @@ import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { err, ok, Result } from "../../packages/common/result";
 import { OrganizationStore } from "../../lib/stores/OrganizationStore";
 import { BaseManager } from "../BaseManager";
+import crypto from "crypto";
 
 export type NewOrganizationParams =
   Database["public"]["Tables"]["organization"]["Insert"];
@@ -175,7 +176,7 @@ export class OrganizationManager extends BaseManager {
   async addMember(
     organizationId: string,
     email: string
-  ): Promise<Result<string, string>> {
+  ): Promise<Result<{ userId: string, temporaryPassword?: string }, string>> {
     if (!this.authParams.userId) return err("Unauthorized");
     let { data: userId, error: userIdError } =
       await this.organizationStore.getUserByEmail(email);
@@ -183,11 +184,15 @@ export class OrganizationManager extends BaseManager {
     if (userIdError) {
       return err(userIdError);
     }
+    let temporaryPassword: string | undefined;
     if (!userId || userId.length === 0) {
       try {
         // We still need to use the auth API for this specific function
         const authClient = getHeliconeAuthClient();
-        const userResult = await authClient.createUser({ email, otp: true });
+        if (process.env.NEXT_PUBLIC_BETTER_AUTH === "true") {
+          temporaryPassword = crypto.randomBytes(18).toString("base64url");
+        }
+        const userResult = await authClient.createUser({ email, password: temporaryPassword, otp: true });
         if (userResult.error) {
           return err(userResult.error);
         }
@@ -196,7 +201,8 @@ export class OrganizationManager extends BaseManager {
           return err("Failed to create user");
         }
 
-        userId = userResult.data?.id;
+        // we refetch the id since createUser can return a better auth format id (not a UUID)
+        userId = userResult.data?.id ?? "";
         userIdError = null;
       } catch (error) {
         return err(`Failed to send OTP: ${error}`);
@@ -225,7 +231,7 @@ export class OrganizationManager extends BaseManager {
       return err(insertError);
     }
 
-    return ok(userId!);
+    return ok({ userId: userId!, temporaryPassword });
   }
 
   async updateMember(
