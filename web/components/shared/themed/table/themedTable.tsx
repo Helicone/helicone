@@ -84,6 +84,8 @@ interface ThemedTableProps<T extends { id?: string; subRows?: T[] }> {
   hideHeader?: boolean;
   noDataCTA?: React.ReactNode;
   onDataSet?: () => void;
+  showClearFilters?: boolean;
+  onClearFilters?: () => void;
   savedFilters?: {
     filters?: OrganizationFilter[];
     currentFilter?: string;
@@ -127,6 +129,7 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
   props: ThemedTableProps<T>,
 ) {
   const {
+    id,
     defaultData,
     defaultColumns,
     skeletonLoading,
@@ -135,6 +138,8 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
     sortable,
     onRowSelect,
     noDataCTA,
+    showClearFilters = false,
+    onClearFilters,
     checkboxMode = "never",
     children,
     onSelectAll,
@@ -224,6 +229,15 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
             <p className="text-xl font-semibold text-slate-900 dark:text-slate-100">
               No Data Found
             </p>
+            {id === "requests-table" && showClearFilters && onClearFilters && (
+              <Button
+                variant="outline"
+                onClick={onClearFilters}
+                className="text-slate-900 dark:text-slate-100"
+              >
+                Clear Filters
+              </Button>
+            )}
             {noDataCTA}
           </div>
         ) : table.getVisibleFlatColumns().length === 0 ? (
