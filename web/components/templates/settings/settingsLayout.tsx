@@ -4,7 +4,6 @@ import {
   BuildingOfficeIcon,
   CreditCardIcon,
   DocumentTextIcon,
-  ExclamationTriangleIcon,
   NoSymbolIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
@@ -87,12 +86,6 @@ const DEVELOPER_TABS = [
     title: "Webhooks",
     icon: Webhook,
     href: "/settings/webhooks",
-  },
-  {
-    id: "alerts",
-    title: "Alerts",
-    icon: ExclamationTriangleIcon,
-    href: "/settings/alerts",
   },
   {
     id: "connections",
