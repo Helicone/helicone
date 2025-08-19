@@ -59,6 +59,9 @@ import { strings } from "/snippets/strings.mdx";
     ```
 
     ```javascript Groq
+    import { createOpenAI } from "@ai-sdk/openai";
+    import { generateText } from "ai";
+
     const groq = createOpenAI({
       baseURL: "https://groq.helicone.ai/openai/v1",
       apiKey: process.env.GROQ_API_KEY,
@@ -73,7 +76,6 @@ import { strings } from "/snippets/strings.mdx";
     });
 
     console.log(response);
-    ```
 
     ```javascript Google Gemini
     import { createGoogleGenerativeAI } from "@ai-sdk/google";
