@@ -177,30 +177,34 @@ export class OrganizationManager extends BaseManager {
     email: string
   ): Promise<Result<string, string>> {
     if (!this.authParams.userId) return err("Unauthorized");
-    let { data: userId, error: userIdError } =
-      await this.organizationStore.getUserByEmail(email);
+    const authClient = getHeliconeAuthClient();
+    console.log("inside fn to add member to organization", email);
+    let { data: user, error: userIdError } =
+      await authClient.getUserByEmail(email);
+    let userId = user?.id;
 
-    if (userIdError) {
+    if (userIdError && userIdError !== "User not found") {
+      console.error("Failed to get user by email", userIdError);
       return err(userIdError);
     }
-    if (!userId || userId.length === 0) {
+    if (!userId) {
       try {
+        console.log("creating user");
         // We still need to use the auth API for this specific function
-        const authClient = getHeliconeAuthClient();
         const userResult = await authClient.createUser({ email, otp: true });
+        console.log("create user result", userResult);
         if (userResult.error) {
           return err(userResult.error);
         }
-
-        if (!userResult.data?.id) {
-          return err("Failed to create user");
-        }
-
-        userId = userResult.data?.id;
+        userId = (await authClient.getUserByEmail(email)).data?.id;
         userIdError = null;
       } catch (error) {
         return err(`Failed to send OTP: ${error}`);
       }
+    }
+
+    if (!userId) {
+      return err("User not found");
     }
 
     if (userIdError) {
@@ -215,6 +219,8 @@ export class OrganizationManager extends BaseManager {
       return err("User does not have access to add member to organization");
     }
 
+    console.log("adding userId ", userId, " to org");
+
     const { error: insertError } =
       await this.organizationStore.addMemberToOrganization(
         userId!,
@@ -222,6 +228,7 @@ export class OrganizationManager extends BaseManager {
       );
 
     if (insertError && insertError !== null) {
+      console.error("Failed to add member to organization", insertError);
       return err(insertError);
     }
 

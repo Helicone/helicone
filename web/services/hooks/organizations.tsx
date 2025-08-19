@@ -15,6 +15,7 @@ import {
 } from "../../lib/clients/jawn";
 import { ORG_ID_COOKIE_KEY } from "../../lib/constants";
 import { OnboardingState } from "./useOrgOnboarding";
+import { authClient } from "@/packages/common/toImplement/client/betterAuthHelper";
 
 const useGetOrgMembers = (orgId: string) => {
   const { data, isLoading, refetch } = $JAWN_API.useQuery(

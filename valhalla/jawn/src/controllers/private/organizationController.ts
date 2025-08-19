@@ -240,7 +240,7 @@ export class OrganizationController extends Controller {
     }
 
     const isExistingMember = members.data?.some(
-      (member) => member.email.toLowerCase() === requestBody.email.toLowerCase()
+      (member) => member.email?.toLowerCase() === requestBody.email.toLowerCase()
     );
 
     if (isExistingMember) {
@@ -290,10 +290,12 @@ export class OrganizationController extends Controller {
       }
     }
 
+    console.log("adding member to organization", requestBody.email);
     const result = await organizationManager.addMember(
       organizationId,
       requestBody.email
     );
+    console.log("add member result", result);
 
     if (result.error || !result.data) {
       this.setStatus(500);

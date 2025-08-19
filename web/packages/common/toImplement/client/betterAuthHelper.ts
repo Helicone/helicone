@@ -1,10 +1,15 @@
 import { createAuthClient } from "better-auth/react";
+import { emailOTPClient } from "better-auth/client/plugins"
 import { HeliconeAuthClient } from "../../auth/client/HeliconeAuthClient";
 import { HeliconeOrg, HeliconeUser } from "../../auth/types";
 import { err, ok, Result } from "../../result";
 import { logger } from "@/lib/telemetry/logger";
 
-export const authClient = createAuthClient();
+export const authClient = createAuthClient({
+  plugins: [
+    emailOTPClient(),
+  ],
+});
 
 // Helper: Ensure user exists in Better Auth
 async function ensureUserInBetterAuth(
@@ -109,13 +114,11 @@ export const heliconeAuthClientFromSession = (
 
     async signUp(params): Promise<Result<HeliconeUser, string>> {
       try {
-        logger.info({ params }, "sign up params");
         const result: any = await authClient.signUp.email({
           email: params.email,
           password: params.password,
           name: "",
         });
-        logger.info({ result }, "sign up result");
         if (result.data) {
           return ok({
             id: result.data.user.id,

@@ -4,6 +4,7 @@ import { getUser } from "@/packages/common/toImplement/server/useBetterAuthClien
 import { Pool } from "pg";
 import nodemailer from "nodemailer";
 import { logger } from "@/lib/telemetry/logger";
+import { emailOTPClient } from "better-auth/client/plugins";
 
 // Create a reusable transporter object using the default SMTP transport
 // Configure for MailHog in development, or your actual email service in production
