@@ -67,7 +67,6 @@ import { strings } from "/snippets/strings.mdx";
       },
     });
 
-    // Use openai to make API calls
     const response = await generateText({
       model: groq("llama-3.3-70b-versatile"),
       prompt: "Hello world",
