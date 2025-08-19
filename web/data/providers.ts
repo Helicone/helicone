@@ -86,7 +86,7 @@ export const providers: Provider[] = [
       "https://docs.helicone.ai/getting-started/integration-methods/groq",
     apiKeyLabel: "Groq API Key",
     apiKeyPlaceholder: "...",
-    relevanceScore: 75,
+    relevanceScore: 76,
   },
   // {
   //   id: "cohere",
