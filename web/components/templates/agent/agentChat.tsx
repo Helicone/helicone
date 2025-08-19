@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import BouncingDotsLoader from "@/components/ui/bouncing-dots-loader";
 
 import { generateStream } from "@/lib/api/llm/generate-stream";
 import { processStream } from "@/lib/api/llm/process-stream";
@@ -31,8 +31,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
   const router = useRouter();
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
-  const [isWaitingForFirstResponse, setIsWaitingForFirstResponse] =
-    useState(false);
+  const [isLoading, setisLoading] = useState(false);
   const [selectedModel, setSelectedModel] = useState(
     "claude-3.7-sonnet, gpt-4o, gpt-4o-mini",
   );
@@ -169,7 +168,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
       let shouldContinue = true;
       while (shouldContinue) {
         setIsStreaming(true);
-        setIsWaitingForFirstResponse(true);
+        setisLoading(true);
 
         const assistantMessageIdx = updatedMessages.length;
         updateCurrentSessionMessages(updatedMessages, false);
@@ -222,7 +221,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
                   idx === assistantMessageIdx ? parsedResponse : msg,
                 );
                 updateCurrentSessionMessages(updatedMessages, false);
-                setIsWaitingForFirstResponse(false);
+                setisLoading(false);
               } catch (error) {
                 console.error("Failed to parse response:", error);
                 shouldContinue = false;
@@ -242,7 +241,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
                   idx === assistantMessageIdx ? parsedResponse : msg,
                 );
                 updateCurrentSessionMessages(updatedMessages, true);
-                setIsWaitingForFirstResponse(false);
+                setisLoading(false);
               } catch (error) {
                 console.error("Failed to parse response:", error);
                 if (errorSetInCurrentMessages) return;
@@ -286,7 +285,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
       updateCurrentSessionMessages(updatedMessages, true);
     } finally {
       setIsStreaming(false);
-      setIsWaitingForFirstResponse(false);
+      setisLoading(false);
       abortController.current = null;
       // Focus the input after streaming is complete
       setTimeout(() => {
@@ -326,7 +325,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
     if (abortController.current) {
       abortController.current.abort();
       setIsStreaming(false);
-      setIsWaitingForFirstResponse(false);
+      setisLoading(false);
     }
   };
 
@@ -392,30 +391,13 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
           <MessageRenderer key={uuidv4()} message={message} />
         ))}
 
-        {isWaitingForFirstResponse && (
-          <div className="w-full">
-            <div className="w-full text-sm text-foreground">
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
-                <Skeleton className="h-4 w-5/6" />
-              </div>
+        {isLoading && (
+          <div className="flex w-full justify-start">
+            <div className="flex items-center gap-2 pt-2 text-xs text-muted-foreground">
+              <BouncingDotsLoader size="xs" />
             </div>
           </div>
         )}
-
-        {/* {(isStreaming || true) && (
-          <div className="flex justify-center">
-            <Button
-              onClick={stopGeneration}
-              variant="outline"
-              size="sm_sleek"
-              className="text-xs"
-            >
-              Stop generating
-            </Button>
-          </div>
-        )} */}
 
         <div ref={messagesEndRef} />
       </div>
