@@ -153,10 +153,10 @@ export class OrganizationStore extends BaseStore {
 
       const sql = `
         UPDATE organization 
-        SET ${updateFields.join(', ')}
+        SET ${updateFields.join(", ")}
         WHERE id = $${paramIndex} 
         RETURNING id`;
-      
+
       params.push(organizationId);
 
       // Execute the query
@@ -330,12 +330,21 @@ export class OrganizationStore extends BaseStore {
   async getOrganizationMembers(
     organizationId: string
   ): Promise<Result<OrganizationMember[], string>> {
-    const query = `
+    let query;
+    if (process.env.NEXT_PUBLIC_BETTER_AUTH === "true") {
+      query = `
       select pu.email, member, org_role from organization_member om 
         left join auth.users u on u.id = om.member
         left join public.user pu on pu.auth_user_id = u.id
         where om.organization = $1
     `;
+    } else {
+      query = `
+      select u.email, member, org_role from organization_member om 
+        left join auth.users u on u.id = om.member
+        where om.organization = $1
+      `;
+    }
 
     return await dbExecute<{
       email: string;
@@ -599,7 +608,7 @@ export class OrganizationStore extends BaseStore {
 
   async updateOnboardingStatus(
     onboardingStatus: OnboardingStatus,
-    name: string,
+    name: string
   ): Promise<Result<string, string>> {
     const hasOnboarded = onboardingStatus.hasOnboarded ?? false;
     const hasIntegrated = onboardingStatus.hasIntegrated ?? false;
