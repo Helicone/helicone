@@ -10,7 +10,7 @@ import MessageRenderer from "./MessageRenderer";
 import { SessionDropdown } from "./SessionDropdown";
 import ChatInterface from "./ChatInterface";
 import { useRouter } from "next/router";
-import { UserIcon, XIcon } from "lucide-react";
+import { XIcon } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 
 type Message = NonNullable<OpenAIChatRequest["messages"]>[0];
