@@ -244,6 +244,7 @@ const useGetRequests = (
   isCached: boolean = false,
   isLive: boolean = false,
 ) => {
+  console.log("Sort Leaf", sortLeaf);
   return {
     requests: useGetRequestsWithBodies(
       currentPage,
