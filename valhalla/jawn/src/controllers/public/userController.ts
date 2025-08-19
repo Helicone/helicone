@@ -113,7 +113,7 @@ export class UserController extends Controller {
         prompt_tokens: number;
         completion_tokens: number;
         user_id: string;
-        cost_usd: number;
+        cost: number;
       }[],
       string
     >
@@ -163,7 +163,7 @@ export class UserController extends Controller {
       prompt_tokens: number;
       completion_tokens: number;
       user_id: string;
-      cost_usd: number;
+      cost: number;
     }>(
       `
     SELECT 
@@ -171,7 +171,7 @@ export class UserController extends Controller {
       sum(prompt_tokens) as prompt_tokens, 
       sum(completion_tokens) as completion_tokens, 
       user_id,
-      sum(cost) / ${COST_PRECISION_MULTIPLIER} as cost_usd
+      sum(cost) / ${COST_PRECISION_MULTIPLIER} as cost
       from request_response_rmt
     WHERE (
       ${filter.filter}

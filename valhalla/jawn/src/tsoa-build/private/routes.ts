@@ -944,7 +944,7 @@ const models: TsoaRoute.Models = {
             "response_text": {"ref":"SortDirection"},
             "properties": {"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"ref":"SortDirection"}},
             "values": {"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"ref":"SortDirection"}},
-            "cost_usd": {"ref":"SortDirection"},
+            "cost": {"ref":"SortDirection"},
         },
         "additionalProperties": false,
     },

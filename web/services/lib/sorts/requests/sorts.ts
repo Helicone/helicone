@@ -22,6 +22,7 @@ export interface SortLeafRequest {
   values?: {
     [key: string]: SortDirection;
   };
+  cost?: SortDirection;
 }
 
 function assertValidSortDirection(direction: SortDirection) {

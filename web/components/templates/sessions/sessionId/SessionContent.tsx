@@ -158,7 +158,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
       { label: "End Time", value: endTime ? get24HourFromDate(endTime) : "-" },
       {
         label: "Cost",
-        value: `$${(session.session_cost_usd ?? 0).toFixed(4)}`,
+        value: `$${(session.session_cost ?? 0).toFixed(4)}`,
       },
       { label: "Avg Latency", value: `${avgLatency.toFixed(0)}ms` },
       { label: "Requests", value: session.traces.length.toString() },
@@ -167,7 +167,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
   }, [
     startTime,
     endTime,
-    session.session_cost_usd,
+    session.session_cost,
     avgLatency,
     session.traces.length,
     totalTokens,

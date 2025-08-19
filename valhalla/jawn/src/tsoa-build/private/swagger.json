@@ -3400,7 +3400,7 @@
 						},
 						"type": "object"
 					},
-					"cost_usd": {
+					"cost": {
 						"$ref": "#/components/schemas/SortDirection"
 					}
 				},

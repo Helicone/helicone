@@ -99,7 +99,7 @@ Tabular format with the following columns:
 - prompt_tokens
 - completion_tokens
 - latency
-- cost_usd
+- cost
 
 ## Rate Limiting
 
