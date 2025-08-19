@@ -16,13 +16,13 @@ import { formatDate } from "@/utils/date";
 import { useQuery } from "@tanstack/react-query";
 import {
   Eye,
-  FlaskConicalIcon,
   ListTreeIcon,
   ScrollTextIcon,
   ShuffleIcon,
   Share2,
   UserIcon,
 } from "lucide-react";
+
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -898,18 +898,6 @@ export default function RequestDrawer(props: RequestDivProps) {
                       : "Playground"}
                   </Button>
                 </Link>
-              )}
-
-              {isChatRequest && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex flex-row items-center gap-1.5"
-                  onClick={handleCreateExperiment}
-                >
-                  <FlaskConicalIcon className="h-4 w-4" />
-                  Experiment
-                </Button>
               )}
 
               <Button
