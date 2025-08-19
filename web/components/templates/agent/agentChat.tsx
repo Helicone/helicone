@@ -360,7 +360,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
       <div className="flex w-full items-center justify-between border-b border-border px-1 py-3">
         <SessionDropdown />
         <div className="flex items-center gap-2">
-          <Button
+          {/* <Button
             onClick={() => escalateSession()}
             variant="outline"
             size="sm"
@@ -368,7 +368,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
           >
             <UserIcon className="h-3.5 w-3.5" />
             <span className="text-sm">Talk to a human</span>
-          </Button>
+          </Button> */}
           <Button
             onClick={onClose}
             variant="ghost"
