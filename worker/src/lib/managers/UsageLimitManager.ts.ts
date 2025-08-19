@@ -1,9 +1,9 @@
 import { hash } from "../..";
 import { Database } from "../../../supabase/database.types";
-import { clickhousePriceCalc } from "@helicone-package/cost";
 import { Result, err, ok } from "../util/results";
 import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
 import { safePut } from "../safePut";
+import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 
 // uses Dat trunc
 export async function checkLimitsSingle(
@@ -25,7 +25,7 @@ export async function checkLimitsSingle(
     `
     SELECT
       count(*) as count,
-      ${clickhousePriceCalc("request_response_rmt")} as cost
+      sum(cost) / ${COST_PRECISION_MULTIPLIER} as cost
     FROM request_response_rmt
     WHERE (
       request_response_rmt.request_created_at >= DATE_TRUNC('${timeGrain}', now())
@@ -61,7 +61,7 @@ const generateSubquery = (index: number) => {
   return `
     (
       SELECT count(*) as count,
-      ${clickhousePriceCalc("request_response_rmt")} as cost
+      sum(cost) / ${COST_PRECISION_MULTIPLIER} as cost
       FROM request_response_rmt
       WHERE (
         request_response_rmt.request_created_at >= now() - INTERVAL {${secondsVal} : Int32} SECOND
