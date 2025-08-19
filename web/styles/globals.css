@@ -182,6 +182,16 @@
   }
 }
 
+@keyframes bounce-dot {
+  to {
+    transform: translateY(-3px);
+  }
+}
+
+.animate-bounce-dot {
+  animation: bounce-dot 0.5s infinite alternate;
+}
+
 .text-tertiary {
   @apply text-slate-400 dark:text-slate-600;
 }
