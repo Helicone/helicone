@@ -32,6 +32,14 @@ export interface HeliconeAuthClient {
     options?: { emailRedirectTo?: string };
   }) => Promise<Result<void, string>>;
 
+  changePassword: ({
+    currentPassword,
+    newPassword,
+  }: {
+    currentPassword: string;
+    newPassword: string;
+  }) => Promise<Result<void, string>>;
+
   signInWithPassword: ({
     email,
     password,
