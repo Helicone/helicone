@@ -1,4 +1,4 @@
-import { ModelConfig } from "@/cost/models/types";
+import { ModelConfig } from "../../../types";
 
 export const models = {
   "gemini-2.5-flash-lite": {
