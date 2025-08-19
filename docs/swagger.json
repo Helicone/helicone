@@ -19605,7 +19605,8 @@
 														"groq",
 														"deepseek",
 														"cohere",
-														"xai"
+														"xai",
+														"google"
 													]
 												}
 											},
