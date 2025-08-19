@@ -10,7 +10,7 @@ import Editor from "react-simple-code-editor";
 import { Editor as MonacoEditor } from "@monaco-editor/react";
 import { editor } from "monaco-editor";
 import { useTheme } from "next-themes";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { TEMPLATE_REGEX } from "@helicone-package/prompts/templates";
 import { useVariableColorMapStore } from "@/store/features/playground/variableColorMap";
 import { HeliconeTemplateManager } from "@helicone-package/prompts/templates";
@@ -29,6 +29,7 @@ const MonacoMarkdownEditor = (props: MarkdownEditorProps) => {
   } = props;
   const { theme: currentTheme } = useTheme();
   const minHeight = 100;
+  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 
   const [height, setHeight] = useState(minHeight);
   const updateHeight = (editor: editor.IStandaloneCodeEditor) =>
@@ -39,6 +40,14 @@ const MonacoMarkdownEditor = (props: MarkdownEditorProps) => {
       ),
     );
 
+  // Update theme when currentTheme changes
+  useEffect(() => {
+    if (editorRef.current && typeof window !== 'undefined' && (window as any).monaco) {
+      const monaco = (window as any).monaco;
+      monaco.editor.setTheme(currentTheme === "dark" ? "custom-dark" : "custom-light");
+    }
+  }, [currentTheme]);
+
   return (
     <div className={containerClassName}>
       <MonacoEditor
@@ -46,9 +55,33 @@ const MonacoMarkdownEditor = (props: MarkdownEditorProps) => {
         onChange={(value) => setText(value || "")}
         language={language}
         theme={currentTheme === "dark" ? "vs-dark" : "vs-light"}
-        onMount={(editor) =>
-          editor.onDidContentSizeChange(() => updateHeight(editor))
-        }
+        onMount={(editor) => {
+          editorRef.current = editor;
+          editor.onDidContentSizeChange(() => updateHeight(editor));
+          
+          // Define custom theme with transparent background
+          if (typeof window !== 'undefined' && (window as any).monaco) {
+            const monaco = (window as any).monaco;
+            monaco.editor.defineTheme('custom-dark', {
+              base: 'vs-dark',
+              inherit: true,
+              rules: [],
+              colors: {
+                'editor.background': '#00000000', // Transparent background
+              }
+            });
+            monaco.editor.defineTheme('custom-light', {
+              base: 'vs',
+              inherit: true,
+              rules: [],
+              colors: {
+                'editor.background': '#00000000', // Transparent background
+              }
+            });
+            // Apply the custom theme
+            monaco.editor.setTheme(currentTheme === "dark" ? "custom-dark" : "custom-light");
+          }
+        }}
         options={{
           minimap: { enabled: false },
           fontSize: 12,
@@ -59,6 +92,12 @@ const MonacoMarkdownEditor = (props: MarkdownEditorProps) => {
           language: "markdown",
           scrollBeyondLastLine: false, // Prevents extra space at bottom
           automaticLayout: true, // Enables auto-resizing
+          scrollbar: {
+            alwaysConsumeMouseWheel: false, // Prevents scroll lock - allows scroll to bubble up to parent
+            handleMouseWheel: true,
+            vertical: 'auto',
+            horizontal: 'auto',
+          },
           ...(monacoOptions ?? {}),
         }}
         className={className}
