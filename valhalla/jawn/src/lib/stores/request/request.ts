@@ -236,9 +236,7 @@ export async function getRequestsClickhouse(
     return { data: null, error: "Invalid offset or limit" };
   }
 
-  console.log("Sort", sort);
   const sortSQL = buildRequestSortClickhouse(sort);
-  console.log("Sort SQL", sortSQL);
 
   if (limit < 0 || limit > 1_000) {
     return err("invalid limit");
