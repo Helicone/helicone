@@ -4,6 +4,7 @@ import { useState } from "react";
 import ThemedModal from "../components/shared/themed/themedModal";
 import { InboxArrowDownIcon } from "@heroicons/react/24/outline";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+import { logger } from "@/lib/telemetry/logger";
 
 const Reset = () => {
   const heliconeAuthClient = useHeliconeAuthClient();
@@ -27,7 +28,7 @@ const Reset = () => {
               "Error resetting password. Please try again.",
               "error",
             );
-            console.error(error);
+            logger.error({ error }, "Error resetting password");
             return;
           }
           setOpen(true);

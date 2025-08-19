@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { logger } from "@/lib/telemetry/logger";
 
 export function useURLParams<T>(
   key: string,
@@ -16,7 +17,13 @@ export function useURLParams<T>(
       try {
         setStoredValue(JSON.parse(stored));
       } catch (e) {
-        console.error(`Failed to parse URL param ${key}:`, e);
+        logger.error(
+          {
+            key,
+            error: e,
+          },
+          "Failed to parse URL param",
+        );
         if (onNothingStored) onNothingStored(setStoredValue);
       }
     } else if (onNothingStored) {

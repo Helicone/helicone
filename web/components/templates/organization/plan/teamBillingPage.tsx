@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { getJawnClient } from "@/lib/clients/jawn";
+import { logger } from "@/lib/telemetry/logger";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { InvoiceSheet } from "./InvoiceSheet";
@@ -142,7 +143,7 @@ export const TeamPlanCard = () => {
                   if (result.data) {
                     subscription.refetch();
                   } else {
-                    console.error("Failed to reactivate subscription");
+                    logger.error("Failed to reactivate subscription");
                   }
                 }}
                 disabled={reactivateSubscription.isPending}
@@ -159,7 +160,7 @@ export const TeamPlanCard = () => {
                   if (result.data) {
                     window.open(result.data, "_blank");
                   } else {
-                    console.error(
+                    logger.error(
                       "No URL returned from manage subscription mutation",
                     );
                   }

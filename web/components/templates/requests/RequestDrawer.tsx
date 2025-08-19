@@ -8,6 +8,7 @@ import {
 import { P, XSmall } from "@/components/ui/typography";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useJawnClient } from "@/lib/clients/jawnHook";
+import { logger } from "@/lib/telemetry/logger";
 import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
 import { useGetPromptInputs } from "@/services/hooks/prompts";
 import { useLocalStorage } from "@/services/hooks/localStorage";
@@ -15,13 +16,13 @@ import { formatDate } from "@/utils/date";
 import { useQuery } from "@tanstack/react-query";
 import {
   Eye,
-  FlaskConicalIcon,
   ListTreeIcon,
   ScrollTextIcon,
   ShuffleIcon,
   Share2,
   UserIcon,
 } from "lucide-react";
+
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -425,7 +426,12 @@ export default function RequestDrawer(props: RequestDivProps) {
           setNotification("Error adding label", "error");
         }
       } catch (err) {
-        console.error(err);
+        logger.error(
+          {
+            error: err,
+          },
+          "Failed to add request property",
+        );
         setNotification(`Error adding label: ${err}`, "error");
       }
     },
@@ -465,7 +471,12 @@ export default function RequestDrawer(props: RequestDivProps) {
           setNotification("Error adding score", "error");
         }
       } catch (err) {
-        console.error(err);
+        logger.error(
+          {
+            error: err,
+          },
+          "Failed to add request property",
+        );
         setNotification(`Error adding score: ${err}`, "error");
       }
     },
@@ -887,18 +898,6 @@ export default function RequestDrawer(props: RequestDivProps) {
                       : "Playground"}
                   </Button>
                 </Link>
-              )}
-
-              {isChatRequest && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex flex-row items-center gap-1.5"
-                  onClick={handleCreateExperiment}
-                >
-                  <FlaskConicalIcon className="h-4 w-4" />
-                  Experiment
-                </Button>
               )}
 
               <Button

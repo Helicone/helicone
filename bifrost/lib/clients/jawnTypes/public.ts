@@ -829,8 +829,6 @@ export interface components {
       cached?: components["schemas"]["Partial_BooleanOperators_"];
       assets?: components["schemas"]["Partial_TextOperators_"];
       "helicone-score-feedback"?: components["schemas"]["Partial_BooleanOperators_"];
-      gateway_router_id?: components["schemas"]["Partial_TextOperators_"];
-      gateway_deployment_target?: components["schemas"]["Partial_TextOperators_"];
       prompt_id?: components["schemas"]["Partial_TextOperators_"];
       prompt_version?: components["schemas"]["Partial_TextOperators_"];
     };
@@ -912,10 +910,10 @@ export interface components {
       timeZoneDifferenceMinutes?: number;
       sort?: components["schemas"]["SortLeafUsers"];
     };
-    "ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_": {
+    "ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array_": {
       data: {
           /** Format: double */
-          cost_usd: number;
+          cost: number;
           user_id: string;
           /** Format: double */
           completion_tokens: number;
@@ -927,7 +925,7 @@ export interface components {
       /** @enum {number|null} */
       error: null;
     };
-    "Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_": components["schemas"]["ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_"] | components["schemas"]["ResultError_string_"];
+    "Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array.string_": components["schemas"]["ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array_"] | components["schemas"]["ResultError_string_"];
     UserQueryParams: {
       userIds?: string[];
       timeFilter?: {
@@ -1376,7 +1374,7 @@ export interface components {
       values?: {
         [key: string]: components["schemas"]["SortDirection"];
       };
-      cost_usd?: components["schemas"]["SortDirection"];
+      cost?: components["schemas"]["SortDirection"];
     };
     RequestQueryParams: {
       filter: components["schemas"]["RequestFilterNode"];
@@ -1617,8 +1615,7 @@ export interface components {
       cache_reference_id: string | null;
       cache_enabled: boolean;
       updated_at?: string;
-      gateway_router_id?: string | null;
-      gateway_deployment_target?: string | null;
+      request_referrer?: string | null;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
@@ -3720,7 +3717,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_"];
+          "application/json": components["schemas"]["Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array.string_"];
         };
       };
     };
@@ -7007,7 +7004,7 @@ export interface operations {
         content: {
           "application/json": ({
             /** @enum {string} */
-            providerName: "anthropic" | "openai" | "perplexity" | "vertex" | "bedrock" | "azure-openai" | "xai" | "groq" | "deepseek" | "cohere";
+            providerName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure-openai" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "google";
           }) | {
             error: string;
           };

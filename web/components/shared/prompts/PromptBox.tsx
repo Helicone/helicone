@@ -21,6 +21,7 @@ import LoadingDots from "@/components/shared/universal/LoadingDots";
 import { processStream } from "@/lib/api/llm-old/process-stream";
 import { MdKeyboardTab } from "react-icons/md";
 import { PiChatDotsBold } from "react-icons/pi";
+import { logger } from "@/lib/telemetry/logger";
 
 type SelectionState = {
   text: string;
@@ -216,7 +217,7 @@ export default function PromptBox({
         }
       } catch (error) {
         if (error instanceof Error && error.name !== "AbortError") {
-          console.error("Error fetching suggestion:", error);
+          logger.error({ error }, "Error fetching suggestion");
         }
         dispatch({ type: "STOP_STREAMING" });
         if (abortControllerRef.current === controller) {
@@ -557,7 +558,7 @@ export default function PromptBox({
       );
     } catch (error) {
       if (error instanceof Error && error.name !== "AbortError") {
-        console.error("Error generating edit:", error);
+        logger.error({ error }, "Error generating edit");
         setPendingEdit(null); // Clear pending edit on non-abort error
       }
       // If it was an abort error, pendingEdit might have already been cleared by handleDenyEdit

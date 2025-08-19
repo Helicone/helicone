@@ -1,4 +1,5 @@
 import { dbExecute } from "./api/db/dbExecute";
+import { logger } from "@/lib/telemetry/logger";
 
 interface MessageMapping {
   id: string;
@@ -23,7 +24,7 @@ export class IntercomSlackService {
     slackThreadTs: string,
     slackMessageTs: string,
   ): Promise<void> {
-    console.error("Storing message mapping with dbExecute...");
+    logger.debug("Storing message mapping with dbExecute...");
     const result = await dbExecute(
       `INSERT INTO intercom_slack_mappings 
        (intercom_conversation_id, intercom_message_id, slack_channel_id, slack_thread_ts, slack_message_ts) 
@@ -38,11 +39,11 @@ export class IntercomSlackService {
     );
 
     if (result.error) {
-      console.error("Database error:", result.error);
+      logger.error(result, "Database error");
       throw new Error(`Failed to store message mapping: ${result.error}`);
     }
 
-    console.error("Message mapping stored successfully");
+    logger.debug("Message mapping stored successfully");
   }
 
   async getMessageMappingBySlackThread(
@@ -82,11 +83,11 @@ export class IntercomSlackService {
     );
 
     if (result.error) {
-      console.error("Failed to clear invalid mapping:", result.error);
+      logger.error({ error: result.error }, "Failed to clear invalid mapping");
     } else {
-      console.log(
-        "Cleared invalid mapping for conversation:",
-        intercomConversationId,
+      logger.info(
+        { conversationId: intercomConversationId },
+        "Cleared invalid mapping for conversation",
       );
     }
   }
@@ -114,13 +115,13 @@ export class IntercomSlackService {
     const slackChannelId = process.env.SLACK_CHANNEL_ID;
 
     if (!slackBotToken || !slackChannelId) {
-      console.error("SLACK_BOT_TOKEN or SLACK_CHANNEL_ID not configured");
+      logger.error("SLACK_BOT_TOKEN or SLACK_CHANNEL_ID not configured");
       throw new Error("Slack Web API not configured");
     }
 
     // Test channel access first
     try {
-      console.log("Testing channel access...");
+      logger.debug("Testing channel access...");
       const channelTestResponse = await fetch(
         "https://slack.com/api/conversations.info",
         {
@@ -134,16 +135,16 @@ export class IntercomSlackService {
       );
 
       const channelTestData = await channelTestResponse.json();
-      console.log(
-        "Channel test response:",
-        JSON.stringify(channelTestData, null, 2),
-      );
+      logger.debug({ response: channelTestData }, "Channel test response");
 
       if (!channelTestData.ok) {
-        console.error("Channel access test failed:", channelTestData.error);
+        logger.error(
+          { error: channelTestData.error },
+          "Channel access test failed",
+        );
       }
     } catch (error) {
-      console.error("Error testing channel access:", error);
+      logger.error({ error }, "Error testing channel access");
     }
 
     // Create metadata text
@@ -162,10 +163,7 @@ export class IntercomSlackService {
     // Handle attachments - just show a simple message
     let attachmentMessage = "";
     if (attachments && attachments.length > 0) {
-      console.log(
-        "Processing attachments:",
-        JSON.stringify(attachments, null, 2),
-      );
+      logger.debug({ attachments }, "Processing attachments");
 
       const imageCount = attachments.filter((a) =>
         a.content_type.startsWith("image/"),
@@ -241,18 +239,18 @@ export class IntercomSlackService {
       // Check if this looks like a valid Slack timestamp (should contain a decimal point)
       if (threadTs.includes(".")) {
         slackPayload.thread_ts = threadTs;
-        console.log("Adding thread_ts for reply:", threadTs);
+        logger.debug({ threadTs }, "Adding thread_ts for reply");
       } else {
-        console.log(
-          "Invalid thread_ts format, treating as new message:",
-          threadTs,
+        logger.warn(
+          { threadTs },
+          "Invalid thread_ts format, treating as new message",
         );
         // Clear invalid mapping and treat as new message
         threadTs = undefined;
       }
     }
 
-    console.error("Slack payload:", JSON.stringify(slackPayload, null, 2));
+    logger.debug({ payload: slackPayload }, "Slack payload");
 
     const response = await fetch("https://slack.com/api/chat.postMessage", {
       method: "POST",
@@ -263,15 +261,15 @@ export class IntercomSlackService {
       body: JSON.stringify(slackPayload),
     });
 
-    console.error("Slack response status:", response.status);
+    logger.debug({ status: response.status }, "Slack response status");
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Slack error response:", errorText);
-      console.error("Channel ID used:", slackChannelId);
-      console.error(
-        "Bot token (first 20 chars):",
-        slackBotToken?.substring(0, 20),
+      logger.error({ response: errorText }, "Slack error response");
+      logger.error({ channelId: slackChannelId }, "Channel ID used");
+      logger.error(
+        { tokenPrefix: slackBotToken?.substring(0, 20) },
+        "Bot token (first 20 chars)",
       );
       throw new Error(
         `Failed to send Slack message: ${response.statusText} - ${errorText}`,
@@ -279,10 +277,10 @@ export class IntercomSlackService {
     }
 
     const responseData = await response.json();
-    console.log("Slack response body:", JSON.stringify(responseData, null, 2));
+    logger.debug({ response: responseData }, "Slack response body");
 
     if (!responseData.ok) {
-      console.error("Slack API error:", responseData.error);
+      logger.error({ error: responseData.error }, "Slack API error");
 
       if (responseData.error === "not_in_channel") {
         throw new Error(
@@ -293,7 +291,7 @@ export class IntercomSlackService {
       throw new Error(`Slack API error: ${responseData.error}`);
     }
 
-    console.log("=== SLACK MESSAGE SEND SUCCESS ===");
+    logger.info("Slack message sent successfully");
 
     return {
       ts: responseData.ts,
@@ -310,10 +308,13 @@ export class IntercomSlackService {
       throw new Error("INTERCOM_ACCESS_TOKEN not configured");
     }
 
-    console.log("=== INTERCOM REPLY START ===");
-    console.log("Conversation ID:", conversationId);
-    console.log("Message:", message);
-    console.log("Access Token:", intercomAccessToken.substring(0, 20) + "...");
+    logger.debug("Starting Intercom reply");
+    logger.debug({ conversationId }, "Conversation ID");
+    logger.debug({ message }, "Message");
+    logger.debug(
+      { tokenPrefix: intercomAccessToken.substring(0, 20) + "..." },
+      "Access Token",
+    );
 
     const intercomApiUrl = `https://api.intercom.io/conversations/${conversationId}/reply`;
 
@@ -329,9 +330,9 @@ export class IntercomSlackService {
     if (adminResponse.ok) {
       const adminData = await adminResponse.json();
       adminId = adminData.id;
-      console.error("Found admin ID:", adminId);
+      logger.debug({ adminId }, "Found admin ID");
     } else {
-      console.error("Could not get admin ID, trying without it");
+      logger.warn("Could not get admin ID, trying without it");
     }
 
     const payload: any = {
@@ -344,8 +345,8 @@ export class IntercomSlackService {
       payload.admin_id = adminId;
     }
 
-    console.error("Intercom API URL:", intercomApiUrl);
-    console.error("Payload:", JSON.stringify(payload, null, 2));
+    logger.debug({ url: intercomApiUrl }, "Intercom API URL");
+    logger.debug({ payload }, "Payload");
 
     const response = await fetch(intercomApiUrl, {
       method: "POST",
@@ -357,18 +358,18 @@ export class IntercomSlackService {
       body: JSON.stringify(payload),
     });
 
-    console.error("Intercom response status:", response.status);
+    logger.debug({ status: response.status }, "Intercom response status");
 
     if (!response.ok) {
       const errorData = await response.text();
-      console.error("Intercom error response:", errorData);
+      logger.error({ response: errorData }, "Intercom error response");
       throw new Error(
         `Failed to send Intercom reply: ${response.statusText} - ${errorData}`,
       );
     }
 
     const responseData = await response.json();
-    console.error("Intercom response:", JSON.stringify(responseData, null, 2));
-    console.error("=== INTERCOM REPLY SUCCESS ===");
+    logger.debug({ response: responseData }, "Intercom response");
+    logger.info("Intercom reply sent successfully");
   }
 }

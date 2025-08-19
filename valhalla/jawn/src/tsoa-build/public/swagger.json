@@ -665,12 +665,6 @@
 					"helicone-score-feedback": {
 						"$ref": "#/components/schemas/Partial_BooleanOperators_"
 					},
-					"gateway_router_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"gateway_deployment_target": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
 					"prompt_id": {
 						"$ref": "#/components/schemas/Partial_TextOperators_"
 					},
@@ -948,12 +942,12 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_": {
+			"ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array_": {
 				"properties": {
 					"data": {
 						"items": {
 							"properties": {
-								"cost_usd": {
+								"cost": {
 									"type": "number",
 									"format": "double"
 								},
@@ -974,7 +968,7 @@
 								}
 							},
 							"required": [
-								"cost_usd",
+								"cost",
 								"user_id",
 								"completion_tokens",
 								"prompt_tokens",
@@ -999,10 +993,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_": {
+			"Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_"
+						"$ref": "#/components/schemas/ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -2742,7 +2736,7 @@
 						},
 						"type": "object"
 					},
-					"cost_usd": {
+					"cost": {
 						"$ref": "#/components/schemas/SortDirection"
 					}
 				},
@@ -3669,11 +3663,7 @@
 					"updated_at": {
 						"type": "string"
 					},
-					"gateway_router_id": {
-						"type": "string",
-						"nullable": true
-					},
-					"gateway_deployment_target": {
+					"request_referrer": {
 						"type": "string",
 						"nullable": true
 					}
@@ -11322,7 +11312,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_"
+									"$ref": "#/components/schemas/Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array.string_"
 								}
 							}
 						}
@@ -19608,14 +19598,15 @@
 													"enum": [
 														"anthropic",
 														"openai",
-														"perplexity",
-														"vertex",
 														"bedrock",
+														"vertex",
 														"azure-openai",
-														"xai",
+														"perplexity",
 														"groq",
 														"deepseek",
-														"cohere"
+														"cohere",
+														"xai",
+														"google"
 													]
 												}
 											},

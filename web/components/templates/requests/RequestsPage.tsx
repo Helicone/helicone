@@ -1,6 +1,7 @@
 import { Row } from "@/components/layout/common";
 import Header from "@/components/shared/Header";
 import LivePill from "@/components/shared/LivePill";
+import { logger } from "@/lib/telemetry/logger";
 import ViewColumns from "@/components/shared/themed/table/columns/viewColumns";
 import ThemedTimeFilter from "@/components/shared/themed/themedTimeFilter";
 import { Button } from "@/components/ui/button";
@@ -137,7 +138,10 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   const orgContext = useOrg();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [drawerSize, setDrawerSize] = useLocalStorage("request-drawer-size", 0);
+  const [drawerSize, setDrawerSize] = useLocalStorage(
+    "request-drawer-size",
+    initialRequestId ? 33 : 0,
+  );
   const [isLive, setIsLive] = useLocalStorage("isLive-RequestPage", false);
   const { unauthorized, currentTier } = useGetUnauthorized(userId || "");
   const initialRequest = useGetRequestWithBodies(initialRequestId || "");
@@ -384,10 +388,13 @@ export default function RequestsPage(props: RequestsPageV2Props) {
           filterMapIdx === -1 ||
           operatorIdx === -1
         ) {
-          console.log("Invalid filter map or operator index", {
-            filterLabel,
-            operator,
-          });
+          logger.warn(
+            {
+              filterLabel,
+              operator,
+            },
+            "Invalid filter map or operator index",
+          );
           return getRootFilterNode();
         }
 
@@ -413,7 +420,12 @@ export default function RequestsPage(props: RequestsPageV2Props) {
         return result;
       }
     } catch (error) {
-      console.error("Error decoding advanced filters:", error);
+      logger.error(
+        {
+          error,
+        },
+        "Error decoding advanced filters",
+      );
     }
 
     return getRootFilterNode();

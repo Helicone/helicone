@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { logger } from "@/lib/telemetry/logger";
 import { X, PlayCircle, CheckCircle2, AlertCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import useNotification from "@/components/shared/notification/useNotification";
@@ -57,7 +58,7 @@ export function TestDrawer({ evaluatorId, isOpen, onClose }: TestDrawerProps) {
           return requests.data?.data[0].request_id;
         }
       } catch (error) {
-        console.error("Failed to fetch latest request", error);
+        logger.error({ error }, "Failed to fetch latest request");
       }
       return null;
     },
@@ -94,7 +95,7 @@ export function TestDrawer({ evaluatorId, isOpen, onClose }: TestDrawerProps) {
           return request.data.data;
         }
       } catch (error) {
-        console.error("Failed to fetch request data", error);
+        logger.error({ error, requestId }, "Failed to fetch request data");
         notification.setNotification("Failed to fetch request data", "error");
       }
       return null;
@@ -237,7 +238,7 @@ export function TestDrawer({ evaluatorId, isOpen, onClose }: TestDrawerProps) {
           return;
         }
       } catch (e) {
-        console.error("Error parsing test response:", e);
+        logger.error({ error: e }, "Error parsing test response");
       }
 
       // Check if we got a specific error about score not found
@@ -312,7 +313,7 @@ export function TestDrawer({ evaluatorId, isOpen, onClose }: TestDrawerProps) {
           }
         } catch (jsonError) {
           // If parsing fails, continue with the original error
-          console.error("Failed to parse score from error:", jsonError);
+          logger.error({ jsonError }, "Failed to parse score from error");
         }
       }
 
@@ -327,7 +328,7 @@ export function TestDrawer({ evaluatorId, isOpen, onClose }: TestDrawerProps) {
         });
       }, 100);
     } catch (error) {
-      console.error("Error testing evaluator:", error);
+      logger.error({ error, evaluatorId }, "Error testing evaluator");
       const errorMessage =
         error instanceof Error
           ? error.message

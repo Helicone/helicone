@@ -46,8 +46,7 @@ const nextConfig = {
     ];
   },
   experimental: {
-    appDir: true,
-    runtime: "experimental-edge",
+    // appDir and runtime options have been removed as they're no longer needed in Next.js 14
   },
 };
 

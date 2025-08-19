@@ -1,16 +1,10 @@
 import {
-  type Endpoint,
-  authenticateRequest as authenticateProviderRequest,
-  buildEndpointUrl,
-  buildModelId,
-  getEndpoint,
-  getModelEndpoints,
+  buildRequestBody,
   getProvider,
-  ModelName,
-  ProviderConfig,
-} from "@helicone-package/cost/models";
-import { buildRequestBody } from "@helicone-package/cost/models/providers";
-import { ProviderName } from "@helicone-package/cost/models/types";
+  authenticateRequest as authenticateProviderRequest,
+} from "@helicone-package/cost/models/provider-helpers";
+import { ProviderName } from "@helicone-package/cost/models/providers";
+import { BaseProvider } from "@helicone-package/cost/models/providers/base";
 import { RequestWrapper } from "../RequestWrapper";
 import { toAnthropic } from "../clients/llmmapper/providers/openai/request/toAnthropic";
 import { APIKeysStore } from "../db/APIKeysStore";
@@ -20,7 +14,11 @@ import { PromptManager } from "../managers/PromptManager";
 import { ProviderKeysManager } from "../managers/ProviderKeysManager";
 import { HeliconeHeaders } from "../models/HeliconeHeaders";
 import { err, isErr, ok, Result } from "./results";
-import { createFallbackEndpoint } from "@helicone-package/cost/models/registry";
+import { registry } from "@helicone-package/cost/models/registry";
+import {
+  Endpoint,
+  UserEndpointConfig,
+} from "@helicone-package/cost/models/types";
 
 type Error = {
   type:
@@ -31,18 +29,6 @@ type Error = {
   message: string;
   code: number;
 };
-
-type ProviderConfigType =
-  | {
-      region?: string;
-      location?: string;
-      crossRegion?: string;
-      projectId?: string;
-      deploymentName?: string;
-      resourceName?: string;
-    }
-  | null
-  | undefined;
 
 const DEFAULT_REGION = "us-west-1";
 
@@ -86,13 +72,13 @@ export const authenticate = async (
 type DirectProviderEndpoint = {
   type: "direct";
   provider: ProviderName;
-  providerConfig: ProviderConfig;
+  providerConfig: BaseProvider;
   modelName: string;
 };
 
 type EndpointsProviderEndpoint = {
   type: "endpoints";
-  endpoints: Endpoint[];
+  providers: Set<ProviderName>;
 };
 
 type ValidateModelStringResult = Result<
@@ -103,11 +89,11 @@ type ValidateModelStringResult = Result<
 const validateModelString = (model: string): ValidateModelStringResult => {
   const modelParts = model.split("/");
   if (modelParts.length !== 2) {
-    const endpointsResult = getModelEndpoints(model);
+    const providersResult = registry.getModelProviders(model);
     if (
-      endpointsResult.error ||
-      !endpointsResult.data ||
-      endpointsResult.data.length === 0
+      providersResult.error ||
+      !providersResult.data ||
+      providersResult.data.size === 0
     ) {
       return err({
         type: "invalid_format",
@@ -115,7 +101,7 @@ const validateModelString = (model: string): ValidateModelStringResult => {
         code: 400,
       });
     }
-    return ok({ type: "endpoints", endpoints: endpointsResult.data });
+    return ok({ type: "endpoints", providers: providersResult.data });
   }
 
   const [modelName, providerName] = modelParts;
@@ -140,7 +126,6 @@ const validateModelString = (model: string): ValidateModelStringResult => {
 const authenticateRequest = async (
   requestWrapper: RequestWrapper,
   providerKey: ProviderKey,
-  model: string,
   body: string,
   heliconeHeaders: HeliconeHeaders,
   targetBaseUrl: string | null,
@@ -165,7 +150,11 @@ const authenticateRequest = async (
   });
 
   if (authResult.error) {
-    throw new Error(`Authentication failed: ${authResult.error}`);
+    return err({
+      type: "request_failed",
+      message: `Authentication failed: ${authResult.error}`,
+      code: 401,
+    });
   }
 
   for (const [key, value] of Object.entries(authResult.data?.headers || {})) {
@@ -197,56 +186,15 @@ const parseErrorResponse = async (
   }
 };
 
-const attemptDirectProviderRequest = async (
-  directProviderEndpoint: DirectProviderEndpoint,
+const sendRequest = async (
+  endpoint: Endpoint,
+  parsedBody: any,
   requestWrapper: RequestWrapper,
-  forwarder: (targetBaseUrl: string | null) => Promise<Response>,
-  providerKeysManager: ProviderKeysManager,
-  orgId: string,
-  parsedBody: any
+  providerKey: ProviderKey,
+  forwarder: (targetBaseUrl: string | null) => Promise<Response>
 ): Promise<Result<Response, Error>> => {
-  const { provider, modelName } = directProviderEndpoint;
-  const providerKey = await providerKeysManager.getProviderKeyWithFetch(
-    provider,
-    orgId
-  );
-
-  if (!providerKey) {
-    return err({
-      type: "missing_provider_key",
-      message: "Missing/Incorrect provider key",
-      code: 400,
-    });
-  }
-
-  const endpointResult = getEndpoint(modelName, provider);
-  const endpoint =
-    endpointResult.error || !endpointResult.data
-      ? createFallbackEndpoint(modelName, provider)
-      : endpointResult.data;
-
-  const config = providerKey.config as ProviderConfigType;
-
-  let providerModelId: string;
-
-  if (isErr(endpointResult)) {
-    providerModelId = modelName;
-  } else {
-    const modelIdResult = buildModelId(endpoint, {
-      region: config?.region ?? DEFAULT_REGION,
-      crossRegion: config?.crossRegion === "true",
-      projectId: config?.projectId,
-    });
-    providerModelId =
-      modelIdResult.error || !modelIdResult.data
-        ? modelName
-        : modelIdResult.data;
-  }
-
   const body = await buildRequestBody(endpoint, {
     parsedBody,
-    model: providerModelId,
-    provider,
     bodyMapping: requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
     toAnthropic: toAnthropic,
   });
@@ -261,28 +209,11 @@ const attemptDirectProviderRequest = async (
 
   requestWrapper.setBody(body.data);
 
-  const targetBaseUrlResult = buildEndpointUrl(endpoint, {
-    region: config?.region ?? config?.location ?? DEFAULT_REGION,
-    crossRegion: config?.crossRegion === "true",
-    projectId: config?.projectId,
-    deploymentName: config?.deploymentName,
-    resourceName: config?.resourceName,
-  });
-
-  if (targetBaseUrlResult.error || !targetBaseUrlResult.data) {
-    return err({
-      type: "request_failed",
-      message: targetBaseUrlResult.error || "Failed to get target base URL",
-      code: 500,
-    });
-  }
-
-  const targetBaseUrl = targetBaseUrlResult.data;
+  const targetBaseUrl = endpoint.baseUrl;
 
   await authenticateRequest(
     requestWrapper,
     providerKey,
-    providerModelId,
     body.data,
     requestWrapper.heliconeHeaders,
     targetBaseUrl,
@@ -306,20 +237,131 @@ const attemptDirectProviderRequest = async (
   }
 };
 
-const attemptEndpointsProviderRequest = async (
-  modelName: string,
-  endpointsProviderEndpoint: EndpointsProviderEndpoint,
+const attemptDirectProviderRequest = async (
+  directProviderEndpoint: DirectProviderEndpoint,
   requestWrapper: RequestWrapper,
   forwarder: (targetBaseUrl: string | null) => Promise<Response>,
   providerKeysManager: ProviderKeysManager,
   orgId: string,
   parsedBody: any
 ): Promise<Result<Response, Error>> => {
-  const { endpoints } = endpointsProviderEndpoint;
+  const { provider, modelName } = directProviderEndpoint;
+  const providerKey = await providerKeysManager.getProviderKeyWithFetch(
+    provider,
+    orgId
+  );
+
+  if (!providerKey) {
+    return err({
+      type: "missing_provider_key",
+      message: "Missing/Incorrect provider key",
+      code: 400,
+    });
+  }
+
+  const userEndpointConfig = providerKey.config as UserEndpointConfig;
+
+  // Try to get PTB endpoints first
+  // const endpointsResult: Result<Endpoint[], Error> = ok([]);
+  const endpointsResult = registry.getPtbEndpoints(modelName, provider);
+
+  let endpoints: Endpoint[];
+  if (endpointsResult.data && endpointsResult.data.length > 0) {
+    endpoints = endpointsResult.data;
+  } else {
+    // Fall back to creating a custom endpoint
+    const fallback = registry.createFallbackEndpoint(
+      modelName,
+      provider,
+      userEndpointConfig
+    );
+    if (isErr(fallback)) {
+      return err({
+        type: "request_failed",
+        message: fallback.error || "Failed to create fallback endpoint",
+        code: 500,
+      });
+    }
+
+    const result = await sendRequest(
+      fallback.data,
+      parsedBody,
+      requestWrapper,
+      providerKey,
+      forwarder
+    );
+
+    if (isErr(result)) {
+      return err(result.error);
+    }
+
+    return result;
+  }
+
+  const modelProviderConfig = registry.getModelProviderConfig(
+    modelName,
+    provider
+  );
+
+  if (isErr(modelProviderConfig)) {
+    return err({
+      type: "request_failed",
+      message: modelProviderConfig.error || "Failed to get endpoint config",
+      code: 500,
+    });
+  }
+
+  const byokEndpoint = registry.buildEndpoint(
+    modelProviderConfig.data,
+    userEndpointConfig
+  );
+
+  if (isErr(byokEndpoint)) {
+    return err({
+      type: "request_failed",
+      message: byokEndpoint.error || "Failed to build BYOK endpoint",
+      code: 500,
+    });
+  }
+
+  // const finalEndpoints = [byokEndpoint.data, ...endpoints]; // Do this when we have Passthrough Billing
+  const finalEndpoints = [byokEndpoint.data];
+
+  for (const endpoint of finalEndpoints) {
+    const result = await sendRequest(
+      endpoint,
+      parsedBody,
+      requestWrapper,
+      providerKey,
+      forwarder
+    );
+
+    if (!isErr(result)) {
+      return result;
+    }
+  }
+
+  return err({
+    type: "request_failed",
+    message: "All models failed",
+    code: 500,
+  });
+};
+
+const attemptProvidersRequest = async (
+  modelName: string,
+  providersEndpoint: EndpointsProviderEndpoint,
+  requestWrapper: RequestWrapper,
+  forwarder: (targetBaseUrl: string | null) => Promise<Response>,
+  providerKeysManager: ProviderKeysManager,
+  orgId: string,
+  parsedBody: any
+): Promise<Result<Response, Error>> => {
+  const { providers } = providersEndpoint;
 
   let error: Error | null = null;
-  for (const endpoint of endpoints) {
-    const providerResult = getProvider(endpoint.provider);
+  for (const provider of providers) {
+    const providerResult = getProvider(provider);
     if (isErr(providerResult) || !providerResult.data) {
       continue;
     }
@@ -327,7 +369,7 @@ const attemptEndpointsProviderRequest = async (
     const result = await attemptDirectProviderRequest(
       {
         type: "direct",
-        provider: endpoint.provider as ProviderName,
+        provider,
         modelName,
         providerConfig: providerResult.data,
       },
@@ -385,7 +427,7 @@ const attemptModelRequest = async ({
     return directProviderRequestResult;
   }
 
-  const endpointsProviderRequestResult = await attemptEndpointsProviderRequest(
+  const endpointsProviderRequestResult = await attemptProvidersRequest(
     model,
     result.data,
     requestWrapper,

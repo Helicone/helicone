@@ -1,6 +1,6 @@
 # Cost Package
 
-The Cost package provides pricing calculations for LLM providers supported by Helicone. It contains cost models for various AI/ML service providers and calculates token-based pricing.
+The Cost package provides pricing calculations and model registry for LLM providers supported by Helicone. It contains cost models for various AI/ML service providers and manages both Pass-Through Billing (PTB) and Bring Your Own Key (BYOK) scenarios.
 
 ## Architecture
 
@@ -11,68 +11,106 @@ The Cost package provides pricing calculations for LLM providers supported by He
 - **`providers/mappings.ts`** - Provider URL patterns and cost mappings
 - **`costCalc.ts`** - Cost calculation utilities and constants
 
-### Model Registry
+## Model Registry v2
 
-The model registry provides a comprehensive database of AI models with their metadata, pricing, and endpoint information. Data is synced from OpenRouter API and organized by author.
+The model registry provides a comprehensive, type-safe database of AI models with their metadata, pricing, and endpoint configurations. It supports O(1) lookups for efficient access patterns.
 
-#### Structure
+### Core Concepts
+
+- **ModelProviderConfig**: Base configuration for a model/provider combination with pricing, context limits, and parameters
+- **EndpointConfig**: Deployment-specific overrides (e.g., regional deployments, different versions)
+- **Endpoint**: Fully resolved configuration merging base + deployment configs
+- **PTB (Pass-Through Billing)**: Helicone handles billing, requires `ptbEnabled: true`
+- **BYOK (Bring Your Own Key)**: Users provide their own API keys, uses base configs
+
+### Structure
 
 ```
 models/
-├── authors/          # Model data organized by author
+├── authors/              # Model data organized by author
 │   ├── anthropic/
-│   │   ├── models.json
-│   │   ├── endpoints.json
-│   │   └── metadata.json
-│   └── openai/
-│       ├── models.json
-│       ├── endpoints.json
-│       └── metadata.json
-├── index.ts          # Auto-generated registry index
-├── model-versions.json
-└── scripts/
-    ├── sync-openrouter.ts  # Sync data from OpenRouter
-    └── build-registry.ts   # Build combined index
+│   │   ├── claude-3.5-sonnet/
+│   │   │   ├── models.ts
+│   │   │   └── endpoints.ts
+│   │   └── index.ts
+│   ├── openai/
+│   │   ├── gpt-4/
+│   │   │   ├── models.ts
+│   │   │   └── endpoints.ts
+│   │   └── index.ts
+│   └── [other-authors]/
+├── registry.ts           # Main registry with API methods
+├── build-indexes.ts      # Index builder for O(1) lookups
+├── types.ts             # Core type definitions
+└── providers.ts         # Provider configurations
 ```
 
-#### Scripts
+## Request Processing Flows
 
-```bash
-# Sync latest model data from OpenRouter
-yarn sync-openrouter
+For detailed explanations of how PTB (Pass-Through Billing) and BYOK (Bring Your Own Key) flows work, including the priority system and all implementation details, see [FLOWS.md](./FLOWS.md).
 
-# Build registry index from author folders
-yarn build-registry
-```
+### Quick Summary
 
-### Provider Structure
+- **PTB**: Helicone manages API keys and handles billing
+- **BYOK**: Users provide their own API keys and are billed directly
+- **Priority**: BYOK always takes precedence over PTB when available
+- **BYOK-Only Mode**: Users can disable PTB fallback for specific providers
 
-Each provider has its own directory under `providers/` containing:
+## Key Design Principles
 
-- `index.ts` - Main cost definitions for the provider
-- Additional files for specific model categories (e.g., `chat/`, `completion/`)
+1. **O(1) Lookups**: All primary access patterns use Map-based indexes for constant time access
+2. **Type Safety**: Full TypeScript types with intellisense support for model names, providers, and deployments
+3. **Progressive Enhancement**: PTB endpoints inherit from base configs with deployment-specific overrides
+4. **Cost Optimization**: PTB endpoints are automatically sorted by cost (cheapest first)
+5. **Efficient DB Queries**: Returns Sets instead of arrays where appropriate for `IN` queries
+6. **Clear Separation**: PTB (resolved endpoints) vs BYOK (base configs) have distinct APIs
 
-## Model Registry API
+## Data Structure
+
+### ModelProviderConfig
 
 ```typescript
-import {
-  registry,
-  getModel,
-  getEndpoints,
-  getAuthor,
-} from "@helicone-package/cost/models";
+interface ModelProviderConfig {
+  providerModelId: string;
+  provider: ProviderName;
+  pricing: ModelPricing;
+  contextLength: number;
+  maxCompletionTokens: number;
+  ptbEnabled: boolean;
+  supportedParameters: StandardParameter[];
+  endpointConfigs: Record<string, EndpointConfig>;
+  version?: string;
+}
+```
 
-// Get a specific model
-const model = getModel("claude-3.5-sonnet");
+### EndpointConfig (Deployment Override)
 
-// Get all endpoints for a model
-const endpoints = getEndpoints("claude-3.5-sonnet");
+```typescript
+interface EndpointConfig {
+  providerModelId?: string;
+  pricing?: ModelPricing;
+  contextLength?: number;
+  maxCompletionTokens?: number;
+  ptbEnabled?: boolean;
+  version?: string;
+}
+```
 
-// Get author information
-const author = getAuthor("anthropic");
+### Endpoint (Resolved)
 
-// Access all data
-const { models, endpoints, authors, modelVersions } = registry;
+```typescript
+interface Endpoint {
+  provider: ProviderName;
+  providerModelId: string;
+  pricing: ModelPricing;
+  contextLength: number;
+  maxCompletionTokens: number;
+  ptbEnabled: boolean;
+  supportedParameters: StandardParameter[];
+  endpointKey: string;
+  deployment?: string;
+  version?: string;
+}
 ```
 
 ---

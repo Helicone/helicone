@@ -1,14 +1,15 @@
-import type { Endpoint } from "../../../types";
+import { ProviderName } from "../../../providers";
+import type { ModelProviderConfig } from "../../../types";
+import { O4ModelName } from "./models";
 
 export const endpoints = {
   "o4-mini:openai": {
-    modelId: "o4-mini",
-    provider: "openai",
     providerModelId: "o4-mini",
+    provider: "openai",
     pricing: {
-      prompt: 1.1,
-      completion: 4.4,
-      cacheRead: 0.275,
+      prompt: 0.0000011,
+      completion: 0.0000044,
+      cacheRead: 0.000000275,
     },
     contextLength: 200000,
     maxCompletionTokens: 100000,
@@ -20,15 +21,17 @@ export const endpoints = {
       "response_format",
     ],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
   "o4-mini-high:openai": {
-    modelId: "o4-mini-high",
-    provider: "openai",
     providerModelId: "o4-mini-high-2025-04-16",
+    provider: "openai",
     pricing: {
-      prompt: 1.1,
-      completion: 4.4,
-      cacheRead: 0.275,
+      prompt: 0.0000011,
+      completion: 0.0000044,
+      cacheRead: 0.000000275,
     },
     contextLength: 200000,
     maxCompletionTokens: 100000,
@@ -40,7 +43,10 @@ export const endpoints = {
       "response_format",
     ],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
-} satisfies Record<string, Endpoint>;
-
-export type EndpointId = keyof typeof endpoints;
+} satisfies Partial<
+  Record<`${O4ModelName}:${ProviderName}`, ModelProviderConfig>
+>;

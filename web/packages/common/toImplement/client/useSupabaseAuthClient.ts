@@ -188,6 +188,16 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
     }
     return ok(undefined);
   }
+
+  async changePassword({
+    currentPassword,
+    newPassword,
+  }: {
+    currentPassword: string;
+    newPassword: string;
+  }): Promise<Result<void, string>> {
+    throw new Error("Not implemented");
+  }
 }
 
 export function useSupabaseAuthClient(): HeliconeAuthClient {

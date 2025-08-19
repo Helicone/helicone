@@ -12,6 +12,7 @@ import { ModelParameters } from "@/lib/api/llm/generate";
 import { DEFAULT_EMPTY_CHAT } from "../playgroundPage";
 import { CommandIcon, Undo2Icon } from "lucide-react";
 import { useOrg } from "@/components/layout/org/organizationContext";
+import { logger } from "@/lib/telemetry/logger";
 
 interface PlaygroundActionsProps {
   mappedContent: MappedLLMRequest | null;
@@ -47,14 +48,17 @@ const PlaygroundActions = ({
 }: PlaygroundActionsProps) => {
   const organization = useOrg();
   const resetToDefault = () => {
-    console.log("Reset triggered with:", {
-      defaultContent,
-      mappedContent,
-      requestId,
-    });
+    logger.debug(
+      {
+        defaultContent: !!defaultContent,
+        mappedContent: !!mappedContent,
+        requestId,
+      },
+      "Reset triggered",
+    );
 
     if (defaultContent) {
-      console.log("Setting to default content");
+      logger.debug("Setting to default content");
       // Reset all states in sequence
       setModelParameters({
         temperature: defaultContent.schema.request.temperature,
@@ -71,7 +75,7 @@ const PlaygroundActions = ({
       setTools(defaultContent.schema.request.tools || []);
       setMappedContent(defaultContent);
     } else {
-      console.log("Setting to empty chat");
+      logger.debug("Setting to empty chat");
       // Reset all states in sequence
       setTools([]);
       setModelParameters({

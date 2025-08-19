@@ -1,6 +1,7 @@
 import { providerConfigs } from "@helicone-package/cost/unified/providers";
 import { Provider, ProviderConfig } from "@helicone-package/cost/unified/types";
 import { StateInputs, StateParameters } from "@/types/prompt-state";
+import { logger } from "@/lib/telemetry/logger";
 
 /**
  * Environment variables required for each provider
@@ -46,7 +47,7 @@ export const getPromptDeploymentExample = (
 // model, temperature, messages inferred from id
 const response = await generate("${promptId}");
 
-console.log(response);`;
+logger.info({ response }, "Generated response");`;
 
   // With variables example
   const variablesExample = `import { generate } from "@helicone/generate";
@@ -58,7 +59,7 @@ const response = await generate({
   }
 });
 
-console.log(response);`;
+logger.info({ response }, "Generated response");`;
 
   // Chat example
   const chatExample = `import { generate } from "@helicone/generate";
@@ -71,14 +72,14 @@ chat.push("can you help me with my homework?");
 
 // Assistant
 chat.push(await generate({ promptId, chat }));
-console.log(chat[chat.length - 1]);
+logger.info({ response: chat[chat.length - 1] }, "Chat response");
 
 // User
 chat.push("thanks, the first question is what is 2+2?");
 
 // Assistant
 chat.push(await generate({ promptId, chat }));
-console.log(chat[chat.length - 1]);`;
+logger.info({ response: chat[chat.length - 1] }, "Chat response");`;
 
   return {
     simpleExample,
@@ -137,7 +138,7 @@ ${formattedInputsObject}
       });
       setResponse(result);
     } catch (error) {
-      console.error("Error generating response:", error);
+      logger.error({ error }, "Error generating response");
     } finally {
       setIsLoading(false);
     }
@@ -216,9 +217,9 @@ async function main() {
     });
     
     console.log("Generated response:");
-    console.log(response);
+    console.log({ response }, "Response");
   } catch (error) {
-    console.error("Error generating response:", error);
+    console.error("Error generating response", { error }, "Error generating response");
   }
 }
 

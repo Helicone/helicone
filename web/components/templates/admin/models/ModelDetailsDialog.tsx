@@ -8,7 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { H3, P, Small } from "@/components/ui/typography";
-import type { Model, ModelEndpoint } from "@helicone-package/cost/models";
+import type {
+  ModelConfig as Model,
+  Endpoint as ModelEndpoint,
+} from "@helicone-package/cost/models/types";
 import { CheckCircle, XCircle, DollarSign, Clock, Globe } from "lucide-react";
 
 interface ModelDetailsDialogProps {
@@ -153,7 +156,7 @@ export function ModelDetailsDialog({
                                   <div className="mt-1 flex items-center gap-2">
                                     <Globe className="h-3 w-3 text-muted-foreground" />
                                     <Small className="font-mono text-muted-foreground">
-                                      {endpoint.region || "default"}
+                                      {"default"}
                                     </Small>
                                   </div>
                                 </div>
@@ -325,7 +328,7 @@ export function ModelDetailsDialog({
                             {endpoint.providerModelId}
                           </P>
                           <Small className="font-mono text-muted-foreground">
-                            {endpoint.region || "default"}
+                            {"default"}
                           </Small>
                         </div>
                       </div>

@@ -10,7 +10,11 @@ import { RequestResponseManager } from "../managers/RequestResponseManager";
 import { AsyncLogModel } from "../models/AsyncLog";
 import { HeliconeHeaders } from "../models/HeliconeHeaders";
 import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
-import { Prompt2025Settings, PromptSettings, RequestWrapper } from "../RequestWrapper";
+import {
+  Prompt2025Settings,
+  PromptSettings,
+  RequestWrapper,
+} from "../RequestWrapper";
 import { INTERNAL_ERRORS } from "../util/constants";
 import { withTimeout } from "../util/helpers";
 import { Result, err, ok } from "../util/results";
@@ -60,6 +64,7 @@ export interface DBLoggableProps {
     flaggedForModeration: boolean | null;
     request_ip: string | null;
     country_code: string | null;
+    requestReferrer: string | null;
   };
   timing: {
     startTime: Date;
@@ -105,6 +110,7 @@ export function dbLoggableRequestFromProxyRequest(
     flaggedForModeration: proxyRequest.flaggedForModeration ?? null,
     request_ip: null,
     country_code: (proxyRequest.requestWrapper.cf?.country as string) ?? null,
+    requestReferrer: proxyRequest.requestWrapper.requestReferrer ?? null,
   };
 }
 
@@ -183,6 +189,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
       request_ip: null,
       country_code: (requestWrapper.cf?.country as string) ?? null,
       heliconeTemplate: heliconeTemplate ?? undefined,
+      requestReferrer: requestWrapper.requestReferrer ?? null,
     },
     response: {
       responseId: crypto.randomUUID(),
@@ -214,7 +221,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
         : new Date(new Date().getTime() + 1000),
       timeToFirstToken: async () =>
         asyncLogModel.timing
-          ? Number(asyncLogModel.timing.timeToFirstToken) ?? null
+          ? (Number(asyncLogModel.timing.timeToFirstToken) ?? null)
           : null,
     },
     tokenCalcUrl: env.VALHALLA_URL,
@@ -743,6 +750,7 @@ export class DBLoggable {
           requestCreatedAt: this.request.startTime ?? new Date(),
           isStream: this.request.isStream,
           heliconeTemplate: this.request.heliconeTemplate ?? undefined,
+          requestReferrer: this.request.requestReferrer ?? undefined,
           experimentColumnId:
             requestHeaders.experimentHeaders.columnId ?? undefined,
           experimentRowIndex:

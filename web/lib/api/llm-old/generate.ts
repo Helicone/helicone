@@ -2,6 +2,7 @@ import { modelMapping } from "@helicone-package/cost/unified/models";
 import { Provider } from "@helicone-package/cost/unified/types";
 import { Message, Tool } from "@helicone-package/llm-mapper/types";
 import { z } from "zod";
+import { logger } from "@/lib/telemetry/logger";
 
 export interface GenerateParams {
   provider: Provider;
@@ -102,9 +103,9 @@ export async function generate<T extends object | undefined = undefined>(
         if (done) {
           // Process any remaining buffer content
           if (buffer.trim()) {
-            console.warn(
-              "[generate] Stream ended with unprocessed buffer content:",
-              buffer,
+            logger.warn(
+              { buffer },
+              "[generate] Stream ended with unprocessed buffer content",
             );
             // Attempt to process remaining buffer as if it were a complete event
             const potentialEvents = buffer.split("\n\n");
@@ -116,11 +117,9 @@ export async function generate<T extends object | undefined = undefined>(
                     // Just pass the raw JSON string from the data field
                     params.stream?.onChunk(jsonString);
                   } catch (parseError) {
-                    console.error(
-                      "[generate] Error parsing final buffer JSON:",
-                      parseError,
-                      "JSON String:",
-                      jsonString,
+                    logger.error(
+                      { parseError, jsonString },
+                      "[generate] Error parsing final buffer JSON",
                     );
                   }
                 }
@@ -144,17 +143,15 @@ export async function generate<T extends object | undefined = undefined>(
                 // Pass the raw JSON string from the data field to onChunk
                 params.stream?.onChunk(jsonString);
               } catch (parseError) {
-                console.error(
-                  "[generate] Error parsing event JSON:",
-                  parseError,
-                  "Event:",
-                  event,
+                logger.error(
+                  { parseError, event },
+                  "[generate] Error parsing event JSON",
                 );
                 // Decide how to handle parse errors, e.g., skip or log
               }
             } else if (event.trim()) {
               // Handle potential non-data lines (e.g., comments, empty lines)
-              console.info("[generate] Received non-data SSE line:", event);
+              logger.info({ event }, "[generate] Received non-data SSE line");
             }
           }
         }
@@ -165,7 +162,7 @@ export async function generate<T extends object | undefined = undefined>(
       return { content: "", reasoning: "", calls: "" };
     } catch (error) {
       // Error handling for the stream reading itself
-      console.error("[generate] Error reading stream:", error);
+      logger.error({ error }, "[generate] Error reading stream");
       if (error instanceof Error && error.name === "AbortError") {
         // Return empty state object on abort
         return { content: "", reasoning: "", calls: "" };
@@ -202,7 +199,10 @@ export async function generate<T extends object | undefined = undefined>(
         calls: "", // Schemas typically don't involve calls in this flow
       };
     } catch (parseError) {
-      console.error("[generate] Failed to parse schema response:", parseError);
+      logger.error(
+        { parseError },
+        "[generate] Failed to parse schema response",
+      );
       // Fall back to standard response if parsing fails
     }
   }

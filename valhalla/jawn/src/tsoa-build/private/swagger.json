@@ -1111,6 +1111,42 @@
 					}
 				]
 			},
+			"ResultSuccess__temporaryPassword_63_-string_-or-null_": {
+				"properties": {
+					"data": {
+						"properties": {
+							"temporaryPassword": {
+								"type": "string"
+							}
+						},
+						"type": "object",
+						"nullable": true
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__temporaryPassword_63_-string_-or-null.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__temporaryPassword_63_-string_-or-null_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"UIFilterRowTree": {
 				"anyOf": [
 					{
@@ -3175,12 +3211,6 @@
 					"helicone-score-feedback": {
 						"$ref": "#/components/schemas/Partial_BooleanOperators_"
 					},
-					"gateway_router_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"gateway_deployment_target": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
 					"prompt_id": {
 						"$ref": "#/components/schemas/Partial_TextOperators_"
 					},
@@ -3370,7 +3400,7 @@
 						},
 						"type": "object"
 					},
-					"cost_usd": {
+					"cost": {
 						"$ref": "#/components/schemas/SortDirection"
 					}
 				},
@@ -4297,11 +4327,7 @@
 					"updated_at": {
 						"type": "string"
 					},
-					"gateway_router_id": {
-						"type": "string",
-						"nullable": true
-					},
-					"gateway_deployment_target": {
+					"request_referrer": {
 						"type": "string",
 						"nullable": true
 					}
@@ -6017,6 +6043,9 @@
 					},
 					"request": {
 						"properties": {
+							"requestReferrer": {
+								"type": "string"
+							},
 							"cacheReferenceId": {
 								"type": "string"
 							},
@@ -47784,7 +47813,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_null.string_"
+									"$ref": "#/components/schemas/Result__temporaryPassword_63_-string_-or-null.string_"
 								}
 							}
 						}

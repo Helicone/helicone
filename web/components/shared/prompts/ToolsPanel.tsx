@@ -13,6 +13,7 @@ import UniversalPopup from "../universal/Popup";
 import { ParameterLabel } from "./ParametersPanel";
 // import ToolEditor from "./ToolEditor";
 import MarkdownEditor from "@/components/shared/markdownEditor";
+import { logger } from "@/lib/telemetry/logger";
 import { toSnakeCase } from "@/utils/strings";
 
 interface ToolPanelProps {
@@ -40,7 +41,7 @@ export default function ToolPanel({ tools, onToolsChange }: ToolPanelProps) {
       onToolsChange([...tools, tool]);
       setIsPopupOpen(false);
     } catch (e) {
-      console.error("Invalid tool JSON:", e);
+      logger.error({ error: e }, "Invalid tool JSON");
     }
   };
 

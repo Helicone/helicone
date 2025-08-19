@@ -26,6 +26,7 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
       env: Env,
       ctx: ExecutionContext
     ) => {
+      requestWrapper.setRequestReferrer("ai-gateway");
       function forwarder(targetBaseUrl: string | null) {
         return gatewayForwarder(
           {

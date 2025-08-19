@@ -86,6 +86,41 @@ def create_migration_table(args, user=None, password=None):
         print("Created helicone_migrations table")
 
 
+def get_all_applied_migrations(args, user=None, password=None):
+    """Get all applied migration names in a single query"""
+    # First check if the table exists
+    check_query = """
+    SELECT count(*) FROM system.tables WHERE database = 'default' AND name = 'helicone_migrations';
+    """
+    check_res = run_curl_command(check_query, args, user, password)
+    
+    if check_res.returncode != 0 or check_res.stdout.strip() == "0":
+        print("helicone_migrations table does not exist yet")
+        return set()
+    
+    query = """
+    SELECT migration_name FROM helicone_migrations;
+    """
+    res = run_curl_command(query, args, user, password)
+    if res.returncode != 0:
+        print(f"Warning: Failed to query applied migrations: {res.stderr}")
+        return set()
+    
+    # Parse the result and return as a set for O(1) lookups
+    applied_migrations = set()
+    if res.stdout.strip():
+        for line in res.stdout.strip().split('\n'):
+            migration_name = line.strip()
+            if migration_name:
+                applied_migrations.add(migration_name)
+    
+    print(f"Found {len(applied_migrations)} applied migrations")
+    if applied_migrations:
+        print(f"Sample applied migrations: {list(applied_migrations)[:3]}")
+    
+    return applied_migrations
+
+
 def is_migration_applied(migration_name, args, user=None, password=None):
     query = f"""
     SELECT count(*) FROM helicone_migrations WHERE migration_name = '{migration_name}';
@@ -101,15 +136,56 @@ def mark_migration_as_applied(migration_name, args, user=None, password=None):
     run_curl_command(query, args, user, password)
 
 
-def run_migrations(args, retries=2, user=None, password=None):
-    print("Running migrations")
-    time.sleep(1)
+def preview_migrations(args, user=None, password=None):
+    """Preview migrations that will be applied"""
+    # Preload all applied migrations in a single query
+    applied_migrations = get_all_applied_migrations(args, user, password)
+    
+    pending_migrations = []
     for schema_path in all_schemas:
         migration_name = os.path.basename(schema_path)
-        if is_migration_applied(migration_name, args, user, password):
-            print(f"Skipping already applied migration: {migration_name}")
-            continue
+        if migration_name not in applied_migrations:
+            pending_migrations.append((migration_name, schema_path))
+    
+    return pending_migrations
 
+
+def run_migrations(args, retries=2, user=None, password=None, skip_confirmation=False):
+    print("Running migrations")
+    time.sleep(1)
+    
+    # Preload all applied migrations in a single query
+    applied_migrations = get_all_applied_migrations(args, user, password)
+    
+    # Show preview of migrations to be applied
+    pending_migrations = []
+    for schema_path in all_schemas:
+        migration_name = os.path.basename(schema_path)
+        if migration_name not in applied_migrations:
+            pending_migrations.append((migration_name, schema_path))
+    
+    if not pending_migrations:
+        print("No migrations to apply. All migrations are up to date.")
+        return
+    
+    print(f"\nThe following {len(pending_migrations)} migration(s) will be applied:")
+    for i, (migration_name, schema_path) in enumerate(pending_migrations, 1):
+        print(f"  {i}. {migration_name}")
+    
+    # Ask for confirmation unless skipped
+    if not skip_confirmation:
+        while True:
+            response = input(f"\nDo you want to apply these {len(pending_migrations)} migration(s)? [y/N]: ").strip().lower()
+            if response in ['y', 'yes']:
+                break
+            elif response in ['n', 'no', '']:
+                print("Migration cancelled.")
+                return
+            else:
+                print("Please enter 'y' for yes or 'n' for no.")
+    
+    # Apply migrations
+    for migration_name, schema_path in pending_migrations:
         print(f"Running {schema_path}")
 
         res = run_curl_command(None, args, user, password, schema_path)
@@ -120,11 +196,13 @@ def run_migrations(args, retries=2, user=None, password=None):
             if retries > 0:
                 time.sleep(1)
                 print("Retrying")
-                run_migrations(args, retries, user, password)
+                run_migrations(args, retries, user, password, skip_confirmation=True)
             break
         else:
             mark_migration_as_applied(
                 migration_name, args, user, password)
+            # Add to the in-memory set to avoid duplicate runs within the same session
+            applied_migrations.add(migration_name)
 
     print("Finished running migrations")
 

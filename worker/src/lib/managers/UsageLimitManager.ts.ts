@@ -35,7 +35,7 @@ export async function checkLimitsSingle(
   `,
     [organizationId]
   );
-  if (error || !data) {
+  if (error || !data || data.length === 0) {
     console.error("Error checking limits:", error);
     return err("Error checking limits");
   }

@@ -1,4 +1,4 @@
-import type { Model } from "../../../types";
+import type { ModelConfig } from "../../../types";
 
 export const models = {
   "gpt-4": {
@@ -12,4 +12,6 @@ export const models = {
     modality: "text->text",
     tokenizer: "GPT",
   },
-} satisfies Record<string, Model>;
+} satisfies Record<string, ModelConfig>;
+
+export type GPT4ModelName = keyof typeof models;

@@ -93,8 +93,6 @@ const metaDataFromHeliconeRequest = (
     provider: heliconeRequest.provider,
     timeToFirstToken: heliconeRequest.time_to_first_token,
     scores: heliconeRequest.scores,
-    gatewayRouterId: heliconeRequest.gateway_router_id,
-    gatewayDeploymentTarget: heliconeRequest.gateway_deployment_target,
     promptId: heliconeRequest.prompt_id ?? null,
     promptVersion: heliconeRequest.prompt_version ?? null,
   };

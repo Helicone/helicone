@@ -19,6 +19,7 @@ import { useFilterUIDefinitions } from "../filterUIDefinitions/useFilterUIDefini
 import clsx from "clsx";
 import { Small } from "@/components/ui/typography";
 import DateTimeInput from "./ui/DateTimeInput";
+import { logger } from "@/lib/telemetry/logger";
 
 // Define the FILTER_OPERATOR_LABELS mapping
 const FILTER_OPERATOR_LABELS: Record<FilterOperator, string> = {
@@ -304,7 +305,7 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
         value: String(result.value),
       }));
     } catch (error) {
-      console.error("Error searching:", error);
+      logger.error({ error }, "Error searching");
       return [];
     }
   };

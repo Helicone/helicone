@@ -3,7 +3,7 @@
  * Combines all models and endpoints from subdirectories
  */
 
-import type { Model, Endpoint, EndpointKey } from "../../types";
+import type { ModelConfig, ModelProviderConfig } from "../../types";
 
 // Import models
 import { models as claudeOpus41Models } from "./claude-opus-4-1/model";
@@ -29,21 +29,17 @@ export const anthropicModels = {
   ...claude37SonnetModels,
   ...claude35SonnetV2Models,
   ...claude35HaikuModels,
-} satisfies Record<string, Model>;
+} satisfies Record<string, ModelConfig>;
 
 // Aggregate endpoints
-export const anthropicEndpoints = {
+export const anthropicEndpointConfig = {
   ...claudeOpus41Endpoints,
   ...claudeOpus4Endpoints,
   ...claudeSonnet4Endpoints,
   ...claude37SonnetEndpoints,
   ...claude35SonnetV2Endpoints,
   ...claude35HaikuEndpoints,
-} satisfies Record<EndpointKey<AnthropicModelName>, Endpoint>;
-
-// Export types
-export type AnthropicModelName = keyof typeof anthropicModels;
-export type AnthropicEndpointId = keyof typeof anthropicEndpoints;
+} satisfies Record<string, ModelProviderConfig>;
 
 // Re-export metadata
 export { anthropicMetadata } from "./metadata";

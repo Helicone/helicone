@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useOrg } from "../layout/org/organizationContext";
 import ThemedModal from "./themed/themedModal";
 import getStripe from "../../utils/getStripe";
+import { logger } from "@/lib/telemetry/logger";
 
 import { clsx } from "./clsx";
 import { useGetRequestCountClickhouse } from "../../services/hooks/requests";
@@ -57,7 +58,7 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
     const stripe = await getStripe();
 
     if (!stripe) {
-      console.error("Stripe failed to initialize.");
+      logger.error("Stripe failed to initialize.");
       return;
     }
 
@@ -77,7 +78,7 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
     const result = await stripe.redirectToCheckout({ sessionId });
 
     if (result.error) {
-      console.error(result.error.message);
+      logger.error({ error: result.error.message }, "Stripe checkout failed");
     }
   }
 

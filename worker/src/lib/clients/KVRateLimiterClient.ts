@@ -69,7 +69,6 @@ interface RateLimitProps {
   rateLimitOptions: RateLimitOptions;
   organizationId: string | undefined;
   rateLimitKV: KVNamespace;
-  cost: number;
 }
 
 export async function checkRateLimit(
@@ -154,11 +153,6 @@ export async function updateRateLimitCounter(
     prunedTimestamps.push({
       timestamp: now,
       unit: 1,
-    });
-  } else if (props.rateLimitOptions.unit === "cents") {
-    prunedTimestamps.push({
-      timestamp: now,
-      unit: props.cost * 100,
     });
   }
 

@@ -1,16 +1,17 @@
-import type { Endpoint } from "../../../types";
+import { ProviderName } from "../../../providers";
+import type { ModelProviderConfig } from "../../../types";
+import { Claude37SonnetModelName } from "./model";
 
 export const endpoints = {
   "claude-3.7-sonnet:anthropic": {
-    modelId: "claude-3.7-sonnet",
     provider: "anthropic",
     providerModelId: "claude-3-7-sonnet-20250219",
     version: "20250219",
     pricing: {
-      prompt: 3,
-      completion: 15,
-      cacheRead: 0.3,
-      cacheWrite: 3.75,
+      prompt: 0.000003,
+      completion: 0.000015,
+      cacheRead: 0.0000003,
+      cacheWrite: 0.00000375,
     },
     contextLength: 200000,
     maxCompletionTokens: 64000,
@@ -24,19 +25,20 @@ export const endpoints = {
       "stop",
     ],
     ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
   },
 
-  "claude-3.7-sonnet:vertex:global": {
-    modelId: "claude-3.7-sonnet",
+  "claude-3.7-sonnet:vertex": {
     provider: "vertex",
-    region: "global",
     providerModelId: "claude-3-7-sonnet@20250219",
     version: "vertex-2023-10-16",
     pricing: {
-      prompt: 3,
-      completion: 15,
-      cacheRead: 0.3,
-      cacheWrite: 3.75,
+      prompt: 0.000003,
+      completion: 0.000015,
+      cacheRead: 0.0000003,
+      cacheWrite: 0.00000375,
     },
     contextLength: 200000,
     maxCompletionTokens: 64000,
@@ -50,7 +52,12 @@ export const endpoints = {
       "stop",
     ],
     ptbEnabled: true,
+    endpointConfigs: {
+      global: {
+        providerModelId: "claude-3-7-sonnet@20250219",
+      },
+    },
   },
-} satisfies Record<string, Endpoint>;
-
-export type EndpointId = keyof typeof endpoints;
+} satisfies Partial<
+  Record<`${Claude37SonnetModelName}:${ProviderName}`, ModelProviderConfig>
+>;

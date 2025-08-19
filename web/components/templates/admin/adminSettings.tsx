@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { InfoBox } from "@/components/ui/helicone/infoBox";
+import { logger } from "@/lib/telemetry/logger";
 
 interface SettingType {
   name: string;
@@ -176,7 +177,10 @@ const AdminSettings = () => {
       setEditableSetting(null);
       refetch();
     } catch (error) {
-      console.error("Failed to parse or save settings:", error);
+      logger.error(
+        { error, settingName: editableSetting.name },
+        "Failed to parse or save settings",
+      );
     }
   };
 
@@ -200,7 +204,10 @@ const AdminSettings = () => {
       setShowNewSettingForm(false);
       refetch();
     } catch (error) {
-      console.error("Failed to parse or save new setting:", error);
+      logger.error(
+        { error, settingName: newSetting.name },
+        "Failed to parse or save new setting",
+      );
     }
   };
 

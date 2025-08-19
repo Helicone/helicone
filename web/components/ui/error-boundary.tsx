@@ -1,6 +1,7 @@
 import React, { Component, ErrorInfo, ReactNode, useState } from "react";
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import posthog from "posthog-js";
+import { logger } from "@/lib/telemetry/logger";
 
 interface Props {
   children?: ReactNode;
@@ -57,13 +58,24 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public static getDerivedStateFromError(error: Error): State {
-    console.log("getDerivedStateFromError", error);
+    logger.error(
+      {
+        error,
+      },
+      "getDerivedStateFromError",
+    );
     return { hasError: true, error, errorInfo: null };
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     this.setState({ errorInfo, hasError: true, error });
-    console.error("Uncaught error:", error, errorInfo);
+    logger.error(
+      {
+        error,
+        errorInfo,
+      },
+      "Uncaught error",
+    );
 
     // Add PostHog event
     posthog.capture("error_boundary_triggered", {

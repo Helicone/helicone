@@ -2,6 +2,7 @@ import MarkdownEditor from "@/components/shared/markdownEditor";
 import UniversalPopup from "@/components/shared/universal/Popup";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
+import { logger } from "@/lib/telemetry/logger";
 
 interface ResponseFormatEditorProps {
   isOpen: boolean;
@@ -40,7 +41,7 @@ export default function ResponseFormatEditor({
       onSave(parsedSchema);
       onClose();
     } catch (e) {
-      console.error("Invalid response format JSON:", e);
+      logger.error({ error: e }, "Invalid response format JSON");
       // Potentially show an error message to the user
     }
   };

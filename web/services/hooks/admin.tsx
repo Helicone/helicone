@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import Parser from "rss-parser";
 import { $JAWN_API, getJawnClient } from "../../lib/clients/jawn";
 import { components } from "../../lib/clients/jawnTypes/private";
+import { logger } from "@/lib/telemetry/logger";
 
 const useCreateAlertBanner = (onSuccess?: () => void) => {
   const { mutate: createBanner, isPending: isCreatingBanner } = useMutation({
@@ -65,7 +66,7 @@ const useUpdateSetting = (onSuccess?: () => void) => {
         },
       });
 
-      console.log(`Updated setting ${req.name}`, data);
+      logger.info({ name: req.name, data }, "Updated setting");
 
       if (!error) {
         onSuccess && onSuccess();
@@ -101,7 +102,7 @@ const useGetSetting = (
         },
       );
 
-      console.log(`Received setting ${settingName}`, data);
+      logger.info({ settingName, data }, "Received setting");
       if (!error) {
         onSuccess && onSuccess();
       }
@@ -135,7 +136,7 @@ const useChangelog = () => {
         );
         return feed.items;
       } catch (err) {
-        console.error("Error parsing RSS feed:", err);
+        logger.error({ error: err }, "Error parsing RSS feed");
         throw err;
       }
     },
@@ -175,7 +176,7 @@ const useBackfillCostsPreview = (onSuccess?: () => void) => {
         },
       );
 
-      console.log(`Backfill costs preview`, data);
+      logger.info({ data }, "Backfill costs preview");
 
       if (!error) {
         onSuccess && onSuccess();
@@ -204,7 +205,7 @@ const useDeduplicateRequestResponse = (onSuccess?: () => void) => {
           },
         );
 
-        console.log(`Deduplicated request response`, data);
+        logger.info({ data }, "Deduplicated request response");
 
         if (!error) {
           onSuccess && onSuccess();
@@ -246,7 +247,7 @@ const useBackfillCosts = (onSuccess?: () => void) => {
         },
       );
 
-      console.log(`Backfilled costs`, data);
+      logger.info({ data }, "Backfilled costs");
 
       if (!error) {
         onSuccess && onSuccess();

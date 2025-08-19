@@ -7,3 +7,12 @@ export function cn(...inputs: ClassValue[]) {
 
 export const ISLAND_WIDTH =
   " w-full px-4 sm:px-16 md:px-24 2xl:px-40 max-w-[2000px] mx-auto";
+
+export function isJson(content: string) {
+  try {
+    JSON.parse(content);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}

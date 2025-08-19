@@ -43,7 +43,7 @@
     "iso-3166-1": "^2.1.1",
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.456.0",
-    "next": "14.2.25",
+    "next": "14.2.30",
     "next-mdx-remote": "^5.0.0",
     "next-sitemap": "^4.2.3",
     "openapi-fetch": "^0.13.0",

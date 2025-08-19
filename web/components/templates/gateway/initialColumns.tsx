@@ -201,7 +201,7 @@ export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
       return <span>${formatNumber(num)}</span>;
     },
     meta: {
-      sortKey: "cost_usd",
+      sortKey: "cost",
     },
     size: 175,
   },

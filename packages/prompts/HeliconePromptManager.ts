@@ -113,7 +113,7 @@ export class HeliconePromptManager {
       return message;
     });
 
-    let finalResponseFormat = sourcePromptBody.response_format;
+    let finalResponseFormat = params.response_format ?? sourcePromptBody.response_format;
     if (finalResponseFormat) {
       const substitutedResponseFormat =
         HeliconeTemplateManager.substituteVariablesJSON(
@@ -128,7 +128,7 @@ export class HeliconePromptManager {
         : finalResponseFormat;
     }
 
-    let finalTools = sourcePromptBody.tools;
+    let finalTools = [...(sourcePromptBody.tools ?? []), ...(params.tools ?? [])];
     if (finalTools) {
       const substitutedTools =
         HeliconeTemplateManager.substituteVariablesJSON(

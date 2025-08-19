@@ -12,6 +12,7 @@ import { Result, err, ok } from "@/packages/common/result";
 import { FilterNode, TimeFilter } from "@helicone-package/filters/filterDefs";
 import { Permission, Role, hasPermission } from "../../services/lib/user";
 import { dbExecute } from "./db/dbExecute";
+import { logger } from "@/lib/telemetry/logger";
 
 export interface HandlerWrapperNext<RetVal> {
   req: NextApiRequest;
@@ -28,7 +29,7 @@ export class RequestBodyParser {
         this.body = req.body;
       }
     } catch (e) {
-      console.error("RequestBodyParser", e, req.body);
+      logger.error({ error: e, body: req.body }, "RequestBodyParser error");
       this.body = {};
     }
   }

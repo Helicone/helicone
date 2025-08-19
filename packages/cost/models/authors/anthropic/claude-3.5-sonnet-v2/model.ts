@@ -1,4 +1,4 @@
-import type { Model } from "../../../types";
+import type { ModelConfig } from "../../../types";
 
 export const models = {
   "claude-3.5-sonnet-v2": {
@@ -12,4 +12,6 @@ export const models = {
     modality: "text+image->text",
     tokenizer: "Claude",
   },
-} satisfies Record<string, Model>;
+} satisfies Record<string, ModelConfig>;
+
+export type Claude35SonnetV2ModelName = keyof typeof models;

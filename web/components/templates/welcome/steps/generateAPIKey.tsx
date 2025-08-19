@@ -13,6 +13,7 @@ import { DiffHighlight } from "../diffHighlight";
 import { DialogFooter } from "@/components/ui/dialog";
 import { ArrowUpRightIcon } from "lucide-react";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+import { logger } from "@/lib/telemetry/logger";
 
 const ASYNC_CODE_CONVERTS = {
   "node.js": (key: string) => `
@@ -84,7 +85,10 @@ const GenerateAPIKey = ({
 
       if (!res.response.ok) {
         setNotification("Failed to generate API key", "error");
-        console.error(await res.response.text());
+        logger.error(
+          { response: await res.response.text() },
+          "Failed to generate API key",
+        );
       }
 
       setApiKey(generatedApiKey);
