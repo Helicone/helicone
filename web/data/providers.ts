@@ -67,17 +67,17 @@ export const providers: Provider[] = [
   //   apiKeyPlaceholder: "...",
   //   relevanceScore: 80,
   // },
-  // {
-  //   id: "groq",
-  //   name: "Groq",
-  //   logoUrl: "/assets/home/providers/groq.png",
-  //   description: "Configure your Groq API keys for fast inference",
-  //   docsUrl:
-  //     "https://docs.helicone.ai/getting-started/integration-methods/groq",
-  //   apiKeyLabel: "Groq API Key",
-  //   apiKeyPlaceholder: "...",
-  //   relevanceScore: 75,
-  // },
+  {
+    id: "groq",
+    name: "Groq",
+    logoUrl: "/assets/home/providers/groq.png",
+    description: "Configure your Groq API keys for fast inference",
+    docsUrl:
+      "https://docs.helicone.ai/getting-started/integration-methods/groq",
+    apiKeyLabel: "Groq API Key",
+    apiKeyPlaceholder: "...",
+    relevanceScore: 75,
+  },
   // {
   //   id: "cohere",
   //   name: "Cohere",

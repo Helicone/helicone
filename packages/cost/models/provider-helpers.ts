@@ -34,6 +34,9 @@ export const dbProviderToProvider = (provider: string): ProviderName | null => {
   if (provider === "Vertex AI") {
     return "vertex";
   }
+  if (provider === "Groq") {
+    return "groq";
+  }
   return null;
 };
 
@@ -49,6 +52,9 @@ export const providerToDbProvider = (provider: ProviderName): string => {
   }
   if (provider === "vertex") {
     return "Vertex AI";
+  }
+  if (provider === "groq") {
+    return "Groq";
   }
   return provider;
 };

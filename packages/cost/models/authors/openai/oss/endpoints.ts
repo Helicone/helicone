@@ -1,0 +1,88 @@
+import { ProviderName } from "../../../providers";
+import type { ModelProviderConfig } from "../../../types";
+import { GPTOSSModelName } from "./models";
+
+export const endpoints = {
+  "gpt-oss-120b:groq": {
+    providerModelId: "openai/gpt-oss-120b",
+    provider: "groq",
+    pricing: {
+      prompt: 0.00000015,
+      completion: 0.00000075,
+      request: 0.0,
+      image: 0.0,
+      audio: 0.0,
+      web_search: 0.0,
+      internal_reasoning: 0.0,
+    },
+    contextLength: 131000,
+    maxCompletionTokens: 131000,
+    supportedParameters: [
+      "frequency_penalty",
+      "include_reasoning",
+      "logit_bias",
+      "logprobs",
+      "max_tokens",
+      "min_p",
+      "presence_penalty",
+      "reasoning",
+      "repetition_penalty",
+      "response_format",
+      "seed",
+      "stop",
+      "structured_outputs",
+      "temperature",
+      "tool_choice",
+      "tools",
+      "top_k",
+      "top_logprobs",
+      "top_p",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "gpt-oss-20b:groq": {
+    providerModelId: "openai/gpt-oss-20b",
+    provider: "groq",
+    pricing: {
+      prompt: 0.0000001,
+      completion: 0.0000005,
+      request: 0.0,
+      image: 0.0,
+      audio: 0.0,
+      web_search: 0.0,
+      internal_reasoning: 0.0,
+    },
+    contextLength: 131000,
+    maxCompletionTokens: 131000,
+    supportedParameters: [
+      "frequency_penalty",
+      "include_reasoning",
+      "logit_bias",
+      "logprobs",
+      "max_tokens",
+      "min_p",
+      "presence_penalty",
+      "reasoning",
+      "repetition_penalty",
+      "response_format",
+      "seed",
+      "stop",
+      "structured_outputs",
+      "temperature",
+      "tool_choice",
+      "tools",
+      "top_k",
+      "top_logprobs",
+      "top_p",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+} satisfies Partial<
+  Record<`${GPTOSSModelName}:${ProviderName}`, ModelProviderConfig>
+>;
