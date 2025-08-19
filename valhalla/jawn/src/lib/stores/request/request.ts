@@ -16,8 +16,7 @@ import {
   buildRequestSortClickhouse,
 } from "../../shared/sorts/requests/sorts";
 import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
-
-const MAX_TOTAL_BODY_SIZE = 1024 * 1024;
+import { SortDirection } from "../../shared/sorts/requests/sorts";
 
 export interface HeliconeRequestAsset {
   assetUrl: string;
@@ -152,7 +151,8 @@ export async function getRequestsClickhouseNoSort(
   orgId: string,
   filter: FilterNode,
   offset: number,
-  limit: number
+  limit: number,
+  createdAtSort: SortDirection
 ): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
@@ -167,6 +167,7 @@ export async function getRequestsClickhouseNoSort(
     argsAcc: [],
   });
 
+  const sortSQL = createdAtSort === "asc" ? "ASC" : "DESC";
   const query = `
     SELECT response_id,
       map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as response_body,
@@ -201,7 +202,7 @@ export async function getRequestsClickhouseNoSort(
     WHERE (
       (${builtFilter.filter})
     )
-    ORDER BY (organization_id, toStartOfHour(request_created_at), request_created_at) DESC
+    ORDER BY (organization_id, toStartOfHour(request_created_at), request_created_at) ${sortSQL}
     LIMIT ${limit}
     OFFSET ${offset}
   `;
@@ -235,7 +236,9 @@ export async function getRequestsClickhouse(
     return { data: null, error: "Invalid offset or limit" };
   }
 
+  console.log("Sort", sort);
   const sortSQL = buildRequestSortClickhouse(sort);
+  console.log("Sort SQL", sortSQL);
 
   if (limit < 0 || limit > 1_000) {
     return err("invalid limit");
