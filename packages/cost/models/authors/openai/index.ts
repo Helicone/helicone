@@ -40,6 +40,3 @@ export const openaiEndpointConfig = {
   ...gpt41Endpoints,
   ...gpt4Endpoints,
 } satisfies Record<string, ModelProviderConfig>;
-
-// Re-export metadata
-export { openaiMetadata } from "./metadata";
