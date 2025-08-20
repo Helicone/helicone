@@ -69,6 +69,7 @@ interface RateLimitProps {
   rateLimitOptions: RateLimitOptions;
   organizationId: string | undefined;
   rateLimitKV: KVNamespace;
+  cost: number;
 }
 
 export async function checkRateLimit(
@@ -83,38 +84,63 @@ export async function checkRateLimit(
   } = props;
   const { time_window, segment, quota } = rateLimitOptions;
 
+  console.log("[RateLimit] Props:", {
+    heliconeProperties,
+    userId,
+    rateLimitOptions,
+    organizationId,
+  });
+
   const segmentKeyValue = await getSegmentKeyValue(
     heliconeProperties,
     userId,
     segment
   );
+  console.log("[RateLimit] segmentKeyValue:", segmentKeyValue);
+
   const kvKey = `rl_${segmentKeyValue}_${organizationId}`;
+  console.log("[RateLimit] kvKey:", kvKey);
+
   const kv = await rateLimitKV.get(kvKey, "text");
+  console.log("[RateLimit] Raw KV value:", kv);
+
   const timestamps: KVObject = kv !== null ? JSON.parse(kv) : [];
+  console.log("[RateLimit] Parsed timestamps:", timestamps);
 
   const now = Date.now();
   const timeWindowMillis = time_window * 1000; // Convert time_window to milliseconds
+  console.log("[RateLimit] now:", now, "timeWindowMillis:", timeWindowMillis);
 
   const firstRelevantIndex = binarySearchFirstRelevantIndex(
-    timestamps.map((x) => x.timestamp),
+    timestamps.map((x) => x?.timestamp ?? 0),
     now,
     timeWindowMillis
   );
+  console.log("[RateLimit] firstRelevantIndex", firstRelevantIndex);
 
   const relevantTimestamps = timestamps.slice(firstRelevantIndex);
+  console.log("[RateLimit] relevantTimestamps:", relevantTimestamps);
 
   if (relevantTimestamps.length === 0) {
+    console.log("[RateLimit] No relevant timestamps, returning OK");
     return { status: "ok", limit: quota, remaining: quota };
   }
   const currentQuota = relevantTimestamps.reduce((acc, x) => acc + x.unit, 0);
+  console.log("[RateLimit] currentQuota:", currentQuota);
 
   const remaining = Math.max(0, quota - currentQuota);
+  console.log("[RateLimit] remaining:", remaining);
 
   const reset = Math.ceil(
-    (timestamps[firstRelevantIndex].timestamp + timeWindowMillis - now) / 1000
+    ((timestamps[firstRelevantIndex]?.timestamp ?? 0) +
+      timeWindowMillis -
+      now) /
+      1000
   );
+  console.log("[RateLimit] reset (seconds):", reset);
 
   if (currentQuota >= quota) {
+    console.log("[RateLimit] Rate limited! Returning rate_limited status.");
     return { status: "rate_limited", limit: quota, remaining, reset };
   }
 
@@ -146,13 +172,18 @@ export async function updateRateLimitCounter(
   const now = Date.now();
   const timeWindowMillis = time_window * 1000; // Convert time_window to milliseconds
   const prunedTimestamps = timestamps.filter((timestamp) => {
-    return now - timestamp.timestamp < timeWindowMillis;
+    return now - (timestamp?.timestamp ?? 0) < timeWindowMillis;
   });
 
   if (props.rateLimitOptions.unit === "request") {
     prunedTimestamps.push({
       timestamp: now,
       unit: 1,
+    });
+  } else if (props.rateLimitOptions.unit === "cents") {
+    prunedTimestamps.push({
+      timestamp: now,
+      unit: props.cost,
     });
   }
 
