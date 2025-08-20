@@ -34,7 +34,7 @@ jobs:
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          echo "Cache miss - installing dependencies from root"
+          echo "Cache miss - installing dependencies from root workspace"
           yarn install --frozen-lockfile --network-timeout 100000
       
       # Show cache status
