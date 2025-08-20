@@ -1,4 +1,5 @@
 import { registry } from "@helicone-package/cost/models/registry";
+import { UserEndpointConfig } from "@helicone-package/cost/models/types";
 
 export interface TestCase {
   name: string;
@@ -12,10 +13,17 @@ export interface TestCase {
   skipForNow?: boolean;
 }
 
+export interface BYOKUserConfig {
+  name: string;
+  description: string;
+  config: UserEndpointConfig;
+}
+
 export interface ProviderTestConfig {
   provider: string;
   baseUrl: string;
   testCases: TestCase[];
+  byokUserConfigs: BYOKUserConfig[];
   generateMockResponse: (modelId: string, testCase: TestCase) => any;
   generateErrorResponse: (type: "auth" | "rate_limit" | "invalid_model") => {
     status: number;
@@ -26,6 +34,54 @@ export interface ProviderTestConfig {
 export const anthropicTestConfig: ProviderTestConfig = {
   provider: "anthropic",
   baseUrl: "https://api.anthropic.com",
+  
+  byokUserConfigs: [
+    {
+      name: "default",
+      description: "Default Anthropic API configuration",
+      config: {}
+    },
+    {
+      name: "vertex_us_east1",
+      description: "Vertex AI US East 1 configuration",
+      config: {
+        region: "us-east1",
+        projectId: "test-project-123",
+        location: "us-east1"
+      }
+    },
+    {
+      name: "vertex_global",
+      description: "Vertex AI global configuration", 
+      config: {
+        region: "global",
+        projectId: "test-project-global",
+        location: "global"
+      }
+    },
+    {
+      name: "bedrock_us_east1",
+      description: "Bedrock US East 1 configuration",
+      config: {
+        region: "us-east-1"
+      }
+    },
+    {
+      name: "bedrock_us_west2",
+      description: "Bedrock US West 2 configuration",
+      config: {
+        region: "us-west-2"
+      }
+    },
+    {
+      name: "bedrock_cross_region",
+      description: "Bedrock cross-region configuration",
+      config: {
+        region: "us-east-1",
+        crossRegion: true
+      }
+    }
+  ],
   
   testCases: [
     {
