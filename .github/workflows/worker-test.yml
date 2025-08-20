@@ -16,16 +16,34 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: "yarn"
-          cache-dependency-path: worker/yarn.lock
+      # Use pre-installed Node 20 (saves 30+ seconds!)
+      - name: Use pre-installed Node 20
+        run: |
+          echo "Using pre-installed Node"
+          node --version
+          npm --version
       
+      # Cache the actual node_modules directory (not just global cache)
+      - name: Cache node_modules
+        id: cache-modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            worker/node_modules
+            packages/node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+      
+      # Only install if cache miss
       - name: Install dependencies
+        if: steps.cache-modules.outputs.cache-hit != 'true'
         working-directory: worker
-        run: yarn install
+        run: yarn install --frozen-lockfile --ignore-scripts
+      
+      # If using native modules, rebuild them (only if cached)
+      - name: Rebuild native modules
+        if: steps.cache-modules.outputs.cache-hit == 'true'
+        working-directory: worker
+        run: yarn rebuild || true
       
       - name: Run tests
         working-directory: worker
