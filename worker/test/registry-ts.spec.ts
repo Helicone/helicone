@@ -1,16 +1,6 @@
-import { env, SELF, fetchMock } from "cloudflare:test";
-import {
-  describe,
-  it,
-  expect,
-  beforeEach,
-  afterEach,
-  beforeAll,
-  afterAll,
-  vi,
-} from "vitest";
+import { SELF, fetchMock } from "cloudflare:test";
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { registry } from "@helicone-package/cost/models/registry";
-
 import "./setup";
 import {
   anthropicTestConfig,
@@ -70,12 +60,10 @@ describe("Registry Tests with Provider Configs", () => {
         return;
       }
 
-      let serviceMocks: ReturnType<typeof mockRequiredServices>;
-
       beforeAll(() => {
         fetchMock.activate();
         fetchMock.disableNetConnect();
-        serviceMocks = mockRequiredServices();
+        mockRequiredServices();
       });
 
       afterAll(() => {
@@ -96,9 +84,14 @@ describe("Registry Tests with Provider Configs", () => {
 
           activeTestCases.forEach((testCase) => {
             it(`should handle ${testCase.name}`, async () => {
-              const ptbEndpoints = getAllPtbEndpointsForProvider(provider);
+              // Get PTB endpoints for THIS specific model
+              const endpointsResult = registry.getPtbEndpointsByProvider(modelId, provider);
+              const endpoints = endpointsResult.data || [];
               
-              ptbEndpoints.forEach((path, baseUrl) => {
+              endpoints.forEach((endpoint) => {
+                const url = new URL(endpoint.baseUrl);
+                const baseUrl = `${url.protocol}//${url.host}`;
+                const path = url.pathname;
                 fetchMock
                   .get(baseUrl)
                   .intercept({
@@ -108,7 +101,7 @@ describe("Registry Tests with Provider Configs", () => {
                   .reply((request) => {
                     const body = JSON.parse(request.body as string);
                     const modelName = body.model?.split("/")[0] || body.model;
-                    
+
                     const mockResponse = config.generateMockResponse(modelName);
 
                     return {
@@ -120,7 +113,6 @@ describe("Registry Tests with Provider Configs", () => {
                     };
                   })
                   .persist();
-
               });
 
               const response = await SELF.fetch(
@@ -371,33 +363,3 @@ describe("Registry Tests with Provider Configs", () => {
     });
   });
 });
-
-function getAllPtbEndpointsForProvider(provider: string): Map<string, string> {
-  const endpointsByUrl = new Map<string, string>();
-
-  const modelsResult = registry.getProviderModels(provider);
-  if (!modelsResult.data) {
-    return endpointsByUrl;
-  }
-
-  for (const modelName of modelsResult.data) {
-    const endpointsResult = registry.getPtbEndpointsByProvider(
-      modelName,
-      provider
-    );
-    const endpoints = endpointsResult.data || [];
-
-    for (const endpoint of endpoints) {
-      try {
-        const url = new URL(endpoint.baseUrl);
-        const baseUrl = `${url.protocol}//${url.host}`;
-        const path = url.pathname;
-        endpointsByUrl.set(baseUrl, path);
-      } catch (e) {
-        console.warn(`Invalid URL from registry: ${endpoint.baseUrl}`);
-      }
-    }
-  }
-
-  return endpointsByUrl;
-}
