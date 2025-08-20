@@ -23,12 +23,12 @@ jobs:
         with:
           node-version: 20
           cache: 'yarn'
+          cache-dependency-path: worker/yarn.lock
       
-      # Install only what's needed for worker workspace
+      # Install only worker dependencies
       - name: Install dependencies
-        run: |
-          # Install dependencies focusing on worker workspace
-          yarn workspaces focus worker --production=false
+        working-directory: worker
+        run: yarn install --frozen-lockfile
       
       
       - name: Run tests
