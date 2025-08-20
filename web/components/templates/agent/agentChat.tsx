@@ -123,7 +123,6 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
   };
 
   const handleToolCall = async (toolCall: ToolCall) => {
-    console.log("toolCall", toolCall);
     const result = await executeTool(
       toolCall.function.name,
       JSON.parse(toolCall.function.arguments),
@@ -159,6 +158,32 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
       if (lastMessage?.role === "tool") {
         setAgentState((prev) => ({ ...prev, needsAssistantResponse: true }));
       }
+      return;
+    }
+
+    const last20Messages = messages.slice(-20);
+    const hasOnlyNonUserMessages =
+      last20Messages.length >= 20 &&
+      last20Messages.every((msg) => msg.role !== "user");
+
+    if (hasOnlyNonUserMessages) {
+      const toolResultMessage: Message = {
+        role: "tool",
+        tool_call_id: currentToolCall.id,
+        content:
+          "Timeout tool call: This conversation turn has become too long with too many tool calls.",
+      };
+
+      const updatedMessages = [...messages, toolResultMessage];
+      updateCurrentSessionMessages(updatedMessages, false);
+
+      setAgentState((prev) => ({
+        ...prev,
+        pendingToolCalls: [],
+        isProcessing: false,
+        needsAssistantResponse: true,
+      }));
+      isProcessingRef.current = false;
       return;
     }
 
