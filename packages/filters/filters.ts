@@ -251,6 +251,7 @@ const whereKeyMappings: KeyMappings = {
       prompt_tokens: "request_response_rmt.prompt_tokens",
       completion_tokens: "request_response_rmt.completion_tokens",
       request_body: "request_response_rmt.request_body",
+      "helicone-score-feedback": "request_response_rmt.scores['helicone-score-feedback']",
       response_body: "request_response_rmt.response_body",
       scores_column: "request_response_rmt.scores",
       cache_enabled: "request_response_rmt.cache_enabled",
