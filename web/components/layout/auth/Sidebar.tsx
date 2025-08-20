@@ -10,6 +10,7 @@ import {
   TagIcon,
   TestTube2,
   UsersIcon,
+  Code2Icon,
 } from "lucide-react";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
@@ -31,6 +32,10 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
   const org = useOrg();
   const { data: hasFeatureFlag } = useFeatureFlag(
     "ai_gateway",
+    org?.currentOrg?.id ?? "",
+  );
+  const { data: hasHQLFeatureFlag } = useFeatureFlag(
+    "hql",
     org?.currentOrg?.id ?? "",
   );
 
@@ -118,8 +123,18 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
         icon: ExclamationTriangleIcon,
         current: pathname.includes("/alerts"),
       },
+      ...(hasHQLFeatureFlag?.data
+        ? [
+            {
+              name: "HQL",
+              href: "/hql",
+              icon: Code2Icon,
+              current: pathname.includes("/hql"),
+            },
+          ]
+        : []),
     ],
-    [pathname, hasFeatureFlag?.data],
+    [pathname, hasFeatureFlag?.data, hasHQLFeatureFlag?.data],
   );
 
   return (
