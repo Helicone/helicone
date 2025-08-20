@@ -31,7 +31,8 @@
       "Bash(npx tsc:*)",
       "Bash(npx jest:*)",
       "WebFetch(domain:developers.cloudflare.com)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(curl:*)"
     ],
     "deny": []
   }
