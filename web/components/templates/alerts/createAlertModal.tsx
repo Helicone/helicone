@@ -5,6 +5,7 @@ import ThemedModal from "../../shared/themed/themedModal";
 import AlertForm, { AlertRequest } from "./alertForm";
 
 import { Database } from "../../../db/database.types";
+import { toFilterNode } from "@/filterAST/toFilterNode";
 
 interface EditAlertModalProps {
   open: boolean;
@@ -29,7 +30,7 @@ export const EditAlertModal = (props: EditAlertModalProps) => {
         emails: req.emails,
         slack_channels: req.slack_channels,
         minimum_request_count: req.minimum_request_count,
-        filter: req.filter,
+        filter: req.filter ? (toFilterNode(req.filter) as any) : "all",
       },
     });
 
@@ -97,7 +98,7 @@ export const CreateAlertModal = (props: CreateAlertModalProps) => {
         emails: req.emails,
         slack_channels: req.slack_channels,
         minimum_request_count: req.minimum_request_count,
-        filter: req.filter,
+        filter: req.filter ? (toFilterNode(req.filter) as any) : "all",
       },
     });
 

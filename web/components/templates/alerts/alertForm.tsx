@@ -91,7 +91,9 @@ const AlertForm = (props: AlertFormProps) => {
     initialValues ? initialValues.slack_channels.length > 0 : false,
   );
   const [alertFilter, setAlertFilter] = useState<FilterExpression | null>(
-    initialValues?.filter || null,
+    initialValues?.filter
+      ? (initialValues.filter as unknown as FilterExpression)
+      : null,
   );
 
   const orgContext = useOrg();
