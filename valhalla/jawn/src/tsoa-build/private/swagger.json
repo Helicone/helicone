@@ -7961,6 +7961,14 @@
 					}
 				]
 			},
+			"AlertMetricType": {
+				"type": "string",
+				"enum": [
+					"response.status",
+					"cost",
+					"aggregation"
+				]
+			},
 			"Partial_UserMetricsToOperators_": {
 				"properties": {
 					"user_id": {
@@ -8421,6 +8429,9 @@
 						"$ref": "#/components/schemas/FilterBranch"
 					},
 					{
+						"$ref": "#/components/schemas/AggregationNode"
+					},
+					{
 						"type": "string",
 						"enum": [
 							"all"
@@ -8452,13 +8463,74 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"AggregationFunction": {
+				"type": "string",
+				"enum": [
+					"sum",
+					"avg",
+					"min",
+					"max",
+					"count",
+					"p50",
+					"p75",
+					"p90",
+					"p95",
+					"p99"
+				]
+			},
+			"ComparisonOperator": {
+				"type": "string",
+				"enum": [
+					"gt",
+					"lt",
+					"gte",
+					"lte",
+					"equals"
+				]
+			},
+			"AggregationNode": {
+				"properties": {
+					"type": {
+						"type": "string",
+						"enum": [
+							"aggregation"
+						],
+						"nullable": false
+					},
+					"field": {
+						"$ref": "#/components/schemas/FilterLeaf"
+					},
+					"function": {
+						"$ref": "#/components/schemas/AggregationFunction"
+					},
+					"comparison": {
+						"$ref": "#/components/schemas/ComparisonOperator"
+					},
+					"threshold": {
+						"type": "number",
+						"format": "double"
+					},
+					"where": {
+						"$ref": "#/components/schemas/FilterNode"
+					}
+				},
+				"required": [
+					"type",
+					"field",
+					"function",
+					"comparison",
+					"threshold"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"AlertRequest": {
 				"properties": {
 					"name": {
 						"type": "string"
 					},
 					"metric": {
-						"type": "string"
+						"$ref": "#/components/schemas/AlertMetricType"
 					},
 					"threshold": {
 						"type": "number",

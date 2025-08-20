@@ -221,5 +221,22 @@ export function toFilterNode(filter: FilterExpression): FilterNode {
     return result;
   }
 
+  // Handle aggregation expression
+  if (filter.type === "aggregation") {
+    // Pass through aggregation nodes directly
+    // They're already in the correct format for the backend
+    const aggExpr = filter as any;
+    
+    // If there's a where clause, convert it
+    if (aggExpr.where) {
+      return {
+        ...aggExpr,
+        where: toFilterNode(aggExpr.where),
+      } as any;
+    }
+    
+    return aggExpr as any;
+  }
+
   throw new Error("Unknown filter type: " + filter);
 }

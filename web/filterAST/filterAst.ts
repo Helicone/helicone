@@ -84,6 +84,19 @@ const FILTER_OPERATOR_LABELS: Record<FilterOperator, string> = {
 };
 
 /**
+ * Aggregation expression for complex metric-based alerts
+ * Represents aggregation functions with optional WHERE clauses
+ */
+interface AggregationExpression extends BaseExpression {
+  type: "aggregation";
+  field: any; // FilterLeaf type from backend
+  function: "avg" | "sum" | "min" | "max" | "count" | "p50" | "p75" | "p90" | "p95" | "p99";
+  comparison: "gt" | "gte" | "lt" | "lte" | "equals";
+  threshold: number;
+  where?: FilterExpression; // Optional WHERE clause using existing filter types
+}
+
+/**
  * Filter expression type union
  * Represents all possible filter expression types in the AST
  */
@@ -91,7 +104,8 @@ type FilterExpression =
   | AllExpression
   | ConditionExpression
   | AndExpression
-  | OrExpression;
+  | OrExpression
+  | AggregationExpression;
 
 /**
  * Base interface for all expression types
@@ -667,6 +681,7 @@ export type {
   ConditionExpression,
   AndExpression,
   OrExpression,
+  AggregationExpression,
 };
 
 export const DEFAULT_FILTER_EXPRESSION = FilterAST.condition(

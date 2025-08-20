@@ -2909,6 +2909,8 @@ Json: JsonObject;
       error: null;
     };
     "Result_AlertResponse.string_": components["schemas"]["ResultSuccess_AlertResponse_"] | components["schemas"]["ResultError_string_"];
+    /** @enum {string} */
+    AlertMetricType: "response.status" | "cost" | "aggregation";
     /** @description Make all properties in T optional */
     Partial_UserMetricsToOperators_: {
       user_id?: components["schemas"]["Partial_TextOperators_"];
@@ -3078,16 +3080,30 @@ Json: JsonObject;
     };
     SingleKey_TablesAndViews_: components["schemas"]["Partial_TablesAndViews_"];
     FilterLeaf: components["schemas"]["SingleKey_TablesAndViews_"];
-    FilterNode: components["schemas"]["FilterLeaf"] | components["schemas"]["FilterBranch"] | "all";
+    FilterNode: components["schemas"]["FilterLeaf"] | components["schemas"]["FilterBranch"] | components["schemas"]["AggregationNode"] | "all";
     FilterBranch: {
       left: components["schemas"]["FilterNode"];
       /** @enum {string} */
       operator: "or" | "and";
       right: components["schemas"]["FilterNode"];
     };
+    /** @enum {string} */
+    AggregationFunction: "sum" | "avg" | "min" | "max" | "count" | "p50" | "p75" | "p90" | "p95" | "p99";
+    /** @enum {string} */
+    ComparisonOperator: "gt" | "lt" | "gte" | "lte" | "equals";
+    AggregationNode: {
+      /** @enum {string} */
+      type: "aggregation";
+      field: components["schemas"]["FilterLeaf"];
+      function: components["schemas"]["AggregationFunction"];
+      comparison: components["schemas"]["ComparisonOperator"];
+      /** Format: double */
+      threshold: number;
+      where?: components["schemas"]["FilterNode"];
+    };
     AlertRequest: {
       name: string;
-      metric: string;
+      metric: components["schemas"]["AlertMetricType"];
       /** Format: double */
       threshold: number;
       time_window: string;

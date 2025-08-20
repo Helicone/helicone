@@ -86,22 +86,28 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            `justify-between w-[${width}] text-[10px] font-normal`,
+            "justify-between text-[10px] font-normal",
             className,
           )}
+          style={{ width }}
           disabled={disabled}
         >
           {getCurrentLabel()}
           <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className={`w-[${width}] p-0`}>
+      <PopoverContent className="p-0" style={{ width }}>
         <Command>
           <CommandInput
             placeholder={searchPlaceholder}
             className="h-7 text-[10px]"
           />
           <CommandEmpty className="text-[10px]">{emptyMessage}</CommandEmpty>
+          <div 
+            style={{ maxHeight: '300px', overflowY: 'auto', overflowX: 'hidden' }}
+            onWheel={(e) => e.stopPropagation()}
+            tabIndex={0}
+          >
           <CommandList>
             {/* Property subtype options */}
             {groupedOptions.users.length > 0 && (
@@ -239,6 +245,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
               </CommandGroup>
             )}
           </CommandList>
+          </div>
         </Command>
       </PopoverContent>
     </Popover>

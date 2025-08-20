@@ -2,6 +2,7 @@ import { AlertRequest, AlertResponse } from "../../managers/alert/AlertManager";
 import { err, ok, Result } from "../../packages/common/result";
 import { Database } from "../db/database.types";
 import { dbExecute } from "../shared/db/dbExecute";
+import { ALERT_METRIC_DEFINITIONS } from "@helicone-package/filters/alertDefs";
 
 import { BaseStore } from "./baseStore";
 
@@ -144,7 +145,8 @@ export class AlertStore extends BaseStore {
     if (!isValidTimePeriod(parseInt(alert.time_window)))
       return { data: null, error: "Invalid time_window" };
 
-    if (alert.metric !== "response.status" && alert.metric !== "cost")
+    const allowedMetrics = ALERT_METRIC_DEFINITIONS.map(def => def.id);
+    if (!allowedMetrics.includes(alert.metric))
       return { data: null, error: "Invalid metric" };
 
     if (!isValidEmailArray(alert.emails))
