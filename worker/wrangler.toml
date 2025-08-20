@@ -8,7 +8,12 @@ logpush = true
 
 durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
+	{ name = "RATE_LIMITER_SQL", class_name = "RateLimiterDO" },
 ]
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["RateLimiterDO"]
 
 kv_namespaces = [
 	{ binding = "RATE_LIMIT_KV", id = "0492dc9511cb4ed5b6f012a85354fa34", preview_id = "d275df550f7a4276ad50a3115f3e84b4" },
@@ -82,6 +87,7 @@ EU_AWS_REGION = "eu-west-1"
 UPSTASH_KAFKA_URL=""
 UPSTASH_KAFKA_USERNAME=""
 UPSTASH_KAFKA_PASSWORD=""
+USE_DO_RATE_LIMITER="true"
 
 [triggers]
 crons = ["* * * * *", "0 * * * *", "0 10 * * mon", "*/5 * * * *"]

@@ -67,7 +67,9 @@ declare namespace Cloudflare {
 		UPSTASH_KAFKA_USERNAME: string;
 		UPSTASH_KAFKA_PASSWORD: string;
 		QUEUE_PROVIDER: string;
+		USE_DO_RATE_LIMITER: string;
 		RATE_LIMITER: DurableObjectNamespace<import("./src/index").InMemoryRateLimiter>;
+		RATE_LIMITER_SQL: DurableObjectNamespace<import("./src/index").RateLimiterDO>;
 		FALLBACK_QUEUE: Queue;
 	}
 }

@@ -18,6 +18,7 @@ export async function safePut({
   success: boolean;
   error?: string;
 }> {
+  return { success: true };
   try {
     await key.put(keyName, value, options);
     return { success: true };

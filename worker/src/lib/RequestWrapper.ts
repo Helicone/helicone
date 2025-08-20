@@ -139,7 +139,10 @@ export class RequestWrapper {
     this.injectPromptProperties();
   }
 
-  private constructor(private request: Request, private env: Env) {
+  private constructor(
+    private request: Request,
+    private env: Env
+  ) {
     this.url = new URL(request.url);
     this.originalUrl = new URL(request.url);
     this.headers = this.mutatedAuthorizationHeaders(request);
@@ -249,6 +252,7 @@ export class RequestWrapper {
       const res = await this.validateHeliconeAuthHeader(
         this.heliconeHeaders.heliconeAuthV2.token ?? this.authorization
       );
+
       if (res.error) {
         return err(res.error);
       }
@@ -469,6 +473,7 @@ export class RequestWrapper {
 
     const apiKey = heliconeAuth.replace("Bearer ", "").trim();
 
+    console.log("apiKey", apiKey);
     if (!HELICONE_API_KEY_REGEX.some((pattern) => pattern.test(apiKey))) {
       return err("API Key is not well formed");
     }
