@@ -2908,6 +2908,182 @@ Json: JsonObject;
       error: null;
     };
     "Result_AlertResponse.string_": components["schemas"]["ResultSuccess_AlertResponse_"] | components["schemas"]["ResultError_string_"];
+    /** @description Make all properties in T optional */
+    Partial_UserMetricsToOperators_: {
+      user_id?: components["schemas"]["Partial_TextOperators_"];
+      last_active?: components["schemas"]["Partial_TimestampOperators_"];
+      total_requests?: components["schemas"]["Partial_NumberOperators_"];
+      active_for?: components["schemas"]["Partial_NumberOperators_"];
+      average_requests_per_day_active?: components["schemas"]["Partial_NumberOperators_"];
+      average_tokens_per_request?: components["schemas"]["Partial_NumberOperators_"];
+      total_completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      total_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      cost?: components["schemas"]["Partial_NumberOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_UserApiKeysTableToOperators_: {
+      api_key_hash?: components["schemas"]["Partial_TextOperators_"];
+      api_key_name?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_PropertiesTableToOperators_: {
+      auth_hash?: components["schemas"]["Partial_TextOperators_"];
+      key?: components["schemas"]["Partial_TextOperators_"];
+      value?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_ExperimentToOperators_: {
+      id?: components["schemas"]["Partial_TextOperators_"];
+      prompt_v2?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_ExperimentHypothesisRunToOperator_: {
+      result_request_id?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_ScoreValueToOperator_: {
+      request_id?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_RequestResponseLogToOperators_: {
+      latency?: components["schemas"]["Partial_NumberOperators_"];
+      status?: components["schemas"]["Partial_NumberOperators_"];
+      request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      response_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      auth_hash?: components["schemas"]["Partial_TextOperators_"];
+      model?: components["schemas"]["Partial_TextOperators_"];
+      user_id?: components["schemas"]["Partial_TextOperators_"];
+      organization_id?: components["schemas"]["Partial_TextOperators_"];
+      node_id?: components["schemas"]["Partial_TextOperators_"];
+      job_id?: components["schemas"]["Partial_TextOperators_"];
+      threat?: components["schemas"]["Partial_BooleanOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_UserViewToOperators_: {
+      user_user_id?: components["schemas"]["Partial_TextOperators_"];
+      user_active_for?: components["schemas"]["Partial_NumberOperators_"];
+      user_first_active?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      user_last_active?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      user_total_requests?: components["schemas"]["Partial_NumberOperators_"];
+      user_average_requests_per_day_active?: components["schemas"]["Partial_NumberOperators_"];
+      user_average_tokens_per_request?: components["schemas"]["Partial_NumberOperators_"];
+      user_total_completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      user_total_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      user_cost?: components["schemas"]["Partial_NumberOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_PropertiesV3ToOperators_: {
+      key?: components["schemas"]["Partial_TextOperators_"];
+      value?: components["schemas"]["Partial_TextOperators_"];
+      organization_id?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_PropertyWithResponseV1ToOperators_: {
+      property_key?: components["schemas"]["Partial_TextOperators_"];
+      property_value?: components["schemas"]["Partial_TextOperators_"];
+      request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      organization_id?: components["schemas"]["Partial_TextOperators_"];
+      threat?: components["schemas"]["Partial_BooleanOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_JobToOperators_: {
+      id?: components["schemas"]["Partial_TextOperators_"];
+      name?: components["schemas"]["Partial_TextOperators_"];
+      description?: components["schemas"]["Partial_TextOperators_"];
+      status?: components["schemas"]["Partial_TextOperators_"];
+      created_at?: components["schemas"]["Partial_TimestampOperators_"];
+      updated_at?: components["schemas"]["Partial_TimestampOperators_"];
+      timeout_seconds?: components["schemas"]["Partial_NumberOperators_"];
+      custom_properties?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      org_id?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_NodesToOperators_: {
+      id?: components["schemas"]["Partial_TextOperators_"];
+      name?: components["schemas"]["Partial_TextOperators_"];
+      description?: components["schemas"]["Partial_TextOperators_"];
+      job_id?: components["schemas"]["Partial_TextOperators_"];
+      status?: components["schemas"]["Partial_TextOperators_"];
+      created_at?: components["schemas"]["Partial_TimestampOperators_"];
+      updated_at?: components["schemas"]["Partial_TimestampOperators_"];
+      timeout_seconds?: components["schemas"]["Partial_NumberOperators_"];
+      custom_properties?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      org_id?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_CacheMetricsTableToOperators_: {
+      organization_id?: components["schemas"]["Partial_TextOperators_"];
+      request_id?: components["schemas"]["Partial_TextOperators_"];
+      date?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      hour?: components["schemas"]["Partial_NumberOperators_"];
+      model?: components["schemas"]["Partial_TextOperators_"];
+      cache_hit_count?: components["schemas"]["Partial_NumberOperators_"];
+      saved_latency_ms?: components["schemas"]["Partial_NumberOperators_"];
+      saved_completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      saved_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      saved_completion_audio_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      saved_prompt_audio_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      saved_prompt_cache_write_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      saved_prompt_cache_read_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      first_hit?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      last_hit?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      request_body?: components["schemas"]["Partial_TextOperators_"];
+      response_body?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_RateLimitTableToOperators_: {
+      organization_id?: components["schemas"]["Partial_TextOperators_"];
+      created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_OrganizationPropertiesToOperators_: {
+      organization_id?: components["schemas"]["Partial_TextOperators_"];
+      property_key?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_TablesAndViews_: {
+      user_metrics?: components["schemas"]["Partial_UserMetricsToOperators_"];
+      user_api_keys?: components["schemas"]["Partial_UserApiKeysTableToOperators_"];
+      response?: components["schemas"]["Partial_ResponseTableToOperators_"];
+      request?: components["schemas"]["Partial_RequestTableToOperators_"];
+      feedback?: components["schemas"]["Partial_FeedbackTableToOperators_"];
+      properties_table?: components["schemas"]["Partial_PropertiesTableToOperators_"];
+      prompt_v2?: components["schemas"]["Partial_PromptToOperators_"];
+      prompts_versions?: components["schemas"]["Partial_PromptVersionsToOperators_"];
+      experiment?: components["schemas"]["Partial_ExperimentToOperators_"];
+      experiment_hypothesis_run?: components["schemas"]["Partial_ExperimentHypothesisRunToOperator_"];
+      score_value?: components["schemas"]["Partial_ScoreValueToOperator_"];
+      request_response_log?: components["schemas"]["Partial_RequestResponseLogToOperators_"];
+      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
+      sessions_request_response_rmt?: components["schemas"]["Partial_SessionsRequestResponseRMTToOperators_"];
+      users_view?: components["schemas"]["Partial_UserViewToOperators_"];
+      properties_v3?: components["schemas"]["Partial_PropertiesV3ToOperators_"];
+      property_with_response_v1?: components["schemas"]["Partial_PropertyWithResponseV1ToOperators_"];
+      job?: components["schemas"]["Partial_JobToOperators_"];
+      job_node?: components["schemas"]["Partial_NodesToOperators_"];
+      cache_metrics?: components["schemas"]["Partial_CacheMetricsTableToOperators_"];
+      rate_limit_log?: components["schemas"]["Partial_RateLimitTableToOperators_"];
+      organization_properties?: components["schemas"]["Partial_OrganizationPropertiesToOperators_"];
+      properties?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      values?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+    };
+    SingleKey_TablesAndViews_: components["schemas"]["Partial_TablesAndViews_"];
+    FilterLeaf: components["schemas"]["SingleKey_TablesAndViews_"];
+    FilterNode: components["schemas"]["FilterLeaf"] | components["schemas"]["FilterBranch"] | "all";
+    FilterBranch: {
+      left: components["schemas"]["FilterNode"];
+      /** @enum {string} */
+      operator: "or" | "and";
+      right: components["schemas"]["FilterNode"];
+    };
     AlertRequest: {
       name: string;
       metric: string;
@@ -2918,6 +3094,7 @@ Json: JsonObject;
       slack_channels: string[];
       /** Format: double */
       minimum_request_count?: number;
+      filter?: components["schemas"]["FilterNode"];
     };
     "ResultSuccess__active-boolean--created_at-string--id-number--message-string--title-string--updated_at-string_-Array_": {
       data: {
@@ -2960,7 +3137,7 @@ Json: JsonObject;
     /** @enum {string} */
     SettingName: "kafka:dlq" | "kafka:log" | "kafka:score" | "kafka:dlq:score" | "kafka:dlq:eu" | "kafka:log:eu" | "kafka:orgs-to-dlq" | "azure:experiment" | "openai:apiKey" | "anthropic:apiKey" | "openrouter:apiKey" | "togetherai:apiKey" | "sqs:request-response-logs" | "sqs:helicone-scores" | "sqs:request-response-logs-dlq" | "sqs:helicone-scores-dlq";
     /**
-     * @description The **`URL`** interface is used to parse, construct, normalize, and encode URL.
+     * @description The URL interface represents an object providing static methods used for creating object URLs.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL)
      * `URL` class is a global reference for `import { URL } from 'node:url'`
@@ -15344,6 +15521,8 @@ Json: JsonObject;
       object: "invoice";
       /** @description The status of the invoice, one of `draft`, `open`, `paid`, `uncollectible`, or `void`. [Learn more](https://stripe.com/docs/billing/invoices/workflow#workflow-overview) */
       status: components["schemas"]["stripe.Stripe.Invoice.Status"];
+      /** @description An arbitrary string attached to the object. Often useful for displaying to users. Referenced as 'memo' in the Dashboard. */
+      description: string;
       /** @description ID of the Connect Application that created the invoice. */
       application: string | components["schemas"]["stripe.Stripe.Application"] | components["schemas"]["stripe.Stripe.DeletedApplication"];
       /** @description The subscription that this invoice was prepared for, if any. */
@@ -15448,8 +15627,6 @@ Json: JsonObject;
       default_source: string | components["schemas"]["stripe.Stripe.CustomerSource"];
       /** @description The tax rates applied to this invoice, if any. */
       default_tax_rates: components["schemas"]["stripe.Stripe.TaxRate"][];
-      /** @description An arbitrary string attached to the object. Often useful for displaying to users. Referenced as 'memo' in the Dashboard. */
-      description: string;
       /** @description The discounts applied to the invoice. Line item discounts are applied before invoice discounts. Use `expand[]=discounts` to expand each discount. */
       discounts: (string | components["schemas"]["stripe.Stripe.Discount"] | components["schemas"]["stripe.Stripe.DeletedDiscount"])[];
       /**

@@ -4,7 +4,6 @@ import useAlertsPage from "./useAlertsPage";
 import { CreateAlertModal, EditAlertModal } from "./createAlertModal";
 import DeleteAlertModal from "./deleteAlertModal";
 import ThemedTable from "../../shared/themed/themedTable";
-import { Database } from "../../../db/database.types";
 import { getUSDate } from "../../shared/utils/utils";
 import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import { useGetOrgSlackChannels } from "@/services/hooks/organizations";
@@ -13,13 +12,14 @@ import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
-import { FileText } from "lucide-react";
+import { FileText, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import "@/styles/settings-tables.css";
 import { SettingsContainer } from "@/components/ui/settings-container";
 import "@/styles/settings.css";
+import { Database } from "@/db/database.types";
 
 const AlertsPage = () => {
   const [createNewAlertModal, setCreateNewAlertModal] = useState(false);
@@ -151,7 +151,16 @@ const AlertsPage = () => {
             rows={alerts?.map((key) => {
               return {
                 ...key,
-                key_name: <p className="text-xs font-semibold">{key.name}</p>,
+                key_name: (
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs font-semibold">{key.name}</p>
+                    {key.filter && (
+                      <Tooltip title="Has filter conditions">
+                        <Filter className="h-3 w-3 text-muted-foreground" />
+                      </Tooltip>
+                    )}
+                  </div>
+                ),
                 status: (
                   <div>
                     {key.status === "resolved" ? (

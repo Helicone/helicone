@@ -38,7 +38,9 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Check, ChevronsUpDown, X } from "lucide-react";
+import { Check, ChevronsUpDown, X, Filter } from "lucide-react";
+import { Small } from "@/components/ui/typography";
+import { FilterExpression } from "@/filterAST/filterAst";
 
 export type AlertRequest = {
   name: string;
@@ -49,6 +51,7 @@ export type AlertRequest = {
   slack_channels: string[];
   org_id: string;
   minimum_request_count: number | undefined;
+  filter?: FilterExpression | null; // FilterAST expression for conditional alerts
 };
 
 interface AlertFormProps {
@@ -86,6 +89,9 @@ const AlertForm = (props: AlertFormProps) => {
   );
   const [showSlackChannels, setShowSlackChannels] = useState<boolean>(
     initialValues ? initialValues.slack_channels.length > 0 : false,
+  );
+  const [alertFilter, setAlertFilter] = useState<FilterExpression | null>(
+    initialValues?.filter || null,
   );
 
   const orgContext = useOrg();
@@ -171,6 +177,7 @@ const AlertForm = (props: AlertFormProps) => {
       minimum_request_count: isNaN(alertMinRequests)
         ? undefined
         : alertMinRequests,
+      filter: alertFilter,
     });
   };
 
@@ -332,6 +339,37 @@ const AlertForm = (props: AlertFormProps) => {
           min={0}
           step={1}
         />
+      </div>
+
+      <div className="col-span-4 w-full space-y-1.5 text-sm">
+        <label
+          htmlFor="filter"
+          className="flex items-center gap-1 text-gray-500 dark:text-gray-200"
+        >
+          Filter Conditions (optional){" "}
+          <Tooltip title="Define filters to make this alert only trigger for specific requests (e.g., specific project, user, or custom properties)">
+            <InformationCircleIcon className="inline h-4 w-4 text-gray-500" />
+          </Tooltip>
+        </label>
+        <div className="space-y-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="w-full justify-between"
+            disabled
+          >
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4" />
+              <span>Filter conditions (coming soon)</span>
+            </div>
+          </Button>
+          <Small className="text-muted-foreground">
+            Filter conditions will allow you to create alerts that only trigger
+            for specific requests (e.g., specific projects, users, or custom
+            properties).
+          </Small>
+        </div>
       </div>
 
       <div className="col-span-4 w-full space-y-1.5 rounded-md bg-gray-100 p-6 dark:bg-gray-900">
