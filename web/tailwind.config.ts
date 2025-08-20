@@ -100,6 +100,10 @@ export default {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
         },
+        subdued: {
+          DEFAULT: "hsl(var(--subdued))",
+          foreground: "hsl(var(--subdued-foreground))",
+        },
         // Accent Colors
         accent: {
           DEFAULT: "hsl(var(--accent))",

@@ -20,7 +20,6 @@ import {
 } from "@dnd-kit/sortable";
 import { GripVertical } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
-
 export type ChatMode = "PLAYGROUND_INPUT" | "PLAYGROUND_OUTPUT" | "DEFAULT";
 
 interface ChatProps {

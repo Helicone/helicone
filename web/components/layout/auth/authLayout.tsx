@@ -15,6 +15,13 @@ import DemoModal from "./DemoModal";
 import MainContent, { BannerType } from "./MainContent";
 import Sidebar from "./Sidebar";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+import { HeliconeAgentProvider } from "@/components/templates/agent/HeliconeAgentContext";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
+import AgentChat from "@/components/templates/agent/agentChat";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -26,8 +33,33 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const { pathname } = router;
 
   const [open, setOpen] = useState(false);
+  const [chatWindowOpen, setChatWindowOpen] = useState(false);
+  const agentChatPanelRef = useRef<any>(null);
 
   const auth = useHeliconeAuthClient();
+
+  const handleResizableHandleDoubleClick = () => {
+    if (agentChatPanelRef.current) {
+      // Reset the agent chat panel to its default size (35)
+      agentChatPanelRef.current.resize(35);
+    }
+  };
+
+  // Handle Command+I keyboard shortcut
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key === "i") {
+        event.preventDefault();
+        setChatWindowOpen((prev) => !prev);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -104,49 +136,86 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const sidebarRef = useRef<HTMLDivElement>(null);
 
   return (
-    <MetaData title={currentPage}>
-      <div>
-        <DemoModal />
+    <HeliconeAgentProvider>
+      <MetaData title={currentPage}>
+        <div>
+          <DemoModal />
 
-        <Row className="flex-col md:flex-row">
-          <div className="w-full md:w-min">
-            <Sidebar
-              sidebarRef={sidebarRef}
-              changelog={
-                changelog
-                  ? changelog.slice(0, 2).map((item) => ({
-                      title: item.title || "",
-                      image: item.enclosure,
-                      description: item.description || "",
-                      link: item.link || "",
-                      content: item.content || "",
-                      "content:encoded": item["content:encoded"] || "",
-                      "content:encodedSnippet":
-                        item["content:encodedSnippet"] || "",
-                      contentSnippet: item.contentSnippet || "",
-                      isoDate: item.isoDate || "",
-                      pubDate: item.pubDate || "",
-                    }))
-                  : []
-              }
-              setOpen={setOpen}
-            />
-          </div>
-          <div
-            className="relative max-w-full flex-grow overflow-hidden"
-            key={orgContext?.currentOrg?.id}
-          >
-            <MainContent banner={banner} pathname={pathname}>
-              <ErrorBoundary>{children}</ErrorBoundary>
-            </MainContent>
-          </div>
-        </Row>
-      </div>
+          <Row className="flex-col md:flex-row">
+            <div className="w-full md:w-min">
+              <Sidebar
+                sidebarRef={sidebarRef}
+                changelog={
+                  changelog
+                    ? changelog.slice(0, 2).map((item) => ({
+                        title: item.title || "",
+                        image: item.enclosure,
+                        description: item.description || "",
+                        link: item.link || "",
+                        content: item.content || "",
+                        "content:encoded": item["content:encoded"] || "",
+                        "content:encodedSnippet":
+                          item["content:encodedSnippet"] || "",
+                        contentSnippet: item.contentSnippet || "",
+                        isoDate: item.isoDate || "",
+                        pubDate: item.pubDate || "",
+                      }))
+                    : []
+                }
+                setOpen={setOpen}
+              />
+            </div>
 
-      <UpgradeProModal open={open} setOpen={setOpen} />
-      {/* <AcceptTermsModal /> */}
-    </MetaData>
+            <div
+              className="relative max-w-full flex-grow overflow-hidden"
+              key={orgContext?.currentOrg?.id}
+            >
+              <ResizablePanelGroup
+                direction="horizontal"
+                className="h-full max-h-screen w-full"
+              >
+                <ResizablePanel
+                  defaultSize={chatWindowOpen ? 65 : 100}
+                  minSize={30}
+                  className="relative h-full"
+                >
+                  <MainContent banner={banner} pathname={pathname}>
+                    <ErrorBoundary>{children}</ErrorBoundary>
+                  </MainContent>
+                </ResizablePanel>
+
+                {chatWindowOpen && (
+                  <>
+                    <ResizableHandle
+                      withHandle
+                      onDoubleClick={handleResizableHandleDoubleClick}
+                    />
+                    <ResizablePanel
+                      ref={agentChatPanelRef}
+                      defaultSize={35}
+                      minSize={20}
+                      maxSize={50}
+                      collapsible={true}
+                      collapsedSize={0}
+                      onCollapse={() => setChatWindowOpen(false)}
+                      className="h-full max-h-screen border-l border-border bg-background"
+                    >
+                      <AgentChat onClose={() => setChatWindowOpen(false)} />
+                    </ResizablePanel>
+                  </>
+                )}
+              </ResizablePanelGroup>
+            </div>
+          </Row>
+        </div>
+
+        <UpgradeProModal open={open} setOpen={setOpen} />
+        {/* <AcceptTermsModal /> */}
+      </MetaData>
+    </HeliconeAgentProvider>
   );
 };
+
+// export default AuthLayout;
 
 export default AuthLayout;
