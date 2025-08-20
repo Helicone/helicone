@@ -14,7 +14,7 @@ export interface Session {
   end_time_unix_timestamp_ms: number;
   session_id: string;
   session_tags: string[];
-  session_cost_usd: number;
+  session_cost: number;
   traces: Trace[];
 }
 

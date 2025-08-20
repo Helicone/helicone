@@ -11,6 +11,7 @@ import {
   TestTube2,
   UsersIcon,
 } from "lucide-react";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
 import DesktopSidebar from "./DesktopSidebar";
@@ -47,7 +48,6 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
         icon: SheetIcon,
         current: pathname.includes("/requests"),
       },
-
       {
         name: "Segments",
         href: "/segments",
@@ -111,6 +111,12 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
             current: pathname.includes("/playground"),
           },
         ],
+      },
+      {
+        name: "Alerts",
+        href: "/alerts",
+        icon: ExclamationTriangleIcon,
+        current: pathname.includes("/alerts"),
       },
     ],
     [pathname, hasFeatureFlag?.data],

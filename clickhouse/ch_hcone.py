@@ -115,8 +115,6 @@ def get_all_applied_migrations(args, user=None, password=None):
                 applied_migrations.add(migration_name)
     
     print(f"Found {len(applied_migrations)} applied migrations")
-    if applied_migrations:
-        print(f"Sample applied migrations: {list(applied_migrations)[:3]}")
     
     return applied_migrations
 
@@ -150,12 +148,13 @@ def preview_migrations(args, user=None, password=None):
     return pending_migrations
 
 
-def run_migrations(args, retries=2, user=None, password=None, skip_confirmation=False):
+def run_migrations(args, retries=2, user=None, password=None):
     print("Running migrations")
     time.sleep(1)
     
     # Preload all applied migrations in a single query
     applied_migrations = get_all_applied_migrations(args, user, password)
+    skip_confirmation = args.skip_confirmation
     
     # Show preview of migrations to be applied
     pending_migrations = []
@@ -290,6 +289,9 @@ def main():
 
     parser.add_argument(
         "--test", action="store_true", help="Run in test mode"
+    )
+    parser.add_argument(
+        "--skip-confirmation", default=False, action="store_true", help="Skip confirmation for migrations"
     )
 
     args = parser.parse_args()

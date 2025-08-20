@@ -1111,6 +1111,42 @@
 					}
 				]
 			},
+			"ResultSuccess__temporaryPassword_63_-string_-or-null_": {
+				"properties": {
+					"data": {
+						"properties": {
+							"temporaryPassword": {
+								"type": "string"
+							}
+						},
+						"type": "object",
+						"nullable": true
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__temporaryPassword_63_-string_-or-null.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__temporaryPassword_63_-string_-or-null_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"UIFilterRowTree": {
 				"anyOf": [
 					{
@@ -3364,7 +3400,7 @@
 						},
 						"type": "object"
 					},
-					"cost_usd": {
+					"cost": {
 						"$ref": "#/components/schemas/SortDirection"
 					}
 				},
@@ -5968,6 +6004,10 @@
 				"properties": {
 					"response": {
 						"properties": {
+							"cost": {
+								"type": "number",
+								"format": "double"
+							},
 							"cachedLatency": {
 								"type": "number",
 								"format": "double"
@@ -47777,7 +47817,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_null.string_"
+									"$ref": "#/components/schemas/Result__temporaryPassword_63_-string_-or-null.string_"
 								}
 							}
 						}

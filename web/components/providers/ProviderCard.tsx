@@ -452,6 +452,11 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
                 />
               </div>
               <div className="text-xs font-medium">{provider.name}</div>
+              {provider.note && (
+                <div className="text-[10px] text-muted-foreground">
+                  {provider.note}
+                </div>
+              )}
               {isEditMode && (
                 <div className="border border-muted-foreground/30 px-1 py-0.5 text-xs text-muted-foreground">
                   Key set

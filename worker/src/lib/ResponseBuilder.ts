@@ -1,7 +1,7 @@
 import {
   RateLimitOptions,
   RateLimitResponse,
-} from "./clients/KVRateLimiterClient";
+} from "./clients/DurableObjectRateLimiterClient";
 
 export interface BuildParams {
   body: BodyInit | null;

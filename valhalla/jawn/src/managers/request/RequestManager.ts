@@ -484,7 +484,8 @@ export class RequestManager extends BaseManager {
             this.authParams.organizationId,
             newFilter,
             offset,
-            limit
+            limit,
+            sort.created_at
           )
         : await getRequestsClickhouse(
             this.authParams.organizationId,

@@ -729,9 +729,9 @@ describe("OpenAI Responses API Mapper", () => {
         },
       });
 
-      // Verify preview - getRequestText looks at the last item, which is function_call_output
-      // so it will return empty string since function_call_output doesn't have extractable text
-      expect(result.preview.request).toBe("");
+      // Verify preview - should extract content from the last message with actual content
+      // which is the tool result "[REDACTED SEARCH RESULTS]"
+      expect(result.preview.request).toBe("[REDACTED SEARCH RESULTS]");
       expect(result.preview.response).toBe("[REDACTED FINAL ANSWER BASED ON SEARCH]");
       expect(result.preview.concatenatedMessages).toHaveLength(5); // 4 request + 1 response
     });

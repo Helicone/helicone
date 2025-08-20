@@ -26,7 +26,7 @@ const getRequestText = (requestBody: any): string => {
       return "";
     }
 
-    const lastMessage = messages.at(-1);
+    const lastMessage = messages[messages.length - 1];
     if (!lastMessage) return "";
 
     if (lastMessage.function_call || lastMessage.tool_calls) {

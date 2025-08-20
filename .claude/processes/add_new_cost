@@ -113,7 +113,6 @@ Added these models to `providers/togetherai/chat/index.ts`:
 ### Key Functions (index.ts)
 - `costOf({model, provider})` - Get cost structure for model
 - `costOfPrompt({...})` - Calculate total cost for request
-- `clickhousePriceCalc()` - Generate SQL for cost calculations
 
 ### Notes for Claude
 - Always use WebFetch to get current pricing

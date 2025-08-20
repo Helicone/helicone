@@ -17,17 +17,20 @@ import { ModelName, ModelProviderConfigId, EndpointId } from "./registry-types";
 // Import all models and endpoints from authors
 import { anthropicModels, anthropicEndpointConfig } from "./authors/anthropic";
 import { openaiModels, openaiEndpointConfig } from "./authors/openai";
+import { googleModels, googleEndpointConfig } from "./authors/google";
 
 // Combine all models
 const allModels = {
   ...anthropicModels,
   ...openaiModels,
+  ...googleModels,
 } satisfies Record<string, ModelConfig>;
 
 // Combine all endpoint configs
 const modelProviderConfigs = {
   ...anthropicEndpointConfig,
   ...openaiEndpointConfig,
+  ...googleEndpointConfig,
 } satisfies Record<string, ModelProviderConfig>;
 
 const indexes: ModelIndexes = buildIndexes(modelProviderConfigs);
