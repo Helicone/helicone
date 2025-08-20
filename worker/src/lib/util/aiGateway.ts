@@ -19,6 +19,7 @@ import {
   Endpoint,
   UserEndpointConfig,
 } from "@helicone-package/cost/models/types";
+import { HeliconePromptParams } from "@helicone-package/prompts/types";
 
 type Error = {
   type:
@@ -465,7 +466,7 @@ export const attemptModelRequestWithFallback = async ({
     });
   }
 
-  if (parsedBody.prompt_id) {
+  if (parsedBody.prompt_id || parsedBody.environment || parsedBody.version_id || parsedBody.inputs) {
     const result = await promptManager.getMergedPromptBody(parsedBody, orgId);
     if (isErr(result)) {
       return err({
