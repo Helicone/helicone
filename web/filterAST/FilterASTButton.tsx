@@ -62,7 +62,7 @@ export const FilterASTButton: React.FC<FilterASTButtonProps> = ({}) => {
       </Popover>
       {store.getFilterNodeCount() > 0 && (
         <Button
-          variant="outline"
+          variant="glass"
           size="sm"
           className="gap-2 ml-2"
           onClick={() => {
