@@ -473,7 +473,6 @@ export class RequestWrapper {
 
     const apiKey = heliconeAuth.replace("Bearer ", "").trim();
 
-    console.log("apiKey", apiKey);
     if (!HELICONE_API_KEY_REGEX.some((pattern) => pattern.test(apiKey))) {
       return err("API Key is not well formed");
     }
