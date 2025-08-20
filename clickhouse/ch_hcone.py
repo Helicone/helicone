@@ -48,9 +48,6 @@ def split_sql_statements(sql_content):
     """Split SQL content into individual statements, handling comments and strings properly"""
     statements = []
     current_statement = []
-    in_string = False
-    in_comment = False
-    string_char = None
     
     lines = sql_content.split('\n')
     
@@ -60,9 +57,14 @@ def split_sql_statements(sql_content):
         if not stripped_line or stripped_line.startswith('--'):
             continue
             
-        # Remove inline comments
-        if '--' in line and not in_string:
+        # For now, do simple comment removal (this could be improved to handle strings)
+        # Remove inline comments only if they're not inside a string
+        if '--' in line:
+            # Simple approach: just remove everything after --
+            # A more robust solution would track whether we're inside a string
             line = line[:line.index('--')]
+            if not line.strip():
+                continue
         
         current_statement.append(line)
         
