@@ -12,8 +12,6 @@
     "@smithy/signature-v4": "^4.2.3"
   },
   "devDependencies": {
-    "@types/glob": "^8.1.0",
-    "glob": "^11.0.3",
     "tsx": "^4.0.0"
   }
 }
