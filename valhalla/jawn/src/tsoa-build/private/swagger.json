@@ -6004,6 +6004,10 @@
 				"properties": {
 					"response": {
 						"properties": {
+							"cost": {
+								"type": "number",
+								"format": "double"
+							},
 							"cachedLatency": {
 								"type": "number",
 								"format": "double"

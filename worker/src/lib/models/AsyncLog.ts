@@ -20,6 +20,7 @@ type ProviderResponse = {
   };
   textBody?: string;
   status: number;
+  cost?: number;
   headers: Record<string, string>;
 };
 

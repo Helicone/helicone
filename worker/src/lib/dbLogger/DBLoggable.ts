@@ -42,6 +42,7 @@ export interface DBLoggableProps {
     status: () => Promise<number>;
     responseHeaders: Headers;
     omitLog: boolean;
+    cost?: number;
   };
   request: {
     requestId: string;
@@ -205,6 +206,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
       responseHeaders: providerResponseHeaders,
       status: async () => asyncLogModel.providerResponse.status,
       omitLog: false,
+      cost: asyncLogModel.providerResponse.cost,
     },
     timing: {
       startTime: asyncLogModel.timing
@@ -776,6 +778,7 @@ export class DBLoggable {
                     return 0;
                   }
                 })(),
+          cost: this.response.cost,
         },
       },
     };

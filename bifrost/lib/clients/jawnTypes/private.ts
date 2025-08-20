@@ -2036,6 +2036,8 @@ Json: JsonObject;
     Log: {
       response: {
         /** Format: double */
+        cost?: number;
+        /** Format: double */
         cachedLatency?: number;
         /** Format: double */
         delayMs: number;
