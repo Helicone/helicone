@@ -97,6 +97,7 @@ export class AgentController extends Controller {
               tools: params.tools,
               reasoning_effort: params.reasoning_effort,
               verbosity: params.verbosity,
+              stream_options: { include_usage: true },
 
               // Helicone Prompt Params
               prompt_id:
