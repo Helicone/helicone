@@ -33,6 +33,8 @@ export const FilterASTButton: React.FC<FilterASTButtonProps> = ({}) => {
     );
   }
 
+  const numFilters = store.getFilterNodeCount();
+
   return (
     <Row>
       <Popover onOpenChange={setIsOpen} open={isOpen}>
@@ -60,14 +62,14 @@ export const FilterASTButton: React.FC<FilterASTButtonProps> = ({}) => {
       </Popover>
       {store.getFilterNodeCount() > 0 && (
         <Button
-          variant="ghost"
+          variant="outline"
           size="sm"
-          className="gap-2"
+          className="gap-2 ml-2"
           onClick={() => {
             store.clearActiveFilter();
           }}
         >
-          Clear
+          Clear {numFilters} filter{numFilters > 1 ? "s" : ""}
         </Button>
       )}
     </Row>
