@@ -723,13 +723,31 @@ export const mapOpenAIResponse = ({
     };
   }
 
+  // Get request text from mapped messages instead of raw request
+  const getRequestPreviewText = (): string => {
+    const requestMessages = schema.request.messages;
+    if (!requestMessages || requestMessages.length === 0) {
+      return getRequestText(request); // Fallback to original method
+    }
+    
+    // Look for the last user message or any message with content
+    for (let i = requestMessages.length - 1; i >= 0; i--) {
+      const message = requestMessages[i];
+      if (message?.content && typeof message.content === "string" && message.content.trim().length > 0) {
+        return message.content;
+      }
+    }
+    
+    return "";
+  };
+
   return {
     schema,
     preview: {
       concatenatedMessages: (schema.request.messages ?? []).concat(
         schema.response?.messages || []
       ),
-      request: getRequestText(request),
+      request: getRequestPreviewText(),
       response: getResponseText(response),
       fullRequestText: () => JSON.stringify(request),
       fullResponseText: () => JSON.stringify(response),

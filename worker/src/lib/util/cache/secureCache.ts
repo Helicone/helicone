@@ -205,21 +205,27 @@ async function getFromCacheWithHmac({
   useMemoryCache?: boolean;
   expirationTtl?: number;
 }): Promise<string | null> {
-  const hashedKey = await hashWithHmac(key, hmac_key);
-  if (useMemoryCache) {
-    const encryptedMemory = InMemoryCache.getInstance<string>().get(hashedKey);
-    if (encryptedMemory !== undefined) {
-      return decrypt(JSON.parse(encryptedMemory), env, hmac_key);
+  try {
+    const hashedKey = await hashWithHmac(key, hmac_key);
+    if (useMemoryCache) {
+      const encryptedMemory =
+        InMemoryCache.getInstance<string>().get(hashedKey);
+      if (encryptedMemory !== undefined) {
+        return decrypt(JSON.parse(encryptedMemory), env, hmac_key);
+      }
     }
-  }
-  const encryptedRemote = await env.SECURE_CACHE.get(hashedKey, {
-    cacheTtl: expirationTtl ?? 60 * 60, // 1 hour
-  });
-  if (!encryptedRemote) {
+    const encryptedRemote = await env.SECURE_CACHE.get(hashedKey, {
+      cacheTtl: expirationTtl ?? 60 * 60, // 1 hour
+    });
+    if (!encryptedRemote) {
+      return null;
+    }
+
+    return decrypt(JSON.parse(encryptedRemote), env, hmac_key);
+  } catch (e) {
+    console.error("Error getting from cache", e);
     return null;
   }
-
-  return decrypt(JSON.parse(encryptedRemote), env, hmac_key);
 }
 
 export async function getFromCache({

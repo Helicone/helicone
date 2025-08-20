@@ -66,7 +66,10 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
       try {
         return JSON.parse(line.replace("data:", ""));
       } catch (e) {
-        console.log("Error parsing line OpenAI", line);
+        // This line was filling up the logs
+        if (!line.includes("[DONE]")) {
+          console.log("Error parsing line OpenAI", line);
+        }
         return err({ msg: `Error parsing line`, line });
       }
     });

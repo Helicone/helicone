@@ -11,7 +11,7 @@ import { parseJSXObject } from "@helicone/prompts";
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 import { MAPPERS } from "@helicone-package/llm-mapper/utils/getMappedContent";
 import { getMapperType } from "@helicone-package/llm-mapper/utils/getMapperType";
-import { RateLimitOptions } from "../clients/KVRateLimiterClient";
+import { RateLimitOptions } from "../clients/DurableObjectRateLimiterClient";
 import { RateLimitOptionsBuilder } from "../util/rateLimitOptions";
 
 export type RetryOptions = {

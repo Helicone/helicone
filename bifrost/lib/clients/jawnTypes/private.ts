@@ -757,6 +757,14 @@ Json: JsonObject;
     UpdateOrganizationParams: components["schemas"]["Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-organization_type-or-onboarding_status_"] & {
       variant?: string;
     };
+    "ResultSuccess__temporaryPassword_63_-string_-or-null_": {
+      data: {
+        temporaryPassword?: string;
+      } | null;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__temporaryPassword_63_-string_-or-null.string_": components["schemas"]["ResultSuccess__temporaryPassword_63_-string_-or-null_"] | components["schemas"]["ResultError_string_"];
     UIFilterRowTree: components["schemas"]["UIFilterRowNode"] | components["schemas"]["FilterRow"];
     UIFilterRowNode: {
       /** @enum {string} */
@@ -1364,7 +1372,7 @@ Json: JsonObject;
       values?: {
         [key: string]: components["schemas"]["SortDirection"];
       };
-      cost_usd?: components["schemas"]["SortDirection"];
+      cost?: components["schemas"]["SortDirection"];
     };
     RequestQueryParams: {
       filter: components["schemas"]["RequestFilterNode"];
@@ -2027,6 +2035,8 @@ Json: JsonObject;
     };
     Log: {
       response: {
+        /** Format: double */
+        cost?: number;
         /** Format: double */
         cachedLatency?: number;
         /** Format: double */
@@ -16115,7 +16125,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_null.string_"];
+          "application/json": components["schemas"]["Result__temporaryPassword_63_-string_-or-null.string_"];
         };
       };
     };

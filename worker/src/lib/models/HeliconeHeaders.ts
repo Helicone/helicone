@@ -264,7 +264,8 @@ export class HeliconeHeaders implements IHeliconeHeaders {
         keyType: this.determineBearerKeyType(heliconeAuth),
       };
     }
-    const heliconeAuthFallback = this.headers.get("authorization");
+    const heliconeAuthFallback =
+      this.headers.get("authorization") || this.headers.get("x-api-key");
     if (heliconeAuthFallback) {
       return {
         _type: "bearer",

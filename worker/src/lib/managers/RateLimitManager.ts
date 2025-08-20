@@ -1,5 +1,5 @@
 import { DBWrapper, RateLimitPolicy } from "../db/DBWrapper";
-import { RateLimitOptions } from "../clients/KVRateLimiterClient";
+import { RateLimitOptions } from "../clients/DurableObjectRateLimiterClient";
 import { Result, ok, err } from "../util/results";
 import { HeliconeProperties } from "../models/HeliconeProxyRequest";
 

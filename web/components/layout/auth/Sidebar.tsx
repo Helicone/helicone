@@ -10,7 +10,9 @@ import {
   TagIcon,
   TestTube2,
   UsersIcon,
+  Code2Icon,
 } from "lucide-react";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
 import DesktopSidebar from "./DesktopSidebar";
@@ -32,6 +34,10 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
     "ai_gateway",
     org?.currentOrg?.id ?? "",
   );
+  const { data: hasHQLFeatureFlag } = useFeatureFlag(
+    "hql",
+    org?.currentOrg?.id ?? "",
+  );
 
   const NAVIGATION: NavigationItem[] = useMemo(
     () => [
@@ -47,7 +53,6 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
         icon: SheetIcon,
         current: pathname.includes("/requests"),
       },
-
       {
         name: "Segments",
         href: "/segments",
@@ -112,8 +117,24 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
           },
         ],
       },
+      {
+        name: "Alerts",
+        href: "/alerts",
+        icon: ExclamationTriangleIcon,
+        current: pathname.includes("/alerts"),
+      },
+      ...(hasHQLFeatureFlag?.data
+        ? [
+            {
+              name: "HQL",
+              href: "/hql",
+              icon: Code2Icon,
+              current: pathname.includes("/hql"),
+            },
+          ]
+        : []),
     ],
-    [pathname, hasFeatureFlag?.data],
+    [pathname, hasFeatureFlag?.data, hasHQLFeatureFlag?.data],
   );
 
   return (

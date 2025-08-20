@@ -69,7 +69,12 @@ export type StandardParameter =
   | "thinking"
   | "response_format"
   | "json_mode"
-  | "truncate";
+  | "truncate"
+  | "min_p"
+  | "logit_bias"
+  | "logprobs"
+  | "top_logprobs"
+  | "structured_outputs";
 
 export interface ModelPricing {
   prompt: number;
@@ -84,6 +89,11 @@ export interface ModelPricing {
         default: number;
       };
   thinking?: number;
+  request?: number;
+  audio?: number;
+  video?: number;
+  web_search?: number;
+  internal_reasoning?: number;
 }
 
 export interface ModelConfig {
@@ -136,6 +146,7 @@ export interface UserEndpointConfig {
   deploymentName?: string;
   resourceName?: string;
   crossRegion?: boolean;
+  gatewayMapping?: "OPENAI" | "NO_MAPPING";
 }
 
 export interface AuthContext {

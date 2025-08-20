@@ -8,6 +8,7 @@ logpush = true
 
 durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
+	{ name = "RATE_LIMITER_SQL", class_name = "RateLimiterDO" },
 ]
 
 kv_namespaces = [
@@ -157,6 +158,7 @@ routes = [
 
 durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
+	{ name = "RATE_LIMITER_SQL", class_name = "RateLimiterDO" },
 ]
 
 kv_namespaces = [
@@ -230,6 +232,7 @@ kv_namespaces = [
 
 durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
+	{ name = "RATE_LIMITER_SQL", class_name = "RateLimiterDO" },
 ]
 
 queues.producers = [
@@ -272,3 +275,7 @@ deleted_classes = ["AtomicAlerter"]
 tag = "v6"
 new_classes = ["InMemoryRateLimiter"]
 deleted_classes = ["AtomicRateLimiter"]
+
+[[migrations]]
+tag = "v7"
+new_sqlite_classes = ["RateLimiterDO"]

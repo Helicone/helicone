@@ -199,5 +199,20 @@ export const heliconeAuthClientFromSession = (
     async updateUser(params): Promise<Result<void, string>> {
       throw new Error("Not implemented");
     },
+
+    async changePassword(params): Promise<Result<void, string>> {
+      try {
+        const { data, error } = await authClient.changePassword({
+          currentPassword: params.currentPassword,
+          newPassword: params.newPassword,
+        });
+        if (error) {
+          return err(error.message || "Change password failed");
+        }
+        return ok(undefined);
+      } catch (error: any) {
+        return err(error.message || "Change password failed");
+      }
+    },
   };
 };

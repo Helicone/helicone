@@ -942,12 +942,12 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_": {
+			"ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array_": {
 				"properties": {
 					"data": {
 						"items": {
 							"properties": {
-								"cost_usd": {
+								"cost": {
 									"type": "number",
 									"format": "double"
 								},
@@ -968,7 +968,7 @@
 								}
 							},
 							"required": [
-								"cost_usd",
+								"cost",
 								"user_id",
 								"completion_tokens",
 								"prompt_tokens",
@@ -993,10 +993,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_": {
+			"Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_"
+						"$ref": "#/components/schemas/ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -2736,7 +2736,7 @@
 						},
 						"type": "object"
 					},
-					"cost_usd": {
+					"cost": {
 						"$ref": "#/components/schemas/SortDirection"
 					}
 				},
@@ -11312,7 +11312,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_"
+									"$ref": "#/components/schemas/Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array.string_"
 								}
 							}
 						}
@@ -19605,7 +19605,8 @@
 														"groq",
 														"deepseek",
 														"cohere",
-														"xai"
+														"xai",
+														"google"
 													]
 												}
 											},
