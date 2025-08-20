@@ -8,7 +8,6 @@ export function recursivelyConsolidateAnthropic(body: any, delta: any): any {
       // console.log("Stop Reason", delta[key]);
     }
     if (key === "delta") {
-      console.log("Delta", delta[key]);
     } else if (key === "type") {
       body[key] = delta[key];
     } else if (body[key] === undefined || body[key] === null) {

@@ -32,16 +32,26 @@ type Error = {
 
 const DEFAULT_REGION = "us-west-1";
 
-const enableStreamUsage = async (requestWrapper: RequestWrapper) => {
+const enableStreamUsage = async (
+  requestWrapper: RequestWrapper,
+  bodyMapping: "OPENAI" | "NO_MAPPING"
+) => {
   const jsonBody = (await requestWrapper.getJson()) as Record<string, unknown>;
-  const bodyWithUsage = {
-    ...jsonBody,
-    stream_options: {
-      ...((jsonBody.stream_options as Record<string, unknown>) || {}),
-      include_usage: true,
-    },
-  };
-  return JSON.stringify(bodyWithUsage);
+  if (
+    "stream" in jsonBody &&
+    jsonBody.stream === true &&
+    bodyMapping === "OPENAI"
+  ) {
+    const bodyWithUsage = {
+      ...jsonBody,
+      stream_options: {
+        ...((jsonBody.stream_options as Record<string, unknown>) || {}),
+        include_usage: true,
+      },
+    };
+    return JSON.stringify(bodyWithUsage);
+  }
+  return await requestWrapper.getText();
 };
 
 export const getBody = async (requestWrapper: RequestWrapper) => {
@@ -49,11 +59,15 @@ export const getBody = async (requestWrapper: RequestWrapper) => {
     return null;
   }
 
-  if (requestWrapper.heliconeHeaders.featureFlags.streamUsage) {
-    return enableStreamUsage(requestWrapper);
-  }
+  return enableStreamUsage(
+    requestWrapper,
+    requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping
+  );
+  // if (requestWrapper.heliconeHeaders.featureFlags.streamUsage) {
+  //   return enableStreamUsage(requestWrapper);
+  // }
 
-  return await requestWrapper.getText();
+  // return await requestWrapper.getText();
 };
 
 export const authenticate = async (
@@ -131,11 +145,11 @@ const authenticateRequest = async (
   targetBaseUrl: string | null,
   endpoint: Endpoint
 ) => {
-  requestWrapper.resetObject();
   requestWrapper.setHeader(
     "Helicone-Auth",
     requestWrapper.getAuthorization() ?? ""
   );
+  requestWrapper.resetObject();
   requestWrapper.setUrl(targetBaseUrl ?? requestWrapper.url.toString());
 
   // Use the unified authenticate function from the cost package
@@ -259,7 +273,10 @@ const attemptDirectProviderRequest = async (
     });
   }
 
-  const userEndpointConfig = providerKey.config as UserEndpointConfig;
+  const userEndpointConfig = {
+    ...(providerKey.config as UserEndpointConfig),
+    gatewayMapping: requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
+  };
 
   // Try to get PTB endpoints first
   // const endpointsResult: Result<Endpoint[], Error> = ok([]);

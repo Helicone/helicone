@@ -139,7 +139,10 @@ export class RequestWrapper {
     this.injectPromptProperties();
   }
 
-  private constructor(private request: Request, private env: Env) {
+  private constructor(
+    private request: Request,
+    private env: Env
+  ) {
     this.url = new URL(request.url);
     this.originalUrl = new URL(request.url);
     this.headers = this.mutatedAuthorizationHeaders(request);

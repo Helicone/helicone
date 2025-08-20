@@ -108,6 +108,11 @@ export class BedrockProvider extends BaseProvider {
       };
       return JSON.stringify(updatedBody);
     }
-    return JSON.stringify(context.parsedBody);
+
+    return JSON.stringify({
+      ...context.parsedBody,
+      stream: undefined,
+      stream_options: undefined,
+    });
   }
 }
