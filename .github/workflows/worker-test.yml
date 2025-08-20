@@ -17,13 +17,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Setup Node with caching
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'yarn'
-          cache-dependency-path: worker/yarn.lock
+      # Use pre-installed Node (faster than setup-node cache)
+      - name: Check Node version
+        run: |
+          node --version
+          yarn --version
       
       # Install only worker dependencies
       - name: Install dependencies
