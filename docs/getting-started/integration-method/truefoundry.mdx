@@ -1,0 +1,88 @@
+---
+title: "TrueFoundry AI Gateway"
+sidebarTitle: "TrueFoundry AI Gateway"
+description: "Monitor and analyze your TrueFoundry AI Gateway requests with Helicone"
+"twitter:title": "TrueFoundry AI Gateway - Helicone OSS LLM Observability"
+---
+
+TrueFoundry provides an enterprise-ready [AI Gateway](https://www.truefoundry.com/ai-gateway) which can integrate with Helicone to provide comprehensive observability and monitoring for your AI Applications. TrueFoundry AI Gateway serves as a unified interface for LLM access, providing:
+
+- **Unified API Access**: Connect to 250+ LLMs (OpenAI, Claude, Gemini, Groq, Mistral) through one API
+- **Low Latency**: Sub-3ms internal latency with intelligent routing and load balancing  
+- **Enterprise Security**: SOC 2, HIPAA, GDPR compliance with RBAC and audit logging
+- **Quota and cost management**: Token-based quotas, rate limiting, and comprehensive usage tracking
+
+## Prerequisites
+
+Before integrating Helicone with TrueFoundry, ensure you have:
+
+1. **TrueFoundry Account**: Create a [TrueFoundry account](https://www.truefoundry.com/register) and follow the [Quick Start Guide](https://docs.truefoundry.com/gateway/quick-start)
+2. **Helicone Account**: Sign up at [helicone.ai](https://helicone.ai) and get your API key from the dashboard
+
+## Integration Steps
+
+### Step 1: Get Configuration from TrueFoundry
+
+Get the API key, base URL and model name from the unified code snippet in TrueFoundry's playground:
+
+<Frame caption="Get API key, Base URL and Model Name from Unified Code Snippet">
+  <img
+    src="/images/helicone-tfy-code.png"
+    alt="TrueFoundry playground showing unified code snippet with API configuration"
+  />
+</Frame>
+
+### Step 2: Configure Helicone Integration
+
+Use the HeliconeAsyncLogger to automatically log all your TrueFoundry requests:
+
+```python
+from openai import OpenAI
+from helicone_async import HeliconeAsyncLogger
+
+# Initialize Helicone Logger
+logger = HeliconeAsyncLogger(
+    api_key="<HELICONE_API_KEY>",
+)
+logger.init()
+
+client = OpenAI(
+    api_key="your-truefoundry-api-key",
+    base_url="your-truefoundry-base-url"
+)
+
+stream = client.chat.completions.create(
+    messages=[
+        {"role": "system", "content": "You are a helpful AI assistant."},
+        {"role": "user", "content": "Hello! Can you tell me a short fun fact about peregrine falcon?"},
+    ],
+    model="openai-main/gpt-4o",
+    temperature=0.7,
+    max_tokens=2500,
+    stream=True,
+    extra_headers={
+        "X-TFY-METADATA": '{"tfy_log_request":"true"}',
+    }
+)
+
+for chunk in stream:
+    if (
+        chunk.choices
+        and len(chunk.choices) > 0
+        and chunk.choices[0].delta.content is not None
+    ):
+        print(chunk.choices[0].delta.content, end="")
+```
+
+### Step 3: View Your Requests in Helicone
+
+Your TrueFoundry AI Gateway requests will now appear in the Helicone dashboard with full observability:
+
+<Frame caption="Helicone dashboard showing TrueFoundry requests with comprehensive logging and analytics">
+  <img
+    src="/images/helicone-request.png"
+    alt="Helicone dashboard displaying TrueFoundry AI Gateway requests with detailed metrics"
+  />
+</Frame>
+
+Your TrueFoundry AI Gateway is now integrated with Helicone and ready for comprehensive monitoring, analytics, and observability of all your LLM requests.

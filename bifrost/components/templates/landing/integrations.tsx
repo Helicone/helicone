@@ -146,6 +146,40 @@ client = OpenAI(
       docsLink:
         "https://docs.helicone.ai/getting-started/integration-method/openrouter",
     },
+    truefoundry: {
+      formattedName: "TrueFoundry",
+      logo: "/static/truefoundry.webp",
+      typescript: `import OpenAI from "openai";
+import { HeliconeAsyncLogger } from "helicone-async";
+
+const logger = new HeliconeAsyncLogger({
+  apiKey: HELICONE_API_KEY,
+});
+logger.init();
+
+const client = new OpenAI({
+  apiKey: TRUEFOUNDRY_JWT_TOKEN,
+  baseURL: "your-truefoundry-base-url"
+});`,
+      python: `from openai import OpenAI
+from helicone_async import HeliconeAsyncLogger
+
+logger = HeliconeAsyncLogger(
+    api_key=HELICONE_API_KEY,
+)
+logger.init()
+
+client = OpenAI(
+    api_key=TRUEFOUNDRY_JWT_TOKEN,
+    base_url="your-truefoundry-base-url"
+)`,
+      curl: `# Install helicone-async first
+pip install helicone-async openai
+
+# Then use the Python integration above`,
+      docsLink:
+        "https://docs.helicone.ai/getting-started/integration-method/truefoundry",
+    },
   };
 
   const ADDITIONAL_PROVIDERS = [
