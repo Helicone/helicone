@@ -136,7 +136,6 @@ export async function updateRateLimitCounter(
     segment
   );
 
-  // Get the Durable Object instance
   const doId = getDurableObjectId(
     rateLimiterDO,
     organizationId,
@@ -150,10 +149,8 @@ export async function updateRateLimitCounter(
     quota,
     unit,
     cost: props.cost,
-    checkOnly: false, // Actually update the counter
+    checkOnly: false,
   };
-
-  console.log("[DORateLimit] Updating counter with:", request);
 
   try {
     const response = await doStub.fetch("http://rate-limiter/update", {
@@ -163,17 +160,9 @@ export async function updateRateLimitCounter(
     });
 
     if (!response.ok && response.status !== 429) {
-      console.error(
-        "[DORateLimit] Update failed with status:",
-        response.status
-      );
-    } else if (response.status === 429) {
-      console.log(
-        "[DORateLimit] Update rejected due to rate limit - this is expected behavior"
-      );
+      console.error("[DORateLimit] Update failed:", response.status);
     }
   } catch (error) {
-    console.error("[DORateLimit] Error updating counter:", error);
-    // Silently fail on update errors to not block the request
+    console.error("[DORateLimit] Update error:", error);
   }
 }
