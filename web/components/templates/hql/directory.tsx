@@ -81,7 +81,7 @@ export function Directory({
   );
 
   return (
-    <div className="flex h-screen w-80 flex-col border-r bg-background">
+    <div className="flex h-screen flex-col border-r bg-background">
       {/* Tabs */}
       <section className="flex border-b">
         <button

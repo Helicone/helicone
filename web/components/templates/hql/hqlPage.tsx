@@ -220,12 +220,13 @@ function HQLPage() {
   }
 
   return (
-    <ResizablePanelGroup direction="horizontal">
+    <ResizablePanelGroup direction="horizontal" className="h-screen w-full">
       <ResizablePanel
         defaultSize={20}
+        minSize={10}
         maxSize={40}
         collapsible={true}
-        collapsedSize={4}
+        collapsedSize={0}
       >
         <Directory
           tables={clickhouseSchemas.data ?? []}
