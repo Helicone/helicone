@@ -320,7 +320,7 @@ describe("Registry Tests with TypeScript Configs", () => {
     it("should match expected PTB endpoint URLs (snapshot)", () => {
       const allEndpoints: Record<
         string,
-        { ptb: string[]; byok: Record<string, string> }
+        { ptb: Record<string, string>; byok: Record<string, string> }
       > = {};
 
       const allModelsResult = registry.getAllModelIds();
