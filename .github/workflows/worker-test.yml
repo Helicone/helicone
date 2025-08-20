@@ -39,9 +39,9 @@ jobs:
       # Only install if node_modules is not cached
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        working-directory: worker
         run: |
           echo "Cache miss - installing dependencies"
+          # Install from root to get all workspaces
           yarn install --frozen-lockfile --network-timeout 100000
       
       # Log cache status for debugging

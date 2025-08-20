@@ -29,7 +29,14 @@
       "Bash(rm:*)",
       "Bash(npx prettier:*)",
       "Bash(npx tsc:*)",
-      "Bash(npx jest:*)"
+      "Bash(npx jest:*)",
+      "Bash(npx ts-node:*)",
+      "WebFetch(domain:undici.nodejs.org)",
+      "WebSearch",
+      "WebFetch(domain:gist.github.com)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh run watch:*)"
     ],
     "deny": []
   }

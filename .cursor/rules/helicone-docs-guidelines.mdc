@@ -1,0 +1,224 @@
+---
+description: 
+globs: *.mdx
+alwaysApply: false
+---
+# Helicone Docs Design Guidelines
+
+This document provides guidelines for working with Helicone's documentation powered by Mintlify.
+
+## Structure
+
+### File Organization
+
+- Documentation is stored in the `/docs` directory
+- Uses MDX files for content (Markdown + JSX)
+- Configuration is managed through `mint.json` at the root of the docs directory
+- Images should be placed in the `/docs/images` directory
+- Logos are stored in the `/docs/logo` directory
+
+### Helicone-Specific Organization
+
+- API reference documentation is automatically generated from the `/docs/swagger.json` file
+- Integration guides are organized by provider (OpenAI, Anthropic, etc.) in the `/docs/integrations` directory
+- Feature documentation is stored in the `/docs/features` directory
+- Guides and tutorials are in the `/docs/guides` directory
+
+### Navigation
+
+- Documentation structure is defined in the `navigation` array in `mint.json`
+- Pages are organized into groups and subgroups
+- Each page requires frontmatter metadata
+
+## Creating and Editing Content
+
+### File Format
+
+- Use `.mdx` extension for all documentation files
+- Each file must include proper frontmatter with at least:
+  ```md
+  ---
+  title: "Page Title"
+  sidebarTitle: "Sidebar Title" (optional)
+  description: "Brief description of the page content"
+  ---
+  ```
+
+### Page Structure
+
+- Start with a clear introduction
+- Use proper heading hierarchy (H2, H3, etc.)
+- Aim for scannable content with short paragraphs
+- Include examples where applicable
+
+### Helicone Style Conventions
+
+- Use American English for all documentation
+- Write in a clear, conversational tone
+- Use second person ("you") when addressing the reader
+- Include code examples for all integration guides
+- When documenting features, include:
+  - What the feature does
+  - When to use it
+  - How to implement it
+  - Example use cases
+
+### Components
+
+Mintlify supports various components for enhanced documentation:
+
+#### Cards and Card Groups
+
+```jsx
+<CardGroup cols={2}>
+  <Card title="Component Title" href="/link/to/page" icon="icon-name">
+    Description text
+  </Card>
+</CardGroup>
+```
+
+#### Steps for Tutorials
+
+```jsx
+<Steps>
+  <Step title="First Step">Content for the first step</Step>
+  <Step title="Second Step">Content for the second step</Step>
+</Steps>
+```
+
+#### Callouts
+
+```jsx
+<Note>
+  Important information to highlight
+</Note>
+
+<Warning>
+  Critical warnings users should be aware of
+</Warning>
+```
+
+#### Images and Frames
+
+```jsx
+<Frame>
+  <img src="/images/path/to/image.webp" alt="Description of image" />
+</Frame>
+```
+
+#### Tabs
+
+```jsx
+<Tabs>
+  <Tab title="JavaScript">JavaScript example code</Tab>
+  <Tab title="Python">Python example code</Tab>
+</Tabs>
+```
+
+### Code Blocks
+
+Use proper syntax highlighting by specifying the language:
+
+````jsx
+```javascript
+// JavaScript code here
+````
+
+### Helicone Code Examples
+
+For integration examples, always include:
+
+1. SDK installation instructions
+2. Implementation code
+3. Expected response format
+
+Example structure:
+
+````md
+### Installation
+
+```bash
+npm install @helicone/sdk
+```
+````
+
+### Usage
+
+```javascript
+import { Helicone } from "@helicone/sdk";
+
+const helicone = new Helicone({
+  apiKey: "your-helicone-api-key",
+});
+
+// Example code
+```
+
+````
+
+## Configuration
+
+### Update Navigation
+When adding new pages, update the `navigation` section in `mint.json`:
+
+```json
+"navigation": [
+  {
+    "group": "Group Name",
+    "pages": [
+      "path/to/file",
+      {
+        "group": "Subgroup Name",
+        "pages": ["path/to/subgroup/file"]
+      }
+    ]
+  }
+]
+````
+
+### Redirects
+
+Manage URL redirects in the `redirects` section of `mint.json`:
+
+```json
+"redirects": [
+  {
+    "source": "/old-path",
+    "destination": "/new-path"
+  }
+]
+```
+
+### Helicone Theme Configuration
+
+Helicone uses a customized Mintlify theme with specific colors and settings:
+
+```json
+"name": "Helicone OSS LLM Observability",
+"theme": "venus",
+"colors": {
+  "primary": "#0CA5E9",
+  "light": "#0CA5E9",
+  "dark": "#0CA5E9"
+},
+"modeToggle": {
+  "default": "light"
+}
+```
+
+Do not modify these settings without consulting the design team.
+
+## Best Practices
+
+1. **Keep content up-to-date**: Regularly review and update documentation
+2. **Use proper linking**: Link related content using relative paths
+3. **Optimize images**: Use WebP format for better performance
+4. **Be consistent**: Follow the same structure and style across all pages
+5. **Test locally**: Preview changes locally using the Mintlify CLI before pushing
+
+### Helicone-Specific Best Practices
+
+1. **Maintain provider consistency**: When adding a new integration, follow the existing structure for other providers
+2. **Update redirects**: When moving or renaming pages, add proper redirects to prevent broken links
+3. **Cross-link related features**: Connect related features in the documentation with internal links
+4. **Keep API references in sync**: Ensure the `swagger.json` file is updated when API changes are made
