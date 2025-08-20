@@ -1,6 +1,7 @@
 name: Worker Tests
 
 on:
+  workflow_dispatch:  # Manual trigger for testing iterations!
   push:
     branches:
       - "**" # Run on ALL branches for every push
