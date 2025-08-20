@@ -247,7 +247,9 @@ export class ResponseBodyHandler extends AbstractLogHandler {
         isStream,
         provider,
         responseBody,
-        model
+        model,
+        log.request.requestReferrer,
+        log.request.targetUrl
       );
       return await parser.parse({
         responseBody: responseBody,
@@ -324,45 +326,62 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     isStream: boolean,
     provider: string,
     responseBody: any,
-    model?: string
+    model?: string,
+    requestReferrer?: string,
+    targetUrl?: string
   ): IBodyProcessor {
-    if (!isStream && provider === "ANTHROPIC" && responseBody) {
-      return new AnthropicBodyProcessor();
-    } else if (!isStream && provider === "OPENAI") {
-      return new OpenAIBodyProcessor();
-    } else if (!isStream && provider === "LLAMA") {
-      return new LlamaBodyProcessor();
-    } else if (!isStream && provider === "GOOGLE") {
-      return new GoogleBodyProcessor();
-    } else if (!isStream && provider === "VERCEL") {
-      // Check if it's actually a stream by content
-      if (
-        typeof responseBody === "string" &&
-        responseBody.includes("data: {") &&
-        responseBody.includes('"type":')
-      ) {
+    const isAIGateway = requestReferrer?.includes("ai-gateway");
+    if (!isStream) {
+      if (provider === "OPENAI" || isAIGateway) {
+        return new OpenAIBodyProcessor();
+      }
+      if (provider === "ANTHROPIC" && responseBody) {
+        return new AnthropicBodyProcessor();
+      }
+      if (provider === "LLAMA") {
+        return new LlamaBodyProcessor();
+      }
+      if (provider === "GOOGLE") {
+        return new GoogleBodyProcessor();
+      }
+      if (provider === "VERCEL") {
+        // Check if it's actually a stream by content
+        if (
+          typeof responseBody === "string" &&
+          responseBody.includes("data: {") &&
+          responseBody.includes('"type":')
+        ) {
+          return new VercelStreamProcessor();
+        }
+        return new VercelBodyProcessor();
+      }
+    }
+
+    if (isStream) {
+      if (isAIGateway && !targetUrl?.includes("anthropic.com/v1/messages")) {
+        return new OpenAIStreamProcessor();
+      }
+      if (provider === "ANTHROPIC" || model?.includes("claude")) {
+        return new AnthropicStreamBodyProcessor();
+      }
+      if (provider === "LLAMA") {
+        return new LlamaStreamBodyProcessor();
+      }
+      if (provider === "GOOGLE") {
+        return new GoogleStreamBodyProcessor();
+      }
+      if (provider === "TOGETHER") {
+        return new TogetherAIStreamProcessor();
+      }
+      if (provider === "GROQ") {
+        return new GroqStreamProcessor();
+      }
+      if (provider === "VERCEL") {
         return new VercelStreamProcessor();
       }
-      return new VercelBodyProcessor();
-    } else if (
-      isStream &&
-      (provider === "ANTHROPIC" || model?.includes("claude"))
-    ) {
-      return new AnthropicStreamBodyProcessor();
-    } else if (isStream && provider === "LLAMA") {
-      return new LlamaStreamBodyProcessor();
-    } else if (isStream && provider === "GOOGLE") {
-      return new GoogleStreamBodyProcessor();
-    } else if (isStream && provider === "TOGETHER") {
-      return new TogetherAIStreamProcessor();
-    } else if (isStream && provider === "GROQ") {
-      return new GroqStreamProcessor();
-    } else if (isStream && provider === "VERCEL") {
-      return new VercelStreamProcessor();
-    } else if (isStream) {
       return new OpenAIStreamProcessor();
-    } else {
-      return new GenericBodyProcessor();
     }
+
+    return new GenericBodyProcessor();
   }
 }
