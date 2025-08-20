@@ -272,12 +272,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     });
 
     setToolHandler(
-      "playground-edit_message",
-      async (args: {
-        message_index: number;
-        content_array_index: number;
-        text: string;
-      }) => {
+      "playground-edit_messages",
+      async (args: { messages: Message[] }) => {
         if (!mappedContent) {
           return {
             success: false,
@@ -285,57 +281,51 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           };
         }
 
-        const message =
-          mappedContent.schema.request.messages?.[args.message_index];
-        if (!message) {
-          return {
-            success: false,
-            message: "Message not found",
-          };
-        }
-
-        const updatedMappedContent = { ...mappedContent };
-        const updatedMessages = [
-          ...(mappedContent.schema.request.messages || []),
-        ];
-        const updatedMessage = { ...message };
-        if (message._type === "contentArray") {
-          if (
-            !message.contentArray ||
-            args.content_array_index >= message.contentArray.length
-          ) {
+        try {
+          if (!Array.isArray(args.messages)) {
             return {
               success: false,
-              message: "Content array index out of bounds",
+              message: "Messages must be an array",
             };
           }
 
-          const updatedContentArray = [...message.contentArray];
-          updatedContentArray[args.content_array_index] = {
-            _type: "message",
-            role: message.role,
-            content: args.text,
-          } as Message;
+          const processedMessages = args.messages.map((message, index) => {
+            const processedMessage = { ...message };
+            processedMessage.id = `msg-${uuidv4()}`;
 
-          updatedMessage.contentArray = updatedContentArray;
-        } else {
-          updatedMessage.content = args.text;
+            if (
+              processedMessage._type === "message" &&
+              !processedMessage.role
+            ) {
+              processedMessage.role = index === 0 ? "system" : "user";
+            }
+
+            return processedMessage;
+          });
+
+          const updatedMappedContent = {
+            ...mappedContent,
+            schema: {
+              ...mappedContent.schema,
+              request: {
+                ...mappedContent.schema.request,
+                messages: processedMessages,
+              },
+            },
+          };
+
+          setMappedContent(updatedMappedContent);
+
+          return {
+            success: true,
+            message: `Successfully updated ${processedMessages.length} messages`,
+          };
+        } catch (error) {
+          return {
+            success: false,
+            message: `Error updating messages: ${error instanceof Error ? error.message : "Unknown error"}`,
+          };
         }
-
-        updatedMessages[args.message_index] = updatedMessage;
-        updatedMappedContent.schema = {
-          ...updatedMappedContent.schema,
-          request: {
-            ...updatedMappedContent.schema.request,
-            messages: updatedMessages,
-          },
-        };
-
-        setMappedContent(updatedMappedContent);
-        return {
-          success: true,
-          message: "Message edited successfully",
-        };
       },
     );
   }, [mappedContent]);

@@ -111,7 +111,7 @@ export const playgroundTools = [
     function: {
       name: "playground-get_messages",
       description:
-        "Gets the messages in the playground with IDs for each message. Always use this before editing a message to get the ID. Returns a JSON string of the messages.",
+        "Gets the messages in the playground with IDs for each message. Always use this before editing messages to get the current state. Returns a JSON string of the messages.",
       parameters: {
         type: "object",
         properties: {},
@@ -121,37 +121,86 @@ export const playgroundTools = [
   {
     type: "function" as const,
     function: {
-      name: "playground-edit_message",
-      description: "Inputs text to edit a certain message in the playground.",
+      name: "playground-edit_messages",
+      description:
+        "Sets the entire messages array in the playground. This replaces all existing messages with the provided array.",
       parameters: {
         type: "object",
+
+        // SIMPLIFIED input JSON schema for the Message type of MappedLLMRequest, the type used for
+        // the playground.
+        // does not include several message type and fields that Helix should not be able to input, such as rich media (audio/video).
         properties: {
-          message_index: {
-            type: "number",
-            description: "The index of the message to edit",
-          },
-          content_array_index: {
-            type: "number",
+          messages: {
+            type: "array",
             description:
-              "For messages that are content arrays, this is the index of the content array to edit",
-          },
-          text: {
-            type: "string",
-            description: "The text to edit the message with",
+              "The complete array of messages to set in the playground",
+            items: {
+              type: "object",
+              properties: {
+                _type: {
+                  type: "string",
+                  enum: ["functionCall", "function", "message", "contentArray"],
+                  description: "The type of the message",
+                },
+                id: {
+                  type: "string",
+                  description: "Unique identifier for the message",
+                },
+                role: {
+                  type: "string",
+                  enum: ["user", "assistant", "system", "tool"],
+                  description: "The role of the message sender",
+                },
+                content: {
+                  type: "string",
+                  description: "The content of the message",
+                },
+                tool_calls: {
+                  type: "array",
+                  description:
+                    "Array of function calls (only used if _type is functionCall)",
+                  items: {
+                    type: "object",
+                    properties: {
+                      id: {
+                        type: "string",
+                        description: "Unique identifier for the function call",
+                      },
+                      name: {
+                        type: "string",
+                        description: "Name of the function to call",
+                      },
+                      arguments: {
+                        type: "object",
+                        description: "Arguments to pass to the function",
+                      },
+                    },
+                    required: ["name", "arguments"],
+                  },
+                },
+                tool_call_id: {
+                  type: "string",
+                  description:
+                    "ID of the tool call this message is responding to",
+                },
+                contentArray: {
+                  type: "array",
+                  description: "Array of nested messages for contentArray type",
+                  items: {
+                    $ref: "#/properties/messages/items",
+                  },
+                },
+                reasoning: {
+                  type: "string",
+                  description: "Reasoning content for reasoning models",
+                },
+              },
+              required: ["_type", "role"],
+            },
           },
         },
-        required: ["message_index", "text"],
-      },
-    },
-  },
-  {
-    type: "function" as const,
-    function: {
-      name: "playground-add_blank_message",
-      description: "Adds a blank message to the playground messages.",
-      parameters: {
-        type: "object",
-        properties: {},
+        required: ["messages"],
       },
     },
   },

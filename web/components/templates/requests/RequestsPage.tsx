@@ -303,7 +303,10 @@ export default function RequestsPage(props: RequestsPageV2Props) {
 
     setToolHandler("set-filters", async (args: { filter: any }) => {
       try {
-        const filterNode = args.filter;
+        const filterNode =
+          typeof args.filter === "string"
+            ? JSON.parse(args.filter)
+            : args.filter;
         filterStore.setFilter(FilterAST.and(filterNode));
         return {
           success: true,
