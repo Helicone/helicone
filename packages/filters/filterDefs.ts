@@ -383,7 +383,44 @@ export type TablesAndViews = {
 };
 export type FilterLeaf = SingleKey<TablesAndViews>;
 
-export type FilterNode = FilterLeaf | FilterBranch | "all";
+// Aggregation support for alerts and metrics
+export type AggregationFunction = 
+  | "sum"
+  | "avg"
+  | "min"
+  | "max"
+  | "count"
+  | "p50"
+  | "p75"
+  | "p90"
+  | "p95"
+  | "p99";
+
+export type ComparisonOperator = 
+  | "gt"
+  | "lt"
+  | "gte"
+  | "lte"
+  | "equals";
+
+export interface AggregationNode {
+  type: "aggregation";
+  
+  // The field to aggregate (reuses existing FilterLeaf)
+  field: FilterLeaf;
+  
+  // Aggregation configuration
+  function: AggregationFunction;
+  
+  // Comparison configuration
+  comparison: ComparisonOperator;
+  threshold: number;
+  
+  // Optional WHERE clause filters (applied before aggregation)
+  where?: FilterNode;
+}
+
+export type FilterNode = FilterLeaf | FilterBranch | AggregationNode | "all";
 
 export interface FilterBranch {
   left: FilterNode;

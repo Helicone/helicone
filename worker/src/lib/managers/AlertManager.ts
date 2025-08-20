@@ -212,6 +212,32 @@ export class AlertManager {
   async getAlertState(alert: Alert): Promise<Result<AlertState, string>> {
     const alertFilter = alert.filter ? JSON.parse(alert.filter as string) : undefined;
     
+    // Check if the filter is an AggregationNode (new system)
+    if (alertFilter && typeof alertFilter === 'object' && 'type' in alertFilter && alertFilter.type === 'aggregation') {
+      // Use new aggregation-based alert checking
+      const result = await this.alertStore.checkAggregationAlert(
+        alert.org_id,
+        alert.time_window,
+        alertFilter
+      );
+      
+      if (result.error) {
+        return err(result.error);
+      }
+      
+      // Convert to AlertState format for compatibility
+      if (!result.data) {
+        return err("No data returned from aggregation check");
+      }
+      
+      return ok({
+        totalCount: result.data.value,
+        errorCount: result.data.triggered ? result.data.value : 0,
+        requestCount: result.data.requestCount,
+      });
+    }
+    
+    // Legacy alert handling for backward compatibility
     if (alert.metric === "response.status") {
       return await this.alertStore.getErrorRate(
         alert.org_id,
