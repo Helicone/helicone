@@ -138,25 +138,30 @@ export async function proxyForwarder(
         }
 
         if (finalRateLimitOptions) {
-          const rateLimitCheckResult = await checkRateLimit({
-            organizationId: orgData.organizationId,
-            heliconeProperties: proxyRequest.heliconeProperties,
-            rateLimitKV: env.RATE_LIMIT_KV,
-            rateLimitOptions: finalRateLimitOptions,
-            userId: proxyRequest.userId,
-          });
+          try {
+            const rateLimitCheckResult = await checkRateLimit({
+              organizationId: orgData.organizationId,
+              heliconeProperties: proxyRequest.heliconeProperties,
+              rateLimitKV: env.RATE_LIMIT_KV,
+              rateLimitOptions: finalRateLimitOptions,
+              userId: proxyRequest.userId,
+              cost: 0,
+            });
 
-          responseBuilder.addRateLimitHeaders(
-            rateLimitCheckResult,
-            finalRateLimitOptions
-          );
-
-          if (rateLimitCheckResult.status === "rate_limited") {
-            rate_limited = true;
-            request.injectCustomProperty(
-              "Helicone-Rate-Limit-Status",
-              rateLimitCheckResult.status
+            responseBuilder.addRateLimitHeaders(
+              rateLimitCheckResult,
+              finalRateLimitOptions
             );
+
+            if (rateLimitCheckResult.status === "rate_limited") {
+              rate_limited = true;
+              request.injectCustomProperty(
+                "Helicone-Rate-Limit-Status",
+                rateLimitCheckResult.status
+              );
+            }
+          } catch (error) {
+            console.error("Error checking rate limit", error);
           }
         }
       }
