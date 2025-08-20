@@ -138,7 +138,7 @@ class DataDogClient {
 
       const response = await fetch(
         `https://http-intake.logs.us5.datadoghq.com/api/v2/logs`,
-        requestInit
+        requestInit as RequestInit
       );
 
       return ok(response);
