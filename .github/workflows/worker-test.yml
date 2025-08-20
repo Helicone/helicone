@@ -16,19 +16,42 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Use setup-node with BUILT-IN yarn caching (the proper way)
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      # Use pre-installed Node (faster than setup-node)
+      - name: Check Node version
+        run: |
+          node --version
+          yarn --version
+      
+      # Cache node_modules directly - skip yarn install when cached
+      - name: Cache dependencies
+        id: cache
+        uses: actions/cache@v4
         with:
-          node-version: 20
-          cache: "yarn"
-          cache-dependency-path: worker/yarn.lock # Specific path, no glob!
-
-      # Always run yarn install, but it's FAST with cache
+          path: |
+            node_modules
+            worker/node_modules
+            packages/node_modules
+          key: deps-${{ runner.os }}-${{ hashFiles('yarn.lock', 'worker/yarn.lock', 'packages/yarn.lock') }}
+          restore-keys: |
+            deps-${{ runner.os }}-
+      
+      # Only install if node_modules is not cached
       - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         working-directory: worker
-        run: yarn install --frozen-lockfile --prefer-offline
-
+        run: |
+          echo "Cache miss - installing dependencies"
+          yarn install --frozen-lockfile --network-timeout 100000
+      
+      # Log cache status for debugging
+      - name: Cache status
+        run: |
+          if [ "${{ steps.cache.outputs.cache-hit }}" = "true" ]; then
+            echo "✅ Using cached dependencies - skipped yarn install!"
+          else
+            echo "❌ Cache miss - had to run yarn install"
+          fi
+      
       - name: Run tests
         working-directory: worker
         run: yarn test
