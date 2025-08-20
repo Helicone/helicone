@@ -11,24 +11,18 @@ import {
 } from "vitest";
 import { registry } from "@helicone-package/cost/models/registry";
 
-// Import the setup file to mock Supabase
 import "./setup";
-
-// Import test configs
 import {
   anthropicTestConfig,
   type ProviderTestConfig,
 } from "./providers/anthropic.test-config";
 
-// Helper to mock required services (Supabase, S3, etc)
 function mockRequiredServices() {
-  // Track calls to each service
   const callTrackers = {
     s3Called: false,
     loggingCalled: false,
   };
 
-  // Mock S3/MinIO storage - match the actual path pattern
   const s3Mock = fetchMock
     .get("http://localhost:9000")
     .intercept({
@@ -41,7 +35,6 @@ function mockRequiredServices() {
     })
     .persist();
 
-  // Mock logging endpoint - match the exact path
   const loggingMock = fetchMock
     .get("http://localhost:8585")
     .intercept({
@@ -56,7 +49,7 @@ function mockRequiredServices() {
   return { s3Mock, loggingMock, callTrackers };
 }
 
-describe("Registry Tests with TypeScript Configs", () => {
+describe("Registry Tests with Provider Configs", () => {
   const testConfigs: ProviderTestConfig[] = [anthropicTestConfig];
 
   testConfigs.forEach((config) => {
@@ -82,39 +75,32 @@ describe("Registry Tests with TypeScript Configs", () => {
       beforeAll(() => {
         fetchMock.activate();
         fetchMock.disableNetConnect();
-
-        // Mock required services once for all tests
         serviceMocks = mockRequiredServices();
       });
 
       beforeEach(() => {
-        // Get all unique PTB endpoints for this provider from the registry - optimized!
         const ptbEndpoints = getAllPtbEndpointsForProvider(provider);
+        
+        const testCaseMap = new Map(
+          config.testCases.map(tc => [tc.name, tc])
+        );
 
-        // Setup PTB mocks using registry endpoints
-
-        // Mock each unique PTB endpoint with extracted path from registry
         ptbEndpoints.forEach((path, baseUrl) => {
           fetchMock
             .get(baseUrl)
             .intercept({
-              path: path, // Use exact path from registry URL
+              path: path,
               method: "POST",
             })
             .reply((request) => {
-              // Parse request to get model name and test case
               const body = JSON.parse(request.body as string);
               const modelName = body.model?.split("/")[0] || body.model;
+              
+              const testCase = testCaseMap.get(body.testCaseName);
+              if (!testCase) {
+                throw new Error(`Test case not found: ${body.testCaseName}`);
+              }
 
-              // Find matching test case based on request
-              const testCase =
-                config.testCases.find(
-                  (tc) =>
-                    JSON.stringify(tc.request.messages) ===
-                    JSON.stringify(body.messages)
-                ) || config.testCases[0];
-
-              // Generate mock response using registry data
               const mockResponse = config.generateMockResponse(
                 modelName,
                 testCase
@@ -136,17 +122,14 @@ describe("Registry Tests with TypeScript Configs", () => {
         fetchMock.deactivate();
       });
 
-      // Create tests for each model from registry
       providerModels.forEach((modelId) => {
         describe(modelId, () => {
-          // Get model config from registry
           const modelConfig = registry.getModelProviderConfig(
             modelId,
             provider
           );
           const providerModelId = modelConfig.data?.providerModelId || modelId;
 
-          // Filter out skipped test cases
           const activeTestCases = config.testCases.filter(
             (tc) => !tc.skipForNow
           );
@@ -165,6 +148,7 @@ describe("Registry Tests with TypeScript Configs", () => {
                   body: JSON.stringify({
                     model: `${modelId}/${provider}`,
                     ...testCase.request,
+                    testCaseName: testCase.name,
                   }),
                 }
               );
@@ -175,22 +159,16 @@ describe("Registry Tests with TypeScript Configs", () => {
               expect(body).toHaveProperty("model");
               expect(body).toHaveProperty("usage");
 
-              // Verify model name contains the provider model ID from registry
               expect(body.model).toContain(providerModelId);
 
-              // Verify usage calculation
               expect(body.usage.total_tokens).toBe(
                 body.usage.prompt_tokens + body.usage.completion_tokens
               );
             });
           });
-
-          // TODO: Add auth error tests later when we want to test error handling
         });
 
-        // BYOK endpoint tests
         describe("BYOK endpoints", () => {
-          // Get model config from registry for BYOK testing
           const modelConfig = registry.getModelProviderConfig(
             modelId,
             provider
@@ -203,7 +181,6 @@ describe("Registry Tests with TypeScript Configs", () => {
 
           const baseConfig = modelConfig.data;
 
-          // Test each BYOK user configuration
           config.byokUserConfigs.forEach((userConfig) => {
             const activeTestCases = config.testCases.filter(
               (tc) => !tc.skipForNow
@@ -211,14 +188,12 @@ describe("Registry Tests with TypeScript Configs", () => {
 
             activeTestCases.forEach((testCase) => {
               it(`BYOK ${userConfig.name} - should handle ${testCase.name}`, async () => {
-                // Build BYOK endpoint using registry
                 const byokEndpointResult = registry.buildEndpoint(
                   baseConfig,
                   userConfig.config
                 );
 
                 if (byokEndpointResult.error) {
-                  // Skip if BYOK endpoint can't be built for this config
                   console.warn(
                     `Cannot build BYOK endpoint: ${byokEndpointResult.error}`
                   );
@@ -227,11 +202,12 @@ describe("Registry Tests with TypeScript Configs", () => {
 
                 const byokEndpoint = byokEndpointResult.data;
                 if (!byokEndpoint) {
-                  console.warn(`No BYOK endpoint returned for ${userConfig.name}`);
+                  console.warn(
+                    `No BYOK endpoint returned for ${userConfig.name}`
+                  );
                   return;
                 }
 
-                // Extract path from BYOK endpoint URL for proper mocking
                 let byokBaseUrl: string;
                 let byokPath: string;
                 try {
@@ -240,24 +216,19 @@ describe("Registry Tests with TypeScript Configs", () => {
                   byokPath = url.pathname;
                 } catch (e) {
                   console.warn(`Invalid BYOK URL: ${byokEndpoint.baseUrl}`);
-                  return; // Skip this test if URL is invalid
+                  return;
                 }
 
-                // Setup BYOK mock using extracted path from endpoint
-
-                // Mock the BYOK endpoint URL with extracted path
                 fetchMock
                   .get(byokBaseUrl)
                   .intercept({
-                    path: byokPath, // Use exact path from BYOK endpoint
+                    path: byokPath,
                     method: "POST",
                   })
                   .reply((request) => {
-                    // Parse request to get model name and test case
                     const body = JSON.parse(request.body as string);
                     const modelName = body.model?.split("/")[0] || body.model;
 
-                    // Generate mock response using registry data
                     const mockResponse = config.generateMockResponse(
                       modelName,
                       testCase
@@ -286,6 +257,7 @@ describe("Registry Tests with TypeScript Configs", () => {
                       body: JSON.stringify({
                         model: `${modelId}/${provider}`,
                         ...testCase.request,
+                        testCaseName: testCase.name,
                       }),
                     }
                   );
@@ -296,16 +268,12 @@ describe("Registry Tests with TypeScript Configs", () => {
                   expect(body).toHaveProperty("model");
                   expect(body).toHaveProperty("usage");
 
-                  // Verify model name contains the BYOK provider model ID
                   expect(body.model).toContain(byokEndpoint.providerModelId);
 
-                  // Verify usage calculation
                   expect(body.usage.total_tokens).toBe(
                     body.usage.prompt_tokens + body.usage.completion_tokens
                   );
                 } finally {
-                  // BYOK mock will be cleaned up by test framework
-                  // No manual cleanup needed
                 }
               });
             });
@@ -315,7 +283,6 @@ describe("Registry Tests with TypeScript Configs", () => {
     });
   });
 
-  // Endpoint URL snapshot testing for regression detection
   describe("Registry Endpoint URLs", () => {
     it("should match expected PTB endpoint URLs (snapshot)", () => {
       const allEndpoints: Record<
@@ -331,14 +298,12 @@ describe("Registry Tests with TypeScript Configs", () => {
             for (const provider of providersResult.data) {
               const key = `${modelId}:${provider}`;
 
-              // Get PTB endpoints with deployment IDs
               const ptbEndpointsResult = registry.getPtbEndpointsWithIds(
                 modelId,
                 provider
               );
               const ptbEndpoints = ptbEndpointsResult.data || {};
 
-              // Get BYOK endpoints for different configurations
               const modelConfigResult = registry.getModelProviderConfig(
                 modelId,
                 provider
@@ -346,7 +311,6 @@ describe("Registry Tests with TypeScript Configs", () => {
               const byokUrls: Record<string, string> = {};
 
               if (modelConfigResult.data) {
-                // Test key BYOK configurations
                 const testConfigs = [
                   { name: "default", config: {} },
                   { name: "us-east-1", config: { region: "us-east-1" } },
@@ -372,7 +336,10 @@ describe("Registry Tests with TypeScript Configs", () => {
                 }
               }
 
-              if (Object.keys(ptbEndpoints).length > 0 || Object.keys(byokUrls).length > 0) {
+              if (
+                Object.keys(ptbEndpoints).length > 0 ||
+                Object.keys(byokUrls).length > 0
+              ) {
                 allEndpoints[key] = {
                   ptb: ptbEndpoints, // Now includes deployment IDs!
                   byok: byokUrls,
@@ -383,12 +350,10 @@ describe("Registry Tests with TypeScript Configs", () => {
         }
       }
 
-      // Snapshot the endpoint URLs to detect registry changes
       expect(allEndpoints).toMatchSnapshot("registry-endpoint-urls");
     });
   });
 
-  // Report coverage
   describe("Provider Coverage", () => {
     it("should have test configs for all providers", () => {
       const allProvidersSet = new Set<string>();
@@ -420,25 +385,26 @@ describe("Registry Tests with TypeScript Configs", () => {
         );
       }
 
-      // We expect some providers to be missing initially
       expect(missingProviders.length).toBeGreaterThan(0);
     });
   });
 });
 
-// Helper function to get all PTB endpoints for a provider - optimized for testing
 function getAllPtbEndpointsForProvider(provider: string): Map<string, string> {
   const endpointsByUrl = new Map<string, string>();
-  
+
   const modelsResult = registry.getProviderModels(provider);
   if (!modelsResult.data) {
     return endpointsByUrl;
   }
-  
+
   for (const modelName of modelsResult.data) {
-    const endpointsResult = registry.getPtbEndpointsByProvider(modelName, provider);
+    const endpointsResult = registry.getPtbEndpointsByProvider(
+      modelName,
+      provider
+    );
     const endpoints = endpointsResult.data || [];
-    
+
     for (const endpoint of endpoints) {
       try {
         const url = new URL(endpoint.baseUrl);
@@ -450,6 +416,6 @@ function getAllPtbEndpointsForProvider(provider: string): Map<string, string> {
       }
     }
   }
-  
+
   return endpointsByUrl;
 }
