@@ -242,7 +242,7 @@ function HQLPage() {
             defaultSize={75}
             minSize={20}
             collapsible={false}
-            className="min-h-[64px]"
+            className="min-h-[64px] flex flex-col"
           >
             <TopBar
               currentQuery={currentQuery}
@@ -256,10 +256,25 @@ function HQLPage() {
                 });
               }}
             />
-            <Editor
-              defaultLanguage="sql"
-              defaultValue={currentQuery.sql}
-              onMount={async (editor, monaco) => {
+            <div className="flex-1 relative">
+              <Editor
+                defaultLanguage="sql"
+                defaultValue={currentQuery.sql}
+                options={{
+                  minimap: { 
+                    enabled: true,
+                    side: 'right',
+                    showSlider: 'mouseover',
+                    renderCharacters: false,
+                    maxColumn: 80
+                  },
+                  fontSize: 14,
+                  fontFamily: '"Fira Code", "Fira Mono", monospace',
+                  wordWrap: "on",
+                  automaticLayout: true,
+                  scrollBeyondLastLine: false,
+                }}
+                onMount={async (editor, monaco) => {
                 editorRef.current = editor;
                 const model = editor.getModel();
                 if (!model) return;
@@ -378,6 +393,7 @@ function HQLPage() {
                 }
               }}
             />
+            </div>
           </ResizablePanel>
           <ResizableHandle withHandle={true} />
           <ResizablePanel
