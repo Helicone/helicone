@@ -3,7 +3,6 @@
 -- passed in the session context
 
 -- Drop and recreate hql_user to ensure it exists
-DROP USER IF EXISTS hql_user;
 CREATE USER IF NOT EXISTS hql_user;
 
 -- Drop existing row policy if it exists (for idempotency)
