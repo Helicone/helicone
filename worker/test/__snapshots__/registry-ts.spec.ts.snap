@@ -109,7 +109,7 @@ exports[`Registry Tests with TypeScript Configs > Registry Endpoint URLs > shoul
       "vertex-us-east1": "https://api.anthropic.com/v1/chat/completions",
     },
     "ptb": {
-      "global": "https://api.anthropic.com/v1/chat/completions",
+      "*": "https://api.anthropic.com/v1/chat/completions",
     },
   },
   "claude-opus-4-1:bedrock": {
