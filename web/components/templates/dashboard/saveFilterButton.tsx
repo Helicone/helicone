@@ -170,9 +170,9 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
       </Button>
       <ThemedModal
         open={isSaveFiltersModalOpen}
-        setOpen={() => setIsSaveFiltersModalOpen(false)}
+        setOpen={setIsSaveFiltersModalOpen}
       >
-        <div className="inset-0 flex h-full w-full max-w-[450px] flex-col gap-8 rounded-3xl bg-opacity-50 sm:w-[450px]">
+        <div className="flex w-full max-w-[450px] flex-col gap-8 sm:w-[450px]">
           <h1 className="col-span-4 text-xl font-semibold text-gray-900 dark:text-gray-100">
             Save Filter
           </h1>

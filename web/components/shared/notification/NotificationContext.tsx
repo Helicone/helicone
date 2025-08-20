@@ -1,25 +1,23 @@
-import { createContext, ReactNode, useState } from "react";
+import { createContext, ReactNode, useCallback, useMemo, useRef, useState } from "react";
 
-const ALERT_TIME = 3500;
+const ALERT_TIME = 3000;
 type NotificationVariants = "success" | "info" | "error";
 
 const initialState: {
   variant: NotificationVariants;
   title: string;
 } = {
-  variant: "info", //  variant?: "success" | "info" | "error";
+  variant: "info",
   title: "",
-
-  // description: "",
 };
 
 const NotificationContext = createContext({
   ...initialState,
   setNotification: (
     _title: string,
-    // description: string,
     _variant: NotificationVariants,
   ) => {},
+  clearNotification: () => {},
 });
 
 interface NotificationProviderProps {
@@ -29,33 +27,48 @@ interface NotificationProviderProps {
 export const NotificationProvider = (props: NotificationProviderProps) => {
   const { children } = props;
   const [title, setTitle] = useState("");
-  // const [description, setDescription] = useState("");
   const [variant, setVariant] = useState<NotificationVariants>("success");
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const setNotification = (
+  const clearNotification = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    setTitle("");
+    setVariant("success");
+  }, []);
+
+  const setNotification = useCallback((
     title: string,
-    // description: string,
     variant: NotificationVariants,
   ) => {
     setTitle(title);
-    // setDescription(description);
     setVariant(variant);
 
-    setTimeout(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = setTimeout(() => {
       setTitle("");
-      // setDescription("");
       setVariant("success");
+      timeoutRef.current = null;
     }, ALERT_TIME);
-  };
+  }, []);
+
+  const contextValue = useMemo(
+    () => ({
+      title,
+      variant,
+      setNotification,
+      clearNotification,
+    }),
+    [title, variant, setNotification, clearNotification],
+  );
 
   return (
     <NotificationContext.Provider
-      value={{
-        title,
-        // description,
-        variant,
-        setNotification,
-      }}
+      value={contextValue}
     >
       {children}
     </NotificationContext.Provider>
