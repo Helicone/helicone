@@ -109,10 +109,7 @@ describe("Registry Tests with Provider Configs", () => {
                     const body = JSON.parse(request.body as string);
                     const modelName = body.model?.split("/")[0] || body.model;
                     
-                    const mockResponse = config.generateMockResponse(
-                      modelName,
-                      testCase
-                    );
+                    const mockResponse = config.generateMockResponse(modelName);
 
                     return {
                       statusCode: 200,
@@ -218,10 +215,7 @@ describe("Registry Tests with Provider Configs", () => {
                     const body = JSON.parse(request.body as string);
                     const modelName = body.model?.split("/")[0] || body.model;
 
-                    const mockResponse = config.generateMockResponse(
-                      modelName,
-                      testCase
-                    );
+                    const mockResponse = config.generateMockResponse(modelName);
 
                     return {
                       statusCode: 200,

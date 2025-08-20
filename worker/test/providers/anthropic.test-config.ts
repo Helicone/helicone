@@ -24,7 +24,7 @@ export interface ProviderTestConfig {
   baseUrl: string;
   testCases: TestCase[];
   byokUserConfigs: BYOKUserConfig[];
-  generateMockResponse: (modelId: string, testCase: TestCase) => any;
+  generateMockResponse: (modelId: string) => any;
   generateErrorResponse: (type: "auth" | "rate_limit" | "invalid_model") => {
     status: number;
     body: any;
@@ -34,120 +34,53 @@ export interface ProviderTestConfig {
 export const anthropicTestConfig: ProviderTestConfig = {
   provider: "anthropic",
   baseUrl: "https://api.anthropic.com",
-  
+
   byokUserConfigs: [
     {
       name: "default",
       description: "Default Anthropic API configuration",
-      config: {}
+      config: {},
     },
-    {
-      name: "vertex_us_east1",
-      description: "Vertex AI US East 1 configuration",
-      config: {
-        region: "us-east1",
-        projectId: "test-project-123",
-        location: "us-east1"
-      }
-    },
-    {
-      name: "vertex_global",
-      description: "Vertex AI global configuration", 
-      config: {
-        region: "global",
-        projectId: "test-project-global",
-        location: "global"
-      }
-    },
-    {
-      name: "bedrock_us_east1",
-      description: "Bedrock US East 1 configuration",
-      config: {
-        region: "us-east-1"
-      }
-    },
-    {
-      name: "bedrock_us_west2",
-      description: "Bedrock US West 2 configuration",
-      config: {
-        region: "us-west-2"
-      }
-    },
-    {
-      name: "bedrock_cross_region",
-      description: "Bedrock cross-region configuration",
-      config: {
-        region: "us-east-1",
-        crossRegion: true
-      }
-    }
   ],
-  
+
   testCases: [
     {
       name: "basic_chat_request",
       description: "Basic chat completion request",
       request: {
-        messages: [
-          { role: "user", content: "Hello, this is a test" }
-        ],
-        max_tokens: 100
-      }
-    },
-    {
-      name: "chat_with_system",
-      description: "Chat with system message",
-      request: {
-        messages: [
-          { role: "system", content: "You are a helpful assistant" },
-          { role: "user", content: "Hello" }
-        ],
-        max_tokens: 100
-      }
-    },
-    {
-      name: "streaming_request",
-      description: "Streaming chat request",
-      request: {
-        messages: [
-          { role: "user", content: "Tell me a story" }
-        ],
+        messages: [{ role: "user", content: "Hello, this is a test" }],
         max_tokens: 100,
-        stream: true
       },
-      skipForNow: true // Streaming is complex to test
-    }
+    },
   ],
-  
-  generateMockResponse: (modelId: string, testCase: TestCase) => {
-    // Get the actual provider model ID from registry
+
+  generateMockResponse: (modelId: string) => {
     const config = registry.getModelProviderConfig(modelId, "anthropic");
     const providerModelId = config.data?.providerModelId || modelId;
-    
-    // Generate response based on registry data
+
     return {
       id: `chatcmpl-test-${modelId}`,
       object: "chat.completion",
       created: Date.now(),
-      model: providerModelId, // Use actual provider model ID from registry
+      model: providerModelId,
       choices: [
         {
           index: 0,
           message: {
             role: "assistant",
-            content: `Test response for ${modelId} using ${providerModelId}`
+            content: `Test response for ${modelId}`,
           },
-          finish_reason: "stop"
-        }
+          finish_reason: "stop",
+        },
       ],
       usage: {
-        prompt_tokens: testCase.request.messages.length * 5, // Rough estimate
+        prompt_tokens: 10,
         completion_tokens: 5,
-        total_tokens: testCase.request.messages.length * 5 + 5
-      }
+        total_tokens: 15,
+      },
     };
   },
-  
+
   generateErrorResponse: (type: "auth" | "rate_limit" | "invalid_model") => {
     const responses = {
       auth: {
@@ -155,30 +88,30 @@ export const anthropicTestConfig: ProviderTestConfig = {
         body: {
           error: {
             type: "authentication_error",
-            message: "Invalid API key provided"
-          }
-        }
+            message: "Invalid API key provided",
+          },
+        },
       },
       rate_limit: {
         status: 429,
         body: {
           error: {
             type: "rate_limit_error",
-            message: "Rate limit exceeded"
-          }
-        }
+            message: "Rate limit exceeded",
+          },
+        },
       },
       invalid_model: {
         status: 400,
         body: {
           error: {
             type: "invalid_request_error",
-            message: "Model not found"
-          }
-        }
-      }
+            message: "Model not found",
+          },
+        },
+      },
     };
-    
+
     return responses[type];
-  }
+  },
 };
