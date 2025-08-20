@@ -146,6 +146,7 @@ export interface UserEndpointConfig {
   deploymentName?: string;
   resourceName?: string;
   crossRegion?: boolean;
+  gatewayMapping?: "OPENAI" | "NO_MAPPING";
 }
 
 export interface AuthContext {
