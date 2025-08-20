@@ -28,6 +28,7 @@ import { components } from "@/lib/clients/jawnTypes/public";
 import useNotification from "@/components/shared/notification/useNotification";
 import { CircleCheckBig, CircleDashed } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { HqlErrorDisplay } from "./HqlErrorDisplay";
 
 interface QueryResultProps {
   sql: string;
@@ -51,7 +52,11 @@ function QueryResult({
   }, [result]);
 
   if (error) {
-    return <div className="p-4 text-center text-muted-foreground">{error}</div>;
+    return (
+      <div className="p-4">
+        <HqlErrorDisplay error={error} />
+      </div>
+    );
   }
 
   if (!result || result.length === 0) {
