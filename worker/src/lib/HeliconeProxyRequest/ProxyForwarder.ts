@@ -505,7 +505,6 @@ async function log(
     proxyRequest?.requestWrapper.heliconeHeaders.cloudBillingEnabled;
   // finalize the escrow
   if (cloudBillingEnabled && res.data && escrowInfo && orgData.stripeCustomerId) {
-  
     try {
       const updateResult = await walletStub.updateBalanceIfNeeded(
         orgData.organizationId,

@@ -17201,10 +17201,10 @@ stripe@17.7.0, stripe@^17.7.0:
     "@types/node" ">=8.1.0"
     qs "^6.11.0"
 
-stripe@^18.4.0:
-  version "18.4.0"
-  resolved "https://registry.yarnpkg.com/stripe/-/stripe-18.4.0.tgz#1c0d5a7ed168f1ecd0f4a80d1e947e615d3eb841"
-  integrity sha512-LKFeDnDYo4U/YzNgx2Lc9PT9XgKN0JNF1iQwZxgkS4lOw5NunWCnzyH5RhTlD3clIZnf54h7nyMWkS8VXPmtTQ==
+stripe@^18.5.0-beta.1:
+  version "18.5.0-beta.2"
+  resolved "https://registry.yarnpkg.com/stripe/-/stripe-18.5.0-beta.2.tgz#36149a0475a5793314b20879cd61a2372bc5338d"
+  integrity sha512-McAjKIiI3XayXwjSJ6JjT2sz/gzIp4QsRY+3s5kFnkVzYJR9rWzkWCkJwXXLxcibRv2IOEZ5SWFmLvHE60czmw==
   dependencies:
     qs "^6.11.0"
 

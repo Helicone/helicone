@@ -1326,36 +1326,48 @@ WHERE (${builtFilter.filter})`,
       }
 
       const tokenUsageProductId = process.env.STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT;
+      const rateCardId = process.env.STRIPE_CLOUD_GATEWAY_RATE_CARD_ID;
       if (!tokenUsageProductId) {
         return err("STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT_ID environment variable is not set");
       }
 
       try {
         const unitAmount = amount * 100;
-        const checkoutResult = await this.stripe.checkout.sessions.create({
+
+        const sessionParams = {
           customer: customerId.data,
           success_url: `${origin}/settings/credits`,
           cancel_url: `${origin}/settings/credits`,
-          mode: "payment",
-          line_items: [{
-            price_data: {
-                currency: "usd", 
-                unit_amount: unitAmount,
-                product: tokenUsageProductId,
+          currency: "usd",
+          checkout_items: [
+            {
+              rate_card_subscription_item: {
+                rate_card: rateCardId,
+              },
+              type: "rate_card_subscription_item",
             },
-            quantity: 1,
-          }],
+          ],
           metadata: {
             orgId: this.authParams.organizationId,
             type: "cloud-gateway-tokens",
           },
-        })
+        };
+        const response = await this.stripe.rawRequest(
+          "POST",
+          "/v1/checkout/sessions",
+          sessionParams,
+          { apiVersion: "2025-07-30.preview" }
+        );
 
-        if (checkoutResult.lastResponse.statusCode !== 200) {
+        if (response.lastResponse.statusCode !== 200) {
           return err("Stripe did not return a session URL");
         }
 
-        return ok(checkoutResult.url ?? "");
+        if ("url" in response) {
+          return ok(response.url as string);
+        }
+
+        return err("Stripe did not return a session URL");
       } catch (error: any) {
         return err(`Error creating cloud gateway checkout session: ${error.message}`);
       }

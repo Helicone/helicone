@@ -28,7 +28,7 @@ export class StripeManager {
     this.stripeSecretKey = stripeSecretKey;
     this.wallet = wallet;
     this.stripe = new Stripe(this.stripeSecretKey, {
-      apiVersion: "2025-07-30.basil",
+      apiVersion: "2025-07-30.preview",
       httpClient: Stripe.createFetchHttpClient(),
     });
     this.supabaseClient = supabaseClient;
@@ -85,17 +85,19 @@ export class StripeManager {
 
   async getCreditBalance(
     stripeCustomerId: string
-  ): Promise<{ balance: number }> {
-    const creditBalanceSummary =
-      await this.stripe.billing.creditBalanceSummary.retrieve({
-        customer: stripeCustomerId,
-        filter: {
-          type: "applicability_scope",
-          applicability_scope: {
-            price_type: "metered",
-          },
+  ): Promise<{ balance: number, last_updated_at: number }> {
+    // need to use rawRequest in order to get the `last_updated_at` field
+    const creditBalanceSummary = await this.stripe.rawRequest('POST', '/v1/billing/credit_balance_summary', {
+      customer: stripeCustomerId,
+      filter: {
+        type: "applicability_scope",
+        applicability_scope: {
+          price_type: "metered",
         },
-      });
+      },
+    },
+    { apiVersion: '2025-07-30.preview' }
+  );
 
     if (
       500 <= creditBalanceSummary.lastResponse.statusCode &&
@@ -107,7 +109,9 @@ export class StripeManager {
     }
 
     let totalBalance = 0;
+    let lastUpdatedAt = 0;
     if (
+      "balances" in creditBalanceSummary &&
       creditBalanceSummary.balances &&
       Array.isArray(creditBalanceSummary.balances)
     ) {
@@ -118,18 +122,21 @@ export class StripeManager {
           typeof balance.available_balance?.monetary?.value === "number"
         ) {
           totalBalance += balance.available_balance.monetary.value;
+          if ("last_updated_at" in balance) {
+            lastUpdatedAt = balance.last_updated_at;
+          }
         }
       }
     }
 
-    return { balance: totalBalance };
+    return { balance: totalBalance, last_updated_at: lastUpdatedAt };
   }
 
   async getCreditBalanceWithRetry(
     stripeCustomerId: string
-  ): Promise<Result<{ balance: number }, string>> {
+  ): Promise<Result<{ balance: number, last_updated_at: number }, string>> {
     try {
-      const balance = await retry<{ balance: number }>(
+      const balance = await retry<{ balance: number, last_updated_at: number }>(
         async () => {
           return await this.getCreditBalance(stripeCustomerId);
         },
@@ -178,7 +185,7 @@ export class StripeManager {
       {
         stripe_customer_id: stripeCustomerId,
         model: usage.model,
-        value: usage.promptTokens.toString(),
+        value: usage.completionTokens.toString(),
       }
     );
     if (isError(outputTokenEvent)) {

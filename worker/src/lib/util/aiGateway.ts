@@ -361,6 +361,7 @@ const attemptDirectProviderRequest = async (
       escrowId: escrowReservation.data.escrowId,
       provider: endpoint.provider,
       model: endpoint.providerModelId,
+      endpoint,
     };
     const providerConfiguration =
       await providerKeysManager.getProviderKeyWithFetch(
@@ -610,6 +611,7 @@ export type EscrowInfo = {
   escrowId: string;
   provider: string;
   model: string;
+  endpoint: Endpoint;
 };
 
 const reserveEscrow = async (

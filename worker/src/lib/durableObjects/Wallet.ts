@@ -299,27 +299,75 @@ export class Wallet extends DurableObject {
   ): Promise<Result<void, string>> {
     try {
       return await this.ctx.storage.transactionSync(async () => {
-        const lastCheckedAt =
-          this.ctx.storage.sql
-            .exec<{
-              last_checked_at: number | null;
-            }>("SELECT last_checked_at FROM wallet WHERE orgId = ?", orgId)
-            .one().last_checked_at ?? 0;
-
+        const walletData = this.ctx.storage.sql
+          .exec<{
+            balance: number;
+            last_checked_at: number | null;
+          }>("SELECT balance, last_checked_at FROM wallet WHERE orgId = ?", orgId)
+          .one();
+        
+        const currentBalance = walletData?.balance ?? 0;
+        const lastCheckedAt = walletData?.last_checked_at ?? 0;
         const timeSinceLastCheck = Date.now() - lastCheckedAt;
 
-        if (timeSinceLastCheck > BALANCE_CHECK_THRESHOLD_MS) {
+        // Check more frequently if balance is low
+        const escrowResult = this.ctx.storage.sql
+          .exec<{ total: number }>("SELECT SUM(amount) as total FROM escrows")
+          .next();
+        const escrowSum = escrowResult.value?.total ?? 0;
+        const availableBalance = currentBalance - escrowSum;
+        
+        // Dynamic threshold based on available balance
+        const checkThreshold = availableBalance < 100 * SCALE_FACTOR 
+          ? 10 * 1000  // 10 seconds if balance < $1
+          : availableBalance < 1000 * SCALE_FACTOR
+          ? 20 * 1000  // 20 seconds if balance < $10
+          : BALANCE_CHECK_THRESHOLD_MS; // 30 seconds otherwise
+
+        if (timeSinceLastCheck > checkThreshold) {
           const balanceResult =
             await this.stripeManager.getCreditBalanceWithRetry(stripeCustomerId);
 
           if (balanceResult.data) {
-            const scaledBalance = balanceResult.data.balance * SCALE_FACTOR;
-            this.ctx.storage.sql.exec(
-              "UPDATE wallet SET balance = ?, last_checked_at = ? WHERE orgId = ?",
-              scaledBalance,
-              Date.now(),
-              orgId
-            );
+            const stripeBalance = balanceResult.data.balance * SCALE_FACTOR;
+            const stripeLastUpdated = balanceResult.data.last_updated_at;
+            
+            // Reconciliation logic
+            const localSpend = currentBalance - stripeBalance;
+            const timeSinceStripeUpdate = Date.now() - (stripeLastUpdated * 1000);
+            
+            // If Stripe was updated recently (< 5 seconds), trust it completely
+            if (timeSinceStripeUpdate < 5000) {
+              this.ctx.storage.sql.exec(
+                "UPDATE wallet SET balance = ?, last_checked_at = ? WHERE orgId = ?",
+                stripeBalance,
+                Date.now(),
+                orgId
+              );
+            } 
+            // If there's a significant discrepancy and Stripe data is stale, 
+            // keep the lower balance (conservative approach)
+            else if (Math.abs(localSpend) > 10 * SCALE_FACTOR && timeSinceStripeUpdate > 60000) {
+              const conservativeBalance = Math.min(currentBalance, stripeBalance);
+              this.ctx.storage.sql.exec(
+                "UPDATE wallet SET balance = ?, last_checked_at = ? WHERE orgId = ?",
+                conservativeBalance,
+                Date.now(),
+                orgId
+              );
+              console.warn(
+                `Balance discrepancy for org ${orgId}: Local: ${currentBalance / SCALE_FACTOR}, Stripe: ${stripeBalance / SCALE_FACTOR}, Using: ${conservativeBalance / SCALE_FACTOR}`
+              );
+            }
+            // Otherwise, trust Stripe as source of truth
+            else {
+              this.ctx.storage.sql.exec(
+                "UPDATE wallet SET balance = ?, last_checked_at = ? WHERE orgId = ?",
+                stripeBalance,
+                Date.now(),
+                orgId
+              );
+            }
           } else {
             console.error(
               `Failed to get balance from Stripe for org ${orgId}:`,
