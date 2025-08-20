@@ -29,7 +29,9 @@
       "Bash(rm:*)",
       "Bash(npx prettier:*)",
       "Bash(npx tsc:*)",
-      "Bash(npx jest:*)"
+      "Bash(npx jest:*)",
+      "WebFetch(domain:developers.cloudflare.com)",
+      "WebSearch"
     ],
     "deny": []
   }
