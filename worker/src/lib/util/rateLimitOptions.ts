@@ -1,4 +1,4 @@
-import { RateLimitOptions } from "../clients/KVRateLimiterClient";
+import { RateLimitOptions } from "../clients/DurableObjectRateLimiterClient";
 import { Result, err } from "./results";
 
 export class RateLimitOptionsBuilder {

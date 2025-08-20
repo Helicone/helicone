@@ -20,6 +20,7 @@ export class ClickhouseClientWrapper {
     });
   }
 
+  // TODO dead code
   async dbInsertClickhouse<T extends keyof ClickhouseDB["Tables"]>(
     table: T,
     values: ClickhouseDB["Tables"][T][]
@@ -48,6 +49,7 @@ export class ClickhouseClientWrapper {
     }
   }
 
+  // TODO dead code
   async dbUpdateClickhouse(query: string): Promise<Result<string, string>> {
     try {
       const commandResult = await this.clickHouseClient.command({
