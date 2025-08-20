@@ -6,9 +6,8 @@ import {
   FilterNode,
   TablesAndViews,
   AggregationNode,
-  AggregationFunction,
-  ComparisonOperator,
 } from "./filterDefs";
+import { buildAggregationFunction as buildAggFn } from "./aggregationDefs";
 
 export enum TagType {
   REQUEST = "request",
@@ -536,63 +535,38 @@ export function buildFilterBranch(
   };
 }
 
-// Helper function to build aggregation SQL
-function buildAggregationFunction(func: AggregationFunction, field: string): string {
-  switch (func) {
-    case "sum":
-      return `SUM(${field})`;
-    case "avg":
-      return `AVG(${field})`;
-    case "min":
-      return `MIN(${field})`;
-    case "max":
-      return `MAX(${field})`;
-    case "count":
-      return `COUNT(${field})`;
-    case "p50":
-      return `quantile(0.50)(${field})`;
-    case "p75":
-      return `quantile(0.75)(${field})`;
-    case "p90":
-      return `quantile(0.90)(${field})`;
-    case "p95":
-      return `quantile(0.95)(${field})`;
-    case "p99":
-      return `quantile(0.99)(${field})`;
-    default:
-      return `AVG(${field})`;
-  }
-}
-
 // Helper to extract field name from FilterLeaf
-function extractFieldFromFilterLeaf(leaf: FilterLeaf, keyMappings: KeyMappings): string {
+function extractFieldFromFilterLeaf(
+  leaf: FilterLeaf,
+  keyMappings: KeyMappings
+): string {
   const table = Object.keys(leaf)[0] as keyof FilterLeaf;
   const fieldObj = leaf[table];
-  
-  if (!fieldObj || typeof fieldObj !== 'object') {
+
+  if (!fieldObj || typeof fieldObj !== "object") {
     return "";
   }
-  
+
   // Get the field name (e.g., "latency", "cost", etc.)
   const field = Object.keys(fieldObj)[0];
-  
+
   // Special handling for properties and scores
-  if (field === 'properties' || field === 'scores') {
+  if (field === "properties" || field === "scores") {
     const subFieldObj = (fieldObj as any)[field];
     const subField = Object.keys(subFieldObj || {})[0];
-    return field === 'properties' 
+    return field === "properties"
       ? `properties['${subField}']`
       : `scores['${subField}']`;
   }
-  
+
   // Use key mappings to get the actual column name
   const mapper = keyMappings[table];
-  if (mapper && typeof mapper === 'function') {
+  if (mapper && typeof mapper === "function") {
     const tableObj = { [table]: fieldObj };
     const { column } = mapper(tableObj as any, (v: any) => v);
     return column || field;
   }
-  
+
   return field;
 }
 
@@ -604,24 +578,27 @@ function buildAggregationFilter(
   argsAcc: any[];
 } {
   const { filter, argPlaceHolder, argsAcc, having } = args;
-  
+
   // Extract the field from the FilterLeaf
   const fieldName = extractFieldFromFilterLeaf(
-    filter.field, 
+    filter.field,
     having ? havingKeyMappings : whereKeyMappings
   );
-  
+
   // Build aggregation SQL
-  const aggFunc = buildAggregationFunction(filter.function, fieldName);
-  
+  const aggFunc = buildAggFn(filter.function, fieldName);
+
   // Build comparison
   const comparison = operatorToSql(filter.comparison as AllOperators);
-  
+
   // Add threshold parameter
   const newArgsAcc = [...argsAcc];
   newArgsAcc.push(filter.threshold);
-  const thresholdParam = argPlaceHolder(newArgsAcc.length - 1, filter.threshold);
-  
+  const thresholdParam = argPlaceHolder(
+    newArgsAcc.length - 1,
+    filter.threshold
+  );
+
   return {
     filter: `${aggFunc} ${comparison} ${thresholdParam}`,
     argsAcc: newArgsAcc,
@@ -639,15 +616,20 @@ export function buildFilter(args: BuildFilterArgs): {
       argsAcc,
     };
   }
-  
+
   // Handle AggregationNode
-  if (typeof filter === 'object' && filter !== null && "type" in filter && filter.type === "aggregation") {
+  if (
+    typeof filter === "object" &&
+    filter !== null &&
+    "type" in filter &&
+    filter.type === "aggregation"
+  ) {
     return buildAggregationFilter({
       ...args,
       filter: filter as AggregationNode,
     });
   }
-  
+
   if ("left" in filter) {
     return buildFilterBranch({
       ...args,

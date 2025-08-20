@@ -11,11 +11,21 @@ import { Label } from "@/components/ui/label";
 import { FilterExpression } from "@/filterAST/filterAst";
 import { Small } from "@/components/ui/typography";
 import LocalFilterEditor from "./LocalFilterEditor";
+import {
+  AggregationFunction,
+  ComparisonOperator,
+} from "@helicone-package/filters/filterDefs";
+import {
+  AGGREGATION_FIELDS,
+  AGGREGATION_FUNCTIONS,
+  AggregationFieldDef,
+  COMPARISON_OPERATORS,
+} from "@helicone-package/filters/aggregationDefs";
 
 export type AggregationConfig = {
   field: string;
-  function: string;
-  comparison: string;
+  function: AggregationFunction;
+  comparison: ComparisonOperator;
   threshold: number;
   whereFilter?: FilterExpression | null;
 };
@@ -25,38 +35,6 @@ interface AggregationBuilderProps {
   onChange: (config: AggregationConfig) => void;
 }
 
-const AGGREGATION_FIELDS = [
-  { value: "latency", label: "Latency (ms)" },
-  { value: "cost", label: "Cost ($)" },
-  { value: "completion_tokens", label: "Completion Tokens" },
-  { value: "prompt_tokens", label: "Prompt Tokens" },
-  { value: "total_tokens", label: "Total Tokens" },
-  { value: "time_to_first_token", label: "Time to First Token (ms)" },
-  { value: "status", label: "Status Code" },
-];
-
-const AGGREGATION_FUNCTIONS = [
-  { value: "avg", label: "Average" },
-  { value: "sum", label: "Sum" },
-  { value: "min", label: "Minimum" },
-  { value: "max", label: "Maximum" },
-  { value: "count", label: "Count" },
-  { value: "p50", label: "P50 (Median)" },
-  { value: "p75", label: "P75" },
-  { value: "p90", label: "P90" },
-  { value: "p95", label: "P95" },
-  { value: "p99", label: "P99" },
-];
-
-
-const COMPARISON_OPERATORS = [
-  { value: "gt", label: "Greater than (>)" },
-  { value: "gte", label: "Greater than or equal (≥)" },
-  { value: "lt", label: "Less than (<)" },
-  { value: "lte", label: "Less than or equal (≤)" },
-  { value: "equals", label: "Equals (=)" },
-];
-
 export const AggregationBuilder: React.FC<AggregationBuilderProps> = ({
   value,
   onChange,
@@ -64,11 +42,11 @@ export const AggregationBuilder: React.FC<AggregationBuilderProps> = ({
   const [config, setConfig] = React.useState<AggregationConfig>(
     value || {
       field: "latency",
-      function: "p95",
-      comparison: "gt",
+      function: "p95" as AggregationFunction,
+      comparison: "gt" as ComparisonOperator,
       threshold: 0,
       whereFilter: null,
-    }
+    },
   );
 
   const updateConfig = (updates: Partial<AggregationConfig>) => {
@@ -90,7 +68,7 @@ export const AggregationBuilder: React.FC<AggregationBuilderProps> = ({
               <SelectValue placeholder="Select a field" />
             </SelectTrigger>
             <SelectContent>
-              {AGGREGATION_FIELDS.map((field) => (
+              {AGGREGATION_FIELDS.map((field: AggregationFieldDef) => (
                 <SelectItem key={field.value} value={field.value}>
                   {field.label}
                 </SelectItem>
@@ -103,7 +81,9 @@ export const AggregationBuilder: React.FC<AggregationBuilderProps> = ({
           <Label>Aggregation Function</Label>
           <Select
             value={config.function}
-            onValueChange={(value) => updateConfig({ function: value })}
+            onValueChange={(value) =>
+              updateConfig({ function: value as AggregationFunction })
+            }
           >
             <SelectTrigger>
               <SelectValue placeholder="Select a function" />
@@ -124,7 +104,9 @@ export const AggregationBuilder: React.FC<AggregationBuilderProps> = ({
           <Label>Comparison</Label>
           <Select
             value={config.comparison}
-            onValueChange={(value) => updateConfig({ comparison: value })}
+            onValueChange={(value) =>
+              updateConfig({ comparison: value as ComparisonOperator })
+            }
           >
             <SelectTrigger>
               <SelectValue placeholder="Select comparison" />
@@ -173,15 +155,14 @@ export const AggregationBuilder: React.FC<AggregationBuilderProps> = ({
           of{" "}
           {AGGREGATION_FIELDS.find((f) => f.value === config.field)?.label ||
             config.field}{" "}
-          {COMPARISON_OPERATORS.find((o) => o.value === config.comparison)
-            ?.label.toLowerCase() || config.comparison}{" "}
+          {COMPARISON_OPERATORS.find(
+            (o) => o.value === config.comparison,
+          )?.label.toLowerCase() || config.comparison}{" "}
           {config.threshold}
           {config.whereFilter && (
             <>
               <br />
-              <span className="text-xs">
-                with filter conditions applied
-              </span>
+              <span className="text-xs">with filter conditions applied</span>
             </>
           )}
         </Small>

@@ -1,44 +1,15 @@
-import { FilterNode, AggregationNode, FilterLeaf } from "./filterDefs";
-
-/**
- * Field display names for formatting
- */
-const FIELD_DISPLAY_NAMES: Record<string, { name: string; unit?: string }> = {
-  latency: { name: "Latency", unit: "ms" },
-  cost: { name: "Cost", unit: "$" },
-  completion_tokens: { name: "Completion Tokens", unit: "" },
-  prompt_tokens: { name: "Prompt Tokens", unit: "" },
-  total_tokens: { name: "Total Tokens", unit: "" },
-  time_to_first_token: { name: "Time to First Token", unit: "ms" },
-  status: { name: "Status Code", unit: "" },
-};
-
-/**
- * Aggregation function display names
- */
-const FUNCTION_DISPLAY_NAMES: Record<string, string> = {
-  avg: "Average",
-  sum: "Total",
-  min: "Minimum",
-  max: "Maximum",
-  count: "Count",
-  p50: "P50",
-  p75: "P75",
-  p90: "P90",
-  p95: "P95",
-  p99: "P99",
-};
-
-/**
- * Comparison operator display symbols
- */
-const COMPARISON_SYMBOLS: Record<string, string> = {
-  gt: ">",
-  gte: "≥",
-  lt: "<",
-  lte: "≤",
-  equals: "=",
-};
+import { 
+  FilterNode, 
+  AggregationNode, 
+  FilterLeaf,
+  AggregationFunction,
+  ComparisonOperator
+} from "./filterDefs";
+import { 
+  AGGREGATION_FIELDS_MAP,
+  AGGREGATION_FUNCTIONS_MAP,
+  COMPARISON_OPERATORS_MAP
+} from "./aggregationDefs";
 
 /**
  * Extract field name from FilterLeaf
@@ -146,11 +117,13 @@ export function parseAlertFilter(
  */
 export function formatAggregationDisplay(node: AggregationNode): string {
   const fieldName = extractFieldFromLeaf(node.field);
-  const fieldInfo = fieldName ? FIELD_DISPLAY_NAMES[fieldName] : null;
-  const functionName = FUNCTION_DISPLAY_NAMES[node.function] || node.function.toUpperCase();
-  const comparisonSymbol = COMPARISON_SYMBOLS[node.comparison] || node.comparison;
+  const fieldInfo = fieldName ? AGGREGATION_FIELDS_MAP[fieldName] : null;
+  const funcDef = AGGREGATION_FUNCTIONS_MAP[node.function as AggregationFunction];
+  const functionName = funcDef?.displayName || node.function.toUpperCase();
+  const opDef = COMPARISON_OPERATORS_MAP[node.comparison as ComparisonOperator];
+  const comparisonSymbol = opDef?.symbol || node.comparison;
   
-  const fieldDisplay = fieldInfo ? fieldInfo.name : (fieldName || "field");
+  const fieldDisplay = fieldInfo ? fieldInfo.displayName : (fieldName || "field");
   const unit = fieldInfo?.unit || "";
   
   // Format like: "P95(Latency) > 1000ms"
@@ -180,7 +153,7 @@ export function formatAlertThreshold(
   
   // Handle aggregation metrics
   if (parsed.type === "aggregation" && parsed.field && parsed.threshold !== undefined) {
-    const fieldInfo = FIELD_DISPLAY_NAMES[parsed.field];
+    const fieldInfo = AGGREGATION_FIELDS_MAP[parsed.field];
     const unit = fieldInfo?.unit || "";
     
     if (unit === "$") {
@@ -206,9 +179,10 @@ export function getAlertMetricDisplay(
   const parsed = parseAlertFilter(filter, metric);
   
   if (parsed.type === "aggregation" && parsed.function && parsed.field) {
-    const functionName = FUNCTION_DISPLAY_NAMES[parsed.function] || parsed.function.toUpperCase();
-    const fieldInfo = FIELD_DISPLAY_NAMES[parsed.field];
-    const fieldDisplay = fieldInfo ? fieldInfo.name : parsed.field;
+    const funcDef = AGGREGATION_FUNCTIONS_MAP[parsed.function as AggregationFunction];
+    const functionName = funcDef?.displayName || parsed.function.toUpperCase();
+    const fieldInfo = AGGREGATION_FIELDS_MAP[parsed.field];
+    const fieldDisplay = fieldInfo ? fieldInfo.displayName : parsed.field;
     
     // Short format for table: "P95 Latency"
     return `${functionName} ${fieldDisplay}`;

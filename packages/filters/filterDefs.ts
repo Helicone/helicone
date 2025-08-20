@@ -405,17 +405,17 @@ export type ComparisonOperator =
 
 export interface AggregationNode {
   type: "aggregation";
-  
+
   // The field to aggregate (reuses existing FilterLeaf)
   field: FilterLeaf;
-  
+
   // Aggregation configuration
   function: AggregationFunction;
-  
+
   // Comparison configuration
   comparison: ComparisonOperator;
   threshold: number;
-  
+
   // Optional WHERE clause filters (applied before aggregation)
   where?: FilterNode;
 }
