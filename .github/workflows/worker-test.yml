@@ -1,0 +1,38 @@
+name: Worker Tests
+
+on:
+  push:
+    branches:
+      - "**"  # Run on ALL branches for every push
+  pull_request:
+    branches:
+      - "**"  # Run on ALL branches for PRs
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  worker-tests:
+    name: Worker Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "yarn"
+          cache-dependency-path: worker/yarn.lock
+      
+      - name: Install dependencies
+        working-directory: worker
+        run: yarn install
+      
+      - name: Run tests
+        working-directory: worker
+        run: yarn test
+      
+      # Optional: Include test summary in PR
+      - name: Test Summary
+        if: always()
+        run: |
+          echo "✅ Worker tests completed"
