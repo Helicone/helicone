@@ -60,6 +60,7 @@ export type Log = {
     responseCreatedAt: Date;
     delayMs: number;
     cachedLatency?: number;
+    cost?: number;
   };
 };
 
