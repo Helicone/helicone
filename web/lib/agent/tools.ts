@@ -122,79 +122,83 @@ export const playgroundTools = [
     type: "function" as const,
     function: {
       name: "playground-edit_messages",
-      description: "Sets the entire messages array in the playground. This replaces all existing messages with the provided array.",
+      description:
+        "Sets the entire messages array in the playground. This replaces all existing messages with the provided array.",
       parameters: {
         type: "object",
-        
+
         // SIMPLIFIED input JSON schema for the Message type of MappedLLMRequest, the type used for
         // the playground.
         // does not include several message type and fields that Helix should not be able to input, such as rich media (audio/video).
         properties: {
           messages: {
             type: "array",
-            description: "The complete array of messages to set in the playground",
+            description:
+              "The complete array of messages to set in the playground",
             items: {
               type: "object",
               properties: {
                 _type: {
                   type: "string",
                   enum: ["functionCall", "function", "message", "contentArray"],
-                  description: "The type of the message"
+                  description: "The type of the message",
                 },
                 id: {
                   type: "string",
-                  description: "Unique identifier for the message"
+                  description: "Unique identifier for the message",
                 },
                 role: {
                   type: "string",
                   enum: ["user", "assistant", "system", "tool"],
-                  description: "The role of the message sender"
+                  description: "The role of the message sender",
                 },
                 content: {
                   type: "string",
-                  description: "The content of the message"
+                  description: "The content of the message",
                 },
                 tool_calls: {
                   type: "array",
-                  description: "Array of function calls (only used if _type is functionCall)",
+                  description:
+                    "Array of function calls (only used if _type is functionCall)",
                   items: {
                     type: "object",
                     properties: {
                       id: {
                         type: "string",
-                        description: "Unique identifier for the function call"
+                        description: "Unique identifier for the function call",
                       },
                       name: {
                         type: "string",
-                        description: "Name of the function to call"
+                        description: "Name of the function to call",
                       },
                       arguments: {
                         type: "object",
-                        description: "Arguments to pass to the function"
-                      }
+                        description: "Arguments to pass to the function",
+                      },
                     },
-                    required: ["name", "arguments"]
-                  }
+                    required: ["name", "arguments"],
+                  },
                 },
                 tool_call_id: {
                   type: "string",
-                  description: "ID of the tool call this message is responding to"
+                  description:
+                    "ID of the tool call this message is responding to",
                 },
                 contentArray: {
                   type: "array",
                   description: "Array of nested messages for contentArray type",
                   items: {
-                    $ref: "#/properties/messages/items"
-                  }
+                    $ref: "#/properties/messages/items",
+                  },
                 },
                 reasoning: {
                   type: "string",
-                  description: "Reasoning content for reasoning models"
+                  description: "Reasoning content for reasoning models",
                 },
               },
-              required: ["_type", "role"]
-            }
-          }
+              required: ["_type", "role"],
+            },
+          },
         },
         required: ["messages"],
       },

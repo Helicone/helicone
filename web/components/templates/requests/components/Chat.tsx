@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { MappedLLMRequest, Message } from "@helicone-package/llm-mapper/types";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { LuPlus } from "react-icons/lu";
 import ChatMessage from "./chatComponent/ChatMessage";
 import {
@@ -127,7 +127,6 @@ export default function Chat({
       },
     });
   };
-
 
   const renderMessages = () => {
     if (mode === "PLAYGROUND_INPUT") {

@@ -292,8 +292,11 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           const processedMessages = args.messages.map((message, index) => {
             const processedMessage = { ...message };
             processedMessage.id = `msg-${uuidv4()}`;
-            
-            if (processedMessage._type === "message" && !processedMessage.role) {
+
+            if (
+              processedMessage._type === "message" &&
+              !processedMessage.role
+            ) {
               processedMessage.role = index === 0 ? "system" : "user";
             }
 
@@ -312,7 +315,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           };
 
           setMappedContent(updatedMappedContent);
-          
+
           return {
             success: true,
             message: `Successfully updated ${processedMessages.length} messages`,
@@ -320,7 +323,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         } catch (error) {
           return {
             success: false,
-            message: `Error updating messages: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            message: `Error updating messages: ${error instanceof Error ? error.message : "Unknown error"}`,
           };
         }
       },
