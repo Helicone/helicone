@@ -47,30 +47,7 @@ export class RateLimiterDO extends DurableObject {
     `);
   }
 
-  async fetch(request: Request): Promise<Response> {
-    try {
-      const body: RateLimitRequest = await request.json();
-      const result = await this.processRateLimit(body);
-
-      return new Response(JSON.stringify(result), {
-        headers: { "Content-Type": "application/json" },
-        status: result.status === "rate_limited" ? 429 : 200,
-      });
-    } catch (error) {
-      console.error("[RateLimiterDO] Error:", error);
-      return new Response(
-        JSON.stringify({
-          error: error instanceof Error ? error.message : "Unknown error",
-        }),
-        {
-          status: 500,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-    }
-  }
-
-  private async processRateLimit(
+  public async processRateLimit(
     req: RateLimitRequest
   ): Promise<RateLimitResponse> {
     const now = Date.now();
@@ -141,7 +118,6 @@ export class RateLimiterDO extends DurableObject {
       const finalCurrentUsage = wouldExceed
         ? currentUsage
         : currentUsage + unitCount;
-
 
       return {
         status: wouldExceed ? "rate_limited" : "ok",

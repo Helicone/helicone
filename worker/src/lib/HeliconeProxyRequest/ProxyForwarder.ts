@@ -410,7 +410,12 @@ export async function proxyForwarder(
     if (incurRateLimit && !rate_limited) {
       const db = new DBWrapper(env, auth);
       const { data: orgData, error: orgError } = await db.getAuthParams();
-      if (proxyRequest && finalRateLimitOptions && !orgError) {
+      if (
+        proxyRequest &&
+        finalRateLimitOptions &&
+        !orgError &&
+        orgData?.organizationId
+      ) {
         await updateRateLimitCounterDO({
           organizationId: orgData?.organizationId,
           heliconeProperties:

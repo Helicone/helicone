@@ -23,7 +23,7 @@ interface RateLimitProps {
   heliconeProperties: HeliconeProperties;
   userId: string | undefined;
   rateLimitOptions: RateLimitOptions;
-  organizationId: string | undefined;
+  organizationId: string;
   rateLimiterDO: DurableObjectNamespace<RateLimiterDO>;
   cost: number;
 }
@@ -51,7 +51,7 @@ async function getSegmentKeyValue(
 
 function getDurableObjectId(
   namespace: DurableObjectNamespace<RateLimiterDO>,
-  organizationId: string | undefined,
+  organizationId: string,
   segmentKeyValue: string
 ): DurableObjectId {
   const idString = `${organizationId || "default"}_${segmentKeyValue}`;
@@ -93,24 +93,12 @@ export async function checkRateLimit(
   };
 
   try {
-    const response = await doStub.fetch("http://rate-limiter/check", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(request),
-    });
-
-    if (!response.ok && response.status !== 429) {
-      console.error("[DORateLimit] DO returned error status:", response.status);
-      return { status: "ok", limit: quota, remaining: quota };
-    }
-
-    const doResponse: DORateLimitResponse = await response.json();
-
+    const response = await doStub.processRateLimit(request);
     return {
-      status: doResponse.status,
-      limit: doResponse.limit,
-      remaining: doResponse.remaining,
-      reset: doResponse.reset,
+      status: response.status,
+      limit: response.limit,
+      remaining: response.remaining,
+      reset: response.reset,
     };
   } catch (error) {
     console.error("[DORateLimit] Error calling DO:", error);
@@ -141,25 +129,21 @@ export async function updateRateLimitCounter(
     organizationId,
     segmentKeyValue
   );
-  const doStub = rateLimiterDO.get(doId);
-
-  const request: RateLimitRequest = {
-    segmentKey: segmentKeyValue,
-    timeWindow: time_window,
-    quota,
-    unit,
-    cost: props.cost,
-    checkOnly: false,
-  };
 
   try {
-    const response = await doStub.fetch("http://rate-limiter/update", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(request),
-    });
+    const doStub = rateLimiterDO.get(doId);
 
-    if (!response.ok && response.status !== 429) {
+    const request: RateLimitRequest = {
+      segmentKey: segmentKeyValue,
+      timeWindow: time_window,
+      quota,
+      unit,
+      cost: props.cost,
+      checkOnly: false,
+    };
+
+    const response = await doStub.processRateLimit(request);
+    if (response.status !== "ok") {
       console.error("[DORateLimit] Update failed:", response.status);
     }
   } catch (error) {
