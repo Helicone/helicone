@@ -111,7 +111,7 @@ export const playgroundTools = [
     function: {
       name: "playground-get_messages",
       description:
-        "Gets the messages in the playground with IDs for each message. Always use this before editing a message to get the ID. Returns a JSON string of the messages.",
+        "Gets the messages in the playground with IDs for each message. Always use this before editing messages to get the current state. Returns a JSON string of the messages.",
       parameters: {
         type: "object",
         properties: {},
@@ -121,37 +121,143 @@ export const playgroundTools = [
   {
     type: "function" as const,
     function: {
-      name: "playground-edit_message",
-      description: "Inputs text to edit a certain message in the playground.",
+      name: "playground-edit_messages",
+      description: "Sets the entire messages array in the playground. This replaces all existing messages with the provided array.",
       parameters: {
         type: "object",
         properties: {
-          message_index: {
-            type: "number",
-            description: "The index of the message to edit",
-          },
-          content_array_index: {
-            type: "number",
-            description:
-              "For messages that are content arrays, this is the index of the content array to edit",
-          },
-          text: {
-            type: "string",
-            description: "The text to edit the message with",
-          },
+          messages: {
+            type: "array",
+            description: "The complete array of messages to set in the playground",
+            items: {
+              type: "object",
+              properties: {
+                _type: {
+                  type: "string",
+                  enum: ["functionCall", "function", "image", "file", "message", "autoInput", "contentArray", "audio"],
+                  description: "The type of the message"
+                },
+                id: {
+                  type: "string",
+                  description: "Unique identifier for the message"
+                },
+                role: {
+                  type: "string",
+                  enum: ["user", "assistant", "system", "developer"],
+                  description: "The role of the message sender"
+                },
+                content: {
+                  type: "string",
+                  description: "The content of the message"
+                },
+                instruction: {
+                  type: "string",
+                  description: "Optional instruction for the message"
+                },
+                name: {
+                  type: "string",
+                  description: "Optional name for the message sender"
+                },
+                mime_type: {
+                  type: "string",
+                  description: "MIME type for base64 content"
+                },
+                tool_calls: {
+                  type: "array",
+                  description: "Array of function calls (only used if _type is functionCall)",
+                  items: {
+                    type: "object",
+                    properties: {
+                      id: {
+                        type: "string",
+                        description: "Unique identifier for the function call"
+                      },
+                      name: {
+                        type: "string",
+                        description: "Name of the function to call"
+                      },
+                      arguments: {
+                        type: "object",
+                        description: "Arguments to pass to the function"
+                      }
+                    },
+                    required: ["name", "arguments"]
+                  }
+                },
+                tool_call_id: {
+                  type: "string",
+                  description: "ID of the tool call this message is responding to"
+                },
+                timestamp: {
+                  type: "string",
+                  description: "Timestamp for realtime API"
+                },
+                image_url: {
+                  type: "string",
+                  description: "URL of an image"
+                },
+                audio_data: {
+                  type: "string",
+                  description: "Base64 encoded audio data"
+                },
+                type: {
+                  type: "string",
+                  enum: ["input_image", "input_text", "input_file"],
+                  description: "Type of input"
+                },
+                file_data: {
+                  type: "string",
+                  description: "File data"
+                },
+                file_id: {
+                  type: "string",
+                  description: "File identifier"
+                },
+                filename: {
+                  type: "string",
+                  description: "Name of the file"
+                },
+                detail: {
+                  type: "string",
+                  description: "Detail level for image input"
+                },
+                idx: {
+                  type: "number",
+                  description: "Index of an auto prompt input message"
+                },
+                contentArray: {
+                  type: "array",
+                  description: "Array of nested messages for contentArray type",
+                  items: {
+                    $ref: "#/properties/messages/items"
+                  }
+                },
+                deleted: {
+                  type: "boolean",
+                  description: "Whether the message is deleted (for realtime API)"
+                },
+                reasoning: {
+                  type: "string",
+                  description: "Reasoning content for reasoning models"
+                },
+                start_timestamp: {
+                  type: "string",
+                  description: "Start timestamp for realtime API"
+                },
+                trigger_event_id: {
+                  type: "string",
+                  description: "Event ID that sets start_timestamp"
+                },
+                ending_event_id: {
+                  type: "string",
+                  description: "Event ID that sets timestamp for realtime API"
+                }
+              },
+              required: ["_type"]
+            }
+          }
         },
-        required: ["message_index", "text"],
-      },
-    },
-  },
-  {
-    type: "function" as const,
-    function: {
-      name: "playground-add_blank_message",
-      description: "Adds a blank message to the playground messages.",
-      parameters: {
-        type: "object",
-        properties: {},
+        required: ["messages"],
       },
     },
   },

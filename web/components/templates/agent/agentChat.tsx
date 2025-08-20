@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import BouncingDotsLoader from "@/components/ui/bouncing-dots-loader";
 
@@ -10,7 +10,7 @@ import MessageRenderer from "./MessageRenderer";
 import { SessionDropdown } from "./SessionDropdown";
 import ChatInterface from "./ChatInterface";
 import { useRouter } from "next/router";
-import { UserIcon, XIcon } from "lucide-react";
+import { XIcon } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 
 type Message = NonNullable<OpenAIChatRequest["messages"]>[0];
@@ -21,6 +21,14 @@ export interface QueuedMessage {
   content: string;
   images: File[];
   timestamp: Date;
+}
+
+interface AgentExecutionState {
+  isProcessing: boolean;
+  pendingToolCalls: ToolCall[];
+  currentAssistantMessage?: Message;
+  needsAssistantResponse: boolean; // New flag to trigger assistant response
+  error?: string;
 }
 
 interface AgentChatProps {
@@ -37,9 +45,17 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
   );
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
   const [messageQueue, setMessageQueue] = useState<QueuedMessage[]>([]);
+  
+  const [agentState, setAgentState] = useState<AgentExecutionState>({
+    isProcessing: false,
+    pendingToolCalls: [],
+    needsAssistantResponse: false,
+  });
+  
   const abortController = useRef<AbortController | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatInterfaceRef = useRef<{ focus: () => void }>(null);
+  const isProcessingRef = useRef(false);
 
   const {
     tools,
@@ -70,17 +86,28 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
     scrollToBottom();
   }, [messages]);
 
-  // Focus the chat input when component mounts
   useEffect(() => {
     chatInterfaceRef.current?.focus();
   }, []);
 
-  // Process message queue when streaming stops
   useEffect(() => {
-    if (!isStreaming && messageQueue.length > 0) {
+    if (!isStreaming && !agentState.isProcessing && messageQueue.length > 0) {
       processMessageQueue();
     }
-  }, [isStreaming, messageQueue.length]);
+  }, [isStreaming, agentState.isProcessing, messageQueue.length]);
+
+  useEffect(() => {
+    if (!isStreaming && !isProcessingRef.current) {
+      processPendingToolCalls();
+    }
+  }, [agentState.pendingToolCalls, messages]);
+
+  useEffect(() => {
+    if (agentState.needsAssistantResponse && !isStreaming && !isProcessingRef.current) {
+      setAgentState(prev => ({ ...prev, needsAssistantResponse: false }));
+      getAssistantResponse(messages);
+    }
+  }, [agentState.needsAssistantResponse, messages, tools]);
 
   const processMessageQueue = async () => {
     if (messageQueue.length === 0) return;
@@ -88,12 +115,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
     const nextMessage = messageQueue[0];
     setMessageQueue((prev) => prev.slice(1));
 
-    // // Set the input to the queued message content
-    // setInput(nextMessage.content);
-    // setUploadedImages(nextMessage.images);
-
-    // Send the message
-    await sendMessageInternal(nextMessage.content, nextMessage.images);
+    await sendMessage(nextMessage.content, nextMessage.images);
   };
 
   const handleToolCall = async (toolCall: ToolCall) => {
@@ -117,11 +139,200 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
     });
   };
 
-  const sendMessageInternal = async (
-    messageContent: string,
-    images: File[],
-  ) => {
-    let errorSetInCurrentMessages = false;
+  const processPendingToolCalls = async () => {
+    if (isProcessingRef.current) return;
+    isProcessingRef.current = true;
+
+    const [currentToolCall, ...remainingToolCalls] = agentState.pendingToolCalls;
+    
+    if (!currentToolCall) {
+      setAgentState(prev => ({ ...prev, isProcessing: false }));
+      isProcessingRef.current = false;
+      
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage?.role === "tool") {
+        setAgentState(prev => ({ ...prev, needsAssistantResponse: true }));
+      }
+      return;
+    }
+
+    try {
+      const toolResult = await handleToolCall(currentToolCall);
+      
+      const isNavigationTool = currentToolCall.function.name === "navigate";
+      
+      const toolResultMessage: Message = {
+        role: "tool",
+        tool_call_id: currentToolCall.id,
+        content: toolResult.message,
+      };
+      
+      const updatedMessages = [...messages, toolResultMessage];
+      updateCurrentSessionMessages(updatedMessages, false);
+      
+      if (isNavigationTool) {
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
+      
+      setAgentState(prev => ({
+        ...prev,
+        pendingToolCalls: remainingToolCalls,
+      }));
+      
+      isProcessingRef.current = false;
+    } catch (error) {
+      console.error("Error executing tool:", error);
+      setAgentState(prev => ({
+        ...prev,
+        pendingToolCalls: [],
+        error: `Failed to execute tool: ${currentToolCall.function.name}`,
+        isProcessing: false,
+      }));
+      isProcessingRef.current = false;
+    }
+  };
+
+  const getAssistantResponse = useCallback(async (currentMessages: Message[]) => {
+    if (isProcessingRef.current) return;
+    isProcessingRef.current = true;
+
+    setIsStreaming(true);
+    setisLoading(true);
+    setAgentState(prev => ({ ...prev, isProcessing: true }));
+
+    try {
+      abortController.current = new AbortController();
+
+      const assistantMessageIdx = currentMessages.length;
+      updateCurrentSessionMessages(currentMessages, false);
+
+      const request: OpenAIChatRequest = {
+        model: selectedModel,
+        messages: currentMessages,
+        temperature: 0.7,
+        max_tokens: 1000,
+        tools: tools.map(({ handler, ...tool }) => tool),
+      };
+
+      const stream = await generateStream({
+        ...request,
+        inputs: {
+          page: router.pathname,
+          model: selectedModel.split(",")[0],
+          date: new Date().toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          }),
+        },
+        endpoint: "agent",
+        signal: abortController.current.signal,
+      } as any);
+
+      const emptyAssistantMessage: Message = {
+        role: "assistant",
+        content: "",
+      };
+
+      const result = await processStream(
+        stream,
+        {
+          initialState: {
+            fullContent: JSON.stringify(emptyAssistantMessage),
+          },
+          onUpdate: async (result) => {
+            try {
+              const parsedResponse = JSON.parse(result.fullContent);
+              if (!parsedResponse.content) {
+                parsedResponse.content = "";
+              }
+              
+              let updatedMessages = [...currentMessages];
+              if (!updatedMessages[assistantMessageIdx]) {
+                updatedMessages = [...updatedMessages, parsedResponse];
+              } else {
+                updatedMessages[assistantMessageIdx] = parsedResponse;
+              }
+              
+              updateCurrentSessionMessages(updatedMessages, false);
+              setisLoading(false);
+            } catch (error) {
+              console.error("Failed to parse response:", error);
+            }
+          },
+          onComplete: async (result) => {
+            try {
+              const parsedResponse = JSON.parse(result.fullContent);
+              if (!parsedResponse.content) {
+                parsedResponse.content = "";
+              }
+              
+              let updatedMessages = [...currentMessages];
+              if (!updatedMessages[assistantMessageIdx]) {
+                updatedMessages = [...updatedMessages, parsedResponse];
+              } else {
+                updatedMessages[assistantMessageIdx] = parsedResponse;
+              }
+              
+              updateCurrentSessionMessages(updatedMessages, true);
+              setisLoading(false);
+              
+              if (parsedResponse.tool_calls && parsedResponse.tool_calls.length > 0) {
+                setAgentState(prev => ({
+                  ...prev,
+                  pendingToolCalls: parsedResponse.tool_calls,
+                  currentAssistantMessage: parsedResponse,
+                }));
+              } else {
+                setAgentState(prev => ({
+                  ...prev,
+                  isProcessing: false,
+                  pendingToolCalls: [],
+                }));
+                setTimeout(() => {
+                  chatInterfaceRef.current?.focus();
+                }, 0);
+              }
+            } catch (error) {
+              console.error("Failed to parse response:", error);
+              const errorMessages = addErrorMessage(
+                currentMessages,
+                "Failed to parse response from the AI"
+              );
+              updateCurrentSessionMessages(errorMessages, true);
+              setAgentState(prev => ({
+                ...prev,
+                isProcessing: false,
+                pendingToolCalls: [],
+                error: "Failed to parse response",
+              }));
+            }
+          },
+        },
+        abortController.current.signal,
+      );
+    } catch (error) {
+      console.error("Chat error:", error);
+      const errorMessages = addErrorMessage(
+        currentMessages,
+        "An error occurred while processing your message"
+      );
+      updateCurrentSessionMessages(errorMessages, true);
+      setAgentState(prev => ({
+        ...prev,
+        isProcessing: false,
+        pendingToolCalls: [],
+        error: "Chat error occurred",
+      }));
+    } finally {
+      setIsStreaming(false);
+      setisLoading(false);
+      abortController.current = null;
+      isProcessingRef.current = false;
+    }
+  }, [tools, selectedModel, router.pathname, updateCurrentSessionMessages]);
+
+  const sendMessage = async (messageContent: string, images: File[]) => {
     let userMessage: Message;
 
     if (images.length > 0) {
@@ -159,151 +370,24 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
       };
     }
 
-    let updatedMessages = [...messages, userMessage];
+    const updatedMessages = [...messages, userMessage];
     updateCurrentSessionMessages(updatedMessages, true);
-
-    try {
-      abortController.current = new AbortController();
-
-      let shouldContinue = true;
-      while (shouldContinue) {
-        setIsStreaming(true);
-        setisLoading(true);
-
-        const assistantMessageIdx = updatedMessages.length;
-        updateCurrentSessionMessages(updatedMessages, false);
-
-        const request: OpenAIChatRequest = {
-          model: selectedModel,
-          messages: updatedMessages,
-          temperature: 0.7,
-          max_tokens: 1000,
-          tools: tools.map(({ handler, ...tool }) => tool),
-        };
-
-        const stream = await generateStream({
-          ...request,
-          inputs: {
-            page: router.pathname,
-            model: selectedModel.split(",")[0],
-            date: new Date().toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            }),
-          },
-          endpoint: "agent",
-          signal: abortController.current.signal,
-        } as any);
-
-        const emptyAssistantMessage: Message = {
-          role: "assistant",
-          content: "",
-        };
-
-        const result = await processStream(
-          stream,
-          {
-            initialState: {
-              fullContent: JSON.stringify(emptyAssistantMessage),
-            },
-            onUpdate: async (result) => {
-              try {
-                const parsedResponse = JSON.parse(result.fullContent);
-                // ensure content is set
-                if (!parsedResponse.content) {
-                  parsedResponse.content = "";
-                }
-                if (!updatedMessages[assistantMessageIdx]) {
-                  updatedMessages = [...updatedMessages, parsedResponse];
-                }
-                updatedMessages = updatedMessages.map((msg, idx) =>
-                  idx === assistantMessageIdx ? parsedResponse : msg,
-                );
-                updateCurrentSessionMessages(updatedMessages, false);
-                setisLoading(false);
-              } catch (error) {
-                console.error("Failed to parse response:", error);
-                shouldContinue = false;
-              }
-            },
-            onComplete: async (result) => {
-              try {
-                const parsedResponse = JSON.parse(result.fullContent);
-                // ensure content is set
-                if (!parsedResponse.content) {
-                  parsedResponse.content = "";
-                }
-                if (!updatedMessages[assistantMessageIdx]) {
-                  updatedMessages = [...updatedMessages, parsedResponse];
-                }
-                updatedMessages = updatedMessages.map((msg, idx) =>
-                  idx === assistantMessageIdx ? parsedResponse : msg,
-                );
-                updateCurrentSessionMessages(updatedMessages, true);
-                setisLoading(false);
-              } catch (error) {
-                console.error("Failed to parse response:", error);
-                if (errorSetInCurrentMessages) return;
-                updatedMessages = addErrorMessage(
-                  updatedMessages,
-                  "Failed to parse response from the AI",
-                );
-                errorSetInCurrentMessages = true;
-                updateCurrentSessionMessages(updatedMessages, true);
-              }
-            },
-          },
-          abortController.current.signal,
-        );
-
-        const parsedResponse = JSON.parse(result.fullContent) as Message;
-        if (parsedResponse.tool_calls) {
-          for (const toolCall of parsedResponse.tool_calls) {
-            const toolResult = await handleToolCall(toolCall);
-            const toolResultMessage: Message = {
-              role: "tool",
-              tool_call_id: toolCall.id,
-              content: toolResult.message,
-            };
-            updatedMessages = [...updatedMessages, toolResultMessage];
-            updateCurrentSessionMessages(updatedMessages, false);
-          }
-        } else {
-          shouldContinue = false;
-        }
-      }
-      updateCurrentSessionMessages(updatedMessages, true);
-    } catch (error) {
-      console.error("Chat error:", error);
-      if (errorSetInCurrentMessages) return;
-      updatedMessages = addErrorMessage(
-        updatedMessages,
-        "An error occurred while processing your message",
-      );
-      errorSetInCurrentMessages = true;
-      updateCurrentSessionMessages(updatedMessages, true);
-    } finally {
-      setIsStreaming(false);
-      setisLoading(false);
-      abortController.current = null;
-      // Focus the input after streaming is complete
-      setTimeout(() => {
-        chatInterfaceRef.current?.focus();
-      }, 0);
-    }
+    
+    setAgentState(prev => ({ 
+      ...prev, 
+      needsAssistantResponse: true,
+      isProcessing: true 
+    }));
   };
 
-  const sendMessage = async () => {
+  const handleSendMessage = async () => {
     if (!input.trim() && uploadedImages.length === 0) return;
 
-    // Focus the input after sending the message
     setTimeout(() => {
       chatInterfaceRef.current?.focus();
     }, 0);
 
-    if (isStreaming) {
-      // Queue the message if currently streaming
+    if (isStreaming || agentState.isProcessing) {
       const queuedMessage: QueuedMessage = {
         id: uuidv4(),
         content: input.trim(),
@@ -314,10 +398,11 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
       setInput("");
       setUploadedImages([]);
     } else {
-      // Send immediately if not streaming
-      await sendMessageInternal(input.trim(), uploadedImages);
+      const messageContent = input.trim();
+      const messageImages = [...uploadedImages];
       setInput("");
       setUploadedImages([]);
+      await sendMessage(messageContent, messageImages);
     }
   };
 
@@ -326,6 +411,13 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
       abortController.current.abort();
       setIsStreaming(false);
       setisLoading(false);
+      setAgentState(prev => ({
+        ...prev,
+        isProcessing: false,
+        pendingToolCalls: [],
+        needsAssistantResponse: false,
+      }));
+      isProcessingRef.current = false;
     }
   };
 
@@ -334,25 +426,20 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
   };
 
   const forcePushMessageFromQueue = async (messageId: string) => {
-    // Find the message in the queue
     const messageIndex = messageQueue.findIndex((msg) => msg.id === messageId);
     if (messageIndex === -1) return;
 
     const messageToPush = messageQueue[messageIndex];
 
-    // Stop current generation if streaming
-    if (isStreaming) {
+    if (isStreaming || agentState.isProcessing) {
       stopGeneration();
     }
 
-    // Remove the message from the queue
     setMessageQueue((prev) => prev.filter((msg) => msg.id !== messageId));
 
-    // Wait a bit for the streaming to fully stop
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    // Force push the message to the chat
-    await sendMessageInternal(messageToPush.content, messageToPush.images);
+    await sendMessage(messageToPush.content, messageToPush.images);
   };
 
   return (
@@ -360,15 +447,6 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
       <div className="flex w-full items-center justify-between border-b border-border px-1 py-3">
         <SessionDropdown />
         <div className="flex items-center gap-2">
-          {/* <Button
-            onClick={() => escalateSession()}
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2 border-border bg-background hover:bg-muted"
-          >
-            <UserIcon className="h-3.5 w-3.5" />
-            <span className="text-sm">Talk to a human</span>
-          </Button> */}
           <Button
             onClick={onClose}
             variant="ghost"
@@ -399,6 +477,12 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
           </div>
         )}
 
+        {agentState.pendingToolCalls.length > 0 && (
+          <div className="text-xs text-muted-foreground">
+            Executing {agentState.pendingToolCalls.length} tool{agentState.pendingToolCalls.length > 1 ? 's' : ''}...
+          </div>
+        )}
+
         <div ref={messagesEndRef} />
       </div>
 
@@ -407,8 +491,8 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
         ref={chatInterfaceRef}
         input={input}
         setInput={setInput}
-        onSendMessage={sendMessage}
-        isStreaming={isStreaming}
+        onSendMessage={handleSendMessage}
+        isStreaming={isStreaming || agentState.isProcessing}
         onStopGeneration={stopGeneration}
         selectedModel={selectedModel}
         onModelChange={setSelectedModel}
