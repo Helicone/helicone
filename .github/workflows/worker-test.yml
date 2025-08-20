@@ -17,41 +17,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Use pre-installed Node (faster than setup-node)
-      - name: Check Node version
-        run: |
-          node --version
-          yarn --version
-      
-      # Cache node_modules directly - skip yarn install when cached
-      - name: Cache dependencies
-        id: cache
-        uses: actions/cache@v4
+      # Setup Node with caching
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          path: |
-            node_modules
-            worker/node_modules
-            packages/node_modules
-          key: deps-${{ runner.os }}-${{ hashFiles('yarn.lock', 'worker/yarn.lock', 'packages/yarn.lock') }}
-          restore-keys: |
-            deps-${{ runner.os }}-
+          node-version: 20
+          cache: 'yarn'
       
-      # Only install if node_modules is not cached
+      # Install only what's needed for worker workspace
       - name: Install dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          echo "Cache miss - installing dependencies"
-          # Install from root to get all workspaces
-          yarn install --frozen-lockfile --network-timeout 100000
+          # Install dependencies focusing on worker workspace
+          yarn workspaces focus worker --production=false
       
-      # Log cache status for debugging
-      - name: Cache status
-        run: |
-          if [ "${{ steps.cache.outputs.cache-hit }}" = "true" ]; then
-            echo "✅ Using cached dependencies - skipped yarn install!"
-          else
-            echo "❌ Cache miss - had to run yarn install"
-          fi
       
       - name: Run tests
         working-directory: worker
