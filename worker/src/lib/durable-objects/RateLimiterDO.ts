@@ -142,16 +142,6 @@ export class RateLimiterDO extends DurableObject {
         ? currentUsage
         : currentUsage + unitCount;
 
-      console.log(`[RateLimiterDO] Rate limit check for ${req.segmentKey}:`, {
-        unit: req.unit,
-        quota: req.quota,
-        currentUsage: finalCurrentUsage,
-        remaining: finalRemaining,
-        unitCount,
-        wouldExceed,
-        checkOnly: req.checkOnly,
-        timeWindow: req.timeWindow,
-      });
 
       return {
         status: wouldExceed ? "rate_limited" : "ok",
@@ -163,9 +153,7 @@ export class RateLimiterDO extends DurableObject {
     });
   }
 
-  // Optional: Add a cleanup method that can be called periodically
   async cleanup(olderThanMs: number): Promise<number> {
-    // Get count before deletion
     const countBefore = this.sql
       .exec(
         "SELECT COUNT(*) as count FROM rate_limit_entries WHERE timestamp < ?",
@@ -173,17 +161,14 @@ export class RateLimiterDO extends DurableObject {
       )
       .one();
 
-    // Perform deletion
     this.sql.exec(
       "DELETE FROM rate_limit_entries WHERE timestamp < ?",
       Date.now() - olderThanMs
     );
 
-    // Return number of deleted rows
     return Number(countBefore?.count || 0);
   }
 
-  // Optional: Get current state for debugging
   async getState(segmentKey: string, timeWindow: number): Promise<any> {
     const windowStartMs = Date.now() - timeWindow * 1000;
 
