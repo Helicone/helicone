@@ -205,7 +205,6 @@ async function getFromCacheWithHmac({
   useMemoryCache?: boolean;
   expirationTtl?: number;
 }): Promise<string | null> {
-  return null;
   try {
     const hashedKey = await hashWithHmac(key, hmac_key);
     if (useMemoryCache) {
