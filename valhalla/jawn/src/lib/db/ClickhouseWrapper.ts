@@ -121,7 +121,7 @@ export class ClickhouseClientWrapper {
           wait_end_of_query: 1,
           max_execution_time: 30,
           max_memory_usage: "1000000000",
-          max_rows_to_read: `${100_000_000}`,
+          max_rows_to_read: "10000000",
           max_result_rows: "10000",
           SQL_helicone_organization_id: organizationId,
           readonly: "1",
@@ -307,6 +307,7 @@ export interface RequestResponseRMT {
   gateway_deployment_target?: string;
   prompt_id?: string;
   prompt_version?: string;
+  request_referrer?: string;
 }
 
 export interface Prompt2025Input {
