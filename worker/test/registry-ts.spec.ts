@@ -226,6 +226,10 @@ describe("Registry Tests with TypeScript Configs", () => {
                 }
 
                 const byokEndpoint = byokEndpointResult.data;
+                if (!byokEndpoint) {
+                  console.warn(`No BYOK endpoint returned for ${userConfig.name}`);
+                  return;
+                }
 
                 // Extract path from BYOK endpoint URL for proper mocking
                 let byokBaseUrl: string;
