@@ -119,6 +119,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
   };
 
   const handleToolCall = async (toolCall: ToolCall) => {
+    console.log('toolCall', toolCall);
     const result = await executeTool(
       toolCall.function.name,
       JSON.parse(toolCall.function.arguments),
@@ -234,7 +235,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
         content: "",
       };
 
-      const result = await processStream(
+      await processStream(
         stream,
         {
           initialState: {

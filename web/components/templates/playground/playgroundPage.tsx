@@ -291,14 +291,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
 
           const processedMessages = args.messages.map((message, index) => {
             const processedMessage = { ...message };
-            
-            if (!processedMessage._type) {
-              processedMessage._type = "message";
-            }
-            
-            if (!processedMessage.id) {
-              processedMessage.id = `msg-${uuidv4()}`;
-            }
+            processedMessage.id = `msg-${uuidv4()}`;
             
             if (processedMessage._type === "message" && !processedMessage.role) {
               processedMessage.role = index === 0 ? "system" : "user";

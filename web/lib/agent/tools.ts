@@ -125,6 +125,10 @@ export const playgroundTools = [
       description: "Sets the entire messages array in the playground. This replaces all existing messages with the provided array.",
       parameters: {
         type: "object",
+        
+        // SIMPLIFIED input JSON schema for the Message type of MappedLLMRequest, the type used for
+        // the playground.
+        // does not include several message type and fields that Helix should not be able to input, such as rich media (audio/video).
         properties: {
           messages: {
             type: "array",
@@ -134,7 +138,7 @@ export const playgroundTools = [
               properties: {
                 _type: {
                   type: "string",
-                  enum: ["functionCall", "function", "image", "file", "message", "autoInput", "contentArray", "audio"],
+                  enum: ["functionCall", "function", "message", "contentArray"],
                   description: "The type of the message"
                 },
                 id: {
@@ -143,24 +147,12 @@ export const playgroundTools = [
                 },
                 role: {
                   type: "string",
-                  enum: ["user", "assistant", "system", "developer"],
+                  enum: ["user", "assistant", "system", "tool"],
                   description: "The role of the message sender"
                 },
                 content: {
                   type: "string",
                   description: "The content of the message"
-                },
-                instruction: {
-                  type: "string",
-                  description: "Optional instruction for the message"
-                },
-                name: {
-                  type: "string",
-                  description: "Optional name for the message sender"
-                },
-                mime_type: {
-                  type: "string",
-                  description: "MIME type for base64 content"
                 },
                 tool_calls: {
                   type: "array",
@@ -188,43 +180,6 @@ export const playgroundTools = [
                   type: "string",
                   description: "ID of the tool call this message is responding to"
                 },
-                timestamp: {
-                  type: "string",
-                  description: "Timestamp for realtime API"
-                },
-                image_url: {
-                  type: "string",
-                  description: "URL of an image"
-                },
-                audio_data: {
-                  type: "string",
-                  description: "Base64 encoded audio data"
-                },
-                type: {
-                  type: "string",
-                  enum: ["input_image", "input_text", "input_file"],
-                  description: "Type of input"
-                },
-                file_data: {
-                  type: "string",
-                  description: "File data"
-                },
-                file_id: {
-                  type: "string",
-                  description: "File identifier"
-                },
-                filename: {
-                  type: "string",
-                  description: "Name of the file"
-                },
-                detail: {
-                  type: "string",
-                  description: "Detail level for image input"
-                },
-                idx: {
-                  type: "number",
-                  description: "Index of an auto prompt input message"
-                },
                 contentArray: {
                   type: "array",
                   description: "Array of nested messages for contentArray type",
@@ -232,28 +187,12 @@ export const playgroundTools = [
                     $ref: "#/properties/messages/items"
                   }
                 },
-                deleted: {
-                  type: "boolean",
-                  description: "Whether the message is deleted (for realtime API)"
-                },
                 reasoning: {
                   type: "string",
                   description: "Reasoning content for reasoning models"
                 },
-                start_timestamp: {
-                  type: "string",
-                  description: "Start timestamp for realtime API"
-                },
-                trigger_event_id: {
-                  type: "string",
-                  description: "Event ID that sets start_timestamp"
-                },
-                ending_event_id: {
-                  type: "string",
-                  description: "Event ID that sets timestamp for realtime API"
-                }
               },
-              required: ["_type"]
+              required: ["_type", "role"]
             }
           }
         },
