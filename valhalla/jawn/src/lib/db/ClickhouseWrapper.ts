@@ -308,7 +308,6 @@ export interface RequestResponseRMT {
   gateway_deployment_target?: string;
   prompt_id?: string;
   prompt_version?: string;
-  request_referrer?: string;
 }
 
 export interface Prompt2025Input {
