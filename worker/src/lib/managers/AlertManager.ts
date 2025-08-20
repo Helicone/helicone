@@ -210,13 +210,16 @@ export class AlertManager {
   }
 
   async getAlertState(alert: Alert): Promise<Result<AlertState, string>> {
+    const alertFilter = alert.filter ? JSON.parse(alert.filter as string) : undefined;
+    
     if (alert.metric === "response.status") {
       return await this.alertStore.getErrorRate(
         alert.org_id,
-        alert.time_window
+        alert.time_window,
+        alertFilter
       );
     } else if (alert.metric === "cost") {
-      return await this.alertStore.getCost(alert.org_id, alert.time_window);
+      return await this.alertStore.getCost(alert.org_id, alert.time_window, alertFilter);
     }
 
     return err(`Unsupported metric: ${alert.metric}`);

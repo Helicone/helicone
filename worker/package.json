@@ -42,6 +42,7 @@
     "@clickhouse/client-common": "^0.2",
     "@clickhouse/client-web": "^0.2",
     "@cloudflare/itty-router-openapi": "^1",
+    "@helicone-package/filters": "^1",
     "@helicone/prompts": "^1",
     "@smithy/protocol-http": "^4.1.7",
     "@smithy/signature-v4": "^4.2.3",
