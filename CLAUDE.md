@@ -153,3 +153,4 @@ className="bg-background text-foreground border-border"
 - Follow typography component system
 - Use flexbox + gap for layouts
 - Test in both light and dark modes
+- when making changes to /packages run the tests npx jest __tests__/ in /packages to make sure nothing else is broken
