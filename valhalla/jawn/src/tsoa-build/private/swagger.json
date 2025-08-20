@@ -7961,14 +7961,6 @@
 					}
 				]
 			},
-			"AlertMetricType": {
-				"type": "string",
-				"enum": [
-					"response.status",
-					"cost",
-					"aggregation"
-				]
-			},
 			"Partial_UserMetricsToOperators_": {
 				"properties": {
 					"user_id": {
@@ -8529,9 +8521,6 @@
 					"name": {
 						"type": "string"
 					},
-					"metric": {
-						"$ref": "#/components/schemas/AlertMetricType"
-					},
 					"threshold": {
 						"type": "number",
 						"format": "double"
@@ -8561,7 +8550,6 @@
 				},
 				"required": [
 					"name",
-					"metric",
 					"threshold",
 					"time_window",
 					"emails",

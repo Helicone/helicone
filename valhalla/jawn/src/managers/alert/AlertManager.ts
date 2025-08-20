@@ -5,11 +5,8 @@ import { AlertStore } from "../../lib/stores/AlertStore";
 import { BaseManager } from "../BaseManager";
 import { FilterNode } from "@helicone-package/filters/filterDefs";
 
-import { AlertMetricType } from "@helicone-package/filters/alertDefs";
-
 export interface AlertRequest {
   name: string;
-  metric: AlertMetricType;
   threshold: number;
   time_window: string;
   emails: string[];

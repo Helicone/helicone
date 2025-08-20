@@ -38,15 +38,9 @@ import {
 } from "@/components/ui/command";
 import { Check, ChevronsUpDown, X } from "lucide-react";
 import AggregationBuilder, { AggregationConfig } from "./AggregationBuilder";
-import LocalFilterEditor from "./LocalFilterEditor";
 import { AggregationExpression } from "@/filterAST/filterAst";
-import { Small } from "@/components/ui/typography";
-import { FilterExpression } from "@/filterAST/filterAst";
-import { ALERT_METRIC_DEFINITIONS, AlertMetricType } from "@helicone-package/filters/alertDefs";
-
 export type AlertRequest = {
   name: string;
-  metric: AlertMetricType;
   threshold: number;
   time_window: string;
   emails: string[];
@@ -74,9 +68,6 @@ const AlertForm = (props: AlertFormProps) => {
     return null;
   }, []);
 
-  const [selectedMetric, setSelectedMetric] = useState<AlertMetricType>(
-    (initialValues?.metric as AlertMetricType) || "response.status",
-  );
   const [selectedEmails, setSelectedEmails] = useState<string[]>(
     initialValues?.emails || [],
   );
@@ -91,11 +82,6 @@ const AlertForm = (props: AlertFormProps) => {
   );
   const [showSlackChannels, setShowSlackChannels] = useState<boolean>(
     initialValues ? initialValues.slack_channels.length > 0 : false,
-  );
-  const [alertFilter, setAlertFilter] = useState<FilterExpression | null>(
-    initialValues?.filter
-      ? (initialValues.filter as unknown as FilterExpression)
-      : null,
   );
   const [aggregationConfig, setAggregationConfig] = useState<AggregationConfig>({
     field: "latency",
@@ -140,33 +126,12 @@ const AlertForm = (props: AlertFormProps) => {
     const formData = new FormData(event.currentTarget);
 
     const alertName = formData.get("alert-name") as string;
-    let alertThreshold = Number(formData.get("alert-threshold") as string);
+    const alertThreshold = aggregationConfig.threshold;
     const alertMinRequests = Number(formData.get("min-requests") as string);
-    
-    // For aggregation alerts, use the threshold from aggregationConfig
-    if (selectedMetric === "aggregation") {
-      alertThreshold = aggregationConfig.threshold;
-    }
 
-    if (selectedMetric === "response.status") {
-      if (isNaN(alertThreshold) || alertThreshold < 0 || alertThreshold > 100) {
-        setNotification("Please enter a valid threshold", "error");
-        return;
-      }
-    }
-
-    if (selectedMetric === "cost") {
-      if (isNaN(alertThreshold) || alertThreshold < 0) {
-        setNotification("Please enter a valid threshold", "error");
-        return;
-      }
-    }
-    
-    if (selectedMetric === "aggregation") {
-      if (isNaN(alertThreshold)) {
-        setNotification("Please enter a valid threshold for aggregation", "error");
-        return;
-      }
+    if (isNaN(alertThreshold) || alertThreshold <= 0) {
+      setNotification("Please enter a valid threshold for the aggregation", "error");
+      return;
     }
     if (
       (!showEmails && !showSlackChannels) ||
@@ -179,42 +144,29 @@ const AlertForm = (props: AlertFormProps) => {
       return;
     }
 
-    if (selectedMetric === "") {
-      setNotification("Please select a metric", "error");
-      return;
-    }
-
     if (selectedTimeWindow === "") {
       setNotification("Please select a time window", "error");
       return;
     }
 
-    // Create the filter based on metric type
-    let finalFilter: FilterExpression | null = alertFilter;
-    
-    if (selectedMetric === "aggregation") {
-      // Create properly typed AggregationExpression
-      const aggregationFilter: AggregationExpression = {
-        type: "aggregation",
-        field: {
-          request_response_rmt: {
-            [aggregationConfig.field]: {
-              gte: 0, // Dummy operator for FilterLeaf structure
-            },
+    // All alerts now use aggregation configuration
+    const aggregationFilter: AggregationExpression = {
+      type: "aggregation",
+      field: {
+        request_response_rmt: {
+          [aggregationConfig.field]: {
+            gte: 0, // Dummy operator for FilterLeaf structure
           },
         },
-        function: aggregationConfig.function as AggregationExpression["function"],
-        comparison: aggregationConfig.comparison as AggregationExpression["comparison"],
-        threshold: aggregationConfig.threshold,
-        where: aggregationConfig.whereFilter || undefined,
-      };
-      
-      finalFilter = aggregationFilter;
-    }
+      },
+      function: aggregationConfig.function as AggregationExpression["function"],
+      comparison: aggregationConfig.comparison as AggregationExpression["comparison"],
+      threshold: aggregationConfig.threshold,
+      where: aggregationConfig.whereFilter || undefined,
+    };
 
     handleSubmit({
       name: alertName,
-      metric: selectedMetric,
       threshold: alertThreshold,
       time_window: selectedTimeWindow,
       emails: showEmails ? selectedEmails : [],
@@ -223,7 +175,7 @@ const AlertForm = (props: AlertFormProps) => {
       minimum_request_count: isNaN(alertMinRequests)
         ? undefined
         : alertMinRequests,
-      filter: finalFilter,
+      filter: aggregationFilter,
     });
   };
 
@@ -252,90 +204,12 @@ const AlertForm = (props: AlertFormProps) => {
         />
       </div>
 
-      <div className="col-span-2 w-full space-y-1.5 text-sm">
-        <label
-          htmlFor="alert-metric"
-          className="text-gray-500 dark:text-gray-200"
-        >
-          Metric
-        </label>
-        <Select
-          value={selectedMetric}
-          defaultValue="response.status"
-          onValueChange={(values: AlertMetricType) => {
-            setSelectedMetric(values);
-          }}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select a metric" />
-          </SelectTrigger>
-          <SelectContent>
-            {ALERT_METRIC_DEFINITIONS.map((option, idx) => {
-              return (
-                <SelectItem value={option.id} key={idx}>
-                  {option.label}
-                </SelectItem>
-              );
-            })}
-          </SelectContent>
-        </Select>
+      <div className="col-span-4 w-full space-y-1.5">
+        <AggregationBuilder
+          value={aggregationConfig}
+          onChange={setAggregationConfig}
+        />
       </div>
-      
-      {selectedMetric === "aggregation" ? (
-        <div className="col-span-4 w-full space-y-1.5">
-          <AggregationBuilder
-            value={aggregationConfig}
-            onChange={setAggregationConfig}
-          />
-        </div>
-      ) : (
-        <div className="col-span-2 w-full space-y-1.5 text-sm">
-          <label
-            htmlFor="alert-threshold"
-            className="flex items-center gap-1 text-gray-500 dark:text-gray-200"
-          >
-            Threshold
-            <Tooltip
-              title={
-                selectedMetric === "response.status"
-                  ? "Specify the percentage at which the alert should be triggered. For instance, entering '10%' will trigger an alert when the metric exceeds 10% of the set value."
-                  : "Specify the amount at which the alert should be triggered. For instance, entering '10' will trigger an alert when the metric exceeds $10."
-              }
-            >
-              <InformationCircleIcon className="inline h-4 w-4 text-gray-500" />
-            </Tooltip>
-          </label>
-          <div className="relative">
-            {selectedMetric === "cost" && (
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                <span className="text-gray-500 sm:text-sm" id="price-currency">
-                  $
-                </span>
-              </div>
-            )}
-            <Input
-              type="number"
-              name="alert-threshold"
-              id="alert-threshold"
-              className={clsx(
-                selectedMetric === "response.status" && "pr-8",
-                selectedMetric === "cost" && "pl-8",
-              )}
-              min={selectedMetric === "response.status" ? 1 : 0.01}
-              defaultValue={initialValues?.threshold.toString()}
-              step={0.01}
-              required={selectedMetric !== "aggregation"}
-            />
-            {selectedMetric === "response.status" && (
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                <span className="text-gray-500 sm:text-sm" id="price-currency">
-                  %
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
       <div className="col-span-2 w-full space-y-1.5 text-sm">
         <label
           htmlFor="time-frame"
@@ -386,32 +260,6 @@ const AlertForm = (props: AlertFormProps) => {
         />
       </div>
 
-      {/* Only show filter section for non-aggregation metrics */}
-      {selectedMetric !== "aggregation" && (
-        <div className="col-span-4 w-full space-y-1.5 text-sm">
-          <label
-            htmlFor="filter"
-            className="flex items-center gap-1 text-gray-500 dark:text-gray-200"
-          >
-            Filter Conditions (optional){" "}
-            <Tooltip title="Define filters to make this alert only trigger for specific requests (e.g., specific project, user, or custom properties)">
-              <InformationCircleIcon className="inline h-4 w-4 text-gray-500" />
-            </Tooltip>
-          </label>
-          <div className="space-y-2">
-            <LocalFilterEditor
-              value={alertFilter}
-              onChange={setAlertFilter}
-              placeholder="Add filter conditions"
-            />
-            <Small className="text-muted-foreground">
-              Filter conditions allow you to create alerts that only trigger
-              for specific requests (e.g., specific projects, users, or custom
-              properties).
-            </Small>
-          </div>
-        </div>
-      )}
 
       <div className="col-span-4 w-full space-y-1.5 rounded-md bg-gray-100 p-6 dark:bg-gray-900">
         <h3 className="font-semibold text-gray-500">Notify By</h3>

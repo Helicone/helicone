@@ -48,6 +48,7 @@ const AGGREGATION_FUNCTIONS = [
   { value: "p99", label: "P99" },
 ];
 
+
 const COMPARISON_OPERATORS = [
   { value: "gt", label: "Greater than (>)" },
   { value: "gte", label: "Greater than or equal (≥)" },

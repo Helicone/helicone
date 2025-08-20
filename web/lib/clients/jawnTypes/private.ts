@@ -2909,8 +2909,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_AlertResponse.string_": components["schemas"]["ResultSuccess_AlertResponse_"] | components["schemas"]["ResultError_string_"];
-    /** @enum {string} */
-    AlertMetricType: "response.status" | "cost" | "aggregation";
     /** @description Make all properties in T optional */
     Partial_UserMetricsToOperators_: {
       user_id?: components["schemas"]["Partial_TextOperators_"];
@@ -3103,7 +3101,6 @@ Json: JsonObject;
     };
     AlertRequest: {
       name: string;
-      metric: components["schemas"]["AlertMetricType"];
       /** Format: double */
       threshold: number;
       time_window: string;

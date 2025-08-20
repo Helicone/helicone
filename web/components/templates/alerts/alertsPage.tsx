@@ -20,6 +20,11 @@ import "@/styles/settings-tables.css";
 import { SettingsContainer } from "@/components/ui/settings-container";
 import "@/styles/settings.css";
 import { Database } from "@/db/database.types";
+import { 
+  parseAlertFilter, 
+  formatAlertThreshold, 
+  getAlertMetricDisplay 
+} from "@helicone-package/filters/alertHelpers";
 
 const AlertsPage = () => {
   const [createNewAlertModal, setCreateNewAlertModal] = useState(false);
@@ -134,7 +139,7 @@ const AlertsPage = () => {
               { name: "Status", key: "status", hidden: false },
               { name: "Created", key: "created_at", hidden: false },
               { name: "Threshold", key: "threshold", hidden: false },
-              { name: "Metric", key: "metric", hidden: false },
+              { name: "Alert Type", key: "metric", hidden: false },
               { name: "Time Window", key: "time_window", hidden: false },
               {
                 name: "Min Requests",
@@ -149,13 +154,15 @@ const AlertsPage = () => {
               },
             ]}
             rows={alerts?.map((key) => {
+              const parsedFilter = parseAlertFilter(key.filter as any, key.metric);
+              
               return {
                 ...key,
                 key_name: (
                   <div className="flex items-center gap-2">
                     <p className="text-xs font-semibold">{key.name}</p>
-                    {key.filter && (
-                      <Tooltip title="Has filter conditions">
+                    {(key.filter || parsedFilter.hasWhereClause) && (
+                      <Tooltip title={parsedFilter.hasWhereClause ? "Has WHERE conditions" : "Has filter conditions"}>
                         <Filter className="h-3 w-3 text-muted-foreground" />
                       </Tooltip>
                     )}
@@ -186,17 +193,12 @@ const AlertsPage = () => {
                 ),
                 threshold: (
                   <p className="text-xs">
-                    {key.metric === "response.status" && (
-                      <span>{`${key.threshold}%`}</span>
-                    )}
-                    {key.metric === "cost" && (
-                      <span>{`$${Number(key.threshold).toFixed(2)}`}</span>
-                    )}
+                    {formatAlertThreshold(key.filter as any, key.metric, Number(key.threshold))}
                   </p>
                 ),
                 metric: (
                   <Badge variant="helicone">
-                    {key.metric === "response.status" ? "status" : key.metric}
+                    {getAlertMetricDisplay(key.filter as any, key.metric)}
                   </Badge>
                 ),
                 time_window: (

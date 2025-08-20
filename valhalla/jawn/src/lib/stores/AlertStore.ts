@@ -2,7 +2,6 @@ import { AlertRequest, AlertResponse } from "../../managers/alert/AlertManager";
 import { err, ok, Result } from "../../packages/common/result";
 import { Database } from "../db/database.types";
 import { dbExecute } from "../shared/db/dbExecute";
-import { ALERT_METRIC_DEFINITIONS } from "@helicone-package/filters/alertDefs";
 
 import { BaseStore } from "./baseStore";
 
@@ -74,7 +73,7 @@ export class AlertStore extends BaseStore {
     `;
     const parameters = [
       alert.name,
-      alert.metric,
+      "aggregation", // All alerts are now aggregation-based
       alert.threshold,
       alert.time_window,
       alert.emails,
@@ -133,21 +132,8 @@ export class AlertStore extends BaseStore {
     if (typeof alert.threshold !== "number" || alert.threshold <= 0)
       return { data: null, error: "Invalid threshold" };
 
-    if (alert.metric === "cost" && alert.threshold < 0.01)
-      return { data: null, error: "Invalid threshold" };
-
-    if (
-      alert.metric === "response.status" &&
-      (alert.threshold > 100 || alert.threshold <= 0)
-    )
-      return { data: null, error: "Invalid threshold" };
-
     if (!isValidTimePeriod(parseInt(alert.time_window)))
       return { data: null, error: "Invalid time_window" };
-
-    const allowedMetrics = ALERT_METRIC_DEFINITIONS.map(def => def.id);
-    if (!allowedMetrics.includes(alert.metric))
-      return { data: null, error: "Invalid metric" };
 
     if (!isValidEmailArray(alert.emails))
       return { data: null, error: "Invalid emails" };
