@@ -7822,6 +7822,14 @@
 								"id": {
 									"type": "string"
 								},
+								"filter": {
+									"allOf": [
+										{
+											"$ref": "#/components/schemas/Json"
+										}
+									],
+									"nullable": true
+								},
 								"emails": {
 									"items": {
 										"type": "string"
@@ -7846,6 +7854,7 @@
 								"minimum_request_count",
 								"metric",
 								"id",
+								"filter",
 								"emails",
 								"created_at"
 							],
@@ -8689,7 +8698,7 @@
 			},
 			"url.URL": {
 				"type": "string",
-				"description": "The URL interface represents an object providing static methods used for creating object URLs.\n\n[MDN Reference](https://developer.mozilla.org/docs/Web/API/URL)\n`URL` class is a global reference for `import { URL } from 'node:url'`\nhttps://nodejs.org/api/url.html#the-whatwg-url-api"
+				"description": "The **`URL`** interface is used to parse, construct, normalize, and encode URL.\n\n[MDN Reference](https://developer.mozilla.org/docs/Web/API/URL)\n`URL` class is a global reference for `import { URL } from 'node:url'`\nhttps://nodejs.org/api/url.html#the-whatwg-url-api"
 			},
 			"stripe.Stripe.Application": {
 				"description": "The Application object.",
