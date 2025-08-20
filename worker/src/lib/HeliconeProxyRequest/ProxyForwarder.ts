@@ -5,10 +5,7 @@ import {
   checkRateLimit as checkRateLimitDO,
   updateRateLimitCounter as updateRateLimitCounterDO,
 } from "../clients/DurableObjectRateLimiterClient";
-import {
-  checkRateLimit as checkRateLimitKV,
-  updateRateLimitCounter as updateRateLimitCounterKV,
-} from "../clients/KVRateLimiterClient";
+
 import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
 import { checkPromptSecurity } from "../clients/PromptSecurityClient";
 import { S3Client } from "../clients/S3Client";
@@ -143,28 +140,14 @@ export async function proxyForwarder(
 
         if (finalRateLimitOptions) {
           try {
-            // Use Durable Object rate limiter if available, otherwise fall back to KV
-            const useDurableObject =
-              env.RATE_LIMITER_SQL && env.USE_DO_RATE_LIMITER === "true";
-
-            const rateLimitCheckResult = useDurableObject
-              ? await checkRateLimitDO({
-                  organizationId: orgData.organizationId,
-                  heliconeProperties: proxyRequest.heliconeProperties,
-                  rateLimiterDO: env.RATE_LIMITER_SQL,
-                  rateLimitOptions: finalRateLimitOptions,
-                  userId: proxyRequest.userId,
-                  cost: 0,
-                })
-              : await checkRateLimitKV({
-                  organizationId: orgData.organizationId,
-                  heliconeProperties: proxyRequest.heliconeProperties,
-                  rateLimitKV: env.RATE_LIMIT_KV,
-                  rateLimitOptions: finalRateLimitOptions,
-                  userId: proxyRequest.userId,
-                  cost: 0,
-                });
-
+            const rateLimitCheckResult = await checkRateLimitDO({
+              organizationId: orgData.organizationId,
+              heliconeProperties: proxyRequest.heliconeProperties,
+              rateLimiterDO: env.RATE_LIMITER_SQL,
+              rateLimitOptions: finalRateLimitOptions,
+              userId: proxyRequest.userId,
+              cost: 0,
+            });
             responseBuilder.addRateLimitHeaders(
               rateLimitCheckResult,
               finalRateLimitOptions
@@ -424,35 +407,19 @@ export async function proxyForwarder(
       console.error("Error logging", res.error);
     }
 
-    if (incurRateLimit) {
+    if (incurRateLimit && !rate_limited) {
       const db = new DBWrapper(env, auth);
       const { data: orgData, error: orgError } = await db.getAuthParams();
       if (proxyRequest && finalRateLimitOptions && !orgError) {
-        // Use Durable Object rate limiter if available, otherwise fall back to KV
-        const useDurableObject =
-          env.RATE_LIMITER_SQL && env.USE_DO_RATE_LIMITER === "true";
-
-        if (useDurableObject) {
-          await updateRateLimitCounterDO({
-            organizationId: orgData?.organizationId,
-            heliconeProperties:
-              proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
-            rateLimiterDO: env.RATE_LIMITER_SQL,
-            rateLimitOptions: finalRateLimitOptions,
-            userId: proxyRequest.userId,
-            cost: res.data?.cost ?? 0,
-          });
-        } else {
-          await updateRateLimitCounterKV({
-            organizationId: orgData?.organizationId,
-            heliconeProperties:
-              proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
-            rateLimitKV: env.RATE_LIMIT_KV,
-            rateLimitOptions: finalRateLimitOptions,
-            userId: proxyRequest.userId,
-            cost: res.data?.cost ?? 0,
-          });
-        }
+        await updateRateLimitCounterDO({
+          organizationId: orgData?.organizationId,
+          heliconeProperties:
+            proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
+          rateLimiterDO: env.RATE_LIMITER_SQL,
+          rateLimitOptions: finalRateLimitOptions,
+          userId: proxyRequest.userId,
+          cost: res.data?.cost ?? 0,
+        });
       }
     }
   }

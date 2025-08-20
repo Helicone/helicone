@@ -1,10 +1,23 @@
 import { HeliconeProperties } from "../models/HeliconeProxyRequest";
-import { RateLimitOptions, RateLimitResponse } from "./KVRateLimiterClient";
 import {
   RateLimitRequest,
   RateLimitResponse as DORateLimitResponse,
   RateLimiterDO,
 } from "../durable-objects/RateLimiterDO";
+
+export interface RateLimitOptions {
+  time_window: number;
+  segment: string | undefined;
+  quota: number;
+  unit: "request" | "cents";
+}
+
+export interface RateLimitResponse {
+  status: "ok" | "rate_limited";
+  limit: number;
+  remaining: number;
+  reset?: number;
+}
 
 interface RateLimitProps {
   heliconeProperties: HeliconeProperties;
@@ -37,7 +50,7 @@ async function getSegmentKeyValue(
 }
 
 function getDurableObjectId(
-  namespace: DurableObjectNamespace,
+  namespace: DurableObjectNamespace<RateLimiterDO>,
   organizationId: string | undefined,
   segmentKeyValue: string
 ): DurableObjectId {

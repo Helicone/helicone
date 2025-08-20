@@ -11,10 +11,6 @@ durable_objects.bindings = [
 	{ name = "RATE_LIMITER_SQL", class_name = "RateLimiterDO" },
 ]
 
-[[migrations]]
-tag = "v1"
-new_sqlite_classes = ["RateLimiterDO"]
-
 kv_namespaces = [
 	{ binding = "RATE_LIMIT_KV", id = "0492dc9511cb4ed5b6f012a85354fa34", preview_id = "d275df550f7a4276ad50a3115f3e84b4" },
 	{ binding = "CACHE_KV", id = "81f49b61645345a499b37e3944c3502d", preview_id = "9d7e936c78be456c8c7e296a15215837" },
@@ -163,6 +159,7 @@ routes = [
 
 durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
+	{ name = "RATE_LIMITER_SQL", class_name = "RateLimiterDO" },
 ]
 
 kv_namespaces = [
@@ -236,6 +233,7 @@ kv_namespaces = [
 
 durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
+	{ name = "RATE_LIMITER_SQL", class_name = "RateLimiterDO" },
 ]
 
 queues.producers = [
@@ -278,3 +276,7 @@ deleted_classes = ["AtomicAlerter"]
 tag = "v6"
 new_classes = ["InMemoryRateLimiter"]
 deleted_classes = ["AtomicRateLimiter"]
+
+[[migrations]]
+tag = "v7"
+new_sqlite_classes = ["RateLimiterDO"]

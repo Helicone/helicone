@@ -3,7 +3,7 @@ curl -i -X POST "$OPENAI_PROXY_URL" \
   -H "Helicone-Auth: Bearer $HELICONE_API_KEY" \
   -H "Content-Type: application/json" \
   -H "Helicone-User-Id: user-1233" \
-  -H "Helicone-RateLimit-Policy: 1;w=10000000;u=cents;s=user" \
+  -H "Helicone-RateLimit-Policy: 2;w=10;u=request;s=user" \
   -d '{
     "model": "gpt-4o-mini",
     "messages": [
