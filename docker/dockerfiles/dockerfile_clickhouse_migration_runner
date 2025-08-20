@@ -14,4 +14,4 @@ RUN find /app -name ".env.*" -exec rm {} \;
 RUN python3 -m pip install -r requirements.txt
 ENV CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD}
 
-CMD python3 ch_hcone.py --upgrade --host ${CLICKHOUSE_HOST} --port ${CLICKHOUSE_PORT} --user ${CLICKHOUSE_USER} --no-password
+CMD python3 ch_hcone.py --upgrade --host ${CLICKHOUSE_HOST} --port ${CLICKHOUSE_PORT} --user ${CLICKHOUSE_USER} --no-password --skip-confirmation
