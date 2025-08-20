@@ -21,14 +21,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'yarn'
-          cache-dependency-path: worker/yarn.lock  # Specific path, no glob!
-      
+          cache: "yarn"
+          cache-dependency-path: worker/yarn.lock # Specific path, no glob!
+
       # Always run yarn install, but it's FAST with cache
       - name: Install dependencies
         working-directory: worker
         run: yarn install --frozen-lockfile --prefer-offline
-      
+
       - name: Run tests
         working-directory: worker
         run: yarn test
