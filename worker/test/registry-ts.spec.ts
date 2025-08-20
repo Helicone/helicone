@@ -331,13 +331,12 @@ describe("Registry Tests with TypeScript Configs", () => {
             for (const provider of providersResult.data) {
               const key = `${modelId}:${provider}`;
 
-              // Get PTB endpoints
-              const ptbEndpointsResult = registry.getPtbEndpointsByProvider(
+              // Get PTB endpoints with deployment IDs
+              const ptbEndpointsResult = registry.getPtbEndpointsWithIds(
                 modelId,
                 provider
               );
-              const ptbUrls =
-                ptbEndpointsResult.data?.map((ep) => ep.baseUrl) || [];
+              const ptbEndpoints = ptbEndpointsResult.data || {};
 
               // Get BYOK endpoints for different configurations
               const modelConfigResult = registry.getModelProviderConfig(
@@ -373,9 +372,9 @@ describe("Registry Tests with TypeScript Configs", () => {
                 }
               }
 
-              if (ptbUrls.length > 0 || Object.keys(byokUrls).length > 0) {
+              if (Object.keys(ptbEndpoints).length > 0 || Object.keys(byokUrls).length > 0) {
                 allEndpoints[key] = {
-                  ptb: ptbUrls.sort(), // Sort for consistent snapshots
+                  ptb: ptbEndpoints, // Now includes deployment IDs!
                   byok: byokUrls,
                 };
               }
