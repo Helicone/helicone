@@ -28,7 +28,7 @@ jobs:
       # Install only worker dependencies
       - name: Install dependencies
         working-directory: worker
-        run: yarn install --frozen-lockfile
+        run: yarn install --frozen-lockfile --network-timeout 100000
       
       
       - name: Run tests
