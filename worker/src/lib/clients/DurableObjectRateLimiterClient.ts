@@ -54,8 +54,6 @@ function getDurableObjectId(
   organizationId: string | undefined,
   segmentKeyValue: string
 ): DurableObjectId {
-  // Create a unique ID based on org and segment
-  // This ensures rate limits are isolated per organization
   const idString = `${organizationId || "default"}_${segmentKeyValue}`;
   return namespace.idFromName(idString);
 }
@@ -72,21 +70,12 @@ export async function checkRateLimit(
   } = props;
   const { time_window, segment, quota, unit } = rateLimitOptions;
 
-  console.log("[DORateLimit] Props:", {
-    heliconeProperties,
-    userId,
-    rateLimitOptions,
-    organizationId,
-  });
-
   const segmentKeyValue = await getSegmentKeyValue(
     heliconeProperties,
     userId,
     segment
   );
-  console.log("[DORateLimit] segmentKeyValue:", segmentKeyValue);
 
-  // Get the Durable Object instance
   const doId = getDurableObjectId(
     rateLimiterDO,
     organizationId,
@@ -100,10 +89,8 @@ export async function checkRateLimit(
     quota,
     unit,
     cost: props.cost,
-    checkOnly: true, // Only checking, not updating yet
+    checkOnly: true,
   };
-
-  console.log("[DORateLimit] Sending request to DO:", request);
 
   try {
     const response = await doStub.fetch("http://rate-limiter/check", {
@@ -114,41 +101,19 @@ export async function checkRateLimit(
 
     if (!response.ok && response.status !== 429) {
       console.error("[DORateLimit] DO returned error status:", response.status);
-      // If DO fails (but not rate limited), allow the request to proceed
       return { status: "ok", limit: quota, remaining: quota };
     }
 
     const doResponse: DORateLimitResponse = await response.json();
-    console.log("[DORateLimit] DO response:", doResponse);
 
-    // Convert DO response to expected format
-    const result = {
+    return {
       status: doResponse.status,
       limit: doResponse.limit,
       remaining: doResponse.remaining,
       reset: doResponse.reset,
     };
-
-    // Log the final rate limit status with unit information
-    console.log(
-      `[DORateLimit] Final rate limit result for ${segmentKeyValue}:`,
-      {
-        status: result.status,
-        unit: unit,
-        limit: result.limit,
-        remaining: result.remaining,
-        reset: result.reset,
-        message:
-          unit === "cents"
-            ? `${result.remaining} cents remaining out of ${result.limit} cents quota`
-            : `${result.remaining} requests remaining out of ${result.limit} requests quota`,
-      }
-    );
-
-    return result;
   } catch (error) {
     console.error("[DORateLimit] Error calling DO:", error);
-    // On error, allow the request to proceed
     return { status: "ok", limit: quota, remaining: quota };
   }
 }
