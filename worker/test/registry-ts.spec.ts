@@ -78,46 +78,6 @@ describe("Registry Tests with Provider Configs", () => {
         serviceMocks = mockRequiredServices();
       });
 
-      beforeEach(() => {
-        const ptbEndpoints = getAllPtbEndpointsForProvider(provider);
-        
-        const testCaseMap = new Map(
-          config.testCases.map(tc => [tc.name, tc])
-        );
-
-        ptbEndpoints.forEach((path, baseUrl) => {
-          fetchMock
-            .get(baseUrl)
-            .intercept({
-              path: path,
-              method: "POST",
-            })
-            .reply((request) => {
-              const body = JSON.parse(request.body as string);
-              const modelName = body.model?.split("/")[0] || body.model;
-              
-              const testCase = testCaseMap.get(body.testCaseName);
-              if (!testCase) {
-                throw new Error(`Test case not found: ${body.testCaseName}`);
-              }
-
-              const mockResponse = config.generateMockResponse(
-                modelName,
-                testCase
-              );
-
-              return {
-                statusCode: 200,
-                data: mockResponse,
-                responseOptions: {
-                  headers: { "content-type": "application/json" },
-                },
-              };
-            })
-            .persist();
-        });
-      });
-
       afterAll(() => {
         fetchMock.deactivate();
       });
@@ -136,6 +96,36 @@ describe("Registry Tests with Provider Configs", () => {
 
           activeTestCases.forEach((testCase) => {
             it(`should handle ${testCase.name}`, async () => {
+              const ptbEndpoints = getAllPtbEndpointsForProvider(provider);
+              
+              ptbEndpoints.forEach((path, baseUrl) => {
+                fetchMock
+                  .get(baseUrl)
+                  .intercept({
+                    path: path,
+                    method: "POST",
+                  })
+                  .reply((request) => {
+                    const body = JSON.parse(request.body as string);
+                    const modelName = body.model?.split("/")[0] || body.model;
+                    
+                    const mockResponse = config.generateMockResponse(
+                      modelName,
+                      testCase
+                    );
+
+                    return {
+                      statusCode: 200,
+                      data: mockResponse,
+                      responseOptions: {
+                        headers: { "content-type": "application/json" },
+                      },
+                    };
+                  })
+                  .persist();
+
+              });
+
               const response = await SELF.fetch(
                 "https://ai-gateway.helicone.ai/v1/chat/completions",
                 {
@@ -148,7 +138,6 @@ describe("Registry Tests with Provider Configs", () => {
                   body: JSON.stringify({
                     model: `${modelId}/${provider}`,
                     ...testCase.request,
-                    testCaseName: testCase.name,
                   }),
                 }
               );
@@ -257,7 +246,6 @@ describe("Registry Tests with Provider Configs", () => {
                       body: JSON.stringify({
                         model: `${modelId}/${provider}`,
                         ...testCase.request,
-                        testCaseName: testCase.name,
                       }),
                     }
                   );
