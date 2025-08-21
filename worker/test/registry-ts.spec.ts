@@ -1,13 +1,10 @@
 import { SELF, fetchMock } from "cloudflare:test";
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { registry } from "@helicone-package/cost/models/registry";
+import { UserEndpointConfig } from "@helicone-package/cost/models/types";
 import "./setup";
-import {
-  anthropicPtbTestCases,
-  anthropicByokTestCases,
-  generateMockResponse,
-  type TestCase,
-} from "./providers/anthropic.test-config";
+import { type TestCase } from "./providers/base.test-config";
+import { anthropicTestConfig } from "./providers/anthropic.test-config";
 
 function mockRequiredServices() {
   const callTrackers = {
@@ -41,6 +38,62 @@ function mockRequiredServices() {
   return { s3Mock, loggingMock, callTrackers };
 }
 
+function mockProviderEndpoint(
+  modelId: string,
+  provider: string,
+  statusCode: number,
+  byokConfig: UserEndpointConfig = {}
+) {
+  const config = registry.getModelProviderConfig(modelId, provider).data;
+  if (!config) return;
+
+  const endpoint = registry.buildEndpoint(config, byokConfig).data;
+  if (!endpoint) return;
+
+  const url = new URL(endpoint.baseUrl);
+
+  if (statusCode === 200) {
+    // For now just use anthropic config, in future we'll have a map of providers
+    const testConfig = anthropicTestConfig;
+    
+    fetchMock
+      .get(`${url.protocol}//${url.host}`)
+      .intercept({ path: url.pathname, method: "POST" })
+      .reply((request) => {
+        const body = JSON.parse(request.body as string);
+        const modelName = body.model?.split("/")[0] || body.model;
+        return {
+          statusCode: 200,
+          data: testConfig.generateMockResponse(modelName),
+          responseOptions: { headers: { "content-type": "application/json" } },
+        };
+      })
+      .persist();
+  } else {
+    fetchMock
+      .get(`${url.protocol}//${url.host}`)
+      .intercept({ path: url.pathname, method: "POST" })
+      .reply(() => ({ statusCode, data: { error: "Provider failed" } }))
+      .persist();
+  }
+}
+
+function setupTestMocks(testCase: TestCase) {
+  const byokConfig = testCase.byokConfig || {};
+
+  if (testCase.testType === "multi-provider-fallback") {
+    // Mock failures for specified providers (with same byokConfig)
+    testCase.failProviders?.forEach((failProvider) => {
+      mockProviderEndpoint(testCase.modelId, failProvider, 500, byokConfig);
+    });
+  }
+
+  // Mock success for the target provider
+  if (testCase.provider) {
+    mockProviderEndpoint(testCase.modelId, testCase.provider, 200, byokConfig);
+  }
+}
+
 describe("Registry Tests", () => {
   beforeAll(() => {
     fetchMock.activate();
@@ -52,109 +105,83 @@ describe("Registry Tests", () => {
     fetchMock.deactivate();
   });
 
-  describe("PTB Tests", () => {
-    const ptbTestCases: TestCase[] = [
-      ...anthropicPtbTestCases,
-    ];
-    
-    ptbTestCases.forEach((testCase) => {
-      it(testCase.name, async () => {
-        const endpointsResult = registry.getPtbEndpointsByProvider(testCase.modelId, testCase.provider);
-        const endpoints = endpointsResult.data || [];
-        
-        endpoints.forEach((endpoint) => {
-          const url = new URL(endpoint.baseUrl);
-          const baseUrl = `${url.protocol}//${url.host}`;
-          const path = url.pathname;
-          
-          fetchMock
-            .get(baseUrl)
-            .intercept({
-              path: path,
-              method: "POST",
-            })
-            .reply((request) => {
-              const body = JSON.parse(request.body as string);
-              const modelName = body.model?.split("/")[0] || body.model;
-              return {
-                statusCode: 200,
-                data: generateMockResponse(modelName),
-                responseOptions: {
-                  headers: { "content-type": "application/json" },
-                },
-              };
-            })
-            .persist();
-        });
+  // PTB Tests commented out - PTB is not currently active (see aiGateway.ts line 241)
+  // describe("PTB Tests", () => {
+  //   const ptbTestCases: TestCase[] = [...anthropicTestConfig.generatePtbTestCases()];
 
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: "Bearer sk-helicone-aaa1234-bbb1234-ccc1234-ddd1234",
-            },
-            body: JSON.stringify({
-              model: `${testCase.modelId}/${testCase.provider}`,
-              ...testCase.request,
-            }),
-          }
-        );
+  //   ptbTestCases.forEach((testCase) => {
+  //     it(testCase.name, async () => {
+  //       if (!testCase.provider) {
+  //         console.warn(`No provider specified for ${testCase.name}`);
+  //         return;
+  //       }
+  //       const endpointsResult = registry.getPtbEndpointsByProvider(
+  //         testCase.modelId,
+  //         testCase.provider
+  //       );
+  //       const endpoints = endpointsResult.data || [];
 
-        expect(response.status).toBe(200);
-        const body = (await response.json()) as any;
-        expect(body).toHaveProperty("model");
-        expect(body).toHaveProperty("usage");
-        expect(body.usage.total_tokens).toBe(
-          body.usage.prompt_tokens + body.usage.completion_tokens
-        );
-      });
-    });
-  });
+  //       endpoints.forEach((endpoint) => {
+  //         const url = new URL(endpoint.baseUrl);
+  //         const baseUrl = `${url.protocol}//${url.host}`;
+  //         const path = url.pathname;
+
+  //         fetchMock
+  //           .get(baseUrl)
+  //           .intercept({
+  //             path: path,
+  //             method: "POST",
+  //           })
+  //           .reply((request) => {
+  //             const body = JSON.parse(request.body as string);
+  //             const modelName = body.model?.split("/")[0] || body.model;
+  //             return {
+  //               statusCode: 200,
+  //               data: generateMockResponse(modelName),
+  //               responseOptions: {
+  //                 headers: { "content-type": "application/json" },
+  //               },
+  //             };
+  //           })
+  //           .persist();
+  //       });
+
+  //       const response = await SELF.fetch(
+  //         "https://ai-gateway.helicone.ai/v1/chat/completions",
+  //         {
+  //           method: "POST",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //             Authorization:
+  //               "Bearer sk-helicone-aaa1234-bbb1234-ccc1234-ddd1234",
+  //           },
+  //           body: JSON.stringify({
+  //             model: `${testCase.modelId}/${testCase.provider}`,
+  //             ...testCase.request,
+  //           }),
+  //         }
+  //       );
+
+  //       expect(response.status).toBe(200);
+  //       const body = (await response.json()) as any;
+  //       expect(body).toHaveProperty("model");
+  //       expect(body).toHaveProperty("usage");
+  //       expect(body.usage.total_tokens).toBe(
+  //         body.usage.prompt_tokens + body.usage.completion_tokens
+  //       );
+  //     });
+  //   });
+  // });
 
   describe("BYOK Tests", () => {
     const byokTestCases: TestCase[] = [
-      ...anthropicByokTestCases,
+      ...anthropicTestConfig.generateByokTestCases(),
+      // Future: ...bedrockTestConfig.generateByokTestCases(),
     ];
-    
+
     byokTestCases.forEach((testCase) => {
       it(testCase.name, async () => {
-        const modelConfig = registry.getModelProviderConfig(testCase.modelId, testCase.provider);
-        if (!modelConfig.data) {
-          console.warn(`No config found for ${testCase.modelId}:${testCase.provider}`);
-          return;
-        }
-        
-        const byokEndpointResult = registry.buildEndpoint(modelConfig.data, testCase.byokConfig || {});
-        if (!byokEndpointResult.data) {
-          console.warn(`Cannot build BYOK endpoint for ${testCase.name}`);
-          return;
-        }
-        
-        const byokEndpoint = byokEndpointResult.data;
-        const url = new URL(byokEndpoint.baseUrl);
-        const baseUrl = `${url.protocol}//${url.host}`;
-        const path = url.pathname;
-        
-        fetchMock
-          .get(baseUrl)
-          .intercept({
-            path: path,
-            method: "POST",
-          })
-          .reply((request) => {
-            const body = JSON.parse(request.body as string);
-            const modelName = body.model?.split("/")[0] || body.model;
-            return {
-              statusCode: 200,
-              data: generateMockResponse(modelName),
-              responseOptions: {
-                headers: { "content-type": "application/json" },
-              },
-            };
-          })
-          .persist();
+        setupTestMocks(testCase);
 
         const response = await SELF.fetch(
           "https://ai-gateway.helicone.ai/v1/chat/completions",
@@ -162,10 +189,11 @@ describe("Registry Tests", () => {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: "Bearer sk-helicone-aaa1234-bbb1234-ccc1234-ddd1234",
+              Authorization:
+                "Bearer sk-helicone-aaa1234-bbb1234-ccc1234-ddd1234",
             },
             body: JSON.stringify({
-              model: `${testCase.modelId}/${testCase.provider}`,
+              model: testCase.modelString,
               ...testCase.request,
             }),
           }
