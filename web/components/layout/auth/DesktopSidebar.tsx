@@ -47,7 +47,7 @@ const DesktopSidebar = ({
   const router = useRouter();
   const onboardingStatus = orgContext?.currentOrg
     ?.onboarding_status as unknown as OnboardingState;
-  
+
   const [isCollapsed, setIsCollapsed] = useLocalStorage(
     "isSideBarCollapsed",
     false,

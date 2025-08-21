@@ -1,27 +1,16 @@
-import {
-  ChevronDown,
-  Plus,
-  Trash2,
-  AlertCircle,
-  MessageSquareIcon,
-} from "lucide-react";
+import { Trash2, AlertCircle, MessageSquareIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useHeliconeAgent } from "./HeliconeAgentContext";
 
 export function SessionDropdown() {
-  const {
-    sessions,
-    currentSessionId,
-    switchToSession,
-    deleteSession,
-  } = useHeliconeAgent();
+  const { sessions, currentSessionId, switchToSession, deleteSession } =
+    useHeliconeAgent();
 
   return (
     <DropdownMenu>

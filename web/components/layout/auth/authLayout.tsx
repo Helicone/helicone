@@ -136,7 +136,10 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const sidebarRef = useRef<HTMLDivElement>(null);
 
   return (
-    <HeliconeAgentProvider agentChatOpen={chatWindowOpen} setAgentChatOpen={setChatWindowOpen}>
+    <HeliconeAgentProvider
+      agentChatOpen={chatWindowOpen}
+      setAgentChatOpen={setChatWindowOpen}
+    >
       <MetaData title={currentPage}>
         <div>
           <DemoModal />
