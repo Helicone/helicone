@@ -10,6 +10,7 @@ import { DecryptedProviderKey } from "../VaultManager";
 import { ProviderName } from "@helicone-package/cost/models/providers";
 import { dbProviderToProvider } from "@helicone-package/cost/models/provider-helpers";
 import { setProviderKeys } from "../../lib/refetchKeys";
+import { init } from "@paralleldrive/cuid2";
 
 type HashedPasswordRow = {
   hashed_password: string;
@@ -253,12 +254,14 @@ export class KeyManager extends BaseManager {
         providerSecretKey,
       } = data;
 
-      // Note: Removed the logic that soft deletes existing keys to allow multiple keys per provider
+      const createId = init({ length: 12 });
+
+      const providerKeyCUID = createId();
 
       // Insert the new key
       const result = await dbExecute<{ id: string }>(
-        `INSERT INTO provider_keys (provider_name, provider_key_name, provider_key, provider_secret_key, org_id, soft_delete, config)
-         VALUES ($1, $2, $3, $4, $5, $6, $7)
+        `INSERT INTO provider_keys (provider_name, provider_key_name, provider_key, provider_secret_key, org_id, soft_delete, config, cuid)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
          RETURNING id`,
         [
           providerName,
@@ -268,6 +271,7 @@ export class KeyManager extends BaseManager {
           this.authParams.organizationId,
           false,
           config,
+          providerKeyCUID,
         ]
       );
 
@@ -375,8 +379,9 @@ export class KeyManager extends BaseManager {
         decrypted_provider_secret_key: string | null;
         provider_key_name: string;
         provider_name: string;
+        cuid?: string | null;
       }>(
-        `SELECT id, org_id, decrypted_provider_key, decrypted_provider_secret_key, provider_key_name, provider_name, provider_secret_key
+        `SELECT id, org_id, decrypted_provider_key, decrypted_provider_secret_key, provider_key_name, provider_name, provider_secret_key, cuid
          FROM decrypted_provider_keys_v2
          WHERE id = $1
          AND org_id = $2
@@ -397,6 +402,7 @@ export class KeyManager extends BaseManager {
         provider_name: key.provider_name,
         provider_key_name: key.provider_key_name,
         provider_secret_key: key.decrypted_provider_secret_key ?? null,
+        cuid: key.cuid,
       };
 
       return ok(providerKey);
@@ -593,6 +599,7 @@ export class KeyManager extends BaseManager {
           auth_type: key.auth_type,
           config: key.config,
           orgId: this.authParams.organizationId,
+          cuid: key.cuid,
         })) ?? []
       );
 

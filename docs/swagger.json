@@ -260,6 +260,10 @@
 			},
 			"DecryptedProviderKey": {
 				"properties": {
+					"cuid": {
+						"type": "string",
+						"nullable": true
+					},
 					"provider_secret_key": {
 						"type": "string",
 						"nullable": true

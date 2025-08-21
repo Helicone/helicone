@@ -699,6 +699,7 @@ export interface components {
       name?: string;
     };
     DecryptedProviderKey: {
+      cuid?: string | null;
       provider_secret_key: string | null;
       provider_key_name: string | null;
       provider_name: string | null;
