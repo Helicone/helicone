@@ -329,7 +329,7 @@ const ChatInterface = forwardRef<{ focus: () => void }, ChatInterfaceProps>(
                   ? "Type your message (will be queued)..."
                   : isDragOver
                     ? "Drop images here..."
-                    : "Type your message..."
+                    : `Type your message... (Press ⌘ + I to open this window)`
               }
               className="w-full resize-none border-0 bg-transparent p-2 text-[13px] focus-visible:ring-0 focus-visible:ring-offset-0"
               style={{ minHeight: "24px" }}

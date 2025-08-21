@@ -51,6 +51,8 @@ interface HeliconeAgentContextType {
   switchToSession: (sessionId: string) => void;
   deleteSession: (sessionId: string) => void;
   escalateSession: () => void;
+  agentChatOpen: boolean;
+  setAgentChatOpen: (open: boolean) => void;
 }
 
 const HeliconeAgentContext = createContext<
@@ -84,9 +86,11 @@ const getToolsForRoute = (pathname: string): HeliconeAgentTool[] => {
 
 // TODO: utils to get contexts
 
-export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const HeliconeAgentProvider: React.FC<{
+  children: React.ReactNode;
+  agentChatOpen: boolean;
+  setAgentChatOpen: (open: boolean) => void;
+}> = ({ children, agentChatOpen, setAgentChatOpen }) => {
   const router = useRouter();
   const [tools, setTools] = useState<HeliconeAgentTool[]>([]);
   const [toolHandlers, setToolHandlers] = useState<
@@ -265,6 +269,8 @@ export const HeliconeAgentProvider: React.FC<{ children: React.ReactNode }> = ({
         },
         currentSessionId,
         messages: messages,
+        agentChatOpen,
+        setAgentChatOpen,
         escalateSession: () => {
           escalateThread({
             params: {
