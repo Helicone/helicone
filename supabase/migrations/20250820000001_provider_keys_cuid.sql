@@ -17,28 +17,28 @@ SELECT
   pk.provider_secret_key,
 
   -- decrypted_provider_key
-  -- CASE
-  --   WHEN pk.provider_key IS NULL OR pk.key_id IS NULL THEN NULL
-  --   ELSE convert_from(
-  --          pgsodium.crypto_aead_det_decrypt(
-  --            decode(translate(pk.provider_key, '-_', '+/'), 'base64'),
-  --            convert_to(pk.org_id::text, 'utf8'),
-  --            pk.key_id,
-  --            pk.nonce),
-  --          'utf8')
-  -- END AS decrypted_provider_key,
+  CASE
+    WHEN pk.provider_key IS NULL OR pk.key_id IS NULL THEN NULL
+    ELSE convert_from(
+           pgsodium.crypto_aead_det_decrypt(
+             decode(translate(pk.provider_key, '-_', '+/'), 'base64'),
+             convert_to(pk.org_id::text, 'utf8'),
+             pk.key_id,
+             pk.nonce),
+           'utf8')
+  END AS decrypted_provider_key,
 
   -- -- decrypted_provider_secret_key
-  -- CASE
-  --   WHEN pk.provider_secret_key IS NULL OR pk.key_id IS NULL THEN NULL
-  --   ELSE convert_from(
-  --          pgsodium.crypto_aead_det_decrypt(
-  --            decode(translate(pk.provider_secret_key, '-_', '+/'), 'base64'),
-  --            convert_to(pk.org_id::text, 'utf8'),
-  --            pk.key_id,
-  --            pk.nonce),
-  --          'utf8')
-  -- END AS decrypted_provider_secret_key,
+  CASE
+    WHEN pk.provider_secret_key IS NULL OR pk.key_id IS NULL THEN NULL
+    ELSE convert_from(
+           pgsodium.crypto_aead_det_decrypt(
+             decode(translate(pk.provider_secret_key, '-_', '+/'), 'base64'),
+             convert_to(pk.org_id::text, 'utf8'),
+             pk.key_id,
+             pk.nonce),
+           'utf8')
+  END AS decrypted_provider_secret_key,
 
   pk.key_id,
   pk.auth_type,
