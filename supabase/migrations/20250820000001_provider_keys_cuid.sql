@@ -14,7 +14,9 @@ SELECT
   pk.soft_delete,
   pk.created_at,
   pk.provider_key,
+  -- pk.provider_key as decrypted_provider_key, -- this is only for local mock
   pk.provider_secret_key,
+  -- pk.provider_secret_key as decrypted_provider_secret_key, -- this is only for local mock
 
   -- decrypted_provider_key
   CASE
@@ -43,6 +45,6 @@ SELECT
   pk.key_id,
   pk.auth_type,
   pk.nonce,
-  pk.config
+  pk.config,
   pk.cuid
 FROM public.provider_keys pk;
