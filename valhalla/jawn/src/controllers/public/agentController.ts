@@ -15,13 +15,14 @@ import { type JawnAuthenticatedRequest } from "../../types/request";
 import { type OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
 import OpenAI from "openai";
 import { getHeliconeDefaultTempKey } from "../../lib/experiment/tempKeys/tempAPIKey";
-import { ENVIRONMENT } from "../../lib/clients/constant";
+import { ENVIRONMENT, GET_KEY } from "../../lib/clients/constant";
 import { HeliconeChatCreateParams } from "@helicone-package/prompts/types";
 import {
   InAppThreadsManager,
   InAppThread,
   ThreadSummary,
 } from "../../managers/InAppThreadsManager";
+
 
 @Route("v1/agent")
 @Tags("Agent")
@@ -59,6 +60,8 @@ export class AgentController extends Controller {
           tempKey.error || "Failed to generate temporary API key"
         );
       }
+
+      const PROMPT_ID = await GET_KEY("key:helix_prompt_id");
 
       return tempKey.data.with<
         Result<
@@ -100,8 +103,7 @@ export class AgentController extends Controller {
               stream_options: { include_usage: true },
 
               // Helicone Prompt Params
-              prompt_id:
-                bodyParams.prompt_id ?? process.env.HELI_AGENT_PROMPT_ID,
+              prompt_id: bodyParams.prompt_id ?? PROMPT_ID,
               environment: bodyParams.environment,
               inputs: bodyParams.inputs,
             } as HeliconeChatCreateParams,
