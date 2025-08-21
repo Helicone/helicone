@@ -3,6 +3,7 @@ import dynamic from "next/dynamic";
 import { markdownComponents } from "@/components/shared/prompts/ResponsePanel";
 import { useState } from "react";
 import { ImageModal } from "../requests/components/chatComponent/single/images/ImageModal";
+import { User } from "lucide-react";
 
 const markdownStyling =
   "w-full text-[13px] prose-p:my-2 prose-h1:mt-2 prose-h1:font-bold prose-h2:mt-2 prose-h3:mt-2 prose-h3:mb-1 prose-a:text-brand prose-a:underline";
@@ -11,7 +12,9 @@ const ReactMarkdown = dynamic(() => import("react-markdown"), {
   loading: () => <div className="h-4 w-full animate-pulse rounded bg-muted" />,
 });
 
-type Message = NonNullable<OpenAIChatRequest["messages"]>[0];
+type Message = NonNullable<OpenAIChatRequest["messages"]>[0] & {
+  name?: string; // Team member name from Slack
+};
 
 interface MessageRendererProps {
   message: Message;
@@ -103,9 +106,22 @@ const MessageRenderer = ({ message }: MessageRendererProps) => {
   }
 
   if (message.role === "assistant") {
+    // Check if this is a human response (has a name field from Slack)
+    const isHumanResponse = !!message.name;
+    
     return (
       <div className="w-full">
-        <div className="w-full text-sm text-foreground">
+        {isHumanResponse && (
+          <div className="mb-2 flex items-center gap-2">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/30">
+              <User className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
+            </div>
+            <span className="text-xs font-medium text-purple-600 dark:text-purple-400">
+              {message.name} from Helicone Support
+            </span>
+          </div>
+        )}
+        <div className={`w-full text-sm text-foreground ${isHumanResponse ? 'rounded-lg border border-purple-200 bg-purple-50 p-3 dark:border-purple-900 dark:bg-purple-950/20' : ''}`}>
           {typeof message.content === "string" && (
             <ReactMarkdown
               components={markdownComponents}

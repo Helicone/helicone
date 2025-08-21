@@ -156,6 +156,21 @@ export const HeliconeAgentProvider: React.FC<{
     },
   );
 
+  const { mutate: createAndEscalateThread } = $JAWN_API.useMutation(
+    "post",
+    "/v1/agent/thread/create-and-escalate",
+    {
+      onSuccess: (data) => {
+        // Switch to the newly created thread
+        if (data.data?.id) {
+          setCurrentSessionId(data.data.id);
+        }
+        refetchThreads();
+        refetchThread();
+      },
+    },
+  );
+
   const { mutate: deleteThread } = $JAWN_API.useMutation(
     "delete",
     "/v1/agent/thread/{sessionId}",
@@ -272,13 +287,20 @@ export const HeliconeAgentProvider: React.FC<{
         agentChatOpen,
         setAgentChatOpen,
         escalateSession: () => {
-          escalateThread({
-            params: {
-              path: {
-                sessionId: currentSessionId || "",
+          // Check if we have messages/existing thread
+          if (messages.length > 1 && currentSessionId) {
+            // Escalate existing thread
+            escalateThread({
+              params: {
+                path: {
+                  sessionId: currentSessionId,
+                },
               },
-            },
-          });
+            });
+          } else {
+            // Create new thread and escalate it
+            createAndEscalateThread({});
+          }
         },
         createNewSession: () => {
           const newSessionId = crypto.randomUUID();

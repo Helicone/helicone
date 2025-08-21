@@ -36,7 +36,9 @@
       "WebFetch(domain:gist.github.com)",
       "Bash(gh run list:*)",
       "Bash(gh run view:*)",
-      "Bash(gh run watch:*)"
+      "Bash(gh run watch:*)",
+      "Bash(curl:*)",
+      "Bash(yarn lint:*)"
     ],
     "deny": []
   }

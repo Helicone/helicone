@@ -64,6 +64,8 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
     currentSession,
     createNewSession,
   } = useHeliconeAgent();
+  
+  const [escalating, setEscalating] = useState(false);
 
   const addErrorMessage = (
     updatedMessages: Message[],
@@ -409,11 +411,22 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
     const updatedMessages = [...messages, userMessage];
     updateCurrentSessionMessages(updatedMessages, true);
 
-    setAgentState((prev) => ({
-      ...prev,
-      needsAssistantResponse: true,
-      isProcessing: true,
-    }));
+    // Only trigger AI response if thread is not escalated
+    if (!currentSession?.escalated) {
+      setAgentState((prev) => ({
+        ...prev,
+        needsAssistantResponse: true,
+        isProcessing: true,
+      }));
+    } else {
+      // Show a subtle message that the message was sent to human support
+      const systemMessage: Message = {
+        role: "assistant",
+        content: "💬 Your message has been sent to our support team. They'll respond here shortly.",
+      };
+      const messagesWithFeedback = [...updatedMessages, systemMessage];
+      updateCurrentSessionMessages(messagesWithFeedback, true);
+    }
   };
 
   const handleSendMessage = async (input: string, uploadedImages: File[]) => {
@@ -504,6 +517,30 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
         </div>
       </div>
 
+      {/* Escalation Banner */}
+      {currentSession?.escalated && (
+        <div className="mx-3 mb-2 rounded-lg border border-green-200 bg-green-50 p-3 dark:border-green-800 dark:bg-green-950/20">
+          <div className="flex items-start gap-3">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+              <Clock className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <h4 className="text-sm font-medium text-green-800 dark:text-green-200">
+                  Human support connected
+                </h4>
+                <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900/50 dark:text-green-300">
+                  Live
+                </span>
+              </div>
+              <p className="mt-1 text-sm text-green-700 dark:text-green-300">
+                We are looping in a human to this chat. Please wait for them to respond. Typical response time is ~1 hour.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex-1 space-y-2 overflow-y-auto px-3 py-1">
         {messages.length === 0 && (
           <div className="text-center text-sm text-muted-foreground">
@@ -543,6 +580,29 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
         onModelChange={setSelectedModel}
         onForcePushMessage={forcePushMessageFromQueue}
         onRemoveFromQueue={removeFromQueue}
+        isEscalated={currentSession?.escalated}
+        onEscalate={() => {
+          setEscalating(true);
+          try {
+            escalateSession();
+            // Show success message in chat
+            const systemMessage: Message = {
+              role: "assistant",
+              content: "🎯 I've escalated your request to our support team. They'll respond here shortly. You can continue asking questions while you wait."
+            };
+            updateCurrentSessionMessages([...messages, systemMessage], true);
+          } catch (error) {
+            console.error("Failed to escalate:", error);
+            const errorMessage: Message = {
+              role: "assistant",
+              content: "❌ Sorry, I couldn't connect you to support right now. Please try again or email support@helicone.ai"
+            };
+            updateCurrentSessionMessages([...messages, errorMessage], true);
+          } finally {
+            setTimeout(() => setEscalating(false), 1000); // Small delay to show the animation
+          }
+        }}
+        isEscalating={escalating}
       />
     </div>
   );
