@@ -2716,6 +2716,14 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_void_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "BulkDeleteSavedQueriesRequest": {
+        "dataType": "refObject",
+        "properties": {
+            "ids": {"dataType":"array","array":{"dataType":"string"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ResultSuccess_HqlSavedQuery-Array_": {
         "dataType": "refObject",
         "properties": {
@@ -8662,6 +8670,37 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'deleteSavedQuery',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsHeliconeSqlController_bulkDeleteSavedQueries: Record<string, TsoaRoute.ParameterSchema> = {
+                requestBody: {"in":"body","name":"requestBody","required":true,"ref":"BulkDeleteSavedQueriesRequest"},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.post('/v1/helicone-sql/saved-queries/bulk-delete',
+            ...(fetchMiddlewares<RequestHandler>(HeliconeSqlController)),
+            ...(fetchMiddlewares<RequestHandler>(HeliconeSqlController.prototype.bulkDeleteSavedQueries)),
+
+            async function HeliconeSqlController_bulkDeleteSavedQueries(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsHeliconeSqlController_bulkDeleteSavedQueries, request, response });
+
+                const controller = new HeliconeSqlController();
+
+              await templateService.apiHandler({
+                methodName: 'bulkDeleteSavedQueries',
                 controller,
                 response,
                 next,

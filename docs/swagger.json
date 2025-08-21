@@ -8421,6 +8421,21 @@
 					}
 				]
 			},
+			"BulkDeleteSavedQueriesRequest": {
+				"properties": {
+					"ids": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"ids"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"ResultSuccess_HqlSavedQuery-Array_": {
 				"properties": {
 					"data": {
@@ -17801,6 +17816,38 @@
 						}
 					}
 				]
+			}
+		},
+		"/v1/helicone-sql/saved-queries/bulk-delete": {
+			"post": {
+				"operationId": "BulkDeleteSavedQueries",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_void.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"HeliconeSql"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/BulkDeleteSavedQueriesRequest"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/helicone-sql/saved-query": {
