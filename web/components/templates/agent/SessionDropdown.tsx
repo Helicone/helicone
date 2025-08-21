@@ -18,7 +18,6 @@ import { useHeliconeAgent } from "./HeliconeAgentContext";
 export function SessionDropdown() {
   const {
     sessions,
-    currentSession,
     currentSessionId,
     createNewSession,
     switchToSession,

@@ -87,10 +87,17 @@ function HQLPage() {
 
   useEffect(() => {
     setToolHandler("hql-get-schema", async () => {
-      return {
-        success: true,
-        message: JSON.stringify(clickhouseSchemas.data),
-      };
+      if (clickhouseSchemas.data) {
+        return {
+          success: true,
+          message: JSON.stringify(clickhouseSchemas.data),
+        };
+      } else {
+        return {
+          success: false,
+          message: "Failed to get HQL schema",
+        };
+      }
     });
   }, [clickhouseSchemas.data]);
 
