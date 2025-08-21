@@ -1,4 +1,4 @@
-import {
+import React, {
   useRef,
   useEffect,
   forwardRef,
@@ -33,15 +33,11 @@ import {
 
 interface ChatInterfaceProps {
   messageQueue: QueuedMessage[];
-  input: string;
-  setInput: (value: string) => void;
-  onSendMessage: () => void;
+  onSendMessage: (input: string, images: File[]) => void;
   isStreaming: boolean;
   onStopGeneration: () => void;
   selectedModel: string;
   onModelChange: (model: string) => void;
-  uploadedImages: File[];
-  setUploadedImages: (images: File[]) => void;
   messageQueueLength?: number;
   onForcePushMessage?: (messageId: string) => Promise<void>;
   onRemoveFromQueue?: (messageId: string) => void;
@@ -58,15 +54,11 @@ const ChatInterface = forwardRef<{ focus: () => void }, ChatInterfaceProps>(
   (
     {
       messageQueue,
-      input,
-      setInput,
       onSendMessage,
       isStreaming,
       onStopGeneration,
       selectedModel,
       onModelChange,
-      uploadedImages,
-      setUploadedImages,
       onForcePushMessage,
       onRemoveFromQueue,
     },
@@ -74,6 +66,8 @@ const ChatInterface = forwardRef<{ focus: () => void }, ChatInterfaceProps>(
   ) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [input, setInput] = useState("");
+    const [uploadedImages, setUploadedImages] = useState<File[]>([]);
     const [isDragOver, setIsDragOver] = useState(false);
     const [selectedImage, setSelectedImage] = useState<{
       src: string;
@@ -108,14 +102,16 @@ const ChatInterface = forwardRef<{ focus: () => void }, ChatInterfaceProps>(
     const handleKeyDown = (e: React.KeyboardEvent) => {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
-        onSendMessage();
-        // clear input
-        setInput("");
-        setUploadedImages([]);
-        // Focus the textarea after sending the message
-        setTimeout(() => {
-          textareaRef.current?.focus();
-        }, 0);
+        if (input.trim() || uploadedImages.length > 0) {
+          onSendMessage(input, uploadedImages);
+          // clear input
+          setInput("");
+          setUploadedImages([]);
+          // Focus the textarea after sending the message
+          setTimeout(() => {
+            textareaRef.current?.focus();
+          }, 0);
+        }
       }
 
       if (e.key === "C" && e.ctrlKey && isStreaming) {
@@ -390,7 +386,16 @@ const ChatInterface = forwardRef<{ focus: () => void }, ChatInterfaceProps>(
                         !input.trim() &&
                         uploadedImages.length === 0
                           ? onStopGeneration
-                          : onSendMessage
+                          : () => {
+                              if (input.trim() || uploadedImages.length > 0) {
+                                onSendMessage(input, uploadedImages);
+                                setInput("");
+                                setUploadedImages([]);
+                                setTimeout(() => {
+                                  textareaRef.current?.focus();
+                                }, 0);
+                              }
+                            }
                       }
                       disabled={
                         !isStreaming &&

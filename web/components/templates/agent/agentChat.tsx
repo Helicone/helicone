@@ -37,13 +37,11 @@ interface AgentChatProps {
 
 const AgentChat = ({ onClose }: AgentChatProps) => {
   const router = useRouter();
-  const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [isLoading, setisLoading] = useState(false);
   const [selectedModel, setSelectedModel] = useState(
     "claude-3.7-sonnet, gpt-4o, gpt-4o-mini",
   );
-  const [uploadedImages, setUploadedImages] = useState<File[]>([]);
   const [messageQueue, setMessageQueue] = useState<QueuedMessage[]>([]);
 
   const [agentState, setAgentState] = useState<AgentExecutionState>({
@@ -417,7 +415,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
     }));
   };
 
-  const handleSendMessage = async () => {
+  const handleSendMessage = async (input: string, uploadedImages: File[]) => {
     if (!input.trim() && uploadedImages.length === 0) return;
 
     setTimeout(() => {
@@ -432,14 +430,8 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
         timestamp: new Date(),
       };
       setMessageQueue((prev) => [...prev, queuedMessage]);
-      setInput("");
-      setUploadedImages([]);
     } else {
-      const messageContent = input.trim();
-      const messageImages = [...uploadedImages];
-      setInput("");
-      setUploadedImages([]);
-      await sendMessage(messageContent, messageImages);
+      await sendMessage(input.trim(), uploadedImages);
     }
   };
 
@@ -527,15 +519,11 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
       <ChatInterface
         messageQueue={messageQueue}
         ref={chatInterfaceRef}
-        input={input}
-        setInput={setInput}
         onSendMessage={handleSendMessage}
         isStreaming={isStreaming || agentState.isProcessing}
         onStopGeneration={stopGeneration}
         selectedModel={selectedModel}
         onModelChange={setSelectedModel}
-        uploadedImages={uploadedImages}
-        setUploadedImages={setUploadedImages}
         onForcePushMessage={forcePushMessageFromQueue}
         onRemoveFromQueue={removeFromQueue}
       />
