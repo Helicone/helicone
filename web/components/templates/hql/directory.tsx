@@ -320,7 +320,7 @@ function QueryList({
         <div className="flex items-center gap-2">
           {queries.length > 0 && (
             <Checkbox
-              checked={selectedQueries.size === queries.length && queries.length > 0}
+              checked={selectedQueries.size === queries.length}
               onCheckedChange={toggleSelectAll}
               aria-label="Select all queries"
             />
