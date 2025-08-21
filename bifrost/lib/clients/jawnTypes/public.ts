@@ -440,6 +440,9 @@ export interface paths {
     get: operations["GetSavedQuery"];
     delete: operations["DeleteSavedQuery"];
   };
+  "/v1/helicone-sql/saved-queries/bulk-delete": {
+    post: operations["BulkDeleteSavedQueries"];
+  };
   "/v1/helicone-sql/saved-query": {
     put: operations["UpdateSavedQuery"];
     post: operations["CreateSavedQuery"];
@@ -2949,6 +2952,9 @@ Json: JsonObject;
       error: null;
     };
     "Result_void.string_": components["schemas"]["ResultSuccess_void_"] | components["schemas"]["ResultError_string_"];
+    BulkDeleteSavedQueriesRequest: {
+      ids: string[];
+    };
     "ResultSuccess_HqlSavedQuery-Array_": {
       data: components["schemas"]["HqlSavedQuery"][];
       /** @enum {number|null} */
@@ -6261,6 +6267,21 @@ export interface operations {
     parameters: {
       path: {
         queryId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_void.string_"];
+        };
+      };
+    };
+  };
+  BulkDeleteSavedQueries: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BulkDeleteSavedQueriesRequest"];
       };
     };
     responses: {

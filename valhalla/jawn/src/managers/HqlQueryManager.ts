@@ -192,4 +192,28 @@ export class HqlQueryManager {
       );
     }
   }
+
+  async bulkDeleteSavedQueries(ids: string[]): Promise<Result<void, string>> {
+    try {
+      if (ids.length === 0) {
+        return ok(undefined);
+      }
+
+      // Create placeholders for the query ($1, $2, $3, etc.)
+      const placeholders = ids.map((_, index) => `$${index + 2}`).join(", ");
+      
+      const result = await dbExecute<void>(
+        `DELETE FROM saved_queries WHERE organization_id = $1 AND id IN (${placeholders})`,
+        [this.authParams.organizationId, ...ids]
+      );
+      
+      if (result.error) {
+        return err(result.error);
+      }
+
+      return ok(undefined);
+    } catch (e) {
+      return err(String(e));
+    }
+  }
 }
