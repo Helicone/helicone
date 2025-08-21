@@ -209,4 +209,148 @@ describe("Registry Tests", () => {
       });
     });
   });
+
+  describe("Customer-Specific Tests", () => {
+    
+    describe("Anthropic SDK with NO_MAPPING", () => {
+      it("should route to /v1/messages for Anthropic provider", async () => {
+        // Mock Anthropic /v1/messages endpoint (NOT /chat/completions)
+        fetchMock
+          .get("https://api.anthropic.com")
+          .intercept({
+            path: "/v1/messages",
+            method: "POST",
+          })
+          .reply(() => ({
+            statusCode: 200,
+            data: {
+              id: "msg_test",
+              type: "message",
+              role: "assistant",
+              content: [{ type: "text", text: "Test response" }],
+              model: "claude-3-7-sonnet-20250219",
+              usage: { input_tokens: 10, output_tokens: 5 },
+            },
+          }))
+          .persist();
+        
+        const response = await SELF.fetch(
+          "https://ai-gateway.helicone.ai/v1/chat/completions",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer sk-helicone-test",
+              "Helicone-Gateway-Body-Mapping": "NO_MAPPING",
+            },
+            body: JSON.stringify({
+              model: "claude-3-7-sonnet-20250219/anthropic",
+              messages: [{ role: "user", content: "Test" }],
+              max_tokens: 100,
+            }),
+          }
+        );
+        
+        expect(response.status).toBe(200);
+      });
+    });
+    
+    describe("Fallback with comma-separated models", () => {
+      it("should try bedrock first, then fallback to anthropic", async () => {
+        // Mock Bedrock to fail
+        fetchMock
+          .get("https://bedrock-runtime.us-east-1.amazonaws.com")
+          .intercept({
+            path: "/model/us.anthropic.claude-3-7-sonnet-20250219-v1:0/invoke",
+            method: "POST",
+          })
+          .reply(() => ({ statusCode: 500, data: { error: "Bedrock failed" } }))
+          .persist();
+        
+        // Mock Anthropic to succeed (on /v1/messages)
+        fetchMock
+          .get("https://api.anthropic.com")
+          .intercept({
+            path: "/v1/messages",
+            method: "POST",
+          })
+          .reply(() => ({
+            statusCode: 200,
+            data: {
+              id: "msg_fallback",
+              type: "message",
+              role: "assistant",
+              content: [{ type: "text", text: "Fallback response" }],
+              model: "claude-3-7-sonnet-20250219",
+              usage: { input_tokens: 10, output_tokens: 5 },
+            },
+          }))
+          .persist();
+        
+        const response = await SELF.fetch(
+          "https://ai-gateway.helicone.ai/v1/chat/completions",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer sk-helicone-test",
+            },
+            body: JSON.stringify({
+              model: "us.anthropic.claude-3-7-sonnet-20250219-v1:0/bedrock,claude-3-7-sonnet-20250219/anthropic",
+              messages: [{ role: "user", content: "Test fallback" }],
+              max_tokens: 50,
+            }),
+          }
+        );
+        
+        expect(response.status).toBe(200);
+      });
+    });
+    
+    describe("Model with NO_MAPPING and fallback", () => {
+      it("should handle Anthropic SDK format with fallback", async () => {
+        const model = "claude-3-7-sonnet-20250219/anthropic, us.anthropic.claude-3-7-sonnet-20250219-v1:0/bedrock";
+        
+        // Mock first model (anthropic) to succeed on /v1/messages
+        fetchMock
+          .get("https://api.anthropic.com")
+          .intercept({
+            path: "/v1/messages",
+            method: "POST",
+          })
+          .reply(() => ({
+            statusCode: 200,
+            data: {
+              id: "msg_anthropic_sdk",
+              type: "message",
+              role: "assistant",
+              content: [{ type: "text", text: "Anthropic SDK response" }],
+              model: "claude-3-7-sonnet-20250219",
+              usage: { input_tokens: 10, output_tokens: 5 },
+            },
+          }))
+          .persist();
+        
+        const response = await SELF.fetch(
+          "https://ai-gateway.helicone.ai/v1/chat/completions",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer sk-helicone-test",
+              "Helicone-Gateway-Body-Mapping": "NO_MAPPING",
+            },
+            body: JSON.stringify({
+              model: model,
+              system: "You are a helpful assistant.",
+              messages: [{ role: "user", content: "What is the capital of France?" }],
+              max_tokens: 100,
+            }),
+          }
+        );
+        
+        expect(response.status).toBe(200);
+      });
+    });
+  });
 });

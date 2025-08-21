@@ -1,5 +1,6 @@
 import { registry } from "@helicone-package/cost/models/registry";
 import { UserEndpointConfig } from "@helicone-package/cost/models/types";
+import { ProviderName } from "@helicone-package/cost/models/providers";
 
 export interface TestCase {
   name: string;
@@ -17,9 +18,9 @@ export interface TestCase {
 }
 
 export abstract class BaseTestConfig {
-  protected provider: string;
+  protected provider: ProviderName;
   
-  constructor(provider: string) {
+  constructor(provider: ProviderName) {
     this.provider = provider;
   }
   
