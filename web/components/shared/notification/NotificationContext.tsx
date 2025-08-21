@@ -1,4 +1,11 @@
-import { createContext, ReactNode, useCallback, useMemo, useRef, useState } from "react";
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 const ALERT_TIME = 3000;
 type NotificationVariants = "success" | "info" | "error";
@@ -13,10 +20,7 @@ const initialState: {
 
 const NotificationContext = createContext({
   ...initialState,
-  setNotification: (
-    _title: string,
-    _variant: NotificationVariants,
-  ) => {},
+  setNotification: (_title: string, _variant: NotificationVariants) => {},
   clearNotification: () => {},
 });
 
@@ -39,22 +43,22 @@ export const NotificationProvider = (props: NotificationProviderProps) => {
     setVariant("success");
   }, []);
 
-  const setNotification = useCallback((
-    title: string,
-    variant: NotificationVariants,
-  ) => {
-    setTitle(title);
-    setVariant(variant);
+  const setNotification = useCallback(
+    (title: string, variant: NotificationVariants) => {
+      setTitle(title);
+      setVariant(variant);
 
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    timeoutRef.current = setTimeout(() => {
-      setTitle("");
-      setVariant("success");
-      timeoutRef.current = null;
-    }, ALERT_TIME);
-  }, []);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      timeoutRef.current = setTimeout(() => {
+        setTitle("");
+        setVariant("success");
+        timeoutRef.current = null;
+      }, ALERT_TIME);
+    },
+    [],
+  );
 
   const contextValue = useMemo(
     () => ({
@@ -67,9 +71,7 @@ export const NotificationProvider = (props: NotificationProviderProps) => {
   );
 
   return (
-    <NotificationContext.Provider
-      value={contextValue}
-    >
+    <NotificationContext.Provider value={contextValue}>
       {children}
     </NotificationContext.Provider>
   );

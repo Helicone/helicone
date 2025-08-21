@@ -1,9 +1,4 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogPortal,
-  DialogOverlay,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface ThemedModalProps {
   open: boolean;
