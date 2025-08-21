@@ -71,8 +71,8 @@ export function parseHqlError(errorString: string): HqlError {
   }
 
   // Fallback with UNEXPECTED_ERROR code when no valid code is found
-  return { 
-    code: HqlErrorCode.UNEXPECTED_ERROR, 
-    message: errorString 
+  return {
+    code: HqlErrorCode.UNEXPECTED_ERROR,
+    message: errorString,
   };
 }
