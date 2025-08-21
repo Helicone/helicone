@@ -14,8 +14,6 @@ import LocalFilterEditor from "./LocalFilterEditor";
 import {
   AggregationFunction,
   ComparisonOperator,
-} from "@helicone-package/filters/filterDefs";
-import {
   AGGREGATION_FIELDS,
   AGGREGATION_FUNCTIONS,
   AggregationFieldDef,

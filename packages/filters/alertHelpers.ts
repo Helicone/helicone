@@ -1,11 +1,11 @@
 import { 
   FilterNode, 
-  AggregationNode, 
-  FilterLeaf,
-  AggregationFunction,
-  ComparisonOperator
+  FilterLeaf
 } from "./filterDefs";
 import { 
+  AggregationNode,
+  AggregationFunction,
+  ComparisonOperator,
   AGGREGATION_FIELDS_MAP,
   AGGREGATION_FUNCTIONS_MAP,
   COMPARISON_OPERATORS_MAP

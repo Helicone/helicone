@@ -5,9 +5,8 @@ import {
   FilterLeaf,
   FilterNode,
   TablesAndViews,
-  AggregationNode,
 } from "./filterDefs";
-import { buildAggregationFunction as buildAggFn } from "./aggregationDefs";
+import { AggregationNode, buildAggregationFilter } from "./aggregations";
 
 export enum TagType {
   REQUEST = "request",
@@ -403,7 +402,7 @@ const havingKeyMappings: KeyMappings = {
   job_node: NOT_IMPLEMENTED,
 };
 
-function operatorToSql(operator: AllOperators): string {
+export function operatorToSql(operator: AllOperators): string {
   switch (operator) {
     case "equals":
       return "=";
@@ -535,76 +534,6 @@ export function buildFilterBranch(
   };
 }
 
-// Helper to extract field name from FilterLeaf
-function extractFieldFromFilterLeaf(
-  leaf: FilterLeaf,
-  keyMappings: KeyMappings
-): string {
-  const table = Object.keys(leaf)[0] as keyof FilterLeaf;
-  const fieldObj = leaf[table];
-
-  if (!fieldObj || typeof fieldObj !== "object") {
-    return "";
-  }
-
-  // Get the field name (e.g., "latency", "cost", etc.)
-  const field = Object.keys(fieldObj)[0];
-
-  // Special handling for properties and scores
-  if (field === "properties" || field === "scores") {
-    const subFieldObj = (fieldObj as any)[field];
-    const subField = Object.keys(subFieldObj || {})[0];
-    return field === "properties"
-      ? `properties['${subField}']`
-      : `scores['${subField}']`;
-  }
-
-  // Use key mappings to get the actual column name
-  const mapper = keyMappings[table];
-  if (mapper && typeof mapper === "function") {
-    const tableObj = { [table]: fieldObj };
-    const { column } = mapper(tableObj as any, (v: any) => v);
-    return column || field;
-  }
-
-  return field;
-}
-
-// Build aggregation filter
-function buildAggregationFilter(
-  args: BuildFilterArgs & { filter: AggregationNode }
-): {
-  filter: string;
-  argsAcc: any[];
-} {
-  const { filter, argPlaceHolder, argsAcc, having } = args;
-
-  // Extract the field from the FilterLeaf
-  const fieldName = extractFieldFromFilterLeaf(
-    filter.field,
-    having ? havingKeyMappings : whereKeyMappings
-  );
-
-  // Build aggregation SQL
-  const aggFunc = buildAggFn(filter.function, fieldName);
-
-  // Build comparison
-  const comparison = operatorToSql(filter.comparison as AllOperators);
-
-  // Add threshold parameter
-  const newArgsAcc = [...argsAcc];
-  newArgsAcc.push(filter.threshold);
-  const thresholdParam = argPlaceHolder(
-    newArgsAcc.length - 1,
-    filter.threshold
-  );
-
-  return {
-    filter: `${aggFunc} ${comparison} ${thresholdParam}`,
-    argsAcc: newArgsAcc,
-  };
-}
-
 export function buildFilter(args: BuildFilterArgs): {
   filter: string;
   argsAcc: any[];
@@ -627,6 +556,8 @@ export function buildFilter(args: BuildFilterArgs): {
     return buildAggregationFilter({
       ...args,
       filter: filter as AggregationNode,
+      having: args.having || false,
+      keyMappings: args.having ? havingKeyMappings : whereKeyMappings,
     });
   }
 

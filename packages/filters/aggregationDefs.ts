@@ -1,7 +1,43 @@
-// Single source of truth for all aggregation-related constants and display metadata
+// Single source of truth for all aggregation-related types, constants and display metadata
 
-// Import types from filterDefs
-import { AggregationFunction, ComparisonOperator } from "./filterDefs";
+import { FilterLeaf, FilterNode } from "./filterDefs";
+
+// ============ TYPE DEFINITIONS ============
+export type AggregationFunction = 
+  | "sum"
+  | "avg"
+  | "min"
+  | "max"
+  | "count"
+  | "p50"
+  | "p75"
+  | "p90"
+  | "p95"
+  | "p99";
+
+export type ComparisonOperator = 
+  | "gt"
+  | "lt"
+  | "gte"
+  | "lte"
+  | "equals";
+
+export interface AggregationNode {
+  type: "aggregation";
+  
+  // The field to aggregate (reuses existing FilterLeaf)
+  field: FilterLeaf;
+  
+  // Aggregation configuration
+  function: AggregationFunction;
+  
+  // Comparison configuration
+  comparison: ComparisonOperator;
+  threshold: number;
+  
+  // Optional WHERE clause filters (applied before aggregation)
+  where?: FilterNode;
+}
 
 // ============ FIELD DEFINITIONS ============
 export interface AggregationFieldDef {
@@ -171,22 +207,7 @@ export const COMPARISON_OPERATORS_MAP: Record<
   {} as Record<ComparisonOperator, ComparisonOperatorDef>
 );
 
-// ============ HELPER FUNCTIONS ============
-
-/**
- * Build SQL aggregation function string
- */
-export function buildAggregationFunction(
-  func: AggregationFunction,
-  field: string
-): string {
-  const funcDef = AGGREGATION_FUNCTIONS_MAP[func];
-  if (!funcDef) {
-    // Fallback to AVG if function not found
-    return `AVG(${field})`;
-  }
-  return funcDef.sqlTemplate(field);
-}
+// ============ DISPLAY HELPER FUNCTIONS ============
 
 /**
  * Get field display information
