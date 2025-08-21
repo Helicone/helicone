@@ -32,72 +32,6 @@ export const endpoints = {
       "*": {},
     },
   },
-  // "claude-3.5-sonnet-v2:bedrock": {
-  //   providerModelId: "anthropic.claude-3-5-sonnet-20241022-v2:0",
-  //   provider: "bedrock",
-  //   crossRegion: true,
-  //   pricing: {
-  //     prompt: 3,
-  //     completion: 15,
-  //     cacheRead: 0.3,
-  //     cacheWrite: {
-  //       "5m": 3.75,
-  //       "1h": 6,
-  //       default: 3.75,
-  //     },
-  //   },
-  //   contextLength: 200000,
-  //   maxCompletionTokens: 8192,
-  //   supportedParameters: [
-  //     "tools",
-  //     "tool_choice",
-  //     "max_tokens",
-  //     "temperature",
-  //     "top_p",
-  //     "top_k",
-  //     "stop",
-  //   ],
-  //   ptbEnabled: true,
-  //   endpointConfigs: {
-  //     "*": {},
-  //   },
-  // },
-
-  // "claude-3.5-sonnet-v2:bedrock": {
-  //   modelId: "claude-3.5-sonnet-v2",
-  //   provider: "bedrock",
-  //   pricing: {
-  //     prompt: 3,
-  //     completion: 15,
-  //     cacheRead: 0.3,
-  //     cacheWrite: {
-  //       "5m": 3.75,
-  //       "1h": 6,
-  //       default: 3.75,
-  //     },
-  //   },
-  //   contextLength: 200000,
-  //   maxCompletionTokens: 8192,
-  //   supportedParameters: [
-  //     "tools",
-  //     "tool_choice",
-  //     "max_tokens",
-  //     "temperature",
-  //     "top_p",
-  //     "top_k",
-  //     "stop",
-  //   ],
-  //   ptbEnabled: true,
-  //   deployments: {
-  //     "us-west-2": {
-  //       providerModelId: "us.anthropic.claude-3-5-sonnet-20241022-v2:0",
-  //     },
-  //     "eu-west-1": {
-  //       providerModelId: "eu.anthropic.claude-3-5-sonnet-20241022-v2:0",
-  //     },
-  //   },
-  // },
-
   "claude-3.5-sonnet-v2:vertex": {
     providerModelId: "claude-3-5-sonnet-v2@20241022",
     provider: "vertex",
@@ -124,6 +58,33 @@ export const endpoints = {
       global: {
         providerModelId: "claude-3-5-sonnet-v2@20241022",
       },
+    },
+  },
+  "claude-3.5-sonnet-v2:bedrock": {
+    provider: "bedrock",
+    providerModelId: "anthropic.claude-3-5-sonnet-20241022-v2:0",
+    version: "20241022",
+    crossRegion: true,
+    pricing: {
+      prompt: 0.000003,
+      completion: 0.000015,
+      cacheRead: 0.0000003,
+      cacheWrite: 0.00000375,
+    },
+    contextLength: 200000,
+    maxCompletionTokens: 8192,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "top_k",
+      "stop",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "us-east-1": {},
     },
   },
 } satisfies Partial<

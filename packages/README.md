@@ -36,13 +36,32 @@ Each package contains its own documentation. See individual README files for con
 
 ## Development
 
+### Running Tests
+
+Tests are located in `__tests__/` directory and use Jest:
+
 ```bash
-# Install dependencies
-npm install
+# Run all package tests
+npx jest
 
-# Run tests
-npm test
+# Run specific test file
+npx jest __tests__/cost/registrySnapshots.test.ts
 
+# Update snapshots after intentional changes
+npx jest -u
+
+# Run tests without cache (useful for debugging)
+npx jest --no-cache
+```
+
+#### Key Test Files
+- `__tests__/cost/ensureOnlyOne.test.ts` - Validates no duplicate models and cost calculations
+- `__tests__/cost/registrySnapshots.test.ts` - Snapshot tests for model registry (pricing, coverage, configs)
+- `__tests__/llm-mapper/` - Tests for request/response mapping
+
+### Building
+
+```bash
 # Build packages
 npm run build
 ```

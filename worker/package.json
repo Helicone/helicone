@@ -10,6 +10,7 @@
     "dev": "wrangler dev",
     "start": "wrangler dev",
     "test": "vitest",
+    "test:registry": "vitest registry-ts",
     "cf-typegen": "wrangler types --strict-vars false",
     "lint": "tsc && eslint --ext .js,.jsx,.ts,.tsx ./src --max-warnings=0",
     "lint-fix": "eslint --ext .js,.jsx,.ts,.tsx ./src --fix"
