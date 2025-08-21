@@ -1,5 +1,5 @@
 import { describe, expect, test, beforeEach, afterEach } from "@jest/globals";
-import { testClickhouseDb } from "../../../lib/db/test/TestClickhouseWrapper";
+import { testClickhouseDb } from "../../../lib/db/test/RealClickhouseWrapper";
 import { CLICKHOUSE_TABLES } from "../../../managers/HeliconeSqlManager";
 
 // Test configuration

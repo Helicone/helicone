@@ -1,14 +1,7 @@
 import { Result } from "../../../packages/common/result";
-import { ClickhouseDB, RequestResponseRMT } from "../ClickhouseWrapper";
+import { ClickhouseDB } from "../ClickhouseWrapper";
 import { CLICKHOUSE_ERRORS, mockRequestResponseData } from "./clickhouseMockData";
-
-interface ClickhouseEnv {
-  CLICKHOUSE_HOST: string;
-  CLICKHOUSE_USER: string;
-  CLICKHOUSE_PASSWORD: string;
-  CLICKHOUSE_HQL_USER: string;
-  CLICKHOUSE_HQL_PASSWORD: string;
-}
+import { IClickhouseWrapper, ClickhouseEnv } from "./IClickhouseWrapper";
 
 interface SecurityRule {
   pattern: RegExp;
@@ -17,16 +10,17 @@ interface SecurityRule {
   errorMessage: string;
 }
 
-export class MockClickhouseClientWrapper {
+/**
+ * Mock ClickHouse wrapper for unit testing without external dependencies
+ */
+export class MockClickhouseWrapper implements IClickhouseWrapper {
   private mockData: Map<string, any[]> = new Map();
   private securityRules: SecurityRule[] = [];
   private readonlyMode: boolean = true;
-  private orgContext: string | null = null;
 
   constructor(env?: ClickhouseEnv) {
-    // Initialize security rules that match ClickHouse's actual behavior
+    // Initialize security rules and mock data
     this.initializeSecurityRules();
-    // Load mock data
     this.initializeMockData();
   }
 
@@ -94,6 +88,13 @@ export class MockClickhouseClientWrapper {
         errorCode: CLICKHOUSE_ERRORS.ACCESS_DENIED.code,
         errorType: CLICKHOUSE_ERRORS.ACCESS_DENIED.type,
         errorMessage: "Access to system.row_policies is denied",
+      },
+      // Block access to system.columns
+      {
+        pattern: /\bsystem\.columns\b/i,
+        errorCode: CLICKHOUSE_ERRORS.ACCESS_DENIED.code,
+        errorType: CLICKHOUSE_ERRORS.ACCESS_DENIED.type,
+        errorMessage: "Access to system.columns is denied",
       },
       // Block GRANT/REVOKE statements
       {
@@ -201,7 +202,7 @@ export class MockClickhouseClientWrapper {
     organizationId: string;
     parameters: (number | string | boolean | Date)[];
   }): Promise<Result<RowType[], string>> {
-    const { query, organizationId, parameters } = params;
+    const { query, organizationId } = params;
 
     // Check for forbidden SQL_helicone_organization_id reference
     const forbiddenPattern = /sql[_\s]*helicone[_\s]*organization[_\s]*id/i;
@@ -248,7 +249,6 @@ export class MockClickhouseClientWrapper {
     }
 
     // Apply WHERE clause filtering after RLS
-    // This simulates how ClickHouse would apply WHERE conditions after row-level security
     if (query.includes(`WHERE organization_id = '${organizationId.replace(/'/g, "")}'`)) {
       // Already filtered by RLS, this WHERE is redundant but valid
     } else if (query.includes("WHERE organization_id = '")) {
@@ -342,28 +342,10 @@ export class MockClickhouseClientWrapper {
     // Mock - data is already loaded
     return { data: null, error: null };
   }
-
-  private paramsToValues(params: (number | string | boolean | Date)[]) {
-    return params
-      .map((p) => {
-        if (p instanceof Date) {
-          return p
-            .toISOString()
-            .replace("T", " ")
-            .replace("Z", "")
-            .replace(/\.\d+$/, "");
-        } else {
-          return p;
-        }
-      })
-      .reduce((acc, parameter, index) => {
-        return {
-          ...acc,
-          [`val_${index}`]: parameter,
-        };
-      }, {});
-  }
 }
 
-// Export both the class and a singleton for tests
-export const mockClickhouseDb = new MockClickhouseClientWrapper();
+// Export a singleton instance for tests
+export const mockClickhouseDb = new MockClickhouseWrapper();
+
+// Alias for backward compatibility
+export const MockClickhouseClientWrapper = MockClickhouseWrapper;

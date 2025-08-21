@@ -4,7 +4,7 @@ import {
   ClickHouseSettings,
 } from "@clickhouse/client";
 import { Result } from "../../packages/common/result";
-import { TestClickhouseClientWrapper } from "./test/TestClickhouseWrapper";
+import { TestClickhouseClientWrapper } from "./test/RealClickhouseWrapper";
 
 interface ClickhouseEnv {
   CLICKHOUSE_HOST: string;

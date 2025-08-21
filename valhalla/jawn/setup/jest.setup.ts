@@ -1,5 +1,5 @@
 import { beforeAll, afterAll } from "@jest/globals";
-import { testClickhouseDb } from "../src/lib/db/test/TestClickhouseWrapper";
+import { testClickhouseDb } from "../src/lib/db/test/RealClickhouseWrapper";
 
 // Global setup - runs once before all test suites
 /**

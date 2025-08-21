@@ -3,16 +3,12 @@ import * as fs from "fs";
 import * as path from "path";
 import { ClickhouseDB, RequestResponseRMT } from "../ClickhouseWrapper";
 import { Result } from "../../../packages/common/result";
+import { IClickhouseWrapper, ClickhouseEnv } from "./IClickhouseWrapper";
 
-interface ClickhouseEnv {
-  CLICKHOUSE_HOST: string;
-  CLICKHOUSE_USER: string;
-  CLICKHOUSE_PASSWORD: string;
-  CLICKHOUSE_HQL_USER: string;
-  CLICKHOUSE_HQL_PASSWORD: string;
-}
-
-export class TestClickhouseClientWrapper {
+/**
+ * Real ClickHouse wrapper for integration testing with actual ClickHouse instance
+ */
+export class RealClickhouseWrapper implements IClickhouseWrapper {
   private clickHouseClient: ClickHouseClient;
   private clickHouseHqlClient: ClickHouseClient;
 
@@ -39,10 +35,6 @@ export class TestClickhouseClientWrapper {
         table: table,
         values: values,
         format: "JSONEachRow",
-        // Recommended for cluster usage to avoid situations
-        // where a query processing error occurred after the response code
-        // and HTTP headers were sent to the client.
-        // See https://clickhouse.com/docs/en/interfaces/http/#response-buffering
         clickhouse_settings: {
           async_insert: 1,
           wait_end_of_query: 1,
@@ -105,24 +97,26 @@ export class TestClickhouseClientWrapper {
     }
   }
 
-  async queryWithContext<RowType>({
-    query,
-    organizationId,
-    parameters,
-  }: {
+  async queryWithContext<RowType>(params: {
     query: string;
     organizationId: string;
     parameters: (number | string | boolean | Date)[];
   }): Promise<Result<RowType[], string>> {
+    const { query, organizationId, parameters } = params;
+
     try {
       const query_params = this.paramsToValues(parameters);
-      // Align security check with production: block attempts to reference or set our org-id context
+      
+      // Check for forbidden SQL_helicone_organization_id reference
       const forbiddenPattern = /sql[_\s]*helicone[_\s]*organization[_\s]*id/i;
       if (forbiddenPattern.test(query)) {
         return {
           data: null,
-          error:
-            "Query contains 'SQL_helicone_organization_id' keyword, which is not allowed in HQL queries",
+          error: JSON.stringify({
+            code: "62",
+            type: "SYNTAX_ERROR",
+            message: "Query contains 'SQL_helicone_organization_id' keyword, which is not allowed in HQL queries",
+          }),
         };
       }
 
@@ -134,13 +128,8 @@ export class TestClickhouseClientWrapper {
         query_params,
         clickhouse_settings: {
           wait_end_of_query: 1,
-          // Set the organization context for row-level security
-          // Custom settings must be prefixed with SQL_
           SQL_helicone_organization_id: organizationId,
-          // CRITICAL: Set readonly=1 to prevent query from overriding settings
-          // This makes ALL settings immutable for this query
           readonly: 1,
-          // Align protective limits with production wrapper
           max_execution_time: 30,
           max_memory_usage: "1000000000",
           max_rows_to_read: "10000000",
@@ -149,7 +138,6 @@ export class TestClickhouseClientWrapper {
         } as any,
       };
 
-      // Only add format for queries that return data
       if (!isDDL) {
         queryOptions.format = "JSONEachRow";
       }
@@ -157,7 +145,6 @@ export class TestClickhouseClientWrapper {
       const queryResult = await this.clickHouseHqlClient.query(queryOptions);
       
       if (isDDL) {
-        // DDL commands don't return data
         return { data: [] as RowType[], error: null };
       } else {
         const rows = (await queryResult.json<RowType>()) as unknown as RowType[];
@@ -203,19 +190,16 @@ export class TestClickhouseClientWrapper {
 
   async createTables(): Promise<Result<null, string>> {
     try {
-      // Get the path to the migrations directory
       const migrationsDir = path.join(
         process.cwd(),
         "clickhouse",
         "migrations"
       );
 
-      // Read all migration files
       const migrationFiles = fs
         .readdirSync(migrationsDir)
         .filter((file) => file.endsWith(".sql"))
         .sort((a, b) => {
-          // Extract schema number for sorting
           const aMatch = a.match(/schema_(\d+)/);
           const bMatch = b.match(/schema_(\d+)/);
           const aNum = aMatch ? parseInt(aMatch[1]) : 0;
@@ -223,7 +207,6 @@ export class TestClickhouseClientWrapper {
           return aNum - bNum;
         });
 
-      // Run each migration file
       for (const migrationFile of migrationFiles) {
         const migrationPath = path.join(migrationsDir, migrationFile);
         const migrationContent = fs.readFileSync(migrationPath, "utf8");
@@ -234,7 +217,6 @@ export class TestClickhouseClientWrapper {
           });
         } catch (err) {
           // Continue with other migrations even if one fails
-          // This is useful for migrations that might not apply to test data
         }
       }
 
@@ -249,19 +231,16 @@ export class TestClickhouseClientWrapper {
 
   async dropTables(): Promise<Result<null, string>> {
     try {
-      // Get the path to the migrations directory
       const migrationsDir = path.join(
         process.cwd(),
         "clickhouse",
         "migrations"
       );
 
-      // Read all migration files to get table names
       const migrationFiles = fs
         .readdirSync(migrationsDir)
         .filter((file) => file.endsWith(".sql"))
         .sort((a, b) => {
-          // Extract schema number for sorting
           const aMatch = a.match(/schema_(\d+)/);
           const bMatch = b.match(/schema_(\d+)/);
           const aNum = aMatch ? parseInt(aMatch[1]) : 0;
@@ -269,12 +248,10 @@ export class TestClickhouseClientWrapper {
           return bNum - aNum; // Reverse order for dropping
         });
 
-      // Extract table names from migration files and drop them
       for (const migrationFile of migrationFiles) {
         const migrationPath = path.join(migrationsDir, migrationFile);
         const migrationContent = fs.readFileSync(migrationPath, "utf8");
 
-        // Extract table names from CREATE TABLE statements
         const tableMatches = migrationContent.match(
           /CREATE TABLE (?:IF NOT EXISTS )?([^\s(]+)/gi
         );
@@ -305,11 +282,9 @@ export class TestClickhouseClientWrapper {
 
   async insertTestData(): Promise<Result<null, string>> {
     try {
-      // Read test data from CSV file
       const csvPath = path.join(process.cwd(), "setup", "test_seed_rmt.csv");
       const csvContent = fs.readFileSync(csvPath, "utf8");
 
-      // Parse CSV content into structured data
       const lines = csvContent.trim().split("\n");
       const rows = lines.map((line) => {
         const values = this.parseCSVLine(line);
@@ -320,34 +295,20 @@ export class TestClickhouseClientWrapper {
           status: parseInt(values[3]),
           completion_tokens: parseInt(values[4]),
           prompt_tokens: parseInt(values[7]),
-          prompt_cache_write_tokens: parseInt(values[8]),
-          prompt_cache_read_tokens: parseInt(values[9]),
-          prompt_audio_tokens: parseInt(values[10]),
-          completion_audio_tokens: parseInt(values[10]),
           model: values[11],
           request_id: values[12],
           request_created_at: values[13],
           user_id: values[14],
           organization_id: values[15],
-          proxy_key_id: values[16],
-          threat: values[17] === "true",
-          time_to_first_token: parseInt(values[18]),
           provider: values[19],
-          country_code: values[21],
-          target_url: values[20],
           properties: {},
           scores: {},
           request_body: values[25],
           response_body: values[26],
-          assets: [values[28]],
-          updated_at: values[29],
-          cache_reference_id: values[6],
-          cache_enabled: values[21] === "true",
           cost: parseFloat(values[27]),
         } as RequestResponseRMT;
       });
 
-      // Insert data using proper ClickHouse insert method
       try {
         await this.dbInsertClickhouse("request_response_rmt", rows);
       } catch (err) {}
@@ -371,15 +332,12 @@ export class TestClickhouseClientWrapper {
 
       if (char === '"') {
         if (inQuotes && line[i + 1] === '"') {
-          // Escaped quote
           current += '"';
-          i++; // Skip next quote
+          i++;
         } else {
-          // Toggle quote state
           inQuotes = !inQuotes;
         }
       } else if (char === "," && !inQuotes) {
-        // End of value
         values.push(current.trim());
         current = "";
       } else {
@@ -387,9 +345,7 @@ export class TestClickhouseClientWrapper {
       }
     }
 
-    // Add the last value
     values.push(current.trim());
-
     return values;
   }
 
@@ -415,11 +371,14 @@ export class TestClickhouseClientWrapper {
   }
 }
 
-// Export a singleton instance for tests
-export const testClickhouseDb = new TestClickhouseClientWrapper({
-  CLICKHOUSE_HOST: "http://localhost:18123",
+// Export singleton for backward compatibility
+export const testClickhouseDb = new RealClickhouseWrapper({
+  CLICKHOUSE_HOST: process.env.CLICKHOUSE_HOST || "http://localhost:18123",
   CLICKHOUSE_USER: process.env.CLICKHOUSE_USER || "default",
   CLICKHOUSE_PASSWORD: process.env.CLICKHOUSE_PASSWORD || "",
   CLICKHOUSE_HQL_USER: process.env.CLICKHOUSE_HQL_USER || "hql_user",
   CLICKHOUSE_HQL_PASSWORD: process.env.CLICKHOUSE_HQL_PASSWORD || "",
 });
+
+// Alias for backward compatibility
+export const TestClickhouseClientWrapper = RealClickhouseWrapper;
