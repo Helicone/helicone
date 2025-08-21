@@ -40,7 +40,7 @@ export const NotificationProvider = (props: NotificationProviderProps) => {
       timeoutRef.current = null;
     }
     setTitle("");
-    setVariant("success");
+    setVariant("info");
   }, []);
 
   const setNotification = useCallback(
@@ -48,16 +48,12 @@ export const NotificationProvider = (props: NotificationProviderProps) => {
       setTitle(title);
       setVariant(variant);
 
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
+      clearTimeout(timeoutRef.current!);
       timeoutRef.current = setTimeout(() => {
-        setTitle("");
-        setVariant("success");
-        timeoutRef.current = null;
+        clearNotification();
       }, ALERT_TIME);
     },
-    [],
+    [clearNotification],
   );
 
   const contextValue = useMemo(
