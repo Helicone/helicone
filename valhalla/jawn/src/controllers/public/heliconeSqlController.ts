@@ -11,7 +11,12 @@ import {
   Delete,
 } from "tsoa";
 import { err, ok, Result, isError } from "../../packages/common/result";
-import { HqlError, HqlErrorCode, StatusCodeMap } from "../../lib/errors/HqlErrors";
+import { 
+  HqlError, 
+  HqlErrorCode, 
+  StatusCodeMap,
+  createHqlError
+} from "../../lib/errors/HqlErrors";
 import { HeliconeSqlManager } from "../../managers/HeliconeSqlManager";
 import { type JawnAuthenticatedRequest } from "../../types/request";
 import {
@@ -105,14 +110,16 @@ export class HeliconeSqlController extends Controller {
       HQL_FEATURE_FLAG
     );
     if (isError(featureFlagResult)) {
-      this.setStatus(StatusCodeMap[HqlErrorCode.FEATURE_NOT_ENABLED] || 403);
-      return err("Access to HQL feature is not enabled for your organization");
+      const error = createHqlError(HqlErrorCode.FEATURE_NOT_ENABLED);
+      this.setStatus(error.statusCode || 403);
+      return err(formatHqlError(error));
     }
 
     // Validate request
     if (!requestBody.sql?.trim()) {
-      this.setStatus(400);
-      return err("SQL query is required");
+      const error = createHqlError(HqlErrorCode.MISSING_QUERY_SQL);
+      this.setStatus(error.statusCode || 400);
+      return err(formatHqlError(error));
     }
 
     const heliconeSqlManager = new HeliconeSqlManager(request.authParams);
@@ -138,14 +145,16 @@ export class HeliconeSqlController extends Controller {
       HQL_FEATURE_FLAG
     );
     if (isError(featureFlagResult)) {
-      this.setStatus(StatusCodeMap[HqlErrorCode.FEATURE_NOT_ENABLED] || 403);
-      return err("Access to HQL feature is not enabled for your organization");
+      const error = createHqlError(HqlErrorCode.FEATURE_NOT_ENABLED);
+      this.setStatus(error.statusCode || 403);
+      return err(formatHqlError(error));
     }
 
     // Validate request
     if (!requestBody.sql?.trim()) {
-      this.setStatus(400);
-      return err("SQL query is required for CSV download");
+      const error = createHqlError(HqlErrorCode.MISSING_QUERY_SQL, "CSV download requires a SQL query");
+      this.setStatus(error.statusCode || 400);
+      return err(formatHqlError(error));
     }
 
     const heliconeSqlManager = new HeliconeSqlManager(request.authParams);
