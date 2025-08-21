@@ -229,7 +229,7 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
             <p className="text-xl font-semibold text-slate-900 dark:text-slate-100">
               No Data Found
             </p>
-            {id === "requests-table" && showClearFilters && onClearFilters && (
+            {showClearFilters && onClearFilters && (
               <Button
                 variant="outline"
                 onClick={onClearFilters}
