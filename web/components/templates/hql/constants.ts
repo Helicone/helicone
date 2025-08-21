@@ -255,8 +255,8 @@ export const useBulkDeleteQueryMutation = (
     onSuccess: (_data: any, queryIds: string[]) => {
       const count = queryIds.length;
       setNotification(
-        `${count} ${count === 1 ? 'query' : 'queries'} deleted successfully`,
-        "success"
+        `${count} ${count === 1 ? "query" : "queries"} deleted successfully`,
+        "success",
       );
       // Invalidate the queries cache to refresh the list
       queryClient.invalidateQueries({
