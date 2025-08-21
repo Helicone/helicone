@@ -32,6 +32,7 @@ import { SimpleTable } from "@/components/shared/table/simpleTable";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import { getInitialColumns } from "./initialColumns";
 import TagsFilter from "./TagsFilter";
+import { useHeliconeAgent } from "@/components/templates/agent/HeliconeAgentContext";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -54,6 +55,7 @@ const PromptsPage = (props: PromptsPageProps) => {
   const { setNotification } = useNotification();
   const drawerRef = useRef<any>(null);
   const [drawerSize, setDrawerSize] = useLocalStorage("prompt-drawer-size", 40);
+  const { setToolHandler } = useHeliconeAgent();
 
   const { data: tags = [], isLoading: isLoadingTags } = useGetPromptTags();
   const { data, isLoading } = useGetPromptsWithVersions(
@@ -268,6 +270,62 @@ const PromptsPage = (props: PromptsPageProps) => {
   };
 
   const columns = getInitialColumns(handlePlaygroundActionClick);
+
+  useEffect(() => {
+    setToolHandler("prompts-search", async (args: { query: string }) => {
+      setSearch(args.query);
+      return {
+        success: true,
+        message: `Successfully searched for prompts: "${args.query}"`,
+      };
+    });
+
+    setToolHandler("prompts-get", async () => {
+      const promptInfo = prompts.map((prompt) => {
+        return `Name: ${prompt.prompt.name} (ID: ${prompt.prompt.id})\n}`;
+      });
+      return {
+        success: true,
+        message: "PROMPTS: " + JSON.stringify(promptInfo),
+      };
+    });
+
+    setToolHandler("prompts-select", async (args: { id: string }) => {
+      const prompt = prompts.find((p) => p.prompt.id === args.id);
+      if (prompt) {
+        handleRowSelect(prompt);
+        return {
+          success: true,
+          message: `Successfully selected prompt: ${prompt.prompt.name} (${prompt.prompt.id})`,
+        };
+      }
+      return {
+        success: false,
+        message: `Prompt does not exist with ID ${args.id}`,
+      };
+    });
+
+    setToolHandler("prompts-get_versions", async (args: { id: string }) => {
+      const prompt = prompts.find((p) => p.prompt.id === args.id);
+      if (prompt) {
+        const promptVersions = prompt.versions.map((version) => {
+          return `
+          Version: ${version.major_version}.${version.minor_version} (ID: ${version.id})
+          Environment: ${version.environment}
+          Commit Message: ${version.commit_message}\n
+          `;
+        });
+        return {
+          success: true,
+          message: `PROMPT VERSIONS: ${JSON.stringify(promptVersions)}`,
+        };
+      }
+      return {
+        success: false,
+        message: `Prompt does not exist with ID ${args.id}`,
+      };
+    });
+  }, [prompts]);
 
   return (
     <main className="flex h-screen w-full animate-fade-in flex-col">
