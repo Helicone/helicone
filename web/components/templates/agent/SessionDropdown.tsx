@@ -19,7 +19,6 @@ export function SessionDropdown() {
   const {
     sessions,
     currentSessionId,
-    createNewSession,
     switchToSession,
     deleteSession,
   } = useHeliconeAgent();
@@ -29,29 +28,16 @@ export function SessionDropdown() {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="flex h-auto items-center gap-2 px-3 py-2 hover:bg-muted"
+          size="sm"
+          className="h-7 w-7 p-0 hover:bg-muted"
         >
-          <div className="flex w-full flex-col items-start">
-            <span className="text-sm font-medium text-foreground">
-              Agent Chat
-            </span>
-          </div>
-          <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+          <MessageSquareIcon className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="start"
         className="max-h-[400px] w-72 overflow-y-auto"
       >
-        <DropdownMenuItem
-          onClick={createNewSession}
-          className="gap-2 px-2 py-1.5"
-        >
-          <Plus className="h-3.5 w-3.5" />
-          <span className="text-[13px]">New conversation</span>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-
         {sessions.length === 0 && (
           <div className="p-3 text-center text-sm text-muted-foreground">
             No conversations yet

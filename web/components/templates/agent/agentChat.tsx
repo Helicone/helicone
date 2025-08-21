@@ -10,7 +10,7 @@ import MessageRenderer from "./MessageRenderer";
 import { SessionDropdown } from "./SessionDropdown";
 import ChatInterface from "./ChatInterface";
 import { useRouter } from "next/router";
-import { XIcon } from "lucide-react";
+import { XIcon, Plus, MessageSquareIcon } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 
 type Message = NonNullable<OpenAIChatRequest["messages"]>[0];
@@ -62,6 +62,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
     updateCurrentSessionMessages,
     escalateSession,
     currentSession,
+    createNewSession,
   } = useHeliconeAgent();
 
   const addErrorMessage = (
@@ -473,16 +474,32 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
 
   return (
     <div className="flex h-full w-full flex-col">
-      <div className="flex w-full items-center justify-between border-b border-border px-1 py-3">
-        <SessionDropdown />
+      <div className="flex w-full items-center justify-between border-b border-border px-3 py-3">
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-foreground">
+            Agent Chat
+          </span>
+          <span className="inline-flex items-center rounded-md bg-orange-100 px-2 py-1 text-xs font-medium text-orange-800 dark:bg-orange-900/20 dark:text-orange-300">
+            Beta
+          </span>
+        </div>
         <div className="flex items-center gap-2">
+          <Button
+            onClick={createNewSession}
+            variant="ghost"
+            size="sm"
+            className="h-7 w-7 p-0 hover:bg-muted"
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+          <SessionDropdown />
           <Button
             onClick={onClose}
             variant="ghost"
             size="sm"
             className="h-8 w-8 p-0 hover:bg-muted"
           >
-            <XIcon className="h-4 w-4" />
+            <XIcon className="h-4 w-4 text-red-700 dark:text-red-300" />
           </Button>
         </div>
       </div>
