@@ -34,7 +34,10 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
       const response = await jawnClient.GET("/v1/api-keys/provider-keys", {});
 
       if (response && "error" in response) {
-        logger.error({ error: response.error, orgId }, "Failed to fetch provider keys");
+        logger.error(
+          { error: response.error, orgId },
+          "Failed to fetch provider keys",
+        );
         return [] as ProviderKey[];
       }
 
@@ -121,7 +124,10 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
         if (response.error) throw new Error(response);
         return response.data;
       } catch (error) {
-        logger.error({ error, providerName, providerKeyName, orgId }, "Error adding provider key");
+        logger.error(
+          { error, providerName, providerKeyName, orgId },
+          "Error adding provider key",
+        );
         throw error;
       }
     },
@@ -158,7 +164,10 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
       );
 
       if (response && "error" in response) {
-        logger.error({ error: response.error, keyId, orgId }, "Failed to fetch decrypted key");
+        logger.error(
+          { error: response.error, keyId, orgId },
+          "Failed to fetch decrypted key",
+        );
         return null;
       }
 
