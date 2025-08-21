@@ -125,7 +125,9 @@ const Notification = () => {
                   <button
                     onClick={() => {
                       setShow(false);
-                      clearNotification();
+                      setTimeout(() => {
+                        clearNotification();
+                      }, 150);
                     }}
                     className={clsx(
                       variantBgColor(),
