@@ -253,7 +253,9 @@ function QueryList({
   >;
 }) {
   const { setNotification } = useNotification();
-  const [selectedQueries, setSelectedQueries] = useState<Set<string>>(new Set());
+  const [selectedQueries, setSelectedQueries] = useState<Set<string>>(
+    new Set(),
+  );
 
   const deleteQueryMutation = useMutation(
     useDeleteQueryMutation(setNotification),
@@ -271,14 +273,18 @@ function QueryList({
 
   const handleBulkDelete = () => {
     const count = selectedQueries.size;
-    if (confirm(`Are you sure you want to delete ${count} selected ${count === 1 ? 'query' : 'queries'}?`)) {
+    if (
+      confirm(
+        `Are you sure you want to delete ${count} selected ${count === 1 ? "query" : "queries"}?`,
+      )
+    ) {
       bulkDeleteMutation.mutate(Array.from(selectedQueries));
       setSelectedQueries(new Set());
     }
   };
 
   const toggleQuerySelection = (queryId: string) => {
-    setSelectedQueries(prev => {
+    setSelectedQueries((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(queryId)) {
         newSet.delete(queryId);
@@ -293,7 +299,7 @@ function QueryList({
     if (selectedQueries.size === queries.length) {
       setSelectedQueries(new Set());
     } else {
-      setSelectedQueries(new Set(queries.map(q => q.id)));
+      setSelectedQueries(new Set(queries.map((q) => q.id)));
     }
   };
 
@@ -348,9 +354,7 @@ function QueryList({
           {queries.map((query, index) => (
             <ContextMenu key={query.id || index}>
               <ContextMenuTrigger>
-                <div
-                  className="group flex cursor-pointer items-center justify-between rounded-md px-2 py-2 hover:bg-muted/50"
-                >
+                <div className="group flex cursor-pointer items-center justify-between rounded-md px-2 py-2 hover:bg-muted/50">
                   <div className="flex items-center gap-2">
                     <Checkbox
                       checked={selectedQueries.has(query.id)}
@@ -358,7 +362,7 @@ function QueryList({
                       onClick={(e) => e.stopPropagation()}
                       aria-label={`Select ${query.name}`}
                     />
-                    <span 
+                    <span
                       className="flex items-center gap-2 truncate pr-2 text-sm"
                       onClick={(e) => {
                         e.stopPropagation();
