@@ -29,10 +29,8 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 function HQLPage() {
   const organization = useOrg();
-  const { data: hasAccessToHQL, isLoading: isLoadingFeatureFlag } = useFeatureFlag(
-    "hql",
-    organization?.currentOrg?.id ?? "",
-  );
+  const { data: hasAccessToHQL, isLoading: isLoadingFeatureFlag } =
+    useFeatureFlag("hql", organization?.currentOrg?.id ?? "");
   const { setNotification } = useNotification();
 
   const monaco = useMonaco();
