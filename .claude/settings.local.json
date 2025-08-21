@@ -30,9 +30,13 @@
       "Bash(npx prettier:*)",
       "Bash(npx tsc:*)",
       "Bash(npx jest:*)",
-      "WebFetch(domain:developers.cloudflare.com)",
+      "Bash(npx ts-node:*)",
+      "WebFetch(domain:undici.nodejs.org)",
       "WebSearch",
-      "Bash(curl:*)"
+      "WebFetch(domain:gist.github.com)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh run watch:*)"
     ],
     "deny": []
   }
