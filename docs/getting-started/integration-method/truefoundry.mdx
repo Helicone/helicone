@@ -118,10 +118,7 @@ Use the HeliconeAsyncLogger to automatically log all your TrueFoundry requests:
 
   <Tab title="cURL">
     ```bash
-    # First install helicone-async (Python example)
-    pip install helicone-async openai
-
-    # Then use with TrueFoundry gateway
+    # Direct HTTP request to TrueFoundry AI Gateway
     curl "your-truefoundry-base-url/chat/completions" \
       -H "Authorization: Bearer your-truefoundry-api-key" \
       -H "Content-Type: application/json" \
@@ -138,7 +135,9 @@ Use the HeliconeAsyncLogger to automatically log all your TrueFoundry requests:
       }'
     ```
     
-    Note: For cURL, you'll need to use the Python or Node.js HeliconeAsyncLogger in a separate process to capture and log the requests to Helicone.
+    **Note**: HeliconeAsyncLogger requires a runtime environment (Python/Node.js) for async logging. For cURL users who need Helicone logging, consider:
+    - Using the Python or Node.js examples above, or
+    - Running HeliconeAsyncLogger in a separate service to capture HTTP requests
   </Tab>
 </Tabs>
 
