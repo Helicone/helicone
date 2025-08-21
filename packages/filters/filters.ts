@@ -6,6 +6,7 @@ import {
   FilterNode,
   TablesAndViews,
 } from "./filterDefs";
+import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 
 export enum TagType {
   REQUEST = "request",
@@ -233,9 +234,21 @@ const whereKeyMappings: KeyMappings = {
         value: placeValueSafely("00000000-0000-0000-0000-000000000000"),
       };
     }
+    if ("cost" in filter && filter.cost) {
+      const { operator, value } = extractOperatorAndValueFromAnOperator(
+        filter.cost
+      );
+      console.log("cost", operator, value);
+      return {
+        column: "request_response_rmt.cost",
+        operator: operator,
+        value: placeValueSafely(`${value * COST_PRECISION_MULTIPLIER}`),
+      }
+    }
     return easyKeyMappings<"request_response_rmt">({
       country_code: "request_response_rmt.country_code",
       latency: "request_response_rmt.latency",
+      cost: "request_response_rmt.cost",
       time_to_first_token: "request_response_rmt.time_to_first_token",
       status: "request_response_rmt.status",
       request_created_at: "request_response_rmt.request_created_at",

@@ -206,6 +206,7 @@ export async function getRequestsClickhouseNoSort(
     LIMIT ${limit}
     OFFSET ${offset}
   `;
+  console.log("query", query);
 
   const requests = await dbQueryClickhouse<HeliconeRequest>(
     query,
