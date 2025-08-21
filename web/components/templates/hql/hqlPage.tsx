@@ -29,10 +29,8 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 function HQLPage() {
   const organization = useOrg();
-  const { data: hasAccessToHQL } = useFeatureFlag(
-    "hql",
-    organization?.currentOrg?.id ?? "",
-  );
+  const { data: hasAccessToHQL, isLoading: isLoadingFeatureFlag } =
+    useFeatureFlag("hql", organization?.currentOrg?.id ?? "");
   const { setNotification } = useNotification();
 
   const monaco = useMonaco();
@@ -207,16 +205,16 @@ function HQLPage() {
     latestQueryRef.current = currentQuery;
   }, [currentQuery]);
 
-  if (!hasAccessToHQL) {
-    return <div>You do not have access to HQL</div>;
-  }
-
-  if (savedQueryDetailsLoading) {
+  if (isLoadingFeatureFlag || savedQueryDetailsLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <div className="text-lg">Loading...</div>
       </div>
     );
+  }
+
+  if (!hasAccessToHQL) {
+    return <div>You do not have access to HQL</div>;
   }
 
   return (
