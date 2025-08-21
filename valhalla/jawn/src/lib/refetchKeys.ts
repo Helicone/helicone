@@ -14,25 +14,29 @@ type ProviderKey = {
 
 export const MAX_RETRIES = 3;
 async function setProviderKeyDev(
-  providerKey: ProviderKey,
+  orgId: string,
+  providerKeys: ProviderKey[],
   retries = MAX_RETRIES
 ) {
   try {
     const res = await fetch(
-      `${process.env.HELICONE_WORKER_API}/mock-set-provider-key`,
+      `${process.env.HELICONE_WORKER_API}/mock-set-provider-keys/${orgId}`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          provider: providerKey.provider,
-          decryptedProviderKey: providerKey.decrypted_provider_key,
-          decryptedProviderSecretKey: providerKey.decrypted_provider_secret_key,
-          authType: providerKey.auth_type,
-          config: providerKey.config,
-          orgId: providerKey.orgId,
-        }),
+        body: JSON.stringify(
+          providerKeys.map((providerKey) => ({
+            provider: providerKey.provider,
+            decryptedProviderKey: providerKey.decrypted_provider_key,
+            decryptedProviderSecretKey:
+              providerKey.decrypted_provider_secret_key,
+            authType: providerKey.auth_type,
+            config: providerKey.config,
+            orgId: providerKey.orgId,
+          }))
+        ),
       }
     );
     if (!res.ok) {
@@ -41,7 +45,7 @@ async function setProviderKeyDev(
         await new Promise((resolve) =>
           setTimeout(resolve, 10_000 * (MAX_RETRIES - retries))
         );
-        await setProviderKeyDev(providerKey, retries - 1);
+        await setProviderKeyDev(orgId, providerKeys, retries - 1);
       }
     }
   } catch (e) {
@@ -49,14 +53,14 @@ async function setProviderKeyDev(
   }
 }
 
-export async function setProviderKey(providerKey: ProviderKey) {
+export async function setProviderKeys(
+  orgId: string,
+  providerKeys: ProviderKey[]
+) {
   if (ENVIRONMENT === "production") {
-    await storeInCache(
-      `provider_keys_${providerKey.provider}_${providerKey.orgId}`,
-      JSON.stringify(providerKey)
-    );
+    await storeInCache(`provider_keys_${orgId}`, JSON.stringify(providerKeys));
   } else {
-    await setProviderKeyDev(providerKey);
+    await setProviderKeyDev(orgId, providerKeys);
   }
 }
 
@@ -108,29 +112,5 @@ export async function setAPIKeyDev(
     }
   } catch (e) {
     console.error(e);
-  }
-}
-
-export async function deleteProviderKey(
-  providerName: ProviderName,
-  orgId: string
-) {
-  if (ENVIRONMENT === "production") {
-    await removeFromCache(`provider_keys_${providerName}_${orgId}`);
-  } else {
-    try {
-      const res = await fetch(
-        `${process.env.HELICONE_WORKER_API}/delete-provider-key`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ providerName, orgId }),
-        }
-      );
-    } catch (e) {
-      console.error(e);
-    }
   }
 }

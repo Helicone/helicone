@@ -24,17 +24,18 @@ export const providers: Provider[] = [
     apiKeyPlaceholder: "sk-ant-...",
     relevanceScore: 95,
   },
-  // {
-  //   id: "azure",
-  //   name: "Azure OpenAI",
-  //   logoUrl: "/assets/home/providers/azure.webp",
-  //   description: "Configure your Azure OpenAI API keys",
-  //   docsUrl:
-  //     "https://docs.helicone.ai/getting-started/integration-methods/azure",
-  //   apiKeyLabel: "Azure API Key",
-  //   apiKeyPlaceholder: "...",
-  //   relevanceScore: 90,
-  // },
+  {
+    id: "azure",
+    name: "Azure OpenAI",
+    logoUrl: "/assets/home/providers/azure.webp",
+    description: "Configure your Azure OpenAI API keys",
+    docsUrl:
+      "https://docs.helicone.ai/getting-started/integration-methods/azure",
+    apiKeyLabel: "Azure API Key",
+    apiKeyPlaceholder: "...",
+    relevanceScore: 90,
+    multipleAllowed: true,
+  },
   {
     id: "vertex",
     name: "Vertex AI",

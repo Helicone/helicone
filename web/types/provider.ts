@@ -8,6 +8,7 @@ export interface Provider {
   apiKeyPlaceholder: string;
   relevanceScore: number; // Hidden score for sorting by relevance
   note?: string;
+  multipleAllowed?: boolean;
 }
 
 // Interface for provider configuration from API

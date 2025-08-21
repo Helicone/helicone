@@ -30,6 +30,33 @@ export const endpoints = {
       "*": {},
     },
   },
+  "gpt-4o:azure-openai": {
+    providerModelId: "gpt-4o",
+    provider: "azure-openai",
+    pricing: {
+      prompt: 0.0000025,
+      completion: 0.00001,
+      cacheRead: 0.00000125,
+    },
+    contextLength: 128000,
+    maxCompletionTokens: 16384,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "seed",
+      "max_tokens",
+      "response_format",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
   "gpt-4o:extended:openai": {
     providerModelId: "gpt-4o-2024-08-06",
     provider: "openai",
@@ -60,6 +87,33 @@ export const endpoints = {
   "gpt-4o-mini:openai": {
     providerModelId: "gpt-4o-mini",
     provider: "openai",
+    pricing: {
+      prompt: 0.00000015,
+      completion: 0.0000006,
+      cacheRead: 0.000000075,
+    },
+    contextLength: 128000,
+    maxCompletionTokens: 16384,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "seed",
+      "max_tokens",
+      "response_format",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "gpt-4o-mini:azure-openai": {
+    providerModelId: "gpt-4o-mini",
+    provider: "azure-openai",
     pricing: {
       prompt: 0.00000015,
       completion: 0.0000006,

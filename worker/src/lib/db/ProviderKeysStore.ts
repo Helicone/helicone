@@ -21,12 +21,13 @@ export type ProviderKey = {
    */
   auth_type: "key" | "session_token";
   config: Json | null;
+  cuid?: string;
 };
 
 export class ProviderKeysStore {
   constructor(private supabaseClient: SupabaseClient<Database>) {}
 
-  async getProviderKeys(): Promise<ProviderKey[] | null> {
+  async getProviderKeys(): Promise<Record<string, ProviderKey[]> | null> {
     const { data, error } = await this.supabaseClient
       .from("decrypted_provider_keys_v2")
       .select(
@@ -55,7 +56,14 @@ export class ProviderKeysStore {
           config: row.config,
         };
       })
-      .filter((key): key is ProviderKey => key !== null);
+      .filter((key): key is ProviderKey => key !== null)
+      .reduce<Record<string, ProviderKey[]>>((acc, key) => {
+        if (!acc[key.org_id]) {
+          acc[key.org_id] = [];
+        }
+        acc[key.org_id].push(key);
+        return acc;
+      }, {});
   }
 
   async getProviderKeyWithFetch(

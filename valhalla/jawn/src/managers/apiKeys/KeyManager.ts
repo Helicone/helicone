@@ -9,6 +9,7 @@ import { BaseManager } from "../BaseManager";
 import { DecryptedProviderKey } from "../VaultManager";
 import { ProviderName } from "@helicone-package/cost/models/providers";
 import { dbProviderToProvider } from "@helicone-package/cost/models/provider-helpers";
+import { setProviderKeys } from "../../lib/refetchKeys";
 
 type HashedPasswordRow = {
   hashed_password: string;
@@ -252,30 +253,7 @@ export class KeyManager extends BaseManager {
         providerSecretKey,
       } = data;
 
-      // Check if a key already exists for this provider
-      const existingKeysResult = await dbExecute<{ id: string }>(
-        `SELECT id
-         FROM provider_keys
-         WHERE org_id = $1
-         AND provider_name = $2
-         AND soft_delete = false`,
-        [this.authParams.organizationId, providerName]
-      );
-
-      // If a key exists, soft delete it first
-      if (existingKeysResult.data && existingKeysResult.data.length > 0) {
-        const existingKeyId = existingKeysResult.data[0].id;
-        const deleteResult = await dbExecute(
-          `UPDATE provider_keys
-           SET soft_delete = true
-           WHERE id = $1`,
-          [existingKeyId]
-        );
-
-        if (deleteResult.error) {
-          return err(`Failed to replace existing key: ${deleteResult.error}`);
-        }
-      }
+      // Note: Removed the logic that soft deletes existing keys to allow multiple keys per provider
 
       // Insert the new key
       const result = await dbExecute<{ id: string }>(
@@ -596,6 +574,31 @@ export class KeyManager extends BaseManager {
       });
     } catch (error) {
       return err(`Failed to create temporary key: ${error}`);
+    }
+  }
+
+  async resetProviderKeysInGatewayCache() {
+    try {
+      const allProviderKeys = await this.getProviderKeys();
+      if (allProviderKeys.error) {
+        return err(allProviderKeys.error);
+      }
+
+      setProviderKeys(
+        this.authParams.organizationId,
+        allProviderKeys.data?.map((key) => ({
+          provider: key.provider,
+          decrypted_provider_key: key.decrypted_provider_key,
+          decrypted_provider_secret_key: key.decrypted_provider_secret_key,
+          auth_type: key.auth_type,
+          config: key.config,
+          orgId: this.authParams.organizationId,
+        })) ?? []
+      );
+
+      return ok(true);
+    } catch (error) {
+      return err(`Failed to reset provider keys: ${error}`);
     }
   }
 }
