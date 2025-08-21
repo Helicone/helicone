@@ -16,7 +16,8 @@ type keySlug =
   | "key:helicone_on_helicone_key"
   | "key:openai"
   | "key:openrouter"
-  | "key:together_ai";
+  | "key:together_ai"
+  | "key:helix_prompt_id";
 
 const getKey = (key: string) => {
   if (process.env.PROVIDER_KEYS) {
