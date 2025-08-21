@@ -49,10 +49,10 @@ export class RealClickhouseWrapper implements IClickhouseWrapper {
     }
   }
 
-  async dbQuery<RowType>(
+  async dbQuery<T>(
     query: string,
     parameters: (number | string | boolean | Date)[]
-  ): Promise<Result<RowType[], string>> {
+  ): Promise<Result<T[], string>> {
     try {
       const query_params = this.paramsToValues(parameters);
 
@@ -64,7 +64,7 @@ export class RealClickhouseWrapper implements IClickhouseWrapper {
           wait_end_of_query: 1,
         },
       });
-      return { data: await queryResult.json<RowType>(), error: null };
+      return { data: await queryResult.json<T[]>(), error: null };
     } catch (err) {
       return {
         data: null,
@@ -73,10 +73,10 @@ export class RealClickhouseWrapper implements IClickhouseWrapper {
     }
   }
 
-  async dbQueryHql<RowType>(
+  async dbQueryHql<T>(
     query: string,
     parameters: (number | string | boolean | Date)[]
-  ): Promise<Result<RowType[], string>> {
+  ): Promise<Result<T[], string>> {
     try {
       const query_params = this.paramsToValues(parameters);
 
@@ -88,7 +88,7 @@ export class RealClickhouseWrapper implements IClickhouseWrapper {
           wait_end_of_query: 1,
         },
       });
-      return { data: await queryResult.json<RowType>(), error: null };
+      return { data: await queryResult.json<T[]>(), error: null };
     } catch (err) {
       return {
         data: null,
@@ -147,7 +147,7 @@ export class RealClickhouseWrapper implements IClickhouseWrapper {
       if (isDDL) {
         return { data: [] as RowType[], error: null };
       } else {
-        const rows = (await queryResult.json<RowType>()) as unknown as RowType[];
+        const rows = await queryResult.json<T[]>();
         return { data: rows, error: null };
       }
     } catch (err) {
