@@ -30,6 +30,7 @@ interface PlaygroundActionsProps {
   onRun: () => void;
   requestId?: string;
   isScrolled: boolean;
+  isLoading?: boolean;
 }
 const PlaygroundActions = ({
   mappedContent,
@@ -43,6 +44,7 @@ const PlaygroundActions = ({
   onRun,
   requestId,
   isScrolled,
+  isLoading = false,
 }: PlaygroundActionsProps) => {
   const organization = useOrg();
   const resetToDefault = () => {
@@ -110,7 +112,9 @@ const PlaygroundActions = ({
       />
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button onClick={onRun}>Run</Button>
+          <Button onClick={onRun} disabled={isLoading}>
+            {isLoading ? "Running..." : "Run"}
+          </Button>
         </TooltipTrigger>
         <TooltipContent>
           <div className="flex items-center gap-1">

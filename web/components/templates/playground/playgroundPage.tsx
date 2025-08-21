@@ -955,6 +955,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                 useAIGateway={useAIGateway}
                 setUseAIGateway={setUseAIGateway}
                 error={error}
+                isLoading={isStreaming}
               />
             )}
           </ResizablePanel>
