@@ -36,43 +36,111 @@ Get the API key, base URL and model name from the unified code snippet in TrueFo
 
 Use the HeliconeAsyncLogger to automatically log all your TrueFoundry requests:
 
-```python
-from openai import OpenAI
-from helicone_async import HeliconeAsyncLogger
+<Tabs>
+  <Tab title="Python">
+    ```python
+    from openai import OpenAI
+    from helicone_async import HeliconeAsyncLogger
 
-# Initialize Helicone Logger
-logger = HeliconeAsyncLogger(
-    api_key="<HELICONE_API_KEY>",
-)
-logger.init()
+    # Initialize Helicone Logger
+    logger = HeliconeAsyncLogger(
+        api_key="HELICONE_API_KEY",
+    )
+    logger.init()
 
-client = OpenAI(
-    api_key="your-truefoundry-api-key",
-    base_url="your-truefoundry-base-url"
-)
+    client = OpenAI(
+        api_key="your-truefoundry-api-key",
+        base_url="your-truefoundry-base-url"
+    )
 
-stream = client.chat.completions.create(
-    messages=[
-        {"role": "system", "content": "You are a helpful AI assistant."},
-        {"role": "user", "content": "Hello! Can you tell me a short fun fact about peregrine falcon?"},
-    ],
-    model="openai-main/gpt-4o",
-    temperature=0.7,
-    max_tokens=2500,
-    stream=True,
-    extra_headers={
-        "X-TFY-METADATA": '{"tfy_log_request":"true"}',
+    stream = client.chat.completions.create(
+        messages=[
+            {"role": "system", "content": "You are a helpful AI assistant."},
+            {"role": "user", "content": "Hello! Can you tell me a short fun fact about peregrine falcon?"},
+        ],
+        model="openai-main/gpt-4o",
+        temperature=0.7,
+        max_tokens=2500,
+        stream=True,
+        extra_headers={
+            "X-TFY-METADATA": '{"tfy_log_request":"true"}',
+        }
+    )
+
+    for chunk in stream:
+        if (
+            chunk.choices
+            and len(chunk.choices) > 0
+            and chunk.choices[0].delta.content is not None
+        ):
+            print(chunk.choices[0].delta.content, end="")
+    ```
+  </Tab>
+
+  <Tab title="Node.js">
+    ```javascript
+    import OpenAI from "openai";
+    import { HeliconeAsyncLogger } from "helicone-async";
+
+    // Initialize Helicone Logger
+    const logger = new HeliconeAsyncLogger({
+      apiKey: process.env.HELICONE_API_KEY,
+    });
+    await logger.init();
+
+    const client = new OpenAI({
+      apiKey: process.env.TRUEFOUNDRY_API_KEY,
+      baseURL: process.env.TRUEFOUNDRY_BASE_URL,
+    });
+
+    const stream = await client.chat.completions.create({
+      messages: [
+        { role: "system", content: "You are a helpful AI assistant." },
+        { role: "user", content: "Hello! Can you tell me a short fun fact about peregrine falcon?" },
+      ],
+      model: "openai-main/gpt-4o",
+      temperature: 0.7,
+      max_tokens: 2500,
+      stream: true,
+      // TrueFoundry metadata
+      extra_headers: {
+        "X-TFY-METADATA": JSON.stringify({ tfy_log_request: true }),
+      },
+    });
+
+    for await (const chunk of stream) {
+      if (chunk.choices[0]?.delta?.content) {
+        process.stdout.write(chunk.choices[0].delta.content);
+      }
     }
-)
+    ```
+  </Tab>
 
-for chunk in stream:
-    if (
-        chunk.choices
-        and len(chunk.choices) > 0
-        and chunk.choices[0].delta.content is not None
-    ):
-        print(chunk.choices[0].delta.content, end="")
-```
+  <Tab title="cURL">
+    ```bash
+    # First install helicone-async (Python example)
+    pip install helicone-async openai
+
+    # Then use with TrueFoundry gateway
+    curl "your-truefoundry-base-url/chat/completions" \
+      -H "Authorization: Bearer your-truefoundry-api-key" \
+      -H "Content-Type: application/json" \
+      -H "X-TFY-METADATA: {\"tfy_log_request\":\"true\"}" \
+      -d '{
+        "model": "openai-main/gpt-4o",
+        "messages": [
+          {"role": "system", "content": "You are a helpful AI assistant."},
+          {"role": "user", "content": "Hello! Can you tell me a short fun fact about peregrine falcon?"}
+        ],
+        "temperature": 0.7,
+        "max_tokens": 2500,
+        "stream": true
+      }'
+    ```
+    
+    Note: For cURL, you'll need to use the Python or Node.js HeliconeAsyncLogger in a separate process to capture and log the requests to Helicone.
+  </Tab>
+</Tabs>
 
 ### Step 3: View Your Requests in Helicone
 
