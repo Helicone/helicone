@@ -72,7 +72,6 @@ import useRequestsPageV2 from "./useRequestsPageV2";
 import { useHeliconeAgent } from "../agent/HeliconeAgentContext";
 import { useFilterUIDefinitions } from "@/filterAST/filterUIDefinitions/useFilterUIDefinitions";
 import { FilterUIDefinition } from "@/filterAST/filterUIDefinitions/types";
-import { useFilterStore } from "@/filterAST/store/filterStore";
 import { FilterAST } from "@/filterAST/filterAst";
 import { GET_FILTER_ARGS_TOOL_CONTEXT } from "@/lib/agent/tools";
 
