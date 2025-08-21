@@ -16,16 +16,25 @@
         "groups": [
           {
             "group": "Getting Started",
+            "pages": ["getting-started/quick-start"]
+          },
+          {
+            "group": "AI Gateway",
+            "tag": "NEW",
             "pages": [
-              "getting-started/quick-start",
+              "ai-gateway/overview",
+              "ai-gateway/model-registry",
+              "ai-gateway/migration-guide",
               {
-                "group": "Self Host",
+                "group": "Features",
                 "pages": [
-                  "getting-started/self-host/overview",
-                  "getting-started/self-host/cloud",
-                  "getting-started/self-host/docker",
-                  "getting-started/self-host/kubernetes",
-                  "getting-started/self-host/manual"
+                  "features/advanced-usage/prompts",
+                  "features/advanced-usage/custom-rate-limits",
+                  "getting-started/integration-method/gateway-fallbacks",
+                  "features/advanced-usage/llm-security",
+                  "features/advanced-usage/moderations",
+                  "features/advanced-usage/retries",
+                  "features/advanced-usage/vault"
                 ]
               }
             ]
@@ -33,6 +42,7 @@
           {
             "group": "Integrations",
             "pages": [
+              "integrations/overview",
               {
                 "group": "LLM & Inference Providers",
                 "pages": [
@@ -229,21 +239,20 @@
               }
             ]
           },
-          {
-            "group": "Cloud AI Gateway",
-            "pages": [
-              "features/advanced-usage/cloud-ai-gateway-overview",
-              "features/advanced-usage/custom-rate-limits",
-              "getting-started/integration-method/gateway-fallbacks",
-              "features/advanced-usage/llm-security",
-              "features/advanced-usage/moderations",
-              "features/advanced-usage/retries",
-              "features/advanced-usage/vault"
-            ]
-          },
+
           {
             "group": "References",
             "pages": [
+              {
+                "group": "Self Host",
+                "pages": [
+                  "getting-started/self-host/overview",
+                  "getting-started/self-host/cloud",
+                  "getting-started/self-host/docker",
+                  "getting-started/self-host/kubernetes",
+                  "getting-started/self-host/manual"
+                ]
+              },
               {
                 "group": "Prompts (Legacy)",
                 "pages": [

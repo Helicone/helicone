@@ -1,75 +1,145 @@
 ---
 title: "AI Gateway Overview"
 sidebarTitle: "Overview"
-description: "Complete guide to Helicone's AI Gateway - routing, load balancing, and monitoring for 100+ LLM providers"
+description: "Use any LLM provider through a single OpenAI-compatible API with intelligent routing, fallbacks, and unified observability"
 ---
 
-Helicone AI Gateway is a lightweight, Rust-based proxy that provides intelligent routing, load balancing, and monitoring for over 100 LLM providers. Whether you're building AI applications or managing production workloads, the Gateway simplifies LLM operations with enterprise-grade features.
+Helicone AI Gateway provides a unified API for 100+ LLM providers through the OpenAI SDK format. Instead of learning different SDKs and APIs for each provider, use one familiar interface to access any model with intelligent routing, automatic fallbacks, and complete observability.
 
-## Choose Your Deployment
+## Why Use AI Gateway?
 
 <CardGroup cols={2}>
-<Card title="Cloud Hosted" icon="cloud" href="/ai-gateway/cloud-quickstart">
-  <strong>Recommended</strong> - Get started in 30 seconds with zero infrastructure
+<Card title="One SDK for All Models" icon="code">
+  Use OpenAI SDK to access GPT, Claude, Gemini, and 100+ other models
 </Card>
-<Card title="Self-Hosted" icon="server" href="/ai-gateway/self-hosted-quickstart">
-  Deploy on your own infrastructure for complete control
+<Card title="Intelligent Routing" icon="route">
+  Automatic model fallbacks, cost optimization, and load balancing
+</Card>
+<Card title="Unified Observability" icon="chart-line">
+  Track usage, costs, and performance across all providers in one dashboard
+</Card>
+<Card title="Prompt Management" icon="wand-magic-sparkles">
+  Deploy and iterate prompts without code changes
 </Card>
 </CardGroup>
 
-## Getting Started
+## Quick Example
 
-<CardGroup cols={2}>
-<Card title="Introduction" icon="book-open" href="/ai-gateway/introduction">
-  Learn about the AI Gateway's features and benefits
-</Card>
-<Card title="Configuration Reference" icon="gear" href="/ai-gateway/config">
-  Complete YAML configuration guide for all Gateway features
-</Card>
-</CardGroup>
+Instead of managing multiple SDKs:
 
-## Integration & Observability
+```typescript
+// ❌ Old way - multiple SDKs and endpoints
+const openai = new OpenAI({ baseURL: "https://oai.helicone.ai/v1" });
+const anthropic = new Anthropic({ baseURL: "https://anthropic.helicone.ai" });
 
-<CardGroup cols={2}>
-<Card title="Helicone Integration" icon="chart-line" href="/ai-gateway/helicone-integration">
-  Enable authentication and observability with Helicone platform
-</Card>
-<Card title="Application Health" icon="heart-pulse" href="/ai-gateway/self-hosted/debugging/telemetry">
-  Monitor Gateway performance with OpenTelemetry integration
-</Card>
-</CardGroup>
+// Switch providers = code changes
+const openaiResponse = await openai.chat.completions.create({
+  model: "gpt-4o",
+  messages: [...]
+});
 
-## Core Concepts
+const anthropicResponse = await anthropic.messages.create({
+  model: "claude-3.5-sonnet",
+  messages: [...] // Different message format!
+});
+```
+
+Use one SDK for everything:
+
+```typescript
+// ✅ New way - one SDK, all providers
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai/ai",
+  apiKey: process.env.HELICONE_API_KEY,
+});
+
+// Switch providers = change model string
+const response = await client.chat.completions.create({
+  model: "gpt-4o/openai",  // or "claude-3.5-sonnet-v2/anthropic"
+  messages: [{ role: "user", content: "Hello!" }]
+});
+
+// Automatic fallbacks - if GPT-4o fails, try Claude
+const response = await client.chat.completions.create({
+  model: "gpt-4o/openai,claude-3.5-sonnet-v2/anthropic",
+  messages: [{ role: "user", content: "Hello!" }]
+});
+```
+
+## Key Features
+
+### Model Fallbacks & Cost Optimization
+```typescript
+// Try multiple models in order of preference/cost
+model: "gpt-4o-mini/openai,claude-3.5-haiku/anthropic,gemini-pro/google"
+```
+
+### Prompt Management Integration
+```typescript
+// Reference saved prompts with variables
+{
+  model: "claude-3.5-sonnet-v2/anthropic",
+  prompt_id: "customer_support_v2",
+  environment: "production",
+  inputs: {
+    customer_name: "John Doe",
+    issue_type: "billing"
+  }
+}
+```
+
+### Automatic Format Conversion
+The gateway automatically converts between provider formats:
+- OpenAI → Anthropic message format
+- OpenAI → Google Gemini format
+- Handle provider-specific parameters seamlessly
+
+## Supported Providers
 
 <CardGroup cols={3}>
-<Card title="Load Balancing" icon="scale-balanced" href="/ai-gateway/concepts/loadbalancing">
-  Distribute requests across providers for optimal performance
+<Card title="OpenAI" icon="openai">
+  GPT-4o, GPT-4o-mini, GPT-4-turbo, o1, o3
 </Card>
-<Card title="Caching" icon="database" href="/ai-gateway/concepts/caching">
-  Store and reuse responses to reduce costs and latency
+<Card title="Anthropic" icon="anthropic">
+  Claude-3.5-Sonnet-v2, Claude-3.5-Haiku, Claude-Opus-4.1
 </Card>
-<Card title="Rate Limiting" icon="gauge-high" href="/ai-gateway/concepts/rate-limiting">
-  Control request frequency with GCRA algorithm
+<Card title="Google" icon="google">
+  Gemini-Pro, Gemini-2.5, Gemini-Flash
 </Card>
-<Card title="Multiple Routers" icon="server" href="/ai-gateway/concepts/multi-router">
-  Configure separate routers for different environments and use cases
+<Card title="AWS Bedrock" icon="aws">
+  All Bedrock models with automatic region handling
 </Card>
-<Card title="Model Mapping" icon="arrows-left-right" href="/ai-gateway/concepts/model-mapping">
-  Define equivalencies between models from different providers
+<Card title="Azure OpenAI" icon="microsoft">
+  GPT models with deployment configuration
 </Card>
-<Card title="Providers" icon="server-cog" href="/ai-gateway/concepts/providers">
-  Configure custom LLM provider endpoints and models
+<Card title="100+ More" icon="plus">
+  Groq, xAI, DeepSeek, Perplexity, and growing
 </Card>
 </CardGroup>
 
-## Deployment Options
+## Next Steps
 
 <CardGroup cols={2}>
-<Card title="Self-hosted Deployment" icon="server" href="/ai-gateway/self-host">
-  Deploy on your own infrastructure with full control
+<Card title="Get Started in 5 Minutes" icon="rocket" href="/getting-started/quick-start">
+  Set up AI Gateway and make your first request
 </Card>
-<Card title="Deployment Guides" icon="book" href="/ai-gateway/self-hosted/deployment">
-  Platform-specific deployment instructions and best practices
+<Card title="Browse Model Registry" icon="list" href="/ai-gateway/model-registry">
+  See all supported models and provider formats
+</Card>
+<Card title="Migration Guide" icon="arrow-right" href="/ai-gateway/migration-guide">
+  Migrate from proxy endpoints to unified API
+</Card>
+<Card title="Advanced Features" icon="gear" href="/features/advanced-usage/prompts">
+  Explore prompts, security, rate limiting, and more
 </Card>
 </CardGroup>
 
+## How It Works
+
+1. **Point your OpenAI SDK** to `ai-gateway.helicone.ai/ai`
+2. **Add your Helicone API key** for authentication
+3. **Store your provider keys** in Helicone's secure vault
+4. **Use any model** with the format `model/provider`
+5. **View everything** in your unified dashboard
+
+The AI Gateway handles authentication, format conversion, routing, and observability automatically.

@@ -1,0 +1,241 @@
+---
+title: "Model Registry"
+sidebarTitle: "Model Registry"
+description: "Complete reference of all supported models and providers in Helicone AI Gateway"
+---
+
+The AI Gateway supports 100+ models across major LLM providers. Use the format `model/provider` to access any model through the unified API.
+
+## Usage Format
+
+```typescript
+await client.chat.completions.create({
+  model: "model/provider",  // e.g., "claude-3.5-sonnet-v2/anthropic"
+  messages: [{ role: "user", content: "Hello!" }]
+});
+```
+
+## OpenAI Models
+
+<AccordionGroup>
+  <Accordion title="GPT-4o Models">
+    - `gpt-4o/openai` - Latest GPT-4o model
+    - `gpt-4o-2024-11-20/openai` - Specific date version
+    - `gpt-4o-2024-08-06/openai` - Previous version
+    - `gpt-4o-mini/openai` - Faster, cheaper GPT-4o
+    - `gpt-4o-mini-2024-07-18/openai` - Specific date version
+  </Accordion>
+  
+  <Accordion title="GPT-4 Models">
+    - `gpt-4-turbo/openai` - Latest GPT-4 Turbo
+    - `gpt-4-turbo-2024-04-09/openai` - Specific version
+    - `gpt-4-turbo-preview/openai` - Preview version
+    - `gpt-4/openai` - Original GPT-4
+  </Accordion>
+  
+  <Accordion title="o1 Models">
+    - `o1-preview/openai` - Reasoning model preview
+    - `o1-mini/openai` - Faster reasoning model
+  </Accordion>
+  
+  <Accordion title="o3 Models">
+    - `o3-mini/openai` - Latest reasoning model
+  </Accordion>
+</AccordionGroup>
+
+## Anthropic Models
+
+<AccordionGroup>
+  <Accordion title="Claude 3.5 Models">
+    - `claude-3.5-sonnet-v2/anthropic` - Latest Claude 3.5 Sonnet (20241022)
+    - `claude-3.5-sonnet/anthropic` - Previous Claude 3.5 Sonnet
+    - `claude-3.5-haiku/anthropic` - Fast and efficient Claude model
+  </Accordion>
+  
+  <Accordion title="Claude Opus 4 Models">
+    - `claude-opus-4.1/anthropic` - Latest Claude Opus
+    - `claude-opus-4/anthropic` - Previous Opus version
+    - `claude-sonnet-4/anthropic` - Claude Sonnet 4
+  </Accordion>
+  
+  <Accordion title="Claude 3.7 Models">
+    - `claude-3.7-sonnet/anthropic` - Claude 3.7 Sonnet
+  </Accordion>
+</AccordionGroup>
+
+## Google Models
+
+<AccordionGroup>
+  <Accordion title="Gemini Models">
+    - `gemini-pro/google` - Standard Gemini Pro
+    - `gemini-2.5/google` - Latest Gemini version
+    - `gemini-flash/google` - Fast Gemini variant
+  </Accordion>
+</AccordionGroup>
+
+## AWS Bedrock
+
+<AccordionGroup>
+  <Accordion title="Anthropic on Bedrock">
+    - `claude-3.5-sonnet-v2/bedrock` - Claude 3.5 Sonnet v2
+    - `claude-3.5-sonnet/bedrock` - Claude 3.5 Sonnet
+    - `claude-3.5-haiku/bedrock` - Claude 3.5 Haiku
+  </Accordion>
+  
+  <Accordion title="Region Configuration">
+    Configure regions through your provider keys in the Helicone vault:
+    - `us-east-1` (default)
+    - `us-west-2`
+    - `eu-west-1`
+  </Accordion>
+</AccordionGroup>
+
+## Azure OpenAI
+
+<AccordionGroup>
+  <Accordion title="GPT Models on Azure">
+    - `gpt-4o/azure-openai` - GPT-4o on Azure
+    - `gpt-4o-mini/azure-openai` - GPT-4o mini on Azure
+    - `gpt-4-turbo/azure-openai` - GPT-4 Turbo on Azure
+  </Accordion>
+  
+  <Accordion title="Deployment Configuration">
+    Configure your Azure deployment through provider keys:
+    - Resource name (e.g., `my-openai-resource`)
+    - Deployment name (e.g., `gpt-4o-deployment`)
+    - API version is handled automatically
+  </Accordion>
+</AccordionGroup>
+
+## Other Providers
+
+<AccordionGroup>
+  <Accordion title="Groq">
+    - `llama-3.3-70b-versatile/groq`
+    - `llama-3.1-70b-versatile/groq`
+    - `mixtral-8x7b-32768/groq`
+  </Accordion>
+  
+  <Accordion title="xAI">
+    - `grok-beta/xai`
+    - `grok-vision-beta/xai`
+  </Accordion>
+  
+  <Accordion title="DeepSeek">
+    - `deepseek-chat/deepseek`
+    - `deepseek-coder/deepseek`
+  </Accordion>
+  
+  <Accordion title="Perplexity">
+    - `llama-3.1-sonar-small-128k-online/perplexity`
+    - `llama-3.1-sonar-large-128k-online/perplexity`
+  </Accordion>
+</AccordionGroup>
+
+## Model Fallbacks
+
+Use comma-separated model lists for automatic failover:
+
+```typescript
+// Try GPT-4o first, then Claude if it fails
+model: "gpt-4o/openai,claude-3.5-sonnet-v2/anthropic"
+
+// Cost-optimized chain: try cheapest first
+model: "gpt-4o-mini/openai,claude-3.5-haiku/anthropic,gemini-pro/google"
+
+// Multi-provider redundancy
+model: "gpt-4o/openai,claude-3.5-sonnet-v2/anthropic,gemini-pro/google"
+```
+
+## Provider Configuration
+
+### Setting Up Provider Keys
+
+1. Go to [Provider Keys](https://us.helicone.ai/providers) in your Helicone dashboard
+2. Add your API keys for each provider you want to use
+3. Configure provider-specific settings (regions, deployments, etc.)
+4. The AI Gateway will automatically use your keys for authentication
+
+### Special Configuration
+
+**AWS Bedrock:**
+- Requires AWS Access Key ID and Secret Access Key
+- Optionally configure regions and cross-region access
+
+**Azure OpenAI:**
+- Requires API key, resource name, and deployment name
+- API version is managed automatically
+
+**Google (Vertex AI):**
+- Requires service account credentials or API key
+- Configure project ID for Vertex AI models
+
+## Example Usage
+
+<CodeGroup>
+```typescript TypeScript
+import { OpenAI } from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai/ai",
+  apiKey: process.env.HELICONE_API_KEY,
+});
+
+// Single model
+const response = await client.chat.completions.create({
+  model: "claude-3.5-sonnet-v2/anthropic",
+  messages: [{ role: "user", content: "Explain quantum computing" }],
+});
+
+// Fallback chain
+const response = await client.chat.completions.create({
+  model: "gpt-4o/openai,claude-3.5-sonnet-v2/anthropic,gemini-pro/google",
+  messages: [{ role: "user", content: "Write a haiku about AI" }],
+});
+```
+
+```python Python
+from openai import OpenAI
+import os
+
+client = OpenAI(
+    base_url="https://ai-gateway.helicone.ai/ai",
+    api_key=os.getenv("HELICONE_API_KEY")
+)
+
+# Single model
+response = client.chat.completions.create(
+    model="claude-3.5-sonnet-v2/anthropic",
+    messages=[{"role": "user", "content": "Explain machine learning"}]
+)
+
+# Fallback chain
+response = client.chat.completions.create(
+    model="gpt-4o/openai,claude-3.5-sonnet-v2/anthropic",
+    messages=[{"role": "user", "content": "Write a story about robots"}]
+)
+```
+
+```bash cURL
+curl https://ai-gateway.helicone.ai/ai/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $HELICONE_API_KEY" \
+  -d '{
+    "model": "claude-3.5-sonnet-v2/anthropic",
+    "messages": [
+      {"role": "user", "content": "What is the future of AI?"}
+    ]
+  }'
+```
+</CodeGroup>
+
+## Notes
+
+- **Model names are case-sensitive**: Use exact formats shown above
+- **Format is `model/provider`**: Always model name first, then provider
+- **New models added regularly**: This registry is updated as new models become available
+- **Provider-specific features**: Some advanced features may require direct provider integration
+- **Rate limits apply**: Both Helicone and provider rate limits are enforced
+- **Cost tracking**: All usage is tracked and visible in your Helicone dashboard
+
+For the most up-to-date model availability, check your [Helicone dashboard](https://us.helicone.ai/dashboard) or contact support.

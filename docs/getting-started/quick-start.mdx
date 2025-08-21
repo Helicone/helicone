@@ -73,23 +73,29 @@ Welcome to Helicone! Integrate your preferred provider with Helicone in seconds.
 
   <Step title="Integrate with AI Gateway (Recommended)">
 
-    The fastest way to get started is with Helicone's AI Gateway - our unified OpenAI-compatible API that works with models from OpenAI, Anthropic, Vertex, Groq, and more.
+    The fastest way to get started is with Helicone's AI Gateway - use OpenAI SDK to access models from OpenAI, Anthropic, Google, AWS Bedrock, and 100+ other providers through a single unified API.
 
-    **Bring your own key:** Go to [Provider Keys](https://us.helicone.ai/providers) to securely store API keys for the providers you want to use.
+    **Set up provider keys:** Go to [Provider Keys](https://us.helicone.ai/providers) to securely store API keys for the providers you want to use.
 
     <Tabs>
       <Tab title="TypeScript">
         ```typescript
         import { OpenAI } from "openai";
 
-        const openai = new OpenAI({
-          baseURL: "https://ai-gateway.helicone.ai/v1",
+        const client = new OpenAI({
+          baseURL: "https://ai-gateway.helicone.ai/ai",
           apiKey: process.env.HELICONE_API_KEY,
         });
 
-        const response = await openai.chat.completions.create({
-          model: "gpt-4o-mini/openai", // model-name/provider
+        const response = await client.chat.completions.create({
+          model: "gpt-4o-mini/openai", // model/provider format
           messages: [{ role: "user", content: "Hello, world!" }],
+        });
+        
+        // Try other providers with same code
+        const claudeResponse = await client.chat.completions.create({
+          model: "claude-3.5-sonnet-v2/anthropic",
+          messages: [{ role: "user", content: "Hello from Claude!" }],
         });
         ```
       </Tab>
@@ -99,20 +105,26 @@ Welcome to Helicone! Integrate your preferred provider with Helicone in seconds.
         from openai import OpenAI
 
         client = OpenAI(
-            base_url="https://ai-gateway.helicone.ai/v1",
+            base_url="https://ai-gateway.helicone.ai/ai",
             api_key=os.getenv("HELICONE_API_KEY")
         )
 
         response = client.chat.completions.create(
-            model="claude-3-5-sonnet/anthropic",
+            model="gpt-4o-mini/openai",  # model/provider format
             messages=[{"role": "user", "content": "Hello, world!"}]
+        )
+        
+        # Try other providers with same code
+        claude_response = client.chat.completions.create(
+            model="claude-3.5-sonnet-v2/anthropic",
+            messages=[{"role": "user", "content": "Hello from Claude!"}]
         )
         ```
       </Tab>
 
       <Tab title="cURL">
         ```bash
-        curl https://ai-gateway.helicone.ai/v1/chat/completions \
+        curl https://ai-gateway.helicone.ai/ai/chat/completions \
           -H "Content-Type: application/json" \
           -H "Authorization: Bearer $HELICONE_API_KEY" \
           -d '{
@@ -126,7 +138,7 @@ Welcome to Helicone! Integrate your preferred provider with Helicone in seconds.
     </Tabs>
 
     <Note>
-      **Why AI Gateway?** Get immediate, OpenAI-compatible access to models from any major provider, alongside features like rate limiting, caching, prompt versioning, and complete observability - all with zero code changes beyond the base URL and API key.
+      **Why AI Gateway?** One SDK for all providers, automatic fallbacks (`"gpt-4o/openai,claude-3.5-sonnet-v2/anthropic"`), prompt management, and unified observability. See all [supported models →](/ai-gateway/model-registry)
     </Note>
   </Step>
 
@@ -221,7 +233,13 @@ Here are the key features to explore as you build with Helicone:
 
 ## Alternative Integration Methods
 
-Need a different integration approach? Here are provider-specific and alternative methods:
+Need provider-specific features or using existing SDKs? Explore [all integration options →](/integrations/overview)
+
+<CardGroup cols={1}>
+<Card title="When to use alternatives" icon="question">
+  Use direct provider integrations if you need specific features only available through native SDKs, have existing code deeply integrated with a provider, or have enterprise requirements that prevent using the unified API.
+</Card>
+</CardGroup>
 
 <CardGroup cols={4}>
   <Card title="OpenAI" href="/integrations/openai/javascript" />
