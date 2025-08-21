@@ -171,6 +171,20 @@ function getModelProviders(model: string): Result<Set<ProviderName>> {
   return ok(providers);
 }
 
+function getPtbEndpointsWithIds(model: string, provider: string): Result<Record<string, string>> {
+  const result: Record<string, string> = {};
+  const prefix = `${model}:${provider}:`;
+  
+  indexes.endpointIdToEndpoint.forEach((endpoint, endpointId) => {
+    if (endpointId.startsWith(prefix) && endpoint.ptbEnabled) {
+      const deploymentId = endpointId.substring(prefix.length);
+      result[deploymentId] = endpoint.baseUrl;
+    }
+  });
+  
+  return ok(result);
+}
+
 export const registry = {
   getModel,
   getAllModels,
@@ -181,6 +195,7 @@ export const registry = {
   getPtbEndpointById,
   getPtbEndpointsByModel,
   getPtbEndpointsByProvider,
+  getPtbEndpointsWithIds,
   getProviderModels,
   buildEndpoint,
   buildModelId,

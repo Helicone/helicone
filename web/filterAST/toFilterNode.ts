@@ -35,7 +35,7 @@ const operatorMap: Record<string, string> = {
  * This includes both explicitly marked properties and keys that follow property naming conventions
  */
 function isPropertyField(field: FieldSpec): boolean {
-  if (field.column === "helicone-score-feedback") {
+  if (String(field.column) === "helicone-score-feedback") {
     return false;
   }
 

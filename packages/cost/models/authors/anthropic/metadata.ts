@@ -2,8 +2,8 @@
  * Anthropic author metadata
  */
 
+import { anthropicModels } from ".";
 import type { AuthorMetadata } from "../../types";
-import { anthropicModels } from "./index";
 
 export const anthropicMetadata = {
   name: "Anthropic",

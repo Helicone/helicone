@@ -16,6 +16,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import FilterASTButton from "@/filterAST/FilterASTButton";
+import { useFilterAST } from "@/filterAST/context/filterContext";
 import {
   HeliconeRequest,
   MappedLLMRequest,
@@ -145,6 +146,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   const orgContext = useOrg();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { store: filterStore, helpers: filterHelpers } = useFilterAST();
   const [drawerSize, setDrawerSize] = useLocalStorage(
     "request-drawer-size",
     initialRequestId ? 33 : 0,
@@ -433,6 +435,19 @@ export default function RequestsPage(props: RequestsPageV2Props) {
       selectedIds.includes(index.toString()),
     );
   }, [requests, selectedIds]);
+
+  const hasActiveFilters = useMemo(() => {
+    return filterStore.filter !== null && filterStore.getFilterNodeCount() > 0;
+  }, [filterStore.filter, filterStore.getFilterNodeCount]);
+
+  const shouldShowClearFilters = useMemo(() => {
+    return (
+      shouldShowMockData === false &&
+      requests.length === 0 &&
+      !isDataLoading &&
+      hasActiveFilters
+    );
+  }, [shouldShowMockData, requests.length, isDataLoading, hasActiveFilters]);
 
   /* -------------------------------------------------------------------------- */
   /*                                  CALLBACKS                                 */
@@ -804,6 +819,10 @@ export default function RequestsPage(props: RequestsPageV2Props) {
               selectedIds={selectedIds}
               // only for request page
               currentRow={selectedData}
+              showClearFilters={shouldShowClearFilters}
+              onClearFilters={() => {
+                filterHelpers.clearFilter();
+              }}
             >
               {selectMode && (
                 <Row className="w-full items-center justify-between gap-5 bg-white p-5 dark:bg-black">
