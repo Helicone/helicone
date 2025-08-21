@@ -148,7 +148,7 @@ client = OpenAI(
     },
     truefoundry: {
       formattedName: "TrueFoundry",
-      logo: "/static/truefoundry.webp",
+      logo: "/static/truefoundry-logo.png",
       typescript: `import OpenAI from "openai";
 import { HeliconeAsyncLogger } from "helicone-async";
 
@@ -158,7 +158,7 @@ const logger = new HeliconeAsyncLogger({
 logger.init();
 
 const client = new OpenAI({
-  apiKey: TRUEFOUNDRY_JWT_TOKEN,
+  apiKey: ,
   baseURL: "your-truefoundry-base-url"
 });`,
       python: `from openai import OpenAI
