@@ -360,7 +360,8 @@ function QueryList({
                     />
                     <span 
                       className="flex items-center gap-2 truncate pr-2 text-sm"
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
                         setCurrentQuery({
                           id: query.id,
                           name: query.name,
