@@ -47,9 +47,14 @@ export enum HqlErrorCode {
 
 // Parsed error structure from API responses
 export interface HqlError {
-  code?: HqlErrorCode;
+  code: HqlErrorCode;
   message: string;
   details?: string;
+}
+
+// Helper to check if a string is a valid HqlErrorCode
+function isValidHqlErrorCode(code: string): code is HqlErrorCode {
+  return Object.values(HqlErrorCode).includes(code as HqlErrorCode);
 }
 
 // Parse error string to extract HQL error structure
@@ -57,11 +62,17 @@ export function parseHqlError(errorString: string): HqlError {
   // Try to extract error code from string if it follows pattern
   const codeMatch = errorString.match(/\[(HQL_[A-Z_]+)\]/);
   if (codeMatch) {
-    const code = codeMatch[1] as HqlErrorCode;
-    const message = errorString.replace(/\[HQL_[A-Z_]+\]\s*/, "");
-    return { code, message };
+    const extractedCode = codeMatch[1];
+    // Validate that the extracted code is actually a valid enum value
+    if (isValidHqlErrorCode(extractedCode)) {
+      const message = errorString.replace(/\[HQL_[A-Z_]+\]\s*/, "");
+      return { code: extractedCode, message };
+    }
   }
 
-  // Fallback to parsing error message patterns
-  return { message: errorString };
+  // Fallback with UNEXPECTED_ERROR code when no valid code is found
+  return { 
+    code: HqlErrorCode.UNEXPECTED_ERROR, 
+    message: errorString 
+  };
 }

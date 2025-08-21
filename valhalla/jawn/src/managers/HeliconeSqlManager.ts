@@ -5,7 +5,7 @@ import {
 import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
 import { AuthParams } from "../packages/common/auth/types";
 import { ok, Result, isError } from "../packages/common/result";
-import { HqlError, HqlErrorCode, hqlError, parseClickhouseError, createHqlError } from "../lib/errors/HqlErrors";
+import { HqlError, HqlErrorCode, hqlError, parseClickhouseError } from "../lib/errors/HqlErrors";
 import { AST, Parser } from "node-sql-parser";
 import { HqlStore } from "../lib/stores/HqlStore";
 
@@ -23,8 +23,6 @@ interface ClickHouseTableRow {
 }
 
 function validateSql(sql: string): Result<null, HqlError> {
-  const parser = new Parser();
-  
   try {
     const tables = parser.tableList(sql, { database: "Postgresql" });
 
@@ -79,7 +77,7 @@ function addLimit(ast: AST, limit: number): AST {
   } else {
     // No existing limit, add one with 1000
     ast.limit = {
-      seperator: ",",
+      separator: ",",
       value: [
         {
           type: "number",
@@ -101,9 +99,9 @@ function normalizeAst(ast: AST | AST[]): AST[] {
 }
 
 export class HeliconeSqlManager {
-  private hqlStore: HqlStore;
+  private readonly hqlStore: HqlStore;
 
-  constructor(private authParams: AuthParams) {
+  constructor(private readonly authParams: AuthParams) {
     this.hqlStore = new HqlStore();
   }
 

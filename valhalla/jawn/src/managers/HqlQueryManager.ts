@@ -83,7 +83,7 @@ export class HqlQueryManager {
     if (!requestBody.sql?.trim()) {
       return hqlError(HqlErrorCode.MISSING_QUERY_SQL);
     }
-    if (requestBody.name.length > 255) {
+    if (requestBody.name.trim().length > 255) {
       return hqlError(HqlErrorCode.QUERY_NAME_TOO_LONG);
     }
     
@@ -121,7 +121,7 @@ export class HqlQueryManager {
     if (!requestBody.sql?.trim()) {
       return hqlError(HqlErrorCode.MISSING_QUERY_SQL);
     }
-    if (requestBody.name.length > 255) {
+    if (requestBody.name.trim().length > 255) {
       return hqlError(HqlErrorCode.QUERY_NAME_TOO_LONG);
     }
     
