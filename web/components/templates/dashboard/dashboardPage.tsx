@@ -363,7 +363,8 @@ const DashboardPage = (props: DashboardPageProps) => {
                         }
                       },
                       isLive: isLive,
-                      hasCustomTimeFilter: searchParams.get("t")?.startsWith("custom_") || false,
+                      hasCustomTimeFilter:
+                        searchParams.get("t")?.startsWith("custom_") || false,
                       onClearTimeFilter: () => {
                         searchParams.delete("t");
                         setInterval("24h");

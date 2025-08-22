@@ -152,7 +152,7 @@ export function ThemedTimeFilterShadCN({
         return `${format(from, "LLL d, yyyy HH:mm")} - Now`;
       }
     }
-    
+
     if (from.toDateString() === to.toDateString()) {
       // Same day
       return `${format(from, "LLL d, yyyy")} ${format(
@@ -244,7 +244,6 @@ export function ThemedTimeFilterShadCN({
           className="flex w-auto flex-col gap-2 p-4"
           align="start"
         >
-          
           {/* Predefined ranges */}
           <span className="pt-4 text-sm font-semibold">Quick Select:</span>
           <div className="grid grid-cols-6 gap-2">

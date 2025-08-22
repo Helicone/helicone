@@ -700,7 +700,9 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                 defaultValue={getDefaultValue()}
                 custom={true}
                 isLive={isLive}
-                hasCustomTimeFilter={searchParams.get("t")?.startsWith("custom_") || false}
+                hasCustomTimeFilter={
+                  searchParams.get("t")?.startsWith("custom_") || false
+                }
                 onClearTimeFilter={() => {
                   searchParams.delete("t");
                   setTimeFilter(defaultFilter);
