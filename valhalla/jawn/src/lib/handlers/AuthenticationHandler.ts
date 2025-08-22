@@ -60,7 +60,8 @@ export class AuthenticationHandler extends AbstractLogHandler {
 
     const authResult = await getAndStoreInCache(
       `auth-${JSON.stringify(heliconeAuth)}`,
-      async () => authClient.authenticate(heliconeAuth)
+      async () => authClient.authenticate(heliconeAuth),
+      60 // 1 minute
     );
 
     if (authResult.error || !authResult.data?.organizationId) {
