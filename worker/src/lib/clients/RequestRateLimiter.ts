@@ -30,7 +30,7 @@ export class RateLimiter {
           method: "POST",
           body: JSON.stringify({
             windowSizeSeconds: 60,
-            maxCount: 100,
+            maxCount: getRPSFromTier(tier),
           }),
           headers: {
             "content-type": "application/json",
@@ -49,5 +49,21 @@ export class RateLimiter {
     } catch (error: any) {
       return err(JSON.stringify(error));
     }
+  }
+}
+
+function getRPSFromTier(tier: string): number {
+  if (!tier || typeof tier !== "string") {
+    return 100;
+  } else if (tier.startsWith("enterprise")) {
+    return 10_000;
+  } else if (tier.startsWith("team")) {
+    return 5000;
+  } else if (tier.startsWith("pro")) {
+    return 1000;
+  } else if (tier.startsWith("growth")) {
+    return 500;
+  } else {
+    return 100;
   }
 }
