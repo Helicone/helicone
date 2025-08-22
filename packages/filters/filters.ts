@@ -248,6 +248,7 @@ const whereKeyMappings: KeyMappings = {
       country_code: "request_response_rmt.country_code",
       latency: "request_response_rmt.latency",
       cost: "request_response_rmt.cost",
+      provider: "request_response_rmt.provider",
       time_to_first_token: "request_response_rmt.time_to_first_token",
       status: "request_response_rmt.status",
       request_created_at: "request_response_rmt.request_created_at",

@@ -504,6 +504,7 @@ interface RequestResponseRMT {
   response_created_at: string;
   latency: number;
   cost: number;
+  provider: string;
   status: number;
   completion_tokens: number;
   prompt_tokens: number;
