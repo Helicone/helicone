@@ -197,7 +197,6 @@ export class LogManager {
     logMetaData: LogMetaData,
     logMessages: KafkaMessageContents[]
   ): Promise<void> {
-    console.log(`Upserting logs for batch ${logMetaData.batchId}`);
     const start = performance.now();
     const result = await handler.handleResults();
     const end = performance.now();
@@ -226,7 +225,8 @@ export class LogManager {
       });
 
       console.error(
-        `Error inserting logs: ${JSON.stringify(result.error)} for batch ${logMetaData.batchId
+        `Error inserting logs: ${JSON.stringify(result.error)} for batch ${
+          logMetaData.batchId
         }`
       );
 
@@ -259,7 +259,6 @@ export class LogManager {
     handler: RateLimitHandler,
     logMetaData: LogMetaData
   ): Promise<void> {
-    console.log(`Inserting rate limits for batch ${logMetaData.batchId}`);
     const start = performance.now();
     const { data: rateLimitInsId, error: rateLimitErr } =
       await handler.handleResults();
