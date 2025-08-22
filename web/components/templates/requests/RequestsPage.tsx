@@ -325,13 +325,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
         message: "Filter saved successfully",
       };
     });
-    // setToolHandler("set-filters", async (args: { filters: FilterNode[] }) => {
-    //   setAdvancedFilters(args.filters);
-    //   return {
-    //     success: true,
-    //     message: "Filters set successfully",
-    //   };
-    // });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allowedFilterDefinitions]);
 
@@ -706,6 +699,12 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                 isFetching={false}
                 defaultValue={getDefaultValue()}
                 custom={true}
+                isLive={isLive}
+                hasCustomTimeFilter={searchParams.get("t")?.startsWith("custom_") || false}
+                onClearTimeFilter={() => {
+                  searchParams.delete("t");
+                  setTimeFilter(defaultFilter);
+                }}
               />
 
               {/* Filter AST Button */}

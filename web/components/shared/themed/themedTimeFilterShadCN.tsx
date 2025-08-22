@@ -29,6 +29,9 @@ interface ThemedTimeFilterShadCNProps
   extends React.HTMLAttributes<HTMLDivElement> {
   onDateChange: (date: DateRange | undefined) => void;
   initialDateRange?: DateRange;
+  isLive?: boolean;
+  hasCustomTimeFilter?: boolean;
+  onClearTimeFilter?: () => void;
 }
 
 function isValidDate(date: Date | undefined) {
@@ -42,6 +45,9 @@ export function ThemedTimeFilterShadCN({
   className,
   onDateChange,
   initialDateRange,
+  isLive = false,
+  hasCustomTimeFilter = false,
+  onClearTimeFilter,
 }: ThemedTimeFilterShadCNProps) {
   const [date, setDate] = useState<DateRange | undefined>(undefined);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -49,15 +55,12 @@ export function ThemedTimeFilterShadCN({
   const { hasAccess } = useProFeature("time_filter");
 
   useEffect(() => {
-    // Set the initial date range after the component mounts
-    if (!date) {
-      setDate(
-        initialDateRange || {
-          from: new Date(),
-          to: new Date(),
-        },
-      );
-    }
+    setDate(
+      initialDateRange || {
+        from: new Date(),
+        to: new Date(),
+      },
+    );
   }, [initialDateRange]);
 
   const predefinedRanges = [
@@ -142,6 +145,14 @@ export function ThemedTimeFilterShadCN({
   };
 
   const formatDateDisplay = (from: Date, to: Date) => {
+    if (isLive && !hasCustomTimeFilter) {
+      if (from.toDateString() === to.toDateString()) {
+        return `${format(from, "LLL d, yyyy")} ${format(from, "HH:mm")} - Now`;
+      } else {
+        return `${format(from, "LLL d, yyyy HH:mm")} - Now`;
+      }
+    }
+    
     if (from.toDateString() === to.toDateString()) {
       // Same day
       return `${format(from, "LLL d, yyyy")} ${format(
@@ -233,6 +244,7 @@ export function ThemedTimeFilterShadCN({
           className="flex w-auto flex-col gap-2 p-4"
           align="start"
         >
+          
           {/* Predefined ranges */}
           <span className="pt-4 text-sm font-semibold">Quick Select:</span>
           <div className="grid grid-cols-6 gap-2">
@@ -397,6 +409,17 @@ export function ThemedTimeFilterShadCN({
               </div>
             </div>
           </div>
+
+          {hasCustomTimeFilter && onClearTimeFilter && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClearTimeFilter}
+              className="ml-auto"
+            >
+              Clear
+            </Button>
+          )}
 
           {/* Warning moved to bottom to avoid content shifting */}
           {isInvertedRange && (
