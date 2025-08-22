@@ -2,6 +2,7 @@ import { Client } from "pg";
 import { Result } from "../../../packages/common/result";
 import { clickhouseDb } from "../../db/ClickhouseWrapper";
 import { HELICONE_DB } from "./pgpClient";
+import { SecretManager } from "../../secrets/SecretManager";
 
 export function paramsToValues(params: (number | string | boolean | Date)[]) {
   return params
@@ -49,11 +50,11 @@ export function getPGClient() {
     process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "development"
       ? {
           rejectUnauthorized: true,
-          ca: process.env.SUPABASE_SSL_CERT_CONTENTS!.split("\\n").join("\n"),
+          ca: SecretManager.getSecret('SUPABASE_SSL_CERT_CONTENTS')!.split("\\n").join("\n"),
         }
       : undefined;
   const client = new Client({
-    connectionString: process.env.SUPABASE_DATABASE_URL,
+    connectionString: SecretManager.getSecret('SUPABASE_DATABASE_URL'),
     ssl,
     statement_timeout: 10000,
   });
@@ -69,7 +70,8 @@ export async function dbExecute<T>(
   query: string,
   parameters: any[]
 ): Promise<Result<T[], string>> {
-  if (!process.env.SUPABASE_DATABASE_URL) {
+  const databaseUrl = SecretManager.getSecret('SUPABASE_DATABASE_URL');
+  if (!databaseUrl) {
     console.error("SUPABASE_DATABASE_URL not set");
     return { data: null, error: "DATABASE_URL not set" };
   }

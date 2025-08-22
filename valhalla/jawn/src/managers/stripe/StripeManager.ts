@@ -13,6 +13,7 @@ import { AuthParams } from "../../packages/common/auth/types";
 import { Result, err, ok } from "../../packages/common/result";
 import { costOf } from "@helicone-package/cost";
 import { BaseManager } from "../BaseManager";
+import { SecretManager } from "../../lib/secrets/SecretManager";
 import { OrganizationManager } from "../organization/OrganizationManager";
 import { KVCache } from "../../lib/cache/kvCache";
 import { cacheResultCustom } from "../../utils/cacheResult";
@@ -106,7 +107,7 @@ export class StripeManager extends BaseManager {
 
   constructor(authParams: AuthParams) {
     super(authParams);
-    this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    this.stripe = new Stripe(SecretManager.getSecret('STRIPE_SECRET_KEY')!, {
       apiVersion: "2025-02-24.acacia",
     });
   }

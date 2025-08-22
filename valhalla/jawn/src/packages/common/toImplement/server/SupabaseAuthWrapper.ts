@@ -17,6 +17,7 @@ import { KVCache } from "../../../../lib/cache/kvCache";
 import { Database } from "../../../../lib/db/database.types";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { hashAuth } from "../../../../lib/db/hash";
+import { SecretManager } from "../../../../lib/secrets/SecretManager";
 import { cacheResultCustom } from "../../../../utils/cacheResult";
 import { authenticateBearer } from "./common";
 
@@ -27,7 +28,7 @@ export class SupabaseConnector {
   connected: boolean = false;
 
   constructor() {
-    const SUPABASE_CREDS = JSON.parse(process.env.SUPABASE_CREDS ?? "{}");
+    const SUPABASE_CREDS = JSON.parse(SecretManager.getSecret('SUPABASE_CREDS') ?? "{}");
     const supabaseURL = SUPABASE_CREDS?.url ?? process.env.SUPABASE_URL;
     const supabaseServiceRoleKey =
       SUPABASE_CREDS?.service_role_key ?? process.env.SUPABASE_SERVICE_ROLE_KEY;

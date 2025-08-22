@@ -4,6 +4,7 @@ import { fromNodeHeaders } from "better-auth/node";
 import { Pool } from "pg";
 import { Database } from "../../../../lib/db/database.types";
 import { dbExecute } from "../../../../lib/shared/db/dbExecute";
+import { SecretManager } from "../../../../lib/secrets/SecretManager";
 import crypto from "crypto";
 import {
   GenericHeaders,
@@ -23,7 +24,7 @@ import { authenticateBearer } from "./common";
 
 export const betterAuthClient = betterAuth({
   database: new Pool({
-    connectionString: process.env.SUPABASE_DATABASE_URL,
+    connectionString: SecretManager.getSecret('SUPABASE_DATABASE_URL'),
   }),
   emailAndPassword: {
     enabled: true,

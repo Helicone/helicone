@@ -5,6 +5,7 @@ import {
 } from "@clickhouse/client";
 import { Result } from "../../packages/common/result";
 import { TestClickhouseClientWrapper } from "./test/TestClickhouseWrapper";
+import { SecretManager } from "../secrets/SecretManager";
 
 interface ClickhouseEnv {
   CLICKHOUSE_HOST: string;
@@ -383,7 +384,7 @@ const {
   CLICKHOUSE_HOST,
   CLICKHOUSE_HQL_USER,
   CLICKHOUSE_HQL_PASSWORD,
-} = JSON.parse(process.env.CLICKHOUSE_CREDS ?? "{}") as {
+} = JSON.parse(SecretManager.getSecret("CLICKHOUSE_CREDS") ?? "{}") as {
   CLICKHOUSE_USER?: string;
   CLICKHOUSE_PASSWORD?: string;
   CLICKHOUSE_HOST?: string;
