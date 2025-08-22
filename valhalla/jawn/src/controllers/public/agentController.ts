@@ -23,7 +23,6 @@ import {
   ThreadSummary,
 } from "../../managers/InAppThreadsManager";
 
-
 @Route("v1/agent")
 @Tags("Agent")
 @Security("api_key")
@@ -308,6 +307,9 @@ export class AgentController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<string, string>> {
     const { query } = bodyParams;
+    const mcpTool =
+      (await GET_KEY("key:mintlify_mcp_tool")) ||
+      "SearchHeliconeOssLlmObservability";
 
     try {
       const response = await fetch(`https://docs.helicone.ai/mcp`, {
@@ -320,9 +322,9 @@ export class AgentController extends Controller {
         body: JSON.stringify({
           jsonrpc: "2.0",
           id: 1,
-          method: "tools/call", // Fixed: was "tool/call", should be "tools/call"
+          method: "tools/call",
           params: {
-            name: "Search", // Fixed: moved name to correct level
+            name: mcpTool,
             arguments: {
               query,
             },
