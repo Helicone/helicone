@@ -2,9 +2,9 @@ import { SELF, fetchMock } from "cloudflare:test";
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { registry } from "@helicone-package/cost/models/registry";
 import { UserEndpointConfig } from "@helicone-package/cost/models/types";
-import "./setup";
-import { type TestCase } from "./providers/base.test-config";
-import { anthropicTestConfig } from "./providers/anthropic.test-config";
+import "../setup";
+import { type TestCase } from "../providers/base.test-config";
+import { anthropicTestConfig } from "../providers/anthropic.test-config";
 
 function mockRequiredServices() {
   const callTrackers = {
@@ -55,7 +55,7 @@ function mockProviderEndpoint(
   if (statusCode === 200) {
     // For now just use anthropic config, in future we'll have a map of providers
     const testConfig = anthropicTestConfig;
-    
+
     fetchMock
       .get(`${url.protocol}//${url.host}`)
       .intercept({ path: url.pathname, method: "POST" })
@@ -211,7 +211,6 @@ describe("Registry Tests", () => {
   });
 
   describe("Customer-Specific Tests", () => {
-    
     describe("Anthropic SDK with NO_MAPPING", () => {
       it("should route to /v1/messages for Anthropic provider", async () => {
         // Mock Anthropic /v1/messages endpoint (NOT /chat/completions)
@@ -233,7 +232,7 @@ describe("Registry Tests", () => {
             },
           }))
           .persist();
-        
+
         const response = await SELF.fetch(
           "https://ai-gateway.helicone.ai/v1/chat/completions",
           {
@@ -250,11 +249,11 @@ describe("Registry Tests", () => {
             }),
           }
         );
-        
+
         expect(response.status).toBe(200);
       });
     });
-    
+
     describe("Fallback with comma-separated models", () => {
       it("should try bedrock first, then fallback to anthropic", async () => {
         // Mock Bedrock to fail
@@ -266,7 +265,7 @@ describe("Registry Tests", () => {
           })
           .reply(() => ({ statusCode: 500, data: { error: "Bedrock failed" } }))
           .persist();
-        
+
         // Mock Anthropic to succeed (on /v1/messages)
         fetchMock
           .get("https://api.anthropic.com")
@@ -286,7 +285,7 @@ describe("Registry Tests", () => {
             },
           }))
           .persist();
-        
+
         const response = await SELF.fetch(
           "https://ai-gateway.helicone.ai/v1/chat/completions",
           {
@@ -296,21 +295,23 @@ describe("Registry Tests", () => {
               Authorization: "Bearer sk-helicone-test",
             },
             body: JSON.stringify({
-              model: "us.anthropic.claude-3-7-sonnet-20250219-v1:0/bedrock,claude-3-7-sonnet-20250219/anthropic",
+              model:
+                "us.anthropic.claude-3-7-sonnet-20250219-v1:0/bedrock,claude-3-7-sonnet-20250219/anthropic",
               messages: [{ role: "user", content: "Test fallback" }],
               max_tokens: 50,
             }),
           }
         );
-        
+
         expect(response.status).toBe(200);
       });
     });
-    
+
     describe("Model with NO_MAPPING and fallback", () => {
       it("should handle Anthropic SDK format with fallback", async () => {
-        const model = "claude-3-7-sonnet-20250219/anthropic, us.anthropic.claude-3-7-sonnet-20250219-v1:0/bedrock";
-        
+        const model =
+          "claude-3-7-sonnet-20250219/anthropic, us.anthropic.claude-3-7-sonnet-20250219-v1:0/bedrock";
+
         // Mock first model (anthropic) to succeed on /v1/messages
         fetchMock
           .get("https://api.anthropic.com")
@@ -330,7 +331,7 @@ describe("Registry Tests", () => {
             },
           }))
           .persist();
-        
+
         const response = await SELF.fetch(
           "https://ai-gateway.helicone.ai/v1/chat/completions",
           {
@@ -343,12 +344,14 @@ describe("Registry Tests", () => {
             body: JSON.stringify({
               model: model,
               system: "You are a helpful assistant.",
-              messages: [{ role: "user", content: "What is the capital of France?" }],
+              messages: [
+                { role: "user", content: "What is the capital of France?" },
+              ],
               max_tokens: 100,
             }),
           }
         );
-        
+
         expect(response.status).toBe(200);
       });
     });
