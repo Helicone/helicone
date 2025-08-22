@@ -649,7 +649,7 @@ export const TraceSpan = ({
                   const barMidpoint = entry.start + entry.duration / 2;
                   const domainMidpoint = (domain[0] + domain[1]) / 2;
                   const isOnRightHalf = barMidpoint > domainMidpoint;
-                  
+
                   return (
                     <text
                       x={typeof x === "number" ? x + 5 : x}
