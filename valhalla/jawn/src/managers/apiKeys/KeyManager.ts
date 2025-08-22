@@ -630,7 +630,7 @@ export class KeyManager extends BaseManager {
     }
   }
 
-  async resetProviderKeysInGatewayCache() {
+  async resetProviderKeysInGatewayCache(): Promise<Result<boolean, string>> {
     try {
       const allProviderKeys = await this.getDecryptedProviderKeys();
       if (allProviderKeys.error) {
