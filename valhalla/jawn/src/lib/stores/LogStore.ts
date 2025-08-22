@@ -1,15 +1,11 @@
+import { shouldBumpVersion } from "@helicone/prompts";
 import pgPromise from "pg-promise";
-import { Database } from "../db/database.types";
+import { PromiseGenericResult, err, ok } from "../../packages/common/result";
+import { safeJSONStringify } from "../../utils/sanitize";
+import { Prompt2025Input } from "../db/ClickhouseWrapper";
 import { PromptRecord } from "../handlers/HandlerContext";
 import { BatchPayload } from "../handlers/LoggingHandler";
-import { PromiseGenericResult, err, ok } from "../../packages/common/result";
-
-import { shouldBumpVersion } from "@helicone/prompts";
-import { mapScores } from "../../managers/score/ScoreManager";
-import { safeJSONStringify, sanitizeObject } from "../../utils/sanitize";
-
 import { HELICONE_DB as db, HELICONE_PGP as pgp } from "../shared/db/pgpClient";
-import { Prompt2025Input } from "../db/ClickhouseWrapper";
 
 process.on("exit", () => {
   pgp.end();

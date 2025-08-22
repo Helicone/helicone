@@ -30,10 +30,6 @@ import { GovOrganizationController } from './../../controllers/private/govOrgani
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { GenerateHashController } from './../../controllers/private/generateHashController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-import { DatasetController } from './../../controllers/private/datasetController';
-// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-import { FineTuneMainController } from './../../controllers/private/fineTuneController';
-// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { FilterController } from './../../controllers/private/filterController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { DemoController } from './../../controllers/private/demoController';
@@ -1821,27 +1817,6 @@ const models: TsoaRoute.Models = {
             "governance": {"dataType":"boolean","required":true},
             "keyName": {"dataType":"string","required":true},
             "permissions": {"ref":"KeyPermissions","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "FineTuneResult": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"nestedObjectLiteral","nestedProperties":{"error":{"dataType":"string","required":true}}},{"dataType":"nestedObjectLiteral","nestedProperties":{"data":{"dataType":"nestedObjectLiteral","nestedProperties":{"url":{"dataType":"string","required":true},"fineTuneJob":{"dataType":"string","required":true}},"required":true},"success":{"dataType":"boolean","required":true}}}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "FineTuneBodyParams": {
-        "dataType": "refObject",
-        "properties": {
-            "providerKeyId": {"dataType":"string","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "FineTuneBody": {
-        "dataType": "refObject",
-        "properties": {
-            "providerKeyId": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
     },
@@ -18306,103 +18281,6 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'generateHash',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: undefined,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsDatasetController_datasetFineTune: Record<string, TsoaRoute.ParameterSchema> = {
-                datasetId: {"in":"path","name":"datasetId","required":true,"dataType":"string"},
-                body: {"in":"body","name":"body","required":true,"ref":"FineTuneBodyParams"},
-                request: {"in":"request","name":"request","required":true,"dataType":"object"},
-        };
-        app.post('/v1/dataset/:datasetId/fine-tune',
-            authenticateMiddleware([{"api_key":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(DatasetController)),
-            ...(fetchMiddlewares<RequestHandler>(DatasetController.prototype.datasetFineTune)),
-
-            async function DatasetController_datasetFineTune(request: ExRequest, response: ExResponse, next: any) {
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsDatasetController_datasetFineTune, request, response });
-
-                const controller = new DatasetController();
-
-              await templateService.apiHandler({
-                methodName: 'datasetFineTune',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: undefined,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsFineTuneMainController_fineTune: Record<string, TsoaRoute.ParameterSchema> = {
-                body: {"in":"body","name":"body","required":true,"ref":"FineTuneBody"},
-                request: {"in":"request","name":"request","required":true,"dataType":"object"},
-        };
-        app.post('/v1/fine-tune',
-            authenticateMiddleware([{"api_key":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(FineTuneMainController)),
-            ...(fetchMiddlewares<RequestHandler>(FineTuneMainController.prototype.fineTune)),
-
-            async function FineTuneMainController_fineTune(request: ExRequest, response: ExResponse, next: any) {
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsFineTuneMainController_fineTune, request, response });
-
-                const controller = new FineTuneMainController();
-
-              await templateService.apiHandler({
-                methodName: 'fineTune',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: undefined,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsFineTuneMainController_fineTuneJobStats: Record<string, TsoaRoute.ParameterSchema> = {
-                jobId: {"in":"path","name":"jobId","required":true,"dataType":"string"},
-                request: {"in":"request","name":"request","required":true,"dataType":"object"},
-        };
-        app.get('/v1/fine-tune/:jobId/stats',
-            authenticateMiddleware([{"api_key":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(FineTuneMainController)),
-            ...(fetchMiddlewares<RequestHandler>(FineTuneMainController.prototype.fineTuneJobStats)),
-
-            async function FineTuneMainController_fineTuneJobStats(request: ExRequest, response: ExResponse, next: any) {
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsFineTuneMainController_fineTuneJobStats, request, response });
-
-                const controller = new FineTuneMainController();
-
-              await templateService.apiHandler({
-                methodName: 'fineTuneJobStats',
                 controller,
                 response,
                 next,
