@@ -646,6 +646,10 @@ export const TraceSpan = ({
 
                   const isSelected = isInHighlighter || isIndividuallySelected;
 
+                  const barMidpoint = entry.start + entry.duration / 2;
+                  const domainMidpoint = (domain[0] + domain[1]) / 2;
+                  const isOnRightHalf = barMidpoint > domainMidpoint;
+                  
                   return (
                     <text
                       x={typeof x === "number" ? x + 5 : x}
@@ -662,7 +666,7 @@ export const TraceSpan = ({
                           : "fill-card-foreground"
                       }
                       opacity={isSelected ? 1 : 0.7}
-                      textAnchor="start"
+                      textAnchor={isOnRightHalf ? "end" : "start"}
                       dominantBaseline="central"
                       style={{
                         fontSize: "12px",
