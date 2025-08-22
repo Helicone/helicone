@@ -1,74 +1,15 @@
+import { shouldBumpVersion } from "@helicone/prompts";
 import pgPromise from "pg-promise";
-import { Database } from "../db/database.types";
+import { PromiseGenericResult, err, ok } from "../../packages/common/result";
+import { safeJSONStringify } from "../../utils/sanitize";
+import { Prompt2025Input } from "../db/ClickhouseWrapper";
 import { PromptRecord } from "../handlers/HandlerContext";
 import { BatchPayload } from "../handlers/LoggingHandler";
-import { PromiseGenericResult, err, ok } from "../../packages/common/result";
-
-import { shouldBumpVersion } from "@helicone/prompts";
-import { mapScores } from "../../managers/score/ScoreManager";
-import { safeJSONStringify, sanitizeObject } from "../../utils/sanitize";
-
 import { HELICONE_DB as db, HELICONE_PGP as pgp } from "../shared/db/pgpClient";
-import { Prompt2025Input } from "../db/ClickhouseWrapper";
 
 process.on("exit", () => {
   pgp.end();
 });
-
-const requestColumns = new pgp.helpers.ColumnSet(
-  [
-    "id",
-    "auth_hash",
-    "path",
-    "provider",
-    "created_at",
-    { name: "formatted_prompt_id", def: null }, // Default to null if not provided
-    { name: "helicone_api_key_id", def: null },
-    { name: "helicone_org_id", def: null },
-    { name: "helicone_proxy_key_id", def: null },
-    { name: "helicone_user", def: null },
-    { name: "model", def: null },
-    { name: "model_override", def: null },
-    { name: "prompt_id", def: null },
-    { name: "prompt_values", def: null },
-    { name: "properties", def: null },
-    { name: "request_ip", def: null },
-    { name: "target_url", def: null },
-    { name: "threat", def: null },
-    { name: "user_id", def: null },
-    { name: "country_code", def: null },
-    { name: "version", def: 1 },
-  ],
-  { table: "request" }
-);
-const onConflictRequest =
-  " ON CONFLICT (id, helicone_org_id) DO UPDATE SET " +
-  requestColumns.assignColumns({ from: "EXCLUDED", skip: "id" });
-
-const responseColumns = new pgp.helpers.ColumnSet(
-  [
-    "id",
-    "request",
-    "created_at",
-    { name: "helicone_org_id", def: null },
-    { name: "model", def: null },
-    { name: "completion_tokens", def: null },
-    { name: "delay_ms", def: null },
-    { name: "feedback", def: null },
-    { name: "prompt_tokens", def: null },
-    { name: "status", def: null },
-    { name: "time_to_first_token", def: null },
-    { name: "prompt_cache_write_tokens", def: null },
-    { name: "prompt_cache_read_tokens", def: null },
-    { name: "prompt_audio_tokens", def: null },
-    { name: "completion_audio_tokens", def: null },
-  ],
-  { table: "response" }
-);
-
-const onConflictResponse =
-  " ON CONFLICT (request, helicone_org_id) DO UPDATE SET " +
-  responseColumns.assignColumns({ from: "EXCLUDED", skip: "id" });
 
 const assetColumns = new pgp.helpers.ColumnSet(
   ["id", "request_id", "organization_id", "created_at"],
@@ -83,44 +24,6 @@ export class LogStore {
   async insertLogBatch(payload: BatchPayload): PromiseGenericResult<string> {
     try {
       await db.tx(async (t: pgPromise.ITask<{}>) => {
-        // Insert into the 'request' table
-        if (payload.requests && payload.requests.length > 0) {
-          const filteredRequests = this.filterDuplicateRequests(
-            payload.requests
-          );
-
-          try {
-            if (filteredRequests && filteredRequests.length > 0) {
-              const insertRequest =
-                pgp.helpers.insert(filteredRequests, requestColumns) +
-                onConflictRequest;
-              await t.none(insertRequest);
-            }
-          } catch (error) {
-            console.error("Error inserting request", error);
-            throw error;
-          }
-        }
-
-        // Insert into the 'response' table with conflict resolution
-        if (payload.responses && payload.responses.length > 0) {
-          const filteredResponses = this.filterDuplicateResponses(
-            payload.responses
-          );
-
-          try {
-            if (filteredResponses && filteredResponses.length > 0) {
-              const insertResponse =
-                pgp.helpers.insert(filteredResponses, responseColumns) +
-                onConflictResponse;
-              await t.none(insertResponse);
-            }
-          } catch (error) {
-            console.error("Error inserting response", error);
-            throw error;
-          }
-        }
-
         if (
           payload.orgsToMarkAsIntegrated &&
           payload.orgsToMarkAsIntegrated.size > 0
@@ -169,21 +72,15 @@ export class LogStore {
         }
 
         if (payload.promptInputs && payload.promptInputs.length > 0) {
-          const result = await this.processPromptInputsBatch(payload.promptInputs, t);
+          const result = await this.processPromptInputsBatch(
+            payload.promptInputs,
+            t
+          );
           if (result.error) {
-            console.error("Error processing prompt inputs batch:", result.error);
-          }
-        }
-
-        if (payload.scores && payload.scores.length > 0) {
-          for (const score of payload.scores) {
-            await this.processScore({
-              score: score.scores,
-              requestId: score.requestId,
-              organizationId: score.organizationId,
-              evaluatorIds: score.evaluatorIds,
-              t,
-            });
+            console.error(
+              "Error processing prompt inputs batch:",
+              result.error
+            );
           }
         }
       });
@@ -202,19 +99,21 @@ export class LogStore {
       return ok("No prompt inputs to process");
     }
 
-    const versionIds = [...new Set(promptInputs.map(input => input.version_id))];
-    
+    const versionIds = [
+      ...new Set(promptInputs.map((input) => input.version_id)),
+    ];
+
     const existingVersions = await t.manyOrNone<{ id: string }>(
       `SELECT id FROM prompts_2025_versions WHERE id = ANY($1::uuid[])`,
       [versionIds]
     );
-    
-    const existingVersionIds = new Set(existingVersions.map(v => v.id));
-    const validInputs = promptInputs.filter(input =>
+
+    const existingVersionIds = new Set(existingVersions.map((v) => v.id));
+    const validInputs = promptInputs.filter((input) =>
       existingVersionIds.has(input.version_id)
     );
-    const invalidInputs = promptInputs.filter(input =>
-      !existingVersionIds.has(input.version_id)
+    const invalidInputs = promptInputs.filter(
+      (input) => !existingVersionIds.has(input.version_id)
     );
 
     if (validInputs.length === 0) {
@@ -223,22 +122,25 @@ export class LogStore {
 
     try {
       const cs = new pgp.helpers.ColumnSet(
-        ['request_id', 'version_id', 'inputs', 'environment'],
-        { table: 'prompts_2025_inputs' }
+        ["request_id", "version_id", "inputs", "environment"],
+        { table: "prompts_2025_inputs" }
       );
-      
+
       const query = pgp.helpers.insert(validInputs, cs);
       await t.none(query);
-      
+
       if (invalidInputs.length > 0) {
-        console.warn(`Skipped ${invalidInputs.length} prompt inputs due to invalid version IDs:`, 
-          invalidInputs.map(input => input.version_id));
+        console.warn(
+          `Skipped ${invalidInputs.length} prompt inputs due to invalid version IDs:`,
+          invalidInputs.map((input) => input.version_id)
+        );
       }
-      
-      const message = invalidInputs.length > 0
-        ? `Processed ${validInputs.length} inputs successfully. ${invalidInputs.length} inputs skipped due to invalid version IDs.`
-        : `All ${validInputs.length} inputs processed successfully`;
-        
+
+      const message =
+        invalidInputs.length > 0
+          ? `Processed ${validInputs.length} inputs successfully. ${invalidInputs.length} inputs skipped due to invalid version IDs.`
+          : `All ${validInputs.length} inputs processed successfully`;
+
       return ok(message);
     } catch (error) {
       console.error("Error batch inserting prompt inputs", error);
@@ -404,124 +306,5 @@ export class LogStore {
     }
 
     return ok("Prompt processed successfully");
-  }
-
-  async processScore({
-    score,
-    requestId,
-    t,
-    organizationId,
-    evaluatorIds,
-  }: {
-    score: Record<string, number | boolean | undefined>;
-    requestId: string;
-    t: pgPromise.ITask<{}>;
-    organizationId: string;
-    evaluatorIds: Record<string, string>;
-  }) {
-    const mappedScores = mapScores(score);
-
-    // Convert arrays for the upsert
-    const scoreKeys = mappedScores.map((s) => s.score_attribute_key);
-    const scoreTypes = mappedScores.map((s) => s.score_attribute_type);
-    const scoreValues = mappedScores.map((s) => s.score_attribute_value);
-    const organizationIds = Array(scoreKeys.length).fill(organizationId);
-    const scoreEvaluatorIds = mappedScores.map((s) => {
-      return evaluatorIds[s.score_attribute_key] || null;
-    });
-    // First upsert the score attributes and get their IDs
-    const upsertedAttributes = await t.many(
-      `
-      WITH upserted_attributes AS (
-        INSERT INTO score_attribute (score_key, value_type, organization, evaluator_id)
-        SELECT unnest($1::text[]), unnest($2::text[]), unnest($3::uuid[]), unnest($4::uuid[])
-        ON CONFLICT (score_key, organization) DO UPDATE SET
-          score_key = EXCLUDED.score_key,
-          value_type = EXCLUDED.value_type,
-          evaluator_id = EXCLUDED.evaluator_id
-        RETURNING id, score_key
-      )
-      SELECT id, score_key
-      FROM upserted_attributes
-    `,
-      [scoreKeys, scoreTypes, organizationIds, scoreEvaluatorIds]
-    );
-
-    // Then insert the score values
-    const attributeIds = upsertedAttributes.map((attr) => attr.id);
-    await t.none(
-      `
-      INSERT INTO score_value (score_attribute, request_id, int_value)
-      SELECT unnest($1::uuid[]), $2, unnest($3::bigint[])
-      ON CONFLICT (score_attribute, request_id) DO NOTHING
-    `,
-      [attributeIds, requestId, scoreValues]
-    );
-
-    return ok("Scores processed successfully");
-  }
-
-  filterDuplicateRequests(
-    entries: Database["public"]["Tables"]["request"]["Insert"][]
-  ) {
-    const entryMap = new Map<
-      string,
-      Database["public"]["Tables"]["request"]["Insert"]
-    >();
-
-    entries.forEach((entry) => {
-      if (!entry.id) {
-        return;
-      }
-
-      const existingEntry = entryMap.get(entry.id);
-
-      // No existing entry, add it
-      if (!existingEntry || !existingEntry.created_at) {
-        entryMap.set(entry.id, entry);
-        return;
-      }
-
-      if (
-        entry.created_at &&
-        new Date(entry.created_at) < new Date(existingEntry.created_at)
-      ) {
-        entryMap.set(entry.id, entry);
-      }
-    });
-
-    return Array.from(entryMap.values());
-  }
-
-  filterDuplicateResponses(
-    entries: Database["public"]["Tables"]["response"]["Insert"][]
-  ) {
-    const entryMap = new Map<
-      string,
-      Database["public"]["Tables"]["response"]["Insert"]
-    >();
-
-    entries.forEach((entry) => {
-      if (!entry.request) {
-        return;
-      }
-
-      const existingEntry = entryMap.get(entry.request);
-
-      // No existing entry, add it
-      if (!existingEntry || !existingEntry.created_at) {
-        entryMap.set(entry.request, entry);
-        return;
-      }
-
-      if (
-        entry.created_at &&
-        new Date(entry.created_at) < new Date(existingEntry.created_at)
-      ) {
-        entryMap.set(entry.request, entry);
-      }
-    });
-
-    return Array.from(entryMap.values());
   }
 }
