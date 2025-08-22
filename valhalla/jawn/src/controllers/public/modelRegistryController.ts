@@ -1,6 +1,7 @@
 import { Controller, Get, Route, Tags } from "tsoa";
 import { err, ok, Result } from "../../packages/common/result";
 import { registry } from "../../../../../packages/cost/models/registry";
+import { InputModality, OutputModality, StandardParameter } from "../../../../../packages/cost/models/types";
 
 interface ModelEndpoint {
   provider: string;
@@ -28,6 +29,9 @@ interface ModelRegistryItem {
   maxOutput?: number;
   trainingDate?: string;
   description?: string;
+  inputModalities: InputModality[];
+  outputModalities: OutputModality[];
+  supportedParameters: StandardParameter[];
 }
 
 interface ModelRegistryResponse {
@@ -132,6 +136,15 @@ export class ModelRegistryController extends Controller {
           continue;
         }
 
+        // Extract modality information
+        const structuredModality = modelConfig.modality;
+        
+        // Collect all unique supported parameters from all provider configs
+        const allSupportedParameters = new Set<StandardParameter>();
+        for (const config of providerConfigsResult.data) {
+          config.supportedParameters.forEach(param => allSupportedParameters.add(param));
+        }
+
         models.push({
           id: modelId,
           name: modelConfig.name,
@@ -141,6 +154,9 @@ export class ModelRegistryController extends Controller {
           maxOutput: modelConfig.maxOutputTokens,
           trainingDate: modelConfig.created,
           description: modelConfig.description,
+          inputModalities: structuredModality.inputs,
+          outputModalities: structuredModality.outputs,
+          supportedParameters: Array.from(allSupportedParameters),
         });
       }
 

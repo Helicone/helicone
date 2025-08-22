@@ -7391,6 +7391,54 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"InputModality": {
+				"type": "string",
+				"enum": [
+					"text",
+					"image",
+					"audio",
+					"video"
+				]
+			},
+			"OutputModality": {
+				"type": "string",
+				"enum": [
+					"text",
+					"image",
+					"audio",
+					"video"
+				]
+			},
+			"StandardParameter": {
+				"type": "string",
+				"enum": [
+					"max_tokens",
+					"temperature",
+					"top_p",
+					"top_k",
+					"stop",
+					"stream",
+					"frequency_penalty",
+					"presence_penalty",
+					"repetition_penalty",
+					"seed",
+					"tools",
+					"tool_choice",
+					"functions",
+					"function_call",
+					"reasoning",
+					"include_reasoning",
+					"thinking",
+					"response_format",
+					"json_mode",
+					"truncate",
+					"min_p",
+					"logit_bias",
+					"logprobs",
+					"top_logprobs",
+					"structured_outputs"
+				]
+			},
 			"ModelRegistryItem": {
 				"properties": {
 					"id": {
@@ -7421,6 +7469,24 @@
 					},
 					"description": {
 						"type": "string"
+					},
+					"inputModalities": {
+						"items": {
+							"$ref": "#/components/schemas/InputModality"
+						},
+						"type": "array"
+					},
+					"outputModalities": {
+						"items": {
+							"$ref": "#/components/schemas/OutputModality"
+						},
+						"type": "array"
+					},
+					"supportedParameters": {
+						"items": {
+							"$ref": "#/components/schemas/StandardParameter"
+						},
+						"type": "array"
 					}
 				},
 				"required": [
@@ -7428,7 +7494,10 @@
 					"name",
 					"author",
 					"contextLength",
-					"endpoints"
+					"endpoints",
+					"inputModalities",
+					"outputModalities",
+					"supportedParameters"
 				],
 				"type": "object",
 				"additionalProperties": false

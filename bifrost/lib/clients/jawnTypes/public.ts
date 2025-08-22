@@ -2730,6 +2730,12 @@ Json: JsonObject;
       };
       supportsPtb?: boolean;
     };
+    /** @enum {string} */
+    InputModality: "text" | "image" | "audio" | "video";
+    /** @enum {string} */
+    OutputModality: "text" | "image" | "audio" | "video";
+    /** @enum {string} */
+    StandardParameter: "max_tokens" | "temperature" | "top_p" | "top_k" | "stop" | "stream" | "frequency_penalty" | "presence_penalty" | "repetition_penalty" | "seed" | "tools" | "tool_choice" | "functions" | "function_call" | "reasoning" | "include_reasoning" | "thinking" | "response_format" | "json_mode" | "truncate" | "min_p" | "logit_bias" | "logprobs" | "top_logprobs" | "structured_outputs";
     ModelRegistryItem: {
       id: string;
       name: string;
@@ -2741,6 +2747,9 @@ Json: JsonObject;
       maxOutput?: number;
       trainingDate?: string;
       description?: string;
+      inputModalities: components["schemas"]["InputModality"][];
+      outputModalities: components["schemas"]["OutputModality"][];
+      supportedParameters: components["schemas"]["StandardParameter"][];
     };
     ModelRegistryResponse: {
       models: components["schemas"]["ModelRegistryItem"][];
