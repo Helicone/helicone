@@ -117,12 +117,16 @@ export async function proxyForwarder(
 
   let rate_limited = false;
   let finalRateLimitOptions = proxyRequest.rateLimitOptions;
+  let rateLimitOrgData: { organizationId: string } | null = null;
+  
   if (finalRateLimitOptions || proxyRequest.isRateLimitedKey) {
     const { data: auth, error: authError } = await request.auth();
     if (authError === null) {
       const db = new DBWrapper(env, auth);
       const { data: orgData, error: orgError } = await db.getAuthParams();
       if (orgError === null && orgData?.organizationId) {
+        rateLimitOrgData = orgData;
+        
         if (!finalRateLimitOptions && proxyRequest.isRateLimitedKey) {
           const rateLimitManager = new RateLimitManager();
           const result = await rateLimitManager.getRateLimitOptionsForKey(
@@ -139,30 +143,35 @@ export async function proxyForwarder(
         }
 
         if (finalRateLimitOptions) {
-          try {
-            const rateLimitCheckResult = await checkRateLimitDO({
-              organizationId: orgData.organizationId,
-              heliconeProperties: proxyRequest.heliconeProperties,
-              rateLimiterDO: env.RATE_LIMITER_SQL,
-              rateLimitOptions: finalRateLimitOptions,
-              userId: proxyRequest.userId,
-              cost: 0,
-            });
-            responseBuilder.addRateLimitHeaders(
-              rateLimitCheckResult,
-              finalRateLimitOptions
-            );
-
-            if (rateLimitCheckResult.status === "rate_limited") {
-              rate_limited = true;
-              request.injectCustomProperty(
-                "Helicone-Rate-Limit-Status",
-                rateLimitCheckResult.status
+          // Only do pre-check for request-based rate limiting
+          // For cents-based, we'll check after we know the cost
+          if (finalRateLimitOptions.unit === "request") {
+            try {
+              const rateLimitCheckResult = await checkRateLimitDO({
+                organizationId: orgData.organizationId,
+                heliconeProperties: proxyRequest.heliconeProperties,
+                rateLimiterDO: env.RATE_LIMITER_SQL,
+                rateLimitOptions: finalRateLimitOptions,
+                userId: proxyRequest.userId,
+                cost: 0,
+              });
+              responseBuilder.addRateLimitHeaders(
+                rateLimitCheckResult,
+                finalRateLimitOptions
               );
+
+              if (rateLimitCheckResult.status === "rate_limited") {
+                rate_limited = true;
+                request.injectCustomProperty(
+                  "Helicone-Rate-Limit-Status",
+                  rateLimitCheckResult.status
+                );
+              }
+            } catch (error) {
+              console.error("[ProxyForwarder] Error checking rate limit", error);
             }
-          } catch (error) {
-            console.error("[ProxyForwarder] Error checking rate limit", error);
           }
+          // For cents-based, we'll handle it after we know the cost
         }
       }
     }
@@ -357,12 +366,12 @@ export async function proxyForwarder(
     incurRateLimit = true,
     cachedResponse?: Response,
     cacheSettings?: CacheSettings
-  ) {
+  ): Promise<{ cost?: number } | undefined> {
     const { data: auth, error: authError } = await request.auth();
 
     if (authError !== null) {
       console.error("Error getting auth", authError);
-      return;
+      return undefined;
     }
     const supabase = createClient(
       env.SUPABASE_URL,
@@ -405,28 +414,66 @@ export async function proxyForwarder(
 
     if (res.error !== null) {
       console.error("Error logging", res.error);
+      return undefined;
     }
 
-    if (incurRateLimit && !rate_limited) {
+    if (incurRateLimit && !rate_limited && finalRateLimitOptions) {
       const db = new DBWrapper(env, auth);
       const { data: orgData, error: orgError } = await db.getAuthParams();
       if (
         proxyRequest &&
-        finalRateLimitOptions &&
         !orgError &&
         orgData?.organizationId
       ) {
-        await updateRateLimitCounterDO({
-          organizationId: orgData?.organizationId,
-          heliconeProperties:
-            proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
-          rateLimiterDO: env.RATE_LIMITER_SQL,
-          rateLimitOptions: finalRateLimitOptions,
-          userId: proxyRequest.userId,
-          cost: res.data?.cost ?? 0,
-        });
+        // For request-based rate limiting, we already checked and it passed
+        // For cents-based, we need to check and update with the actual cost
+        if (finalRateLimitOptions.unit === "request") {
+          await updateRateLimitCounterDO({
+            organizationId: orgData?.organizationId,
+            heliconeProperties:
+              proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
+            rateLimiterDO: env.RATE_LIMITER_SQL,
+            rateLimitOptions: finalRateLimitOptions,
+            userId: proxyRequest.userId,
+            cost: 0,
+          });
+        } else if (finalRateLimitOptions.unit === "cents") {
+          // For cents-based, convert dollars to cents
+          const costInCents = (res.data?.cost ?? 0) * 100;
+          
+          // Check if this would exceed the rate limit
+          const rateLimitCheckResult = await checkRateLimitDO({
+            organizationId: orgData.organizationId,
+            heliconeProperties: proxyRequest.heliconeProperties,
+            rateLimiterDO: env.RATE_LIMITER_SQL,
+            rateLimitOptions: finalRateLimitOptions,
+            userId: proxyRequest.userId,
+            cost: costInCents,
+          });
+          
+          // Update headers with accurate rate limit info
+          responseBuilder.addRateLimitHeaders(
+            rateLimitCheckResult,
+            finalRateLimitOptions
+          );
+          
+          // Only update if not rate limited
+          if (rateLimitCheckResult.status !== "rate_limited") {
+            await updateRateLimitCounterDO({
+              organizationId: orgData?.organizationId,
+              heliconeProperties:
+                proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
+              rateLimiterDO: env.RATE_LIMITER_SQL,
+              rateLimitOptions: finalRateLimitOptions,
+              userId: proxyRequest.userId,
+              cost: costInCents,
+            });
+          }
+        }
       }
     }
+    
+    return { cost: res.data?.cost };
   }
 
   if (
@@ -434,7 +481,12 @@ export async function proxyForwarder(
     request?.heliconeHeaders.heliconeAuthV2 ||
     request.heliconeProxyKeyId
   ) {
-    ctx.waitUntil(log(loggable));
+    // For cents-based rate limiting, we need to wait for logging to update headers
+    if (finalRateLimitOptions && finalRateLimitOptions.unit === "cents") {
+      await log(loggable);
+    } else {
+      ctx.waitUntil(log(loggable));
+    }
   }
 
   return responseBuilder.build({

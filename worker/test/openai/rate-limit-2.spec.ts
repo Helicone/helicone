@@ -107,7 +107,7 @@ describe("Durable Object Rate Limiter Tests", () => {
       expect(cost).toBeCloseTo(SAMPLE_COST);
     });
 
-    it("The cost should be deducted from the remaining quota", async () => {
+    it("should deduct cost from remaining quota for cents-based rate limiting", async () => {
       mockHeliconeResponse();
       const uniqueUserId = `user-rate-limit-test-${Date.now()}`;
       const RATE_LIMIT = 10;
@@ -120,7 +120,8 @@ describe("Durable Object Rate Limiter Tests", () => {
       );
 
       const remaining1 = response1.headers.get("helicone-ratelimit-remaining");
-      expect(+Number(remaining1)).toBeCloseTo(10);
+      // After first request, the cost is deducted
+      expect(+Number(remaining1)).toBeCloseTo(10 - centsCosts);
 
       const response2 = await simpleFetchHelicone(
         rateLimitPolicy,
@@ -128,8 +129,8 @@ describe("Durable Object Rate Limiter Tests", () => {
       );
 
       const remaining2 = response2.headers.get("helicone-ratelimit-remaining");
-
-      expect(+Number(remaining2)).toBeCloseTo(10 - centsCosts);
+      // After second request, the cost is deducted twice
+      expect(+Number(remaining2)).toBeCloseTo(10 - centsCosts * 2);
     });
 
     it("should enforce rate limit after quota is exceeded", async () => {
