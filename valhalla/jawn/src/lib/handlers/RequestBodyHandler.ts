@@ -20,6 +20,11 @@ function truncMap(
 
 export class RequestBodyHandler extends AbstractLogHandler {
   async handle(context: HandlerContext): PromiseGenericResult<string> {
+    const start = performance.now();
+    context.timingMetrics.push({
+      constructor: this.constructor.name,
+      start,
+    });
     try {
       const { body: processedBody, model: requestModel } =
         this.processRequestBody(context);

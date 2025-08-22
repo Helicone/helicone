@@ -65,6 +65,12 @@ function isHTML(responseBody: string): boolean {
 
 export class ResponseBodyHandler extends AbstractLogHandler {
   public async handle(context: HandlerContext): PromiseGenericResult<string> {
+    const start = performance.now();
+    context.timingMetrics.push({
+      constructor: this.constructor.name,
+      start,
+    });
+
     try {
       const processedResponseBody = await this.processBody(context);
       context.processedLog.response.model = getModelFromResponse(

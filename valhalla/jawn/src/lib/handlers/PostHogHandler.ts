@@ -18,6 +18,11 @@ export class PostHogHandler extends AbstractLogHandler {
   }
 
   public async handle(context: HandlerContext): PromiseGenericResult<string> {
+    const start = performance.now();
+    context.timingMetrics.push({
+      constructor: this.constructor.name,
+      start,
+    });
     if (!context.message.heliconeMeta.posthogApiKey) {
       return await super.handle(context);
     }
