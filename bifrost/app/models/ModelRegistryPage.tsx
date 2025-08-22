@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Input } from "@/components/ui/input";
+import { useJawnClient } from "@/lib/clients/jawnHook";
+import Head from "next/head";
 import {
   Select,
   SelectContent,
@@ -9,39 +11,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { 
-  Search,
-  Zap,
-  ArrowUpDown,
-  Filter,
-  Cpu,
-  ArrowRight,
-  Copy,
-  Check,
-  Eye,
-  Code,
-  FileJson,
-  Gauge,
-  DollarSign,
-  Calendar,
-  Info
-} from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Search, ArrowUpDown, Clipboard, Check, ChevronDown, X } from "lucide-react";
 
 interface ModelEndpoint {
   provider: string;
-  region?: string;
+  providerSlug: string;
   pricing: {
-    prompt: number;
-    completion: number;
+    prompt: number; // per million tokens
+    completion: number; // per million tokens
+    audio?: number; // per million tokens, if > 0
+    web_search?: number; // per million tokens, if > 0
+    video?: number; // per million tokens, if > 0
+    image?: number; // per million tokens, if > 0
+    thinking?: number; // per million tokens, if > 0
+    cacheRead?: number; // per million tokens, if > 0
+    cacheWrite?: number; // per million tokens, if > 0
   };
   supportsPtb?: boolean;
 }
@@ -52,68 +36,87 @@ interface Model {
   author: string;
   contextLength: number;
   endpoints: ModelEndpoint[];
-  // New fields for better UX
-  capabilities?: {
-    vision?: boolean;
-    functionCalling?: boolean;
-    jsonMode?: boolean;
-    streaming?: boolean;
-  };
   maxOutput?: number;
   trainingDate?: string;
   description?: string;
-  speed?: 'fast' | 'medium' | 'slow';
-  quality?: 'high' | 'medium' | 'budget';
 }
 
-type SortOption = "name" | "price-low" | "price-high" | "context" | "value" | "speed" | "newest";
+type SortOption = "name" | "price-low" | "price-high" | "context" | "newest";
 type ContextFilter = "all" | "small" | "medium" | "large" | "xlarge";
 type PriceFilter = "all" | "free" | "cheap" | "moderate" | "expensive";
 
 export function ModelRegistryPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedProvider, setSelectedProvider] = useState<string>("all");
-  const [selectedAuthor, setSelectedAuthor] = useState<string>("all");
   const [models, setModels] = useState<Model[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<SortOption>("name");
   const [copiedModel, setCopiedModel] = useState<string | null>(null);
-  const [contextFilter, setContextFilter] = useState<ContextFilter>("all");
-  const [priceFilter, setPriceFilter] = useState<PriceFilter>("all");
-  const [capabilityFilters, setCapabilityFilters] = useState({
-    vision: false,
-    functionCalling: false,
-    jsonMode: false,
-    streaming: false,
-  });
+
+  // Sidebar filter states
+  const [selectedProviders, setSelectedProviders] = useState<Set<string>>(
+    new Set()
+  );
+  const [selectedAuthors, setSelectedAuthors] = useState<Set<string>>(
+    new Set()
+  );
+  const [selectedPriceRanges, setSelectedPriceRanges] = useState<Set<string>>(
+    new Set()
+  );
+  const [selectedContextSizes, setSelectedContextSizes] = useState<Set<string>>(
+    new Set()
+  );
+  const [selectedCapabilities, setSelectedCapabilities] = useState<Set<string>>(
+    new Set()
+  );
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  
+  // Collapsible filter sections
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(
+    new Set(["providers", "price", "context", "capabilities"])
+  );
+
+  const toggleSection = (section: string) => {
+    const newSet = new Set(expandedSections);
+    if (newSet.has(section)) {
+      newSet.delete(section);
+    } else {
+      newSet.add(section);
+    }
+    setExpandedSections(newSet);
+  };
+
+  const jawnClient = useJawnClient();
 
   useEffect(() => {
     async function loadData() {
       try {
-        const response = await fetch("/api/models");
-        const data = await response.json();
-        setModels(data.models || []);
+        const response = await jawnClient.GET(
+          "/v1/public/model-registry/models"
+        );
+        if (response.data?.data) {
+          setModels(response.data.data.models || []);
+        }
       } catch (error) {
         console.error("Failed to load models:", error);
       } finally {
         setLoading(false);
       }
     }
-    
+
     loadData();
-  }, []);
+  }, []); // Remove jawnClient from dependencies
 
   const { allProviders, allAuthors } = useMemo(() => {
     const providers = new Set<string>();
     const authors = new Set<string>();
-    
+
     models.forEach((model) => {
       authors.add(model.author);
       model.endpoints.forEach((endpoint) => {
         providers.add(endpoint.provider);
       });
     });
-    
+
     return {
       allProviders: Array.from(providers).sort(),
       allAuthors: Array.from(authors).sort(),
@@ -131,46 +134,91 @@ export function ModelRegistryPage() {
 
       // Provider filter
       const matchesProvider =
-        selectedProvider === "all"
-          ? true
-          : model.endpoints.some((ep) => ep.provider === selectedProvider);
+        selectedProviders.size === 0 ||
+        model.endpoints.some((ep) => selectedProviders.has(ep.provider));
 
       // Author filter
       const matchesAuthor =
-        selectedAuthor === "all" ? true : model.author === selectedAuthor;
+        selectedAuthors.size === 0 || selectedAuthors.has(model.author);
 
       // Context size filter
-      const matchesContext = (() => {
-        switch (contextFilter) {
-          case "small": return model.contextLength <= 32000;
-          case "medium": return model.contextLength > 32000 && model.contextLength <= 128000;
-          case "large": return model.contextLength > 128000 && model.contextLength <= 200000;
-          case "xlarge": return model.contextLength > 200000;
-          default: return true;
-        }
-      })();
+      const matchesContext =
+        selectedContextSizes.size === 0 ||
+        (() => {
+          if (selectedContextSizes.has("small") && model.contextLength <= 32000)
+            return true;
+          if (
+            selectedContextSizes.has("medium") &&
+            model.contextLength > 32000 &&
+            model.contextLength <= 128000
+          )
+            return true;
+          if (
+            selectedContextSizes.has("large") &&
+            model.contextLength > 128000 &&
+            model.contextLength <= 200000
+          )
+            return true;
+          if (
+            selectedContextSizes.has("xlarge") &&
+            model.contextLength > 200000
+          )
+            return true;
+          return false;
+        })();
 
       // Price filter
-      const minCost = Math.min(...model.endpoints.map(e => (e.pricing.prompt + e.pricing.completion) / 2));
-      const matchesPrice = (() => {
-        const avgDollarsPerM = minCost / 1000000 * 1000; // Convert to per million
-        switch (priceFilter) {
-          case "free": return avgDollarsPerM === 0;
-          case "cheap": return avgDollarsPerM > 0 && avgDollarsPerM <= 0.5;
-          case "moderate": return avgDollarsPerM > 0.5 && avgDollarsPerM <= 5;
-          case "expensive": return avgDollarsPerM > 5;
-          default: return true;
-        }
-      })();
+      const minCost = Math.min(
+        ...model.endpoints.map(
+          (e) => (e.pricing.prompt + e.pricing.completion) / 2
+        )
+      );
+      const matchesPrice =
+        selectedPriceRanges.size === 0 ||
+        (() => {
+          if (selectedPriceRanges.has("free") && minCost === 0) return true;
+          if (selectedPriceRanges.has("cheap") && minCost > 0 && minCost <= 0.5)
+            return true;
+          if (
+            selectedPriceRanges.has("moderate") &&
+            minCost > 0.5 &&
+            minCost <= 5
+          )
+            return true;
+          if (selectedPriceRanges.has("expensive") && minCost > 5) return true;
+          return false;
+        })();
 
-      // Capability filters
-      const matchesCapabilities = 
-        (!capabilityFilters.vision || model.capabilities?.vision) &&
-        (!capabilityFilters.functionCalling || model.capabilities?.functionCalling) &&
-        (!capabilityFilters.jsonMode || model.capabilities?.jsonMode) &&
-        (!capabilityFilters.streaming || model.capabilities?.streaming);
+      // Capabilities filter
+      // Focus on user-facing capabilities only (like OpenRouter)
+      const modelCapabilities = new Set<string>();
+      model.endpoints.forEach((ep) => {
+        if (ep.pricing.audio && ep.pricing.audio > 0)
+          modelCapabilities.add("audio");
+        if (ep.pricing.video && ep.pricing.video > 0)
+          modelCapabilities.add("video");
+        if (ep.pricing.thinking && ep.pricing.thinking > 0)
+          modelCapabilities.add("thinking");
+        if (ep.pricing.web_search && ep.pricing.web_search > 0)
+          modelCapabilities.add("web_search");
+        if (ep.pricing.image && ep.pricing.image > 0)
+          modelCapabilities.add("image");
+        // Skip cache capabilities - too technical
+      });
+      const matchesCapabilities =
+        selectedCapabilities.size === 0 ||
+        Array.from(selectedCapabilities).some((cap) =>
+          modelCapabilities.has(cap)
+        );
 
-      return matchesSearch && matchesProvider && matchesAuthor && matchesContext && matchesPrice && matchesCapabilities;
+      return (
+        matchesSearch &&
+        matchesProvider &&
+        matchesAuthor &&
+        matchesContext &&
+        matchesPrice &&
+        matchesCapabilities
+      );
     });
 
     // Sorting
@@ -179,40 +227,54 @@ export function ModelRegistryPage() {
         case "name":
           return a.name.localeCompare(b.name);
         case "price-low":
-          const aMin = Math.min(...a.endpoints.map(e => (e.pricing.prompt + e.pricing.completion) / 2));
-          const bMin = Math.min(...b.endpoints.map(e => (e.pricing.prompt + e.pricing.completion) / 2));
+          const aMin = Math.min(
+            ...a.endpoints.map(
+              (e) => (e.pricing.prompt + e.pricing.completion) / 2
+            )
+          );
+          const bMin = Math.min(
+            ...b.endpoints.map(
+              (e) => (e.pricing.prompt + e.pricing.completion) / 2
+            )
+          );
           return aMin - bMin;
         case "price-high":
-          const aMax = Math.max(...a.endpoints.map(e => (e.pricing.prompt + e.pricing.completion) / 2));
-          const bMax = Math.max(...b.endpoints.map(e => (e.pricing.prompt + e.pricing.completion) / 2));
+          const aMax = Math.max(
+            ...a.endpoints.map(
+              (e) => (e.pricing.prompt + e.pricing.completion) / 2
+            )
+          );
+          const bMax = Math.max(
+            ...b.endpoints.map(
+              (e) => (e.pricing.prompt + e.pricing.completion) / 2
+            )
+          );
           return bMax - aMax;
         case "context":
           return b.contextLength - a.contextLength;
-        case "value":
-          // Sort by quality/price ratio (simplified)
-          const aValue = (a.quality === 'high' ? 3 : a.quality === 'medium' ? 2 : 1) / 
-                         Math.max(0.01, Math.min(...a.endpoints.map(e => (e.pricing.prompt + e.pricing.completion) / 2)) / 1000000);
-          const bValue = (b.quality === 'high' ? 3 : b.quality === 'medium' ? 2 : 1) / 
-                         Math.max(0.01, Math.min(...b.endpoints.map(e => (e.pricing.prompt + e.pricing.completion) / 2)) / 1000000);
-          return bValue - aValue;
-        case "speed":
-          const speedOrder = { 'fast': 1, 'medium': 2, 'slow': 3 };
-          return (speedOrder[a.speed || 'medium'] || 2) - (speedOrder[b.speed || 'medium'] || 2);
         case "newest":
-          return (b.trainingDate || '').localeCompare(a.trainingDate || '');
+          return (b.trainingDate || "").localeCompare(a.trainingDate || "");
         default:
           return 0;
       }
     });
 
     return filtered;
-  }, [models, searchQuery, selectedProvider, selectedAuthor, sortBy, contextFilter, priceFilter, capabilityFilters]);
+  }, [
+    models,
+    searchQuery,
+    selectedProviders,
+    selectedAuthors,
+    selectedPriceRanges,
+    selectedContextSizes,
+    selectedCapabilities,
+    sortBy,
+  ]);
 
-  const formatCost = (cost: number) => {
-    const dollarsPerM = (cost / 1000000) * 1000; // Convert to per million
-    if (dollarsPerM === 0) return "Free";
-    if (dollarsPerM < 1) return `$${dollarsPerM.toFixed(2)}/M`;
-    return `$${dollarsPerM.toFixed(1)}/M`;
+  const formatCost = (costPerMillion: number) => {
+    if (costPerMillion === 0) return "Free";
+    if (costPerMillion < 1) return `$${costPerMillion.toFixed(2)}/M`;
+    return `$${costPerMillion.toFixed(1)}/M`;
   };
 
   const formatContext = (tokens: number) => {
@@ -239,7 +301,10 @@ export function ModelRegistryPage() {
             <div className="h-8 w-48 bg-gray-200 dark:bg-gray-800 rounded mb-8" />
             <div className="space-y-4">
               {[...Array(10)].map((_, i) => (
-                <div key={i} className="h-16 bg-white dark:bg-gray-900 rounded" />
+                <div
+                  key={i}
+                  className="h-16 bg-white dark:bg-gray-900 rounded"
+                />
               ))}
             </div>
           </div>
@@ -249,351 +314,643 @@ export function ModelRegistryPage() {
   }
 
   return (
-    <TooltipProvider>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-        <div className="max-w-7xl mx-auto px-4 py-12">
-          {/* Clean Header */}
-          <div className="mb-10">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 bg-black dark:bg-white rounded-lg">
-                <Cpu className="h-5 w-5 text-white dark:text-black" />
-              </div>
-              <h1 className="text-3xl font-semibold text-gray-900 dark:text-gray-100">
-                Model Registry
-              </h1>
+    <div className="min-h-screen bg-white dark:bg-gray-950">
+      <div className="max-w-7xl mx-auto px-4">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            Model Registry
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Compare {models.length} language models across {allProviders.length}{" "}
+            providers
+          </p>
+        </div>
+
+        {/* Search and Sort */}
+        <div className="mb-6">
+          <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+            <div className="relative w-full sm:w-80">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Input
+                placeholder="Search models, providers, or capabilities..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 h-10 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700"
+              />
             </div>
-            <p className="text-gray-600 dark:text-gray-400">
-              Compare {models.length} language models across {allProviders.length} providers
-            </p>
-          </div>
 
-          {/* Enhanced Filters */}
-          <div className="mb-6 space-y-4">
-            {/* Search and main filters */}
-            <div className="flex flex-col sm:flex-row gap-3">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                <Input
-                  placeholder="Search models, providers, or capabilities..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 h-10 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700"
-                />
-              </div>
-              
-              <Select value={selectedProvider} onValueChange={setSelectedProvider}>
-                <SelectTrigger className="w-full sm:w-[140px] h-10 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700">
-                  <SelectValue placeholder="Provider" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Providers</SelectItem>
-                  {allProviders.map((provider) => (
-                    <SelectItem key={provider} value={provider}>
-                      {provider}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-gray-500 dark:text-gray-400">
+                {processedModels.length} of {models.length} models
+              </span>
+              <Select
+                value={sortBy}
+                onValueChange={(v) => setSortBy(v as SortOption)}
+              >
                 <SelectTrigger className="w-full sm:w-[160px] h-10 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700">
                   <ArrowUpDown className="h-4 w-4 mr-2" />
                   <SelectValue placeholder="Sort" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="name">Name</SelectItem>
-                  <SelectItem value="value">Best Value</SelectItem>
                   <SelectItem value="price-low">Price: Low to High</SelectItem>
                   <SelectItem value="price-high">Price: High to Low</SelectItem>
                   <SelectItem value="context">Context Size</SelectItem>
-                  <SelectItem value="speed">Speed</SelectItem>
                   <SelectItem value="newest">Newest First</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+          </div>
+        </div>
 
-            {/* Additional filters */}
-            <div className="flex flex-wrap gap-4">
-              {/* Context size filter */}
-              <Select value={contextFilter} onValueChange={(v) => setContextFilter(v as ContextFilter)}>
-                <SelectTrigger className="w-[150px] h-9 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700">
-                  <SelectValue placeholder="Context Size" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Sizes</SelectItem>
-                  <SelectItem value="small">≤32K</SelectItem>
-                  <SelectItem value="medium">32K-128K</SelectItem>
-                  <SelectItem value="large">128K-200K</SelectItem>
-                  <SelectItem value="xlarge">200K+</SelectItem>
-                </SelectContent>
-              </Select>
+        {/* Filter Toggle Button - Mobile Only */}
+        <div className="lg:hidden mb-4">
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z"
+              />
+            </svg>
+            Filters
+            {selectedProviders.size +
+              selectedPriceRanges.size +
+              selectedContextSizes.size +
+              selectedCapabilities.size >
+              0 && (
+              <span className="bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 text-xs font-medium px-2 py-0.5 rounded-full">
+                {selectedProviders.size +
+                  selectedPriceRanges.size +
+                  selectedContextSizes.size +
+                  selectedCapabilities.size}
+              </span>
+            )}
+          </button>
+        </div>
 
-              {/* Price filter */}
-              <Select value={priceFilter} onValueChange={(v) => setPriceFilter(v as PriceFilter)}>
-                <SelectTrigger className="w-[150px] h-9 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700">
-                  <SelectValue placeholder="Price Range" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Prices</SelectItem>
-                  <SelectItem value="free">Free</SelectItem>
-                  <SelectItem value="cheap">Under $0.5/M</SelectItem>
-                  <SelectItem value="moderate">$0.5-$5/M</SelectItem>
-                  <SelectItem value="expensive">Over $5/M</SelectItem>
-                </SelectContent>
-              </Select>
+        {/* Main Layout: Sidebar + Content */}
+        <div className="flex gap-6">
+          {/* Left Sidebar - Filters */}
+          <div
+            className={`w-80 flex-shrink-0 ${sidebarOpen ? "block" : "hidden"} lg:block`}
+          >
+            <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
+              <div className="p-6">
+              {/* Mobile close button */}
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="lg:hidden absolute top-4 right-4 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
 
-              {/* Capability checkboxes */}
-              <div className="flex flex-wrap gap-3">
-                <label className="flex items-center gap-1.5 cursor-pointer">
-                  <Checkbox 
-                    checked={capabilityFilters.vision}
-                    onCheckedChange={(checked) => 
-                      setCapabilityFilters(prev => ({ ...prev, vision: checked as boolean }))}
+              {/* Active Filters */}
+              {(selectedProviders.size > 0 ||
+                selectedAuthors.size > 0 ||
+                selectedPriceRanges.size > 0 ||
+                selectedContextSizes.size > 0 ||
+                selectedCapabilities.size > 0) && (
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Active Filters
+                    </span>
+                    <button
+                      onClick={() => {
+                        setSelectedProviders(new Set());
+                        setSelectedAuthors(new Set());
+                        setSelectedPriceRanges(new Set());
+                        setSelectedContextSizes(new Set());
+                        setSelectedCapabilities(new Set());
+                      }}
+                      className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200"
+                    >
+                      Clear All
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {Array.from(selectedProviders).map((provider) => (
+                      <span
+                        key={provider}
+                        className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 text-xs rounded"
+                      >
+                        {provider}
+                        <button
+                          onClick={() => {
+                            const newSet = new Set(selectedProviders);
+                            newSet.delete(provider);
+                            setSelectedProviders(newSet);
+                          }}
+                          className="ml-1 hover:text-blue-600"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                    {Array.from(selectedPriceRanges).map((range) => (
+                      <span
+                        key={range}
+                        className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200 text-xs rounded"
+                      >
+                        {range === "free"
+                          ? "Free"
+                          : range === "cheap"
+                            ? "<$0.5/M"
+                            : range === "moderate"
+                              ? "$0.5-5/M"
+                              : ">$5/M"}
+                        <button
+                          onClick={() => {
+                            const newSet = new Set(selectedPriceRanges);
+                            newSet.delete(range);
+                            setSelectedPriceRanges(newSet);
+                          }}
+                          className="ml-1 hover:text-green-600"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Provider Filter */}
+              <div className="mb-6">
+                <button
+                  onClick={() => toggleSection("providers")}
+                  className="w-full flex items-center justify-between text-base font-light text-gray-800 dark:text-gray-200 mb-3 hover:text-gray-900 dark:hover:text-gray-100"
+                >
+                  <span>Providers ({allProviders.length})</span>
+                  <ChevronDown 
+                    className={`h-4 w-4 transition-transform ${
+                      expandedSections.has("providers") ? "rotate-180" : ""
+                    }`}
                   />
-                  <Eye className="h-3.5 w-3.5" />
-                  <span className="text-sm">Vision</span>
-                </label>
-                <label className="flex items-center gap-1.5 cursor-pointer">
-                  <Checkbox 
-                    checked={capabilityFilters.functionCalling}
-                    onCheckedChange={(checked) => 
-                      setCapabilityFilters(prev => ({ ...prev, functionCalling: checked as boolean }))}
+                </button>
+                {expandedSections.has("providers") && (
+                  <div className="space-y-1 max-h-48 overflow-y-auto">
+                    {allProviders.map((provider) => {
+                      const count = models.filter((m) =>
+                        m.endpoints.some((e) => e.provider === provider)
+                      ).length;
+                      const isSelected = selectedProviders.has(provider);
+                      return (
+                        <div
+                          key={provider}
+                          onClick={() => {
+                            const newSet = new Set(selectedProviders);
+                            if (isSelected) {
+                              newSet.delete(provider);
+                            } else {
+                              newSet.add(provider);
+                            }
+                            setSelectedProviders(newSet);
+                          }}
+                          className={`flex items-center justify-between px-2 py-1.5 text-base font-light rounded cursor-pointer transition-colors ${
+                            isSelected 
+                              ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300" 
+                              : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                          }`}
+                        >
+                          <span>{provider}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-400 dark:text-gray-500">
+                              {count}
+                            </span>
+                            {isSelected && (
+                              <X className="h-3 w-3" />
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Price Range Filter */}
+              <div className="mb-6">
+                <button
+                  onClick={() => toggleSection("price")}
+                  className="w-full flex items-center justify-between text-base font-light text-gray-800 dark:text-gray-200 mb-3 hover:text-gray-900 dark:hover:text-gray-100"
+                >
+                  <span>Price Range</span>
+                  <ChevronDown 
+                    className={`h-4 w-4 transition-transform ${
+                      expandedSections.has("price") ? "rotate-180" : ""
+                    }`}
                   />
-                  <Code className="h-3.5 w-3.5" />
-                  <span className="text-sm">Functions</span>
-                </label>
-                <label className="flex items-center gap-1.5 cursor-pointer">
-                  <Checkbox 
-                    checked={capabilityFilters.jsonMode}
-                    onCheckedChange={(checked) => 
-                      setCapabilityFilters(prev => ({ ...prev, jsonMode: checked as boolean }))}
+                </button>
+                {expandedSections.has("price") && (
+                  <div className="space-y-1">
+                    {[
+                      { key: "free", label: "Free", description: "$0" },
+                      { key: "cheap", label: "Budget", description: "Under $0.5/M" },
+                      { key: "moderate", label: "Standard", description: "$0.5 - $5/M" },
+                      { key: "expensive", label: "Premium", description: "Over $5/M" },
+                    ].map(({ key, label, description }) => {
+                      const count = models.filter((m) => {
+                        const minCost = Math.min(
+                          ...m.endpoints.map(
+                            (e) => (e.pricing.prompt + e.pricing.completion) / 2
+                          )
+                        );
+                        switch (key) {
+                          case "free": return minCost === 0;
+                          case "cheap": return minCost > 0 && minCost <= 0.5;
+                          case "moderate": return minCost > 0.5 && minCost <= 5;
+                          case "expensive": return minCost > 5;
+                          default: return false;
+                        }
+                      }).length;
+                      const isSelected = selectedPriceRanges.has(key);
+                      return (
+                        <div
+                          key={key}
+                          onClick={() => {
+                            const newSet = new Set(selectedPriceRanges);
+                            if (isSelected) {
+                              newSet.delete(key);
+                            } else {
+                              newSet.add(key);
+                            }
+                            setSelectedPriceRanges(newSet);
+                          }}
+                          className={`flex items-center justify-between px-2 py-1.5 rounded cursor-pointer transition-colors ${
+                            isSelected 
+                              ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300" 
+                              : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                          }`}
+                        >
+                          <div>
+                            <div className="text-base font-light">{label}</div>
+                            <div className="text-xs text-gray-400 dark:text-gray-500">{description}</div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-400 dark:text-gray-500">
+                              {count}
+                            </span>
+                            {isSelected && <X className="h-3 w-3" />}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Context Size Filter */}
+              <div className="mb-6">
+                <button
+                  onClick={() => toggleSection("context")}
+                  className="w-full flex items-center justify-between text-base font-light text-gray-800 dark:text-gray-200 mb-3 hover:text-gray-900 dark:hover:text-gray-100"
+                >
+                  <span>Context Size</span>
+                  <ChevronDown 
+                    className={`h-4 w-4 transition-transform ${
+                      expandedSections.has("context") ? "rotate-180" : ""
+                    }`}
                   />
-                  <FileJson className="h-3.5 w-3.5" />
-                  <span className="text-sm">JSON</span>
-                </label>
+                </button>
+                {expandedSections.has("context") && (
+                  <div className="space-y-1">
+                    {[
+                      { key: "small", label: "Small", description: "≤32K tokens" },
+                      { key: "medium", label: "Medium", description: "32K - 128K tokens" },
+                      { key: "large", label: "Large", description: "128K - 200K tokens" },
+                      { key: "xlarge", label: "Extra Large", description: "200K+ tokens" },
+                    ].map(({ key, label, description }) => {
+                      const count = models.filter((m) => {
+                        switch (key) {
+                          case "small": return m.contextLength <= 32000;
+                          case "medium": return m.contextLength > 32000 && m.contextLength <= 128000;
+                          case "large": return m.contextLength > 128000 && m.contextLength <= 200000;
+                          case "xlarge": return m.contextLength > 200000;
+                          default: return false;
+                        }
+                      }).length;
+                      const isSelected = selectedContextSizes.has(key);
+                      return (
+                        <div
+                          key={key}
+                          onClick={() => {
+                            const newSet = new Set(selectedContextSizes);
+                            if (isSelected) {
+                              newSet.delete(key);
+                            } else {
+                              newSet.add(key);
+                            }
+                            setSelectedContextSizes(newSet);
+                          }}
+                          className={`flex items-center justify-between px-2 py-1.5 rounded cursor-pointer transition-colors ${
+                            isSelected 
+                              ? "bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300" 
+                              : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                          }`}
+                        >
+                          <div>
+                            <div className="text-base font-light">{label}</div>
+                            <div className="text-xs text-gray-400 dark:text-gray-500">{description}</div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-400 dark:text-gray-500">
+                              {count}
+                            </span>
+                            {isSelected && <X className="h-3 w-3" />}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Capabilities Filter */}
+              <div className="mb-6">
+                <button
+                  onClick={() => toggleSection("capabilities")}
+                  className="w-full flex items-center justify-between text-base font-light text-gray-800 dark:text-gray-200 mb-3 hover:text-gray-900 dark:hover:text-gray-100"
+                >
+                  <span>Special Capabilities</span>
+                  <ChevronDown 
+                    className={`h-4 w-4 transition-transform ${
+                      expandedSections.has("capabilities") ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                {expandedSections.has("capabilities") && (
+                  <div className="space-y-1">
+                    {[
+                      { key: "audio", label: "Audio Processing", icon: "🎧" },
+                      { key: "video", label: "Video Processing", icon: "🎥" },
+                      { key: "thinking", label: "Chain-of-Thought", icon: "🧠" },
+                      { key: "web_search", label: "Web Search", icon: "🔍" },
+                      { key: "image", label: "Image Processing", icon: "🖼️" },
+                    ]
+                      .map(({ key, label, icon }) => {
+                        const count = models.filter((m) =>
+                          m.endpoints.some((ep) => {
+                            switch (key) {
+                              case "audio": return ep.pricing.audio && ep.pricing.audio > 0;
+                              case "video": return ep.pricing.video && ep.pricing.video > 0;
+                              case "thinking": return ep.pricing.thinking && ep.pricing.thinking > 0;
+                              case "web_search": return ep.pricing.web_search && ep.pricing.web_search > 0;
+                              case "image": return ep.pricing.image && ep.pricing.image > 0;
+                              default: return false;
+                            }
+                          })
+                        ).length;
+
+                        if (count === 0) return null;
+                        const isSelected = selectedCapabilities.has(key);
+                        
+                        return (
+                          <div
+                            key={key}
+                            onClick={() => {
+                              const newSet = new Set(selectedCapabilities);
+                              if (isSelected) {
+                                newSet.delete(key);
+                              } else {
+                                newSet.add(key);
+                              }
+                              setSelectedCapabilities(newSet);
+                            }}
+                            className={`flex items-center justify-between px-2 py-1.5 rounded cursor-pointer transition-colors ${
+                              isSelected 
+                                ? "bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300" 
+                                : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <span>{icon}</span>
+                              <span className="text-base font-light">{label}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-gray-400 dark:text-gray-500">
+                                {count}
+                              </span>
+                              {isSelected && <X className="h-3 w-3" />}
+                            </div>
+                          </div>
+                        );
+                      })
+                      .filter(Boolean)}
+                  </div>
+                )}
+              </div>
               </div>
             </div>
           </div>
 
-          {/* Results count */}
-          <div className="mb-3 text-sm text-gray-500 dark:text-gray-400">
-            Showing {processedModels.length} of {models.length} models
-          </div>
+          {/* Right Content - Table */}
+          <div className="flex-1 min-w-0">
+            {/* Clean Table */}
+            <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[640px]">
+                  <tbody>
+                    {processedModels.map((model) => {
+                      const minInputCost = Math.min(
+                        ...model.endpoints.map((e) => e.pricing.prompt)
+                      );
+                      const minOutputCost = Math.min(
+                        ...model.endpoints.map((e) => e.pricing.completion)
+                      );
+                      const isFree = minInputCost === 0;
+                      const cheapestProvider = model.endpoints.reduce(
+                        (min, ep) =>
+                          (ep.pricing.prompt + ep.pricing.completion) / 2 <
+                          (min.pricing.prompt + min.pricing.completion) / 2
+                            ? ep
+                            : min
+                      );
 
-          {/* Enhanced Table */}
-          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
-                    <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Model
-                    </th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Capabilities
-                    </th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Speed / Quality
-                    </th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Context
-                    </th>
-                    <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Price / Million
-                    </th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Providers
-                    </th>
-                    <th className="w-10"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
-                  {processedModels.map((model) => {
-                    const minInputCost = Math.min(...model.endpoints.map(e => e.pricing.prompt));
-                    const minOutputCost = Math.min(...model.endpoints.map(e => e.pricing.completion));
-                    const avgCost = (minInputCost + minOutputCost) / 2;
-                    const isFree = minInputCost === 0;
-                    const isNew = model.name.includes('3.7') || model.name.includes('2.0') || model.name.includes('3.3');
-                    const cheapestProvider = model.endpoints.reduce((min, ep) => 
-                      (ep.pricing.prompt + ep.pricing.completion) / 2 < (min.pricing.prompt + min.pricing.completion) / 2 ? ep : min
-                    );
-                    
-                    return (
-                      <tr 
-                        key={model.id}
-                        className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group"
-                      >
-                        <td className="px-6 py-4">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium text-gray-900 dark:text-gray-100">
-                                {model.name}
-                              </span>
-                              {isFree && (
-                                <Badge className="text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border-0">
-                                  Free
-                                </Badge>
-                              )}
-                              {isNew && !isFree && (
-                                <Badge className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-0">
-                                  New
-                                </Badge>
-                              )}
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Info className="h-3.5 w-3.5 text-gray-400 cursor-help" />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <div className="text-sm">
-                                    <p className="font-medium mb-1">{model.name}</p>
-                                    <p className="text-gray-600">{model.description}</p>
-                                    <p className="text-xs text-gray-500 mt-1">Training data: {model.trainingDate}</p>
-                                    <p className="text-xs text-gray-500">Max output: {model.maxOutput?.toLocaleString()} tokens</p>
-                                  </div>
-                                </TooltipContent>
-                              </Tooltip>
-                            </div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                              {model.author.charAt(0).toUpperCase() + model.author.slice(1).replace(/-/g, ' ')}
-                            </div>
-                          </div>
-                        </td>
-                        
-                        <td className="px-4 py-4">
-                          <div className="flex gap-1.5">
-                            {model.capabilities?.vision && (
-                              <Tooltip>
-                                <TooltipTrigger>
-                                  <Eye className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                                </TooltipTrigger>
-                                <TooltipContent>Vision capable</TooltipContent>
-                              </Tooltip>
-                            )}
-                            {model.capabilities?.functionCalling && (
-                              <Tooltip>
-                                <TooltipTrigger>
-                                  <Code className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                                </TooltipTrigger>
-                                <TooltipContent>Function calling</TooltipContent>
-                              </Tooltip>
-                            )}
-                            {model.capabilities?.jsonMode && (
-                              <Tooltip>
-                                <TooltipTrigger>
-                                  <FileJson className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                                </TooltipTrigger>
-                                <TooltipContent>JSON mode</TooltipContent>
-                              </Tooltip>
-                            )}
-                          </div>
-                        </td>
+                      // Get capabilities with pricing from cheapest provider
+                      const capabilities: {
+                        key: string;
+                        icon: string;
+                        label: string;
+                        cost: string;
+                      }[] = [];
+                      const pricing = cheapestProvider.pricing;
 
-                        <td className="px-4 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-1">
-                              <Gauge className="h-3.5 w-3.5 text-gray-400" />
-                              <span className={`text-xs font-medium ${
-                                model.speed === 'fast' ? 'text-green-600 dark:text-green-400' :
-                                model.speed === 'slow' ? 'text-orange-600 dark:text-orange-400' :
-                                'text-gray-600 dark:text-gray-400'
-                              }`}>
-                                {model.speed === 'fast' ? 'Fast' : model.speed === 'slow' ? 'Slow' : 'Medium'}
-                              </span>
-                            </div>
-                            <div className="text-xs text-gray-600 dark:text-gray-400">
-                              {model.quality === 'high' ? '⭐⭐⭐' : model.quality === 'medium' ? '⭐⭐' : '⭐'}
-                            </div>
-                          </div>
-                        </td>
-                        
-                        <td className="px-4 py-4">
-                          <span className="text-sm font-mono text-gray-700 dark:text-gray-300">
-                            {formatContext(model.contextLength)}
-                          </span>
-                        </td>
-                        
-                        <td className="px-4 py-4 text-right">
-                          <div>
-                            <div className={`text-sm font-mono font-medium ${
-                              isFree ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-gray-100'
-                            }`}>
-                              {formatCost(avgCost)}
-                            </div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400">
-                              in: {formatCost(minInputCost)}
-                            </div>
-                          </div>
-                        </td>
-                        
-                        <td className="px-4 py-4">
-                          <div className="space-y-1">
-                            <div className="flex flex-wrap gap-1">
-                              {model.endpoints.slice(0, 2).map((endpoint, idx) => (
-                                <span 
-                                  key={idx}
-                                  className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${
-                                    endpoint === cheapestProvider 
-                                      ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-                                      : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
-                                  }`}
-                                >
-                                  {endpoint.provider}
+                      if (pricing.audio && pricing.audio > 0) {
+                        capabilities.push({
+                          key: "audio",
+                          icon: "🎧",
+                          label: "Audio",
+                          cost: formatCost(pricing.audio),
+                        });
+                      }
+                      if (pricing.video && pricing.video > 0) {
+                        capabilities.push({
+                          key: "video",
+                          icon: "🎥",
+                          label: "Video",
+                          cost: formatCost(pricing.video),
+                        });
+                      }
+                      if (pricing.thinking && pricing.thinking > 0) {
+                        capabilities.push({
+                          key: "thinking",
+                          icon: "🧠",
+                          label: "Reasoning",
+                          cost: formatCost(pricing.thinking),
+                        });
+                      }
+                      if (pricing.web_search && pricing.web_search > 0) {
+                        capabilities.push({
+                          key: "search",
+                          icon: "🔍",
+                          label: "Web Search",
+                          cost: formatCost(pricing.web_search),
+                        });
+                      }
+                      if (pricing.image && pricing.image > 0) {
+                        capabilities.push({
+                          key: "vision",
+                          icon: "👁️",
+                          label: "Vision",
+                          cost: formatCost(pricing.image),
+                        });
+                      }
+
+                      return (
+                        <tbody key={model.id} className="group cursor-pointer">
+                          {/* Row 1: Primary info */}
+                          <tr className="border-t-4 border-transparent group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50">
+                            {/* Model name with copy button */}
+                            <td className="px-6 pt-6 pb-1">
+                              <div className="flex items-center gap-2">
+                                <span className="text-lg font-normal text-gray-900 dark:text-gray-100">
+                                  {model.name}
                                 </span>
-                              ))}
-                              {model.endpoints.length > 2 && (
-                                <Tooltip>
-                                  <TooltipTrigger>
-                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
-                                      +{model.endpoints.length - 2}
-                                    </span>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <div className="text-xs">
-                                      {model.endpoints.slice(2).map(ep => ep.provider).join(', ')}
-                                    </div>
-                                  </TooltipContent>
-                                </Tooltip>
-                              )}
-                            </div>
-                          </div>
-                        </td>
-                        
-                        <td className="px-4">
-                          <button
-                            onClick={() => copyModelId(model.id)}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded"
-                          >
-                            {copiedModel === model.id ? (
-                              <Check className="h-4 w-4 text-green-600" />
-                            ) : (
-                              <Copy className="h-4 w-4 text-gray-400" />
-                            )}
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                                <button
+                                  onClick={() => copyModelId(model.id)}
+                                  className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
+                                  title={`Copy model ID: ${model.id}`}
+                                >
+                                  {copiedModel === model.id ? (
+                                    <Check className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+                                  ) : (
+                                    <Clipboard className="h-3.5 w-3.5" />
+                                  )}
+                                </button>
+                                {isFree && (
+                                  <span className="text-xs font-normal text-green-800 dark:text-green-200 bg-green-100 dark:bg-green-900/40 px-2.5 py-1 rounded-full border border-green-200 dark:border-green-800">
+                                    Free
+                                  </span>
+                                )}
+                              </div>
+                            </td>
 
-          {processedModels.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-gray-500 dark:text-gray-400">
-                No models found matching your criteria
+                          </tr>
+
+                          {/* Row 2: Secondary info */}
+                          <tr className="group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50">
+                            <td className="px-6 pt-1 pb-6">
+                              <div className="space-y-2">
+                                {/* Description first - truncated with ellipsis */}
+                                {model.description && (
+                                  <div className="text-base font-light text-gray-400 dark:text-gray-500">
+                                    {model.description.length > 150
+                                      ? `${model.description.slice(0, 150)}...`
+                                      : model.description}
+                                  </div>
+                                )}
+                                
+                                {/* Author, Context, and Pricing - same light text as description */}
+                                <div className="flex flex-wrap items-center gap-3 text-sm font-light text-gray-400 dark:text-gray-500">
+                                  <div>
+                                    by{" "}
+                                    <a
+                                      href={`/authors/${model.author.toLowerCase().replace(/\s+/g, "-")}`}
+                                      className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 underline"
+                                    >
+                                      {model.author.charAt(0).toUpperCase() +
+                                        model.author
+                                          .slice(1)
+                                          .replace(/-/g, " ")}
+                                    </a>
+                                  </div>
+                                  <div>•</div>
+                                  <div>
+                                    {formatContext(model.contextLength)} context
+                                  </div>
+                                  <div>•</div>
+                                  <div>
+                                    ${minInputCost === 0 ? '0' : minInputCost < 1 ? minInputCost.toFixed(2) : minInputCost.toFixed(1)}/M in, ${minOutputCost === 0 ? '0' : minOutputCost < 1 ? minOutputCost.toFixed(2) : minOutputCost.toFixed(1)}/M out
+                                  </div>
+                                  {model.maxOutput && (
+                                    <>
+                                      <div>•</div>
+                                      <div>
+                                        {formatContext(model.maxOutput)} max output
+                                      </div>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                          
+                          {/* Subtle divider between models */}
+                          <tr>
+                            <td className="px-6 py-2">
+                              <div className="border-b border-gray-100 dark:border-gray-800/50 mx-12"></div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {processedModels.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-gray-500 dark:text-gray-400">
+                  No models found matching your criteria
+                </p>
+              </div>
+            )}
+
+            {/* Simple Footer */}
+            <div className="mt-8 text-center">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Prices shown are per million tokens from cheapest available
+                provider.
               </p>
             </div>
-          )}
-
-          {/* Simple Footer */}
-          <div className="mt-8 text-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Prices shown are blended average per million tokens. Green highlight indicates cheapest provider.
-            </p>
           </div>
         </div>
       </div>
-    </TooltipProvider>
+    </div>
   );
 }
