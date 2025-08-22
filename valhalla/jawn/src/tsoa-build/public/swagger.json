@@ -572,6 +572,9 @@
 					"cost": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
+					"provider": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
 					"time_to_first_token": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
