@@ -7,7 +7,7 @@ import {
   BackendMetricsCall,
   useBackendMetricCall,
 } from "../../../services/hooks/useBackendFunction";
-import { FilterBranch, FilterLeaf } from "@helicone-package/filters/filterDefs";
+import { FilterBranch, FilterLeaf, FilterNode } from "@helicone-package/filters/filterDefs";
 
 export interface PropertyPageData {
   timeFilter: {
@@ -18,10 +18,11 @@ export interface PropertyPageData {
   limit?: number;
   sortKey?: string;
   sortDirection?: "asc" | "desc";
+  userFilters?: FilterNode;
 }
 
 export const usePropertyCard = (props: PropertyPageData) => {
-  const { timeFilter, property, limit = 10, sortKey, sortDirection } = props;
+  const { timeFilter, property, limit = 10, sortKey, sortDirection, userFilters = "all" } = props;
   const propertyFilterLeaf: FilterLeaf = {
     request_response_rmt: {
       search_properties: {
@@ -32,13 +33,17 @@ export const usePropertyCard = (props: PropertyPageData) => {
     },
   };
 
+  const combinedFilters: FilterNode = userFilters === "all" 
+    ? propertyFilterLeaf
+    : {
+        left: propertyFilterLeaf,
+        operator: "and",
+        right: userFilters,
+      } as FilterBranch;
+
   const params: BackendMetricsCall<any>["params"] = {
     timeFilter,
-    userFilters: {
-      left: propertyFilterLeaf,
-      operator: "and",
-      right: "all",
-    } as FilterBranch,
+    userFilters: combinedFilters,
     dbIncrement: "day",
     timeZoneDifference: 0,
     limit,
