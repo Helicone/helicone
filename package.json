@@ -6,6 +6,7 @@
     "web",
     "packages/*",
     "valhalla/jawn",
+    "valhalla/consumers",
     "worker"
   ],
   "engines": {

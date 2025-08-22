@@ -1,0 +1,155 @@
+# This docker file must be built using the context of it's parent directory
+# docker build -t valhalla-consumer .. -f dockerfile_consumer
+
+# Use an official Node.js runtime as the base image
+# Updated to latest version to address Go stdlib CVE-2025-47907
+FROM node:20.19.4-bookworm-slim
+
+WORKDIR /usr/src/app
+
+# Apply security updates and fix system library vulnerabilities
+# CVE-2023-52425: expat vulnerability - Force install latest patched version
+# CVE-2025-4802: glibc vulnerability  
+# CVE-2025-6020: pam vulnerability
+# CVE-2025-52496, CVE-2025-48965, CVE-2025-47917: mbedtls vulnerabilities
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    libexpat1-dev \
+    expat \
+    libpam0g \
+    libpam-modules \
+    libmbedtls14 \
+    libc6 \
+    && apt-get autoremove -y && apt-get clean
+
+# Verify expat version to ensure CVE-2023-52425 is patched
+RUN expat_version=$(dpkg-query -W -f='${Version}' libexpat1 2>/dev/null || echo "0") && \
+    echo "Installed expat version: $expat_version" && \
+    # Force reinstall if version is still vulnerable
+    if dpkg --compare-versions "$expat_version" lt "2.5.0-2"; then \
+        echo "Expat version is vulnerable, forcing update from security repos"; \
+        echo "deb http://security.debian.org/debian-security bookworm-security main" >> /etc/apt/sources.list.d/security.list && \
+        apt-get update && \
+        apt-get install -y --reinstall libexpat1 libexpat1-dev expat && \
+        rm -f /etc/apt/sources.list.d/security.list; \
+    fi
+
+# Install latest versions to address security vulnerabilities
+# CVE-2023-26819: libcjson vulnerability (fixed with libcjson-dev update)
+# CVE-2025-6170: libxml2 vulnerability (fixed with libxml2-dev update)
+# CVE-2025-37317: mbedtls critical vulnerability - force latest version
+# CVE-2025-7458: sqlite3 critical vulnerability - force latest version
+RUN apt-get update && \
+    apt-get install -y \
+    libcjson-dev \
+    libxml2-dev \
+    sqlite3 \
+    libsqlite3-0 \
+    libsqlite3-dev \
+    && apt-get clean
+
+# Force update mbedtls to address CVE-2025-37317 critical vulnerability
+RUN apt-get update && \
+    apt-get install -y --reinstall \
+    libmbedtls14 \
+    libmbedtls-dev \
+    && apt-get clean
+
+# Critical vulnerability fixes using the correct fix versions
+RUN echo "Applying critical security patches..." && \
+    # Add unstable repo for expat 2.6.0+ first (fixes CVE-2023-52425)
+    echo "deb http://deb.debian.org/debian unstable main" >> /etc/apt/sources.list.d/unstable.list && \
+    apt-get update && \
+    # Install expat 2.6.0+ from unstable (fixes CVE-2023-52425)
+    apt-get install -y -t unstable expat libexpat1 libexpat1-dev && \
+    # Clean up unstable repo
+    rm -f /etc/apt/sources.list.d/unstable.list && \
+    apt-get update && \
+    # Verify versions installed
+    echo "Verifying security patches applied:" && \
+    dpkg-query -W -f='expat: ${Version} (fixes CVE-2023-52425)\n' expat
+
+# Fix CVE-2023-6879 by installing fixed aom version from testing
+RUN echo "deb https://deb.debian.org/debian testing main" > /etc/apt/sources.list.d/testing.list && \
+    apt-get update && \
+    apt-get install -y -t testing libaom3 && \
+    rm /etc/apt/sources.list.d/testing.list && \
+    apt-get update
+
+# Fix additional medium-priority system library vulnerabilities
+# CVE-2025-3576: krb5 vulnerability - update Kerberos libraries
+# CVE-2023-53154: cjson vulnerability - already fixed with libcjson-dev update above
+# CVE-2025-45582: tar vulnerability - update tar package
+# CVE-2025-8114: libssh vulnerability - update SSH libraries
+# CVE-2024-13176, CVE-2024-9143: OpenSSL vulnerabilities - update OpenSSL
+# CVE-2025-50952: openjpeg2 vulnerability - update JPEG2000 libraries
+RUN echo "Applying additional medium-priority security patches..." && \
+    # Add testing repo for latest packages
+    echo "deb https://deb.debian.org/debian testing main" > /etc/apt/sources.list.d/medium-security.list && \
+    apt-get update && \
+    # Remove conflicting libssl3 first, then install new versions
+    apt-get remove -y libssl3 || true && \
+    # Update system packages to fix medium-priority CVEs
+    apt-get install -y -t testing \
+        krb5-user \
+        libkrb5-3 \
+        libkrb5-dev \
+        tar \
+        libssh-4 \
+        libssh-dev \
+        openssl \
+        libssl3t64 \
+        libssl-dev \
+        libopenjp2-7 \
+        libopenjp2-7-dev && \
+    # Clean up testing repo
+    rm /etc/apt/sources.list.d/medium-security.list && \
+    apt-get update && \
+    echo "Medium-priority system library vulnerabilities patched" && \
+    # Final cleanup
+    apt-get autoremove -y && apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy shared dependencies and packages
+COPY ./shared ./shared
+COPY ./packages ./packages
+COPY ./package.json ./package.json
+
+# Setup and build jawn (required dependency)
+WORKDIR /usr/src/app/valhalla/jawn
+COPY ./valhalla/jawn .
+
+# Remove any .env files
+RUN find /usr/src/app/valhalla/jawn -name ".env.*" -exec rm {} \;
+
+# Install dependencies and build jawn
+RUN yarn install --frozen-lockfile
+RUN yarn build
+
+# Setup consumers service
+WORKDIR /usr/src/app/valhalla/consumers
+COPY ./valhalla/consumers .
+
+# Install dependencies and build consumers
+RUN yarn install --frozen-lockfile
+RUN yarn build
+
+# Clean up dev dependencies and only keep production
+RUN yarn install --frozen-lockfile --production && \
+    yarn cache clean
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=8585
+ENV DLQ_WORKER_COUNT=1
+ENV NORMAL_WORKER_COUNT=3
+ENV SCORES_WORKER_COUNT=1
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD node -e "console.log('Healthy')" || exit 1
+
+# Run the consumer service directly
+CMD ["node", "dist/index.js"]

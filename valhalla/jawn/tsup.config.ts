@@ -16,6 +16,10 @@ export default defineConfig([
     loader: { ".json": "copy" },
     minify: true,
     sourcemap: false,
+    dts: {
+      resolve: true,
+      entry: ["src/consumer-exports.ts", "src/tracer.ts", "src/lib/env.ts"],
+    },
     external: ["**/kafkaConsumer.js", "**/sqsConsumer.js"],
   },
   {
@@ -33,5 +37,6 @@ export default defineConfig([
     loader: { ".json": "copy" },
     minify: true,
     sourcemap: false,
+    dts: true,
   },
 ]);

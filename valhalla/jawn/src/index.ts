@@ -20,14 +20,14 @@ import { RequestWrapper } from "./lib/requestWrapper/requestWrapper";
 import { tokenRouter } from "./lib/routers/tokenRouter";
 import { DelayedOperationService } from "./lib/shared/delayedOperationService";
 import { runLoopsOnce, runMainLoops } from "./mainLoops";
-import { authFromRequest, authMiddleware } from "./middleware/auth";
+import { authMiddleware } from "./middleware/auth";
 import { IS_RATE_LIMIT_ENABLED, limiter } from "./middleware/ratelimitter";
 import { RegisterRoutes as registerPrivateTSOARoutes } from "./tsoa-build/private/routes";
 import { RegisterRoutes as registerPublicTSOARoutes } from "./tsoa-build/public/routes";
 import * as publicSwaggerDoc from "./tsoa-build/public/swagger.json";
 import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
-import { startConsumers, startSQSConsumers } from "./workers/consumerInterface";
+import { startSQSConsumers } from "./workers/consumerInterface";
 import { IS_ON_PREM } from "./constants/IS_ON_PREM";
 import { toExpressRequest } from "./utils/expressHelpers";
 import { webSocketControlPlaneServer } from "./controlPlane/controlPlane";
@@ -129,13 +129,6 @@ const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
 
 if (KAFKA_ENABLED) {
   console.log("Starting Kafka consumers");
-  startConsumers({
-    dlqCount: 0,
-    normalCount: 0,
-    scoresCount: 0,
-    scoresDlqCount: 0,
-    backFillCount: 0,
-  });
   startSQSConsumers({
     dlqCount: DLQ_WORKER_COUNT,
     normalCount: NORMAL_WORKER_COUNT,

@@ -9,7 +9,26 @@
     "build": "tsup && mkdir -p dist/valhalla/utils && cp src/utils/trace.proto dist/valhalla/jawn/src/utils/trace.proto && cp src/utils/trace.proto dist/valhalla/utils/trace.proto && cp dist/valhalla/jawn/src/workers/kafkaConsumer.js dist/valhalla/jawn/src/kafkaConsumer.js && cp dist/valhalla/jawn/src/workers/sqsConsumer.js dist/valhalla/jawn/src/sqsConsumer.js"
   },
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/valhalla/jawn/src/index.js",
+  "types": "dist/valhalla/jawn/src/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/valhalla/jawn/src/index.js",
+      "types": "./dist/valhalla/jawn/src/index.d.ts"
+    },
+    "./consumers": {
+      "require": "./dist/valhalla/jawn/src/consumer-exports.js",
+      "types": "./dist/valhalla/jawn/src/consumer-exports.d.ts"
+    },
+    "./tracer": {
+      "require": "./dist/valhalla/jawn/src/tracer.js",
+      "types": "./dist/valhalla/jawn/src/tracer.d.ts"
+    },
+    "./env": {
+      "require": "./dist/valhalla/jawn/src/lib/env.js",
+      "types": "./dist/valhalla/jawn/src/lib/env.d.ts"
+    }
+  },
   "license": "MIT",
   "dependencies": {
     "@anthropic-ai/tokenizer": "^0.0.4",

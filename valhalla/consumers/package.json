@@ -1,0 +1,23 @@
+{
+  "name": "@helicone/consumers",
+  "version": "1.0.0",
+  "description": "Helicone Kafka/SQS consumers service",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "nodemon --watch src --exec ts-node src/index.ts",
+    "build": "tsc",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "helicone-api": "*",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.10",
+    "nodemon": "^3.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.2.2"
+  },
+  "license": "MIT"
+}
