@@ -9,12 +9,6 @@ import { getAndStoreInCache } from "../cache/staticMemCache";
 
 export class AuthenticationHandler extends AbstractLogHandler {
   async handle(context: HandlerContext): PromiseGenericResult<string> {
-    const start = performance.now();
-    context.timingMetrics.push({
-      constructor: this.constructor.name,
-      start,
-    });
-
     try {
       const authResult = await this.authenticateEntry(context);
       if (authResult.error || !authResult.data) {
