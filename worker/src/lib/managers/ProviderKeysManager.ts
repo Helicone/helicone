@@ -39,20 +39,6 @@ export class ProviderKeysManager {
       this.env
     );
   }
-
-  /*
-    UPDATE: Ideally, this is never called since we're
-    storing all the keys in an array rather than a single key,
-    so when a key is being deleted, we probably should just fetch
-    the list again and set the whole thing
-  */
-  async deleteProviderKey(provider: ProviderName, orgId: string) {
-    if (this.env.ENVIRONMENT !== "development") {
-      return;
-    }
-    await removeFromCache(`provider_keys_${provider}_${orgId}`, this.env);
-  }
-
   async getProviderKey(
     provider: ProviderName,
     orgId: string,

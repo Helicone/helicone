@@ -134,53 +134,6 @@ function getAPIRouterV1(
   );
 
   router.post(
-    "/mock-delete-provider-key",
-    async (
-      _,
-      requestWrapper: RequestWrapper,
-      env: Env,
-      _ctx: ExecutionContext
-    ) => {
-      if (env.ENVIRONMENT !== "development") {
-        return new Response("not allowed", { status: 403 });
-      }
-
-      const data = await requestWrapper.getJson<{
-        providerName: ProviderName;
-        orgId: string;
-      }>();
-
-      const supabaseClientUS = createClient<Database>(
-        env.SUPABASE_URL,
-        env.SUPABASE_SERVICE_ROLE_KEY
-      );
-      const supabaseClientEU = createClient<Database>(
-        env.EU_SUPABASE_URL,
-        env.EU_SUPABASE_SERVICE_ROLE_KEY
-      );
-
-      const providerKeysManagerUS = new ProviderKeysManager(
-        new ProviderKeysStore(supabaseClientUS),
-        env
-      );
-      await providerKeysManagerUS.deleteProviderKey(
-        data.providerName,
-        data.orgId
-      );
-
-      const providerKeysManagerEU = new ProviderKeysManager(
-        new ProviderKeysStore(supabaseClientEU),
-        env
-      );
-      await providerKeysManagerEU.deleteProviderKey(
-        data.providerName,
-        data.orgId
-      );
-      return new Response("ok", { status: 200 });
-    }
-  );
-
-  router.post(
     "/job",
     async (
       _,
