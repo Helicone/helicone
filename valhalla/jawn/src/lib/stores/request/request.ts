@@ -206,12 +206,14 @@ export async function getRequestsClickhouseNoSort(
     LIMIT ${limit}
     OFFSET ${offset}
   `;
-  console.log("query", query);
 
   const requests = await dbQueryClickhouse<HeliconeRequest>(
     query,
     builtFilter.argsAcc
   );
+
+  console.log(builtFilter);
+
 
   const s3Client = new S3Client(
     process.env.S3_ACCESS_KEY ?? "",

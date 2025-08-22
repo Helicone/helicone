@@ -15,11 +15,11 @@ export enum TagType {
 
 type KeyMapper<T> = (
   filter: T,
-  placeValueSafely: (val: string) => string
+  placeValueSafely: (val: string | number) => string | number
 ) => {
   column?: string;
   operator: AllOperators;
-  value: string;
+  value: string | number;
 };
 
 type KeyMappings = {
@@ -238,11 +238,10 @@ const whereKeyMappings: KeyMappings = {
       const { operator, value } = extractOperatorAndValueFromAnOperator(
         filter.cost
       );
-      console.log("cost", operator, value);
       return {
         column: "request_response_rmt.cost",
         operator: operator,
-        value: placeValueSafely(`${value * COST_PRECISION_MULTIPLIER}`),
+        value: placeValueSafely(Math.floor((value as number) * COST_PRECISION_MULTIPLIER)),
       }
     }
     return easyKeyMappings<"request_response_rmt">({
@@ -453,7 +452,7 @@ export function buildFilterLeaf(
   filters: string[];
   argsAcc: any[];
 } {
-  const placeValueSafely = (value: string) => {
+  const placeValueSafely = (value: string | number) => {
     argsAcc.push(value);
     return argPlaceHolder(argsAcc.length - 1, value);
   };
