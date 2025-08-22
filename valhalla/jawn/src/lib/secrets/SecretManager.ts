@@ -1,10 +1,12 @@
 /**
  * SecretManager handles blue-green rotation of sensitive environment variables.
  * 
- * For each secret, it expects three environment variables:
+ * For each secret, it expects:
  * - {SECRET_NAME}_BLUE: The blue version of the secret
  * - {SECRET_NAME}_GREEN: The green version of the secret  
- * - {SECRET_NAME}_ACTIVE: Either "blue" or "green" to indicate which is active
+ * 
+ * A single environment variable controls which cycle is active:
+ * - ACTIVE_SECRET_CYCLE: Either "blue" or "green" to indicate which is active for all secrets
  * 
  * If rotation variables don't exist, it falls back to the original environment variable.
  */
@@ -67,11 +69,10 @@ class SecretManagerClass {
   private resolveSecret(secretName: RotatableSecret): SecretRotationResult {
     const blueKey = `${secretName}_BLUE`;
     const greenKey = `${secretName}_GREEN`;
-    const activeKey = `${secretName}_ACTIVE`;
-
+    
     const blueValue = process.env[blueKey];
     const greenValue = process.env[greenKey];
-    const activeColor = process.env[activeKey]?.toLowerCase();
+    const activeColor = process.env.ACTIVE_SECRET_CYCLE?.toLowerCase();
 
     // If rotation variables don't exist, fall back to original
     if (!blueValue || !greenValue || !activeColor) {
@@ -84,7 +85,7 @@ class SecretManagerClass {
 
     // Validate active color
     if (activeColor !== 'blue' && activeColor !== 'green') {
-      console.warn(`SecretManager: Invalid active color '${activeColor}' for ${secretName}, falling back to original`);
+      console.warn(`SecretManager: Invalid ACTIVE_SECRET_CYCLE value '${activeColor}', falling back to original`);
       return {
         value: process.env[secretName],
         source: 'fallback',
@@ -99,6 +100,17 @@ class SecretManagerClass {
       source: activeColor as 'blue' | 'green',
       secretName
     };
+  }
+
+  /**
+   * Gets the current active secret cycle
+   */
+  getActiveSecretCycle(): 'blue' | 'green' | 'none' {
+    const activeColor = process.env.ACTIVE_SECRET_CYCLE?.toLowerCase();
+    if (activeColor === 'blue' || activeColor === 'green') {
+      return activeColor;
+    }
+    return 'none';
   }
 
   /**
