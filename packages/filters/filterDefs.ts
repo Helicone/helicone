@@ -181,6 +181,7 @@ export type FilterLeafRequestResponseLog =
 interface RequestResponseRMTToOperators {
   country_code: SingleKey<TextOperators>;
   latency: SingleKey<NumberOperators>;
+  cost: SingleKey<NumberOperators>;
   time_to_first_token: SingleKey<NumberOperators>;
   status: SingleKey<NumberOperators>;
   request_created_at: SingleKey<TimestampOperatorsTyped>;

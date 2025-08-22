@@ -3115,6 +3115,9 @@
 					"latency": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
+					"cost": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
 					"time_to_first_token": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},

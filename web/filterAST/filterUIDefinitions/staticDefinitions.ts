@@ -263,6 +263,13 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
     table: "request_response_rmt",
   },
   {
+    id: "cost",
+    label: "Cost", 
+    type: "number",
+    operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
+    table: "request_response_rmt",
+  },
+  {
     id: "completion_tokens",
     label: "Completion Tokens",
     type: "number",
