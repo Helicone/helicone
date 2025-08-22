@@ -70,7 +70,9 @@ const PropertyPanel = (props: PropertyPanelProps) => {
   });
 
   const filterStore = useFilterStore();
-  const userFilters = filterStore.filter ? toFilterNode(filterStore.filter) : "all";
+  const userFilters = filterStore.filter
+    ? toFilterNode(filterStore.filter)
+    : "all";
 
   const { keyMetrics, valueMetrics, isAnyLoading } = usePropertyCard({
     timeFilter,
