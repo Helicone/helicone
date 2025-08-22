@@ -360,7 +360,6 @@ export default {
     env: Env,
     ctx: ExecutionContext
   ): Promise<Response> {
-    console.log("WORKER_TYPE", env.WORKER_TYPE);
     try {
       const requestWrapper = await RequestWrapper.create(request, env);
       if (requestWrapper.error || !requestWrapper.data) {
