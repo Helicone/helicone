@@ -29,6 +29,7 @@ type Error = {
     | "invalid_prompt";
   message: string;
   code: number;
+  details?: string;
 };
 
 const DEFAULT_REGION = "us-west-1";
@@ -354,9 +355,7 @@ const attemptDirectProviderRequest = async (
       forwarder
     );
 
-    if (!isErr(result)) {
-      return result;
-    }
+    return result;
   }
 
   return err({
@@ -483,7 +482,12 @@ export const attemptModelRequestWithFallback = async ({
     });
   }
 
-  if (parsedBody.prompt_id || parsedBody.environment || parsedBody.version_id || parsedBody.inputs) {
+  if (
+    parsedBody.prompt_id ||
+    parsedBody.environment ||
+    parsedBody.version_id ||
+    parsedBody.inputs
+  ) {
     const result = await promptManager.getMergedPromptBody(parsedBody, orgId);
     if (isErr(result)) {
       return err({
