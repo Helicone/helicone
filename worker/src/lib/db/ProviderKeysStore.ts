@@ -41,7 +41,7 @@ export class ProviderKeysStore {
       return null;
     }
 
-    return data
+    const finalData = data
       .map((row) => {
         const provider = dbProviderToProvider(row.provider_name ?? "");
         if (!provider) return null;
@@ -65,13 +65,16 @@ export class ProviderKeysStore {
         acc[key.org_id].push(key);
         return acc;
       }, {});
+
+    return finalData;
   }
 
   async getProviderKeyWithFetch(
     provider: ProviderName,
-    orgId: string
+    orgId: string,
+    keyCuid?: string
   ): Promise<ProviderKey | null> {
-    const { data, error } = await this.supabaseClient
+    let query = this.supabaseClient
       .from("decrypted_provider_keys_v2")
       .select(
         "org_id, decrypted_provider_key, decrypted_provider_secret_key, auth_type, provider_name, config, cuid"
@@ -79,6 +82,12 @@ export class ProviderKeysStore {
       .eq("provider_name", providerToDbProvider(provider))
       .eq("org_id", orgId)
       .eq("soft_delete", false);
+
+    if (keyCuid !== undefined) {
+      query = query.eq("cuid", keyCuid);
+    }
+
+    const { data, error } = await query;
 
     if (error || !data || data.length === 0) {
       return null;

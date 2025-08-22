@@ -40,6 +40,9 @@ export const dbProviderToProvider = (provider: string): ProviderName | null => {
   if (provider === "Google AI (Gemini)") {
     return "google";
   }
+  if (provider === "Azure OpenAI") {
+    return "azure-openai";
+  }
   return null;
 };
 
@@ -61,6 +64,9 @@ export const providerToDbProvider = (provider: ProviderName): string => {
   }
   if (provider === "google") {
     return "Google AI (Gemini)";
+  }
+  if (provider === "azure-openai") {
+    return "Azure OpenAI";
   }
   return provider;
 };

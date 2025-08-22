@@ -70,20 +70,26 @@ export class ProviderKeysManager {
     if (keyCuid) {
       return data.find((key) => "cuid" in key && key.cuid === keyCuid) ?? null;
     }
+    const randomIndex = Math.floor(Math.random() * data.length);
 
     return data.length > 0
       ? // pick a random key if there are multiple keys for the same provider and they haven't mentioned cuid
-        data[Math.floor(Math.random() * data.length)]
+        data[randomIndex]
       : null;
   }
 
   async getProviderKeyWithFetch(
     provider: ProviderName,
-    orgId: string
+    orgId: string,
+    keyCuid?: string
   ): Promise<ProviderKey | null> {
-    const key = await this.getProviderKey(provider, orgId);
+    const key = await this.getProviderKey(provider, orgId, keyCuid);
     if (!key) {
-      const key = await this.store.getProviderKeyWithFetch(provider, orgId);
+      const key = await this.store.getProviderKeyWithFetch(
+        provider,
+        orgId,
+        keyCuid
+      );
       if (!key) return null;
 
       await storeInCache(

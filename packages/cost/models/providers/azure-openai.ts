@@ -17,15 +17,16 @@ export class AzureOpenAIProvider extends BaseProvider {
     "https://learn.microsoft.com/azure/ai-services/openai/concepts/models",
   ];
 
-  buildUrl(
-    endpoint: ModelProviderConfig,
-    config: UserEndpointConfig
-  ): string {
-    if (!config.resourceName || !config.deploymentName) {
-      throw new Error("Azure OpenAI requires resourceName and deploymentName");
+  buildUrl(endpoint: ModelProviderConfig, config: UserEndpointConfig): string {
+    if (!config.baseUri || !config.deploymentName) {
+      throw new Error("Azure OpenAI requires baseUri and deploymentName");
     }
-    const apiVersion = "2024-02-15-preview";
-    return `https://${config.resourceName}.openai.azure.com/openai/deployments/${config.deploymentName}/chat/completions?api-version=${apiVersion}`;
+    const apiVersion = config.apiVersion || "2024-02-15-preview";
+    const baseUri = config.baseUri.endsWith("/")
+      ? config.baseUri
+      : `${config.baseUri}/`;
+    const builtUrl = `${baseUri}openai/deployments/${config.deploymentName}/chat/completions?api-version=${apiVersion}`;
+    return builtUrl;
   }
 
   authenticate(context: AuthContext): AuthResult {

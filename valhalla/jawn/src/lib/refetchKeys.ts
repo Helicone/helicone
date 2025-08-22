@@ -10,6 +10,7 @@ type ProviderKey = {
   auth_type: "key" | "session_token";
   config: Json | null;
   orgId: string;
+  cuid?: string;
 };
 
 export const MAX_RETRIES = 3;
@@ -35,6 +36,7 @@ async function setProviderKeyDev(
             authType: providerKey.auth_type,
             config: providerKey.config,
             orgId: providerKey.orgId,
+            cuid: providerKey.cuid,
           }))
         ),
       }
@@ -57,6 +59,7 @@ export async function setProviderKeys(
   orgId: string,
   providerKeys: ProviderKey[]
 ) {
+  console.log("setProviderKeys", orgId, providerKeys);
   if (ENVIRONMENT === "production") {
     await storeInCache(`provider_keys_${orgId}`, JSON.stringify(providerKeys));
   } else {

@@ -29,6 +29,7 @@ export interface ProviderKey {
   created_at?: string;
   soft_delete: boolean;
   config?: Record<string, any>; // JSON config field for provider-specific settings
+  cuid?: string | null; // CUID for the provider key
 }
 
 // Interface for decrypted provider key

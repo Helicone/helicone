@@ -1,6 +1,6 @@
 import generateApiKey from "generate-api-key";
 import { uuid } from "uuidv4";
-import { Database } from "../../lib/db/database.types";
+import { Database, Json } from "../../lib/db/database.types";
 import { AuthParams } from "../../packages/common/auth/types";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { Result, err, ok } from "../../packages/common/result";
@@ -221,6 +221,53 @@ export class KeyManager extends BaseManager {
          FROM provider_keys
          WHERE org_id = $1
          AND soft_delete = false
+         ORDER BY created_at DESC`,
+        [this.authParams.organizationId]
+      );
+
+      if (result.error) {
+        return err(`Failed to get provider keys: ${result.error}`);
+      }
+
+      return ok(result.data || []);
+    } catch (error) {
+      return err(`Failed to get provider keys: ${error}`);
+    }
+  }
+
+  async getDecryptedProviderKeys(): Promise<
+    Result<
+      {
+        id: string;
+        org_id: string;
+        decrypted_provider_key: string;
+        decrypted_provider_secret_key: string | null;
+        provider_key_name: string;
+        provider_name: string;
+        auth_type: "key" | "session_token";
+        config: Json | null;
+        cuid: string;
+      }[],
+      string
+    >
+  > {
+    try {
+      const result = await dbExecute<{
+        id: string;
+        org_id: string;
+        decrypted_provider_key: string;
+        decrypted_provider_secret_key: string | null;
+        provider_key_name: string;
+        provider_name: string;
+        auth_type: "key" | "session_token";
+        config: Json | null;
+        cuid: string;
+      }>(
+        `SELECT id, org_id, decrypted_provider_key, decrypted_provider_secret_key, provider_key_name, provider_name, auth_type, config, cuid
+         FROM decrypted_provider_keys_v2
+         WHERE org_id = $1
+         AND soft_delete = false
+         AND provider_name IS NOT NULL
          ORDER BY created_at DESC`,
         [this.authParams.organizationId]
       );
@@ -585,22 +632,29 @@ export class KeyManager extends BaseManager {
 
   async resetProviderKeysInGatewayCache() {
     try {
-      const allProviderKeys = await this.getProviderKeys();
+      const allProviderKeys = await this.getDecryptedProviderKeys();
       if (allProviderKeys.error) {
         return err(allProviderKeys.error);
       }
 
       setProviderKeys(
         this.authParams.organizationId,
-        allProviderKeys.data?.map((key) => ({
-          provider: key.provider,
-          decrypted_provider_key: key.decrypted_provider_key,
-          decrypted_provider_secret_key: key.decrypted_provider_secret_key,
-          auth_type: key.auth_type,
-          config: key.config,
-          orgId: this.authParams.organizationId,
-          cuid: key.cuid,
-        })) ?? []
+        allProviderKeys.data
+          ?.map((key) => {
+            const provider = dbProviderToProvider(key.provider_name ?? "");
+            if (!provider) return null;
+            return {
+              provider,
+              decrypted_provider_key: key.decrypted_provider_key,
+              decrypted_provider_secret_key:
+                key.decrypted_provider_secret_key ?? "",
+              auth_type: key.auth_type,
+              config: key.config,
+              orgId: this.authParams.organizationId,
+              cuid: key.cuid,
+            };
+          })
+          .filter((key): key is NonNullable<typeof key> => key !== null) ?? []
       );
 
       return ok(true);
