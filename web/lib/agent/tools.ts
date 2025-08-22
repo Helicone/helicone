@@ -704,7 +704,7 @@ function condition(
  * @example
  * const combinedFilter = Filter.and(
  *   Filter.condition("status", "eq", 200),
- *   Filter.condition("model", "like", "gpt-4")
+ *   Filter.condition("model", "like", "gpt-4%")
  * );
  *
  * @param expressions - Filter expressions to combine with AND
