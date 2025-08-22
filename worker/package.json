@@ -10,6 +10,7 @@
     "dev": "wrangler dev",
     "start": "wrangler dev",
     "test": "vitest",
+    "test:debug": "vitest --inspect --no-file-parallelism",
     "test:registry": "vitest registry-ts",
     "cf-typegen": "wrangler types --strict-vars false",
     "lint": "tsc && eslint --ext .js,.jsx,.ts,.tsx ./src --max-warnings=0",
@@ -33,7 +34,7 @@
     "prettier": "^3.6.2",
     "typescript": "^5.8.3",
     "vitest": "~3.2.0",
-    "wrangler": "^4.27.0",
+    "wrangler": "^4.32.0",
     "yarn": "^1.22.22",
     "zod": "^3.23.8"
   },

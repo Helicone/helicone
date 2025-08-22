@@ -93,7 +93,13 @@ export async function checkRateLimit(
   };
 
   try {
-    const response = await doStub.processRateLimit(request);
+    let fetchResponse = await doStub.fetch("https://this-doesnt-matter.com", {
+      body: JSON.stringify(request),
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+    const response = (await fetchResponse.json()) as DORateLimitResponse;
+
     return {
       status: response.status,
       limit: response.limit,
@@ -142,7 +148,12 @@ export async function updateRateLimitCounter(
       checkOnly: false,
     };
 
-    const response = await doStub.processRateLimit(request);
+    let fetchResponse = await doStub.fetch("https://this-doesnt-matter.com", {
+      body: JSON.stringify(request),
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+    const response = (await fetchResponse.json()) as DORateLimitResponse;
     if (response.status !== "ok") {
       console.error("[DORateLimit] Update failed:", response.status);
     }

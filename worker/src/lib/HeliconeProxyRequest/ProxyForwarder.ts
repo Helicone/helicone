@@ -161,7 +161,7 @@ export async function proxyForwarder(
               );
             }
           } catch (error) {
-            console.error("Error checking rate limit", error);
+            console.error("[ProxyForwarder] Error checking rate limit", error);
           }
         }
       }

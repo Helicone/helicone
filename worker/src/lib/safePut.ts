@@ -3,7 +3,7 @@ export async function safePut({
   keyName,
   value,
   options,
-  maxRetries = 3,
+  maxRetries = 0,
   currentRetry = 0,
   baseDelay = 1_000,
 }: {
