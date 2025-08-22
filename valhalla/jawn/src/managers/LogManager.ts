@@ -38,7 +38,7 @@ export interface LogMetaData {
   messageCount?: number;
 }
 
-async function withTimout<T>(
+async function withTimeout<T>(
   fn: PromiseGenericResult<T>,
   timeout: number
 ): Promise<PromiseGenericResult<T>> {
@@ -117,7 +117,7 @@ export class LogManager {
     await Promise.all(
       logMessages.map(async (logMessage) => {
         const handlerContext = new HandlerContext(logMessage);
-        const result = await withTimout(
+        const result = await withTimeout(
           authHandler.handle(handlerContext),
           60_000 * 15 // 15 minutes
         );
