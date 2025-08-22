@@ -3,7 +3,10 @@ import { redisClient } from "../clients/redisClient";
 import { Result, ok } from "../../packages/common/result";
 
 export class CacheItem<T> {
-  constructor(public value: T, public expiry: number) {}
+  constructor(
+    public value: T,
+    public expiry: number
+  ) {}
 }
 
 export class InMemoryCache {
@@ -47,19 +50,11 @@ export class InMemoryCache {
     }
     return item.value;
   }
-
-  // Removes a key from the cache if it's expired
-  private removeIfExpired(key: string): void {
-    const item = this.cache.get(key);
-    if (item && item.expiry < Date.now()) {
-      this.cache.delete(key);
-    }
-  }
 }
 
 class ProviderKeyCache extends InMemoryCache {
   private static instance: ProviderKeyCache;
-  private API_KEY_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
   constructor() {
     super(1_000);
   }
@@ -70,17 +65,21 @@ class ProviderKeyCache extends InMemoryCache {
     }
     return ProviderKeyCache.instance;
   }
-
-  set<T>(key: string, value: T): void {
-    super.set(key, value, this.API_KEY_CACHE_TTL);
+  // 5 minutes
+  set<T>(key: string, value: T, ttl: number = 300_000): void {
+    super.set(key, value, ttl);
   }
 }
 
-export async function storeInCache(key: string, value: string): Promise<void> {
+export async function storeInCache(
+  key: string,
+  value: string,
+  ttl: number = 600
+): Promise<void> {
   const encrypted = await encrypt(value);
   const hashedKey = await hashAuth(key);
   // redis
-  await redisClient?.set(hashedKey, JSON.stringify(encrypted), "EX", 600);
+  await redisClient?.set(hashedKey, JSON.stringify(encrypted), "EX", ttl);
 
   ProviderKeyCache.getInstance().set<string>(
     hashedKey,
@@ -105,7 +104,8 @@ export async function getFromCache(key: string): Promise<string | null> {
 
 export async function getAndStoreInCache<T, K>(
   key: string,
-  fn: () => Promise<Result<T, K>>
+  fn: () => Promise<Result<T, K>>,
+  ttl: number = 600
 ): Promise<Result<T, K>> {
   const cached = await getFromCache(key);
   if (cached !== null) {
@@ -126,11 +126,12 @@ export async function getAndStoreInCache<T, K>(
   if (typeof value.data === "string") {
     await storeInCache(
       key,
-      JSON.stringify({ _helicone_cached_string: value.data })
+      JSON.stringify({ _helicone_cached_string: value.data }),
+      ttl
     );
     return value;
   } else {
-    await storeInCache(key, JSON.stringify(value.data));
+    await storeInCache(key, JSON.stringify(value.data), ttl);
   }
   return value;
 }
