@@ -40,8 +40,11 @@ export default function LivePill(props: LivePillProps) {
       >
         <ArrowPathIcon
           className={clsx(
-            isDataLoading || isRefetching ? "animate-spin" : "",
-            "inline h-4 w-4 duration-500 ease-in-out",
+            isDataLoading || isRefetching
+              ? "animate-spin duration-500 ease-in-out"
+              : "",
+            isLive ? "animate-spin duration-1000" : "",
+            "inline h-4 w-4",
           )}
         />
       </Button>
