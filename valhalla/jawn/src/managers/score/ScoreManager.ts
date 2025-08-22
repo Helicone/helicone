@@ -67,7 +67,6 @@ export class ScoreManager extends BaseManager {
     evaluatorId?: string
   ): Promise<Result<null, string>> {
     const mappedScores = mapScores(scores);
-    await this.scoreStore.putScoresIntoDB(requestId, mappedScores, evaluatorId);
     const res = await this.addBatchScores(
       [
         {
