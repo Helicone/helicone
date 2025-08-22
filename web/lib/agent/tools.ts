@@ -503,6 +503,7 @@ interface RequestResponseRMT {
   response_id: string;
   response_created_at: string;
   latency: number;
+  cost: number;
   status: number;
   completion_tokens: number;
   prompt_tokens: number;
@@ -673,7 +674,7 @@ function all(): AllExpression {
  *
  * @example
  * const statusFilter = Filter.condition("status", "eq", 200);
- * const modelFilter = Filter.condition("model", "like", "gpt-4%");
+ * const modelFilter = Filter.condition("model", "like", "gpt-4");
  *
  * @param column - Column name from request_response_rmt
  * @param operator - Comparison operator
@@ -703,7 +704,7 @@ function condition(
  * @example
  * const combinedFilter = Filter.and(
  *   Filter.condition("status", "eq", 200),
- *   Filter.condition("model", "like", "gpt-4%")
+ *   Filter.condition("model", "like", "gpt-4")
  * );
  *
  * @param expressions - Filter expressions to combine with AND
