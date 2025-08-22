@@ -120,64 +120,13 @@ export class RequestManager extends BaseManager {
   private async uncachedGetRequestById(
     requestId: string
   ): Promise<Result<HeliconeRequest, string>> {
-    const requestPostgres = await this.getRequestsPostgres({
+    const requestClickhouse = await this.getRequestsClickhouse({
       filter: {
-        request: {
-          id: {
+        request_response_rmt: {
+          request_id: {
             equals: requestId,
           },
         },
-      },
-    });
-
-    if (requestPostgres.error) {
-      return err(requestPostgres.error);
-    }
-
-    const requestFromPostgres = requestPostgres.data?.[0];
-    const requestClickhouse = await this.getRequestsClickhouse({
-      filter: {
-        left: {
-          left: {
-            request_response_rmt: {
-              request_id: {
-                equals: requestId,
-              },
-            },
-          },
-          operator: "and",
-          right: {
-            request_response_rmt: {
-              model: {
-                equals: requestFromPostgres?.response_model ?? "",
-              },
-            },
-          },
-        },
-        right: {
-          right: {
-            request_response_rmt: {
-              request_created_at: {
-                gt: deltaTime(
-                  new Date(requestFromPostgres?.request_created_at!),
-                  -10
-                ),
-              },
-            },
-          },
-          left: {
-            request_response_rmt: {
-              request_created_at: {
-                lt: deltaTime(
-                  new Date(requestFromPostgres?.request_created_at!),
-                  10
-                ),
-              },
-            },
-          },
-          operator: "and",
-        },
-        operator: "and",
       },
     });
 
