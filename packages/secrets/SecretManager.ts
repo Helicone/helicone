@@ -18,8 +18,17 @@ interface SecretRotationResult {
 }
 
 class SecretManagerClass {
-  getSecret(secretName: string): string | undefined {
+  getSecret(
+    secretName: string,
+    fallback: string | undefined = undefined
+  ): string | undefined {
     const result = this.resolveSecret(secretName);
+    if (!result.value && fallback) {
+      const fallbackResult = this.resolveSecret(fallback);
+      if (fallbackResult.value) {
+        return fallbackResult.value;
+      }
+    }
     return result.value;
   }
 

@@ -56,7 +56,10 @@ export function getPGClient() {
         }
       : undefined;
   const client = new Client({
-    connectionString: SecretManager.getSecret("SUPABASE_DATABASE_URL"),
+    connectionString: SecretManager.getSecret(
+      "SUPABASE_DATABASE_URL", // TODO remove supabase URL eventually
+      "DATABASE_URL"
+    ),
     ssl,
     statement_timeout: 10000,
   });
@@ -72,7 +75,10 @@ export async function dbExecute<T>(
   query: string,
   parameters: any[]
 ): Promise<Result<T[], string>> {
-  const databaseUrl = SecretManager.getSecret("SUPABASE_DATABASE_URL");
+  const databaseUrl = SecretManager.getSecret(
+    "SUPABASE_DATABASE_URL", // TODO remove supabase URL eventually
+    "DATABASE_URL"
+  );
   if (!databaseUrl) {
     console.error("SUPABASE_DATABASE_URL not set");
     return { data: null, error: "DATABASE_URL not set" };
