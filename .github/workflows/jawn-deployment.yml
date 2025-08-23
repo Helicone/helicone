@@ -142,7 +142,7 @@ jobs:
             --deployment-group-name DgpECS-valhalla_cluster-jawn-prod-blue-green \
             --deployment-config-name CodeDeployDefault.ECSAllAtOnce \
             --description "GitHub Actions deployment ${{ needs.build_and_push.outputs.image_tag }}" \
-            --revision '{"revisionType": "AppSpecContent", "appSpecContent": {"content": "{\"version\": 1, \"Resources\": [{\"TargetService\": {\"Type\": \"AWS::ECS::Service\", \"Properties\": {\"TaskDefinition\": \"arn:aws:ecs:${{ env.US_REGION }}:${{ env.AWS_ACCOUNT_ID }}:task-definition/valhalla_jawn_production:45\", \"LoadBalancerInfo\": {\"ContainerName\": \"valhalla_jawn_staging\", \"ContainerPort\": 8585}, \"PlatformVersion\": \"1.4.0\"}}}]}"}}'
+            --revision '{"revisionType": "AppSpecContent", "appSpecContent": {"content": "{\"version\": 1, \"Resources\": [{\"TargetService\": {\"Type\": \"AWS::ECS::Service\", \"Properties\": {\"TaskDefinition\": \"arn:aws:ecs:${{ env.US_REGION }}:${{ env.AWS_ACCOUNT_ID }}:task-definition/valhalla_jawn_production:46\", \"LoadBalancerInfo\": {\"ContainerName\": \"valhalla_jawn_staging\", \"ContainerPort\": 8585}, \"PlatformVersion\": \"1.4.0\"}}}]}"}}'
 
   deploy_eu:
     name: Deploy to EU
