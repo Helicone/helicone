@@ -53,7 +53,7 @@ export class APIClient {
     private requestWrapper: RequestWrapper,
     auth: HeliconeAuth
   ) {
-    this.response = new InternalResponse(this);
+  this.response = new InternalResponse(this);
     this.db = new DBWrapper(env, auth);
     this.queue = new RequestResponseStore(
       createClient<Database>(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
