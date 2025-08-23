@@ -51,6 +51,7 @@ async function modifyEnvBasedOnPath(
   if (request.isEU()) {
     env = {
       ...env,
+      VALHALLA_URL: env.EU_VALHALLA_URL,
       CLICKHOUSE_HOST: env.EU_CLICKHOUSE_HOST,
       CLICKHOUSE_USER: env.EU_CLICKHOUSE_USER,
       CLICKHOUSE_PASSWORD: env.EU_CLICKHOUSE_PASSWORD,
