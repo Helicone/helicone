@@ -19,7 +19,17 @@ export type RotatableSecret =
   | 'CLOUDFLARE_API_TOKEN'
   | 'DATADOG_API_KEY'
   | 'REQUEST_CACHE_KEY'
-  | 'STRIPE_SECRET_KEY';
+  | 'STRIPE_SECRET_KEY'
+  | 'SLACK_BOT_TOKEN'
+  | 'SLACK_SIGNING_SECRET'
+  | 'LOOPS_API_KEY'
+  | 'NEXT_PUBLIC_SUPABASE_ANON_KEY'
+  | 'DATABASE_URL'
+  | 'SENTRY_AUTH_TOKEN'
+  | 'SLACK_CLIENT_SECRET'
+  | 'WEB_AWS_ACCESS_KEY'
+  | 'WEB_AWS_SECRET_KEY'
+  | 'GITHUB_API_KEY';
 
 interface SecretRotationResult {
   value: string | undefined;
@@ -125,7 +135,17 @@ class SecretManagerClass {
       'CLOUDFLARE_API_TOKEN',
       'DATADOG_API_KEY',
       'REQUEST_CACHE_KEY',
-      'STRIPE_SECRET_KEY'
+      'STRIPE_SECRET_KEY',
+      'SLACK_BOT_TOKEN',
+      'SLACK_SIGNING_SECRET',
+      'LOOPS_API_KEY',
+      'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+      'DATABASE_URL',
+      'SENTRY_AUTH_TOKEN',
+      'SLACK_CLIENT_SECRET',
+      'WEB_AWS_ACCESS_KEY',
+      'WEB_AWS_SECRET_KEY',
+      'GITHUB_API_KEY'
     ];
 
     const status = {} as Record<RotatableSecret, { source: 'blue' | 'green' | 'fallback' }>;
