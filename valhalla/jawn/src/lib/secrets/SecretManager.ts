@@ -40,7 +40,7 @@ class SecretManagerClass {
     const now = Date.now();
     
     // Check cache first
-    if (this.cache.has(cacheKey) && this.cacheExpiry.get(cacheKey)! > now) {
+    if (this.cache.has(cacheKey) && this.cacheExpiry.has(cacheKey) && this.cacheExpiry.get(cacheKey)! > now) {
       return this.cache.get(cacheKey)!.value;
     }
 
