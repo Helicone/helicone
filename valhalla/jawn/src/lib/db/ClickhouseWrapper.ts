@@ -5,7 +5,7 @@ import {
 } from "@clickhouse/client";
 import { Result } from "../../packages/common/result";
 import { TestClickhouseClientWrapper } from "./test/TestClickhouseWrapper";
-import { SecretManager } from "../secrets/SecretManager";
+import { SecretManager } from "@helicone-package/secrets/SecretManager";
 
 interface ClickhouseEnv {
   CLICKHOUSE_HOST: string;

@@ -4,8 +4,7 @@ import { fromNodeHeaders } from "better-auth/node";
 import { Pool } from "pg";
 import { Database } from "../../../../lib/db/database.types";
 import { dbExecute } from "../../../../lib/shared/db/dbExecute";
-import { SecretManager } from "../../../../lib/secrets/SecretManager";
-import crypto from "crypto";
+import { SecretManager } from "@helicone-package/secrets/SecretManager";
 import {
   GenericHeaders,
   HeliconeAuthClient,

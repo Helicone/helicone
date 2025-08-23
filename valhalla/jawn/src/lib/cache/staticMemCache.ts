@@ -1,7 +1,7 @@
 import { hashAuth } from "../../utils/hash";
 import { redisClient } from "../clients/redisClient";
 import { Result, ok } from "../../packages/common/result";
-import { SecretManager } from "../secrets/SecretManager";
+import { SecretManager } from "@helicone-package/secrets/SecretManager";
 
 export class CacheItem<T> {
   constructor(
@@ -181,7 +181,7 @@ export async function decrypt(encrypted: {
 
 async function getCacheKey(): Promise<CryptoKey> {
   // Convert the hexadecimal key to a byte array
-  const requestCacheKey = SecretManager.getSecret('REQUEST_CACHE_KEY');
+  const requestCacheKey = SecretManager.getSecret("REQUEST_CACHE_KEY");
   if (!requestCacheKey) {
     throw new Error("REQUEST_CACHE_KEY is not set");
   }

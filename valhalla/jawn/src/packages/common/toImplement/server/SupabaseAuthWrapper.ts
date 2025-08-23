@@ -17,7 +17,7 @@ import { KVCache } from "../../../../lib/cache/kvCache";
 import { Database } from "../../../../lib/db/database.types";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { hashAuth } from "../../../../lib/db/hash";
-import { SecretManager } from "../../../../lib/secrets/SecretManager";
+import { SecretManager } from "@helicone-package/secrets/SecretManager";
 import { cacheResultCustom } from "../../../../utils/cacheResult";
 import { authenticateBearer } from "./common";
 
