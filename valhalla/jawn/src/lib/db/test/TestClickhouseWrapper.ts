@@ -117,13 +117,35 @@ export class TestClickhouseClientWrapper {
     try {
       const query_params = this.paramsToValues(parameters);
       // Align security check with production: block attempts to reference or set our org-id context
-      const forbiddenPattern = /sql[_\s]*helicone[_\s]*organization[_\s]*id/i;
-      if (forbiddenPattern.test(query)) {
-        return {
-          data: null,
-          error:
-            "Query contains 'SQL_helicone_organization_id' keyword, which is not allowed in HQL queries",
-        };
+      const forbiddenPatterns = [
+        // Main pattern with various separators (_, -, ., space, tab, newline, multiple chars)
+        /sql[_\s\-\.]*helicone[_\s\-\.]*organization[_\s\-\.]*id/gi,
+        // Pattern with comments /* */
+        /sql\/\*.*?\*\/helicone\/\*.*?\*\/organization\/\*.*?\*\/id/gi,
+        // Pattern with no separators
+        /sqlheliconeorganizationid/gi,
+        // Pattern with dots specifically (common bypass)
+        /sql\.+helicone\.+organization\.+id/gi,
+        // Pattern with multiple underscores
+        /sql_+helicone_+organization_+id/gi,
+        // Pattern with newlines (multiline flag)
+        /sql[\s\S]*helicone[\s\S]*organization[\s\S]*id/gi,
+        // Common SQL injection patterns
+        /;\s*(drop|delete|insert|update|create|alter|grant|revoke)/gi,
+        /union\s+select/gi,
+        // Settings override attempts
+        /settings\s+sql[_\s\-\.]*helicone[_\s\-\.]*organization[_\s\-\.]*id/gi,
+        /set\s+sql[_\s\-\.]*helicone[_\s\-\.]*organization[_\s\-\.]*id/gi
+      ];
+
+      for (const pattern of forbiddenPatterns) {
+        if (pattern.test(query)) {
+          return {
+            data: null,
+            error:
+              "Query contains forbidden keywords or patterns that could compromise security",
+          };
+        }
       }
 
       // Check if this is a DDL command that doesn't return data

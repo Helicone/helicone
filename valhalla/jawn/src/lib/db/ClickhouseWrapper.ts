@@ -102,15 +102,37 @@ export class ClickhouseClientWrapper {
     try {
       const query_params = paramsToValues(parameters);
 
-      // Check for SQL_helicone_organization_id variations with regex
-      // This catches different cases, underscore variations, and potential injection attempts
-      const forbiddenPattern = /sql[_\s]*helicone[_\s]*organization[_\s]*id/i;
-      if (forbiddenPattern.test(query)) {
-        return {
-          data: null,
-          error:
-            "Query contains 'SQL_helicone_organization_id' keyword, which is not allowed in HQL queries",
-        };
+      // Check for SQL_helicone_organization_id variations with comprehensive regex
+      // This catches different cases, separators, and potential injection attempts
+      const forbiddenPatterns = [
+        // Main pattern with various separators (_, -, ., space, tab, newline, multiple chars)
+        /sql[_\s\-\.]*helicone[_\s\-\.]*organization[_\s\-\.]*id/gi,
+        // Pattern with comments /* */
+        /sql\/\*.*?\*\/helicone\/\*.*?\*\/organization\/\*.*?\*\/id/gi,
+        // Pattern with no separators
+        /sqlheliconeorganizationid/gi,
+        // Pattern with dots specifically (common bypass)
+        /sql\.+helicone\.+organization\.+id/gi,
+        // Pattern with multiple underscores
+        /sql_+helicone_+organization_+id/gi,
+        // Pattern with newlines (multiline flag)
+        /sql[\s\S]*helicone[\s\S]*organization[\s\S]*id/gi,
+        // Common SQL injection patterns
+        /;\s*(drop|delete|insert|update|create|alter|grant|revoke)/gi,
+        /union\s+select/gi,
+        // Settings override attempts
+        /settings\s+sql[_\s\-\.]*helicone[_\s\-\.]*organization[_\s\-\.]*id/gi,
+        /set\s+sql[_\s\-\.]*helicone[_\s\-\.]*organization[_\s\-\.]*id/gi
+      ];
+
+      for (const pattern of forbiddenPatterns) {
+        if (pattern.test(query)) {
+          return {
+            data: null,
+            error:
+              "Query contains forbidden keywords or patterns that could compromise security",
+          };
+        }
       }
 
       const queryResult = await this.clickHouseHqlClient.query({
