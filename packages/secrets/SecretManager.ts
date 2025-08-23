@@ -17,29 +17,44 @@ interface SecretRotationResult {
   secretName: string;
 }
 
-const SECRETS = {
-  OPENAI_API_KEY: ["web"], // NEEDS TO BE RE-ADDED TO PROD
-  CLAY_WEBHOOK_URL: ["web"],
-};
-
 class SecretManagerClass {
   getSecret(secretName: string): string | undefined {
     const result = this.resolveSecret(secretName);
     return result.value;
   }
 
+  private tryInfisical(): Record<string, string> | null {
+    const infisicalAWSEnv = process.env.INFISICAL_AWS_ENV;
+    if (!infisicalAWSEnv) {
+      return null;
+    }
+    try {
+      const infisical = JSON.parse(infisicalAWSEnv);
+      return infisical;
+    } catch (error) {
+      return null;
+    }
+  }
+  private getSecretFromEnv(secretName: string): string | undefined {
+    const infisicalAWSEnv = this.tryInfisical();
+    if (infisicalAWSEnv) {
+      return infisicalAWSEnv[secretName];
+    }
+    return process.env[secretName];
+  }
+
   private resolveSecret(secretName: string): SecretRotationResult {
     const blueKey = `${secretName}_BLUE`;
     const greenKey = `${secretName}_GREEN`;
 
-    const blueValue = process.env[blueKey];
-    const greenValue = process.env[greenKey];
+    const blueValue = this.getSecretFromEnv(blueKey);
+    const greenValue = this.getSecretFromEnv(greenKey);
     const activeColor = process.env.ACTIVE_SECRET_CYCLE?.toLowerCase();
 
     // If rotation variables don't exist, fall back to original
     if (!blueValue || !greenValue || !activeColor) {
       return {
-        value: process.env[secretName],
+        value: this.getSecretFromEnv(secretName),
         source: "fallback",
         secretName,
       };
@@ -51,7 +66,7 @@ class SecretManagerClass {
         `SecretManager: Invalid ACTIVE_SECRET_CYCLE value '${activeColor}', falling back to original`
       );
       return {
-        value: process.env[secretName],
+        value: this.getSecretFromEnv(secretName),
         source: "fallback",
         secretName,
       };
