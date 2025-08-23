@@ -11,6 +11,7 @@
     "start": "wrangler dev",
     "test": "vitest",
     "test:registry": "vitest registry-ts",
+    "test:do-manual": "echo 'See test/durable-objects/README.md for manual testing instructions' && wrangler dev --local --persist",
     "cf-typegen": "wrangler types --strict-vars false",
     "lint": "tsc && eslint --ext .js,.jsx,.ts,.tsx ./src --max-warnings=0",
     "lint-fix": "eslint --ext .js,.jsx,.ts,.tsx ./src --fix"

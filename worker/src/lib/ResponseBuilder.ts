@@ -21,7 +21,10 @@ export class ResponseBuilder {
     rateLimitCheckResult: RateLimitResponse,
     rateLimitOptions: RateLimitOptions
   ): void {
-    const policy = `${rateLimitOptions.quota};w=${rateLimitOptions.time_window};u=${rateLimitOptions.unit}`;
+    let policy = `${rateLimitOptions.quota};w=${rateLimitOptions.time_window};u=${rateLimitOptions.unit}`;
+    if (rateLimitOptions.segment) {
+      policy += `;s=${rateLimitOptions.segment}`;
+    }
     const headers: { [key: string]: string } = {
       "Helicone-RateLimit-Limit": rateLimitCheckResult.limit.toString(),
       "Helicone-RateLimit-Remaining": rateLimitCheckResult.remaining.toString(),
