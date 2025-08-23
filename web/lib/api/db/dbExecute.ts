@@ -45,7 +45,8 @@ export async function dbQueryClickhouse<T>(
       if (process.env.CLICKHOUSE_HOST) {
         return process.env.CLICKHOUSE_HOST;
       }
-      // Use APP_URL to construct clickhouse host if not specified
+
+      // Use APP_URL to construct clickhouse host if not specified in env
       const appUrl =
         process.env.APP_URL ||
         process.env.NEXT_PUBLIC_APP_URL ||
