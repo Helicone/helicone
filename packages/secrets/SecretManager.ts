@@ -17,10 +17,14 @@ interface SecretRotationResult {
   secretName: string;
 }
 
+const SECRETS = {
+  OPENAI_API_KEY: ["web"], // NEEDS TO BE RE-ADDED TO PROD
+  CLAY_WEBHOOK_URL: ["web"],
+};
+
 class SecretManagerClass {
   getSecret(secretName: string): string | undefined {
     const result = this.resolveSecret(secretName);
-
     return result.value;
   }
 
