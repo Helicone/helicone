@@ -108,7 +108,7 @@ const MessageRenderer = ({ message }: MessageRendererProps) => {
   if (message.role === "assistant") {
     // Check if this is a human response (has a name field from Slack)
     const isHumanResponse = !!message.name;
-    
+
     return (
       <div className="w-full">
         {isHumanResponse && (
@@ -121,7 +121,13 @@ const MessageRenderer = ({ message }: MessageRendererProps) => {
             </span>
           </div>
         )}
-        <div className={`w-full text-sm text-foreground ${isHumanResponse ? 'rounded-lg border border-purple-200 bg-purple-50 p-3 dark:border-purple-900 dark:bg-purple-950/20' : ''}`}>
+        <div
+          className={`w-full text-sm text-foreground ${
+            isHumanResponse
+              ? "rounded-lg border border-purple-200 bg-purple-50 p-3 dark:border-purple-900 dark:bg-purple-950/20"
+              : ""
+          }`}
+        >
           {typeof message.content === "string" && (
             <ReactMarkdown
               components={markdownComponents}

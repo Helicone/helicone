@@ -287,20 +287,20 @@ export const HeliconeAgentProvider: React.FC<{
         agentChatOpen,
         setAgentChatOpen,
         escalateSession: () => {
-          // Check if we have messages/existing thread
-          if (messages.length > 1 && currentSessionId) {
-            // Escalate existing thread
-            escalateThread({
-              params: {
-                path: {
-                  sessionId: currentSessionId,
-                },
-              },
-            });
-          } else {
-            // Create new thread and escalate it
-            createAndEscalateThread({});
-          }
+
+if (messages.length > 1 && currentSessionId) {
+
+  escalateThread({
+    params: {
+      path: {
+        sessionId: currentSessionId,
+      },
+    },
+  });
+} else {
+  
+  createAndEscalateThread({});
+}
         },
         createNewSession: () => {
           const newSessionId = crypto.randomUUID();

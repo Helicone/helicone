@@ -10,8 +10,9 @@ import MessageRenderer from "./MessageRenderer";
 import { SessionDropdown } from "./SessionDropdown";
 import ChatInterface from "./ChatInterface";
 import { useRouter } from "next/router";
-import { XIcon, Plus } from "lucide-react";
+import { XIcon, Plus, Clock } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
+import { H4, P } from "@/components/ui/typography";
 
 type Message = NonNullable<OpenAIChatRequest["messages"]>[0];
 type ToolCall = NonNullable<Message["tool_calls"]>[0];
@@ -522,25 +523,25 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
         <div className="mx-3 mb-2 rounded-lg border border-green-200 bg-green-50 p-3 dark:border-green-800 dark:bg-green-950/20">
           <div className="flex items-start gap-3">
             <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
-              <Clock className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+              {/* Use lucide-react Clock icon, size 14 for consistency */}
+              <Clock size={14} className="text-green-600 dark:text-green-400" />
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <h4 className="text-sm font-medium text-green-800 dark:text-green-200">
+                <H4 className="text-green-800 dark:text-green-200">
                   Human support connected
-                </h4>
+                </H4>
                 <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900/50 dark:text-green-300">
                   Live
                 </span>
               </div>
-              <p className="mt-1 text-sm text-green-700 dark:text-green-300">
+              <P className="mt-1 text-green-700 dark:text-green-300">
                 We are looping in a human to this chat. Please wait for them to respond. Typical response time is ~1 hour.
-              </p>
+              </P>
             </div>
           </div>
         </div>
       )}
-
       <div className="flex-1 space-y-2 overflow-y-auto px-3 py-1">
         {messages.length === 0 && (
           <div className="text-center text-sm text-muted-foreground">
@@ -581,21 +582,23 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
         onForcePushMessage={forcePushMessageFromQueue}
         onRemoveFromQueue={removeFromQueue}
         isEscalated={currentSession?.escalated}
-        onEscalate={() => {
+        onEscalate={async () => {
           setEscalating(true);
           try {
-            escalateSession();
+            await escalateSession();
             // Show success message in chat
             const systemMessage: Message = {
               role: "assistant",
-              content: "🎯 I've escalated your request to our support team. They'll respond here shortly. You can continue asking questions while you wait."
+              content:
+                "🎯 I've escalated your request to our support team. They'll respond here shortly. You can continue asking questions while you wait.",
             };
             updateCurrentSessionMessages([...messages, systemMessage], true);
           } catch (error) {
             console.error("Failed to escalate:", error);
             const errorMessage: Message = {
               role: "assistant",
-              content: "❌ Sorry, I couldn't connect you to support right now. Please try again or email support@helicone.ai"
+              content:
+                "❌ Sorry, I couldn't connect you to support right now. Please try again or email support@helicone.ai",
             };
             updateCurrentSessionMessages([...messages, errorMessage], true);
           } finally {

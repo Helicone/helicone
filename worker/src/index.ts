@@ -21,7 +21,6 @@ const FALLBACK_QUEUE = "fallback-queue";
 
 export type Provider = ProviderName | "CUSTOM";
 
-
 export async function hash(key: string): Promise<string> {
   const encoder = new TextEncoder();
   const hashedKey = await crypto.subtle.digest(
@@ -52,6 +51,7 @@ async function modifyEnvBasedOnPath(
   if (request.isEU()) {
     env = {
       ...env,
+      VALHALLA_URL: env.EU_VALHALLA_URL,
       CLICKHOUSE_HOST: env.EU_CLICKHOUSE_HOST,
       CLICKHOUSE_USER: env.EU_CLICKHOUSE_USER,
       CLICKHOUSE_PASSWORD: env.EU_CLICKHOUSE_PASSWORD,
@@ -361,6 +361,7 @@ export default {
     env: Env,
     ctx: ExecutionContext
   ): Promise<Response> {
+    console.log("WORKER_TYPE", env.WORKER_TYPE);
     try {
       const requestWrapper = await RequestWrapper.create(request, env);
       if (requestWrapper.error || !requestWrapper.data) {

@@ -75,7 +75,7 @@ import { FilterUIDefinition } from "@/filterAST/filterUIDefinitions/types";
 import { useFilterStore } from "@/filterAST/store/filterStore";
 import { FilterAST } from "@/filterAST/filterAst";
 import { GET_FILTER_ARGS_TOOL_CONTEXT } from "@/lib/agent/tools";
-import { useFilterAST } from "@/filterAST/context/filterContext";
+
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -283,7 +283,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     setAllowedFilterDefinitions(filterDefinitions);
   }, [filterDefinitions]);
 
-  const filterStore = useFilterStore();
+  
   const { helpers } = useFilterAST();
   useEffect(() => {
     setToolHandler("get-filter-args", async () => {
@@ -328,13 +328,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
         message: "Filter saved successfully",
       };
     });
-    // setToolHandler("set-filters", async (args: { filters: FilterNode[] }) => {
-    //   setAdvancedFilters(args.filters);
-    //   return {
-    //     success: true,
-    //     message: "Filters set successfully",
-    //   };
-    // });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allowedFilterDefinitions]);
 
@@ -709,6 +702,14 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                 isFetching={false}
                 defaultValue={getDefaultValue()}
                 custom={true}
+                isLive={isLive}
+                hasCustomTimeFilter={
+                  searchParams.get("t")?.startsWith("custom_") || false
+                }
+                onClearTimeFilter={() => {
+                  searchParams.delete("t");
+                  setTimeFilter(defaultFilter);
+                }}
               />
 
               {/* Filter AST Button */}

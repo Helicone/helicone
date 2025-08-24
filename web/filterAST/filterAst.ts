@@ -9,6 +9,7 @@ interface RequestResponseRMT {
   response_id: string;
   response_created_at: string;
   latency: number;
+  cost: number;
   status: number;
   completion_tokens: number;
   prompt_tokens: number;

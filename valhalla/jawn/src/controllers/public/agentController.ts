@@ -15,7 +15,7 @@ import { type JawnAuthenticatedRequest } from "../../types/request";
 import { type OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
 import OpenAI from "openai";
 import { getHeliconeDefaultTempKey } from "../../lib/experiment/tempKeys/tempAPIKey";
-import { ENVIRONMENT } from "../../lib/clients/constant";
+import { ENVIRONMENT, GET_KEY } from "../../lib/clients/constant";
 import { HeliconeChatCreateParams } from "@helicone-package/prompts/types";
 import {
   InAppThreadsManager,
@@ -60,6 +60,8 @@ export class AgentController extends Controller {
         );
       }
 
+      const PROMPT_ID = await GET_KEY("key:helix_prompt_id");
+
       return tempKey.data.with<
         Result<
           | OpenAI.Chat.Completions.ChatCompletion
@@ -100,8 +102,7 @@ export class AgentController extends Controller {
               stream_options: { include_usage: true },
 
               // Helicone Prompt Params
-              prompt_id:
-                bodyParams.prompt_id ?? process.env.HELI_AGENT_PROMPT_ID,
+              prompt_id: bodyParams.prompt_id ?? PROMPT_ID,
               environment: bodyParams.environment,
               inputs: bodyParams.inputs,
             } as HeliconeChatCreateParams,
@@ -322,6 +323,9 @@ export class AgentController extends Controller {
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<string, string>> {
     const { query } = bodyParams;
+    const mcpTool =
+      (await GET_KEY("key:mintlify_mcp_tool")) ||
+      "SearchHeliconeOssLlmObservability";
 
     try {
       const response = await fetch(`https://docs.helicone.ai/mcp`, {
@@ -334,9 +338,9 @@ export class AgentController extends Controller {
         body: JSON.stringify({
           jsonrpc: "2.0",
           id: 1,
-          method: "tools/call", // Fixed: was "tool/call", should be "tools/call"
+          method: "tools/call",
           params: {
-            name: "Search", // Fixed: moved name to correct level
+            name: mcpTool,
             arguments: {
               query,
             },

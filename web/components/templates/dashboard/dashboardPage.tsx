@@ -310,7 +310,7 @@ const DashboardPage = (props: DashboardPageProps) => {
               >
                 <ArrowPathIcon
                   className={clsx(
-                    isAnyLoading ? "animate-spin" : "",
+                    isAnyLoading || isLive ? "animate-spin" : "",
                     "inline h-5 w-5",
                   )}
                 />
@@ -362,6 +362,17 @@ const DashboardPage = (props: DashboardPageProps) => {
                           });
                         }
                       },
+                      isLive: isLive,
+                      hasCustomTimeFilter:
+                        searchParams.get("t")?.startsWith("custom_") || false,
+                      onClearTimeFilter: () => {
+                        searchParams.delete("t");
+                        setInterval("24h");
+                        setTimeFilter({
+                          start: getTimeIntervalAgo("24h"),
+                          end: new Date(),
+                        });
+                      },
                     }
               }
               savedFilters={undefined}
@@ -383,7 +394,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                 cols={gridCols}
                 rowHeight={96}
               >
-                {metricsData.map((m, i) => (
+                {metricsData.map((m) => (
                   <div key={m.id}>
                     <MetricsPanel metric={m} />
                   </div>
