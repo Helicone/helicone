@@ -23,7 +23,10 @@ import { authenticateBearer } from "./common";
 
 export const betterAuthClient = betterAuth({
   database: new Pool({
-    connectionString: SecretManager.getSecret('SUPABASE_DATABASE_URL'),
+    connectionString: SecretManager.getSecret(
+      "SUPABASE_DATABASE_URL", // TODO remove supabase URL eventually
+      "DATABASE_URL"
+    ),
   }),
   emailAndPassword: {
     enabled: true,

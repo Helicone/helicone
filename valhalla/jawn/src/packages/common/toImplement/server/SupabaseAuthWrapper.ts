@@ -28,10 +28,17 @@ export class SupabaseConnector {
   connected: boolean = false;
 
   constructor() {
-    const SUPABASE_CREDS = JSON.parse(SecretManager.getSecret('SUPABASE_CREDS') ?? "{}");
-    const supabaseURL = SUPABASE_CREDS?.url ?? process.env.SUPABASE_URL;
+    const SUPABASE_CREDS = JSON.parse(
+      SecretManager.getSecret("SUPABASE_CREDS") ?? "{}"
+    );
+    const supabaseURL =
+      SUPABASE_CREDS?.url ??
+      process.env.SUPABASE_URL ??
+      SecretManager.getSecret("SUPABASE_URL");
     const supabaseServiceRoleKey =
-      SUPABASE_CREDS?.service_role_key ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
+      SUPABASE_CREDS?.service_role_key ??
+      process.env.SUPABASE_SERVICE_ROLE_KEY ??
+      SecretManager.getSecret("SUPABASE_SERVICE_ROLE_KEY");
     if (!supabaseURL) {
       throw new Error("No Supabase URL");
     }

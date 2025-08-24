@@ -378,7 +378,7 @@ export interface ClickhouseDB {
   };
 }
 
-const {
+let {
   CLICKHOUSE_USER,
   CLICKHOUSE_PASSWORD,
   CLICKHOUSE_HOST,
@@ -391,6 +391,15 @@ const {
   CLICKHOUSE_HQL_USER?: string;
   CLICKHOUSE_HQL_PASSWORD?: string;
 };
+
+CLICKHOUSE_HOST = CLICKHOUSE_HOST ?? SecretManager.getSecret("CLICKHOUSE_HOST");
+CLICKHOUSE_USER = CLICKHOUSE_USER ?? SecretManager.getSecret("CLICKHOUSE_USER");
+CLICKHOUSE_PASSWORD =
+  CLICKHOUSE_PASSWORD ?? SecretManager.getSecret("CLICKHOUSE_PASSWORD");
+CLICKHOUSE_HQL_USER =
+  CLICKHOUSE_HQL_USER ?? SecretManager.getSecret("CLICKHOUSE_HQL_USER");
+CLICKHOUSE_HQL_PASSWORD =
+  CLICKHOUSE_HQL_PASSWORD ?? SecretManager.getSecret("CLICKHOUSE_HQL_PASSWORD");
 
 export const clickhouseDb = (() => {
   if (process.env.NODE_ENV === "test") {
