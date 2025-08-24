@@ -33,6 +33,7 @@ import { toExpressRequest } from "./utils/expressHelpers";
 import { webSocketControlPlaneServer } from "./controlPlane/controlPlane";
 import { startDBListener } from "./controlPlane/dbListener";
 import { ValidateError } from "tsoa";
+import { SecretManager } from "@helicone-package/secrets/SecretManager";
 
 if (ENVIRONMENT === "production" || process.env.ENABLE_CRON_JOB === "true") {
   runMainLoops();
