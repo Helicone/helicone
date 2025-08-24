@@ -50,7 +50,7 @@ interface HeliconeAgentContextType {
   ) => void;
   switchToSession: (sessionId: string) => void;
   deleteSession: (sessionId: string) => void;
-  escalateSession: () => void;
+  escalateSession: () => Promise<void>;
   agentChatOpen: boolean;
   setAgentChatOpen: (open: boolean) => void;
 }
@@ -145,7 +145,7 @@ export const HeliconeAgentProvider: React.FC<{
     }
   }, [thread]);
 
-  const { mutate: escalateThread } = $JAWN_API.useMutation(
+  const { mutateAsync: escalateThread } = $JAWN_API.useMutation(
     "post",
     "/v1/agent/thread/{sessionId}/escalate",
     {
@@ -156,7 +156,7 @@ export const HeliconeAgentProvider: React.FC<{
     },
   );
 
-  const { mutate: createAndEscalateThread } = $JAWN_API.useMutation(
+  const { mutateAsync: createAndEscalateThread } = $JAWN_API.useMutation(
     "post",
     "/v1/agent/thread/create-and-escalate",
     {
@@ -286,21 +286,23 @@ export const HeliconeAgentProvider: React.FC<{
         messages: messages,
         agentChatOpen,
         setAgentChatOpen,
-        escalateSession: () => {
-
-if (messages.length > 1 && currentSessionId) {
-
-  escalateThread({
-    params: {
-      path: {
-        sessionId: currentSessionId,
-      },
-    },
-  });
-} else {
-  
-  createAndEscalateThread({});
-}
+        escalateSession: async () => {
+          try {
+            if (messages.length > 1 && currentSessionId) {
+              await escalateThread({
+                params: {
+                  path: {
+                    sessionId: currentSessionId,
+                  },
+                },
+              });
+            } else {
+              await createAndEscalateThread({});
+            }
+          } catch (error) {
+            console.error("Escalation failed:", error);
+            throw error;
+          }
         },
         createNewSession: () => {
           const newSessionId = crypto.randomUUID();

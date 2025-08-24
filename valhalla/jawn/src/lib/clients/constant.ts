@@ -18,7 +18,10 @@ type keySlug =
   | "key:openrouter"
   | "key:together_ai"
   | "key:helix_prompt_id"
-  | "key:mintlify_mcp_tool";
+  | "key:mintlify_mcp_tool"
+  | "key:slack_bot_token"
+  | "key:slack_app_token"
+  | "key:slack_channel";
 
 const getKey = (key: string) => {
   if (process.env.PROVIDER_KEYS) {
@@ -54,6 +57,18 @@ export const GET_KEY = async (key: keySlug) => {
 
   if (key === "key:openrouter") {
     return getKey("OPENROUTER_API_KEY");
+  }
+
+  if (key === "key:slack_bot_token") {
+    return process.env.HELICONE_IN_APP_SLACK_BOT_TOKEN;
+  }
+
+  if (key === "key:slack_app_token") {
+    return process.env.HELICONE_IN_APP_SLACK_APP_TOKEN;
+  }
+
+  if (key === "key:slack_channel") {
+    return process.env.HELICONE_IN_APP_SLACK_CHANNEL;
   }
 
   return null;
