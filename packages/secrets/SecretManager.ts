@@ -20,10 +20,22 @@ interface SecretRotationResult {
 }
 
 class SecretManagerClass {
+  private envLookupFunctions: ((key: string) => string | undefined)[] = [];
+
+  constructor(envLookupFunctions: ((key: string) => string | undefined)[]) {
+    this.envLookupFunctions = envLookupFunctions;
+  }
+
   getSecret(
     secretName: string,
     fallback: string | undefined = undefined
   ): string | undefined {
+    for (const func of this.envLookupFunctions) {
+      const result = func(secretName);
+      if (result) {
+        return result;
+      }
+    }
     const result = this.resolveSecret(secretName);
     if (!result.value && fallback) {
       const fallbackResult = this.resolveSecret(fallback);
