@@ -347,58 +347,58 @@ const ChatInterface = forwardRef<{ focus: () => void }, ChatInterfaceProps>(
             />
 
             <div className="mt-1 flex items-center justify-between">
-<div className="flex items-center gap-2">
-  <DropdownMenu>
-    <DropdownMenuTrigger asChild>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="h-6 items-center gap-1 rounded-full bg-muted px-3 py-0 text-xs text-muted-foreground hover:text-foreground"
-      >
-        <span>{currentModel.label}</span>
-        <ChevronUpIcon size={12} />
-      </Button>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent align="start" className="w-40">
-      {models.map((model) => (
-        <DropdownMenuItem
-          key={model.id}
-          onClick={() => onModelChange(model.id)}
-          className="flex flex-col items-start gap-0 px-2 py-1"
-        >
-          <span className="text-xs">{model.label}</span>
-        </DropdownMenuItem>
-      ))}
-    </DropdownMenuContent>
-  </DropdownMenu>
+              <div className="flex items-center gap-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 items-center gap-1 rounded-full bg-muted px-3 py-0 text-xs text-muted-foreground hover:text-foreground"
+                    >
+                      <span>{currentModel.label}</span>
+                      <ChevronUpIcon size={12} />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-40">
+                    {models.map((model) => (
+                      <DropdownMenuItem
+                        key={model.id}
+                        onClick={() => onModelChange(model.id)}
+                        className="flex flex-col items-start gap-0 px-2 py-1"
+                      >
+                        <span className="text-xs">{model.label}</span>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
-  {/* Support button */}
-  {onEscalate && (
-    <Button
-      onClick={onEscalate}
-      disabled={isEscalating || isEscalated}
-      variant="ghost"
-      size="sm"
-      className="h-6 items-center gap-1 rounded-full bg-muted px-3 py-0 text-xs text-muted-foreground hover:text-foreground disabled:opacity-50"
-    >
-      {isEscalating ? (
-        <>
-          <BouncingDotsLoader size="xs" />
-        </>
-      ) : isEscalated ? (
-        <>
-          <CheckCircle size={10} />
-          <span>Support</span>
-        </>
-      ) : (
-        <>
-          <Users size={10} />
-          <span>Support</span>
-        </>
-      )}
-    </Button>
-  )}
-</div>
+                {/* Support button */}
+                {onEscalate && (
+                  <Button
+                    onClick={onEscalate}
+                    disabled={isEscalating || isEscalated}
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 items-center gap-1 rounded-full bg-muted px-3 py-0 text-xs text-muted-foreground hover:text-foreground disabled:opacity-50"
+                  >
+                    {isEscalating ? (
+                      <>
+                        <BouncingDotsLoader size="xs" />
+                      </>
+                    ) : isEscalated ? (
+                      <>
+                        <CheckCircle size={10} />
+                        <span>Support</span>
+                      </>
+                    ) : (
+                      <>
+                        <Users size={10} />
+                        <span>Support</span>
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
 
               <div className="flex items-center gap-1">
                 <input

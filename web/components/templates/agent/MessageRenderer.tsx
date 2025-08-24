@@ -109,7 +109,9 @@ const MessageRenderer = ({ message }: MessageRendererProps) => {
     const isHumanResponse = !!message.name;
 
     return (
-      <div className={`w-full ${isHumanResponse ? "flex flex-col items-start" : ""}`}>
+      <div
+        className={`w-full ${isHumanResponse ? "flex flex-col items-start" : ""}`}
+      >
         {isHumanResponse && (
           <div className="mb-2 flex items-center gap-2">
             <div className="flex h-7 w-7 items-center justify-center rounded-full bg-purple-500">

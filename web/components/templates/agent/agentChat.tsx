@@ -64,7 +64,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
     currentSession,
     createNewSession,
   } = useHeliconeAgent();
-  
+
   const [escalating, setEscalating] = useState(false);
 
   const addErrorMessage = (

@@ -37,7 +37,9 @@ export function SessionDropdown() {
           <DropdownMenuItem
             key={session.id}
             className={`group relative flex items-start gap-3 ${
-              session.escalated ? "bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/20 dark:hover:bg-purple-950/40" : ""
+              session.escalated
+                ? "bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/20 dark:hover:bg-purple-950/40"
+                : ""
             }`}
             onSelect={(e) => {
               e.preventDefault();
@@ -59,7 +61,9 @@ export function SessionDropdown() {
                 {session.escalated && (
                   <div className="flex items-center gap-1">
                     <Users className="h-3 w-3 shrink-0 text-purple-600 dark:text-purple-400" />
-                    <span className="text-[10px] font-medium text-purple-600 dark:text-purple-400">Support</span>
+                    <span className="text-[10px] font-medium text-purple-600 dark:text-purple-400">
+                      Support
+                    </span>
                   </div>
                 )}
               </div>
