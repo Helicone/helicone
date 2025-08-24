@@ -22,6 +22,8 @@ env:
   US_REGION: us-west-2
   EU_REGION: eu-west-1
   AWS_ACCOUNT_ID: 849596434884
+  US_TASK_DEFINITION_REVISION: 47
+  EU_TASK_DEFINITION_REVISION: 29
 
 jobs:
   build_and_push:
@@ -142,7 +144,7 @@ jobs:
             --deployment-group-name DgpECS-valhalla_cluster-jawn-prod-blue-green \
             --deployment-config-name CodeDeployDefault.ECSAllAtOnce \
             --description "GitHub Actions deployment ${{ needs.build_and_push.outputs.image_tag }}" \
-            --revision '{"revisionType": "AppSpecContent", "appSpecContent": {"content": "{\"version\": 1, \"Resources\": [{\"TargetService\": {\"Type\": \"AWS::ECS::Service\", \"Properties\": {\"TaskDefinition\": \"arn:aws:ecs:${{ env.US_REGION }}:${{ env.AWS_ACCOUNT_ID }}:task-definition/valhalla_jawn_production:46\", \"LoadBalancerInfo\": {\"ContainerName\": \"valhalla_jawn_staging\", \"ContainerPort\": 8585}, \"PlatformVersion\": \"1.4.0\"}}}]}"}}'
+            --revision '{"revisionType": "AppSpecContent", "appSpecContent": {"content": "{\"version\": 1, \"Resources\": [{\"TargetService\": {\"Type\": \"AWS::ECS::Service\", \"Properties\": {\"TaskDefinition\": \"arn:aws:ecs:${{ env.US_REGION }}:${{ env.AWS_ACCOUNT_ID }}:task-definition/valhalla_jawn_production:${{ env.US_TASK_DEFINITION_REVISION }}\", \"LoadBalancerInfo\": {\"ContainerName\": \"valhalla_jawn_staging\", \"ContainerPort\": 8585}, \"PlatformVersion\": \"1.4.0\"}}}]}"}}'
 
   deploy_eu:
     name: Deploy to EU
@@ -167,4 +169,4 @@ jobs:
             --deployment-group-name DgpECS-eu-jawn-prod-blue-green \
             --deployment-config-name CodeDeployDefault.ECSAllAtOnce \
             --description "GitHub Actions deployment ${{ needs.build_and_push.outputs.image_tag }}" \
-            --revision '{"revisionType": "AppSpecContent", "appSpecContent": {"content": "{\"version\": 1, \"Resources\": [{\"TargetService\": {\"Type\": \"AWS::ECS::Service\", \"Properties\": {\"TaskDefinition\": \"arn:aws:ecs:${{ env.EU_REGION }}:${{ env.AWS_ACCOUNT_ID }}:task-definition/eu_valhalla_jawn_production:29\", \"LoadBalancerInfo\": {\"ContainerName\": \"eu_jawn\", \"ContainerPort\": 8585}, \"PlatformVersion\": \"1.4.0\"}}}]}"}}'
+            --revision '{"revisionType": "AppSpecContent", "appSpecContent": {"content": "{\"version\": 1, \"Resources\": [{\"TargetService\": {\"Type\": \"AWS::ECS::Service\", \"Properties\": {\"TaskDefinition\": \"arn:aws:ecs:${{ env.EU_REGION }}:${{ env.AWS_ACCOUNT_ID }}:task-definition/eu_valhalla_jawn_production:${{ env.EU_TASK_DEFINITION_REVISION }}\", \"LoadBalancerInfo\": {\"ContainerName\": \"eu_jawn\", \"ContainerPort\": 8585}, \"PlatformVersion\": \"1.4.0\"}}}]}"}}'

@@ -11,6 +11,8 @@
  * If rotation variables don't exist, it falls back to the original environment variable.
  */
 
+const KNOWN_SECRET_DICTIONARIES = ["JAWN_DATABASE_CONNECTIONS"];
+
 interface SecretRotationResult {
   value: string | undefined;
   source: "blue" | "green" | "fallback";
@@ -32,22 +34,26 @@ class SecretManagerClass {
     return result.value;
   }
 
-  private tryInfisical(): Record<string, string> | null {
-    const infisicalAWSEnv = process.env.INFISICAL_AWS_ENV;
-    if (!infisicalAWSEnv) {
-      return null;
+  private tryKnownDictionaries(secretName: string): string | null {
+    for (const dictionary of KNOWN_SECRET_DICTIONARIES) {
+      const dictionaryEnv = process.env?.[dictionary];
+      if (dictionaryEnv) {
+        try {
+          const dictionaryObject = JSON.parse(dictionaryEnv);
+          if (dictionaryObject[secretName]) {
+            return dictionaryObject[secretName];
+          }
+        } catch (error) {
+          return null;
+        }
+      }
     }
-    try {
-      const infisical = JSON.parse(infisicalAWSEnv);
-      return infisical;
-    } catch (error) {
-      return null;
-    }
+    return null;
   }
   private getSecretFromEnv(secretName: string): string | undefined {
-    const infisicalAWSEnv = this.tryInfisical();
-    if (infisicalAWSEnv) {
-      return infisicalAWSEnv[secretName];
+    const knownDictionarySecret = this.tryKnownDictionaries(secretName);
+    if (knownDictionarySecret !== null) {
+      return knownDictionarySecret;
     }
     return process.env[secretName];
   }
@@ -58,7 +64,9 @@ class SecretManagerClass {
 
     const blueValue = this.getSecretFromEnv(blueKey);
     const greenValue = this.getSecretFromEnv(greenKey);
-    const activeColor = process.env.ACTIVE_SECRET_CYCLE?.toLowerCase();
+    const activeColor = this.getSecretFromEnv(
+      "ACTIVE_SECRET_CYCLE"
+    )?.toLowerCase();
 
     // If rotation variables don't exist, fall back to original
     if (!blueValue || !greenValue || !activeColor) {
@@ -88,17 +96,6 @@ class SecretManagerClass {
       source: activeColor as "blue" | "green",
       secretName,
     };
-  }
-
-  /**
-   * Gets the current active secret cycle
-   */
-  getActiveSecretCycle(): "blue" | "green" | "none" {
-    const activeColor = process.env.ACTIVE_SECRET_CYCLE?.toLowerCase();
-    if (activeColor === "blue" || activeColor === "green") {
-      return activeColor;
-    }
-    return "none";
   }
 }
 

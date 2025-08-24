@@ -124,10 +124,9 @@ app.use(
 );
 app.use(bodyParser.raw({ verify: rawBodySaver, type: "*/*", limit: "50mb" }));
 
-const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
-const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
+const SQS_ENABLED = SecretManager.getSecret("SQS_ENABLED") === "true";
 
-if (KAFKA_ENABLED) {
+if (SQS_ENABLED) {
   console.log("Starting Kafka consumers");
   startConsumers({
     dlqCount: 0,

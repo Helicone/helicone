@@ -56,10 +56,7 @@ export function getPGClient() {
         }
       : undefined;
   const client = new Client({
-    connectionString: SecretManager.getSecret(
-      "SUPABASE_DATABASE_URL", // TODO remove supabase URL eventually
-      "DATABASE_URL"
-    ),
+    connectionString: SecretManager.getSecret("SUPABASE_DATABASE_URL"),
     ssl,
     statement_timeout: 10000,
   });
