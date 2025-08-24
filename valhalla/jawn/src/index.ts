@@ -127,7 +127,7 @@ app.use(bodyParser.raw({ verify: rawBodySaver, type: "*/*", limit: "50mb" }));
 const SQS_ENABLED = SecretManager.getSecret("SQS_ENABLED") === "true";
 
 if (SQS_ENABLED) {
-  console.log("Starting Kafka consumers");
+  console.log("Starting SQS consumers");
   startConsumers({
     dlqCount: 0,
     normalCount: 0,
