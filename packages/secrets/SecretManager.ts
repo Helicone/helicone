@@ -112,4 +112,4 @@ export class SecretManagerClass {
 }
 
 // Export singleton instance
-export const SecretManager = new SecretManagerClass();
+export const SecretManager = new SecretManagerClass([]);

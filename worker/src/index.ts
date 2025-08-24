@@ -52,9 +52,11 @@ async function modifyEnvBasedOnPath(
 
   // This configures all the blue <> green secrets
   for (const key of Object.keys(env)) {
-    const value = secretManager.getSecret(key);
-    if (value) {
-      env[key as keyof Env] = value;
+    if (typeof env[key as keyof Env] === "string") {
+      const value = secretManager.getSecret(key);
+      if (value) {
+        env[key as keyof Env] = value as any;
+      }
     }
   }
 
