@@ -24,7 +24,7 @@ import { LogStore } from "../lib/stores/LogStore";
 import { RateLimitStore } from "../lib/stores/RateLimitStore";
 import { VersionedRequestStore } from "../lib/stores/request/VersionedRequestStore";
 import { WebhookStore } from "../lib/stores/WebhookStore";
-import { SecretManager } from "../lib/secrets/SecretManager";
+import { SecretManager } from "@helicone-package/secrets/SecretManager";
 
 export interface LogMetaData {
   batchId?: string;
@@ -176,7 +176,7 @@ export class LogManager {
     stripeLogHandler: StripeLogHandler,
     logMetaData: LogMetaData
   ): Promise<void> {
-    if (!SecretManager.getSecret('STRIPE_SECRET_KEY')) {
+    if (!SecretManager.getSecret("STRIPE_SECRET_KEY")) {
       return;
     }
     const start = performance.now();
