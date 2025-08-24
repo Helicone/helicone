@@ -217,7 +217,7 @@ export class InAppThreadsManager extends BaseManager {
           type: "section",
           text: {
             type: "mrkdwn",
-            text: `*Organization:* ${this.authParams.organizationId}\n*User:* ${this.authParams.userId || "Unknown"}\n*Session:* \`${sessionId}\`\n*Time:* ${new Date().toLocaleString()}`,
+            text: `*Organization:* ${this.authParams.organizationId}\n*User:* ${this.authParams.userId || "Unknown"}\n*Session:* \`${sessionId}\`\n*Current Page:* ${thread.metadata?.currentPage || "Unknown"}\n*Time:* ${new Date().toLocaleString()}`,
           },
         },
         {
@@ -427,10 +427,7 @@ export class InAppThreadsManager extends BaseManager {
         }
 
         if (messageText.trim()) {
-          const userInfo = this.authParams.userId
-            ? ` (User: ${this.authParams.userId})`
-            : "";
-          const formattedMessage = `**Customer${userInfo}:**\n${messageText}`;
+          const formattedMessage = `👤 **Customer:**\n${messageText}`;
 
           await slackService.postThreadMessage(slackThreadTs, formattedMessage);
         }

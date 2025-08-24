@@ -12,7 +12,6 @@ import ChatInterface from "./ChatInterface";
 import { useRouter } from "next/router";
 import { XIcon, Plus, Clock } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
-import { H4, P } from "@/components/ui/typography";
 
 type Message = NonNullable<OpenAIChatRequest["messages"]>[0];
 type ToolCall = NonNullable<Message["tool_calls"]>[0];
@@ -419,15 +418,8 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
         needsAssistantResponse: true,
         isProcessing: true,
       }));
-    } else {
-      // Show a subtle message that the message was sent to human support
-      const systemMessage: Message = {
-        role: "assistant",
-        content: "💬 Your message has been sent to our support team. They'll respond here shortly.",
-      };
-      const messagesWithFeedback = [...updatedMessages, systemMessage];
-      updateCurrentSessionMessages(messagesWithFeedback, true);
     }
+    // If escalated, messages go directly to Slack - no system feedback needed
   };
 
   const handleSendMessage = async (input: string, uploadedImages: File[]) => {
@@ -520,24 +512,23 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
 
       {/* Escalation Banner */}
       {currentSession?.escalated && (
-        <div className="mx-3 mb-2 rounded-lg border border-green-200 bg-green-50 p-3 dark:border-green-800 dark:bg-green-950/20">
-          <div className="flex items-start gap-3">
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
-              {/* Use lucide-react Clock icon, size 14 for consistency */}
-              <Clock size={14} className="text-green-600 dark:text-green-400" />
+        <div className="mx-3 mb-3 rounded-lg border border-green-200 bg-green-50 p-3 dark:border-green-800 dark:bg-green-950/20">
+          <div className="flex items-center gap-3">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+              <Clock size={16} className="text-green-600 dark:text-green-400" />
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <H4 className="text-green-800 dark:text-green-200">
+                <span className="text-sm font-semibold text-green-800 dark:text-green-200">
                   Human support connected
-                </H4>
-                <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900/50 dark:text-green-300">
+                </span>
+                <span className="rounded-full bg-green-500 px-2 py-0.5 text-xs font-medium text-white">
                   Live
                 </span>
               </div>
-              <P className="mt-1 text-green-700 dark:text-green-300">
-                We are looping in a human to this chat. Please wait for them to respond. Typical response time is ~1 hour.
-              </P>
+              <p className="mt-0.5 text-xs text-green-700 dark:text-green-300">
+                Connected to our support team. They'll respond here shortly.
+              </p>
             </div>
           </div>
         </div>
@@ -586,13 +577,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
           setEscalating(true);
           try {
             await escalateSession();
-            // Show success message in chat
-            const systemMessage: Message = {
-              role: "assistant",
-              content:
-                "🎯 I've escalated your request to our support team. They'll respond here shortly. You can continue asking questions while you wait.",
-            };
-            updateCurrentSessionMessages([...messages, systemMessage], true);
+            // Don't add a success message - the banner will show instead
           } catch (error) {
             console.error("Failed to escalate:", error);
             const errorMessage: Message = {

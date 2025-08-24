@@ -40,9 +40,8 @@ const MessageRenderer = ({ message }: MessageRendererProps) => {
   if (message.role === "user") {
     return (
       <>
-        <div className="w-full">
-          {/* <div className="w-full rounded-lg border border-blue-100 bg-sidebar-background px-2.5 py-1 text-foreground "> */}
-          <div className="w-full rounded-lg border border-blue-200 bg-blue-100 px-2.5 py-1 text-foreground dark:border-blue-950 dark:bg-blue-900/20">
+        <div className="flex w-full justify-end">
+          <div className="max-w-[80%] rounded-lg border border-blue-200 bg-blue-100 px-2.5 py-1 text-foreground dark:border-blue-950 dark:bg-blue-900/20">
             {typeof message.content === "string" ? (
               <span className="text-[13px]">{message.content}</span>
             ) : Array.isArray(message.content) ? (
@@ -110,22 +109,22 @@ const MessageRenderer = ({ message }: MessageRendererProps) => {
     const isHumanResponse = !!message.name;
 
     return (
-      <div className="w-full">
+      <div className={`w-full ${isHumanResponse ? "flex flex-col items-start" : ""}`}>
         {isHumanResponse && (
           <div className="mb-2 flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/30">
-              <User className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-purple-500">
+              <User className="h-4 w-4 text-white" />
             </div>
-            <span className="text-xs font-medium text-purple-600 dark:text-purple-400">
+            <span className="text-xs font-medium text-purple-700 dark:text-purple-400">
               {message.name} from Helicone Support
             </span>
           </div>
         )}
         <div
-          className={`w-full text-sm text-foreground ${
+          className={`text-sm text-foreground ${
             isHumanResponse
-              ? "rounded-lg border border-purple-200 bg-purple-50 p-3 dark:border-purple-900 dark:bg-purple-950/20"
-              : ""
+              ? "max-w-[80%] rounded-lg border border-purple-200 bg-purple-50 px-2.5 py-1.5 dark:border-purple-800 dark:bg-purple-950/30"
+              : "w-full"
           }`}
         >
           {typeof message.content === "string" && (

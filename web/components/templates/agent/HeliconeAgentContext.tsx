@@ -322,6 +322,7 @@ export const HeliconeAgentProvider: React.FC<{
               messages: newChatMessages as any,
               metadata: {
                 posthogSession: "test",
+                currentPage: window.location.pathname,
               },
             },
           });
@@ -340,6 +341,7 @@ export const HeliconeAgentProvider: React.FC<{
                 messages: messages as any,
                 metadata: {
                   posthogSession: "test",
+                  currentPage: window.location.pathname,
                 },
               },
             });
