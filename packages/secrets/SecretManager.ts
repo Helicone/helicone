@@ -19,7 +19,7 @@ interface SecretRotationResult {
   secretName: string;
 }
 
-class SecretManagerClass {
+export class SecretManagerClass {
   private envLookupFunctions: ((key: string) => string | undefined)[] = [];
 
   constructor(envLookupFunctions: ((key: string) => string | undefined)[]) {
