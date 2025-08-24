@@ -529,22 +529,10 @@ export class InAppThreadsManager extends BaseManager {
 
       // Get previous messages to find new ones
       const existingMessages = thread.chat?.messages || [];
+      const lastMessage = existingMessages?.[existingMessages.length - 1];
 
       // Find new user messages by comparing content and timestamps
-      const newUserMessages = allMessages.filter((msg) => {
-        // Only forward user messages
-        if (msg.role !== "user") return false;
-
-        // Check if this exact message already exists in the existing messages
-        const messageExists = existingMessages.some((existingMsg: any) => {
-          return (
-            existingMsg.role === "user" &&
-            JSON.stringify(existingMsg.content) === JSON.stringify(msg.content)
-          );
-        });
-
-        return !messageExists;
-      });
+      const newUserMessages = lastMessage?.role === "user" ? [lastMessage] : [];
 
       console.log("Forwarding user messages to Slack:", {
         threadId: thread.id,

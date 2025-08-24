@@ -40,6 +40,14 @@ export const GET_KEY = async (key: keySlug) => {
     return apiKey.data;
   }
 
+  if (key === "key:helicone_on_helicone_key") {
+    return process.env.HELICONE_ON_HELICONE;
+  }
+
+  if (key === "key:helix_prompt_id") {
+    return process.env.HELICONE_PROMPT_ID;
+  }
+
   if (key === "key:openai") {
     return getOpenAIKey();
   }
