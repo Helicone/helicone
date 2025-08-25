@@ -1,7 +1,7 @@
 {
   "name": "@helicone-package/filters",
   "version": "1.0.0",
-  "main": "./types.js",
+  "main": "./types.ts",
   "types": "./types.ts",
   "sideEffects": false,
   "exports": {
