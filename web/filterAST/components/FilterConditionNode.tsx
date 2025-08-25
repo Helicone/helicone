@@ -1,5 +1,5 @@
 import React from "react";
-import { ConditionExpression, FilterOperator } from "../filterAst";
+import { ConditionExpression, FilterOperator } from "@helicone-package/filters";
 import { useFilterStore } from "../store/filterStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
