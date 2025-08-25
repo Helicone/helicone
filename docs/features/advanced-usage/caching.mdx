@@ -219,6 +219,7 @@ const response2 = await openai.chat.completions.create(
 - Ignore tracking IDs that don't affect the response
 - Exclude timestamps for time-independent queries
 - Remove session or user metadata when caching shared content
+- Ignore `prompt_cache_key` when using OpenAI prompt caching alongside Helicone caching
 </Accordion>
 </AccordionGroup>
 
@@ -324,6 +325,40 @@ const response = await openai.chat.completions.create(
 // Common documentation questions get instant, consistent responses
 // Perfect for chatbots, help widgets, and FAQ systems
 ```
+</Tab>
+
+<Tab title="OpenAI Prompt Caching">
+Combine Helicone caching with OpenAI's native prompt caching by ignoring the `prompt_cache_key` parameter:
+
+```typescript
+const response = await openai.chat.completions.create(
+  {
+    model: "gpt-4o-mini",
+    messages: [{ 
+      role: "user", 
+      content: "Analyze this large document with cached context..." 
+    }],
+    prompt_cache_key: `doc-analysis-${documentId}` // Different per document
+  },
+  {
+    headers: {
+      "Helicone-Cache-Enabled": "true",
+      "Helicone-Cache-Ignore-Keys": "prompt_cache_key", // Ignore this for Helicone cache
+      "Cache-Control": "max-age=3600"                   // Cache for 1 hour
+    }
+  }
+);
+
+// Requests with the same message but different prompt_cache_key values 
+// will hit Helicone's cache, while still leveraging OpenAI's prompt caching
+// for improved performance and cost savings on both sides
+```
+
+This approach:
+- Uses OpenAI's prompt caching for faster processing of repeated context
+- Uses Helicone's caching for instant responses to identical requests  
+- Ignores `prompt_cache_key` so Helicone cache works across different OpenAI cache entries
+- Maximizes cost savings by combining both caching strategies
 </Tab>
 </Tabs>
 
