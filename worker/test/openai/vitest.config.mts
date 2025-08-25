@@ -23,6 +23,10 @@ export default defineWorkersConfig({
         "../../../packages/cost",
         import.meta.url
       ).pathname,
+      "@helicone-package/secrets": new URL(
+        "../../../packages/secrets",
+        import.meta.url
+      ).pathname,
     },
   },
 });
