@@ -12,7 +12,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, ArrowUpDown, Clipboard, Check, ChevronDown, X } from "lucide-react";
+import {
+  Search,
+  ArrowUpDown,
+  Clipboard,
+  Check,
+  ChevronDown,
+  X,
+} from "lucide-react";
 import { Small, Muted } from "@/components/ui/typography";
 import { Slider } from "@/components/ui/slider";
 
@@ -35,7 +42,32 @@ interface ModelEndpoint {
 
 type InputModality = "text" | "image" | "audio" | "video";
 type OutputModality = "text" | "image" | "audio" | "video";
-type StandardParameter = "max_tokens" | "temperature" | "top_p" | "top_k" | "stop" | "stream" | "frequency_penalty" | "presence_penalty" | "repetition_penalty" | "seed" | "tools" | "tool_choice" | "functions" | "function_call" | "reasoning" | "include_reasoning" | "thinking" | "response_format" | "json_mode" | "truncate" | "min_p" | "logit_bias" | "logprobs" | "top_logprobs" | "structured_outputs";
+type StandardParameter =
+  | "max_tokens"
+  | "temperature"
+  | "top_p"
+  | "top_k"
+  | "stop"
+  | "stream"
+  | "frequency_penalty"
+  | "presence_penalty"
+  | "repetition_penalty"
+  | "seed"
+  | "tools"
+  | "tool_choice"
+  | "functions"
+  | "function_call"
+  | "reasoning"
+  | "include_reasoning"
+  | "thinking"
+  | "response_format"
+  | "json_mode"
+  | "truncate"
+  | "min_p"
+  | "logit_bias"
+  | "logprobs"
+  | "top_logprobs"
+  | "structured_outputs";
 
 interface Model {
   id: string;
@@ -58,7 +90,7 @@ type PriceFilter = "all" | "free" | "cheap" | "moderate" | "expensive";
 export function ModelRegistryPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   const [searchQuery, setSearchQuery] = useState("");
   const [models, setModels] = useState<Model[]>([]);
   const [loading, setLoading] = useState(true);
@@ -79,17 +111,24 @@ export function ModelRegistryPage() {
   const [selectedCapabilities, setSelectedCapabilities] = useState<Set<string>>(
     new Set()
   );
-  const [selectedInputModalities, setSelectedInputModalities] = useState<Set<InputModality>>(
-    new Set()
-  );
-  const [selectedParameters, setSelectedParameters] = useState<Set<StandardParameter>>(
-    new Set()
-  );
+  const [selectedInputModalities, setSelectedInputModalities] = useState<
+    Set<InputModality>
+  >(new Set());
+  const [selectedParameters, setSelectedParameters] = useState<
+    Set<StandardParameter>
+  >(new Set());
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  
+
   // Collapsible filter sections
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
-    new Set(["providers", "price", "context", "capabilities", "modalities", "parameters"])
+    new Set([
+      "providers",
+      "price",
+      "context",
+      "capabilities",
+      "modalities",
+      "parameters",
+    ])
   );
 
   const toggleSection = (section: string) => {
@@ -105,73 +144,79 @@ export function ModelRegistryPage() {
   // URL state management
   const serializeFiltersToURL = () => {
     const params = new URLSearchParams();
-    
+
     if (selectedProviders.size > 0) {
-      params.set('providers', Array.from(selectedProviders).join(','));
+      params.set("providers", Array.from(selectedProviders).join(","));
     }
     if (priceRange[0] > 0 || priceRange[1] < priceStats.max) {
-      params.set('price', `${priceRange[0]}-${priceRange[1]}`);
+      params.set("price", `${priceRange[0]}-${priceRange[1]}`);
     }
     if (minContextSize > 0) {
-      params.set('context', minContextSize.toString());
+      params.set("context", minContextSize.toString());
     }
     if (selectedCapabilities.size > 0) {
-      params.set('capabilities', Array.from(selectedCapabilities).join(','));
+      params.set("capabilities", Array.from(selectedCapabilities).join(","));
     }
     if (selectedInputModalities.size > 0) {
-      params.set('modalities', Array.from(selectedInputModalities).join(','));
+      params.set("modalities", Array.from(selectedInputModalities).join(","));
     }
     if (selectedParameters.size > 0) {
-      params.set('parameters', Array.from(selectedParameters).join(','));
+      params.set("parameters", Array.from(selectedParameters).join(","));
     }
     if (searchQuery) {
-      params.set('search', searchQuery);
+      params.set("search", searchQuery);
     }
-    if (sortBy !== 'name') {
-      params.set('sort', sortBy);
+    if (sortBy !== "name") {
+      params.set("sort", sortBy);
     }
-    
+
     return params.toString();
   };
 
   const initializeFromURL = () => {
-    const providers = searchParams.get('providers');
+    const providers = searchParams.get("providers");
     if (providers) {
-      setSelectedProviders(new Set(providers.split(',')));
+      setSelectedProviders(
+        new Set(providers.split(",").map((p) => p.toLowerCase()))
+      );
     }
-    
-    const price = searchParams.get('price');
-    if (price && price.includes('-')) {
-      const [min, max] = price.split('-').map(Number);
+
+    const price = searchParams.get("price");
+    if (price && price.includes("-")) {
+      const [min, max] = price.split("-").map(Number);
       setPriceRange([min, max]);
     }
-    
-    const context = searchParams.get('context');
+
+    const context = searchParams.get("context");
     if (context) {
       setMinContextSize(Number(context));
     }
-    
-    const capabilities = searchParams.get('capabilities');
+
+    const capabilities = searchParams.get("capabilities");
     if (capabilities) {
-      setSelectedCapabilities(new Set(capabilities.split(',')));
+      setSelectedCapabilities(new Set(capabilities.split(",")));
     }
-    
-    const modalities = searchParams.get('modalities');
+
+    const modalities = searchParams.get("modalities");
     if (modalities) {
-      setSelectedInputModalities(new Set(modalities.split(',') as InputModality[]));
+      setSelectedInputModalities(
+        new Set(modalities.split(",") as InputModality[])
+      );
     }
-    
-    const parameters = searchParams.get('parameters');
+
+    const parameters = searchParams.get("parameters");
     if (parameters) {
-      setSelectedParameters(new Set(parameters.split(',') as StandardParameter[]));
+      setSelectedParameters(
+        new Set(parameters.split(",") as StandardParameter[])
+      );
     }
-    
-    const search = searchParams.get('search');
+
+    const search = searchParams.get("search");
     if (search) {
       setSearchQuery(search);
     }
-    
-    const sort = searchParams.get('sort') as SortOption;
+
+    const sort = searchParams.get("sort") as SortOption;
     if (sort) {
       setSortBy(sort);
     }
@@ -179,7 +224,9 @@ export function ModelRegistryPage() {
 
   const updateURL = () => {
     const params = serializeFiltersToURL();
-    const newUrl = params ? `${window.location.pathname}?${params}` : window.location.pathname;
+    const newUrl = params
+      ? `${window.location.pathname}?${params}`
+      : window.location.pathname;
     router.push(newUrl, { scroll: false });
   };
 
@@ -214,21 +261,21 @@ export function ModelRegistryPage() {
 
     models.forEach((model) => {
       authors.add(model.author);
-      
+
       // Calculate min cost for this model
       const modelMinCost = Math.min(
         ...model.endpoints.map(
           (e) => (e.pricing.prompt + e.pricing.completion) / 2
         )
       );
-      
+
       if (modelMinCost < minPrice) minPrice = modelMinCost;
       if (modelMinCost > maxPrice) maxPrice = modelMinCost;
-      
+
       // Context size
       if (model.contextLength < minContext) minContext = model.contextLength;
       if (model.contextLength > maxContext) maxContext = model.contextLength;
-      
+
       model.endpoints.forEach((endpoint) => {
         providers.add(endpoint.provider);
       });
@@ -237,13 +284,13 @@ export function ModelRegistryPage() {
     return {
       allProviders: Array.from(providers).sort(),
       allAuthors: Array.from(authors).sort(),
-      priceStats: { 
-        min: minPrice === Infinity ? 0 : minPrice, 
-        max: maxPrice === 0 ? 50 : Math.ceil(maxPrice) 
+      priceStats: {
+        min: minPrice === Infinity ? 0 : minPrice,
+        max: maxPrice === 0 ? 50 : Math.ceil(maxPrice),
       },
-      contextStats: { 
-        min: minContext === Infinity ? 0 : minContext, 
-        max: maxContext === 0 ? 1000000 : maxContext 
+      contextStats: {
+        min: minContext === Infinity ? 0 : minContext,
+        max: maxContext === 0 ? 1000000 : maxContext,
       },
     };
   }, [models]);
@@ -251,23 +298,73 @@ export function ModelRegistryPage() {
   // Initialize filters from URL on mount
   useEffect(() => {
     if (models.length > 0 && priceStats.max > 0) {
+      // Set default price range to full range if not in URL
+      const price = searchParams.get("price");
+      if (!price) {
+        setPriceRange([0, priceStats.max]);
+      }
       initializeFromURL();
     }
   }, [models.length, priceStats.max]); // Wait for models and stats to be loaded
 
   const processedModels = useMemo(() => {
     let filtered = models.filter((model) => {
-      // Search filter
-      const matchesSearch = searchQuery
-        ? model.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          model.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          model.author.toLowerCase().includes(searchQuery.toLowerCase())
-        : true;
+      // Enhanced search filter - more intelligent matching
+      const query = searchQuery.toLowerCase().trim();
 
-      // Provider filter
+      if (!query) return true;
+
+      // Split query into words for better matching
+      const queryWords = query.split(/\s+/);
+
+      // Remove author prefix from model name for cleaner display and search
+      const cleanModelName = model.name.replace(
+        new RegExp(`^${model.author}:\s*`, "i"),
+        ""
+      );
+
+      // Search across multiple fields with intelligent matching
+      const searchableText = [
+        model.id.toLowerCase(),
+        cleanModelName.toLowerCase(),
+        model.author.toLowerCase(),
+        model.description?.toLowerCase() || "",
+        // Add context size as searchable (e.g., "200k", "1m")
+        model.contextLength >= 1000000
+          ? `${(model.contextLength / 1000000).toFixed(0)}m`
+          : model.contextLength >= 1000
+            ? `${(model.contextLength / 1000).toFixed(0)}k`
+            : "",
+        // Add capabilities as searchable terms
+        ...model.inputModalities,
+        ...model.outputModalities,
+        // Add provider names
+        ...model.endpoints.map((ep) => ep.provider.toLowerCase()),
+      ].join(" ");
+
+      // Check if all query words are found in searchable text (partial matching)
+      const matchesSearch = queryWords.every((word) =>
+        searchableText.includes(word)
+      );
+
+      // Provider filter (case-insensitive)
       const matchesProvider =
         selectedProviders.size === 0 ||
-        model.endpoints.some((ep) => selectedProviders.has(ep.provider));
+        model.endpoints.some((ep) =>
+          selectedProviders.has(ep.provider.toLowerCase())
+        );
+
+      // Debug for first few models to understand what's happening
+      if (models.indexOf(model) < 3) {
+        console.log(`DEBUG Model ${model.name}:`);
+        console.log(`  selectedProviders:`, Array.from(selectedProviders));
+        console.log(
+          `  model.endpoints:`,
+          model.endpoints.map((ep) => ep.provider)
+        );
+        console.log(`  matchesProvider:`, matchesProvider);
+        console.log(`  ---`);
+      }
 
       // Author filter
       const matchesAuthor =
@@ -283,6 +380,13 @@ export function ModelRegistryPage() {
         )
       );
       const matchesPrice = minCost >= priceRange[0] && minCost <= priceRange[1];
+
+      // Debug log for first few models
+      if (models.indexOf(model) < 3) {
+        console.log(
+          `Model ${model.name}: cost=${minCost}, matchesPrice=${matchesPrice}, priceRange=[${priceRange[0]}, ${priceRange[1]}]`
+        );
+      }
 
       // Capabilities filter
       // Focus on user-facing capabilities only (like OpenRouter)
@@ -462,43 +566,6 @@ export function ModelRegistryPage() {
           </p>
         </div>
 
-        {/* Search and Sort */}
-        <div className="mb-6">
-          <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
-            <div className="relative w-full sm:w-80">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <Input
-                placeholder="Search models, providers, or capabilities..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 h-10 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700"
-              />
-            </div>
-
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-500 dark:text-gray-400">
-                {processedModels.length} of {models.length} models
-              </span>
-              <Select
-                value={sortBy}
-                onValueChange={(v) => setSortBy(v as SortOption)}
-              >
-                <SelectTrigger className="w-full sm:w-[160px] h-10 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700">
-                  <ArrowUpDown className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Sort" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="name">Name</SelectItem>
-                  <SelectItem value="price-low">Price: Low to High</SelectItem>
-                  <SelectItem value="price-high">Price: High to Low</SelectItem>
-                  <SelectItem value="context">Context Size</SelectItem>
-                  <SelectItem value="newest">Newest First</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
-
         {/* Filter Toggle Button - Mobile Only */}
         <div className="lg:hidden mb-4">
           <button
@@ -528,7 +595,9 @@ export function ModelRegistryPage() {
               0 && (
               <span className="bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 text-xs font-medium px-2 py-0.5 rounded-full">
                 {selectedProviders.size +
-                  (priceRange[0] > 0 || priceRange[1] < priceStats.max ? 1 : 0) +
+                  (priceRange[0] > 0 || priceRange[1] < priceStats.max
+                    ? 1
+                    : 0) +
                   (minContextSize > 0 ? 1 : 0) +
                   selectedCapabilities.size +
                   selectedInputModalities.size +
@@ -546,364 +615,459 @@ export function ModelRegistryPage() {
           >
             <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
               <div className="p-6">
-              {/* Mobile close button */}
-              <button
-                onClick={() => setSidebarOpen(false)}
-                className="lg:hidden absolute top-4 right-4 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-
-
-              {/* Provider Filter */}
-              <div className="mb-6">
+                {/* Mobile close button */}
                 <button
-                  onClick={() => toggleSection("providers")}
-                  className="w-full flex items-center justify-between text-sm font-normal text-gray-700 dark:text-gray-300 mb-3 hover:text-gray-900 dark:hover:text-gray-100"
+                  onClick={() => setSidebarOpen(false)}
+                  className="lg:hidden absolute top-4 right-4 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 >
-                  <span>Providers</span>
-                  <ChevronDown 
-                    className={`h-4 w-4 transition-transform ${
-                      expandedSections.has("providers") ? "rotate-180" : ""
-                    }`}
-                  />
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
                 </button>
-                {expandedSections.has("providers") && (
-                  <div className="space-y-1 max-h-48 overflow-y-auto">
-                    {allProviders.map((provider) => {
-                      const isSelected = selectedProviders.has(provider);
-                      return (
-                        <div
-                          key={provider}
-                          onClick={() => {
-                            const newSet = new Set(selectedProviders);
-                            if (isSelected) {
-                              newSet.delete(provider);
-                            } else {
-                              newSet.add(provider);
-                            }
-                            setSelectedProviders(newSet);
-                          }}
-                          className={`flex items-center justify-between px-2 py-1.5 text-sm font-light rounded cursor-pointer transition-colors ${
-                            isSelected 
-                              ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300" 
-                              : "text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
-                          }`}
-                        >
-                          <span>{provider}</span>
-                          {isSelected && (
-                            <X className="h-3 w-3" />
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
 
-              {/* Price Range Filter */}
-              <div className="mb-6">
-                <button
-                  onClick={() => toggleSection("price")}
-                  className="w-full flex items-center justify-between text-sm font-normal text-gray-700 dark:text-gray-300 mb-3 hover:text-gray-900 dark:hover:text-gray-100"
-                >
-                  <span>Price Range</span>
-                  <ChevronDown 
-                    className={`h-4 w-4 transition-transform ${
-                      expandedSections.has("price") ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-                {expandedSections.has("price") && (
-                  <div className="px-2 pb-2">
-                    <div className="mb-2 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                      <span>${priceRange[0].toFixed(2)}</span>
-                      <span>${priceRange[1].toFixed(2)} per M tokens</span>
+                {/* Provider Filter */}
+                <div className="mb-6">
+                  <button
+                    onClick={() => toggleSection("providers")}
+                    className="w-full flex items-center justify-between text-sm font-normal text-gray-700 dark:text-gray-300 mb-3 hover:text-gray-900 dark:hover:text-gray-100"
+                  >
+                    <span>Providers</span>
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform ${
+                        expandedSections.has("providers") ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  {expandedSections.has("providers") && (
+                    <div className="space-y-1 max-h-48 overflow-y-auto">
+                      {allProviders.map((provider) => {
+                        const isSelected = selectedProviders.has(
+                          provider.toLowerCase()
+                        );
+                        return (
+                          <div
+                            key={provider}
+                            onClick={() => {
+                              const newSet = new Set(selectedProviders);
+                              if (isSelected) {
+                                newSet.delete(provider.toLowerCase());
+                              } else {
+                                newSet.add(provider.toLowerCase());
+                              }
+                              setSelectedProviders(newSet);
+                            }}
+                            className={`flex items-center justify-between px-2 py-1.5 text-sm font-light rounded cursor-pointer transition-colors ${
+                              isSelected
+                                ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300"
+                                : "text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
+                            }`}
+                          >
+                            <span className="truncate flex-1 mr-2">
+                              {provider}
+                            </span>
+                            {isSelected && <X className="h-3 w-3" />}
+                          </div>
+                        );
+                      })}
                     </div>
-                    <div className="relative">
+                  )}
+                </div>
+
+                {/* Price Range Filter */}
+                <div className="mb-6">
+                  <button
+                    onClick={() => toggleSection("price")}
+                    className="w-full flex items-center justify-between text-sm font-normal text-gray-700 dark:text-gray-300 mb-3 hover:text-gray-900 dark:hover:text-gray-100"
+                  >
+                    <span>Price Range</span>
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform ${
+                        expandedSections.has("price") ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  {expandedSections.has("price") && (
+                    <div className="px-2 pb-2">
+                      <div className="mb-3 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                        <span>${priceRange[0].toFixed(2)}</span>
+                        <span>${priceRange[1].toFixed(2)} per M tokens</span>
+                      </div>
                       <Slider
                         value={priceRange}
                         onValueChange={setPriceRange}
                         min={0}
                         max={priceStats.max}
                         step={0.1}
-                        className="mb-2"
+                        className="mb-1"
                       />
-                      {/* Price tick marks */}
-                      <div className="absolute top-6 w-full flex justify-between px-0.5">
-                        {[0, 0.5, 1, 2, 5, 10, priceStats.max].filter((tick, index, arr) => tick <= priceStats.max && arr.indexOf(tick) === index).map((tick) => (
-                          <div key={tick} className="flex flex-col items-center">
-                            <div className="w-px h-2 bg-gray-300 dark:bg-gray-600"></div>
-                            <span className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                              {tick === 0 ? 'FREE' : `$${tick}${tick >= 10 ? '+' : ''}`}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
 
-              {/* Context Size Filter */}
-              <div className="mb-6">
-                <button
-                  onClick={() => toggleSection("context")}
-                  className="w-full flex items-center justify-between text-sm font-normal text-gray-700 dark:text-gray-300 mb-3 hover:text-gray-900 dark:hover:text-gray-100"
-                >
-                  <span>Context Size</span>
-                  <ChevronDown 
-                    className={`h-4 w-4 transition-transform ${
-                      expandedSections.has("context") ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-                {expandedSections.has("context") && (
-                  <div className="px-2 pb-2">
-                    <div className="mb-2 text-xs text-gray-500 dark:text-gray-400">
-                      Minimum: {minContextSize >= 1000 ? `${(minContextSize / 1000).toFixed(0)}K` : minContextSize} tokens or higher
-                    </div>
-                    <div className="relative">
+                {/* Context Size Filter */}
+                <div className="mb-6">
+                  <button
+                    onClick={() => toggleSection("context")}
+                    className="w-full flex items-center justify-between text-sm font-normal text-gray-700 dark:text-gray-300 mb-3 hover:text-gray-900 dark:hover:text-gray-100"
+                  >
+                    <span>Context Size</span>
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform ${
+                        expandedSections.has("context") ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  {expandedSections.has("context") && (
+                    <div className="px-2 pb-2">
+                      <div className="mb-3 text-xs text-gray-500 dark:text-gray-400">
+                        Minimum:{" "}
+                        {minContextSize >= 1000
+                          ? `${(minContextSize / 1000).toFixed(0)}K`
+                          : minContextSize}{" "}
+                        tokens or higher
+                      </div>
                       <Slider
                         value={[minContextSize]}
                         onValueChange={([value]) => setMinContextSize(value)}
                         min={0}
                         max={contextStats.max}
                         step={1000}
-                        className="mb-2"
+                        className="mb-1"
                       />
-                      {/* Context tick marks */}
-                      <div className="absolute top-6 w-full flex justify-between px-0.5">
-                        {[0, 4000, 32000, 128000, 200000, 1000000].filter(tick => tick <= contextStats.max).map((tick) => (
-                          <div key={tick} className="flex flex-col items-center">
-                            <div className="w-px h-2 bg-gray-300 dark:bg-gray-600"></div>
-                            <span className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                              {tick === 0 ? '0' : tick >= 1000000 ? `${(tick / 1000000).toFixed(0)}M` : `${(tick / 1000).toFixed(0)}K`}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
 
-              {/* Capabilities Filter */}
-              <div className="mb-6">
-                <button
-                  onClick={() => toggleSection("capabilities")}
-                  className="w-full flex items-center justify-between text-sm font-normal text-gray-700 dark:text-gray-300 mb-3 hover:text-gray-900 dark:hover:text-gray-100"
-                >
-                  <span>Special Capabilities</span>
-                  <ChevronDown 
-                    className={`h-4 w-4 transition-transform ${
-                      expandedSections.has("capabilities") ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-                {expandedSections.has("capabilities") && (
-                  <div className="space-y-1">
-                    {[
-                      { key: "audio", label: "Audio Processing", icon: "🎧" },
-                      { key: "video", label: "Video Processing", icon: "🎥" },
-                      { key: "thinking", label: "Chain-of-Thought", icon: "🧠" },
-                      { key: "web_search", label: "Web Search", icon: "🔍" },
-                      { key: "image", label: "Image Processing", icon: "🖼️" },
-                    ]
-                      .map(({ key, label, icon }) => {
-                        // Check if any models have this capability
-                        const hasCapability = models.some((m) =>
-                          m.endpoints.some((ep) => {
-                            switch (key) {
-                              case "audio": return ep.pricing.audio && ep.pricing.audio > 0;
-                              case "video": return ep.pricing.video && ep.pricing.video > 0;
-                              case "thinking": return ep.pricing.thinking && ep.pricing.thinking > 0;
-                              case "web_search": return ep.pricing.web_search && ep.pricing.web_search > 0;
-                              case "image": return ep.pricing.image && ep.pricing.image > 0;
-                              default: return false;
-                            }
-                          })
-                        );
-
-                        if (!hasCapability) return null;
-                        const isSelected = selectedCapabilities.has(key);
-                        
-                        return (
-                          <div
-                            key={key}
-                            onClick={() => {
-                              const newSet = new Set(selectedCapabilities);
-                              if (isSelected) {
-                                newSet.delete(key);
-                              } else {
-                                newSet.add(key);
+                {/* Capabilities Filter */}
+                <div className="mb-6">
+                  <button
+                    onClick={() => toggleSection("capabilities")}
+                    className="w-full flex items-center justify-between text-sm font-normal text-gray-700 dark:text-gray-300 mb-3 hover:text-gray-900 dark:hover:text-gray-100"
+                  >
+                    <span>Special Capabilities</span>
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform ${
+                        expandedSections.has("capabilities") ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  {expandedSections.has("capabilities") && (
+                    <div className="space-y-1">
+                      {[
+                        { key: "audio", label: "Audio Processing" },
+                        { key: "video", label: "Video Processing" },
+                        { key: "thinking", label: "Chain-of-Thought" },
+                        { key: "web_search", label: "Web Search" },
+                        { key: "image", label: "Image Processing" },
+                      ]
+                        .map(({ key, label }) => {
+                          // Check if any models have this capability
+                          const hasCapability = models.some((m) =>
+                            m.endpoints.some((ep) => {
+                              switch (key) {
+                                case "audio":
+                                  return (
+                                    ep.pricing.audio && ep.pricing.audio > 0
+                                  );
+                                case "video":
+                                  return (
+                                    ep.pricing.video && ep.pricing.video > 0
+                                  );
+                                case "thinking":
+                                  return (
+                                    ep.pricing.thinking &&
+                                    ep.pricing.thinking > 0
+                                  );
+                                case "web_search":
+                                  return (
+                                    ep.pricing.web_search &&
+                                    ep.pricing.web_search > 0
+                                  );
+                                case "image":
+                                  return (
+                                    ep.pricing.image && ep.pricing.image > 0
+                                  );
+                                default:
+                                  return false;
                               }
-                              setSelectedCapabilities(newSet);
-                            }}
-                            className={`flex items-center justify-between px-2 py-1.5 rounded cursor-pointer transition-colors ${
-                              isSelected 
-                                ? "bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300" 
-                                : "text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
-                            }`}
-                          >
-                            <div className="flex items-center gap-2">
-                              <span>{icon}</span>
-                              <span className="text-sm font-light">{label}</span>
-                            </div>
-                            {isSelected && <X className="h-3 w-3" />}
-                          </div>
-                        );
-                      })
-                      .filter(Boolean)}
-                  </div>
-                )}
-              </div>
+                            })
+                          );
 
-              {/* Input Modalities Filter */}
-              <div className="mb-6">
-                <button
-                  onClick={() => toggleSection("modalities")}
-                  className="w-full flex items-center justify-between text-sm font-normal text-gray-700 dark:text-gray-300 mb-3 hover:text-gray-900 dark:hover:text-gray-100"
-                >
-                  <span>Input Modalities</span>
-                  <ChevronDown 
-                    className={`h-4 w-4 transition-transform ${
-                      expandedSections.has("modalities") ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-                {expandedSections.has("modalities") && (
-                  <div className="space-y-1">
-                    {[
-                      { key: "text" as InputModality, label: "Text", icon: "📝" },
-                      { key: "image" as InputModality, label: "Image", icon: "🖼️" },
-                      { key: "audio" as InputModality, label: "Audio", icon: "🎵" },
-                      { key: "video" as InputModality, label: "Video", icon: "🎬" },
-                    ]
-                      .map(({ key, label, icon }) => {
-                        // Check if any models support this input modality
-                        const hasModality = models.some((m) =>
-                          m.inputModalities.includes(key)
-                        );
-                        
-                        if (!hasModality) return null;
-                        
-                        const isSelected = selectedInputModalities.has(key);
-                        
-                        return (
-                          <div
-                            key={key}
-                            onClick={() => {
-                              const newSet = new Set(selectedInputModalities);
-                              if (isSelected) {
-                                newSet.delete(key);
-                              } else {
-                                newSet.add(key);
-                              }
-                              setSelectedInputModalities(newSet);
-                            }}
-                            className={`flex items-center justify-between px-2 py-1.5 rounded cursor-pointer transition-colors ${
-                              isSelected 
-                                ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300" 
-                                : "text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
-                            }`}
-                          >
-                            <div className="flex items-center gap-2">
-                              <span>{icon}</span>
-                              <span className="text-sm font-light">{label}</span>
-                            </div>
-                            {isSelected && <X className="h-3 w-3" />}
-                          </div>
-                        );
-                      })
-                      .filter(Boolean)}
-                  </div>
-                )}
-              </div>
+                          if (!hasCapability) return null;
+                          const isSelected = selectedCapabilities.has(key);
 
-              {/* Supported Parameters Filter */}
-              <div className="mb-6">
-                <button
-                  onClick={() => toggleSection("parameters")}
-                  className="w-full flex items-center justify-between text-sm font-normal text-gray-700 dark:text-gray-300 mb-3 hover:text-gray-900 dark:hover:text-gray-100"
-                >
-                  <span>Supported Parameters</span>
-                  <ChevronDown 
-                    className={`h-4 w-4 transition-transform ${
-                      expandedSections.has("parameters") ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-                {expandedSections.has("parameters") && (
-                  <div className="space-y-1 max-h-48 overflow-y-auto">
-                    {[
-                      { key: "tools" as StandardParameter, label: "Function Calling" },
-                      { key: "response_format" as StandardParameter, label: "Structured Output" },
-                      { key: "temperature" as StandardParameter, label: "Temperature" },
-                      { key: "top_p" as StandardParameter, label: "Top-p Sampling" },
-                      { key: "max_tokens" as StandardParameter, label: "Max Tokens" },
-                      { key: "stop" as StandardParameter, label: "Stop Sequences" },
-                      { key: "seed" as StandardParameter, label: "Seed" },
-                      { key: "frequency_penalty" as StandardParameter, label: "Frequency Penalty" },
-                      { key: "presence_penalty" as StandardParameter, label: "Presence Penalty" },
-                      { key: "logprobs" as StandardParameter, label: "Log Probabilities" },
-                    ]
-                      .map(({ key, label }) => {
-                        // Check if any models support this parameter
-                        const hasParameter = models.some((m) =>
-                          m.supportedParameters.includes(key)
-                        );
-                        
-                        if (!hasParameter) return null;
-                        
-                        const isSelected = selectedParameters.has(key);
-                        
-                        return (
-                          <div
-                            key={key}
-                            onClick={() => {
-                              const newSet = new Set(selectedParameters);
-                              if (isSelected) {
-                                newSet.delete(key);
-                              } else {
-                                newSet.add(key);
-                              }
-                              setSelectedParameters(newSet);
-                            }}
-                            className={`flex items-center justify-between px-2 py-1.5 rounded cursor-pointer transition-colors ${
-                              isSelected 
-                                ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300" 
-                                : "text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
-                            }`}
-                          >
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm font-light">{label}</span>
+                          return (
+                            <div
+                              key={key}
+                              onClick={() => {
+                                const newSet = new Set(selectedCapabilities);
+                                if (isSelected) {
+                                  newSet.delete(key);
+                                } else {
+                                  newSet.add(key);
+                                }
+                                setSelectedCapabilities(newSet);
+                              }}
+                              className={`flex items-center justify-between px-2 py-1.5 rounded cursor-pointer transition-colors ${
+                                isSelected
+                                  ? "bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300"
+                                  : "text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
+                              }`}
+                            >
+                              <span className="text-sm font-light truncate flex-1 mr-2">
+                                {label}
+                              </span>
+                              {isSelected && <X className="h-3 w-3" />}
                             </div>
-                            {isSelected && <X className="h-3 w-3" />}
-                          </div>
-                        );
-                      })
-                      .filter(Boolean)}
-                  </div>
-                )}
+                          );
+                        })
+                        .filter(Boolean)}
+                    </div>
+                  )}
+                </div>
+
+                {/* Input Modalities Filter */}
+                <div className="mb-6">
+                  <button
+                    onClick={() => toggleSection("modalities")}
+                    className="w-full flex items-center justify-between text-sm font-normal text-gray-700 dark:text-gray-300 mb-3 hover:text-gray-900 dark:hover:text-gray-100"
+                  >
+                    <span>Input Modalities</span>
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform ${
+                        expandedSections.has("modalities") ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  {expandedSections.has("modalities") && (
+                    <div className="space-y-1">
+                      {[
+                        { key: "text" as InputModality, label: "Text" },
+                        { key: "image" as InputModality, label: "Image" },
+                        { key: "audio" as InputModality, label: "Audio" },
+                        { key: "video" as InputModality, label: "Video" },
+                      ]
+                        .map(({ key, label }) => {
+                          // Check if any models support this input modality
+                          const hasModality = models.some((m) =>
+                            m.inputModalities.includes(key)
+                          );
+
+                          if (!hasModality) return null;
+
+                          const isSelected = selectedInputModalities.has(key);
+
+                          return (
+                            <div
+                              key={key}
+                              onClick={() => {
+                                const newSet = new Set(selectedInputModalities);
+                                if (isSelected) {
+                                  newSet.delete(key);
+                                } else {
+                                  newSet.add(key);
+                                }
+                                setSelectedInputModalities(newSet);
+                              }}
+                              className={`flex items-center justify-between px-2 py-1.5 rounded cursor-pointer transition-colors ${
+                                isSelected
+                                  ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300"
+                                  : "text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
+                              }`}
+                            >
+                              <span className="text-sm font-light truncate flex-1 mr-2">
+                                {label}
+                              </span>
+                              {isSelected && <X className="h-3 w-3" />}
+                            </div>
+                          );
+                        })
+                        .filter(Boolean)}
+                    </div>
+                  )}
+                </div>
+
+                {/* Supported Parameters Filter */}
+                <div className="mb-6">
+                  <button
+                    onClick={() => toggleSection("parameters")}
+                    className="w-full flex items-center justify-between text-sm font-normal text-gray-700 dark:text-gray-300 mb-3 hover:text-gray-900 dark:hover:text-gray-100"
+                  >
+                    <span>Supported Parameters</span>
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform ${
+                        expandedSections.has("parameters") ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  {expandedSections.has("parameters") && (
+                    <div className="space-y-1 max-h-48 overflow-y-auto">
+                      {[
+                        {
+                          key: "tools" as StandardParameter,
+                          label: "Function Calling",
+                        },
+                        {
+                          key: "response_format" as StandardParameter,
+                          label: "Structured Output",
+                        },
+                        {
+                          key: "temperature" as StandardParameter,
+                          label: "Temperature",
+                        },
+                        {
+                          key: "top_p" as StandardParameter,
+                          label: "Top-p Sampling",
+                        },
+                        {
+                          key: "max_tokens" as StandardParameter,
+                          label: "Max Tokens",
+                        },
+                        {
+                          key: "stop" as StandardParameter,
+                          label: "Stop Sequences",
+                        },
+                        { key: "seed" as StandardParameter, label: "Seed" },
+                        {
+                          key: "frequency_penalty" as StandardParameter,
+                          label: "Frequency Penalty",
+                        },
+                        {
+                          key: "presence_penalty" as StandardParameter,
+                          label: "Presence Penalty",
+                        },
+                        {
+                          key: "logprobs" as StandardParameter,
+                          label: "Log Probabilities",
+                        },
+                      ]
+                        .map(({ key, label }) => {
+                          // Check if any models support this parameter
+                          const hasParameter = models.some((m) =>
+                            m.supportedParameters.includes(key)
+                          );
+
+                          if (!hasParameter) return null;
+
+                          const isSelected = selectedParameters.has(key);
+
+                          return (
+                            <div
+                              key={key}
+                              onClick={() => {
+                                const newSet = new Set(selectedParameters);
+                                if (isSelected) {
+                                  newSet.delete(key);
+                                } else {
+                                  newSet.add(key);
+                                }
+                                setSelectedParameters(newSet);
+                              }}
+                              className={`flex items-center justify-between px-2 py-1.5 rounded cursor-pointer transition-colors ${
+                                isSelected
+                                  ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300"
+                                  : "text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
+                              }`}
+                            >
+                              <span className="text-sm font-light truncate flex-1 mr-2">
+                                {label}
+                              </span>
+                              {isSelected && <X className="h-3 w-3" />}
+                            </div>
+                          );
+                        })
+                        .filter(Boolean)}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
 
           {/* Right Content - Table */}
           <div className="flex-1 min-w-0">
+            {/* Search and Sort */}
+            <div className="mb-6">
+              <div className="flex flex-col gap-3">
+                {/* Model count */}
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    {processedModels.length} of {models.length} models
+                  </span>
+                  {/* Reset filters button - show only when filters are active */}
+                  {(selectedProviders.size > 0 ||
+                    selectedAuthors.size > 0 ||
+                    priceRange[0] > 0 ||
+                    priceRange[1] < priceStats.max ||
+                    minContextSize > 0 ||
+                    selectedCapabilities.size > 0 ||
+                    selectedInputModalities.size > 0 ||
+                    selectedParameters.size > 0) && (
+                    <button
+                      onClick={() => {
+                        setSelectedProviders(new Set());
+                        setSelectedAuthors(new Set());
+                        setPriceRange([0, priceStats.max]);
+                        setMinContextSize(0);
+                        setSelectedCapabilities(new Set());
+                        setSelectedInputModalities(new Set());
+                        setSelectedParameters(new Set());
+                        setSearchQuery("");
+                      }}
+                      className="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors flex items-center gap-2"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                      Reset filters
+                    </button>
+                  )}
+                </div>
+
+                {/* Search bar and sort on same row */}
+                <div className="flex gap-3">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                    <Input
+                      placeholder="Search models, providers, or capabilities..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-9 h-10 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700"
+                    />
+                  </div>
+
+                  <Select
+                    value={sortBy}
+                    onValueChange={(v) => setSortBy(v as SortOption)}
+                  >
+                    <SelectTrigger className="w-[160px] h-10 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-sm font-normal">
+                      <ArrowUpDown className="h-4 w-4 mr-2" />
+                      <SelectValue placeholder="Sort" />
+                    </SelectTrigger>
+                    <SelectContent className="text-sm font-normal">
+                      <SelectItem value="name">Name</SelectItem>
+                      <SelectItem value="price-low">
+                        Price: Low to High
+                      </SelectItem>
+                      <SelectItem value="price-high">
+                        Price: High to Low
+                      </SelectItem>
+                      <SelectItem value="context">Context Size</SelectItem>
+                      <SelectItem value="newest">Newest First</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
             {/* Clean Table */}
             <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
               <div className="overflow-x-auto">
@@ -928,7 +1092,6 @@ export function ModelRegistryPage() {
                       // Get capabilities with pricing from cheapest provider
                       const capabilities: {
                         key: string;
-                        icon: string;
                         label: string;
                         cost: string;
                       }[] = [];
@@ -937,7 +1100,6 @@ export function ModelRegistryPage() {
                       if (pricing.audio && pricing.audio > 0) {
                         capabilities.push({
                           key: "audio",
-                          icon: "🎧",
                           label: "Audio",
                           cost: formatCost(pricing.audio),
                         });
@@ -945,7 +1107,6 @@ export function ModelRegistryPage() {
                       if (pricing.video && pricing.video > 0) {
                         capabilities.push({
                           key: "video",
-                          icon: "🎥",
                           label: "Video",
                           cost: formatCost(pricing.video),
                         });
@@ -953,7 +1114,6 @@ export function ModelRegistryPage() {
                       if (pricing.thinking && pricing.thinking > 0) {
                         capabilities.push({
                           key: "thinking",
-                          icon: "🧠",
                           label: "Reasoning",
                           cost: formatCost(pricing.thinking),
                         });
@@ -961,7 +1121,6 @@ export function ModelRegistryPage() {
                       if (pricing.web_search && pricing.web_search > 0) {
                         capabilities.push({
                           key: "search",
-                          icon: "🔍",
                           label: "Web Search",
                           cost: formatCost(pricing.web_search),
                         });
@@ -969,7 +1128,6 @@ export function ModelRegistryPage() {
                       if (pricing.image && pricing.image > 0) {
                         capabilities.push({
                           key: "vision",
-                          icon: "👁️",
                           label: "Vision",
                           cost: formatCost(pricing.image),
                         });
@@ -983,7 +1141,10 @@ export function ModelRegistryPage() {
                             <td className="px-6 pt-6 pb-1">
                               <div className="flex items-center gap-2">
                                 <span className="text-lg font-normal text-gray-900 dark:text-gray-100">
-                                  {model.name}
+                                  {model.name.replace(
+                                    new RegExp(`^${model.author}:\s*`, "i"),
+                                    ""
+                                  )}
                                 </span>
                                 <button
                                   onClick={() => copyModelId(model.id)}
@@ -1003,7 +1164,6 @@ export function ModelRegistryPage() {
                                 )}
                               </div>
                             </td>
-
                           </tr>
 
                           {/* Row 2: Secondary info */}
@@ -1018,7 +1178,7 @@ export function ModelRegistryPage() {
                                       : model.description}
                                   </div>
                                 )}
-                                
+
                                 {/* Author, Context, and Pricing - same light text as description */}
                                 <div className="flex flex-wrap items-center gap-3 text-sm font-light text-gray-400 dark:text-gray-500">
                                   <div>
@@ -1039,13 +1199,26 @@ export function ModelRegistryPage() {
                                   </div>
                                   <div>•</div>
                                   <div>
-                                    ${minInputCost === 0 ? '0' : minInputCost < 1 ? minInputCost.toFixed(2) : minInputCost.toFixed(1)}/M in, ${minOutputCost === 0 ? '0' : minOutputCost < 1 ? minOutputCost.toFixed(2) : minOutputCost.toFixed(1)}/M out
+                                    $
+                                    {minInputCost === 0
+                                      ? "0"
+                                      : minInputCost < 1
+                                        ? minInputCost.toFixed(2)
+                                        : minInputCost.toFixed(1)}
+                                    /M in, $
+                                    {minOutputCost === 0
+                                      ? "0"
+                                      : minOutputCost < 1
+                                        ? minOutputCost.toFixed(2)
+                                        : minOutputCost.toFixed(1)}
+                                    /M out
                                   </div>
                                   {model.maxOutput && (
                                     <>
                                       <div>•</div>
                                       <div>
-                                        {formatContext(model.maxOutput)} max output
+                                        {formatContext(model.maxOutput)} max
+                                        output
                                       </div>
                                     </>
                                   )}
@@ -1053,7 +1226,7 @@ export function ModelRegistryPage() {
                               </div>
                             </td>
                           </tr>
-                          
+
                           {/* Subtle divider between models */}
                           <tr>
                             <td className="px-6 py-2">
