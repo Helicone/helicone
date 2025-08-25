@@ -49,73 +49,16 @@ Use one SDK for everything:
 ```typescript
 // ✅ New way - one SDK, all providers
 const client = new OpenAI({
-  baseURL: "https://ai-gateway.helicone.ai/ai",
+  baseURL: "https://ai-gateway.helicone.ai",
   apiKey: process.env.HELICONE_API_KEY,
 });
 
 // Switch providers = change model string
 const response = await client.chat.completions.create({
-  model: "gpt-4o/openai",  // or "claude-3.5-sonnet-v2/anthropic"
-  messages: [{ role: "user", content: "Hello!" }]
-});
-
-// Automatic fallbacks - if GPT-4o fails, try Claude
-const response = await client.chat.completions.create({
-  model: "gpt-4o/openai,claude-3.5-sonnet-v2/anthropic",
+  model: "gpt-4o-mini",  // Works with any model: claude-sonnet-4, gemini-2.5-flash, etc.
   messages: [{ role: "user", content: "Hello!" }]
 });
 ```
-
-## Key Features
-
-### Model Fallbacks & Cost Optimization
-```typescript
-// Try multiple models in order of preference/cost
-model: "gpt-4o-mini/openai,claude-3.5-haiku/anthropic,gemini-pro/google"
-```
-
-### Prompt Management Integration
-```typescript
-// Reference saved prompts with variables
-{
-  model: "claude-3.5-sonnet-v2/anthropic",
-  prompt_id: "customer_support_v2",
-  environment: "production",
-  inputs: {
-    customer_name: "John Doe",
-    issue_type: "billing"
-  }
-}
-```
-
-### Automatic Format Conversion
-The gateway automatically converts between provider formats:
-- OpenAI → Anthropic message format
-- OpenAI → Google Gemini format
-- Handle provider-specific parameters seamlessly
-
-## Supported Providers
-
-<CardGroup cols={3}>
-<Card title="OpenAI" icon="openai">
-  GPT-4o, GPT-4o-mini, GPT-4-turbo, o1, o3
-</Card>
-<Card title="Anthropic" icon="anthropic">
-  Claude-3.5-Sonnet-v2, Claude-3.5-Haiku, Claude-Opus-4.1
-</Card>
-<Card title="Google" icon="google">
-  Gemini-Pro, Gemini-2.5, Gemini-Flash
-</Card>
-<Card title="AWS Bedrock" icon="aws">
-  All Bedrock models with automatic region handling
-</Card>
-<Card title="Azure OpenAI" icon="microsoft">
-  GPT models with deployment configuration
-</Card>
-<Card title="100+ More" icon="plus">
-  Groq, xAI, DeepSeek, Perplexity, and growing
-</Card>
-</CardGroup>
 
 ## Next Steps
 
@@ -123,20 +66,29 @@ The gateway automatically converts between provider formats:
 <Card title="Get Started in 5 Minutes" icon="rocket" href="/getting-started/quick-start">
   Set up AI Gateway and make your first request
 </Card>
-<Card title="Browse Model Registry" icon="list" href="/ai-gateway/model-registry">
+<Card title="Browse Model Registry" icon="list" href="https://helicone.ai/models">
   See all supported models and provider formats
 </Card>
-<Card title="Migration Guide" icon="arrow-right" href="/ai-gateway/migration-guide">
-  Migrate from proxy endpoints to unified API
+<Card title="Configure Fallbacks" icon="shield" href="/gateway/fallbacks">
+  Set up automatic model fallbacks for reliability
 </Card>
-<Card title="Advanced Features" icon="gear" href="/features/advanced-usage/prompts">
-  Explore prompts, security, rate limiting, and more
+<Card title="Prompt Integration" icon="wand-magic-sparkles" href="/gateway/prompt-integration">
+  Deploy and manage prompts through the gateway
+</Card>
+</CardGroup>
+
+<CardGroup cols={2}>
+<Card title="Rate Limiting" icon="gauge" href="/features/advanced-usage/custom-rate-limits">
+  Control usage and prevent abuse
+</Card>
+<Card title="Security Features" icon="lock" href="/features/advanced-usage/llm-security">
+  Protect your applications with built-in security
 </Card>
 </CardGroup>
 
 ## How It Works
 
-1. **Point your OpenAI SDK** to `ai-gateway.helicone.ai/ai`
+1. **Point your OpenAI SDK** to `ai-gateway.helicone.ai`
 2. **Add your Helicone API key** for authentication
 3. **Store your provider keys** in Helicone's secure vault
 4. **Use any model** with the format `model/provider`

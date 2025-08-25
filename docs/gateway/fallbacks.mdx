@@ -1,0 +1,115 @@
+---
+title: "Model Fallbacks"
+sidebarTitle: "Fallbacks"
+description: "Implement automatic model fallbacks for reliable AI applications"
+---
+
+Build resilient AI applications with automatic fallbacks. When requests fail, the AI Gateway automatically tries alternative providers or models to ensure your requests succeed.
+
+<Note>
+This page focuses on fallback behavior. To understand how models are routed to providers, see [Provider Routing](/gateway/provider-routing).
+</Note>
+
+## How Fallbacks Work
+
+Fallbacks leverage the [provider routing](/gateway/provider-routing) system to automatically retry requests with different providers or models when failures occur.
+
+```typescript
+// Simple: Let the gateway handle everything
+await client.chat.completions.create({
+  model: "gpt-4o-mini",
+  messages: [{ role: "user", content: "Explain quantum computing" }]
+});
+
+// If OpenAI fails → tries Azure OpenAI → tries other providers
+```
+
+
+<Warning>
+**API Keys Required:** The gateway only tries providers for which you have valid API keys configured. If you only have an OpenAI API key, it won't attempt Azure or other providers - it will move to the next model in your fallback chain instead.
+</Warning>
+
+## Benefits of Fallbacks
+
+<CardGroup cols={2}>
+<Card title="Provider Redundancy" icon="shield">
+  OpenAI down? Automatically try Azure OpenAI
+</Card>
+<Card title="Rate Limit Protection" icon="clock">
+  Hit OpenAI limits? Switch to another provider instantly
+</Card>
+<Card title="Geographic Availability" icon="globe">
+  Some providers work better in different regions
+</Card>
+<Card title="Zero Configuration" icon="gear">
+  Just specify the model - gateway handles the rest
+</Card>
+</CardGroup>
+
+## When Fallbacks Trigger
+
+The gateway automatically tries the next model when encountering the following errors:
+
+| Error | Description |
+|-------|-------------|
+| 429 | Rate limit errors |
+| 401 | Authentication errors |
+| 400 | Context length errors |
+| 408 | Timeout errors |
+| 500+ | Server errors |
+
+## Fallback Patterns
+
+### Cross-Model Fallbacks
+
+Define a chain of different models to try in order:
+
+```typescript
+await client.chat.completions.create({
+  model: "gpt-4o,claude-sonnet-4,gemini-2.5-flash",
+  messages: [{ role: "user", content: "Complex reasoning task" }]
+});
+```
+
+### Provider-Specific Fallbacks
+
+Mix automatic and explicit provider routing:
+
+```typescript
+await client.chat.completions.create({
+  model: "gpt-4o-mini,gpt-4o-mini/azure,claude-haiku-4",
+  messages: [{ role: "user", content: "Hello!" }]
+});
+
+// 1. Try any provider for gpt-4o-mini
+// 2. Try Azure specifically 
+// 3. Fall back to Claude Haiku
+```
+
+## Best Practices
+
+<CardGroup cols={2}>
+<Card title="Start Simple" icon="play">
+  Use model names only for automatic provider selection
+</Card>
+<Card title="Order by Cost" icon="dollar-sign">
+  Place cheaper models first in your fallback chain
+</Card>
+<Card title="Mix Providers" icon="shuffle">
+  Combine models from different providers for redundancy
+</Card>
+<Card title="Monitor Performance" icon="chart-line">
+  Track which models/providers are being used in production
+</Card>
+</CardGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+<Card title="Provider Routing" icon="route" href="/gateway/provider-routing">
+  Learn how models are routed to providers
+</Card>
+<Card title="Model Registry" icon="list" href="https://helicone.ai/models">
+  Browse all supported models and providers
+</Card>
+</CardGroup>

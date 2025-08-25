@@ -1,81 +1,37 @@
 ---
 title: "Quickstart"
 sidebarTitle: "Quickstart"
-description: "Helicone is the open-source LLM observability platform for developers to monitor, debug, and improve **production-ready** applications."
+description: "Get your first LLM request logged with Helicone in under 2 minutes using the AI Gateway."
 "twitter:title": "Quickstart - Helicone Open Source LLM Observability"
 ---
 
-<Frame>
-  <img
-    src="/images/introduction/intro-dashboard.webp"
-    alt="Helicone dashboard where you can monitor your AI applications."
-  />
-</Frame>
+Use the OpenAI SDK to access 100+ LLM models with automatic logging and observability.
 
-Log your LLM requests, evaluate, and experiment with prompts, and get instant insights that helps you push changes to production with _confidence_. Helicone is the CI workflow designed for the entire LLM lifecycle.
+<Accordion title="Using a third-party SDK?">
+  The AI Gateway is our **recommended integration**, you get automatic fallbacks, 100+ models through one SDK, and seamless model switching.
+  
+  However, we understand you might already be deeply integrated with a third-party SDK.
+  
+  We support [direct integrations](/integrations/overview) for OpenAI, Anthropic, Azure, and 20+ other providers. You'll still get full observability, just without the unified API benefits.
+</Accordion>
 
-## Quick Start
+## Quick Integration
 
-Welcome to Helicone! Integrate your preferred provider with Helicone in seconds.
+Two steps to your first logged request:
 
 <Steps>
 
-<Step title="Create an account">
-  Once you have an [account](https://helicone.ai/), proceed to the next step.
-</Step>
-
-  <Step title="Generate an API key">
-    <AccordionGroup>
-      <Accordion title="Go to Settings" icon="square-1">
-        Click on your organization on the top left, then select `Settings` from the dropdown.
-        <Frame>
-          <img
-            src="/images/introduction/key-step-1.webp"
-            alt="Find Settings from Helicone's sidebar."
-          />
-        </Frame>
-      </Accordion>
-
-      <Accordion title="Select the API Keys tab" icon="square-2">
-        <Frame>
-          <img
-            src="/images/introduction/key-step-2.webp"
-            alt="In Settings, select the API Keys tab."
-          />
-        </Frame>
-      </Accordion>
-
-      <Accordion title="Generate new key" icon="square-3">
-        Click on `Generate new key`.
-
-        When creating a new Helicone API key, you have the ability to enable `read` and `write` permissions.
-        Write keys can be used through Helicone via our proxy, feedback or any other Helicone service when calling a `POST` or using our gateway.
-        <Frame>
-          <img
-            src="/images/introduction/key-step-3.webp"
-            alt="Create a new Helicone API key from Settings."
-          />
-        </Frame>
-
-        <Note>
-          Keys with read permissions will start with `sk-` and keys with write
-          permissions will start with `pk-`. For our EU customers, keys are generated
-          with the prefix `eu-` this allows our edge workers to know which region to
-          route the request to.
-        </Note>
-      </Accordion>
-
-    </AccordionGroup>
-
-    For more details on Helicone API keys, check out the [Helicone Auth](/helicone-headers/helicone-auth) docs.
-
+  <Step title="Set up your keys">
+  1. **Create an account**: [Sign up for free](https://helicone.ai/signup)
+  2. **Helicone API Key**: Go to [API Keys](https://us.helicone.ai/settings/api-keys) and generate a new key
+  3. **Provider Keys**: Add your LLM API keys (OpenAI, Anthropic, etc.) at [Provider Keys](https://us.helicone.ai/providers)
+    
+    <Note>
+      The Helicone key authenticates with our gateway. Provider keys let you access the actual LLMs.
+    </Note>
   </Step>
 
-  <Step title="Integrate with AI Gateway (Recommended)">
-
-    The fastest way to get started is with Helicone's AI Gateway - use OpenAI SDK to access models from OpenAI, Anthropic, Google, AWS Bedrock, and 100+ other providers through a single unified API.
-
-    **Set up provider keys:** Go to [Provider Keys](https://us.helicone.ai/providers) to securely store API keys for the providers you want to use.
+  <Step title="Send your first request">
 
     <Tabs>
       <Tab title="TypeScript">
@@ -83,19 +39,13 @@ Welcome to Helicone! Integrate your preferred provider with Helicone in seconds.
         import { OpenAI } from "openai";
 
         const client = new OpenAI({
-          baseURL: "https://ai-gateway.helicone.ai/ai",
+          baseURL: "https://ai-gateway.helicone.ai",
           apiKey: process.env.HELICONE_API_KEY,
         });
 
         const response = await client.chat.completions.create({
-          model: "gpt-4o-mini/openai", // model/provider format
+          model: "gpt-4o-mini", // Or 100+ other models
           messages: [{ role: "user", content: "Hello, world!" }],
-        });
-        
-        // Try other providers with same code
-        const claudeResponse = await client.chat.completions.create({
-          model: "claude-3.5-sonnet-v2/anthropic",
-          messages: [{ role: "user", content: "Hello from Claude!" }],
         });
         ```
       </Tab>
@@ -105,7 +55,7 @@ Welcome to Helicone! Integrate your preferred provider with Helicone in seconds.
         from openai import OpenAI
 
         client = OpenAI(
-            base_url="https://ai-gateway.helicone.ai/ai",
+            base_url="https://ai-gateway.helicone.ai",
             api_key=os.getenv("HELICONE_API_KEY")
         )
 
@@ -124,7 +74,7 @@ Welcome to Helicone! Integrate your preferred provider with Helicone in seconds.
 
       <Tab title="cURL">
         ```bash
-        curl https://ai-gateway.helicone.ai/ai/chat/completions \
+        curl https://ai-gateway.helicone.ai/chat/completions \
           -H "Content-Type: application/json" \
           -H "Authorization: Bearer $HELICONE_API_KEY" \
           -d '{
@@ -136,183 +86,28 @@ Welcome to Helicone! Integrate your preferred provider with Helicone in seconds.
         ```
       </Tab>
     </Tabs>
-
+    
+    Once you run this code, you'll see your request appear in the [Requests](https://us.helicone.ai/requests) tab within seconds.
+    
     <Note>
-      **Why AI Gateway?** One SDK for all providers, automatic fallbacks (`"gpt-4o/openai,claude-3.5-sonnet-v2/anthropic"`), prompt management, and unified observability. See all [supported models →](/ai-gateway/model-registry)
+      See [all supported models](/ai-gateway/model-registry) or try [automatic fallbacks](/ai-gateway/fallbacks) for reliability.
     </Note>
-  </Step>
-
-  <Step title="Send your first request 🎉">
-    Once we receive your requests, you will see them in the `Requests` tab.
-
-  You will also see that your `Dashboard` has been updated with your new request.
 
   </Step>
 
 </Steps>
 
-## What's next?
+## What's Next?
 
-We curated a list to help you make the most of Helicone, but you're welcome to explore the product on your own!
-
-<CardGroup cols={2}>
-  <Card
-    title="Add a custom property"
-    href="/features/advanced-usage/custom-properties"
-    icon="square-1"
+Now that data is flowing, explore what Helicone can do for you:
+<Card
+    title="Explore The Platform" 
+    href="/getting-started/platform-overview"
+    icon="rocket"
+    horizontal
   >
-    Label your requests to segment, analyze, and visualize them.
-  </Card>
-  <Card
-    title="Create your first prompt"
-    href="/features/advanced-usage/prompts"
-    icon="square-2"
-  >
-    Version your prompt and inputs as they evolve.
-  </Card>
-  <Card title="Track a session" href="/features/sessions" icon="square-3">
-    Group and visualize multi-step LLM interactions (i.e. AI agents).
-  </Card>
-  <Card
-    title="Cache responses"
-    href="/features/advanced-usage/caching"
-    icon="square-4"
-  >
-    Cache and watch how much time and cost you saved.
-  </Card>
-</CardGroup>
-
-## Explore Features
-
-Here are the key features to explore as you build with Helicone:
-
-<CardGroup cols={3}>
-  <Card
-    title="Prompts"
-    href="/features/advanced-usage/prompts"
-    icon="square-terminal"
-  >
-    Manage and version prompts from code or UI.
-  </Card>
-  <Card
-    title="Sessions"
-    href="/features/sessions"
-    icon="rectangle-history"
-  >
-    Trace agentic workflows and visualize them.
-  </Card>
-  <Card
-    title="Custom Properties"
-    href="/features/advanced-usage/custom-properties"
-    icon="tag"
-  >
-    Label and segment your requests.
-  </Card>
-  <Card
-    title="Caching"
-    href="/features/advanced-usage/caching"
-    icon="database"
-  >
-    Save cost and improve latency.
-  </Card>
-  <Card
-    title="Rate Limiting"
-    href="/features/advanced-usage/custom-rate-limits"
-    icon="user-minus"
-  >
-    Easily rate-limit power users.
-  </Card>
-  <Card
-    title="User Metrics"
-    href="/features/advanced-usage/user-metrics"
-    icon="chart-user"
-  >
-    Get insights into your user's usage.
-  </Card>
-</CardGroup>
-
-## Alternative Integration Methods
-
-Need provider-specific features or using existing SDKs? Explore [all integration options →](/integrations/overview)
-
-<CardGroup cols={1}>
-<Card title="When to use alternatives" icon="question">
-  Use direct provider integrations if you need specific features only available through native SDKs, have existing code deeply integrated with a provider, or have enterprise requirements that prevent using the unified API.
+    Understand how Helicone solves common LLM development challenges.
 </Card>
-</CardGroup>
-
-<CardGroup cols={4}>
-  <Card title="OpenAI" href="/integrations/openai/javascript" />
-  <Card title="Azure" href="/integrations/azure/javascript" />
-  <Card title="Anthropic" href="/integrations/anthropic/javascript" />
-  <Card title="Llama" href="/integrations/llama/javascript" />
-  <Card title="Ollama" href="/integrations/ollama/javascript" />
-  <Card title="AWS Bedrock" href="/integrations/bedrock/javascript" />
-  <Card title="Gemini" href="/integrations/gemini/api/javascript" />
-  <Card title="Groq" href="/integrations/groq/javascript" />
-  <Card title="Instructor" href="/integrations/instructor/javascript" />
-  <Card
-    title="Vercel AI"
-    href="/getting-started/integration-method/vercelai"
-  />
-  <Card
-    title="Anyscale"
-    href="/getting-started/integration-method/anyscale"
-  />
-  <Card
-    title="Together AI"
-    href="/getting-started/integration-method/together"
-  />
-  <Card
-    title="Hyperbolic"
-    href="/getting-started/integration-method/hyperbolic"
-  />
-  <Card
-    title="Deepinfra"
-    href="/getting-started/integration-method/deepinfra"
-  />
-  <Card
-    title="OpenRouter"
-    href="/getting-started/integration-method/openrouter"
-  />
-  <Card
-    title="LiteLLM"
-    href="/getting-started/integration-method/litellm"
-  />
-  <Card
-    title="Fireworks AI"
-    href="/getting-started/integration-method/fireworks"
-  />
-</CardGroup>
-
-<CardGroup cols={2}>
-  <Card
-    title="OpenLLMetry"
-    href="/getting-started/integration-method/openllmetry"
-  >
-    Log directly to Helicone without going through our proxy.
-  </Card>
-  <Card title="Gateway" href="/getting-started/integration-method/gateway">
-    Custom gateway configurations and legacy documentation.
-  </Card>
-</CardGroup>
-
-## Further Reading
-
-<CardGroup cols={3}>
-  <Card title="Proxy or Async?" href="/getting-started/proxy-vs-async">
-    Determine when you should use a proxy or async function in Helicone.
-  </Card>
-  <Card title="How we calculate costs" href="/faq/how-we-calculate-cost">
-    A detailed breakdown of our process to calculate cost per request.
-  </Card>
-  <Card
-    title="Understanding Helicone Headers"
-    href="/helicone-headers/header-directory"
-  >
-    Every header you need to know to access Helicone features.
-  </Card>
-</CardGroup>
 
 ## Questions?
 
@@ -320,5 +115,3 @@ Although we designed the docs to be as self-serving as possible, you are
 welcome to join our [Discord](https://discord.com/invite/HwUbV3Q8qz) or
 contact [help@helicone.ai](help@helicone.ai) with any questions or feedback
 you have.
-
-Interested in deploying Helicone on-prem? [Schedule a call](https://www.helicone.ai/contact) with us.

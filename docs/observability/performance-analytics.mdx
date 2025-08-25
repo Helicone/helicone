@@ -1,0 +1,427 @@
+---
+title: "Performance Analytics"
+sidebarTitle: "Performance Analytics"
+description: "Monitor LLM performance metrics including latency, throughput, success rates, and quality indicators across all providers"
+---
+
+Track the performance of your LLM applications with comprehensive analytics covering response times, success rates, throughput, and quality metrics. Identify bottlenecks, optimize performance, and ensure reliable AI experiences.
+
+## Performance Dashboard
+
+<Frame>
+  <img
+    src="/images/observability/performance-dashboard.webp"
+    alt="Helicone performance analytics dashboard showing latency, success rates, and throughput metrics."
+  />
+</Frame>
+
+### Key Performance Indicators
+
+<CardGroup cols={2}>
+<Card title="Response Latency" icon="clock">
+  Average, median, and P95 response times
+  Track performance across models and providers
+</Card>
+<Card title="Success Rate" icon="check-circle">
+  Percentage of successful vs failed requests
+  Monitor reliability and error patterns
+</Card>
+<Card title="Throughput" icon="activity">
+  Requests per second/minute/hour
+  Understand system capacity and usage patterns
+</Card>
+<Card title="Token Efficiency" icon="zap">
+  Tokens per second processing speed
+  Compare model performance characteristics
+</Card>
+</CardGroup>
+
+## Latency Analytics
+
+### Response Time Metrics
+Monitor how quickly your LLM requests are processed:
+
+```json
+{
+  "latency_metrics": {
+    "average_ms": 1450,
+    "median_ms": 1200,
+    "p95_ms": 3500,
+    "p99_ms": 8200,
+    "min_ms": 450,
+    "max_ms": 15000
+  }
+}
+```
+
+### Latency Breakdown
+Understand where time is spent:
+
+- **Queue time** - Time waiting in request queue
+- **Provider time** - Actual LLM processing time  
+- **Network time** - Round-trip network latency
+- **Processing time** - Helicone processing overhead
+
+### Latency Trends
+Track performance changes over time:
+
+<Tabs>
+  <Tab title="By Time Period">
+    - **Hourly trends** - Performance throughout the day
+    - **Daily averages** - Day-over-day comparisons
+    - **Weekly patterns** - Identify peak usage times
+    - **Monthly analysis** - Long-term performance trends
+  </Tab>
+  
+  <Tab title="By Model">
+    Compare latency across different models:
+    - `gpt-4o/openai`: ~1200ms average
+    - `claude-3.5-sonnet-v2/anthropic`: ~1800ms average
+    - `gpt-4o-mini/openai`: ~800ms average
+    - `gemini-flash/google`: ~600ms average
+  </Tab>
+  
+  <Tab title="By Provider">
+    Understand provider-specific performance:
+    - **OpenAI**: Generally fast, consistent
+    - **Anthropic**: Slightly slower, high quality
+    - **Google**: Very fast, especially Gemini Flash
+    - **Bedrock**: Varies by region and model
+  </Tab>
+</Tabs>
+
+## Success Rate Monitoring
+
+### Success Metrics
+Track request reliability:
+
+```json
+{
+  "success_metrics": {
+    "total_requests": 10000,
+    "successful_requests": 9756,
+    "failed_requests": 244,
+    "success_rate": 97.56,
+    "error_rate": 2.44
+  }
+}
+```
+
+### Error Categories
+Understand what causes failures:
+
+<AccordionGroup>
+  <Accordion title="Rate Limit Errors (429)">
+    **Causes**: Too many requests to provider
+    **Impact**: Temporary delays, request queuing
+    **Solutions**: Implement backoff, use multiple keys
+  </Accordion>
+  
+  <Accordion title="Authentication Errors (401)">
+    **Causes**: Invalid or expired API keys
+    **Impact**: All requests fail until resolved
+    **Solutions**: Check key validity, rotate keys
+  </Accordion>
+  
+  <Accordion title="Context Length Errors (400)">
+    **Causes**: Request exceeds model token limits
+    **Impact**: Request rejected, no response
+    **Solutions**: Truncate input, use larger context models
+  </Accordion>
+  
+  <Accordion title="Timeout Errors (408)">
+    **Causes**: Request takes too long to process
+    **Impact**: Request cancelled, partial responses
+    **Solutions**: Adjust timeout, use faster models
+  </Accordion>
+  
+  <Accordion title="Server Errors (500+)">
+    **Causes**: Provider infrastructure issues
+    **Impact**: Temporary service disruption
+    **Solutions**: Implement retries, use fallbacks
+  </Accordion>
+</AccordionGroup>
+
+### Error Recovery
+Monitor how your system handles failures:
+
+- **Retry success rate** - Percentage of failed requests that succeed on retry
+- **Fallback effectiveness** - Success rate when failing over to backup models
+- **Recovery time** - How quickly service is restored after outages
+
+## Throughput Analysis
+
+### Request Volume
+Track your system's processing capacity:
+
+<CardGroup cols={2}>
+<Card title="Requests Per Second" icon="gauge">
+  Peak and average RPS
+  Identify capacity limits and scaling needs
+</Card>
+<Card title="Concurrent Requests" icon="layers">
+  How many requests are processed simultaneously
+  Monitor queue depth and waiting times
+</Card>
+<Card title="Burst Capacity" icon="trending-up">
+  Maximum throughput during peak periods
+  Plan for traffic spikes and scaling
+</Card>
+<Card title="Provider Limits" icon="shield">
+  Track usage against provider rate limits
+  Avoid throttling and service disruption
+</Card>
+</CardGroup>
+
+### Usage Patterns
+Understand when and how your system is used:
+
+```typescript
+// Peak usage analysis
+{
+  "peak_hours": [
+    { "hour": 14, "avg_rps": 45.2 },
+    { "hour": 15, "avg_rps": 52.1 },
+    { "hour": 16, "avg_rps": 48.7 }
+  ],
+  "peak_days": ["Tuesday", "Wednesday", "Thursday"],
+  "seasonal_patterns": {
+    "workdays": "high_usage",
+    "weekends": "low_usage",
+    "holidays": "minimal_usage"
+  }
+}
+```
+
+## Model Performance Comparison
+
+### Speed vs Quality Trade-offs
+Compare models across different dimensions:
+
+| Model | Avg Latency | Success Rate | Cost/1K Tokens | Quality Score |
+|-------|-------------|--------------|----------------|---------------|
+| `gemini-flash/google` | 600ms | 98.5% | $0.0004 | 7.8/10 |
+| `gpt-4o-mini/openai` | 800ms | 97.2% | $0.0006 | 8.2/10 |
+| `claude-3.5-haiku/anthropic` | 950ms | 98.1% | $0.0013 | 8.4/10 |
+| `gpt-4o/openai` | 1200ms | 96.8% | $0.02 | 9.1/10 |
+| `claude-3.5-sonnet-v2/anthropic` | 1800ms | 97.5% | $0.009 | 9.3/10 |
+
+### Performance Optimization
+Use data to optimize model selection:
+
+<CodeGroup>
+```typescript Speed-Optimized
+// For latency-sensitive applications
+const fastModels = [
+  "gemini-flash/google",      // 600ms avg
+  "gpt-4o-mini/openai",      // 800ms avg  
+  "claude-3.5-haiku/anthropic" // 950ms avg
+];
+
+await client.chat.completions.create({
+  model: fastModels.join(','),
+  messages: [...]
+});
+```
+
+```typescript Quality-Optimized  
+// For high-quality responses
+const qualityModels = [
+  "claude-3.5-sonnet-v2/anthropic", // 9.3/10 quality
+  "gpt-4o/openai",                  // 9.1/10 quality
+  "claude-3.5-haiku/anthropic"      // 8.4/10 quality
+];
+
+await client.chat.completions.create({
+  model: qualityModels.join(','),
+  messages: [...]
+});
+```
+
+```typescript Balanced
+// For cost-performance balance
+const balancedModels = [
+  "gpt-4o-mini/openai",
+  "claude-3.5-haiku/anthropic",
+  "gpt-4o/openai" // fallback for complex queries
+];
+
+await client.chat.completions.create({
+  model: balancedModels.join(','),
+  messages: [...]
+});
+```
+</CodeGroup>
+
+## Real-time Performance Monitoring
+
+### Live Metrics Dashboard
+Monitor performance in real-time:
+
+- **Current RPS** - Requests being processed now
+- **Active failures** - Errors happening in real-time  
+- **Response time** - Latest request latencies
+- **Queue depth** - Requests waiting to be processed
+
+### Performance Alerts
+Get notified of performance issues:
+
+<AccordionGroup>
+  <Accordion title="High Latency Alert">
+    **Trigger**: P95 latency > 5 seconds for 5+ minutes
+    **Action**: Check provider status, implement fallbacks
+    **Escalation**: Page on-call if P95 > 10 seconds
+  </Accordion>
+  
+  <Accordion title="Low Success Rate Alert">
+    **Trigger**: Success rate < 95% for 10+ minutes  
+    **Action**: Review error logs, check API keys
+    **Escalation**: Incident if success rate < 90%
+  </Accordion>
+  
+  <Accordion title="Throughput Alert">
+    **Trigger**: RPS drops 50% below normal for period
+    **Action**: Check rate limits, provider capacity
+    **Escalation**: Service degradation warning
+  </Accordion>
+</AccordionGroup>
+
+## Performance Optimization
+
+### Latency Optimization
+Strategies to improve response times:
+
+<Tabs>
+  <Tab title="Model Selection">
+    - Use faster models for simple tasks
+    - Reserve slow, high-quality models for complex queries
+    - Implement smart routing based on request complexity
+  </Tab>
+  
+  <Tab title="Caching">
+    - Cache frequent queries for instant responses
+    - Use semantic caching for similar requests
+    - Implement request deduplication
+  </Tab>
+  
+  <Tab title="Infrastructure">
+    - Choose providers with good geographic coverage
+    - Use multiple API keys to increase rate limits
+    - Implement connection pooling and keep-alive
+  </Tab>
+  
+  <Tab title="Request Optimization">
+    - Reduce prompt length when possible
+    - Use streaming for long responses
+    - Implement request batching where applicable
+  </Tab>
+</Tabs>
+
+### Reliability Improvements
+Enhance success rates and error handling:
+
+```typescript
+// Robust error handling
+const makeRequest = async (messages: Message[]) => {
+  const maxRetries = 3;
+  const backoffMs = 1000;
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await client.chat.completions.create({
+        model: "gpt-4o/openai,claude-3.5-sonnet-v2/anthropic",
+        messages,
+        timeout: 30000, // 30 second timeout
+      });
+    } catch (error) {
+      if (attempt === maxRetries) throw error;
+      
+      // Exponential backoff
+      await new Promise(resolve => 
+        setTimeout(resolve, backoffMs * Math.pow(2, attempt - 1))
+      );
+    }
+  }
+};
+```
+
+## Performance Reports
+
+### Automated Performance Reports
+Receive regular performance summaries:
+
+- **Daily performance digest** - Key metrics and trends
+- **Weekly analysis** - Performance patterns and optimization opportunities
+- **Monthly review** - Long-term trends and capacity planning
+- **Incident reports** - Post-mortem analysis of performance issues
+
+### Custom Dashboards
+Create dashboards for specific needs:
+
+<CardGroup cols={2}>
+<Card title="Executive Dashboard" icon="chart-bar">
+  High-level metrics for business stakeholders
+  Success rates, costs, and user satisfaction
+</Card>
+<Card title="Engineering Dashboard" icon="code">
+  Technical metrics for development teams
+  Latency distributions, error rates, throughput
+</Card>
+<Card title="Operations Dashboard" icon="settings">
+  Real-time monitoring for DevOps teams
+  Live alerts, system health, capacity metrics
+</Card>
+<Card title="Product Dashboard" icon="users">
+  User experience metrics for product teams
+  Feature performance, user engagement, satisfaction
+</Card>
+</CardGroup>
+
+## SLA Monitoring
+
+### Service Level Objectives
+Define and track performance targets:
+
+```json
+{
+  "slo_targets": {
+    "availability": "99.9%",
+    "p95_latency": "< 3 seconds", 
+    "p99_latency": "< 8 seconds",
+    "error_rate": "< 1%"
+  },
+  "current_performance": {
+    "availability": "99.94%",
+    "p95_latency": "2.1 seconds",
+    "p99_latency": "5.8 seconds", 
+    "error_rate": "0.3%"
+  }
+}
+```
+
+### SLA Compliance
+Track performance against commitments:
+
+- **Availability tracking** - Uptime and downtime analysis
+- **Performance compliance** - Meeting latency and quality targets
+- **Error budget management** - Balancing reliability vs feature velocity
+- **Incident impact** - How outages affect SLA compliance
+
+## Next Steps
+
+<CardGroup cols={2}>
+<Card title="Set Up Monitoring" icon="bell" href="/features/advanced-usage/alerts">
+  Configure alerts for performance issues
+</Card>
+<Card title="Optimize Models" icon="route" href="/ai-gateway/fallbacks">
+  Implement smart routing for better performance
+</Card>
+<Card title="Enable Caching" icon="zap" href="/features/advanced-usage/caching">
+  Speed up responses with intelligent caching
+</Card>
+<Card title="Scale Infrastructure" icon="trending-up" href="/features/advanced-usage/rate-limiting">
+  Plan capacity and implement rate limiting
+</Card>
+</CardGroup>
+
+Performance analytics help you deliver fast, reliable AI experiences. Use these insights to optimize your system architecture, model selection, and operational practices.

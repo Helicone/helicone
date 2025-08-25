@@ -1,0 +1,390 @@
+---
+title: "Cost Tracking & Optimization"
+sidebarTitle: "Cost Tracking"
+description: "Monitor LLM spending across providers, optimize costs, and set spending limits to control your AI budget"
+---
+
+Track and optimize your LLM costs across all providers and models. Helicone provides detailed cost analytics, spending forecasts, and optimization recommendations to help you manage your AI budget effectively.
+
+## Cost Overview Dashboard
+
+<Frame>
+  <img
+    src="/images/observability/cost-dashboard.webp"
+    alt="Helicone cost tracking dashboard showing spending across providers and time."
+  />
+</Frame>
+
+### Key Metrics
+Monitor your essential cost metrics:
+
+- **Total spend** - Current period spending
+- **Cost per request** - Average cost per API call
+- **Token efficiency** - Cost per token across models
+- **Provider breakdown** - Spending by provider (OpenAI, Anthropic, etc.)
+- **Model comparison** - Cost analysis by model type
+
+## Cost Calculation
+
+### How Costs Are Calculated
+Helicone automatically calculates costs based on:
+
+1. **Token usage** - Input and output tokens from each request
+2. **Provider pricing** - Up-to-date pricing for each model
+3. **Exchange rates** - Real-time currency conversion when needed
+4. **Volume discounts** - Applied when available from providers
+
+### Example Cost Breakdown
+```json
+{
+  "request_id": "req_abc123",
+  "model": "gpt-4o/openai",
+  "tokens": {
+    "input": 150,
+    "output": 200,
+    "total": 350
+  },
+  "cost": {
+    "input_cost_usd": 0.0015,    // 150 * $0.01/1k tokens
+    "output_cost_usd": 0.0060,   // 200 * $0.03/1k tokens
+    "total_cost_usd": 0.0075
+  }
+}
+```
+
+### Provider Pricing
+Current pricing tiers automatically tracked:
+
+<CardGroup cols={2}>
+<Card title="OpenAI" icon="openai">
+  **GPT-4o**: $0.01 input / $0.03 output per 1K tokens
+  **GPT-4o-mini**: $0.00015 input / $0.0006 output per 1K tokens
+</Card>
+<Card title="Anthropic" icon="anthropic">
+  **Claude 3.5 Sonnet**: $0.003 input / $0.015 output per 1K tokens
+  **Claude 3.5 Haiku**: $0.00025 input / $0.00125 output per 1K tokens
+</Card>
+<Card title="Google" icon="google">
+  **Gemini Pro**: $0.00125 input / $0.00375 output per 1K tokens
+  **Gemini Flash**: $0.000075 input / $0.0003 output per 1K tokens
+</Card>
+<Card title="AWS Bedrock" icon="aws">
+  Pricing varies by region and model
+  Volume discounts often available
+</Card>
+</CardGroup>
+
+## Cost Analytics
+
+### Spending Trends
+Track how your costs change over time:
+
+- **Daily/Weekly/Monthly trends** - Spending patterns
+- **Seasonal variations** - Usage spikes and dips
+- **Growth rate** - Cost increase as you scale
+- **Efficiency improvements** - Cost per request over time
+
+### Cost Segmentation
+Break down spending by different dimensions:
+
+```typescript
+// By feature
+{
+  "chat": "$145.20",
+  "search": "$87.50", 
+  "summary": "$23.10"
+}
+
+// By user tier
+{
+  "premium": "$89.40",
+  "free": "$12.30",
+  "enterprise": "$234.60"
+}
+
+// By model
+{
+  "gpt-4o/openai": "$187.50",
+  "claude-3.5-sonnet-v2/anthropic": "$98.20",
+  "gemini-pro/google": "$45.80"
+}
+```
+
+### Top Consumers
+Identify your highest-cost activities:
+
+- **Expensive users** - Users driving high costs
+- **Costly features** - Which features spend the most
+- **Long sessions** - Multi-step interactions with high token usage
+- **Inefficient prompts** - Prompts generating excessive tokens
+
+## Cost Optimization
+
+### Model Selection
+Choose the right model for each use case:
+
+<Tabs>
+  <Tab title="High Quality">
+    For complex reasoning and important interactions:
+    - `gpt-4o/openai` - Best reasoning, highest cost
+    - `claude-3.5-sonnet-v2/anthropic` - Great balance
+    - `gemini-pro/google` - Good quality, competitive price
+  </Tab>
+  
+  <Tab title="Balanced">
+    For general-purpose applications:
+    - `gpt-4o-mini/openai` - 10x cheaper than GPT-4o
+    - `claude-3.5-haiku/anthropic` - Fast and affordable
+    - `gemini-flash/google` - Ultra-fast, low cost
+  </Tab>
+  
+  <Tab title="High Volume">
+    For simple tasks and high-volume processing:
+    - `gemini-flash/google` - Extremely cost-effective
+    - `gpt-4o-mini/openai` - Cheapest OpenAI option
+    - `claude-3.5-haiku/anthropic` - Budget-friendly Claude
+  </Tab>
+</Tabs>
+
+### Smart Fallbacks
+Use model cascading to optimize costs:
+
+```typescript
+// Try cheaper models first, fallback to expensive ones
+await client.chat.completions.create({
+  model: "gpt-4o-mini/openai,gpt-4o/openai,claude-3.5-sonnet-v2/anthropic",
+  messages: [...]
+});
+
+// Route by complexity
+const model = isComplexQuery 
+  ? "claude-3.5-sonnet-v2/anthropic"
+  : "gpt-4o-mini/openai";
+```
+
+### Prompt Optimization
+Reduce token usage through better prompts:
+
+<CodeGroup>
+```typescript Verbose (Expensive)
+const prompt = `
+Please analyze the following customer support ticket in great detail.
+I need you to carefully read through this entire message and provide 
+a comprehensive analysis of the customer's issue, their emotional state,
+the urgency level, and detailed recommendations for resolution.
+
+Customer message: "${message}"
+
+Please provide:
+1. A detailed summary of the issue
+2. Analysis of customer sentiment  
+3. Urgency assessment
+4. Detailed resolution steps
+5. Follow-up recommendations
+`;
+```
+
+```typescript Optimized (Cheaper)
+const prompt = `
+Analyze this support ticket:
+"${message}"
+
+Output JSON:
+{
+  "issue": "brief summary",
+  "sentiment": "positive/negative/neutral", 
+  "urgency": "low/medium/high",
+  "resolution": "action steps",
+  "followup": "next steps"
+}
+`;
+```
+</CodeGroup>
+
+### Caching Strategies
+Reduce costs by caching common responses:
+
+- **Exact match caching** - Identical requests return cached results
+- **Semantic caching** - Similar requests may reuse responses
+- **Template caching** - Cache responses for common prompt patterns
+
+## Budget Management
+
+### Spending Limits
+Set limits to control costs:
+
+<CardGroup cols={2}>
+<Card title="User Limits" icon="user">
+  Set daily/monthly spending caps per user
+  Prevent individual users from excessive usage
+</Card>
+<Card title="Feature Limits" icon="layers">
+  Limit spending by feature or use case
+  Allocate budget across different functions
+</Card>
+<Card title="Time-based Limits" icon="clock">
+  Daily, weekly, or monthly spending caps
+  Automatic alerts when approaching limits
+</Card>
+<Card title="Model Limits" icon="cpu">
+  Cap usage of expensive models
+  Force fallbacks to cheaper alternatives
+</Card>
+</CardGroup>
+
+### Rate Limiting
+Control request volume to manage costs:
+
+```typescript
+// Set rate limits by user tier
+{
+  "free": {
+    "requests_per_hour": 100,
+    "monthly_spend_limit": 5.00
+  },
+  "premium": {
+    "requests_per_hour": 1000,
+    "monthly_spend_limit": 100.00
+  }
+}
+```
+
+### Cost Alerts
+Get notified before overspending:
+
+- **Spending thresholds** - Alert at 50%, 80%, 95% of budget
+- **Usage spikes** - Detect unusual spending patterns
+- **Model-specific alerts** - High usage of expensive models
+- **User alerts** - Individual users exceeding limits
+
+## Cost Forecasting
+
+### Predictive Analytics
+Understand future spending based on current trends:
+
+- **Monthly projections** - Forecast based on current usage
+- **Growth modeling** - Predict costs as user base grows
+- **Seasonal adjustments** - Account for usage pattern changes
+- **Feature impact** - Model cost impact of new features
+
+### Scenario Planning
+Model different cost scenarios:
+
+```typescript
+// What if we switch 50% of GPT-4o usage to Claude?
+const scenario = {
+  current_model: "gpt-4o/openai",
+  new_model: "claude-3.5-sonnet-v2/anthropic", 
+  migration_percentage: 50,
+  estimated_savings: "$1,247/month"
+};
+```
+
+## Cost Reports
+
+### Automated Reports
+Receive regular cost summaries:
+
+- **Daily spend reports** - Yesterday's usage and costs
+- **Weekly summaries** - Trends and optimization opportunities  
+- **Monthly statements** - Detailed breakdowns and forecasts
+- **Custom reports** - Tailored to your specific needs
+
+### Export Options
+Download cost data for analysis:
+
+<CodeGroup>
+```typescript CSV Export
+// Export cost data as CSV
+const response = await fetch('/api/costs/export', {
+  headers: { 'Authorization': `Bearer ${apiKey}` },
+  params: {
+    format: 'csv',
+    start_date: '2024-01-01',
+    end_date: '2024-01-31',
+    group_by: 'model'
+  }
+});
+```
+
+```typescript API Access
+// Get cost data programmatically
+const costs = await fetch('/api/costs', {
+  headers: { 'Authorization': `Bearer ${apiKey}` },
+  params: {
+    start_date: '2024-01-01',
+    group_by: ['model', 'user_tier'],
+    metrics: ['total_cost', 'request_count', 'avg_cost_per_request']
+  }
+});
+```
+</CodeGroup>
+
+## Advanced Cost Features
+
+### Chargebacks
+Allocate costs to different departments or projects:
+
+```json
+{
+  "properties": {
+    "department": "engineering",
+    "project": "ai-assistant",
+    "cost_center": "R&D"
+  }
+}
+```
+
+### Cost Attribution
+Track which features, users, or sessions drive costs:
+
+- **Session-level costs** - Total spending per conversation
+- **User lifetime value** - Cost vs revenue per user
+- **Feature profitability** - Revenue impact vs costs
+- **A/B test costs** - Compare spending across variants
+
+## Best Practices
+
+### Cost Optimization Checklist
+
+<Tabs>
+  <Tab title="Daily">
+    - [ ] Review yesterday's spending
+    - [ ] Check for cost spikes or anomalies
+    - [ ] Monitor high-cost users/sessions
+    - [ ] Verify rate limiting is working
+  </Tab>
+  
+  <Tab title="Weekly">
+    - [ ] Analyze cost trends and patterns
+    - [ ] Review model usage distribution
+    - [ ] Optimize underperforming prompts
+    - [ ] Update spending forecasts
+  </Tab>
+  
+  <Tab title="Monthly">
+    - [ ] Comprehensive cost analysis
+    - [ ] Model performance vs cost review
+    - [ ] Budget planning for next month
+    - [ ] Stakeholder cost reporting
+  </Tab>
+</Tabs>
+
+## Next Steps
+
+<CardGroup cols={2}>
+<Card title="Set Up Alerts" icon="bell" href="/features/advanced-usage/alerts">
+  Get notified about cost spikes and budget overruns
+</Card>
+<Card title="Rate Limiting" icon="shield" href="/features/advanced-usage/rate-limiting">
+  Control usage and prevent cost overruns
+</Card>
+<Card title="Prompt Optimization" icon="wand-magic-sparkles" href="/features/advanced-usage/prompts">
+  Optimize prompts to reduce token usage
+</Card>
+<Card title="Model Fallbacks" icon="route" href="/ai-gateway/fallbacks">
+  Smart routing to optimize costs automatically
+</Card>
+</CardGroup>
+
+Effective cost tracking and optimization is crucial for scaling AI applications. Use Helicone's cost tools to maintain control over your LLM spending while maximizing value.

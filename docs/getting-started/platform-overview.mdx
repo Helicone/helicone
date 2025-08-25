@@ -1,0 +1,121 @@
+---
+title: "Platform Overview"
+sidebarTitle: "Platform Overview"
+description: "Understand how Helicone solves the core challenges of building production LLM applications"
+---
+
+Now that your requests are flowing through Helicone, you have access to a complete platform built around production-first principles.
+
+<Frame>
+  <img
+    src="/images/introduction/intro-dashboard.webp"
+    alt="Helicone dashboard showing comprehensive LLM observability metrics."
+  />
+</Frame>
+
+## The Problems We Solve
+
+<CardGroup cols={2}>
+<Card title="Reliability Issues" icon="shield">
+  Provider outages break your application. No visibility when requests fail. Manual fallback logic is complex and error-prone.
+</Card>
+<Card title="Debugging Complexity" icon="bug">
+  LLM responses are non-deterministic. Multi-step AI workflows are hard to trace. Errors are difficult to reproduce.
+</Card>
+<Card title="Cost Uncertainty" icon="dollar-sign">
+  Unpredictable spending across providers. No understanding of unit economics. Difficult to optimize without breaking functionality.
+</Card>
+<Card title="Prompt Management Pain" icon="code">
+  Every prompt change requires a deployment. No version control for prompts. Can't iterate quickly based on user feedback.
+</Card>
+</CardGroup>
+
+## Our Principles
+
+**Best Price Always**  
+We fight for every penny. PTB (coming soon...) finds the absolute lowest price across providers. No markup, no games.
+
+**Invisible Performance**  
+Your app shouldn't slow down for observability. Edge deployment keeps us under 50ms. Always.
+
+**Always Online**  
+Your app stays up, period. Providers fail, we fallback. Rate limits hit, we load balance. We don't go down.
+
+**Never Be Surprised**  
+No shock bills. No mystery spikes. See every cost as it happens. We believe in radical transparency.
+
+**Find Anything**  
+Every request, searchable. Every error, findable. That needle in the haystack? We'll help you find it.
+
+**Built for Your Worst Day**  
+When production breaks and everyone's panicking, we're rock solid. Built for when you need us most.
+
+## Real Scenarios
+
+<AccordionGroup>
+  <Accordion title="Costs spiked 300% overnight">
+    Helicone's user tracking and custom properties turn cost mysteries into clear insights. See exactly which users or features are driving spend with automatic cost breakdowns by user ID, feature, or any custom dimension you define. Instead of panic and guesswork, you get immediate visibility into what changed and can take targeted action.
+  </Accordion>
+  
+  <Accordion title="User says AI gave wrong answer">
+    Session tracking captures the full conversation context so you can see exactly what led to the wrong answer. Find the user's complete interaction history, trace through multi-step workflows, and identify the exact prompt or step that failed. With prompt versioning, you can fix and deploy the correction instantly without touching code.
+  </Accordion>
+  
+  <Accordion title="OpenAI is down">
+    Automatic fallback chains keep your app running when providers fail. Configure GPT-4o on OpenAI → Vertex → Bedrock sequences that trigger instantly when requests fail or hit rate limits. Your users get the same model through a different provider, your app stays online, and you maintain full observability throughout the outage.
+  </Accordion>
+  
+  <Accordion title="AI agent workflow is broken">
+    Session trees show you exactly how complex AI workflows unfold across multiple LLM calls. When multi-step agents fail, trace the entire sequence to pinpoint where it broke - whether it's hitting token limits, using wrong context, or failing prompt logic. See the full chain of reasoning that led to the failure and fix the root cause.
+  </Accordion>
+</AccordionGroup>
+
+## How It Works
+
+Simple architecture, powerful results:
+
+1. **Your app** calls the AI Gateway (any SDK works)
+2. **Gateway** handles intelligent routing and reliability
+3. **Everything** gets logged automatically
+4. **Dashboard** shows costs, errors, performance, everything
+5. **You** fix issues without touching code
+
+## Start Here
+
+<CardGroup cols={2}>
+<Card
+  title="AI Gateway" 
+  href="/gateway/overview"
+  icon="globe"
+>
+  Integrate with 100+ LLM providers through one API
+</Card>
+
+<Card
+  title="Sessions" 
+  href="/observability/sessions"
+  icon="link"
+>
+  Track multi-step AI agent workflows
+</Card>
+
+<Card
+  title="Prompt Management" 
+  href="/prompts/getting-started"
+  icon="pencil"
+>
+  Version control and deploy prompts instantly
+</Card>
+
+<Card
+  title="Cost Tracking" 
+  href="/observability/cost-tracking"
+  icon="chart-line"
+>
+  Monitor spend by user, feature, or any dimension
+</Card>
+</CardGroup>
+
+---
+
+We built Helicone for developers with users depending on them. For the 3am outages. For the surprise bills. For finding that one broken request in millions.

@@ -16,21 +16,23 @@
         "groups": [
           {
             "group": "Getting Started",
-            "pages": ["getting-started/quick-start"]
+            "pages": [
+              "getting-started/quick-start",
+              "getting-started/platform-overview"
+            ]
           },
           {
             "group": "AI Gateway",
             "tag": "NEW",
             "pages": [
-              "ai-gateway/overview",
-              "ai-gateway/model-registry",
-              "ai-gateway/migration-guide",
+              "gateway/overview",
+              "gateway/provider-routing",
               {
                 "group": "Features",
                 "pages": [
-                  "features/advanced-usage/prompts",
+                  "gateway/fallbacks",
+                  "gateway/prompt-integration",
                   "features/advanced-usage/custom-rate-limits",
-                  "getting-started/integration-method/gateway-fallbacks",
                   "features/advanced-usage/llm-security",
                   "features/advanced-usage/moderations",
                   "features/advanced-usage/retries",
@@ -40,11 +42,75 @@
             ]
           },
           {
-            "group": "Integrations",
+            "group": "Self-Hosted Router",
+            "pages": [
+              "ai-gateway/introduction",
+              "ai-gateway/cloud-quickstart",
+              "ai-gateway/self-hosted-quickstart",
+              "ai-gateway/config",
+              {
+                "group": "Concepts",
+                "pages": [
+                  "ai-gateway/concepts/routers",
+                  "ai-gateway/concepts/providers",
+                  "ai-gateway/concepts/model-mapping",
+                  "ai-gateway/concepts/loadbalancing",
+                  "ai-gateway/concepts/retries",
+                  "ai-gateway/concepts/rate-limiting",
+                  "ai-gateway/concepts/cache",
+                  "ai-gateway/concepts/secret-management"
+                ]
+              },
+              {
+                "group": "Self-Hosted Deployment",
+                "pages": [
+                  "ai-gateway/self-hosted/deployment/overview",
+                  "ai-gateway/self-hosted/deployment/docker",
+                  "ai-gateway/self-hosted/deployment/k8s",
+                  "ai-gateway/self-hosted/deployment/fly",
+                  "ai-gateway/self-hosted/deployment/porter",
+                  "ai-gateway/self-hosted/deployment/ecs"
+                ]
+              },
+              {
+                "group": "Advanced",
+                "pages": [
+                  "ai-gateway/self-hosted/authentication",
+                  "ai-gateway/self-hosted/observability",
+                  "ai-gateway/self-hosted/router-quickstart",
+                  "ai-gateway/self-hosted/debugging/telemetry"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Observability & Analytics",
+            "pages": [
+              "observability/request-monitoring",
+              "observability/cost-tracking",
+              "observability/performance-analytics",
+              "observability/user-metrics",
+              "features/sessions"
+            ]
+          },
+          {
+            "group": "Prompt Management",
+            "pages": [
+              "features/advanced-usage/prompts",
+              "features/advanced-usage/scores",
+              "features/advanced-usage/feedback",
+              {
+                "group": "Webhooks",
+                "pages": ["features/webhooks", "features/webhooks-testing"]
+              }
+            ]
+          },
+          {
+            "group": "Alternative Integrations",
             "pages": [
               "integrations/overview",
               {
-                "group": "LLM & Inference Providers",
+                "group": "Provider-Specific",
                 "pages": [
                   {
                     "group": "Anthropic",
@@ -161,81 +227,23 @@
                 ]
               },
               {
-                "group": "Frameworks & Libraries",
+                "group": "Frameworks",
                 "pages": [
-                  "other-integrations/bubble",
+                  "other-integrations/langgraph",
+                  "getting-started/integration-method/litellm",
+                  "getting-started/integration-method/vercelai",
                   "getting-started/integration-method/crewai",
                   "other-integrations/dify",
-                  "other-integrations/embedchain",
-                  "other-integrations/firecrawl",
-                  "getting-started/integration-method/fireworks",
-                  "other-integrations/langgraph",
-                  {
-                    "group": "LiteLLM",
-                    "pages": [
-                      "getting-started/integration-method/litellm-openllmetry",
-                      "getting-started/integration-method/litellm",
-                      "getting-started/integration-method/litellm-proxy"
-                    ]
-                  },
-                  "other-integrations/meta-gpt",
-                  "other-integrations/open-devin",
-                  "other-integrations/open-webui",
-                  "getting-started/integration-method/openrouter",
-                  "other-integrations/ragas",
-                  "getting-started/integration-method/posthog",
-                  {
-                    "group": "Upstash",
-                    "pages": [
-                      "other-integrations/upstash-rag",
-                      "other-integrations/upstash-qstash"
-                    ]
-                  },
-                  {
-                    "group": "Vercel",
-                    "pages": [
-                      "getting-started/integration-method/vercelai",
-                      "getting-started/integration-method/vercel-ai-gateway"
-                    ]
-                  }
+                  "other-integrations/ragas"
                 ]
               },
               {
-                "group": "Tools Logging",
+                "group": "Specialized",
                 "pages": [
                   "integrations/tools/curl",
-                  "integrations/tools/logger-sdk"
-                ]
-              },
-              {
-                "group": "Any Vector DB",
-                "pages": [
                   "integrations/vectordb/curl",
-                  "integrations/vectordb/logger-sdk"
+                  "getting-started/integration-method/openllmetry"
                 ]
-              }
-            ]
-          },
-
-          {
-            "group": "Tracing",
-            "pages": [
-              "features/advanced-usage/caching",
-              "features/advanced-usage/custom-properties",
-              "features/sessions",
-              "features/advanced-usage/user-metrics",
-              "features/advanced-usage/omit-logs"
-            ]
-          },
-          {
-            "group": "Prompts & Evals",
-            "pages": [
-              "features/advanced-usage/prompts",
-              "features/advanced-usage/scores",
-              "features/advanced-usage/feedback",
-              {
-                "group": "Webhooks",
-                "pages": ["features/webhooks", "features/webhooks-testing"]
               }
             ]
           },
@@ -244,70 +252,29 @@
             "group": "References",
             "pages": [
               {
-                "group": "Self Host",
+                "group": "Self-Hosting",
                 "pages": [
                   "getting-started/self-host/overview",
-                  "getting-started/self-host/cloud",
                   "getting-started/self-host/docker",
-                  "getting-started/self-host/kubernetes",
-                  "getting-started/self-host/manual"
+                  "getting-started/self-host/kubernetes"
                 ]
               },
               {
-                "group": "Prompts (Legacy)",
+                "group": "Advanced",
+                "pages": [
+                  "references/how-we-calculate-cost",
+                  "references/data-autonomy",
+                  "references/proxy-vs-async",
+                  "helicone-headers/header-directory"
+                ]
+              },
+              {
+                "group": "Legacy Features",
                 "pages": [
                   "features/prompts-legacy/editor",
-                  "features/prompts-legacy/generate",
-                  "features/prompts-legacy/import"
+                  "features/prompts-legacy/generate"
                 ]
-              },
-              {
-                "group": "Async Logging",
-                "pages": [
-                  "getting-started/integration-method/openllmetry",
-                  {
-                    "group": "Manual Logger",
-                    "pages": [
-                      "getting-started/integration-method/custom",
-                      "getting-started/integration-method/manual-logger-curl",
-                      "getting-started/integration-method/manual-logger-python",
-                      "getting-started/integration-method/manual-logger-typescript",
-                      "getting-started/integration-method/manual-logger-go"
-                    ]
-                  }
-                ]
-              },
-              "references/how-we-calculate-cost",
-              "references/data-autonomy",
-              {
-                "group": "Generic Gateway",
-                "pages": ["getting-started/integration-method/gateway"]
-              },
-              {
-                "group": "Prompts (Legacy)",
-                "pages": [
-                  "rest/prompt/post-v1promptquery",
-                  "rest/prompt/post-v1prompt-query",
-                  "rest/prompt/delete-v1prompt",
-                  "rest/prompt/post-v1promptcreate",
-                  "rest/prompt/post-v1promptversion-edit-label",
-                  "rest/prompt/post-v1promptversion-edit-template",
-                  "rest/prompt/post-v1promptversion-subversion",
-                  "rest/prompt/post-v1promptversion-promote",
-                  "rest/prompt/post-v1promptversion-inputsquery",
-                  "rest/prompt/get-v1prompt-experiments",
-                  "rest/prompt/post-v1prompt-versionsquery",
-                  "rest/prompt/get-v1promptversion",
-                  "rest/prompt/delete-v1promptversion",
-                  "rest/prompt/post-v1prompt-compile",
-                  "rest/prompt/post-v1prompt-template"
-                ]
-              },
-              "helicone-headers/header-directory",
-              "references/latency-affect",
-              "references/open-source",
-              "references/proxy-vs-async",
-              "references/availability"
+              }
             ]
           }
         ]
@@ -766,6 +733,18 @@
     {
       "source": "/ai-gateway/debugging/telemetry",
       "destination": "/ai-gateway/self-hosted/debugging/telemetry"
+    },
+    {
+      "source": "/ai-gateway/overview",
+      "destination": "/gateway/overview"
+    },
+    {
+      "source": "/ai-gateway/fallbacks",
+      "destination": "/gateway/fallbacks"
+    },
+    {
+      "source": "/ai-gateway/prompt-integration",
+      "destination": "/gateway/prompt-integration"
     }
   ]
 }

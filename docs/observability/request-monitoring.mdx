@@ -1,0 +1,265 @@
+---
+title: "Request Monitoring"
+sidebarTitle: "Request Monitoring"
+description: "Monitor all your LLM requests and responses across providers with detailed logs and analytics"
+---
+
+Track every LLM request flowing through your application with comprehensive logging, filtering, and search capabilities. The Request Monitoring dashboard gives you complete visibility into your AI interactions.
+
+## Overview
+
+Every request through the AI Gateway is automatically logged with detailed information including:
+
+- **Request/Response content** - Full messages and model outputs
+- **Performance metrics** - Latency, token usage, and timing
+- **Provider information** - Which model and provider was used
+- **User context** - Session IDs, user IDs, and custom properties
+- **Cost data** - Token counts and pricing breakdown
+
+<Frame>
+  <img
+    src="/images/observability/request-logs.webp"
+    alt="Helicone request monitoring dashboard showing detailed LLM request logs."
+  />
+</Frame>
+
+## Request Details
+
+### Basic Information
+Each request log contains:
+
+```json
+{
+  "id": "req_abc123",
+  "created_at": "2024-01-15T10:30:00Z",
+  "model": "gpt-4o/openai",
+  "status": "success",
+  "latency_ms": 1450,
+  "total_tokens": 842,
+  "cost_usd": 0.0168
+}
+```
+
+### Request Content
+View the full conversation context sent to the model:
+
+<CodeGroup>
+```json Request
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "Explain quantum computing in simple terms"
+    }
+  ],
+  "model": "gpt-4o/openai",
+  "temperature": 0.7,
+  "max_tokens": 500
+}
+```
+
+```json Response
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "Quantum computing is like having a super-powered calculator..."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 12,
+    "completion_tokens": 156,
+    "total_tokens": 168
+  }
+}
+```
+</CodeGroup>
+
+### Metadata & Properties
+Requests include automatic and custom metadata:
+
+```json
+{
+  "properties": {
+    "feature": "chat",
+    "user_tier": "premium",
+    "environment": "production"
+  },
+  "user_id": "user-123",
+  "session_id": "conv-456",
+  "provider": "openai",
+  "model_name": "gpt-4o"
+}
+```
+
+## Filtering & Search
+
+### Quick Filters
+Use preset filters to find specific requests:
+
+<CardGroup cols={2}>
+<Card title="By Status" icon="check-circle">
+  Filter by success, error, timeout, or cancelled requests
+</Card>
+<Card title="By Model" icon="cpu">
+  View requests for specific models or providers
+</Card>
+<Card title="By User" icon="user">
+  See all requests from a particular user
+</Card>
+<Card title="By Time Range" icon="calendar">
+  Filter by date range or specific time periods
+</Card>
+</CardGroup>
+
+### Advanced Search
+Use the search bar for complex queries:
+
+- **Content search**: `"quantum computing"` - Find requests containing specific text
+- **Property filters**: `user_tier:premium` - Filter by custom properties
+- **Status filters**: `status:error` - Show only failed requests
+- **Cost filters**: `cost:>0.01` - Find expensive requests
+- **Latency filters**: `latency:>2000` - Show slow requests
+
+### Example Queries
+```
+# Find all errors from premium users
+status:error AND user_tier:premium
+
+# Expensive GPT-4 requests this week
+model:gpt-4 AND cost:>0.05 AND created_at:>7d
+
+# Long conversations
+session_length:>10
+
+# Specific user's chat requests
+user_id:user-123 AND feature:chat
+```
+
+## Request Analytics
+
+### Performance Metrics
+Track key performance indicators:
+
+- **Average latency** - Response time across requests
+- **Success rate** - Percentage of successful requests
+- **Token efficiency** - Input vs output token ratios
+- **Cost per request** - Average spending per interaction
+
+### Usage Patterns
+Understand how your AI is being used:
+
+- **Request volume** - Requests per hour/day/week
+- **Model distribution** - Which models are most popular
+- **Feature usage** - Breakdown by custom properties
+- **User behavior** - Active users and request patterns
+
+## Real-time Monitoring
+
+### Live Request Stream
+Watch requests as they happen in real-time:
+
+- See new requests appear instantly
+- Monitor system health and performance
+- Quickly identify and investigate issues
+- Track usage spikes or anomalies
+
+### Request Status
+Monitor the lifecycle of each request:
+
+1. **Queued** - Request received and queued
+2. **Processing** - Sent to LLM provider
+3. **Completed** - Response received successfully
+4. **Failed** - Error occurred during processing
+
+## Troubleshooting
+
+### Common Issues
+
+<AccordionGroup>
+  <Accordion title="High Error Rates">
+    **Symptoms**: Many requests showing error status
+    
+    **Investigation**:
+    - Check provider API status
+    - Review error messages in request details
+    - Verify API key configuration
+    - Check rate limiting settings
+  </Accordion>
+  
+  <Accordion title="Slow Response Times">
+    **Symptoms**: High latency across requests
+    
+    **Investigation**:
+    - Compare latency across different models
+    - Check if specific users are affected
+    - Review model parameters (temperature, max_tokens)
+    - Consider using faster model variants
+  </Accordion>
+  
+  <Accordion title="Cost Spikes">
+    **Symptoms**: Unexpected increase in costs
+    
+    **Investigation**:
+    - Filter by high-cost requests
+    - Check token usage patterns
+    - Review which users/features are driving costs
+    - Consider implementing rate limiting
+  </Accordion>
+</AccordionGroup>
+
+### Request Debugging
+Use request logs to debug issues:
+
+1. **Find the problematic request** using filters
+2. **Examine the full request/response** for errors
+3. **Check custom properties** for context
+4. **Review session history** if it's part of a conversation
+5. **Compare with successful similar requests**
+
+## Exporting Data
+
+### Export Options
+Download request data for external analysis:
+
+- **CSV export** - Request metadata and metrics
+- **JSON export** - Full request/response data
+- **API access** - Programmatic data retrieval
+- **Webhook integration** - Real-time data streaming
+
+### API Access
+Retrieve request data programmatically:
+
+```typescript
+// Get recent requests
+const response = await fetch('/api/requests', {
+  headers: { 'Authorization': `Bearer ${apiKey}` },
+  params: {
+    limit: 100,
+    start_date: '2024-01-01',
+    status: 'success'
+  }
+});
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+<Card title="Set Up Alerts" icon="bell" href="/features/advanced-usage/alerts">
+  Get notified about errors, cost spikes, or performance issues
+</Card>
+<Card title="Track Costs" icon="dollar-sign" href="/observability/cost-tracking">
+  Monitor and optimize your LLM spending
+</Card>
+<Card title="Analyze Sessions" icon="git-branch" href="/features/sessions">
+  Group related requests for better insights
+</Card>
+<Card title="Custom Properties" icon="tag" href="/features/advanced-usage/custom-properties">
+  Add labels to organize and filter requests
+</Card>
+</CardGroup>
+
+Request monitoring is the foundation of LLM observability. Use it to understand your AI usage patterns, debug issues, and optimize performance and costs.
