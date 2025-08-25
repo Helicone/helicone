@@ -5,7 +5,7 @@ import {
   EMPTY_FILTER_GROUP_EXPRESSION,
   FilterExpression,
   OrExpression,
-} from "../filterAst";
+} from "@helicone-package/filters";
 
 export interface FilterState {
   // The active filter expression
