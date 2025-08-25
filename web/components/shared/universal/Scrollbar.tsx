@@ -93,13 +93,13 @@ const CustomScrollbar = forwardRef<
       </div>
       {/* Custom overlay scrollbar */}
       {scrollHeight > clientHeight + 1 && (
-        <div className="pointer-events-none absolute bottom-0 right-0 top-0 z-10 w-[8px]">
+        <div className="pointer-events-none absolute bottom-0 right-0 top-0 z-50 w-[10px]">
           <div
             className={`absolute right-0 transition-opacity duration-200 ${
               withBorder
-                ? "border-slate-100 bg-slate-200 dark:border-slate-900 dark:bg-slate-800"
-                : "border-transparent bg-slate-200 dark:bg-slate-800"
-            } ${hovered ? "opacity-100" : "opacity-0"} ${
+                ? "border-slate-100 bg-slate-300 dark:border-slate-900 dark:bg-slate-700"
+                : "border-transparent bg-slate-300 dark:bg-slate-700"
+            } ${hovered ? "opacity-100" : "opacity-40"} ${
               thumbTop === 0
                 ? "rounded-r-xs rounded-bl-md border-b border-l"
                 : thumbTop + thumbHeight >= clientHeight
@@ -109,7 +109,7 @@ const CustomScrollbar = forwardRef<
             style={{
               top: thumbTop,
               height: thumbHeight,
-              width: "8px",
+              width: "10px",
             }}
           />
         </div>
