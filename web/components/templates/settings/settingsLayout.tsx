@@ -76,12 +76,6 @@ const DEVELOPER_TABS = [
     href: "/settings/providers",
   },
   {
-    id: "ai-gateway",
-    title: "AI Gateway",
-    icon: ShuffleIcon,
-    href: "/settings/ai-gateway",
-  },
-  {
     id: "webhooks",
     title: "Webhooks",
     icon: Webhook,
