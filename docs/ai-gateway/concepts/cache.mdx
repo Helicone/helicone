@@ -108,6 +108,34 @@ Caching uses exact parameter matching with configurable TTL, staleness policies,
     curl -H "Helicone-Cache-Seed: user-123" ...
     ```
   </Accordion>
+
+  <Accordion title="Ignore Keys in Cache Key Generation" icon="filter">
+    **Exclude specific JSON fields from cache key generation**
+    
+    When generating cache keys, you can exclude specific fields from the request body that shouldn't affect caching. This is useful for fields that change between requests but don't affect the response, such as timestamps or request IDs.
+    
+    **Best for:** Applications with dynamic metadata that shouldn't invalidate cache
+    
+    **How it works:**
+    1. Specify keys to ignore via the `Helicone-Cache-Ignore-Keys` header
+    2. These keys are removed from the request body before generating the cache key
+    3. The original request with all fields is still sent to the provider
+    
+    **Example:**
+    ```bash
+    curl -X POST http://localhost:8080/ai/chat/completions \
+      -H "Content-Type: application/json" \
+      -H "Helicone-Cache-Ignore-Keys: request_id,timestamp" \
+      -d '{
+        "model": "openai/gpt-4o-mini",
+        "messages": [{"role": "user", "content": "Hello!"}],
+        "request_id": "unique-123",
+        "timestamp": "2024-01-01T00:00:00Z"
+      }'
+    ```
+    
+    In this example, the `request_id` and `timestamp` fields are ignored when generating the cache key, so requests with different values for these fields will still hit the same cache entry.
+  </Accordion>
 </AccordionGroup>
 
 ## Use Cases
@@ -227,6 +255,7 @@ Control caching behavior per-request with these headers:
 - `Cache-Control: "max-age=3600"` - Override cache directive
 - `Helicone-Cache-Seed: "custom-seed"` - Set cache namespace
 - `Helicone-Cache-Bucket-Max-Size: 5` - Override bucket size
+- `Helicone-Cache-Ignore-Keys: "key1,key2"` - Ignore specific JSON keys when generating cache keys
 
 ### Cache Response Headers
 
