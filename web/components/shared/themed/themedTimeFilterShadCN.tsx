@@ -353,6 +353,18 @@ export function ThemedTimeFilterShadCN({
                     setDate1Value(e.target.value);
                     const newFrom = new Date(e.target.value);
                     if (isValidDate(newFrom)) {
+                      // Preserve existing time when changing date
+                      if (date?.from && isValidDate(date.from)) {
+                        newFrom.setHours(
+                          date.from.getHours(),
+                          date.from.getMinutes(),
+                        );
+                      } else if (time1Value) {
+                        const [hours, minutes] = time1Value.split(":");
+                        if (hours && minutes) {
+                          newFrom.setHours(Number(hours), Number(minutes));
+                        }
+                      }
                       handleDateChange({ ...date, from: newFrom });
                     }
                   }}
@@ -363,13 +375,14 @@ export function ThemedTimeFilterShadCN({
                   value={time1Value}
                   onChange={(e) => {
                     setTime1Value(e.target.value);
-                    const newFrom = new Date(e.target.value);
-                    if (isValidDate(newFrom)) {
-                      let [hours, minutes] = e.target.value.split(":");
-
+                    if (date?.from && date1Value) {
+                      const [hours, minutes] = e.target.value.split(":");
                       if (hours && minutes) {
+                        const newFrom = new Date(date1Value);
                         newFrom.setHours(Number(hours), Number(minutes));
-                        handleDateChange({ ...date, from: newFrom });
+                        if (isValidDate(newFrom)) {
+                          handleDateChange({ ...date, from: newFrom });
+                        }
                       }
                     }
                   }}
@@ -384,7 +397,19 @@ export function ThemedTimeFilterShadCN({
                     setDate2Value(e.target.value);
                     const newTo = new Date(e.target.value);
                     if (isValidDate(newTo) && date?.from) {
-                      handleDateChange({ ...date, to: newTo });
+                      // Preserve existing time when changing date
+                      if (date?.to && isValidDate(date.to)) {
+                        newTo.setHours(
+                          date.to.getHours(),
+                          date.to.getMinutes(),
+                        );
+                      } else if (time2Value) {
+                        const [hours, minutes] = time2Value.split(":");
+                        if (hours && minutes) {
+                          newTo.setHours(Number(hours), Number(minutes));
+                        }
+                      }
+                      handleDateChange({ from: date.from, to: newTo });
                     }
                   }}
                 />
@@ -394,13 +419,14 @@ export function ThemedTimeFilterShadCN({
                   value={time2Value}
                   onChange={(e) => {
                     setTime2Value(e.target.value);
-                    const newTo = new Date(e.target.value);
-                    if (isValidDate(newTo) && date?.from) {
-                      let [hours, minutes] = e.target.value.split(":");
-
+                    if (date2Value && date?.from) {
+                      const [hours, minutes] = e.target.value.split(":");
                       if (hours && minutes) {
+                        const newTo = new Date(date2Value);
                         newTo.setHours(Number(hours), Number(minutes));
-                        handleDateChange({ ...date, to: newTo });
+                        if (isValidDate(newTo)) {
+                          handleDateChange({ from: date.from, to: newTo });
+                        }
                       }
                     }
                   }}
