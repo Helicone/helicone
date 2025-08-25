@@ -50,7 +50,7 @@ interface HeliconeAgentContextType {
   ) => void;
   switchToSession: (sessionId: string) => void;
   deleteSession: (sessionId: string) => void;
-  escalateSession: () => void;
+  escalateSession: () => Promise<void>;
   agentChatOpen: boolean;
   setAgentChatOpen: (open: boolean) => void;
 }
@@ -145,11 +145,26 @@ export const HeliconeAgentProvider: React.FC<{
     }
   }, [thread]);
 
-  const { mutate: escalateThread } = $JAWN_API.useMutation(
+  const { mutateAsync: escalateThread } = $JAWN_API.useMutation(
     "post",
     "/v1/agent/thread/{sessionId}/escalate",
     {
       onSuccess: () => {
+        refetchThreads();
+        refetchThread();
+      },
+    },
+  );
+
+  const { mutateAsync: createAndEscalateThread } = $JAWN_API.useMutation(
+    "post",
+    "/v1/agent/thread/create-and-escalate",
+    {
+      onSuccess: (data) => {
+        // Switch to the newly created thread
+        if (data.data?.id) {
+          setCurrentSessionId(data.data.id);
+        }
         refetchThreads();
         refetchThread();
       },
@@ -271,14 +286,23 @@ export const HeliconeAgentProvider: React.FC<{
         messages: messages,
         agentChatOpen,
         setAgentChatOpen,
-        escalateSession: () => {
-          escalateThread({
-            params: {
-              path: {
-                sessionId: currentSessionId || "",
-              },
-            },
-          });
+        escalateSession: async () => {
+          try {
+            if (messages.length > 1 && currentSessionId) {
+              await escalateThread({
+                params: {
+                  path: {
+                    sessionId: currentSessionId,
+                  },
+                },
+              });
+            } else {
+              await createAndEscalateThread({});
+            }
+          } catch (error) {
+            console.error("Escalation failed:", error);
+            throw error;
+          }
         },
         createNewSession: () => {
           const newSessionId = crypto.randomUUID();
@@ -298,6 +322,7 @@ export const HeliconeAgentProvider: React.FC<{
               messages: newChatMessages as any,
               metadata: {
                 posthogSession: "test",
+                currentPage: window.location.pathname,
               },
             },
           });
@@ -316,6 +341,7 @@ export const HeliconeAgentProvider: React.FC<{
                 messages: messages as any,
                 metadata: {
                   posthogSession: "test",
+                  currentPage: window.location.pathname,
                 },
               },
             });

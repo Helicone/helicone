@@ -3,6 +3,13 @@ import { Result, ok, err } from "../packages/common/result";
 import { dbExecute } from "../lib/shared/db/dbExecute";
 import { AuthParams } from "../packages/common/auth/types";
 import OpenAI from "openai";
+import { SlackService } from "../services/SlackService";
+
+// Initialize Slack service on module load
+const slackService = SlackService.getInstance();
+slackService.initialize().catch(error => {
+  console.error("Failed to initialize Slack service:", error);
+});
 
 export interface InAppThread {
   id: string;
@@ -67,7 +74,7 @@ export class InAppThreadsManager extends BaseManager {
         const updateResult = await dbExecute<InAppThread>(
           `UPDATE in_app_threads 
            SET chat = $1::jsonb, 
-               metadata = $2::jsonb,
+               metadata = COALESCE(metadata, '{}'::jsonb) || $2::jsonb,
                updated_at = NOW()
            WHERE id = $3 AND org_id = $4
            RETURNING *`,
@@ -87,7 +94,17 @@ export class InAppThreadsManager extends BaseManager {
           return err("Failed to update thread: No data returned");
         }
 
-        return ok(updateResult.data[0]);
+        const updatedThread = updateResult.data[0];
+
+        // If thread is escalated, forward new user messages to Slack
+        if (
+          updatedThread.escalated &&
+          updatedThread.metadata?.slack_thread_ts
+        ) {
+          await this.forwardUserMessageToSlack(updatedThread, messages);
+        }
+
+        return ok(updatedThread);
       } else {
         // Create new thread
         const insertResult = await dbExecute<InAppThread>(
@@ -143,15 +160,123 @@ export class InAppThreadsManager extends BaseManager {
   async escalateThread(
     sessionId: string
   ): Promise<Result<InAppThread, string>> {
+    const slackService = SlackService.getInstance();
+
     try {
+      // Get the thread details to include in the Slack message
+      const threadResult = await this.getThread(sessionId);
+      if (threadResult.error || !threadResult.data) {
+        return err("Thread not found");
+      }
+
+      const thread = threadResult.data;
+      const messages = thread.chat?.messages || [];
+
+      // Get last few messages for context (up to 3)
+      const recentMessages = messages
+        .slice(-3)
+        .map((msg: any) => {
+          const role = msg.role === "user" ? "👤 User" : "🤖 Assistant";
+          const content =
+            typeof msg.content === "string"
+              ? msg.content.substring(0, 200) +
+                (msg.content.length > 200 ? "..." : "")
+              : "[Complex content]";
+          return `${role}: ${content}`;
+        })
+        .join("\n\n");
+
+      // Create the stub admin link (to be implemented later)
+      const adminLink = `https://helicone.ai/admin/threads/${sessionId}`;
+
+      // Check if this was created directly escalated (no prior conversation)
+      const wasDirectlyEscalated =
+        thread.metadata?.createdDirectlyEscalated === true;
+      const headerText = wasDirectlyEscalated
+        ? "🎯 Direct Support Request"
+        : "🚨 Customer Support Escalation";
+
+      const conversationText = wasDirectlyEscalated
+        ? "*Status:* Customer clicked 'Support' without prior conversation - they need direct help"
+        : "*Recent Conversation:*\n```" + recentMessages + "```";
+
+      const text = wasDirectlyEscalated
+        ? `🎯 New direct support request`
+        : `🚨 New escalation from user`;
+      
+      const blocks = [
+        {
+          type: "header",
+          text: {
+            type: "plain_text",
+            text: headerText,
+            emoji: true,
+          },
+        },
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `*Organization:* ${this.authParams.organizationId}\n*User:* ${this.authParams.userId || "Unknown"}\n*Session:* \`${sessionId}\`\n*Current Page:* ${thread.metadata?.currentPage || "Unknown"}\n*Time:* ${new Date().toLocaleString()}`,
+          },
+        },
+        {
+          type: "divider",
+        },
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: conversationText,
+          },
+        },
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `<${adminLink}|View Full Thread> (admin view - coming soon)`,
+          },
+        },
+        {
+          type: "context",
+          elements: [
+            {
+              type: "mrkdwn",
+              text: "💡 Reply in this thread to respond to the customer. Messages will sync back to their chat.",
+            },
+          ],
+        },
+      ];
+
+      const threadTs = await slackService.postMessage(text, blocks);
+      if (!threadTs) {
+        return err("Failed to post message to Slack");
+      }
+
+      console.log("Storing slack_thread_ts in database:", {
+        sessionId,
+        threadTs,
+      });
+
       const updateResult = await dbExecute<InAppThread>(
         `UPDATE in_app_threads 
          SET escalated = true,
-             updated_at = NOW()
-         WHERE id = $1 AND org_id = $2
+             updated_at = NOW(),
+             metadata = jsonb_set(
+               COALESCE(metadata, '{}'::jsonb),
+               '{slack_thread_ts}',
+               to_jsonb($3::text)
+             )
+         WHERE id = $1 AND org_id = $2 AND escalated = false
          RETURNING *`,
-        [sessionId, this.authParams.organizationId]
+        // If no row is updated, it means it was already escalated
+        [sessionId, this.authParams.organizationId, threadTs]
       );
+
+
+      if (updateResult.data?.[0]) {
+        return ok(updateResult.data[0]);
+      }
 
       if (updateResult.error) {
         return err(`Failed to escalate thread: ${updateResult.error}`);
@@ -213,6 +338,102 @@ export class InAppThreadsManager extends BaseManager {
       return ok(threadResult.data[0]);
     } catch (error) {
       return err(`Unexpected error: ${error}`);
+    }
+  }
+
+  async createAndEscalateThread(): Promise<Result<InAppThread, string>> {
+    try {
+      // Generate a new session ID
+      const sessionId = crypto.randomUUID();
+
+      // Create initial system message
+      const initialMessages = [
+        {
+          role: "assistant",
+          content:
+            "Hello! I'm Helix, your Helicone assistant. I've connected you directly to our support team who will help you with your question.",
+        },
+      ];
+
+      // Create the thread
+      const createResult = await this.upsertThreadMessage({
+        sessionId,
+        messages: initialMessages as any,
+        metadata: {
+          createdDirectlyEscalated: true,
+        },
+      });
+
+      if (createResult.error) {
+        return err(`Failed to create thread: ${createResult.error}`);
+      }
+
+      // Now escalate the newly created thread
+      const escalateResult = await this.escalateThread(sessionId);
+
+      if (escalateResult.error) {
+        return err(`Failed to escalate thread: ${escalateResult.error}`);
+      }
+
+      if (!escalateResult.data) {
+        return err("Failed to escalate thread: No data returned");
+      }
+
+      return ok(escalateResult.data);
+    } catch (error) {
+      return err(`Unexpected error: ${error}`);
+    }
+  }
+
+  private async forwardUserMessageToSlack(
+    thread: InAppThread,
+    _allMessages: OpenAI.Chat.ChatCompletionMessageParam[]
+  ): Promise<void> {
+    const slackService = SlackService.getInstance();
+
+    try {
+      const slackThreadTs = thread.metadata?.slack_thread_ts;
+      if (!slackThreadTs) {
+        return;
+      }
+
+      // Get previous messages to find new ones
+      const existingMessages = thread.chat?.messages || [];
+      const lastMessage = existingMessages?.[existingMessages.length - 1];
+
+      // Find new user messages by comparing content and timestamps
+      const newUserMessages = lastMessage?.role === "user" ? [lastMessage] : [];
+
+
+      // Forward each new user message to Slack
+      for (const message of newUserMessages) {
+        let messageText = "";
+
+        if (typeof message.content === "string") {
+          messageText = message.content;
+        } else if (Array.isArray(message.content)) {
+          // Handle multimodal content (text + images)
+          const textParts = message.content
+            .filter((part: any) => part.type === "text")
+            .map((part: any) => part.text);
+          messageText = textParts.join("\n");
+
+          const imageParts = message.content.filter(
+            (part: any) => part.type === "image_url"
+          );
+          if (imageParts.length > 0) {
+            messageText += `\n\n📎 *[Message contains ${imageParts.length} image(s)]*`;
+          }
+        }
+
+        if (messageText.trim()) {
+          const formattedMessage = `👤 **Customer:**\n${messageText}`;
+
+          await slackService.postThreadMessage(slackThreadTs, formattedMessage);
+        }
+      }
+    } catch (error) {
+      console.error("Error forwarding user message to Slack:", error);
     }
   }
 }
