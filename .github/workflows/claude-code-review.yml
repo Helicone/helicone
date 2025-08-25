@@ -78,7 +78,9 @@ jobs:
           # Optional: Add specific tools for running tests or linting
           allowed_tools: "Bash(yarn build),Bash(yarn test),Bash(yarn lint)"
 
+          # Optional: Allow specific bots to trigger this workflow
+          allowed_bots: "greptile-apps"
+
           # Optional: Skip review for certain conditions
           if: |
-          #   !contains(github.event.pull_request.title, '[skip-review]') &&
             !contains(github.event.pull_request.title, '[WIP]')
