@@ -203,8 +203,7 @@ const QuickstartPage = () => {
                   </div>
 
                   <Link
-                    // TODO: Swap for AI Gateway documentation
-                    href="https://docs.helicone.ai"
+                    href="https://docs.helicone.ai/getting-started/quick-start"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-fit"
