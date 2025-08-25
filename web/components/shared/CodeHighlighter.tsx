@@ -28,8 +28,8 @@ export function CodeHighlighter({
         });
         // Sanitize the HTML to prevent XSS attacks
         const sanitizedHtml = DOMPurify.sanitize(highlightedHtml, {
-          ALLOWED_TAGS: ['pre', 'code', 'span', 'div'],
-          ALLOWED_ATTR: ['class', 'style', 'data-*'],
+          ALLOWED_TAGS: ["pre", "code", "span", "div"],
+          ALLOWED_ATTR: ["class", "style", "data-*"],
         });
         setHtml(sanitizedHtml);
       } catch (error) {
