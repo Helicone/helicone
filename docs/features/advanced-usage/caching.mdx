@@ -95,6 +95,7 @@ Control caching behavior with these headers:
 |--------|------|-------------|---------|---------|
 | `Helicone-Cache-Bucket-Max-Size` | `string` | Number of responses to store per cache bucket | `"1"` | `"3"` |
 | `Helicone-Cache-Seed` | `string` | Create separate cache namespaces | N/A | `"user-123"` |
+| `Helicone-Cache-Ignore-Keys` | `string` | Comma-separated JSON keys to exclude from cache key generation | N/A | `"request_id,timestamp"` |
 
 <Info>
 All header values must be strings. For example, `"Helicone-Cache-Bucket-Max-Size": "10"`.
@@ -163,6 +164,61 @@ openai.completion("random number") -> "17"  # Consistent per seed
 ```
 
 <Tip>Change the seed value to effectively clear your cache for testing.</Tip>
+</Accordion>
+
+<Accordion title="Ignore Keys">
+Exclude specific JSON fields from cache key generation:
+
+```typescript
+{
+  "Helicone-Cache-Ignore-Keys": "request_id,timestamp,session_id"
+}
+```
+
+When these fields are ignored, requests with different values for these fields will still hit the same cache entry:
+
+```typescript
+// First request
+const response1 = await openai.chat.completions.create(
+  {
+    model: "gpt-4o-mini",
+    messages: [{ role: "user", content: "Hello" }],
+    request_id: "req-123",
+    timestamp: "2024-01-01T00:00:00Z"
+  },
+  {
+    headers: {
+      "Helicone-Cache-Enabled": "true",
+      "Helicone-Cache-Ignore-Keys": "request_id,timestamp"
+    }
+  }
+);
+
+// Second request with different request_id and timestamp
+// This will hit the cache despite different values
+const response2 = await openai.chat.completions.create(
+  {
+    model: "gpt-4o-mini",
+    messages: [{ role: "user", content: "Hello" }],
+    request_id: "req-456",  // Different ID
+    timestamp: "2024-02-02T00:00:00Z"  // Different timestamp
+  },
+  {
+    headers: {
+      "Helicone-Cache-Enabled": "true",
+      "Helicone-Cache-Ignore-Keys": "request_id,timestamp"
+    }
+  }
+);
+// response2 returns cached response from response1
+```
+
+<Note>This feature only works with JSON request bodies. Non-JSON bodies will use the original text for cache key generation.</Note>
+
+**Common use cases:**
+- Ignore tracking IDs that don't affect the response
+- Exclude timestamps for time-independent queries
+- Remove session or user metadata when caching shared content
 </Accordion>
 </AccordionGroup>
 
