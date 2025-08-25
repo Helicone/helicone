@@ -2,7 +2,16 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Mock dependencies - must be hoisted before imports
 vi.mock("../../src", () => ({
-  hash: vi.fn((input: string) => Promise.resolve(`hashed_${Buffer.from(input).toString('base64').substring(0, 20)}`)),
+  hash: vi.fn((input: string) => {
+    // Simple hash that will produce different results for different inputs
+    let hash = 0;
+    for (let i = 0; i < input.length; i++) {
+      const char = input.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return Promise.resolve(`hashed_${Math.abs(hash).toString(16)}`);
+  }),
 }));
 
 vi.mock("../../src/lib/safePut", () => ({
@@ -26,7 +35,7 @@ describe("Simple Cache Test", () => {
       get: vi.fn(async (key: string) => {
         return cacheStorage.get(key) || null;
       }),
-      put: vi.fn(async (key: string, value: string, options?: any) => {
+      put: vi.fn(async (key: string, value: string) => {
         cacheStorage.set(key, JSON.parse(value));
         return Promise.resolve();
       }),
@@ -120,15 +129,41 @@ describe("Simple Cache Test", () => {
   });
 
   it("should return different cached responses for different requests", async () => {
+    // Create two different mock requests to avoid shared state
+    const createMockRequest = (body: string) => {
+      const headers = new Headers({
+        "Content-Type": "application/json",
+        "Authorization": "Bearer test-key",
+      });
+      
+      return {
+        url: "https://api.openai.com/v1/chat/completions",
+        requestWrapper: {
+          getText: vi.fn().mockResolvedValue(body),
+          getHeaders: vi.fn(() => headers),
+          heliconeHeaders: {
+            cacheHeaders: {
+              cacheSeed: null,
+              cacheEnabled: true,
+              cacheBucketMaxSize: null,
+              cacheControl: null,
+              cacheIgnoreKeys: null,
+            },
+          },
+          headers: headers,
+        },
+      };
+    };
+    
     // Request 1
     const request1Body = JSON.stringify({
       model: "gpt-4",
       messages: [{ role: "user", content: "What is 2+2?" }],
     });
+    const mockRequest1 = createMockRequest(request1Body);
     
     // Manually populate cache for request 1
-    vi.mocked(mockRequest.requestWrapper.getText).mockResolvedValue(request1Body);
-    const key1 = await kvKeyFromRequest(mockRequest, 0, null);
+    const key1 = await kvKeyFromRequest(mockRequest1, 0, null);
     cacheStorage.set(key1, {
       headers: { "Content-Type": "application/json" },
       latency: 100,
@@ -140,10 +175,14 @@ describe("Simple Cache Test", () => {
       model: "gpt-4",
       messages: [{ role: "user", content: "What is 3+3?" }],
     });
+    const mockRequest2 = createMockRequest(request2Body);
     
     // Manually populate cache for request 2
-    vi.mocked(mockRequest.requestWrapper.getText).mockResolvedValue(request2Body);
-    const key2 = await kvKeyFromRequest(mockRequest, 0, null);
+    const key2 = await kvKeyFromRequest(mockRequest2, 0, null);
+    
+    // Keys should be different for different requests
+    expect(key1).not.toBe(key2);
+    
     cacheStorage.set(key2, {
       headers: { "Content-Type": "application/json" },
       latency: 150,
@@ -151,9 +190,8 @@ describe("Simple Cache Test", () => {
     });
     
     // Retrieve request 1
-    vi.mocked(mockRequest.requestWrapper.getText).mockResolvedValue(request1Body);
     const cached1 = await getCachedResponse(
-      mockRequest,
+      mockRequest1,
       { bucketSize: 1 },
       mockCacheKv,
       null
@@ -162,9 +200,8 @@ describe("Simple Cache Test", () => {
     expect(body1).toBe('{"answer":"4"}');
     
     // Retrieve request 2
-    vi.mocked(mockRequest.requestWrapper.getText).mockResolvedValue(request2Body);
     const cached2 = await getCachedResponse(
-      mockRequest,
+      mockRequest2,
       { bucketSize: 1 },
       mockCacheKv,
       null
