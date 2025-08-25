@@ -704,7 +704,7 @@ export function ModelRegistryPage() {
                       </div>
                       <Slider
                         value={priceRange}
-                        onValueChange={setPriceRange}
+                        onValueChange={(value) => setPriceRange(value as [number, number])}
                         min={0}
                         max={priceStats.max}
                         step={0.1}
