@@ -1,4 +1,3 @@
-import { Small } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
 import { HelpCircle } from "lucide-react";
 import {
@@ -17,7 +16,7 @@ const DefaultAIGateway = ({ setTabValue }: { setTabValue: () => void }) => {
       {/* AI Gateway Getting Started Section */}
       <div className="w-full flex-shrink-0 border border-border bg-background">
         <div className="p-4">
-          <div className="flex justify-end mb-2">
+          <div className="mb-2 flex justify-end">
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -35,7 +34,7 @@ const DefaultAIGateway = ({ setTabValue }: { setTabValue: () => void }) => {
                 <div className="space-y-4">
                   <p className="text-sm text-muted-foreground">
                     Send your first request to the AI Gateway using one of the
-                    code examples above.
+                    code examples below.
                   </p>
                   <div className="space-y-2">
                     <p className="text-sm">
@@ -50,8 +49,8 @@ const DefaultAIGateway = ({ setTabValue }: { setTabValue: () => void }) => {
                       gateway.
                     </p>
                     <p className="text-sm">
-                      For more information on how to use the AI Gateway,
-                      please refer to the{" "}
+                      For more information on how to use the AI Gateway, please
+                      refer to the{" "}
                       <a
                         href="https://docs.helicone.ai/ai-gateway"
                         className="font-medium text-primary underline"
@@ -76,7 +75,7 @@ const DefaultAIGateway = ({ setTabValue }: { setTabValue: () => void }) => {
               </DialogContent>
             </Dialog>
           </div>
-          
+
           <IntegrationCodeTabs />
         </div>
       </div>

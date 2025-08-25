@@ -8,10 +8,10 @@ interface IntegrationCodeTabsProps {
   theme?: string;
 }
 
-export function IntegrationCodeTabs({ 
-  apiKey, 
+export function IntegrationCodeTabs({
+  apiKey,
   defaultTab = "javascript",
-  theme = "github-dark"
+  theme = "github-dark",
 }: IntegrationCodeTabsProps) {
   return (
     <Tabs defaultValue={defaultTab} className="w-full">
