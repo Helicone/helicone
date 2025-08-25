@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Filter, X, Code, ChevronDown, ChevronUp } from "lucide-react";
-import { FilterExpression } from "@/filterAST/filterAst";
+import { FilterExpression } from "@helicone-package/filters";
 import { Small } from "@/components/ui/typography";
 import { Textarea } from "@/components/ui/textarea";
 import LocalFilterBuilder from "./LocalFilterBuilder";

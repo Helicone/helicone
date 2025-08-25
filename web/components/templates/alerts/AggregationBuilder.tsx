@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FilterExpression } from "@/filterAST/filterAst";
+import { FilterExpression } from "@helicone-package/filters";
 import { Small } from "@/components/ui/typography";
 import LocalFilterEditor from "./LocalFilterEditor";
 import {

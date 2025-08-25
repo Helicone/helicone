@@ -38,7 +38,7 @@ import {
 } from "@/components/ui/command";
 import { Check, ChevronsUpDown, X } from "lucide-react";
 import AggregationBuilder, { AggregationConfig } from "./AggregationBuilder";
-import { AggregationExpression } from "@/filterAST/filterAst";
+import { AggregationExpression, FilterExpression } from "@helicone-package/filters";
 export type AlertRequest = {
   name: string;
   threshold: number;

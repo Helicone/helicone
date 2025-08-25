@@ -7,7 +7,7 @@ import {
   AndExpression,
   OrExpression,
   FilterOperator,
-} from "@/filterAST/filterAst";
+} from "@helicone-package/filters";
 import { Small } from "@/components/ui/typography";
 import {
   Select,

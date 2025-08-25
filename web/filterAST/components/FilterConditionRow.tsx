@@ -12,7 +12,7 @@ import {
 import SearchableSelect, { SearchableSelectOption } from "./ui/SearchableSelect";
 import SearchableInput, { SearchableInputOption } from "./ui/SearchableInput";
 import DateTimeInput from "./ui/DateTimeInput";
-import { FilterOperator, ConditionExpression } from "../filterAst";
+import { FilterOperator, ConditionExpression } from "@helicone-package/filters";
 import { FilterUIDefinition } from "../filterUIDefinitions/types";
 import { Small } from "@/components/ui/typography";
 import clsx from "clsx";
