@@ -12,7 +12,6 @@ import {
   KeyIcon,
   LinkIcon,
   Plug,
-  ShuffleIcon,
   Webhook,
   Coins,
   Lock,
