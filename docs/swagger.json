@@ -7332,6 +7332,227 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ModelEndpoint": {
+				"properties": {
+					"provider": {
+						"type": "string"
+					},
+					"providerSlug": {
+						"type": "string"
+					},
+					"pricing": {
+						"properties": {
+							"cacheWrite": {
+								"type": "number",
+								"format": "double"
+							},
+							"cacheRead": {
+								"type": "number",
+								"format": "double"
+							},
+							"thinking": {
+								"type": "number",
+								"format": "double"
+							},
+							"image": {
+								"type": "number",
+								"format": "double"
+							},
+							"video": {
+								"type": "number",
+								"format": "double"
+							},
+							"web_search": {
+								"type": "number",
+								"format": "double"
+							},
+							"audio": {
+								"type": "number",
+								"format": "double"
+							},
+							"completion": {
+								"type": "number",
+								"format": "double"
+							},
+							"prompt": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"completion",
+							"prompt"
+						],
+						"type": "object"
+					},
+					"supportsPtb": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"provider",
+					"providerSlug",
+					"pricing"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"InputModality": {
+				"type": "string",
+				"enum": [
+					"text",
+					"image",
+					"audio",
+					"video"
+				]
+			},
+			"OutputModality": {
+				"type": "string",
+				"enum": [
+					"text",
+					"image",
+					"audio",
+					"video"
+				]
+			},
+			"StandardParameter": {
+				"type": "string",
+				"enum": [
+					"max_tokens",
+					"temperature",
+					"top_p",
+					"top_k",
+					"stop",
+					"stream",
+					"frequency_penalty",
+					"presence_penalty",
+					"repetition_penalty",
+					"seed",
+					"tools",
+					"tool_choice",
+					"functions",
+					"function_call",
+					"reasoning",
+					"include_reasoning",
+					"thinking",
+					"response_format",
+					"json_mode",
+					"truncate",
+					"min_p",
+					"logit_bias",
+					"logprobs",
+					"top_logprobs",
+					"structured_outputs"
+				]
+			},
+			"ModelRegistryItem": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"author": {
+						"type": "string"
+					},
+					"contextLength": {
+						"type": "number",
+						"format": "double"
+					},
+					"endpoints": {
+						"items": {
+							"$ref": "#/components/schemas/ModelEndpoint"
+						},
+						"type": "array"
+					},
+					"maxOutput": {
+						"type": "number",
+						"format": "double"
+					},
+					"trainingDate": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"inputModalities": {
+						"items": {
+							"$ref": "#/components/schemas/InputModality"
+						},
+						"type": "array"
+					},
+					"outputModalities": {
+						"items": {
+							"$ref": "#/components/schemas/OutputModality"
+						},
+						"type": "array"
+					},
+					"supportedParameters": {
+						"items": {
+							"$ref": "#/components/schemas/StandardParameter"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"author",
+					"contextLength",
+					"endpoints",
+					"inputModalities",
+					"outputModalities",
+					"supportedParameters"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ModelRegistryResponse": {
+				"properties": {
+					"models": {
+						"items": {
+							"$ref": "#/components/schemas/ModelRegistryItem"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"models"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_ModelRegistryResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/ModelRegistryResponse"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ModelRegistryResponse.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ModelRegistryResponse_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"MetricStats": {
 				"properties": {
 					"p99": {
@@ -17214,6 +17435,28 @@
 						}
 					}
 				}
+			}
+		},
+		"/v1/public/model-registry/models": {
+			"get": {
+				"operationId": "GetModelRegistry",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ModelRegistryResponse.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Model Registry"
+				],
+				"security": [],
+				"parameters": []
 			}
 		},
 		"/v1/public/compare/models": {

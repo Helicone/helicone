@@ -394,6 +394,9 @@ export interface paths {
   "/v1/pi/costs-over-time/query": {
     post: operations["GetCostsOverTime"];
   };
+  "/v1/public/model-registry/models": {
+    get: operations["GetModelRegistry"];
+  };
   "/v1/public/compare/models": {
     post: operations["GetModelComparison"];
   };
@@ -2704,6 +2707,61 @@ Json: JsonObject;
       /** Format: double */
       timeZoneDifference: number;
     };
+    ModelEndpoint: {
+      provider: string;
+      providerSlug: string;
+      pricing: {
+        /** Format: double */
+        cacheWrite?: number;
+        /** Format: double */
+        cacheRead?: number;
+        /** Format: double */
+        thinking?: number;
+        /** Format: double */
+        image?: number;
+        /** Format: double */
+        video?: number;
+        /** Format: double */
+        web_search?: number;
+        /** Format: double */
+        audio?: number;
+        /** Format: double */
+        completion: number;
+        /** Format: double */
+        prompt: number;
+      };
+      supportsPtb?: boolean;
+    };
+    /** @enum {string} */
+    InputModality: "text" | "image" | "audio" | "video";
+    /** @enum {string} */
+    OutputModality: "text" | "image" | "audio" | "video";
+    /** @enum {string} */
+    StandardParameter: "max_tokens" | "temperature" | "top_p" | "top_k" | "stop" | "stream" | "frequency_penalty" | "presence_penalty" | "repetition_penalty" | "seed" | "tools" | "tool_choice" | "functions" | "function_call" | "reasoning" | "include_reasoning" | "thinking" | "response_format" | "json_mode" | "truncate" | "min_p" | "logit_bias" | "logprobs" | "top_logprobs" | "structured_outputs";
+    ModelRegistryItem: {
+      id: string;
+      name: string;
+      author: string;
+      /** Format: double */
+      contextLength: number;
+      endpoints: components["schemas"]["ModelEndpoint"][];
+      /** Format: double */
+      maxOutput?: number;
+      trainingDate?: string;
+      description?: string;
+      inputModalities: components["schemas"]["InputModality"][];
+      outputModalities: components["schemas"]["OutputModality"][];
+      supportedParameters: components["schemas"]["StandardParameter"][];
+    };
+    ModelRegistryResponse: {
+      models: components["schemas"]["ModelRegistryItem"][];
+    };
+    ResultSuccess_ModelRegistryResponse_: {
+      data: components["schemas"]["ModelRegistryResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ModelRegistryResponse.string_": components["schemas"]["ResultSuccess_ModelRegistryResponse_"] | components["schemas"]["ResultError_string_"];
     MetricStats: {
       /** Format: double */
       p99: number;
@@ -6046,6 +6104,16 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result__cost-number--created_at_trunc-string_-Array.string_"];
+        };
+      };
+    };
+  };
+  GetModelRegistry: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ModelRegistryResponse.string_"];
         };
       };
     };

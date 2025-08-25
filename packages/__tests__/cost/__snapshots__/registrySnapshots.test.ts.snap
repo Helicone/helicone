@@ -380,6 +380,150 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "google/gemini-2.5": {
+    "gemini-2.5-flash-lite-preview:google": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 65535,
+      "modelId": "gemini-2.5-flash-lite-preview",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "google",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-2.5-flash-lite:google": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 65535,
+      "modelId": "gemini-2.5-flash-lite",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "google",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-2.5-flash:google": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 65535,
+      "modelId": "gemini-2.5-flash",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "google",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-2.5-pro-exp:google": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 65535,
+      "modelId": "gemini-2.5-pro-exp-03-25",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "google",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-2.5-pro-preview:google": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "gemini-2.5-pro-preview",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "google",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-2.5-pro:google": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "gemini-2.5-pro",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "google",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
+  },
   "openai/gpt-4": {
     "gpt-4:openai": {
       "context": 8191,
@@ -765,6 +909,72 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "openai/oss": {
+    "gpt-oss-120b:groq": {
+      "context": 131000,
+      "crossRegion": false,
+      "maxTokens": 131000,
+      "modelId": "openai/gpt-oss-120b",
+      "parameters": [
+        "frequency_penalty",
+        "include_reasoning",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "reasoning",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "groq",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-oss-20b:groq": {
+      "context": 131000,
+      "crossRegion": false,
+      "maxTokens": 131000,
+      "modelId": "openai/gpt-oss-20b",
+      "parameters": [
+        "frequency_penalty",
+        "include_reasoning",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "reasoning",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "groq",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
 }
 `;
 
@@ -800,6 +1010,14 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "bedrock",
     "vertex",
   ],
+  "google/gemini-2.5": [
+    "google",
+    "google",
+    "google",
+    "google",
+    "google",
+    "google",
+  ],
   "openai/gpt-4": [
     "openai",
   ],
@@ -830,6 +1048,10 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   "openai/o4": [
     "openai",
     "openai",
+  ],
+  "openai/oss": [
+    "groq",
+    "groq",
   ],
 }
 `;
@@ -980,6 +1202,17 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       "prompt": 0.000003,
     },
   },
+  "google/gemini-2.5": {
+    "google": {
+      "audio": 0,
+      "completion": 0,
+      "image": 0,
+      "internal_reasoning": 0,
+      "prompt": 0,
+      "request": 0,
+      "web_search": 0,
+    },
+  },
   "openai/gpt-4": {
     "openai": {
       "completion": 0.00006,
@@ -1018,6 +1251,17 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       "cacheRead": 2.75e-7,
       "completion": 0.0000044,
       "prompt": 0.0000011,
+    },
+  },
+  "openai/oss": {
+    "groq": {
+      "audio": 0,
+      "completion": 5e-7,
+      "image": 0,
+      "internal_reasoning": 0,
+      "prompt": 1e-7,
+      "request": 0,
+      "web_search": 0,
     },
   },
 }
@@ -1081,6 +1325,42 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       ],
     },
     {
+      "model": "gemini-2.5-flash",
+      "providers": [
+        "google",
+      ],
+    },
+    {
+      "model": "gemini-2.5-flash-lite",
+      "providers": [
+        "google",
+      ],
+    },
+    {
+      "model": "gemini-2.5-flash-lite-preview",
+      "providers": [
+        "google",
+      ],
+    },
+    {
+      "model": "gemini-2.5-pro",
+      "providers": [
+        "google",
+      ],
+    },
+    {
+      "model": "gemini-2.5-pro-exp",
+      "providers": [
+        "google",
+      ],
+    },
+    {
+      "model": "gemini-2.5-pro-preview",
+      "providers": [
+        "google",
+      ],
+    },
+    {
       "model": "gpt-4",
       "providers": [
         "openai",
@@ -1127,6 +1407,18 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "model": "gpt-4o-search-preview",
       "providers": [
         "openai",
+      ],
+    },
+    {
+      "model": "gpt-oss-120b",
+      "providers": [
+        "groq",
+      ],
+    },
+    {
+      "model": "gpt-oss-20b",
+      "providers": [
+        "groq",
       ],
     },
     {
@@ -1198,6 +1490,14 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "provider": "extended",
     },
     {
+      "modelCount": 6,
+      "provider": "google",
+    },
+    {
+      "modelCount": 2,
+      "provider": "groq",
+    },
+    {
       "modelCount": 18,
       "provider": "openai",
     },
@@ -1222,6 +1522,8 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "gpt-4o-mini",
     "gpt-4o-mini-search-preview",
     "gpt-4o-search-preview",
+    "gpt-oss-120b",
+    "gpt-oss-20b",
     "o1",
     "o1-mini",
     "o1-pro",
@@ -1239,9 +1541,9 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "claude-3.5-sonnet-v2:anthropic:*",
     "claude-3.5-sonnet-v2:vertex:global",
   ],
-  "totalEndpoints": 37,
-  "totalModelProviderConfigs": 37,
-  "totalModelsWithPtb": 24,
-  "totalProviders": 5,
+  "totalEndpoints": 45,
+  "totalModelProviderConfigs": 45,
+  "totalModelsWithPtb": 26,
+  "totalProviders": 7,
 }
 `;
