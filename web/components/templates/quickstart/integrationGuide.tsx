@@ -20,7 +20,7 @@ const IntegrationGuide = ({ apiKey }: IntegrationGuideProps) => {
           <span className="text-sm text-blue-900 dark:text-blue-100">
             Check our{" "}
             <Link
-              href="/models"
+              href="https://helicone.ai/models"
               className="font-medium underline underline-offset-2 hover:no-underline"
             >
               Model Registry

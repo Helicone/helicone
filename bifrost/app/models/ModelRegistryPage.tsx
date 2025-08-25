@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import Head from "next/head";
+import Link from "next/link";
 import {
   Select,
   SelectContent,
@@ -1136,18 +1137,33 @@ export function ModelRegistryPage() {
                       return (
                         <tbody key={model.id} className="group cursor-pointer">
                           {/* Row 1: Primary info */}
-                          <tr className="border-t-4 border-transparent group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50">
+                          <tr 
+                            className="border-t-4 border-transparent group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50"
+                            onClick={(e) => {
+                              // Don't navigate if clicking on copy button
+                              if (!(e.target as HTMLElement).closest('button')) {
+                                router.push(`/model/${encodeURIComponent(model.id)}`);
+                              }
+                            }}
+                          >
                             {/* Model name with copy button */}
                             <td className="px-6 pt-6 pb-1">
                               <div className="flex items-center gap-2">
-                                <span className="text-lg font-normal text-gray-900 dark:text-gray-100">
+                                <Link 
+                                  href={`/model/${encodeURIComponent(model.id)}`}
+                                  className="text-lg font-normal text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
                                   {model.name.replace(
                                     new RegExp(`^${model.author}:\s*`, "i"),
                                     ""
                                   )}
-                                </span>
+                                </Link>
                                 <button
-                                  onClick={() => copyModelId(model.id)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    copyModelId(model.id);
+                                  }}
                                   className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
                                   title={`Copy model ID: ${model.id}`}
                                 >
@@ -1167,7 +1183,10 @@ export function ModelRegistryPage() {
                           </tr>
 
                           {/* Row 2: Secondary info */}
-                          <tr className="group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50">
+                          <tr 
+                            className="group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50"
+                            onClick={() => router.push(`/model/${encodeURIComponent(model.id)}`)}
+                          >
                             <td className="px-6 pt-1 pb-6">
                               <div className="space-y-2">
                                 {/* Description first - truncated with ellipsis */}
