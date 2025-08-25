@@ -40,7 +40,7 @@ const DefaultAIGateway = ({ setTabValue }: { setTabValue: () => void }) => {
                     <p className="text-sm">
                       Check our{" "}
                       <a
-                        href="/models"
+                        href="https://helicone.ai/models"
                         className="font-medium text-primary underline"
                       >
                         Model Registry
