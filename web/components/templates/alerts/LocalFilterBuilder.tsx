@@ -38,24 +38,25 @@ export const LocalFilterBuilder: React.FC<LocalFilterBuilderProps> = ({
   // Initialize from value prop
   const initializeConditions = () => {
     if (!value) return [];
-    
+
     // Single condition
     if (value.type === "condition") {
       return [value as ConditionExpression];
     }
-    
+
     // AND/OR expression with conditions
     if (value.type === "and" || value.type === "or") {
       const groupExpr = value as AndExpression | OrExpression;
       return groupExpr.expressions.filter(
-        (e) => e.type === "condition"
+        (e) => e.type === "condition",
       ) as ConditionExpression[];
     }
-    
+
     return [];
   };
 
-  const [conditions, setConditions] = useState<ConditionExpression[]>(initializeConditions);
+  const [conditions, setConditions] =
+    useState<ConditionExpression[]>(initializeConditions);
   const [groupOperator, setGroupOperator] = useState<"and" | "or">(() => {
     if (value && (value.type === "and" || value.type === "or")) {
       return value.type;
@@ -76,7 +77,10 @@ export const LocalFilterBuilder: React.FC<LocalFilterBuilderProps> = ({
     setConditions([...conditions, newCondition]);
   };
 
-  const updateCondition = (index: number, updates: Partial<ConditionExpression>) => {
+  const updateCondition = (
+    index: number,
+    updates: Partial<ConditionExpression>,
+  ) => {
     const newConditions = [...conditions];
     newConditions[index] = {
       ...newConditions[index],
@@ -118,7 +122,10 @@ export const LocalFilterBuilder: React.FC<LocalFilterBuilderProps> = ({
     updateCondition(index, { operator });
   };
 
-  const handleValueChange = (index: number, value: string | number | boolean) => {
+  const handleValueChange = (
+    index: number,
+    value: string | number | boolean,
+  ) => {
     updateCondition(index, { value });
   };
 
@@ -127,7 +134,9 @@ export const LocalFilterBuilder: React.FC<LocalFilterBuilderProps> = ({
     setConditions(newConditions);
   };
 
-  const buildFilter = (conditions: ConditionExpression[]): FilterExpression | null => {
+  const buildFilter = (
+    conditions: ConditionExpression[],
+  ): FilterExpression | null => {
     if (conditions.length === 0) {
       return null;
     } else if (conditions.length === 1) {
@@ -157,14 +166,16 @@ export const LocalFilterBuilder: React.FC<LocalFilterBuilderProps> = ({
     <div className="space-y-3">
       {conditions.length > 1 && (
         <div className="flex items-center gap-2">
-          <Small className="text-muted-foreground">Group conditions with:</Small>
+          <Small className="text-muted-foreground">
+            Group conditions with:
+          </Small>
           <Select
             value={groupOperator}
             onValueChange={(v: "and" | "or") => {
               setGroupOperator(v);
             }}
           >
-            <SelectTrigger className="w-24 h-7">
+            <SelectTrigger className="h-7 w-24">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -179,7 +190,7 @@ export const LocalFilterBuilder: React.FC<LocalFilterBuilderProps> = ({
         {conditions.map((condition, index) => (
           <div key={index}>
             {index > 0 && (
-              <Small className="text-muted-foreground uppercase pl-2">
+              <Small className="pl-2 uppercase text-muted-foreground">
                 {groupOperator}
               </Small>
             )}
@@ -187,7 +198,9 @@ export const LocalFilterBuilder: React.FC<LocalFilterBuilderProps> = ({
               condition={condition}
               filterDefinitions={filterDefinitions}
               onFieldChange={(fieldId) => handleFieldChange(index, fieldId)}
-              onOperatorChange={(operator) => handleOperatorChange(index, operator)}
+              onOperatorChange={(operator) =>
+                handleOperatorChange(index, operator)
+              }
               onValueChange={(value) => handleValueChange(index, value)}
               onRemove={() => removeCondition(index)}
               isFirst={index === 0}
@@ -205,12 +218,12 @@ export const LocalFilterBuilder: React.FC<LocalFilterBuilderProps> = ({
         onClick={addCondition}
         className="w-full"
       >
-        <Plus className="h-4 w-4 mr-2" />
+        <Plus className="mr-2 h-4 w-4" />
         Add Condition
       </Button>
 
       {/* Apply/Cancel buttons */}
-      <div className="flex justify-end gap-2 pt-3 border-t">
+      <div className="flex justify-end gap-2 border-t pt-3">
         <Button
           type="button"
           size="sm"
@@ -219,11 +232,7 @@ export const LocalFilterBuilder: React.FC<LocalFilterBuilderProps> = ({
         >
           Cancel
         </Button>
-        <Button
-          type="button"
-          size="sm"
-          onClick={handleApply}
-        >
+        <Button type="button" size="sm" onClick={handleApply}>
           Apply Filters
         </Button>
       </div>

@@ -20,10 +20,10 @@ import "@/styles/settings-tables.css";
 import { SettingsContainer } from "@/components/ui/settings-container";
 import "@/styles/settings.css";
 import { Database } from "@/db/database.types";
-import { 
-  parseAlertFilter, 
-  formatAlertThreshold, 
-  getAlertMetricDisplay 
+import {
+  parseAlertFilter,
+  formatAlertThreshold,
+  getAlertMetricDisplay,
 } from "@helicone-package/filters/alertHelpers";
 
 const AlertsPage = () => {
@@ -154,15 +154,24 @@ const AlertsPage = () => {
               },
             ]}
             rows={alerts?.map((key) => {
-              const parsedFilter = parseAlertFilter(key.filter as any, key.metric);
-              
+              const parsedFilter = parseAlertFilter(
+                key.filter as any,
+                key.metric,
+              );
+
               return {
                 ...key,
                 key_name: (
                   <div className="flex items-center gap-2">
                     <p className="text-xs font-semibold">{key.name}</p>
                     {(key.filter || parsedFilter.hasWhereClause) && (
-                      <Tooltip title={parsedFilter.hasWhereClause ? "Has WHERE conditions" : "Has filter conditions"}>
+                      <Tooltip
+                        title={
+                          parsedFilter.hasWhereClause
+                            ? "Has WHERE conditions"
+                            : "Has filter conditions"
+                        }
+                      >
                         <Filter className="h-3 w-3 text-muted-foreground" />
                       </Tooltip>
                     )}
@@ -193,7 +202,11 @@ const AlertsPage = () => {
                 ),
                 threshold: (
                   <p className="text-xs">
-                    {formatAlertThreshold(key.filter as any, key.metric, Number(key.threshold))}
+                    {formatAlertThreshold(
+                      key.filter as any,
+                      key.metric,
+                      Number(key.threshold),
+                    )}
                   </p>
                 ),
                 metric: (

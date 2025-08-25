@@ -13,9 +13,7 @@ import {
   SelectValue,
   SelectTrigger,
 } from "@/components/ui/select";
-import {
-  InformationCircleIcon,
-} from "@heroicons/react/24/outline";
+import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import { clsx } from "../../shared/clsx";
 import { alertTimeWindows } from "./constant";
@@ -38,7 +36,10 @@ import {
 } from "@/components/ui/command";
 import { Check, ChevronsUpDown, X } from "lucide-react";
 import AggregationBuilder, { AggregationConfig } from "./AggregationBuilder";
-import { AggregationExpression, FilterExpression } from "@helicone-package/filters";
+import {
+  AggregationExpression,
+  FilterExpression,
+} from "@helicone-package/filters";
 export type AlertRequest = {
   name: string;
   threshold: number;
@@ -83,13 +84,15 @@ const AlertForm = (props: AlertFormProps) => {
   const [showSlackChannels, setShowSlackChannels] = useState<boolean>(
     initialValues ? initialValues.slack_channels.length > 0 : false,
   );
-  const [aggregationConfig, setAggregationConfig] = useState<AggregationConfig>({
-    field: "latency",
-    function: "p95",
-    comparison: "gt",
-    threshold: 0,
-    whereFilter: null,
-  });
+  const [aggregationConfig, setAggregationConfig] = useState<AggregationConfig>(
+    {
+      field: "latency",
+      function: "p95",
+      comparison: "gt",
+      threshold: 0,
+      whereFilter: null,
+    },
+  );
 
   const orgContext = useOrg();
 
@@ -130,7 +133,10 @@ const AlertForm = (props: AlertFormProps) => {
     const alertMinRequests = Number(formData.get("min-requests") as string);
 
     if (isNaN(alertThreshold) || alertThreshold <= 0) {
-      setNotification("Please enter a valid threshold for the aggregation", "error");
+      setNotification(
+        "Please enter a valid threshold for the aggregation",
+        "error",
+      );
       return;
     }
     if (
@@ -160,7 +166,8 @@ const AlertForm = (props: AlertFormProps) => {
         },
       },
       function: aggregationConfig.function as AggregationExpression["function"],
-      comparison: aggregationConfig.comparison as AggregationExpression["comparison"],
+      comparison:
+        aggregationConfig.comparison as AggregationExpression["comparison"],
       threshold: aggregationConfig.threshold,
       where: aggregationConfig.whereFilter || undefined,
     };
@@ -259,7 +266,6 @@ const AlertForm = (props: AlertFormProps) => {
           step={1}
         />
       </div>
-
 
       <div className="col-span-4 w-full space-y-1.5 rounded-md bg-gray-100 p-6 dark:bg-gray-900">
         <h3 className="font-semibold text-gray-500">Notify By</h3>

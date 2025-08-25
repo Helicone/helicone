@@ -61,20 +61,20 @@ export const LocalFilterEditor: React.FC<LocalFilterEditorProps> = ({
 
   const getFilterSummary = (filter: FilterExpression): string => {
     if (!filter) return "";
-    
+
     if (filter.type === "condition") {
       const condition = filter as any;
       const fieldName = condition.field?.column || "field";
       const operator = condition.operator === "eq" ? "=" : condition.operator;
       return `${fieldName} ${operator} ${condition.value}`;
     }
-    
+
     if (filter.type === "and" || filter.type === "or") {
       const group = filter as any;
       const count = group.expressions?.length || 0;
       return `${count} condition${count !== 1 ? "s" : ""} (${filter.type.toUpperCase()})`;
     }
-    
+
     return "Custom filter";
   };
 
@@ -92,7 +92,7 @@ export const LocalFilterEditor: React.FC<LocalFilterEditorProps> = ({
           </Button>
           <Small className="text-muted-foreground">JSON Editor</Small>
         </div>
-        
+
         <Textarea
           value={filterText}
           onChange={(e) => setFilterText(e.target.value)}
@@ -100,12 +100,16 @@ export const LocalFilterEditor: React.FC<LocalFilterEditorProps> = ({
           className="font-mono text-xs"
           rows={8}
         />
-        
+
         <div className="flex gap-2">
           <Button size="sm" onClick={handleJsonSave}>
             Apply Filter
           </Button>
-          <Button size="sm" variant="outline" onClick={() => setShowJson(false)}>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setShowJson(false)}
+          >
             Cancel
           </Button>
           {value && (
@@ -114,7 +118,7 @@ export const LocalFilterEditor: React.FC<LocalFilterEditorProps> = ({
             </Button>
           )}
         </div>
-        
+
         <Small className="text-muted-foreground">
           Advanced JSON editor for complex filters
         </Small>
@@ -144,7 +148,7 @@ export const LocalFilterEditor: React.FC<LocalFilterEditorProps> = ({
               )}
             </Button>
           </CollapsibleTrigger>
-          
+
           {value && !isOpen && (
             <Button
               type="button"
@@ -157,9 +161,9 @@ export const LocalFilterEditor: React.FC<LocalFilterEditorProps> = ({
             </Button>
           )}
         </div>
-        
+
         <CollapsibleContent className="mt-3 overflow-visible data-[state=open]:overflow-visible">
-          <div className="border rounded-md p-4 space-y-4">
+          <div className="space-y-4 rounded-md border p-4">
             <div className="flex items-center justify-between">
               <h4 className="font-medium">Filter Conditions</h4>
               <Button
@@ -171,11 +175,11 @@ export const LocalFilterEditor: React.FC<LocalFilterEditorProps> = ({
                   setIsOpen(false);
                 }}
               >
-                <Code className="h-4 w-4 mr-1" />
+                <Code className="mr-1 h-4 w-4" />
                 JSON
               </Button>
             </div>
-            
+
             <LocalFilterBuilder
               value={value}
               onChange={onChange}
@@ -185,9 +189,9 @@ export const LocalFilterEditor: React.FC<LocalFilterEditorProps> = ({
           </div>
         </CollapsibleContent>
       </Collapsible>
-      
+
       {value && !isOpen && (
-        <Small className="text-muted-foreground pl-2">
+        <Small className="pl-2 text-muted-foreground">
           {getFilterSummary(value)}
         </Small>
       )}
