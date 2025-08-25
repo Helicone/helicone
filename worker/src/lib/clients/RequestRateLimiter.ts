@@ -56,13 +56,13 @@ function getRPSFromTier(tier: string): number {
   if (!tier || typeof tier !== "string") {
     return 100;
   } else if (tier.startsWith("enterprise")) {
-    return 10_000;
-  } else if (tier.startsWith("team")) {
-    return 5000;
-  } else if (tier.startsWith("pro")) {
     return 1000;
-  } else if (tier.startsWith("growth")) {
+  } else if (tier.startsWith("team")) {
     return 500;
+  } else if (tier.startsWith("pro")) {
+    return 200;
+  } else if (tier.startsWith("growth")) {
+    return 100;
   } else {
     return 100;
   }
