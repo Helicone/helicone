@@ -42,6 +42,7 @@ jobs:
 
           # Direct prompt for automated review (no @claude mention needed)
           direct_prompt: |
+
             Put long feedback in a collapsible section. (<details>...</details>)
             Please review this pull request and provide feedback on:
             - Code quality and best practices
@@ -55,19 +56,8 @@ jobs:
 
             Add a summary of the feedback.
 
-          
-            
-
           # Optional: Use sticky comments to make Claude reuse the same comment on subsequent pushes to the same PR
           use_sticky_comment: true
-
-          # Optional: Customize review based on file types
-          direct_prompt: |
-
-            Review this PR focusing on:
-            - For TypeScript files: Type safety and proper interface usage
-            - For API Controllers: Make sure the controller is using auth, and checking on organization id
-            - For React components: Uses tanstack and the $JAWN for quering controllers
 
           # Optional: Different prompts for different authors
           # direct_prompt: |
