@@ -103,8 +103,7 @@ export function ModelDetailsDialog({
               <div>
                 <Small className="text-muted-foreground">Modality</Small>
                 <P>
-                  {model.modality.inputs.join(", ")} →{" "}
-                  {model.modality.outputs.join(", ")}
+                  {model.modality.inputs.join(", ")} → {model.modality.outputs.join(", ")}
                 </P>
               </div>
               <div>
