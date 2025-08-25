@@ -4,7 +4,7 @@ import { fromNodeHeaders } from "better-auth/node";
 import { Pool } from "pg";
 import { Database } from "../../../../lib/db/database.types";
 import { dbExecute } from "../../../../lib/shared/db/dbExecute";
-import crypto from "crypto";
+import { SecretManager } from "@helicone-package/secrets/SecretManager";
 import {
   GenericHeaders,
   HeliconeAuthClient,
@@ -23,7 +23,10 @@ import { authenticateBearer } from "./common";
 
 export const betterAuthClient = betterAuth({
   database: new Pool({
-    connectionString: process.env.SUPABASE_DATABASE_URL,
+    connectionString: SecretManager.getSecret(
+      "SUPABASE_DATABASE_URL", // TODO remove supabase URL eventually
+      "DATABASE_URL"
+    ),
   }),
   emailAndPassword: {
     enabled: true,
