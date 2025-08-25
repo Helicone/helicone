@@ -1,6 +1,45 @@
 {
   "name": "@helicone-package/filters",
-  "types": "./",
+  "version": "1.0.0",
+  "main": "./types.js",
+  "types": "./types.ts",
   "sideEffects": false,
-  "version": "1.0.0"
+  "exports": {
+    ".": {
+      "types": "./types.ts",
+      "default": "./types.ts"
+    },
+    "./filterDefs": {
+      "types": "./filterDefs.ts",
+      "default": "./filterDefs.ts"
+    },
+    "./filters": {
+      "types": "./filters.ts",
+      "default": "./filters.ts"
+    },
+    "./aggregationDefs": {
+      "types": "./aggregationDefs.ts", 
+      "default": "./aggregationDefs.ts"
+    },
+    "./helpers": {
+      "types": "./helpers.ts",
+      "default": "./helpers.ts"
+    },
+    "./frontendFilterDefs": {
+      "types": "./frontendFilterDefs.ts",
+      "default": "./frontendFilterDefs.ts"
+    },
+    "./types": {
+      "types": "./types.ts",
+      "default": "./types.ts"
+    },
+    "./aggregations": {
+      "types": "./aggregations.ts",
+      "default": "./aggregations.ts"
+    },
+    "./alertHelpers": {
+      "types": "./alertHelpers.ts",
+      "default": "./alertHelpers.ts"
+    }
+  }
 }

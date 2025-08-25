@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { useFilterAST } from "@/filterAST/context/filterContext";
-import { FilterExpression } from "@/filterAST/filterAst";
+import { FilterExpression } from "@helicone-package/filters";
 import { toFilterNode } from "@/filterAST/toFilterNode";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { TimeFilter } from "@/types/timeFilter";

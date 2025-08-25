@@ -3,7 +3,7 @@ import { useOrg } from "../../components/layout/org/organizationContext";
 import { getJawnClient } from "../../lib/clients/jawn";
 import { useFilterAST } from "@/filterAST/context/filterContext";
 import { toFilterNode } from "@/filterAST/toFilterNode";
-import { FilterExpression } from "@/filterAST/filterAst";
+import { FilterExpression } from "@helicone-package/filters";
 import { TimeFilter } from "@/types/timeFilter";
 
 const useSessions = ({

@@ -2,7 +2,7 @@ import { FilterState } from "@/filterAST/store/filterStore";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 import { logger } from "@/lib/telemetry/logger";
-import { FilterExpression } from "../filterAst";
+import { FilterExpression } from "@helicone-package/filters";
 import { StoreFilterType, useFilterCrud } from "../hooks/useFilterCrud";
 import useNotification from "@/components/shared/notification/useNotification";
 
