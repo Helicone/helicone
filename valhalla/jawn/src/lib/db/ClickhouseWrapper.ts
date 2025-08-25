@@ -5,7 +5,6 @@ import {
 } from "@clickhouse/client";
 import { Result } from "../../packages/common/result";
 import { TestClickhouseClientWrapper } from "./test/TestClickhouseWrapper";
-import { SecretManager } from "@helicone-package/secrets/SecretManager";
 
 interface ClickhouseEnv {
   CLICKHOUSE_HOST: string;
@@ -378,28 +377,19 @@ export interface ClickhouseDB {
   };
 }
 
-let {
+const {
   CLICKHOUSE_USER,
   CLICKHOUSE_PASSWORD,
   CLICKHOUSE_HOST,
   CLICKHOUSE_HQL_USER,
   CLICKHOUSE_HQL_PASSWORD,
-} = JSON.parse(SecretManager.getSecret("CLICKHOUSE_CREDS") ?? "{}") as {
+} = JSON.parse(process.env.CLICKHOUSE_CREDS ?? "{}") as {
   CLICKHOUSE_USER?: string;
   CLICKHOUSE_PASSWORD?: string;
   CLICKHOUSE_HOST?: string;
   CLICKHOUSE_HQL_USER?: string;
   CLICKHOUSE_HQL_PASSWORD?: string;
 };
-
-CLICKHOUSE_HOST = CLICKHOUSE_HOST ?? SecretManager.getSecret("CLICKHOUSE_HOST");
-CLICKHOUSE_USER = CLICKHOUSE_USER ?? SecretManager.getSecret("CLICKHOUSE_USER");
-CLICKHOUSE_PASSWORD =
-  CLICKHOUSE_PASSWORD ?? SecretManager.getSecret("CLICKHOUSE_PASSWORD");
-CLICKHOUSE_HQL_USER =
-  CLICKHOUSE_HQL_USER ?? SecretManager.getSecret("CLICKHOUSE_HQL_USER");
-CLICKHOUSE_HQL_PASSWORD =
-  CLICKHOUSE_HQL_PASSWORD ?? SecretManager.getSecret("CLICKHOUSE_HQL_PASSWORD");
 
 export const clickhouseDb = (() => {
   if (process.env.NODE_ENV === "test") {
