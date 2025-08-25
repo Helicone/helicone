@@ -209,7 +209,7 @@ export function ModelDetailPage() {
     }
 
     loadModel();
-  }, [decodedModelName]);
+  }, [decodedModelName, jawnClient]);
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
@@ -247,7 +247,7 @@ export function ModelDetailPage() {
                 Model not found
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mb-8">
-                The model "{decodedModelName}" could not be found.
+                The model &quot;{decodedModelName}&quot; could not be found.
               </p>
               <Button onClick={() => router.push("/models")} variant="outline">
                 <ArrowLeft className="h-4 w-4 mr-2" />
