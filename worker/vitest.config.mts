@@ -6,6 +6,7 @@ export default defineConfig({
     projects: [
       "./test/openai/vitest.config.mts",
       "./test/ai-gateway/vitest.config.mts",
+      "./test/cache/vitest.config.mts",
     ],
   },
 });

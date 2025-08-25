@@ -1,7 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
 import { hash } from "../../..";
 import { HeliconeProxyRequest } from "../../models/HeliconeProxyRequest";
-import { ClickhouseClientWrapper, RequestResponseRMT } from "../../db/ClickhouseWrapper";
+import {
+  ClickhouseClientWrapper,
+  RequestResponseRMT,
+} from "../../db/ClickhouseWrapper";
 import { Database } from "../../../../supabase/database.types";
 import { safePut } from "../../safePut";
 import { DBLoggable } from "../../dbLogger/DBLoggable";
@@ -13,6 +16,18 @@ function isGoogleAuthHeader(value: string): boolean {
   }
 
   return value.split(" ").some((part) => part.startsWith("ya29."));
+}
+
+function tryGetBodyAndRemoveKeys(text: string, ignoreKeys: string[]): string {
+  try {
+    const json = JSON.parse(text);
+    for (const key of ignoreKeys) {
+      delete json[key];
+    }
+    return JSON.stringify(json);
+  } catch {
+    return text;
+  }
 }
 
 export async function kvKeyFromRequest(
@@ -32,11 +47,18 @@ export async function kvKeyFromRequest(
       headers.set(key, value);
     }
   }
+  const ignoreKeys =
+    request.requestWrapper.heliconeHeaders.cacheHeaders.cacheIgnoreKeys ?? [];
+
+  const body = tryGetBodyAndRemoveKeys(
+    await request.requestWrapper.getText(),
+    ignoreKeys
+  );
 
   return await hash(
     (cacheSeed ?? "") +
       request.url +
-      (await request.requestWrapper.getText()) +
+      body +
       JSON.stringify([...headers.entries()]) +
       (freeIndex >= 1 ? freeIndex.toString() : "")
   );
@@ -99,7 +121,9 @@ async function trySaveToCache(options: SaveToCacheOptions): Promise<boolean> {
   }
 }
 
-async function saveToCacheBackoff(options: SaveToCacheOptions): Promise<boolean> {
+async function saveToCacheBackoff(
+  options: SaveToCacheOptions
+): Promise<boolean> {
   for (let i = 0; i < CACHE_BACKOFF_RETRIES; i++) {
     const result = await trySaveToCache(options);
     if (result) return result;
@@ -108,7 +132,9 @@ async function saveToCacheBackoff(options: SaveToCacheOptions): Promise<boolean>
   return false;
 }
 
-export async function saveToCache(options: SaveToCacheOptions): Promise<boolean> {
+export async function saveToCache(
+  options: SaveToCacheOptions
+): Promise<boolean> {
   return await saveToCacheBackoff(options);
 }
 
@@ -147,8 +173,9 @@ export async function getCachedResponse(
         cacheIdx.toString()
       );
       cachedResponseHeaders.append(
-        "Helicone-Cache-Latency", randomCache.latency ? randomCache.latency.toString() : "0"
-      )
+        "Helicone-Cache-Latency",
+        randomCache.latency ? randomCache.latency.toString() : "0"
+      );
 
       const cachedStream = new ReadableStream({
         start(controller) {
