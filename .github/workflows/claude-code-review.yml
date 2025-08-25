@@ -52,9 +52,15 @@ jobs:
 
             Be constructive and helpful in your feedback.
 
-            Add a confidence score to the feedback. (1-10)
+            Add a confidence score to the feedback. (0-10) 
+              - 0: Do not merge this PR
+              - 5: Merge this PR with caution
+              - 10: Merge this PR
 
-            Add a summary of the feedback.
+            [Reason why if low score]
+
+
+            Add a summary of the feedback. Highlight the most important feedback, like the most important bugs, or the most important performance improvements.
 
           # Optional: Use sticky comments to make Claude reuse the same comment on subsequent pushes to the same PR
           use_sticky_comment: true
