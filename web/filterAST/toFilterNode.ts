@@ -11,7 +11,7 @@ import {
   AndExpression,
   OrExpression,
   FieldSpec,
-} from "./filterAst";
+} from "@helicone-package/filters/types";
 
 /**
  * Maps the new FilterAST operator names to the legacy operator names
