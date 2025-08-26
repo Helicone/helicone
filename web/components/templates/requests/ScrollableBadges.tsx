@@ -14,7 +14,6 @@ import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { logger } from "@/lib/telemetry/logger";
 import {
   LuCheck,
-  LuCopy,
   LuExternalLink,
   LuListTree,
   LuPlus,
@@ -415,7 +414,9 @@ const ItemBadge = memo(
               } cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-800`}
               onClick={handleCopy}
             >
-              <span className="text-nowrap text-muted-foreground">{item.key}</span>{" "}
+              <span className="text-nowrap text-muted-foreground">
+                {item.key}
+              </span>{" "}
               <span className="text-nowrap font-medium text-primary">
                 {item.value}
               </span>
