@@ -330,8 +330,6 @@ export class OrganizationStore extends BaseStore {
   async getOrganizationMembers(
     organizationId: string
   ): Promise<Result<OrganizationMember[], string>> {
-    const query = `
-      select distinct on (om.member) email, member, org_role from organization_member om 
     let query;
     if (process.env.NEXT_PUBLIC_BETTER_AUTH === "true") {
       query = `
