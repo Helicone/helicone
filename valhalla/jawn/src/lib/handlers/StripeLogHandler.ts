@@ -43,6 +43,11 @@ export class StripeLogHandler extends AbstractLogHandler {
   }
 
   public async handle(context: HandlerContext): PromiseGenericResult<string> {
+    const start = performance.now();
+    context.timingMetrics.push({
+      constructor: this.constructor.name,
+      start,
+    });
     const organizationId = context.authParams?.organizationId;
     if (!organizationId) {
       return await super.handle(context);

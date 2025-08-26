@@ -24,6 +24,7 @@ import { Muted, Small } from "@/components/ui/typography";
 import { Label } from "../ui/label";
 import { Checkbox } from "../ui/checkbox";
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/telemetry/logger";
 
 // ====== Types ======
 interface ProviderCardProps {
@@ -253,7 +254,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
           payload: existingKey.config as Record<string, string>,
         });
       } catch (error) {
-        console.error("Error parsing config:", error);
+        logger.error({ error, existingKey }, "Error parsing config");
       }
     }
   }, [existingKey]);
@@ -283,7 +284,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
         };
         dispatch({ type: "SET_DECRYPTED_KEY", payload: key });
       } catch (error) {
-        console.error("Error viewing key:", error);
+        logger.error({ error, keyId: existingKey.id }, "Error viewing key");
         setNotification("Failed to retrieve key", "error");
         dispatch({ type: "HIDE_KEY" });
       }
@@ -331,7 +332,10 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
         });
       }
     } catch (error) {
-      console.error("Error saving provider key:", error);
+      logger.error(
+        { error, providerName: provider.name, isEditMode },
+        "Error saving provider key",
+      );
       setNotification("Failed to save provider key", "error");
     }
   };
@@ -448,6 +452,11 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
                 />
               </div>
               <div className="text-xs font-medium">{provider.name}</div>
+              {provider.note && (
+                <div className="text-[10px] text-muted-foreground">
+                  {provider.note}
+                </div>
+              )}
               {isEditMode && (
                 <div className="border border-muted-foreground/30 px-1 py-0.5 text-xs text-muted-foreground">
                   Key set

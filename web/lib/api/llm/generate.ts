@@ -7,6 +7,7 @@ import { getHeliconeCookie } from "@/lib/cookies";
 import { ORG_ID_COOKIE_KEY } from "@/lib/constants";
 import Cookies from "js-cookie";
 import { OpenAI } from "openai";
+import { logger } from "@/lib/telemetry/logger";
 
 export interface ModelParameters {
   temperature: number | null | undefined;
@@ -41,6 +42,12 @@ export interface GenerateParams {
     onCompletion: () => void;
   };
   useAIGateway?: boolean;
+  endpoint?: "playground" | "agent";
+
+  // helicone prompt params
+  prompt_id?: string;
+  environment?: string;
+  inputs?: any;
 }
 
 export type GenerateResponse = {
@@ -142,7 +149,7 @@ async function handleNonStreamResponse(
         calls: "",
       };
     } catch (error) {
-      console.error("[generate] Failed to parse schema response:", error);
+      logger.error({ error }, "[generate] Failed to parse schema response");
     }
   }
 
@@ -162,12 +169,19 @@ export async function generate<T extends object | undefined = undefined>(
     schema?: z.ZodType<object>;
     useAIGateway?: boolean;
     logRequest?: boolean;
+    endpoint?: "playground" | "agent";
+    prompt_id?: string;
+    environment?: string;
+    inputs?: any;
   },
 ): Promise<GenerateResponse> {
   const currentOrgId = Cookies.get(ORG_ID_COOKIE_KEY);
   const jwtToken = getHeliconeCookie().data?.jwtToken ?? "";
+
+  const apiEndpoint = params.endpoint === "agent" ? "agent" : "playground";
+
   const response = await fetch(
-    `${env("NEXT_PUBLIC_HELICONE_JAWN_SERVICE")}/v1/playground/generate`,
+    `${env("NEXT_PUBLIC_HELICONE_JAWN_SERVICE")}/v1/${apiEndpoint}/generate`,
     {
       method: "POST",
       body: JSON.stringify({
@@ -186,6 +200,9 @@ export async function generate<T extends object | undefined = undefined>(
         verbosity: params.verbosity,
         useAIGateway: params.useAIGateway,
         logRequest: params.logRequest,
+        prompt_id: params.prompt_id,
+        environment: params.environment,
+        inputs: params.inputs,
       }),
       headers: {
         "helicone-authorization": JSON.stringify({

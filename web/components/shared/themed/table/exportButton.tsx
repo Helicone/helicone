@@ -6,6 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { logger } from "@/lib/telemetry/logger";
 import {
   Tooltip,
   TooltipContent,
@@ -81,7 +82,7 @@ export default function ExportButton<T>({
 
       setNotification(`${format} downloaded successfully!`, "success");
     } catch (error) {
-      console.error(`Error exporting ${format}:`, error);
+      logger.error({ error, format }, `Error exporting ${format}`);
       setNotification(`Error exporting ${format}. Please try again.`, "error");
     } finally {
       setDownloadingCSV(false);

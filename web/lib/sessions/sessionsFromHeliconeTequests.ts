@@ -12,7 +12,7 @@ export function sessionFromHeliconeRequests(
       end_time_unix_timestamp_ms: 0,
       session_id: "0",
       session_tags: [],
-      session_cost_usd: 0,
+      session_cost: 0,
       traces: [],
     };
   }
@@ -43,7 +43,7 @@ export function sessionFromHeliconeRequests(
       "Helicone-Session-Id"
     ] as string,
     session_tags: [],
-    session_cost_usd: sortedRequests // Use sortedRequests here
+    session_cost: sortedRequests // Use sortedRequests here
       .map((r) =>
         modelCost({
           model: r.model_override ?? r.request_model ?? r.response_model ?? "",

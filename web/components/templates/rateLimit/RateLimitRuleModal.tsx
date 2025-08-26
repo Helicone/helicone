@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { z } from "zod";
 import { $JAWN_API } from "@/lib/clients/jawn";
+import { logger } from "@/lib/telemetry/logger";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useOrg } from "@/components/layout/org/organizationContext"; // Import useOrg
 import {
@@ -141,7 +142,12 @@ const RateLimitRuleModal = ({
       }
 
       if (resp.error || !resp.data?.data) {
-        console.error("Failed to save rate limit rule:", resp.error);
+        logger.error(
+          {
+            error: resp.error,
+          },
+          "Failed to save rate limit rule",
+        );
         throw new Error(
           resp.error || "An error occurred while saving the rule.",
         );
@@ -160,7 +166,7 @@ const RateLimitRuleModal = ({
         onOpenChange(false); // Close modal on success
       } else {
         // Handle unexpected success case where data might be null/undefined
-        console.warn("Rate limit rule saved, but no data returned.");
+        logger.warn("Rate limit rule saved, but no data returned.");
         setError("Rule saved, but failed to retrieve updated data.");
         onOpenChange(false); // Still close modal
       }

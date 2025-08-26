@@ -20,7 +20,7 @@ import {
 } from "@dnd-kit/sortable";
 import { GripVertical } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
-
+import ToolsRenderer from "./ToolsRenderer";
 export type ChatMode = "PLAYGROUND_INPUT" | "PLAYGROUND_OUTPUT" | "DEFAULT";
 
 interface ChatProps {
@@ -37,6 +37,10 @@ export default function Chat({
   const [expandedMessages, setExpandedMessages] = useState<
     Record<number, boolean>
   >({});
+
+  const tools = useMemo(() => {
+    return mappedRequest.schema.request?.tools;
+  }, [mappedRequest, mode]);
 
   const messages = useMemo(() => {
     const requestMessages = mappedRequest.schema.request?.messages ?? [];
@@ -179,6 +183,9 @@ export default function Chat({
 
   return (
     <div className="flex h-full w-full flex-col">
+      <div className="border-b">
+        <ToolsRenderer tools={tools} chatMode={mode} />
+      </div>
       {renderMessages()}
       {mode === "PLAYGROUND_INPUT" && (
         <div>

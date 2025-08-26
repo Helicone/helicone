@@ -32,6 +32,8 @@ import { IS_ON_PREM } from "./constants/IS_ON_PREM";
 import { toExpressRequest } from "./utils/expressHelpers";
 import { webSocketControlPlaneServer } from "./controlPlane/controlPlane";
 import { startDBListener } from "./controlPlane/dbListener";
+import { ValidateError } from "tsoa";
+import { SecretManager } from "@helicone-package/secrets/SecretManager";
 
 if (ENVIRONMENT === "production" || process.env.ENABLE_CRON_JOB === "true") {
   runMainLoops();
@@ -123,11 +125,10 @@ app.use(
 );
 app.use(bodyParser.raw({ verify: rawBodySaver, type: "*/*", limit: "50mb" }));
 
-const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
-const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
+const SQS_ENABLED = SecretManager.getSecret("SQS_ENABLED") === "true";
 
-if (KAFKA_ENABLED) {
-  console.log("Starting Kafka consumers");
+if (SQS_ENABLED) {
+  console.log("Starting SQS consumers");
   startConsumers({
     dlqCount: 0,
     normalCount: 0,
@@ -211,6 +212,30 @@ registerPrivateTSOARoutes(v1APIRouter);
 
 app.use(unAuthenticatedRouter);
 app.use(v1APIRouter);
+
+function errorHandler(
+  err: unknown,
+  req: express.Request,
+  res: express.Response,
+  next: NextFunction
+): express.Response | void {
+  if (err instanceof ValidateError) {
+    console.warn(`Caught Validation Error for ${req.path}:`, err.fields);
+    return res.status(422).json({
+      message: "Validation Failed",
+      details: err.fields,
+    });
+  }
+  if (err instanceof Error) {
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+
+  next();
+}
+
+app.use(errorHandler);
 
 function setRouteTimeout(
   req: express.Request,

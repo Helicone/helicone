@@ -8,7 +8,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
-import { Rocket, Settings } from "lucide-react";
+import { MessageCircle, Rocket, Settings } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -19,6 +19,7 @@ import SidebarHelpDropdown from "../SidebarHelpDropdown";
 import NavItem from "./NavItem";
 import { ChangelogItem } from "./types";
 import SidebarQuickstepCard from "../SidebarQuickstartCard";
+import { useHeliconeAgent } from "@/components/templates/agent/HeliconeAgentContext";
 
 export interface NavigationItem {
   name: string;
@@ -41,6 +42,7 @@ const DesktopSidebar = ({
   NAVIGATION,
   sidebarRef,
 }: SidebarProps) => {
+  const { agentChatOpen, setAgentChatOpen } = useHeliconeAgent();
   const orgContext = useOrg();
   const router = useRouter();
   const onboardingStatus = orgContext?.currentOrg
@@ -53,7 +55,7 @@ const DesktopSidebar = ({
 
   const [expandedItems, setExpandedItems] = useLocalStorage<string[]>(
     "expandedItems",
-    ["Developer", "Segments", "Improve"],
+    ["Developer", "Segments", "Improve", "Monitor"],
   );
 
   const toggleExpand = (name: string) => {
@@ -355,43 +357,66 @@ const DesktopSidebar = ({
                 ))}
             </div>
 
-            {/* Bottom buttons */}
-            {orgContext?.currentOrg?.tier !== "demo" && (
-              <div className="flex flex-col gap-2 p-3">
-                {/* Settings button */}
-                <Button
-                  variant="ghost"
-                  size="none"
-                  onClick={() => router.push("/settings")}
+            <div className="flex flex-col gap-2 p-3">
+              <Button
+                variant="ghost"
+                size="none"
+                onClick={() => setAgentChatOpen(true)}
+                className={cn(
+                  "flex items-center text-xs hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800",
+                  isCollapsed
+                    ? "h-9 w-9 justify-center"
+                    : "h-9 w-full justify-start gap-2 px-3",
+                  agentChatOpen
+                    ? "bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900/50"
+                    : "text-muted-foreground",
+                )}
+              >
+                <MessageCircle
+                  size={16}
                   className={cn(
-                    "flex items-center text-xs hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800",
-                    isCollapsed
-                      ? "h-9 w-9 justify-center"
-                      : "h-9 w-full justify-start gap-2 px-3",
-                    router.pathname.startsWith("/settings")
-                      ? "bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900/50"
-                      : "text-muted-foreground",
+                    "text-muted-foreground",
+                    agentChatOpen && "text-blue-700 dark:text-blue-300",
                   )}
-                >
-                  <Settings
-                    size={16}
+                />
+                {!isCollapsed && <span>Support</span>}
+              </Button>
+
+              {orgContext?.currentOrg?.tier !== "demo" && (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="none"
+                    onClick={() => router.push("/settings")}
                     className={cn(
+                      "flex items-center text-xs hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800",
+                      isCollapsed
+                        ? "h-9 w-9 justify-center"
+                        : "h-9 w-full justify-start gap-2 px-3",
                       router.pathname.startsWith("/settings")
-                        ? "text-blue-700 dark:text-blue-300"
+                        ? "bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900/50"
                         : "text-muted-foreground",
                     )}
-                  />
-                  {!isCollapsed && <span>Configure</span>}
-                </Button>
+                  >
+                    <Settings
+                      size={16}
+                      className={cn(
+                        router.pathname.startsWith("/settings")
+                          ? "text-blue-700 dark:text-blue-300"
+                          : "text-muted-foreground",
+                      )}
+                    />
+                    {!isCollapsed && <span>Configure</span>}
+                  </Button>
 
-                {/* Help dropdown */}
-                <SidebarHelpDropdown
-                  changelog={changelog}
-                  handleChangelogClick={handleChangelogClick}
-                  isCollapsed={isCollapsed}
-                />
-              </div>
-            )}
+                  <SidebarHelpDropdown
+                    changelog={changelog}
+                    handleChangelogClick={handleChangelogClick}
+                    isCollapsed={isCollapsed}
+                  />
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>

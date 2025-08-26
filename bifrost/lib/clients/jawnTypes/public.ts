@@ -394,6 +394,9 @@ export interface paths {
   "/v1/pi/costs-over-time/query": {
     post: operations["GetCostsOverTime"];
   };
+  "/v1/public/model-registry/models": {
+    get: operations["GetModelRegistry"];
+  };
   "/v1/public/compare/models": {
     post: operations["GetModelComparison"];
   };
@@ -539,23 +542,6 @@ export interface paths {
   "/v1/helicone-dataset/{datasetId}/delete": {
     post: operations["DeleteHeliconeDataset"];
   };
-  "/v1/gateway": {
-    get: operations["GetRouters"];
-    post: operations["CreateRouter"];
-  };
-  "/v1/gateway/{routerHash}": {
-    get: operations["GetLatestRouterConfig"];
-    put: operations["UpdateRouter"];
-  };
-  "/v1/gateway/{routerHash}/requests-over-time": {
-    get: operations["GetRouterRequestsOverTime"];
-  };
-  "/v1/gateway/{routerHash}/cost-over-time": {
-    get: operations["GetRouterCostOverTime"];
-  };
-  "/v1/gateway/{routerHash}/latency-over-time": {
-    get: operations["GetRouterLatencyOverTime"];
-  };
   "/v1/evals/query": {
     post: operations["QueryEvals"];
   };
@@ -629,6 +615,25 @@ export interface paths {
   "/v1/public/alert-banner": {
     get: operations["GetAlertBanners"];
     patch: operations["UpdateAlertBannerActive"];
+  };
+  "/v1/agent/generate": {
+    post: operations["Generate"];
+  };
+  "/v1/agent/thread/{sessionId}/message": {
+    post: operations["UpsertThreadMessage"];
+  };
+  "/v1/agent/thread/{sessionId}": {
+    get: operations["GetThread"];
+    delete: operations["DeleteThread"];
+  };
+  "/v1/agent/thread/{sessionId}/escalate": {
+    post: operations["EscalateThread"];
+  };
+  "/v1/agent/threads": {
+    get: operations["GetAllThreads"];
+  };
+  "/v1/agent/mcp/search": {
+    post: operations["SearchDocs"];
   };
 }
 
@@ -795,6 +800,8 @@ export interface components {
     Partial_RequestResponseRMTToOperators_: {
       country_code?: components["schemas"]["Partial_TextOperators_"];
       latency?: components["schemas"]["Partial_NumberOperators_"];
+      cost?: components["schemas"]["Partial_NumberOperators_"];
+      provider?: components["schemas"]["Partial_TextOperators_"];
       time_to_first_token?: components["schemas"]["Partial_NumberOperators_"];
       status?: components["schemas"]["Partial_NumberOperators_"];
       request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
@@ -910,10 +917,10 @@ export interface components {
       timeZoneDifferenceMinutes?: number;
       sort?: components["schemas"]["SortLeafUsers"];
     };
-    "ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_": {
+    "ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array_": {
       data: {
           /** Format: double */
-          cost_usd: number;
+          cost: number;
           user_id: string;
           /** Format: double */
           completion_tokens: number;
@@ -925,7 +932,7 @@ export interface components {
       /** @enum {number|null} */
       error: null;
     };
-    "Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_": components["schemas"]["ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_"] | components["schemas"]["ResultError_string_"];
+    "Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array.string_": components["schemas"]["ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array_"] | components["schemas"]["ResultError_string_"];
     UserQueryParams: {
       userIds?: string[];
       timeFilter?: {
@@ -1374,7 +1381,7 @@ export interface components {
       values?: {
         [key: string]: components["schemas"]["SortDirection"];
       };
-      cost_usd?: components["schemas"]["SortDirection"];
+      cost?: components["schemas"]["SortDirection"];
     };
     RequestQueryParams: {
       filter: components["schemas"]["RequestFilterNode"];
@@ -2683,6 +2690,72 @@ Json: JsonObject;
       /** Format: double */
       timeZoneDifference: number;
     };
+    ModelEndpoint: {
+      provider: string;
+      providerSlug: string;
+      pricing: {
+        /** Format: double */
+        cacheWrite?: number;
+        /** Format: double */
+        cacheRead?: number;
+        /** Format: double */
+        thinking?: number;
+        /** Format: double */
+        image?: number;
+        /** Format: double */
+        video?: number;
+        /** Format: double */
+        web_search?: number;
+        /** Format: double */
+        audio?: number;
+        /** Format: double */
+        completion: number;
+        /** Format: double */
+        prompt: number;
+      };
+      supportsPtb?: boolean;
+    };
+    /** @enum {string} */
+    InputModality: "text" | "image" | "audio" | "video";
+    /** @enum {string} */
+    OutputModality: "text" | "image" | "audio" | "video";
+    /** @enum {string} */
+    StandardParameter: "max_tokens" | "temperature" | "top_p" | "top_k" | "stop" | "stream" | "frequency_penalty" | "presence_penalty" | "repetition_penalty" | "seed" | "tools" | "tool_choice" | "functions" | "function_call" | "reasoning" | "include_reasoning" | "thinking" | "response_format" | "json_mode" | "truncate" | "min_p" | "logit_bias" | "logprobs" | "top_logprobs" | "structured_outputs";
+    ModelRegistryItem: {
+      id: string;
+      name: string;
+      author: string;
+      /** Format: double */
+      contextLength: number;
+      endpoints: components["schemas"]["ModelEndpoint"][];
+      /** Format: double */
+      maxOutput?: number;
+      trainingDate?: string;
+      description?: string;
+      inputModalities: components["schemas"]["InputModality"][];
+      outputModalities: components["schemas"]["OutputModality"][];
+      supportedParameters: components["schemas"]["StandardParameter"][];
+    };
+    /** @enum {string} */
+    ModelCapability: "audio" | "video" | "image" | "thinking" | "web_search" | "caching" | "reasoning";
+    ModelRegistryResponse: {
+      models: components["schemas"]["ModelRegistryItem"][];
+      /** Format: double */
+      total: number;
+      filters: {
+        capabilities: components["schemas"]["ModelCapability"][];
+        authors: string[];
+        providers: string[];
+      };
+    };
+    ResultSuccess_ModelRegistryResponse_: {
+      data: components["schemas"]["ModelRegistryResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ModelRegistryResponse.string_": components["schemas"]["ResultSuccess_ModelRegistryResponse_"] | components["schemas"]["ResultError_string_"];
+    /** @enum {string} */
+    SortOption: "name" | "price-low" | "price-high" | "context" | "newest";
     MetricStats: {
       /** Format: double */
       p99: number;
@@ -3216,83 +3289,6 @@ Json: JsonObject;
       /** @enum {number|null} */
       error: null;
     };
-    Router: {
-      lastUpdatedAt: string;
-      latestVersion: string;
-      name: string;
-      hash: string;
-      id: string;
-    };
-    "ResultSuccess__routers-Router-Array__": {
-      data: {
-        routers: components["schemas"]["Router"][];
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__routers-Router-Array_.string_": components["schemas"]["ResultSuccess__routers-Router-Array__"] | components["schemas"]["ResultError_string_"];
-    LatestRouterConfig: {
-      config: components["schemas"]["Json"];
-      version: string;
-      hash: string;
-      name: string;
-      id: string;
-    };
-    ResultSuccess_LatestRouterConfig_: {
-      data: components["schemas"]["LatestRouterConfig"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_LatestRouterConfig.string_": components["schemas"]["ResultSuccess_LatestRouterConfig_"] | components["schemas"]["ResultError_string_"];
-    RouterRequestsOverTime: {
-      /** Format: double */
-      status: number;
-      /** Format: double */
-      count: number;
-      /** Format: date-time */
-      time: string;
-    };
-    "ResultSuccess_RouterRequestsOverTime-Array_": {
-      data: components["schemas"]["RouterRequestsOverTime"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_RouterRequestsOverTime-Array.string_": components["schemas"]["ResultSuccess_RouterRequestsOverTime-Array_"] | components["schemas"]["ResultError_string_"];
-    RouterCostOverTime: {
-      /** Format: double */
-      cost: number;
-      /** Format: date-time */
-      time: string;
-    };
-    "ResultSuccess_RouterCostOverTime-Array_": {
-      data: components["schemas"]["RouterCostOverTime"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_RouterCostOverTime-Array.string_": components["schemas"]["ResultSuccess_RouterCostOverTime-Array_"] | components["schemas"]["ResultError_string_"];
-    RouterLatencyOverTime: {
-      /** Format: double */
-      duration: number;
-      /** Format: date-time */
-      time: string;
-    };
-    "ResultSuccess_RouterLatencyOverTime-Array_": {
-      data: components["schemas"]["RouterLatencyOverTime"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_RouterLatencyOverTime-Array.string_": components["schemas"]["ResultSuccess_RouterLatencyOverTime-Array_"] | components["schemas"]["ResultError_string_"];
-    CreateRouterResult: {
-      routerVersionId: string;
-      routerHash: string;
-      routerId: string;
-    };
-    ResultSuccess_CreateRouterResult_: {
-      data: components["schemas"]["CreateRouterResult"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_CreateRouterResult.string_": components["schemas"]["ResultSuccess_CreateRouterResult_"] | components["schemas"]["ResultError_string_"];
     Eval: {
       name: string;
       /** Format: double */
@@ -3534,6 +3530,273 @@ Json: JsonObject;
       error: null;
     };
     "Result__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array.string_": components["schemas"]["ResultSuccess__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array_"] | components["schemas"]["ResultError_string_"];
+    InAppThread: {
+      id: string;
+      chat: unknown;
+      user_id: string;
+      org_id: string;
+      /** Format: date-time */
+      created_at: string;
+      escalated: boolean;
+      metadata: unknown;
+      /** Format: date-time */
+      updated_at: string;
+      soft_delete: boolean;
+    };
+    ResultSuccess_InAppThread_: {
+      data: components["schemas"]["InAppThread"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_InAppThread.string_": components["schemas"]["ResultSuccess_InAppThread_"] | components["schemas"]["ResultError_string_"];
+    /**
+     * @description Learn about
+     * [text inputs](https://platform.openai.com/docs/guides/text-generation).
+     */
+    ChatCompletionContentPartText: {
+      /** @description The text content. */
+      text: string;
+      /**
+       * @description The type of the content part.
+       * @enum {string}
+       */
+      type: "text";
+    };
+    /**
+     * @description Developer-provided instructions that the model should follow, regardless of
+     * messages sent by the user. With o1 models and newer, `developer` messages
+     * replace the previous `system` messages.
+     */
+    ChatCompletionDeveloperMessageParam: {
+      /** @description The contents of the developer message. */
+      content: string | components["schemas"]["ChatCompletionContentPartText"][];
+      /**
+       * @description The role of the messages author, in this case `developer`.
+       * @enum {string}
+       */
+      role: "developer";
+      /**
+       * @description An optional name for the participant. Provides the model information to
+       * differentiate between participants of the same role.
+       */
+      name?: string;
+    };
+    /**
+     * @description Developer-provided instructions that the model should follow, regardless of
+     * messages sent by the user. With o1 models and newer, use `developer` messages
+     * for this purpose instead.
+     */
+    ChatCompletionSystemMessageParam: {
+      /** @description The contents of the system message. */
+      content: string | components["schemas"]["ChatCompletionContentPartText"][];
+      /**
+       * @description The role of the messages author, in this case `system`.
+       * @enum {string}
+       */
+      role: "system";
+      /**
+       * @description An optional name for the participant. Provides the model information to
+       * differentiate between participants of the same role.
+       */
+      name?: string;
+    };
+    "ChatCompletionContentPartImage.ImageURL": {
+      /** @description Either a URL of the image or the base64 encoded image data. */
+      url: string;
+      /**
+       * @description Specifies the detail level of the image. Learn more in the
+       * [Vision guide](https://platform.openai.com/docs/guides/vision#low-or-high-fidelity-image-understanding).
+       * @enum {string}
+       */
+      detail?: "auto" | "low" | "high";
+    };
+    /** @description Learn about [image inputs](https://platform.openai.com/docs/guides/vision). */
+    ChatCompletionContentPartImage: {
+      image_url: components["schemas"]["ChatCompletionContentPartImage.ImageURL"];
+      /**
+       * @description The type of the content part.
+       * @enum {string}
+       */
+      type: "image_url";
+    };
+    "ChatCompletionContentPartInputAudio.InputAudio": {
+      /** @description Base64 encoded audio data. */
+      data: string;
+      /**
+       * @description The format of the encoded audio data. Currently supports "wav" and "mp3".
+       * @enum {string}
+       */
+      format: "wav" | "mp3";
+    };
+    /** @description Learn about [audio inputs](https://platform.openai.com/docs/guides/audio). */
+    ChatCompletionContentPartInputAudio: {
+      input_audio: components["schemas"]["ChatCompletionContentPartInputAudio.InputAudio"];
+      /**
+       * @description The type of the content part. Always `input_audio`.
+       * @enum {string}
+       */
+      type: "input_audio";
+    };
+    "ChatCompletionContentPart.File.File": {
+      /**
+       * @description The base64 encoded file data, used when passing the file to the model as a
+       * string.
+       */
+      file_data?: string;
+      /** @description The ID of an uploaded file to use as input. */
+      file_id?: string;
+      /** @description The name of the file, used when passing the file to the model as a string. */
+      filename?: string;
+    };
+    /**
+     * @description Learn about [file inputs](https://platform.openai.com/docs/guides/text) for text
+     * generation.
+     */
+    "ChatCompletionContentPart.File": {
+      file: components["schemas"]["ChatCompletionContentPart.File.File"];
+      /**
+       * @description The type of the content part. Always `file`.
+       * @enum {string}
+       */
+      type: "file";
+    };
+    /**
+     * @description Learn about
+     * [text inputs](https://platform.openai.com/docs/guides/text-generation).
+     */
+    ChatCompletionContentPart: components["schemas"]["ChatCompletionContentPartText"] | components["schemas"]["ChatCompletionContentPartImage"] | components["schemas"]["ChatCompletionContentPartInputAudio"] | components["schemas"]["ChatCompletionContentPart.File"];
+    /**
+     * @description Messages sent by an end user, containing prompts or additional context
+     * information.
+     */
+    ChatCompletionUserMessageParam: {
+      /** @description The contents of the user message. */
+      content: string | components["schemas"]["ChatCompletionContentPart"][];
+      /**
+       * @description The role of the messages author, in this case `user`.
+       * @enum {string}
+       */
+      role: "user";
+      /**
+       * @description An optional name for the participant. Provides the model information to
+       * differentiate between participants of the same role.
+       */
+      name?: string;
+    };
+    /**
+     * @description Data about a previous audio response from the model.
+     * [Learn more](https://platform.openai.com/docs/guides/audio).
+     */
+    "ChatCompletionAssistantMessageParam.Audio": {
+      /** @description Unique identifier for a previous audio response from the model. */
+      id: string;
+    };
+    ChatCompletionContentPartRefusal: {
+      /** @description The refusal message generated by the model. */
+      refusal: string;
+      /**
+       * @description The type of the content part.
+       * @enum {string}
+       */
+      type: "refusal";
+    };
+    /** @deprecated */
+    "ChatCompletionAssistantMessageParam.FunctionCall": {
+      /**
+       * @description The arguments to call the function with, as generated by the model in JSON
+       * format. Note that the model does not always generate valid JSON, and may
+       * hallucinate parameters not defined by your function schema. Validate the
+       * arguments in your code before calling your function.
+       */
+      arguments: string;
+      /** @description The name of the function to call. */
+      name: string;
+    };
+    /** @description Messages sent by the model in response to user messages. */
+    ChatCompletionAssistantMessageParam: {
+      /**
+       * @description The role of the messages author, in this case `assistant`.
+       * @enum {string}
+       */
+      role: "assistant";
+      /**
+       * @description Data about a previous audio response from the model.
+       * [Learn more](https://platform.openai.com/docs/guides/audio).
+       */
+      audio?: components["schemas"]["ChatCompletionAssistantMessageParam.Audio"] | null;
+      /**
+       * @description The contents of the assistant message. Required unless `tool_calls` or
+       * `function_call` is specified.
+       */
+      content?: (string | ((components["schemas"]["ChatCompletionContentPartText"] | components["schemas"]["ChatCompletionContentPartRefusal"])[])) | null;
+      /** @deprecated */
+      function_call?: components["schemas"]["ChatCompletionAssistantMessageParam.FunctionCall"] | null;
+      /**
+       * @description An optional name for the participant. Provides the model information to
+       * differentiate between participants of the same role.
+       */
+      name?: string;
+      /** @description The refusal message by the assistant. */
+      refusal?: string | null;
+      /** @description The tool calls generated by the model, such as function calls. */
+      tool_calls?: components["schemas"]["ChatCompletionMessageToolCall"][];
+    };
+    ChatCompletionToolMessageParam: {
+      /** @description The contents of the tool message. */
+      content: string | components["schemas"]["ChatCompletionContentPartText"][];
+      /**
+       * @description The role of the messages author, in this case `tool`.
+       * @enum {string}
+       */
+      role: "tool";
+      /** @description Tool call that this message is responding to. */
+      tool_call_id: string;
+    };
+    /** @deprecated */
+    ChatCompletionFunctionMessageParam: {
+      /** @description The contents of the function message. */
+      content: string | null;
+      /** @description The name of the function to call. */
+      name: string;
+      /**
+       * @description The role of the messages author, in this case `function`.
+       * @enum {string}
+       */
+      role: "function";
+    };
+    /**
+     * @description Developer-provided instructions that the model should follow, regardless of
+     * messages sent by the user. With o1 models and newer, `developer` messages
+     * replace the previous `system` messages.
+     */
+    ChatCompletionMessageParam: components["schemas"]["ChatCompletionDeveloperMessageParam"] | components["schemas"]["ChatCompletionSystemMessageParam"] | components["schemas"]["ChatCompletionUserMessageParam"] | components["schemas"]["ChatCompletionAssistantMessageParam"] | components["schemas"]["ChatCompletionToolMessageParam"] | components["schemas"]["ChatCompletionFunctionMessageParam"];
+    "ResultSuccess__success-boolean__": {
+      data: {
+        success: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__success-boolean_.string_": components["schemas"]["ResultSuccess__success-boolean__"] | components["schemas"]["ResultError_string_"];
+    ThreadSummary: {
+      id: string;
+      /** Format: date-time */
+      created_at: string;
+      /** Format: date-time */
+      updated_at: string;
+      escalated: boolean;
+      /** Format: double */
+      message_count: number;
+      first_message?: string;
+      last_message?: string;
+      soft_delete?: boolean;
+    };
+    "ResultSuccess_ThreadSummary-Array_": {
+      data: components["schemas"]["ThreadSummary"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ThreadSummary-Array.string_": components["schemas"]["ResultSuccess_ThreadSummary-Array_"] | components["schemas"]["ResultError_string_"];
   };
   responses: {
   };
@@ -3717,7 +3980,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_"];
+          "application/json": components["schemas"]["Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array.string_"];
         };
       };
     };
@@ -5639,6 +5902,9 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["OpenAIChatRequest"] & {
+          inputs?: unknown;
+          environment?: string;
+          prompt_id?: string;
           logRequest?: boolean;
           useAIGateway?: boolean;
         };
@@ -5755,6 +6021,33 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result__cost-number--created_at_trunc-string_-Array.string_"];
+        };
+      };
+    };
+  };
+  GetModelRegistry: {
+    parameters: {
+      query?: {
+        providers?: string;
+        authors?: string;
+        inputModalities?: string;
+        outputModalities?: string;
+        parameters?: string;
+        capabilities?: string;
+        priceMin?: number;
+        priceMax?: number;
+        contextMin?: number;
+        search?: string;
+        sort?: components["schemas"]["SortOption"];
+        limit?: number;
+        offset?: number;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ModelRegistryResponse.string_"];
         };
       };
     };
@@ -6630,117 +6923,6 @@ export interface operations {
       };
     };
   };
-  GetRouters: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__routers-Router-Array_.string_"];
-        };
-      };
-    };
-  };
-  CreateRouter: {
-    requestBody: {
-      content: {
-        "application/json": {
-          config: string;
-          name: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_CreateRouterResult.string_"];
-        };
-      };
-    };
-  };
-  GetLatestRouterConfig: {
-    parameters: {
-      path: {
-        routerHash: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_LatestRouterConfig.string_"];
-        };
-      };
-    };
-  };
-  UpdateRouter: {
-    parameters: {
-      path: {
-        routerHash: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          config: string;
-          name: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  GetRouterRequestsOverTime: {
-    parameters: {
-      path: {
-        routerHash: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_RouterRequestsOverTime-Array.string_"];
-        };
-      };
-    };
-  };
-  GetRouterCostOverTime: {
-    parameters: {
-      path: {
-        routerHash: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_RouterCostOverTime-Array.string_"];
-        };
-      };
-    };
-  };
-  GetRouterLatencyOverTime: {
-    parameters: {
-      path: {
-        routerHash: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_RouterLatencyOverTime-Array.string_"];
-        };
-      };
-    };
-  };
   QueryEvals: {
     requestBody: {
       content: {
@@ -7004,7 +7186,7 @@ export interface operations {
         content: {
           "application/json": ({
             /** @enum {string} */
-            providerName: "anthropic" | "openai" | "perplexity" | "vertex" | "bedrock" | "azure-openai" | "xai" | "groq" | "deepseek" | "cohere";
+            providerName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure-openai" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "google";
           }) | {
             error: string;
           };
@@ -7206,6 +7388,104 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_void.string_"];
+        };
+      };
+    };
+  };
+  UpsertThreadMessage: {
+    parameters: {
+      path: {
+        sessionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          metadata: {
+            posthogSession?: string;
+            [key: string]: unknown;
+          };
+          messages: components["schemas"]["ChatCompletionMessageParam"][];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_InAppThread.string_"];
+        };
+      };
+    };
+  };
+  GetThread: {
+    parameters: {
+      path: {
+        sessionId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_InAppThread.string_"];
+        };
+      };
+    };
+  };
+  DeleteThread: {
+    parameters: {
+      path: {
+        sessionId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__success-boolean_.string_"];
+        };
+      };
+    };
+  };
+  EscalateThread: {
+    parameters: {
+      path: {
+        sessionId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_InAppThread.string_"];
+        };
+      };
+    };
+  };
+  GetAllThreads: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ThreadSummary-Array.string_"];
+        };
+      };
+    };
+  };
+  SearchDocs: {
+    requestBody: {
+      content: {
+        "application/json": {
+          query: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string.string_"];
         };
       };
     };

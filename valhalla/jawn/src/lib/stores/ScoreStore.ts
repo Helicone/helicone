@@ -34,82 +34,6 @@ export class ScoreStore extends BaseStore {
     super(organizationId);
   }
 
-  public async putScoresIntoDB(
-    requestId: string,
-    scores: Score[],
-    evaluatorId?: string
-  ) {
-    try {
-      const scoreKeys = scores.map((score) => {
-        if (score.score_attribute_type === "boolean") {
-          return `${score.score_attribute_key}-hcone-bool`;
-        }
-        return score.score_attribute_key;
-      });
-      const scoreTypes = scores.map((score) => score.score_attribute_type);
-      const scoreValues = scores.map((score) => score.score_attribute_value);
-      const evaluatorIds = scores.map((_score) => evaluatorId);
-      const { data: requestData, error: requestError } = await dbExecute(
-        `SELECT id FROM request WHERE id = $1 AND helicone_org_id = $2`,
-        [requestId, this.organizationId]
-      );
-
-      if (!requestData || requestError) {
-        return err(
-          `${requestId} not found in organization ${this.organizationId}`
-        );
-      }
-
-      const organizationIds = Array(scoreKeys.length).fill(this.organizationId);
-
-      const upsertQuery = `
-        WITH upserted_attributes AS (
-            INSERT INTO score_attribute (score_key, value_type, organization, evaluator_id)
-            SELECT unnest($1::text[]), unnest($2::text[]), unnest($3::uuid[]), unnest($4::uuid[])
-            ON CONFLICT (score_key, organization) DO UPDATE SET
-                score_key = EXCLUDED.score_key,
-                value_type = EXCLUDED.value_type,
-                evaluator_id = EXCLUDED.evaluator_id
-            RETURNING id, score_key
-        )
-        SELECT id, score_key
-        FROM upserted_attributes;
-      `;
-
-      const { data: upsertedAttributes, error: upsertError } = await dbExecute(
-        upsertQuery,
-        [scoreKeys, scoreTypes, organizationIds, evaluatorIds]
-      );
-
-      if (!upsertedAttributes || upsertError) {
-        return err(`Error upserting attributes: ${upsertError}`);
-      }
-
-      const attributeIds = upsertedAttributes.map((attr: any) => attr.id);
-
-      const insertValuesQuery = `
-        INSERT INTO score_value (score_attribute, request_id, int_value)
-        SELECT unnest($1::uuid[]), $2, unnest($3::bigint[])
-        ON CONFLICT (score_attribute, request_id) DO NOTHING
-        RETURNING *;
-      `;
-
-      const { data, error } = await dbExecute(insertValuesQuery, [
-        attributeIds,
-        requestId,
-        scoreValues,
-      ]);
-
-      if (!data || error) {
-        return err(`Error adding scores: ${error}`);
-      }
-
-      return { data: "Scores added successfully", error: null };
-    } catch (error: any) {
-      return err(error.message);
-    }
-  }
-
   public async putScoresIntoClickhouse(
     newVersions: BatchScores[]
   ): Promise<Result<RequestResponseRMT[], string>> {
@@ -152,18 +76,21 @@ export class ScoreStore extends BaseStore {
           .join(", ")}`
       );
     }
-    const uniqueRequestResponseLogs = rowContents.data.reduce((acc, row) => {
-      const key = `${row.request_id}-${row.organization_id}`;
-      if (
-        !acc[key] ||
-        (row.updated_at &&
-          (!acc[key].updated_at ||
-            new Date(row.updated_at) > new Date(acc[key].updated_at)))
-      ) {
-        acc[key] = row;
-      }
-      return acc;
-    }, {} as Record<string, RequestResponseRMT>);
+    const uniqueRequestResponseLogs = rowContents.data.reduce(
+      (acc, row) => {
+        const key = `${row.request_id}-${row.organization_id}`;
+        if (
+          !acc[key] ||
+          (row.updated_at &&
+            (!acc[key].updated_at ||
+              new Date(row.updated_at) > new Date(acc[key].updated_at)))
+        ) {
+          acc[key] = row;
+        }
+        return acc;
+      },
+      {} as Record<string, RequestResponseRMT>
+    );
 
     const filteredRequestResponseLogs = Object.values(
       uniqueRequestResponseLogs
@@ -177,16 +104,19 @@ export class ScoreStore extends BaseStore {
         // Merge existing scores with new scores
         const combinedScores = {
           ...(row.scores || {}),
-          ...newVersion.mappedScores.reduce((acc, score) => {
-            if (!Number.isInteger(score.score_attribute_value)) {
-              console.log(
-                `Skipping score ${score.score_attribute_key} with value ${score.score_attribute_value}`
-              );
-            } else {
-              acc[score.score_attribute_key] = score.score_attribute_value;
-            }
-            return acc;
-          }, {} as Record<string, number>),
+          ...newVersion.mappedScores.reduce(
+            (acc, score) => {
+              if (!Number.isInteger(score.score_attribute_value)) {
+                console.log(
+                  `Skipping score ${score.score_attribute_key} with value ${score.score_attribute_value}`
+                );
+              } else {
+                acc[score.score_attribute_key] = score.score_attribute_value;
+              }
+              return acc;
+            },
+            {} as Record<string, number>
+          ),
         };
 
         // Validate and ensure the scores are in the correct format

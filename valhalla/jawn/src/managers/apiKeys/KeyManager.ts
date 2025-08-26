@@ -7,10 +7,8 @@ import { Result, err, ok } from "../../packages/common/result";
 import { hashAuth } from "../../utils/hash";
 import { BaseManager } from "../BaseManager";
 import { DecryptedProviderKey } from "../VaultManager";
-import {
-  dbProviderToProvider,
-  ProviderName,
-} from "@helicone-package/cost/models/providers";
+import { ProviderName } from "@helicone-package/cost/models/providers";
+import { dbProviderToProvider } from "@helicone-package/cost/models/provider-helpers";
 
 type HashedPasswordRow = {
   hashed_password: string;

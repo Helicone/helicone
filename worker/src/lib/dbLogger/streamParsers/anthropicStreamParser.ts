@@ -8,7 +8,6 @@ export function recursivelyConsolidateAnthropic(body: any, delta: any): any {
       // console.log("Stop Reason", delta[key]);
     }
     if (key === "delta") {
-      console.log("Delta", delta[key]);
     } else if (key === "type") {
       body[key] = delta[key];
     } else if (body[key] === undefined || body[key] === null) {
@@ -112,7 +111,9 @@ export async function anthropicAIStream(
     if (
       getModel(requestBody ?? "{}").includes("claude-3") ||
       getModel(requestBody ?? "{}").includes("claude-sonnet-4") ||
-      getModel(requestBody ?? "{}").includes("claude-opus-4")
+      getModel(requestBody ?? "{}").includes("claude-opus-4") ||
+      // for AI SDK
+      getModel(requestBody ?? "{}").includes("claude-4")
     ) {
       return ok({
         ...recursivelyConsolidateAnthropicListForClaude(lines),

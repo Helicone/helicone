@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { updateSessionFeedback } from "../../../services/hooks/sessions";
 import { updateRequestFeedback } from "../../../services/lib/requests";
 import useNotification from "../../shared/notification/useNotification";
+import { logger } from "@/lib/telemetry/logger";
 
 interface FeedbackActionProps {
   id: string;
@@ -37,7 +38,7 @@ const FeedbackAction = ({ id, type, defaultValue }: FeedbackActionProps) => {
         }
       })
       .catch((err) => {
-        console.error(`Error submitting ${type} feedback:`, err);
+        logger.error({ error: err, type }, `Error submitting ${type} feedback`);
         setNotification(`Error submitting ${type} feedback`, "error");
       });
   };

@@ -7,6 +7,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { logger } from "@/lib/telemetry/logger";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
@@ -350,7 +351,12 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
                   queryKey: ["promptTemplate", promptVersionId],
                 });
                 if (result.error || !result.data) {
-                  console.error(result);
+                  logger.error(
+                    {
+                      result,
+                    },
+                    "Failed to get prompt template",
+                  );
                   return;
                 }
 
@@ -449,7 +455,12 @@ const PromptColumnHeader = ({
 
       setLabelData(result.data?.data?.metadata?.label as string);
       if (result.error || !result.data) {
-        console.error(result);
+        logger.error(
+          {
+            result,
+          },
+          "Failed to run experiment",
+        );
         return;
       }
     }

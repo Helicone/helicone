@@ -238,6 +238,13 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
     operators: ["eq", "neq", "like", "ilike", "contains"],
     table: "request_response_rmt",
   },
+  {
+    id: "provider",
+    label: "Provider",
+    type: "string",
+    operators: ["eq", "neq", "like", "ilike", "contains"],
+    table: "request_response_rmt",
+  },
 
   // Number fields
   {
@@ -258,6 +265,13 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
   {
     id: "latency",
     label: "Latency (ms)",
+    type: "number",
+    operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
+    table: "request_response_rmt",
+  },
+  {
+    id: "cost",
+    label: "Cost", 
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
     table: "request_response_rmt",
@@ -331,6 +345,18 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
       { label: "No", value: false },
     ],
     table: "request_response_rmt",
+  },
+  {
+    id: "helicone-score-feedback",
+    label: "Feedback",
+    type: "boolean",
+    operators: ["eq"],
+    valueOptions: [
+      { label: "Positive", value: true },
+      { label: "Negative", value: false },
+    ],
+    table: "request_response_rmt",
+
   },
 
   // Datetime fields

@@ -13,6 +13,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { logger } from "@/lib/telemetry/logger";
 import {
   Dialog,
   DialogContent,
@@ -44,6 +45,7 @@ import {
   ChevronsUpDown,
   Crown,
   Copy,
+  AlertTriangle,
 } from "lucide-react";
 import {
   Tooltip,
@@ -110,7 +112,7 @@ const PromptVersionCard = ({
       await navigator.clipboard.writeText(version.id);
       setNotification("Version ID copied to clipboard", "success");
     } catch (err) {
-      console.error("Failed to copy version ID:", err);
+      logger.error({ error: err }, "Failed to copy version ID");
       setNotification("Failed to copy version ID", "error");
     }
   };
@@ -202,6 +204,24 @@ const PromptVersionCard = ({
                   this version.
                 </DialogDescription>
               </DialogHeader>
+
+              {version.environment === "production" && (
+                <div className="flex items-start gap-3 rounded-lg border border-orange-200 bg-orange-50 p-4 dark:border-orange-800 dark:bg-orange-950/20">
+                  <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-orange-600 dark:text-orange-400" />
+                  <div className="flex flex-col gap-1">
+                    <p className="text-sm font-medium text-orange-800 dark:text-orange-200">
+                      Production Environment Warning
+                    </p>
+                    <p className="text-sm text-orange-700 dark:text-orange-300">
+                      You are about to deploy your production prompt version to
+                      a different environment. Consider setting another prompt
+                      version to production first to ensure safe fallback
+                      behavior.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               <div className="flex flex-col gap-4 pb-2">
                 <div className="flex flex-col gap-2">
                   <label className="text-sm font-medium">Environment</label>

@@ -8,6 +8,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useOrg } from "../../../components/layout/org/organizationContext";
 import { getJawnClient } from "../../../lib/clients/jawn";
 import { toast } from "sonner";
+import { logger } from "@/lib/telemetry/logger";
 
 const fetchHeliconeDatasetRows = async (
   orgId: string,
@@ -51,7 +52,7 @@ const fetchHeliconeDatasetRows = async (
             request_body = content?.request ?? "";
             response_body = content?.response ?? "";
           } catch (error) {
-            console.error("Error fetching signed URL:", error);
+            logger.error({ error }, "Error fetching signed URL");
           }
         }
       }

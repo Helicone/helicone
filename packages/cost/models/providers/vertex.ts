@@ -20,7 +20,7 @@ export class VertexProvider extends BaseProvider {
 
   buildUrl(
     endpoint: ModelProviderConfig,
-    config: UserEndpointConfig
+    config: UserEndpointConfig = {}
   ): string {
     if (!config.projectId || !config.region) {
       throw new Error("Vertex AI requires projectId and region");

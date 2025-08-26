@@ -8,6 +8,7 @@ import { DecryptedProviderKeyMapping } from "../../../../services/lib/keys";
 import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 import { Permission } from "../../../../services/lib/user";
 import { LimitUsageResult } from "./LimitUsageResult";
+import { logger } from "@/lib/telemetry/logger";
 const generateSubquery = (
   limit: DecryptedProviderKeyMapping["limits"][number],
   index: number,
@@ -44,7 +45,7 @@ async function handler({
     limits: DecryptedProviderKeyMapping["limits"];
   };
   if (!limits) {
-    console.error("Limits not provided");
+    logger.error("Limits not provided");
     res.status(400).json({ error: "Limits not provided", data: null });
     return;
   }

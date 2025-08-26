@@ -16,11 +16,13 @@ export class BedrockProvider extends BaseProvider {
   readonly auth = "aws-signature" as const;
   readonly requiredConfig = ["region"] as const;
   readonly pricingPages = ["https://aws.amazon.com/bedrock/pricing/"];
-  readonly modelPages = ["https://docs.aws.amazon.com/bedrock/latest/userguide/model-ids.html"];
+  readonly modelPages = [
+    "https://docs.aws.amazon.com/bedrock/latest/userguide/model-ids.html",
+  ];
 
   private getModelId(
     endpoint: ModelProviderConfig,
-    config: UserEndpointConfig
+    config: UserEndpointConfig = {}
   ): string {
     if (config.crossRegion && config.region && endpoint.crossRegion) {
       const regionPrefix = config.region.split("-")[0];
@@ -31,7 +33,7 @@ export class BedrockProvider extends BaseProvider {
 
   buildUrl(
     endpoint: ModelProviderConfig,
-    config: UserEndpointConfig
+    config: UserEndpointConfig = {}
   ): string {
     const region = config.region || "us-east-1";
     const modelId = this.getModelId(endpoint, config);
@@ -40,7 +42,7 @@ export class BedrockProvider extends BaseProvider {
 
   buildModelId(
     endpoint: ModelProviderConfig,
-    config: UserEndpointConfig
+    config: UserEndpointConfig = {}
   ): string {
     return this.getModelId(endpoint, config);
   }
@@ -56,7 +58,7 @@ export class BedrockProvider extends BaseProvider {
       );
     }
 
-    const awsRegion = context.config.region || "us-west-1";
+    const awsRegion = context.config?.region || "us-west-1";
     const sigv4 = new SignatureV4({
       service: "bedrock",
       region: awsRegion,
@@ -106,6 +108,11 @@ export class BedrockProvider extends BaseProvider {
       };
       return JSON.stringify(updatedBody);
     }
-    return JSON.stringify(context.parsedBody);
+
+    return JSON.stringify({
+      ...context.parsedBody,
+      stream: undefined,
+      stream_options: undefined,
+    });
   }
 }

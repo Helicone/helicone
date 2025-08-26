@@ -2,6 +2,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { Database } from "../supabase/database.types";
 import { InMemoryRateLimiter } from "./lib/clients/InMemoryRateLimiter";
+import { RateLimiterDO } from "./lib/durable-objects/RateLimiterDO";
 import { AlertStore } from "./lib/db/AlertStore";
 import { ClickhouseClientWrapper } from "./lib/db/ClickhouseWrapper";
 import { AlertManager } from "./lib/managers/AlertManager";
@@ -15,11 +16,11 @@ import { ProviderKeysManager } from "./lib/managers/ProviderKeysManager";
 import { ProviderKeysStore } from "./lib/db/ProviderKeysStore";
 import { APIKeysStore } from "./lib/db/APIKeysStore";
 import { APIKeysManager } from "./lib/managers/APIKeysManager";
+import { SecretManagerClass } from "@helicone-package/secrets/SecretManager";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
 export type Provider = ProviderName | "CUSTOM";
-
 
 export async function hash(key: string): Promise<string> {
   const encoder = new TextEncoder();
@@ -45,12 +46,27 @@ async function modifyEnvBasedOnPath(
   env: Env,
   request: RequestWrapper
 ): Promise<Env> {
+  const secretManager = new SecretManagerClass([
+    (key: string) => process.env[key],
+  ]);
+
+  // This configures all the blue <> green secrets
+  for (const key of Object.keys(env)) {
+    if (typeof env[key as keyof Env] === "string") {
+      const value = secretManager.getSecret(key);
+      if (value) {
+        env[key as keyof Env] = value as any;
+      }
+    }
+  }
+
   const url = new URL(request.getUrl());
   const host = url.host;
   const hostParts = host.split(".");
   if (request.isEU()) {
     env = {
       ...env,
+      VALHALLA_URL: env.EU_VALHALLA_URL,
       CLICKHOUSE_HOST: env.EU_CLICKHOUSE_HOST,
       CLICKHOUSE_USER: env.EU_CLICKHOUSE_USER,
       CLICKHOUSE_PASSWORD: env.EU_CLICKHOUSE_PASSWORD,
@@ -360,6 +376,7 @@ export default {
     env: Env,
     ctx: ExecutionContext
   ): Promise<Response> {
+    console.log("WORKER_TYPE", env.WORKER_TYPE);
     try {
       const requestWrapper = await RequestWrapper.create(request, env);
       if (requestWrapper.error || !requestWrapper.data) {
@@ -535,4 +552,4 @@ function handleError(e: unknown): Response {
     }
   );
 }
-export { InMemoryRateLimiter };
+export { InMemoryRateLimiter, RateLimiterDO };

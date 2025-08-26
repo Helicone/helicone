@@ -10,6 +10,7 @@ import { GetServerSidePropsContext } from "next";
 import { InfoBanner } from "../components/shared/themed/themedDemoBanner";
 import { env } from "next-runtime-env";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+import { logger } from "@/lib/telemetry/logger";
 
 const SignUp = () => {
   const heliconeAuthClient = useHeliconeAuthClient();
@@ -48,7 +49,7 @@ const SignUp = () => {
       <AuthForm
         handleEmailSubmit={async (email: string, password: string) => {
           const origin = window.location.origin;
-          console.log("signing up");
+          logger.info({ email, origin }, "User signing up with email");
 
           const { error } = await heliconeAuthClient.signUp({
             email: email,
@@ -63,7 +64,7 @@ const SignUp = () => {
               "Error creating your account. Please try again.",
               "error",
             );
-            console.error(error);
+            logger.error({ error, email }, "Email sign up failed");
             return;
           }
 
@@ -81,7 +82,7 @@ const SignUp = () => {
               "Error creating your account. Please try again.",
               "error",
             );
-            console.error(error);
+            logger.error({ error }, "Google OAuth sign up failed");
             return;
           }
         }}
@@ -97,7 +98,7 @@ const SignUp = () => {
               "Error creating your account. Please try again.",
               "error",
             );
-            console.error(error);
+            logger.error({ error }, "GitHub OAuth sign up failed");
             return;
           }
         }}

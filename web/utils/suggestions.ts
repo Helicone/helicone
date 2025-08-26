@@ -1,3 +1,5 @@
+import { logger } from "@/lib/telemetry/logger";
+
 export type SuggestionState = {
   isTyping: boolean;
   lastTypingTime: number;
@@ -20,7 +22,7 @@ export const suggestionReducer = (
   action: SuggestionAction,
 ): SuggestionState => {
   const now = Date.now();
-  // console.log("Suggestion Reducer:", { action, prevState: state });
+  // logger.debug({ action, prevState: state }, "Suggestion Reducer");
 
   const newState = (() => {
     switch (action.type) {
@@ -76,7 +78,7 @@ export const suggestionReducer = (
     return state;
   })();
 
-  // console.log("New State:", newState);
+  // logger.debug({ newState }, "New State");
   return newState;
 };
 

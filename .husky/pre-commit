@@ -1,7 +1,0 @@
-#!/bin/sh
-if [ "$HELICONE_IGNORE_PRECOMMIT" = "true" ]; then
-  echo "Skipping pre-commit hooks due to HELICONE_IGNORE_PRECOMMIT=true"
-  exit 0
-fi
-
-yarn lint:fix

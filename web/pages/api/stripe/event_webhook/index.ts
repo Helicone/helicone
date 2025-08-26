@@ -13,6 +13,7 @@ import { buffer } from "micro";
 import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { hashAuth } from "../../../../lib/hashClient";
+import { logger } from "@/lib/telemetry/logger";
 
 async function getUserIdFromEmail(email: string): Promise<string | null> {
   try {
@@ -29,10 +30,10 @@ async function getUserIdFromEmail(email: string): Promise<string | null> {
       return result.data[0].id;
     }
 
-    console.error(`No user found with email: ${email}`);
+    logger.error({ email }, "No user found with email");
     return null;
   } catch (error) {
-    console.error(`Error getting userId from email: ${email}`, error);
+    logger.error({ email, error }, "Error getting userId from email");
     return null;
   }
 }
@@ -66,7 +67,7 @@ async function sendSubscriptionEvent(
   try {
     const orgId = subscription.metadata?.orgId;
     if (!orgId) {
-      console.log(
+      logger.info(
         `No orgId found in subscription metadata, skipping PostHog event`,
       );
       return;
@@ -85,7 +86,7 @@ async function sendSubscriptionEvent(
       !("email" in customer) ||
       !customer.email
     ) {
-      console.log(`No valid customer email found, skipping PostHog event`);
+      logger.info("No valid customer email found, skipping PostHog event");
       return;
     }
 
@@ -101,7 +102,7 @@ async function sendSubscriptionEvent(
 
     const userId = await getUserIdFromEmail(customer.email);
     if (!userId) {
-      console.error(
+      logger.error(
         `Failed to get userId for email ${customer.email}, cannot send PostHog event`,
       );
       return;
@@ -135,11 +136,11 @@ async function sendSubscriptionEvent(
       orgId,
     );
 
-    console.log(
+    logger.info(
       `PostHog: Sent ${eventType} event for org ${orgId} (userId: ${userId}, tier: ${tier})`,
     );
   } catch (error) {
-    console.error(`Failed to send PostHog event for ${eventType}:`, error);
+    logger.error({ eventType, error }, "Failed to send PostHog event");
   }
 }
 
@@ -186,16 +187,13 @@ async function sendSubscriptionCanceledEvent(
 
         await sendSubscriptionEvent("subscription_canceled", subscription);
       } else {
-        console.log(
-          `No valid customer email found. Customer object:`,
-          JSON.stringify(customer),
-        );
+        logger.info({ customer }, "No valid customer email found");
       }
     } catch (loopsError) {
-      console.error("Failed to send Loops event:", loopsError);
+      logger.error({ error: loopsError }, "Failed to send Loops event");
     }
   } else {
-    console.log(
+    logger.info(
       `Subscription ${subscription.id} does not meet criteria for sending cancellation email`,
     );
   }
@@ -215,9 +213,9 @@ const PricingVersionOld = {
     );
 
     if (orgError) {
-      console.error("Failed to update organization:", JSON.stringify(orgError));
+      logger.error({ error: orgError }, "Failed to update organization");
     } else {
-      console.log("Organization updated successfully: ", JSON.stringify(org));
+      logger.info({ org }, "Organization updated successfully");
     }
   },
 
@@ -277,17 +275,14 @@ const PricingVersionOld = {
       const { data: org, error: orgError } = await dbExecute(query, params);
 
       if (orgError) {
-        console.error(
-          "Failed to update organization:",
-          JSON.stringify(orgError),
-        );
+        logger.error({ error: orgError }, "Failed to update organization");
       } else {
-        console.log("Organization updated successfully: ", JSON.stringify(org));
+        logger.info({ org }, "Organization updated successfully");
       }
     } else {
-      console.log(
-        "No fields to update for organization with customer ID:",
-        subscriptionUpdated.customer,
+      logger.info(
+        { customerId: subscriptionUpdated.customer },
+        "No fields to update for organization with customer ID",
       );
     }
 
@@ -314,9 +309,9 @@ const PricingVersionOld = {
     );
 
     if (orgError) {
-      console.error("Failed to update organization:", JSON.stringify(orgError));
+      logger.error({ error: orgError }, "Failed to update organization");
     } else {
-      console.log("Organization updated successfully: ", JSON.stringify(org));
+      logger.info({ org }, "Organization updated successfully");
     }
   },
 };
@@ -345,7 +340,7 @@ class TempAPIKey {
         [this.keyId],
       );
     } catch (error) {
-      console.error("Failed to cleanup temporary API key:", error);
+      logger.error({ error }, "Failed to cleanup temporary API key");
     }
   }
 }
@@ -444,7 +439,7 @@ async function inviteOnboardingMembers(orgId: string | undefined) {
     );
 
   if (orgDataError || !orgDataArr || orgDataArr.length === 0) {
-    console.log("Failed to fetch onboarding status:", orgDataError);
+    logger.error({ error: orgDataError }, "Failed to fetch onboarding status");
     return;
   }
 
@@ -497,7 +492,7 @@ async function inviteOnboardingMembers(orgId: string | undefined) {
 
         await response.json();
       } catch (error) {
-        console.error(`Failed to invite member ${member.email}:`, error);
+        logger.error({ email: member.email, error }, "Failed to invite member");
       }
     }
   });
@@ -508,14 +503,14 @@ async function createSlackChannelAndInviteMembers(
   orgName: string | undefined,
 ) {
   if (!orgId || !orgName || !process.env.SLACK_BOT_TOKEN_AUTO_INVITE) {
-    console.log("Missing organization ID, name, or Slack token");
+    logger.info("Missing organization ID, name, or Slack token");
     return;
   }
 
   const slackClient = new WebClient(process.env.SLACK_BOT_TOKEN_AUTO_INVITE);
 
   const channelName = formatChannelName(orgName, orgId);
-  console.log(`Creating Slack channel: ${channelName}`);
+  logger.info({ channelName }, "Creating Slack channel");
 
   const createChannelResponse = await slackClient.conversations.create({
     name: channelName,
@@ -541,7 +536,10 @@ async function createSlackChannelAndInviteMembers(
     );
 
   if (orgMembersError) {
-    console.log("Failed to fetch organization members:", orgMembersError);
+    logger.error(
+      { error: orgMembersError },
+      "Failed to fetch organization members",
+    );
   }
 
   const emails = await Promise.all(
@@ -549,7 +547,7 @@ async function createSlackChannelAndInviteMembers(
   ).then((emails) => emails.filter((email) => email !== null) as string[]);
 
   // Invite all workspace members
-  console.log("Inviting all workspace members to the channel");
+  logger.info("Inviting all workspace members to the channel");
   const allMembers = await slackClient.users.list({
     limit: 200, // Fetch up to 200 users at once
   });
@@ -561,7 +559,7 @@ async function createSlackChannelAndInviteMembers(
     );
 
     if (realUsers.length > 0) {
-      console.log(`Found ${realUsers.length} real workspace members`);
+      logger.info({ count: realUsers.length }, "Found real workspace members");
 
       // Collect all user IDs and invite them
       const userIds = realUsers
@@ -574,7 +572,7 @@ async function createSlackChannelAndInviteMembers(
           channel: channelId,
           users: userIds,
         });
-        console.log(
+        logger.info(
           `Invited ${realUsers.length} workspace members to the channel`,
         );
       }
@@ -583,7 +581,7 @@ async function createSlackChannelAndInviteMembers(
 
   // Get support team user group ID
   const userGroupId = "S08JS8UK211"; // Team support group ID
-  console.log(
+  logger.info(
     `Associating channel ${channelId} with support group ${userGroupId}`,
   );
 
@@ -610,7 +608,7 @@ async function createSlackChannelAndInviteMembers(
       usergroup: userGroupId,
       channels: existingChannels.join(","), // Slack expects a comma-separated string
     });
-    console.log(`Successfully associated channel with support group`);
+    logger.info("Successfully associated channel with support group");
   }
 
   // Post welcome message to the channel with email list
@@ -630,7 +628,7 @@ async function createSlackChannelAndInviteMembers(
       `(These users will need to be manually invited to the Slack workspace)`,
   });
 
-  console.log(
+  logger.info(
     `Successfully created Slack channel and added team members for ${orgName}`,
   );
 }
@@ -673,7 +671,7 @@ async function getUserEmail(
     const user = await getHeliconeAuthClient().getUserById(userId);
     return user.data?.email || null;
   } catch (error) {
-    console.error("Error fetching owner email:", error);
+    logger.error({ error }, "Error fetching owner email");
     return null;
   }
 }
@@ -700,7 +698,10 @@ const TeamVersion20250130 = {
       );
 
     if (orgDataError) {
-      console.error("Failed to fetch organization data:", orgDataError);
+      logger.error(
+        { error: orgDataError },
+        "Failed to fetch organization data",
+      );
     }
 
     const orgData =
@@ -713,13 +714,13 @@ const TeamVersion20250130 = {
       typeof orgData.stripe_subscription_id === "string"
     ) {
       try {
-        console.log("Cancelling old subscription");
+        logger.info("Cancelling old subscription");
         await stripe.subscriptions.cancel(orgData.stripe_subscription_id, {
           invoice_now: true,
           prorate: true,
         });
       } catch (_e) {
-        console.error("Error canceling old subscription:", _e);
+        logger.error({ error: _e }, "Error canceling old subscription");
       }
     }
 
@@ -736,7 +737,7 @@ const TeamVersion20250130 = {
     );
 
     if (updateError) {
-      console.error("Failed to update organization:", updateError);
+      logger.error({ error: updateError }, "Failed to update organization");
     }
 
     // Invite members after org is updated
@@ -793,7 +794,7 @@ const PricingVersion20240913 = {
     );
 
     if (updateError) {
-      console.error("Failed to update organization:", updateError);
+      logger.error({ error: updateError }, "Failed to update organization");
     }
 
     // Invite members after org is updated
@@ -827,7 +828,7 @@ const InvoiceHandlers = {
         const subscriptionMetadata = invoice.subscription_details?.metadata;
         const orgId = subscriptionMetadata?.orgId;
         if (!orgId) {
-          console.log("No orgId found, skipping invoice item creation");
+          logger.info("No orgId found, skipping invoice item creation");
           return;
         }
 
@@ -837,7 +838,7 @@ const InvoiceHandlers = {
             : invoice.customer?.id;
 
         if (!customerID) {
-          console.log("No customerID found, skipping invoice item creation");
+          logger.info("No customerID found, skipping invoice item creation");
           return;
         }
 
@@ -859,9 +860,9 @@ const InvoiceHandlers = {
         );
 
         if (experimentUsage.error || !experimentUsage.data) {
-          console.error(
-            "Error getting experiment usage:",
-            experimentUsage.error,
+          logger.error(
+            { error: experimentUsage.error },
+            "Error getting experiment usage",
           );
           return;
         }
@@ -873,7 +874,10 @@ const InvoiceHandlers = {
         );
 
         if (evaluatorUsage.error || !evaluatorUsage.data) {
-          console.error("Error getting evaluator usage:", evaluatorUsage.error);
+          logger.error(
+            { error: evaluatorUsage.error },
+            "Error getting evaluator usage",
+          );
           return;
         }
 
@@ -885,7 +889,10 @@ const InvoiceHandlers = {
             });
 
             if (!totalCost) {
-              console.error("No cost found for", usage.model, usage.provider);
+              logger.error(
+                { model: usage.model, provider: usage.provider },
+                "No cost found for model/provider",
+              );
               continue;
             }
 
@@ -917,7 +924,10 @@ const InvoiceHandlers = {
             });
 
             if (!totalCost) {
-              console.error("No cost found for", usage.model, usage.provider);
+              logger.error(
+                { model: usage.model, provider: usage.provider },
+                "No cost found for model/provider",
+              );
               continue;
             }
 
@@ -941,10 +951,10 @@ const InvoiceHandlers = {
           }
         }
       } else {
-        console.log("Invoice is not draft, skipping finalization");
+        logger.info("Invoice is not draft, skipping finalization");
       }
     } catch (error) {
-      console.error("Error handling invoice creation:", error);
+      logger.error({ error }, "Error handling invoice creation");
       throw error;
     }
   },
@@ -961,7 +971,7 @@ const InvoiceHandlers = {
         // });
       }
     } catch (error) {
-      console.error("Error handling upcoming invoice:", error);
+      logger.error({ error }, "Error handling upcoming invoice");
       throw error;
     }
   },
@@ -1014,7 +1024,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     ];
 
     if (knownUnhandledEvents.includes(event.type)) {
-      console.log("Unhandled event type", event.type);
+      logger.info({ eventType: event.type }, "Unhandled event type");
       return res.status(200).end();
     }
 
@@ -1031,7 +1041,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     } else if (event.type === "invoice.upcoming") {
       await InvoiceHandlers.handleInvoiceUpcoming(event);
     } else {
-      console.log("Unhandled event type", event.type);
+      logger.info({ eventType: event.type }, "Unhandled event type");
       return res.status(400).end();
     }
 

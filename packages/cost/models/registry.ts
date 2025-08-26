@@ -17,17 +17,20 @@ import { ModelName, ModelProviderConfigId, EndpointId } from "./registry-types";
 // Import all models and endpoints from authors
 import { anthropicModels, anthropicEndpointConfig } from "./authors/anthropic";
 import { openaiModels, openaiEndpointConfig } from "./authors/openai";
+import { googleModels, googleEndpointConfig } from "./authors/google";
 
 // Combine all models
 const allModels = {
   ...anthropicModels,
   ...openaiModels,
+  ...googleModels,
 } satisfies Record<string, ModelConfig>;
 
 // Combine all endpoint configs
 const modelProviderConfigs = {
   ...anthropicEndpointConfig,
   ...openaiEndpointConfig,
+  ...googleEndpointConfig,
 } satisfies Record<string, ModelProviderConfig>;
 
 const indexes: ModelIndexes = buildIndexes(modelProviderConfigs);
@@ -168,6 +171,20 @@ function getModelProviders(model: string): Result<Set<ProviderName>> {
   return ok(providers);
 }
 
+function getPtbEndpointsWithIds(model: string, provider: string): Result<Record<string, string>> {
+  const result: Record<string, string> = {};
+  const prefix = `${model}:${provider}:`;
+  
+  indexes.endpointIdToEndpoint.forEach((endpoint, endpointId) => {
+    if (endpointId.startsWith(prefix) && endpoint.ptbEnabled) {
+      const deploymentId = endpointId.substring(prefix.length);
+      result[deploymentId] = endpoint.baseUrl;
+    }
+  });
+  
+  return ok(result);
+}
+
 export const registry = {
   getModel,
   getAllModels,
@@ -178,6 +195,7 @@ export const registry = {
   getPtbEndpointById,
   getPtbEndpointsByModel,
   getPtbEndpointsByProvider,
+  getPtbEndpointsWithIds,
   getProviderModels,
   buildEndpoint,
   buildModelId,

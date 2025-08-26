@@ -13,6 +13,7 @@ import {
 } from "@/lib/admin/RevenueCalculator";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { formatMonthKey } from "@/lib/uiUtils";
+import { logger } from "@/lib/telemetry/logger";
 import { useEffect, useMemo, useState } from "react";
 import type Stripe from "stripe";
 
@@ -184,7 +185,7 @@ const AdminProjections = () => {
           upcomingInvoices: response.data.upcomingInvoices,
         });
       } catch (err) {
-        console.error("Error fetching subscription data:", err);
+        logger.error({ error: err }, "Error fetching subscription data");
         setError("Failed to load subscription data. Using mock data instead.");
 
         // Fall back to mock data if fetch fails

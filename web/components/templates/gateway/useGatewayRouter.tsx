@@ -1,5 +1,6 @@
 import { $JAWN_API } from "@/lib/clients/jawn";
 import { useMutation } from "@tanstack/react-query";
+import { logger } from "@/lib/telemetry/logger";
 
 const useGatewayRouter = ({ routerHash }: { routerHash: string }) => {
   const { data: gatewayRouter, isLoading } = $JAWN_API.useQuery(
@@ -40,7 +41,7 @@ const useGatewayRouter = ({ routerHash }: { routerHash: string }) => {
           error: "Failed to validate router config",
         };
       } catch (error) {
-        console.error(error);
+        logger.error({ error }, "Failed to validate router config");
         return {
           error: "Failed to validate router config",
         };

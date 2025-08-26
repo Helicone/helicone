@@ -2,6 +2,7 @@ import { useRouter } from "next/router";
 import useNotification from "../components/shared/notification/useNotification";
 import AuthForm from "../components/templates/auth/authForm";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+import { logger } from "@/lib/telemetry/logger";
 const ResetPassword = () => {
   const router = useRouter();
   const heliconeAuthClient = useHeliconeAuthClient();
@@ -16,7 +17,7 @@ const ResetPassword = () => {
 
         if (error) {
           setNotification("Error updating user. Please try again.", "error");
-          console.error(error);
+          logger.error({ error }, "Error updating user");
           return;
         }
         setNotification("Success. Redirecting...", "success");

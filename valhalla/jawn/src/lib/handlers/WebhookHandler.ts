@@ -26,6 +26,11 @@ export class WebhookHandler extends AbstractLogHandler {
   }
 
   async handle(context: HandlerContext): PromiseGenericResult<string> {
+    const start = performance.now();
+    context.timingMetrics.push({
+      constructor: this.constructor.name,
+      start,
+    });
     const orgId = context.orgParams?.id;
 
     if (!orgId) {

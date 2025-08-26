@@ -64,9 +64,12 @@ export class HeliconeTemplateManager {
     const errors: ValidationError[] = [];
     
     for (const variable of variables) {
-      const value = inputs[variable.name];
+      const value = variable.name in inputs ? inputs[variable.name] : undefined;
+      if (!value) {
+        continue;
+      }
       
-      if (!value || !this.isTypeCompatible(value, variable.type)) {
+      if (!this.isTypeCompatible(value, variable.type)) {
         errors.push({
           variable: variable.name,
           expected: variable.type,
@@ -84,7 +87,7 @@ export class HeliconeTemplateManager {
     
     TEMPLATE_REGEX.lastIndex = 0;
     const result = template.replace(TEMPLATE_REGEX, (match, name) => {
-      const value = inputs[name.trim()];
+      const value = name.trim() in inputs ? inputs[name.trim()] : undefined;
       return value ? String(value) : match;
     });
     

@@ -19,6 +19,7 @@ import { useFilterUIDefinitions } from "../filterUIDefinitions/useFilterUIDefini
 import clsx from "clsx";
 import { Small } from "@/components/ui/typography";
 import DateTimeInput from "./ui/DateTimeInput";
+import { logger } from "@/lib/telemetry/logger";
 
 // Define the FILTER_OPERATOR_LABELS mapping
 const FILTER_OPERATOR_LABELS: Record<FilterOperator, string> = {
@@ -65,50 +66,26 @@ const NumberInput: React.FC<{
   className = "",
 }) => {
   const [open, setOpen] = React.useState(false);
+  const [inputValue, setInputValue] = React.useState(value.toString());
   const containerRef = React.useRef<HTMLDivElement>(null);
 
-  // Format display value to remove leading zeros but preserve decimals
-  const formatDisplayValue = (val: string | number): string => {
-    if (val === 0 || val === "0") return "0";
-
-    if (typeof val === "string") {
-      // If it's a string with leading zeros (not a decimal)
-      if (val.startsWith("0") && val.length > 1 && val[1] !== ".") {
-        return parseFloat(val).toString();
-      }
-    }
-    return val.toString();
-  };
+  React.useEffect(() => {
+    setInputValue(value.toString());
+  }, [value]);
 
   // Handle direct input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value;
+    const newValue = e.target.value;
+    setInputValue(newValue);
 
     // For empty input, use 0
-    if (inputValue === "") {
+    if (newValue === "") {
       onValueChange(0);
       return;
     }
 
-    // If it has leading zeros (but is not a decimal), remove them
-    if (
-      inputValue.startsWith("0") &&
-      inputValue.length > 1 &&
-      inputValue[1] !== "."
-    ) {
-      const cleanValue = inputValue.replace(/^0+/, "");
-      const numericValue = Number(cleanValue);
-      if (!isNaN(numericValue)) {
-        onValueChange(numericValue);
-      }
-      return;
-    }
-
-    // Parse the input as a number
-    const numericValue = Number(inputValue);
-
-    // Only update if it's a valid number
-    if (!isNaN(numericValue)) {
+    const numericValue = Number(newValue);
+    if (!isNaN(numericValue) && newValue !== "" && !newValue.endsWith('.')) {
       onValueChange(numericValue);
     }
   };
@@ -146,8 +123,8 @@ const NumberInput: React.FC<{
     <div className="relative w-full" ref={containerRef}>
       <div className="flex">
         <Input
-          type="number"
-          value={formatDisplayValue(value)}
+          type="text"
+          value={inputValue}
           onChange={handleInputChange}
           disabled={disabled}
           className={`h-7 w-full text-[10px] ${className}`}
@@ -304,7 +281,7 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
         value: String(result.value),
       }));
     } catch (error) {
-      console.error("Error searching:", error);
+      logger.error({ error }, "Error searching");
       return [];
     }
   };

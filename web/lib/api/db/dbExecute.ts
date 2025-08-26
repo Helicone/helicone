@@ -2,6 +2,8 @@ import { Client } from "pg";
 import { Result } from "@/packages/common/result";
 import { createClient as clickhouseCreateClient } from "@clickhouse/client";
 import dateFormat from "dateformat";
+import { logger } from "@/lib/telemetry/logger";
+import { SecretManager } from "@helicone-package/secrets/SecretManager";
 
 export function paramsToValues(params: (number | string | boolean | Date)[]) {
   return params
@@ -30,7 +32,7 @@ export function printRunnableQuery(
     .map(([key, value]) => `SET param_${key} = '${value}';`)
     .join("\n");
 
-  console.log(`\n\n${setParams}\n\n${query}\n\n`);
+  logger.info({ setParams, query }, "Runnable query");
 }
 
 export async function dbQueryClickhouse<T>(
@@ -41,10 +43,12 @@ export async function dbQueryClickhouse<T>(
     const query_params = paramsToValues(parameters);
 
     const getClickhouseHost = () => {
-      if (process.env.CLICKHOUSE_HOST) {
-        return process.env.CLICKHOUSE_HOST;
+      const clickhouseHost = SecretManager.getSecret("CLICKHOUSE_HOST");
+      if (clickhouseHost) {
+        return clickhouseHost;
       }
-      // Use APP_URL to construct clickhouse host if not specified
+
+      // Use APP_URL to construct clickhouse host if not specified in env
       const appUrl =
         process.env.APP_URL ||
         process.env.NEXT_PUBLIC_APP_URL ||
@@ -59,8 +63,8 @@ export async function dbQueryClickhouse<T>(
 
     const client = clickhouseCreateClient({
       host: getClickhouseHost(),
-      username: process.env.CLICKHOUSE_USER ?? "default",
-      password: process.env.CLICKHOUSE_PASSWORD ?? "",
+      username: SecretManager.getSecret("CLICKHOUSE_USER") ?? "default",
+      password: SecretManager.getSecret("CLICKHOUSE_PASSWORD") ?? "",
     });
 
     const queryResult = await client.query({
@@ -77,8 +81,7 @@ export async function dbQueryClickhouse<T>(
     });
     return { data: await queryResult.json<T[]>(), error: null };
   } catch (err) {
-    console.error("Error executing query: ", query, parameters);
-    console.error(err);
+    logger.error({ query, parameters, error: err }, "Error executing query");
     return {
       data: null,
       error: JSON.stringify(err),
@@ -100,12 +103,17 @@ export async function dbExecute<T>(
     process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "development"
       ? {
           rejectUnauthorized: true,
-          ca: process.env.SUPABASE_SSL_CERT_CONTENTS!.split("\\n").join("\n"),
+          ca: SecretManager.getSecret("SUPABASE_SSL_CERT_CONTENTS")!
+            .split("\\n")
+            .join("\n"),
         }
       : undefined;
 
   const client = new Client({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: SecretManager.getSecret(
+      "DATABASE_URL",
+      "SUPABASE_DATABASE_URL",
+    ),
     ssl,
   });
   try {
@@ -118,8 +126,7 @@ export async function dbExecute<T>(
 
     return { data: result.rows, error: null };
   } catch (err) {
-    console.error("Error executing query: ", query, parameters);
-    console.error(err);
+    logger.error({ query, parameters, error: err }, "Error executing query");
     await client.end();
     return { data: null, error: JSON.stringify(err) };
   }

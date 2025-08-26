@@ -40,6 +40,3 @@ export const anthropicEndpointConfig = {
   ...claude35SonnetV2Endpoints,
   ...claude35HaikuEndpoints,
 } satisfies Record<string, ModelProviderConfig>;
-
-// Re-export metadata
-export { anthropicMetadata } from "./metadata";

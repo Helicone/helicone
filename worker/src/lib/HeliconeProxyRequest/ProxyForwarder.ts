@@ -1,36 +1,37 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createClient } from "@supabase/supabase-js";
 import { Provider } from "@helicone-package/llm-mapper/types";
-import { DBWrapper } from "../db/DBWrapper";
+import { createClient } from "@supabase/supabase-js";
 import {
-  checkRateLimit,
-  updateRateLimitCounter,
-} from "../clients/KVRateLimiterClient";
-import { Prompt2025Settings, RequestWrapper } from "../RequestWrapper";
+  checkRateLimit as checkRateLimitDO,
+  updateRateLimitCounter as updateRateLimitCounterDO,
+} from "../clients/DurableObjectRateLimiterClient";
+
+import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
+import { checkPromptSecurity } from "../clients/PromptSecurityClient";
+import { S3Client } from "../clients/S3Client";
+import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
+import { DBWrapper } from "../db/DBWrapper";
+import { RequestResponseStore } from "../db/RequestResponseStore";
+import { Valhalla } from "../db/valhalla";
+import { DBLoggable } from "../dbLogger/DBLoggable";
+import { Moderator } from "../managers/ModerationManager";
+import { RateLimitManager } from "../managers/RateLimitManager";
+import { RequestResponseManager } from "../managers/RequestResponseManager";
+import { SentryManager } from "../managers/SentryManager";
+import {
+  HeliconeProxyRequest,
+  HeliconeProxyRequestMapper,
+} from "../models/HeliconeProxyRequest";
+import { RequestWrapper } from "../RequestWrapper";
 import { ResponseBuilder } from "../ResponseBuilder";
 import { getCachedResponse, saveToCache } from "../util/cache/cacheFunctions";
 import { CacheSettings, getCacheSettings } from "../util/cache/cacheSettings";
-import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
-import { RequestResponseStore } from "../db/RequestResponseStore";
-import { Valhalla } from "../db/valhalla";
+import { DBQueryTimer } from "../util/loggers/DBQueryTimer";
+import { Result } from "../util/results";
 import {
   handleProxyRequest,
   handleThreatProxyRequest,
 } from "./ProxyRequestHandler";
-import { checkPromptSecurity } from "../clients/PromptSecurityClient";
-import { DBLoggable } from "../dbLogger/DBLoggable";
-import { DBQueryTimer } from "../util/loggers/DBQueryTimer";
-import { Moderator } from "../managers/ModerationManager";
-import { Result } from "../util/results";
-import { S3Client } from "../clients/S3Client";
-import {
-  HeliconeProxyRequestMapper,
-  HeliconeProxyRequest,
-} from "../models/HeliconeProxyRequest";
-import { RequestResponseManager } from "../managers/RequestResponseManager";
-import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
-import { RateLimitManager } from "../managers/RateLimitManager";
-import { SentryManager } from "../managers/SentryManager";
 
 export async function proxyForwarder(
   request: RequestWrapper,
@@ -138,26 +139,29 @@ export async function proxyForwarder(
         }
 
         if (finalRateLimitOptions) {
-          const rateLimitCheckResult = await checkRateLimit({
-            organizationId: orgData.organizationId,
-            heliconeProperties: proxyRequest.heliconeProperties,
-            rateLimitKV: env.RATE_LIMIT_KV,
-            rateLimitOptions: finalRateLimitOptions,
-            userId: proxyRequest.userId,
-            cost: 0,
-          });
-
-          responseBuilder.addRateLimitHeaders(
-            rateLimitCheckResult,
-            finalRateLimitOptions
-          );
-
-          if (rateLimitCheckResult.status === "rate_limited") {
-            rate_limited = true;
-            request.injectCustomProperty(
-              "Helicone-Rate-Limit-Status",
-              rateLimitCheckResult.status
+          try {
+            const rateLimitCheckResult = await checkRateLimitDO({
+              organizationId: orgData.organizationId,
+              heliconeProperties: proxyRequest.heliconeProperties,
+              rateLimiterDO: env.RATE_LIMITER_SQL,
+              rateLimitOptions: finalRateLimitOptions,
+              userId: proxyRequest.userId,
+              cost: 1,
+            });
+            responseBuilder.addRateLimitHeaders(
+              rateLimitCheckResult,
+              finalRateLimitOptions
             );
+
+            if (rateLimitCheckResult.status === "rate_limited") {
+              rate_limited = true;
+              request.injectCustomProperty(
+                "Helicone-Rate-Limit-Status",
+                rateLimitCheckResult.status
+              );
+            }
+          } catch (error) {
+            console.error("Error checking rate limit", error);
           }
         }
       }
@@ -403,15 +407,20 @@ export async function proxyForwarder(
       console.error("Error logging", res.error);
     }
 
-    if (incurRateLimit) {
+    if (incurRateLimit && !rate_limited) {
       const db = new DBWrapper(env, auth);
       const { data: orgData, error: orgError } = await db.getAuthParams();
-      if (proxyRequest && finalRateLimitOptions && !orgError) {
-        await updateRateLimitCounter({
+      if (
+        proxyRequest &&
+        finalRateLimitOptions &&
+        !orgError &&
+        orgData?.organizationId
+      ) {
+        await updateRateLimitCounterDO({
           organizationId: orgData?.organizationId,
           heliconeProperties:
             proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
-          rateLimitKV: env.RATE_LIMIT_KV,
+          rateLimiterDO: env.RATE_LIMITER_SQL,
           rateLimitOptions: finalRateLimitOptions,
           userId: proxyRequest.userId,
           cost: res.data?.cost ?? 0,

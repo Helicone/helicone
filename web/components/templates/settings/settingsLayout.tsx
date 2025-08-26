@@ -4,7 +4,6 @@ import {
   BuildingOfficeIcon,
   CreditCardIcon,
   DocumentTextIcon,
-  ExclamationTriangleIcon,
   NoSymbolIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
@@ -13,9 +12,9 @@ import {
   KeyIcon,
   LinkIcon,
   Plug,
-  ShuffleIcon,
   Webhook,
   Coins,
+  Lock,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -76,28 +75,25 @@ const DEVELOPER_TABS = [
     href: "/settings/providers",
   },
   {
-    id: "ai-gateway",
-    title: "AI Gateway",
-    icon: ShuffleIcon,
-    href: "/settings/ai-gateway",
-  },
-  {
     id: "webhooks",
     title: "Webhooks",
     icon: Webhook,
     href: "/settings/webhooks",
   },
   {
-    id: "alerts",
-    title: "Alerts",
-    icon: ExclamationTriangleIcon,
-    href: "/settings/alerts",
-  },
-  {
     id: "connections",
     title: "Connections",
     icon: LinkIcon,
     href: "/settings/connections",
+  },
+];
+
+const ACCOUNTS_TABS = [
+  {
+    id: "password",
+    title: "Password",
+    icon: Lock,
+    href: "/settings/password",
   },
 ];
 
@@ -111,6 +107,7 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
   const org = useOrg();
 
   const isGovernanceEnabled = useIsGovernanceEnabled();
+  const isBetterAuthEnabled = process.env.NEXT_PUBLIC_BETTER_AUTH === "true";
 
   // Add access keys for governance orgs
   const organizationTabs = useMemo(() => {
@@ -178,6 +175,8 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
             <div className="space-y-8">
               {renderNavSection("Organization", organizationTabs)}
               {renderNavSection("Developer", DEVELOPER_TABS)}
+              {isBetterAuthEnabled &&
+                renderNavSection("Accounts", ACCOUNTS_TABS)}
             </div>
           </div>
 

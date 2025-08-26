@@ -35,6 +35,10 @@
     --muted: 210 40% 96%; /* hsl(210, 40%, 96%) */
     --muted-foreground: 215 16% 47%; /* hsl(215, 16%, 47%) */
 
+    /* Subdued Colors */
+    --subdued: 210 40% 96%; /* hsl(210, 40%, 96%) */
+    --subdued-foreground: 220 20% 35%; /* hsl(220, 20%, 35%) */
+
     /* Accent Colors */
     --accent: 210 40% 96%; /* hsl(210, 40%, 96%) */
     --accent-foreground: 222 47% 11%; /* hsl(222, 47%, 11%) */
@@ -92,16 +96,20 @@
     --primary-foreground: 204 80% 16%;
 
     /* Secondary Colors */
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 217 33% 17%; /* hsl(217, 33%, 17%) */
+    --secondary-foreground: 210 40% 98%; /* hsl(210, 40%, 98%) */
 
     /* Muted Colors */
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 217 33% 17%; /* hsl(217, 33%, 17%) */
+    --muted-foreground: 215 20% 65%; /* hsl(215, 20%, 65%) */
+
+    /* Subdued Colors */
+    --subdued: 217 33% 17%; /* hsl(217, 33%, 17%) */
+    --subdued-foreground: 215 25% 80%; /* hsl(215, 25%, 80%) */
 
     /* Accent Colors */
-    --accent: 217 33% 17%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 217 33% 17%; /* hsl(217, 33%, 17%) */
+    --accent-foreground: 210 40% 98%; /* hsl(210, 40%, 98%) */
 
     /* Destructive Colors */
     --destructive: 0 63% 31%;
@@ -172,6 +180,16 @@
   to {
     stroke-dashoffset: 0;
   }
+}
+
+@keyframes bounce-dot {
+  to {
+    transform: translateY(-3px);
+  }
+}
+
+.animate-bounce-dot {
+  animation: bounce-dot 0.5s infinite alternate;
 }
 
 .text-tertiary {

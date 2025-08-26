@@ -6,6 +6,7 @@ import {
   FilterNode,
   TablesAndViews,
 } from "./filterDefs";
+import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 
 export enum TagType {
   REQUEST = "request",
@@ -14,11 +15,11 @@ export enum TagType {
 
 type KeyMapper<T> = (
   filter: T,
-  placeValueSafely: (val: string) => string
+  placeValueSafely: (val: string | number) => string | number
 ) => {
   column?: string;
   operator: AllOperators;
-  value: string;
+  value: string | number;
 };
 
 type KeyMappings = {
@@ -233,9 +234,21 @@ const whereKeyMappings: KeyMappings = {
         value: placeValueSafely("00000000-0000-0000-0000-000000000000"),
       };
     }
+    if ("cost" in filter && filter.cost) {
+      const { operator, value } = extractOperatorAndValueFromAnOperator(
+        filter.cost
+      );
+      return {
+        column: "request_response_rmt.cost",
+        operator: operator,
+        value: placeValueSafely(Math.floor((value as number) * COST_PRECISION_MULTIPLIER)),
+      }
+    }
     return easyKeyMappings<"request_response_rmt">({
       country_code: "request_response_rmt.country_code",
       latency: "request_response_rmt.latency",
+      cost: "request_response_rmt.cost",
+      provider: "request_response_rmt.provider",
       time_to_first_token: "request_response_rmt.time_to_first_token",
       status: "request_response_rmt.status",
       request_created_at: "request_response_rmt.request_created_at",
@@ -251,6 +264,7 @@ const whereKeyMappings: KeyMappings = {
       prompt_tokens: "request_response_rmt.prompt_tokens",
       completion_tokens: "request_response_rmt.completion_tokens",
       request_body: "request_response_rmt.request_body",
+      "helicone-score-feedback": "request_response_rmt.scores['helicone-score-feedback']",
       response_body: "request_response_rmt.response_body",
       scores_column: "request_response_rmt.scores",
       cache_enabled: "request_response_rmt.cache_enabled",
@@ -439,7 +453,7 @@ export function buildFilterLeaf(
   filters: string[];
   argsAcc: any[];
 } {
-  const placeValueSafely = (value: string) => {
+  const placeValueSafely = (value: string | number) => {
     argsAcc.push(value);
     return argPlaceHolder(argsAcc.length - 1, value);
   };

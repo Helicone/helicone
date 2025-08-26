@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useOrg } from "../../components/layout/org/organizationContext";
+import { logger } from "@/lib/telemetry/logger";
 
 export function useLocalStorage<T>(
   key: string,
@@ -22,7 +23,13 @@ export function useLocalStorage<T>(
           window.localStorage.setItem(orgKey, JSON.stringify(valueToStore)); // Use orgKey
         }
       } catch (error) {
-        console.error(error);
+        logger.error(
+          {
+            error,
+            key: orgKey,
+          },
+          "Failed to save to localStorage",
+        );
       }
     },
     [orgKey, storedValue], // Updated dependency to orgKey

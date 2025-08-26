@@ -7,9 +7,11 @@ import {
   ChatCompletionChunk,
   ChatCompletionMessage,
 } from "openai/resources/chat/completions";
+import { logger } from "@/lib/telemetry/logger";
 
 interface StreamProcessorOptions {
   onUpdate: (response: { fullContent: string }) => void;
+  onComplete?: (response: { fullContent: string }) => void;
   initialState?: { fullContent: string };
 }
 
@@ -111,11 +113,13 @@ export async function processStream(
         fullMessage = messageReducer(fullMessage, chunkJson);
         callbackState.fullContent = JSON.stringify(fullMessage, null, 2);
       } catch (error) {
-        console.error(
-          "[processStream] Error parsing JSON chunk or processing delta:",
-          error,
-          "Chunk:",
-          chunkString,
+        logger.error(
+          {
+            error,
+            chunkString,
+            chunkLength: chunkString.length,
+          },
+          "[processStream] Error parsing JSON chunk or processing delta",
         );
         // Optional: Treat parse errors as raw content?
         // state.content += chunkString; // Be cautious with this
@@ -124,6 +128,10 @@ export async function processStream(
       // Call the update callback with the current accumulated state
       // Send the parts we have accumulated so far for UI updates
       onUpdate({ ...callbackState });
+    }
+
+    if (options.onComplete) {
+      options.onComplete({ ...callbackState });
     }
 
     const finalState = {
@@ -137,15 +145,24 @@ export async function processStream(
   } catch (error) {
     // Catch errors during reader.read() or reader.cancel()
     if (error instanceof Error && error.name === "AbortError") {
-      console.log("[processStream] Stream reading aborted.");
+      logger.info(
+        { signal: !!signal },
+        "[processStream] Stream reading aborted",
+      );
     } else {
-      console.error("[processStream] Error reading from stream:", error);
+      logger.error({ error }, "[processStream] Error reading from stream");
     }
     // Return the state as it was when the error occurred, might be incomplete
-    console.warn(
-      "[processStream] Returning state possibly incomplete due to error:",
-      callbackState,
+    logger.warn(
+      {
+        callbackState,
+        contentLength: callbackState.fullContent.length,
+      },
+      "[processStream] Returning state possibly incomplete due to error",
     );
+    if (options.onComplete) {
+      options.onComplete({ ...callbackState });
+    }
     return {
       error: error,
       fullContent: callbackState.fullContent,

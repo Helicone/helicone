@@ -2,6 +2,7 @@ import { createAuthClient } from "better-auth/react";
 import { HeliconeAuthClient } from "../../auth/client/HeliconeAuthClient";
 import { HeliconeOrg, HeliconeUser } from "../../auth/types";
 import { err, ok, Result } from "../../result";
+import { logger } from "@/lib/telemetry/logger";
 
 export const authClient = createAuthClient();
 
@@ -34,15 +35,16 @@ async function ensureUserInBetterAuth(
 
     // Handle 422 error (user exists in Better Auth but not as credential)
     if (result.error && result.error.status === 422) {
-      console.log(
-        "Sign-up failed: user already exists in Better Auth, but no credential. Prompt for password reset.",
+      logger.info(
+        { email },
+        "Sign-up failed: user already exists in Better Auth, but no credential. Prompt for password reset."
       );
       return false;
     }
 
     return false;
   } catch (error) {
-    console.error("Error creating user in Better Auth:", error);
+    logger.error({ error, email }, "Error creating user in Better Auth");
     return false;
   }
 }
@@ -71,7 +73,7 @@ export const heliconeAuthClientFromSession = (
       try {
         await authClient.signOut();
       } catch (error: any) {
-        console.error("Better Auth sign out error:", error);
+        logger.error({ error }, "Better Auth sign out error");
       }
     },
 
@@ -107,13 +109,13 @@ export const heliconeAuthClientFromSession = (
 
     async signUp(params): Promise<Result<HeliconeUser, string>> {
       try {
-        console.log("sign up params", params);
+        logger.info({ params }, "sign up params");
         const result: any = await authClient.signUp.email({
           email: params.email,
           password: params.password,
           name: "",
         });
-        console.log("sign up result", result);
+        logger.info({ result }, "sign up result");
         if (result.data) {
           return ok({
             id: result.data.user.id,
@@ -123,7 +125,7 @@ export const heliconeAuthClientFromSession = (
 
         return err("Signup process outcome unclear. Check verification steps.");
       } catch (error: any) {
-        console.error("Better Auth sign up error:", error);
+        logger.error({ error }, "Better Auth sign up error");
         return err(error.message || "Sign up failed");
       }
     },
@@ -196,6 +198,21 @@ export const heliconeAuthClientFromSession = (
 
     async updateUser(params): Promise<Result<void, string>> {
       throw new Error("Not implemented");
+    },
+
+    async changePassword(params): Promise<Result<void, string>> {
+      try {
+        const { data, error } = await authClient.changePassword({
+          currentPassword: params.currentPassword,
+          newPassword: params.newPassword,
+        });
+        if (error) {
+          return err(error.message || "Change password failed");
+        }
+        return ok(undefined);
+      } catch (error: any) {
+        return err(error.message || "Change password failed");
+      }
     },
   };
 };

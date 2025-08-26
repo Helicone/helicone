@@ -11,7 +11,7 @@ import {
 } from "@heroicons/react/20/solid";
 
 const Notification = () => {
-  const { variant, title } = useNotification();
+  const { variant, title, clearNotification } = useNotification();
 
   const [show, setShow] = useState(true);
 
@@ -97,9 +97,9 @@ const Notification = () => {
       leave="transition-opacity duration-150"
       leaveFrom="opacity-100"
       leaveTo="opacity-0"
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-[1000] pb-8 pt-0 sm:top-0 sm:pb-0 sm:pt-6"
+      className="fixed inset-x-0 bottom-0 z-[1000] pb-8 pt-0 sm:top-0 sm:pb-0 sm:pt-6"
     >
-      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 pb-8 pt-0 sm:top-0 sm:pb-0 sm:pt-6">
+      <div className="fixed inset-x-0 bottom-0 z-50 pb-8 pt-0 sm:top-0 sm:pb-0 sm:pt-6">
         <div className="mx-auto w-full px-2 sm:max-w-[33vw] sm:px-6 lg:px-8">
           <div
             className={clsx(
@@ -124,7 +124,10 @@ const Notification = () => {
                 <div className="-mx-1.5 -my-1.5">
                   <button
                     onClick={() => {
-                      alert("clicked");
+                      setShow(false);
+                      setTimeout(() => {
+                        clearNotification();
+                      }, 150);
                     }}
                     className={clsx(
                       variantBgColor(),

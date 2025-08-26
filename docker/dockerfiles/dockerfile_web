@@ -11,6 +11,8 @@ COPY web/package.json ./web/
 COPY valhalla/jawn/package.json ./valhalla/jawn/
 COPY bifrost/package.json ./bifrost/
 
+ENV NODE_OPTIONS="--dns-result-order=ipv4first"
+
 RUN yarn install --frozen-lockfile --network-timeout 300000
 
 COPY packages/ ./packages/

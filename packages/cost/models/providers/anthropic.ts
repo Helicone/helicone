@@ -1,13 +1,28 @@
 import { BaseProvider } from "./base";
-import type { AuthContext, AuthResult } from "../types";
+import type {
+  AuthContext,
+  AuthResult,
+  ModelProviderConfig,
+  UserEndpointConfig,
+} from "../types";
 
 export class AnthropicProvider extends BaseProvider {
   readonly baseUrl = "https://api.anthropic.com";
   readonly auth = "api-key" as const;
-  readonly pricingPages = ["https://docs.anthropic.com/en/docs/build-with-claude/pricing"];
-  readonly modelPages = ["https://docs.anthropic.com/en/docs/about-claude/models/all-models"];
+  readonly pricingPages = [
+    "https://docs.anthropic.com/en/docs/build-with-claude/pricing",
+  ];
+  readonly modelPages = [
+    "https://docs.anthropic.com/en/docs/about-claude/models/all-models",
+  ];
 
-  buildUrl(): string {
+  buildUrl(
+    _modelProviderConfig: ModelProviderConfig,
+    userConfig: UserEndpointConfig
+  ): string {
+    if (userConfig.gatewayMapping === "NO_MAPPING") {
+      return "https://api.anthropic.com/v1/messages";
+    }
     return "https://api.anthropic.com/v1/chat/completions";
   }
 

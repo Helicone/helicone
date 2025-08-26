@@ -373,15 +373,6 @@ export interface paths {
   "/v1/key/generateHash": {
     post: operations["GenerateHash"];
   };
-  "/v1/dataset/{datasetId}/fine-tune": {
-    post: operations["DatasetFineTune"];
-  };
-  "/v1/fine-tune": {
-    post: operations["FineTune"];
-  };
-  "/v1/fine-tune/{jobId}/stats": {
-    get: operations["FineTuneJobStats"];
-  };
   "/v1/filter": {
     get: operations["GetFilters"];
     post: operations["CreateFilter"];
@@ -757,6 +748,14 @@ Json: JsonObject;
     UpdateOrganizationParams: components["schemas"]["Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-organization_type-or-onboarding_status_"] & {
       variant?: string;
     };
+    "ResultSuccess__temporaryPassword_63_-string_-or-null_": {
+      data: {
+        temporaryPassword?: string;
+      } | null;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__temporaryPassword_63_-string_-or-null.string_": components["schemas"]["ResultSuccess__temporaryPassword_63_-string_-or-null_"] | components["schemas"]["ResultError_string_"];
     UIFilterRowTree: components["schemas"]["UIFilterRowNode"] | components["schemas"]["FilterRow"];
     UIFilterRowNode: {
       /** @enum {string} */
@@ -1269,6 +1268,8 @@ Json: JsonObject;
     Partial_RequestResponseRMTToOperators_: {
       country_code?: components["schemas"]["Partial_TextOperators_"];
       latency?: components["schemas"]["Partial_NumberOperators_"];
+      cost?: components["schemas"]["Partial_NumberOperators_"];
+      provider?: components["schemas"]["Partial_TextOperators_"];
       time_to_first_token?: components["schemas"]["Partial_NumberOperators_"];
       status?: components["schemas"]["Partial_NumberOperators_"];
       request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
@@ -1364,7 +1365,7 @@ Json: JsonObject;
       values?: {
         [key: string]: components["schemas"]["SortDirection"];
       };
-      cost_usd?: components["schemas"]["SortDirection"];
+      cost?: components["schemas"]["SortDirection"];
     };
     RequestQueryParams: {
       filter: components["schemas"]["RequestFilterNode"];
@@ -2028,6 +2029,8 @@ Json: JsonObject;
     Log: {
       response: {
         /** Format: double */
+        cost?: number;
+        /** Format: double */
         cachedLatency?: number;
         /** Format: double */
         delayMs: number;
@@ -2095,21 +2098,6 @@ Json: JsonObject;
       governance: boolean;
       keyName: string;
       permissions: components["schemas"]["KeyPermissions"];
-    };
-    FineTuneResult: {
-      error: string;
-    } | {
-      data: {
-        url: string;
-        fineTuneJob: string;
-      };
-      success: boolean;
-    };
-    FineTuneBodyParams: {
-      providerKeyId: string;
-    };
-    FineTuneBody: {
-      providerKeyId: string;
     };
     StoreFilterType: {
       createdAt?: string;
@@ -16115,7 +16103,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_null.string_"];
+          "application/json": components["schemas"]["Result__temporaryPassword_63_-string_-or-null.string_"];
         };
       };
     };
@@ -17783,69 +17771,6 @@ export interface operations {
               message?: string;
             };
             success?: boolean;
-          };
-        };
-      };
-    };
-  };
-  DatasetFineTune: {
-    parameters: {
-      path: {
-        datasetId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["FineTuneBodyParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["FineTuneResult"];
-        };
-      };
-    };
-  };
-  FineTune: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["FineTuneBody"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": {
-            error: string;
-          } | {
-            data: {
-              url: string;
-              fineTuneJob: string;
-            };
-            success: boolean;
-          };
-        };
-      };
-    };
-  };
-  FineTuneJobStats: {
-    parameters: {
-      path: {
-        jobId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": {
-            error: string;
-          } | {
-            events: unknown;
-            job: unknown;
           };
         };
       };

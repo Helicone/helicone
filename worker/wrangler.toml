@@ -8,6 +8,7 @@ logpush = true
 
 durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
+	{ name = "RATE_LIMITER_SQL", class_name = "RateLimiterDO" },
 ]
 
 kv_namespaces = [
@@ -39,6 +40,7 @@ VAULT_ENABLED = "true"
 REQUEST_CACHE_KEY = "9984c295ec7d0f506b8af65e9d60773480eb0c9347a6bd8a2b08fb57b5117701"
 REQUEST_CACHE_KEY_2 = "9984c295ec7d0f506b8af65e9d60773480eb0c9347a6bd8a2b08fb57b5117701"
 VALHALLA_URL = "http://localhost:8585"
+EU_VALHALLA_URL = "http://localhost:8585"
 S3_ENDPOINT = "http://localhost:9000"
 S3_ACCESS_KEY = "minioadmin"
 S3_SECRET_KEY = "minioadmin"
@@ -157,6 +159,7 @@ routes = [
 
 durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
+	{ name = "RATE_LIMITER_SQL", class_name = "RateLimiterDO" },
 ]
 
 kv_namespaces = [
@@ -230,6 +233,7 @@ kv_namespaces = [
 
 durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
+	{ name = "RATE_LIMITER_SQL", class_name = "RateLimiterDO" },
 ]
 
 queues.producers = [
@@ -272,3 +276,7 @@ deleted_classes = ["AtomicAlerter"]
 tag = "v6"
 new_classes = ["InMemoryRateLimiter"]
 deleted_classes = ["AtomicRateLimiter"]
+
+[[migrations]]
+tag = "v7"
+new_sqlite_classes = ["RateLimiterDO"]

@@ -2,7 +2,7 @@ import { ClickhouseClientWrapper } from "./ClickhouseWrapper";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Result, err, ok } from "../util/results";
 import { Database } from "../../../supabase/database.types";
-import { clickhousePriceCalc } from "@helicone-package/cost";
+import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 
 export type Integration =
   Database["public"]["Tables"]["integrations"]["Row"] & {
@@ -28,7 +28,7 @@ export class ReportStore {
     timeWindowMs: number
   ): Promise<ReportMetric> {
     const query = `SELECT
-    ${clickhousePriceCalc("request_response_rmt")} as value,
+    sum(cost) / ${COST_PRECISION_MULTIPLIER} as value,
     COUNT() AS requestCount
     FROM request_response_rmt
     WHERE
@@ -175,7 +175,7 @@ export class ReportStore {
     }
 
     const query = `SELECT
-    ${clickhousePriceCalc("request_response_rmt")} as value,
+    sum(cost) / ${COST_PRECISION_MULTIPLIER} as value,
     COUNT() AS requestCount
     FROM request_response_rmt
     WHERE

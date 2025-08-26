@@ -97,7 +97,7 @@ function convertToCSVRow(item: RequestResponse): string {
     "prompt_tokens",
     "completion_tokens",
     "latency",
-    "cost_usd",
+    "cost",
   ];
 
   return fields
@@ -127,7 +127,7 @@ function writeCSVHeader(outputStream: fs.WriteStream): void {
     "prompt_tokens",
     "completion_tokens",
     "latency",
-    "cost_usd",
+    "cost",
   ].join(",");
   outputStream.write(header + "\n");
 }

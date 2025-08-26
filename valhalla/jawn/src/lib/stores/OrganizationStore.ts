@@ -202,7 +202,6 @@ export class OrganizationStore extends BaseStore {
       const result = await dbExecute<{ member: string }>(
         `INSERT INTO organization_member (organization, member)
          VALUES ($1, $2)
-         ON CONFLICT (organization, member) DO NOTHING
          RETURNING member`,
         [organizationId, userId]
       );
@@ -333,9 +332,21 @@ export class OrganizationStore extends BaseStore {
   ): Promise<Result<OrganizationMember[], string>> {
     const query = `
       select distinct on (om.member) email, member, org_role from organization_member om 
+    let query;
+    if (process.env.NEXT_PUBLIC_BETTER_AUTH === "true") {
+      query = `
+      select distinct on (om.member), pu.email, org_role from organization_member om 
         left join auth.users u on u.id = om.member
+        left join public.user pu on pu.auth_user_id = u.id
         where om.organization = $1
     `;
+    } else {
+      query = `
+      select u.email, member, org_role from organization_member om 
+        left join auth.users u on u.id = om.member
+        where om.organization = $1
+      `;
+    }
 
     return await dbExecute<{
       email: string;

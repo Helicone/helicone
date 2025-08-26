@@ -1,6 +1,7 @@
 import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import useNotification from "@/components/shared/notification/useNotification";
+import { logger } from "@/lib/telemetry/logger";
 import AutoImprove from "@/components/shared/prompts/AutoImprove";
 import VariablesPanel from "@/components/shared/prompts/InputsPanel";
 import MessagesPanel from "@/components/shared/prompts/MessagesPanel";
@@ -599,7 +600,10 @@ export default function PromptEditor({
           "success",
         );
       } catch (error) {
-        console.error("Error promoting version:", error);
+        logger.error(
+          { error, versionId: version.id },
+          "Error promoting version",
+        );
         setNotification("Failed to promote version", "error");
       }
     },
@@ -724,7 +728,7 @@ export default function PromptEditor({
         loadVersionData(result.data.data);
         await refetchPromptVersions();
       } catch (error) {
-        console.error("Save error:", error);
+        logger.error({ error, promptVersionId: latestVersionId }, "Save error");
         setNotification("Failed to save and run prompt", "error");
         return;
       }
@@ -769,7 +773,7 @@ export default function PromptEditor({
         );
       } catch (error) {
         if (error instanceof Error && error.name !== "AbortError") {
-          console.error("Error:", error);
+          logger.error({ error }, "Error during stream processing");
           setNotification(error.message, "error");
         }
       } finally {
@@ -847,7 +851,7 @@ export default function PromptEditor({
       );
     } catch (error) {
       if (error instanceof Error && error.name !== "AbortError") {
-        console.error("Error generating improvements:", error);
+        logger.error({ error }, "Error generating improvements");
         setNotification("Failed to generate improvements", "error");
       }
     } finally {
@@ -907,7 +911,7 @@ export default function PromptEditor({
       setNotification("Successfully applied improvements", "success");
       setIsAutoImproveOpen(false);
     } catch (error) {
-      console.error("Error applying improvements:", error);
+      logger.error({ error }, "Error applying improvements");
       setNotification("Failed to apply improvements", "error");
     }
   }, [
@@ -953,7 +957,7 @@ export default function PromptEditor({
         router.push(`/prompts/${res.id}`);
       }
     } catch (error) {
-      console.error("Error creating prompt:", error);
+      logger.error({ error }, "Error creating prompt");
       setNotification("Failed to create prompt", "error");
     }
   }, [state, withinPromptsLimit, createPrompt, router, setNotification]);

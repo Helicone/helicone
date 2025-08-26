@@ -252,6 +252,7 @@ export class RequestWrapper {
       const res = await this.validateHeliconeAuthHeader(
         this.heliconeHeaders.heliconeAuthV2.token ?? this.authorization
       );
+
       if (res.error) {
         return err(res.error);
       }
@@ -690,9 +691,9 @@ export async function getProviderKeyFromPortalKey(
 
   const check = await checkLimitsSingle(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (organization.data?.limits as any)["cost"],
+    (organization.data?.limits as any)?.["cost"] ?? -1,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (organization.data?.limits as any)["requests"],
+    (organization.data?.limits as any)?.["requests"] ?? -1,
     "month",
     apiKey.data?.organization_id ?? "",
     env
