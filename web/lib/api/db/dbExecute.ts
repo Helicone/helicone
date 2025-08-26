@@ -3,7 +3,6 @@ import { Result } from "@/packages/common/result";
 import { createClient as clickhouseCreateClient } from "@clickhouse/client";
 import dateFormat from "dateformat";
 import { logger } from "@/lib/telemetry/logger";
-import { SecretManager } from "@helicone-package/secrets/SecretManager";
 
 export function paramsToValues(params: (number | string | boolean | Date)[]) {
   return params
@@ -43,9 +42,8 @@ export async function dbQueryClickhouse<T>(
     const query_params = paramsToValues(parameters);
 
     const getClickhouseHost = () => {
-      const clickhouseHost = SecretManager.getSecret("CLICKHOUSE_HOST");
-      if (clickhouseHost) {
-        return clickhouseHost;
+      if (process.env.CLICKHOUSE_HOST) {
+        return process.env.CLICKHOUSE_HOST;
       }
 
       // Use APP_URL to construct clickhouse host if not specified in env
@@ -63,8 +61,8 @@ export async function dbQueryClickhouse<T>(
 
     const client = clickhouseCreateClient({
       host: getClickhouseHost(),
-      username: SecretManager.getSecret("CLICKHOUSE_USER") ?? "default",
-      password: SecretManager.getSecret("CLICKHOUSE_PASSWORD") ?? "",
+      username: process.env.CLICKHOUSE_USER ?? "default",
+      password: process.env.CLICKHOUSE_PASSWORD ?? "",
     });
 
     const queryResult = await client.query({
@@ -103,17 +101,12 @@ export async function dbExecute<T>(
     process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "development"
       ? {
           rejectUnauthorized: true,
-          ca: SecretManager.getSecret("SUPABASE_SSL_CERT_CONTENTS")!
-            .split("\\n")
-            .join("\n"),
+          ca: process.env.SUPABASE_SSL_CERT_CONTENTS!.split("\\n").join("\n"),
         }
       : undefined;
 
   const client = new Client({
-    connectionString: SecretManager.getSecret(
-      "DATABASE_URL",
-      "SUPABASE_DATABASE_URL",
-    ),
+    connectionString: process.env.DATABASE_URL,
     ssl,
   });
   try {
