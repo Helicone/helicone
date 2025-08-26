@@ -1,5 +1,6 @@
 {
-	"name": "@helicone-package/filters",
-  "types": "./",
-  "version": "1.0.0"
+  "name": "@helicone-package/filters",
+  "version": "1.0.0",
+  "main": "./index.ts",
+  "types": "./index.ts"
 }
