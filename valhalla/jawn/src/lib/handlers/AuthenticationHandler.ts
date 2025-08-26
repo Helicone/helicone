@@ -17,7 +17,7 @@ export class AuthenticationHandler extends AbstractLogHandler {
       }
 
       const orgResult = await getAndStoreInCache(
-        `auth-handler-org-${stableStringify(authResult.data)}`,
+        `auth-handler-org-${stableStringify(authResult.data)}-${authResult.data.organizationId}`,
         () => this.getOrganization(authResult.data),
         60 * 5 // 5 minutes
       );
@@ -58,7 +58,7 @@ export class AuthenticationHandler extends AbstractLogHandler {
     const authClient = getHeliconeAuthClient();
 
     const authResult = await getAndStoreInCache(
-      `auth-authenticateEntry-${stableStringify(heliconeAuth)}`,
+      `auth-authenticateEntry-${stableStringify(heliconeAuth)}-${heliconeAuth.token}`,
       async () => authClient.authenticate(heliconeAuth),
       60 * 5 // 5 minutes
     );
