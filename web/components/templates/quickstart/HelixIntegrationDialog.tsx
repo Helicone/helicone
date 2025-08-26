@@ -57,15 +57,14 @@ const integrationMethods = [
   {
     value: "ai-gateway",
     label: "Helicone AI Gateway (Recommended)",
-    icon: Bot,
+    icon: SiOpenai,
   },
-  { value: "openai-sdk", label: "OpenAI SDK", icon: SiOpenai },
   { value: "anthropic-sdk", label: "Anthropic SDK", icon: SiAnthropic },
   { value: "azure", label: "Azure", icon: VscAzure },
-  { value: "bedrock", label: "Bedrock", icon: FaAws },
-  { value: "gemini", label: "Gemini", icon: SiGooglegemini },
   { value: "vertex", label: "Vertex", icon: SiGoogle },
-  { value: "vercel-ai", label: "Vercel AI", icon: SiVercel },
+  { value: "gemini", label: "Gemini", icon: SiGooglegemini },
+  { value: "bedrock", label: "Bedrock", icon: FaAws },
+  { value: "vercel-ai", label: "AI SDK", icon: SiVercel },
   { value: "other", label: "Other", icon: FileText },
 ];
 
@@ -213,7 +212,7 @@ const HelixIntegrationDialog = ({
                 </Label>
                 <Input
                   id="custom-method"
-                  placeholder="e.g., Custom REST API, AWS Bedrock, etc."
+                  placeholder="e.g., xAI, Groq Cloud, etc."
                   value={data.customMethod}
                   onChange={(e) =>
                     setData({ ...data, customMethod: e.target.value })
@@ -261,7 +260,7 @@ const HelixIntegrationDialog = ({
                 </Label>
                 <Input
                   id="custom-framework"
-                  placeholder="e.g., Java, C#, Ruby, etc."
+                  placeholder="e.g., Go, Rust, etc."
                   value={data.customFramework}
                   onChange={(e) =>
                     setData({ ...data, customFramework: e.target.value })

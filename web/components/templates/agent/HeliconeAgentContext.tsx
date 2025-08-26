@@ -2,6 +2,7 @@ import {
   filtersTools,
   playgroundTools,
   promptsTools,
+  quickstartTools,
   universalTools,
   hqlTools,
 } from "@/lib/agent/tools";
@@ -79,6 +80,8 @@ const getToolsForRoute = (pathname: string): HeliconeAgentTool[] => {
     tools.push(...promptsTools);
   } else if (pathname === "/playground") {
     tools.push(...playgroundTools);
+  } else if (pathname === "/quickstart") {
+    tools.push(...quickstartTools);
   }
 
   if (
@@ -219,11 +222,18 @@ export const HeliconeAgentProvider: React.FC<{
       ),
     );
   };
+
+  const getInitialMessage = () => {
+    if (router.pathname === "/quickstart") {
+      return "Hello, I'm Helix! I can provide personalized help for integrating with Helicone, so ask me anything.";
+    }
+    return "Hello! I'm Helix, your Helicone assistant. How can I help you today?";
+  };
+
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content:
-        "Hello! I'm Helix, your Helicone assistant. How can I help you today?",
+      content: getInitialMessage(),
     },
   ]);
 
@@ -303,7 +313,7 @@ export const HeliconeAgentProvider: React.FC<{
           const newChatMessages = [
             {
               role: "assistant",
-              content: "Hello, how can I help you today?",
+              content: getInitialMessage(),
             },
             ...(startingMessages ?? []),
           ];
