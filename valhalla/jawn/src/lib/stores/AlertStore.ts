@@ -14,6 +14,7 @@ export class AlertStore extends BaseStore {
 
   public async getAlerts(): Promise<Result<AlertResponse, string>> {
     try {
+      // TODO Remove select * to explicitly select the columns we need
       const alertResult = await dbExecute<
         Database["public"]["Tables"]["alert"]["Row"]
       >(
@@ -67,8 +68,8 @@ export class AlertStore extends BaseStore {
     }
 
     const query = `
-      INSERT INTO alert (name, metric, threshold, time_window, emails, slack_channels, org_id, minimum_request_count, status)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      INSERT INTO alert (name, metric, threshold, time_window, emails, slack_channels, org_id, minimum_request_count, status, filter)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       RETURNING id
     `;
     const parameters = [
@@ -81,6 +82,7 @@ export class AlertStore extends BaseStore {
       alert.org_id,
       alert.minimum_request_count,
       alert.status,
+      alert.filter === "all" ? null : alert.filter,
     ];
 
     const result = await dbExecute<{ id: string }>(query, parameters);

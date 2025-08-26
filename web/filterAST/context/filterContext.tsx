@@ -5,9 +5,10 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useState,
 } from "react";
 import { useFilterCrud } from "../hooks/useFilterCrud";
-import { FilterState, useFilterStore } from "../store/filterStore";
+import { FilterState, useFilterStore, useTempFilterStore } from "../store/filterStore";
 import { useContextHelpers } from "./useContextHelpers";
 
 // Define the shape of our context
@@ -15,6 +16,7 @@ interface FilterContextType {
   store: FilterState;
   crud: ReturnType<typeof useFilterCrud>;
   helpers: ReturnType<typeof useContextHelpers>;
+  setUseTempFilterStore: (useTemp: boolean) => void;
 }
 
 // Create the context with a default value of null
@@ -34,8 +36,11 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({
   children,
   options,
 }) => {
-  const filterStore = useFilterStore();
+  const [useTemp, setUseTemp] = useState(false);
+  const filterStore = useTemp ? useTempFilterStore() : useFilterStore();
   const searchParams = useSearchParams();
+
+  console.log("useTemp", useTemp);
 
   const filterCrud = useFilterCrud();
   const helpers = useContextHelpers({
@@ -52,13 +57,18 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({
     }
   }, [searchParams, filterStore, filterCrud, helpers]);
 
+  const setUseTempFilterStore = (useTemp: boolean) => {
+    setUseTemp(useTemp);
+  };
+  
   const value = useMemo(
     () => ({
       store: filterStore,
       crud: filterCrud,
       helpers,
+      setUseTempFilterStore,
     }),
-    [filterStore, filterCrud, helpers],
+    [filterStore, filterCrud, helpers, setUseTempFilterStore],
   );
 
   return (

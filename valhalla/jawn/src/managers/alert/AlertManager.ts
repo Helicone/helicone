@@ -3,6 +3,7 @@ import { AuthParams } from "../../packages/common/auth/types";
 import { Result } from "../../packages/common/result";
 import { AlertStore } from "../../lib/stores/AlertStore";
 import { BaseManager } from "../BaseManager";
+import { FilterExpression } from "@helicone-package/filters/filterAst";
 export interface AlertRequest {
   name: string;
   metric: string;
@@ -11,6 +12,7 @@ export interface AlertRequest {
   emails: string[];
   slack_channels: string[];
   minimum_request_count: number | undefined;
+  filter: FilterExpression;
 }
 
 export interface AlertHistory {

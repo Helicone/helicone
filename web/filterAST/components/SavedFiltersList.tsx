@@ -12,7 +12,6 @@ interface SavedFiltersListProps {
 export const SavedFiltersList: React.FC<SavedFiltersListProps> = ({
   onClose,
 }) => {
-  const filterStore = useFilterStore();
   const { crud, helpers } = useFilterAST();
   if (crud.isLoading) {
     return <P className="py-4 text-center">Loading saved filters...</P>;

@@ -1,4 +1,4 @@
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useOrg } from "../../layout/org/organizationContext";
 import {
   useGetOrgMembers,
@@ -39,6 +39,11 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Check, ChevronsUpDown, X } from "lucide-react";
+import { FilterASTButton } from "@/filterAST/FilterASTButton";
+import { FilterAST, FilterExpression } from "@/filterAST/filterAst";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
+import { useFilterAST } from "@/filterAST/context/filterContext";
+import { toFilterNode } from "@/filterAST/toFilterNode";
 
 export type AlertRequest = {
   name: string;
@@ -49,6 +54,7 @@ export type AlertRequest = {
   slack_channels: string[];
   org_id: string;
   minimum_request_count: number | undefined;
+  filter: FilterNode;
 };
 
 interface AlertFormProps {
@@ -59,6 +65,22 @@ interface AlertFormProps {
 
 const AlertForm = (props: AlertFormProps) => {
   const { handleSubmit, onCancel, initialValues } = props;
+  const { store: filterStore, setUseTempFilterStore } = useFilterAST();
+
+  useEffect(() => {
+    setUseTempFilterStore(true);
+    return () => {
+      setUseTempFilterStore(false);
+    };
+  }, [setUseTempFilterStore]);
+
+  // Initialize the filter once per alert to avoid update loops
+  useEffect(() => {
+    if (!initialValues) return;
+    filterStore.setFilter(initialValues.filter as unknown as FilterExpression); // TODO Terrible casting, fix this
+    // We intentionally depend only on the alert identity to prevent a feedback loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialValues?.id]);
 
   const slackRedirectUrl = useMemo(() => {
     if (window) {
@@ -171,6 +193,7 @@ const AlertForm = (props: AlertFormProps) => {
       minimum_request_count: isNaN(alertMinRequests)
         ? undefined
         : alertMinRequests,
+      filter: toFilterNode(filterStore.filter ?? FilterAST.all()) as FilterNode,
     });
   };
 
@@ -332,6 +355,18 @@ const AlertForm = (props: AlertFormProps) => {
           min={0}
           step={1}
         />
+      </div>
+      <div className="col-span-2 w-full space-y-1.5 text-sm">
+        <label
+          htmlFor="filter"
+          className="flex items-center gap-1 text-gray-500 dark:text-gray-200"
+        >
+          Filter{" "}
+          <Tooltip title="Define this to set a minimum number of requests for this alert to be triggered.">
+            <InformationCircleIcon className="inline h-4 w-4 text-gray-500" />
+          </Tooltip>
+        </label>
+        <FilterASTButton />
       </div>
 
       <div className="col-span-4 w-full space-y-1.5 rounded-md bg-gray-100 p-6 dark:bg-gray-900">

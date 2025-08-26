@@ -20,6 +20,7 @@ import clsx from "clsx";
 import { Small } from "@/components/ui/typography";
 import DateTimeInput from "./ui/DateTimeInput";
 import { logger } from "@/lib/telemetry/logger";
+import { useFilterAST } from "../context/filterContext";
 
 // Define the FILTER_OPERATOR_LABELS mapping
 const FILTER_OPERATOR_LABELS: Record<FilterOperator, string> = {
@@ -173,7 +174,7 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
   isFirst = false,
   isLast = false,
 }) => {
-  const filterStore = useFilterStore();
+  const { store: filterStore } = useFilterAST();
   const { filterDefinitions: filterDefs, isLoading } = useFilterUIDefinitions();
 
   // Handle changing a field in a condition

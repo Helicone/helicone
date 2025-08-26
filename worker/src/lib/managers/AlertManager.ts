@@ -1,6 +1,7 @@
 import { Result, err, ok } from "../util/results";
 import { Alert, AlertState, AlertStore } from "../db/AlertStore";
 import { safePut } from "../safePut";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
 
 type AlertStateUpdate = {
   alert: Alert;
@@ -213,10 +214,15 @@ export class AlertManager {
     if (alert.metric === "response.status") {
       return await this.alertStore.getErrorRate(
         alert.org_id,
-        alert.time_window
+        alert.time_window,
+        alert.filter as FilterNode
       );
     } else if (alert.metric === "cost") {
-      return await this.alertStore.getCost(alert.org_id, alert.time_window);
+      return await this.alertStore.getCost(
+        alert.org_id,
+        alert.time_window,
+        alert.filter as FilterNode
+      );
     }
 
     return err(`Unsupported metric: ${alert.metric}`);

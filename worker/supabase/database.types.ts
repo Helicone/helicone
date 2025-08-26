@@ -42,6 +42,7 @@ export type Database = {
         Row: {
           created_at: string | null
           emails: string[]
+          filter: Json | null
           id: string
           metric: string
           minimum_request_count: number | null
@@ -58,6 +59,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           emails: string[]
+          filter?: Json | null
           id?: string
           metric: string
           minimum_request_count?: number | null
@@ -74,6 +76,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           emails?: string[]
+          filter?: Json | null
           id?: string
           metric?: string
           minimum_request_count?: number | null
@@ -684,13 +687,6 @@ export type Database = {
             foreignKeyName: "public_experiment_v2_hypothesis_provider_key_fkey"
             columns: ["provider_key"]
             isOneToOne: false
-            referencedRelation: "decrypted_provider_keys"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "public_experiment_v2_hypothesis_provider_key_fkey"
-            columns: ["provider_key"]
-            isOneToOne: false
             referencedRelation: "decrypted_provider_keys_v2"
             referencedColumns: ["id"]
           },
@@ -1005,13 +1001,6 @@ export type Database = {
             foreignKeyName: "finetune_job_provider_key_id_fkey"
             columns: ["provider_key_id"]
             isOneToOne: false
-            referencedRelation: "decrypted_provider_keys"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "finetune_job_provider_key_id_fkey"
-            columns: ["provider_key_id"]
-            isOneToOne: false
             referencedRelation: "decrypted_provider_keys_v2"
             referencedColumns: ["id"]
           },
@@ -1233,13 +1222,6 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organization"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "helicone_proxy_keys_provider_key_id_fkey"
-            columns: ["provider_key_id"]
-            isOneToOne: false
-            referencedRelation: "decrypted_provider_keys"
             referencedColumns: ["id"]
           },
           {
@@ -1779,13 +1761,6 @@ export type Database = {
           tier?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "organization_org_provider_key_fkey"
-            columns: ["org_provider_key"]
-            isOneToOne: false
-            referencedRelation: "decrypted_provider_keys"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "organization_org_provider_key_fkey"
             columns: ["org_provider_key"]
@@ -3012,59 +2987,6 @@ export type Database = {
       }
     }
     Views: {
-      decrypted_provider_keys: {
-        Row: {
-          config: Json | null
-          created_at: string | null
-          decrypted_provider_key: string | null
-          id: string | null
-          key_id: string | null
-          nonce: string | null
-          org_id: string | null
-          provider_key: string | null
-          provider_key_name: string | null
-          provider_name: string | null
-          soft_delete: boolean | null
-          vault_key_id: string | null
-        }
-        Insert: {
-          config?: Json | null
-          created_at?: string | null
-          decrypted_provider_key?: string | null
-          id?: string | null
-          key_id?: string | null
-          nonce?: string | null
-          org_id?: string | null
-          provider_key?: string | null
-          provider_key_name?: string | null
-          provider_name?: string | null
-          soft_delete?: boolean | null
-          vault_key_id?: string | null
-        }
-        Update: {
-          config?: Json | null
-          created_at?: string | null
-          decrypted_provider_key?: string | null
-          id?: string | null
-          key_id?: string | null
-          nonce?: string | null
-          org_id?: string | null
-          provider_key?: string | null
-          provider_key_name?: string | null
-          provider_name?: string | null
-          soft_delete?: boolean | null
-          vault_key_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "provider_keys_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organization"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       decrypted_provider_keys_v2: {
         Row: {
           auth_type: string | null
@@ -3186,21 +3108,21 @@ export type Database = {
       }
       http: {
         Args: { request: Database["public"]["CompositeTypes"]["http_request"] }
-        Returns: unknown
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
       }
       http_delete: {
         Args:
           | { uri: string }
           | { uri: string; content: string; content_type: string }
-        Returns: unknown
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
       }
       http_get: {
         Args: { uri: string } | { uri: string; data: Json }
-        Returns: unknown
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
       }
       http_head: {
         Args: { uri: string }
-        Returns: unknown
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
       }
       http_header: {
         Args: { field: string; value: string }
@@ -3215,17 +3137,17 @@ export type Database = {
       }
       http_patch: {
         Args: { uri: string; content: string; content_type: string }
-        Returns: unknown
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
       }
       http_post: {
         Args:
           | { uri: string; content: string; content_type: string }
           | { uri: string; data: Json }
-        Returns: unknown
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
       }
       http_put: {
         Args: { uri: string; content: string; content_type: string }
-        Returns: unknown
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
       }
       http_reset_curlopt: {
         Args: Record<PropertyKey, never>
@@ -3290,21 +3212,25 @@ export type Database = {
   }
 }
 
-type DefaultSchema = Database[Extract<keyof Database, "public">]
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
@@ -3322,14 +3248,16 @@ export type Tables<
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
@@ -3345,14 +3273,16 @@ export type TablesInsert<
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
@@ -3368,14 +3298,16 @@ export type TablesUpdate<
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
@@ -3383,14 +3315,16 @@ export type Enums<
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never

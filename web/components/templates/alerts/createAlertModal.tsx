@@ -29,6 +29,7 @@ export const EditAlertModal = (props: EditAlertModalProps) => {
         emails: req.emails,
         slack_channels: req.slack_channels,
         minimum_request_count: req.minimum_request_count,
+        filter: req.filter,
       },
     });
 
@@ -61,6 +62,7 @@ export const EditAlertModal = (props: EditAlertModalProps) => {
   return (
     <ThemedModal open={open} setOpen={setOpen}>
       <AlertForm
+        key={currentAlert?.id}
         handleSubmit={(alertReq) => handleEditAlert(alertReq)}
         onCancel={() => setOpen(false)}
         initialValues={currentAlert}
@@ -96,6 +98,7 @@ export const CreateAlertModal = (props: CreateAlertModalProps) => {
         emails: req.emails,
         slack_channels: req.slack_channels,
         minimum_request_count: req.minimum_request_count,
+        filter: req.filter,
       },
     });
 

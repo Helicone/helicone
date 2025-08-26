@@ -3,6 +3,8 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Result, err, ok } from "../util/results";
 import { Database } from "../../../supabase/database.types";
 import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
+import { buildFilterWithAuthClickHouse } from "@helicone-package/filters/filters";
 
 type AlertStatus = "triggered" | "resolved";
 export type Alert = Database["public"]["Tables"]["alert"]["Row"] & {
@@ -15,6 +17,7 @@ export type AlertState = {
   totalCount: number;
   errorCount?: number;
   requestCount: number;
+  filter: FilterNode;
 };
 
 export class AlertStore {
@@ -27,7 +30,7 @@ export class AlertStore {
     const { data: alerts, error: alertsErr } = await this.supabaseClient
       .from("alert")
       .select(
-        "*, organization (integrations (id, integration_name, settings, active))"
+        "*, organization (integrations (id, integration_name, settings, active)), filter"
       )
       .eq("soft_delete", false);
 
@@ -99,23 +102,35 @@ export class AlertStore {
     return ok(null);
   }
 
+
+  // TODO DRY getCost and getErrorRate
   public async getCost(
     organizationId: string,
-    timeWindowMs: number
+    timeWindowMs: number,
+    filter: FilterNode
   ): Promise<Result<AlertState, string>> {
+    if (!filter) {
+      // TODO This is tech debt, since "all" is a valid FilterNode but NOT a valid JSONB
+      // so we represent "all" in PG as null
+      filter = "all";
+    }
+
+    const builtFilter = await buildFilterWithAuthClickHouse({
+      org_id: organizationId,
+      filter: filter,
+      argsAcc: [timeWindowMs],
+    });
+
     const query = `SELECT 
     sum(cost) / ${COST_PRECISION_MULTIPLIER} as totalCount,
     COUNT() AS requestCount
     FROM request_response_rmt
     WHERE
-    organization_id = {val_0: UUID} AND
-    request_created_at >= toDateTime64(now(), 3) - INTERVAL {val_1: Int64} MILLISECOND`;
+    request_created_at >= toDateTime64(now(), 3) - INTERVAL {val_0: Int64} MILLISECOND AND
+    (${builtFilter.filter})`;
 
     const { data: cost, error: alertStateErr } =
-      await this.clickhouseClient.dbQuery<AlertState>(query, [
-        organizationId,
-        timeWindowMs,
-      ]);
+      await this.clickhouseClient.dbQuery<AlertState>(query, builtFilter.argsAcc);
 
     if (alertStateErr || !cost || cost.length === 0) {
       return err(
@@ -128,22 +143,32 @@ export class AlertStore {
 
   public async getErrorRate(
     organizationId: string,
-    timeWindowMs: number
+    timeWindowMs: number,
+    filter: FilterNode
   ): Promise<Result<AlertState, string>> {
+    if (!filter) {
+      // TODO This is tech debt, keeping since "all" is a valid FilterNode but NOT a valid JSONB
+      // so we represent "all" in PG as null
+      filter = "all";
+    }
+    const builtFilter = await buildFilterWithAuthClickHouse({
+      org_id: organizationId,
+      filter: filter,
+      argsAcc: [timeWindowMs],
+    });
+
     const query = `SELECT
     COUNT() AS totalCount,
     COUNTIf(status BETWEEN 400 AND 599) AS errorCount,
     COUNT() AS requestCount
   FROM request_response_rmt
   WHERE 
-    organization_id = {val_0: UUID} AND
-    request_created_at >= toDateTime64(now(), 3) - INTERVAL {val_1: Int64} MILLISECOND
+    request_created_at >= toDateTime64(now(), 3) - INTERVAL {val_0: Int64} MILLISECOND AND
+    ${builtFilter.filter}
   `;
+
     const { data: alertState, error: alertStateErr } =
-      await this.clickhouseClient.dbQuery<AlertState>(query, [
-        organizationId,
-        timeWindowMs,
-      ]);
+      await this.clickhouseClient.dbQuery<AlertState>(query, builtFilter.argsAcc);
 
     if (alertStateErr || !alertState || alertState.length === 0) {
       return err(

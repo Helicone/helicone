@@ -12,6 +12,7 @@ import { useFilterStore } from "../store/filterStore";
 import FilterConditionNode from "./FilterConditionNode";
 import { Row } from "@/components/layout/common/row";
 import SaveFilterButton from "./SaveFilterButton";
+import { useFilterAST } from "../context/filterContext";
 
 interface FilterGroupNodeProps {
   group: AndExpression | OrExpression;
@@ -25,7 +26,7 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
   path,
   isRoot = false,
 }) => {
-  const filterStore = useFilterStore();
+  const { store: filterStore } = useFilterAST();
 
   // Handle adding a new condition to this group with a sensible default
   const handleAddCondition = () => {
