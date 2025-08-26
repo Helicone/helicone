@@ -14,6 +14,12 @@ const kvCache = new KVCache(60); // 1 minutes
 
 export class OnlineEvalHandler extends AbstractLogHandler {
   public async handle(context: HandlerContext): PromiseGenericResult<string> {
+    const start = performance.now();
+    context.timingMetrics.push({
+      constructor: this.constructor.name,
+      start,
+    });
+
     const orgId = context.orgParams?.id;
     if (!orgId) {
       return err(`Org ID not found in context`);

@@ -39,6 +39,12 @@ export class AuthenticationHandler extends AbstractLogHandler {
   private async authenticateEntry(
     context: HandlerContext
   ): PromiseGenericResult<AuthParams> {
+    const start = performance.now();
+    context.timingMetrics.push({
+      constructor: this.constructor.name,
+      start,
+    });
+
     let heliconeAuth: HeliconeAuth;
     if (
       context.message.authorization.startsWith("Bearer sk-helicone-proxy") ||

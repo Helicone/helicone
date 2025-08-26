@@ -6,6 +6,12 @@ import { sanitizeObject } from "../../utils/sanitize";
 
 export class PromptHandler extends AbstractLogHandler {
   public async handle(context: HandlerContext): PromiseGenericResult<string> {
+    const start = performance.now();
+    context.timingMetrics.push({
+      constructor: this.constructor.name,
+      start,
+    });
+
     // Process Helicone Template
     if (
       context.message.log.request.promptId &&
