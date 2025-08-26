@@ -1,34 +1,12 @@
-import { describe, it, expect, beforeAll, afterAll } from "@jest/globals";
-import { TestClickhouseClientWrapper } from "./TestClickhouseWrapper";
+import { describe, it, expect } from "@jest/globals";
+import { MockClickhouseClientWrapper } from "./MockClickhouseWrapper";
 
 describe("HQL Security Tests", () => {
-  let clickhouse: TestClickhouseClientWrapper;
+  let clickhouse: MockClickhouseClientWrapper;
   const testOrgId = "1c6c26f4-d1bd-423c-ba6f-b3375a04fdd0";
   const maliciousOrgId = "99999999-9999-9999-9999-999999999999";
 
-  beforeAll(async () => {
-    const clickhouseHost = process.env.CLICKHOUSE_HOST 
-      ? `http://${process.env.CLICKHOUSE_HOST}:${process.env.CLICKHOUSE_PORT || "18123"}`
-      : "http://localhost:18123";
-    
-    clickhouse = new TestClickhouseClientWrapper({
-      CLICKHOUSE_HOST: clickhouseHost,
-      CLICKHOUSE_USER: process.env.CLICKHOUSE_USER || "default",
-      CLICKHOUSE_PASSWORD: process.env.CLICKHOUSE_PASSWORD || "",
-      CLICKHOUSE_HQL_USER: process.env.CLICKHOUSE_HQL_USER || "hql_user",
-      CLICKHOUSE_HQL_PASSWORD: process.env.CLICKHOUSE_HQL_PASSWORD || "",
-    });
-
-    // Setup test database and tables
-    await clickhouse.createTestDatabase();
-    await clickhouse.createTables();
-    await clickhouse.insertTestData();
-  }, 30000); // Increase timeout for setup
-
-  afterAll(async () => {
-    // Cleanup tables
-    await clickhouse.dropTables();
-  });
+  clickhouse = new MockClickhouseClientWrapper();
 
   describe("Settings Override Prevention", () => {
     it("should block queries with SETTINGS clause", async () => {
