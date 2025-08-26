@@ -20,6 +20,7 @@ import {
   LuScroll,
   LuX,
 } from "react-icons/lu";
+import useNotification from "@/components/shared/notification/useNotification";
 
 // Special property or score keys map
 const SPECIAL_KEYS: Record<
@@ -278,60 +279,154 @@ const ItemBadge = memo(
     isFirst: boolean;
     isProperty?: boolean;
   }) => {
+    const { setNotification } = useNotification();
+    const [showLinkButton, setShowLinkButton] = useState(false);
     const isSpecial = SPECIAL_KEYS[item.key];
+
+    const handleCopy = () => {
+      const textToCopy = `${item.key}: ${item.value}`;
+      navigator.clipboard.writeText(textToCopy);
+      setNotification("Copied to clipboard", "success");
+    };
+
+    const handleLinkClick = (e: React.MouseEvent) => {
+      e.stopPropagation();
+    };
 
     if (isSpecial) {
       return (
-        <Link href={`${isSpecial.hrefPrefix}${item.value}`} target="_blank">
-          <Badge
-            variant={"none"}
-            className={`flex h-6 flex-row gap-2 rounded-lg bg-slate-100 px-2 py-1 text-xs dark:bg-slate-900 ${
-              isFirst ? "ml-4" : ""
-            } cursor-pointer border border-border hover:bg-slate-200 dark:hover:bg-slate-800`}
-          >
-            {isSpecial.icon}
-            <span className="text-nowrap font-medium text-primary">
-              {item.value}
-            </span>
-          </Badge>
-        </Link>
+        <div
+          className="relative flex items-center"
+          onMouseEnter={() => setShowLinkButton(true)}
+          onMouseLeave={() => setShowLinkButton(false)}
+        >
+          <TooltipProvider>
+            <Tooltip delayDuration={100}>
+              <TooltipTrigger asChild>
+                <Badge
+                  variant={"none"}
+                  className={`flex h-6 flex-row gap-2 rounded-lg bg-slate-100 px-2 py-1 text-xs dark:bg-slate-900 ${
+                    isFirst ? "ml-4" : ""
+                  } cursor-pointer border border-border hover:bg-slate-200 dark:hover:bg-slate-800 ${
+                    showLinkButton ? "pr-7" : ""
+                  }`}
+                  onClick={handleCopy}
+                >
+                  {isSpecial.icon}
+                  <span className="text-nowrap font-medium text-primary">
+                    {item.value}
+                  </span>
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="text-xs">
+                Click to copy
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          {showLinkButton && (
+            <TooltipProvider>
+              <Tooltip delayDuration={100}>
+                <TooltipTrigger asChild>
+                  <Link
+                    href={`${isSpecial.hrefPrefix}${item.value}`}
+                    target="_blank"
+                    onClick={handleLinkClick}
+                    className="absolute right-1 flex h-4 w-4 items-center justify-center rounded hover:bg-slate-300 dark:hover:bg-slate-700"
+                  >
+                    <LuExternalLink className="h-3 w-3 text-muted-foreground" />
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="text-xs">
+                  Open in new tab
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </div>
       );
     }
 
-    // If it's a property (and not special), wrap it in a Link
+    // If it's a property (and not special)
     if (isProperty) {
       return (
-        <Link href={`/properties/${encodeURIComponent(item.key)}`}>
-          <Badge
-            variant={"none"}
-            className={`flex h-6 flex-row gap-2 rounded-lg bg-slate-100 px-2 py-1 text-xs dark:bg-slate-900 ${
-              isFirst ? "ml-4" : ""
-            } cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-800`}
-          >
-            <span className="text-nowrap text-muted-foreground">
-              {item.key}
-            </span>{" "}
-            <span className="text-nowrap font-medium text-primary">
-              {item.value}
-            </span>
-          </Badge>
-        </Link>
+        <div
+          className="relative flex items-center"
+          onMouseEnter={() => setShowLinkButton(true)}
+          onMouseLeave={() => setShowLinkButton(false)}
+        >
+          <TooltipProvider>
+            <Tooltip delayDuration={100}>
+              <TooltipTrigger asChild>
+                <Badge
+                  variant={"none"}
+                  className={`flex h-6 flex-row gap-2 rounded-lg bg-slate-100 px-2 py-1 text-xs dark:bg-slate-900 ${
+                    isFirst ? "ml-4" : ""
+                  } cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-800 ${
+                    showLinkButton ? "pr-7" : ""
+                  }`}
+                  onClick={handleCopy}
+                >
+                  <span className="text-nowrap text-muted-foreground">
+                    {item.key}
+                  </span>{" "}
+                  <span className="text-nowrap font-medium text-primary">
+                    {item.value}
+                  </span>
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="text-xs">
+                Click to copy
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          {showLinkButton && (
+            <TooltipProvider>
+              <Tooltip delayDuration={100}>
+                <TooltipTrigger asChild>
+                  <Link
+                    href={`/properties/${encodeURIComponent(item.key)}`}
+                    target="_blank"
+                    onClick={handleLinkClick}
+                    className="absolute right-1 flex h-4 w-4 items-center justify-center rounded hover:bg-slate-300 dark:hover:bg-slate-700"
+                  >
+                    <LuExternalLink className="h-3 w-3 text-muted-foreground" />
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="text-xs">
+                  View property
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </div>
       );
     }
 
-    // Otherwise (e.g., scores), render the badge without a link
+    // Otherwise (e.g., scores), render the badge with copy only
     return (
-      <Badge
-        variant={"none"}
-        className={`flex h-6 flex-row gap-2 rounded-lg bg-slate-100 px-2 py-1 text-xs dark:bg-slate-900 ${
-          isFirst ? "ml-4" : ""
-        }`}
-      >
-        <span className="text-nowrap text-muted-foreground">{item.key}</span>{" "}
-        <span className="text-nowrap font-medium text-primary">
-          {item.value}
-        </span>
-      </Badge>
+      <TooltipProvider>
+        <Tooltip delayDuration={100}>
+          <TooltipTrigger asChild>
+            <Badge
+              variant={"none"}
+              className={`flex h-6 flex-row gap-2 rounded-lg bg-slate-100 px-2 py-1 text-xs dark:bg-slate-900 ${
+                isFirst ? "ml-4" : ""
+              } cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-800`}
+              onClick={handleCopy}
+            >
+              <span className="text-nowrap text-muted-foreground">
+                {item.key}
+              </span>{" "}
+              <span className="text-nowrap font-medium text-primary">
+                {item.value}
+              </span>
+            </Badge>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="text-xs">
+            Click to copy
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     );
   },
 );
