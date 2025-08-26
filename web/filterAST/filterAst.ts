@@ -5,13 +5,13 @@
  */
 
 // Re-export everything from the filters SDK
-export * from "@helicone-package/filters";
+export * from "@helicone-package/filters/types";
 export {
   FilterAST,
   DEFAULT_FILTER_EXPRESSION,
   DEFAULT_FILTER_GROUP_EXPRESSION,
   EMPTY_FILTER_GROUP_EXPRESSION,
-} from "@helicone-package/filters";
+} from "@helicone-package/filters/types";
 
 export type {
   FilterExpression,
@@ -26,4 +26,4 @@ export type {
   FilterSubType,
   Views,
   UserMetric,
-} from "@helicone-package/filters";
+} from "@helicone-package/filters/types";

@@ -35,6 +35,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@headlessui/react": "^1.7.18",
     "@helicone-package/cost": "*",
+    "@helicone-package/filters": "*",
     "@helicone-package/llm-mapper": "*",
     "@helicone/prompts": "1.0.15",
     "@heroicons/react": "^2.0.13",

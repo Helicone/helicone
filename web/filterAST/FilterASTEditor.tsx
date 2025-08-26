@@ -11,7 +11,7 @@ import {
   AndExpression,
   DEFAULT_FILTER_GROUP_EXPRESSION,
   OrExpression,
-} from "@helicone-package/filters";
+} from "@helicone-package/filters/types";
 
 interface FilterASTEditorProps {}
 

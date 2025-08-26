@@ -1,4 +1,4 @@
-import { FieldSpec, FilterOperator } from "@helicone-package/filters";
+import { FieldSpec, FilterOperator } from "@helicone-package/filters/types";
 
 // Define the type for the UI rendering constants
 export interface FilterUIDefinition {

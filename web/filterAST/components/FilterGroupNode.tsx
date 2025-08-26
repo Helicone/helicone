@@ -7,7 +7,7 @@ import {
   DEFAULT_FILTER_GROUP_EXPRESSION,
   FilterAST,
   OrExpression,
-} from "@helicone-package/filters";
+} from "@helicone-package/filters/types";
 import { useFilterStore } from "../store/filterStore";
 import FilterConditionNode from "./FilterConditionNode";
 import { Row } from "@/components/layout/common/row";
