@@ -32,7 +32,14 @@
       "Bash(npx jest:*)",
       "Bash(docker buildx build:*)",
       "WebFetch(domain:developers.cloudflare.com)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(npx ts-node:*)",
+      "WebFetch(domain:undici.nodejs.org)",
+      "WebSearch",
+      "WebFetch(domain:gist.github.com)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh run watch:*)"
     ],
     "deny": []
   }

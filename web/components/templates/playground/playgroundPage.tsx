@@ -47,6 +47,7 @@ import { useLocalStorage } from "@/services/hooks/localStorage";
 import Link from "next/link";
 import EnvironmentPill from "@/components/templates/prompts2025/EnvironmentPill";
 import PromptVersionPill from "@/components/templates/prompts2025/PromptVersionPill";
+import { useHeliconeAgent } from "@/components/templates/agent/HeliconeAgentContext";
 
 export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
   _type: "openai-chat",
@@ -211,6 +212,7 @@ const convertOpenAIChatRequestToMappedLLMRequest = (
 };
 
 const PlaygroundPage = (props: PlaygroundPageProps) => {
+  const { setToolHandler } = useHeliconeAgent();
   const { requestId, promptVersionId } = props;
   const { setNotification } = useNotification();
   const router = useRouter();
@@ -260,6 +262,73 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   const [mappedContent, setMappedContent] = useState<MappedLLMRequest | null>(
     null,
   );
+
+  useEffect(() => {
+    setToolHandler("playground-get_messages", () => {
+      return {
+        success: true,
+        message: JSON.stringify(mappedContent?.schema.request.messages ?? []),
+      };
+    });
+
+    setToolHandler(
+      "playground-edit_messages",
+      async (args: { messages: Message[] }) => {
+        if (!mappedContent) {
+          return {
+            success: false,
+            message: "No mapped content available",
+          };
+        }
+
+        try {
+          if (!Array.isArray(args.messages)) {
+            return {
+              success: false,
+              message: "Messages must be an array",
+            };
+          }
+
+          const processedMessages = args.messages.map((message, index) => {
+            const processedMessage = { ...message };
+            processedMessage.id = `msg-${uuidv4()}`;
+
+            if (
+              processedMessage._type === "message" &&
+              !processedMessage.role
+            ) {
+              processedMessage.role = index === 0 ? "system" : "user";
+            }
+
+            return processedMessage;
+          });
+
+          const updatedMappedContent = {
+            ...mappedContent,
+            schema: {
+              ...mappedContent.schema,
+              request: {
+                ...mappedContent.schema.request,
+                messages: processedMessages,
+              },
+            },
+          };
+
+          setMappedContent(updatedMappedContent);
+
+          return {
+            success: true,
+            message: `Successfully updated ${processedMessages.length} messages`,
+          };
+        } catch (error) {
+          return {
+            success: false,
+            message: `Error updating messages: ${error instanceof Error ? error.message : "Unknown error"}`,
+          };
+        }
+      },
+    );
+  }, [mappedContent]);
 
   useEffect(() => {
     if (!requestId && !promptVersionId) {
@@ -955,6 +1024,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                 useAIGateway={useAIGateway}
                 setUseAIGateway={setUseAIGateway}
                 error={error}
+                isLoading={isStreaming}
               />
             )}
           </ResizablePanel>

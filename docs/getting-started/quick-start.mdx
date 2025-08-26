@@ -1,8 +1,8 @@
 ---
-title: "Introduction"
-sidebarTitle: "Introduction"
+title: "Quickstart"
+sidebarTitle: "Quickstart"
 description: "Helicone is the open-source LLM observability platform for developers to monitor, debug, and improve **production-ready** applications."
-"twitter:title": "Introduction to Helicone - Open Source LLM Observability"
+"twitter:title": "Quickstart - Helicone Open Source LLM Observability"
 ---
 
 <Frame>
@@ -71,74 +71,71 @@ Welcome to Helicone! Integrate your preferred provider with Helicone in seconds.
 
   </Step>
 
-  <Step title="Pick your preferred integration method">
+  <Step title="Integrate with AI Gateway">
 
-    Select the provider you are using below as the next instruction varies.
+    Helicone's AI Gateway is an OpenAI-compatible, unified API with access to 100+ models, including OpenAI, Anthropic, Vertex, Groq, and more.
 
-    <CardGroup cols={4}>
-    <Card title="OpenAI" href="/integrations/openai/javascript" />
-    <Card title="Azure" href="/integrations/azure/javascript" />
-    <Card title="Anthropic" href="/integrations/anthropic/javascript" />
-    <Card title="Llama" href="/integrations/llama/javascript" />
-    <Card title="Ollama" href="/integrations/ollama/javascript" />
-    <Card title="AWS Bedrock" href="/integrations/bedrock/javascript" />
-    <Card title="Gemini" href="/integrations/gemini/api/javascript" />
-    <Card
-      title="Vercel AI"
-      href="/getting-started/integration-method/vercelai"
-    />
-    <Card
-      title="Anyscale"
-      href="/getting-started/integration-method/anyscale"
-    />
-    <Card
-      title="Together AI"
-      href="/getting-started/integration-method/together"
-    />
-    <Card
-      title="Hyperbolic"
-      href="/getting-started/integration-method/hyperbolic"
-    />
-    <Card title="Groq" href="/integrations/groq/javascript" />
-    <Card title="Instructor" href="/integrations/instructor/javascript" />
-    <Card
-      title="Deepinfra"
-      href="/getting-started/integration-method/deepinfra"
-    />
-    <Card
-      title="OpenRouter"
-      href="/getting-started/integration-method/openrouter"
-    />
-    <Card
-      title="LiteLLM"
-      href="/getting-started/integration-method/litellm"
-    />
-    <Card
-      title="Fireworks AI"
-      href="/getting-started/integration-method/fireworks"
-    />
+    **Bring your own key:** Go to [Provider Keys](https://us.helicone.ai/providers) to securely store API keys for the providers you want to use.
 
-  </CardGroup>
-  <CardGroup cols={2}>
-    <Card
-      title="OpenLLMetry"
-      href="/getting-started/integration-method/openllmetry"
-    >
-      Log directly to Helicone without going through our proxy.
-    </Card>
-    <Card title="Gateway" href="/getting-started/integration-method/gateway">
-      Don't see your provider above? Try Helicone's universal Gateway.
-    </Card>
-  </CardGroup>
+    <Tabs>
+      <Tab title="TypeScript">
+        ```typescript
+        import { OpenAI } from "openai";
 
-</Step>
+        const openai = new OpenAI({
+          baseURL: "https://ai-gateway.helicone.ai/v1",
+          apiKey: process.env.HELICONE_API_KEY,
+        });
 
-<Step title="Send your first request 🎉">
-  Once we receive your requests, you will see them in the `Requests` tab.
+        const response = await openai.chat.completions.create({
+          model: "gpt-4o-mini/openai", // model-name/provider
+          messages: [{ role: "user", content: "Hello, world!" }],
+        });
+        ```
+      </Tab>
+      
+      <Tab title="Python">
+        ```python
+        from openai import OpenAI
 
-You will also see that your `Dashboard` has been updated with your new request.
+        client = OpenAI(
+            base_url="https://ai-gateway.helicone.ai/v1",
+            api_key=os.getenv("HELICONE_API_KEY")
+        )
 
-</Step>
+        response = client.chat.completions.create(
+            model="claude-3-5-sonnet/anthropic",
+            messages=[{"role": "user", "content": "Hello, world!"}]
+        )
+        ```
+      </Tab>
+
+      <Tab title="cURL">
+        ```bash
+        curl https://ai-gateway.helicone.ai/v1/chat/completions \
+          -H "Content-Type: application/json" \
+          -H "Authorization: Bearer $HELICONE_API_KEY" \
+          -d '{
+            "model": "gpt-4o-mini/openai",
+            "messages": [
+              { "role": "user", "content": "Hello, world!" }
+            ]
+          }'
+        ```
+      </Tab>
+    </Tabs>
+
+    <Note>
+      **Why AI Gateway?** Get immediate, OpenAI-compatible access to models from any major provider, alongside features like rate limiting, caching, prompt versioning, and complete observability - all with zero code changes beyond the base URL and setting up your API keys.
+    </Note>
+  </Step>
+
+  <Step title="Send your first request 🎉">
+    Once we receive your requests, you will see them in the `Requests` tab.
+
+  You will also see that your `Dashboard` has been updated with your new request.
+
+  </Step>
 
 </Steps>
 
@@ -156,7 +153,7 @@ We curated a list to help you make the most of Helicone, but you're welcome to e
   </Card>
   <Card
     title="Create your first prompt"
-    href="/features/prompts"
+    href="/features/advanced-usage/prompts"
     icon="square-2"
   >
     Version your prompt and inputs as they evolve.
@@ -173,29 +170,14 @@ We curated a list to help you make the most of Helicone, but you're welcome to e
   </Card>
 </CardGroup>
 
-### Recommendations
-
-The following guides are optional, but we think you'll find them useful.
-
-<CardGroup cols={2}>
-  <Card
-    title="Bring it to PostHog"
-    href="/getting-started/integration-method/posthog"
-    icon="star-christmas"
-  >
-    Helicone has teamed up with PostHog to bring your LLM analytics closer to
-    all your other dashboards.
-  </Card>
-</CardGroup>
-
 ## Explore Features
 
-Discover all the features for monitoring and experimenting with your prompts.
+Here are the key features to explore as you build with Helicone:
 
 <CardGroup cols={3}>
   <Card
     title="Prompts"
-    href="/features/prompts"
+    href="/features/advanced-usage/prompts"
     icon="square-terminal"
   >
     Manage and version prompts from code or UI.
@@ -206,13 +188,6 @@ Discover all the features for monitoring and experimenting with your prompts.
     icon="rectangle-history"
   >
     Trace agentic workflows and visualize them.
-  </Card>
-  <Card
-    title="Webhooks"
-    href="/features/webhooks"
-    icon="webhook"
-  >
-    Instantly react to events, trigger actions, and integrate with external tools.
   </Card>
   <Card
     title="Custom Properties"
@@ -229,18 +204,11 @@ Discover all the features for monitoring and experimenting with your prompts.
     Save cost and improve latency.
   </Card>
   <Card
-    title="Scores"
-    href="/features/advanced-usage/scores"
-    icon="chart-line-up"
+    title="Rate Limiting"
+    href="/features/advanced-usage/custom-rate-limits"
+    icon="user-minus"
   >
-    Evaluate prompt performance and quantify model outputs.
-  </Card>
-  <Card
-    title="Omit Logs"
-    href="/features/advanced-usage/omit-logs"
-    icon="square-minus"
-  >
-    Remove request and responses.
+    Easily rate-limit power users.
   </Card>
   <Card
     title="User Metrics"
@@ -249,76 +217,66 @@ Discover all the features for monitoring and experimenting with your prompts.
   >
     Get insights into your user's usage.
   </Card>
-  <Card
-    title="Datasets & Fine-tuning"
-    href="/features/fine-tuning"
-    icon="folders"
-  >
-    Curate datasets and fine-tune your LLMs.
-  </Card>
-  <Card
-    title="Feedback"
-    href="/features/advanced-usage/feedback"
-    icon="thumbs-up"
-  >
-    Provide user feedback on output.
-  </Card>
-  <Card
-    title="Gateway Fallback (Beta)"
-    href="/getting-started/integration-method/gateway-fallbacks"
-    icon="diagram-next"
-  >
-    Utilize any provider through a single endpoint.
-  </Card>
-  <Card
-    title="Retries"
-    href="/features/advanced-usage/retries"
-    icon="repeat"
-  >
-    Smartly retry requests.
-  </Card>
-  <Card
-    title="Rate Limiting"
-    href="/features/advanced-usage/custom-rate-limits"
-    icon="user-minus"
-  >
-    Easily rate-limit power users.
-  </Card>
-  <Card 
-    title="Key Vault" 
-    href="/features/advanced-usage/vault" 
-    icon="key">
-    Manage and distribute your provider API keys securely.
-  </Card>
-  <Card
-    title="Moderation Integration"
-    href="/features/advanced-usage/moderations"
-    icon="eye"
-  >
-    Integrate OpenAI moderation to safeguard your chat completions.
-  </Card>
-  <Card
-    title="LLM Security"
-    href="/features/advanced-usage/llm-security"
-    icon="shield-check"
-  >
-    Secure OpenAI chat completions against prompt injections.
-  </Card>
-  <Card
-    title="Webhooks"
-    href="/features/Webhooks"
-    icon="webhook"
-  >
-    Set up integrations tp subscribe Helicone events.
-  </Card> 
-  <Card
-    title="Customer Portal"
-    href="/features/customer-portal"
-    icon="chart-tree-map"
-  >
-    Easily manage your customers and their usage.
-  </Card>
+</CardGroup>
 
+## Alternative Integration Methods
+
+Need a different integration approach? Here are provider-specific and alternative methods:
+
+<CardGroup cols={4}>
+  <Card title="OpenAI" href="/integrations/openai/javascript" />
+  <Card title="Azure" href="/integrations/azure/javascript" />
+  <Card title="Anthropic" href="/integrations/anthropic/javascript" />
+  <Card title="Llama" href="/integrations/llama/javascript" />
+  <Card title="Ollama" href="/integrations/ollama/javascript" />
+  <Card title="AWS Bedrock" href="/integrations/bedrock/javascript" />
+  <Card title="Gemini" href="/integrations/gemini/api/javascript" />
+  <Card title="Groq" href="/integrations/groq/javascript" />
+  <Card title="Instructor" href="/integrations/instructor/javascript" />
+  <Card
+    title="Vercel AI"
+    href="/getting-started/integration-method/vercelai"
+  />
+  <Card
+    title="Anyscale"
+    href="/getting-started/integration-method/anyscale"
+  />
+  <Card
+    title="Together AI"
+    href="/getting-started/integration-method/together"
+  />
+  <Card
+    title="Hyperbolic"
+    href="/getting-started/integration-method/hyperbolic"
+  />
+  <Card
+    title="Deepinfra"
+    href="/getting-started/integration-method/deepinfra"
+  />
+  <Card
+    title="OpenRouter"
+    href="/getting-started/integration-method/openrouter"
+  />
+  <Card
+    title="LiteLLM"
+    href="/getting-started/integration-method/litellm"
+  />
+  <Card
+    title="Fireworks AI"
+    href="/getting-started/integration-method/fireworks"
+  />
+</CardGroup>
+
+<CardGroup cols={2}>
+  <Card
+    title="OpenLLMetry"
+    href="/getting-started/integration-method/openllmetry"
+  >
+    Log directly to Helicone without going through our proxy.
+  </Card>
+  <Card title="Gateway" href="/getting-started/integration-method/gateway">
+    Custom gateway configurations and legacy documentation.
+  </Card>
 </CardGroup>
 
 ## Further Reading

@@ -1,14 +1,12 @@
-import { defineWorkersConfig } from "@cloudflare/vitest-pool-workers/config";
+// vitest.config.ts (root)
+import { defineConfig } from "vitest/config";
 
-export default defineWorkersConfig({
+export default defineConfig({
   test: {
-    poolOptions: {
-      workers: {
-        wrangler: { configPath: "./wrangler.toml" },
-      },
-    },
-    alias: {
-      "@supabase/supabase-js": "/test/__mocks__/supabase.ts",
-    },
+    projects: [
+      "./test/openai/vitest.config.mts",
+      "./test/ai-gateway/vitest.config.mts",
+      "./test/cache/vitest.config.mts",
+    ],
   },
 });

@@ -11,6 +11,7 @@ import { logger } from "@/lib/telemetry/logger";
 
 interface StreamProcessorOptions {
   onUpdate: (response: { fullContent: string }) => void;
+  onComplete?: (response: { fullContent: string }) => void;
   initialState?: { fullContent: string };
 }
 
@@ -129,6 +130,10 @@ export async function processStream(
       onUpdate({ ...callbackState });
     }
 
+    if (options.onComplete) {
+      options.onComplete({ ...callbackState });
+    }
+
     const finalState = {
       fullContent: callbackState.fullContent,
     };
@@ -155,6 +160,9 @@ export async function processStream(
       },
       "[processStream] Returning state possibly incomplete due to error",
     );
+    if (options.onComplete) {
+      options.onComplete({ ...callbackState });
+    }
     return {
       error: error,
       fullContent: callbackState.fullContent,

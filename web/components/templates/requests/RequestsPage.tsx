@@ -16,6 +16,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import FilterASTButton from "@/filterAST/FilterASTButton";
+import { useFilterAST } from "@/filterAST/context/filterContext";
 import {
   HeliconeRequest,
   MappedLLMRequest,
@@ -68,6 +69,11 @@ import StreamWarning from "./StreamWarning";
 import TableFooter from "./tableFooter";
 import UnauthorizedView from "./UnauthorizedView";
 import useRequestsPageV2 from "./useRequestsPageV2";
+import { useHeliconeAgent } from "../agent/HeliconeAgentContext";
+import { useFilterUIDefinitions } from "@/filterAST/filterUIDefinitions/useFilterUIDefinitions";
+import { FilterUIDefinition } from "@/filterAST/filterUIDefinitions/types";
+import { FilterAST } from "@/filterAST/filterAst";
+import { GET_FILTER_ARGS_TOOL_CONTEXT } from "@/lib/agent/tools";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -138,6 +144,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   const orgContext = useOrg();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { store: filterStore, helpers: filterHelpers } = useFilterAST();
   const [drawerSize, setDrawerSize] = useLocalStorage(
     "request-drawer-size",
     initialRequestId ? 33 : 0,
@@ -262,6 +269,65 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     rateLimited,
   );
 
+  const { setToolHandler } = useHeliconeAgent();
+  const { filterDefinitions } = useFilterUIDefinitions();
+
+  const [allowedFilterDefinitions, setAllowedFilterDefinitions] = useState<
+    FilterUIDefinition[] | null
+  >(null);
+
+  useEffect(() => {
+    if (allowedFilterDefinitions || filterDefinitions.length === 0) return;
+    setAllowedFilterDefinitions(filterDefinitions);
+  }, [filterDefinitions]);
+
+  const { helpers } = useFilterAST();
+  useEffect(() => {
+    setToolHandler("get-filter-args", async () => {
+      const filterDefs = allowedFilterDefinitions?.filter(
+        (def) => def.table === "request_response_rmt",
+      );
+
+      const EXTRA_CONTEXT = `
+      The following are the filter definitions for the requests page:
+      ${JSON.stringify(filterDefs)}
+      ${GET_FILTER_ARGS_TOOL_CONTEXT}
+      `;
+
+      return {
+        success: true,
+        message: EXTRA_CONTEXT,
+      };
+    });
+
+    setToolHandler("set-filters", async (args: { filter: any }) => {
+      try {
+        const filterNode =
+          typeof args.filter === "string"
+            ? JSON.parse(args.filter)
+            : args.filter;
+        filterStore.setFilter(FilterAST.and(filterNode));
+        return {
+          success: true,
+          message: "Filters set successfully",
+        };
+      } catch (error) {
+        return {
+          success: false,
+          message: `Failed to parse filters: ${error}`,
+        };
+      }
+    });
+    setToolHandler("save-current-filter", async () => {
+      helpers.saveFilter();
+      return {
+        success: true,
+        message: "Filter saved successfully",
+      };
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allowedFilterDefinitions]);
+
   /* -------------------------------------------------------------------------- */
   /*                                    MEMOS                                   */
   /* -------------------------------------------------------------------------- */
@@ -359,6 +425,19 @@ export default function RequestsPage(props: RequestsPageV2Props) {
       selectedIds.includes(index.toString()),
     );
   }, [requests, selectedIds]);
+
+  const hasActiveFilters = useMemo(() => {
+    return filterStore.filter !== null && filterStore.getFilterNodeCount() > 0;
+  }, [filterStore.filter, filterStore.getFilterNodeCount]);
+
+  const shouldShowClearFilters = useMemo(() => {
+    return (
+      shouldShowMockData === false &&
+      requests.length === 0 &&
+      !isDataLoading &&
+      hasActiveFilters
+    );
+  }, [shouldShowMockData, requests.length, isDataLoading, hasActiveFilters]);
 
   /* -------------------------------------------------------------------------- */
   /*                                  CALLBACKS                                 */
@@ -620,6 +699,14 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                 isFetching={false}
                 defaultValue={getDefaultValue()}
                 custom={true}
+                isLive={isLive}
+                hasCustomTimeFilter={
+                  searchParams.get("t")?.startsWith("custom_") || false
+                }
+                onClearTimeFilter={() => {
+                  searchParams.delete("t");
+                  setTimeFilter(defaultFilter);
+                }}
               />
 
               {/* Filter AST Button */}
@@ -730,6 +817,10 @@ export default function RequestsPage(props: RequestsPageV2Props) {
               selectedIds={selectedIds}
               // only for request page
               currentRow={selectedData}
+              showClearFilters={shouldShowClearFilters}
+              onClearFilters={() => {
+                filterHelpers.clearFilter();
+              }}
             >
               {selectMode && (
                 <Row className="w-full items-center justify-between gap-5 bg-white p-5 dark:bg-black">

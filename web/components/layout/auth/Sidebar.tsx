@@ -9,9 +9,10 @@ import {
   ShieldCheckIcon,
   TagIcon,
   TestTube2,
+  TriangleAlertIcon,
   UsersIcon,
+  Code2Icon,
 } from "lucide-react";
-import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
 import DesktopSidebar from "./DesktopSidebar";
@@ -31,6 +32,10 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
   const org = useOrg();
   const { data: hasFeatureFlag } = useFeatureFlag(
     "ai_gateway",
+    org?.currentOrg?.id ?? "",
+  );
+  const { data: hasHQLFeatureFlag } = useFeatureFlag(
+    "hql",
     org?.currentOrg?.id ?? "",
   );
 
@@ -78,12 +83,16 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
             icon: ArchiveIcon,
             current: pathname.includes("/cache"),
           },
-          {
-            name: "Rate Limits",
-            href: "/rate-limit",
-            icon: ShieldCheckIcon,
-            current: pathname === "/rate-limit",
-          },
+          ...(hasHQLFeatureFlag?.data
+            ? [
+                {
+                  name: "HQL",
+                  href: "/hql",
+                  icon: Code2Icon,
+                  current: pathname.includes("/hql"),
+                },
+              ]
+            : []),
         ],
       },
       {
@@ -113,13 +122,27 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
         ],
       },
       {
-        name: "Alerts",
-        href: "/alerts",
-        icon: ExclamationTriangleIcon,
-        current: pathname.includes("/alerts"),
+        name: "Monitor",
+        href: "/monitor",
+        icon: null,
+        current: false,
+        subItems: [
+          {
+            name: "Rate Limits",
+            href: "/rate-limit",
+            icon: ShieldCheckIcon,
+            current: pathname === "/rate-limit",
+          },
+          {
+            name: "Alerts",
+            href: "/alerts",
+            icon: TriangleAlertIcon,
+            current: pathname.includes("/alerts"),
+          },
+        ],
       },
     ],
-    [pathname, hasFeatureFlag?.data],
+    [pathname, hasFeatureFlag?.data, hasHQLFeatureFlag?.data],
   );
 
   return (

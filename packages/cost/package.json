@@ -3,10 +3,13 @@
   "types": "./",
   "sideEffects": false,
   "version": "1.0.0",
+  "scripts": {
+    "test": "jest"
+  },
   "dependencies": {
-    "@smithy/signature-v4": "^4.2.3",
     "@aws-crypto/sha256-js": "^5.2.0",
-    "@smithy/protocol-http": "^4.1.7"
+    "@smithy/protocol-http": "^4.1.7",
+    "@smithy/signature-v4": "^4.2.3"
   },
   "devDependencies": {
     "tsx": "^4.0.0"

@@ -1,0 +1,58 @@
+name: Worker Tests
+
+on:
+  workflow_dispatch:  # Manual trigger for testing iterations!
+  push:
+    branches:
+      - "**" # Run on ALL branches for every push
+  pull_request:
+    branches:
+      - "**" # Run on ALL branches for PRs
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  worker-tests:
+    name: Worker Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Cache node_modules using root yarn.lock (the real lockfile)
+      - name: Cache dependencies
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            worker/node_modules
+            packages/*/node_modules
+          key: deps-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            deps-${{ runner.os }}-
+      
+      # Install from root using yarn workspaces (only if cache miss)
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          echo "Cache miss - installing dependencies from root workspace"
+          yarn install --frozen-lockfile --network-timeout 100000
+      
+      # Show cache status
+      - name: Cache status
+        run: |
+          if [ "${{ steps.cache.outputs.cache-hit }}" = "true" ]; then
+            echo "✅ Using cached dependencies - skipped yarn install!"
+          else
+            echo "❌ Cache miss - installed dependencies"
+          fi
+      
+      
+      - name: Run tests
+        working-directory: worker
+        run: yarn test
+
+      # Optional: Include test summary in PR
+      - name: Test Summary
+        if: always()
+        run: |
+          echo "✅ Worker tests completed"

@@ -44,6 +44,46 @@ def get_url(args):
         host_with_scheme = args.host if "http://" in args.host or "https://" in args.host else f"http://{args.host}"
         return f"{host_with_scheme}:{args.port}"
 
+def split_sql_statements(sql_content):
+    """Split SQL content into individual statements, handling comments and strings properly"""
+    statements = []
+    current_statement = []
+    
+    lines = sql_content.split('\n')
+    
+    for line in lines:
+        # Skip empty lines and comment-only lines
+        stripped_line = line.strip()
+        if not stripped_line or stripped_line.startswith('--'):
+            continue
+            
+        # For now, do simple comment removal (this could be improved to handle strings)
+        # Remove inline comments only if they're not inside a string
+        if '--' in line:
+            # Simple approach: just remove everything after --
+            # A more robust solution would track whether we're inside a string
+            line = line[:line.index('--')]
+            if not line.strip():
+                continue
+        
+        current_statement.append(line)
+        
+        # Check if this line ends with a semicolon (end of statement)
+        if line.rstrip().endswith(';'):
+            statement = '\n'.join(current_statement).strip()
+            if statement and statement != ';':
+                statements.append(statement)
+            current_statement = []
+    
+    # Add any remaining statement
+    if current_statement:
+        statement = '\n'.join(current_statement).strip()
+        if statement and statement != ';':
+            statements.append(statement)
+    
+    return statements
+
+
 def run_curl_command(query, args, user=None, password=None, migration_file=None):
     base_url = get_url(args)
     auth = f"--user '{user}:{password}'" if user and password else ""
@@ -60,12 +100,78 @@ def run_curl_command(query, args, user=None, password=None, migration_file=None)
 
     result = subprocess.run(curl_cmd, shell=True,
                             capture_output=True, text=True)
+    
+    # Check for curl errors (connection issues)
     if result.returncode != 0:
-        print("Error running query")
-        print("STDOUT:", result.stdout)
-        print("STDERR:", result.stderr)
+        print("\n" + "="*60)
+        print("ERROR: Failed to connect to ClickHouse")
+        print("="*60)
+        print(f"URL: {base_url}")
+        print(f"Command: {curl_cmd}")
+        print(f"\nSTDOUT: {result.stdout}")
+        print(f"STDERR: {result.stderr}")
+        print("="*60 + "\n")
         sys.exit(1)
+    
+    # Check for ClickHouse errors in the response
+    response = result.stdout.strip()
+    if response and ('Exception' in response or 'DB::Exception' in response or 'Error' in response):
+        print("\n" + "="*60)
+        print("ERROR: ClickHouse returned an error")
+        print("="*60)
+        if migration_file:
+            print(f"Migration file: {migration_file}")
+        if query:
+            print(f"Query: {query[:200]}..." if len(query) > 200 else f"Query: {query}")
+        print(f"\nClickHouse Error Response:")
+        print(response)
+        print("="*60 + "\n")
+        # Don't exit here, let the caller handle it
+        result.clickhouse_error = True
+    else:
+        result.clickhouse_error = False
+    
     return result
+
+
+def run_migration_file(migration_file, args, user=None, password=None):
+    """Run a migration file that may contain multiple SQL statements"""
+    # Read the migration file
+    with open(migration_file, 'r') as f:
+        sql_content = f.read()
+    
+    # Split into individual statements
+    statements = split_sql_statements(sql_content)
+    
+    if len(statements) == 1:
+        # Single statement, run normally
+        return run_curl_command(None, args, user, password, migration_file)
+    
+    # Multiple statements, run each separately
+    print(f"  Migration contains {len(statements)} statements")
+    failed_statements = []
+    
+    for i, statement in enumerate(statements, 1):
+        # Show progress for multi-statement migrations
+        print(f"    Executing statement {i}/{len(statements)}...")
+        
+        result = run_curl_command(statement, args, user, password)
+        
+        if result.returncode != 0 or getattr(result, 'clickhouse_error', False):
+            print(f"    ❌ Statement {i} failed")
+            failed_statements.append(i)
+            # Create a compound result to indicate failure
+            compound_result = subprocess.CompletedProcess(args=[], returncode=1)
+            compound_result.clickhouse_error = True
+            compound_result.stdout = f"Failed on statement {i}/{len(statements)}"
+            return compound_result
+    
+    # All statements succeeded
+    print(f"    ✓ All {len(statements)} statements executed successfully")
+    success_result = subprocess.CompletedProcess(args=[], returncode=0)
+    success_result.clickhouse_error = False
+    success_result.stdout = "OK"
+    return success_result
 
 
 def create_migration_table(args, user=None, password=None):
@@ -77,10 +183,11 @@ def create_migration_table(args, user=None, password=None):
     """
     res = run_curl_command(query, args, user, password)
 
-    if res.returncode != 0:
+    if res.returncode != 0 or getattr(res, 'clickhouse_error', False):
         print("Failed to create helicone_migrations table")
-        print("STDOUT:", res.stdout)
-        print("STDERR:", res.stderr)
+        if not getattr(res, 'clickhouse_error', False):
+            print("STDOUT:", res.stdout)
+            print("STDERR:", res.stderr)
         sys.exit(1)
     else:
         print("Created helicone_migrations table")
@@ -184,26 +291,63 @@ def run_migrations(args, retries=2, user=None, password=None):
                 print("Please enter 'y' for yes or 'n' for no.")
     
     # Apply migrations
-    for migration_name, schema_path in pending_migrations:
-        print(f"Running {schema_path}")
+    failed_migrations = []
+    for i, (migration_name, schema_path) in enumerate(pending_migrations, 1):
+        print(f"\n[{i}/{len(pending_migrations)}] Running migration: {migration_name}")
+        print(f"  File: {schema_path}")
 
-        res = run_curl_command(None, args, user, password, schema_path)
+        res = run_migration_file(schema_path, args, user, password)
 
-        if res.returncode != 0:
-            print(f"Failed to run {schema_path}")
-            retries -= 1
-            if retries > 0:
-                time.sleep(1)
-                print("Retrying")
-                run_migrations(args, retries, user, password, skip_confirmation=True)
-            break
+        if res.returncode != 0 or getattr(res, 'clickhouse_error', False):
+            print(f"\n⚠️  Failed to run migration: {migration_name}")
+            failed_migrations.append(migration_name)
+            
+            # Check if we should retry
+            if retries > 0 and not skip_confirmation:
+                print(f"\nRetries remaining: {retries}")
+                retry_response = input("Do you want to retry this migration? [y/N]: ").strip().lower()
+                if retry_response in ['y', 'yes']:
+                    retries -= 1
+                    time.sleep(1)
+                    print("Retrying...")
+                    # Retry only this specific migration
+                    retry_res = run_migration_file(schema_path, args, user, password)
+                    if retry_res.returncode == 0 and not getattr(retry_res, 'clickhouse_error', False):
+                        print(f"✅ Migration {migration_name} succeeded on retry")
+                        mark_migration_as_applied(migration_name, args, user, password)
+                        applied_migrations.add(migration_name)
+                        continue
+                    else:
+                        print(f"❌ Migration {migration_name} failed again")
+            
+            # Ask if we should continue with remaining migrations
+            if not skip_confirmation and i < len(pending_migrations):
+                continue_response = input(f"\nDo you want to continue with the remaining {len(pending_migrations) - i} migration(s)? [y/N]: ").strip().lower()
+                if continue_response not in ['y', 'yes']:
+                    print("\nStopping migration process.")
+                    break
         else:
+            print(f"✅ Successfully applied migration: {migration_name}")
             mark_migration_as_applied(
                 migration_name, args, user, password)
             # Add to the in-memory set to avoid duplicate runs within the same session
             applied_migrations.add(migration_name)
+    
+    # Summary
+    if failed_migrations:
+        print(f"\n" + "="*60)
+        print(f"Migration Summary:")
+        print(f"  Successful: {len(pending_migrations) - len(failed_migrations)}/{len(pending_migrations)}")
+        print(f"  Failed: {len(failed_migrations)}/{len(pending_migrations)}")
+        print(f"\nFailed migrations:")
+        for failed in failed_migrations:
+            print(f"  - {failed}")
+        print("="*60)
 
-    print("Finished running migrations")
+    if not failed_migrations:
+        print(f"\n✅ Finished running all {len(pending_migrations)} migrations successfully")
+    else:
+        print(f"\n⚠️  Finished with {len(failed_migrations)} failed migration(s)")
 
 
 def list_migrations(args, user=None, password=None):
@@ -225,15 +369,15 @@ def list_migrations(args, user=None, password=None):
 def run_roles_seed(args, user=None, password=None):
     """Run the roles.sql seed file to create roles and grant permissions"""
     for seed_file in all_seeds:
-        print(seed_file)
-        res = run_curl_command(None, args, user, password, seed_file)
-        if res.returncode != 0:
-            print("Warning: Failed to run seed file")
-            print("STDOUT:", res.stdout)
-            print("STDERR:", res.stderr)
+        print(f"\nRunning seed file: {seed_file}")
+        res = run_migration_file(seed_file, args, user, password)
+        if res.returncode != 0 or getattr(res, 'clickhouse_error', False):
+            print(f"⚠️  Warning: Failed to run seed file: {seed_file}")
+            if not getattr(res, 'clickhouse_error', False):
+                print("STDOUT:", res.stdout)
+                print("STDERR:", res.stderr)
             continue
-        print("Successfully applied seed file")
-        print(res)
+        print(f"✅ Successfully applied seed file: {os.path.basename(seed_file)}")
     
 
 

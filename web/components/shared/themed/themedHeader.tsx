@@ -54,6 +54,9 @@ interface ThemedHeaderProps {
     customTimeFilter: boolean;
     onTimeSelectHandler: (key: TimeInterval, value: string) => void;
     defaultTimeFilter: TimeInterval;
+    isLive?: boolean;
+    hasCustomTimeFilter?: boolean;
+    onClearTimeFilter?: () => void;
   };
   savedFilters?: {
     filters?: OrganizationFilter[];
@@ -96,6 +99,9 @@ export default function ThemedHeader({
                 defaultValue={timeFilter.defaultTimeFilter ?? "all"}
                 currentTimeFilter={timeFilter.currentTimeFilter}
                 custom={timeFilter.customTimeFilter}
+                isLive={timeFilter.isLive}
+                hasCustomTimeFilter={timeFilter.hasCustomTimeFilter}
+                onClearTimeFilter={timeFilter.onClearTimeFilter}
               />
             )}
           </div>
