@@ -9,15 +9,12 @@ export interface UIFilterRowNode {
 }
 export type UIFilterRowTree = UIFilterRowNode | UIFilterRow;
 
-// Re-export all types from filterExpressions
-export * from "./filterExpressions";
 export type {
   FilterExpression,
   AllExpression,
   ConditionExpression,
   AndExpression,
   OrExpression,
-  AggregationExpression,
   FilterOperator,
   FieldSpec,
   RequestResponseRMT,
