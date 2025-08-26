@@ -56,6 +56,7 @@ export class AnthropicStreamBodyProcessor implements IBodyProcessor {
         processedLines.push(data);
       } catch (e) {
         console.error("Error parsing line Anthropic", line);
+
         processedLines.push({});
       }
     }

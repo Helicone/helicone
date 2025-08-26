@@ -9,7 +9,7 @@ export const models = {
     contextLength: 200000,
     maxOutputTokens: 100000,
     created: "2025-04-16T17:10:57.000Z",
-    modality: "text+image->text",
+    modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
   },
   "o3-pro": {
@@ -20,7 +20,7 @@ export const models = {
     contextLength: 200000,
     maxOutputTokens: 100000,
     created: "2025-06-10T23:32:32.000Z",
-    modality: "text+image->text",
+    modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
   },
   "o3-mini": {
@@ -31,7 +31,7 @@ export const models = {
     contextLength: 200000,
     maxOutputTokens: 100000,
     created: "2025-01-31T19:28:41.000Z",
-    modality: "text->text",
+    modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "GPT",
   },
   "o3-mini-high": {
@@ -42,7 +42,7 @@ export const models = {
     contextLength: 200000,
     maxOutputTokens: 100000,
     created: "2025-02-12T15:03:31.000Z",
-    modality: "text->text",
+    modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "GPT",
   },
 } satisfies Record<string, ModelConfig>;

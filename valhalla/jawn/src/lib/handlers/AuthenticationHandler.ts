@@ -6,6 +6,7 @@ import { PromiseGenericResult, err, ok } from "../../packages/common/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 import { getAndStoreInCache } from "../cache/staticMemCache";
+import { stableStringify } from "../../utils/stableStringify";
 
 export class AuthenticationHandler extends AbstractLogHandler {
   async handle(context: HandlerContext): PromiseGenericResult<string> {
@@ -15,7 +16,11 @@ export class AuthenticationHandler extends AbstractLogHandler {
         return err(`Authentication failed: ${authResult.error}`);
       }
 
-      const orgResult = await this.getOrganization(authResult.data);
+      const orgResult = await getAndStoreInCache(
+        `auth-handler-org-${stableStringify(authResult.data)}-${authResult.data.organizationId}`,
+        () => this.getOrganization(authResult.data),
+        60 * 5 // 5 minutes
+      );
       if (orgResult.error || !orgResult.data) {
         return err(`Organization not found: ${orgResult.error}`);
       }
@@ -59,7 +64,7 @@ export class AuthenticationHandler extends AbstractLogHandler {
     const authClient = getHeliconeAuthClient();
 
     const authResult = await getAndStoreInCache(
-      `auth-${JSON.stringify(heliconeAuth)}`,
+      `auth-authenticateEntry-${stableStringify(heliconeAuth)}-${heliconeAuth.token}`,
       async () => authClient.authenticate(heliconeAuth),
       60 * 5 // 5 minutes
     );

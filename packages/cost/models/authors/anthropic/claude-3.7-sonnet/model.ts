@@ -9,7 +9,7 @@ export const models = {
     contextLength: 200000,
     maxOutputTokens: 64000,
     created: "2025-02-19T00:00:00.000Z",
-    modality: "text+image->text",
+    modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "Claude",
   },
 } satisfies Record<string, ModelConfig>;

@@ -55,7 +55,7 @@ const DesktopSidebar = ({
 
   const [expandedItems, setExpandedItems] = useLocalStorage<string[]>(
     "expandedItems",
-    ["Developer", "Segments", "Improve"],
+    ["Developer", "Segments", "Improve", "Monitor"],
   );
 
   const toggleExpand = (name: string) => {

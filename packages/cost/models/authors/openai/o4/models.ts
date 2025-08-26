@@ -9,7 +9,7 @@ export const models = {
     contextLength: 200000,
     maxOutputTokens: 100000,
     created: "2025-04-16T16:29:02.000Z",
-    modality: "text+image->text",
+    modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
   },
   "o4-mini-high": {
@@ -20,7 +20,7 @@ export const models = {
     contextLength: 200000,
     maxOutputTokens: 100000,
     created: "2025-04-16T17:23:32.000Z",
-    modality: "text+image->text",
+    modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
   },
 } satisfies Record<string, ModelConfig>;

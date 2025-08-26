@@ -9,7 +9,7 @@ export const models = {
     contextLength: 8191,
     maxOutputTokens: 4096,
     created: "2023-05-28T00:00:00.000Z",
-    modality: "text->text",
+    modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "GPT",
   },
 } satisfies Record<string, ModelConfig>;

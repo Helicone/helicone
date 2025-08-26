@@ -16,6 +16,7 @@ import { ProviderKeysManager } from "./lib/managers/ProviderKeysManager";
 import { ProviderKeysStore } from "./lib/db/ProviderKeysStore";
 import { APIKeysStore } from "./lib/db/APIKeysStore";
 import { APIKeysManager } from "./lib/managers/APIKeysManager";
+import { SecretManagerClass } from "@helicone-package/secrets/SecretManager";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
@@ -45,12 +46,27 @@ async function modifyEnvBasedOnPath(
   env: Env,
   request: RequestWrapper
 ): Promise<Env> {
+  const secretManager = new SecretManagerClass([
+    (key: string) => process.env[key],
+  ]);
+
+  // This configures all the blue <> green secrets
+  for (const key of Object.keys(env)) {
+    if (typeof env[key as keyof Env] === "string") {
+      const value = secretManager.getSecret(key);
+      if (value) {
+        env[key as keyof Env] = value as any;
+      }
+    }
+  }
+
   const url = new URL(request.getUrl());
   const host = url.host;
   const hostParts = host.split(".");
   if (request.isEU()) {
     env = {
       ...env,
+      VALHALLA_URL: env.EU_VALHALLA_URL,
       CLICKHOUSE_HOST: env.EU_CLICKHOUSE_HOST,
       CLICKHOUSE_USER: env.EU_CLICKHOUSE_USER,
       CLICKHOUSE_PASSWORD: env.EU_CLICKHOUSE_PASSWORD,

@@ -30,6 +30,7 @@ import {
   PromiseGenericResult,
   Result,
 } from "../packages/common/result";
+import { SecretManager } from "@helicone-package/secrets/SecretManager";
 
 export interface LogMetaData {
   batchId?: string;
@@ -218,14 +219,13 @@ export class LogManager {
     this.logLytixEvents(lytixHandler, logMetaData);
     this.logSegmentEvents(segmentHandler, logMetaData);
     this.logWebhooks(webhookHandler, logMetaData);
-    console.log(`Finished processing batch ${logMetaData.batchId}`);
   }
 
   private async logStripeMeter(
     stripeLogHandler: StripeLogHandler,
     logMetaData: LogMetaData
   ): Promise<void> {
-    if (!process.env.STRIPE_SECRET_KEY) {
+    if (!SecretManager.getSecret("STRIPE_SECRET_KEY")) {
       return;
     }
     const start = performance.now();
@@ -247,7 +247,6 @@ export class LogManager {
     logMetaData: LogMetaData,
     logMessages: KafkaMessageContents[]
   ): Promise<void> {
-    console.log(`Upserting logs for batch ${logMetaData.batchId}`);
     const start = performance.now();
     const result = await handler.handleResults();
     const end = performance.now();
@@ -276,7 +275,8 @@ export class LogManager {
       });
 
       console.error(
-        `Error inserting logs: ${JSON.stringify(result.error)} for batch ${logMetaData.batchId
+        `Error inserting logs: ${JSON.stringify(result.error)} for batch ${
+          logMetaData.batchId
         }`
       );
 
@@ -309,7 +309,6 @@ export class LogManager {
     handler: RateLimitHandler,
     logMetaData: LogMetaData
   ): Promise<void> {
-    console.log(`Inserting rate limits for batch ${logMetaData.batchId}`);
     const start = performance.now();
     const { data: rateLimitInsId, error: rateLimitErr } =
       await handler.handleResults();

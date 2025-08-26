@@ -1,6 +1,7 @@
 import { PromiseGenericResult, err, ok } from "../../packages/common/result";
 import { gzip } from "zlib";
 import { promisify } from "util";
+import { SecretManager } from "@helicone-package/secrets/SecretManager";
 
 interface DataDogConfig {
   enabled: boolean;
@@ -151,6 +152,6 @@ class DataDogClient {
 
 export const dataDogClient = new DataDogClient({
   enabled: true,
-  apiKey: process.env.DATADOG_API_KEY ?? "",
+  apiKey: SecretManager.getSecret("DATADOG_API_KEY") ?? "",
   endpoint: process.env.DATADOG_ENDPOINT ?? "",
 });

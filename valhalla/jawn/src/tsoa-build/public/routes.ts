@@ -38,6 +38,8 @@ import { PiPublicController } from './../../controllers/public/piPublicControlle
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { PiController } from './../../controllers/public/piController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { ModelRegistryController } from './../../controllers/public/modelRegistryController';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { ModelComparisonController } from './../../controllers/public/modelComparisonController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { ModelController } from './../../controllers/public/modelController';
@@ -271,7 +273,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Partial_RequestResponseRMTToOperators_": {
         "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"country_code":{"ref":"Partial_TextOperators_"},"latency":{"ref":"Partial_NumberOperators_"},"cost":{"ref":"Partial_NumberOperators_"},"time_to_first_token":{"ref":"Partial_NumberOperators_"},"status":{"ref":"Partial_NumberOperators_"},"request_created_at":{"ref":"Partial_TimestampOperatorsTyped_"},"response_created_at":{"ref":"Partial_TimestampOperatorsTyped_"},"model":{"ref":"Partial_TextOperators_"},"user_id":{"ref":"Partial_TextOperators_"},"organization_id":{"ref":"Partial_TextOperators_"},"node_id":{"ref":"Partial_TextOperators_"},"job_id":{"ref":"Partial_TextOperators_"},"threat":{"ref":"Partial_BooleanOperators_"},"request_id":{"ref":"Partial_TextOperators_"},"prompt_tokens":{"ref":"Partial_NumberOperators_"},"completion_tokens":{"ref":"Partial_NumberOperators_"},"prompt_cache_read_tokens":{"ref":"Partial_NumberOperators_"},"prompt_cache_write_tokens":{"ref":"Partial_NumberOperators_"},"total_tokens":{"ref":"Partial_NumberOperators_"},"target_url":{"ref":"Partial_TextOperators_"},"properties":{"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"ref":"Partial_TextOperators_"}},"search_properties":{"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"ref":"Partial_TextOperators_"}},"scores":{"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"ref":"Partial_TextOperators_"}},"scores_column":{"ref":"Partial_TextOperators_"},"request_body":{"ref":"Partial_VectorOperators_"},"response_body":{"ref":"Partial_VectorOperators_"},"cache_enabled":{"ref":"Partial_BooleanOperators_"},"cache_reference_id":{"ref":"Partial_TextOperators_"},"cached":{"ref":"Partial_BooleanOperators_"},"assets":{"ref":"Partial_TextOperators_"},"helicone-score-feedback":{"ref":"Partial_BooleanOperators_"},"prompt_id":{"ref":"Partial_TextOperators_"},"prompt_version":{"ref":"Partial_TextOperators_"}},"validators":{}},
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"country_code":{"ref":"Partial_TextOperators_"},"latency":{"ref":"Partial_NumberOperators_"},"cost":{"ref":"Partial_NumberOperators_"},"provider":{"ref":"Partial_TextOperators_"},"time_to_first_token":{"ref":"Partial_NumberOperators_"},"status":{"ref":"Partial_NumberOperators_"},"request_created_at":{"ref":"Partial_TimestampOperatorsTyped_"},"response_created_at":{"ref":"Partial_TimestampOperatorsTyped_"},"model":{"ref":"Partial_TextOperators_"},"user_id":{"ref":"Partial_TextOperators_"},"organization_id":{"ref":"Partial_TextOperators_"},"node_id":{"ref":"Partial_TextOperators_"},"job_id":{"ref":"Partial_TextOperators_"},"threat":{"ref":"Partial_BooleanOperators_"},"request_id":{"ref":"Partial_TextOperators_"},"prompt_tokens":{"ref":"Partial_NumberOperators_"},"completion_tokens":{"ref":"Partial_NumberOperators_"},"prompt_cache_read_tokens":{"ref":"Partial_NumberOperators_"},"prompt_cache_write_tokens":{"ref":"Partial_NumberOperators_"},"total_tokens":{"ref":"Partial_NumberOperators_"},"target_url":{"ref":"Partial_TextOperators_"},"properties":{"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"ref":"Partial_TextOperators_"}},"search_properties":{"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"ref":"Partial_TextOperators_"}},"scores":{"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"ref":"Partial_TextOperators_"}},"scores_column":{"ref":"Partial_TextOperators_"},"request_body":{"ref":"Partial_VectorOperators_"},"response_body":{"ref":"Partial_VectorOperators_"},"cache_enabled":{"ref":"Partial_BooleanOperators_"},"cache_reference_id":{"ref":"Partial_TextOperators_"},"cached":{"ref":"Partial_BooleanOperators_"},"assets":{"ref":"Partial_TextOperators_"},"helicone-score-feedback":{"ref":"Partial_BooleanOperators_"},"prompt_id":{"ref":"Partial_TextOperators_"},"prompt_version":{"ref":"Partial_TextOperators_"}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Pick_FilterLeaf.users_view-or-request_response_rmt_": {
@@ -2377,6 +2379,84 @@ const models: TsoaRoute.Models = {
             "timeZoneDifference": {"dataType":"double","required":true},
         },
         "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ModelEndpoint": {
+        "dataType": "refObject",
+        "properties": {
+            "provider": {"dataType":"string","required":true},
+            "providerSlug": {"dataType":"string","required":true},
+            "pricing": {"dataType":"nestedObjectLiteral","nestedProperties":{"cacheWrite":{"dataType":"double"},"cacheRead":{"dataType":"double"},"thinking":{"dataType":"double"},"image":{"dataType":"double"},"video":{"dataType":"double"},"web_search":{"dataType":"double"},"audio":{"dataType":"double"},"completion":{"dataType":"double","required":true},"prompt":{"dataType":"double","required":true}},"required":true},
+            "supportsPtb": {"dataType":"boolean"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "InputModality": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["text"]},{"dataType":"enum","enums":["image"]},{"dataType":"enum","enums":["audio"]},{"dataType":"enum","enums":["video"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "OutputModality": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["text"]},{"dataType":"enum","enums":["image"]},{"dataType":"enum","enums":["audio"]},{"dataType":"enum","enums":["video"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "StandardParameter": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["max_tokens"]},{"dataType":"enum","enums":["temperature"]},{"dataType":"enum","enums":["top_p"]},{"dataType":"enum","enums":["top_k"]},{"dataType":"enum","enums":["stop"]},{"dataType":"enum","enums":["stream"]},{"dataType":"enum","enums":["frequency_penalty"]},{"dataType":"enum","enums":["presence_penalty"]},{"dataType":"enum","enums":["repetition_penalty"]},{"dataType":"enum","enums":["seed"]},{"dataType":"enum","enums":["tools"]},{"dataType":"enum","enums":["tool_choice"]},{"dataType":"enum","enums":["functions"]},{"dataType":"enum","enums":["function_call"]},{"dataType":"enum","enums":["reasoning"]},{"dataType":"enum","enums":["include_reasoning"]},{"dataType":"enum","enums":["thinking"]},{"dataType":"enum","enums":["response_format"]},{"dataType":"enum","enums":["json_mode"]},{"dataType":"enum","enums":["truncate"]},{"dataType":"enum","enums":["min_p"]},{"dataType":"enum","enums":["logit_bias"]},{"dataType":"enum","enums":["logprobs"]},{"dataType":"enum","enums":["top_logprobs"]},{"dataType":"enum","enums":["structured_outputs"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ModelRegistryItem": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "name": {"dataType":"string","required":true},
+            "author": {"dataType":"string","required":true},
+            "contextLength": {"dataType":"double","required":true},
+            "endpoints": {"dataType":"array","array":{"dataType":"refObject","ref":"ModelEndpoint"},"required":true},
+            "maxOutput": {"dataType":"double"},
+            "trainingDate": {"dataType":"string"},
+            "description": {"dataType":"string"},
+            "inputModalities": {"dataType":"array","array":{"dataType":"refAlias","ref":"InputModality"},"required":true},
+            "outputModalities": {"dataType":"array","array":{"dataType":"refAlias","ref":"OutputModality"},"required":true},
+            "supportedParameters": {"dataType":"array","array":{"dataType":"refAlias","ref":"StandardParameter"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ModelCapability": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["audio"]},{"dataType":"enum","enums":["video"]},{"dataType":"enum","enums":["image"]},{"dataType":"enum","enums":["thinking"]},{"dataType":"enum","enums":["web_search"]},{"dataType":"enum","enums":["caching"]},{"dataType":"enum","enums":["reasoning"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ModelRegistryResponse": {
+        "dataType": "refObject",
+        "properties": {
+            "models": {"dataType":"array","array":{"dataType":"refObject","ref":"ModelRegistryItem"},"required":true},
+            "total": {"dataType":"double","required":true},
+            "filters": {"dataType":"nestedObjectLiteral","nestedProperties":{"capabilities":{"dataType":"array","array":{"dataType":"refAlias","ref":"ModelCapability"},"required":true},"authors":{"dataType":"array","array":{"dataType":"string"},"required":true},"providers":{"dataType":"array","array":{"dataType":"string"},"required":true}},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_ModelRegistryResponse_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"ref":"ModelRegistryResponse","required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result_ModelRegistryResponse.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_ModelRegistryResponse_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "SortOption": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["name"]},{"dataType":"enum","enums":["price-low"]},{"dataType":"enum","enums":["price-high"]},{"dataType":"enum","enums":["context"]},{"dataType":"enum","enums":["newest"]}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "MetricStats": {
@@ -8156,6 +8236,48 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getCostsOverTime',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsModelRegistryController_getModelRegistry: Record<string, TsoaRoute.ParameterSchema> = {
+                providers: {"in":"query","name":"providers","dataType":"string"},
+                authors: {"in":"query","name":"authors","dataType":"string"},
+                inputModalities: {"in":"query","name":"inputModalities","dataType":"string"},
+                outputModalities: {"in":"query","name":"outputModalities","dataType":"string"},
+                parameters: {"in":"query","name":"parameters","dataType":"string"},
+                capabilities: {"in":"query","name":"capabilities","dataType":"string"},
+                priceMin: {"in":"query","name":"priceMin","dataType":"double"},
+                priceMax: {"in":"query","name":"priceMax","dataType":"double"},
+                contextMin: {"in":"query","name":"contextMin","dataType":"double"},
+                search: {"in":"query","name":"search","dataType":"string"},
+                sort: {"in":"query","name":"sort","ref":"SortOption"},
+                limit: {"in":"query","name":"limit","dataType":"double"},
+                offset: {"in":"query","name":"offset","dataType":"double"},
+        };
+        app.get('/v1/public/model-registry/models',
+            ...(fetchMiddlewares<RequestHandler>(ModelRegistryController)),
+            ...(fetchMiddlewares<RequestHandler>(ModelRegistryController.prototype.getModelRegistry)),
+
+            async function ModelRegistryController_getModelRegistry(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsModelRegistryController_getModelRegistry, request, response });
+
+                const controller = new ModelRegistryController();
+
+              await templateService.apiHandler({
+                methodName: 'getModelRegistry',
                 controller,
                 response,
                 next,

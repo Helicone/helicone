@@ -4,7 +4,8 @@ import {
 } from "../controllers/public/heliconeSqlController";
 import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
 import { AuthParams } from "../packages/common/auth/types";
-import { err, ok, Result } from "../packages/common/result";
+import { ok, Result, isError } from "../packages/common/result";
+import { HqlError, HqlErrorCode, hqlError, parseClickhouseError } from "../lib/errors/HqlErrors";
 import { AST, Parser } from "node-sql-parser";
 import { HqlStore } from "../lib/stores/HqlStore";
 
@@ -21,24 +22,37 @@ interface ClickHouseTableRow {
   ttl_expression?: string;
 }
 
-function validateSql(sql: string): Result<null, string> {
-  const parser = new Parser();
+function validateSql(sql: string): Result<null, HqlError> {
+  try {
+    const tables = parser.tableList(sql, { database: "Postgresql" });
 
-  const tables = parser.tableList(sql, { database: "Postgresql" });
+    // type::DB::table
+    const invalidTable = tables.find((table) => {
+      const [type, _, tableName] = table.split("::");
+      return type !== "select" || !CLICKHOUSE_TABLES.includes(tableName);
+    });
 
-  // type::DB::table
-  const invalidTable = tables.find((table) => {
-    const [type, _, tableName] = table.split("::");
-    return type !== "select" || !CLICKHOUSE_TABLES.includes(tableName);
-  });
+    if (invalidTable) {
+      const [type, _, tableName] = invalidTable.split("::");
+      if (type !== "select") {
+        return hqlError(
+          HqlErrorCode.INVALID_STATEMENT,
+          `Found ${type.toUpperCase()} statement`
+        );
+      }
+      return hqlError(
+        HqlErrorCode.INVALID_TABLE,
+        `Table '${tableName}' is not allowed. Allowed tables: ${CLICKHOUSE_TABLES.join(', ')}`
+      );
+    }
 
-  if (invalidTable) {
-    return err(
-      "Only select statements and tables in CLICKHOUSE_TABLES are allowed"
+    return ok(null);
+  } catch (e) {
+    return hqlError(
+      HqlErrorCode.SYNTAX_ERROR,
+      String(e)
     );
   }
-
-  return ok(null);
 }
 
 function addLimit(ast: AST, limit: number): AST {
@@ -63,7 +77,7 @@ function addLimit(ast: AST, limit: number): AST {
   } else {
     // No existing limit, add one with 1000
     ast.limit = {
-      seperator: ",",
+      separator: ",",
       value: [
         {
           type: "number",
@@ -85,48 +99,51 @@ function normalizeAst(ast: AST | AST[]): AST[] {
 }
 
 export class HeliconeSqlManager {
-  private hqlStore: HqlStore;
+  private readonly hqlStore: HqlStore;
 
-  constructor(private authParams: AuthParams) {
+  constructor(private readonly authParams: AuthParams) {
     this.hqlStore = new HqlStore();
   }
 
   async getClickhouseSchema(): Promise<
-    Result<ClickHouseTableSchema[], string>
+    Result<ClickHouseTableSchema[], HqlError>
   > {
     try {
-      const schema: ClickHouseTableSchema[] = await Promise.all(
-        CLICKHOUSE_TABLES.map(async (table_name) => {
-          const columns = await clickhouseDb.dbQuery<ClickHouseTableRow>(
-            `DESCRIBE TABLE ${table_name}`,
-            []
-          );
+      const schemaPromises = CLICKHOUSE_TABLES.map(async (table_name) => {
+        const columns = await clickhouseDb.dbQuery<ClickHouseTableRow>(
+          `DESCRIBE TABLE ${table_name}`,
+          []
+        );
 
-          if (columns.error) {
-            throw new Error(columns.error);
-          }
+        if (isError(columns)) {
+          throw new Error(`Failed to describe table ${table_name}: ${columns.error}`);
+        }
 
-          return {
-            table_name,
-            columns:
-              columns.data
-                ?.map((col: ClickHouseTableRow) => ({
-                  name: col.name,
-                  type: col.type,
-                  default_type: col.default_type,
-                  default_expression: col.default_expression,
-                  comment: col.comment,
-                  codec_expression: col.codec_expression,
-                  ttl_expression: col.ttl_expression,
-                }))
-                .filter((col) => col.name !== "organization_id") ?? [],
-          };
-        })
-      );
-
+        return {
+          table_name,
+          columns:
+            columns.data
+              ?.map((col: ClickHouseTableRow) => ({
+                name: col.name,
+                type: col.type,
+                default_type: col.default_type,
+                default_expression: col.default_expression,
+                comment: col.comment,
+                codec_expression: col.codec_expression,
+                ttl_expression: col.ttl_expression,
+              }))
+              .filter((col) => col.name !== "organization_id") ?? [],
+        };
+      });
+      
+      const schema = await Promise.all(schemaPromises);
       return ok(schema);
     } catch (e) {
-      return err(String(e));
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      return hqlError(
+        HqlErrorCode.SCHEMA_FETCH_FAILED,
+        errorMessage
+      );
     }
   }
 
@@ -137,32 +154,55 @@ export class HeliconeSqlManager {
   async executeSql(
     sql: string,
     limit: number = 100
-  ): Promise<Result<ExecuteSqlResponse, string>> {
+  ): Promise<Result<ExecuteSqlResponse, HqlError>> {
     try {
-      const ast = parser.astify(sql, { database: "Postgresql" });
-      // always get first semi colon to prevent sql injection like snowflake lol
-      const normalizedAst = addLimit(normalizeAst(ast)[0], limit);
-      const firstSql = parser.sqlify(normalizedAst, { database: "Postgresql" });
+      // Parse SQL to validate and add limit
+      let ast;
+      try {
+        ast = parser.astify(sql, { database: "Postgresql" });
+      } catch (parseError) {
+        return hqlError(
+          HqlErrorCode.SYNTAX_ERROR,
+          parseError instanceof Error ? parseError.message : String(parseError)
+        );
+      }
+      
+      // Always get first statement to prevent SQL injection
+      const normalizedAst = normalizeAst(ast)[0];
+      
+      // Add limit to prevent excessive data retrieval
+      let limitedAst;
+      try {
+        limitedAst = addLimit(normalizedAst, limit);
+      } catch (limitError) {
+        return hqlError(
+          HqlErrorCode.SYNTAX_ERROR,
+          `Failed to apply limit: ${limitError instanceof Error ? limitError.message : String(limitError)}`
+        );
+      }
+      
+      const firstSql = parser.sqlify(limitedAst, { database: "Postgresql" });
 
+      // Validate SQL for security
       const validatedSql = validateSql(firstSql);
-
-      if (validatedSql.error) {
-        return err(validatedSql.error);
+      if (isError(validatedSql)) {
+        return validatedSql;
       }
 
       const start = Date.now();
 
-      // Use the new context-aware query method that passes organization ID
-      // Row-level security will automatically filter data based on organization
+      // Execute query with organization context for row-level security
       const result = await clickhouseDb.queryWithContext<ExecuteSqlResponse["rows"]>({
         query: firstSql,
         organizationId: this.authParams.organizationId,
-        parameters: [], // No additional parameters needed since org filtering is handled by row policy
+        parameters: [],
       });
 
       const elapsedMilliseconds = Date.now() - start;
-      if (result.error) {
-        return err(result.error);
+      
+      if (isError(result)) {
+        const errorCode = parseClickhouseError(result.error);
+        return hqlError(errorCode, result.error);
       }
 
       return ok({
@@ -172,29 +212,44 @@ export class HeliconeSqlManager {
         rowCount: result.data?.length ?? 0,
       });
     } catch (e) {
-      return err(String(e));
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      return hqlError(
+        HqlErrorCode.UNEXPECTED_ERROR,
+        errorMessage
+      );
     }
   }
 
-  async downloadCsv(sql: string): Promise<Result<string, string>> {
+  async downloadCsv(sql: string): Promise<Result<string, HqlError>> {
     const result = await this.executeSql(sql, MAX_LIMIT);
-    if (result.error) {
-      return err(result.error);
+    if (isError(result)) {
+      return result;
     }
 
     if (!result.data?.rows?.length) {
-      return err("No data returned from query");
+      return hqlError(HqlErrorCode.NO_DATA_RETURNED);
     }
 
-    // upload to s3
+    // Generate filename with timestamp
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filename = `hql-export-${timestamp}.csv`;
+    
+    // Upload to S3
     const uploadResult = await this.hqlStore.uploadCsv(
-      `${Date.now()}.csv`,
+      filename,
       this.authParams.organizationId,
       result.data.rows
     );
 
-    if (uploadResult.error || !uploadResult.data) {
-      return err(uploadResult.error ?? "Failed to upload csv");
+    if (isError(uploadResult)) {
+      return hqlError(
+        HqlErrorCode.CSV_UPLOAD_FAILED,
+        uploadResult.error
+      );
+    }
+
+    if (!uploadResult.data) {
+      return hqlError(HqlErrorCode.CSV_URL_NOT_RETURNED);
     }
 
     return ok(uploadResult.data);

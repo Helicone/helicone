@@ -4,7 +4,7 @@ import Stripe from "stripe";
 import { KVCache } from "../../lib/cache/kvCache";
 import pLimit from "p-limit";
 import { ok, err, Result } from "../../packages/common/result";
-import { ModelWithProvider } from "@helicone-package/cost";
+import { SecretManager } from "@helicone-package/secrets/SecretManager";
 
 const adminKVCache = new KVCache(24 * 60 * 60 * 1000); // 1 day in milliseconds
 
@@ -22,9 +22,12 @@ export class AdminManager extends BaseManager {
 
   constructor(authParams: AuthParams) {
     super(authParams);
-    this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-      apiVersion: "2025-02-24.acacia",
-    });
+    this.stripe = new Stripe(
+      SecretManager.getSecret("STRIPE_SECRET_KEY") || "",
+      {
+        apiVersion: "2025-02-24.acacia",
+      }
+    );
   }
 
   /**

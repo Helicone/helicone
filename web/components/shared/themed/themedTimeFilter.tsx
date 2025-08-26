@@ -13,6 +13,9 @@ interface ThemedTimeFilterProps {
   defaultValue: string;
   currentTimeFilter: TimeFilter;
   custom?: boolean;
+  isLive?: boolean;
+  hasCustomTimeFilter?: boolean;
+  onClearTimeFilter?: () => void;
 }
 
 function formatDateToInputString(date: Date): string {
@@ -36,6 +39,9 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
     isFetching,
     currentTimeFilter,
     custom = false,
+    isLive = false,
+    hasCustomTimeFilter = false,
+    onClearTimeFilter,
   } = props;
   const searchParams = useSearchParams();
   const [active, setActive] = useState<string>(defaultValue);
@@ -103,6 +109,9 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
             from: currentTimeFilter?.start,
             to: currentTimeFilter?.end,
           }}
+          isLive={isLive}
+          hasCustomTimeFilter={hasCustomTimeFilter}
+          onClearTimeFilter={onClearTimeFilter}
         />
       )}
 

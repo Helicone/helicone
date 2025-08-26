@@ -9,7 +9,7 @@ export const models = {
     contextLength: 1048576,
     maxOutputTokens: 65535,
     created: "2025-07-22T09:04:36",
-    modality: "text+image->text",
+    modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "Gemini",
   },
   "gemini-2.5-flash-lite-preview": {
@@ -20,7 +20,7 @@ export const models = {
     contextLength: 1048576,
     maxOutputTokens: 65535,
     created: "2025-06-17T08:23:51",
-    modality: "text+image->text",
+    modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "Gemini",
   },
   "gemini-2.5-flash": {
@@ -31,7 +31,7 @@ export const models = {
     contextLength: 1048576,
     maxOutputTokens: 65535,
     created: "2025-06-17T08:01:28",
-    modality: "text+image->text",
+    modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "Gemini",
   },
   "gemini-2.5-pro": {
@@ -42,7 +42,7 @@ export const models = {
     contextLength: 1048576,
     maxOutputTokens: 65536,
     created: "2025-06-17T07:12:24",
-    modality: "text+image->text",
+    modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "Gemini",
   },
   "gemini-2.5-pro-preview": {
@@ -53,7 +53,7 @@ export const models = {
     contextLength: 1048576,
     maxOutputTokens: 65536,
     created: "2025-06-05T08:27:37",
-    modality: "text+image->text",
+    modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "Gemini",
   },
   "gemini-2.5-pro-exp": {
@@ -64,7 +64,7 @@ export const models = {
     contextLength: 1048576,
     maxOutputTokens: 65535,
     created: "2025-03-25T10:01:39",
-    modality: "text+image->text",
+    modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "Gemini",
   },
 } satisfies Record<string, ModelConfig>;
