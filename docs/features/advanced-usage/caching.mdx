@@ -8,24 +8,52 @@ import QuestionsSection from "/snippets/questions-section.mdx";
 
 When developing and testing LLM applications, you often make the same requests repeatedly during debugging and iteration. Caching stores responses on the edge using Cloudflare Workers, eliminating redundant API calls and reducing both latency and costs.
 
-## Why use Caching
+With the AI Gateway, caching works seamlessly across all providers - cache a Claude response and save on Anthropic API calls, or cache GPT-4 responses while testing different models.
 
-- **Save money during development**: Avoid repeated charges for identical requests while testing and debugging
-- **Reduce response latency**: Serve cached responses instantly instead of waiting for LLM providers
-- **Handle traffic spikes**: Protect against rate limits and maintain performance during high usage
+## Why Caching
 
-<Frame caption="Dashboard view of cache hits, cost and time saved">
-  <img
-    src="/images/example-cache.png"
-    alt="Helicone Dashboard showing the number of cache hits, cost, and time saved."
-  />
-</Frame>
+<CardGroup cols={3}>
+<Card title="Save Money" icon="dollar-sign">
+  Avoid repeated charges for identical requests while testing and debugging
+</Card>
+<Card title="Instant Responses" icon="bolt">
+  Serve cached responses immediately instead of waiting for LLM providers
+</Card>
+<Card title="Handle Traffic Spikes" icon="chart-line">
+  Protect against rate limits and maintain performance during high usage
+</Card>
+</CardGroup>
 
-<iframe
-  width="100%"
-  height="420"
-  src="https://www.youtube.com/embed/qIOq_NbeQ28?autoplay=1&mute=1"
-></iframe>
+## How It Works
+
+Helicone's caching system stores LLM responses on Cloudflare's edge network, providing globally distributed, low-latency access to cached data.
+
+### Cache Key Generation
+Helicone generates unique cache keys by hashing:
+- **Request URL** - The full endpoint URL
+- **Request body** - Complete request payload including all parameters
+- **Cache seed** - Optional namespace identifier
+- **Relevant headers** - Authorization and cache-specific headers
+
+Any change in these components creates a new cache entry:
+
+```typescript
+// ✅ Cache hit - identical requests
+const request1 = { model: "gpt-4o-mini", messages: [{ role: "user", content: "Hello" }] };
+const request2 = { model: "gpt-4o-mini", messages: [{ role: "user", content: "Hello" }] };
+
+// ❌ Cache miss - different content  
+const request3 = { model: "gpt-4o-mini", messages: [{ role: "user", content: "Hi" }] };
+
+// ❌ Cache miss - different parameters
+const request4 = { model: "gpt-4o-mini", messages: [{ role: "user", content: "Hello" }], temperature: 0.5 };
+```
+
+### Cache Storage
+- Responses are stored in Cloudflare Workers KV (key-value store)
+- Distributed across 300+ global edge locations
+- Automatic replication and failover
+- No impact on your infrastructure
 
 ## Quick Start
 
@@ -44,7 +72,14 @@ Add the `Helicone-Cache-Enabled` header to your requests:
 Execute your LLM request - the first call will be cached:
 
 ```typescript
-const response = await openai.chat.completions.create(
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY,
+});
+
+const response = await client.chat.completions.create(
   {
     model: "gpt-4o-mini",
     messages: [{ role: "user", content: "Hello world" }]
@@ -63,7 +98,7 @@ Make the same request again - it should return instantly from cache:
 
 ```typescript
 // This exact same request will return a cached response
-const cachedResponse = await openai.chat.completions.create(
+const cachedResponse = await client.chat.completions.create(
   {
     model: "gpt-4o-mini", 
     messages: [{ role: "user", content: "Hello world" }]
@@ -78,27 +113,180 @@ const cachedResponse = await openai.chat.completions.create(
 </Step>
 </Steps>
 
-## Configuration Options
+## Configuration
 
-### Basic Settings
+<ParamField header="Helicone-Cache-Enabled" type="string" required>
+  Enable or disable caching for the request.
+  
+  Example: `"true"` to enable caching
+</ParamField>
 
-Control caching behavior with these headers:
+<ParamField header="Cache-Control" type="string">
+  Set cache duration using standard HTTP cache control directives.
+  
+  Default: `"max-age=604800"` (7 days)
+  
+  Example: `"max-age=3600"` for 1 hour cache
+</ParamField>
 
-| Header | Type | Description | Default | Example |
-|--------|------|-------------|---------|---------|
-| `Helicone-Cache-Enabled` | `string` | Enable or disable caching | N/A | `"true"` |
-| `Cache-Control` | `string` | Set cache duration using max-age | `"max-age=604800"` (7 days) | `"max-age=3600"` (1 hour) |
+<ParamField header="Helicone-Cache-Bucket-Max-Size" type="string">
+  Number of different responses to store for the same request. Useful for non-deterministic prompts.
+  
+  Default: `"1"` (single response cached)
+  
+  Example: `"3"` to cache up to 3 different responses
+</ParamField>
 
-### Advanced Settings
-
-| Header | Type | Description | Default | Example |
-|--------|------|-------------|---------|---------|
-| `Helicone-Cache-Bucket-Max-Size` | `string` | Number of responses to store per cache bucket | `"1"` | `"3"` |
-| `Helicone-Cache-Seed` | `string` | Create separate cache namespaces | N/A | `"user-123"` |
+<ParamField header="Helicone-Cache-Seed" type="string">
+  Create separate cache namespaces for different users or contexts.
+  
+  Example: `"user-123"` to maintain user-specific cache
+</ParamField>
 
 <Info>
 All header values must be strings. For example, `"Helicone-Cache-Bucket-Max-Size": "10"`.
 </Info>
+
+## Examples
+
+<Tabs>
+<Tab title="Development Testing">
+Avoid repeated charges while debugging and iterating on prompts:
+
+<CodeGroup>
+```typescript Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY,
+  defaultHeaders: {
+    "Helicone-Cache-Enabled": "true",
+    "Cache-Control": "max-age=86400" // Cache for 1 day during development
+  },
+});
+
+// This request will be cached - works with any model
+const response = await client.chat.completions.create({
+  model: "gpt-4o-mini",  // or "claude-3.5-sonnet", "gemini-2.5-flash", etc.
+  messages: [{ role: "user", content: "Explain quantum computing" }]
+});
+
+// Subsequent identical requests return cached response instantly
+```
+
+```python Python
+import os
+import openai
+
+client = openai.OpenAI(
+    base_url="https://ai-gateway.helicone.ai",
+    api_key=os.environ.get("HELICONE_API_KEY"),
+    default_headers={
+        "Helicone-Cache-Enabled": "true",
+        "Cache-Control": "max-age=86400"  # Cache for 1 day
+    }
+)
+
+# Works with any model through the gateway
+response = client.chat.completions.create(
+    model="gpt-4o-mini",  # or "claude-3.5-sonnet", "gemini-2.5-flash", etc.
+    messages=[{"role": "user", "content": "Explain quantum computing"}]
+)
+```
+</CodeGroup>
+</Tab>
+
+<Tab title="Code Explanation Bot">
+Cache explanations for commonly asked code snippets across your team:
+
+```typescript
+// Use a consistent identifier for the code snippet
+const codeIdentifier = `code-${codeSnippet.length}-${codeSnippet.slice(0, 20)}`;
+
+const response = await client.chat.completions.create(
+  {
+    model: "claude-3.5-sonnet",  // Use any model through the gateway
+    messages: [{ 
+      role: "user", 
+      content: `Explain this code:\n\n${codeSnippet}` 
+    }]
+  },
+  {
+    headers: {
+      "Helicone-Cache-Enabled": "true",
+      "Helicone-Cache-Seed": codeIdentifier,    // Same code = same cache
+      "Cache-Control": "max-age=604800"         // Cache for 1 week
+    }
+  }
+);
+
+// Multiple developers asking about the same function get instant responses
+```
+</Tab>
+
+<Tab title="Documentation Q&A">
+Cache answers to frequently asked questions about your API or product:
+
+```typescript
+const response = await client.chat.completions.create(
+  {
+    model: "gemini-2.5-flash",  // Use fast, cost-effective models
+    messages: [{ 
+      role: "user", 
+      content: "How do I authenticate with the API?" 
+    }]
+  },
+  {
+    headers: {
+      "Helicone-Cache-Enabled": "true",
+      "Cache-Control": "max-age=86400",          // Cache for 24 hours
+      "Helicone-Cache-Bucket-Max-Size": "1"     // Consistent answers
+    }
+  }
+);
+
+// Common documentation questions get instant, consistent responses
+// Perfect for chatbots, help widgets, and FAQ systems
+```
+</Tab>
+</Tabs>
+
+<Frame caption="Dashboard view of cache hits, cost and time saved">
+  <img
+    src="/images/example-cache.png"
+    alt="Helicone Dashboard showing the number of cache hits, cost, and time saved."
+  />
+</Frame>
+
+## Cache Response Headers
+
+Check cache status by examining response headers:
+
+```typescript
+const response = await client.chat.completions.create(
+  { /* your request */ },
+  { 
+    headers: { "Helicone-Cache-Enabled": "true" }
+  }
+);
+
+// Access raw response to check headers
+const chatCompletion = await client.chat.completions.with_raw_response.create(
+  { /* your request */ },
+  { 
+    headers: { "Helicone-Cache-Enabled": "true" }
+  }
+);
+
+const cacheStatus = chatCompletion.http_response.headers.get('Helicone-Cache');
+console.log(cacheStatus); // "HIT" or "MISS"
+
+const bucketIndex = chatCompletion.http_response.headers.get('Helicone-Cache-Bucket-Idx');
+console.log(bucketIndex); // Index of cached response used
+```
+
+## Advanced Concepts
 
 <AccordionGroup>
 <Accordion title="Cache Duration">
@@ -119,7 +307,7 @@ Set how long responses stay cached using the `Cache-Control` header:
 <Note>Maximum cache duration is 365 days (`max-age=31536000`)</Note>
 </Accordion>
 
-<Accordion title="Bucket Size">
+<Accordion title="Cache Buckets">
 Control how many different responses are stored for the same request:
 
 ```typescript
@@ -137,6 +325,11 @@ openai.completion("give me a random number") -> "17"  # Cache Miss
 
 openai.completion("give me a random number") -> "42" | "47" | "17"  # Cache Hit
 ```
+
+**Behavior by bucket size:**
+- **Size 1 (default)**: Same request always returns same cached response (deterministic)
+- **Size > 1**: Same request can return different cached responses (useful for creative prompts)
+- Response chosen randomly from bucket
 
 <Note>Maximum bucket size is 20. Enterprise plans support larger buckets.</Note>
 </Accordion>
@@ -164,179 +357,14 @@ openai.completion("random number") -> "17"  # Consistent per seed
 
 <Tip>Change the seed value to effectively clear your cache for testing.</Tip>
 </Accordion>
-</AccordionGroup>
 
-## Use Cases
-
-<Tabs>
-<Tab title="Development Testing">
-Avoid repeated charges while debugging and iterating on prompts:
-
-<CodeGroup>
-```typescript Node.js
-import OpenAI from "openai";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  baseURL: "https://oai.helicone.ai/v1",
-  defaultHeaders: {
-    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-    "Helicone-Cache-Enabled": "true",
-    "Cache-Control": "max-age=86400" // Cache for 1 day during development
-  },
-});
-
-// This request will be cached
-const response = await openai.chat.completions.create({
-  model: "gpt-4o-mini",
-  messages: [{ role: "user", content: "Explain quantum computing" }]
-});
-
-// Subsequent identical requests return cached response instantly
-```
-
-```python Python
-import openai
-
-client = openai.OpenAI(
-    api_key=os.environ.get("OPENAI_API_KEY"),
-    base_url="https://oai.helicone.ai/v1",
-    default_headers={
-        "Helicone-Auth": f"Bearer {os.environ.get('HELICONE_API_KEY')}",
-        "Helicone-Cache-Enabled": "true",
-        "Cache-Control": "max-age=86400"  # Cache for 1 day
-    }
-)
-
-response = client.chat.completions.create(
-    model="gpt-4o-mini",
-    messages=[{"role": "user", "content": "Explain quantum computing"}]
-)
-```
-</CodeGroup>
-</Tab>
-
-<Tab title="Code Explanation Bot">
-Cache explanations for commonly asked code snippets across your team:
-
-```typescript
-// Use a consistent identifier for the code snippet
-const codeIdentifier = `code-${codeSnippet.length}-${codeSnippet.slice(0, 20)}`;
-
-const response = await openai.chat.completions.create(
-  {
-    model: "gpt-4o-mini",
-    messages: [{ 
-      role: "user", 
-      content: `Explain this code:\n\n${codeSnippet}` 
-    }]
-  },
-  {
-    headers: {
-      "Helicone-Cache-Enabled": "true",
-      "Helicone-Cache-Seed": codeIdentifier,    // Same code = same cache
-      "Cache-Control": "max-age=604800"         // Cache for 1 week
-    }
-  }
-);
-
-// Multiple developers asking about the same function get instant responses
-```
-</Tab>
-
-<Tab title="Documentation Q&A">
-Cache answers to frequently asked questions about your API or product:
-
-```typescript
-const response = await openai.chat.completions.create(
-  {
-    model: "gpt-4o-mini",
-    messages: [{ 
-      role: "user", 
-      content: "How do I authenticate with the API?" 
-    }]
-  },
-  {
-    headers: {
-      "Helicone-Cache-Enabled": "true",
-      "Cache-Control": "max-age=86400",          // Cache for 24 hours
-      "Helicone-Cache-Bucket-Max-Size": "1"     // Consistent answers
-    }
-  }
-);
-
-// Common documentation questions get instant, consistent responses
-// Perfect for chatbots, help widgets, and FAQ systems
-```
-</Tab>
-</Tabs>
-
-## Understanding Caching
-
-### How Cache Keys Work
-Helicone generates cache keys by hashing:
-- **Cache seed**: If specified (for namespacing)
-- **Request URL**: The full endpoint URL
-- **Request body**: Complete request payload including all parameters
-- **Relevant headers**: Authorization and Helicone-specific cache headers
-- **Bucket index**: For multi-response caching
-
-**What triggers cache hits:**
-```typescript
-// ✅ Cache hit - identical requests
-const request1 = { model: "gpt-4o-mini", messages: [{ role: "user", content: "Hello" }] };
-const request2 = { model: "gpt-4o-mini", messages: [{ role: "user", content: "Hello" }] };
-
-// ❌ Cache miss - different content  
-const request3 = { model: "gpt-4o-mini", messages: [{ role: "user", content: "Hi" }] };
-
-// ❌ Cache miss - different parameters
-const request4 = { model: "gpt-4o-mini", messages: [{ role: "user", content: "Hello" }], temperature: 0.5 };
-```
-
-### Cache Response Headers
-Check cache status in response headers:
-
-```typescript
-const response = await openai.chat.completions.create(
-  { /* your request */ },
-  { 
-    headers: { "Helicone-Cache-Enabled": "true" }
-  }
-);
-
-// Access raw response to check headers
-const chatCompletion = await client.chat.completions.with_raw_response.create(
-  { /* your request */ },
-  { 
-    headers: { "Helicone-Cache-Enabled": "true" }
-  }
-);
-
-const cacheStatus = chatCompletion.http_response.headers.get('Helicone-Cache');
-console.log(cacheStatus); // "HIT" or "MISS"
-
-const bucketIndex = chatCompletion.http_response.headers.get('Helicone-Cache-Bucket-Idx');
-console.log(bucketIndex); // Index of cached response used
-```
-
-### Cache Bucket Behavior
-Cache buckets store multiple responses for the same request:
-
-**Bucket Size 1 (default):**
-- Same request always returns same cached response
-- Deterministic behavior
-
-**Bucket Size > 1:**
-- Same request can return different cached responses
-- Useful for creative prompts where variety is desired
-- Response chosen randomly from bucket
-
-### Cache Limitations
+<Accordion title="Cache Limitations">
 - **Maximum duration**: 365 days
 - **Maximum bucket size**: 20 (enterprise plans support more)
 - **Cache key sensitivity**: Any parameter change creates new cache entry
 - **Storage location**: Cached in Cloudflare Workers KV (edge-distributed), not your infrastructure
+</Accordion>
+</AccordionGroup>
 
 ## Related Features
 
