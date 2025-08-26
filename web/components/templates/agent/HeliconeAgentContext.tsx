@@ -12,6 +12,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 
 type Tool = NonNullable<OpenAIChatRequest["tools"]>[0];
 type Message = NonNullable<OpenAIChatRequest["messages"]>[0];
+type ToolCall = NonNullable<Message["tool_calls"]>[0];
 
 type ToolCallResult = {
   success: boolean;
@@ -20,6 +21,14 @@ type ToolCallResult = {
 
 interface HeliconeAgentTool extends Tool {
   handler?: (args: any) => Promise<ToolCallResult> | ToolCallResult;
+}
+
+export interface AgentExecutionState {
+  isProcessing: boolean;
+  pendingToolCalls: ToolCall[];
+  currentAssistantMessage?: Message;
+  needsAssistantResponse: boolean;
+  error?: string;
 }
 
 export interface ChatSession {
@@ -43,7 +52,7 @@ interface HeliconeAgentContextType {
   currentSession: ChatSession | undefined;
   currentSessionId: string | null;
   messages: Message[];
-  createNewSession: () => void;
+  createNewSession: (startingMessages?: Message[]) => void;
   updateCurrentSessionMessages: (
     messages: Message[],
     saveToDB: boolean,
@@ -53,6 +62,9 @@ interface HeliconeAgentContextType {
   escalateSession: () => void;
   agentChatOpen: boolean;
   setAgentChatOpen: (open: boolean) => void;
+
+  agentState: AgentExecutionState;
+  setAgentState: React.Dispatch<React.SetStateAction<AgentExecutionState>>;
 }
 
 const HeliconeAgentContext = createContext<
@@ -214,6 +226,12 @@ export const HeliconeAgentProvider: React.FC<{
         "Hello! I'm Helix, your Helicone assistant. How can I help you today?",
     },
   ]);
+
+  const [agentState, setAgentState] = useState<AgentExecutionState>({
+    isProcessing: false,
+    pendingToolCalls: [],
+    needsAssistantResponse: false,
+  });
   useEffect(() => {
     if ((thread?.data?.chat as any)?.messages) {
       setMessages((thread?.data?.chat as any)?.messages);
@@ -280,13 +298,14 @@ export const HeliconeAgentProvider: React.FC<{
             },
           });
         },
-        createNewSession: () => {
+        createNewSession: (startingMessages?: Message[]) => {
           const newSessionId = crypto.randomUUID();
           const newChatMessages = [
             {
               role: "assistant",
               content: "Hello, how can I help you today?",
             },
+            ...(startingMessages ?? []),
           ];
           upsertThreadMessage({
             params: {
@@ -334,6 +353,8 @@ export const HeliconeAgentProvider: React.FC<{
             },
           });
         },
+        agentState,
+        setAgentState,
       }}
     >
       {children}

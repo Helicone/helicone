@@ -24,6 +24,7 @@ import {
   Copy,
   Loader,
   Check,
+  Bot,
 } from "lucide-react";
 import Link from "next/link";
 import { useKeys } from "@/components/templates/keys/useKeys";
@@ -37,6 +38,8 @@ import {
   DialogDescription,
 } from "../../ui/dialog";
 import { ProviderKeySettings } from "../settings/providerKeySettings";
+import HelixIntegrationDialog from "./HelixIntegrationDialog";
+import { useHeliconeAgent } from "../agent/HeliconeAgentContext";
 
 const QuickstartPage = () => {
   const router = useRouter();
@@ -49,10 +52,14 @@ const QuickstartPage = () => {
   );
   const [isCreatingKey, setIsCreatingKey] = useState(false);
   const [isProviderModalOpen, setIsProviderModalOpen] = useState(false);
+  const [isHelixDialogOpen, setIsHelixDialogOpen] = useState(false);
 
   const { hasKeys, hasProviderKeys, updateOnboardingStatus } = useOrgOnboarding(
     org?.currentOrg?.id ?? "",
   );
+
+  const { createNewSession, setAgentChatOpen, setAgentState } =
+    useHeliconeAgent();
 
   useEffect(() => {
     if (org?.currentOrg?.onboarding_status) {
@@ -85,6 +92,23 @@ const QuickstartPage = () => {
     } finally {
       setIsCreatingKey(false);
     }
+  };
+
+  const handleHelixSubmit = (message: string) => {
+    const startingMessage = {
+      role: "user" as const,
+      content: message,
+    };
+    createNewSession([startingMessage]);
+    setAgentChatOpen(true);
+
+    setTimeout(() => {
+      setAgentState((prev) => ({
+        ...prev,
+        needsAssistantResponse: true,
+        isProcessing: true,
+      }));
+    }, 100);
   };
 
   const steps = [
@@ -180,25 +204,36 @@ const QuickstartPage = () => {
                 <div className="mt-1">
                   <IntegrationGuide apiKey={quickstartKey} />
 
-                  <div
-                    className={`mx-4 my-2 rounded-sm border border-border p-3 ${org?.currentOrg?.has_integrated ? "bg-confirmative/10" : "bg-muted/30"}`}
-                  >
-                    <div className="flex items-center gap-2">
-                      {org?.currentOrg?.has_integrated ? (
-                        <Check size={16} className="text-confirmative" />
-                      ) : (
-                        <Loader
-                          size={16}
-                          className="animate-spin text-muted-foreground"
-                        />
-                      )}
-                      <span
-                        className={`text-sm ${org?.currentOrg?.has_integrated ? "text-confirmative" : "text-muted-foreground"}`}
-                      >
-                        {org?.currentOrg?.has_integrated
-                          ? "Requests detected!"
-                          : "Listening for requests..."}
-                      </span>
+                  <div className="mx-4 mb-2 flex flex-col gap-2">
+                    <Button
+                      onClick={() => setIsHelixDialogOpen(true)}
+                      variant="outline"
+                      className="flex w-full items-center justify-center gap-2"
+                    >
+                      <Bot size={16} />
+                      Integrate with Helix
+                    </Button>
+
+                    <div
+                      className={`rounded-sm border border-border p-3 ${org?.currentOrg?.has_integrated ? "bg-confirmative/10" : "bg-muted/30"}`}
+                    >
+                      <div className="flex items-center gap-2">
+                        {org?.currentOrg?.has_integrated ? (
+                          <Check size={16} className="text-confirmative" />
+                        ) : (
+                          <Loader
+                            size={16}
+                            className="animate-spin text-muted-foreground"
+                          />
+                        )}
+                        <span
+                          className={`text-sm ${org?.currentOrg?.has_integrated ? "text-confirmative" : "text-muted-foreground"}`}
+                        >
+                          {org?.currentOrg?.has_integrated
+                            ? "Requests detected!"
+                            : "Listening for requests..."}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
@@ -295,6 +330,12 @@ const QuickstartPage = () => {
           <ProviderKeySettings />
         </DialogContent>
       </Dialog>
+
+      <HelixIntegrationDialog
+        isOpen={isHelixDialogOpen}
+        onClose={() => setIsHelixDialogOpen(false)}
+        onSubmit={handleHelixSubmit}
+      />
     </div>
   );
 };

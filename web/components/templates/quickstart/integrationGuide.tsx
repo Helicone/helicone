@@ -12,7 +12,7 @@ const IntegrationGuide = ({ apiKey }: IntegrationGuideProps) => {
       className="w-full rounded-lg bg-background"
       onClick={(e) => e.stopPropagation()}
     >
-      <div className="flex flex-col gap-4 p-4">
+      <div className="flex flex-col gap-4 px-4 py-2">
         <IntegrationCodeTabs apiKey={apiKey} />
 
         <div className="flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50/50 px-3 py-2 dark:border-blue-800 dark:bg-blue-950/20">

@@ -38,18 +38,26 @@ const MessageRenderer = ({ message }: MessageRendererProps) => {
     return (
       <>
         <div className="w-full">
-          {/* <div className="w-full rounded-lg border border-blue-100 bg-sidebar-background px-2.5 py-1 text-foreground "> */}
           <div className="w-full rounded-lg border border-blue-200 bg-blue-100 px-2.5 py-1 text-foreground dark:border-blue-950 dark:bg-blue-900/20">
             {typeof message.content === "string" ? (
-              <span className="text-[13px]">{message.content}</span>
+              <ReactMarkdown
+                components={markdownComponents}
+                className={markdownStyling}
+              >
+                {message.content}
+              </ReactMarkdown>
             ) : Array.isArray(message.content) ? (
               <div className="space-y-2">
                 {message.content
                   .filter((item: any) => item.type === "text")
                   .map((item: any, index: number) => (
-                    <span key={index} className="text-[13px]">
+                    <ReactMarkdown
+                      key={index}
+                      components={markdownComponents}
+                      className={markdownStyling}
+                    >
                       {item.text}
-                    </span>
+                    </ReactMarkdown>
                   ))}
               </div>
             ) : null}
