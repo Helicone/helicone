@@ -34,50 +34,7 @@
                   "features/advanced-usage/custom-rate-limits",
                   "features/advanced-usage/llm-security",
                   "features/advanced-usage/moderations",
-                  "features/advanced-usage/retries",
-                  "features/advanced-usage/vault"
-                ]
-              }
-            ]
-          },
-          {
-            "group": "Self-Hosted Router",
-            "pages": [
-              "ai-gateway/introduction",
-              "ai-gateway/cloud-quickstart",
-              "ai-gateway/self-hosted-quickstart",
-              "ai-gateway/config",
-              {
-                "group": "Concepts",
-                "pages": [
-                  "ai-gateway/concepts/routers",
-                  "ai-gateway/concepts/providers",
-                  "ai-gateway/concepts/model-mapping",
-                  "ai-gateway/concepts/loadbalancing",
-                  "ai-gateway/concepts/retries",
-                  "ai-gateway/concepts/rate-limiting",
-                  "ai-gateway/concepts/cache",
-                  "ai-gateway/concepts/secret-management"
-                ]
-              },
-              {
-                "group": "Self-Hosted Deployment",
-                "pages": [
-                  "ai-gateway/self-hosted/deployment/overview",
-                  "ai-gateway/self-hosted/deployment/docker",
-                  "ai-gateway/self-hosted/deployment/k8s",
-                  "ai-gateway/self-hosted/deployment/fly",
-                  "ai-gateway/self-hosted/deployment/porter",
-                  "ai-gateway/self-hosted/deployment/ecs"
-                ]
-              },
-              {
-                "group": "Advanced",
-                "pages": [
-                  "ai-gateway/self-hosted/authentication",
-                  "ai-gateway/self-hosted/observability",
-                  "ai-gateway/self-hosted/router-quickstart",
-                  "ai-gateway/self-hosted/debugging/telemetry"
+                  "features/advanced-usage/retries"
                 ]
               }
             ]
@@ -85,11 +42,12 @@
           {
             "group": "Observability & Analytics",
             "pages": [
-              "observability/request-monitoring",
-              "observability/cost-tracking",
-              "observability/performance-analytics",
-              "observability/user-metrics",
-              "features/sessions"
+              "features/advanced-usage/custom-properties",
+              "features/sessions",
+              "features/advanced-usage/user-metrics",
+              "guides/cookbooks/cost-tracking",
+              "features/datasets",
+              "features/alerts"
             ]
           },
           {

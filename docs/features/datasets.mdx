@@ -31,22 +31,36 @@ The easiest way to create datasets is by selecting requests from your logs:
 
 <Steps>
 <Step title="Filter your requests">
-  Use [custom properties](/features/advanced-usage/custom-properties) and filters to find the requests you want
+  Use [custom properties](/observability/custom-properties) and filters to find the requests you want
   
-  ```
-  # Example filters
-  status:success AND model:gpt-4o
-  user_rating:positive
-  feature:chat-completion
-  ```
+  <Frame>
+    <img 
+      src="/images/datasets/filters.webp" 
+      alt="Filtering requests with custom properties and search criteria"
+    />
+  </Frame>
 </Step>
 
 <Step title="Select requests">
   Check the boxes next to requests you want to include in your dataset
+  
+  <Frame>
+    <img 
+      src="/images/datasets/datasets-select.webp" 
+      alt="Selecting multiple requests to add to dataset"
+    />
+  </Frame>
 </Step>
 
 <Step title="Add to dataset">
   Click "Add to Dataset" and choose to create a new dataset or add to an existing one
+  
+  <Frame>
+    <img 
+      src="/images/datasets/dataset-add.webp" 
+      alt="Adding selected requests to a dataset"
+    />
+  </Frame>
 </Step>
 </Steps>
 
@@ -79,32 +93,80 @@ await fetch(`https://api.helicone.ai/v1/helicone-dataset/${dataset.id}/request/$
 });
 ```
 
-## Managing Datasets
+## Building Quality Datasets
 
-### Datasets Tab
+### The Curation Process
 
-Access your datasets at [helicone.ai/datasets](https://us.helicone.ai/datasets) to:
+Transform raw requests into high-quality training data through careful curation:
 
-- **View all datasets** - See your collection of curated datasets
-- **Browse contents** - Examine requests and responses in each dataset  
-- **Edit metadata** - Update names, descriptions, and tags
-- **Remove items** - Clean up datasets by removing irrelevant requests
-- **Monitor size** - Track how many examples you've collected
+<Steps>
+<Step title="Collect broadly, then filter">
+Start by adding many potential examples, then narrow down to the best ones. It's easier to remove than to find examples later.
+</Step>
 
-### Dataset Organization
+<Step title="Review each example">
+<Frame>
+  <img 
+    src="/images/datasets/datasets-edit.webp" 
+    alt="Dataset curation interface showing request details for review"
+  />
+</Frame>
 
-Keep your datasets organized with:
+Examine each request/response pair for:
+- **Accuracy** - Is the response correct and helpful?
+- **Consistency** - Does it match the style and format you want?
+- **Completeness** - Does it fully address the user's request?
+</Step>
 
-- **Descriptive names** - "GPT-4 Customer Support" vs "Dataset 1"
-- **Clear descriptions** - Document the purpose and criteria  
-- **Consistent filtering** - Use the same custom properties for related datasets
-- **Regular curation** - Remove low-quality examples over time
+<Step title="Remove poor examples">
+Delete any examples that are:
+- Incorrect or misleading responses
+- Off-topic or irrelevant
+- Inconsistent with your desired behavior
+- Edge cases that might confuse the model
+</Step>
+
+<Step title="Balance your dataset">
+Ensure you have:
+- Examples covering all common use cases
+- Both simple and complex queries
+- Appropriate distribution matching real usage
+</Step>
+</Steps>
+
+<Note>
+**Quality beats quantity** - 50-100 carefully curated examples often outperform thousands of uncurated ones. Focus on consistency and correctness over volume.
+</Note>
+
+### Dataset Dashboard
+
+Access all your datasets at [helicone.ai/datasets](https://us.helicone.ai/datasets):
+
+<Frame caption="Manage all your curated datasets in one place">
+  <img 
+    src="/images/datasets/datasets-dashboard.webp" 
+    alt="Helicone datasets dashboard with list of datasets and their metadata"
+  />
+</Frame>
+
+From the dashboard you can:
+- **Track progress** - Monitor dataset size and last updated time
+- **Access datasets** - Click to view and curate contents
+- **Export data** - Download datasets when ready for fine-tuning
+- **Maintain quality** - Regularly review and improve your collections
 
 ## Exporting Data
 
 ### Export Formats
 
 Download your datasets in various formats:
+
+<Frame caption="Export options for downloading your dataset">
+  <img 
+    src="/images/datasets/datasets-export.webp" 
+    alt="Dataset export dialog showing different format options"
+  />
+</Frame>
 
 <Tabs>
 <Tab title="Fine-Tuning (JSONL)">
@@ -114,29 +176,20 @@ Download your datasets in various formats:
   {"messages": [{"role": "user", "content": "Hello"}, {"role": "assistant", "content": "Hi there!"}]}
   {"messages": [{"role": "user", "content": "Help me"}, {"role": "assistant", "content": "I'd be happy to help!"}]}
   ```
+  
+  Ready to use directly with OpenAI's fine-tuning API.
 </Tab>
 
 <Tab title="Analysis (CSV)">
-  Structured format for data analysis:
+  Structured format for spreadsheet analysis:
   
   ```csv
   request_id,created_at,model,prompt_tokens,completion_tokens,cost,user_message,assistant_response
   req_123,2024-01-15,gpt-4o,50,100,0.002,"Hello","Hi there!"
+  req_124,2024-01-15,gpt-4o,45,95,0.0019,"Help me","I'd be happy to help!"
   ```
-</Tab>
-
-<Tab title="Raw (JSON)">
-  Complete request/response data:
   
-  ```json
-  {
-    "id": "req_123",
-    "model": "gpt-4o",
-    "messages": [...],
-    "response": {...},
-    "metadata": {...}
-  }
-  ```
+  Import into Excel, Google Sheets, or data analysis tools.
 </Tab>
 </Tabs>
 
@@ -163,49 +216,71 @@ const data = await response.json();
 
 ## Use Cases
 
-### Fine-Tuning Workflow
+### Replace Expensive Models with Fine-Tuned Alternatives
+
+The most common use case - using your expensive model logs to train cheaper, faster models:
 
 <Steps>
-<Step title="Collect examples">
-  Filter for successful requests with high user ratings or specific custom properties
+<Step title="Log high-quality outputs">
+  Start logging successful requests from o1, Claude 3.5 Sonnet, Gemini 1.5 Pro, or other premium models that represent your ideal outputs
 </Step>
 
-<Step title="Curate quality">
-  Review examples in the dataset tab and remove any that don't meet your standards
+<Step title="Build task-specific datasets">
+  Create separate datasets for different tasks (e.g., "customer support", "code generation", "data extraction")
 </Step>
 
-<Step title="Export for training">
-  Download in JSONL format compatible with OpenAI fine-tuning
+<Step title="Curate for consistency">
+  Review examples to ensure responses follow the same format, style, and quality standards
 </Step>
 
-<Step title="Train and iterate">
-  Use the dataset to fine-tune your model, then collect more examples from the improved model
+<Step title="Fine-tune smaller models">
+  Export JSONL and fine-tune GPT-4o-mini, Llama 3.1 8B, Gemini 1.5 Flash, or other models that are 10-50x cheaper
+</Step>
+
+<Step title="Iterate with production data">
+  Continue collecting examples from your fine-tuned model to improve it over time
 </Step>
 </Steps>
 
-### Model Evaluation
+### Task-Specific Evaluation Sets
+
+Build evaluation datasets to test model performance:
 
 ```typescript
-// Create evaluation datasets by feature
-const chatDataset = await createDataset({
-  name: 'Chat Evaluation Set',
-  filter: 'feature:chat AND rating:>=4'
-});
-
-const codeDataset = await createDataset({
-  name: 'Code Generation Evaluation',
-  filter: 'feature:code AND language:python'
-});
+// Create eval sets for different capabilities
+const datasets = {
+  reasoning: 'Complex multi-step problems with verified solutions',
+  extraction: 'Structured data extraction with known correct outputs',
+  creativity: 'Creative writing with human-rated quality scores',
+  edge_cases: 'Unusual inputs that often cause failures'
+};
 ```
 
-### Quality Monitoring
+Use these to:
+- Compare model versions before deploying
+- Test prompt changes against consistent examples
+- Identify model weaknesses and blind spots
 
-Track your best examples over time:
+### Continuous Improvement Pipeline
 
-- **Weekly curation** - Add your best requests from each week
-- **A/B test winners** - Collect examples from your best-performing prompts  
-- **User favorites** - Include requests with positive user feedback
-- **Error analysis** - Create datasets of failure cases for debugging
+<Frame caption="Use scores and user feedback to identify your best examples">
+  <img 
+    src="/images/datasets/scores.webp" 
+    alt="Filtering requests by scores to identify best examples for datasets"
+  />
+</Frame>
+
+Build a data flywheel for model improvement:
+
+1. **Tag requests** with custom properties for easy filtering
+2. **Score outputs** based on user feedback or automated metrics
+3. **Auto-collect winners** into datasets when they meet quality thresholds
+4. **Regular retraining** with newly curated examples
+5. **A/B test** new models against production traffic
+
+<Note>
+Start small - even 50-100 high-quality examples can significantly improve performance on specific tasks. Focus on one narrow use case first rather than trying to fine-tune a general-purpose model.
+</Note>
 
 ## Best Practices
 
@@ -218,7 +293,7 @@ Track your best examples over time:
   Include varied inputs, edge cases, and different user types in your datasets
 </Card>
 
-<Card title="Regular Updates" icon="refresh">
+<Card title="Regular Updates" icon="arrows-rotate">
   Continuously add new examples as your application evolves and improves
 </Card>
 
@@ -230,11 +305,11 @@ Track your best examples over time:
 ## Related Features
 
 <CardGroup cols={2}>
-<Card title="Custom Properties" icon="tag" href="/features/advanced-usage/custom-properties">
+<Card title="Custom Properties" icon="tag" href="/observability/custom-properties">
   Tag requests to make dataset creation easier with filtering
 </Card>
 
-<Card title="User Metrics" icon="users" href="/features/advanced-usage/user-metrics">
+<Card title="User Metrics" icon="users" href="/observability/user-metrics">
   Track which users generate the best examples for your datasets
 </Card>
 
@@ -242,7 +317,7 @@ Track your best examples over time:
   Include full conversation context in your datasets
 </Card>
 
-<Card title="Feedback" icon="message-square" href="/features/advanced-usage/feedback">
+<Card title="Feedback" icon="message" href="/features/advanced-usage/feedback">
   Use user ratings to automatically identify dataset candidates
 </Card>
 </CardGroup>
