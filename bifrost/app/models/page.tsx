@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { ModelRegistryPageV2 } from "./ModelRegistryPageV2";
+import { ModelRegistryPage } from "./ModelRegistryPage";
 import { Suspense } from "react";
 import { Layout } from "@/app/components/Layout";
 
@@ -46,7 +46,7 @@ export default async function ModelsPage() {
           </div>
         }
       >
-        <ModelRegistryPageV2 />
+        <ModelRegistryPage />
       </Suspense>
     </Layout>
   );

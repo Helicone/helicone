@@ -95,7 +95,7 @@ interface ModelRegistryResponse {
 
 type SortOption = "name" | "price-low" | "price-high" | "context" | "newest";
 
-export function ModelRegistryPageV2() {
+export function ModelRegistryPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
