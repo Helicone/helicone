@@ -66,7 +66,7 @@ const Notification = () => {
       case "info":
         return (
           <InformationCircleIcon
-            className="text-yelow-400 h-5 w-5"
+            className="text-yellow-400 h-5 w-5"
             aria-hidden="true"
           />
         );
@@ -79,7 +79,7 @@ const Notification = () => {
         );
       default:
         return (
-          <CheckCircleIcon className="h-5 w-5 text-white" aria-hidden="true" />
+          <CheckCircleIcon className="h-5 w-5 text-green-500" aria-hidden="true" />
         );
     }
   };
@@ -97,7 +97,7 @@ const Notification = () => {
       leave="transition-opacity duration-150"
       leaveFrom="opacity-100"
       leaveTo="opacity-0"
-      className="fixed inset-x-0 bottom-0 z-[1000] pb-8 pt-0 sm:top-0 sm:pb-0 sm:pt-6"
+      className="pointer-events-none fixed inset-x-0 top-0 z-50 pt-6"
     >
       <div className="fixed inset-x-0 bottom-0 z-50 pb-8 pt-0 sm:top-0 sm:pb-0 sm:pt-6">
         <div className="mx-auto w-full px-2 sm:max-w-[33vw] sm:px-6 lg:px-8">
