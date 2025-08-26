@@ -48,7 +48,8 @@
               "features/advanced-usage/user-metrics",
               "guides/cookbooks/cost-tracking",
               "features/datasets",
-              "features/alerts"
+              "features/alerts",
+              "features/reports"
             ]
           },
           {
