@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
-import { useJawnClient } from "@/lib/clients/jawnHook";
-import Head from "next/head";
+import { getJawnClient } from "@/lib/clients/jawn";
 import Link from "next/link";
 import {
   Select,
@@ -21,22 +20,22 @@ import {
   ChevronDown,
   X,
 } from "lucide-react";
-import { Small, Muted } from "@/components/ui/typography";
 import { Slider } from "@/components/ui/slider";
 
+// Same interfaces as before
 interface ModelEndpoint {
   provider: string;
   providerSlug: string;
   pricing: {
-    prompt: number; // per million tokens
-    completion: number; // per million tokens
-    audio?: number; // per million tokens, if > 0
-    web_search?: number; // per million tokens, if > 0
-    video?: number; // per million tokens, if > 0
-    image?: number; // per million tokens, if > 0
-    thinking?: number; // per million tokens, if > 0
-    cacheRead?: number; // per million tokens, if > 0
-    cacheWrite?: number; // per million tokens, if > 0
+    prompt: number;
+    completion: number;
+    audio?: number;
+    web_search?: number;
+    video?: number;
+    image?: number;
+    thinking?: number;
+    cacheRead?: number;
+    cacheWrite?: number;
   };
   supportsPtb?: boolean;
 }
@@ -84,53 +83,60 @@ interface Model {
   supportedParameters: StandardParameter[];
 }
 
+interface ModelRegistryResponse {
+  models: Model[];
+  total: number;
+  filters: {
+    providers: string[];
+    authors: string[];
+    capabilities: string[];
+  };
+}
+
 type SortOption = "name" | "price-low" | "price-high" | "context" | "newest";
-type ContextFilter = "all" | "small" | "medium" | "large" | "xlarge";
-type PriceFilter = "all" | "free" | "cheap" | "moderate" | "expensive";
 
 export function ModelRegistryPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  
+  // Memoize the jawn client to prevent recreating on every render
+  const jawnClient = useMemo(() => getJawnClient(), []);
 
-  const [searchQuery, setSearchQuery] = useState("");
+  // State
   const [models, setModels] = useState<Model[]>([]);
+  const [totalModels, setTotalModels] = useState(0);
+  const [availableFilters, setAvailableFilters] = useState<{
+    providers: string[];
+    authors: string[];
+    capabilities: string[];
+  }>({ providers: [], authors: [], capabilities: [] });
   const [loading, setLoading] = useState(true);
-  const [sortBy, setSortBy] = useState<SortOption>("name");
   const [copiedModel, setCopiedModel] = useState<string | null>(null);
 
-  // Sidebar filter states
+  // Filter states from URL
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [selectedProviders, setSelectedProviders] = useState<Set<string>>(
-    new Set()
+    new Set(searchParams.get("providers")?.split(",") || [])
   );
-  const [selectedAuthors, setSelectedAuthors] = useState<Set<string>>(
-    new Set()
+  const [priceRange, setPriceRange] = useState<[number, number]>([
+    Number(searchParams.get("priceMin") || 0),
+    Number(searchParams.get("priceMax") || 50),
+  ]);
+  const [minContextSize, setMinContextSize] = useState<number>(
+    Number(searchParams.get("contextMin") || 0)
   );
-  // Price range: [min, max] in dollars per million tokens
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 50]);
-  // Context size: minimum tokens (in thousands)
-  const [minContextSize, setMinContextSize] = useState<number>(0);
   const [selectedCapabilities, setSelectedCapabilities] = useState<Set<string>>(
-    new Set()
+    new Set(searchParams.get("capabilities")?.split(",") || [])
   );
-  const [selectedInputModalities, setSelectedInputModalities] = useState<
-    Set<InputModality>
-  >(new Set());
-  const [selectedParameters, setSelectedParameters] = useState<
-    Set<StandardParameter>
-  >(new Set());
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sortBy, setSortBy] = useState<SortOption>(
+    (searchParams.get("sort") as SortOption) || "name"
+  );
 
   // Collapsible filter sections
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
-    new Set([
-      "providers",
-      "price",
-      "context",
-      "capabilities",
-      "modalities",
-      "parameters",
-    ])
+    new Set(["providers", "price", "context", "capabilities"])
   );
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const toggleSection = (section: string) => {
     const newSet = new Set(expandedSections);
@@ -142,374 +148,63 @@ export function ModelRegistryPage() {
     setExpandedSections(newSet);
   };
 
-  // URL state management
-  const serializeFiltersToURL = () => {
-    const params = new URLSearchParams();
-
-    if (selectedProviders.size > 0) {
-      params.set("providers", Array.from(selectedProviders).join(","));
-    }
-    if (priceRange[0] > 0 || priceRange[1] < priceStats.max) {
-      params.set("price", `${priceRange[0]}-${priceRange[1]}`);
-    }
-    if (minContextSize > 0) {
-      params.set("context", minContextSize.toString());
-    }
-    if (selectedCapabilities.size > 0) {
-      params.set("capabilities", Array.from(selectedCapabilities).join(","));
-    }
-    if (selectedInputModalities.size > 0) {
-      params.set("modalities", Array.from(selectedInputModalities).join(","));
-    }
-    if (selectedParameters.size > 0) {
-      params.set("parameters", Array.from(selectedParameters).join(","));
-    }
-    if (searchQuery) {
-      params.set("search", searchQuery);
-    }
-    if (sortBy !== "name") {
-      params.set("sort", sortBy);
-    }
-
-    return params.toString();
-  };
-
-  const initializeFromURL = () => {
-    const providers = searchParams.get("providers");
-    if (providers) {
-      setSelectedProviders(
-        new Set(providers.split(",").map((p) => p.toLowerCase()))
-      );
-    }
-
-    const price = searchParams.get("price");
-    if (price && price.includes("-")) {
-      const [min, max] = price.split("-").map(Number);
-      setPriceRange([min, max]);
-    }
-
-    const context = searchParams.get("context");
-    if (context) {
-      setMinContextSize(Number(context));
-    }
-
-    const capabilities = searchParams.get("capabilities");
-    if (capabilities) {
-      setSelectedCapabilities(new Set(capabilities.split(",")));
-    }
-
-    const modalities = searchParams.get("modalities");
-    if (modalities) {
-      setSelectedInputModalities(
-        new Set(modalities.split(",") as InputModality[])
-      );
-    }
-
-    const parameters = searchParams.get("parameters");
-    if (parameters) {
-      setSelectedParameters(
-        new Set(parameters.split(",") as StandardParameter[])
-      );
-    }
-
-    const search = searchParams.get("search");
-    if (search) {
-      setSearchQuery(search);
-    }
-
-    const sort = searchParams.get("sort") as SortOption;
-    if (sort) {
-      setSortBy(sort);
-    }
-  };
-
-  const updateURL = () => {
-    const params = serializeFiltersToURL();
-    const newUrl = params
-      ? `${window.location.pathname}?${params}`
-      : window.location.pathname;
-    router.push(newUrl, { scroll: false });
-  };
-
-  const jawnClient = useJawnClient();
-
+  // Convert Sets to strings for stable dependencies
+  const providersString = Array.from(selectedProviders).sort().join(',');
+  const capabilitiesString = Array.from(selectedCapabilities).sort().join(',');
+  
+  // Track if this is the initial mount
+  const [isInitialMount, setIsInitialMount] = useState(true);
+  
+  // Combined effect for URL update and API fetch
   useEffect(() => {
-    async function loadData() {
+    // Build URL params
+    const params = new URLSearchParams();
+    
+    if (searchQuery) params.set("search", searchQuery);
+    if (providersString) params.set("providers", providersString);
+    if (priceRange[0] > 0) params.set("priceMin", priceRange[0].toString());
+    if (priceRange[1] < 50) params.set("priceMax", priceRange[1].toString());
+    if (minContextSize > 0) params.set("contextMin", minContextSize.toString());
+    if (capabilitiesString) params.set("capabilities", capabilitiesString);
+    if (sortBy !== "name") params.set("sort", sortBy);
+    
+    // Update URL (skip on initial mount to avoid duplicate push)
+    if (!isInitialMount) {
+      const newUrl = params.toString()
+        ? `${window.location.pathname}?${params.toString()}`
+        : window.location.pathname;
+      
+      router.push(newUrl, { scroll: false });
+    }
+    
+    // Fetch models with debounce
+    const timeoutId = setTimeout(async () => {
       try {
-        const response = await jawnClient.GET(
-          "/v1/public/model-registry/models"
-        );
+        setLoading(true);
+        
+        const response = await jawnClient.GET("/v1/public/model-registry/models", {
+          params: {
+            query: Object.fromEntries(params.entries())
+          }
+        });
+
         if (response.data?.data) {
-          setModels(response.data.data.models || []);
+          const data = response.data.data as ModelRegistryResponse;
+          setModels(data.models);
+          setTotalModels(data.total);
+          setAvailableFilters(data.filters);
         }
       } catch (error) {
         console.error("Failed to load models:", error);
       } finally {
         setLoading(false);
+        setIsInitialMount(false);
       }
-    }
+    }, isInitialMount ? 0 : 300); // No delay on initial mount
 
-    loadData();
-  }, []); // Remove jawnClient from dependencies
-
-  const { allProviders, allAuthors, priceStats, contextStats } = useMemo(() => {
-    const providers = new Set<string>();
-    const authors = new Set<string>();
-    let minPrice = Infinity;
-    let maxPrice = 0;
-    let minContext = Infinity;
-    let maxContext = 0;
-
-    models.forEach((model) => {
-      authors.add(model.author);
-
-      // Calculate min cost for this model
-      const modelMinCost = Math.min(
-        ...model.endpoints.map(
-          (e) => (e.pricing.prompt + e.pricing.completion) / 2
-        )
-      );
-
-      if (modelMinCost < minPrice) minPrice = modelMinCost;
-      if (modelMinCost > maxPrice) maxPrice = modelMinCost;
-
-      // Context size
-      if (model.contextLength < minContext) minContext = model.contextLength;
-      if (model.contextLength > maxContext) maxContext = model.contextLength;
-
-      model.endpoints.forEach((endpoint) => {
-        providers.add(endpoint.provider);
-      });
-    });
-
-    return {
-      allProviders: Array.from(providers).sort(),
-      allAuthors: Array.from(authors).sort(),
-      priceStats: {
-        min: minPrice === Infinity ? 0 : minPrice,
-        max: maxPrice === 0 ? 50 : Math.ceil(maxPrice),
-      },
-      contextStats: {
-        min: minContext === Infinity ? 0 : minContext,
-        max: maxContext === 0 ? 1000000 : maxContext,
-      },
-    };
-  }, [models]);
-
-  // Initialize filters from URL on mount
-  useEffect(() => {
-    if (models.length > 0 && priceStats.max > 0) {
-      // Set default price range to full range if not in URL
-      const price = searchParams.get("price");
-      if (!price) {
-        setPriceRange([0, priceStats.max]);
-      }
-      initializeFromURL();
-    }
-  }, [models.length, priceStats.max]); // Wait for models and stats to be loaded
-
-  const processedModels = useMemo(() => {
-    let filtered = models.filter((model) => {
-      // Enhanced search filter - more intelligent matching
-      const query = searchQuery.toLowerCase().trim();
-
-      if (!query) return true;
-
-      // Split query into words for better matching
-      const queryWords = query.split(/\s+/);
-
-      // Remove author prefix from model name for cleaner display and search
-      const cleanModelName = model.name.replace(
-        new RegExp(`^${model.author}:\s*`, "i"),
-        ""
-      );
-
-      // Search across multiple fields with intelligent matching
-      const searchableText = [
-        model.id.toLowerCase(),
-        cleanModelName.toLowerCase(),
-        model.author.toLowerCase(),
-        model.description?.toLowerCase() || "",
-        // Add context size as searchable (e.g., "200k", "1m")
-        model.contextLength >= 1000000
-          ? `${(model.contextLength / 1000000).toFixed(0)}m`
-          : model.contextLength >= 1000
-            ? `${(model.contextLength / 1000).toFixed(0)}k`
-            : "",
-        // Add capabilities as searchable terms
-        ...model.inputModalities,
-        ...model.outputModalities,
-        // Add provider names
-        ...model.endpoints.map((ep) => ep.provider.toLowerCase()),
-      ].join(" ");
-
-      // Check if all query words are found in searchable text (partial matching)
-      const matchesSearch = queryWords.every((word) =>
-        searchableText.includes(word)
-      );
-
-      // Provider filter (case-insensitive)
-      const matchesProvider =
-        selectedProviders.size === 0 ||
-        model.endpoints.some((ep) =>
-          selectedProviders.has(ep.provider.toLowerCase())
-        );
-
-      // Debug for first few models to understand what's happening
-      if (models.indexOf(model) < 3) {
-        console.log(`DEBUG Model ${model.name}:`);
-        console.log(`  selectedProviders:`, Array.from(selectedProviders));
-        console.log(
-          `  model.endpoints:`,
-          model.endpoints.map((ep) => ep.provider)
-        );
-        console.log(`  matchesProvider:`, matchesProvider);
-        console.log(`  ---`);
-      }
-
-      // Author filter
-      const matchesAuthor =
-        selectedAuthors.size === 0 || selectedAuthors.has(model.author);
-
-      // Context size filter - minimum threshold
-      const matchesContext = model.contextLength >= minContextSize;
-
-      // Price filter - within range
-      const minCost = Math.min(
-        ...model.endpoints.map(
-          (e) => (e.pricing.prompt + e.pricing.completion) / 2
-        )
-      );
-      const matchesPrice = minCost >= priceRange[0] && minCost <= priceRange[1];
-
-      // Debug log for first few models
-      if (models.indexOf(model) < 3) {
-        console.log(
-          `Model ${model.name}: cost=${minCost}, matchesPrice=${matchesPrice}, priceRange=[${priceRange[0]}, ${priceRange[1]}]`
-        );
-      }
-
-      // Capabilities filter
-      // Focus on user-facing capabilities only (like OpenRouter)
-      const modelCapabilities = new Set<string>();
-      model.endpoints.forEach((ep) => {
-        if (ep.pricing.audio && ep.pricing.audio > 0)
-          modelCapabilities.add("audio");
-        if (ep.pricing.video && ep.pricing.video > 0)
-          modelCapabilities.add("video");
-        if (ep.pricing.thinking && ep.pricing.thinking > 0)
-          modelCapabilities.add("thinking");
-        if (ep.pricing.web_search && ep.pricing.web_search > 0)
-          modelCapabilities.add("web_search");
-        if (ep.pricing.image && ep.pricing.image > 0)
-          modelCapabilities.add("image");
-        // Skip cache capabilities - too technical
-      });
-      const matchesCapabilities =
-        selectedCapabilities.size === 0 ||
-        Array.from(selectedCapabilities).some((cap) =>
-          modelCapabilities.has(cap)
-        );
-
-      // Input modalities filter
-      const matchesModalities =
-        selectedInputModalities.size === 0 ||
-        Array.from(selectedInputModalities).some((modality) =>
-          model.inputModalities.includes(modality)
-        );
-
-      // Supported parameters filter
-      const matchesParameters =
-        selectedParameters.size === 0 ||
-        Array.from(selectedParameters).some((parameter) =>
-          model.supportedParameters.includes(parameter)
-        );
-
-      return (
-        matchesSearch &&
-        matchesProvider &&
-        matchesAuthor &&
-        matchesContext &&
-        matchesPrice &&
-        matchesCapabilities &&
-        matchesModalities &&
-        matchesParameters
-      );
-    });
-
-    // Sorting
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case "name":
-          return a.name.localeCompare(b.name);
-        case "price-low":
-          const aMin = Math.min(
-            ...a.endpoints.map(
-              (e) => (e.pricing.prompt + e.pricing.completion) / 2
-            )
-          );
-          const bMin = Math.min(
-            ...b.endpoints.map(
-              (e) => (e.pricing.prompt + e.pricing.completion) / 2
-            )
-          );
-          return aMin - bMin;
-        case "price-high":
-          const aMax = Math.max(
-            ...a.endpoints.map(
-              (e) => (e.pricing.prompt + e.pricing.completion) / 2
-            )
-          );
-          const bMax = Math.max(
-            ...b.endpoints.map(
-              (e) => (e.pricing.prompt + e.pricing.completion) / 2
-            )
-          );
-          return bMax - aMax;
-        case "context":
-          return b.contextLength - a.contextLength;
-        case "newest":
-          return (b.trainingDate || "").localeCompare(a.trainingDate || "");
-        default:
-          return 0;
-      }
-    });
-
-    return filtered;
-  }, [
-    models,
-    searchQuery,
-    selectedProviders,
-    selectedAuthors,
-    priceRange,
-    minContextSize,
-    selectedCapabilities,
-    selectedInputModalities,
-    selectedParameters,
-    sortBy,
-  ]);
-
-  // Debounced URL update when filters change
-  useEffect(() => {
-    if (models.length > 0 && priceStats.max > 0) {
-      const timeoutId = setTimeout(() => {
-        updateURL();
-      }, 300); // 300ms debounce
-
-      return () => clearTimeout(timeoutId);
-    }
-  }, [
-    selectedProviders,
-    priceRange,
-    minContextSize,
-    selectedCapabilities,
-    selectedInputModalities,
-    selectedParameters,
-    searchQuery,
-    sortBy,
-    models.length,
-    priceStats.max,
-  ]);
+    return () => clearTimeout(timeoutId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery, providersString, priceRange[0], priceRange[1], minContextSize, capabilitiesString, sortBy]);
 
   const formatCost = (costPerMillion: number) => {
     if (costPerMillion === 0) return "Free";
@@ -533,26 +228,6 @@ export function ModelRegistryPage() {
     setTimeout(() => setCopiedModel(null), 2000);
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-        <div className="max-w-7xl mx-auto px-4 py-16">
-          <div className="animate-pulse">
-            <div className="h-8 w-48 bg-gray-200 dark:bg-gray-800 rounded mb-8" />
-            <div className="space-y-4">
-              {[...Array(10)].map((_, i) => (
-                <div
-                  key={i}
-                  className="h-16 bg-white dark:bg-gray-900 rounded"
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
       <div className="max-w-7xl mx-auto px-4">
@@ -561,86 +236,26 @@ export function ModelRegistryPage() {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
             Model Registry
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Compare {models.length} language models across {allProviders.length}{" "}
-            providers
-          </p>
-        </div>
-
-        {/* Filter Toggle Button - Mobile Only */}
-        <div className="lg:hidden mb-4">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z"
-              />
-            </svg>
-            Filters
-            {selectedProviders.size +
-              (priceRange[0] > 0 || priceRange[1] < priceStats.max ? 1 : 0) +
-              (minContextSize > 0 ? 1 : 0) +
-              selectedCapabilities.size +
-              selectedInputModalities.size +
-              selectedParameters.size >
-              0 && (
-              <span className="bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 text-xs font-medium px-2 py-0.5 rounded-full">
-                {selectedProviders.size +
-                  (priceRange[0] > 0 || priceRange[1] < priceStats.max
-                    ? 1
-                    : 0) +
-                  (minContextSize > 0 ? 1 : 0) +
-                  selectedCapabilities.size +
-                  selectedInputModalities.size +
-                  selectedParameters.size}
-              </span>
+          <p className="text-gray-600 dark:text-gray-400 flex items-center gap-2">
+            {loading ? (
+              <span className="animate-pulse">Loading models...</span>
+            ) : (
+              `${totalModels} models across ${availableFilters.providers.length} providers`
             )}
-          </button>
+          </p>
         </div>
 
         {/* Main Layout: Sidebar + Content */}
         <div className="flex gap-6">
           {/* Left Sidebar - Filters */}
-          <div
-            className={`w-80 flex-shrink-0 ${sidebarOpen ? "block" : "hidden"} lg:block`}
-          >
+          <div className={`w-80 flex-shrink-0 ${sidebarOpen ? "block" : "hidden"} lg:block`}>
             <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
               <div className="p-6">
-                {/* Mobile close button */}
-                <button
-                  onClick={() => setSidebarOpen(false)}
-                  className="lg:hidden absolute top-4 right-4 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-
                 {/* Provider Filter */}
                 <div className="mb-6">
                   <button
                     onClick={() => toggleSection("providers")}
-                    className="w-full flex items-center justify-between text-sm font-normal text-gray-700 dark:text-gray-300 mb-3 hover:text-gray-900 dark:hover:text-gray-100"
+                    className="w-full flex items-center justify-between text-sm font-normal text-gray-700 dark:text-gray-300 mb-3"
                   >
                     <span>Providers</span>
                     <ChevronDown
@@ -651,31 +266,27 @@ export function ModelRegistryPage() {
                   </button>
                   {expandedSections.has("providers") && (
                     <div className="space-y-1 max-h-48 overflow-y-auto">
-                      {allProviders.map((provider) => {
-                        const isSelected = selectedProviders.has(
-                          provider.toLowerCase()
-                        );
+                      {availableFilters.providers.map((provider) => {
+                        const isSelected = selectedProviders.has(provider);
                         return (
                           <div
                             key={provider}
                             onClick={() => {
                               const newSet = new Set(selectedProviders);
                               if (isSelected) {
-                                newSet.delete(provider.toLowerCase());
+                                newSet.delete(provider);
                               } else {
-                                newSet.add(provider.toLowerCase());
+                                newSet.add(provider);
                               }
                               setSelectedProviders(newSet);
                             }}
-                            className={`flex items-center justify-between px-2 py-1.5 text-sm font-light rounded cursor-pointer transition-colors ${
+                            className={`flex items-center justify-between px-2 py-1.5 text-sm rounded cursor-pointer transition-colors ${
                               isSelected
                                 ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300"
                                 : "text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
                             }`}
                           >
-                            <span className="truncate flex-1 mr-2">
-                              {provider}
-                            </span>
+                            <span className="truncate flex-1 mr-2">{provider}</span>
                             {isSelected && <X className="h-3 w-3" />}
                           </div>
                         );
@@ -688,7 +299,7 @@ export function ModelRegistryPage() {
                 <div className="mb-6">
                   <button
                     onClick={() => toggleSection("price")}
-                    className="w-full flex items-center justify-between text-sm font-normal text-gray-700 dark:text-gray-300 mb-3 hover:text-gray-900 dark:hover:text-gray-100"
+                    className="w-full flex items-center justify-between text-sm font-normal text-gray-700 dark:text-gray-300 mb-3"
                   >
                     <span>Price Range</span>
                     <ChevronDown
@@ -707,7 +318,7 @@ export function ModelRegistryPage() {
                         value={priceRange}
                         onValueChange={(value) => setPriceRange(value as [number, number])}
                         min={0}
-                        max={priceStats.max}
+                        max={50}
                         step={0.1}
                         className="mb-1"
                       />
@@ -719,7 +330,7 @@ export function ModelRegistryPage() {
                 <div className="mb-6">
                   <button
                     onClick={() => toggleSection("context")}
-                    className="w-full flex items-center justify-between text-sm font-normal text-gray-700 dark:text-gray-300 mb-3 hover:text-gray-900 dark:hover:text-gray-100"
+                    className="w-full flex items-center justify-between text-sm font-normal text-gray-700 dark:text-gray-300 mb-3"
                   >
                     <span>Context Size</span>
                     <ChevronDown
@@ -731,17 +342,15 @@ export function ModelRegistryPage() {
                   {expandedSections.has("context") && (
                     <div className="px-2 pb-2">
                       <div className="mb-3 text-xs text-gray-500 dark:text-gray-400">
-                        Minimum:{" "}
-                        {minContextSize >= 1000
+                        Minimum: {minContextSize >= 1000
                           ? `${(minContextSize / 1000).toFixed(0)}K`
-                          : minContextSize}{" "}
-                        tokens or higher
+                          : minContextSize} tokens
                       </div>
                       <Slider
                         value={[minContextSize]}
                         onValueChange={([value]) => setMinContextSize(value)}
                         min={0}
-                        max={contextStats.max}
+                        max={1000000}
                         step={1000}
                         className="mb-1"
                       />
@@ -753,7 +362,7 @@ export function ModelRegistryPage() {
                 <div className="mb-6">
                   <button
                     onClick={() => toggleSection("capabilities")}
-                    className="w-full flex items-center justify-between text-sm font-normal text-gray-700 dark:text-gray-300 mb-3 hover:text-gray-900 dark:hover:text-gray-100"
+                    className="w-full flex items-center justify-between text-sm font-normal text-gray-700 dark:text-gray-300 mb-3"
                   >
                     <span>Special Capabilities</span>
                     <ChevronDown
@@ -764,230 +373,43 @@ export function ModelRegistryPage() {
                   </button>
                   {expandedSections.has("capabilities") && (
                     <div className="space-y-1">
-                      {[
-                        { key: "audio", label: "Audio Processing" },
-                        { key: "video", label: "Video Processing" },
-                        { key: "thinking", label: "Chain-of-Thought" },
-                        { key: "web_search", label: "Web Search" },
-                        { key: "image", label: "Image Processing" },
-                      ]
-                        .map(({ key, label }) => {
-                          // Check if any models have this capability
-                          const hasCapability = models.some((m) =>
-                            m.endpoints.some((ep) => {
-                              switch (key) {
-                                case "audio":
-                                  return (
-                                    ep.pricing.audio && ep.pricing.audio > 0
-                                  );
-                                case "video":
-                                  return (
-                                    ep.pricing.video && ep.pricing.video > 0
-                                  );
-                                case "thinking":
-                                  return (
-                                    ep.pricing.thinking &&
-                                    ep.pricing.thinking > 0
-                                  );
-                                case "web_search":
-                                  return (
-                                    ep.pricing.web_search &&
-                                    ep.pricing.web_search > 0
-                                  );
-                                case "image":
-                                  return (
-                                    ep.pricing.image && ep.pricing.image > 0
-                                  );
-                                default:
-                                  return false;
+                      {availableFilters.capabilities.map((capability) => {
+                        const isSelected = selectedCapabilities.has(capability);
+                        const labelMap: Record<string, string> = {
+                          audio: "Audio Processing",
+                          video: "Video Processing",
+                          thinking: "Chain-of-Thought",
+                          web_search: "Web Search",
+                          image: "Image Processing",
+                          caching: "Caching",
+                          reasoning: "Reasoning",
+                        };
+                        
+                        return (
+                          <div
+                            key={capability}
+                            onClick={() => {
+                              const newSet = new Set(selectedCapabilities);
+                              if (isSelected) {
+                                newSet.delete(capability);
+                              } else {
+                                newSet.add(capability);
                               }
-                            })
-                          );
-
-                          if (!hasCapability) return null;
-                          const isSelected = selectedCapabilities.has(key);
-
-                          return (
-                            <div
-                              key={key}
-                              onClick={() => {
-                                const newSet = new Set(selectedCapabilities);
-                                if (isSelected) {
-                                  newSet.delete(key);
-                                } else {
-                                  newSet.add(key);
-                                }
-                                setSelectedCapabilities(newSet);
-                              }}
-                              className={`flex items-center justify-between px-2 py-1.5 rounded cursor-pointer transition-colors ${
-                                isSelected
-                                  ? "bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300"
-                                  : "text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
-                              }`}
-                            >
-                              <span className="text-sm font-light truncate flex-1 mr-2">
-                                {label}
-                              </span>
-                              {isSelected && <X className="h-3 w-3" />}
-                            </div>
-                          );
-                        })
-                        .filter(Boolean)}
-                    </div>
-                  )}
-                </div>
-
-                {/* Input Modalities Filter */}
-                <div className="mb-6">
-                  <button
-                    onClick={() => toggleSection("modalities")}
-                    className="w-full flex items-center justify-between text-sm font-normal text-gray-700 dark:text-gray-300 mb-3 hover:text-gray-900 dark:hover:text-gray-100"
-                  >
-                    <span>Input Modalities</span>
-                    <ChevronDown
-                      className={`h-4 w-4 transition-transform ${
-                        expandedSections.has("modalities") ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-                  {expandedSections.has("modalities") && (
-                    <div className="space-y-1">
-                      {[
-                        { key: "text" as InputModality, label: "Text" },
-                        { key: "image" as InputModality, label: "Image" },
-                        { key: "audio" as InputModality, label: "Audio" },
-                        { key: "video" as InputModality, label: "Video" },
-                      ]
-                        .map(({ key, label }) => {
-                          // Check if any models support this input modality
-                          const hasModality = models.some((m) =>
-                            m.inputModalities.includes(key)
-                          );
-
-                          if (!hasModality) return null;
-
-                          const isSelected = selectedInputModalities.has(key);
-
-                          return (
-                            <div
-                              key={key}
-                              onClick={() => {
-                                const newSet = new Set(selectedInputModalities);
-                                if (isSelected) {
-                                  newSet.delete(key);
-                                } else {
-                                  newSet.add(key);
-                                }
-                                setSelectedInputModalities(newSet);
-                              }}
-                              className={`flex items-center justify-between px-2 py-1.5 rounded cursor-pointer transition-colors ${
-                                isSelected
-                                  ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300"
-                                  : "text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
-                              }`}
-                            >
-                              <span className="text-sm font-light truncate flex-1 mr-2">
-                                {label}
-                              </span>
-                              {isSelected && <X className="h-3 w-3" />}
-                            </div>
-                          );
-                        })
-                        .filter(Boolean)}
-                    </div>
-                  )}
-                </div>
-
-                {/* Supported Parameters Filter */}
-                <div className="mb-6">
-                  <button
-                    onClick={() => toggleSection("parameters")}
-                    className="w-full flex items-center justify-between text-sm font-normal text-gray-700 dark:text-gray-300 mb-3 hover:text-gray-900 dark:hover:text-gray-100"
-                  >
-                    <span>Supported Parameters</span>
-                    <ChevronDown
-                      className={`h-4 w-4 transition-transform ${
-                        expandedSections.has("parameters") ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-                  {expandedSections.has("parameters") && (
-                    <div className="space-y-1 max-h-48 overflow-y-auto">
-                      {[
-                        {
-                          key: "tools" as StandardParameter,
-                          label: "Function Calling",
-                        },
-                        {
-                          key: "response_format" as StandardParameter,
-                          label: "Structured Output",
-                        },
-                        {
-                          key: "temperature" as StandardParameter,
-                          label: "Temperature",
-                        },
-                        {
-                          key: "top_p" as StandardParameter,
-                          label: "Top-p Sampling",
-                        },
-                        {
-                          key: "max_tokens" as StandardParameter,
-                          label: "Max Tokens",
-                        },
-                        {
-                          key: "stop" as StandardParameter,
-                          label: "Stop Sequences",
-                        },
-                        { key: "seed" as StandardParameter, label: "Seed" },
-                        {
-                          key: "frequency_penalty" as StandardParameter,
-                          label: "Frequency Penalty",
-                        },
-                        {
-                          key: "presence_penalty" as StandardParameter,
-                          label: "Presence Penalty",
-                        },
-                        {
-                          key: "logprobs" as StandardParameter,
-                          label: "Log Probabilities",
-                        },
-                      ]
-                        .map(({ key, label }) => {
-                          // Check if any models support this parameter
-                          const hasParameter = models.some((m) =>
-                            m.supportedParameters.includes(key)
-                          );
-
-                          if (!hasParameter) return null;
-
-                          const isSelected = selectedParameters.has(key);
-
-                          return (
-                            <div
-                              key={key}
-                              onClick={() => {
-                                const newSet = new Set(selectedParameters);
-                                if (isSelected) {
-                                  newSet.delete(key);
-                                } else {
-                                  newSet.add(key);
-                                }
-                                setSelectedParameters(newSet);
-                              }}
-                              className={`flex items-center justify-between px-2 py-1.5 rounded cursor-pointer transition-colors ${
-                                isSelected
-                                  ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300"
-                                  : "text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
-                              }`}
-                            >
-                              <span className="text-sm font-light truncate flex-1 mr-2">
-                                {label}
-                              </span>
-                              {isSelected && <X className="h-3 w-3" />}
-                            </div>
-                          );
-                        })
-                        .filter(Boolean)}
+                              setSelectedCapabilities(newSet);
+                            }}
+                            className={`flex items-center justify-between px-2 py-1.5 rounded cursor-pointer transition-colors ${
+                              isSelected
+                                ? "bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300"
+                                : "text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
+                            }`}
+                          >
+                            <span className="text-sm font-light truncate flex-1 mr-2">
+                              {labelMap[capability] || capability}
+                            </span>
+                            {isSelected && <X className="h-3 w-3" />}
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -1003,45 +425,42 @@ export function ModelRegistryPage() {
                 {/* Model count */}
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500 dark:text-gray-400">
-                    {processedModels.length} of {models.length} models
+                    Showing {models.length} of {totalModels} models
                   </span>
-                  {/* Reset filters button - show only when filters are active */}
-                  {(selectedProviders.size > 0 ||
-                    selectedAuthors.size > 0 ||
-                    priceRange[0] > 0 ||
-                    priceRange[1] < priceStats.max ||
-                    minContextSize > 0 ||
-                    selectedCapabilities.size > 0 ||
-                    selectedInputModalities.size > 0 ||
-                    selectedParameters.size > 0) && (
-                    <button
-                      onClick={() => {
-                        setSelectedProviders(new Set());
-                        setSelectedAuthors(new Set());
-                        setPriceRange([0, priceStats.max]);
-                        setMinContextSize(0);
-                        setSelectedCapabilities(new Set());
-                        setSelectedInputModalities(new Set());
-                        setSelectedParameters(new Set());
-                        setSearchQuery("");
-                      }}
-                      className="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors flex items-center gap-2"
-                    >
-                      <X className="h-3.5 w-3.5" />
-                      Reset filters
-                    </button>
-                  )}
+                  {/* Reset filters button - always rendered to prevent layout shift */}
+                  <button
+                    onClick={() => {
+                      setSelectedProviders(new Set());
+                      setPriceRange([0, 50]);
+                      setMinContextSize(0);
+                      setSelectedCapabilities(new Set());
+                      setSearchQuery("");
+                    }}
+                    className={`px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 rounded-lg transition-all flex items-center gap-2 ${
+                      (selectedProviders.size > 0 ||
+                        priceRange[0] > 0 ||
+                        priceRange[1] < 50 ||
+                        minContextSize > 0 ||
+                        selectedCapabilities.size > 0 ||
+                        searchQuery.length > 0)
+                        ? 'opacity-100 pointer-events-auto'
+                        : 'opacity-0 pointer-events-none'
+                    }`}
+                  >
+                    <X className="h-3.5 w-3.5" />
+                    Reset filters
+                  </button>
                 </div>
 
-                {/* Search bar and sort on same row */}
+                {/* Search bar and sort */}
                 <div className="flex gap-3">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                     <Input
-                      placeholder="Search models, providers, or capabilities..."
+                      placeholder="Search models..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-9 h-10 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700"
+                      className="pl-9 h-10"
                     />
                   </div>
 
@@ -1049,18 +468,14 @@ export function ModelRegistryPage() {
                     value={sortBy}
                     onValueChange={(v) => setSortBy(v as SortOption)}
                   >
-                    <SelectTrigger className="w-[160px] h-10 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-sm font-normal">
+                    <SelectTrigger className="w-[160px] h-10">
                       <ArrowUpDown className="h-4 w-4 mr-2" />
                       <SelectValue placeholder="Sort" />
                     </SelectTrigger>
-                    <SelectContent className="text-sm font-normal">
+                    <SelectContent>
                       <SelectItem value="name">Name</SelectItem>
-                      <SelectItem value="price-low">
-                        Price: Low to High
-                      </SelectItem>
-                      <SelectItem value="price-high">
-                        Price: High to Low
-                      </SelectItem>
+                      <SelectItem value="price-low">Price: Low to High</SelectItem>
+                      <SelectItem value="price-high">Price: High to Low</SelectItem>
                       <SelectItem value="context">Context Size</SelectItem>
                       <SelectItem value="newest">Newest First</SelectItem>
                     </SelectContent>
@@ -1069,12 +484,20 @@ export function ModelRegistryPage() {
               </div>
             </div>
 
-            {/* Clean Table */}
-            <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
+            {/* Models Table */}
+            <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden relative">
+              {loading && (
+                <div className="absolute inset-0 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm z-10 flex items-center justify-center">
+                  <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+                    <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                    <span>Updating results...</span>
+                  </div>
+                </div>
+              )}
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[640px]">
                   <tbody>
-                    {processedModels.map((model) => {
+                    {models.map((model) => {
                       const minInputCost = Math.min(
                         ...model.endpoints.map((e) => e.pricing.prompt)
                       );
@@ -1082,76 +505,22 @@ export function ModelRegistryPage() {
                         ...model.endpoints.map((e) => e.pricing.completion)
                       );
                       const isFree = minInputCost === 0;
-                      const cheapestProvider = model.endpoints.reduce(
-                        (min, ep) =>
-                          (ep.pricing.prompt + ep.pricing.completion) / 2 <
-                          (min.pricing.prompt + min.pricing.completion) / 2
-                            ? ep
-                            : min
-                      );
-
-                      // Get capabilities with pricing from cheapest provider
-                      const capabilities: {
-                        key: string;
-                        label: string;
-                        cost: string;
-                      }[] = [];
-                      const pricing = cheapestProvider.pricing;
-
-                      if (pricing.audio && pricing.audio > 0) {
-                        capabilities.push({
-                          key: "audio",
-                          label: "Audio",
-                          cost: formatCost(pricing.audio),
-                        });
-                      }
-                      if (pricing.video && pricing.video > 0) {
-                        capabilities.push({
-                          key: "video",
-                          label: "Video",
-                          cost: formatCost(pricing.video),
-                        });
-                      }
-                      if (pricing.thinking && pricing.thinking > 0) {
-                        capabilities.push({
-                          key: "thinking",
-                          label: "Reasoning",
-                          cost: formatCost(pricing.thinking),
-                        });
-                      }
-                      if (pricing.web_search && pricing.web_search > 0) {
-                        capabilities.push({
-                          key: "search",
-                          label: "Web Search",
-                          cost: formatCost(pricing.web_search),
-                        });
-                      }
-                      if (pricing.image && pricing.image > 0) {
-                        capabilities.push({
-                          key: "vision",
-                          label: "Vision",
-                          cost: formatCost(pricing.image),
-                        });
-                      }
 
                       return (
                         <tbody key={model.id} className="group cursor-pointer">
-                          {/* Row 1: Primary info */}
                           <tr 
                             className="border-t-4 border-transparent group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50"
                             onClick={(e) => {
-                              // Don't navigate if clicking on copy button
                               if (!(e.target as HTMLElement).closest('button')) {
                                 router.push(`/model/${encodeURIComponent(model.id)}`);
                               }
                             }}
                           >
-                            {/* Model name with copy button */}
                             <td className="px-6 pt-6 pb-1">
                               <div className="flex items-center gap-2">
                                 <Link 
                                   href={`/model/${encodeURIComponent(model.id)}`}
-                                  className="text-lg font-normal text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                                  className="text-lg font-normal text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400"
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                   {model.name.replace(
@@ -1164,7 +533,7 @@ export function ModelRegistryPage() {
                                     e.stopPropagation();
                                     copyModelId(model.id);
                                   }}
-                                  className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
+                                  className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded transition-colors"
                                   title={`Copy model ID: ${model.id}`}
                                 >
                                   {copiedModel === model.id ? (
@@ -1174,22 +543,20 @@ export function ModelRegistryPage() {
                                   )}
                                 </button>
                                 {isFree && (
-                                  <span className="text-xs font-normal text-green-800 dark:text-green-200 bg-green-100 dark:bg-green-900/40 px-2.5 py-1 rounded-full border border-green-200 dark:border-green-800">
+                                  <span className="text-xs font-normal text-green-800 dark:text-green-200 bg-green-100 dark:bg-green-900/40 px-2.5 py-1 rounded-full">
                                     Free
                                   </span>
                                 )}
                               </div>
                             </td>
                           </tr>
-
-                          {/* Row 2: Secondary info */}
+                          
                           <tr 
                             className="group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50"
                             onClick={() => router.push(`/model/${encodeURIComponent(model.id)}`)}
                           >
                             <td className="px-6 pt-1 pb-6">
                               <div className="space-y-2">
-                                {/* Description first - truncated with ellipsis */}
                                 {model.description && (
                                   <div className="text-base font-light text-gray-400 dark:text-gray-500">
                                     {model.description.length > 150
@@ -1197,56 +564,20 @@ export function ModelRegistryPage() {
                                       : model.description}
                                   </div>
                                 )}
-
-                                {/* Author, Context, and Pricing - same light text as description */}
                                 <div className="flex flex-wrap items-center gap-3 text-sm font-light text-gray-400 dark:text-gray-500">
-                                  <div>
-                                    by{" "}
-                                    <a
-                                      href={`/authors/${model.author.toLowerCase().replace(/\s+/g, "-")}`}
-                                      className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 underline"
-                                    >
-                                      {model.author.charAt(0).toUpperCase() +
-                                        model.author
-                                          .slice(1)
-                                          .replace(/-/g, " ")}
-                                    </a>
-                                  </div>
+                                  <div>by {model.author}</div>
+                                  <div>•</div>
+                                  <div>{formatContext(model.contextLength)} context</div>
                                   <div>•</div>
                                   <div>
-                                    {formatContext(model.contextLength)} context
+                                    ${minInputCost < 1 ? minInputCost.toFixed(2) : minInputCost.toFixed(1)}/M in,{" "}
+                                    ${minOutputCost < 1 ? minOutputCost.toFixed(2) : minOutputCost.toFixed(1)}/M out
                                   </div>
-                                  <div>•</div>
-                                  <div>
-                                    $
-                                    {minInputCost === 0
-                                      ? "0"
-                                      : minInputCost < 1
-                                        ? minInputCost.toFixed(2)
-                                        : minInputCost.toFixed(1)}
-                                    /M in, $
-                                    {minOutputCost === 0
-                                      ? "0"
-                                      : minOutputCost < 1
-                                        ? minOutputCost.toFixed(2)
-                                        : minOutputCost.toFixed(1)}
-                                    /M out
-                                  </div>
-                                  {model.maxOutput && (
-                                    <>
-                                      <div>•</div>
-                                      <div>
-                                        {formatContext(model.maxOutput)} max
-                                        output
-                                      </div>
-                                    </>
-                                  )}
                                 </div>
                               </div>
                             </td>
                           </tr>
-
-                          {/* Subtle divider between models */}
+                          
                           <tr>
                             <td className="px-6 py-2">
                               <div className="border-b border-gray-100 dark:border-gray-800/50 mx-12"></div>
@@ -1260,21 +591,28 @@ export function ModelRegistryPage() {
               </div>
             </div>
 
-            {processedModels.length === 0 && (
+            {models.length === 0 && !loading && (
               <div className="text-center py-12">
                 <p className="text-gray-500 dark:text-gray-400">
                   No models found matching your criteria
                 </p>
               </div>
             )}
-
-            {/* Simple Footer */}
-            <div className="mt-8 text-center">
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Prices shown are per million tokens from cheapest available
-                provider.
-              </p>
-            </div>
+            
+            {models.length === 0 && loading && (
+              <div className="space-y-4 p-6">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="animate-pulse">
+                    <div className="flex items-start space-x-4">
+                      <div className="flex-1">
+                        <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-2"></div>
+                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
