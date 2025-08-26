@@ -30,7 +30,6 @@
               {
                 "group": "Features",
                 "pages": [
-                  "gateway/fallbacks",
                   "gateway/prompt-integration",
                   "features/advanced-usage/custom-rate-limits",
                   "features/advanced-usage/llm-security",

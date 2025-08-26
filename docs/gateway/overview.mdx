@@ -6,6 +6,10 @@ description: "Use any LLM provider through a single OpenAI-compatible API with i
 
 Helicone AI Gateway provides a unified API for 100+ LLM providers through the OpenAI SDK format. Instead of learning different SDKs and APIs for each provider, use one familiar interface to access any model with intelligent routing, automatic fallbacks, and complete observability.
 
+<Note>
+Currently supporting BYOK (Bring Your Own Keys) and passthrough routing. Pass-through billing (PTB) for using Helicone's API keys is coming soon.
+</Note>
+
 ## Why Use AI Gateway?
 
 <CardGroup cols={2}>
@@ -69,8 +73,8 @@ const response = await client.chat.completions.create({
 <Card title="Browse Model Registry" icon="list" href="https://helicone.ai/models">
   See all supported models and provider formats
 </Card>
-<Card title="Configure Fallbacks" icon="shield" href="/gateway/fallbacks">
-  Set up automatic model fallbacks for reliability
+<Card title="Provider Routing" icon="route" href="/gateway/provider-routing">
+  Configure automatic routing and fallbacks for reliability
 </Card>
 <Card title="Prompt Integration" icon="wand-magic-sparkles" href="/gateway/prompt-integration">
   Deploy and manage prompts through the gateway
