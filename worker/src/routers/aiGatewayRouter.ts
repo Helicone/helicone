@@ -16,6 +16,7 @@ import { isErr } from "../lib/util/results";
 import { PromptManager } from "../lib/managers/PromptManager";
 import { HeliconePromptManager } from "@helicone-package/prompts/HeliconePromptManager";
 import { PromptStore } from "../lib/db/PromptStore";
+import { errorForwarder } from "../lib/HeliconeProxyRequest/ErrorForwarder";
 
 export const getAIGatewayRouter = (router: BaseRouter) => {
   router.all(
@@ -91,9 +92,14 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
       });
 
       if (isErr(result)) {
-        return new Response(result.error.message, {
-          status: result.error.code,
+        requestWrapper.setBaseURLOverride("https://ai-gateway.helicone.ai");
+        const errorResponse = await errorForwarder(requestWrapper, env, ctx, {
+          code: result.error.type,
+          message: result.error.message,
+          statusCode: result.error.code,
+          details: result.error.details,
         });
+        return errorResponse;
       }
 
       return result.data;
