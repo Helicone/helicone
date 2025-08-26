@@ -36,6 +36,10 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
   );
   const [messageQueue, setMessageQueue] = useState<QueuedMessage[]>([]);
 
+  const handleQuickstartHelp = () => {
+    executeTool("quickstart-open-integration-guide", {});
+  };
+
   const abortController = useRef<AbortController | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatInterfaceRef = useRef<{ focus: () => void }>(null);
@@ -496,8 +500,13 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
           </div>
         )}
 
-        {messages.map((message) => (
-          <MessageRenderer key={uuidv4()} message={message} />
+        {messages.map((message, index) => (
+          <MessageRenderer
+            key={uuidv4()}
+            message={message}
+            messageIndex={index}
+            onQuickstartHelp={handleQuickstartHelp}
+          />
         ))}
 
         {isLoading && (

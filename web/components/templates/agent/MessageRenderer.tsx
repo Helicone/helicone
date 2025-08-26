@@ -3,6 +3,8 @@ import dynamic from "next/dynamic";
 import { markdownComponents } from "@/components/shared/prompts/ResponsePanel";
 import { useState } from "react";
 import { ImageModal } from "../requests/components/chatComponent/single/images/ImageModal";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/router";
 
 const markdownStyling =
   "w-full text-[13px] prose-p:my-2 prose-h1:mt-2 prose-h1:font-bold prose-h2:mt-2 prose-h3:mt-2 prose-h3:mb-1 prose-a:text-brand prose-a:underline";
@@ -15,9 +17,16 @@ type Message = NonNullable<OpenAIChatRequest["messages"]>[0];
 
 interface MessageRendererProps {
   message: Message;
+  messageIndex?: number;
+  onQuickstartHelp?: () => void;
 }
 
-const MessageRenderer = ({ message }: MessageRendererProps) => {
+const MessageRenderer = ({
+  message,
+  messageIndex,
+  onQuickstartHelp,
+}: MessageRendererProps) => {
+  const router = useRouter();
   const [selectedImage, setSelectedImage] = useState<{
     src: string;
     alt: string;
@@ -111,6 +120,11 @@ const MessageRenderer = ({ message }: MessageRendererProps) => {
   }
 
   if (message.role === "assistant") {
+    const isFirstMessage = messageIndex === 0;
+    const isQuickstartPage = router.pathname === "/quickstart";
+    const showQuickstartButton =
+      isFirstMessage && isQuickstartPage && onQuickstartHelp;
+
     return (
       <div className="w-full">
         <div className="w-full text-sm text-foreground">
@@ -121,6 +135,18 @@ const MessageRenderer = ({ message }: MessageRendererProps) => {
             >
               {message.content}
             </ReactMarkdown>
+          )}
+          {showQuickstartButton && (
+            <div className="mt-3">
+              <Button
+                onClick={onQuickstartHelp}
+                variant="outline"
+                size="sm"
+                className="text-sm"
+              >
+                Help me integrate
+              </Button>
+            </div>
           )}
           {message.tool_calls && (
             <div className="mt-2 space-y-2">
