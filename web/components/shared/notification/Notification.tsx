@@ -66,7 +66,7 @@ const Notification = () => {
       case "info":
         return (
           <InformationCircleIcon
-            className="text-yellow-400 h-5 w-5"
+            className="h-5 w-5 text-yellow-400"
             aria-hidden="true"
           />
         );
@@ -79,7 +79,10 @@ const Notification = () => {
         );
       default:
         return (
-          <CheckCircleIcon className="h-5 w-5 text-green-500" aria-hidden="true" />
+          <CheckCircleIcon
+            className="h-5 w-5 text-green-500"
+            aria-hidden="true"
+          />
         );
     }
   };
