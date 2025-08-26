@@ -41,6 +41,8 @@ const DefaultAIGateway = ({ setTabValue }: { setTabValue: () => void }) => {
                       Check our{" "}
                       <a
                         href="https://helicone.ai/models"
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="font-medium text-primary underline"
                       >
                         Model Registry
