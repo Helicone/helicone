@@ -2753,8 +2753,17 @@ Json: JsonObject;
       outputModalities: components["schemas"]["OutputModality"][];
       supportedParameters: components["schemas"]["StandardParameter"][];
     };
+    /** @enum {string} */
+    ModelCapability: "audio" | "video" | "image" | "thinking" | "web_search" | "caching" | "reasoning";
     ModelRegistryResponse: {
       models: components["schemas"]["ModelRegistryItem"][];
+      /** Format: double */
+      total: number;
+      filters: {
+        capabilities: components["schemas"]["ModelCapability"][];
+        authors: string[];
+        providers: string[];
+      };
     };
     ResultSuccess_ModelRegistryResponse_: {
       data: components["schemas"]["ModelRegistryResponse"];
@@ -2762,6 +2771,8 @@ Json: JsonObject;
       error: null;
     };
     "Result_ModelRegistryResponse.string_": components["schemas"]["ResultSuccess_ModelRegistryResponse_"] | components["schemas"]["ResultError_string_"];
+    /** @enum {string} */
+    SortOption: "name" | "price-low" | "price-high" | "context" | "newest";
     MetricStats: {
       /** Format: double */
       p99: number;
@@ -6109,6 +6120,23 @@ export interface operations {
     };
   };
   GetModelRegistry: {
+    parameters: {
+      query?: {
+        providers?: string;
+        authors?: string;
+        inputModalities?: string;
+        outputModalities?: string;
+        parameters?: string;
+        capabilities?: string;
+        priceMin?: number;
+        priceMax?: number;
+        contextMin?: number;
+        search?: string;
+        sort?: components["schemas"]["SortOption"];
+        limit?: number;
+        offset?: number;
+      };
+    };
     responses: {
       /** @description Ok */
       200: {

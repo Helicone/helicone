@@ -2425,10 +2425,17 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ModelCapability": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["audio"]},{"dataType":"enum","enums":["video"]},{"dataType":"enum","enums":["image"]},{"dataType":"enum","enums":["thinking"]},{"dataType":"enum","enums":["web_search"]},{"dataType":"enum","enums":["caching"]},{"dataType":"enum","enums":["reasoning"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ModelRegistryResponse": {
         "dataType": "refObject",
         "properties": {
             "models": {"dataType":"array","array":{"dataType":"refObject","ref":"ModelRegistryItem"},"required":true},
+            "total": {"dataType":"double","required":true},
+            "filters": {"dataType":"nestedObjectLiteral","nestedProperties":{"capabilities":{"dataType":"array","array":{"dataType":"refAlias","ref":"ModelCapability"},"required":true},"authors":{"dataType":"array","array":{"dataType":"string"},"required":true},"providers":{"dataType":"array","array":{"dataType":"string"},"required":true}},"required":true},
         },
         "additionalProperties": false,
     },
@@ -2445,6 +2452,11 @@ const models: TsoaRoute.Models = {
     "Result_ModelRegistryResponse.string_": {
         "dataType": "refAlias",
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_ModelRegistryResponse_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "SortOption": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["name"]},{"dataType":"enum","enums":["price-low"]},{"dataType":"enum","enums":["price-high"]},{"dataType":"enum","enums":["context"]},{"dataType":"enum","enums":["newest"]}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "MetricStats": {
@@ -8236,6 +8248,19 @@ export function RegisterRoutes(app: Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsModelRegistryController_getModelRegistry: Record<string, TsoaRoute.ParameterSchema> = {
+                providers: {"in":"query","name":"providers","dataType":"string"},
+                authors: {"in":"query","name":"authors","dataType":"string"},
+                inputModalities: {"in":"query","name":"inputModalities","dataType":"string"},
+                outputModalities: {"in":"query","name":"outputModalities","dataType":"string"},
+                parameters: {"in":"query","name":"parameters","dataType":"string"},
+                capabilities: {"in":"query","name":"capabilities","dataType":"string"},
+                priceMin: {"in":"query","name":"priceMin","dataType":"double"},
+                priceMax: {"in":"query","name":"priceMax","dataType":"double"},
+                contextMin: {"in":"query","name":"contextMin","dataType":"double"},
+                search: {"in":"query","name":"search","dataType":"string"},
+                sort: {"in":"query","name":"sort","ref":"SortOption"},
+                limit: {"in":"query","name":"limit","dataType":"double"},
+                offset: {"in":"query","name":"offset","dataType":"double"},
         };
         app.get('/v1/public/model-registry/models',
             ...(fetchMiddlewares<RequestHandler>(ModelRegistryController)),
