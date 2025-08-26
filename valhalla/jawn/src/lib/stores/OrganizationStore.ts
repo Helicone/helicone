@@ -340,7 +340,7 @@ export class OrganizationStore extends BaseStore {
     `;
     } else {
       query = `
-      select u.email, member, org_role from organization_member om 
+      select distinct on (om.member), u.email, org_role from organization_member om 
         left join auth.users u on u.id = om.member
         where om.organization = $1
       `;
