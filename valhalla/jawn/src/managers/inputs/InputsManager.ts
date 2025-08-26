@@ -32,8 +32,8 @@ export async function getAllSignedURLsFromInputs(
   replaceAssetWithContent: boolean = false
 ) {
   const s3Client = new S3Client(
-    process.env.S3_ACCESS_KEY ?? "",
-    process.env.S3_SECRET_KEY ?? "",
+    process.env.S3_ACCESS_KEY || undefined,
+    process.env.S3_SECRET_KEY || undefined,
     process.env.S3_ENDPOINT ?? "",
     process.env.S3_BUCKET_NAME ?? "",
     (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
