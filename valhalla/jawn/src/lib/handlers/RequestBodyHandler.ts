@@ -82,12 +82,18 @@ export class RequestBodyHandler extends AbstractLogHandler {
   }
 
   private isVectorDBRequest(requestBody: any): boolean {
+    if (typeof requestBody !== "object" || requestBody === null) {
+      return false;
+    }
     return (
       requestBody.hasOwnProperty("_type") && requestBody._type === "vector_db"
     );
   }
 
   private isToolRequest(requestBody: any): boolean {
+    if (typeof requestBody !== "object" || requestBody === null) {
+      return false;
+    }
     return requestBody.hasOwnProperty("_type") && requestBody._type === "tool";
   }
 
