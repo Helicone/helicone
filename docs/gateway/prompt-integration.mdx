@@ -13,18 +13,34 @@ This guide shows you how to integrate the AI Gateway with prompt management, not
 Instead of hardcoding prompts in your application, reference them by ID:
 
 <CodeGroup>
-```typescript Without Integration
-// ❌ Every prompt change = code deployment
-messages: [{
-  role: "user",
-  content: `You are a support agent...` // Hardcoded
-}]
+```typescript Before
+// ❌ Prompt hardcoded in your app
+const response = await client.chat.completions.create({
+  model: "gpt-4o-mini",
+  messages: [
+    {
+      role: "system", 
+      content: "You are a helpful customer support agent for TechCorp. Be friendly and solution-oriented."
+    },
+    {
+      role: "user",
+      content: `Customer ${customerName} is asking about ${issueType}`
+    }
+  ]
+});
 ```
 
-```typescript With Integration
-// ✅ Update prompts instantly via dashboard
-prompt_id: "customer_support_v2",
-inputs: { customer_name, issue_type, ... }
+```typescript After
+// ✅ Prompt managed in Helicone dashboard
+const response = await client.chat.completions.create({
+  model: "gpt-4o-mini",
+  prompt_id: "customer_support",
+  inputs: {
+    customer_name: customerName,
+    issue_type: issueType
+  }
+});
+// The prompt template lives in Helicone, not your code
 ```
 </CodeGroup>
 
@@ -90,25 +106,24 @@ const response = await client.chat.completions.create({
 
 Use these parameters in your chat completions request to integrate with saved prompts:
 
-<Fields>
-  <Field name="prompt_id" type="string" required>
-    The ID of your saved prompt from the Helicone dashboard
-  </Field>
-  <Field name="environment" type="string" default="production">
-    Which environment version to use: `development`, `staging`, or `production`
-  </Field>
-  <Field name="inputs" type="object" required>
-    Variables to fill in your prompt template (e.g., `{"customer_name": "John", "issue_type": "billing"}`)
-  </Field>
-  <Field name="model" type="string" required>
-    Any supported model - works with the unified gateway format
-  </Field>
-</Fields>
+<ParamField body="prompt_id" type="string" required>
+  The ID of your saved prompt from the Helicone dashboard
+</ParamField>
+
+<ParamField body="environment" type="string" default="production">
+  Which environment version to use: `development`, `staging`, or `production`
+</ParamField>
+
+<ParamField body="inputs" type="object" required>
+  Variables to fill in your prompt template (e.g., `{"customer_name": "John", "issue_type": "billing"}`)
+</ParamField>
+
+<ParamField body="model" type="string" required>
+  Any supported model - works with the unified gateway format
+</ParamField>
 
 ## Example Usage
 
-<Tabs>
-<Tab title="Basic">
 ```typescript
 const response = await client.chat.completions.create({
   model: "gpt-4o-mini",
@@ -121,24 +136,6 @@ const response = await client.chat.completions.create({
   }
 });
 ```
-</Tab>
-
-<Tab title="With Model Fallbacks">
-```typescript
-// Combine prompts with automatic fallbacks
-const response = await client.chat.completions.create({
-  model: "gpt-4o-mini,claude-haiku-4", // Try GPT first, then Claude
-  prompt_id: "customer_support_v2",
-  environment: "production",
-  inputs: {
-    customer_name: "Sarah Johnson",
-    issue_type: "billing",
-    customer_message: "I was charged twice this month"
-  }
-});
-```
-</Tab>
-</Tabs>
 
 ## Next Steps
 
