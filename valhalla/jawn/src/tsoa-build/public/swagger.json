@@ -7508,6 +7508,18 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ModelCapability": {
+				"type": "string",
+				"enum": [
+					"audio",
+					"video",
+					"image",
+					"thinking",
+					"web_search",
+					"caching",
+					"reasoning"
+				]
+			},
 			"ModelRegistryResponse": {
 				"properties": {
 					"models": {
@@ -7515,10 +7527,44 @@
 							"$ref": "#/components/schemas/ModelRegistryItem"
 						},
 						"type": "array"
+					},
+					"total": {
+						"type": "number",
+						"format": "double"
+					},
+					"filters": {
+						"properties": {
+							"capabilities": {
+								"items": {
+									"$ref": "#/components/schemas/ModelCapability"
+								},
+								"type": "array"
+							},
+							"authors": {
+								"items": {
+									"type": "string"
+								},
+								"type": "array"
+							},
+							"providers": {
+								"items": {
+									"type": "string"
+								},
+								"type": "array"
+							}
+						},
+						"required": [
+							"capabilities",
+							"authors",
+							"providers"
+						],
+						"type": "object"
 					}
 				},
 				"required": [
-					"models"
+					"models",
+					"total",
+					"filters"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -7551,6 +7597,16 @@
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
+				]
+			},
+			"SortOption": {
+				"type": "string",
+				"enum": [
+					"name",
+					"price-low",
+					"price-high",
+					"context",
+					"newest"
 				]
 			},
 			"MetricStats": {
@@ -17456,7 +17512,117 @@
 					"Model Registry"
 				],
 				"security": [],
-				"parameters": []
+				"parameters": [
+					{
+						"in": "query",
+						"name": "providers",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "authors",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "inputModalities",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "outputModalities",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "parameters",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "capabilities",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "priceMin",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "priceMax",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "contextMin",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "search",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sort",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/SortOption"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "offset",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
 			}
 		},
 		"/v1/public/compare/models": {
