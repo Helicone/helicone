@@ -50,8 +50,11 @@ Use path syntax to represent parent-child relationships:
 Execute your LLM request with the session headers included:
 
 ```typescript
-const response = await openai.chat.completions.create(
-  { messages: [{ role: "user", content: "Hello" }], model: "gpt-4o-mini" },
+const response = await client.chat.completions.create(
+  { 
+    messages: [{ role: "user", content: "Hello" }], 
+    model: "gpt-4o-mini" 
+  },
   {
     headers: {
       "Helicone-Session-Id": sessionId,
@@ -64,51 +67,117 @@ const response = await openai.chat.completions.create(
 </Step>
 </Steps>
 
-## Configuration Options
+## Understanding Sessions
+
+### What Sessions Can Track
+Sessions can group together all types of requests in your AI workflow:
+- **LLM calls** - OpenAI, Anthropic, and other model requests
+- **[Vector database queries](/integrations/vectordb)** - Embeddings, similarity searches, and retrievals  
+- **[Tool calls](/tools)** - Function executions, API calls, and custom tools
+- **Any logged request** - Anything sent through Helicone's logging
+
+This gives you a complete view of your AI agent's behavior, not just the LLM interactions.
+
+### Session IDs
+The session ID is a unique identifier that groups all related requests together. Think of it as a conversation thread ID.
+
+**What to use:**
+- **UUIDs** (recommended): `550e8400-e29b-41d4-a716-446655440000`
+- **Unique strings**: `user_123_conversation_456`
+
+**Why it matters:**
+- Same ID = requests get grouped together in the dashboard
+- Different IDs = separate sessions, even if they're related
+- Reusing IDs across different workflows will mix unrelated requests
+
+```typescript
+// ✅ Good - unique per conversation
+const sessionId = randomUUID(); // Different for each user conversation
+
+// ❌ Bad - reuses same ID
+const sessionId = "chat_session"; // All users get mixed together
+```
+
+### Session Paths
+Paths create the hierarchy within your session, showing how requests relate to each other.
+
+**Path Naming Philosophy:**
+
+Think of session paths as **conceptual groupings** rather than chronological order. Requests with the same path represent the same "type" of work, even if they happen at different times.
+
+*Example: In a code review agent, all "security check" requests get the same path (`/review/security`) whether they happen early or late in the analysis. This lets you see patterns in the duration distribution chart - all security checks will be colored the same, showing you when they typically occur and how long they take.*
+
+**Path Structure Rules:**
+- Start with `/` (forward slash)
+- Use `/` to separate levels: `/parent/child/grandchild`
+- Keep names descriptive: `/analyze_request/fetch_data/process_results`
+- **Group by function, not by time** - same conceptual work = same path
+
+**How Hierarchy Works:**
+```typescript
+"/conversation"                    // Root level
+"/conversation/initial_question"   // Child of conversation  
+"/conversation/followup"          // Another child of conversation
+"/conversation/followup/clarify"  // Child of followup
+```
+
+**Path Design Patterns:**
+```typescript
+// Workflow pattern - good for AI agents
+"/task"
+"/task/research" 
+"/task/research/web_search"
+"/task/generate"
+
+// Conversation pattern - good for chatbots
+"/session"
+"/session/question_1"
+"/session/answer_1" 
+"/session/question_2"
+
+// Pipeline pattern - good for data processing
+"/process"
+"/process/extract"
+"/process/transform"
+"/process/load"
+```
+
+### Session Names
+The session name is a high-level grouping that makes it easy to filter and organize similar types of sessions in the dashboard.
+
+**Good session names:**
+- `"Customer Support"` - All support sessions use this name
+- `"Content Generation"` - All content creation sessions use this name
+- `"Trip Planning Agent"` - All trip planning workflows use this name
+
+**Purpose:**
+- **Quick filtering** - Filter dashboard to show only "Customer Support" sessions
+- **High-level organization** - Group alike sessions for easy comparison
+- **Performance analysis** - Compare metrics across the same session type
+
+## Configuration Reference
 
 ### Required Headers
 
-| Header | Type | Description | Default | Example |
-|--------|------|-------------|---------|----------|
-| `Helicone-Session-Id` | `string` | Unique identifier for the session (recommend UUID) | N/A | `"550e8400-e29b-41d4-a716-446655440000"` |
-| `Helicone-Session-Path` | `string` | Path representing the trace hierarchy using `/` syntax | N/A | `"/abstract"` or `"/parent/child"` |
-| `Helicone-Session-Name` | `string` | Human-readable name for the session | N/A | `"Course Plan"` |
+<ParamField header="Helicone-Session-Id" type="string" required>
+  Unique identifier for the session. Use UUIDs to avoid conflicts.
+  
+  Example: `"550e8400-e29b-41d4-a716-446655440000"`
+</ParamField>
 
+<ParamField header="Helicone-Session-Path" type="string" required>
+  Path representing the trace hierarchy using `/` syntax. Shows parent-child relationships.
+  
+  Example: `"/abstract"` or `"/parent/child"`
+</ParamField>
 
-<AccordionGroup>
-<Accordion title="Session ID Guidelines">
-Use unique identifiers for each session to avoid conflicts:
+<ParamField header="Helicone-Session-Name" type="string" required>
+  Human-readable name for the session type. Groups similar workflows together.
+  
+  Example: `"Course Plan"` or `"Customer Support"`
+</ParamField>
 
-```typescript
-// ✅ Good - Using UUID
-import { randomUUID } from "crypto";
-const sessionId = randomUUID();
-
-// ❌ Bad - Simple strings can cause conflicts
-const sessionId = "session_123";
-```
-</Accordion>
-
-<Accordion title="Path Structure Best Practices">
-Structure paths to reflect your application's logical flow:
-
-```typescript
-// Multi-step conversation
-"/conversation"              // Main thread
-"/conversation/question"     // User question
-"/conversation/answer"       // AI response
-"/conversation/followup"     // Follow-up question
-
-// Complex workflow
-"/workflow"                  // Main process
-"/workflow/analyze"          // Analysis step
-"/workflow/analyze/data"     // Data processing
-"/workflow/generate"         // Generation step
-```
-</Accordion>
-</AccordionGroup>
-
-## Use Cases
+## Common Patterns
 
 <Tabs>
 <Tab title="Code Generation Assistant">
@@ -117,20 +186,17 @@ Track a complete code generation workflow with clarifications and refinements:
 <CodeGroup>
 ```typescript Node.js
 import { randomUUID } from "crypto";
-import OpenAI from "openai";
+import { OpenAI } from "openai";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  baseURL: "https://oai.helicone.ai/v1",
-  defaultHeaders: {
-    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-  },
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY,
 });
 
 const sessionId = randomUUID();
 
 // Initial feature request
-const response1 = await openai.chat.completions.create(
+const response1 = await client.chat.completions.create(
   {
     messages: [{ role: "user", content: "Create a React component for user authentication with email and password" }],
     model: "gpt-4o-mini",
@@ -145,7 +211,7 @@ const response1 = await openai.chat.completions.create(
 );
 
 // User asks for clarification
-const response2 = await openai.chat.completions.create(
+const response2 = await client.chat.completions.create(
   {
     messages: [
       { role: "user", content: "Create a React component for user authentication with email and password" },
@@ -164,7 +230,7 @@ const response2 = await openai.chat.completions.create(
 );
 
 // User requests TypeScript version
-const response3 = await openai.chat.completions.create(
+const response3 = await client.chat.completions.create(
   {
     messages: [
       { role: "user", content: "Convert this to TypeScript with proper interfaces" }
@@ -183,14 +249,12 @@ const response3 = await openai.chat.completions.create(
 
 ```python Python
 import uuid
-import openai
+import os
+from openai import OpenAI
 
-client = openai.OpenAI(
-    api_key=os.environ.get("OPENAI_API_KEY"),
-    base_url="https://oai.helicone.ai/v1",
-    default_headers={
-        "Helicone-Auth": f"Bearer {os.environ.get('HELICONE_API_KEY')}",
-    }
+client = OpenAI(
+    base_url="https://ai-gateway.helicone.ai",
+    api_key=os.environ.get("HELICONE_API_KEY"),
 )
 
 session_id = str(uuid.uuid4())
@@ -242,7 +306,7 @@ Track an automated PR review workflow with multiple analysis steps:
 const sessionId = randomUUID();
 
 // Initial PR analysis
-const analysis = await openai.chat.completions.create(
+const analysis = await client.chat.completions.create(
   { 
     messages: [{ role: "user", content: "Analyze this pull request for code quality and potential issues: [PR diff content]" }],
     model: "gpt-4o-mini" 
@@ -257,7 +321,7 @@ const analysis = await openai.chat.completions.create(
 );
 
 // Security check
-const securityCheck = await openai.chat.completions.create(
+const securityCheck = await client.chat.completions.create(
   { 
     messages: [{ role: "user", content: "Check for security vulnerabilities: SQL injection, XSS, authentication issues" }],
     model: "gpt-4o-mini" 
@@ -272,7 +336,7 @@ const securityCheck = await openai.chat.completions.create(
 );
 
 // Generate review comments
-const reviewComments = await openai.chat.completions.create(
+const reviewComments = await client.chat.completions.create(
   { 
     messages: [{ role: "user", content: "Generate constructive review comments based on analysis" }],
     model: "gpt-4o-mini" 
@@ -295,7 +359,7 @@ Track a multi-step API documentation generation workflow:
 const sessionId = randomUUID();
 
 // Analyze API endpoints
-const endpoints = await openai.chat.completions.create(
+const endpoints = await client.chat.completions.create(
   {
     messages: [{ role: "user", content: "Analyze these API routes and extract endpoint information: [code content]" }],
     model: "gpt-4o-mini",
@@ -310,7 +374,7 @@ const endpoints = await openai.chat.completions.create(
 );
 
 // Generate OpenAPI spec
-const openApiSpec = await openai.chat.completions.create(
+const openApiSpec = await client.chat.completions.create(
   {
     messages: [
       { role: "user", content: "Generate OpenAPI 3.0 specification based on these endpoints" }
@@ -327,7 +391,7 @@ const openApiSpec = await openai.chat.completions.create(
 );
 
 // Create usage examples
-const examples = await openai.chat.completions.create(
+const examples = await client.chat.completions.create(
   {
     messages: [{ role: "user", content: "Create code examples for each endpoint in multiple languages" }],
     model: "gpt-4o-mini",
@@ -353,90 +417,6 @@ const examples = await openai.chat.completions.create(
 >
   Full JavaScript implementation showing session hierarchy and tracking
 </Card>
-
-## Understanding Sessions
-
-### What Sessions Can Track
-Sessions can group together all types of requests in your AI workflow:
-- **LLM calls** - OpenAI, Anthropic, and other model requests
-- **[Vector database queries](/integrations/vectordb)** - Embeddings, similarity searches, and retrievals  
-- **[Tool calls](/tools)** - Function executions, API calls, and custom tools
-- **Any logged request** - Anything sent through Helicone's logging
-
-This gives you a complete view of your AI agent's behavior, not just the LLM interactions.
-
-### Session IDs
-The session ID is a unique identifier that groups all related requests together. Think of it as a conversation thread ID.
-
-**What to use:**
-- **UUIDs** (recommended): `550e8400-e29b-41d4-a716-446655440000`
-- **Unique strings**: `user_123_conversation_456`
-
-**Why it matters:**
-- Same ID = requests get grouped together in the dashboard
-- Different IDs = separate sessions, even if they're related
-- Reusing IDs across different workflows will mix unrelated requests
-
-```typescript
-// ✅ Good - unique per conversation
-const sessionId = randomUUID(); // Different for each user conversation
-
-// ❌ Bad - reuses same ID
-const sessionId = "chat_session"; // All users get mixed together
-```
-
-### Session Paths
-Paths create the hierarchy within your session, showing how requests relate to each other.
-
-**Path Structure Rules:**
-- Start with `/` (forward slash)
-- Use `/` to separate levels: `/parent/child/grandchild`
-- Keep names descriptive: `/analyze_request/fetch_data/process_results`
-
-**How Hierarchy Works:**
-```typescript
-"/conversation"                    // Root level
-"/conversation/initial_question"   // Child of conversation  
-"/conversation/followup"          // Another child of conversation
-"/conversation/followup/clarify"  // Child of followup
-```
-
-This creates a tree structure in the dashboard where you can see the flow from initial question → followup → clarification.
-
-**Path Design Patterns:**
-```typescript
-// Workflow pattern - good for AI agents
-"/task"
-"/task/research" 
-"/task/research/web_search"
-"/task/generate"
-
-// Conversation pattern - good for chatbots
-"/session"
-"/session/question_1"
-"/session/answer_1" 
-"/session/question_2"
-
-// Pipeline pattern - good for data processing
-"/process"
-"/process/extract"
-"/process/transform"
-"/process/load"
-```
-
-### Session Names
-The session name is used to group related sessions together in the dashboard. Use the same name for sessions that are part of the same flow or workflow type.
-
-**Good session names:**
-- `"Customer Support"` - All support sessions use this name
-- `"Content Generation"` - All content creation sessions use this name
-- `"Trip Planning Agent"` - All trip planning workflows use this name
-
-**Why this matters:**
-- Sessions with the same name get grouped together in the dashboard
-- You can filter to see all sessions of a specific type
-- Makes it easy to compare performance across similar workflows
-
 
 ## Related Features
 

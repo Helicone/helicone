@@ -7,8 +7,6 @@ description: "Enable robust security measures in your LLM applications to protec
 
 import QuestionsSection from "/snippets/questions-section.mdx";
 
-## Introduction
-
 Generative AI is quickly changing the cybersecurity landscape. Helicone provides built-in security measures powered by Meta's state-of-the-art security models to protect your LLM applications.
 
 <AccordionGroup>
@@ -80,14 +78,18 @@ Helicone's LLM security is powered by two advanced models from Meta:
 
 ## Quick Start
 
+<Warning>
+LLM Security currently works with **OpenAI models only** (gpt-4, gpt-3.5-turbo, etc.). Support for other providers is coming soon.
+</Warning>
+
 To enable LLM security in Helicone, simply add `Helicone-LLM-Security-Enabled: true` to your request headers. For advanced security analysis using Llama Guard, add `Helicone-LLM-Security-Advanced: true`:
 
 <CodeGroup>
 
-```bash Curl
-curl https://oai.helicone.ai/v1/chat/completions \
+```bash cURL
+curl https://ai-gateway.helicone.ai/chat/completions \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $OPENAI_API_KEY" \
+  -H "Authorization: Bearer $HELICONE_API_KEY" \
   -H "Helicone-LLM-Security-Enabled: true" \
   -H "Helicone-LLM-Security-Advanced: true" \
   -d '{
@@ -102,11 +104,17 @@ curl https://oai.helicone.ai/v1/chat/completions \
 ```
 
 ```python Python
-openai.api_base = "https://oai.helicone.ai/v1"
+from openai import OpenAI
+import os
 
-client.chat.completions.create(
-    model="text-davinci-003",
-    prompt="How do I enable LLM security with helicone?",
+client = OpenAI(
+    base_url="https://ai-gateway.helicone.ai",
+    api_key=os.getenv("HELICONE_API_KEY"),
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "How do I enable LLM security with helicone?"}],
     extra_headers={
       "Helicone-LLM-Security-Enabled": "true",
       "Helicone-LLM-Security-Advanced": "true",
@@ -114,17 +122,26 @@ client.chat.completions.create(
 )
 ```
 
-```ts Node.js
-import { Configuration, OpenAIApi } from "openai";
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-  basePath: "https://oai.helicone.ai/v1",
-  defaultHeaders: {
-    "Helicone-LLM-Security-Enabled": "true",
-    "Helicone-LLM-Security-Advanced": "true",
-  },
+```typescript Node.js
+import { OpenAI } from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY,
 });
-const openai = new OpenAIApi(configuration);
+
+const response = await client.chat.completions.create(
+  {
+    model: "gpt-4o-mini",
+    messages: [{ role: "user", content: "How do I enable LLM security with helicone?" }]
+  },
+  {
+    headers: {
+      "Helicone-LLM-Security-Enabled": "true",
+      "Helicone-LLM-Security-Advanced": "true",
+    }
+  }
+);
 ```
 
 </CodeGroup>

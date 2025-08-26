@@ -1,289 +1,479 @@
 ---
-title: "User Metrics"
+title: "User Metrics & Analytics"
 sidebarTitle: "User Metrics"
-"twitter:title": "User Metrics - Helicone OSS LLM Observability"
+description: "Understand user behavior, track engagement patterns, and optimize AI experiences with detailed user analytics"
 ---
 
-import QuestionsSection from "/snippets/questions-section.mdx";
+Analyze how users interact with your AI features through comprehensive user metrics. Track engagement patterns, identify power users, understand usage trends, and optimize experiences based on real user behavior data.
 
-When building AI applications with multiple users, you need to track costs, usage patterns, and performance per individual user for billing, optimization, and abuse detection. User Metrics automatically aggregates all requests by user ID, giving you detailed analytics on each user's AI usage across your entire application.
-
-<Frame caption="See user metrics such as the number of requests, costs, and activities.">
-  <img
-    src="/images/user-metrics/example-user-metric.png"
-    alt="User metrics overview: Requests, costs, and activities tracked in Helicone"
-  />
-</Frame>
-
-## Why use User Metrics
-
-- **Track billing and costs**: Calculate exact costs per user for accurate billing and profitability analysis
-- **Detect abuse and anomalies**: Identify users with unusual usage patterns or potential API abuse
-- **Optimize user experience**: Find performance bottlenecks and high-cost operations affecting specific users
-
-## Quick Start
-
-<Steps>
-<Step title="Add user identification">
-Include a `Helicone-User-Id` header in your LLM requests:
-
-```typescript
-{
-  "Helicone-User-Id": "user-123" // Or email: "user@example.com"
-}
-```
-</Step>
-
-<Step title="Make your request">
-Execute your LLM request with the user ID header:
-
-```typescript
-const response = await openai.chat.completions.create(
-  {
-    model: "gpt-4o-mini",
-    messages: [{ role: "user", content: "Hello!" }]
-  },
-  {
-    headers: {
-      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-      "Helicone-User-Id": "user-123"
-    }
-  }
-);
-```
-</Step>
-
-<Step title="View user analytics">
-Access detailed per-user metrics in the Users tab of your Helicone dashboard, including costs, request volumes, and usage patterns.
-</Step>
-</Steps>
-
-## Configuration Options
-
-### Basic Settings
-
-User identification can be set through multiple methods:
-
-| Method | Header/Parameter | Type | Description | Example |
-|--------|------------------|------|-------------|----------|
-| **Helicone Header** | `Helicone-User-Id` | `string` | Recommended approach for user tracking | `"user-123"` |
-| **OpenAI Parameter** | `user` in request body | `string` | OpenAI's built-in user parameter | `"user-123"` |
-
-### Advanced Settings
-
-<AccordionGroup>
-<Accordion title="User ID Best Practices">
-Choose appropriate user identifiers for your use case:
-
-```typescript
-// ✅ Good - consistent and identifiable
-{
-  "Helicone-User-Id": "user-12345",        // Internal user ID
-  "Helicone-User-Id": "user@example.com",  // Email address
-  "Helicone-User-Id": "org-123-user-456"   // Hierarchical ID
-}
-
-// ❌ Avoid - inconsistent or non-identifiable
-{
-  "Helicone-User-Id": "session-abc123",    // Session ID, not user ID
-  "Helicone-User-Id": "anonymous",         // Generic identifier
-  "Helicone-User-Id": "123"                // Too simple, potential conflicts
-}
-```
-</Accordion>
-
-<Accordion title="Multiple Identification Methods">
-You can use both OpenAI's user parameter and Helicone's header:
-
-```typescript
-const response = await openai.chat.completions.create(
-  {
-    model: "gpt-4o-mini",
-    messages: [{ role: "user", content: "Hello!" }],
-    user: "user-123" // OpenAI's user parameter
-  },
-  {
-    headers: {
-      "Helicone-User-Id": "user-123" // Helicone's header (takes precedence)
-    }
-  }
-);
-```
-
-<Note>If both are provided, `Helicone-User-Id` takes precedence for user metrics.</Note>
-</Accordion>
-</AccordionGroup>
-
-## Use Cases
-
-<Tabs>
-<Tab title="SaaS Billing & Analytics">
-Track costs per user for accurate billing and profitability analysis:
-
-<CodeGroup>
-```typescript Node.js
-import OpenAI from "openai";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  baseURL: "https://oai.helicone.ai/v1",
-  defaultHeaders: {
-    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-  },
-});
-
-// Track AI costs per customer for billing
-async function handleUserRequest(userId, prompt) {
-  const response = await openai.chat.completions.create(
-    {
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }]
-    },
-    {
-      headers: {
-        "Helicone-User-Id": userId,
-        "Helicone-Property-Plan": "premium", // Track by plan type
-        "Helicone-Property-Feature": "chat" // Track by feature
-      }
-    }
-  );
-  
-  // Use response...
-  return response;
-}
-
-// Now analyze:
-// - Total cost per user this month
-// - Average cost per user by plan type  
-// - Which users are most/least profitable
-```
-
-```python Python
-import openai
-
-client = openai.OpenAI(
-    api_key=os.environ.get("OPENAI_API_KEY"),
-    base_url="https://oai.helicone.ai/v1",
-    default_headers={
-        "Helicone-Auth": f"Bearer {os.environ.get('HELICONE_API_KEY')}",
-    }
-)
-
-def handle_user_request(user_id, prompt):
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": prompt}],
-        extra_headers={
-            "Helicone-User-Id": user_id,
-            "Helicone-Property-Plan": "premium",
-            "Helicone-Property-Feature": "chat"
-        }
-    )
-    return response
-```
-</CodeGroup>
-</Tab>
-
-<Tab title="Abuse Detection & Rate Limiting">
-Monitor user behavior patterns to detect abuse and implement smart rate limiting:
-
-```typescript
-import OpenAI from "openai";
-
-class AIService {
-  constructor() {
-    this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-      baseURL: "https://oai.helicone.ai/v1",
-      defaultHeaders: {
-        "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-      },
-    });
-  }
-
-  async processRequest(userId, prompt, userTier = "free") {
-    const response = await this.openai.chat.completions.create(
-      {
-        model: userTier === "premium" ? "o3" : "gpt-4o-mini",
-        messages: [{ role: "user", content: prompt }]
-      },
-      {
-        headers: {
-          "Helicone-User-Id": userId,
-          "Helicone-Property-Tier": userTier,
-          "Helicone-Property-RequestType": this.classifyRequest(prompt)
-        }
-      }
-    );
-
-    return response;
-  }
-
-  classifyRequest(prompt) {
-    if (prompt.length > 1000) return "long-form";
-    if (prompt.includes("code")) return "code-generation";
-    return "general";
-  }
-}
-
-// In Helicone dashboard, monitor:
-// - Users with sudden usage spikes
-// - High-cost requests by user
-// - Request patterns that indicate abuse
-```
-</Tab>
-
-<Tab title="Multi-Tenant Application Analytics">
-Analyze usage patterns across different organizations and teams:
-
-```typescript
-// For a B2B SaaS with multiple organizations
-async function handleOrgUserRequest(orgId, userId, prompt) {
-  const response = await openai.chat.completions.create(
-    {
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }]
-    },
-    {
-      headers: {
-        "Helicone-User-Id": `${orgId}-${userId}`, // Hierarchical user ID
-        "Helicone-Property-Organization": orgId,
-        "Helicone-Property-Department": "engineering",
-        "Helicone-Property-Role": "developer"
-      }
-    }
-  );
-
-  return response;
-}
-
-// Analytics you can now track:
-// - AI costs per organization
-// - Usage by department within orgs
-// - Most active users per organization
-// - Feature adoption across different user roles
-```
-</Tab>
-</Tabs>
-
-## Related Features
+### Key User Metrics
 
 <CardGroup cols={2}>
-<Card title="Custom Properties" icon="tag" href="/features/advanced-usage/custom-properties">
-Combine user tracking with custom properties for deeper segmentation
+<Card title="Active Users" icon="users">
+  Daily, weekly, and monthly active users
+  Track user growth and retention trends
 </Card>
-
-<Card title="Sessions" icon="link" href="/features/sessions">
-Track user sessions and multi-step workflows per user
+<Card title="Session Analytics" icon="git-branch">
+  Session length, depth, and engagement
+  Understand conversation patterns
 </Card>
-
-<Card title="Webhooks" icon="webhook" href="/features/webhooks">
-Get real-time notifications about user activity and usage patterns
+<Card title="Usage Patterns" icon="activity">
+  Request frequency, timing, and features used
+  Identify most valuable use cases
 </Card>
-
-<Card title="Alerts" icon="bell" href="/features/alerts">
-Set up alerts for unusual user behavior or usage spikes
+<Card title="User Satisfaction" icon="heart">
+  Feedback scores, retry rates, and completion rates
+  Measure AI experience quality
 </Card>
 </CardGroup>
 
-<QuestionsSection />
+## User Identification & Tracking
+
+### Setting User IDs
+Track users across sessions and requests:
+
+<CodeGroup>
+```typescript TypeScript
+await client.chat.completions.create({
+  model: "gpt-4o/openai",
+  messages: [{ role: "user", content: "Hello!" }],
+  headers: {
+    "Helicone-User-Id": "user-12345"
+  }
+});
+```
+
+```python Python
+response = client.chat.completions.create(
+    model="gpt-4o/openai",
+    messages=[{"role": "user", "content": "Hello!"}],
+    extra_headers={
+        "Helicone-User-Id": "user-12345"
+    }
+)
+```
+
+```bash cURL
+curl https://ai-gateway.helicone.ai/ai/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $HELICONE_API_KEY" \
+  -H "Helicone-User-Id: user-12345" \
+  -d '{"model": "gpt-4o/openai", "messages": [...]}'
+```
+</CodeGroup>
+
+### User Properties
+Enrich user data with additional context:
+
+```typescript
+// Add user segmentation data
+{
+  headers: {
+    "Helicone-User-Id": "user-12345",
+    "Helicone-Property-UserTier": "premium",
+    "Helicone-Property-UserType": "business",
+    "Helicone-Property-SignupDate": "2024-01-15",
+    "Helicone-Property-Industry": "healthcare"
+  }
+}
+```
+
+## User Behavior Analytics
+
+### Usage Patterns
+Understand how users interact with your AI:
+
+```json
+{
+  "user_behavior": {
+    "avg_requests_per_day": 24,
+    "peak_usage_hours": [9, 14, 16],
+    "session_length_avg": "12 minutes",
+    "favorite_features": ["chat", "summary", "analysis"],
+    "model_preferences": ["gpt-4o/openai", "claude-3.5-sonnet-v2/anthropic"]
+  }
+}
+```
+
+### Engagement Metrics
+Track how engaged users are with your AI features:
+
+<Tabs>
+  <Tab title="Session Metrics">
+    - **Session duration** - Time spent in conversations
+    - **Messages per session** - Conversation depth
+    - **Return sessions** - Users coming back within 24h
+    - **Session completion rate** - Conversations finished vs abandoned
+  </Tab>
+  
+  <Tab title="Request Patterns">
+    - **Request frequency** - How often users make requests
+    - **Request complexity** - Token length and reasoning difficulty
+    - **Feature usage** - Which AI features are most popular
+    - **Model stickiness** - User preference for specific models
+  </Tab>
+  
+  <Tab title="Satisfaction Indicators">
+    - **Retry rate** - How often users retry the same request
+    - **Feedback scores** - Explicit user ratings
+    - **Completion rate** - Requests that achieve user goals
+    - **Follow-up questions** - Indicator of engagement
+  </Tab>
+</Tabs>
+
+## User Segmentation
+
+### Automatic Segmentation
+Helicone automatically groups users based on behavior:
+
+<CardGroup cols={2}>
+<Card title="Power Users" icon="zap">
+  High request volume, long sessions
+  Top 10% of users by usage
+</Card>
+<Card title="Casual Users" icon="coffee">
+  Moderate usage, shorter sessions
+  Majority of user base
+</Card>
+<Card title="New Users" icon="user-plus">
+  Recent signups, learning patterns
+  First 30 days of usage
+</Card>
+<Card title="At-Risk Users" icon="alert-triangle">
+  Declining usage, potential churn
+  Require retention efforts
+</Card>
+</CardGroup>
+
+### Custom Segmentation
+Create segments based on your business logic:
+
+```typescript
+// Business tier segmentation
+{
+  "free_tier": {
+    "monthly_request_limit": 1000,
+    "features": ["basic_chat"],
+    "support_level": "community"
+  },
+  "pro_tier": {
+    "monthly_request_limit": 10000,
+    "features": ["chat", "analysis", "summaries"],
+    "support_level": "email"
+  },
+  "enterprise_tier": {
+    "monthly_request_limit": "unlimited",
+    "features": ["all"],
+    "support_level": "priority"
+  }
+}
+```
+
+## User Journey Analysis
+
+### Onboarding Analytics
+Track how new users adopt your AI features:
+
+<AccordionGroup>
+  <Accordion title="First Session Analysis">
+    **Key Metrics:**
+    - Time to first request
+    - First request success rate
+    - Features discovered in first session
+    - Session length and engagement
+    
+    **Optimization Goals:**
+    - Reduce time to value
+    - Increase first-session success
+    - Guide feature discovery
+  </Accordion>
+  
+  <Accordion title="Activation Milestones">
+    **Milestone Tracking:**
+    - First successful request
+    - First multi-turn conversation
+    - First use of advanced features
+    - First week retention
+    
+    **Success Indicators:**
+    - Users reaching activation milestones
+    - Time to reach each milestone
+    - Drop-off points in journey
+  </Accordion>
+  
+  <Accordion title="Feature Adoption">
+    **Adoption Funnel:**
+    - Users aware of feature
+    - Users who try feature
+    - Users who adopt feature regularly
+    - Users who become power users
+    
+    **Insights:**
+    - Which features drive retention
+    - Barriers to feature adoption
+    - Optimal feature introduction timing
+  </Accordion>
+</AccordionGroup>
+
+### Usage Evolution
+Track how user behavior changes over time:
+
+```json
+{
+  "user_evolution": {
+    "week_1": {
+      "requests_per_day": 3,
+      "avg_session_length": "5 min",
+      "features_used": ["chat"],
+      "satisfaction_score": 7.2
+    },
+    "week_4": {
+      "requests_per_day": 12,
+      "avg_session_length": "15 min", 
+      "features_used": ["chat", "analysis", "summary"],
+      "satisfaction_score": 8.7
+    },
+    "week_12": {
+      "requests_per_day": 28,
+      "avg_session_length": "22 min",
+      "features_used": ["all_features"],
+      "satisfaction_score": 9.1
+    }
+  }
+}
+```
+
+## Cohort Analysis
+
+### User Cohorts
+Group users by signup date to track retention:
+
+| Cohort | Week 1 | Week 2 | Week 4 | Week 8 | Week 12 |
+|--------|--------|--------|--------|--------|---------|
+| Jan 2024 | 100% | 78% | 65% | 52% | 48% |
+| Feb 2024 | 100% | 82% | 71% | 58% | 54% |
+| Mar 2024 | 100% | 85% | 74% | 61% | - |
+
+### Retention Insights
+Understand what drives long-term usage:
+
+- **High retention features** - Features that keep users coming back
+- **Churn indicators** - Behaviors that predict user departure
+- **Activation thresholds** - Usage levels that predict retention
+- **Seasonal patterns** - How retention varies by time of year
+
+## User Experience Metrics
+
+### Quality Indicators
+Measure the quality of AI interactions:
+
+<CardGroup cols={2}>
+<Card title="Success Rate" icon="check-circle">
+  Percentage of requests that achieve user goals
+  Track by user segment and feature
+</Card>
+<Card title="Response Quality" icon="star">
+  User ratings and feedback scores
+  Automated quality assessments
+</Card>
+<Card title="Task Completion" icon="target">
+  Rate of successful task completion
+  Multi-step workflow success rates  
+</Card>
+<Card title="User Satisfaction" icon="smile">
+  Overall satisfaction scores
+  Net Promoter Score (NPS) tracking
+</Card>
+</CardGroup>
+
+### Friction Points
+Identify where users struggle:
+
+```json
+{
+  "friction_analysis": {
+    "high_retry_requests": {
+      "feature": "document_analysis",
+      "retry_rate": 23,
+      "common_issues": ["format_errors", "timeout"]
+    },
+    "abandoned_sessions": {
+      "avg_abandonment_point": "4th message",
+      "common_patterns": ["long_wait_time", "unclear_response"]
+    },
+    "error_hotspots": {
+      "rate_limits": "15% of power users affected",
+      "model_errors": "2.3% of requests fail"
+    }
+  }
+}
+```
+
+## Personalization Insights
+
+### User Preferences
+Track individual user preferences:
+
+- **Preferred models** - Which models users choose most often
+- **Communication style** - Formal vs casual interaction patterns
+- **Feature usage** - Which features each user finds valuable
+- **Session timing** - When users are most active
+
+### Adaptive Experiences
+Use metrics to personalize experiences:
+
+```typescript
+// Personalized model selection based on user history
+const getUserPreferredModel = (userId: string) => {
+  const userMetrics = getUserMetrics(userId);
+  
+  if (userMetrics.prefers_speed) {
+    return "gpt-4o-mini/openai,gemini-flash/google";
+  }
+  
+  if (userMetrics.prefers_quality) {
+    return "claude-3.5-sonnet-v2/anthropic,gpt-4o/openai";
+  }
+  
+  return "gpt-4o-mini/openai,claude-3.5-haiku/anthropic";
+};
+```
+
+## Comparative Analytics
+
+### User Benchmarking
+Compare user performance against benchmarks:
+
+- **Usage vs peers** - How users compare to similar cohorts
+- **Efficiency metrics** - Requests per goal achieved
+- **Feature adoption** - Adoption rate vs typical users
+- **Satisfaction vs average** - Experience quality comparison
+
+### A/B Testing
+Test improvements with user metrics:
+
+<CodeGroup>
+```typescript Feature Test
+// A/B test new feature with user segments
+const experimentVariant = getUserExperiment(userId, 'new_chat_ui');
+
+if (experimentVariant === 'variant_a') {
+  // Show improved chat interface
+  return <NewChatUI />;
+} else {
+  // Show current interface  
+  return <CurrentChatUI />;
+}
+```
+
+```typescript Model Test
+// Test model preference by user segment
+const modelTest = getUserExperiment(userId, 'model_selection');
+
+const model = modelTest === 'claude_first' 
+  ? "claude-3.5-sonnet-v2/anthropic,gpt-4o/openai"
+  : "gpt-4o/openai,claude-3.5-sonnet-v2/anthropic";
+
+await client.chat.completions.create({ model, messages });
+```
+</CodeGroup>
+
+## User Lifecycle Management
+
+### Lifecycle Stages
+Track users through their journey:
+
+<Tabs>
+  <Tab title="Acquisition">
+    - **Source tracking** - How users discovered your AI
+    - **First interaction** - Initial experience quality
+    - **Onboarding completion** - Setup and first success
+  </Tab>
+  
+  <Tab title="Activation">
+    - **Feature discovery** - Key features adopted
+    - **Usage milestones** - Regular usage patterns
+    - **Value realization** - First significant success
+  </Tab>
+  
+  <Tab title="Retention">
+    - **Regular usage** - Consistent engagement patterns
+    - **Feature expansion** - Adopting additional features
+    - **Satisfaction maintenance** - Ongoing positive experience
+  </Tab>
+  
+  <Tab title="Growth">
+    - **Power user behavior** - High engagement levels
+    - **Advocacy indicators** - Referrals and recommendations
+    - **Premium adoption** - Upgrade to paid features
+  </Tab>
+</Tabs>
+
+## Reporting & Insights
+
+### Automated Reports
+Receive regular user analytics:
+
+- **Daily user activity** - Active users and key metrics
+- **Weekly trends** - User behavior patterns and changes  
+- **Monthly insights** - Deep analysis and recommendations
+- **Quarterly reviews** - Strategic insights and planning
+
+### Custom Dashboards
+Create views tailored to your needs:
+
+<CardGroup cols={2}>
+<Card title="Product Dashboard" icon="users">
+  User engagement, feature adoption, satisfaction
+  Focus on product-market fit metrics
+</Card>
+<Card title="Growth Dashboard" icon="trending-up">
+  Acquisition, activation, retention metrics
+  Track growth funnel performance
+</Card>
+<Card title="Support Dashboard" icon="headphones">
+  User issues, friction points, satisfaction
+  Optimize user support and experience
+</Card>
+<Card title="Business Dashboard" icon="bar-chart">
+  Revenue per user, lifetime value, churn
+  Business impact and financial metrics
+</Card>
+</CardGroup>
+
+## Privacy & Compliance
+
+### Data Privacy
+Protect user privacy while gathering insights:
+
+- **Anonymized analytics** - Remove personally identifiable information
+- **Consent management** - Respect user privacy preferences
+- **Data retention** - Automatic cleanup of old user data
+- **Compliance reporting** - GDPR, CCPA, and other regulations
+
+### Ethical Considerations
+Responsible user analytics practices:
+
+- **Transparent data usage** - Clear communication about data collection
+- **User benefit focus** - Use insights to improve user experience
+- **Bias detection** - Monitor for unfair treatment of user segments
+- **Opt-out options** - Allow users to limit data collection
+
+## Next Steps
+
+<CardGroup cols={2}>
+<Card title="Set Up User Tracking" icon="user" href="/features/sessions">
+  Implement user IDs and session tracking
+</Card>
+<Card title="Custom Properties" icon="tag" href="/features/advanced-usage/custom-properties">
+  Add user segmentation and metadata
+</Card>
+<Card title="Feedback Collection" icon="message-circle" href="/features/advanced-usage/feedback">
+  Gather user satisfaction data
+</Card>
+<Card title="A/B Testing" icon="git-branch" href="/experiments/overview">
+  Test improvements with user segments
+</Card>
+</CardGroup>
+
+User metrics provide crucial insights for building successful AI products. Use this data to understand user needs, optimize experiences, and drive product growth.

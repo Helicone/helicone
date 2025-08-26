@@ -1,0 +1,286 @@
+---
+title: "Alerts"
+sidebarTitle: "Alerts"
+description: "Get notified when your LLM applications hit error thresholds or cost limits"
+---
+
+Stay ahead of production issues with intelligent alerts that notify you when your LLM applications experience problems. Monitor error rates, cost spikes, and performance issues in real-time.
+
+## Why Use Alerts
+
+<CardGroup cols={2}>
+<Card title="Catch Issues Early" icon="bell">
+  Get notified the moment error rates spike or costs exceed budgets
+</Card>
+<Card title="Prevent Downtime" icon="shield">
+  Respond to problems before they impact your users
+</Card>
+<Card title="Control Costs" icon="dollar-sign">
+  Set spending limits and get alerts when you approach budgets
+</Card>
+<Card title="Peace of Mind" icon="heart">
+  Sleep better knowing you'll be alerted to any production issues
+</Card>
+</CardGroup>
+
+## Alert Types
+
+### Error Rate Alerts
+
+Monitor the percentage of failed requests over time:
+
+- **Best for**: Detecting model failures, rate limiting, or integration issues
+- **Threshold**: Percentage (0-100%) of requests that are failing
+- **Example**: "Alert me when error rate exceeds 5% over 10 minutes"
+
+### Cost Alerts
+
+Track spending and get notified when costs exceed limits:
+
+- **Best for**: Budget monitoring, unexpected usage spikes, runaway processes  
+- **Threshold**: Dollar amount spent in the time window
+- **Example**: "Alert me when costs exceed $100 in 1 hour"
+
+## Creating Alerts
+
+### Access Alerts
+
+Navigate to **Settings → Alerts** in your Helicone dashboard to manage all your alerts.
+
+### Alert Configuration
+
+<Steps>
+<Step title="Choose your metric">
+  Select what you want to monitor:
+  - **Error Rate** - Percentage of failed requests
+  - **Cost** - Total spending in dollars
+</Step>
+
+<Step title="Set your threshold">  
+  Define when the alert should trigger:
+  - **Error Rate**: Enter percentage (e.g., 5 for 5% error rate)
+  - **Cost**: Enter dollar amount (e.g., 50 for $50 spending)
+</Step>
+
+<Step title="Pick time window">
+  Choose how long to monitor before alerting:
+  - **5-15 minutes** - Immediate issue detection
+  - **30 minutes - 1 hour** - Sustained problem detection  
+  - **1 day - 1 week** - Budget and trend monitoring
+</Step>
+
+<Step title="Set minimum requests">
+  Avoid false positives by requiring a minimum number of requests in the time window before alerting
+  
+  *Example: Require at least 10 requests to avoid alerting on low traffic periods*
+</Step>
+
+<Step title="Configure notifications">
+  Choose how to be notified when alerts trigger
+</Step>
+</Steps>
+
+## Notification Setup
+
+### Email Notifications
+
+**Built-in option** - Works immediately with any email address:
+
+- Select team members from your organization
+- Add custom email addresses for external stakeholders
+- Multiple recipients supported per alert
+
+### Slack Notifications
+
+**Requires integration** - More powerful for team collaboration:
+
+<Steps>
+<Step title="Connect Slack">
+  1. Go to Settings → Integrations  
+  2. Click "Connect Slack"
+  3. Authorize Helicone to access your Slack workspace
+</Step>
+
+<Step title="Choose channels">
+  - Select specific channels for different alert types
+  - Use #alerts for general notifications
+  - Use #engineering for error alerts
+  - Use #finance for cost alerts
+</Step>
+</Steps>
+
+## Time Window Selection
+
+Choose the right monitoring period for different scenarios:
+
+<Tabs>
+<Tab title="Immediate Issues">
+  **5-15 minutes** for urgent problems:
+  - Production API failures
+  - Authentication errors  
+  - Critical feature outages
+  
+  *Quick detection but may have false positives*
+</Tab>
+
+<Tab title="Sustained Problems">
+  **30 minutes - 1 hour** for persistent issues:
+  - Model performance degradation
+  - Rate limit patterns
+  - Gradual service degradation
+  
+  *Balanced approach - catches real issues, fewer false alarms*
+</Tab>
+
+<Tab title="Budget Monitoring">  
+  **1 day - 1 week** for spending oversight:
+  - Daily budget limits
+  - Weekly cost tracking
+  - Monthly spending reviews
+  
+  *Long-term monitoring for financial control*
+</Tab>
+</Tabs>
+
+## Best Practices
+
+### Setting Thresholds
+
+<AccordionGroup>
+<Accordion title="Error Rate Thresholds">
+  **Start conservative, adjust based on your baseline:**
+  
+  - **5-10%** for new applications (catch issues early)
+  - **2-5%** for stable production apps  
+  - **1-2%** for critical business functions
+  
+  *Review your historical error rates to set realistic thresholds*
+</Accordion>
+
+<Accordion title="Cost Thresholds">  
+  **Base on your usage patterns and budgets:**
+  
+  - **Daily limits**: 120-150% of typical daily spend
+  - **Hourly limits**: 200-300% of typical hourly spend
+  - **Emergency limits**: Hard stops at budget boundaries
+  
+  *Account for traffic spikes, new features, and seasonal patterns*
+</Accordion>
+</AccordionGroup>
+
+### Avoiding Alert Fatigue
+
+- **Use minimum request counts** to prevent low-traffic false positives
+- **Start with longer time windows** (30+ minutes) and decrease as needed  
+- **Set different thresholds for different times** (higher tolerance during low usage)
+- **Group related alerts** instead of creating many individual ones
+- **Review and adjust** thresholds based on actual alert patterns
+
+## Common Alert Scenarios
+
+### Production Error Monitoring
+
+```
+Alert Name: Production API Errors
+Metric: Error Rate  
+Threshold: 5%
+Time Window: 10 minutes
+Minimum Requests: 20
+Notifications: #engineering slack channel + on-call email
+```
+
+**Use case**: Catch API failures, model errors, or integration issues quickly
+
+### Cost Spike Detection
+
+```
+Alert Name: Hourly Spending Limit  
+Metric: Cost
+Threshold: $200
+Time Window: 1 hour  
+Minimum Requests: 1
+Notifications: Engineering lead + finance team
+```
+
+**Use case**: Detect runaway processes, unexpected usage, or billing anomalies
+
+### Weekend/Low-Traffic Monitoring
+
+```
+Alert Name: Weekend Error Check
+Metric: Error Rate
+Threshold: 15%  
+Time Window: 2 hours
+Minimum Requests: 5
+Notifications: Email only (less urgent)
+```
+
+**Use case**: Monitor during low-traffic periods with adjusted thresholds
+
+## Advanced Configuration
+
+### Custom Properties Integration
+
+Alerts work with your existing [custom properties](/features/advanced-usage/custom-properties) filtering:
+
+- Alerts monitor **all requests** that match your current filters
+- Use properties to create environment-specific alerts
+- Filter by user tiers, features, or regions for targeted monitoring
+
+*Example: Set up separate alerts for production vs staging environments*
+
+### Multiple Alert Strategy
+
+Create layered alerts for comprehensive monitoring:
+
+1. **Immediate alerts** (5-15 min) for critical errors
+2. **Sustained alerts** (30-60 min) for ongoing issues  
+3. **Budget alerts** (daily/weekly) for cost control
+4. **Trend alerts** (weekly/monthly) for performance monitoring
+
+## Troubleshooting
+
+### Too Many False Positives
+
+- **Increase minimum request count** - Require more requests before alerting
+- **Extend time window** - Use longer periods to smooth out noise
+- **Adjust thresholds** - Review actual error rates and set realistic limits
+- **Add filters** - Use custom properties to exclude test traffic
+
+### Missing Important Issues
+
+- **Decrease thresholds** - Lower the bar for triggering alerts
+- **Shorten time windows** - Detect issues faster with shorter monitoring periods
+- **Check minimum requests** - Ensure you're not requiring too many requests
+- **Review notification setup** - Verify emails and Slack integrations
+
+### Slack Integration Issues
+
+- **Reconnect integration** - Refresh the Slack connection in Settings
+- **Check channel permissions** - Ensure Helicone can post to selected channels
+- **Verify channel names** - Double-check channel selection in alert configuration
+- **Test with email first** - Confirm alerts work via email before troubleshooting Slack
+
+## Related Features
+
+<CardGroup cols={2}>
+<Card title="Custom Properties" icon="tag" href="/features/advanced-usage/custom-properties">
+  Tag requests to create more targeted and useful alerts
+</Card>
+
+<Card title="User Metrics" icon="users" href="/features/advanced-usage/user-metrics">  
+  Monitor costs and usage by user to inform alert thresholds
+</Card>
+
+<Card title="Sessions" icon="link" href="/features/sessions">
+  Track multi-step workflows that might trigger alerts
+</Card>
+
+<Card title="Cost Tracking" icon="dollar-sign" href="/guides/cookbooks/cost-tracking">
+  Understand spending patterns to set better cost alerts
+</Card>
+</CardGroup>
+
+---
+
+Alerts are your early warning system for production LLM applications. Start with basic error and cost monitoring, then refine your thresholds as you learn your application's normal behavior patterns.
