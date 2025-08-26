@@ -21,6 +21,8 @@ const IntegrationGuide = ({ apiKey }: IntegrationGuideProps) => {
             Check our{" "}
             <Link
               href="https://helicone.ai/models"
+              target="_blank"
+              rel="noopener noreferrer"
               className="font-medium underline underline-offset-2 hover:no-underline"
             >
               Model Registry
