@@ -24,6 +24,11 @@ export class LytixHandler extends AbstractLogHandler {
   }
 
   public async handle(context: HandlerContext): PromiseGenericResult<string> {
+    const start = performance.now();
+    context.timingMetrics.push({
+      constructor: this.constructor.name,
+      start,
+    });
     if (!context.message.heliconeMeta.lytixKey) {
       return await super.handle(context);
     }

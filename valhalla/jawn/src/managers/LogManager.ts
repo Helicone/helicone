@@ -24,6 +24,12 @@ import { LogStore } from "../lib/stores/LogStore";
 import { RateLimitStore } from "../lib/stores/RateLimitStore";
 import { VersionedRequestStore } from "../lib/stores/request/VersionedRequestStore";
 import { WebhookStore } from "../lib/stores/WebhookStore";
+import {
+  err,
+  ok,
+  PromiseGenericResult,
+  Result,
+} from "../packages/common/result";
 import { SecretManager } from "@helicone-package/secrets/SecretManager";
 
 export interface LogMetaData {
@@ -31,6 +37,22 @@ export interface LogMetaData {
   partition?: number;
   lastOffset?: string;
   messageCount?: number;
+}
+
+async function withTimeout<T>(
+  fn: PromiseGenericResult<T>,
+  timeout: number
+): Promise<PromiseGenericResult<T>> {
+  try {
+    return await Promise.race([
+      fn,
+      new Promise<Result<T, string>>((_, reject) =>
+        setTimeout(() => reject(err("Timeout")), timeout)
+      ),
+    ]);
+  } catch (error) {
+    return err("Timeout");
+  }
 }
 
 export class LogManager {
@@ -91,10 +113,28 @@ export class LogManager {
       .setNext(segmentHandler)
       .setNext(stripeLogHandler);
 
+    const globalTimingMetrics: Map<string, number> = new Map();
+
     await Promise.all(
       logMessages.map(async (logMessage) => {
         const handlerContext = new HandlerContext(logMessage);
-        const result = await authHandler.handle(handlerContext);
+        const result = await withTimeout(
+          authHandler.handle(handlerContext),
+          60_000 * 15 // 15 minutes
+        );
+        const end = performance.now();
+
+        for (let i = 0; i < handlerContext.timingMetrics.length; i++) {
+          const metric = handlerContext.timingMetrics[i];
+          const nextEndTime =
+            i === handlerContext.timingMetrics.length - 1
+              ? end
+              : handlerContext.timingMetrics[i + 1]?.start;
+
+          const totalTime = nextEndTime - metric.start;
+          const currentTime = globalTimingMetrics.get(metric.constructor) ?? 0;
+          globalTimingMetrics.set(metric.constructor, currentTime + totalTime);
+        }
 
         if (result.error) {
           Sentry.captureException(new Error(result.error), {
@@ -159,6 +199,16 @@ export class LogManager {
         }
       })
     );
+
+    for (const [constructor, averageTime] of globalTimingMetrics) {
+      Promise.resolve(
+        dataDogClient.logDistributionMetric(
+          Date.now(),
+          averageTime,
+          constructor
+        )
+      ).catch();
+    }
 
     await this.logRateLimits(rateLimitHandler, logMetaData);
     await this.logHandlerResults(loggingHandler, logMetaData, logMessages);

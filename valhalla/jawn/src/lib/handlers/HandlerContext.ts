@@ -12,6 +12,7 @@ export class HandlerContext extends SetOnce {
   public usage: Usage;
   public rawLog: RawLog;
   public processedLog: ProcessedLog;
+  public timingMetrics: { constructor: string; start: number }[] = [];
 
   constructor(message: KafkaMessageContents) {
     super();
