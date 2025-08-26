@@ -146,6 +146,52 @@ client = OpenAI(
       docsLink:
         "https://docs.helicone.ai/getting-started/integration-method/openrouter",
     },
+    truefoundry: {
+      formattedName: "TrueFoundry",
+      logo: "/static/truefoundry-logo.png",
+      typescript: `import OpenAI from "openai";
+import { HeliconeAsyncLogger } from "helicone-async";
+
+const logger = new HeliconeAsyncLogger({
+  apiKey: HELICONE_API_KEY,
+});
+logger.init();
+
+const client = new OpenAI({
+  apiKey: "your-truefoundry-api-key",
+  baseURL: "your-truefoundry-base-url"
+});`,
+      python: `from openai import OpenAI
+from helicone_async import HeliconeAsyncLogger
+
+logger = HeliconeAsyncLogger(
+    api_key=HELICONE_API_KEY,
+)
+logger.init()
+
+client = OpenAI(
+    api_key="your-truefoundry-api-key",
+    base_url="your-truefoundry-base-url"
+)`,
+      curl: `# Direct cURL to TrueFoundry (Helicone logging requires HeliconeAsyncLogger)
+curl "your-truefoundry-base-url/chat/completions" \\
+  -H "Authorization: Bearer your-truefoundry-api-key" \\
+  -H "Content-Type: application/json" \\
+  -H "X-TFY-METADATA: {\\"tfy_log_request\\":\\"true\\"}" \\
+  -d '{
+    "model": "openai-main/gpt-4o",
+    "messages": [
+      {"role": "system", "content": "You are a helpful AI assistant."},
+      {"role": "user", "content": "Hello! Tell me a fun fact."}
+    ],
+    "temperature": 0.7,
+    "max_tokens": 2500
+  }'
+
+# Note: For Helicone logging, use Python/Node.js with HeliconeAsyncLogger`,
+      docsLink:
+        "https://docs.helicone.ai/getting-started/integration-method/truefoundry",
+    },
   };
 
   const ADDITIONAL_PROVIDERS = [
