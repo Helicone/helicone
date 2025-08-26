@@ -19,7 +19,6 @@ export type {
   ConditionExpression,
   AndExpression,
   OrExpression,
-  AggregationExpression,
   FilterOperator,
   FieldSpec,
   RequestResponseRMT,
