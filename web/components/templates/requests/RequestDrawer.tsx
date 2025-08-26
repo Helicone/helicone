@@ -668,17 +668,6 @@ export default function RequestDrawer(props: RequestDivProps) {
                   truncateLength={dynamicTruncateLength}
                 />
               )}
-
-              {/* Gateway Router ID */}
-              {specialProperties.gatewayRouterId && (
-                <RequestDescTooltip
-                  displayText={specialProperties.gatewayRouterId}
-                  icon={<ShuffleIcon className="h-4 w-4" />}
-                  copyText={specialProperties.gatewayRouterId}
-                  href={`/gateway/${specialProperties.gatewayRouterId}`}
-                  truncateLength={dynamicTruncateLength}
-                />
-              )}
             </div>
           )}
 
