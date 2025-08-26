@@ -1,8 +1,7 @@
 import { Cloudflare } from "cloudflare";
-import { SecretManager } from "@helicone-package/secrets/SecretManager";
 
 const cloudflare = new Cloudflare({
-  apiToken: SecretManager.getSecret("CLOUDFLARE_API_TOKEN"),
+  apiToken: process.env.CLOUDFLARE_API_TOKEN,
 });
 
 const hashWithHmac = async (key: string, hmac_key: 1 | 2) => {
@@ -86,7 +85,7 @@ export async function hash(key: string): Promise<string> {
 }
 
 async function getCacheKey(): Promise<CryptoKey> {
-  const requestCacheKey = SecretManager.getSecret("REQUEST_CACHE_KEY");
+  const requestCacheKey = process.env.REQUEST_CACHE_KEY;
   if (!requestCacheKey) {
     throw new Error("REQUEST_CACHE_KEY is not set");
   }
