@@ -169,7 +169,6 @@ export class LogManager {
     this.logLytixEvents(lytixHandler, logMetaData);
     this.logSegmentEvents(segmentHandler, logMetaData);
     this.logWebhooks(webhookHandler, logMetaData);
-    console.log(`Finished processing batch ${logMetaData.batchId}`);
   }
 
   private async logStripeMeter(
