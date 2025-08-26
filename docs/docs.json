@@ -195,13 +195,20 @@
                 ]
               },
               {
-                "group": "Specialized",
+                "group": "Tools",
                 "pages": [
                   "integrations/tools/curl",
-                  "integrations/vectordb/curl",
-                  "getting-started/integration-method/openllmetry"
+                  "integrations/tools/logger-sdk"
                 ]
-              }
+              },
+              {
+                "group": "Vector DB",
+                "pages": [
+                  "integrations/vectordb/curl",
+                  "integrations/vectordb/logger-sdk"
+                ]
+              },
+              "getting-started/integration-method/openllmetry"
             ]
           },
 

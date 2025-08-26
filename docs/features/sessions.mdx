@@ -72,8 +72,8 @@ const response = await client.chat.completions.create(
 ### What Sessions Can Track
 Sessions can group together all types of requests in your AI workflow:
 - **LLM calls** - OpenAI, Anthropic, and other model requests
-- **[Vector database queries](/integrations/vectordb)** - Embeddings, similarity searches, and retrievals  
-- **[Tool calls](/tools)** - Function executions, API calls, and custom tools
+- **[Vector database queries](/integrations/vectordb/logger-sdk)** - Embeddings, similarity searches, and retrievals  
+- **[Tool calls](/integrations/tools/logger-sdk)** - Function executions, API calls, and custom tools
 - **Any logged request** - Anything sent through Helicone's logging
 
 This gives you a complete view of your AI agent's behavior, not just the LLM interactions.
@@ -421,11 +421,11 @@ const examples = await client.chat.completions.create(
 ## Related Features
 
 <CardGroup cols={2}>
-<Card title="Vector Database Logging" icon="database" href="/integrations/vectordb">
+<Card title="Vector Database Logging" icon="database" href="/integrations/vectordb/logger-sdk">
 Track vector database queries and embeddings alongside LLM calls
 </Card>
 
-<Card title="Tool Call Logging" icon="wrench" href="/tools">
+<Card title="Tool Call Logging" icon="wrench" href="/integrations/tools/logger-sdk">
 Monitor tool calls and function executions within your agent workflows
 </Card>
 
