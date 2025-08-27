@@ -108,7 +108,7 @@ export const FreePlanCard = () => {
               </CardHeader>
               <CardContent className="flex-1 space-y-4">
                 <p className="text-sm text-slate-500">
-                  + Optional add-ons starting at $50/mo
+                  + Prompts workspace add-on $50/mo
                 </p>
                 <ul className="space-y-2.5">
                   {proFeatures.slice(0, 4).map((feature) => (
@@ -239,7 +239,7 @@ export const FreePlanCard = () => {
             </CardTitle>
             <p className="text-sm text-muted-foreground">
               Built for companies looking to scale. Includes everything in Pro,
-              plus unlimited requests, prompts, experiments and more.
+              plus unlimited requests, dedicated support and more.
             </p>
           </CardHeader>
           <CardFooter className="mt-auto">
@@ -348,7 +348,6 @@ const proFeatures = [
 const teamBundleFeatures = [
   "Unlimited seats",
   "Everything in Pro plan",
-  "Prompts included",
-  "Experiments included",
-  "Evals included",
+  "Prompts workspace included",
+  "Priority support",
 ];

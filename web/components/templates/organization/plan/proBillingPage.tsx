@@ -24,22 +24,14 @@ import {
 } from "@/components/ui/dialog";
 import { useState } from "react";
 import { useCallback } from "react";
-import {
-  useCostForEvals,
-  useCostForExperiments,
-  useCostForPrompts,
-} from "../../pricing/hooks";
+import { useCostForPrompts } from "../../pricing/hooks";
 import { Badge } from "@/components/ui/badge";
 import { CalendarIcon } from "lucide-react";
 
 export const ProPlanCard = () => {
   const org = useOrg();
   const [isPromptsDialogOpen, setIsPromptsDialogOpen] = useState(false);
-  const [isEvalsDialogOpen, setIsEvalsDialogOpen] = useState(false);
-  const [isExperimentsDialogOpen, setIsExperimentsDialogOpen] = useState(false);
   const costForPrompts = useCostForPrompts();
-  const costForEvals = useCostForEvals();
-  const costForExperiments = useCostForExperiments();
 
   const subscription = useQuery({
     queryKey: ["subscription", org?.currentOrg?.id],
@@ -73,7 +65,7 @@ export const ProPlanCard = () => {
 
   const addProductToSubscription = useMutation({
     mutationFn: async (
-      productType: "alerts" | "prompts" | "evals" | "experiments",
+      productType: "alerts" | "prompts",
     ) => {
       const jawn = getJawnClient(org?.currentOrg?.id);
       const result = await jawn.POST(
@@ -92,7 +84,7 @@ export const ProPlanCard = () => {
 
   const deleteProductFromSubscription = useMutation({
     mutationFn: async (
-      productType: "alerts" | "prompts" | "evals" | "experiments",
+      productType: "alerts" | "prompts",
     ) => {
       const jawn = getJawnClient(org?.currentOrg?.id);
       const result = await jawn.DELETE(
@@ -122,25 +114,8 @@ export const ProPlanCard = () => {
     (item: any) => item.price.product?.name === "Prompts" && item.quantity > 0,
   );
 
-  const hasExperiments = subscription.data?.data?.items?.some(
-    (item: any) =>
-      item.price.product?.name === "Experiments" && item.quantity > 0,
-  );
-
-  const hasEvals = subscription.data?.data?.items?.some(
-    (item: any) => item.price.product?.name === "Evals" && item.quantity > 0,
-  );
-
   const handlePromptsToggle = () => {
     setIsPromptsDialogOpen(true);
-  };
-
-  const handleEvalsToggle = () => {
-    setIsEvalsDialogOpen(true);
-  };
-
-  const handleExperimentsToggle = () => {
-    setIsExperimentsDialogOpen(true);
   };
 
   const confirmPromptsChange = async () => {
@@ -151,26 +126,6 @@ export const ProPlanCard = () => {
     }
     setIsPromptsDialogOpen(false);
 
-    subscription.refetch();
-  };
-
-  const confirmEvalsChange = async () => {
-    if (!hasEvals) {
-      await addProductToSubscription.mutateAsync("evals");
-    } else {
-      await deleteProductFromSubscription.mutateAsync("evals");
-    }
-    setIsEvalsDialogOpen(false);
-    subscription.refetch();
-  };
-
-  const confirmExperimentsChange = async () => {
-    if (!hasExperiments) {
-      await addProductToSubscription.mutateAsync("experiments");
-    } else {
-      await deleteProductFromSubscription.mutateAsync("experiments");
-    }
-    setIsExperimentsDialogOpen(false);
     subscription.refetch();
   };
 
@@ -273,63 +228,6 @@ export const ProPlanCard = () => {
               />
             </div>
 
-            <div className="flex items-center justify-between py-3">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-slate-900">
-                    Evals{" "}
-                    {isTrialActive ? (
-                      <span className="text-slate-400 line-through">
-                        ${costForEvals.data?.data ?? "loading..."}/mo
-                      </span>
-                    ) : (
-                      <span>
-                        (${costForEvals.data?.data ?? "loading..."}/mo)
-                      </span>
-                    )}
-                  </h3>
-                </div>
-                {isTrialActive && (
-                  <p className="text-sm text-slate-500">
-                    Evaluate prompt performance
-                  </p>
-                )}
-              </div>
-              <Switch
-                checked={hasEvals}
-                onCheckedChange={handleEvalsToggle}
-                className="data-[state=checked]:bg-sky-600"
-              />
-            </div>
-
-            <div className="flex items-center justify-between py-3">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-slate-900">
-                    Experiments{" "}
-                    {isTrialActive ? (
-                      <span className="text-slate-400 line-through">
-                        ${costForExperiments.data?.data ?? "loading..."}/mo
-                      </span>
-                    ) : (
-                      <span>
-                        (${costForExperiments.data?.data ?? "loading..."}/mo)
-                      </span>
-                    )}
-                  </h3>
-                </div>
-                {isTrialActive && (
-                  <p className="text-sm text-slate-500">
-                    Run A/B tests on prompts
-                  </p>
-                )}
-              </div>
-              <Switch
-                checked={hasExperiments}
-                onCheckedChange={handleExperimentsToggle}
-                className="data-[state=checked]:bg-sky-600"
-              />
-            </div>
           </div>
 
           <Col className="gap-2">
@@ -409,64 +307,6 @@ export const ProPlanCard = () => {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={isEvalsDialogOpen} onOpenChange={setIsEvalsDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>
-              {!hasEvals ? "Enable Evals" : "Disable Evals"}
-            </DialogTitle>
-            <DialogDescription>
-              {getDialogDescription(
-                !hasEvals,
-                "Evals",
-                `$${costForEvals.data?.data ?? "loading..."}`,
-              )}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsEvalsDialogOpen(false);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button onClick={confirmEvalsChange}>Confirm</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog
-        open={isExperimentsDialogOpen}
-        onOpenChange={setIsExperimentsDialogOpen}
-      >
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>
-              {!hasExperiments ? "Enable Experiments" : "Disable Experiments"}
-            </DialogTitle>
-            <DialogDescription>
-              {getDialogDescription(
-                !hasExperiments,
-                "Experiments",
-                `$${costForExperiments.data?.data ?? "loading..."}`,
-              )}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsExperimentsDialogOpen(false);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button onClick={confirmExperimentsChange}>Confirm</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       <div className="flex flex-col gap-6">
         <Card className="flex flex-col">
