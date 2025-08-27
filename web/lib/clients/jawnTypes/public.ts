@@ -2745,7 +2745,10 @@ Json: JsonObject;
       filters: {
         capabilities: components["schemas"]["ModelCapability"][];
         authors: string[];
-        providers: string[];
+        providers: {
+            displayName: string;
+            name: string;
+          }[];
       };
     };
     ResultSuccess_ModelRegistryResponse_: {

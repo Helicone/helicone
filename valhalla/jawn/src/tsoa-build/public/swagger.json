@@ -7548,7 +7548,19 @@
 							},
 							"providers": {
 								"items": {
-									"type": "string"
+									"properties": {
+										"displayName": {
+											"type": "string"
+										},
+										"name": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"displayName",
+										"name"
+									],
+									"type": "object"
 								},
 								"type": "array"
 							}

@@ -2433,7 +2433,7 @@ const models: TsoaRoute.Models = {
         "properties": {
             "models": {"dataType":"array","array":{"dataType":"refObject","ref":"ModelRegistryItem"},"required":true},
             "total": {"dataType":"double","required":true},
-            "filters": {"dataType":"nestedObjectLiteral","nestedProperties":{"capabilities":{"dataType":"array","array":{"dataType":"refAlias","ref":"ModelCapability"},"required":true},"authors":{"dataType":"array","array":{"dataType":"string"},"required":true},"providers":{"dataType":"array","array":{"dataType":"string"},"required":true}},"required":true},
+            "filters": {"dataType":"nestedObjectLiteral","nestedProperties":{"capabilities":{"dataType":"array","array":{"dataType":"refAlias","ref":"ModelCapability"},"required":true},"authors":{"dataType":"array","array":{"dataType":"string"},"required":true},"providers":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"displayName":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}}},"required":true}},"required":true},
         },
         "additionalProperties": false,
     },

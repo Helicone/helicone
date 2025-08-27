@@ -7,6 +7,7 @@ import type {
 } from "../types";
 
 export class AzureOpenAIProvider extends BaseProvider {
+  readonly displayName = "Azure OpenAI";
   readonly baseUrl = "https://{resourceName}.openai.azure.com";
   readonly auth = "api-key" as const;
   readonly requiredConfig = ["resourceName", "deploymentName"] as const;

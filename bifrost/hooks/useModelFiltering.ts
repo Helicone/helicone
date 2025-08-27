@@ -26,7 +26,7 @@ interface UseModelFilteringResult {
   filteredModels: Model[];
   totalModels: number;
   availableFilters: {
-    providers: string[];
+    providers: Array<{ name: string; displayName: string }>;
     authors: string[];
     capabilities: string[];
   };

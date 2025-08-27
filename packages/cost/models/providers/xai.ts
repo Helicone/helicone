@@ -1,6 +1,7 @@
 import { BaseProvider } from "./base";
 
 export class XAIProvider extends BaseProvider {
+  readonly displayName = "xAI";
   readonly baseUrl = "https://api.x.ai";
   readonly auth = "api-key" as const;
   readonly pricingPages = ["https://docs.x.ai/docs/pricing"];

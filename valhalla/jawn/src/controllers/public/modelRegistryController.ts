@@ -1,12 +1,10 @@
-import { Controller, Get, Query, Route, Tags } from "tsoa";
+import { Controller, Get, Route, Tags } from "tsoa";
 import { err, ok, Result } from "../../packages/common/result";
 import { registry } from "../../../../../packages/cost/models/registry";
 import { 
   InputModality, 
   OutputModality, 
-  StandardParameter,
-  AuthorName,
-  ProviderName
+  StandardParameter
 } from "../../../../../packages/cost/models/types";
 
 // Define capabilities based on ModelPricing fields
@@ -18,8 +16,6 @@ type ModelCapability =
   | "web_search"    // has pricing.web_search > 0
   | "caching"       // has pricing.cacheRead or cacheWrite > 0
   | "reasoning";    // has pricing.internal_reasoning > 0
-
-type SortOption = 'name' | 'price-low' | 'price-high' | 'context' | 'newest';
 
 interface ModelEndpoint {
   provider: string;
@@ -56,7 +52,10 @@ interface ModelRegistryResponse {
   models: ModelRegistryItem[];
   total: number;
   filters: {
-    providers: string[];
+    providers: Array<{
+      name: string;
+      displayName: string;
+    }>;
     authors: string[];
     capabilities: ModelCapability[];
   };
@@ -81,6 +80,24 @@ export class ModelRegistryController extends Controller {
       'azure': 'azure-openai',
     };
     return slugMap[provider.toLowerCase()] || provider.toLowerCase();
+  }
+
+  // Helper function to get display name for providers
+  private getProviderDisplayName(provider: string): string {
+    const displayNameMap: Record<string, string> = {
+      'openai': 'OpenAI',
+      'anthropic': 'Anthropic',
+      'google': 'Google AI Studio',
+      'vertex': 'Vertex AI',
+      'bedrock': 'AWS Bedrock',
+      'azure-openai': 'Azure OpenAI',
+      'perplexity': 'Perplexity',
+      'groq': 'Groq',
+      'deepseek': 'DeepSeek',
+      'cohere': 'Cohere',
+      'xai': 'xAI',
+    };
+    return displayNameMap[provider.toLowerCase()] || provider;
   }
 
   @Get("/models")
@@ -140,11 +157,13 @@ export class ModelRegistryController extends Controller {
           if (sourcePricing.cacheRead && sourcePricing.cacheRead > 0) {
             pricing.cacheRead = this.formatCostPerMillion(sourcePricing.cacheRead);
           }
-          if (sourcePricing.cacheWrite && sourcePricing.cacheWrite > 0) {
+          if (sourcePricing.cacheWrite) {
             const cacheWriteCost = typeof sourcePricing.cacheWrite === 'number' 
               ? sourcePricing.cacheWrite 
               : sourcePricing.cacheWrite.default;
-            pricing.cacheWrite = this.formatCostPerMillion(cacheWriteCost);
+            if (cacheWriteCost > 0) {
+              pricing.cacheWrite = this.formatCostPerMillion(cacheWriteCost);
+            }
           }
 
           endpoints.push({
@@ -205,12 +224,20 @@ export class ModelRegistryController extends Controller {
         });
       });
 
+      // Map providers to include display names
+      const providersWithDisplayNames = Array.from(availableProviders)
+        .sort()
+        .map(provider => ({
+          name: provider,
+          displayName: this.getProviderDisplayName(provider),
+        }));
+
       this.setStatus(200);
       return ok({ 
         models,
         total: models.length,
         filters: {
-          providers: Array.from(availableProviders).sort(),
+          providers: providersWithDisplayNames,
           authors: Array.from(availableAuthors).sort(),
           capabilities: Array.from(availableCapabilities).sort(),
         }

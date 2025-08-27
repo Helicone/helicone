@@ -7,6 +7,7 @@ import type {
 } from "../types";
 
 export class VertexProvider extends BaseProvider {
+  readonly displayName = "Vertex AI";
   readonly baseUrl = "https://{region}-aiplatform.googleapis.com";
   readonly auth = "oauth" as const;
   readonly requiredConfig = ["projectId", "region"] as const;

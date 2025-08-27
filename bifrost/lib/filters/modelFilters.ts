@@ -260,17 +260,43 @@ export const applyFilters = (models: Model[], options: FilterOptions): Model[] =
   return filtered;
 };
 
+// Provider type with display name
+export interface Provider {
+  name: string;
+  displayName: string;
+}
+
 // Extract available filter options from models
 export const extractAvailableFilters = (models: Model[]) => {
-  const providers = new Set<string>();
+  const providersMap = new Map<string, string>();
   const authors = new Set<string>();
   const capabilities = new Set<ModelCapability>();
+  
+  // Display name mapping for providers
+  const providerDisplayNames: Record<string, string> = {
+    'openai': 'OpenAI',
+    'anthropic': 'Anthropic',
+    'google': 'Google AI Studio',
+    'vertex': 'Vertex AI',
+    'bedrock': 'AWS Bedrock',
+    'azure-openai': 'Azure OpenAI',
+    'perplexity': 'Perplexity',
+    'groq': 'Groq',
+    'deepseek': 'DeepSeek',
+    'cohere': 'Cohere',
+    'xai': 'xAI',
+  };
   
   models.forEach(model => {
     authors.add(model.author);
     
     model.endpoints.forEach(ep => {
-      providers.add(ep.provider);
+      if (!providersMap.has(ep.provider)) {
+        providersMap.set(
+          ep.provider, 
+          providerDisplayNames[ep.provider.toLowerCase()] || ep.provider
+        );
+      }
       
       if (ep.pricing.audio && ep.pricing.audio > 0) capabilities.add("audio");
       if (ep.pricing.video && ep.pricing.video > 0) capabilities.add("video");
@@ -284,8 +310,13 @@ export const extractAvailableFilters = (models: Model[]) => {
     });
   });
   
+  // Convert to array of provider objects
+  const providers = Array.from(providersMap.entries())
+    .map(([name, displayName]) => ({ name, displayName }))
+    .sort((a, b) => a.displayName.localeCompare(b.displayName));
+  
   return {
-    providers: Array.from(providers).sort(),
+    providers,
     authors: Array.from(authors).sort(),
     capabilities: Array.from(capabilities).sort(),
   };

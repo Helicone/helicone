@@ -198,16 +198,18 @@ export function ModelRegistryPage() {
                   {expandedSections.has("providers") && (
                     <div className="space-y-1 max-h-48 overflow-y-auto">
                       {availableFilters.providers.map((provider) => {
-                        const isSelected = selectedProviders.has(provider);
+                        const providerName = typeof provider === 'string' ? provider : provider.name;
+                        const displayName = typeof provider === 'string' ? provider : provider.displayName;
+                        const isSelected = selectedProviders.has(providerName);
                         return (
                           <div
-                            key={provider}
+                            key={providerName}
                             onClick={() => {
                               const newSet = new Set(selectedProviders);
                               if (isSelected) {
-                                newSet.delete(provider);
+                                newSet.delete(providerName);
                               } else {
-                                newSet.add(provider);
+                                newSet.add(providerName);
                               }
                               setSelectedProviders(newSet);
                             }}
@@ -217,7 +219,7 @@ export function ModelRegistryPage() {
                                 : "text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
                             }`}
                           >
-                            <span className="truncate flex-1 mr-2">{provider}</span>
+                            <span className="truncate flex-1 mr-2">{displayName}</span>
                             {isSelected && <X className="h-3 w-3" />}
                           </div>
                         );
