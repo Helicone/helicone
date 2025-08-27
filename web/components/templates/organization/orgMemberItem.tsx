@@ -113,7 +113,11 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
                       </span>
                     </div>
                   </SelectItem>
-                  <SelectItem value="member" className="py-2" textValue="Member">
+                  <SelectItem
+                    value="member"
+                    className="py-2"
+                    textValue="Member"
+                  >
                     <div className="flex flex-col items-start gap-0.5">
                       <span className="font-medium">Member</span>
                       <span className="text-xs text-muted-foreground">
