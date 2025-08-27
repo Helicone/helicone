@@ -38,13 +38,18 @@ export default function OnboardingMembersPage() {
       const invitationPromises = draftMembers.map(async (member) => {
         try {
           await addMemberMutation.mutateAsync({
-            orgId,
-            email: member.email,
+            params: {
+              path: {
+                organizationId: orgId,
+              },
+            },
+            body: {
+              email: member.email,
+            },
           });
           return { success: true, email: member.email };
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : String(error);
+        } catch (error: any) {
+          const errorMessage = error.error || "Failed to invite member";
           errors.push(`Failed to invite ${member.email}: ${errorMessage}`);
           return { success: false, email: member.email, error: errorMessage };
         }
