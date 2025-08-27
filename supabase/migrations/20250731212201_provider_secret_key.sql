@@ -70,7 +70,6 @@ create view public.decrypted_provider_keys_v2 as
     provider_keys.auth_type,
     provider_keys.nonce,
     provider_keys.config
-   --  provider_keys.cuid
    FROM provider_keys;
 
 
