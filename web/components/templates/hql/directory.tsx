@@ -81,12 +81,12 @@ export function Directory({
   );
 
   return (
-    <div className="flex h-screen w-80 flex-col border-r bg-background">
+    <div className="flex h-screen flex-col overflow-hidden border-r bg-background">
       {/* Tabs */}
       <section className="flex border-b">
         <button
           className={clsx(
-            "flex-1 border-b-2 px-4 py-3 text-sm font-medium",
+            "flex-1 truncate border-b-2 px-2 py-3 text-sm font-medium sm:px-4",
             activeTab === "tables"
               ? "border-primary text-primary"
               : "border-transparent text-muted-foreground hover:text-foreground",
@@ -97,7 +97,7 @@ export function Directory({
         </button>
         <button
           className={clsx(
-            "flex-1 border-b-2 px-4 py-3 text-sm font-medium",
+            "flex-1 truncate border-b-2 px-2 py-3 text-sm font-medium sm:px-4",
             activeTab === "queries"
               ? "border-primary text-primary"
               : "border-transparent text-muted-foreground hover:text-foreground",
@@ -199,16 +199,14 @@ function TableList({ tables }: { tables: any[] }) {
               className="group flex cursor-pointer items-center justify-between rounded-md px-2 py-2 hover:bg-muted/50"
               onClick={() => toggleTable(table.table_name, setExpandedTables)}
             >
-              <div className="flex items-center gap-2">
+              <div className="flex min-w-0 items-center gap-2">
                 {expandedTables.has(table.table_name) ? (
-                  <ChevronDown size={16} />
+                  <ChevronDown className="flex-shrink-0" size={16} />
                 ) : (
-                  <ChevronRight size={16} />
+                  <ChevronRight className="flex-shrink-0" size={16} />
                 )}
-                <Table size={16} />
-                <span className="truncate pr-2 text-sm">
-                  {table.table_name}
-                </span>
+                <Table className="flex-shrink-0" size={16} />
+                <span className="truncate text-sm">{table.table_name}</span>
               </div>
             </div>
             {expandedTables.has(table.table_name) && (
