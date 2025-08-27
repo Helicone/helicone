@@ -30,13 +30,17 @@
       "Bash(npx prettier:*)",
       "Bash(npx tsc:*)",
       "Bash(npx jest:*)",
+      "Bash(docker buildx build:*)",
+      "WebFetch(domain:developers.cloudflare.com)",
+      "WebSearch",
       "Bash(npx ts-node:*)",
       "WebFetch(domain:undici.nodejs.org)",
       "WebSearch",
       "WebFetch(domain:gist.github.com)",
       "Bash(gh run list:*)",
       "Bash(gh run view:*)",
-      "Bash(gh run watch:*)"
+      "Bash(gh run watch:*)",
+      "mcp__linear-server__list_comments"
     ],
     "deny": []
   }

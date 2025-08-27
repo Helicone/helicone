@@ -9,7 +9,7 @@ export const models = {
     contextLength: 128000,
     maxOutputTokens: 16384,
     created: "2024-05-13T00:00:00.000Z",
-    modality: "text+image->text",
+    modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
   },
   "gpt-4o:extended": {
@@ -20,7 +20,7 @@ export const models = {
     contextLength: 128000,
     maxOutputTokens: 64000,
     created: "2024-05-13T00:00:00.000Z",
-    modality: "text+image->text",
+    modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
   },
   "gpt-4o-mini": {
@@ -31,7 +31,7 @@ export const models = {
     contextLength: 128000,
     maxOutputTokens: 16384,
     created: "2024-07-18T00:00:00.000Z",
-    modality: "text+image->text",
+    modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
   },
   "chatgpt-4o-latest": {
@@ -42,7 +42,7 @@ export const models = {
     contextLength: 128000,
     maxOutputTokens: 16384,
     created: "2024-08-14T00:00:00.000Z",
-    modality: "text+image->text",
+    modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
   },
   "gpt-4o-mini-search-preview": {
@@ -53,7 +53,7 @@ export const models = {
     contextLength: 128000,
     maxOutputTokens: 16384,
     created: "2025-03-12T22:22:02.000Z",
-    modality: "text->text",
+    modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "GPT",
   },
   "gpt-4o-search-preview": {
@@ -64,7 +64,7 @@ export const models = {
     contextLength: 128000,
     maxOutputTokens: 16384,
     created: "2025-03-12T22:19:09.000Z",
-    modality: "text->text",
+    modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "GPT",
   },
 } satisfies Record<string, ModelConfig>;

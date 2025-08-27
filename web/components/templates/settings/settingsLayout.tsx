@@ -12,7 +12,6 @@ import {
   KeyIcon,
   LinkIcon,
   Plug,
-  ShuffleIcon,
   Webhook,
   Coins,
   Lock,
@@ -74,12 +73,6 @@ const DEVELOPER_TABS = [
     title: "Providers",
     icon: Plug,
     href: "/settings/providers",
-  },
-  {
-    id: "ai-gateway",
-    title: "AI Gateway",
-    icon: ShuffleIcon,
-    href: "/settings/ai-gateway",
   },
   {
     id: "webhooks",

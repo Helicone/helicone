@@ -25,7 +25,7 @@ export const authorModels = {
     contextLength: 128000,                // Max input tokens
     maxOutputTokens: 4096,                
     created: "2024-01-01T00:00:00.000Z", // ISO date
-    modality: "text->text",               // or "text+image->text"
+    modality: { inputs: ["text"], outputs: ["text"] }, // or { inputs: ["text", "image"], outputs: ["text"] }
     tokenizer: "GPT",                     // or "Claude", "Gemini"
   }
 } satisfies Record<AuthorModelName, Model>;

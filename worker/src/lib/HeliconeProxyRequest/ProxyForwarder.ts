@@ -146,7 +146,7 @@ export async function proxyForwarder(
               rateLimiterDO: env.RATE_LIMITER_SQL,
               rateLimitOptions: finalRateLimitOptions,
               userId: proxyRequest.userId,
-              cost: 0,
+              cost: 1,
             });
             responseBuilder.addRateLimitHeaders(
               rateLimitCheckResult,

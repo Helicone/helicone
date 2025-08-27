@@ -394,6 +394,9 @@ export interface paths {
   "/v1/pi/costs-over-time/query": {
     post: operations["GetCostsOverTime"];
   };
+  "/v1/public/model-registry/models": {
+    get: operations["GetModelRegistry"];
+  };
   "/v1/public/compare/models": {
     post: operations["GetModelComparison"];
   };
@@ -538,23 +541,6 @@ export interface paths {
   };
   "/v1/helicone-dataset/{datasetId}/delete": {
     post: operations["DeleteHeliconeDataset"];
-  };
-  "/v1/gateway": {
-    get: operations["GetRouters"];
-    post: operations["CreateRouter"];
-  };
-  "/v1/gateway/{routerHash}": {
-    get: operations["GetLatestRouterConfig"];
-    put: operations["UpdateRouter"];
-  };
-  "/v1/gateway/{routerHash}/requests-over-time": {
-    get: operations["GetRouterRequestsOverTime"];
-  };
-  "/v1/gateway/{routerHash}/cost-over-time": {
-    get: operations["GetRouterCostOverTime"];
-  };
-  "/v1/gateway/{routerHash}/latency-over-time": {
-    get: operations["GetRouterLatencyOverTime"];
   };
   "/v1/evals/query": {
     post: operations["QueryEvals"];
@@ -814,6 +800,8 @@ export interface components {
     Partial_RequestResponseRMTToOperators_: {
       country_code?: components["schemas"]["Partial_TextOperators_"];
       latency?: components["schemas"]["Partial_NumberOperators_"];
+      cost?: components["schemas"]["Partial_NumberOperators_"];
+      provider?: components["schemas"]["Partial_TextOperators_"];
       time_to_first_token?: components["schemas"]["Partial_NumberOperators_"];
       status?: components["schemas"]["Partial_NumberOperators_"];
       request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
@@ -2702,6 +2690,72 @@ Json: JsonObject;
       /** Format: double */
       timeZoneDifference: number;
     };
+    ModelEndpoint: {
+      provider: string;
+      providerSlug: string;
+      pricing: {
+        /** Format: double */
+        cacheWrite?: number;
+        /** Format: double */
+        cacheRead?: number;
+        /** Format: double */
+        thinking?: number;
+        /** Format: double */
+        image?: number;
+        /** Format: double */
+        video?: number;
+        /** Format: double */
+        web_search?: number;
+        /** Format: double */
+        audio?: number;
+        /** Format: double */
+        completion: number;
+        /** Format: double */
+        prompt: number;
+      };
+      supportsPtb?: boolean;
+    };
+    /** @enum {string} */
+    InputModality: "text" | "image" | "audio" | "video";
+    /** @enum {string} */
+    OutputModality: "text" | "image" | "audio" | "video";
+    /** @enum {string} */
+    StandardParameter: "max_tokens" | "temperature" | "top_p" | "top_k" | "stop" | "stream" | "frequency_penalty" | "presence_penalty" | "repetition_penalty" | "seed" | "tools" | "tool_choice" | "functions" | "function_call" | "reasoning" | "include_reasoning" | "thinking" | "response_format" | "json_mode" | "truncate" | "min_p" | "logit_bias" | "logprobs" | "top_logprobs" | "structured_outputs";
+    ModelRegistryItem: {
+      id: string;
+      name: string;
+      author: string;
+      /** Format: double */
+      contextLength: number;
+      endpoints: components["schemas"]["ModelEndpoint"][];
+      /** Format: double */
+      maxOutput?: number;
+      trainingDate?: string;
+      description?: string;
+      inputModalities: components["schemas"]["InputModality"][];
+      outputModalities: components["schemas"]["OutputModality"][];
+      supportedParameters: components["schemas"]["StandardParameter"][];
+    };
+    /** @enum {string} */
+    ModelCapability: "audio" | "video" | "image" | "thinking" | "web_search" | "caching" | "reasoning";
+    ModelRegistryResponse: {
+      models: components["schemas"]["ModelRegistryItem"][];
+      /** Format: double */
+      total: number;
+      filters: {
+        capabilities: components["schemas"]["ModelCapability"][];
+        authors: string[];
+        providers: string[];
+      };
+    };
+    ResultSuccess_ModelRegistryResponse_: {
+      data: components["schemas"]["ModelRegistryResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ModelRegistryResponse.string_": components["schemas"]["ResultSuccess_ModelRegistryResponse_"] | components["schemas"]["ResultError_string_"];
+    /** @enum {string} */
+    SortOption: "name" | "price-low" | "price-high" | "context" | "newest";
     MetricStats: {
       /** Format: double */
       p99: number;
@@ -3235,83 +3289,6 @@ Json: JsonObject;
       /** @enum {number|null} */
       error: null;
     };
-    Router: {
-      lastUpdatedAt: string;
-      latestVersion: string;
-      name: string;
-      hash: string;
-      id: string;
-    };
-    "ResultSuccess__routers-Router-Array__": {
-      data: {
-        routers: components["schemas"]["Router"][];
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__routers-Router-Array_.string_": components["schemas"]["ResultSuccess__routers-Router-Array__"] | components["schemas"]["ResultError_string_"];
-    LatestRouterConfig: {
-      config: components["schemas"]["Json"];
-      version: string;
-      hash: string;
-      name: string;
-      id: string;
-    };
-    ResultSuccess_LatestRouterConfig_: {
-      data: components["schemas"]["LatestRouterConfig"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_LatestRouterConfig.string_": components["schemas"]["ResultSuccess_LatestRouterConfig_"] | components["schemas"]["ResultError_string_"];
-    RouterRequestsOverTime: {
-      /** Format: double */
-      status: number;
-      /** Format: double */
-      count: number;
-      /** Format: date-time */
-      time: string;
-    };
-    "ResultSuccess_RouterRequestsOverTime-Array_": {
-      data: components["schemas"]["RouterRequestsOverTime"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_RouterRequestsOverTime-Array.string_": components["schemas"]["ResultSuccess_RouterRequestsOverTime-Array_"] | components["schemas"]["ResultError_string_"];
-    RouterCostOverTime: {
-      /** Format: double */
-      cost: number;
-      /** Format: date-time */
-      time: string;
-    };
-    "ResultSuccess_RouterCostOverTime-Array_": {
-      data: components["schemas"]["RouterCostOverTime"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_RouterCostOverTime-Array.string_": components["schemas"]["ResultSuccess_RouterCostOverTime-Array_"] | components["schemas"]["ResultError_string_"];
-    RouterLatencyOverTime: {
-      /** Format: double */
-      duration: number;
-      /** Format: date-time */
-      time: string;
-    };
-    "ResultSuccess_RouterLatencyOverTime-Array_": {
-      data: components["schemas"]["RouterLatencyOverTime"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_RouterLatencyOverTime-Array.string_": components["schemas"]["ResultSuccess_RouterLatencyOverTime-Array_"] | components["schemas"]["ResultError_string_"];
-    CreateRouterResult: {
-      routerVersionId: string;
-      routerHash: string;
-      routerId: string;
-    };
-    ResultSuccess_CreateRouterResult_: {
-      data: components["schemas"]["CreateRouterResult"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_CreateRouterResult.string_": components["schemas"]["ResultSuccess_CreateRouterResult_"] | components["schemas"]["ResultError_string_"];
     Eval: {
       name: string;
       /** Format: double */
@@ -6048,6 +6025,33 @@ export interface operations {
       };
     };
   };
+  GetModelRegistry: {
+    parameters: {
+      query?: {
+        providers?: string;
+        authors?: string;
+        inputModalities?: string;
+        outputModalities?: string;
+        parameters?: string;
+        capabilities?: string;
+        priceMin?: number;
+        priceMax?: number;
+        contextMin?: number;
+        search?: string;
+        sort?: components["schemas"]["SortOption"];
+        limit?: number;
+        offset?: number;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ModelRegistryResponse.string_"];
+        };
+      };
+    };
+  };
   GetModelComparison: {
     requestBody: {
       content: {
@@ -6915,117 +6919,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  GetRouters: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__routers-Router-Array_.string_"];
-        };
-      };
-    };
-  };
-  CreateRouter: {
-    requestBody: {
-      content: {
-        "application/json": {
-          config: string;
-          name: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_CreateRouterResult.string_"];
-        };
-      };
-    };
-  };
-  GetLatestRouterConfig: {
-    parameters: {
-      path: {
-        routerHash: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_LatestRouterConfig.string_"];
-        };
-      };
-    };
-  };
-  UpdateRouter: {
-    parameters: {
-      path: {
-        routerHash: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          config: string;
-          name: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  GetRouterRequestsOverTime: {
-    parameters: {
-      path: {
-        routerHash: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_RouterRequestsOverTime-Array.string_"];
-        };
-      };
-    };
-  };
-  GetRouterCostOverTime: {
-    parameters: {
-      path: {
-        routerHash: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_RouterCostOverTime-Array.string_"];
-        };
-      };
-    };
-  };
-  GetRouterLatencyOverTime: {
-    parameters: {
-      path: {
-        routerHash: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_RouterLatencyOverTime-Array.string_"];
         };
       };
     };

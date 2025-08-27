@@ -159,6 +159,16 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "qwen/qwen3-235b-a22b-04-28",
+    },
+    cost: {
+      prompt_token: 1.3e-7,
+      completion_token: 6e-7,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
       value: "switchpoint/router",
     },
     cost: {
@@ -940,6 +950,16 @@ export const costs: ModelRow[] = [
     model: {
       operator: "equals",
       value: "openai/gpt-4.1",
+    },
+    cost: {
+      prompt_token: 2e-6,
+      completion_token: 8e-6,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "openai/gpt-4.1-2025-04-14",
     },
     cost: {
       prompt_token: 2e-6,

@@ -20,6 +20,11 @@ function truncMap(
 
 export class RequestBodyHandler extends AbstractLogHandler {
   async handle(context: HandlerContext): PromiseGenericResult<string> {
+    const start = performance.now();
+    context.timingMetrics.push({
+      constructor: this.constructor.name,
+      start,
+    });
     try {
       const { body: processedBody, model: requestModel } =
         this.processRequestBody(context);
@@ -82,12 +87,18 @@ export class RequestBodyHandler extends AbstractLogHandler {
   }
 
   private isVectorDBRequest(requestBody: any): boolean {
+    if (typeof requestBody !== "object" || requestBody === null) {
+      return false;
+    }
     return (
       requestBody.hasOwnProperty("_type") && requestBody._type === "vector_db"
     );
   }
 
   private isToolRequest(requestBody: any): boolean {
+    if (typeof requestBody !== "object" || requestBody === null) {
+      return false;
+    }
     return requestBody.hasOwnProperty("_type") && requestBody._type === "tool";
   }
 

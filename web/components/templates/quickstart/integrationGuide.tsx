@@ -1,6 +1,6 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DiffHighlight } from "@/components/templates/welcome/diffHighlight";
-import { getRouterCode } from "../gateway/routerUseDialog";
+import { IntegrationCodeTabs } from "@/components/shared/IntegrationCodeTabs";
+import { BookOpen } from "lucide-react";
+import Link from "next/link";
 
 interface IntegrationGuideProps {
   apiKey?: string;
@@ -12,55 +12,24 @@ const IntegrationGuide = ({ apiKey }: IntegrationGuideProps) => {
       className="w-full rounded-lg bg-background"
       onClick={(e) => e.stopPropagation()}
     >
-      <div className="p-4 pb-2">
-        <Tabs defaultValue="javascript" className="w-full">
-          <div className="mb-2 flex items-center justify-between">
-            <TabsList className="w-auto">
-              <TabsTrigger value="javascript">JavaScript</TabsTrigger>
-              <TabsTrigger value="python">Python</TabsTrigger>
-              <TabsTrigger value="curl">cURL</TabsTrigger>
-            </TabsList>
-          </div>
+      <div className="flex flex-col gap-4 p-4">
+        <IntegrationCodeTabs apiKey={apiKey} />
 
-          <TabsContent value="javascript" className="mt-2">
-            <DiffHighlight
-              code={getRouterCode("javascript", apiKey)}
-              language="typescript"
-              newLines={[]}
-              oldLines={[]}
-              minHeight={false}
-              maxHeight={false}
-              textSize="sm"
-              marginTop={false}
-            />
-          </TabsContent>
-
-          <TabsContent value="python" className="mt-2">
-            <DiffHighlight
-              code={getRouterCode("python", apiKey)}
-              language="python"
-              newLines={[]}
-              oldLines={[]}
-              minHeight={false}
-              maxHeight={false}
-              textSize="sm"
-              marginTop={false}
-            />
-          </TabsContent>
-
-          <TabsContent value="curl" className="mt-2">
-            <DiffHighlight
-              code={getRouterCode("curl", apiKey)}
-              language="bash"
-              newLines={[]}
-              oldLines={[]}
-              minHeight={false}
-              maxHeight={false}
-              textSize="sm"
-              marginTop={false}
-            />
-          </TabsContent>
-        </Tabs>
+        <div className="flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50/50 px-3 py-2 dark:border-blue-800 dark:bg-blue-950/20">
+          <BookOpen className="h-4 w-4 flex-shrink-0 text-blue-600 dark:text-blue-400" />
+          <span className="text-sm text-blue-900 dark:text-blue-100">
+            Check our{" "}
+            <Link
+              href="https://helicone.ai/models"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium underline underline-offset-2 hover:no-underline"
+            >
+              Model Registry
+            </Link>{" "}
+            to see all supported model slugs for the AI Gateway
+          </span>
+        </div>
       </div>
     </div>
   );

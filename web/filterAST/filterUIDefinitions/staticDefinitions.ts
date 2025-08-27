@@ -238,6 +238,13 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
     operators: ["eq", "neq", "like", "ilike", "contains"],
     table: "request_response_rmt",
   },
+  {
+    id: "provider",
+    label: "Provider",
+    type: "string",
+    operators: ["eq", "neq", "like", "ilike", "contains"],
+    table: "request_response_rmt",
+  },
 
   // Number fields
   {
@@ -258,6 +265,13 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
   {
     id: "latency",
     label: "Latency (ms)",
+    type: "number",
+    operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
+    table: "request_response_rmt",
+  },
+  {
+    id: "cost",
+    label: "Cost", 
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
     table: "request_response_rmt",

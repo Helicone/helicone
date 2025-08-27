@@ -111,7 +111,9 @@ export async function anthropicAIStream(
     if (
       getModel(requestBody ?? "{}").includes("claude-3") ||
       getModel(requestBody ?? "{}").includes("claude-sonnet-4") ||
-      getModel(requestBody ?? "{}").includes("claude-opus-4")
+      getModel(requestBody ?? "{}").includes("claude-opus-4") ||
+      // for AI SDK
+      getModel(requestBody ?? "{}").includes("claude-4")
     ) {
       return ok({
         ...recursivelyConsolidateAnthropicListForClaude(lines),

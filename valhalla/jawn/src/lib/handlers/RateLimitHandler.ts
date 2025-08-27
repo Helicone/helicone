@@ -20,6 +20,11 @@ export class RateLimitHandler extends AbstractLogHandler {
   }
 
   async handle(context: HandlerContext): PromiseGenericResult<string> {
+    const start = performance.now();
+    context.timingMetrics.push({
+      constructor: this.constructor.name,
+      start,
+    });
     if (!context.orgParams?.id) {
       return err("Organization ID not found in org params");
     }
