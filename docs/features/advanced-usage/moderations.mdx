@@ -7,11 +7,9 @@ description: "Enable OpenAI's moderation feature in your LLM applications to aut
 
 import QuestionsSection from "/snippets/questions-section.mdx";
 
-## Introduction
-
 By integrating with OpenAI's moderation endpoint, Helicone helps you check whether the user message is potentially harmful.
 
-### Why Moderations
+## Why Moderations
 
 - Identifying harmful requests and take action, for example, by filtering it.
 - Ensuring any inappropriate or harmful content in user messages is flagged and prevented from being processed.
@@ -19,14 +17,17 @@ By integrating with OpenAI's moderation endpoint, Helicone helps you check wheth
 
 ## Getting Started
 
+<Warning>
+Moderations currently work with **OpenAI models only** (gpt-4, gpt-3.5-turbo, etc.) as it uses OpenAI's moderation endpoint.
+</Warning>
+
 To enable moderation, set `Helicone-Moderations-Enabled` to `true`.
 
 <CodeGroup>
-```bash Curl
-curl https://oai.helicone.ai/v1/chat/completions \
+```bash cURL
+curl https://ai-gateway.helicone.ai/chat/completions \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $OPENAI_API_KEY" \
-  -H "Helicone-Auth: Bearer $HELICONE_API_KEY" \
+  -H "Authorization: Bearer $HELICONE_API_KEY" \
   -H "Helicone-Moderations-Enabled: true" \ # Add this header and set to true
   -d '{
     "model": "gpt-4o-mini",
@@ -40,35 +41,48 @@ curl https://oai.helicone.ai/v1/chat/completions \
 ```
 
 ```python Python
-openai.api_base = "https://oai.helicone.ai/v1"
+from openai import OpenAI
+import os
 
-client.chat.completions.create(
-    model="text-davinci-003",
-    prompt="How do I enable moderations?",
+client = OpenAI(
+    base_url="https://ai-gateway.helicone.ai",
+    api_key=os.getenv("HELICONE_API_KEY"),
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "How do I enable moderations?"}],
     extra_headers={
       "Helicone-Moderations-Enabled": "true", # Add this header and set to true
     }
 )
 ```
 
-```js Node
-import { Configuration, OpenAIApi } from "openai";
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-  basePath: "https://oai.helicone.ai/v1",
-  defaultHeaders: {
-    "Helicone-Auth": `Bearer ${HELICONE_API_KEY}`,
-    "Helicone-Moderations-Enabled": "true", // Add this header and set to true
-  },
+```typescript Node.js
+import { OpenAI } from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY,
 });
-const openai = new OpenAIApi(configuration);
+
+const response = await client.chat.completions.create(
+  {
+    model: "gpt-4o-mini",
+    messages: [{ role: "user", content: "How do I enable moderations?" }]
+  },
+  {
+    headers: {
+      "Helicone-Moderations-Enabled": "true", // Add this header and set to true
+    }
+  }
+);
 ```
 
 </CodeGroup>
 
 <Note>
-  The moderation call to the OpenAI endpoint will utilize your provided OpenAI
-  API key.
+  The moderation call to the OpenAI endpoint will utilize your OpenAI API key configured in Helicone.
 </Note>
 
 <Accordion title="A Deep-Dive of the Moderation Process">

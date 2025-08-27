@@ -1,0 +1,149 @@
+---
+title: "Prompt Integration"
+sidebarTitle: "Prompt Integration"
+description: "Deploy and iterate prompts through the AI Gateway without code changes"
+---
+
+Helicone's AI Gateway integrates directly with our prompt management system without the need for custom packages or code changes.
+
+This guide shows you how to integrate the AI Gateway with prompt management, not the actual prompt management itself. For creating and managing prompts, see [Prompt Management](/features/advanced-usage/prompts).
+
+## Why Use Prompt Integration?
+
+Instead of hardcoding prompts in your application, reference them by ID:
+
+<CodeGroup>
+```typescript Before
+// ❌ Prompt hardcoded in your app
+const response = await client.chat.completions.create({
+  model: "gpt-4o-mini",
+  messages: [
+    {
+      role: "system", 
+      content: "You are a helpful customer support agent for TechCorp. Be friendly and solution-oriented."
+    },
+    {
+      role: "user",
+      content: `Customer ${customerName} is asking about ${issueType}`
+    }
+  ]
+});
+```
+
+```typescript After
+// ✅ Prompt managed in Helicone dashboard
+const response = await client.chat.completions.create({
+  model: "gpt-4o-mini",
+  prompt_id: "customer_support",
+  inputs: {
+    customer_name: customerName,
+    issue_type: issueType
+  }
+});
+// The prompt template lives in Helicone, not your code
+```
+</CodeGroup>
+
+## Gateway vs SDK Integration
+
+Without the AI Gateway, using managed prompts requires multiple steps:
+
+<CodeGroup>
+```typescript SDK Approach (Complex)
+// 1. Install package
+npm install @helicone/helpers
+
+// 2. Initialize prompt manager
+const promptManager = new HeliconePromptManager({
+  apiKey: "your-helicone-api-key"
+});
+
+// 3. Fetch and compile prompt (separate API call)
+const { body, errors } = await promptManager.getPromptBody({
+  prompt_id: "abc123",
+  inputs: { customer_name: "John", ... }
+});
+
+// 4. Handle errors manually
+if (errors.length > 0) {
+  console.warn("Validation errors:", errors);
+}
+
+// 5. Finally make the LLM call
+const response = await openai.chat.completions.create(body);
+```
+
+```typescript Gateway Approach (Simple)
+// Just reference the prompt - gateway handles everything
+const response = await client.chat.completions.create({
+  prompt_id: "abc123",
+  inputs: { customer_name: "John", ... }
+});
+```
+</CodeGroup>
+
+<Info>
+**Why the gateway is better:**
+- **No extra packages** - Works with your existing OpenAI SDK
+- **Single API call** - Gateway fetches and compiles automatically
+- **Lower latency** - Everything happens server-side in one request
+- **Automatic error handling** - Invalid inputs return clear error messages
+- **Cleaner code** - No prompt management logic in your application
+</Info>
+
+## Integration Steps
+
+<Steps>
+<Step title="Create prompts in Helicone">
+  [Build and test prompts](/features/advanced-usage/prompts) with variables in the dashboard
+</Step>
+<Step title="Use prompt_id in your code">
+  Replace `messages` with `prompt_id` and `inputs` in your gateway calls
+</Step>
+</Steps>
+
+## API Parameters
+
+Use these parameters in your chat completions request to integrate with saved prompts:
+
+<ParamField body="prompt_id" type="string" required>
+  The ID of your saved prompt from the Helicone dashboard
+</ParamField>
+
+<ParamField body="environment" type="string" default="production">
+  Which environment version to use: `development`, `staging`, or `production`
+</ParamField>
+
+<ParamField body="inputs" type="object" required>
+  Variables to fill in your prompt template (e.g., `{"customer_name": "John", "issue_type": "billing"}`)
+</ParamField>
+
+<ParamField body="model" type="string" required>
+  Any supported model - works with the unified gateway format
+</ParamField>
+
+## Example Usage
+
+```typescript
+const response = await client.chat.completions.create({
+  model: "gpt-4o-mini",
+  prompt_id: "customer_support_v2",
+  environment: "production",
+  inputs: {
+    customer_name: "Sarah Johnson",
+    issue_type: "billing",
+    customer_message: "I was charged twice this month"
+  }
+});
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+<Card title="Create Your First Prompt" icon="pencil" href="/features/advanced-usage/prompts">
+  Learn to build prompts with variables in the dashboard
+</Card>
+<Card title="Provider Routing" icon="route" href="/gateway/provider-routing">
+  Combine prompts with automatic routing and fallbacks for reliability
+</Card>
+</CardGroup>

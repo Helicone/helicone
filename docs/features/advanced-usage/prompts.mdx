@@ -9,12 +9,20 @@ description: "Compose and iterate prompts, then easily deploy them in any LLM ca
 
 Traditional prompt development involves hardcoded prompts in application code, messy string substitution, and frustrating and rebuilding deployments for every iteration. This creates friction that slows down experimentation and your team's ability to ship.
 
-Our Prompts offers a better approach!
-- **Powerful composability**: Variables of all types in system prompts, messages, and tool/response schemas
-- **Clear version control**: Track, compare, and rollback prompt versions without code changes
-- **Environment management**: Full control over deployment environments like production, staging, and development
-- **Easy deployment**: Reference prompts by ID and let our AI Gateway handle the rest
-- **Real-time testing**: Test prompts instantly with different models and parameters
+<CardGroup cols={2}>
+<Card title="Iterate Without Code Changes" icon="rocket">
+  Test and deploy prompt changes instantly without rebuilding or redeploying your application
+</Card>
+<Card title="Version Control Built-In" icon="code-branch">
+  Track every change, compare versions, and rollback instantly if something goes wrong
+</Card>
+<Card title="Dynamic Variables" icon="brackets-curly">
+  Use variables anywhere - system prompts, messages, even tool schemas - for truly reusable prompts
+</Card>
+<Card title="Environment Management" icon="server">
+  Deploy different versions to production, staging, and development environments independently
+</Card>
+</CardGroup>
 
 ## Quickstart
 
@@ -61,15 +69,12 @@ Our Prompts offers a better approach!
       import { OpenAI } from "openai";
 
       const openai = new OpenAI({
-        baseURL: "https://ai-gateway.helicone.ai/v1",
-        apiKey: "your-openai-api-key",
-        defaultHeaders: {
-          "Helicone-Auth": "Bearer your-helicone-api-key",
-        },
+        baseURL: "https://ai-gateway.helicone.ai",
+        apiKey: process.env.HELICONE_API_KEY,
       });
 
       const response = await openai.chat.completions.create({
-        model: "openai/gpt-4o-mini",
+        model: "gpt-4o-mini",
         prompt_id: "abc123", // Reference your saved prompt
         environment: "production", // Optional: specify environment
         inputs: {
@@ -81,17 +86,15 @@ Our Prompts offers a better approach!
 
       ```python Python
       import openai
+      import os
 
       client = openai.OpenAI(
-          api_key="your-openai-api-key",
-          base_url="https://ai-gateway.helicone.ai/v1",
-          default_headers={
-              "Helicone-Auth": "Bearer your-helicone-api-key"
-          }
+          base_url="https://ai-gateway.helicone.ai",
+          api_key=os.environ.get("HELICONE_API_KEY")
       )
 
       response = client.chat.completions.create(
-          model="openai/gpt-4o-mini",
+          model="gpt-4o-mini",
           prompt_id="abc123",  # Reference your saved prompt
           environment="production",  # Optional: specify environment
           inputs={
@@ -102,12 +105,11 @@ Our Prompts offers a better approach!
       ```
 
       ```bash cURL
-      curl https://ai-gateway.helicone.ai/v1/chat/completions \
+      curl https://ai-gateway.helicone.ai/chat/completions \
         -H "Content-Type: application/json" \
-        -H "Authorization: Bearer your-openai-api-key" \
-        -H "Helicone-Auth: Bearer your-helicone-api-key" \
+        -H "Authorization: Bearer $HELICONE_API_KEY" \
         -d '{
-          "model": "openai/gpt-4o-mini",
+          "model": "gpt-4o-mini",
           "prompt_id": "abc123",
           "environment": "production",
           "inputs": {
@@ -132,12 +134,16 @@ When you make an LLM call with a prompt ID, the AI Gateway will compile your sav
 
 The AI Gateway automatically determines which prompt version to use based on the parameters you provide:
 
-1. **Environment specified**: If you provide an `environment` parameter, the gateway uses the prompt version deployed to that environment (e.g., "production", "staging", "development")
-2. **Version ID specified**: If you provide a `version_id` parameter but no environment, the gateway uses that specific version
-3. **Default behavior**: If neither environment nor version ID is specified, the gateway automatically uses the production version
+<ParamField body="environment" type="string">
+  Uses the version deployed to that environment (e.g., production, staging, development)
+</ParamField>
+
+<ParamField body="version_id" type="string">
+  Uses a specific version directly by its ID
+</ParamField>
 
 <Note>
-  Environment takes precedence over version ID. If both are specified, the environment parameter will be used and version ID will be ignored.
+  **Default behavior**: If neither parameter is provided, the production version is used. Environment takes precedence over version_id if both are specified.
 </Note>
 
 ### Parameter Priority
@@ -413,7 +419,7 @@ Variables can be used within JSON schemas for tools and response formatting. Thi
 
 We provide SDKs for both TypeScript and Python that offer two ways to use Helicone prompts:
 
-1. **AI Gateway Integration** - Use prompts through the Helicone AI Gateway
+1. **[AI Gateway Integration](/gateway/prompt-integration)** - Use prompts through the Helicone AI Gateway
 2. **Direct SDK Integration** - Pull prompts directly via SDK
 
 Prompts through the AI Gateway come with several benefits:
@@ -511,11 +517,8 @@ Both SDKs provide the `HeliconePromptManager` with these main methods:
       import { HeliconePromptManager } from '@helicone/helpers';
 
       const openai = new OpenAI({
-        apiKey: "your-openai-api-key",
-        baseURL: "https://oai.helicone.ai/v1",
-        defaultHeaders: {
-          "Helicone-Auth": "Bearer your-helicone-api-key",
-        },
+        baseURL: "https://ai-gateway.helicone.ai",
+        apiKey: process.env.HELICONE_API_KEY,
       });
 
       const promptManager = new HeliconePromptManager({
@@ -549,11 +552,8 @@ Both SDKs provide the `HeliconePromptManager` with these main methods:
       import { HeliconePromptManager } from '@helicone/helpers';
 
       const openai = new OpenAI({
-        apiKey: "your-openai-api-key",
-        baseURL: "https://oai.helicone.ai/v1",
-        defaultHeaders: {
-          "Helicone-Auth": "Bearer your-helicone-api-key",
-        },
+        baseURL: "https://ai-gateway.helicone.ai",
+        apiKey: process.env.HELICONE_API_KEY,
       });
 
       const promptManager = new HeliconePromptManager({
@@ -634,11 +634,8 @@ Both SDKs provide the `HeliconePromptManager` with these main methods:
 
         // Proceed with valid prompt
         const openai = new OpenAI({ 
-          apiKey: "your-openai-api-key",
-          baseURL: "https://oai.helicone.ai/v1",
-          defaultHeaders: {
-            "Helicone-Auth": "Bearer your-helicone-api-key",
-          },
+          baseURL: "https://ai-gateway.helicone.ai",
+          apiKey: process.env.HELICONE_API_KEY,
         });
         return await openai.chat.completions.create(body);
       }
@@ -650,14 +647,12 @@ Both SDKs provide the `HeliconePromptManager` with these main methods:
     <CodeGroup>
       ```python Basic Usage
       import openai
+      import os
       from helicone_helpers import HeliconePromptManager
 
       client = openai.OpenAI(
-          api_key="your-openai-api-key",
-          base_url="https://oai.helicone.ai/v1",
-          default_headers={
-              "Helicone-Auth": "Bearer your-helicone-api-key"
-          }
+          base_url="https://ai-gateway.helicone.ai",
+          api_key=os.environ.get("HELICONE_API_KEY")
       )
 
       prompt_manager = HeliconePromptManager(
@@ -686,14 +681,12 @@ Both SDKs provide the `HeliconePromptManager` with these main methods:
 
       ```python With Environment Control
       import openai
+      import os
       from helicone_helpers import HeliconePromptManager
 
       client = openai.OpenAI(
-          api_key="your-openai-api-key",
-          base_url="https://oai.helicone.ai/v1",
-          default_headers={
-              "Helicone-Auth": "Bearer your-helicone-api-key"
-          }
+          base_url="https://ai-gateway.helicone.ai",
+          api_key=os.environ.get("HELICONE_API_KEY")
       )
 
       prompt_manager = HeliconePromptManager(
@@ -740,6 +733,7 @@ Both SDKs provide the `HeliconePromptManager` with these main methods:
 
       ```python Error Handling
       import openai
+      import os
       from helicone_helpers import HeliconePromptManager
 
       prompt_manager = HeliconePromptManager(
@@ -768,11 +762,8 @@ Both SDKs provide the `HeliconePromptManager` with these main methods:
 
           # Proceed with valid prompt
           client = openai.OpenAI(
-              api_key="your-openai-api-key",
-              base_url="https://oai.helicone.ai/v1",
-              default_headers={
-                  "Helicone-Auth": "Bearer your-helicone-api-key"
-              }
+              base_url="https://ai-gateway.helicone.ai",
+              api_key=os.environ.get("HELICONE_API_KEY")
           )
           return client.chat.completions.create(**result["body"])
       ```

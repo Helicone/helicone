@@ -1,0 +1,128 @@
+---
+title: "Platform Overview"
+sidebarTitle: "Platform Overview"
+description: "Understand how Helicone solves the core challenges of building production LLM applications"
+---
+
+Now that your requests are flowing through Helicone, let's explore what you can do with the platform.
+
+<Frame>
+  <img
+    src="/images/introduction/intro-dashboard.webp"
+    alt="Helicone dashboard showing comprehensive LLM observability metrics."
+  />
+</Frame>
+
+## How We Integrate
+
+Helicone works through our **AI Gateway** - a unified API that sits between your application and LLM providers:
+
+1. **Single Integration** - Point your OpenAI SDK to our gateway URL
+2. **Automatic Logging** - Every request and response is logged after we return it to you
+3. **Header-Based Features** - Enable capabilities like fallbacks, caching, and agent tracking via simple headers
+4. **Zero Latency Impact** - Edge deployment keeps overhead under 50ms
+
+This means you get both gateway features (routing, fallbacks, unified API) AND complete observability (costs, errors, latency) without any complex setup.
+
+<Note>
+Currently supporting BYOK (Bring Your Own Keys) and passthrough routing. Pass-through billing (PTB) for using Helicone's API keys is coming soon.
+</Note>
+
+## The Problems We Solve
+
+<CardGroup cols={2}>
+<Card title="Reliability Issues" icon="shield">
+  Provider outages break your application. No visibility when requests fail. Manual fallback logic is complex and error-prone.
+</Card>
+<Card title="Debugging Complexity" icon="bug">
+  LLM responses are non-deterministic. Multi-step AI workflows are hard to trace. Errors are difficult to reproduce.
+</Card>
+<Card title="Cost Uncertainty" icon="dollar-sign">
+  Unpredictable spending across providers. No understanding of unit economics. Difficult to optimize without breaking functionality.
+</Card>
+<Card title="Prompt Management Pain" icon="code">
+  Every prompt change requires a deployment. No version control for prompts. Can't iterate quickly based on user feedback.
+</Card>
+</CardGroup>
+
+## Our Principles
+
+**Best Price Always**  
+We fight for every penny. PTB (coming soon...) finds the absolute lowest price across providers. No markup, no games.
+
+**Invisible Performance**  
+Your app shouldn't slow down for observability. Edge deployment keeps us under 50ms. Always.
+
+**Always Online**  
+Your app stays up, period. Providers fail, we fallback. Rate limits hit, we load balance. We don't go down.
+
+**Never Be Surprised**  
+No shock bills. No mystery spikes. See every cost as it happens. We believe in radical transparency.
+
+**Find Anything**  
+Every request, searchable. Every error, findable. That needle in the haystack? We'll help you find it.
+
+**Built for Your Worst Day**  
+When production breaks and everyone's panicking, we're rock solid. Built for when you need us most.
+
+## Real Scenarios
+
+<AccordionGroup>
+  <Accordion title="Costs spiked 300% overnight">
+    Helicone's user tracking and custom properties turn cost mysteries into clear insights. See exactly which users or features are driving spend with automatic cost breakdowns by user ID, feature, or any custom dimension you define. Instead of panic and guesswork, you get immediate visibility into what changed and can take targeted action.
+  </Accordion>
+  
+  <Accordion title="User says AI gave wrong answer">
+    Session tracking captures the full conversation context so you can see exactly what led to the wrong answer. Find the user's complete interaction history, trace through multi-step workflows, and identify the exact prompt or step that failed. With prompt versioning, you can fix and deploy the correction instantly without touching code.
+  </Accordion>
+  
+  <Accordion title="OpenAI is down">
+    Automatic fallback chains keep your app running when providers fail. Configure GPT-4o on OpenAI → Vertex → Bedrock sequences that trigger instantly when requests fail or hit rate limits. Your users get the same model through a different provider, your app stays online, and you maintain full observability throughout the outage.
+  </Accordion>
+  
+  <Accordion title="AI agent workflow is broken">
+    Session trees show you exactly how complex AI workflows unfold across multiple LLM calls. When multi-step agents fail, trace the entire sequence to pinpoint where it broke - whether it's hitting token limits, using wrong context, or failing prompt logic. See the full chain of reasoning that led to the failure and fix the root cause.
+  </Accordion>
+</AccordionGroup>
+
+## Start Exploring Features
+
+<CardGroup cols={2}>
+
+<Card
+  title="AI Gateway" 
+  href="/gateway/overview"
+  icon="route"
+>
+  Use 100+ models through one unified API with automatic fallbacks
+</Card>
+
+<Card
+  title="Session Tracking" 
+  href="/observability/sessions"
+  icon="code-branch"
+>
+  Debug complex AI agents or AI workflows
+</Card>
+
+<Card
+  title="Prompt Management" 
+  href="/gateway/prompt-integration"
+  icon="wand-magic-sparkles"
+>
+  Deploy prompts without code changes
+</Card>
+
+
+<Card
+  title="Cost Tracking" 
+  href="/observability/cost-tracking"
+  icon="dollar-sign"
+>
+  Track cost and understand the unit economics of your LLM applications
+</Card>
+</CardGroup>
+
+---
+
+We built Helicone for developers with users depending on them. For the 3am outages. For the surprise bills. For finding that one broken request in millions.
