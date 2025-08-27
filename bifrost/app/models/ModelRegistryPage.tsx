@@ -28,7 +28,10 @@ interface ModelRegistryResponse {
   models: Model[];
   total: number;
   filters: {
-    providers: string[];
+    providers: {
+      displayName: string;
+      name: string;
+    }[];
     authors: string[];
     capabilities: string[];
   };
