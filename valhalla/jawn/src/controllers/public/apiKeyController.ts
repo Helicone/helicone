@@ -14,11 +14,7 @@ import {
 } from "tsoa";
 import { type JawnAuthenticatedRequest } from "../../types/request";
 import { KeyManager } from "../../managers/apiKeys/KeyManager";
-import {
-  deleteProviderKey,
-  setAPIKey,
-  setProviderKey,
-} from "../../lib/refetchKeys";
+import { setAPIKey } from "../../lib/refetchKeys";
 import { dbProviderToProvider } from "@helicone-package/cost/models/provider-helpers";
 
 @Route("v1/api-keys")
@@ -43,10 +39,7 @@ export class ApiKeyController extends Controller {
     }
 
     if (result.data.providerName) {
-      deleteProviderKey(
-        result.data.providerName,
-        request.authParams.organizationId
-      ).catch((error) => {
+      keyManager.resetProviderKeysInGatewayCache().catch((error) => {
         console.error("error refetching provider keys", error);
       });
     }
@@ -80,15 +73,9 @@ export class ApiKeyController extends Controller {
     }
 
     const providerName = dbProviderToProvider(body.providerName);
+
     if (providerName) {
-      setProviderKey({
-        provider: providerName,
-        decrypted_provider_key: body.providerKey,
-        decrypted_provider_secret_key: body.providerSecretKey ?? "",
-        auth_type: "key",
-        config: body.config,
-        orgId: request.authParams.organizationId,
-      }).catch((error) => {
+      keyManager.resetProviderKeysInGatewayCache().catch((error) => {
         console.error("error refetching provider keys", error);
       });
     }
@@ -151,14 +138,7 @@ export class ApiKeyController extends Controller {
 
     const providerName = dbProviderToProvider(result.data.providerName);
     if (providerName) {
-      setProviderKey({
-        provider: providerName,
-        decrypted_provider_key: body.providerKey ?? "",
-        decrypted_provider_secret_key: body.providerSecretKey ?? "",
-        auth_type: "key",
-        config: body.config ?? {},
-        orgId: request.authParams.organizationId,
-      }).catch((error) => {
+      keyManager.resetProviderKeysInGatewayCache().catch((error) => {
         console.error("error refetching provider keys", error);
       });
     }

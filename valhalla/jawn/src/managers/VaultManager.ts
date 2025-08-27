@@ -11,6 +11,7 @@ export type DecryptedProviderKey = {
   provider_name: string | null;
   provider_key_name: string | null;
   provider_secret_key: string | null;
+  cuid?: string | null;
 };
 
 export class VaultManager extends BaseManager {

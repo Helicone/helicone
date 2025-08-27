@@ -78,9 +78,9 @@ function getAPIRouterV1(
   );
 
   router.post(
-    "/mock-set-provider-key",
+    "/mock-set-provider-keys/:orgId",
     async (
-      _,
+      { params: { orgId } },
       requestWrapper: RequestWrapper,
       env: Env,
       ctx: ExecutionContext
@@ -89,15 +89,17 @@ function getAPIRouterV1(
         return new Response("not allowed", { status: 403 });
       }
 
-      const data = await requestWrapper.getJson<{
-        provider: ProviderName;
-        decryptedProviderKey: string;
-        decryptedProviderSecretKey: string;
-        authType: "key" | "session_token";
-        config: Json | null;
-        orgId: string;
-        softDelete?: boolean;
-      }>();
+      const data = await requestWrapper.getJson<
+        {
+          provider: ProviderName;
+          decryptedProviderKey: string;
+          decryptedProviderSecretKey: string;
+          authType: "key" | "session_token";
+          config: Json | null;
+          orgId: string;
+          softDelete?: boolean;
+        }[]
+      >();
 
       const supabaseClientUS = createClient<Database>(
         env.SUPABASE_URL,
@@ -107,81 +109,26 @@ function getAPIRouterV1(
         env.EU_SUPABASE_URL,
         env.EU_SUPABASE_SERVICE_ROLE_KEY
       );
-      const providerKey: ProviderKey = {
-        provider: data.provider,
-        org_id: data.orgId,
-        decrypted_provider_key: data.decryptedProviderKey,
-        decrypted_provider_secret_key: data.decryptedProviderSecretKey,
-        auth_type: data.authType,
-        config: data.config,
-      };
+      const providerKeys: ProviderKey[] = data.map((providerKey) => ({
+        provider: providerKey.provider,
+        org_id: providerKey.orgId,
+        decrypted_provider_key: providerKey.decryptedProviderKey,
+        decrypted_provider_secret_key: providerKey.decryptedProviderSecretKey,
+        auth_type: providerKey.authType,
+        config: providerKey.config,
+      }));
 
       const providerKeysManagerUS = new ProviderKeysManager(
         new ProviderKeysStore(supabaseClientUS),
         env
       );
-      await providerKeysManagerUS.setProviderKey(
-        data.provider,
-        data.orgId,
-        providerKey
-      );
+      await providerKeysManagerUS.setOrgProviderKeys(orgId, providerKeys);
 
       const providerKeysManagerEU = new ProviderKeysManager(
         new ProviderKeysStore(supabaseClientEU),
         env
       );
-      await providerKeysManagerEU.setProviderKey(
-        data.provider,
-        data.orgId,
-        providerKey
-      );
-      return new Response("ok", { status: 200 });
-    }
-  );
-
-  router.post(
-    "/mock-delete-provider-key",
-    async (
-      _,
-      requestWrapper: RequestWrapper,
-      env: Env,
-      _ctx: ExecutionContext
-    ) => {
-      if (env.ENVIRONMENT !== "development") {
-        return new Response("not allowed", { status: 403 });
-      }
-
-      const data = await requestWrapper.getJson<{
-        providerName: ProviderName;
-        orgId: string;
-      }>();
-
-      const supabaseClientUS = createClient<Database>(
-        env.SUPABASE_URL,
-        env.SUPABASE_SERVICE_ROLE_KEY
-      );
-      const supabaseClientEU = createClient<Database>(
-        env.EU_SUPABASE_URL,
-        env.EU_SUPABASE_SERVICE_ROLE_KEY
-      );
-
-      const providerKeysManagerUS = new ProviderKeysManager(
-        new ProviderKeysStore(supabaseClientUS),
-        env
-      );
-      await providerKeysManagerUS.deleteProviderKey(
-        data.providerName,
-        data.orgId
-      );
-
-      const providerKeysManagerEU = new ProviderKeysManager(
-        new ProviderKeysStore(supabaseClientEU),
-        env
-      );
-      await providerKeysManagerEU.deleteProviderKey(
-        data.providerName,
-        data.orgId
-      );
+      await providerKeysManagerEU.setOrgProviderKeys(orgId, providerKeys);
       return new Response("ok", { status: 200 });
     }
   );
@@ -481,9 +428,10 @@ function getAPIRouterV1(
         return client.response.unauthorized();
       }
 
-      const requestData = await requestWrapper.getJson<
-        Database["public"]["Tables"]["alert"]["Insert"]
-      >();
+      const requestData =
+        await requestWrapper.getJson<
+          Database["public"]["Tables"]["alert"]["Insert"]
+        >();
 
       const alert = {
         ...requestData,
@@ -496,9 +444,8 @@ function getAPIRouterV1(
         return client.response.newError(validateError, 400);
       }
 
-      const { data: alertRow, error: alertError } = await client.db.insertAlert(
-        alert
-      );
+      const { data: alertRow, error: alertError } =
+        await client.db.insertAlert(alert);
 
       if (alertError || !alertRow) {
         return client.response.newError(alertError, 500);

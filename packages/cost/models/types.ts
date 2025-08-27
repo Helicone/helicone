@@ -144,8 +144,10 @@ export interface UserEndpointConfig {
   region?: string;
   location?: string;
   projectId?: string;
+  baseUri?: string; // Azure OpenAI
   deploymentName?: string;
   resourceName?: string;
+  apiVersion?: string; // Azure OpenAI
   crossRegion?: boolean;
   gatewayMapping?: "OPENAI" | "NO_MAPPING";
 }

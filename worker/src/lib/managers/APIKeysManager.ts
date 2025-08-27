@@ -6,7 +6,10 @@ import {
 } from "../util/cache/secureCache";
 
 export class APIKeysManager {
-  constructor(private store: APIKeysStore, private env: Env) {}
+  constructor(
+    private store: APIKeysStore,
+    private env: Env
+  ) {}
 
   async setAPIKeys() {
     const apiKeys = await this.store.getAPIKeys();
