@@ -15,42 +15,15 @@ import { costOf } from "@helicone-package/cost";
 import { BaseManager } from "../BaseManager";
 import { SecretManager } from "@helicone-package/secrets/SecretManager";
 import { OrganizationManager } from "../organization/OrganizationManager";
-import { KVCache } from "../../lib/cache/kvCache";
 
 type StripeMeterEvent = Stripe.V2.Billing.MeterEventStreamCreateParams.Event;
-const cache = new KVCache(60 * 1000); // 1 hour
 
 const DEFAULT_PRODUCT_PRICES = {
   "request-volume": process.env.PRICE_PROD_REQUEST_VOLUME_ID!, //(This is just growth)
   "pro-users": process.env.PRICE_PROD_PRO_USERS_ID!,
-  prompts: process.env.PRICE_PROD_PROMPTS_ID!,
-  alerts: process.env.PRICE_PROD_ALERTS_ID!,
-  experiments: process.env.PRICE_PROD_EXPERIMENTS_FLAT_ID!,
-  evals: process.env.PRICE_PROD_EVALS_ID!,
+
   team_bundle: process.env.PRICE_PROD_TEAM_BUNDLE_ID!,
 } as const;
-
-const getMeterId = async (
-  meterName: "stripe:trace-meter-id"
-): Promise<Result<string, string>> => {
-  const result = await dbExecute<{ name: string; settings: any }>(
-    `SELECT * FROM helicone_settings where name = $1`,
-    [meterName]
-  );
-
-  if (result.error) {
-    return err(`Error fetching meter id: ${result.error}`);
-  }
-
-  if (
-    !result.data?.[0]?.settings?.meterId ||
-    typeof result.data?.[0]?.settings?.meterId !== "string"
-  ) {
-    return err("Meter id not found");
-  }
-
-  return ok(result.data[0].settings.meterId);
-};
 
 const getProProductPrices = async (): Promise<
   typeof DEFAULT_PRODUCT_PRICES
@@ -96,10 +69,6 @@ const getProProductPrices = async (): Promise<
   }
 };
 
-const COST_OF_PROMPTS = 50;
-const COST_OF_EVALS = 100;
-const COST_OF_EXPERIMENTS = 50;
-
 const EARLY_ADOPTER_COUPON = "9ca5IeEs"; // WlDg28Kf | prod: 9ca5IeEs
 
 export class StripeManager extends BaseManager {
@@ -110,36 +79,6 @@ export class StripeManager extends BaseManager {
     this.stripe = new Stripe(SecretManager.getSecret("STRIPE_SECRET_KEY")!, {
       apiVersion: "2025-02-24.acacia",
     });
-  }
-
-  public async getCostForPrompts(): Promise<Result<number, string>> {
-    const subscriptionResult = await this.getSubscription();
-    const proProductPrices = await getProProductPrices();
-    if (!subscriptionResult.data) {
-      return ok(COST_OF_PROMPTS);
-    }
-
-    const subscription = subscriptionResult.data;
-
-    if (
-      subscription.items.data.some(
-        (item) => item.price.id === proProductPrices["prompts"]
-      )
-    ) {
-      const priceTheyArePayingForPrompts = subscription.items.data.find(
-        (item) => item.price.id === proProductPrices["prompts"]
-      );
-      if (
-        priceTheyArePayingForPrompts &&
-        priceTheyArePayingForPrompts.price.unit_amount &&
-        priceTheyArePayingForPrompts?.quantity &&
-        priceTheyArePayingForPrompts.quantity > 0
-      ) {
-        return ok(priceTheyArePayingForPrompts.price.unit_amount / 100);
-      }
-    }
-
-    return ok(COST_OF_PROMPTS);
   }
 
   public async trackStripeMeter(
@@ -176,66 +115,6 @@ export class StripeManager extends BaseManager {
     } catch (error) {
       return err(`Error tracking stripe meter: ${error}`);
     }
-  }
-
-  public async getCostForEvals(): Promise<Result<number, string>> {
-    const subscriptionResult = await this.getSubscription();
-    const proProductPrices = await getProProductPrices();
-    if (!subscriptionResult.data) {
-      return ok(COST_OF_EVALS);
-    }
-
-    const subscription = subscriptionResult.data;
-
-    if (
-      subscription.items.data.some(
-        (item) => item.price.id === proProductPrices["evals"]
-      )
-    ) {
-      const priceTheyArePayingForEvals = subscription.items.data.find(
-        (item) => item.price.id === proProductPrices["evals"]
-      );
-      if (
-        priceTheyArePayingForEvals &&
-        priceTheyArePayingForEvals.price.unit_amount &&
-        priceTheyArePayingForEvals?.quantity &&
-        priceTheyArePayingForEvals.quantity > 0
-      ) {
-        return ok(priceTheyArePayingForEvals.price.unit_amount / 100);
-      }
-    }
-
-    return ok(COST_OF_EVALS);
-  }
-
-  public async getCostForExperiments(): Promise<Result<number, string>> {
-    const subscriptionResult = await this.getSubscription();
-    const proProductPrices = await getProProductPrices();
-    if (!subscriptionResult.data) {
-      return ok(COST_OF_EXPERIMENTS);
-    }
-
-    const subscription = subscriptionResult.data;
-
-    if (
-      subscription.items.data.some(
-        (item) => item.price.id === proProductPrices["experiments"]
-      )
-    ) {
-      const priceTheyArePayingForExperiments = subscription.items.data.find(
-        (item) => item.price.id === proProductPrices["experiments"]
-      );
-      if (
-        priceTheyArePayingForExperiments &&
-        priceTheyArePayingForExperiments.price.unit_amount &&
-        priceTheyArePayingForExperiments?.quantity &&
-        priceTheyArePayingForExperiments.quantity > 0
-      ) {
-        return ok(priceTheyArePayingForExperiments.price.unit_amount / 100);
-      }
-    }
-
-    return ok(COST_OF_EXPERIMENTS);
   }
 
   private async getOrCreateStripeCustomer(): Promise<Result<string, string>> {
@@ -476,38 +355,6 @@ WHERE (${builtFilter.filter})`,
           price: proProductPrices["pro-users"],
           quantity: orgMemberCount,
         },
-        ...(body?.addons?.prompts
-          ? [
-              {
-                price: proProductPrices["prompts"],
-                quantity: 1,
-              },
-            ]
-          : []),
-        ...(body?.addons?.alerts
-          ? [
-              {
-                price: proProductPrices["alerts"],
-                quantity: 1,
-              },
-            ]
-          : []),
-        ...(body?.addons?.experiments
-          ? [
-              {
-                price: proProductPrices["experiments"],
-                quantity: 1,
-              },
-            ]
-          : []),
-        ...(body?.addons?.evals
-          ? [
-              {
-                price: proProductPrices["evals"],
-                quantity: 1,
-              },
-            ]
-          : []),
       ],
       mode: "subscription",
       metadata: {
@@ -899,107 +746,6 @@ WHERE (${builtFilter.filter})`,
     }
   }
 
-  private async addProductToStripe(
-    productType: "alerts" | "prompts" | "experiments" | "evals"
-  ): Promise<Result<null, string>> {
-    const proProductPrices = await getProProductPrices();
-    try {
-      const subscriptionResult = await this.getSubscription();
-      if (!subscriptionResult.data) {
-        return err("No existing subscription found");
-      }
-
-      const subscription = subscriptionResult.data;
-      const priceId = proProductPrices[productType];
-
-      // Check if the product is already included in the subscription
-      const existingItem = subscription.items.data.find(
-        (item) => item.price.id === priceId
-      );
-      if (existingItem && existingItem.quantity === 0) {
-        await this.stripe.subscriptions.update(subscription.id, {
-          items: [
-            {
-              id: existingItem.id,
-              quantity: 1,
-            },
-          ],
-          proration_behavior: "create_prorations",
-        });
-
-        return ok(null);
-      }
-
-      // Add the product to the subscription
-      const updatedSubscription = await this.stripe.subscriptions.update(
-        subscription.id,
-        {
-          items: [
-            ...subscription.items.data.map((item) => ({ id: item.id })),
-            {
-              price: priceId,
-              quantity: 1,
-            },
-          ],
-          proration_behavior: "create_prorations",
-        }
-      );
-
-      console.log(
-        `Subscription updated with ${productType}:`,
-        updatedSubscription.id
-      );
-
-      return ok(null);
-    } catch (error: any) {
-      return err(
-        `Error adding ${productType} to subscription: ${error.message}`
-      );
-    }
-  }
-
-  public async addProductToSubscription(
-    productType: "alerts" | "prompts" | "experiments" | "evals"
-  ): Promise<Result<null, string>> {
-    const stripeAddResult = await this.addProductToStripe(productType);
-    if (stripeAddResult.error) {
-      return err(stripeAddResult.error);
-    }
-
-    const currentOrgStripeMetadata = await this.getStripeMetadata();
-    if (currentOrgStripeMetadata.error) {
-      return err(currentOrgStripeMetadata.error);
-    }
-
-    const orgData = await this.getOrganization();
-    if (orgData.error) {
-      return err(orgData.error);
-    }
-
-    const existingMetadata =
-      (orgData.data?.stripe_metadata as Record<string, any>) || {};
-    const existingAddons =
-      (existingMetadata.addons as Record<string, boolean>) || {};
-
-    await dbExecute(
-      `UPDATE organization
-       SET stripe_metadata = $1
-       WHERE id = $2`,
-      [
-        JSON.stringify({
-          ...existingMetadata,
-          addons: {
-            ...existingAddons,
-            [productType]: true,
-          },
-        }),
-        this.authParams.organizationId,
-      ]
-    );
-
-    return ok(null);
-  }
-
   private async getStripeMetadata(): Promise<Result<Stripe.Metadata, string>> {
     const subscriptionResult = await this.getSubscription();
     if (!subscriptionResult.data) {
@@ -1008,108 +754,6 @@ WHERE (${builtFilter.filter})`,
 
     const subscription = subscriptionResult.data;
     return ok(subscription.metadata);
-  }
-
-  private async deleteProductFromStripe(
-    productType: "alerts" | "prompts" | "experiments" | "evals"
-  ): Promise<Result<null, string>> {
-    const proProductPrices = await getProProductPrices();
-    try {
-      const subscriptionResult = await this.getSubscription();
-      if (!subscriptionResult.data) {
-        return err("No existing subscription found");
-      }
-
-      const subscription = subscriptionResult.data;
-      const currentPriceId = proProductPrices[productType];
-
-      // First try to find the item by the current price ID
-      let itemToRemove = subscription.items.data.find(
-        (item) => item.price.id === currentPriceId
-      );
-
-      // If not found by current price ID, try to find by product name/type
-      if (!itemToRemove) {
-        itemToRemove = subscription.items.data.find((item) => {
-          const product = item.price.product as Stripe.Product;
-          // Check if the product name or metadata contains the productType
-          return (
-            product.name.toLowerCase().includes(productType.toLowerCase()) ||
-            (product.metadata && product.metadata.type === productType)
-          );
-        });
-      }
-
-      if (!itemToRemove) {
-        console.log(`${productType.toUpperCase()} ITEM NOT FOUND`);
-        return ok(null); // Product not found in subscription
-      }
-
-      // If the item is already set to quantity 0, no need to update
-      if (itemToRemove.quantity !== undefined && itemToRemove.quantity === 0) {
-        console.log(`${productType} is already scheduled for removal`);
-        return ok(null);
-      }
-
-      const result = await this.stripe.subscriptions.update(subscription.id, {
-        items: [
-          {
-            id: itemToRemove.id,
-            quantity: 0,
-          },
-        ],
-        proration_behavior: "create_prorations",
-      });
-      console.log("DELETED", result);
-
-      console.log(
-        `${productType} scheduled for removal at the end of the billing cycle`
-      );
-
-      return ok(null);
-    } catch (error: any) {
-      return err(
-        `Error deleting ${productType} from subscription: ${error.message}`
-      );
-    }
-  }
-
-  public async deleteProductFromSubscription(
-    productType: "alerts" | "prompts" | "experiments" | "evals"
-  ): Promise<Result<null, string>> {
-    const stripeDeleteResult = await this.deleteProductFromStripe(productType);
-    if (stripeDeleteResult.error) {
-      return err(stripeDeleteResult.error);
-    }
-
-    const orgData = await this.getOrganization();
-
-    if (orgData.error) {
-      return err("Failed to get organization data");
-    }
-
-    const existingMetadata =
-      (orgData.data?.stripe_metadata as Record<string, any>) || {};
-    const existingAddons =
-      (existingMetadata.addons as Record<string, boolean>) || {};
-
-    await dbExecute(
-      `UPDATE organization
-       SET stripe_metadata = $1
-       WHERE id = $2`,
-      [
-        JSON.stringify({
-          ...existingMetadata,
-          addons: {
-            ...existingAddons,
-            [productType]: false,
-          },
-        }),
-        this.authParams.organizationId,
-      ]
-    );
-
-    return ok(null);
   }
 
   // Takes the existing subscription and adds any missing products
