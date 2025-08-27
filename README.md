@@ -185,7 +185,7 @@ Helicone is comprised of five services:
 We ❤️ our contributors! We warmly welcome contributions for documentation, integrations, costs, and feature requests.
 
 - If you have an idea for how Helicone can be better, create a [GitHub issue](https://github.com/Helicone/helicone/issues) or vote on the [roadmap](https://github.com/Helicone/helicone/labels/roadmap)
-- Update costs instructions in [costs/README.md](https://github.com/Helicone/helicone/blob/main/packages/README.md)
+- Update costs instructions in [costs/README.md](https://github.com/Helicone/helicone/blob/main/packages/cost/README.md)
 - Join [discord](https://discord.gg/zsSTcH2qhG) to ask questions
 
 ## License
