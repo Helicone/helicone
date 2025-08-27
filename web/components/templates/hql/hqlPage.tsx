@@ -227,7 +227,7 @@ function HQLPage() {
         maxSize={40}
         collapsible={true}
         collapsedSize={0}
-              >
+      >
         <Directory
           tables={clickhouseSchemas.data ?? []}
           currentQuery={currentQuery}

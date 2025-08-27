@@ -206,9 +206,7 @@ function TableList({ tables }: { tables: any[] }) {
                   <ChevronRight className="flex-shrink-0" size={16} />
                 )}
                 <Table className="flex-shrink-0" size={16} />
-                <span className="truncate text-sm">
-                  {table.table_name}
-                </span>
+                <span className="truncate text-sm">{table.table_name}</span>
               </div>
             </div>
             {expandedTables.has(table.table_name) && (
