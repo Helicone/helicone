@@ -40,9 +40,11 @@ export const getOpenAIProxyRouter = (router: BaseRouter) => {
         const new_url = new URL(
           `https://api.openai.com${requestWrapper.url.pathname}`
         );
+        const headers = new Headers(requestWrapper.getHeaders());
+        headers.set("Accept-Encoding", "identity");
         return await fetch(new_url.href, {
           method: requestWrapper.getMethod(),
-          headers: requestWrapper.getHeaders(),
+          headers: headers,
           body: requestWrapper.getBody(),
         });
       }

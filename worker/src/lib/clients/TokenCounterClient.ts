@@ -17,6 +17,7 @@ export async function getTokenCount(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Accept-Encoding": "identity",
         authorization: "Bearer " + process.env.TOKEN_KEY,
       },
       body: JSON.stringify({ content: inputText }),
@@ -30,6 +31,7 @@ export async function getTokenCount(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Accept-Encoding": "identity",
         authorization: "Bearer " + process.env.TOKEN_KEY,
       },
       body: JSON.stringify({ content: inputText }),

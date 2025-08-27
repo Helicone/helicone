@@ -103,12 +103,9 @@ export async function callProvider(props: CallProps): Promise<Response> {
     headersWithExtra = joinHeaders(removedHeaders, props.extraHeaders);
   }
 
-  if (
-    originalUrl.host.includes("localhost") ||
-    originalUrl.host.includes("127.0.0.1")
-  ) {
-    headersWithExtra.set("Accept-Encoding", "Identity");
-  }
+  // Always set Accept-Encoding to identity to prevent compressed responses
+  // that would cause parsing errors in ReadableInterceptor
+  headersWithExtra.set("Accept-Encoding", "identity");
 
   const baseInit = { method, headers: headersWithExtra };
   const init = method === "GET" ? { ...baseInit } : { ...baseInit, body };
