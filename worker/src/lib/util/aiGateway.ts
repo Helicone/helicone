@@ -184,7 +184,6 @@ const parseErrorResponse = async (
 ): Promise<Result<never, Error>> => {
   try {
     const responseBody = await response.json();
-    console.log("responseBody", responseBody);
     const errorMessage =
       (responseBody as { message?: string })?.message ??
       (responseBody as { error?: { message?: string } })?.error?.message ??
@@ -196,7 +195,6 @@ const parseErrorResponse = async (
       code: response.status,
     });
   } catch {
-    console.log("response with status", response.status);
     return err({
       type: "request_failed",
       message: response.statusText,

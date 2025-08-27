@@ -59,7 +59,6 @@ export async function setProviderKeys(
   orgId: string,
   providerKeys: ProviderKey[]
 ) {
-  console.log("setProviderKeys", orgId, providerKeys);
   if (ENVIRONMENT === "production") {
     await storeInCache(`provider_keys_${orgId}`, JSON.stringify(providerKeys));
   } else {
