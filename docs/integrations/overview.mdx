@@ -1,175 +1,186 @@
 ---
-title: "Integration Methods"
+title: "Alternative Integration Methods"
 sidebarTitle: "Overview"
-description: "Choose the right integration method for your use case - unified AI Gateway or provider-specific integrations"
+description: "Add Helicone observability to your existing LLM setup without changing your SDK or architecture"
 ---
 
-Helicone offers multiple ways to integrate with your applications. Choose the method that best fits your needs.
+These integration methods let you add Helicone's observability to your existing LLM applications without adopting the AI Gateway. Perfect for teams with established codebases or specific provider requirements.
 
-## Recommended: AI Gateway
-
-<Card title="AI Gateway - Unified API" icon="gateway" href="/ai-gateway/overview">
-  **Use OpenAI SDK for all providers** - One API, 100+ models, automatic fallbacks
-</Card>
-
-The AI Gateway is our **recommended integration method** for new projects. It provides:
-
-- **One SDK for everything**: Use OpenAI SDK to access GPT, Claude, Gemini, and 100+ models  
-- **Automatic fallbacks**: If one model fails, automatically try another
-- **Simplified code**: No need to learn multiple SDKs or handle different APIs
-- **Built-in features**: Prompts, rate limiting, security, and more
-
-<CodeGroup>
-```typescript TypeScript
-import { OpenAI } from "openai";
-
-const client = new OpenAI({
-  baseURL: "https://ai-gateway.helicone.ai/ai",
-  apiKey: process.env.HELICONE_API_KEY,
-});
-
-// Works with any provider
-const response = await client.chat.completions.create({
-  model: "claude-3.5-sonnet-v2/anthropic", // or gpt-4o/openai, gemini-pro/google
-  messages: [{ role: "user", content: "Hello!" }]
-});
-```
-
-```python Python
-from openai import OpenAI
-
-client = OpenAI(
-    base_url="https://ai-gateway.helicone.ai/ai",
-    api_key=os.getenv("HELICONE_API_KEY")
-)
-
-# Works with any provider
-response = client.chat.completions.create(
-    model="claude-3.5-sonnet-v2/anthropic",  # or gpt-4o/openai, gemini-pro/google
-    messages=[{"role": "user", "content": "Hello!"}]
-)
-```
-</CodeGroup>
-
-[**Get Started with AI Gateway →**](/getting-started/quick-start)
-
----
-
-## Alternative Methods
-
-Use these integration methods if you have specific requirements that prevent using the AI Gateway:
-
-### When to Use Direct Provider Integrations
-
-<AccordionGroup>
-  <Accordion title="🔧 Provider-Specific Features">
-    You need features only available through the provider's native SDK:
-    - OpenAI's function calling with complex schemas
-    - Anthropic's custom message types
-    - Google's specialized Vertex AI features
-  </Accordion>
-  
-  <Accordion title="📦 Existing Codebase">
-    You have significant existing code that:
-    - Is deeply integrated with a specific provider's SDK
-    - Would require extensive refactoring to migrate
-    - Uses provider-specific response handling
-  </Accordion>
-  
-  <Accordion title="🏢 Enterprise Requirements">
-    Your organization requires:
-    - Direct relationships with specific providers
-    - Custom authentication or compliance needs
-    - Provider-specific SLA requirements
-  </Accordion>
-</AccordionGroup>
-
-### Direct Provider Integrations
+## When to Use These Methods
 
 <CardGroup cols={2}>
-<Card title="OpenAI" icon="openai" href="/integrations/openai/javascript">
-  Use OpenAI SDK with proxy endpoint `oai.helicone.ai`
+<Card title="Existing Codebase" icon="code">
+  Your application is already built with provider-specific SDKs and refactoring would be costly
 </Card>
-<Card title="Anthropic" icon="anthropic" href="/integrations/anthropic/javascript">
-  Use Anthropic SDK with proxy endpoint `anthropic.helicone.ai`
+<Card title="Provider Features" icon="sparkles">
+  You need native SDK features like OpenAI's complex function calling or Anthropic's specific formats
 </Card>
+<Card title="Minimal Changes" icon="shield-check">
+  You want observability without changing your current authentication or request flow
+</Card>
+<Card title="Framework Users" icon="layer-group">
+  You're using LangChain, LlamaIndex, or other frameworks that handle LLM calls
+</Card>
+</CardGroup>
+
+## Quick Comparison
+
+| Aspect | Alternative Integrations | AI Gateway |
+|--------|-------------------------|------------|
+| **Setup** | Change endpoint URL only | ✅ Simple - one endpoint for 100+ models |
+| **Code changes** | Minimal - keep existing SDK | Minimal - unified OpenAI format |
+| **Switch providers** | ❌ Rewrite for each provider | ✅ Just change model name |
+| **Provider features** | ✅ Full native support | Standard OpenAI format |
+| **Observability** | ✅ Full Helicone features | ✅ Full Helicone features |
+| **Fallbacks** | ❌ Manual implementation | ✅ Automatic |
+| **Best for** | Existing apps, native features | New projects, multi-provider |
+
+## Direct Provider Integrations
+
+### Popular Providers
+
+Simply change your base URL to add Helicone observability:
+
+<CardGroup cols={2}>
+<Card title="OpenAI" icon="robot" href="/integrations/openai/javascript">
+  **Proxy**: `oai.helicone.ai`  
+  Keep using OpenAI SDK as-is
+</Card>
+<Card title="Anthropic" icon="brain" href="/integrations/anthropic/javascript">
+  **Proxy**: `anthropic.helicone.ai`  
+  Works with Claude models
+</Card>
+<Card title="Google Gemini" icon="google" href="/integrations/gemini/api/javascript">
+  **Proxy**: Available  
+  Support for Gemini models
+</Card>
+<Card title="Together AI" icon="link" href="/getting-started/integration-method/together">
+  **Headers**: Add to existing  
+  Open source model hosting
+</Card>
+</CardGroup>
+
+### Cloud Providers
+
+<CardGroup cols={2}>
 <Card title="AWS Bedrock" icon="aws" href="/integrations/bedrock/javascript">
   Use AWS SDK with Helicone logging for Bedrock models
 </Card>
 <Card title="Azure OpenAI" icon="microsoft" href="/integrations/azure/javascript">
-  Use OpenAI SDK with Azure endpoints and Helicone headers
+  OpenAI SDK with Azure endpoints and Helicone headers
 </Card>
-<Card title="Google Gemini" icon="google" href="/integrations/gemini/api/javascript">
-  Use Google AI SDK with Helicone proxy or logging
-</Card>
-<Card title="Groq" icon="groq" href="/integrations/groq/javascript">
-  Use Groq SDK with Helicone headers for fast inference
+<Card title="Google Vertex AI" icon="cloud" href="/integrations/gemini/vertex/javascript">
+  Vertex AI with Helicone observability
 </Card>
 </CardGroup>
 
-### Framework Integrations
+### Speed-Optimized Providers
+
+<CardGroup cols={2}>
+<Card title="Groq" icon="bolt" href="/integrations/groq/javascript">
+  Ultra-fast inference with LPU technology
+</Card>
+<Card title="Fireworks AI" icon="fire" href="/getting-started/integration-method/fireworks">
+  Fast open-source model serving
+</Card>
+<Card title="Perplexity" icon="magnifying-glass" href="/getting-started/integration-method/perplexity">
+  Search-optimized language models
+</Card>
+</CardGroup>
+
+## Framework Integrations
+
+If you're using an AI framework, add Helicone with minimal configuration:
+
+<CardGroup cols={2}>
+<Card title="LangChain" icon="link-simple" href="/integrations/openai/langchain">
+  Monitor chains, agents, and retrieval flows
+</Card>
+<Card title="LlamaIndex" icon="database" href="/integrations/openai/llamaindex">
+  Track document queries and RAG pipelines
+</Card>
+<Card title="LiteLLM" icon="layer-group" href="/getting-started/integration-method/litellm">
+  Unified interface with 100+ models
+</Card>
+<Card title="Vercel AI SDK" icon="triangle" href="/getting-started/integration-method/vercelai">
+  Stream responses in Next.js apps
+</Card>
+<Card title="CrewAI" icon="users" href="/getting-started/integration-method/crewai">
+  Monitor multi-agent workflows
+</Card>
+</CardGroup>
+
+## Custom Integration Options
+
+### Async Logging
+
+For zero-latency observability, log requests asynchronously after they complete:
+
+<Card title="Async Logging" icon="clock" href="/getting-started/integration-method/manual-logger-typescript">
+  Send logs to Helicone after receiving LLM responses - no proxy latency
+</Card>
+
+
+### Custom HTTP Clients
+
+Any HTTP client can work with Helicone:
+
+<CodeGroup>
+```bash cURL
+curl https://oai.helicone.ai/v1/chat/completions \
+  -H "Authorization: Bearer $OPENAI_API_KEY" \
+  -H "Helicone-Auth: Bearer $HELICONE_API_KEY" \
+  -d '{"model": "gpt-4", "messages": [...]}'
+```
+
+```python Requests
+import requests
+
+response = requests.post(
+    "https://oai.helicone.ai/v1/chat/completions",
+    headers={
+        "Authorization": f"Bearer {openai_key}",
+        "Helicone-Auth": f"Bearer {helicone_key}"
+    },
+    json={"model": "gpt-4", "messages": [...]}
+)
+```
+</CodeGroup>
+
+## Implementation Patterns
 
 <AccordionGroup>
-  <Accordion title="When to Use Framework Integrations">
-    - You're already using a framework like LangChain or LlamaIndex
-    - You need framework-specific features (agents, chains, etc.)
-    - Your workflow is built around a particular framework
+  <Accordion title="Proxy Pattern">
+    Change your base URL to route through Helicone:
+    - OpenAI: `api.openai.com` → `oai.helicone.ai`
+    - Anthropic: `api.anthropic.com` → `anthropic.helicone.ai`
+    - Add Helicone-Auth header
+  </Accordion>
+  
+  <Accordion title="Header Pattern">
+    Keep your existing endpoint, add Helicone headers:
+    - Add `Helicone-Auth` header
+    - Add custom properties as needed
+    - Works with any provider
+  </Accordion>
+  
+  <Accordion title="Async Pattern">
+    Log after the request completes:
+    - Make normal LLM request
+    - Send logs to Helicone async endpoint
+    - Zero added latency
   </Accordion>
 </AccordionGroup>
 
-<CardGroup cols={2}>
-<Card title="LangChain" icon="langchain" href="/integrations/openai/langchain">
-  Add Helicone observability to LangChain applications
+## Still Considering the AI Gateway?
+
+The AI Gateway might be better if you:
+- Want automatic fallbacks between providers
+- Need a unified API for multiple models
+- Are starting a new project
+- Want built-in prompt management
+
+<Card title="Learn About AI Gateway" icon="sparkles" href="/gateway/overview">
+  See how the AI Gateway simplifies multi-provider LLM applications
 </Card>
-<Card title="LlamaIndex" icon="llamaindex" href="/integrations/openai/llamaindex">
-  Monitor LlamaIndex queries and responses
-</Card>
-<Card title="LiteLLM" icon="litellm" href="/getting-started/integration-method/litellm">
-  Use LiteLLM with Helicone for unified model access
-</Card>
-<Card title="Vercel AI SDK" icon="vercel" href="/getting-started/integration-method/vercelai">
-  Integrate with Vercel's AI SDK for web applications
-</Card>
-</CardGroup>
 
-## Comparison: AI Gateway vs Direct Integration
-
-| Feature | AI Gateway | Direct Integration |
-|---------|------------|-------------------|
-| **Setup Complexity** | ✅ Simple - one SDK | ⚠️ Complex - multiple SDKs |
-| **Model Fallbacks** | ✅ Built-in automatic | ❌ Manual implementation |
-| **Code Maintenance** | ✅ Minimal - unified API | ⚠️ Higher - per-provider code |
-| **Provider Features** | ⚠️ OpenAI format only | ✅ Full native features |
-| **Migration Effort** | ✅ Low - change endpoint | ⚠️ Medium - per-provider setup |
-| **Future-Proofing** | ✅ New models added automatically | ⚠️ Manual updates required |
-
-## Migration Path
-
-If you're currently using direct integrations and want to try the AI Gateway:
-
-1. **Start small**: Try AI Gateway for new features or non-critical workflows
-2. **Gradual migration**: Use feature flags to switch between methods
-3. **Full migration**: Once comfortable, migrate all traffic to AI Gateway
-
-[**Migration Guide →**](/ai-gateway/migration-guide)
-
-## Getting Support
-
-<CardGroup cols={2}>
-<Card title="Documentation" icon="book" href="/ai-gateway/overview">
-  Complete guides and API references
-</Card>
-<Card title="Community" icon="discord" href="https://discord.com/invite/zsSTcH2qhG">
-  Join our Discord for help and discussions
-</Card>
-<Card title="Support" icon="question" href="mailto:help@helicone.ai">
-  Contact our team for enterprise support
-</Card>
-<Card title="Examples" icon="code" href="/guides/overview">
-  Browse integration examples and tutorials
-</Card>
-</CardGroup>
-
----
-
-**Bottom Line**: Start with the AI Gateway for new projects. It's simpler, more powerful, and future-proof. Use direct integrations only when you have specific requirements that the unified API doesn't meet.

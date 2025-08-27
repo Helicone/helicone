@@ -197,6 +197,21 @@
                 ]
               },
               {
+                "group": "Async Logging",
+                "pages": [
+                  "getting-started/integration-method/openllmetry",
+                  {
+                    "group": "Manual Logger",
+                    "pages": [
+                      "getting-started/integration-method/manual-logger-curl",
+                      "getting-started/integration-method/manual-logger-typescript",
+                      "getting-started/integration-method/manual-logger-python",
+                      "getting-started/integration-method/manual-logger-go"
+                    ]
+                  }
+                ]
+              },
+              {
                 "group": "Tools",
                 "pages": [
                   "integrations/tools/curl",
@@ -209,8 +224,7 @@
                   "integrations/vectordb/curl",
                   "integrations/vectordb/logger-sdk"
                 ]
-              },
-              "getting-started/integration-method/openllmetry"
+              }
             ]
           },
 
@@ -225,15 +239,14 @@
                   "getting-started/self-host/kubernetes"
                 ]
               },
-              {
-                "group": "Advanced",
-                "pages": [
-                  "references/how-we-calculate-cost",
-                  "references/data-autonomy",
-                  "references/proxy-vs-async",
-                  "helicone-headers/header-directory"
-                ]
-              },
+
+              "references/how-we-calculate-cost",
+              "references/data-autonomy",
+              "helicone-headers/header-directory",
+              "references/latency-affect",
+              "references/open-source",
+              "references/proxy-vs-async",
+              "references/availability",
               {
                 "group": "Legacy Features",
                 "pages": [
