@@ -121,7 +121,7 @@ export class ClickhouseClientWrapper {
         clickhouse_settings: {
           wait_end_of_query: 1,
           max_execution_time: 30,
-          max_memory_usage: "1000000000",
+          max_memory_usage: "4000000000",
           max_rows_to_read: "10000000",
           max_result_rows: "10000",
           SQL_helicone_organization_id: organizationId,
