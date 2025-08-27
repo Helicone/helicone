@@ -7552,7 +7552,19 @@
 							},
 							"providers": {
 								"items": {
-									"type": "string"
+									"properties": {
+										"displayName": {
+											"type": "string"
+										},
+										"name": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"displayName",
+										"name"
+									],
+									"type": "object"
 								},
 								"type": "array"
 							}
@@ -7601,16 +7613,6 @@
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
-				]
-			},
-			"SortOption": {
-				"type": "string",
-				"enum": [
-					"name",
-					"price-low",
-					"price-high",
-					"context",
-					"newest"
 				]
 			},
 			"MetricStats": {
@@ -17202,117 +17204,7 @@
 					"Model Registry"
 				],
 				"security": [],
-				"parameters": [
-					{
-						"in": "query",
-						"name": "providers",
-						"required": false,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "query",
-						"name": "authors",
-						"required": false,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "query",
-						"name": "inputModalities",
-						"required": false,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "query",
-						"name": "outputModalities",
-						"required": false,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "query",
-						"name": "parameters",
-						"required": false,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "query",
-						"name": "capabilities",
-						"required": false,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "query",
-						"name": "priceMin",
-						"required": false,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					},
-					{
-						"in": "query",
-						"name": "priceMax",
-						"required": false,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					},
-					{
-						"in": "query",
-						"name": "contextMin",
-						"required": false,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					},
-					{
-						"in": "query",
-						"name": "search",
-						"required": false,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "query",
-						"name": "sort",
-						"required": false,
-						"schema": {
-							"$ref": "#/components/schemas/SortOption"
-						}
-					},
-					{
-						"in": "query",
-						"name": "limit",
-						"required": false,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					},
-					{
-						"in": "query",
-						"name": "offset",
-						"required": false,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					}
-				]
+				"parameters": []
 			}
 		},
 		"/v1/public/compare/models": {

@@ -7,6 +7,7 @@ import type {
 } from "../types";
 
 export class AnthropicProvider extends BaseProvider {
+  readonly displayName = "Anthropic";
   readonly baseUrl = "https://api.anthropic.com";
   readonly auth = "api-key" as const;
   readonly pricingPages = [

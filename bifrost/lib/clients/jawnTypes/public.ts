@@ -2749,7 +2749,10 @@ Json: JsonObject;
       filters: {
         capabilities: components["schemas"]["ModelCapability"][];
         authors: string[];
-        providers: string[];
+        providers: {
+            displayName: string;
+            name: string;
+          }[];
       };
     };
     ResultSuccess_ModelRegistryResponse_: {
@@ -2758,8 +2761,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_ModelRegistryResponse.string_": components["schemas"]["ResultSuccess_ModelRegistryResponse_"] | components["schemas"]["ResultError_string_"];
-    /** @enum {string} */
-    SortOption: "name" | "price-low" | "price-high" | "context" | "newest";
     MetricStats: {
       /** Format: double */
       p99: number;
@@ -6033,23 +6034,6 @@ export interface operations {
     };
   };
   GetModelRegistry: {
-    parameters: {
-      query?: {
-        providers?: string;
-        authors?: string;
-        inputModalities?: string;
-        outputModalities?: string;
-        parameters?: string;
-        capabilities?: string;
-        priceMin?: number;
-        priceMax?: number;
-        contextMin?: number;
-        search?: string;
-        sort?: components["schemas"]["SortOption"];
-        limit?: number;
-        offset?: number;
-      };
-    };
     responses: {
       /** @description Ok */
       200: {
