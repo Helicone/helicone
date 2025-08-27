@@ -218,7 +218,7 @@ export function ThemedTimeFilterShadCN({
             id="date"
             variant={"outline"}
             className={cn(
-              "dark:text-slate-400",
+              "text-xs dark:text-slate-400",
               "justify-start text-left font-normal",
               isInvertedRange ? "border-amber-500" : "",
             )}

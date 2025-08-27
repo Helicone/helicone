@@ -89,6 +89,7 @@ type DirectProviderEndpoint = {
   provider: ProviderName;
   providerConfig: BaseProvider;
   modelName: string;
+  cuid?: string;
 };
 
 type EndpointsProviderEndpoint = {
@@ -103,7 +104,7 @@ type ValidateModelStringResult = Result<
 
 const validateModelString = (model: string): ValidateModelStringResult => {
   const modelParts = model.split("/");
-  if (modelParts.length !== 2) {
+  if (modelParts.length < 2) {
     const providersResult = registry.getModelProviders(model);
     if (
       providersResult.error ||
@@ -119,7 +120,7 @@ const validateModelString = (model: string): ValidateModelStringResult => {
     return ok({ type: "endpoints", providers: providersResult.data });
   }
 
-  const [modelName, providerName] = modelParts;
+  const [modelName, providerName, cuid] = modelParts;
   const providerResult = getProvider(providerName);
 
   if (providerResult.error || !providerResult.data) {
@@ -135,6 +136,7 @@ const validateModelString = (model: string): ValidateModelStringResult => {
     provider: providerName as ProviderName,
     modelName,
     providerConfig: providerResult.data,
+    cuid: cuid ?? undefined,
   });
 };
 
@@ -260,10 +262,11 @@ const attemptDirectProviderRequest = async (
   orgId: string,
   parsedBody: any
 ): Promise<Result<Response, Error>> => {
-  const { provider, modelName } = directProviderEndpoint;
+  const { provider, modelName, cuid } = directProviderEndpoint;
   const providerKey = await providerKeysManager.getProviderKeyWithFetch(
     provider,
-    orgId
+    orgId,
+    cuid
   );
 
   if (!providerKey) {
@@ -308,7 +311,6 @@ const attemptDirectProviderRequest = async (
       providerKey,
       forwarder
     );
-
     if (isErr(result)) {
       return err(result.error);
     }
@@ -357,6 +359,8 @@ const attemptDirectProviderRequest = async (
     if (!isErr(result)) {
       return result;
     }
+
+    return result;
   }
 
   return err({
@@ -390,6 +394,7 @@ const attemptProvidersRequest = async (
         provider,
         modelName,
         providerConfig: providerResult.data,
+        cuid: undefined,
       },
       requestWrapper,
       forwarder,
@@ -483,7 +488,12 @@ export const attemptModelRequestWithFallback = async ({
     });
   }
 
-  if (parsedBody.prompt_id || parsedBody.environment || parsedBody.version_id || parsedBody.inputs) {
+  if (
+    parsedBody.prompt_id ||
+    parsedBody.environment ||
+    parsedBody.version_id ||
+    parsedBody.inputs
+  ) {
     const result = await promptManager.getMergedPromptBody(parsedBody, orgId);
     if (isErr(result)) {
       return err({
