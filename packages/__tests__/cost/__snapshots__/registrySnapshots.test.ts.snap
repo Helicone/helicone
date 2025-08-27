@@ -525,6 +525,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "openai/gpt-4": {
+    "gpt-4:azure-openai": {
+      "context": 8191,
+      "crossRegion": false,
+      "maxTokens": 4096,
+      "modelId": "gpt-4",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "azure-openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-4:openai": {
       "context": 8191,
       "crossRegion": false,
@@ -550,6 +573,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "openai/gpt-4.1": {
+    "gpt-4.1-mini:azure-openai": {
+      "context": 1047576,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "gpt-4.1-mini",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "azure-openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-4.1-mini:openai": {
       "context": 1047576,
       "crossRegion": false,
@@ -573,6 +619,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "gpt-4.1-nano:azure-openai": {
+      "context": 1047576,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "gpt-4.1-nano",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "azure-openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-4.1-nano:openai": {
       "context": 1047576,
       "crossRegion": false,
@@ -591,6 +660,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-4.1:azure-openai": {
+      "context": 1047576,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "gpt-4.1",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "azure-openai",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -659,6 +751,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "gpt-4o-mini:azure-openai": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "gpt-4o-mini",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "azure-openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-4o-mini:openai": {
       "context": 128000,
       "crossRegion": false,
@@ -692,6 +807,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "response_format",
       ],
       "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-4o:azure-openai": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "gpt-4o",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "azure-openai",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -745,6 +883,21 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "openai/o1": {
+    "o1-mini:azure-openai": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "o1-mini",
+      "parameters": [
+        "max_tokens",
+        "seed",
+      ],
+      "provider": "azure-openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "o1-mini:openai": {
       "context": 128000,
       "crossRegion": false,
@@ -773,6 +926,24 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
       ],
       "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "o1:azure-openai": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 100000,
+      "modelId": "o1",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "azure-openai",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -816,6 +987,24 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "o3-mini:azure-openai": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 100000,
+      "modelId": "o3-mini",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "azure-openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "o3-mini:openai": {
       "context": 200000,
       "crossRegion": false,
@@ -834,6 +1023,24 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "o3-pro:azure-openai": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 100000,
+      "modelId": "o3-pro",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "azure-openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "o3-pro:openai": {
       "context": 200000,
       "crossRegion": false,
@@ -847,6 +1054,24 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
       ],
       "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "o3:azure-openai": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 100000,
+      "modelId": "o3",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "azure-openai",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -885,6 +1110,24 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
       ],
       "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "o4-mini:azure-openai": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 100000,
+      "modelId": "o4-mini",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "azure-openai",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -1019,14 +1262,20 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "google",
   ],
   "openai/gpt-4": [
+    "azure-openai",
     "openai",
   ],
   "openai/gpt-4.1": [
+    "azure-openai",
+    "azure-openai",
+    "azure-openai",
     "openai",
     "openai",
     "openai",
   ],
   "openai/gpt-4o": [
+    "azure-openai",
+    "azure-openai",
     "openai",
     "openai",
     "openai",
@@ -1035,17 +1284,23 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openai",
   ],
   "openai/o1": [
+    "azure-openai",
+    "azure-openai",
     "openai",
     "openai",
     "openai",
   ],
   "openai/o3": [
+    "azure-openai",
+    "azure-openai",
+    "azure-openai",
     "openai",
     "openai",
     "openai",
     "openai",
   ],
   "openai/o4": [
+    "azure-openai",
     "openai",
     "openai",
   ],
@@ -1214,12 +1469,21 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     },
   },
   "openai/gpt-4": {
+    "azure-openai": {
+      "completion": 0.00006,
+      "prompt": 0.00003,
+    },
     "openai": {
       "completion": 0.00006,
       "prompt": 0.00003,
     },
   },
   "openai/gpt-4.1": {
+    "azure-openai": {
+      "cacheRead": 3e-8,
+      "completion": 4e-7,
+      "prompt": 1e-7,
+    },
     "openai": {
       "cacheRead": 5e-8,
       "completion": 4e-7,
@@ -1227,12 +1491,22 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     },
   },
   "openai/gpt-4o": {
+    "azure-openai": {
+      "cacheRead": 7.5e-8,
+      "completion": 6e-7,
+      "prompt": 1.5e-7,
+    },
     "openai": {
       "completion": 0.00001,
       "prompt": 0.0000025,
     },
   },
   "openai/o1": {
+    "azure-openai": {
+      "cacheRead": 5.5e-7,
+      "completion": 0.0000044,
+      "prompt": 0.0000011,
+    },
     "openai": {
       "cacheRead": 5.5e-7,
       "completion": 0.0000044,
@@ -1240,6 +1514,11 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     },
   },
   "openai/o3": {
+    "azure-openai": {
+      "cacheRead": 5.5e-7,
+      "completion": 0.0000044,
+      "prompt": 0.0000011,
+    },
     "openai": {
       "cacheRead": 5.5e-7,
       "completion": 0.0000044,
@@ -1247,6 +1526,11 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     },
   },
   "openai/o4": {
+    "azure-openai": {
+      "cacheRead": 2.75e-7,
+      "completion": 0.0000044,
+      "prompt": 0.0000011,
+    },
     "openai": {
       "cacheRead": 2.75e-7,
       "completion": 0.0000044,
@@ -1363,30 +1647,35 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     {
       "model": "gpt-4",
       "providers": [
+        "azure-openai",
         "openai",
       ],
     },
     {
       "model": "gpt-4.1",
       "providers": [
+        "azure-openai",
         "openai",
       ],
     },
     {
       "model": "gpt-4.1-mini",
       "providers": [
+        "azure-openai",
         "openai",
       ],
     },
     {
       "model": "gpt-4.1-nano",
       "providers": [
+        "azure-openai",
         "openai",
       ],
     },
     {
       "model": "gpt-4o",
       "providers": [
+        "azure-openai",
         "extended",
         "openai",
       ],
@@ -1394,6 +1683,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     {
       "model": "gpt-4o-mini",
       "providers": [
+        "azure-openai",
         "openai",
       ],
     },
@@ -1424,12 +1714,14 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     {
       "model": "o1",
       "providers": [
+        "azure-openai",
         "openai",
       ],
     },
     {
       "model": "o1-mini",
       "providers": [
+        "azure-openai",
         "openai",
       ],
     },
@@ -1442,12 +1734,14 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     {
       "model": "o3",
       "providers": [
+        "azure-openai",
         "openai",
       ],
     },
     {
       "model": "o3-mini",
       "providers": [
+        "azure-openai",
         "openai",
       ],
     },
@@ -1460,12 +1754,14 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     {
       "model": "o3-pro",
       "providers": [
+        "azure-openai",
         "openai",
       ],
     },
     {
       "model": "o4-mini",
       "providers": [
+        "azure-openai",
         "openai",
       ],
     },
@@ -1480,6 +1776,10 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     {
       "modelCount": 6,
       "provider": "anthropic",
+    },
+    {
+      "modelCount": 12,
+      "provider": "azure-openai",
     },
     {
       "modelCount": 6,
@@ -1541,9 +1841,9 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "claude-3.5-sonnet-v2:anthropic:*",
     "claude-3.5-sonnet-v2:vertex:global",
   ],
-  "totalEndpoints": 45,
-  "totalModelProviderConfigs": 45,
+  "totalEndpoints": 57,
+  "totalModelProviderConfigs": 57,
   "totalModelsWithPtb": 26,
-  "totalProviders": 7,
+  "totalProviders": 8,
 }
 `;
