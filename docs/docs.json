@@ -279,20 +279,14 @@
           {
             "group": "Prompts",
             "pages": [
-              "rest/prompts/get-v1prompt-2025-id-promptid",
-              "rest/prompts/post-v1prompt-2025-id-promptid-rename",
-              "rest/prompts/delete-v1prompt-2025-promptid",
-              "rest/prompts/delete-v1prompt-2025-promptid-versionid",
-              "rest/prompts/get-v1prompt-2025-tags",
               "rest/prompts/post-v1prompt-2025",
+              "rest/prompts/get-v1prompt-2025-id-promptid",
               "rest/prompts/post-v1prompt-2025-update",
-              "rest/prompts/post-v1prompt-2025-update-production-version",
-              "rest/prompts/get-v1prompt-2025-count",
+              "rest/prompts/delete-v1prompt-2025-promptid",
               "rest/prompts/post-v1prompt-2025-query",
-              "rest/prompts/post-v1prompt-2025-query-version",
               "rest/prompts/post-v1prompt-2025-query-versions",
-              "rest/prompts/post-v1prompt-2025-query-production-version",
-              "rest/prompts/post-v1prompt-2025-query-total-versions"
+              "rest/prompts/post-v1prompt-2025-update-production-version",
+              "rest/prompts/delete-v1prompt-2025-promptid-versionid"
             ]
           },
           {
@@ -321,98 +315,14 @@
             ]
           },
           {
-            "group": "Evaluator",
-            "pages": [
-              "rest/evaluator/post-v1evaluator",
-              "rest/evaluator/get-v1evaluator",
-              "rest/evaluator/put-v1evaluator",
-              "rest/evaluator/delete-v1evaluator",
-              "rest/evaluator/post-v1evaluatorquery",
-              "rest/evaluator/get-v1evaluator-experiments",
-              "rest/evaluator/get-v1evaluator-onlineevaluators",
-              "rest/evaluator/post-v1evaluator-onlineevaluators",
-              "rest/evaluator/delete-v1evaluator-onlineevaluators"
-            ]
-          },
-          {
-            "group": "Experiment",
-            "pages": [
-              "rest/experiment/post-v2experimentcreateempty",
-              "rest/experiment/post-v2experimentcreatefrom-request",
-              "rest/experiment/post-v2experimentnew",
-              "rest/experiment/get-v2experiment",
-              "rest/experiment/get-v2experiment-1",
-              "rest/experiment/post-v2experiment-prompt-version",
-              "rest/experiment/get-v2experiment-prompt-versions",
-              "rest/experiment/get-v2experiment-input-keys",
-              "rest/experiment/post-v2experiment-add-manual-row",
-              "rest/experiment/post-v2experiment-rowinsertbatch",
-              "rest/experiment/post-v2experiment-rowupdate",
-              "rest/experiment/post-v2experiment-run-hypothesis",
-              "rest/experiment/get-v2experiment-evaluators",
-              "rest/experiment/post-v2experiment-evaluators",
-              "rest/experiment/delete-v2experiment-evaluators",
-              "rest/experiment/post-v2experiment-evaluatorsrun",
-              "rest/experiment/get-v2experiment-should-run-evaluators",
-              "rest/experiment/get-v2experiment-scores",
-              "rest/experiment/get-v2experiment-",
-              "rest/experiment/post-v1experimentnew-empty",
-              "rest/experiment/post-v1experimenttablenew",
-              "rest/experiment/post-v1experimenttable-query",
-              "rest/experiment/post-v1experimenttable-metadataquery",
-              "rest/experiment/post-v1experimenttablesquery",
-              "rest/experiment/post-v1experimenttable-cell",
-              "rest/experiment/patch-v1experimenttable-cell",
-              "rest/experiment/post-v1experimenttable-column",
-              "rest/experiment/post-v1experimenttable-rownew",
-              "rest/experiment/delete-v1experimenttable-row",
-              "rest/experiment/post-v1experimenttable-rowinsertbatch",
-              "rest/experiment/post-v1experimentupdate-meta",
-              "rest/experiment/post-v1experiment",
-              "rest/experiment/post-v1experimenthypothesis",
-              "rest/experiment/post-v1experimenthypothesis-scoresquery",
-              "rest/experiment/get-v1experiment-evaluators",
-              "rest/experiment/post-v1experiment-evaluators",
-              "rest/experiment/post-v1experiment-evaluatorsrun",
-              "rest/experiment/delete-v1experiment-evaluators",
-              "rest/experiment/post-v1experimentquery"
-            ]
-          },
-          {
             "group": "Trace",
             "pages": [
-              "rest/trace/post-v1tracelog",
-              "rest/trace/post-v1tracelog-python"
+              "rest/trace/post-v1tracelog"
             ]
           },
           {
             "group": "Property",
             "pages": ["rest/property/post-v1propertyquery"]
-          },
-          {
-            "group": "Dataset",
-            "pages": [
-              "rest/dataset/post-v1experimentdataset",
-              "rest/dataset/post-v1experimentdatasetrandom",
-              "rest/dataset/post-v1experimentdatasetquery",
-              "rest/dataset/post-v1experimentdataset-rowinsert",
-              "rest/dataset/post-v1experimentdataset-version-rownew",
-              "rest/dataset/post-v1experimentdataset-inputsquery",
-              "rest/dataset/post-v1experimentdataset-mutate",
-              "rest/dataset/post-v1helicone-dataset",
-              "rest/dataset/post-v1helicone-dataset-mutate",
-              "rest/dataset/post-v1helicone-dataset-query",
-              "rest/dataset/post-v1helicone-dataset-count",
-              "rest/dataset/post-v1helicone-datasetquery",
-              "rest/dataset/post-v1helicone-dataset-request"
-            ]
-          },
-          {
-            "group": "Customer",
-            "pages": [
-              "rest/customer/post-v1customer-usagequery",
-              "rest/customer/post-v1customerquery"
-            ]
           },
           {
             "group": "Dashboard",
@@ -422,7 +332,6 @@
             "group": "Session",
             "pages": [
               "rest/session/post-v1sessionquery",
-              "rest/session/post-v1sessionnamequery",
               "rest/session/post-v1sessionmetricsquery",
               "rest/session/post-v1session-feedback"
             ]
