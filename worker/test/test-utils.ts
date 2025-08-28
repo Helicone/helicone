@@ -186,7 +186,8 @@ export function mockAnthropicEndpoint(modelName: string) {
     .reply(() => ({
       statusCode: 200,
       data: createAnthropicMockResponse(modelName),
-    }));
+    }))
+    .persist();
 }
 
 /**
@@ -205,7 +206,8 @@ export function mockVertexAnthropicEndpoint(modelId: string) {
     .reply(() => ({
       statusCode: 200,
       data: createVertexMockResponse(modelId),
-    }));
+    }))
+    .persist();
 }
 
 /**
@@ -223,7 +225,8 @@ export function mockBedrockAnthropicEndpoint(modelId: string) {
     .reply(() => ({
       statusCode: 200,
       data: createAnthropicMockResponse(modelId),
-    }));
+    }))
+    .persist();
 }
 
 export function mockGoogleEndpoint(modelName: string) {
@@ -236,7 +239,8 @@ export function mockGoogleEndpoint(modelName: string) {
     .reply(() => ({
       statusCode: 200,
       data: createOpenAIMockResponse(modelName),
-    }));
+    }))
+    .persist();
 }
 
 /**
