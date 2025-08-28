@@ -1,10 +1,7 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { ProviderName } from "@helicone-package/cost/models/providers";
 import { Database, Json } from "../../../supabase/database.types";
-import {
-  dbProviderToProvider,
-  providerToDbProvider,
-} from "@helicone-package/cost/models/provider-helpers";
+import { dbProviderToProvider } from "@helicone-package/cost/models/provider-helpers";
 
 export type ProviderKey = {
   provider: ProviderName;
@@ -79,7 +76,7 @@ export class ProviderKeysStore {
       .select(
         "org_id, decrypted_provider_key, decrypted_provider_secret_key, auth_type, provider_name, config, cuid"
       )
-      .eq("provider_name", providerToDbProvider(provider))
+      .eq("provider_name", provider)
       .eq("org_id", orgId)
       .eq("soft_delete", false);
 
