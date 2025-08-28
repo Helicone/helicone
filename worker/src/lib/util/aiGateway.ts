@@ -483,7 +483,12 @@ export const attemptModelRequestWithFallback = async ({
     });
   }
 
-  if (parsedBody.prompt_id || parsedBody.environment || parsedBody.version_id || parsedBody.inputs) {
+  if (
+    parsedBody.prompt_id ||
+    parsedBody.environment ||
+    parsedBody.version_id ||
+    parsedBody.inputs
+  ) {
     const result = await promptManager.getMergedPromptBody(parsedBody, orgId);
     if (isErr(result)) {
       return err({

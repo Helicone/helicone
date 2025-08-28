@@ -25,44 +25,22 @@ export const dbProviderToProvider = (provider: string): ProviderName | null => {
   if (provider === "openai" || provider === "OpenAI") {
     return "openai";
   }
-  if (provider === "Anthropic") {
+  if (provider === "anthropic" || provider === "Anthropic") {
     return "anthropic";
   }
-  if (provider === "AWS Bedrock") {
+  if (provider === "bedrock" || provider === "AWS Bedrock") {
     return "bedrock";
   }
-  if (provider === "Vertex AI") {
+  if (provider === "vertex" || provider === "Vertex AI") {
     return "vertex";
   }
-  if (provider === "Groq") {
+  if (provider === "groq" || provider === "Groq") {
     return "groq";
   }
-  if (provider === "Google AI (Gemini)") {
+  if (provider === "google" || provider === "Google AI (Gemini)") {
     return "google";
   }
   return null;
-};
-
-export const providerToDbProvider = (provider: ProviderName): string => {
-  if (provider === "openai") {
-    return "OpenAI";
-  }
-  if (provider === "anthropic") {
-    return "Anthropic";
-  }
-  if (provider === "bedrock") {
-    return "AWS Bedrock";
-  }
-  if (provider === "vertex") {
-    return "Vertex AI";
-  }
-  if (provider === "groq") {
-    return "Groq";
-  }
-  if (provider === "google") {
-    return "Google AI (Gemini)";
-  }
-  return provider;
 };
 
 // Helper function to build URL for an endpoint

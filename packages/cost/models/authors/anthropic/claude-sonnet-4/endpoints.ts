@@ -37,6 +37,7 @@ export const endpoints = {
     provider: "vertex",
     providerModelId: "claude-sonnet-4@20250514",
     version: "vertex-2023-10-16",
+    ptbEnabled: true,
     pricing: {
       prompt: 0.000003,
       completion: 0.000015,
