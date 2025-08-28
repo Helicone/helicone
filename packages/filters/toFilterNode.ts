@@ -4,14 +4,14 @@ import {
   FilterNode,
   FilterBranch,
   FilterLeaf,
-} from "@helicone-package/filters/filterDefs";
+} from "./filterDefs";
 import {
   FilterExpression,
   ConditionExpression,
   AndExpression,
   OrExpression,
   FieldSpec,
-} from "@helicone-package/filters/types";
+} from "./types";
 
 /**
  * Maps the new FilterAST operator names to the legacy operator names
