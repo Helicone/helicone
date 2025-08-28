@@ -154,10 +154,13 @@ export class DBWrapper {
   private authParams?: AuthParams;
   private tier?: string;
 
-  constructor(private env: Env, private auth: HeliconeAuth) {
+  constructor(
+    private env: Env,
+    private auth: HeliconeAuth
+  ) {
     this.supabaseClient = createClient(
       env.SUPABASE_URL,
-      env.SUPABASE_SERVICE_ROLE_KEY
+      env.SUPABASE_SERVICE_KEY
     );
     this.secureCacheEnv = {
       REQUEST_CACHE_KEY: env.REQUEST_CACHE_KEY,

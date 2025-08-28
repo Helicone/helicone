@@ -117,7 +117,7 @@ async function getAllOnboardedOrgs(supabaseServer: SupabaseClient<Database>) {
 export async function updateLoopUsers(env: Env) {
   const supabaseServer = createClient<Database>(
     env.SUPABASE_URL,
-    env.SUPABASE_SERVICE_ROLE_KEY
+    env.SUPABASE_SERVICE_KEY
   );
 
   let allUsers = await getAllUser(supabaseServer);

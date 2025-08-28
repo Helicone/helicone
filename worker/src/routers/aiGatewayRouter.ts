@@ -53,12 +53,9 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
       const supabaseClient = isEU
         ? createClient<Database>(
             env.EU_SUPABASE_URL,
-            env.EU_SUPABASE_SERVICE_ROLE_KEY
+            env.EU_SUPABASE_SERVICE_KEY
           )
-        : createClient<Database>(
-            env.SUPABASE_URL,
-            env.SUPABASE_SERVICE_ROLE_KEY
-          );
+        : createClient<Database>(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
 
       const { orgId, rawAPIKey } = await authenticate(
         requestWrapper,

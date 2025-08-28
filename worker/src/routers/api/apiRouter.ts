@@ -47,11 +47,11 @@ function getAPIRouterV1(
 
       const supabaseClientUS = createClient<Database>(
         env.SUPABASE_URL,
-        env.SUPABASE_SERVICE_ROLE_KEY
+        env.SUPABASE_SERVICE_KEY
       );
       const supabaseClientEU = createClient<Database>(
         env.EU_SUPABASE_URL,
-        env.EU_SUPABASE_SERVICE_ROLE_KEY
+        env.EU_SUPABASE_SERVICE_KEY
       );
 
       const apiKeysManagerUS = new APIKeysManager(
@@ -103,11 +103,11 @@ function getAPIRouterV1(
 
       const supabaseClientUS = createClient<Database>(
         env.SUPABASE_URL,
-        env.SUPABASE_SERVICE_ROLE_KEY
+        env.SUPABASE_SERVICE_KEY
       );
       const supabaseClientEU = createClient<Database>(
         env.EU_SUPABASE_URL,
-        env.EU_SUPABASE_SERVICE_ROLE_KEY
+        env.EU_SUPABASE_SERVICE_KEY
       );
       const providerKeys: ProviderKey[] = data.map((providerKey) => ({
         provider: providerKey.provider,

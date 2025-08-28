@@ -579,7 +579,7 @@ export class RequestWrapper {
   ): Promise<Result<ProxyKeyRow, string>> {
     const supabaseClient: SupabaseClient<Database> = createClient(
       this.env.SUPABASE_URL,
-      this.env.SUPABASE_SERVICE_ROLE_KEY
+      this.env.SUPABASE_SERVICE_KEY
     );
     return getProviderKeyFromProxyCache(authKey, env, supabaseClient);
   }
@@ -590,7 +590,7 @@ export class RequestWrapper {
   ): Promise<Result<CustomerPortalValues, string>> {
     const supabaseClient: SupabaseClient<Database> = createClient(
       this.env.SUPABASE_URL,
-      this.env.SUPABASE_SERVICE_ROLE_KEY
+      this.env.SUPABASE_SERVICE_KEY
     );
 
     return await getAndStoreInCache(
