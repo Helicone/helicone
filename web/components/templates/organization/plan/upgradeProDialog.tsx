@@ -133,7 +133,6 @@ export const UpgradeProDialog = ({
     },
   });
 
-
   const handleSeatChange = (increment: number) => {
     setSeats((prev) => Math.max(1, prev + increment));
   };
@@ -161,10 +160,11 @@ export const UpgradeProDialog = ({
 
   const proTotalPrice = useMemo(() => {
     const base = proAddon.price * seats;
-    const promptsCost = selectedAddons.prompts ? (promptsPrice.data?.data || 50) : 0;
+    const promptsCost = selectedAddons.prompts
+      ? promptsPrice.data?.data || 50
+      : 0;
     return base + promptsCost;
   }, [seats, proAddon.price, selectedAddons.prompts, promptsPrice.data]);
-
 
   // Get description text with case insensitivity
   const descriptionText = featureName
@@ -209,10 +209,12 @@ export const UpgradeProDialog = ({
           className="flex flex-col gap-3"
         >
           {/* Pro Plan Option */}
-          <label 
+          <label
             htmlFor="pro"
-            className={`relative flex flex-col gap-3 cursor-pointer rounded-lg border p-4 transition-colors ${
-              selectedPlan === "pro" ? "border-primary bg-muted/50" : "hover:bg-muted/30"
+            className={`relative flex cursor-pointer flex-col gap-3 rounded-lg border p-4 transition-colors ${
+              selectedPlan === "pro"
+                ? "border-primary bg-muted/50"
+                : "hover:bg-muted/30"
             }`}
           >
             <div className="flex items-start gap-3">
@@ -221,29 +223,37 @@ export const UpgradeProDialog = ({
                 <div className="flex items-start justify-between">
                   <div>
                     <P className="font-semibold">Pro Plan</P>
-                    <Muted className="text-sm">${proAddon.price}/seat/month</Muted>
+                    <Muted className="text-sm">
+                      ${proAddon.price}/seat/month
+                    </Muted>
                   </div>
-                  <P className="font-bold text-lg">${proTotalPrice}/mo</P>
+                  <P className="text-lg font-bold">${proTotalPrice}/mo</P>
                 </div>
-                
+
                 {/* Always visible features */}
                 <div className="mt-2 space-y-0.5">
                   <div className="flex items-center gap-2">
                     <div className="h-1 w-1 rounded-full bg-muted-foreground/50" />
-                    <Muted className="text-xs">Unlimited requests (pay as you go)</Muted>
+                    <Muted className="text-xs">
+                      Unlimited requests (pay as you go)
+                    </Muted>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="h-1 w-1 rounded-full bg-muted-foreground/50" />
-                    <Muted className="text-xs">Advanced analytics & sessions</Muted>
+                    <Muted className="text-xs">
+                      Advanced analytics & sessions
+                    </Muted>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="h-1 w-1 rounded-full bg-muted-foreground/50" />
-                    <Muted className="text-xs">Cache, rate limiting, custom properties</Muted>
+                    <Muted className="text-xs">
+                      Cache, rate limiting, custom properties
+                    </Muted>
                   </div>
                 </div>
               </div>
             </div>
-            
+
             {selectedPlan === "pro" && (
               <div className="space-y-3 border-t pt-3">
                 <div className="flex items-center justify-between">
@@ -262,7 +272,9 @@ export const UpgradeProDialog = ({
                     >
                       <Minus size={14} />
                     </Button>
-                    <P className="w-10 text-center text-sm font-medium">{seats}</P>
+                    <P className="w-10 text-center text-sm font-medium">
+                      {seats}
+                    </P>
                     <Button
                       variant="outline"
                       size="icon"
@@ -278,36 +290,43 @@ export const UpgradeProDialog = ({
                     </Button>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Checkbox
                       id="prompts"
                       checked={selectedAddons.prompts}
                       onCheckedChange={(checked) => {
-                        setSelectedAddons(prev => ({ ...prev, prompts: !!checked }));
+                        setSelectedAddons((prev) => ({
+                          ...prev,
+                          prompts: !!checked,
+                        }));
                       }}
                       onClick={(e) => e.stopPropagation()}
                     />
-                    <Label 
-                      htmlFor="prompts" 
-                      className="text-sm cursor-pointer"
+                    <Label
+                      htmlFor="prompts"
+                      className="cursor-pointer text-sm"
                       onClick={(e) => e.stopPropagation()}
                     >
                       Prompts workspace
                     </Label>
                   </div>
-                  <Muted className="text-sm font-medium">+${promptsPrice.data?.data || 50}/mo</Muted>
+                  <Muted className="text-sm font-medium">
+                    +${promptsPrice.data?.data || 50}/mo
+                  </Muted>
                 </div>
               </div>
             )}
           </label>
 
           {/* Team Bundle Option */}
-          <label 
+          <label
             htmlFor="team"
-            className={`relative flex items-start gap-3 cursor-pointer rounded-lg border p-4 transition-colors ${
-              selectedPlan === "team" ? "border-primary bg-muted/50" : "hover:bg-muted/30"
+            className={`relative flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors ${
+              selectedPlan === "team"
+                ? "border-primary bg-muted/50"
+                : "hover:bg-muted/30"
             }`}
           >
             <RadioGroupItem value="team" id="team" className="mt-1" />
@@ -317,9 +336,9 @@ export const UpgradeProDialog = ({
                   <P className="font-semibold">Team Bundle</P>
                   <Muted className="text-sm">Best value for teams</Muted>
                 </div>
-                <P className="font-bold text-lg">$200/mo</P>
+                <P className="text-lg font-bold">$200/mo</P>
               </div>
-              
+
               {/* Always visible features */}
               <div className="mt-2 space-y-0.5">
                 <div className="flex items-center gap-2">
@@ -336,7 +355,9 @@ export const UpgradeProDialog = ({
                 </div>
                 <div className="flex items-center gap-2">
                   <Check size={12} className="text-primary" />
-                  <Muted className="text-xs">Best for teams with 3+ members</Muted>
+                  <Muted className="text-xs">
+                    Best for teams with 3+ members
+                  </Muted>
                 </div>
               </div>
             </div>
@@ -372,4 +393,3 @@ export const UpgradeProDialog = ({
     </Dialog>
   );
 };
-

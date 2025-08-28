@@ -64,9 +64,7 @@ export const ProPlanCard = () => {
   });
 
   const addProductToSubscription = useMutation({
-    mutationFn: async (
-      productType: "alerts" | "prompts",
-    ) => {
+    mutationFn: async (productType: "alerts" | "prompts") => {
       const jawn = getJawnClient(org?.currentOrg?.id);
       const result = await jawn.POST(
         "/v1/stripe/subscription/add-ons/{productType}",
@@ -83,9 +81,7 @@ export const ProPlanCard = () => {
   });
 
   const deleteProductFromSubscription = useMutation({
-    mutationFn: async (
-      productType: "alerts" | "prompts",
-    ) => {
+    mutationFn: async (productType: "alerts" | "prompts") => {
       const jawn = getJawnClient(org?.currentOrg?.id);
       const result = await jawn.DELETE(
         "/v1/stripe/subscription/add-ons/{productType}",
@@ -227,7 +223,6 @@ export const ProPlanCard = () => {
                 className="data-[state=checked]:bg-sky-600"
               />
             </div>
-
           </div>
 
           <Col className="gap-2">
@@ -306,7 +301,6 @@ export const ProPlanCard = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
 
       <div className="flex flex-col gap-6">
         <Card className="flex flex-col">
