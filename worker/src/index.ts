@@ -60,6 +60,8 @@ async function modifyEnvBasedOnPath(
     }
   }
 
+  env.SUPABASE_URL = env.SUPABASE_URL_TMP;
+
   const url = new URL(request.getUrl());
   const host = url.host;
   const hostParts = host.split(".");

@@ -28,6 +28,7 @@ queues.producers = [
 [vars]
 SUPABASE_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
 SUPABASE_URL = "http://localhost:54321"
+SUPABASE_URL_TMP = ""
 EU_SUPABASE_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
 EU_SUPABASE_URL = "http://localhost:54321"
 CLICKHOUSE_HOST = "http://localhost:18123"
@@ -180,7 +181,6 @@ queues.producers = [
 ]
 
 [env.production.vars]
-SUPABASE_URL = "https://bolqqmqbrciybnypvklh.supabase.co"
 CLICKHOUSE_HOST = "https://p76qbrlulo.us-east-1.aws.clickhouse.cloud:8443"
 VAULT_ENABLED = "true"
 DATADOG_ENABLED = "true"
@@ -242,7 +242,6 @@ queues.producers = [
 
 # Environment-specific variables only (inherit most from top-level [vars])
 [env.production_staging.vars]
-SUPABASE_URL = "https://bolqqmqbrciybnypvklh.supabase.co"
 CLICKHOUSE_HOST = "https://p76qbrlulo.us-east-1.aws.clickhouse.cloud:8443"
 VAULT_ENABLED = "true"
 QUEUE_PROVIDER = "sqs"
