@@ -79,8 +79,12 @@ export async function storeInCache(
 ): Promise<void> {
   const encrypted = await encrypt(value);
   const hashedKey = await hashAuth(key);
-  // redis
-  await redisClient?.set(hashedKey, JSON.stringify(encrypted), "EX", ttl);
+  try {
+    // redis
+    await redisClient?.set(hashedKey, JSON.stringify(encrypted), "EX", ttl);
+  } catch (e) {
+    console.error("Error storing in cache", e);
+  }
 
   ProviderKeyCache.getInstance().set<string>(
     hashedKey,
@@ -95,12 +99,16 @@ export async function getFromCache(key: string): Promise<string | null> {
     return decrypt(JSON.parse(encryptedMemory));
   }
 
-  const encryptedRemote = await redisClient?.get(hashedKey);
-  if (!encryptedRemote) {
+  try {
+    const encryptedRemote = await redisClient?.get(hashedKey);
+    if (!encryptedRemote) {
+      return null;
+    }
+    return decrypt(JSON.parse(encryptedRemote));
+  } catch (e) {
+    console.error("Error decrypting cached result", e);
     return null;
   }
-
-  return decrypt(JSON.parse(encryptedRemote));
 }
 
 export async function getAndStoreInCache<T, K>(
