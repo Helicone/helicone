@@ -5,6 +5,7 @@ compatibility_flags = [
 	"nodejs_compat_v2"
 ]
 logpush = true
+keep_vars = true
 
 durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
