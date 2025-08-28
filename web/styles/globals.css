@@ -184,7 +184,7 @@
 }
 
 .dark * {
-  scrollbar-color: rgba(51, 65, 85, 0.6) transparent; /* slate-700/60 equivalent */
+  scrollbar-color: rgba(51, 65, 85, 0.35) transparent; /* slate-700/60 equivalent */
 }
 
 .text-primary {
