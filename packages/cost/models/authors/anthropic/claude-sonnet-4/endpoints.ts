@@ -55,7 +55,6 @@ export const endpoints = {
       "tools",
       "tool_choice",
     ],
-    ptbEnabled: true,
     endpointConfigs: {
       global: {
         providerModelId: "claude-sonnet-4@20250514",

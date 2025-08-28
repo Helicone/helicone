@@ -56,7 +56,6 @@ export const endpoints = {
       "tools",
       "tool_choice",
     ],
-    ptbEnabled: true,
     endpointConfigs: {
       global: {
         providerModelId: "claude-opus-4@20250514",
