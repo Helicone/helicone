@@ -251,7 +251,6 @@ export class ScoreManager extends BaseManager {
     },
     scoresMessages: HeliconeScoresMessage[]
   ): Promise<void> {
-    console.log(`Handling scores for batch ${batchContext.batchId}`);
     const start = performance.now();
     const result = await this.procesScores(scoresMessages);
     const end = performance.now();
