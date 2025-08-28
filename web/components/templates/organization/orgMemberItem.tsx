@@ -70,9 +70,10 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
           )}
         </div>
         <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-start">
-          <div className="col-span-6 w-fit md:min-w-[8rem] lg:col-span-2">
+          <div className="col-span-6 w-40 md:min-w-[10rem] lg:col-span-2">
             {isUserAdmin ? (
               <Select
+                value={memberRole}
                 onValueChange={async (role) => {
                   const { error } = await jawn.POST(
                     "/v1/organization/{organizationId}/update_member",
@@ -103,24 +104,26 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
                 <SelectTrigger>
                   <SelectValue placeholder="Select Role" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem
-                    value="admin"
-                    className="flex !flex-col items-start gap-1 pl-3"
-                  >
-                    <span>Admin</span>
-                    <p className="text-xs text-muted-foreground">
-                      Can manage members, configurations, and settings
-                    </p>
+                <SelectContent className="w-64">
+                  <SelectItem value="admin" className="py-2" textValue="Admin">
+                    <div className="flex flex-col items-start gap-0.5">
+                      <span className="font-medium">Admin</span>
+                      <span className="text-xs text-muted-foreground">
+                        Can manage members, configurations, and settings
+                      </span>
+                    </div>
                   </SelectItem>
                   <SelectItem
                     value="member"
-                    className="flex !flex-col items-start gap-1 pl-3"
+                    className="py-2"
+                    textValue="Member"
                   >
-                    <span>Member</span>
-                    <p className="text-xs text-muted-foreground">
-                      Can view data, create keys, and use API
-                    </p>
+                    <div className="flex flex-col items-start gap-0.5">
+                      <span className="font-medium">Member</span>
+                      <span className="text-xs text-muted-foreground">
+                        Can view data, create keys, and use API
+                      </span>
+                    </div>
                   </SelectItem>
                 </SelectContent>
               </Select>
