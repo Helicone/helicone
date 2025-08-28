@@ -1,19 +1,19 @@
 import { SELF } from "cloudflare:test";
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import "../setup";
-import { 
-  setupTestEnvironment, 
-  cleanupTestEnvironment, 
+import {
+  setupTestEnvironment,
+  cleanupTestEnvironment,
   mockGoogleEndpoint,
-  createAIGatewayRequest 
+  createAIGatewayRequest,
 } from "../test-utils";
 
 describe("Google Registry Tests", () => {
-  beforeAll(() => {
+  beforeEach(() => {
     setupTestEnvironment();
   });
 
-  afterAll(() => {
+  afterEach(() => {
     cleanupTestEnvironment();
   });
 

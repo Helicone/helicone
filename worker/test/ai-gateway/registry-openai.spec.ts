@@ -1,14 +1,14 @@
 import { SELF, fetchMock } from "cloudflare:test";
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import "../setup";
 import { setupTestEnvironment, cleanupTestEnvironment } from "../test-utils";
 
 describe("OpenAI Registry Tests", () => {
-  beforeAll(() => {
+  beforeEach(() => {
     setupTestEnvironment();
   });
 
-  afterAll(() => {
+  afterEach(() => {
     cleanupTestEnvironment();
   });
 

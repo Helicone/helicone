@@ -1,23 +1,23 @@
 import { SELF } from "cloudflare:test";
 import { fetchMock } from "cloudflare:test";
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import "../setup";
-import { 
-  setupTestEnvironment, 
+import {
+  setupTestEnvironment,
   cleanupTestEnvironment,
   mockAnthropicEndpoint,
   mockVertexAnthropicEndpoint,
   mockBedrockAnthropicEndpoint,
   createAIGatewayRequest,
-  createAnthropicMockResponse
+  createAnthropicMockResponse,
 } from "../test-utils";
 
 describe("Anthropic Registry Tests", () => {
-  beforeAll(() => {
+  beforeEach(() => {
     setupTestEnvironment();
   });
 
-  afterAll(() => {
+  afterEach(() => {
     cleanupTestEnvironment();
   });
 
@@ -50,7 +50,9 @@ describe("Anthropic Registry Tests", () => {
       });
 
       it("should handle bedrock provider with region", async () => {
-        mockBedrockAnthropicEndpoint("anthropic.claude-3-5-haiku-20241022-v1:0");
+        mockBedrockAnthropicEndpoint(
+          "anthropic.claude-3-5-haiku-20241022-v1:0"
+        );
 
         const response = await SELF.fetch(
           "https://ai-gateway.helicone.ai/v1/chat/completions",
@@ -139,9 +141,7 @@ describe("Anthropic Registry Tests", () => {
           .intercept({ path: "/v1/chat/completions", method: "POST" })
           .reply(() => ({
             statusCode: 200,
-            data: createAnthropicMockResponse(
-              "claude-3.5-sonnet-v2"
-            ),
+            data: createAnthropicMockResponse("claude-3.5-sonnet-v2"),
           }))
           .persist();
 
@@ -223,9 +223,7 @@ describe("Anthropic Registry Tests", () => {
           })
           .reply(() => ({
             statusCode: 200,
-            data: createAnthropicMockResponse(
-              "claude-3.5-sonnet-v2"
-            ),
+            data: createAnthropicMockResponse("claude-3.5-sonnet-v2"),
           }))
           .persist();
 
@@ -255,9 +253,7 @@ describe("Anthropic Registry Tests", () => {
           .intercept({ path: "/v1/chat/completions", method: "POST" })
           .reply(() => ({
             statusCode: 200,
-            data: createAnthropicMockResponse(
-              "claude-3.5-sonnet-v2"
-            ),
+            data: createAnthropicMockResponse("claude-3.5-sonnet-v2"),
           }))
           .persist();
 
@@ -315,9 +311,7 @@ describe("Anthropic Registry Tests", () => {
           })
           .reply(() => ({
             statusCode: 200,
-            data: createAnthropicMockResponse(
-              "claude-3.5-sonnet-v2"
-            ),
+            data: createAnthropicMockResponse("claude-3.5-sonnet-v2"),
           }))
           .persist();
 
