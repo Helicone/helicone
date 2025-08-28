@@ -60,7 +60,8 @@ async function modifyEnvBasedOnPath(
     }
   }
 
-  env.SUPABASE_URL = env.SUPABASE_URL_TMP;
+  env.SUPABASE_URL = env.SUPABASE_URL ?? env.SUPABASE_URL_TMP;
+  // env.EU_SUPABASE_URL = env.EU_SUPABASE_URL ?? env.SUPABASE_URL_TMP; // apply when doing EU key rotation
 
   const url = new URL(request.getUrl());
   const host = url.host;
