@@ -87,6 +87,7 @@ export class HeliconeProxyRequestMapper {
           model: rawJson.model,
           provider: this.provider,
           path: this.request.url.pathname,
+          requestReferrer: this.request.requestReferrer,
         });
 
         // Map the request using the appropriate mapper
