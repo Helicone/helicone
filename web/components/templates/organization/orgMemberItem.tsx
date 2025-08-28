@@ -71,7 +71,7 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
         </div>
         <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-start">
           <div className="col-span-6 w-40 md:min-w-[10rem] lg:col-span-2">
-            {isUserAdmin ? (
+            {isUserAdmin && !orgMember.isOwner ? (
               <Select
                 value={memberRole}
                 onValueChange={async (role) => {
@@ -102,7 +102,9 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select Role" />
+                  <SelectValue placeholder="Select Role">
+                    {memberRole === "admin" ? "Admin" : memberRole === "member" ? "Member" : memberRole}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="w-64">
                   <SelectItem value="admin" className="py-2" textValue="Admin">
@@ -128,13 +130,13 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
                 </SelectContent>
               </Select>
             ) : (
-              <Tooltip title="Requires admin privileges">
+              <Tooltip title={orgMember.isOwner ? "Owner role cannot be changed" : "Requires admin privileges"}>
                 <div
                   className={clsx(
                     "relative w-full cursor-default rounded-md border border-gray-300 bg-gray-50 py-2 pl-3 pr-10 text-left shadow-sm hover:cursor-not-allowed focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 dark:border-gray-700 dark:bg-gray-900 sm:text-sm",
                   )}
                 >
-                  <span className="block truncate">{orgMember.org_role}</span>
+                  <span className="block truncate">{memberRole === "admin" ? "Admin" : memberRole === "member" ? "Member" : memberRole}</span>
                   <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                     <ChevronDownIcon
                       className="h-5 w-5 text-gray-400"
