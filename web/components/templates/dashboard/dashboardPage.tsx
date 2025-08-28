@@ -22,7 +22,7 @@ import { useLocalStorage } from "../../../services/hooks/localStorage";
 import { useOrg } from "../../layout/org/organizationContext";
 
 import { useFilterStore } from "@/filterAST/store/filterStore";
-import { toFilterNode } from "@/filterAST/toFilterNode";
+import { toFilterNode } from "@helicone-package/filters/toFilterNode";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
