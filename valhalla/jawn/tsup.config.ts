@@ -16,7 +16,7 @@ export default defineConfig([
     loader: { ".json": "copy" },
     minify: true,
     sourcemap: false,
-    external: ["**/kafkaConsumer.js", "**/sqsConsumer.js"],
+    external: ["**/sqsConsumer.js"],
   },
   {
     entry: ["../../shared/**/*.ts"],
