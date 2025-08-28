@@ -16,7 +16,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { FilterSubType } from "@/filterAST/filterAst";
+import { FilterSubType } from "@helicone-package/filters/types";
 
 export type SearchableSelectOption = {
   label: string;
