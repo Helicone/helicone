@@ -18,7 +18,6 @@ import { S3ReaderHandler } from "../lib/handlers/S3ReaderHandler";
 import { SegmentLogHandler } from "../lib/handlers/SegmentLogHandler";
 import { StripeLogHandler } from "../lib/handlers/StripeLogHandler";
 import { WebhookHandler } from "../lib/handlers/WebhookHandler";
-import { KAFKA_ENABLED } from "../lib/producers/KafkaProducerImpl";
 import { S3Client } from "../lib/shared/db/s3Client";
 import { LogStore } from "../lib/stores/LogStore";
 import { RateLimitStore } from "../lib/stores/RateLimitStore";
@@ -167,9 +166,7 @@ export class LogManager {
             );
           }
 
-          const pushToDLQ: boolean =
-            (process.env.SQS_ENABLED ?? "false") === "true" || KAFKA_ENABLED;
-          if (pushToDLQ) {
+          if ((process.env.SQS_ENABLED ?? "false") === "true") {
             const kafkaProducer = new HeliconeQueueProducer();
 
             const res = await kafkaProducer.sendMessages(
@@ -283,7 +280,7 @@ export class LogManager {
         }`
       );
 
-      if (KAFKA_ENABLED) {
+      if ((process.env.SQS_ENABLED ?? "false") === "true") {
         const kafkaProducer = new HeliconeQueueProducer();
         const kafkaResult = await kafkaProducer.sendMessages(
           logMessages,
