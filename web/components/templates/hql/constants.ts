@@ -106,9 +106,7 @@ export function parseSqlAndFindTableNameAndAliases(sql: string) {
 
 // Execute query mutation
 export const createExecuteQueryMutation = (
-  setResult: React.Dispatch<
-    React.SetStateAction<components["schemas"]["ExecuteSqlResponse"]>
-  >,
+  setResult: (result: components["schemas"]["ExecuteSqlResponse"]) => void,
   setQueryError: (error: string | null) => void,
   setQueryLoading: (loading: boolean) => void,
 ) => {
@@ -267,4 +265,21 @@ export const useBulkDeleteQueryMutation = (
       setNotification(error.message, "error");
     },
   };
+};
+
+export const addPaginationToQuery = (
+  sql: string,
+  offset: number,
+  limit: number
+): string => {
+  // Remove existing LIMIT and OFFSET clauses (case-insensitive)
+  let cleanedSql = sql.trim();
+  
+  // Remove LIMIT with optional OFFSET
+  cleanedSql = cleanedSql.replace(/\s+LIMIT\s+\d+(\s+OFFSET\s+\d+)?$/gi, '');
+  // Remove standalone OFFSET
+  cleanedSql = cleanedSql.replace(/\s+OFFSET\s+\d+$/gi, '');
+  
+  // Add new pagination clauses
+  return `${cleanedSql} LIMIT ${limit} OFFSET ${offset}`;
 };

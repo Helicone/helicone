@@ -153,9 +153,13 @@ export class HeliconeSqlManager {
   // Execute it
   async executeSql(
     sql: string,
-    limit: number = 100
+    limit: number = 100,
+    includeCount: boolean = true
   ): Promise<Result<ExecuteSqlResponse, HqlError>> {
     try {
+      // Ensure limit doesn't exceed maximum allowed
+      const safeLimit = Math.min(limit, 500);
+      
       // Parse SQL to validate and add limit
       let ast;
       try {
@@ -173,7 +177,7 @@ export class HeliconeSqlManager {
       // Add limit to prevent excessive data retrieval
       let limitedAst;
       try {
-        limitedAst = addLimit(normalizedAst, limit);
+        limitedAst = addLimit(normalizedAst, safeLimit);
       } catch (limitError) {
         return hqlError(
           HqlErrorCode.SYNTAX_ERROR,
@@ -205,11 +209,44 @@ export class HeliconeSqlManager {
         return hqlError(errorCode, result.error);
       }
 
+      // Get total count if requested
+      let totalCount = result.data?.length ?? 0;
+      
+      // Get total count if requested and we have results
+      if (includeCount && result.data) {
+        try {
+          // Create count query from original SQL (without limit)
+          if (normalizedAst.type === "select") {
+            // Remove any existing LIMIT/OFFSET from the AST for accurate count
+            const countAst = { ...normalizedAst };
+            delete countAst.limit;
+            delete countAst.offset;
+            
+            // Create a simpler count query without LIMIT
+            const unlimitedSql = parser.sqlify(countAst, { database: "Postgresql" });
+            const countSql = `SELECT COUNT(*) as total FROM (${unlimitedSql}) as countQuery`;
+            
+            const countResult = await clickhouseDb.queryWithContext<{total: number}[]>({
+              query: countSql,
+              organizationId: this.authParams.organizationId,
+              parameters: [],
+            });
+            
+            if (!isError(countResult) && countResult.data && countResult.data[0]) {
+              totalCount = Number(countResult.data[0].total) || totalCount;
+            }
+          }
+        } catch (e) {
+          // If count fails, fall back to the limited result count
+          console.error("Failed to get total count:", e);
+        }
+      }
+
       return ok({
         rows: result.data ?? [],
         elapsedMilliseconds,
         size: Buffer.byteLength(JSON.stringify(result.data), "utf8"),
-        rowCount: result.data?.length ?? 0,
+        rowCount: totalCount,
       });
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : String(e);
