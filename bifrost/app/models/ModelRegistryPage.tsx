@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { getJawnClient } from "@/lib/clients/jawn";
@@ -21,79 +21,21 @@ import {
   X,
 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
-
-// Same interfaces as before
-interface ModelEndpoint {
-  provider: string;
-  providerSlug: string;
-  pricing: {
-    prompt: number;
-    completion: number;
-    audio?: number;
-    web_search?: number;
-    video?: number;
-    image?: number;
-    thinking?: number;
-    cacheRead?: number;
-    cacheWrite?: number;
-  };
-  supportsPtb?: boolean;
-}
-
-type InputModality = "text" | "image" | "audio" | "video";
-type OutputModality = "text" | "image" | "audio" | "video";
-type StandardParameter =
-  | "max_tokens"
-  | "temperature"
-  | "top_p"
-  | "top_k"
-  | "stop"
-  | "stream"
-  | "frequency_penalty"
-  | "presence_penalty"
-  | "repetition_penalty"
-  | "seed"
-  | "tools"
-  | "tool_choice"
-  | "functions"
-  | "function_call"
-  | "reasoning"
-  | "include_reasoning"
-  | "thinking"
-  | "response_format"
-  | "json_mode"
-  | "truncate"
-  | "min_p"
-  | "logit_bias"
-  | "logprobs"
-  | "top_logprobs"
-  | "structured_outputs";
-
-interface Model {
-  id: string;
-  name: string;
-  author: string;
-  contextLength: number;
-  endpoints: ModelEndpoint[];
-  maxOutput?: number;
-  trainingDate?: string;
-  description?: string;
-  inputModalities: InputModality[];
-  outputModalities: OutputModality[];
-  supportedParameters: StandardParameter[];
-}
+import { useModelFiltering } from "@/hooks/useModelFiltering";
+import { Model, SortOption } from "@/lib/filters/modelFilters";
 
 interface ModelRegistryResponse {
   models: Model[];
   total: number;
   filters: {
-    providers: string[];
+    providers: {
+      displayName: string;
+      name: string;
+    }[];
     authors: string[];
     capabilities: string[];
   };
 }
-
-type SortOption = "name" | "price-low" | "price-high" | "context" | "newest";
 
 export function ModelRegistryPage() {
   const router = useRouter();
@@ -102,21 +44,15 @@ export function ModelRegistryPage() {
   // Memoize the jawn client to prevent recreating on every render
   const jawnClient = useMemo(() => getJawnClient(), []);
 
-  // State
-  const [models, setModels] = useState<Model[]>([]);
-  const [totalModels, setTotalModels] = useState(0);
-  const [availableFilters, setAvailableFilters] = useState<{
-    providers: string[];
-    authors: string[];
-    capabilities: string[];
-  }>({ providers: [], authors: [], capabilities: [] });
+  // State for all models (fetched once)
+  const [allModels, setAllModels] = useState<Model[]>([]);
   const [loading, setLoading] = useState(true);
   const [copiedModel, setCopiedModel] = useState<string | null>(null);
 
   // Filter states from URL
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [selectedProviders, setSelectedProviders] = useState<Set<string>>(
-    new Set(searchParams.get("providers")?.split(",") || [])
+    new Set(searchParams.get("providers")?.split(",").filter(Boolean) || [])
   );
   const [priceRange, setPriceRange] = useState<[number, number]>([
     Number(searchParams.get("priceMin") || 0),
@@ -126,11 +62,22 @@ export function ModelRegistryPage() {
     Number(searchParams.get("contextMin") || 0)
   );
   const [selectedCapabilities, setSelectedCapabilities] = useState<Set<string>>(
-    new Set(searchParams.get("capabilities")?.split(",") || [])
+    new Set(searchParams.get("capabilities")?.split(",").filter(Boolean) || [])
   );
   const [sortBy, setSortBy] = useState<SortOption>(
     (searchParams.get("sort") as SortOption) || "name"
   );
+
+  // Use client-side filtering hook
+  const { filteredModels, totalModels, availableFilters, isFiltered } = useModelFiltering({
+    models: allModels,
+    search: searchQuery,
+    selectedProviders,
+    priceRange,
+    minContextSize,
+    selectedCapabilities,
+    sortBy,
+  });
 
   // Collapsible filter sections
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
@@ -148,63 +95,50 @@ export function ModelRegistryPage() {
     setExpandedSections(newSet);
   };
 
-  // Convert Sets to strings for stable dependencies
-  const providersString = Array.from(selectedProviders).sort().join(',');
-  const capabilitiesString = Array.from(selectedCapabilities).sort().join(',');
-  
-  // Track if this is the initial mount
-  const [isInitialMount, setIsInitialMount] = useState(true);
-  
-  // Combined effect for URL update and API fetch
+  // Fetch all models once on mount
   useEffect(() => {
-    // Build URL params
-    const params = new URLSearchParams();
-    
-    if (searchQuery) params.set("search", searchQuery);
-    if (providersString) params.set("providers", providersString);
-    if (priceRange[0] > 0) params.set("priceMin", priceRange[0].toString());
-    if (priceRange[1] < 50) params.set("priceMax", priceRange[1].toString());
-    if (minContextSize > 0) params.set("contextMin", minContextSize.toString());
-    if (capabilitiesString) params.set("capabilities", capabilitiesString);
-    if (sortBy !== "name") params.set("sort", sortBy);
-    
-    // Update URL (skip on initial mount to avoid duplicate push)
-    if (!isInitialMount) {
-      const newUrl = params.toString()
-        ? `${window.location.pathname}?${params.toString()}`
-        : window.location.pathname;
-      
-      router.push(newUrl, { scroll: false });
-    }
-    
-    // Fetch models with debounce
-    const timeoutId = setTimeout(async () => {
+    const fetchModels = async () => {
       try {
         setLoading(true);
         
-        const response = await jawnClient.GET("/v1/public/model-registry/models", {
-          params: {
-            query: Object.fromEntries(params.entries())
-          }
-        });
+        const response = await jawnClient.GET("/v1/public/model-registry/models");
 
         if (response.data?.data) {
           const data = response.data.data as ModelRegistryResponse;
-          setModels(data.models);
-          setTotalModels(data.total);
-          setAvailableFilters(data.filters);
+          setAllModels(data.models);
         }
       } catch (error) {
         console.error("Failed to load models:", error);
       } finally {
         setLoading(false);
-        setIsInitialMount(false);
       }
-    }, isInitialMount ? 0 : 300); // No delay on initial mount
+    };
 
-    return () => clearTimeout(timeoutId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery, providersString, priceRange[0], priceRange[1], minContextSize, capabilitiesString, sortBy]);
+    fetchModels();
+  }, [jawnClient]);
+
+  // Update URL when filters change
+  useEffect(() => {
+    const params = new URLSearchParams();
+    
+    if (searchQuery) params.set("search", searchQuery);
+    if (selectedProviders.size > 0) {
+      params.set("providers", Array.from(selectedProviders).sort().join(','));
+    }
+    if (priceRange[0] > 0) params.set("priceMin", priceRange[0].toString());
+    if (priceRange[1] < 50) params.set("priceMax", priceRange[1].toString());
+    if (minContextSize > 0) params.set("contextMin", minContextSize.toString());
+    if (selectedCapabilities.size > 0) {
+      params.set("capabilities", Array.from(selectedCapabilities).sort().join(','));
+    }
+    if (sortBy !== "name") params.set("sort", sortBy);
+    
+    const newUrl = params.toString()
+      ? `${window.location.pathname}?${params.toString()}`
+      : window.location.pathname;
+    
+    router.push(newUrl, { scroll: false });
+  }, [searchQuery, selectedProviders, priceRange, minContextSize, selectedCapabilities, sortBy, router]);
 
   const formatCost = (costPerMillion: number) => {
     if (costPerMillion === 0) return "Free";
@@ -267,16 +201,18 @@ export function ModelRegistryPage() {
                   {expandedSections.has("providers") && (
                     <div className="space-y-1 max-h-48 overflow-y-auto">
                       {availableFilters.providers.map((provider) => {
-                        const isSelected = selectedProviders.has(provider);
+                        const providerName = typeof provider === 'string' ? provider : provider.name;
+                        const displayName = typeof provider === 'string' ? provider : provider.displayName;
+                        const isSelected = selectedProviders.has(providerName);
                         return (
                           <div
-                            key={provider}
+                            key={providerName}
                             onClick={() => {
                               const newSet = new Set(selectedProviders);
                               if (isSelected) {
-                                newSet.delete(provider);
+                                newSet.delete(providerName);
                               } else {
-                                newSet.add(provider);
+                                newSet.add(providerName);
                               }
                               setSelectedProviders(newSet);
                             }}
@@ -286,7 +222,7 @@ export function ModelRegistryPage() {
                                 : "text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
                             }`}
                           >
-                            <span className="truncate flex-1 mr-2">{provider}</span>
+                            <span className="truncate flex-1 mr-2">{displayName}</span>
                             {isSelected && <X className="h-3 w-3" />}
                           </div>
                         );
@@ -425,7 +361,7 @@ export function ModelRegistryPage() {
                 {/* Model count */}
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500 dark:text-gray-400">
-                    Showing {models.length} of {totalModels} models
+                    Showing {filteredModels.length} of {totalModels} models
                   </span>
                   {/* Reset filters button - always rendered to prevent layout shift */}
                   <button
@@ -437,12 +373,7 @@ export function ModelRegistryPage() {
                       setSearchQuery("");
                     }}
                     className={`px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 rounded-lg transition-all flex items-center gap-2 ${
-                      (selectedProviders.size > 0 ||
-                        priceRange[0] > 0 ||
-                        priceRange[1] < 50 ||
-                        minContextSize > 0 ||
-                        selectedCapabilities.size > 0 ||
-                        searchQuery.length > 0)
+                      isFiltered
                         ? 'opacity-100 pointer-events-auto'
                         : 'opacity-0 pointer-events-none'
                     }`}
@@ -485,19 +416,11 @@ export function ModelRegistryPage() {
             </div>
 
             {/* Models Table */}
-            <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden relative">
-              {loading && (
-                <div className="absolute inset-0 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm z-10 flex items-center justify-center">
-                  <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
-                    <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
-                    <span>Updating results...</span>
-                  </div>
-                </div>
-              )}
+            <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[640px]">
                   <tbody>
-                    {models.map((model) => {
+                    {filteredModels.map((model) => {
                       const minInputCost = Math.min(
                         ...model.endpoints.map((e) => e.pricing.prompt)
                       );
@@ -591,7 +514,7 @@ export function ModelRegistryPage() {
               </div>
             </div>
 
-            {models.length === 0 && !loading && (
+            {filteredModels.length === 0 && !loading && (
               <div className="text-center py-12">
                 <p className="text-gray-500 dark:text-gray-400">
                   No models found matching your criteria
@@ -599,7 +522,7 @@ export function ModelRegistryPage() {
               </div>
             )}
             
-            {models.length === 0 && loading && (
+            {loading && (
               <div className="space-y-4 p-6">
                 {[...Array(5)].map((_, i) => (
                   <div key={i} className="animate-pulse">

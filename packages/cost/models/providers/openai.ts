@@ -1,6 +1,7 @@
 import { BaseProvider } from "./base";
 
 export class OpenAIProvider extends BaseProvider {
+  readonly displayName = "OpenAI";
   readonly baseUrl = "https://api.openai.com";
   readonly auth = "api-key" as const;
   readonly pricingPages = ["https://openai.com/api/pricing"];

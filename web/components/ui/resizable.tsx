@@ -40,13 +40,13 @@ const ResizableHandle = ({
   ) : (
     <ResizablePrimitive.PanelResizeHandle
       className={cn(
-        "group relative z-20 flex items-center justify-center",
-        "w-0.5 bg-slate-200 transition-colors group-hover:bg-sky-500 dark:bg-slate-800 dark:group-hover:bg-sky-500",
-        "after:absolute after:bottom-0 after:left-1/2 after:top-0 after:w-3 after:-translate-x-1/2",
-        "data-[panel-group-direction=vertical]:h-0.5 data-[panel-group-direction=vertical]:w-full",
-        "data-[panel-group-direction=vertical]:after:bottom-auto data-[panel-group-direction=vertical]:after:left-0 data-[panel-group-direction=vertical]:after:top-1/2 data-[panel-group-direction=vertical]:after:h-3 data-[panel-group-direction=vertical]:after:w-full data-[panel-group-direction=vertical]:after:-translate-y-1/2 data-[panel-group-direction=vertical]:after:translate-x-0",
-        "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1",
-        "hover:bg-sky-500 dark:hover:bg-sky-500",
+        "group relative z-30 flex items-center justify-center",
+        "w-1 bg-border transition-colors hover:bg-primary/50 active:bg-primary",
+        "after:absolute after:inset-y-0 after:left-1/2 after:w-6 after:-translate-x-1/2",
+        "data-[panel-group-direction=vertical]:h-1 data-[panel-group-direction=vertical]:w-full",
+        "data-[panel-group-direction=vertical]:after:left-0 data-[panel-group-direction=vertical]:after:top-1/2 data-[panel-group-direction=vertical]:after:h-6 data-[panel-group-direction=vertical]:after:w-full data-[panel-group-direction=vertical]:after:-translate-y-1/2 data-[panel-group-direction=vertical]:after:translate-x-0",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        "cursor-col-resize data-[panel-group-direction=vertical]:cursor-row-resize",
         className,
       )}
       {...props}

@@ -440,6 +440,9 @@ export interface paths {
     get: operations["GetSavedQuery"];
     delete: operations["DeleteSavedQuery"];
   };
+  "/v1/helicone-sql/saved-queries/bulk-delete": {
+    post: operations["BulkDeleteSavedQueries"];
+  };
   "/v1/helicone-sql/saved-query": {
     put: operations["UpdateSavedQuery"];
     post: operations["CreateSavedQuery"];
@@ -704,6 +707,7 @@ export interface components {
       name?: string;
     };
     DecryptedProviderKey: {
+      cuid?: string | null;
       provider_secret_key: string | null;
       provider_key_name: string | null;
       provider_name: string | null;
@@ -2745,7 +2749,10 @@ Json: JsonObject;
       filters: {
         capabilities: components["schemas"]["ModelCapability"][];
         authors: string[];
-        providers: string[];
+        providers: {
+            displayName: string;
+            name: string;
+          }[];
       };
     };
     ResultSuccess_ModelRegistryResponse_: {
@@ -2754,8 +2761,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_ModelRegistryResponse.string_": components["schemas"]["ResultSuccess_ModelRegistryResponse_"] | components["schemas"]["ResultError_string_"];
-    /** @enum {string} */
-    SortOption: "name" | "price-low" | "price-high" | "context" | "newest";
     MetricStats: {
       /** Format: double */
       p99: number;
@@ -2948,6 +2953,9 @@ Json: JsonObject;
       error: null;
     };
     "Result_void.string_": components["schemas"]["ResultSuccess_void_"] | components["schemas"]["ResultError_string_"];
+    BulkDeleteSavedQueriesRequest: {
+      ids: string[];
+    };
     "ResultSuccess_HqlSavedQuery-Array_": {
       data: components["schemas"]["HqlSavedQuery"][];
       /** @enum {number|null} */
@@ -6026,23 +6034,6 @@ export interface operations {
     };
   };
   GetModelRegistry: {
-    parameters: {
-      query?: {
-        providers?: string;
-        authors?: string;
-        inputModalities?: string;
-        outputModalities?: string;
-        parameters?: string;
-        capabilities?: string;
-        priceMin?: number;
-        priceMax?: number;
-        contextMin?: number;
-        search?: string;
-        sort?: components["schemas"]["SortOption"];
-        limit?: number;
-        offset?: number;
-      };
-    };
     responses: {
       /** @description Ok */
       200: {
@@ -6260,6 +6251,21 @@ export interface operations {
     parameters: {
       path: {
         queryId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_void.string_"];
+        };
+      };
+    };
+  };
+  BulkDeleteSavedQueries: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BulkDeleteSavedQueriesRequest"];
       };
     };
     responses: {

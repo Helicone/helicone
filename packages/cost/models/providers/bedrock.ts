@@ -12,6 +12,7 @@ import type {
 } from "../types";
 
 export class BedrockProvider extends BaseProvider {
+  readonly displayName = "AWS Bedrock";
   readonly baseUrl = "https://bedrock-runtime.{region}.amazonaws.com";
   readonly auth = "aws-signature" as const;
   readonly requiredConfig = ["region"] as const;

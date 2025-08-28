@@ -236,3 +236,35 @@ export const useDeleteQueryMutation = (
     },
   };
 };
+
+// Bulk delete queries mutation
+export const useBulkDeleteQueryMutation = (
+  setNotification: (_message: string, _type: "success" | "error") => void,
+) => {
+  const queryClient = useQueryClient();
+  return {
+    mutationFn: async (queryIds: string[]) => {
+      const response = await $JAWN_API.POST(
+        "/v1/helicone-sql/saved-queries/bulk-delete",
+        {
+          body: { ids: queryIds },
+        },
+      );
+      return response;
+    },
+    onSuccess: (_data: any, queryIds: string[]) => {
+      const count = queryIds.length;
+      setNotification(
+        `${count} ${count === 1 ? "query" : "queries"} deleted successfully`,
+        "success",
+      );
+      // Invalidate the queries cache to refresh the list
+      queryClient.invalidateQueries({
+        queryKey: ["get", "/v1/helicone-sql/saved-queries"],
+      });
+    },
+    onError: (error: Error) => {
+      setNotification(error.message, "error");
+    },
+  };
+};

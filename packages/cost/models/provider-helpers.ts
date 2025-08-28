@@ -40,10 +40,12 @@ export const dbProviderToProvider = (provider: string): ProviderName | null => {
   if (provider === "google" || provider === "Google AI (Gemini)") {
     return "google";
   }
+  if (provider === "Azure OpenAI") {
+    return "azure-openai";
+  }
   return null;
 };
 
-// Helper function to build URL for an endpoint
 export function buildEndpointUrl(
   endpointConfig: ModelProviderConfig,
   userConfig: UserEndpointConfig = {}

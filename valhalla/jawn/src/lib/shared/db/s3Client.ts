@@ -44,21 +44,29 @@ export class S3Client {
   private awsClient: AwsS3Client;
 
   constructor(
-    accessKey: string,
-    secretKey: string,
+    accessKey: string | undefined,
+    secretKey: string | undefined,
     private endpoint: string,
     private bucketName: string,
     private region: string
   ) {
-    this.awsClient = new AwsS3Client({
-      credentials: {
-        accessKeyId: accessKey,
-        secretAccessKey: secretKey,
-      },
+    const config: any = {
       region: this.region,
       endpoint: endpoint ? endpoint : undefined,
       forcePathStyle: true,
-    });
+    };
+
+    // Only add credentials if both accessKey and secretKey are provided
+    if (accessKey && secretKey) {
+      config.credentials = {
+        accessKeyId: accessKey,
+        secretAccessKey: secretKey,
+      };
+    }
+    // If credentials are not provided, AWS SDK will use default credential chain
+    // (environment variables, IAM roles, etc.)
+
+    this.awsClient = new AwsS3Client(config);
   }
 
   async copyObject(
