@@ -180,7 +180,7 @@
 /* Firefox scrollbar styling */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(203, 213, 225, 0.6) transparent; /* slate-300/60 equivalent */
+  scrollbar-color: rgba(203, 213, 225, 0.35) transparent; /* slate-300/60 equivalent */
 }
 
 .dark * {
