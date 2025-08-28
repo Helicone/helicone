@@ -45,7 +45,7 @@ export const PaginationControls = ({
     <div
       className={clsx(
         "flex items-center justify-between border-tremor-brand-subtle bg-background px-4 py-2",
-        isBottom ? "border-t" : "border-b"
+        isBottom ? "border-t" : "border-b",
       )}
     >
       <div className="flex items-center gap-4">

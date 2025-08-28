@@ -99,7 +99,7 @@ function QueryResult({
         </div>
       ) : (
         <>
-          {(effectiveTotalRows > 0) && (
+          {effectiveTotalRows > 0 && (
             <PaginationControls
               currentPage={currentPage}
               totalPages={totalPages}
@@ -112,36 +112,36 @@ function QueryResult({
             />
           )}
           <ThemedTable
-          id="hql-result"
-          defaultData={result}
-          defaultColumns={[
-            {
-              header: "#",
-              accessorKey: "__rowNum",
-              cell: (info) => info.row.index + 1,
-            },
-            ...columns.map((col) => ({
-              header: col,
-              accessorKey: col,
-              cell: (info: CellContext<Record<string, any>, unknown>) => {
-                const value = info.getValue();
-                if (typeof value === "object" && value !== null) {
-                  return JSON.stringify(value);
-                }
-                return value;
+            id="hql-result"
+            defaultData={result}
+            defaultColumns={[
+              {
+                header: "#",
+                accessorKey: "__rowNum",
+                cell: (info) => info.row.index + 1,
               },
-            })),
-          ]}
-          skeletonLoading={false}
-          dataLoading={false}
-          checkboxMode="never"
-          onRowSelect={() => {}}
-          onSelectAll={() => {}}
-          selectedIds={[]}
-          activeColumns={[]}
-          setActiveColumns={() => {}}
+              ...columns.map((col) => ({
+                header: col,
+                accessorKey: col,
+                cell: (info: CellContext<Record<string, any>, unknown>) => {
+                  const value = info.getValue();
+                  if (typeof value === "object" && value !== null) {
+                    return JSON.stringify(value);
+                  }
+                  return value;
+                },
+              })),
+            ]}
+            skeletonLoading={false}
+            dataLoading={false}
+            checkboxMode="never"
+            onRowSelect={() => {}}
+            onSelectAll={() => {}}
+            selectedIds={[]}
+            activeColumns={[]}
+            setActiveColumns={() => {}}
           />
-          {(effectiveTotalRows > 0) && (
+          {effectiveTotalRows > 0 && (
             <PaginationControls
               currentPage={currentPage}
               totalPages={totalPages}

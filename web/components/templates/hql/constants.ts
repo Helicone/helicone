@@ -270,16 +270,16 @@ export const useBulkDeleteQueryMutation = (
 export const addPaginationToQuery = (
   sql: string,
   offset: number,
-  limit: number
+  limit: number,
 ): string => {
   // Remove existing LIMIT and OFFSET clauses (case-insensitive)
   let cleanedSql = sql.trim();
-  
+
   // Remove LIMIT with optional OFFSET
-  cleanedSql = cleanedSql.replace(/\s+LIMIT\s+\d+(\s+OFFSET\s+\d+)?$/gi, '');
+  cleanedSql = cleanedSql.replace(/\s+LIMIT\s+\d+(\s+OFFSET\s+\d+)?$/gi, "");
   // Remove standalone OFFSET
-  cleanedSql = cleanedSql.replace(/\s+OFFSET\s+\d+$/gi, '');
-  
+  cleanedSql = cleanedSql.replace(/\s+OFFSET\s+\d+$/gi, "");
+
   // Add new pagination clauses
   return `${cleanedSql} LIMIT ${limit} OFFSET ${offset}`;
 };

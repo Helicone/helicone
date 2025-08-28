@@ -26,7 +26,6 @@ import {
   createExecuteQueryMutation,
   addPaginationToQuery,
 } from "./constants";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useHeliconeAgent } from "../agent/HeliconeAgentContext";
 
 function HQLPage() {
@@ -70,7 +69,7 @@ function HQLPage() {
           setTotalRows(data.rowCount);
         },
         setQueryError,
-        setQueryLoading
+        setQueryLoading,
       ),
     );
 
@@ -129,7 +128,7 @@ function HQLPage() {
       const paginatedSql = addPaginationToQuery(
         currentQuery.sql,
         (currentPage - 1) * rowsPerPage,
-        rowsPerPage
+        rowsPerPage,
       );
       const response = await handleExecuteQueryAsync(paginatedSql);
       return {
@@ -310,11 +309,7 @@ function HQLPage() {
               currentQuery={currentQuery}
               handleExecuteQuery={(sql) => {
                 setCurrentPage(1);
-                const paginatedSql = addPaginationToQuery(
-                  sql,
-                  0,
-                  rowsPerPage
-                );
+                const paginatedSql = addPaginationToQuery(sql, 0, rowsPerPage);
                 handleExecuteQuery(paginatedSql);
               }}
               handleSaveQuery={handleSaveQuery}
@@ -412,7 +407,7 @@ function HQLPage() {
                       const paginatedSql = addPaginationToQuery(
                         latestQueryRef.current.sql,
                         0,
-                        rowsPerPage
+                        rowsPerPage,
                       );
                       handleExecuteQuery(paginatedSql);
                     },
@@ -497,7 +492,7 @@ function HQLPage() {
                 const paginatedSql = addPaginationToQuery(
                   currentQuery.sql,
                   (page - 1) * rowsPerPage,
-                  rowsPerPage
+                  rowsPerPage,
                 );
                 handleExecuteQuery(paginatedSql);
               }}
@@ -507,7 +502,7 @@ function HQLPage() {
                 const paginatedSql = addPaginationToQuery(
                   currentQuery.sql,
                   0,
-                  rows
+                  rows,
                 );
                 handleExecuteQuery(paginatedSql);
               }}
