@@ -51,18 +51,14 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
   // Mutation to create/update provider key
   const updateProviderKey = useMutation({
     mutationFn: async ({
-      providerName,
       key,
       secretKey,
       keyId,
-      providerKeyName,
       config,
     }: {
-      providerName: string;
       key?: string;
       secretKey?: string;
       keyId: string;
-      providerKeyName: string;
       config?: Record<string, any>;
     }) => {
       if (!orgId) throw new Error("No organization selected");

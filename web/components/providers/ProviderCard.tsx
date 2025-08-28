@@ -213,18 +213,15 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
         if (!existingKey) return;
         // If we have an existing key, use updateProviderKey mutation
         updateProviderKey.mutate({
-          providerName: provider.name,
           key: keyValue,
           secretKey: secretKeyValue,
           keyId: existingKey.id,
-          providerKeyName:
-            keyName || existingKey.provider_key_name || defaultKeyName,
           config: configValues,
         });
       } else {
         // Otherwise create a new key using addProviderKey mutation
         addProviderKey.mutate({
-          providerName: provider.name,
+          providerName: provider.id,
           key: keyValue,
           secretKey: secretKeyValue,
           providerKeyName: keyName || defaultKeyName,
