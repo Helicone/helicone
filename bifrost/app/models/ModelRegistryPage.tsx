@@ -23,16 +23,9 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { useModelFiltering } from "@/hooks/useModelFiltering";
 import { Model, SortOption } from "@/lib/filters/modelFilters";
+import { components } from "@/lib/clients/jawnTypes/public";
 
-interface ModelRegistryResponse {
-  models: Model[];
-  total: number;
-  filters: {
-    providers: string[];
-    authors: string[];
-    capabilities: string[];
-  };
-}
+type ModelRegistryResponse = components["schemas"]["ModelRegistryResponse"];
 
 export function ModelRegistryPage() {
   const router = useRouter();
