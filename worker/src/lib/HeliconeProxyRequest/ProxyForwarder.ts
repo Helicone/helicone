@@ -416,6 +416,7 @@ export async function proxyForwarder(
         !orgError &&
         orgData?.organizationId
       ) {
+        const costInCents = (res.data?.cost ?? 0) * 100;
         await updateRateLimitCounterDO({
           organizationId: orgData?.organizationId,
           heliconeProperties:
@@ -423,7 +424,7 @@ export async function proxyForwarder(
           rateLimiterDO: env.RATE_LIMITER_SQL,
           rateLimitOptions: finalRateLimitOptions,
           userId: proxyRequest.userId,
-          cost: res.data?.cost ?? 0,
+          cost: costInCents,
         });
       }
     }
