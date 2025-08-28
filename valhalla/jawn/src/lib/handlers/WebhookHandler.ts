@@ -144,7 +144,6 @@ export class WebhookHandler extends AbstractLogHandler {
     if (this.webhookPayloads.length === 0) {
       return ok("No webhooks to send");
     }
-    console.log("Sending to webhooks: ", this.webhookPayloads.length);
 
     await Promise.all(
       this.webhookPayloads.map(async (webhookPayload) => {

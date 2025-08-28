@@ -5,6 +5,16 @@ import { PromiseGenericResult, ok } from "../../../packages/common/result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 import { isParseInputJson } from "./helpers";
 
+const ALLOWED_LINES = [
+  "content_block_delta",
+  "message_delta",
+  "message_start",
+  "content_block_start",
+  "content_block_stop",
+  "message_stop",
+  "ping",
+];
+
 export class AnthropicStreamBodyProcessor implements IBodyProcessor {
   public async parse(
     parseInput: ParseInput
@@ -55,9 +65,13 @@ export class AnthropicStreamBodyProcessor implements IBodyProcessor {
 
         processedLines.push(data);
       } catch (e) {
-        console.error("Error parsing line Anthropic", line);
-
-        processedLines.push({});
+        const cleanedLine = line
+          .replace("data:", "")
+          .replace("event:", "")
+          .trim();
+        if (!ALLOWED_LINES.includes(cleanedLine)) {
+          console.error("Error parsing line Anthropic", line);
+        }
       }
     }
 

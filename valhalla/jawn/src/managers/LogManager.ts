@@ -166,7 +166,10 @@ export class LogManager {
               `Reproducing error for request ${logMessage.log.request.id} for batch ${logMetaData.batchId}: ${result.error}`
             );
           }
-          if (KAFKA_ENABLED) {
+
+          const pushToDLQ: boolean =
+            (process.env.SQS_ENABLED ?? "false") === "true" || KAFKA_ENABLED;
+          if (pushToDLQ) {
             const kafkaProducer = new HeliconeQueueProducer();
 
             const res = await kafkaProducer.sendMessages(
@@ -280,7 +283,10 @@ export class LogManager {
         }`
       );
 
-      if (KAFKA_ENABLED) {
+      const pushToDLQ: boolean =
+        (process.env.SQS_ENABLED ?? "false") === "true" || KAFKA_ENABLED;
+
+      if (pushToDLQ) {
         const kafkaProducer = new HeliconeQueueProducer();
         const kafkaResult = await kafkaProducer.sendMessages(
           logMessages,
