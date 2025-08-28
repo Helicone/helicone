@@ -13,7 +13,7 @@ BEGIN
     ADD COLUMN IF NOT EXISTS cuid TEXT DEFAULT NULL;
 
     ALTER TABLE public.provider_keys
-    ADD CONSTRAINT IF NOT EXISTS provider_keys_cuid_unique UNIQUE (cuid);
+    ADD CONSTRAINT provider_keys_cuid_unique UNIQUE (cuid);
 
     -- Create view based on pgsodium availability
     IF has_pgsodium THEN
