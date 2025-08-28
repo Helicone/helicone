@@ -34,10 +34,7 @@ export async function updateRequestProperties(
   properties: Record<string, string>,
   env: Env
 ): Promise<void> {
-  const dbClient = createClient(
-    env.SUPABASE_URL,
-    env.SUPABASE_SERVICE_ROLE_KEY
-  );
+  const dbClient = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
 
   // Fetch the existing properties
   const { data: requestData, error: fetchError } = await dbClient

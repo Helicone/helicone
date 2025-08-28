@@ -70,7 +70,7 @@ async function modifyEnvBasedOnPath(
       CLICKHOUSE_HOST: env.EU_CLICKHOUSE_HOST,
       CLICKHOUSE_USER: env.EU_CLICKHOUSE_USER,
       CLICKHOUSE_PASSWORD: env.EU_CLICKHOUSE_PASSWORD,
-      SUPABASE_SERVICE_ROLE_KEY: env.EU_SUPABASE_SERVICE_ROLE_KEY,
+      SUPABASE_SERVICE_KEY: env.EU_SUPABASE_SERVICE_KEY,
       SUPABASE_URL: env.EU_SUPABASE_URL,
       S3_BUCKET_NAME: env.EU_S3_BUCKET_NAME,
       SECURE_CACHE: env.EU_SECURE_CACHE,
@@ -414,11 +414,11 @@ export default {
   ): Promise<void> {
     const supabaseClientUS = createClient<Database>(
       env.SUPABASE_URL,
-      env.SUPABASE_SERVICE_ROLE_KEY
+      env.SUPABASE_SERVICE_KEY
     );
     const supabaseClientEU = createClient<Database>(
       env.EU_SUPABASE_URL,
-      env.EU_SUPABASE_SERVICE_ROLE_KEY
+      env.EU_SUPABASE_SERVICE_KEY
     );
     await updateLoopUsers(env);
     if (controller.cron === "0 * * * *") {

@@ -364,17 +364,14 @@ export async function proxyForwarder(
       console.error("Error getting auth", authError);
       return;
     }
-    const supabase = createClient(
-      env.SUPABASE_URL,
-      env.SUPABASE_SERVICE_ROLE_KEY
-    );
+    const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
     const res = await loggable.log(
       {
         clickhouse: new ClickhouseClientWrapper(env),
         supabase: supabase,
         dbWrapper: new DBWrapper(env, auth),
         queue: new RequestResponseStore(
-          createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+          createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY),
           new DBQueryTimer(ctx, {
             enabled: (env.DATADOG_ENABLED ?? "false") === "true",
             apiKey: env.DATADOG_API_KEY,
@@ -393,7 +390,7 @@ export async function proxyForwarder(
             env.S3_BUCKET_NAME ?? "",
             env.S3_REGION ?? "us-west-2"
           ),
-          createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY)
+          createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY)
         ),
         producer: new HeliconeProducer(env),
       },
