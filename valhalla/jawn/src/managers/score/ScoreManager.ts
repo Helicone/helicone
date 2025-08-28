@@ -217,24 +217,6 @@ export class ScoreManager extends BaseManager {
         return err(scoresScoreResult.error);
       }
 
-      const feedbackResult = await this.scoreStore.bulkUpsertFeedback(
-        scoresScoreResult.data
-          .filter(
-            (requestResponseRow) =>
-              "helicone-score-feedback" in requestResponseRow.scores &&
-              requestResponseRow.response_id !== null
-          )
-          .map((requestResponseRow) => ({
-            responseId: requestResponseRow.response_id!,
-            rating: Boolean(
-              requestResponseRow.scores["helicone-score-feedback"]
-            ),
-          }))
-      );
-      if (feedbackResult.error) {
-        console.error("Error upserting feedback:", feedbackResult.error);
-        return err(feedbackResult.error);
-      }
       return ok(null);
     } catch (error: any) {
       console.error("Error processing scores message:", error.message);
