@@ -56,7 +56,12 @@ async function getSegmentConfig(
       !writeKeyResult.data ||
       writeKeyResult.data.length === 0
     ) {
-      console.error("Error fetching segment write key:", writeKeyResult.error);
+      if (writeKeyResult.error) {
+        console.error(
+          "Error fetching segment write key:",
+          writeKeyResult.error
+        );
+      }
 
       return err("Failed to fetch segment write key");
     }

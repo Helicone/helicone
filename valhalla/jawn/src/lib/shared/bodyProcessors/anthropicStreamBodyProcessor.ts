@@ -11,6 +11,8 @@ const ALLOWED_LINES = [
   "message_start",
   "content_block_start",
   "content_block_stop",
+  "message_stop",
+  "ping",
 ];
 
 export class AnthropicStreamBodyProcessor implements IBodyProcessor {
