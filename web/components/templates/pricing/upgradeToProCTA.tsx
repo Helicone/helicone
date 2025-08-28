@@ -11,7 +11,6 @@ import { logger } from "@/lib/telemetry/logger";
 
 export const UpgradeToProCTA = ({
   defaultPrompts = false,
-  defaultAlerts = false,
   showAddons = false,
   showContactCTA = false,
 }) => {
@@ -26,7 +25,6 @@ export const UpgradeToProCTA = ({
     },
   });
   const [prompts, setPrompts] = useState(defaultPrompts);
-  const [alerts, setAlerts] = useState(defaultAlerts);
 
   const upgradeToPro = useMutation({
     mutationFn: async () => {
@@ -39,7 +37,6 @@ export const UpgradeToProCTA = ({
         body: {
           addons: {
             prompts,
-            alerts,
           },
         },
       });
@@ -74,25 +71,10 @@ export const UpgradeToProCTA = ({
                   htmlFor="unlimited-prompts"
                   className="whitespace-nowrap"
                 >
-                  Prompts & Experiments
+                  Prompts
                 </Label>
                 <p className="whitespace-nowrap text-sm text-muted-foreground text-slate-500">
                   + ${costForPrompts.data?.data ?? "loading..."}/mo
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <Switch
-                id="unlimited-alerts"
-                checked={alerts}
-                onCheckedChange={(checked) => setAlerts(checked)}
-              />
-              <div className="flex items-center space-x-2">
-                <Label htmlFor="unlimited-alerts" className="whitespace-nowrap">
-                  Unlimited Alerts
-                </Label>
-                <p className="whitespace-nowrap text-sm text-muted-foreground text-slate-500">
-                  + $15/mo
                 </p>
               </div>
             </div>

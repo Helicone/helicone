@@ -23,24 +23,14 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { useModelFiltering } from "@/hooks/useModelFiltering";
 import { Model, SortOption } from "@/lib/filters/modelFilters";
+import { components } from "@/lib/clients/jawnTypes/public";
 
-interface ModelRegistryResponse {
-  models: Model[];
-  total: number;
-  filters: {
-    providers: {
-      displayName: string;
-      name: string;
-    }[];
-    authors: string[];
-    capabilities: string[];
-  };
-}
+type ModelRegistryResponse = components["schemas"]["ModelRegistryResponse"];
 
 export function ModelRegistryPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   // Memoize the jawn client to prevent recreating on every render
   const jawnClient = useMemo(() => getJawnClient(), []);
 
@@ -50,7 +40,9 @@ export function ModelRegistryPage() {
   const [copiedModel, setCopiedModel] = useState<string | null>(null);
 
   // Filter states from URL
-  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
+  const [searchQuery, setSearchQuery] = useState(
+    searchParams.get("search") || ""
+  );
   const [selectedProviders, setSelectedProviders] = useState<Set<string>>(
     new Set(searchParams.get("providers")?.split(",").filter(Boolean) || [])
   );
@@ -69,15 +61,16 @@ export function ModelRegistryPage() {
   );
 
   // Use client-side filtering hook
-  const { filteredModels, totalModels, availableFilters, isFiltered } = useModelFiltering({
-    models: allModels,
-    search: searchQuery,
-    selectedProviders,
-    priceRange,
-    minContextSize,
-    selectedCapabilities,
-    sortBy,
-  });
+  const { filteredModels, totalModels, availableFilters, isFiltered } =
+    useModelFiltering({
+      models: allModels,
+      search: searchQuery,
+      selectedProviders,
+      priceRange,
+      minContextSize,
+      selectedCapabilities,
+      sortBy,
+    });
 
   // Collapsible filter sections
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
@@ -100,8 +93,10 @@ export function ModelRegistryPage() {
     const fetchModels = async () => {
       try {
         setLoading(true);
-        
-        const response = await jawnClient.GET("/v1/public/model-registry/models");
+
+        const response = await jawnClient.GET(
+          "/v1/public/model-registry/models"
+        );
 
         if (response.data?.data) {
           const data = response.data.data as ModelRegistryResponse;
@@ -120,25 +115,36 @@ export function ModelRegistryPage() {
   // Update URL when filters change
   useEffect(() => {
     const params = new URLSearchParams();
-    
+
     if (searchQuery) params.set("search", searchQuery);
     if (selectedProviders.size > 0) {
-      params.set("providers", Array.from(selectedProviders).sort().join(','));
+      params.set("providers", Array.from(selectedProviders).sort().join(","));
     }
     if (priceRange[0] > 0) params.set("priceMin", priceRange[0].toString());
     if (priceRange[1] < 50) params.set("priceMax", priceRange[1].toString());
     if (minContextSize > 0) params.set("contextMin", minContextSize.toString());
     if (selectedCapabilities.size > 0) {
-      params.set("capabilities", Array.from(selectedCapabilities).sort().join(','));
+      params.set(
+        "capabilities",
+        Array.from(selectedCapabilities).sort().join(",")
+      );
     }
     if (sortBy !== "name") params.set("sort", sortBy);
-    
+
     const newUrl = params.toString()
       ? `${window.location.pathname}?${params.toString()}`
       : window.location.pathname;
-    
+
     router.push(newUrl, { scroll: false });
-  }, [searchQuery, selectedProviders, priceRange, minContextSize, selectedCapabilities, sortBy, router]);
+  }, [
+    searchQuery,
+    selectedProviders,
+    priceRange,
+    minContextSize,
+    selectedCapabilities,
+    sortBy,
+    router,
+  ]);
 
   const formatCost = (costPerMillion: number) => {
     if (costPerMillion === 0) return "Free";
@@ -182,7 +188,9 @@ export function ModelRegistryPage() {
         {/* Main Layout: Sidebar + Content */}
         <div className="flex gap-6">
           {/* Left Sidebar - Filters */}
-          <div className={`w-80 flex-shrink-0 ${sidebarOpen ? "block" : "hidden"} lg:block`}>
+          <div
+            className={`w-80 flex-shrink-0 ${sidebarOpen ? "block" : "hidden"} lg:block`}
+          >
             <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
               <div className="p-6">
                 {/* Provider Filter */}
@@ -201,8 +209,14 @@ export function ModelRegistryPage() {
                   {expandedSections.has("providers") && (
                     <div className="space-y-1 max-h-48 overflow-y-auto">
                       {availableFilters.providers.map((provider) => {
-                        const providerName = typeof provider === 'string' ? provider : provider.name;
-                        const displayName = typeof provider === 'string' ? provider : provider.displayName;
+                        const providerName =
+                          typeof provider === "string"
+                            ? provider
+                            : provider.name;
+                        const displayName =
+                          typeof provider === "string"
+                            ? provider
+                            : provider.displayName;
                         const isSelected = selectedProviders.has(providerName);
                         return (
                           <div
@@ -222,7 +236,9 @@ export function ModelRegistryPage() {
                                 : "text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
                             }`}
                           >
-                            <span className="truncate flex-1 mr-2">{displayName}</span>
+                            <span className="truncate flex-1 mr-2">
+                              {displayName}
+                            </span>
                             {isSelected && <X className="h-3 w-3" />}
                           </div>
                         );
@@ -252,7 +268,9 @@ export function ModelRegistryPage() {
                       </div>
                       <Slider
                         value={priceRange}
-                        onValueChange={(value) => setPriceRange(value as [number, number])}
+                        onValueChange={(value) =>
+                          setPriceRange(value as [number, number])
+                        }
                         min={0}
                         max={50}
                         step={0.1}
@@ -278,9 +296,11 @@ export function ModelRegistryPage() {
                   {expandedSections.has("context") && (
                     <div className="px-2 pb-2">
                       <div className="mb-3 text-xs text-gray-500 dark:text-gray-400">
-                        Minimum: {minContextSize >= 1000
+                        Minimum:{" "}
+                        {minContextSize >= 1000
                           ? `${(minContextSize / 1000).toFixed(0)}K`
-                          : minContextSize} tokens
+                          : minContextSize}{" "}
+                        tokens
                       </div>
                       <Slider
                         value={[minContextSize]}
@@ -320,7 +340,7 @@ export function ModelRegistryPage() {
                           caching: "Caching",
                           reasoning: "Reasoning",
                         };
-                        
+
                         return (
                           <div
                             key={capability}
@@ -374,8 +394,8 @@ export function ModelRegistryPage() {
                     }}
                     className={`px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 rounded-lg transition-all flex items-center gap-2 ${
                       isFiltered
-                        ? 'opacity-100 pointer-events-auto'
-                        : 'opacity-0 pointer-events-none'
+                        ? "opacity-100 pointer-events-auto"
+                        : "opacity-0 pointer-events-none"
                     }`}
                   >
                     <X className="h-3.5 w-3.5" />
@@ -405,8 +425,12 @@ export function ModelRegistryPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="name">Name</SelectItem>
-                      <SelectItem value="price-low">Price: Low to High</SelectItem>
-                      <SelectItem value="price-high">Price: High to Low</SelectItem>
+                      <SelectItem value="price-low">
+                        Price: Low to High
+                      </SelectItem>
+                      <SelectItem value="price-high">
+                        Price: High to Low
+                      </SelectItem>
                       <SelectItem value="context">Context Size</SelectItem>
                       <SelectItem value="newest">Newest First</SelectItem>
                     </SelectContent>
@@ -431,17 +455,21 @@ export function ModelRegistryPage() {
 
                       return (
                         <tbody key={model.id} className="group cursor-pointer">
-                          <tr 
+                          <tr
                             className="border-t-4 border-transparent group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50"
                             onClick={(e) => {
-                              if (!(e.target as HTMLElement).closest('button')) {
-                                router.push(`/model/${encodeURIComponent(model.id)}`);
+                              if (
+                                !(e.target as HTMLElement).closest("button")
+                              ) {
+                                router.push(
+                                  `/model/${encodeURIComponent(model.id)}`
+                                );
                               }
                             }}
                           >
                             <td className="px-6 pt-6 pb-1">
                               <div className="flex items-center gap-2">
-                                <Link 
+                                <Link
                                   href={`/model/${encodeURIComponent(model.id)}`}
                                   className="text-lg font-normal text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400"
                                   onClick={(e) => e.stopPropagation()}
@@ -473,10 +501,14 @@ export function ModelRegistryPage() {
                               </div>
                             </td>
                           </tr>
-                          
-                          <tr 
+
+                          <tr
                             className="group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50"
-                            onClick={() => router.push(`/model/${encodeURIComponent(model.id)}`)}
+                            onClick={() =>
+                              router.push(
+                                `/model/${encodeURIComponent(model.id)}`
+                              )
+                            }
                           >
                             <td className="px-6 pt-1 pb-6">
                               <div className="space-y-2">
@@ -490,17 +522,26 @@ export function ModelRegistryPage() {
                                 <div className="flex flex-wrap items-center gap-3 text-sm font-light text-gray-400 dark:text-gray-500">
                                   <div>by {model.author}</div>
                                   <div>•</div>
-                                  <div>{formatContext(model.contextLength)} context</div>
+                                  <div>
+                                    {formatContext(model.contextLength)} context
+                                  </div>
                                   <div>•</div>
                                   <div>
-                                    ${minInputCost < 1 ? minInputCost.toFixed(2) : minInputCost.toFixed(1)}/M in,{" "}
-                                    ${minOutputCost < 1 ? minOutputCost.toFixed(2) : minOutputCost.toFixed(1)}/M out
+                                    $
+                                    {minInputCost < 1
+                                      ? minInputCost.toFixed(2)
+                                      : minInputCost.toFixed(1)}
+                                    /M in, $
+                                    {minOutputCost < 1
+                                      ? minOutputCost.toFixed(2)
+                                      : minOutputCost.toFixed(1)}
+                                    /M out
                                   </div>
                                 </div>
                               </div>
                             </td>
                           </tr>
-                          
+
                           <tr>
                             <td className="px-6 py-2">
                               <div className="border-b border-gray-100 dark:border-gray-800/50 mx-12"></div>
@@ -521,7 +562,7 @@ export function ModelRegistryPage() {
                 </p>
               </div>
             )}
-            
+
             {loading && (
               <div className="space-y-4 p-6">
                 {[...Array(5)].map((_, i) => (
