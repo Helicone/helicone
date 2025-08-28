@@ -63,7 +63,11 @@ export class AnthropicStreamBodyProcessor implements IBodyProcessor {
 
         processedLines.push(data);
       } catch (e) {
-        if (!ALLOWED_LINES.includes(line.replace("data:", "").trim())) {
+        const cleanedLine = line
+          .replace("data:", "")
+          .replace("event:", "")
+          .trim();
+        if (!ALLOWED_LINES.includes(cleanedLine)) {
           console.error("Error parsing line Anthropic", line);
         }
       }
