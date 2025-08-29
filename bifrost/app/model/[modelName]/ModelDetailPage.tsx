@@ -1,19 +1,13 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import Link from "next/link";
 import {
   ArrowLeft,
   Check,
   Copy,
-  Brain,
-  Globe,
-  Image,
-  FileText,
-  Activity,
-  MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -64,6 +58,7 @@ const parameterLabels = PARAMETER_LABELS as Record<StandardParameter, string>;
 export function ModelDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const modelName = params.modelName as string;
   const decodedModelName = decodeURIComponent(modelName);
 
@@ -149,7 +144,10 @@ export function ModelDetailPage() {
             <p className="text-gray-600 dark:text-gray-400 mb-8">
               The model &quot;{decodedModelName}&quot; could not be found.
             </p>
-            <Button onClick={() => router.push("/models")} variant="outline">
+            <Button 
+              onClick={() => router.push(`/models${searchParams.toString() ? `?${searchParams.toString()}` : ''}`)} 
+              variant="outline"
+            >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Models
             </Button>
@@ -190,14 +188,14 @@ export function ModelDetailPage() {
     capabilities.push({
       key: "audio",
       label: "Audio Processing",
-      cost: formatCost(basePricing.audio * 1000000),
+      cost: formatCost(basePricing.audio),
     });
   }
   if (basePricing && basePricing.thinking && basePricing.thinking > 0) {
     capabilities.push({
       key: "thinking",
       label: "Chain of Thought",
-      cost: formatCost(basePricing.thinking * 1000000),
+      cost: formatCost(basePricing.thinking),
     });
   }
   if (
@@ -208,7 +206,7 @@ export function ModelDetailPage() {
       key: "caching",
       label: "Prompt Caching",
       cost: basePricing.cacheRead
-        ? formatCost(basePricing.cacheRead * 1000000)
+        ? formatCost(basePricing.cacheRead)
         : undefined,
     });
   }
@@ -216,20 +214,31 @@ export function ModelDetailPage() {
     capabilities.push({
       key: "search",
       label: "Web Search",
-      cost: formatCost(basePricing.web_search * 1000000),
+      cost: formatCost(basePricing.web_search),
     });
   }
   if (basePricing && basePricing.image && basePricing.image > 0) {
     capabilities.push({
       key: "vision",
       label: "Vision",
-      cost: formatCost(basePricing.image * 1000000),
+      cost: formatCost(basePricing.image),
     });
   }
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
       <div className="max-w-7xl mx-auto px-4 py-6">
+        {/* Back to Models Link */}
+        <div className="mb-4">
+          <Link 
+            href={`/models${searchParams.toString() ? `?${searchParams.toString()}` : ''}`}
+            className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Back to Models
+          </Link>
+        </div>
+
         {/* Compact Header */}
         <div className="mb-8">
           {/* Model Name and ID */}
@@ -272,11 +281,11 @@ export function ModelDetailPage() {
                   {formatContext(model.contextLength)} context
                 </span>
                 <span className="text-gray-500">
-                  Starting at {formatCost(basePricing.prompt * 1000000)}{" "}
+                  Starting at {formatCost(basePricing.prompt)}{" "}
                   input tokens
                 </span>
                 <span className="text-gray-500">
-                  Starting at {formatCost(basePricing.completion * 1000000)}{" "}
+                  Starting at {formatCost(basePricing.completion)}{" "}
                   output tokens
                 </span>
                 {model.maxOutput && (
@@ -287,11 +296,6 @@ export function ModelDetailPage() {
               </div>
             </div>
 
-            {/* Chat Button */}
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-              <MessageSquare className="h-4 w-4 mr-2" />
-              Chat
-            </Button>
           </div>
 
           {/* Description */}
@@ -404,7 +408,7 @@ export function ModelDetailPage() {
                                             </span>
                                           )}
                                           <span className="font-mono">
-                                            {formatCost(tier.prompt * 1000000)}
+                                            {formatCost(tier.prompt)}
                                           </span>
                                         </div>
                                       )
@@ -412,9 +416,7 @@ export function ModelDetailPage() {
                                   </div>
                                 ) : (
                                   <span className="font-mono">
-                                    {formatCost(
-                                      endpoint.pricing.prompt * 1000000
-                                    )}
+                                    {formatCost(endpoint.pricing.prompt)}
                                   </span>
                                 )}
                               </TableCell>
@@ -433,7 +435,7 @@ export function ModelDetailPage() {
                                             </span>
                                           )}
                                           <span className="font-mono">
-                                            {formatCost(tier.completion * 1000000)}
+                                            {formatCost(tier.completion)}
                                           </span>
                                         </div>
                                       )
@@ -441,20 +443,18 @@ export function ModelDetailPage() {
                                   </div>
                                 ) : (
                                   <span className="font-mono">
-                                    {formatCost(
-                                      endpoint.pricing.completion * 1000000
-                                    )}
+                                    {formatCost(endpoint.pricing.completion)}
                                   </span>
                                 )}
                               </TableCell>
                               <TableCell className="font-mono text-sm text-gray-500">
                                 {endpoint.pricing.cacheRead
-                                  ? formatCost(endpoint.pricing.cacheRead * 1000000)
+                                  ? formatCost(endpoint.pricing.cacheRead)
                                   : "--"}
                               </TableCell>
                               <TableCell className="font-mono text-sm text-gray-500">
                                 {endpoint.pricing.cacheWrite
-                                  ? formatCost(endpoint.pricing.cacheWrite * 1000000)
+                                  ? formatCost(endpoint.pricing.cacheWrite)
                                   : "--"}
                               </TableCell>
                             </TableRow>
@@ -628,9 +628,9 @@ export function ModelDetailPage() {
                             <span className="text-gray-500">Starting at:</span>
                             <span className="font-mono">
                               {formatCost(
-                                (relatedCheapest.pricingTiers && relatedCheapest.pricingTiers.length > 0
+                                relatedCheapest.pricingTiers && relatedCheapest.pricingTiers.length > 0
                                   ? relatedCheapest.pricingTiers[0].prompt
-                                  : relatedCheapest.pricing.prompt) * 1000000
+                                  : relatedCheapest.pricing.prompt
                               )}{" "}
                               input
                             </span>
