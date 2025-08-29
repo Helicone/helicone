@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import Link from "next/link";
@@ -8,16 +8,12 @@ import {
   ArrowLeft,
   Check,
   Copy,
-  ChevronRight,
-  Zap,
   Brain,
   Globe,
   Image,
   FileText,
-  Clock,
   Activity,
-  DollarSign,
-  Info,
+  MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,7 +23,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
@@ -42,10 +37,9 @@ import { PARAMETER_LABELS } from "@helicone-package/cost/models/types";
 import type { components } from "@/lib/clients/jawnTypes/public";
 
 type ModelRegistryItem = components["schemas"]["ModelRegistryItem"];
-type ModelEndpoint = components["schemas"]["ModelEndpoint"];
-type SimplifiedPricing = components["schemas"]["SimplifiedPricing"];
 type StandardParameter = components["schemas"]["StandardParameter"];
 type Model = ModelRegistryItem;
+
 
 const formatCost = (costPerMillion: number) => {
   if (costPerMillion === 0) return "Free";
@@ -64,21 +58,6 @@ const formatContext = (tokens: number) => {
   return tokens.toString();
 };
 
-const getModalityIcon = (modality: string) => {
-  switch (modality) {
-    case "text":
-      return <FileText className="h-4 w-4" />;
-    case "image":
-    case "vision":
-      return <Image className="h-4 w-4" />;
-    case "audio":
-      return <Activity className="h-4 w-4" />;
-    case "video":
-      return <Globe className="h-4 w-4" />;
-    default:
-      return <Brain className="h-4 w-4" />;
-  }
-};
 
 const parameterLabels = PARAMETER_LABELS as Record<StandardParameter, string>;
 
@@ -140,8 +119,8 @@ export function ModelDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-        <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="min-h-screen bg-white dark:bg-gray-950">
+        <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="animate-pulse">
             <div className="h-8 w-48 bg-gray-200 dark:bg-gray-800 rounded mb-4" />
             <div className="h-4 w-96 bg-gray-200 dark:bg-gray-800 rounded mb-8" />
@@ -161,8 +140,8 @@ export function ModelDetailPage() {
 
   if (!model) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-        <div className="max-w-6xl mx-auto px-4 py-16">
+      <div className="min-h-screen bg-white dark:bg-gray-950">
+        <div className="max-w-7xl mx-auto px-4 py-16">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
               Model not found
@@ -186,382 +165,393 @@ export function ModelDetailPage() {
   );
 
   const cheapestEndpoint = model.endpoints.reduce((min, ep) => {
-    const epCost = (ep.pricing.prompt + ep.pricing.completion) / 2;
-    const minCost = (min.pricing.prompt + min.pricing.completion) / 2;
+    // Use base pricing or first tier for comparison
+    const epPricing = ep.pricingTiers && ep.pricingTiers.length > 0 
+      ? ep.pricingTiers[0] 
+      : ep.pricing;
+    const minPricing = min.pricingTiers && min.pricingTiers.length > 0
+      ? min.pricingTiers[0]
+      : min.pricing;
+
+    if (!epPricing || !minPricing) return min;
+
+    const epCost = (epPricing.prompt + epPricing.completion) / 2;
+    const minCost = (minPricing.prompt + minPricing.completion) / 2;
     return epCost < minCost ? ep : min;
   });
 
   const capabilities: { key: string; label: string; cost?: string }[] = [];
-  const pricing = cheapestEndpoint.pricing;
+  // Use first pricing tier for capabilities or base pricing
+  const basePricing = cheapestEndpoint.pricingTiers && cheapestEndpoint.pricingTiers.length > 0
+    ? cheapestEndpoint.pricingTiers[0]
+    : cheapestEndpoint.pricing;
 
-  if (pricing.audio && pricing.audio > 0) {
+  if (basePricing && basePricing.audio && basePricing.audio > 0) {
     capabilities.push({
       key: "audio",
       label: "Audio Processing",
-      cost: formatCost(pricing.audio),
+      cost: formatCost(basePricing.audio * 1000000),
     });
   }
-  if (pricing.video && pricing.video > 0) {
-    capabilities.push({
-      key: "video",
-      label: "Video Processing",
-      cost: formatCost(pricing.video),
-    });
-  }
-  if (pricing.thinking && pricing.thinking > 0) {
+  if (basePricing && basePricing.thinking && basePricing.thinking > 0) {
     capabilities.push({
       key: "thinking",
       label: "Chain of Thought",
-      cost: formatCost(pricing.thinking),
+      cost: formatCost(basePricing.thinking * 1000000),
     });
   }
-  if (pricing.web_search && pricing.web_search > 0) {
+  if (
+    basePricing &&
+    (basePricing.cacheRead || basePricing.cacheWrite)
+  ) {
+    capabilities.push({
+      key: "caching",
+      label: "Prompt Caching",
+      cost: basePricing.cacheRead
+        ? formatCost(basePricing.cacheRead * 1000000)
+        : undefined,
+    });
+  }
+  if (basePricing && basePricing.web_search && basePricing.web_search > 0) {
     capabilities.push({
       key: "search",
       label: "Web Search",
-      cost: formatCost(pricing.web_search),
+      cost: formatCost(basePricing.web_search * 1000000),
     });
   }
-  if (pricing.image && pricing.image > 0) {
+  if (basePricing && basePricing.image && basePricing.image > 0) {
     capabilities.push({
       key: "vision",
       label: "Vision",
-      cost: formatCost(pricing.image),
+      cost: formatCost(basePricing.image * 1000000),
     });
   }
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-6">
-          <Link
-            href="/models"
-            className="hover:text-gray-700 dark:hover:text-gray-200"
-          >
-            Models
-          </Link>
-          <ChevronRight className="h-4 w-4" />
-          <span className="text-gray-900 dark:text-gray-100">
-            {cleanModelName}
-          </span>
-        </nav>
-
-        {/* Header */}
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        {/* Compact Header */}
         <div className="mb-8">
+          {/* Model Name and ID */}
           <div className="flex items-start justify-between mb-4">
-            <div>
+            <div className="flex-1">
               <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                {cleanModelName}
+                {model.author}: {cleanModelName}
               </h1>
-              <p className="text-lg text-gray-600 dark:text-gray-400">
-                by {model.author}
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={() => copyToClipboard(model.id, "model-id")}
-              >
-                {copiedText === "model-id" ? (
-                  <Check className="h-4 w-4 mr-2" />
-                ) : (
-                  <Copy className="h-4 w-4 mr-2" />
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-3">
+                <span className="font-mono flex items-center gap-1">
+                  {model.id}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-5 w-5 p-0"
+                    onClick={() => copyToClipboard(model.id, "Model ID")}
+                  >
+                    {copiedText === "Model ID" ? (
+                      <Check className="h-3 w-3" />
+                    ) : (
+                      <Copy className="h-3 w-3" />
+                    )}
+                  </Button>
+                </span>
+              </div>
+
+              {/* Quick Stats */}
+              <div className="flex flex-wrap items-center gap-4 text-sm mb-3">
+                {model.trainingDate && (
+                  <span className="text-gray-500">
+                    Created{" "}
+                    {new Date(model.trainingDate).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </span>
                 )}
-                Copy Model ID
-              </Button>
-              <Button
-                onClick={() => router.push(`/comparison?models=${model.id}`)}
-              >
-                Compare
-              </Button>
+                <span className="text-gray-500">
+                  {formatContext(model.contextLength)} context
+                </span>
+                <span className="text-gray-500">
+                  Starting at {formatCost(basePricing.prompt * 1000000)}{" "}
+                  input tokens
+                </span>
+                <span className="text-gray-500">
+                  Starting at {formatCost(basePricing.completion * 1000000)}{" "}
+                  output tokens
+                </span>
+                {model.maxOutput && (
+                  <span className="text-gray-500">
+                    {formatContext(model.maxOutput)} max output
+                  </span>
+                )}
+              </div>
             </div>
+
+            {/* Chat Button */}
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+              <MessageSquare className="h-4 w-4 mr-2" />
+              Chat
+            </Button>
           </div>
+
+          {/* Description */}
           {model.description && (
-            <p className="text-gray-600 dark:text-gray-400 max-w-3xl">
+            <p className="text-gray-600 dark:text-gray-400 max-w-4xl">
               {model.description}
             </p>
           )}
         </div>
 
-        {/* Primary Pricing Card - Cheapest Provider */}
-        <Card className="mb-8">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Pricing</CardTitle>
-                <CardDescription>
-                  Best available pricing from {cheapestEndpoint.provider}
-                </CardDescription>
-              </div>
-              {cheapestEndpoint.supportsPtb && (
-                <Badge variant="outline">
-                  <Zap className="h-3 w-3 mr-1" />
-                  Pass-through billing
-                </Badge>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent>
-            {cheapestEndpoint.pricingTiers && cheapestEndpoint.pricingTiers.length > 1 ? (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Context Window</TableHead>
-                    <TableHead className="text-right">Input Price</TableHead>
-                    <TableHead className="text-right">Output Price</TableHead>
-                    {cheapestEndpoint.pricingTiers.some((t: SimplifiedPricing) => t.cacheRead || t.cacheWrite) && (
-                      <>
-                        <TableHead className="text-right">Cache Read</TableHead>
-                        <TableHead className="text-right">Cache Write</TableHead>
-                      </>
-                    )}
-                    {cheapestEndpoint.pricingTiers.some((t: SimplifiedPricing) => t.audio) && (
-                      <TableHead className="text-right">Input Audio</TableHead>
-                    )}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {cheapestEndpoint.pricingTiers.map((tier: SimplifiedPricing & { threshold?: number }, idx: number) => (
-                    <TableRow key={idx}>
-                      <TableCell className="font-medium">
-                        {idx === 0 && cheapestEndpoint.pricingTiers!.length > 1 ? (
-                          <>
-                            ≤{(cheapestEndpoint.pricingTiers![1] as any).threshold >= 1000000 
-                              ? `${((cheapestEndpoint.pricingTiers![1] as any).threshold / 1000000).toFixed(0)}M` 
-                              : `${((cheapestEndpoint.pricingTiers![1] as any).threshold / 1000).toFixed(0)}K`}
-                          </>
-                        ) : tier.threshold && tier.threshold > 0 ? (
-                          <>
-                            &gt;{tier.threshold >= 1000000 
-                              ? `${(tier.threshold / 1000000).toFixed(0)}M` 
-                              : `${(tier.threshold / 1000).toFixed(0)}K`}
-                          </>
-                        ) : (
-                          "Standard"
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right font-mono">
-                        {formatCost(tier.prompt)}
-                      </TableCell>
-                      <TableCell className="text-right font-mono">
-                        {formatCost(tier.completion)}
-                      </TableCell>
-                      {cheapestEndpoint.pricingTiers.some((t: SimplifiedPricing) => t.cacheRead || t.cacheWrite) && (
-                        <>
-                          <TableCell className="text-right font-mono">
-                            {tier.cacheRead ? formatCost(tier.cacheRead) : '—'}
-                          </TableCell>
-                          <TableCell className="text-right font-mono">
-                            {tier.cacheWrite ? formatCost(tier.cacheWrite) : '—'}
-                          </TableCell>
-                        </>
-                      )}
-                      {cheapestEndpoint.pricingTiers.some((t: SimplifiedPricing) => t.audio) && (
-                        <TableCell className="text-right font-mono">
-                          {tier.audio ? formatCost(tier.audio) : '—'}
-                        </TableCell>
-                      )}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div>
-                  <p className="text-sm text-gray-500 mb-1">Input</p>
-                  <p className="text-2xl font-bold">{formatCost(cheapestEndpoint.pricing.prompt)}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 mb-1">Output</p>
-                  <p className="text-2xl font-bold">{formatCost(cheapestEndpoint.pricing.completion)}</p>
-                </div>
-                {cheapestEndpoint.pricing.cacheRead && (
-                  <div>
-                    <p className="text-sm text-gray-500 mb-1">Cache Read</p>
-                    <p className="text-2xl font-bold">{formatCost(cheapestEndpoint.pricing.cacheRead)}</p>
-                  </div>
-                )}
-                {cheapestEndpoint.pricing.cacheWrite && (
-                  <div>
-                    <p className="text-sm text-gray-500 mb-1">Cache Write</p>
-                    <p className="text-2xl font-bold">{formatCost(cheapestEndpoint.pricing.cacheWrite)}</p>
-                  </div>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Key Specifications */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-normal text-gray-500">
-                Context Length
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {formatContext(model.contextLength)}
-              </div>
-              <p className="text-xs text-gray-500 mt-1">tokens</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-normal text-gray-500">
-                Max Output
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {model.maxOutput ? formatContext(model.maxOutput) : "Variable"}
-              </div>
-              <p className="text-xs text-gray-500 mt-1">tokens</p>
-            </CardContent>
-          </Card>
-
-          {model.trainingDate && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-normal text-gray-500">
-                  Training Date
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {new Date(model.trainingDate).toLocaleDateString("en-US", {
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-normal text-gray-500">
-                Modalities
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex gap-2">
-                {model.inputModalities.map((modality) => (
-                  <span key={modality} title={modality}>
-                    {getModalityIcon(modality)}
-                  </span>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Providers Overview Section */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Provider Availability</CardTitle>
-            <CardDescription>
-              All providers offering this model with their base pricing
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {model.endpoints
-                .sort((a, b) => {
-                  const aAvg = (a.pricing.prompt + a.pricing.completion) / 2;
-                  const bAvg = (b.pricing.prompt + b.pricing.completion) / 2;
-                  return aAvg - bAvg;
-                })
-                .map((endpoint) => {
-                  const isCheapest = endpoint === cheapestEndpoint;
-                  const hasTiers = endpoint.pricingTiers && endpoint.pricingTiers.length > 1;
-                  
-                  return (
-                    <div
-                      key={endpoint.provider}
-                      className={`border rounded-lg p-4 ${
-                        isCheapest ? "border-green-500 bg-green-50 dark:bg-green-950/20" : ""
-                      }`}
-                    >
-                      <div className="flex items-start justify-between mb-3">
-                        <div>
-                          <h3 className="font-semibold">{endpoint.provider}</h3>
-                          {hasTiers && (
-                            <p className="text-xs text-gray-500 mt-1">
-                              {endpoint.pricingTiers!.length} pricing tiers
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex gap-1">
-                          {isCheapest && (
-                            <Badge variant="secondary" className="text-xs">
-                              Best Price
-                            </Badge>
-                          )}
-                          {endpoint.supportsPtb && (
-                            <Badge variant="outline" className="text-xs">
-                              PTB
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-gray-500">Input:</span>
-                          <span className="font-mono font-medium">
-                            {formatCost(endpoint.pricing.prompt)}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-500">Output:</span>
-                          <span className="font-mono font-medium">
-                            {formatCost(endpoint.pricing.completion)}
-                          </span>
-                        </div>
-                        {(endpoint.pricing.cacheRead || endpoint.pricing.cacheWrite) && (
-                          <div className="pt-2 border-t text-xs">
-                            <span className="text-gray-500">Cache support</span>
-                          </div>
-                        )}
-                        {(endpoint.pricing.audio || endpoint.pricing.thinking) && (
-                          <div className="text-xs">
-                            <span className="text-gray-500">Special features</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Tabs for Additional Details */}
-        <Tabs defaultValue="parameters" className="mb-12">
+        <Tabs defaultValue="overview" className="mb-12">
           <TabsList className="grid w-full grid-cols-3 max-w-md">
-            <TabsTrigger value="parameters">Parameters</TabsTrigger>
-            <TabsTrigger value="capabilities">Capabilities</TabsTrigger>
-            <TabsTrigger value="related">Related Models</TabsTrigger>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="api">API</TabsTrigger>
+            <TabsTrigger value="related">Related</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="parameters" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Supported Parameters</CardTitle>
-                <CardDescription>
-                  API parameters that can be used with this model
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="mt-6">
+            <div className="space-y-8">
+              {/* Providers Section */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4">
+                  Providers for {cleanModelName}
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  Available through {model.endpoints.length} provider
+                  {model.endpoints.length > 1 ? "s" : ""}. Prices shown per 1M
+                  tokens.
+                </p>
+
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Provider</TableHead>
+                        <TableHead>Total Context</TableHead>
+                        <TableHead>Max Output</TableHead>
+                        <TableHead>Input Price</TableHead>
+                        <TableHead>Output Price</TableHead>
+                        <TableHead>Cache Read</TableHead>
+                        <TableHead>Cache Write</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {model.endpoints
+                        .sort((a, b) => {
+                          const aPricing = a.pricingTiers && a.pricingTiers.length > 0
+                            ? a.pricingTiers[0]
+                            : a.pricing;
+                          const bPricing = b.pricingTiers && b.pricingTiers.length > 0
+                            ? b.pricingTiers[0]
+                            : b.pricing;
+                          const aAvg = (aPricing.prompt + aPricing.completion) / 2;
+                          const bAvg = (bPricing.prompt + bPricing.completion) / 2;
+                          return aAvg - bAvg;
+                        })
+                        .map((endpoint) => {
+                          const isCheapest = endpoint === cheapestEndpoint;
+                          // Check for pricing tiers
+                          const pricingArray = endpoint.pricingTiers;
+                          const hasTiers =
+                            pricingArray && pricingArray.length > 0;
+
+                          return (
+                            <TableRow
+                              key={endpoint.provider}
+                              className={
+                                isCheapest
+                                  ? "bg-green-50 dark:bg-green-950/10"
+                                  : ""
+                              }
+                            >
+                              <TableCell className="font-medium">
+                                <div className="flex items-center gap-2">
+                                  <Link
+                                    href={`/providers/${endpoint.providerSlug}`}
+                                    className="hover:underline"
+                                  >
+                                    {endpoint.provider}
+                                  </Link>
+                                  {isCheapest && (
+                                    <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200">
+                                      Cheapest
+                                    </span>
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell className="font-mono text-sm">
+                                {formatContext(model.contextLength)}
+                              </TableCell>
+                              <TableCell className="font-mono text-sm">
+                                {model.maxOutput
+                                  ? formatContext(model.maxOutput)
+                                  : "--"}
+                              </TableCell>
+                              <TableCell className="text-sm">
+                                {hasTiers && pricingArray ? (
+                                  <div className="space-y-0.5">
+                                    {pricingArray.map(
+                                      (tier: any, idx: number) => (
+                                        <div
+                                          key={idx}
+                                          className="whitespace-nowrap"
+                                        >
+                                          {idx > 0 && (
+                                            <span className="text-gray-500 text-xs">
+                                              Tier {idx + 1}:{" "}
+                                            </span>
+                                          )}
+                                          <span className="font-mono">
+                                            {formatCost(tier.prompt * 1000000)}
+                                          </span>
+                                        </div>
+                                      )
+                                    )}
+                                  </div>
+                                ) : (
+                                  <span className="font-mono">
+                                    {formatCost(
+                                      endpoint.pricing.prompt * 1000000
+                                    )}
+                                  </span>
+                                )}
+                              </TableCell>
+                              <TableCell className="text-sm">
+                                {hasTiers && pricingArray ? (
+                                  <div className="space-y-0.5">
+                                    {pricingArray.map(
+                                      (tier: any, idx: number) => (
+                                        <div
+                                          key={idx}
+                                          className="whitespace-nowrap"
+                                        >
+                                          {idx > 0 && (
+                                            <span className="text-gray-500 text-xs">
+                                              Tier {idx + 1}:{" "}
+                                            </span>
+                                          )}
+                                          <span className="font-mono">
+                                            {formatCost(tier.completion * 1000000)}
+                                          </span>
+                                        </div>
+                                      )
+                                    )}
+                                  </div>
+                                ) : (
+                                  <span className="font-mono">
+                                    {formatCost(
+                                      endpoint.pricing.completion * 1000000
+                                    )}
+                                  </span>
+                                )}
+                              </TableCell>
+                              <TableCell className="font-mono text-sm text-gray-500">
+                                {endpoint.pricing.cacheRead
+                                  ? formatCost(endpoint.pricing.cacheRead * 1000000)
+                                  : "--"}
+                              </TableCell>
+                              <TableCell className="font-mono text-sm text-gray-500">
+                                {endpoint.pricing.cacheWrite
+                                  ? formatCost(endpoint.pricing.cacheWrite * 1000000)
+                                  : "--"}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+
+              {/* Model Information */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3">
+                  Model Information
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div>
+                    <span className="text-sm text-gray-500">
+                      Context Window
+                    </span>
+                    <p className="font-medium">
+                      {formatContext(model.contextLength)} tokens
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-sm text-gray-500">Max Output</span>
+                    <p className="font-medium">
+                      {model.maxOutput
+                        ? formatContext(model.maxOutput) + " tokens"
+                        : "Unlimited"}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-sm text-gray-500">
+                      Input Modalities
+                    </span>
+                    <p className="font-medium">
+                      {model.inputModalities.join(", ")}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-sm text-gray-500">
+                      Output Modalities
+                    </span>
+                    <p className="font-medium">
+                      {model.outputModalities.join(", ")}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-sm text-gray-500">Training Date</span>
+                    <p className="font-medium">
+                      {model.trainingDate
+                        ? new Date(model.trainingDate).toLocaleDateString()
+                        : "N/A"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Special Capabilities */}
+              {capabilities.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">
+                    Special Capabilities
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {capabilities.map((cap) => (
+                      <div
+                        key={cap.key}
+                        className="flex items-center justify-between p-3 border rounded-lg"
+                      >
+                        <span className="text-sm font-medium">{cap.label}</span>
+                        {cap.cost && (
+                          <span className="text-sm text-gray-500">
+                            {cap.cost}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          {/* API Tab */}
+          <TabsContent value="api" className="mt-6">
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold mb-3">
+                  Supported Parameters
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                   {model.supportedParameters.map((param) => (
                     <div
                       key={param}
-                      className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded"
+                      className="flex items-center gap-2 p-2 border rounded"
                     >
                       <Check className="h-4 w-4 text-green-600" />
                       <span className="text-sm">
@@ -570,93 +560,92 @@ export function ModelDetailPage() {
                     </div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Example Usage</h3>
+                <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                  <pre className="text-sm overflow-x-auto">
+                    <code>{`curl https://api.helicone.ai/v1/chat/completions \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer $API_KEY" \\
+  -d '{
+    "model": "${model.id}",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Hello!"
+      }
+    ]
+  }'`}</code>
+                  </pre>
+                </div>
+              </div>
+            </div>
           </TabsContent>
 
-          <TabsContent value="capabilities" className="mt-6">
-            {capabilities.length > 0 ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Special Capabilities</CardTitle>
-                  <CardDescription>
-                    Additional features with their associated costs
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {capabilities.map((cap) => (
-                      <div
-                        key={cap.key}
-                        className="flex items-center justify-between py-3 px-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
-                      >
-                        <span className="font-medium">{cap.label}</span>
-                        {cap.cost && (
-                          <span className="font-mono text-sm">{cap.cost}</span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card>
-                <CardContent className="py-8">
-                  <p className="text-center text-gray-500">
-                    No special capabilities available for this model
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-
+          {/* Related Models Tab */}
           <TabsContent value="related" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Related Models</CardTitle>
-                <CardDescription>
-                  Other models from {model.author}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {relatedModels.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {relatedModels.map((relatedModel) => (
-                      <div
-                        key={relatedModel.id}
-                        className="border rounded-lg p-4 cursor-pointer hover:shadow-md transition-shadow"
-                        onClick={() => router.push(`/model/${encodeURIComponent(relatedModel.id)}`)}
-                      >
-                        <h4 className="font-semibold mb-2">
-                          {relatedModel.name.replace(
-                            new RegExp(`^${relatedModel.author}:\s*`, "i"),
-                            ""
-                          )}
-                        </h4>
-                        <div className="space-y-1 text-sm text-gray-600">
-                          <div>
-                            Context: {formatContext(relatedModel.contextLength)}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {relatedModels.map((related) => {
+                const relatedCleanName = related.name.replace(
+                  new RegExp(`^${related.author}:\s*`, "i"),
+                  ""
+                );
+                const relatedCheapest = related.endpoints.reduce((min, ep) => {
+                  const epPricing = ep.pricingTiers && ep.pricingTiers.length > 0
+                    ? ep.pricingTiers[0]
+                    : ep.pricing;
+                  const minPricing = min.pricingTiers && min.pricingTiers.length > 0
+                    ? min.pricingTiers[0]
+                    : min.pricing;
+                  if (!epPricing || !minPricing) return min;
+                  const epCost = (epPricing.prompt + epPricing.completion) / 2;
+                  const minCost = (minPricing.prompt + minPricing.completion) / 2;
+                  return epCost < minCost ? ep : min;
+                });
+
+                return (
+                  <Link
+                    key={related.id}
+                    href={`/models/${encodeURIComponent(related.id)}`}
+                    className="block"
+                  >
+                    <Card className="hover:shadow-lg transition-shadow">
+                      <CardHeader>
+                        <CardTitle className="text-lg">
+                          {relatedCleanName}
+                        </CardTitle>
+                        <CardDescription>{related.author}</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Context:</span>
+                            <span>{formatContext(related.contextLength)}</span>
                           </div>
-                          <div>
-                            From {formatCost(
-                              Math.min(
-                                ...relatedModel.endpoints.map(
-                                  (e: ModelEndpoint) => e.pricing.prompt
-                                )
-                              )
-                            )} input
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Starting at:</span>
+                            <span className="font-mono">
+                              {formatCost(
+                                (relatedCheapest.pricingTiers && relatedCheapest.pricingTiers.length > 0
+                                  ? relatedCheapest.pricingTiers[0].prompt
+                                  : relatedCheapest.pricing.prompt) * 1000000
+                              )}{" "}
+                              input
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Providers:</span>
+                            <span>{related.endpoints.length}</span>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-center text-gray-500 py-4">
-                    No other models available from this author
-                  </p>
-                )}
-              </CardContent>
-            </Card>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                );
+              })}
+            </div>
           </TabsContent>
         </Tabs>
       </div>
