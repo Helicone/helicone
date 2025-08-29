@@ -52,6 +52,12 @@ export interface Prompt2025Input {
   inputs: Record<string, any>;
 }
 
+// OpenAI chat completion types where messages is optional
+// this is because we can generally assume that prompts contain messages themselves, and so after merging the params, the messages will be present
+// and OpenAI compatible endpoints will not complain about messages being omitted.
+type ChatCompletionCreateParamsNonStreamingPartialMessages = Omit<ChatCompletionCreateParamsNonStreaming, 'messages'> & Partial<Pick<ChatCompletionCreateParamsNonStreaming, 'messages'>>;
+type ChatCompletionCreateParamsStreamingPartialMessages = Omit<ChatCompletionCreateParamsStreaming, 'messages'> & Partial<Pick<ChatCompletionCreateParamsStreaming, 'messages'>>;
+
 /**
  * Parameters for using Helicone prompt templates.
  *
@@ -91,7 +97,7 @@ export type HeliconePromptParams = {
  * const response = await openai.chat.completions.create({
  *   prompt_id: "XXXXXX",
  *   model: "gpt-4",
- *   messages: [{ role: "user", content: "Hello!" }],
+ *   messages: [{ role: "user", content: "Hello!" }], // optional
  *   inputs: {
  *     name: "John",
  *     age: 20,
@@ -99,7 +105,7 @@ export type HeliconePromptParams = {
  * } as HeliconeChatCreateCompletion);
  * ```
  */
-export type HeliconeChatCreateParams = ChatCompletionCreateParamsNonStreaming &
+export type HeliconeChatCreateParams = ChatCompletionCreateParamsNonStreamingPartialMessages &
   HeliconePromptParams;
 
 /**
@@ -111,7 +117,7 @@ export type HeliconeChatCreateParams = ChatCompletionCreateParamsNonStreaming &
  * const stream = await openai.chat.completions.create({
  *   prompt_id: "XXXXXX",
  *   model: "gpt-4",
- *   messages: [{ role: "user", content: "Hello!" }],
+ *   messages: [{ role: "user", content: "Hello!" }], // optional
  *   stream: true,
  *   inputs: {
  *     name: "John",
@@ -121,4 +127,4 @@ export type HeliconeChatCreateParams = ChatCompletionCreateParamsNonStreaming &
  * ```
  */
 export type HeliconeChatCreateParamsStreaming =
-  ChatCompletionCreateParamsStreaming & HeliconePromptParams;
+  ChatCompletionCreateParamsStreamingPartialMessages & HeliconePromptParams;
