@@ -94,7 +94,10 @@ export class HeliconePromptManager {
 
     const substitutionValues = params.inputs || {};
 
-    const mergedMessages = [...sourcePromptBody.messages, ...params.messages];
+    const mergedMessages = [
+      ...(sourcePromptBody.messages || []),
+      ...(params.messages || []),
+    ];
 
     const substitutedMessages = mergedMessages.map((message) => {
       if (typeof message.content === "string") {
@@ -145,8 +148,8 @@ export class HeliconePromptManager {
 
     const { prompt_id, version_id, inputs, environment, ...inputOpenaiParams } = params;
     const mergedBody = {
-      ...sourcePromptBody,
       ...inputOpenaiParams,
+      ...sourcePromptBody,
       messages: substitutedMessages,
       response_format: finalResponseFormat,
       tools: finalTools,

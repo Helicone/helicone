@@ -67,6 +67,7 @@ Traditional prompt development involves hardcoded prompts in application code, m
     <CodeGroup>
       ```typescript TypeScript
       import { OpenAI } from "openai";
+      import { HeliconeChatCreateParams } from "@helicone/helpers";
 
       const openai = new OpenAI({
         baseURL: "https://ai-gateway.helicone.ai",
@@ -77,11 +78,45 @@ Traditional prompt development involves hardcoded prompts in application code, m
         model: "gpt-4o-mini",
         prompt_id: "abc123", // Reference your saved prompt
         environment: "production", // Optional: specify environment
+        messages: [
+          {
+            role: "user",
+            content: "Hello there!"
+          }
+        ], // optional: saved prompt also provides messages
         inputs: {
           customer_name: "John Doe",
           product: "AI Gateway"
         }
+      } as HeliconeChatCreateParams);
+      ```
+
+      ```typescript TypeScript (with satisfies)
+      import { OpenAI } from "openai";
+      import { HeliconeChatCreateParams } from "@helicone/helpers";
+
+      const openai = new OpenAI({
+        baseURL: "https://ai-gateway.helicone.ai",
+        apiKey: process.env.HELICONE_API_KEY,
       });
+
+      const body = {
+        model: "gpt-4o-mini",
+        prompt_id: "abc123",
+        environment: "production", // Optional: specify environment
+        messages: [
+          {
+            role: "user",
+            content: "Hello there!"
+          }
+        ], // optional: saved prompt also provides messages
+        inputs: {
+          customer_name: "John Doe",
+          product: "AI Gateway"
+        }
+      } satisfies HeliconeChatCreateParams;
+
+      const response = await openai.chat.completions.create(body);
       ```
 
       ```python Python
@@ -215,6 +250,8 @@ Messages work differently than other parameters. Instead of overriding, runtime 
 - Define consistent system prompts and example conversations in your saved prompt
 - Add dynamic user messages at runtime
 - Build multi-turn conversations that maintain context
+
+Since your saved prompts contain the required messages, the `messages` parameter becomes optional in API calls when using Helicone prompts. However, if your prompt template is empty or lacks messages, you'll need to provide them at runtime.
 
 <Warning>
   Runtime messages are always appended to the end of your saved prompt messages. Make sure your saved prompt structure accounts for this behavior.
@@ -459,6 +496,8 @@ Prompts through the AI Gateway come with several benefits:
     - `environment` - Optional environment to target (e.g., "production", "staging")
     - `version_id` - Optional specific version (defaults to production version)
     - `inputs` - Variable values
+    
+    **Important**: These types make `messages` optional because Helicone prompts are expected to contain the required message structure. If your prompt template is empty or doesn't include messages, you'll need to provide them at runtime.
 
     For direct SDK integration:
     ```typescript
@@ -483,6 +522,8 @@ Prompts through the AI Gateway come with several benefits:
     - `environment` - Optional environment to target (e.g., "production", "staging")
     - `version_id` - Optional specific version (defaults to production version)
     - `inputs` - Variable values for template substitution
+    
+    **Important**: Similar to TypeScript, `messages` becomes optional when using prompts since your saved prompt template should contain the necessary message structure.
 
     The main class for direct SDK integration:
     ```python
