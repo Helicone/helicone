@@ -59,15 +59,15 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
     const lines = responseBody
       .split("\n")
       .filter((line) => !line.includes("OPENROUTER PROCESSING"))
-      .filter((line) => line !== "")
-      .filter((line) => !NON_DATA_LINES.includes(line));
+      .filter((line) => !NON_DATA_LINES.includes(line))
+      .filter((line) => line !== "");
 
     const data = lines.map((line, i) => {
       try {
         return JSON.parse(line.replace("data:", ""));
       } catch (e) {
         // This line was filling up the logs
-        if (!line.includes("[DONE]")) {
+        if (!line.includes("[DONE]") && line !== "") {
           console.log("Error parsing line OpenAI", line);
         }
         return err({ msg: `Error parsing line`, line });
