@@ -65,7 +65,5 @@ export async function updateRequestProperties(
 
   if (updateError) {
     console.error("Error updating properties:", updateError.message);
-  } else {
-    console.log("Update successful");
   }
 }

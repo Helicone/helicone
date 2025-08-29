@@ -8,6 +8,7 @@ import {
   getBody,
   authenticate,
   attemptModelRequestWithFallback,
+  EscrowInfo,
 } from "../lib/util/aiGateway";
 import { gatewayForwarder } from "./gatewayRouter";
 import { ProviderKeysManager } from "../lib/managers/ProviderKeysManager";
@@ -27,27 +28,20 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
       ctx: ExecutionContext
     ) => {
       requestWrapper.setRequestReferrer("ai-gateway");
-      function forwarder(targetBaseUrl: string | null) {
+      function forwarder(targetBaseUrl: string | null, escrowInfo?: EscrowInfo) {
         return gatewayForwarder(
           {
             targetBaseUrl,
             setBaseURLOverride: (url) => {
               requestWrapper.setBaseURLOverride(url);
             },
+            escrowInfo,
           },
           requestWrapper,
           env,
           ctx
         );
       }
-
-      const body = await getBody(requestWrapper);
-      const parsedBody = tryJSONParse(body ?? "{}");
-      if (!parsedBody || !parsedBody.model) {
-        return new Response("Invalid body or missing model", { status: 400 });
-      }
-
-      const models = parsedBody.model.split(",").map((m) => m.trim());
 
       const isEU = requestWrapper.isEU();
       const supabaseClient = isEU
@@ -69,6 +63,13 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
       if (!orgId || !rawAPIKey) {
         return new Response("Invalid API key", { status: 401 });
       }
+      const body = await getBody(requestWrapper);
+      const parsedBody = tryJSONParse(body ?? "{}");
+      if (!parsedBody || !parsedBody.model) {
+        return new Response("Invalid body or missing model", { status: 400 });
+      }
+
+      const models = parsedBody.model.split(",").map((m) => m.trim());
 
       const result = await attemptModelRequestWithFallback({
         models,
@@ -88,14 +89,17 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
         ),
         orgId,
         parsedBody,
+        env,
+        ctx,
       });
 
       if (isErr(result)) {
         return new Response(
           JSON.stringify({
+            "helicone-message":
+              "Helicone ran into an error servicing your request: " + result.error.message,
             support:
               "Please reach out on our discord or email us at help@helicone.ai, we'd love to help!",
-            message: result.error.message,
             type: result.error.type,
           }),
           {

@@ -15,6 +15,9 @@ export interface TestCase {
   };
   byokConfig?: UserEndpointConfig;
   failProviders?: string[];
+  byokEnabled?: boolean;
+  currentCredits?: number;
+  orgId?: string;
 }
 
 export abstract class BaseTestConfig {
@@ -72,7 +75,8 @@ export abstract class BaseTestConfig {
           messages: [{ role: "user", content: "Hello, this is a test" }],
           max_tokens: 100,
         },
-        byokConfig: this.getByokConfig('*')
+        byokConfig: this.getByokConfig('*'),
+        byokEnabled: true,
       });
       
       // Type 2: Multi-provider fallback
@@ -93,7 +97,8 @@ export abstract class BaseTestConfig {
               messages: [{ role: "user", content: "Hello, this is a test" }],
               max_tokens: 100,
             },
-            byokConfig: this.getByokConfig('*')
+            byokConfig: this.getByokConfig('*'),
+            byokEnabled: true,
           });
         }
       }
@@ -113,7 +118,8 @@ export abstract class BaseTestConfig {
                 messages: [{ role: "user", content: "Hello, this is a test" }],
                 max_tokens: 100,
               },
-              byokConfig: this.getByokConfig(configKey)
+              byokConfig: this.getByokConfig(configKey),
+              byokEnabled: true,
             });
           }
         });
@@ -123,7 +129,131 @@ export abstract class BaseTestConfig {
     return cases;
   }
   
-  generatePtbTestCases(): TestCase[] {
-    return []; // PTB not active yet
+  generateSuccessfulPtbTestCases(): TestCase[] {
+    const cases: TestCase[] = [];
+    const models = registry.getProviderModels(this.provider).data;
+    if (!models || !(models instanceof Set)) return cases;
+    
+    models.forEach(modelId => {
+      // Type 1: Direct provider test w/sufficient credit balance
+      cases.push({
+        name: `${this.provider} - ${modelId} - PTB direct`,
+        provider: this.provider,
+        modelId,
+        modelString: `${modelId}/${this.provider}`,
+        testType: 'single-provider',
+        request: {
+          messages: [{ role: "user", content: "Hello, this is a test" }],
+          max_tokens: 100,
+        },
+        byokConfig: this.getByokConfig('*'),
+        byokEnabled: false,
+        currentCredits: 100,
+        orgId: 'test-org-id',
+      });
+      
+      // Type 2: Multi-provider fallback w/sufficient credit balance
+      const allProviders = registry.getModelProviders(modelId).data;
+      if (allProviders && allProviders.size > 1) {
+        const providerArray = Array.from(allProviders);
+        const targetIndex = providerArray.indexOf(this.provider);
+        
+        if (targetIndex > 0) {
+          cases.push({
+            name: `${modelId} - PTB fallback to ${this.provider}`,
+            provider: this.provider,
+            modelId,
+            modelString: modelId,
+            testType: 'multi-provider-fallback',
+            failProviders: providerArray.slice(0, targetIndex),
+            request: {
+              messages: [{ role: "user", content: "Hello, this is a test" }],
+              max_tokens: 100,
+            },
+            byokConfig: this.getByokConfig('*'),
+            byokEnabled: false,
+            currentCredits: 100,
+            orgId: 'test-org-id',
+          });
+        }
+      }
+      
+      // Type 3: Different endpoint configs w/sufficient credit balance
+      const modelConfig = registry.getModelProviderConfig(modelId, this.provider).data;
+      if (modelConfig) {
+        Object.keys(modelConfig.endpointConfigs).forEach(configKey => {
+          if (configKey !== '*') {
+            cases.push({
+              name: `${this.provider} - ${modelId} - BYOK config:${configKey}`,
+              provider: this.provider,
+              modelId,
+              modelString: `${modelId}/${this.provider}`,
+              testType: 'endpoint-config',
+              request: {
+                messages: [{ role: "user", content: "Hello, this is a test" }],
+                max_tokens: 100,
+              },
+              byokConfig: this.getByokConfig(configKey),
+              byokEnabled: false,
+              currentCredits: 100,
+              orgId: 'test-org-id',
+            });
+          }
+        });
+      }
+    });
+    return cases;
+  }
+
+  generateUnsuccessfulPtbTestCases(): TestCase[] {
+    const cases: TestCase[] = [];
+    const models = registry.getProviderModels(this.provider).data;
+    if (!models || !(models instanceof Set)) return cases;
+    
+    models.forEach(modelId => {
+      // type 1: PTB direct w/insufficient credit balance
+      cases.push({
+        name: `${this.provider} - ${modelId} - PTB direct - insufficient credits`,
+        provider: this.provider,
+        modelId,
+        modelString: `${modelId}/${this.provider}`,
+        testType: 'single-provider',
+        request: {
+          messages: [{ role: "user", content: "Hello, this is a test" }],
+          max_tokens: 100,
+        },
+        byokConfig: this.getByokConfig('*'),
+        byokEnabled: false,
+        currentCredits: 1,
+        orgId: 'test-org-id',
+      });
+
+      // type 2: multi provider fallback w/insufficient credit balance
+      const allProviders = registry.getModelProviders(modelId).data;
+      if (allProviders && allProviders.size > 1) {
+        const providerArray = Array.from(allProviders);
+        const targetIndex = providerArray.indexOf(this.provider);
+        
+        if (targetIndex > 0) {
+          cases.push({
+            name: `${modelId} - PTB fallback to ${this.provider} - insufficient credits`,
+            provider: this.provider,
+            modelId,
+            modelString: modelId,
+            testType: 'multi-provider-fallback',
+            failProviders: providerArray.slice(0, targetIndex),
+            request: {
+              messages: [{ role: "user", content: "Hello, this is a test" }],
+              max_tokens: 100,
+            },
+            byokConfig: this.getByokConfig('*'),
+            byokEnabled: false,
+            currentCredits: 1,
+            orgId: 'test-org-id',
+          });
+        }
+      }
+    });
+    return cases;
   }
 }

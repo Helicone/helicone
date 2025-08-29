@@ -166,7 +166,6 @@ describe("OpenAI Registry Tests", () => {
             }),
           }
         );
-
         expect(response.status).toBe(200);
       });
 

@@ -309,6 +309,7 @@ export interface RequestResponseRMT {
   prompt_id?: string;
   prompt_version?: string;
   request_referrer?: string;
+  is_passthrough_billing: boolean;
 }
 
 export interface Prompt2025Input {

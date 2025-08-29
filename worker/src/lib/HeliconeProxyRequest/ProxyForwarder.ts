@@ -32,18 +32,23 @@ import {
   handleProxyRequest,
   handleThreatProxyRequest,
 } from "./ProxyRequestHandler";
+import { EscrowInfo } from "../util/aiGateway";
+import { WalletManager } from "../managers/WalletManager";
+import { costOfPrompt } from "@helicone-package/cost";
 
 export async function proxyForwarder(
   request: RequestWrapper,
   env: Env,
   ctx: ExecutionContext,
-  provider: Provider
+  provider: Provider,
+  escrowInfo?: EscrowInfo
 ): Promise<Response> {
   const { data: proxyRequest, error: proxyRequestError } =
     await new HeliconeProxyRequestMapper(
       request,
       provider,
-      env
+      env,
+      escrowInfo
     ).tryToProxyRequest();
 
   if (proxyRequestError !== null) {
@@ -64,6 +69,7 @@ export async function proxyForwarder(
     });
   }
 
+  let rateLimited = false;
   if (cacheSettings.shouldReadFromCache) {
     const { data: auth, error: authError } = await request.auth();
     if (authError == null) {
@@ -99,10 +105,14 @@ export async function proxyForwarder(
             ctx.waitUntil(
               log(
                 loggable,
-                "false", // don't push body to S3
-                false, // don't rate limit cache hit
+                request,
+                proxyRequest,
+                env,
+                ctx,
+                rateLimited,
+                "false", // S3_ENABLED
                 cachedResponse,
-                cacheSettings // send them cache settings hehe
+                cacheSettings
               )
             );
 
@@ -115,7 +125,6 @@ export async function proxyForwarder(
     }
   }
 
-  let rate_limited = false;
   let finalRateLimitOptions = proxyRequest.rateLimitOptions;
   if (finalRateLimitOptions || proxyRequest.isRateLimitedKey) {
     const { data: auth, error: authError } = await request.auth();
@@ -154,7 +163,7 @@ export async function proxyForwarder(
             );
 
             if (rateLimitCheckResult.status === "rate_limited") {
-              rate_limited = true;
+              rateLimited = true;
               request.injectCustomProperty(
                 "Helicone-Rate-Limit-Status",
                 rateLimitCheckResult.status
@@ -215,7 +224,19 @@ export async function proxyForwarder(
           responseBuilder.setHeader(key, value);
         });
 
-        ctx.waitUntil(log(loggable));
+        ctx.waitUntil(
+          log(
+            loggable,
+            request,
+            proxyRequest,
+            env,
+            ctx,
+            rateLimited,
+            undefined,
+            undefined,
+            undefined
+          )
+        );
 
         const responseContent = {
           body: JSON.stringify({
@@ -273,7 +294,19 @@ export async function proxyForwarder(
         });
       }
 
-      ctx.waitUntil(log(moderationRes.loggable));
+      ctx.waitUntil(
+        log(
+          moderationRes.loggable,
+          request,
+          proxyRequest,
+          env,
+          ctx,
+          rateLimited,
+          undefined,
+          undefined,
+          undefined
+        )
+      );
 
       if (moderationRes.isModerated) {
         return moderationRes.response;
@@ -284,7 +317,7 @@ export async function proxyForwarder(
 
   const { data, error } = await handleProxyRequest(
     proxyRequest,
-    rate_limited ? responseBuilder.buildRateLimitedResponse() : undefined
+    rateLimited ? responseBuilder.buildRateLimitedResponse() : undefined
   );
   if (error !== null) {
     return responseBuilder.build({
@@ -351,91 +384,24 @@ export async function proxyForwarder(
     responseBuilder.setHeader("Helicone-Cache", "MISS");
   }
 
-  async function log(
-    loggable: DBLoggable,
-    S3_ENABLED?: Env["S3_ENABLED"],
-    incurRateLimit = true,
-    cachedResponse?: Response,
-    cacheSettings?: CacheSettings
-  ) {
-    const { data: auth, error: authError } = await request.auth();
-
-    if (authError !== null) {
-      console.error("Error getting auth", authError);
-      return;
-    }
-    const supabase = createClient(
-      env.SUPABASE_URL,
-      env.SUPABASE_SERVICE_ROLE_KEY
-    );
-    const res = await loggable.log(
-      {
-        clickhouse: new ClickhouseClientWrapper(env),
-        supabase: supabase,
-        dbWrapper: new DBWrapper(env, auth),
-        queue: new RequestResponseStore(
-          createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-          new DBQueryTimer(ctx, {
-            enabled: (env.DATADOG_ENABLED ?? "false") === "true",
-            apiKey: env.DATADOG_API_KEY,
-            endpoint: env.DATADOG_ENDPOINT,
-          }),
-          new Valhalla(env.VALHALLA_URL, auth),
-          new ClickhouseClientWrapper(env),
-          env.FALLBACK_QUEUE,
-          env.REQUEST_AND_RESPONSE_QUEUE_KV
-        ),
-        requestResponseManager: new RequestResponseManager(
-          new S3Client(
-            env.S3_ACCESS_KEY ?? "",
-            env.S3_SECRET_KEY ?? "",
-            env.S3_ENDPOINT ?? "",
-            env.S3_BUCKET_NAME ?? "",
-            env.S3_REGION ?? "us-west-2"
-          ),
-          createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY)
-        ),
-        producer: new HeliconeProducer(env),
-      },
-      S3_ENABLED ?? env.S3_ENABLED ?? "true",
-      proxyRequest?.requestWrapper.heliconeHeaders,
-      cachedResponse ? cachedResponse.headers : undefined,
-      cacheSettings ?? undefined
-    );
-
-    if (res.error !== null) {
-      console.error("Error logging", res.error);
-    }
-
-    if (incurRateLimit && !rate_limited) {
-      const db = new DBWrapper(env, auth);
-      const { data: orgData, error: orgError } = await db.getAuthParams();
-      if (
-        proxyRequest &&
-        finalRateLimitOptions &&
-        !orgError &&
-        orgData?.organizationId
-      ) {
-        const costInCents = (res.data?.cost ?? 0) * 100;
-        await updateRateLimitCounterDO({
-          organizationId: orgData?.organizationId,
-          heliconeProperties:
-            proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
-          rateLimiterDO: env.RATE_LIMITER_SQL,
-          rateLimitOptions: finalRateLimitOptions,
-          userId: proxyRequest.userId,
-          cost: costInCents,
-        });
-      }
-    }
-  }
-
   if (
     request?.heliconeHeaders?.heliconeAuth ||
     request?.heliconeHeaders.heliconeAuthV2 ||
     request.heliconeProxyKeyId
   ) {
-    ctx.waitUntil(log(loggable));
+    ctx.waitUntil(
+      log(
+        loggable,
+        request,
+        proxyRequest,
+        env,
+        ctx,
+        rateLimited,
+        undefined,
+        undefined,
+        undefined
+      )
+    );
   }
 
   return responseBuilder.build({
@@ -443,24 +409,24 @@ export async function proxyForwarder(
     inheritFrom: response,
     status: response.status,
   });
+}
 
-  function parseLatestMessage(
-    proxyRequest: HeliconeProxyRequest
-  ): Result<LatestMessage, string> {
-    try {
-      return {
-        error: null,
-        data: JSON.parse(
-          proxyRequest.bodyText ?? ""
-        ).messages.pop() as LatestMessage,
-      };
-    } catch (error) {
-      console.error("Error parsing latest message:", error);
-      return {
-        error: "Failed to parse the latest message.",
-        data: null,
-      };
-    }
+function parseLatestMessage(
+  proxyRequest: HeliconeProxyRequest
+): Result<LatestMessage, string> {
+  try {
+    return {
+      error: null,
+      data: JSON.parse(
+        proxyRequest.bodyText ?? ""
+      ).messages.pop() as LatestMessage,
+    };
+  } catch (error) {
+    console.error("Error parsing latest message:", error);
+    return {
+      error: "Failed to parse the latest message.",
+      data: null,
+    };
   }
 }
 
@@ -468,3 +434,148 @@ type LatestMessage = {
   role?: string;
   content?: string;
 };
+
+async function log(
+  loggable: DBLoggable,
+  request: RequestWrapper,
+  proxyRequest: HeliconeProxyRequest,
+  env: Env,
+  ctx: ExecutionContext,
+  rateLimited: boolean,
+  S3_ENABLED?: Env["S3_ENABLED"],
+  cachedResponse?: Response,
+  cacheSettings?: CacheSettings
+) {
+  const { data: auth, error: authError } = await request.auth();
+
+  if (authError !== null) {
+    console.error("Error getting auth", authError);
+    return;
+  }
+  const supabase = createClient(
+    env.SUPABASE_URL,
+    env.SUPABASE_SERVICE_ROLE_KEY
+  );
+  const responseBodyPromise = loggable.readResponse();
+  const logPromise = loggable.log(
+    {
+      clickhouse: new ClickhouseClientWrapper(env),
+      supabase: supabase,
+      dbWrapper: new DBWrapper(env, auth),
+      queue: new RequestResponseStore(
+        createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+        new DBQueryTimer(ctx, {
+          enabled: (env.DATADOG_ENABLED ?? "false") === "true",
+          apiKey: env.DATADOG_API_KEY,
+          endpoint: env.DATADOG_ENDPOINT,
+        }),
+        new Valhalla(env.VALHALLA_URL, auth),
+        new ClickhouseClientWrapper(env),
+        env.FALLBACK_QUEUE,
+        env.REQUEST_AND_RESPONSE_QUEUE_KV
+      ),
+      requestResponseManager: new RequestResponseManager(
+        new S3Client(
+          env.S3_ACCESS_KEY ?? "",
+          env.S3_SECRET_KEY ?? "",
+          env.S3_ENDPOINT ?? "",
+          env.S3_BUCKET_NAME ?? "",
+          env.S3_REGION ?? "us-west-2"
+        ),
+        createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY)
+      ),
+      producer: new HeliconeProducer(env),
+    },
+    S3_ENABLED ?? env.S3_ENABLED ?? "true",
+    proxyRequest?.requestWrapper.heliconeHeaders,
+    cachedResponse ? cachedResponse.headers : undefined,
+    cacheSettings ?? undefined
+  );
+  const [responseBody, logResult] = await Promise.all([
+    responseBodyPromise,
+    logPromise,
+  ]);
+  const finalRateLimitOptions = proxyRequest.rateLimitOptions;
+
+  if (logResult.error !== null) {
+    console.error("Error logging", logResult.error);
+  }
+  if (responseBody.error !== null) {
+    console.error("Error reading response", responseBody.error);
+  }
+  const db = new DBWrapper(env, auth);
+  const { data: orgData, error: orgError } = await db.getAuthParams();
+  if (!orgData) {
+    console.error(
+      "Could not get org data for request w/ id: ",
+      proxyRequest.requestId
+    );
+    return;
+  }
+
+  const model = responseBody.data?.response.model;
+  const promptTokens = responseBody.data?.response.prompt_tokens ?? 0;
+  const completionTokens = responseBody.data?.response.completion_tokens ?? 0;
+  const provider = proxyRequest.provider;
+  const promptCacheWriteTokens =
+    responseBody.data?.response.prompt_cache_write_tokens ?? 0;
+  const promptCacheReadTokens =
+    responseBody.data?.response.prompt_cache_read_tokens ?? 0;
+  const promptAudioTokens =
+    responseBody.data?.response.prompt_audio_tokens ?? 0;
+  const completionAudioTokens =
+    responseBody.data?.response.completion_audio_tokens ?? 0;
+
+  let cost;
+  if (model && provider) {
+    cost =
+      costOfPrompt({
+        model,
+        promptTokens,
+        completionTokens,
+        provider,
+        promptCacheWriteTokens,
+        promptCacheReadTokens,
+        promptAudioTokens,
+        completionAudioTokens,
+      }) ?? 0;
+  } else {
+    cost = 0;
+  }
+
+  if (responseBody.data && proxyRequest.escrowInfo) {
+    const walletId = env.WALLET.idFromName(orgData.organizationId);
+    const walletStub = env.WALLET.get(walletId);
+    const walletManager = new WalletManager(env, ctx, walletStub);
+    await walletManager.finalizeEscrowAndSyncSpend(
+      orgData.organizationId,
+      proxyRequest,
+      cost,
+      cachedResponse
+    );
+  }
+
+  // if not a cached response, incur rate limits
+  if (
+    (!rateLimited && cachedResponse === undefined) ||
+    (!rateLimited && cachedResponse === null)
+  ) {
+    if (
+      proxyRequest &&
+      finalRateLimitOptions &&
+      !orgError &&
+      orgData?.organizationId
+    ) {
+      const costInCents = cost * 100;
+      await updateRateLimitCounterDO({
+        organizationId: orgData?.organizationId,
+        heliconeProperties:
+          proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
+        rateLimiterDO: env.RATE_LIMITER_SQL,
+        rateLimitOptions: finalRateLimitOptions,
+        userId: proxyRequest.userId,
+        cost: costInCents,
+      });
+    }
+  }
+}

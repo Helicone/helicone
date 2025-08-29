@@ -10,10 +10,7 @@ export async function oai2ant({
   body: OpenAIRequestBody;
   headers: Headers;
 }): Promise<Response> {
-  console.log(body);
-
   const anthropicBody = toAnthropic(body);
-  console.log(anthropicBody);
 
   let auth = headers.get("Authorization");
 
@@ -25,7 +22,6 @@ export async function oai2ant({
   if (!anthropicVersion) {
     anthropicVersion = "2023-06-01";
   }
-  console.log(anthropicBody);
 
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -39,7 +35,6 @@ export async function oai2ant({
   });
 
   const responseBody = await response.json<AntResponseBody>();
-  console.log(responseBody);
   try {
     return new Response(JSON.stringify(toOpenAI(responseBody)), {
       headers: {

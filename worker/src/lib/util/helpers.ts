@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { EventEmitter } from "events";
+import { Database } from "../../../supabase/database.types";
 
 export const once = (
   emitter: EventEmitter,
@@ -112,5 +114,13 @@ export function getModelFromResponse(responseBody: any) {
     );
   } catch (e) {
     return "unknown";
+  }
+}
+
+export function createSupabaseClient(env: Env): SupabaseClient<Database> {
+  if (env.WORKER_REGION === "us") {
+    return createClient<Database>(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+  } else {
+    return createClient<Database>(env.EU_SUPABASE_URL, env.EU_SUPABASE_SERVICE_ROLE_KEY);
   }
 }

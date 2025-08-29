@@ -479,7 +479,7 @@ export class RequestWrapper {
     return ok(null);
   }
 
-  async getRawProviderAuthHeader(): Promise<string | undefined> {
+  getRawProviderAuthHeader(): string | undefined {
     let auth = this.authorization;
     if (auth?.startsWith("Bearer ")) {
       auth = auth.split(" ")[1];
@@ -701,8 +701,6 @@ export async function getProviderKeyFromPortalKey(
 
   if (check.error) {
     return err(check.error);
-  } else {
-    console.log("check.data", check.data);
   }
 
   const providerKey = await supabaseClient

@@ -48,7 +48,6 @@ export class ResponseBuilder {
       headers.set(key, value);
     });
     if (status < 200 || status >= 600) {
-      console.log("Invalid status code:", status);
       status = 500;
     }
 

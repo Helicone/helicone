@@ -14,7 +14,6 @@ export async function checkLimitsSingle(
   env: Env
 ): Promise<Result<string, string>> {
   if (!organizationId) {
-    console.log("No organization ID provided");
     return err("No organization ID provided");
   }
   const client = new ClickhouseClientWrapper(env);
@@ -42,11 +41,9 @@ export async function checkLimitsSingle(
   const { cost, count } = data[0];
 
   if (cost > costUSD && costUSD !== -1) {
-    console.log("Cost exceeded:", cost, costUSD);
     return err("Cost exceeded");
   }
   if (count > requestCount && requestCount !== -1) {
-    console.log("Count exceeded:", count, requestCount);
     return err("Count exceeded");
   }
 
@@ -79,10 +76,7 @@ export async function checkLimits(
   const cacheKey = (await hash(JSON.stringify(limits))).substring(0, 32);
   const cached = await env.CACHE_KV.get(cacheKey);
   if (cached) {
-    console.log("Using cached limits");
     return cached === "true";
-  } else {
-    console.log("No cached limits");
   }
 
   const timeWindows = limits.map((_, i) => generateSubquery(i));
@@ -99,8 +93,6 @@ export async function checkLimits(
   if (error) {
     console.error("Error checking limits:", error);
     return false;
-  } else {
-    console.log("Checked limits:", keyMappings);
   }
   const limitResults = (Object.values(keyMappings?.[0])?.[0] ?? []) as [
     number,
@@ -120,13 +112,10 @@ export async function checkLimits(
       return false;
     }
     if (limit.cost !== null) {
-      console.log("Checking cost:", limitResult.cost, limit.cost);
       return limitResult.cost <= (limit?.cost ?? 0);
     } else if (limit.count !== null) {
-      console.log("Checking count:", limitResult.count, limit.count);
       return limitResult.count <= (limit?.count ?? 0);
     } else {
-      console.log("No cost or count limit");
       return false;
     }
   });

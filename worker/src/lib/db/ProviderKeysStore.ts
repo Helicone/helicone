@@ -17,6 +17,9 @@ export type ProviderKey = {
    * In all other provider cases, this would be "key"
    */
   auth_type: "key" | "session_token";
+  // `null` should default to `true` so that the behavior is backwards compatible
+  // with what existed before we added passthrough billing
+  byok_enabled: boolean | null;
   config: Json | null;
   cuid?: string | null;
 };
@@ -74,7 +77,7 @@ export class ProviderKeysStore {
     let query = this.supabaseClient
       .from("decrypted_provider_keys_v2")
       .select(
-        "org_id, decrypted_provider_key, decrypted_provider_secret_key, auth_type, provider_name, config, cuid"
+        "org_id, decrypted_provider_key, decrypted_provider_secret_key, auth_type, provider_name, config, cuid, byok_enabled"
       )
       .eq("provider_name", provider)
       .eq("org_id", orgId)
@@ -97,6 +100,7 @@ export class ProviderKeysStore {
       decrypted_provider_secret_key:
         data[0].decrypted_provider_secret_key ?? null,
       auth_type: data[0].auth_type as "key" | "session_token",
+      byok_enabled: data[0].byok_enabled ?? null,
       config: data[0].config,
       cuid: data[0].cuid,
     };

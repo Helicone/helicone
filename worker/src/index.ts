@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { Database } from "../supabase/database.types";
 import { InMemoryRateLimiter } from "./lib/clients/InMemoryRateLimiter";
 import { RateLimiterDO } from "./lib/durable-objects/RateLimiterDO";
+import { Wallet } from "./lib/durable-objects/Wallet";
 import { AlertStore } from "./lib/db/AlertStore";
 import { ClickhouseClientWrapper } from "./lib/db/ClickhouseWrapper";
 import { AlertManager } from "./lib/managers/AlertManager";
@@ -376,7 +377,6 @@ export default {
     env: Env,
     ctx: ExecutionContext
   ): Promise<Response> {
-    console.log("WORKER_TYPE", env.WORKER_TYPE);
     try {
       const requestWrapper = await RequestWrapper.create(request, env);
       if (requestWrapper.error || !requestWrapper.data) {
@@ -534,11 +534,11 @@ export default {
 };
 
 function handleError(e: unknown): Response {
-  console.error(e);
   return new Response(
     JSON.stringify({
       "helicone-message":
-        "Helicone ran into an error servicing your request: " + e,
+        "Helicone ran into an error servicing your request" +
+        (e instanceof Error ? ": " + e.message : ""),
       support:
         "Please reach out on our discord or email us at help@helicone.ai, we'd love to help!",
       "helicone-error": JSON.stringify(e),
@@ -552,4 +552,4 @@ function handleError(e: unknown): Response {
     }
   );
 }
-export { InMemoryRateLimiter, RateLimiterDO };
+export { InMemoryRateLimiter, RateLimiterDO, Wallet };

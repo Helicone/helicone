@@ -1,7 +1,8 @@
-import { ProviderName } from "@helicone-package/cost/models/providers";
-import { Json } from "./db/database.types";
+import { type ProviderName } from "@helicone-package/cost/models/providers";
 import { removeFromCache, storeInCache } from "./clients/cloudflareKV";
+import { type Json } from "./db/database.types";
 import { ENVIRONMENT } from "./clients/constant";
+import { type CreateProviderKeyRequest } from "../controllers/public/apiKeyController";
 
 type ProviderKey = {
   provider: ProviderName;
@@ -11,9 +12,11 @@ type ProviderKey = {
   config: Json | null;
   orgId: string;
   cuid?: string;
+  byok_enabled?: boolean;
 };
 
 export const MAX_RETRIES = 3;
+
 async function setProviderKeyDev(
   orgId: string,
   providerKeys: ProviderKey[],
@@ -37,6 +40,7 @@ async function setProviderKeyDev(
             config: providerKey.config,
             orgId: providerKey.orgId,
             cuid: providerKey.cuid,
+            byokEnabled: providerKey.byok_enabled,
           }))
         ),
       }
