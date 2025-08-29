@@ -2,7 +2,7 @@ name: Test Filters Package
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, filters-test-ci ]
     paths:
       - 'packages/filters/**'
   pull_request:
