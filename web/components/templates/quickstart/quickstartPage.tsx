@@ -143,8 +143,8 @@ const QuickstartPage = () => {
     },
     {
       title: "Integrate",
-      description: "Gateway dashboard",
-      link: "/settings/ai-gateway",
+      description: "",  // TODO Add back once gateway route is fixed
+      link: "",
     },
   ];
 
