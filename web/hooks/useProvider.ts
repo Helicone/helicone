@@ -192,7 +192,7 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
   const providerKeys = providerKeysData || [];
   const existingKey = providerId
     ? providerKeys.find(
-        (key: any) => key.provider_name === providerName && !key.soft_delete,
+        (key: any) => key.provider_name === providerId && !key.soft_delete,
       )
     : undefined;
 
