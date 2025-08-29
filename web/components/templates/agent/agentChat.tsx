@@ -23,14 +23,6 @@ export interface QueuedMessage {
   timestamp: Date;
 }
 
-interface AgentExecutionState {
-  isProcessing: boolean;
-  pendingToolCalls: ToolCall[];
-  currentAssistantMessage?: Message;
-  needsAssistantResponse: boolean;
-  error?: string;
-}
-
 interface AgentChatProps {
   onClose: () => void;
 }
@@ -44,11 +36,9 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
   );
   const [messageQueue, setMessageQueue] = useState<QueuedMessage[]>([]);
 
-  const [agentState, setAgentState] = useState<AgentExecutionState>({
-    isProcessing: false,
-    pendingToolCalls: [],
-    needsAssistantResponse: false,
-  });
+  const handleQuickstartHelp = () => {
+    executeTool("quickstart-open-integration-guide", {});
+  };
 
   const abortController = useRef<AbortController | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -60,9 +50,9 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
     executeTool,
     messages,
     updateCurrentSessionMessages,
-    escalateSession,
-    currentSession,
     createNewSession,
+    agentState,
+    setAgentState,
   } = useHeliconeAgent();
 
   const addErrorMessage = (
@@ -241,7 +231,6 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
           model: selectedModel,
           messages: currentMessages,
           temperature: 0.7,
-          max_tokens: 1000,
           tools: tools.map(({ handler, ...tool }) => tool),
         };
 
@@ -485,7 +474,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
         </div>
         <div className="flex items-center gap-2">
           <Button
-            onClick={createNewSession}
+            onClick={() => createNewSession()}
             variant="ghost"
             size="sm"
             className="h-7 w-7 p-0 hover:bg-muted"
@@ -511,8 +500,13 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
           </div>
         )}
 
-        {messages.map((message) => (
-          <MessageRenderer key={uuidv4()} message={message} />
+        {messages.map((message, index) => (
+          <MessageRenderer
+            key={uuidv4()}
+            message={message}
+            messageIndex={index}
+            onQuickstartHelp={handleQuickstartHelp}
+          />
         ))}
 
         {isLoading && (
