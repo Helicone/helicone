@@ -2,8 +2,6 @@ import { App } from "@slack/bolt";
 import { WebClient } from "@slack/web-api";
 import { GET_KEY } from "../lib/clients/constant";
 import { dbExecute } from "../lib/shared/db/dbExecute";
-import OpenAI from "openai";
-
 interface SlackConfig {
   botToken: string | null;
   appToken: string | null;
@@ -57,7 +55,11 @@ export class SlackService {
     this.config.channel = await GET_KEY("key:slack_channel");
 
     // Check if Slack is configured
-    if (!this.config.botToken || !this.config.appToken || !this.config.channel) {
+    if (
+      !this.config.botToken ||
+      !this.config.appToken ||
+      !this.config.channel
+    ) {
       console.error("Slack configuration incomplete, Slack features disabled");
       return;
     }
@@ -72,25 +74,33 @@ export class SlackService {
     this.client = new WebClient(this.config.botToken);
 
     // Set up event handler
-    this.app.event("message", async ({ event, client }) => {
-      await this.handleSlackMessage(event, client);
-    });
+    this.app.event(
+      "message",
+      async ({ event, client }: { event: any; client: any }) => {
+        await this.handleSlackMessage(event, client);
+      }
+    );
 
     // Start the app
     await this.app.start();
-    console.log("Slack bot initialized successfully");
 
     // Set up cleanup interval for processed events (every hour)
-    this.cleanupInterval = setInterval(() => {
-      this.processedEvents.clear();
-    }, 60 * 60 * 1000);
+    this.cleanupInterval = setInterval(
+      () => {
+        this.processedEvents.clear();
+      },
+      60 * 60 * 1000
+    );
 
     // Handle shutdown
     process.on("SIGINT", () => this.shutdown());
     process.on("SIGTERM", () => this.shutdown());
   }
 
-  private async handleSlackMessage(event: any, client: WebClient): Promise<void> {
+  private async handleSlackMessage(
+    event: any,
+    client: WebClient
+  ): Promise<void> {
     // Check for thread_ts
     if (!event.thread_ts) {
       return;
@@ -153,7 +163,7 @@ export class SlackService {
         // Add new message
         const newMessages = [...messages, message];
         const newChat = { messages: newMessages };
-        
+
         const updateResult = await dbExecute(
           `UPDATE in_app_threads SET chat = $1 WHERE id = $2`,
           [JSON.stringify(newChat), thread.data[0].id]
@@ -168,7 +178,10 @@ export class SlackService {
     }
   }
 
-  public async postMessage(text: string, blocks?: any[]): Promise<string | null> {
+  public async postMessage(
+    text: string,
+    blocks?: any[]
+  ): Promise<string | null> {
     if (!this.client || !this.config.channel) {
       console.error("Slack not configured, cannot post message");
       return null;
@@ -220,7 +233,7 @@ export class SlackService {
     maxRetries: number = 1
   ): Promise<T> {
     let lastError: any;
-    
+
     for (let i = 0; i <= maxRetries; i++) {
       try {
         return await fn();
@@ -228,11 +241,11 @@ export class SlackService {
         lastError = error;
         if (i < maxRetries) {
           // Wait 2 seconds before retry
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          await new Promise((resolve) => setTimeout(resolve, 2000));
         }
       }
     }
-    
+
     throw lastError;
   }
 
@@ -246,6 +259,10 @@ export class SlackService {
   }
 
   public isConfigured(): boolean {
-    return !!(this.config.botToken && this.config.appToken && this.config.channel);
+    return !!(
+      this.config.botToken &&
+      this.config.appToken &&
+      this.config.channel
+    );
   }
 }
