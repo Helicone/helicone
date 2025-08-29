@@ -116,11 +116,3 @@ export function getModelFromResponse(responseBody: any) {
     return "unknown";
   }
 }
-
-export function createSupabaseClient(env: Env): SupabaseClient<Database> {
-  if (env.WORKER_REGION === "us") {
-    return createClient<Database>(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
-  } else {
-    return createClient<Database>(env.EU_SUPABASE_URL, env.EU_SUPABASE_SERVICE_ROLE_KEY);
-  }
-}
