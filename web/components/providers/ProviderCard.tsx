@@ -123,7 +123,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
       };
     } else if (provider.id === "vertex") {
       initialConfig = {
-        location: "",
+        region: "",
         projectId: "",
       };
     }
@@ -321,7 +321,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
       ];
     } else if (provider.id === "vertex") {
       configFields = [
-        { label: "Location", key: "location", placeholder: "us-east5" },
+        { label: "Region", key: "region", placeholder: "us-east5" },
         {
           label: "Project ID",
           key: "projectId",
