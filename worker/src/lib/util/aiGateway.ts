@@ -28,7 +28,7 @@ type Error = {
     | "request_failed"
     | "invalid_prompt";
   message: string;
-  code: number;
+  statusCode: number;
 };
 
 const DEFAULT_REGION = "us-west-1";
@@ -114,7 +114,7 @@ const validateModelString = (model: string): ValidateModelStringResult => {
       return err({
         type: "invalid_format",
         message: "Invalid model",
-        code: 400,
+        statusCode: 400,
       });
     }
     return ok({ type: "endpoints", providers: providersResult.data });
@@ -127,7 +127,7 @@ const validateModelString = (model: string): ValidateModelStringResult => {
     return err({
       type: "invalid_format",
       message: "Invalid model",
-      code: 400,
+      statusCode: 400,
     });
   }
 
@@ -170,7 +170,7 @@ const authenticateRequest = async (
     return err({
       type: "request_failed",
       message: `Authentication failed: ${authResult.error}`,
-      code: 401,
+      statusCode: 401,
     });
   }
 
@@ -192,13 +192,13 @@ const parseErrorResponse = async (
     return err({
       type: "request_failed",
       message: errorMessage,
-      code: response.status,
+      statusCode: response.status,
     });
   } catch {
     return err({
       type: "request_failed",
       message: response.statusText,
-      code: response.status,
+      statusCode: response.status,
     });
   }
 };
@@ -220,7 +220,7 @@ const sendRequest = async (
     return err({
       type: "request_failed",
       message: body.error || "Failed to build request body",
-      code: 500,
+      statusCode: 500,
     });
   }
 
@@ -249,7 +249,7 @@ const sendRequest = async (
     return err({
       type: "request_failed",
       message: error instanceof Error ? error.message : "Unknown error",
-      code: 500,
+      statusCode: 500,
     });
   }
 };
@@ -273,7 +273,7 @@ const attemptDirectProviderRequest = async (
     return err({
       type: "missing_provider_key",
       message: "Missing/Incorrect provider key",
-      code: 400,
+      statusCode: 400,
     });
   }
 
@@ -300,7 +300,7 @@ const attemptDirectProviderRequest = async (
       return err({
         type: "request_failed",
         message: fallback.error || "Failed to create fallback endpoint",
-        code: 500,
+        statusCode: 500,
       });
     }
 
@@ -327,7 +327,7 @@ const attemptDirectProviderRequest = async (
     return err({
       type: "request_failed",
       message: modelProviderConfig.error || "Failed to get endpoint config",
-      code: 500,
+      statusCode: 500,
     });
   }
 
@@ -340,7 +340,7 @@ const attemptDirectProviderRequest = async (
     return err({
       type: "request_failed",
       message: byokEndpoint.error || "Failed to build BYOK endpoint",
-      code: 500,
+      statusCode: 500,
     });
   }
 
@@ -366,7 +366,7 @@ const attemptDirectProviderRequest = async (
   return err({
     type: "request_failed",
     message: "All models failed",
-    code: 500,
+    statusCode: 500,
   });
 };
 
@@ -413,7 +413,7 @@ const attemptProvidersRequest = async (
     error ?? {
       type: "request_failed",
       message: "All models failed",
-      code: 500,
+      statusCode: 500,
     }
   );
 };
@@ -484,7 +484,7 @@ export const attemptModelRequestWithFallback = async ({
     return err({
       type: "invalid_format",
       message: "No models provided",
-      code: 400,
+      statusCode: 400,
     });
   }
 
@@ -499,7 +499,7 @@ export const attemptModelRequestWithFallback = async ({
       return err({
         type: "invalid_prompt",
         message: result.error,
-        code: 400,
+        statusCode: 400,
       });
     }
 
@@ -512,7 +512,7 @@ export const attemptModelRequestWithFallback = async ({
               `Variable '${error.variable}' is '${error.expected}' but got '${error.value}'`
           )
           .join("\n"),
-        code: 400,
+        statusCode: 400,
       });
     }
 
@@ -546,7 +546,7 @@ export const attemptModelRequestWithFallback = async ({
     error ?? {
       type: "request_failed",
       message: "All models failed",
-      code: 500,
+      statusCode: 500,
     }
   );
 };

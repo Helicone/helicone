@@ -91,9 +91,21 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
       });
 
       if (isErr(result)) {
-        return new Response(result.error.message, {
-          status: result.error.code,
-        });
+        return new Response(
+          JSON.stringify({
+            support:
+              "Please reach out on our discord or email us at help@helicone.ai, we'd love to help!",
+            message: result.error.message,
+            type: result.error.type,
+          }),
+          {
+            status: result.error.statusCode,
+            headers: {
+              "content-type": "application/json;charset=UTF-8",
+              "helicone-error": "true",
+            },
+          }
+        );
       }
 
       return result.data;
