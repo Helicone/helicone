@@ -1,0 +1,81 @@
+name: Test Filters Package
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'packages/filters/**'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'packages/filters/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: 'packages/filters/package-lock.json'
+    
+    - name: Install dependencies
+      working-directory: ./packages/filters
+      run: npm ci
+    
+    - name: Run type checking
+      working-directory: ./packages/filters
+      run: npm run type-check
+    
+    - name: Run linting
+      working-directory: ./packages/filters
+      run: npm run lint
+    
+    - name: Run tests
+      working-directory: ./packages/filters
+      run: npm run test:coverage
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./packages/filters/coverage/lcov.info
+        flags: filters
+        name: filters-coverage
+        fail_ci_if_error: false
+
+  test-suites:
+    runs-on: ubuntu-latest
+    needs: test
+    
+    strategy:
+      matrix:
+        test-suite: [expressions, builders, helpers, frontend, edge-cases]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Use Node.js 20.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20.x
+        cache: 'npm'
+        cache-dependency-path: 'packages/filters/package-lock.json'
+    
+    - name: Install dependencies
+      working-directory: ./packages/filters
+      run: npm ci
+    
+    - name: Run ${{ matrix.test-suite }} tests
+      working-directory: ./packages/filters
+      run: npm run test:${{ matrix.test-suite }}
