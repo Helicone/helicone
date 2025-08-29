@@ -1450,8 +1450,6 @@ export class AdminController extends Controller {
       completion_tokens,
       completion_audio_tokens,
       cache_reference_id,
-      gateway_router_id,
-      gateway_deployment_target,
       prompt_tokens,
       prompt_cache_write_tokens,
       prompt_cache_read_tokens,

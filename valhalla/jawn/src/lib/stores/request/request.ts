@@ -275,8 +275,6 @@ export async function getRequestsClickhouse(
       cache_reference_id,
       request_referrer,
       cache_enabled,
-      gateway_router_id,
-      gateway_deployment_target,
       cost / ${COST_PRECISION_MULTIPLIER} as cost,
       prompt_id,
       prompt_version,

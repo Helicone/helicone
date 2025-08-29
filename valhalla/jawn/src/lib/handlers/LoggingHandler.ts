@@ -607,10 +607,6 @@ export class LoggingHandler extends AbstractLogHandler {
       cache_reference_id:
         context.message.log.request.cacheReferenceId ?? undefined,
       cache_enabled: context.message.log.request.cacheEnabled ?? false,
-      gateway_router_id:
-        context.message.heliconeMeta.gatewayRouterId ?? undefined,
-      gateway_deployment_target:
-        context.message.heliconeMeta.gatewayDeploymentTarget ?? undefined,
       prompt_id: context.message.heliconeMeta.promptId ?? "",
       prompt_version: context.message.heliconeMeta.promptVersionId ?? "",
       request_referrer: context.message.log.request.requestReferrer ?? "",
