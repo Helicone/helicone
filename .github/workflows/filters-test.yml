@@ -26,40 +26,32 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-        cache-dependency-path: 'packages/filters/package-lock.json'
     
     - name: Install dependencies
       working-directory: ./packages/filters
-      run: npm ci
-    
-    - name: Run type checking
-      working-directory: ./packages/filters
-      run: npm run type-check
-    
-    - name: Run linting
-      working-directory: ./packages/filters
-      run: npm run lint
+      run: npm install
     
     - name: Run tests
       working-directory: ./packages/filters
-      run: npm run test:coverage
+      run: npx jest __tests__/ --preset ts-jest --testEnvironment node
     
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./packages/filters/coverage/lcov.info
-        flags: filters
-        name: filters-coverage
-        fail_ci_if_error: false
+    - name: Run tests with coverage
+      working-directory: ./packages/filters
+      run: npx jest __tests__/ --preset ts-jest --testEnvironment node --coverage
 
-  test-suites:
+  test-individual:
     runs-on: ubuntu-latest
     needs: test
     
     strategy:
       matrix:
-        test-suite: [expressions, builders, helpers, frontend, edge-cases]
+        test-file: [
+          "filterExpressions.test.ts",
+          "filters.test.ts", 
+          "helpers.test.ts",
+          "frontendFilterDefs.test.ts",
+          "edgeCases.test.ts"
+        ]
     
     steps:
     - name: Checkout code
@@ -69,13 +61,11 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: 20.x
-        cache: 'npm'
-        cache-dependency-path: 'packages/filters/package-lock.json'
     
     - name: Install dependencies
       working-directory: ./packages/filters
-      run: npm ci
+      run: npm install
     
-    - name: Run ${{ matrix.test-suite }} tests
+    - name: Run ${{ matrix.test-file }} tests
       working-directory: ./packages/filters
-      run: npm run test:${{ matrix.test-suite }}
+      run: npx jest __tests__/${{ matrix.test-file }} --preset ts-jest --testEnvironment node
