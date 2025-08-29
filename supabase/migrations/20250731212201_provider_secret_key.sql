@@ -37,6 +37,10 @@ DROP FUNCTION IF EXISTS provider_keys_encrypt_secret_provider_key();
 -- BEFORE INSERT OR UPDATE ON provider_keys
 -- FOR EACH ROW EXECUTE FUNCTION provider_keys_encrypt_secret_provider_key();
 
+-- Add missing columns that should have been added earlier
+ALTER TABLE provider_keys ADD COLUMN IF NOT EXISTS key_id UUID DEFAULT NULL;
+ALTER TABLE provider_keys ADD COLUMN IF NOT EXISTS nonce BYTEA DEFAULT NULL;
+
 create view public.decrypted_provider_keys_v2 as
  SELECT provider_keys.id,
     provider_keys.org_id,
