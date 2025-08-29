@@ -577,7 +577,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
 
   // Filter provider keys for this specific provider
   const existingKeys = providerKeys.filter(
-    (key) => key.provider_name === provider.name && !key.soft_delete,
+    (key) => key.provider_name === provider.id && !key.soft_delete,
   );
 
   // If provider doesn't allow multiple instances, use the original behavior
