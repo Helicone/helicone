@@ -6,7 +6,7 @@ on:
     paths:
       - 'packages/filters/**'
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, develop, filters-test-ci ]
     paths:
       - 'packages/filters/**'
 
