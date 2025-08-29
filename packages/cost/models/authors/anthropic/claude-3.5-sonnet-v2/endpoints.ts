@@ -6,16 +6,19 @@ export const endpoints = {
   "claude-3.5-sonnet-v2:anthropic": {
     providerModelId: "claude-3-5-sonnet-20241022",
     provider: "anthropic",
-    pricing: {
-      prompt: 0.000003,
-      completion: 0.000015,
-      cacheRead: 0.0000003,
-      cacheWrite: {
-        "5m": 0.00000375,
-        "1h": 0.000006,
-        default: 0.00000375,
+    author: "anthropic",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.000003,
+        output: 0.000015,
+        cacheMultipliers: {
+          read: 0.1,
+          write5m: 1.25,
+          write1h: 2.0,
+        },
       },
-    },
+    ],
     contextLength: 200000,
     maxCompletionTokens: 8192,
     supportedParameters: [
@@ -35,13 +38,19 @@ export const endpoints = {
   "claude-3.5-sonnet-v2:vertex": {
     providerModelId: "claude-3-5-sonnet-v2@20241022",
     provider: "vertex",
+    author: "anthropic",
     version: "vertex-2023-10-16",
-    pricing: {
-      prompt: 0.000003,
-      completion: 0.000015,
-      cacheRead: 0.0000003,
-      cacheWrite: 0.00000375,
-    },
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.000003,
+        output: 0.000015,
+        cacheMultipliers: {
+          read: 0.1,
+          write5m: 1.25,
+        },
+      },
+    ],
     contextLength: 200000,
     maxCompletionTokens: 8192,
     supportedParameters: [
@@ -62,15 +71,21 @@ export const endpoints = {
   },
   "claude-3.5-sonnet-v2:bedrock": {
     provider: "bedrock",
+    author: "anthropic",
     providerModelId: "anthropic.claude-3-5-sonnet-20241022-v2:0",
     version: "20241022",
     crossRegion: true,
-    pricing: {
-      prompt: 0.000003,
-      completion: 0.000015,
-      cacheRead: 0.0000003,
-      cacheWrite: 0.00000375,
-    },
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.000003,
+        output: 0.000015,
+        cacheMultipliers: {
+          read: 0.1,
+          write5m: 1.25,
+        },
+      },
+    ],
     contextLength: 200000,
     maxCompletionTokens: 8192,
     supportedParameters: [

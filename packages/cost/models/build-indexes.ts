@@ -18,6 +18,7 @@ function mergeConfigs(
   });
 
   return {
+    author: modelProviderConfig.author,
     baseUrl: baseUrl.data ?? "",
     provider: modelProviderConfig.provider,
     providerModelId:
@@ -117,8 +118,8 @@ export function buildIndexes(
 
   // Sort endpoints by cost (ascending)
   const sortByCost = (a: Endpoint, b: Endpoint) => {
-    const aCost = a.pricing.prompt + a.pricing.completion;
-    const bCost = b.pricing.prompt + b.pricing.completion;
+    const aCost = (a.pricing[0]?.input ?? 0) + (a.pricing[0]?.output ?? 0);
+    const bCost = (b.pricing[0]?.input ?? 0) + (b.pricing[0]?.output ?? 0);
     return aCost - bCost;
   };
 

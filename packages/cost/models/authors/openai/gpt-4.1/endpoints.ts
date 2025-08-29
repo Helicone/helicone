@@ -1,16 +1,18 @@
 import { ProviderName } from "../../../providers";
 import type { ModelProviderConfig } from "../../../types";
 import { GPT41ModelName } from "./models";
-
 export const endpoints = {
   "gpt-4.1:openai": {
     providerModelId: "gpt-4.1",
     provider: "openai",
-    pricing: {
-      prompt: 0.000002,
-      completion: 0.000008,
-      cacheRead: 0.0000005,
-    },
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.000002,
+        output: 0.000008,
+      },
+    ],
     contextLength: 1047576,
     maxCompletionTokens: 32768,
     supportedParameters: [
@@ -33,11 +35,14 @@ export const endpoints = {
   "gpt-4.1:azure-openai": {
     providerModelId: "gpt-4.1",
     provider: "azure-openai",
-    pricing: {
-      prompt: 0.000002,
-      completion: 0.000008,
-      cacheRead: 0.0000005,
-    },
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.000002,
+        output: 0.000008,
+      },
+    ],
     contextLength: 1047576,
     maxCompletionTokens: 32768,
     supportedParameters: [
@@ -60,11 +65,14 @@ export const endpoints = {
   "gpt-4.1-mini:openai": {
     providerModelId: "gpt-4.1-mini",
     provider: "openai",
-    pricing: {
-      prompt: 0.00000025,
-      completion: 0.000001,
-      cacheRead: 0.0000001,
-    },
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000025,
+        output: 0.000001,
+      },
+    ],
     contextLength: 1047576,
     maxCompletionTokens: 32768,
     supportedParameters: [
@@ -87,11 +95,14 @@ export const endpoints = {
   "gpt-4.1-mini:azure-openai": {
     providerModelId: "gpt-4.1-mini",
     provider: "azure-openai",
-    pricing: {
-      prompt: 0.0000004,
-      completion: 0.000001,
-      cacheRead: 0.0000001,
-    },
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000004,
+        output: 0.000001,
+      },
+    ],
     contextLength: 1047576,
     maxCompletionTokens: 32768,
     supportedParameters: [
@@ -114,11 +125,14 @@ export const endpoints = {
   "gpt-4.1-nano:openai": {
     providerModelId: "gpt-4.1-nano",
     provider: "openai",
-    pricing: {
-      prompt: 0.0000001,
-      completion: 0.0000004,
-      cacheRead: 0.00000005,
-    },
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000001,
+        output: 0.0000004,
+      },
+    ],
     contextLength: 1047576,
     maxCompletionTokens: 32768,
     supportedParameters: [
@@ -141,11 +155,14 @@ export const endpoints = {
   "gpt-4.1-nano:azure-openai": {
     providerModelId: "gpt-4.1-nano",
     provider: "azure-openai",
-    pricing: {
-      prompt: 0.0000001,
-      completion: 0.0000004,
-      cacheRead: 0.00000003,
-    },
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000001,
+        output: 0.0000004,
+      },
+    ],
     contextLength: 1047576,
     maxCompletionTokens: 32768,
     supportedParameters: [

@@ -310,7 +310,7 @@ export default function AdminModelsPage() {
                 const endpoints = registryData.endpoints[modelKey] || [];
                 const isDisabled = endpoints.length === 0;
                 const costs = endpoints.map(
-                  (ep: ModelEndpoint) => ep.pricing.prompt,
+                  (ep: ModelEndpoint) => ep.pricing[0]?.input,
                 );
                 const minCost = costs.length > 0 ? Math.min(...costs) : 0;
                 const maxCost = costs.length > 0 ? Math.max(...costs) : 0;
@@ -375,7 +375,7 @@ export default function AdminModelsPage() {
                           registryData.endpoints[variantKey] || [];
                         const isVariantDisabled = variantEndpoints.length === 0;
                         const variantCosts = variantEndpoints.map(
-                          (ep: ModelEndpoint) => ep.pricing.prompt,
+                          (ep: ModelEndpoint) => ep.pricing[0]?.input,
                         );
                         const variantMinCost =
                           variantCosts.length > 0

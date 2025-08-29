@@ -22,7 +22,7 @@ export const providers = {
   deepseek: new DeepSeekProvider(),
   cohere: new CohereProvider(),
   xai: new XAIProvider(),
-  google: new GoogleProvider(),
+  "google-ai-studio": new GoogleProvider(),
 } as const;
 
 export type ProviderName = keyof typeof providers;

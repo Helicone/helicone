@@ -1,0 +1,100 @@
+import { ProviderName } from "../../../providers";
+import type { ModelProviderConfig } from "../../../types";
+import { Gemini25ProModelName } from "./model";
+
+export const endpoints = {
+  "gemini-2.5-pro:google-ai-studio": {
+    providerModelId: "gemini-2.5-pro",
+    provider: "google-ai-studio",
+    author: "google",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000125,
+        output: 0.00001,
+        image: 0.00516,
+        cacheMultipliers: {
+          read: 0.25,
+          write5m: 1.0,
+        },
+        cacheStoragePerHour: 0.0000045,
+      },
+      {
+        threshold: 200000,
+        input: 0.0000025,
+        output: 0.000015,
+        image: 0.00516,
+      },
+    ],
+    contextLength: 1048576,
+    maxCompletionTokens: 65536,
+    supportedParameters: [
+      "include_reasoning",
+      "max_tokens",
+      "reasoning",
+      "response_format",
+      "seed",
+      "stop",
+      "structured_outputs",
+      "temperature",
+      "tool_choice",
+      "tools",
+      "top_p",
+    ],
+    rateLimits: {
+      rpm: 2_000,
+      tpm: 8_000_000,
+    },
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "gemini-2.5-pro:vertex": {
+    providerModelId: "gemini-2.5-pro",
+    provider: "vertex",
+    author: "google",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000125,
+        output: 0.00001,
+        image: 0.00516,
+        cacheMultipliers: {
+          read: 0.25,
+          write5m: 1.0,
+        },
+        cacheStoragePerHour: 0.0000045,
+      },
+      {
+        threshold: 200000,
+        input: 0.0000025,
+        output: 0.000015,
+        image: 0.00516,
+      },
+    ],
+    contextLength: 1048576,
+    maxCompletionTokens: 65536,
+    supportedParameters: [
+      "include_reasoning",
+      "max_tokens",
+      "reasoning",
+      "response_format",
+      "seed",
+      "stop",
+      "structured_outputs",
+      "temperature",
+      "tool_choice",
+      "tools",
+      "top_p",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      global: {
+        providerModelId: "gemini-2.5-pro",
+      },
+    },
+  },
+} satisfies Partial<
+  Record<`${Gemini25ProModelName}:${ProviderName}`, ModelProviderConfig>
+>;

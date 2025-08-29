@@ -1,16 +1,18 @@
 import { ProviderName } from "../../../providers";
 import type { ModelProviderConfig } from "../../../types";
 import { O4ModelName } from "./models";
-
 export const endpoints = {
   "o4-mini:openai": {
     providerModelId: "o4-mini",
     provider: "openai",
-    pricing: {
-      prompt: 0.0000011,
-      completion: 0.0000044,
-      cacheRead: 0.000000275,
-    },
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000011,
+        output: 0.0000044,
+      },
+    ],
     contextLength: 200000,
     maxCompletionTokens: 100000,
     supportedParameters: [
@@ -28,11 +30,14 @@ export const endpoints = {
   "o4-mini:azure-openai": {
     providerModelId: "o4-mini",
     provider: "azure-openai",
-    pricing: {
-      prompt: 0.0000011,
-      completion: 0.0000044,
-      cacheRead: 0.000000275,
-    },
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000011,
+        output: 0.0000044,
+      },
+    ],
     contextLength: 200000,
     maxCompletionTokens: 100000,
     supportedParameters: [
@@ -50,11 +55,14 @@ export const endpoints = {
   "o4-mini-high:openai": {
     providerModelId: "o4-mini-high-2025-04-16",
     provider: "openai",
-    pricing: {
-      prompt: 0.0000011,
-      completion: 0.0000044,
-      cacheRead: 0.000000275,
-    },
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000011,
+        output: 0.0000044,
+      },
+    ],
     contextLength: 200000,
     maxCompletionTokens: 100000,
     supportedParameters: [

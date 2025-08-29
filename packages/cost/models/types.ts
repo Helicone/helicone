@@ -27,7 +27,7 @@ export const AUTHORS = [
   "perplexity",
 ] as const;
 
-export type AuthorName = (typeof AUTHORS)[number];
+export type AuthorName = (typeof AUTHORS)[number] | "fallback";
 
 export type InputModality = "text" | "image" | "audio" | "video";
 export type OutputModality = "text" | "image" | "audio" | "video";
@@ -78,17 +78,16 @@ export type StandardParameter =
   | "structured_outputs";
 
 export interface ModelPricing {
-  prompt: number;
-  completion: number;
+  threshold: number;
+  input: number;
+  output: number;
   image?: number;
-  cacheRead?: number;
-  cacheWrite?:
-    | number
-    | {
-        "5m": number;
-        "1h": number;
-        default: number;
-      };
+  cacheMultipliers?: {
+    read: number;
+    write5m: number;
+    write1h?: number;
+  };
+  cacheStoragePerHour?: number;
   thinking?: number;
   request?: number;
   audio?: number;
@@ -109,33 +108,42 @@ export interface ModelConfig {
 }
 
 interface BaseConfig {
-  pricing: ModelPricing;
+  pricing: ModelPricing[];
   contextLength: number;
   maxCompletionTokens: number;
   ptbEnabled: boolean;
   version?: string;
 }
 
+export interface RateLimits {
+  rpm?: number;
+  tpm?: number;
+}
+
 export interface ModelProviderConfig extends BaseConfig {
   providerModelId: string;
   provider: ProviderName;
+  author: AuthorName;
   supportedParameters: StandardParameter[];
+  rateLimits?: RateLimits;
   endpointConfigs: Record<string, EndpointConfig>;
   crossRegion?: boolean;
 }
 
 export interface EndpointConfig extends UserEndpointConfig {
   providerModelId?: string;
-  pricing?: ModelPricing;
+  pricing?: ModelPricing[];
   contextLength?: number;
   maxCompletionTokens?: number;
   ptbEnabled?: boolean;
   version?: string;
+  rateLimits?: RateLimits;
 }
 
 export interface Endpoint extends BaseConfig {
   baseUrl: string;
   provider: ProviderName;
+  author: AuthorName;
   providerModelId: string;
   supportedParameters: StandardParameter[];
 }

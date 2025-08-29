@@ -96,10 +96,14 @@ function createFallbackEndpoint(
     providerModelId: modelName,
     ptbEnabled: false,
     provider,
-    pricing: {
-      prompt: 0,
-      completion: 0,
-    },
+    author: "fallback",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0,
+        output: 0,
+      },
+    ],
     contextLength: 0,
     maxCompletionTokens: 0,
     supportedParameters: [],
@@ -141,6 +145,7 @@ function buildEndpoint(
   return ok({
     baseUrl: baseUrlResult.data ?? "",
     provider: endpointConfig.provider,
+    author: endpointConfig.author,
     providerModelId: modelIdResult.data ?? "",
     supportedParameters: endpointConfig.supportedParameters,
     pricing: endpointConfig.pricing,
@@ -171,17 +176,20 @@ function getModelProviders(model: string): Result<Set<ProviderName>> {
   return ok(providers);
 }
 
-function getPtbEndpointsWithIds(model: string, provider: string): Result<Record<string, string>> {
+function getPtbEndpointsWithIds(
+  model: string,
+  provider: string
+): Result<Record<string, string>> {
   const result: Record<string, string> = {};
   const prefix = `${model}:${provider}:`;
-  
+
   indexes.endpointIdToEndpoint.forEach((endpoint, endpointId) => {
     if (endpointId.startsWith(prefix) && endpoint.ptbEnabled) {
       const deploymentId = endpointId.substring(prefix.length);
       result[deploymentId] = endpoint.baseUrl;
     }
   });
-  
+
   return ok(result);
 }
 

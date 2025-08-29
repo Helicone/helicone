@@ -1,15 +1,18 @@
 import { ProviderName } from "../../../providers";
 import type { ModelProviderConfig } from "../../../types";
 import { GPT4ModelName } from "./models";
-
 export const endpoints = {
   "gpt-4:openai": {
     providerModelId: "gpt-4",
     provider: "openai",
-    pricing: {
-      prompt: 0.00003,
-      completion: 0.00006,
-    },
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00003,
+        output: 0.00006,
+      },
+    ],
     contextLength: 8191,
     maxCompletionTokens: 4096,
     supportedParameters: [
@@ -32,10 +35,14 @@ export const endpoints = {
   "gpt-4:azure-openai": {
     providerModelId: "gpt-4",
     provider: "azure-openai",
-    pricing: {
-      prompt: 0.00003,
-      completion: 0.00006,
-    },
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00003,
+        output: 0.00006,
+      },
+    ],
     contextLength: 8191,
     maxCompletionTokens: 4096,
     supportedParameters: [

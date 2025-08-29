@@ -1,17 +1,19 @@
 import { ProviderName } from "../../../providers";
 import type { ModelProviderConfig } from "../../../types";
 import { O1ModelName } from "./models";
-
 export const endpoints = {
   "o1:openai": {
     provider: "openai",
+    author: "openai",
     providerModelId: "o1",
-    pricing: {
-      prompt: 0.000015,
-      completion: 0.00006,
-      image: 0.000000021675,
-      cacheRead: 0.0000075,
-    },
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.000015,
+        output: 0.00006,
+        image: 0.000000021675,
+      },
+    ],
     contextLength: 200000,
     maxCompletionTokens: 100000,
     supportedParameters: [
@@ -28,13 +30,16 @@ export const endpoints = {
   },
   "o1:azure-openai": {
     provider: "azure-openai",
+    author: "openai",
     providerModelId: "o1",
-    pricing: {
-      prompt: 0.000015,
-      completion: 0.00006,
-      image: 0.000000021675,
-      cacheRead: 0.0000075,
-    },
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.000015,
+        output: 0.00006,
+        image: 0.000000021675,
+      },
+    ],
     contextLength: 200000,
     maxCompletionTokens: 100000,
     supportedParameters: [
@@ -51,12 +56,15 @@ export const endpoints = {
   },
   "o1-pro:openai": {
     provider: "openai",
+    author: "openai",
     providerModelId: "o1-pro",
-    pricing: {
-      prompt: 0.000015,
-      completion: 0.00006,
-      cacheRead: 0.0000075,
-    },
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.000015,
+        output: 0.00006,
+      },
+    ],
     contextLength: 200000,
     maxCompletionTokens: 100000,
     supportedParameters: [
@@ -73,12 +81,15 @@ export const endpoints = {
   },
   "o1-mini:openai": {
     provider: "openai",
+    author: "openai",
     providerModelId: "o1-mini",
-    pricing: {
-      prompt: 0.0000011,
-      completion: 0.0000044,
-      cacheRead: 0.00000055,
-    },
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000011,
+        output: 0.0000044,
+      },
+    ],
     contextLength: 128000,
     maxCompletionTokens: 65536,
     supportedParameters: ["seed", "max_tokens"],
@@ -89,12 +100,15 @@ export const endpoints = {
   },
   "o1-mini:azure-openai": {
     provider: "azure-openai",
+    author: "openai",
     providerModelId: "o1-mini",
-    pricing: {
-      prompt: 0.0000011,
-      completion: 0.0000044,
-      cacheRead: 0.00000055,
-    },
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000011,
+        output: 0.0000044,
+      },
+    ],
     contextLength: 128000,
     maxCompletionTokens: 65536,
     supportedParameters: ["seed", "max_tokens"],

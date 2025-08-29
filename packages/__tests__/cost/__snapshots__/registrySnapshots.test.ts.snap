@@ -380,56 +380,8 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
-  "google/gemini-2.5": {
-    "gemini-2.5-flash-lite-preview:google": {
-      "context": 1048576,
-      "crossRegion": false,
-      "maxTokens": 65535,
-      "modelId": "gemini-2.5-flash-lite-preview",
-      "parameters": [
-        "include_reasoning",
-        "max_tokens",
-        "reasoning",
-        "response_format",
-        "seed",
-        "stop",
-        "structured_outputs",
-        "temperature",
-        "tool_choice",
-        "tools",
-        "top_p",
-      ],
-      "provider": "google",
-      "ptbEnabled": false,
-      "regions": [
-        "*",
-      ],
-    },
-    "gemini-2.5-flash-lite:google": {
-      "context": 1048576,
-      "crossRegion": false,
-      "maxTokens": 65535,
-      "modelId": "gemini-2.5-flash-lite",
-      "parameters": [
-        "include_reasoning",
-        "max_tokens",
-        "reasoning",
-        "response_format",
-        "seed",
-        "stop",
-        "structured_outputs",
-        "temperature",
-        "tool_choice",
-        "tools",
-        "top_p",
-      ],
-      "provider": "google",
-      "ptbEnabled": false,
-      "regions": [
-        "*",
-      ],
-    },
-    "gemini-2.5-flash:google": {
+  "google/gemini-2.5-flash": {
+    "gemini-2.5-flash:google-ai-studio": {
       "context": 1048576,
       "crossRegion": false,
       "maxTokens": 65535,
@@ -447,39 +399,17 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
         "top_p",
       ],
-      "provider": "google",
-      "ptbEnabled": false,
+      "provider": "google-ai-studio",
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
     },
-    "gemini-2.5-pro-exp:google": {
+    "gemini-2.5-flash:vertex": {
       "context": 1048576,
       "crossRegion": false,
       "maxTokens": 65535,
-      "modelId": "gemini-2.5-pro-exp-03-25",
-      "parameters": [
-        "max_tokens",
-        "response_format",
-        "seed",
-        "stop",
-        "structured_outputs",
-        "temperature",
-        "tool_choice",
-        "tools",
-        "top_p",
-      ],
-      "provider": "google",
-      "ptbEnabled": false,
-      "regions": [
-        "*",
-      ],
-    },
-    "gemini-2.5-pro-preview:google": {
-      "context": 1048576,
-      "crossRegion": false,
-      "maxTokens": 65536,
-      "modelId": "gemini-2.5-pro-preview",
+      "modelId": "gemini-2.5-flash",
       "parameters": [
         "include_reasoning",
         "max_tokens",
@@ -493,13 +423,65 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
         "top_p",
       ],
-      "provider": "google",
-      "ptbEnabled": false,
+      "provider": "vertex",
+      "ptbEnabled": true,
+      "regions": [
+        "global",
+      ],
+    },
+  },
+  "google/gemini-2.5-flash-lite": {
+    "gemini-2.5-flash-lite:google-ai-studio": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 65535,
+      "modelId": "gemini-2.5-flash-lite",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "google-ai-studio",
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
     },
-    "gemini-2.5-pro:google": {
+    "gemini-2.5-flash-lite:vertex": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 65535,
+      "modelId": "gemini-2.5-flash-lite",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "vertex",
+      "ptbEnabled": true,
+      "regions": [
+        "global",
+      ],
+    },
+  },
+  "google/gemini-2.5-pro": {
+    "gemini-2.5-pro:google-ai-studio": {
       "context": 1048576,
       "crossRegion": false,
       "maxTokens": 65536,
@@ -517,10 +499,34 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
         "top_p",
       ],
-      "provider": "google",
-      "ptbEnabled": false,
+      "provider": "google-ai-studio",
+      "ptbEnabled": true,
       "regions": [
         "*",
+      ],
+    },
+    "gemini-2.5-pro:vertex": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "gemini-2.5-pro",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "vertex",
+      "ptbEnabled": true,
+      "regions": [
+        "global",
       ],
     },
   },
@@ -1253,13 +1259,17 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "bedrock",
     "vertex",
   ],
-  "google/gemini-2.5": [
-    "google",
-    "google",
-    "google",
-    "google",
-    "google",
-    "google",
+  "google/gemini-2.5-flash": [
+    "google-ai-studio",
+    "vertex",
+  ],
+  "google/gemini-2.5-flash-lite": [
+    "google-ai-studio",
+    "vertex",
+  ],
+  "google/gemini-2.5-pro": [
+    "google-ai-studio",
+    "vertex",
   ],
   "openai/gpt-4": [
     "azure-openai",
@@ -1314,239 +1324,443 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
 exports[`Registry Snapshots pricing snapshot 1`] = `
 {
   "anthropic/claude-3.5-haiku": {
-    "anthropic": {
-      "cacheRead": 8e-8,
-      "cacheWrite": {
-        "1h": 0.0000016,
-        "5m": 0.000001,
-        "default": 0.000001,
+    "anthropic": [
+      {
+        "cacheMultipliers": {
+          "read": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 8e-7,
+        "output": 0.000004,
+        "threshold": 0,
       },
-      "completion": 0.000004,
-      "prompt": 8e-7,
-    },
-    "bedrock": {
-      "cacheRead": 8e-8,
-      "cacheWrite": 0.000001,
-      "completion": 0.000004,
-      "prompt": 8e-7,
-    },
-    "vertex": {
-      "cacheRead": 8e-8,
-      "cacheWrite": 0.000001,
-      "completion": 0.000004,
-      "prompt": 8e-7,
-    },
+    ],
+    "bedrock": [
+      {
+        "cacheMultipliers": {
+          "read": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 8e-7,
+        "output": 0.000004,
+        "threshold": 0,
+      },
+    ],
+    "vertex": [
+      {
+        "cacheMultipliers": {
+          "read": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 8e-7,
+        "output": 0.000004,
+        "threshold": 0,
+      },
+    ],
   },
   "anthropic/claude-3.5-sonnet-v2": {
-    "anthropic": {
-      "cacheRead": 3e-7,
-      "cacheWrite": {
-        "1h": 0.000006,
-        "5m": 0.00000375,
-        "default": 0.00000375,
+    "anthropic": [
+      {
+        "cacheMultipliers": {
+          "read": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
       },
-      "completion": 0.000015,
-      "prompt": 0.000003,
-    },
-    "bedrock": {
-      "cacheRead": 3e-7,
-      "cacheWrite": 0.00000375,
-      "completion": 0.000015,
-      "prompt": 0.000003,
-    },
-    "vertex": {
-      "cacheRead": 3e-7,
-      "cacheWrite": 0.00000375,
-      "completion": 0.000015,
-      "prompt": 0.000003,
-    },
+    ],
+    "bedrock": [
+      {
+        "cacheMultipliers": {
+          "read": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
+      },
+    ],
+    "vertex": [
+      {
+        "cacheMultipliers": {
+          "read": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
+      },
+    ],
   },
   "anthropic/claude-3.7-sonnet": {
-    "anthropic": {
-      "cacheRead": 3e-7,
-      "cacheWrite": {
-        "1h": 0.000006,
-        "5m": 0.00000375,
-        "default": 0.00000375,
+    "anthropic": [
+      {
+        "cacheMultipliers": {
+          "read": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
       },
-      "completion": 0.000015,
-      "prompt": 0.000003,
-    },
-    "bedrock": {
-      "cacheRead": 3e-7,
-      "cacheWrite": 0.00000375,
-      "completion": 0.000015,
-      "prompt": 0.000003,
-    },
-    "vertex": {
-      "cacheRead": 3e-7,
-      "cacheWrite": 0.00000375,
-      "completion": 0.000015,
-      "prompt": 0.000003,
-    },
+    ],
+    "bedrock": [
+      {
+        "cacheMultipliers": {
+          "read": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
+      },
+    ],
+    "vertex": [
+      {
+        "cacheMultipliers": {
+          "read": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
+      },
+    ],
   },
   "anthropic/claude-opus-4": {
-    "anthropic": {
-      "cacheRead": 0.0000015,
-      "cacheWrite": {
-        "1h": 0.00003,
-        "5m": 0.00001875,
-        "default": 0.00001875,
+    "anthropic": [
+      {
+        "cacheMultipliers": {
+          "read": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000015,
+        "output": 0.000075,
+        "threshold": 0,
       },
-      "completion": 0.000075,
-      "prompt": 0.000015,
-    },
-    "bedrock": {
-      "cacheRead": 0.0000015,
-      "cacheWrite": 0.00001875,
-      "completion": 0.000075,
-      "prompt": 0.000015,
-    },
-    "vertex": {
-      "cacheRead": 0.0000015,
-      "cacheWrite": 0.00001875,
-      "completion": 0.000075,
-      "prompt": 0.000015,
-    },
+    ],
+    "bedrock": [
+      {
+        "cacheMultipliers": {
+          "read": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000015,
+        "output": 0.000075,
+        "threshold": 0,
+      },
+    ],
+    "vertex": [
+      {
+        "cacheMultipliers": {
+          "read": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000015,
+        "output": 0.000075,
+        "threshold": 0,
+      },
+    ],
   },
   "anthropic/claude-opus-4-1": {
-    "anthropic": {
-      "cacheRead": 0.0000015,
-      "cacheWrite": {
-        "1h": 0.00003,
-        "5m": 0.00001875,
-        "default": 0.00001875,
+    "anthropic": [
+      {
+        "cacheMultipliers": {
+          "read": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000015,
+        "output": 0.000075,
+        "threshold": 0,
       },
-      "completion": 0.000075,
-      "prompt": 0.000015,
-    },
-    "bedrock": {
-      "cacheRead": 0.0000015,
-      "cacheWrite": 0.00001875,
-      "completion": 0.000075,
-      "prompt": 0.000015,
-    },
-    "vertex": {
-      "cacheRead": 0.0000015,
-      "cacheWrite": 0.00001875,
-      "completion": 0.000075,
-      "prompt": 0.000015,
-    },
+    ],
+    "bedrock": [
+      {
+        "cacheMultipliers": {
+          "read": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000015,
+        "output": 0.000075,
+        "threshold": 0,
+      },
+    ],
+    "vertex": [
+      {
+        "cacheMultipliers": {
+          "read": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000015,
+        "output": 0.000075,
+        "threshold": 0,
+      },
+    ],
   },
   "anthropic/claude-sonnet-4": {
-    "anthropic": {
-      "cacheRead": 3e-7,
-      "cacheWrite": {
-        "1h": 0.000006,
-        "5m": 0.00000375,
-        "default": 0.00000375,
+    "anthropic": [
+      {
+        "cacheMultipliers": {
+          "read": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
       },
-      "completion": 0.000015,
-      "prompt": 0.000003,
-    },
-    "bedrock": {
-      "cacheRead": 3e-7,
-      "cacheWrite": 0.00000375,
-      "completion": 0.000015,
-      "prompt": 0.000003,
-    },
-    "vertex": {
-      "cacheRead": 3e-7,
-      "cacheWrite": 0.00000375,
-      "completion": 0.000015,
-      "prompt": 0.000003,
-    },
+      {
+        "input": 0.000006,
+        "output": 0.0000225,
+        "threshold": 200000,
+      },
+    ],
+    "bedrock": [
+      {
+        "cacheMultipliers": {
+          "read": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
+      },
+      {
+        "input": 0.000006,
+        "output": 0.0000225,
+        "threshold": 200000,
+      },
+    ],
+    "vertex": [
+      {
+        "cacheMultipliers": {
+          "read": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
+      },
+      {
+        "input": 0.000006,
+        "output": 0.0000225,
+        "threshold": 200000,
+      },
+    ],
   },
-  "google/gemini-2.5": {
-    "google": {
-      "audio": 0,
-      "completion": 0,
-      "image": 0,
-      "internal_reasoning": 0,
-      "prompt": 0,
-      "request": 0,
-      "web_search": 0,
-    },
+  "google/gemini-2.5-flash": {
+    "google-ai-studio": [
+      {
+        "audio": 0.000001,
+        "cacheMultipliers": {
+          "read": 0.25,
+          "write5m": 1,
+        },
+        "cacheStoragePerHour": 0.000001,
+        "image": 0.001238,
+        "input": 3e-7,
+        "output": 0.0000025,
+        "threshold": 0,
+      },
+    ],
+    "vertex": [
+      {
+        "audio": 0.000001,
+        "cacheMultipliers": {
+          "read": 0.25,
+          "write5m": 1,
+        },
+        "cacheStoragePerHour": 0.000001,
+        "image": 0.001238,
+        "input": 3e-7,
+        "output": 0.0000025,
+        "threshold": 0,
+      },
+    ],
+  },
+  "google/gemini-2.5-flash-lite": {
+    "google-ai-studio": [
+      {
+        "audio": 3e-7,
+        "cacheMultipliers": {
+          "read": 0.25,
+          "write5m": 1,
+        },
+        "cacheStoragePerHour": 0.000001,
+        "input": 1e-7,
+        "output": 4e-7,
+        "threshold": 0,
+      },
+    ],
+    "vertex": [
+      {
+        "audio": 3e-7,
+        "cacheMultipliers": {
+          "read": 0.25,
+          "write5m": 1,
+        },
+        "cacheStoragePerHour": 0.000001,
+        "input": 1e-7,
+        "output": 4e-7,
+        "threshold": 0,
+      },
+    ],
+  },
+  "google/gemini-2.5-pro": {
+    "google-ai-studio": [
+      {
+        "cacheMultipliers": {
+          "read": 0.25,
+          "write5m": 1,
+        },
+        "cacheStoragePerHour": 0.0000045,
+        "image": 0.00516,
+        "input": 0.00000125,
+        "output": 0.00001,
+        "threshold": 0,
+      },
+      {
+        "image": 0.00516,
+        "input": 0.0000025,
+        "output": 0.000015,
+        "threshold": 200000,
+      },
+    ],
+    "vertex": [
+      {
+        "cacheMultipliers": {
+          "read": 0.25,
+          "write5m": 1,
+        },
+        "cacheStoragePerHour": 0.0000045,
+        "image": 0.00516,
+        "input": 0.00000125,
+        "output": 0.00001,
+        "threshold": 0,
+      },
+      {
+        "image": 0.00516,
+        "input": 0.0000025,
+        "output": 0.000015,
+        "threshold": 200000,
+      },
+    ],
   },
   "openai/gpt-4": {
-    "azure-openai": {
-      "completion": 0.00006,
-      "prompt": 0.00003,
-    },
-    "openai": {
-      "completion": 0.00006,
-      "prompt": 0.00003,
-    },
+    "azure-openai": [
+      {
+        "input": 0.00003,
+        "output": 0.00006,
+        "threshold": 0,
+      },
+    ],
+    "openai": [
+      {
+        "input": 0.00003,
+        "output": 0.00006,
+        "threshold": 0,
+      },
+    ],
   },
   "openai/gpt-4.1": {
-    "azure-openai": {
-      "cacheRead": 3e-8,
-      "completion": 4e-7,
-      "prompt": 1e-7,
-    },
-    "openai": {
-      "cacheRead": 5e-8,
-      "completion": 4e-7,
-      "prompt": 1e-7,
-    },
+    "azure-openai": [
+      {
+        "input": 1e-7,
+        "output": 4e-7,
+        "threshold": 0,
+      },
+    ],
+    "openai": [
+      {
+        "input": 1e-7,
+        "output": 4e-7,
+        "threshold": 0,
+      },
+    ],
   },
   "openai/gpt-4o": {
-    "azure-openai": {
-      "cacheRead": 7.5e-8,
-      "completion": 6e-7,
-      "prompt": 1.5e-7,
-    },
-    "openai": {
-      "completion": 0.00001,
-      "prompt": 0.0000025,
-    },
+    "azure-openai": [
+      {
+        "input": 1.5e-7,
+        "output": 6e-7,
+        "threshold": 0,
+      },
+    ],
+    "openai": [
+      {
+        "input": 0.0000025,
+        "output": 0.00001,
+        "threshold": 0,
+      },
+    ],
   },
   "openai/o1": {
-    "azure-openai": {
-      "cacheRead": 5.5e-7,
-      "completion": 0.0000044,
-      "prompt": 0.0000011,
-    },
-    "openai": {
-      "cacheRead": 5.5e-7,
-      "completion": 0.0000044,
-      "prompt": 0.0000011,
-    },
+    "azure-openai": [
+      {
+        "input": 0.0000011,
+        "output": 0.0000044,
+        "threshold": 0,
+      },
+    ],
+    "openai": [
+      {
+        "input": 0.0000011,
+        "output": 0.0000044,
+        "threshold": 0,
+      },
+    ],
   },
   "openai/o3": {
-    "azure-openai": {
-      "cacheRead": 5.5e-7,
-      "completion": 0.0000044,
-      "prompt": 0.0000011,
-    },
-    "openai": {
-      "cacheRead": 5.5e-7,
-      "completion": 0.0000044,
-      "prompt": 0.0000011,
-    },
+    "azure-openai": [
+      {
+        "input": 0.0000011,
+        "output": 0.0000044,
+        "threshold": 0,
+      },
+    ],
+    "openai": [
+      {
+        "input": 0.0000011,
+        "output": 0.0000044,
+        "threshold": 0,
+      },
+    ],
   },
   "openai/o4": {
-    "azure-openai": {
-      "cacheRead": 2.75e-7,
-      "completion": 0.0000044,
-      "prompt": 0.0000011,
-    },
-    "openai": {
-      "cacheRead": 2.75e-7,
-      "completion": 0.0000044,
-      "prompt": 0.0000011,
-    },
+    "azure-openai": [
+      {
+        "input": 0.0000011,
+        "output": 0.0000044,
+        "threshold": 0,
+      },
+    ],
+    "openai": [
+      {
+        "input": 0.0000011,
+        "output": 0.0000044,
+        "threshold": 0,
+      },
+    ],
   },
   "openai/oss": {
-    "groq": {
-      "audio": 0,
-      "completion": 5e-7,
-      "image": 0,
-      "internal_reasoning": 0,
-      "prompt": 1e-7,
-      "request": 0,
-      "web_search": 0,
-    },
+    "groq": [
+      {
+        "audio": 0,
+        "image": 0,
+        "input": 1e-7,
+        "internal_reasoning": 0,
+        "output": 5e-7,
+        "request": 0,
+        "threshold": 0,
+        "web_search": 0,
+      },
+    ],
   },
 }
 `;
@@ -1611,37 +1825,22 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     {
       "model": "gemini-2.5-flash",
       "providers": [
-        "google",
+        "google-ai-studio",
+        "vertex",
       ],
     },
     {
       "model": "gemini-2.5-flash-lite",
       "providers": [
-        "google",
-      ],
-    },
-    {
-      "model": "gemini-2.5-flash-lite-preview",
-      "providers": [
-        "google",
+        "google-ai-studio",
+        "vertex",
       ],
     },
     {
       "model": "gemini-2.5-pro",
       "providers": [
-        "google",
-      ],
-    },
-    {
-      "model": "gemini-2.5-pro-exp",
-      "providers": [
-        "google",
-      ],
-    },
-    {
-      "model": "gemini-2.5-pro-preview",
-      "providers": [
-        "google",
+        "google-ai-studio",
+        "vertex",
       ],
     },
     {
@@ -1790,8 +1989,8 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "provider": "extended",
     },
     {
-      "modelCount": 6,
-      "provider": "google",
+      "modelCount": 3,
+      "provider": "google-ai-studio",
     },
     {
       "modelCount": 2,
@@ -1802,7 +2001,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "provider": "openai",
     },
     {
-      "modelCount": 6,
+      "modelCount": 9,
       "provider": "vertex",
     },
   ],
@@ -1814,6 +2013,9 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "claude-opus-4",
     "claude-opus-4-1",
     "claude-sonnet-4",
+    "gemini-2.5-flash",
+    "gemini-2.5-flash-lite",
+    "gemini-2.5-pro",
     "gpt-4",
     "gpt-4.1",
     "gpt-4.1-mini",
@@ -1843,7 +2045,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
   ],
   "totalEndpoints": 57,
   "totalModelProviderConfigs": 57,
-  "totalModelsWithPtb": 26,
+  "totalModelsWithPtb": 29,
   "totalProviders": 8,
 }
 `;

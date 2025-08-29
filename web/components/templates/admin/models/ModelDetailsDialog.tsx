@@ -165,69 +165,85 @@ export function ModelDetailsDialog({
                                 </div>
                               </div>
                               <div className="text-right">
-                                <div className="flex items-center gap-1 text-sm">
-                                  <DollarSign className="h-3 w-3" />
-                                  <span>
-                                    $
-                                    {(
-                                      endpoint.pricing.prompt / 1000000
-                                    ).toFixed(2)}
-                                  </span>
-                                  <span className="text-muted-foreground">
-                                    / 1K prompt
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-1 text-sm">
-                                  <DollarSign className="h-3 w-3" />
-                                  <span>
-                                    $
-                                    {(
-                                      endpoint.pricing.completion / 1000000
-                                    ).toFixed(2)}
-                                  </span>
-                                  <span className="text-muted-foreground">
-                                    / 1K completion
-                                  </span>
-                                </div>
+                                {/* Display pricing tiers */}
+                                {endpoint.pricing.map((tier, tierIdx) => (
+                                  <div key={tierIdx} className={tierIdx > 0 ? "mt-2 pt-2 border-t" : ""}>
+                                    {tier.threshold > 0 && (
+                                      <Small className="text-muted-foreground">
+                                        &gt;{(tier.threshold / 1000).toFixed(0)}K tokens
+                                      </Small>
+                                    )}
+                                    {tier.threshold === 0 && endpoint.pricing.length > 1 && (
+                                      <Small className="text-muted-foreground">
+                                        ≤{(endpoint.pricing[1]?.threshold / 1000).toFixed(0)}K tokens
+                                      </Small>
+                                    )}
+                                    <div className="flex items-center gap-1 text-sm">
+                                      <DollarSign className="h-3 w-3" />
+                                      <span>
+                                        $
+                                        {(
+                                          (tier.input ?? 0) * 1000
+                                        ).toFixed(2)}
+                                      </span>
+                                      <span className="text-muted-foreground">
+                                        / 1M input
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-1 text-sm">
+                                      <DollarSign className="h-3 w-3" />
+                                      <span>
+                                        $
+                                        {(
+                                          (tier.output ?? 0) * 1000
+                                        ).toFixed(2)}
+                                      </span>
+                                      <span className="text-muted-foreground">
+                                        / 1M output
+                                      </span>
+                                    </div>
+                                  </div>
+                                ))}
                               </div>
                             </div>
 
                             {/* Additional pricing info */}
-                            {(endpoint.pricing.image ||
-                              endpoint.pricing.cacheRead ||
-                              endpoint.pricing.cacheWrite) && (
+                            {(endpoint.pricing[0]?.image ||
+                              endpoint.pricing[0]?.cacheRead ||
+                              endpoint.pricing[0]?.cacheWrite) && (
                               <div className="mt-3 grid grid-cols-3 gap-2 border-t pt-3 text-xs">
-                                {endpoint.pricing.image && (
+                                {endpoint.pricing[0]?.image && (
                                   <div>
                                     <span className="text-muted-foreground">
                                       Image:
                                     </span>{" "}
-                                    ${endpoint.pricing.image.toFixed(4)}
+                                    ${endpoint.pricing[0]?.image.toFixed(4)}
                                   </div>
                                 )}
-                                {endpoint.pricing.cacheRead && (
+                                {endpoint.pricing[0]?.cacheRead && (
                                   <div>
                                     <span className="text-muted-foreground">
                                       Cache Read:
                                     </span>{" "}
                                     $
                                     {(
-                                      endpoint.pricing.cacheRead / 1000000
+                                      endpoint.pricing[0]?.cacheRead / 1000000
                                     ).toFixed(2)}
                                     /1K
                                   </div>
                                 )}
-                                {endpoint.pricing.cacheWrite && (
+                                {endpoint.pricing[0]?.cacheWrite && (
                                   <div>
                                     <span className="text-muted-foreground">
                                       Cache Write:
                                     </span>{" "}
-                                    {typeof endpoint.pricing.cacheWrite ===
+                                    {typeof endpoint.pricing[0]?.cacheWrite ===
                                     "number" ? (
                                       <>
                                         $
                                         {(
-                                          endpoint.pricing.cacheWrite / 1000000
+                                          endpoint.pricing[0]?.cacheWrite /
+                                          1000000
                                         ).toFixed(2)}
                                         /1K
                                       </>
