@@ -148,8 +148,8 @@ export class HeliconePromptManager {
 
     const { prompt_id, version_id, inputs, environment, ...inputOpenaiParams } = params;
     const mergedBody = {
-      ...inputOpenaiParams,
       ...sourcePromptBody,
+      ...inputOpenaiParams,
       messages: substitutedMessages,
       response_format: finalResponseFormat,
       tools: finalTools,
