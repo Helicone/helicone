@@ -1,7 +1,7 @@
 import Stripe from "stripe";
 import { ok, err, Result } from "../util/results";
 import { Wallet } from "../durable-objects/Wallet";
-import { SupabaseClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../../../supabase/database.types";
 
 export class StripeManager {
@@ -9,14 +9,12 @@ export class StripeManager {
   private stripeSecretKey: string;
   private wallet: DurableObjectNamespace<Wallet>;
   private stripe: Stripe;
-  private supabaseClient: SupabaseClient<Database>;
   private env: Env;
 
   constructor(
     webhookSecret: string,
     stripeSecretKey: string,
     wallet: DurableObjectNamespace<Wallet>,
-    supabaseClient: SupabaseClient<Database>,
     env: Env
   ) {
     this.webhookSecret = webhookSecret;
@@ -26,7 +24,6 @@ export class StripeManager {
       apiVersion: "2025-07-30.basil",
       httpClient: Stripe.createFetchHttpClient(),
     });
-    this.supabaseClient = supabaseClient;
     this.env = env;
   }
 
@@ -99,18 +96,12 @@ export class StripeManager {
       return err("Unable to get Stripe customer id from payment intent");
     }
 
-    const orgId = await this.supabaseClient
-      .from("organization")
-      .select("id")
-      .eq("stripe_customer_id", customerId)
-      .eq("soft_delete", false)
-      .single();
-
-    if (orgId.error || !orgId.data?.id) {
+    const orgId = await getOrgIdFromStripeCustomerId(this.env, customerId);
+    if (!orgId) {
       return err("Unable to get org id from payment intent");
     }
 
-    const walletId = this.wallet.idFromName(orgId.data?.id);
+    const walletId = this.wallet.idFromName(orgId);
     const walletStub = this.wallet.get(walletId);
     try {
       const isProcessed = await walletStub.isEventProcessed(eventId);
@@ -128,13 +119,21 @@ export class StripeManager {
       return ok(undefined);
     } else if (paymentIntent.currency.toUpperCase() !== "USD") {
       return ok(undefined);
-    } else if (paymentIntent.metadata.productId === this.env.STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT) {
-      return this.handleTokenUsagePaymentSucceeded(eventId, paymentIntent, walletStub, orgId.data?.id);
+    } else if (
+      paymentIntent.metadata.productId ===
+      this.env.STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT
+    ) {
+      return this.handleTokenUsagePaymentSucceeded(
+        eventId,
+        paymentIntent,
+        walletStub,
+        orgId
+      );
     } else {
       return ok(undefined);
     }
   }
-  
+
   private async handleTokenUsagePaymentSucceeded(
     eventId: string,
     paymentIntent: Stripe.PaymentIntent,
@@ -154,4 +153,59 @@ export class StripeManager {
       return err(errorMessage);
     }
   }
+}
+
+async function getOrgIdFromStripeCustomerId(
+  env: Env,
+  stripeCustomerId: string
+): Promise<string | null> {
+  const supabaseClientUs = createClient<Database>(
+    env.SUPABASE_URL,
+    env.SUPABASE_SERVICE_ROLE_KEY
+  );
+
+  // stripe webhook could originate from any region,
+  // and might not be related to where the user's org is located
+  // so we just try to get their org id from the stripe customer id
+  // from either region
+
+  try {
+    const orgId = await supabaseClientUs
+      .from("organization")
+      .select("id")
+      .eq("stripe_customer_id", stripeCustomerId)
+      .eq("soft_delete", false)
+      .single();
+
+    if (orgId.data?.id) {
+      return orgId.data?.id;
+    }
+  } catch (e) {
+    console.log(
+      "could not get org id from stripe customer id from us region, trying eu region"
+    );
+  }
+
+  const supabaseClientEu = createClient<Database>(
+    env.EU_SUPABASE_URL,
+    env.EU_SUPABASE_SERVICE_ROLE_KEY
+  );
+
+  try {
+    const orgId = await supabaseClientEu
+      .from("organization")
+      .select("id")
+      .eq("stripe_customer_id", stripeCustomerId)
+      .eq("soft_delete", false)
+      .single();
+
+    if (orgId.data?.id) {
+      return orgId.data?.id;
+    }
+  } catch (e) {
+    console.log(
+      "could not get org id from stripe customer id from eu region, skipping"
+    );
+  }
+  return null;
 }

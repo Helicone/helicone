@@ -16,7 +16,6 @@ import { APIKeysStore } from "../../lib/db/APIKeysStore";
 import { APIKeysManager } from "../../lib/managers/APIKeysManager";
 import { ProviderName } from "@helicone-package/cost/models/providers";
 import { BaseOpenAPIRouter } from "../routerFactory";
-import { createSupabaseClient } from "../../lib/util/helpers";
 import { StripeManager } from "../../lib/managers/StripeManager";
 
 function getAPIRouterV1(
@@ -640,13 +639,10 @@ function getAPIRouterV1(
           return new Response("Missing request body", { status: 400 });
         }
   
-        const supabaseClient = createSupabaseClient(env);
-  
         const webhookManager = new StripeManager(
           env.STRIPE_WEBHOOK_SECRET,
           env.STRIPE_SECRET_KEY,
           env.WALLET,
-          supabaseClient,
           env
         );
   
