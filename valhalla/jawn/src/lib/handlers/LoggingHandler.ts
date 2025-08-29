@@ -387,12 +387,16 @@ export class LoggingHandler extends AbstractLogHandler {
 
   async logToClickhouse(): PromiseGenericResult<string> {
     try {
-      const result = await this.requestStore.insertRequestResponseVersioned(
-        this.batchPayload.requestResponseVersionedCH
-      );
-
-      if (result.error) {
-        return err(`Error inserting request response logs: ${result.error}`);
+      if (
+        Array.isArray(this.batchPayload.requestResponseVersionedCH) &&
+        this.batchPayload.requestResponseVersionedCH.length > 0
+      ) {
+        const result = await this.requestStore.insertRequestResponseVersioned(
+          this.batchPayload.requestResponseVersionedCH
+        );
+        if (result.error) {
+          return err(`Error inserting request response logs: ${result.error}`);
+        }
       }
 
       if (this.batchPayload.cacheMetricCH.length > 0) {
