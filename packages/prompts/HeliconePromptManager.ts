@@ -94,7 +94,10 @@ export class HeliconePromptManager {
 
     const substitutionValues = params.inputs || {};
 
-    const mergedMessages = [...sourcePromptBody.messages, ...params.messages];
+    const mergedMessages = [
+      ...(sourcePromptBody.messages || []),
+      ...(params.messages || []),
+    ];
 
     const substitutedMessages = mergedMessages.map((message) => {
       if (typeof message.content === "string") {
