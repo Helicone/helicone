@@ -2694,29 +2694,31 @@ Json: JsonObject;
       /** Format: double */
       timeZoneDifference: number;
     };
+    SimplifiedPricing: {
+      /** Format: double */
+      prompt: number;
+      /** Format: double */
+      completion: number;
+      /** Format: double */
+      audio?: number;
+      /** Format: double */
+      web_search?: number;
+      /** Format: double */
+      video?: number;
+      /** Format: double */
+      image?: number;
+      /** Format: double */
+      thinking?: number;
+      /** Format: double */
+      cacheRead?: number;
+      /** Format: double */
+      cacheWrite?: number;
+    };
     ModelEndpoint: {
       provider: string;
       providerSlug: string;
-      pricing: {
-        /** Format: double */
-        cacheWrite?: number;
-        /** Format: double */
-        cacheRead?: number;
-        /** Format: double */
-        thinking?: number;
-        /** Format: double */
-        image?: number;
-        /** Format: double */
-        video?: number;
-        /** Format: double */
-        web_search?: number;
-        /** Format: double */
-        audio?: number;
-        /** Format: double */
-        completion: number;
-        /** Format: double */
-        prompt: number;
-      };
+      pricing: components["schemas"]["SimplifiedPricing"];
+      pricingTiers?: components["schemas"]["SimplifiedPricing"][];
       supportsPtb?: boolean;
     };
     /** @enum {string} */

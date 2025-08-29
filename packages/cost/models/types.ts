@@ -77,6 +77,34 @@ export type StandardParameter =
   | "top_logprobs"
   | "structured_outputs";
 
+export const PARAMETER_LABELS: Record<StandardParameter, string> = {
+  max_tokens: "Max Tokens",
+  temperature: "Temperature",
+  top_p: "Top-P",
+  top_k: "Top-K",
+  stop: "Stop Sequences",
+  stream: "Streaming",
+  frequency_penalty: "Frequency Penalty",
+  presence_penalty: "Presence Penalty",
+  repetition_penalty: "Repetition Penalty",
+  seed: "Seed",
+  tools: "Function Calling",
+  tool_choice: "Tool Choice",
+  functions: "Functions",
+  function_call: "Function Call",
+  reasoning: "Reasoning",
+  include_reasoning: "Include Reasoning",
+  thinking: "Chain of Thought",
+  response_format: "Response Format",
+  json_mode: "JSON Mode",
+  truncate: "Truncate",
+  min_p: "Min-P",
+  logit_bias: "Logit Bias",
+  logprobs: "Log Probabilities",
+  top_logprobs: "Top Log Probs",
+  structured_outputs: "Structured Outputs",
+};
+
 export interface ModelPricing {
   threshold: number;
   input: number;

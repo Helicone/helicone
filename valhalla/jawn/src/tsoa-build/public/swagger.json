@@ -7336,6 +7336,52 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"SimplifiedPricing": {
+				"properties": {
+					"prompt": {
+						"type": "number",
+						"format": "double"
+					},
+					"completion": {
+						"type": "number",
+						"format": "double"
+					},
+					"audio": {
+						"type": "number",
+						"format": "double"
+					},
+					"web_search": {
+						"type": "number",
+						"format": "double"
+					},
+					"video": {
+						"type": "number",
+						"format": "double"
+					},
+					"image": {
+						"type": "number",
+						"format": "double"
+					},
+					"thinking": {
+						"type": "number",
+						"format": "double"
+					},
+					"cacheRead": {
+						"type": "number",
+						"format": "double"
+					},
+					"cacheWrite": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"prompt",
+					"completion"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"ModelEndpoint": {
 				"properties": {
 					"provider": {
@@ -7345,49 +7391,13 @@
 						"type": "string"
 					},
 					"pricing": {
-						"properties": {
-							"cacheWrite": {
-								"type": "number",
-								"format": "double"
-							},
-							"cacheRead": {
-								"type": "number",
-								"format": "double"
-							},
-							"thinking": {
-								"type": "number",
-								"format": "double"
-							},
-							"image": {
-								"type": "number",
-								"format": "double"
-							},
-							"video": {
-								"type": "number",
-								"format": "double"
-							},
-							"web_search": {
-								"type": "number",
-								"format": "double"
-							},
-							"audio": {
-								"type": "number",
-								"format": "double"
-							},
-							"completion": {
-								"type": "number",
-								"format": "double"
-							},
-							"prompt": {
-								"type": "number",
-								"format": "double"
-							}
+						"$ref": "#/components/schemas/SimplifiedPricing"
+					},
+					"pricingTiers": {
+						"items": {
+							"$ref": "#/components/schemas/SimplifiedPricing"
 						},
-						"required": [
-							"completion",
-							"prompt"
-						],
-						"type": "object"
+						"type": "array"
 					},
 					"supportsPtb": {
 						"type": "boolean"

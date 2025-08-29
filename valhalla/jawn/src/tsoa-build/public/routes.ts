@@ -2379,12 +2379,29 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "SimplifiedPricing": {
+        "dataType": "refObject",
+        "properties": {
+            "prompt": {"dataType":"double","required":true},
+            "completion": {"dataType":"double","required":true},
+            "audio": {"dataType":"double"},
+            "web_search": {"dataType":"double"},
+            "video": {"dataType":"double"},
+            "image": {"dataType":"double"},
+            "thinking": {"dataType":"double"},
+            "cacheRead": {"dataType":"double"},
+            "cacheWrite": {"dataType":"double"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ModelEndpoint": {
         "dataType": "refObject",
         "properties": {
             "provider": {"dataType":"string","required":true},
             "providerSlug": {"dataType":"string","required":true},
-            "pricing": {"dataType":"nestedObjectLiteral","nestedProperties":{"cacheWrite":{"dataType":"double"},"cacheRead":{"dataType":"double"},"thinking":{"dataType":"double"},"image":{"dataType":"double"},"video":{"dataType":"double"},"web_search":{"dataType":"double"},"audio":{"dataType":"double"},"completion":{"dataType":"double","required":true},"prompt":{"dataType":"double","required":true}},"required":true},
+            "pricing": {"ref":"SimplifiedPricing","required":true},
+            "pricingTiers": {"dataType":"array","array":{"dataType":"refObject","ref":"SimplifiedPricing"}},
             "supportsPtb": {"dataType":"boolean"},
         },
         "additionalProperties": false,

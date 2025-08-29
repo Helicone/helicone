@@ -309,9 +309,9 @@ export default function AdminModelsPage() {
               {baseModels.map(([modelKey, model]) => {
                 const endpoints = registryData.endpoints[modelKey] || [];
                 const isDisabled = endpoints.length === 0;
-                const costs = endpoints.map(
-                  (ep: ModelEndpoint) => ep.pricing[0]?.input,
-                );
+                const costs = endpoints
+                  .map((ep: ModelEndpoint) => ep.pricing?.[0]?.input)
+                  .filter((cost): cost is number => cost !== undefined && cost !== null);
                 const minCost = costs.length > 0 ? Math.min(...costs) : 0;
                 const maxCost = costs.length > 0 ? Math.max(...costs) : 0;
 
@@ -364,8 +364,15 @@ export default function AdminModelsPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="text-xs">
-                          ${(minCost / 1000000).toFixed(2)} - $
-                          {(maxCost / 1000000).toFixed(2)}/1K
+                          {costs.length > 0 ? (
+                            minCost === maxCost ? (
+                              <>${(minCost * 1000000).toFixed(2)}/1M</>
+                            ) : (
+                              <>${(minCost * 1000000).toFixed(2)} - ${(maxCost * 1000000).toFixed(2)}/1M</>
+                            )
+                          ) : (
+                            <span className="text-muted-foreground">N/A</span>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -374,9 +381,9 @@ export default function AdminModelsPage() {
                         const variantEndpoints =
                           registryData.endpoints[variantKey] || [];
                         const isVariantDisabled = variantEndpoints.length === 0;
-                        const variantCosts = variantEndpoints.map(
-                          (ep: ModelEndpoint) => ep.pricing[0]?.input,
-                        );
+                        const variantCosts = variantEndpoints
+                          .map((ep: ModelEndpoint) => ep.pricing?.[0]?.input)
+                          .filter((cost): cost is number => cost !== undefined && cost !== null);
                         const variantMinCost =
                           variantCosts.length > 0
                             ? Math.min(...variantCosts)
@@ -439,8 +446,15 @@ export default function AdminModelsPage() {
                             </TableCell>
                             <TableCell className="text-right">
                               <div className="text-xs">
-                                ${(variantMinCost / 1000000).toFixed(2)} - $
-                                {(variantMaxCost / 1000000).toFixed(2)}/1K
+                                {variantCosts.length > 0 ? (
+                                  variantMinCost === variantMaxCost ? (
+                                    <>${(variantMinCost * 1000000).toFixed(2)}/1M</>
+                                  ) : (
+                                    <>${(variantMinCost * 1000000).toFixed(2)} - ${(variantMaxCost * 1000000).toFixed(2)}/1M</>
+                                  )
+                                ) : (
+                                  <span className="text-muted-foreground">N/A</span>
+                                )}
                               </div>
                             </TableCell>
                           </TableRow>

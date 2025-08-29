@@ -4,7 +4,9 @@ import { registry } from "../../../../../packages/cost/models/registry";
 import { 
   InputModality, 
   OutputModality, 
-  StandardParameter
+  StandardParameter,
+  ModelPricing,
+  Endpoint
 } from "../../../../../packages/cost/models/types";
 
 // Define capabilities based on ModelPricing fields
@@ -20,17 +22,7 @@ type ModelCapability =
 interface ModelEndpoint {
   provider: string;
   providerSlug: string;
-  pricing: {
-    prompt: number;      // per million tokens
-    completion: number;  // per million tokens
-    audio?: number;      // per million tokens, if > 0
-    web_search?: number; // per million tokens, if > 0
-    video?: number;      // per million tokens, if > 0
-    image?: number;      // per million tokens, if > 0
-    thinking?: number;   // per million tokens, if > 0
-    cacheRead?: number;  // per million tokens, if > 0
-    cacheWrite?: number; // per million tokens, if > 0
-  };
+  endpoint?: Endpoint; // Direct from package
   supportsPtb?: boolean;
 }
 
@@ -64,10 +56,6 @@ interface ModelRegistryResponse {
 @Route("/v1/public/model-registry")
 @Tags("Model Registry")
 export class ModelRegistryController extends Controller {
-  // Helper function to format cost per million tokens
-  private formatCostPerMillion(costPerToken: number): number {
-    return costPerToken * 1000000;
-  }
 
   // Helper function to get provider slug for linking
   private getProviderSlug(provider: string): string {
@@ -122,56 +110,28 @@ export class ModelRegistryController extends Controller {
 
         const endpoints: ModelEndpoint[] = [];
         
-        // Transform each provider config into an endpoint
-        for (const config of providerConfigsResult.data) {
-          // Get PTB endpoints for cost information
-          const ptbEndpointsResult = registry.getPtbEndpointsByProvider(modelId, config.provider);
-          
-          // Use PTB endpoint pricing if available, otherwise use config pricing
-          const sourcePricing = ptbEndpointsResult.data && ptbEndpointsResult.data.length > 0
-            ? ptbEndpointsResult.data[0].pricing
-            : config.pricing;
-
-          // Convert all costs to per-million tokens and only include if > 0
-          const pricing: any = {
-            prompt: this.formatCostPerMillion(sourcePricing.prompt),
-            completion: this.formatCostPerMillion(sourcePricing.completion),
-          };
-
-          // Add optional cost metrics only if they exist and are > 0
-          if (sourcePricing.audio && sourcePricing.audio > 0) {
-            pricing.audio = this.formatCostPerMillion(sourcePricing.audio);
+        // Get PTB endpoints directly from registry
+        const ptbEndpointsResult = registry.getPtbEndpoints(modelId);
+        
+        if (ptbEndpointsResult.data && ptbEndpointsResult.data.length > 0) {
+          // Use PTB endpoints directly - they already have the correct structure
+          for (const endpoint of ptbEndpointsResult.data) {
+            endpoints.push({
+              provider: endpoint.provider,
+              providerSlug: this.getProviderSlug(endpoint.provider),
+              endpoint: endpoint, // Pass the entire endpoint object from the package
+              supportsPtb: true,
+            });
           }
-          if (sourcePricing.web_search && sourcePricing.web_search > 0) {
-            pricing.web_search = this.formatCostPerMillion(sourcePricing.web_search);
+        } else {
+          // Fallback: get provider configs if no PTB endpoints
+          for (const config of providerConfigsResult.data) {
+            endpoints.push({
+              provider: config.provider,
+              providerSlug: this.getProviderSlug(config.provider),
+              supportsPtb: config.ptbEnabled,
+            });
           }
-          if (sourcePricing.video && sourcePricing.video > 0) {
-            pricing.video = this.formatCostPerMillion(sourcePricing.video);
-          }
-          if (sourcePricing.image && sourcePricing.image > 0) {
-            pricing.image = this.formatCostPerMillion(sourcePricing.image);
-          }
-          if (sourcePricing.thinking && sourcePricing.thinking > 0) {
-            pricing.thinking = this.formatCostPerMillion(sourcePricing.thinking);
-          }
-          if (sourcePricing.cacheRead && sourcePricing.cacheRead > 0) {
-            pricing.cacheRead = this.formatCostPerMillion(sourcePricing.cacheRead);
-          }
-          if (sourcePricing.cacheWrite) {
-            const cacheWriteCost = typeof sourcePricing.cacheWrite === 'number' 
-              ? sourcePricing.cacheWrite 
-              : sourcePricing.cacheWrite.default;
-            if (cacheWriteCost > 0) {
-              pricing.cacheWrite = this.formatCostPerMillion(cacheWriteCost);
-            }
-          }
-
-          endpoints.push({
-            provider: config.provider,
-            providerSlug: this.getProviderSlug(config.provider),
-            pricing,
-            supportsPtb: config.ptbEnabled,
-          });
         }
 
         // Skip models without endpoints
