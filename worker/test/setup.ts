@@ -1,6 +1,15 @@
 import { vi } from "vitest";
+import { TestCase } from "./providers/base.test-config";
 
-// Mock Supabase before any imports happen
+type MutableTestCase = Partial<TestCase> | undefined;
+
+let currentTestCase: MutableTestCase;
+
+export function setSupabaseTestCase(tc: MutableTestCase) {
+  currentTestCase = tc;
+}
+
+// Register the mock once at module load and read hoisted state inside the factory
 vi.mock("@supabase/supabase-js", () => ({
   createClient: vi.fn(() => ({
     from: vi.fn((table: string) => {
@@ -45,7 +54,6 @@ vi.mock("@supabase/supabase-js", () => ({
         const originalEq = chainObj.eq;
         chainObj.eq = vi.fn(() => {
           eqCount++;
-          // After second eq() call, we're done with filters
           if (eqCount === 2) {
             return {
               ...chainObj,
@@ -68,9 +76,15 @@ vi.mock("@supabase/supabase-js", () => ({
       }
 
       // Mock decrypted_provider_keys_v2 table for AI Gateway
+      let isByokEnabled;
+      if (currentTestCase?.byokEnabled || (currentTestCase && currentTestCase.byokEnabled === undefined) || currentTestCase === undefined) {
+        isByokEnabled = true;
+      } else {
+        isByokEnabled = false;
+      }
       if (table === "decrypted_provider_keys_v2") {
-        // Define mock provider keys for testing
-        const mockProviderKeys: Record<string, any> = {
+        // Define mock provider keys for testing - separate keys for user and Helicone org
+        const mockUserProviderKeys: Record<string, any> = {
           anthropic: {
             org_id: "test-org-id",
             provider_name: "anthropic",
@@ -78,6 +92,7 @@ vi.mock("@supabase/supabase-js", () => ({
             decrypted_provider_secret_key: null,
             auth_type: "api_key",
             config: null,
+            byok_enabled: isByokEnabled,
           },
           openai: {
             org_id: "test-org-id",
@@ -86,6 +101,7 @@ vi.mock("@supabase/supabase-js", () => ({
             decrypted_provider_secret_key: null,
             auth_type: "api_key",
             config: null,
+            byok_enabled: isByokEnabled,
           },
           vertex: {
             org_id: "test-org-id",
@@ -97,6 +113,7 @@ vi.mock("@supabase/supabase-js", () => ({
               projectId: "test-project",
               region: "us-central1",
             },
+            byok_enabled: isByokEnabled,
           },
           google: {
             org_id: "test-org-id",
@@ -105,6 +122,7 @@ vi.mock("@supabase/supabase-js", () => ({
             decrypted_provider_secret_key: null,
             auth_type: "api_key",
             config: null,
+            byok_enabled: isByokEnabled,
           },
           bedrock: {
             org_id: "test-org-id",
@@ -115,6 +133,7 @@ vi.mock("@supabase/supabase-js", () => ({
             config: {
               region: "us-east-1",
             },
+            byok_enabled: isByokEnabled,
           },
           groq: {
             org_id: "test-org-id",
@@ -123,6 +142,70 @@ vi.mock("@supabase/supabase-js", () => ({
             decrypted_provider_secret_key: null,
             auth_type: "api_key",
             config: null,
+            byok_enabled: isByokEnabled,
+          },
+        };
+
+        // Helicone provider keys (for PTB when BYOK is disabled)
+        const mockHeliconeProviderKeys: Record<string, any> = {
+          anthropic: {
+            org_id: "0afe3a6e-d095-4ec0-bc1e-2af6f57bd2a5",
+            provider_name: "anthropic",
+            decrypted_provider_key: "helicone-anthropic-api-key",
+            decrypted_provider_secret_key: null,
+            auth_type: "api_key",
+            config: null,
+            byok_enabled: true,
+          },
+          openai: {
+            org_id: "0afe3a6e-d095-4ec0-bc1e-2af6f57bd2a5",
+            provider_name: "openai",
+            decrypted_provider_key: "helicone-openai-api-key",
+            decrypted_provider_secret_key: null,
+            auth_type: "api_key",
+            config: null,
+            byok_enabled: true,
+          },
+          vertex: {
+            org_id: "0afe3a6e-d095-4ec0-bc1e-2af6f57bd2a5",
+            provider_name: "vertex",
+            decrypted_provider_key: "helicone-vertex-api-key",
+            decrypted_provider_secret_key: null,
+            auth_type: "api_key",
+            config: {
+              projectId: "helicone-project",
+              region: "us-central1",
+            },
+            byok_enabled: true,
+          },
+          google: {
+            org_id: "0afe3a6e-d095-4ec0-bc1e-2af6f57bd2a5",
+            provider_name: "google",
+            decrypted_provider_key: "helicone-google-api-key",
+            decrypted_provider_secret_key: null,
+            auth_type: "api_key",
+            config: null,
+            byok_enabled: true,
+          },
+          bedrock: {
+            org_id: "0afe3a6e-d095-4ec0-bc1e-2af6f57bd2a5",
+            provider_name: "bedrock",
+            decrypted_provider_key: "helicone-bedrock-api-key",
+            decrypted_provider_secret_key: null,
+            auth_type: "api_key",
+            config: {
+              region: "us-east-1",
+            },
+            byok_enabled: true,
+          },
+          groq: {
+            org_id: "0afe3a6e-d095-4ec0-bc1e-2af6f57bd2a5",
+            provider_name: "groq",
+            decrypted_provider_key: "helicone-groq-api-key",
+            decrypted_provider_secret_key: null,
+            auth_type: "api_key",
+            config: null,
+            byok_enabled: true,
           },
         };
 
@@ -134,17 +217,31 @@ vi.mock("@supabase/supabase-js", () => ({
 
           // Once we have all required filters, return the matching provider key
           if (filters.provider_name && filters.org_id && "soft_delete" in filters) {
-            const providerKey = mockProviderKeys[filters.provider_name];
-            
-            if (providerKey && filters.org_id === "test-org-id" && !filters.soft_delete) {
-              return {
-                ...chainObj,
-                then: (resolve: any) =>
-                  resolve({
-                    data: [providerKey],
-                    error: null,
-                  }),
-              };
+            // Check if it's the Helicone org ID
+            if (filters.org_id === "0afe3a6e-d095-4ec0-bc1e-2af6f57bd2a5") {
+              const heliconeKey = mockHeliconeProviderKeys[filters.provider_name];
+              if (heliconeKey && !filters.soft_delete) {
+                return {
+                  ...chainObj,
+                  then: (resolve: any) =>
+                    resolve({
+                      data: [heliconeKey],
+                      error: null,
+                    }),
+                };
+              }
+            } else if (filters.org_id === "test-org-id") {
+              const userKey = mockUserProviderKeys[filters.provider_name];
+              if (userKey && !filters.soft_delete) {
+                return {
+                  ...chainObj,
+                  then: (resolve: any) =>
+                    resolve({
+                      data: [userKey],
+                      error: null,
+                    }),
+                };
+              }
             }
             
             // No matching provider key found
@@ -171,4 +268,3 @@ vi.mock("@supabase/supabase-js", () => ({
     rpc: vi.fn(() => Promise.resolve({ data: null, error: null })),
   })),
 }));
-export {};

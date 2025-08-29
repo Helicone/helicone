@@ -40,7 +40,6 @@ export function recursivelyConsolidateAnthropicListForClaude(
       return acc;
     }
     if (item.type === "message_delta") {
-      console.log("Message Delta", item);
       return recursivelyConsolidateAnthropic(acc, {
         ...item.delta,
         ...item,
@@ -74,8 +73,6 @@ export function recursivelyConsolidateAnthropicListForClaude(
     if (item.type === "message_start") {
       return recursivelyConsolidateAnthropic(acc, item.message);
     }
-
-    // console.log("Item Without Ignore Keys", item);
 
     return recursivelyConsolidateAnthropic(acc, item);
   }, {});

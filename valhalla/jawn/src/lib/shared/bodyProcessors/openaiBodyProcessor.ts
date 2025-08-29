@@ -66,6 +66,8 @@ export class OpenAIBodyProcessor implements IBodyProcessor {
     };
 
     // OpenAI charges for input, input cache read, output, output audio, input audio.
+    // since we have pricing rates that are separate for audio, input, output, and cached tokens,
+    // we need to separate those components out here so that we can correctly calculate the cost.
     const usage = response.usage;
     const effectivePromptTokens =
       usage?.prompt_tokens !== undefined

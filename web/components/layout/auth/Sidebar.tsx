@@ -30,10 +30,6 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
   const router = useRouter();
   const { pathname } = router;
   const org = useOrg();
-  const { data: hasFeatureFlag } = useFeatureFlag(
-    "ai_gateway",
-    org?.currentOrg?.id ?? "",
-  );
   const { data: hasHQLFeatureFlag } = useFeatureFlag(
     "hql",
     org?.currentOrg?.id ?? "",
@@ -142,7 +138,7 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
         ],
       },
     ],
-    [pathname, hasFeatureFlag?.data, hasHQLFeatureFlag?.data],
+    [pathname, hasHQLFeatureFlag?.data],
   );
 
   return (

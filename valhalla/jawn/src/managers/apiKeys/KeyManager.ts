@@ -3,7 +3,7 @@ import { uuid } from "uuidv4";
 import { Database, Json } from "../../lib/db/database.types";
 import { AuthParams } from "../../packages/common/auth/types";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { Result, err, ok } from "../../packages/common/result";
+import { Result, err, isError, ok } from "../../packages/common/result";
 import { hashAuth } from "../../utils/hash";
 import { BaseManager } from "../BaseManager";
 import { DecryptedProviderKey } from "../VaultManager";
@@ -11,10 +11,33 @@ import { ProviderName } from "@helicone-package/cost/models/providers";
 import { dbProviderToProvider } from "@helicone-package/cost/models/provider-helpers";
 import { setProviderKeys } from "../../lib/refetchKeys";
 import { init } from "@paralleldrive/cuid2";
+import { CreateProviderKeyRequest, UpdateProviderKeyRequest } from "../../controllers/public/apiKeyController";
+
+export type ProviderKey = {
+  providerName: ProviderName;
+  providerKey: string;
+  providerSecretKey?: string;
+  providerKeyName: string;
+  byokEnabled: boolean;
+  config: Json;
+  cuid?: string;
+};
+
+export interface ProviderKeyRow {
+  id: string;
+  provider_name: string;
+  provider_key_name: string;
+  created_at?: string;
+  soft_delete: boolean;
+  config?: Record<string, any>;
+  byok_enabled?: boolean;
+  cuid?: string;
+}
 
 type HashedPasswordRow = {
   hashed_password: string;
 };
+
 
 export class KeyManager extends BaseManager {
   constructor(authParams: AuthParams) {
@@ -214,10 +237,10 @@ export class KeyManager extends BaseManager {
   /**
    * Get all provider keys for an organization
    */
-  async getProviderKeys(): Promise<Result<any[], string>> {
+  async getProviderKeys(): Promise<Result<ProviderKeyRow[], string>> {
     try {
-      const result = await dbExecute(
-        `SELECT *
+      const result = await dbExecute<ProviderKeyRow>(
+        `SELECT id, org_id, provider_name, provider_key_name, created_at, soft_delete, config, byok_enabled
          FROM provider_keys
          WHERE org_id = $1
          AND soft_delete = false
@@ -225,7 +248,7 @@ export class KeyManager extends BaseManager {
         [this.authParams.organizationId]
       );
 
-      if (result.error) {
+      if (isError(result)) {
         return err(`Failed to get provider keys: ${result.error}`);
       }
 
@@ -247,6 +270,7 @@ export class KeyManager extends BaseManager {
         auth_type: "key" | "session_token";
         config: Json | null;
         cuid: string;
+        byok_enabled: boolean;
       }[],
       string
     >
@@ -262,8 +286,9 @@ export class KeyManager extends BaseManager {
         auth_type: "key" | "session_token";
         config: Json | null;
         cuid: string;
+        byok_enabled: boolean;
       }>(
-        `SELECT id, org_id, decrypted_provider_key, decrypted_provider_secret_key, provider_key_name, provider_name, auth_type, config, cuid
+        `SELECT id, org_id, decrypted_provider_key, decrypted_provider_secret_key, provider_key_name, provider_name, auth_type, config, cuid, byok_enabled
          FROM decrypted_provider_keys_v2
          WHERE org_id = $1
          AND soft_delete = false
@@ -285,20 +310,15 @@ export class KeyManager extends BaseManager {
   /**
    * Create a provider key
    */
-  async createProviderKey(data: {
-    providerName: string;
-    providerKeyName: string;
-    providerKey: string;
-    providerSecretKey?: string;
-    config: Record<string, string>;
-  }): Promise<Result<{ id: string }, string>> {
+  async createProviderKey(data: CreateProviderKeyRequest): Promise<Result<{ id: string }, string>> {
     try {
       const {
         providerName,
-        providerKey,
         providerKeyName,
-        config,
+        providerKey,
         providerSecretKey,
+        config,
+        byokEnabled,
       } = data;
 
       const createId = init({ length: 12 });
@@ -307,8 +327,8 @@ export class KeyManager extends BaseManager {
 
       // Insert the new key
       const result = await dbExecute<{ id: string }>(
-        `INSERT INTO provider_keys (provider_name, provider_key_name, provider_key, provider_secret_key, org_id, soft_delete, config, cuid)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        `INSERT INTO provider_keys (provider_name, provider_key_name, provider_key, provider_secret_key, org_id, soft_delete, config, cuid, byok_enabled)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
          RETURNING id`,
         [
           providerName,
@@ -319,6 +339,7 @@ export class KeyManager extends BaseManager {
           false,
           config,
           providerKeyCUID,
+          byokEnabled,
         ]
       );
 
@@ -341,9 +362,10 @@ export class KeyManager extends BaseManager {
     providerKey?: string;
     providerSecretKey?: string;
     config?: Record<string, string>;
+    byokEnabled?: boolean;
   }): Promise<Result<{ id: string; providerName: string }, string>> {
     try {
-      const { providerKeyId, providerKey, providerSecretKey, config } = params;
+      const { providerKeyId, providerKey, providerSecretKey, config, byokEnabled } = params;
 
       // Verify the key belongs to this organization
       const hasAccess = await this.hasAccessToProviderKey(providerKeyId);
@@ -356,11 +378,9 @@ export class KeyManager extends BaseManager {
       const values = [];
       let paramIndex = 1;
 
-      updateParts.push(`provider_key = $${paramIndex++}`);
       if (providerKey !== "" && providerKey !== undefined) {
+        updateParts.push(`provider_key = $${paramIndex++}`);
         values.push(providerKey);
-      } else {
-        values.push(null);
       }
 
       if (providerSecretKey !== "" && providerSecretKey !== undefined) {
@@ -371,6 +391,11 @@ export class KeyManager extends BaseManager {
       if (config !== undefined) {
         updateParts.push(`config = $${paramIndex++}`);
         values.push(config);
+      }
+
+      if (byokEnabled !== undefined) {
+        updateParts.push(`byok_enabled = $${paramIndex++}`);
+        values.push(byokEnabled);
       }
 
       if (updateParts.length === 0) {
@@ -652,6 +677,7 @@ export class KeyManager extends BaseManager {
               config: key.config,
               orgId: this.authParams.organizationId,
               cuid: key.cuid,
+              byok_enabled: key.byok_enabled,
             };
           })
           .filter((key): key is NonNullable<typeof key> => key !== null) ?? []

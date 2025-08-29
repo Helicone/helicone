@@ -27,6 +27,7 @@ import {
   COST_PRECISION_MULTIPLIER,
   modelCost,
 } from "@helicone-package/cost/costCalc";
+import { normalizeTier } from "../utils/tiers";
 
 type S3Record = {
   requestId: string;
@@ -34,6 +35,7 @@ type S3Record = {
   requestBody: string;
   responseBody: string;
   assets: Map<string, string>;
+  tier: string;
 };
 
 export type BatchPayload = {
@@ -241,13 +243,18 @@ export class LoggingHandler extends AbstractLogHandler {
         s3Record.organizationId
       );
 
-      // Upload request and response body
+      // Get tier information from context (stored in s3Record)
+      const tags: Record<string, string> = {};
+      tags.tier = normalizeTier(s3Record.tier);
+
+      // Upload request and response body with tier tag
       const uploadRes = await this.s3Client.store(
         key,
         JSON.stringify({
           request: s3Record.requestBody,
           response: s3Record.responseBody,
-        })
+        }),
+        tags
       );
 
       if (uploadRes.error) {
@@ -261,7 +268,8 @@ export class LoggingHandler extends AbstractLogHandler {
         const imageUploadRes = await this.storeRequestResponseImage(
           s3Record.organizationId,
           s3Record.requestId,
-          s3Record.assets
+          s3Record.assets,
+          s3Record.tier
         );
 
         if (imageUploadRes.error) {
@@ -284,11 +292,12 @@ export class LoggingHandler extends AbstractLogHandler {
   private async storeRequestResponseImage(
     organizationId: string,
     requestId: string,
-    assets: Map<string, string>
+    assets: Map<string, string>,
+    tier: string
   ): PromiseGenericResult<string> {
     const uploadPromises: Promise<void>[] = Array.from(assets.entries()).map(
       ([assetId, imageUrl]) =>
-        this.handleImageUpload(assetId, imageUrl, requestId, organizationId)
+        this.handleImageUpload(assetId, imageUrl, requestId, organizationId, tier)
     );
 
     await Promise.allSettled(uploadPromises);
@@ -314,9 +323,14 @@ export class LoggingHandler extends AbstractLogHandler {
     assetId: string,
     imageUrl: string,
     requestId: string,
-    organizationId: string
+    organizationId: string,
+    tier: string
   ): Promise<void> {
     try {
+      // Prepare tags
+      const tags: Record<string, string> = {};
+      tags.tier = normalizeTier(tier);
+
       if (this.isBase64Image(imageUrl)) {
         const [assetType, base64Data] = this.extractBase64Data(imageUrl);
         const buffer = Buffer.from(base64Data, "base64");
@@ -325,7 +339,8 @@ export class LoggingHandler extends AbstractLogHandler {
           assetType,
           requestId,
           organizationId,
-          assetId
+          assetId,
+          tags
         );
       } else {
         const response = await fetch(imageUrl, {
@@ -341,7 +356,8 @@ export class LoggingHandler extends AbstractLogHandler {
           blob,
           requestId,
           organizationId,
-          assetId
+          assetId,
+          tags
         );
       }
     } catch (error) {
@@ -371,12 +387,16 @@ export class LoggingHandler extends AbstractLogHandler {
 
   async logToClickhouse(): PromiseGenericResult<string> {
     try {
-      const result = await this.requestStore.insertRequestResponseVersioned(
-        this.batchPayload.requestResponseVersionedCH
-      );
-
-      if (result.error) {
-        return err(`Error inserting request response logs: ${result.error}`);
+      if (
+        Array.isArray(this.batchPayload.requestResponseVersionedCH) &&
+        this.batchPayload.requestResponseVersionedCH.length > 0
+      ) {
+        const result = await this.requestStore.insertRequestResponseVersioned(
+          this.batchPayload.requestResponseVersionedCH
+        );
+        if (result.error) {
+          return err(`Error inserting request response logs: ${result.error}`);
+        }
       }
 
       if (this.batchPayload.cacheMetricCH.length > 0) {
@@ -414,6 +434,7 @@ export class LoggingHandler extends AbstractLogHandler {
       requestBody: context.processedLog.request.body,
       responseBody: context.processedLog.response.body,
       assets: assets ?? new Map(),
+      tier: orgParams.tier,
     };
 
     return s3Record;
@@ -586,13 +607,10 @@ export class LoggingHandler extends AbstractLogHandler {
       cache_reference_id:
         context.message.log.request.cacheReferenceId ?? undefined,
       cache_enabled: context.message.log.request.cacheEnabled ?? false,
-      gateway_router_id:
-        context.message.heliconeMeta.gatewayRouterId ?? undefined,
-      gateway_deployment_target:
-        context.message.heliconeMeta.gatewayDeploymentTarget ?? undefined,
       prompt_id: context.message.heliconeMeta.promptId ?? "",
       prompt_version: context.message.heliconeMeta.promptVersionId ?? "",
       request_referrer: context.message.log.request.requestReferrer ?? "",
+      is_passthrough_billing: context.message.heliconeMeta.isPassthroughBilling ?? false,
     };
 
     return requestResponseLog;

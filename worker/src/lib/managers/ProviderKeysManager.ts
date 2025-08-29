@@ -56,11 +56,10 @@ export class ProviderKeysManager {
     if (keyCuid) {
       return data.find((key) => "cuid" in key && key.cuid === keyCuid) ?? null;
     }
-    const randomIndex = Math.floor(Math.random() * data.length);
 
     return data.length > 0
-      ? // pick a random key if there are multiple keys for the same provider and they haven't mentioned cuid
-        data[randomIndex]
+      ? // pick the first key if there are multiple keys for the same provider and they haven't mentioned cuid
+        data[0]
       : null;
   }
 

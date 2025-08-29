@@ -121,7 +121,7 @@ export class ClickhouseClientWrapper {
         clickhouse_settings: {
           wait_end_of_query: 1,
           max_execution_time: 30,
-          max_memory_usage: "1000000000",
+          max_memory_usage: "4000000000",
           max_rows_to_read: "10000000",
           max_result_rows: "10000",
           SQL_helicone_organization_id: organizationId,
@@ -265,8 +265,6 @@ export interface InsertRequestResponseVersioned {
   request_body: string;
   response_body: string;
   assets: Array<string>;
-  gateway_router_id?: string;
-  gateway_deployment_target?: string;
 }
 
 export type RequestResponseVersioned =
@@ -304,11 +302,10 @@ export interface RequestResponseRMT {
   cache_reference_id?: string;
   cache_enabled: boolean;
   cost: number;
-  gateway_router_id?: string;
-  gateway_deployment_target?: string;
   prompt_id?: string;
   prompt_version?: string;
   request_referrer?: string;
+  is_passthrough_billing: boolean;
 }
 
 export interface Prompt2025Input {

@@ -5,6 +5,7 @@ import {
   DeleteObjectCommand,
   GetObjectCommand,
   PutObjectCommand,
+  PutObjectCommandInput,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import {
@@ -186,17 +187,19 @@ export class S3Client {
     assetType: string,
     requestId: string,
     orgId: string,
-    assetId: string
+    assetId: string,
+    tags?: Record<string, string>
   ): PromiseGenericResult<string> {
     const key = this.getRequestResponseImageUrl(requestId, orgId, assetId);
-    return await this.uploadToS3(key, buffer, assetType);
+    return await this.uploadToS3(key, buffer, assetType, tags);
   }
 
   async uploadImageToS3(
     image: Blob,
     requestId: string,
     orgId: string,
-    assetId: string
+    assetId: string,
+    tags?: Record<string, string>
   ): Promise<Result<string, string>> {
     const uploadUrl = this.getRequestResponseImageUrl(
       requestId,
@@ -207,7 +210,8 @@ export class S3Client {
     return await this.uploadToS3(
       uploadUrl,
       await image.arrayBuffer(),
-      image.type
+      image.type,
+      tags
     );
   }
 
@@ -255,15 +259,27 @@ export class S3Client {
   async uploadToS3(
     key: string,
     body: ArrayBuffer | Buffer,
-    contentType: string
+    contentType: string,
+    tags?: Record<string, string>
   ): Promise<Result<string, string>> {
     return await putLimiter.schedule(async () => {
-      const command = new PutObjectCommand({
+      const commandOptions: PutObjectCommandInput = {
         Bucket: this.bucketName,
         Key: key,
         Body: new Uint8Array(body),
         ContentType: contentType,
-      });
+      };
+
+      // Add tags if provided
+      if (tags && Object.keys(tags).length > 0) {
+        const tagsAsQueryParams = new URLSearchParams();
+        for (const [tagKey, value] of Object.entries(tags)) {
+          tagsAsQueryParams.set(tagKey, value);
+        }
+        commandOptions.Tagging = tagsAsQueryParams.toString();
+      }
+
+      const command = new PutObjectCommand(commandOptions);
 
       try {
         const response = await this.awsClient.send(command);
@@ -301,14 +317,24 @@ export class S3Client {
             ContentType: "application/json",
           });
         } else {
-          command = new PutObjectCommand({
+          const commandOptions: PutObjectCommandInput = {
             Bucket: this.bucketName,
             Key: key,
             Body: compressedValue.data,
             ContentEncoding: "gzip",
             ContentType: "application/json",
-            Metadata: tags,
-          });
+          };
+
+          // Add tags if provided
+          if (tags && Object.keys(tags).length > 0) {
+            const tagsAsQueryParams = new URLSearchParams();
+            for (const [tagKey, value] of Object.entries(tags)) {
+              tagsAsQueryParams.set(tagKey, value);
+            }
+            commandOptions.Tagging = tagsAsQueryParams.toString();
+          }
+
+          command = new PutObjectCommand(commandOptions);
         }
 
         const response = await this.awsClient.send(command);

@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { EventEmitter } from "events";
+import { Database } from "../../../supabase/database.types";
 
 export const once = (
   emitter: EventEmitter,

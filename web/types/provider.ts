@@ -30,6 +30,7 @@ export interface ProviderKey {
   soft_delete: boolean;
   config?: Record<string, any>; // JSON config field for provider-specific settings
   cuid?: string | null; // CUID for the provider key
+  byok_enabled?: boolean; // Indicates if key is enabled for AI Gateway (BYOK)
 }
 
 // Interface for decrypted provider key
