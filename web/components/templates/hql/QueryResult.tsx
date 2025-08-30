@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from "react";
-import LoadingAnimation from "@/components/shared/loadingAnimation";
 import ThemedTable from "@/components/shared/themed/table/themedTable";
 import ThemedModal from "@/components/shared/themed/themedModal";
 import { MAX_EXPORT_CSV } from "@/lib/constants";
