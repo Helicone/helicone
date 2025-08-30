@@ -1,4 +1,4 @@
-import { ProviderName } from "./providers";
+import { ModelProviderName } from "./providers";
 
 export interface AuthorMetadata {
   modelCount: number;
@@ -150,7 +150,7 @@ export interface RateLimits {
 
 export interface ModelProviderConfig extends BaseConfig {
   providerModelId: string;
-  provider: ProviderName;
+  provider: ModelProviderName;
   author: AuthorName;
   supportedParameters: StandardParameter[];
   rateLimits?: RateLimits;
@@ -170,7 +170,7 @@ export interface EndpointConfig extends UserEndpointConfig {
 
 export interface Endpoint extends BaseConfig {
   baseUrl: string;
-  provider: ProviderName;
+  provider: ModelProviderName;
   author: AuthorName;
   providerModelId: string;
   supportedParameters: StandardParameter[];

@@ -7562,97 +7562,41 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"SimplifiedPricing": {
-				"properties": {
-					"prompt": {
-						"type": "number",
-						"format": "double"
-					},
-					"completion": {
-						"type": "number",
-						"format": "double"
-					},
-					"audio": {
-						"type": "number",
-						"format": "double"
-					},
-					"web_search": {
-						"type": "number",
-						"format": "double"
-					},
-					"video": {
-						"type": "number",
-						"format": "double"
-					},
-					"image": {
-						"type": "number",
-						"format": "double"
-					},
-					"thinking": {
-						"type": "number",
-						"format": "double"
-					},
-					"cacheRead": {
-						"type": "number",
-						"format": "double"
-					},
-					"cacheWrite": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"prompt",
-					"completion"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ModelEndpoint": {
-				"properties": {
-					"provider": {
-						"type": "string"
-					},
-					"providerSlug": {
-						"type": "string"
-					},
-					"pricing": {
-						"$ref": "#/components/schemas/SimplifiedPricing"
-					},
-					"pricingTiers": {
-						"items": {
-							"$ref": "#/components/schemas/SimplifiedPricing"
-						},
-						"type": "array"
-					},
-					"supportsPtb": {
-						"type": "boolean"
-					}
-				},
-				"required": [
-					"provider",
-					"providerSlug",
-					"pricing"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"InputModality": {
+			"ModelProviderName": {
 				"type": "string",
 				"enum": [
-					"text",
-					"image",
-					"audio",
-					"video"
-				]
+					"anthropic",
+					"openai",
+					"bedrock",
+					"vertex",
+					"azure-openai",
+					"perplexity",
+					"groq",
+					"deepseek",
+					"cohere",
+					"xai",
+					"google-ai-studio"
+				],
+				"nullable": false
 			},
-			"OutputModality": {
+			"AuthorName": {
 				"type": "string",
 				"enum": [
-					"text",
-					"image",
-					"audio",
-					"video"
+					"anthropic",
+					"openai",
+					"perplexity",
+					"deepseek",
+					"cohere",
+					"google",
+					"meta-llama",
+					"mistralai",
+					"amazon",
+					"microsoft",
+					"nvidia",
+					"qwen",
+					"x-ai",
+					"moonshotai",
+					"fallback"
 				]
 			},
 			"StandardParameter": {
@@ -7683,6 +7627,241 @@
 					"logprobs",
 					"top_logprobs",
 					"structured_outputs"
+				]
+			},
+			"ModelPricing": {
+				"properties": {
+					"threshold": {
+						"type": "number",
+						"format": "double"
+					},
+					"input": {
+						"type": "number",
+						"format": "double"
+					},
+					"output": {
+						"type": "number",
+						"format": "double"
+					},
+					"image": {
+						"type": "number",
+						"format": "double"
+					},
+					"cacheMultipliers": {
+						"properties": {
+							"write1h": {
+								"type": "number",
+								"format": "double"
+							},
+							"write5m": {
+								"type": "number",
+								"format": "double"
+							},
+							"read": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"write5m",
+							"read"
+						],
+						"type": "object"
+					},
+					"cacheStoragePerHour": {
+						"type": "number",
+						"format": "double"
+					},
+					"thinking": {
+						"type": "number",
+						"format": "double"
+					},
+					"request": {
+						"type": "number",
+						"format": "double"
+					},
+					"audio": {
+						"type": "number",
+						"format": "double"
+					},
+					"video": {
+						"type": "number",
+						"format": "double"
+					},
+					"web_search": {
+						"type": "number",
+						"format": "double"
+					},
+					"internal_reasoning": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"threshold",
+					"input",
+					"output"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Endpoint": {
+				"properties": {
+					"pricing": {
+						"items": {
+							"$ref": "#/components/schemas/ModelPricing"
+						},
+						"type": "array"
+					},
+					"contextLength": {
+						"type": "number",
+						"format": "double"
+					},
+					"maxCompletionTokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"ptbEnabled": {
+						"type": "boolean"
+					},
+					"version": {
+						"type": "string"
+					},
+					"baseUrl": {
+						"type": "string"
+					},
+					"provider": {
+						"$ref": "#/components/schemas/ModelProviderName"
+					},
+					"author": {
+						"$ref": "#/components/schemas/AuthorName"
+					},
+					"providerModelId": {
+						"type": "string"
+					},
+					"supportedParameters": {
+						"items": {
+							"$ref": "#/components/schemas/StandardParameter"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"pricing",
+					"contextLength",
+					"maxCompletionTokens",
+					"ptbEnabled",
+					"baseUrl",
+					"provider",
+					"author",
+					"providerModelId",
+					"supportedParameters"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SimplifiedPricing": {
+				"properties": {
+					"prompt": {
+						"type": "number",
+						"format": "double"
+					},
+					"completion": {
+						"type": "number",
+						"format": "double"
+					},
+					"audio": {
+						"type": "number",
+						"format": "double"
+					},
+					"thinking": {
+						"type": "number",
+						"format": "double"
+					},
+					"web_search": {
+						"type": "number",
+						"format": "double"
+					},
+					"image": {
+						"type": "number",
+						"format": "double"
+					},
+					"video": {
+						"type": "number",
+						"format": "double"
+					},
+					"cacheRead": {
+						"type": "number",
+						"format": "double"
+					},
+					"cacheWrite": {
+						"type": "number",
+						"format": "double"
+					},
+					"internal_reasoning": {
+						"type": "number",
+						"format": "double"
+					},
+					"threshold": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"prompt",
+					"completion"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ModelEndpoint": {
+				"properties": {
+					"provider": {
+						"type": "string"
+					},
+					"providerSlug": {
+						"type": "string"
+					},
+					"endpoint": {
+						"$ref": "#/components/schemas/Endpoint"
+					},
+					"supportsPtb": {
+						"type": "boolean"
+					},
+					"pricing": {
+						"$ref": "#/components/schemas/SimplifiedPricing"
+					},
+					"pricingTiers": {
+						"items": {
+							"$ref": "#/components/schemas/SimplifiedPricing"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"provider",
+					"providerSlug",
+					"pricing"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"InputModality": {
+				"type": "string",
+				"enum": [
+					"text",
+					"image",
+					"audio",
+					"video"
+				]
+			},
+			"OutputModality": {
+				"type": "string",
+				"enum": [
+					"text",
+					"image",
+					"audio",
+					"video"
 				]
 			},
 			"ModelRegistryItem": {
@@ -12346,7 +12525,7 @@
 														"deepseek",
 														"cohere",
 														"xai",
-														"google"
+														"google-ai-studio"
 													]
 												}
 											},
@@ -20948,80 +21127,7 @@
 				}
 			}
 		},
-<<<<<<< HEAD
-		"/v1/api-keys/provider-key/{providerKeyId}": {
-			"delete": {
-				"operationId": "DeleteProviderKey",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{
-											"properties": {
-												"providerName": {
-													"type": "string",
-													"enum": [
-														"anthropic",
-														"openai",
-														"bedrock",
-														"vertex",
-														"azure-openai",
-														"perplexity",
-														"groq",
-														"deepseek",
-														"cohere",
-														"xai",
-														"google-ai-studio"
-													]
-												}
-											},
-											"required": [
-												"providerName"
-											],
-											"type": "object"
-										},
-										{
-											"properties": {
-												"error": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"error"
-											],
-											"type": "object"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"API Key"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "providerKeyId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			},
-=======
 		"/v1/credits/balance": {
->>>>>>> origin/main
 			"get": {
 				"operationId": "GetCreditsBalance",
 				"responses": {

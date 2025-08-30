@@ -12,6 +12,8 @@ import { VaultController } from './../../controllers/public/vaultController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { UserController } from './../../controllers/public/userController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { ApiKeyController } from './../../controllers/public/apiKeyController';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { EvaluatorController } from './../../controllers/public/evaluatorController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { Prompt2025Controller } from './../../controllers/public/prompt2025Controller';
@@ -64,7 +66,7 @@ import { DashboardController } from './../../controllers/public/dashboardControl
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { CustomerController } from './../../controllers/public/customerController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-import { ApiKeyController } from './../../controllers/public/apiKeyController';
+import { CreditsController } from './../../controllers/public/creditsController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { AlertBannerController } from './../../controllers/public/alertBannerController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -271,7 +273,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Partial_RequestResponseRMTToOperators_": {
         "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"country_code":{"ref":"Partial_TextOperators_"},"latency":{"ref":"Partial_NumberOperators_"},"cost":{"ref":"Partial_NumberOperators_"},"provider":{"ref":"Partial_TextOperators_"},"time_to_first_token":{"ref":"Partial_NumberOperators_"},"status":{"ref":"Partial_NumberOperators_"},"request_created_at":{"ref":"Partial_TimestampOperatorsTyped_"},"response_created_at":{"ref":"Partial_TimestampOperatorsTyped_"},"model":{"ref":"Partial_TextOperators_"},"user_id":{"ref":"Partial_TextOperators_"},"organization_id":{"ref":"Partial_TextOperators_"},"node_id":{"ref":"Partial_TextOperators_"},"job_id":{"ref":"Partial_TextOperators_"},"threat":{"ref":"Partial_BooleanOperators_"},"request_id":{"ref":"Partial_TextOperators_"},"prompt_tokens":{"ref":"Partial_NumberOperators_"},"completion_tokens":{"ref":"Partial_NumberOperators_"},"prompt_cache_read_tokens":{"ref":"Partial_NumberOperators_"},"prompt_cache_write_tokens":{"ref":"Partial_NumberOperators_"},"total_tokens":{"ref":"Partial_NumberOperators_"},"target_url":{"ref":"Partial_TextOperators_"},"properties":{"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"ref":"Partial_TextOperators_"}},"search_properties":{"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"ref":"Partial_TextOperators_"}},"scores":{"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"ref":"Partial_TextOperators_"}},"scores_column":{"ref":"Partial_TextOperators_"},"request_body":{"ref":"Partial_VectorOperators_"},"response_body":{"ref":"Partial_VectorOperators_"},"cache_enabled":{"ref":"Partial_BooleanOperators_"},"cache_reference_id":{"ref":"Partial_TextOperators_"},"cached":{"ref":"Partial_BooleanOperators_"},"assets":{"ref":"Partial_TextOperators_"},"helicone-score-feedback":{"ref":"Partial_BooleanOperators_"},"prompt_id":{"ref":"Partial_TextOperators_"},"prompt_version":{"ref":"Partial_TextOperators_"}},"validators":{}},
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"country_code":{"ref":"Partial_TextOperators_"},"latency":{"ref":"Partial_NumberOperators_"},"cost":{"ref":"Partial_NumberOperators_"},"provider":{"ref":"Partial_TextOperators_"},"time_to_first_token":{"ref":"Partial_NumberOperators_"},"status":{"ref":"Partial_NumberOperators_"},"request_created_at":{"ref":"Partial_TimestampOperatorsTyped_"},"response_created_at":{"ref":"Partial_TimestampOperatorsTyped_"},"model":{"ref":"Partial_TextOperators_"},"user_id":{"ref":"Partial_TextOperators_"},"organization_id":{"ref":"Partial_TextOperators_"},"node_id":{"ref":"Partial_TextOperators_"},"job_id":{"ref":"Partial_TextOperators_"},"threat":{"ref":"Partial_BooleanOperators_"},"request_id":{"ref":"Partial_TextOperators_"},"prompt_tokens":{"ref":"Partial_NumberOperators_"},"completion_tokens":{"ref":"Partial_NumberOperators_"},"prompt_cache_read_tokens":{"ref":"Partial_NumberOperators_"},"prompt_cache_write_tokens":{"ref":"Partial_NumberOperators_"},"total_tokens":{"ref":"Partial_NumberOperators_"},"target_url":{"ref":"Partial_TextOperators_"},"properties":{"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"ref":"Partial_TextOperators_"}},"search_properties":{"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"ref":"Partial_TextOperators_"}},"scores":{"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"ref":"Partial_TextOperators_"}},"scores_column":{"ref":"Partial_TextOperators_"},"request_body":{"ref":"Partial_VectorOperators_"},"response_body":{"ref":"Partial_VectorOperators_"},"cache_enabled":{"ref":"Partial_BooleanOperators_"},"cache_reference_id":{"ref":"Partial_TextOperators_"},"cached":{"ref":"Partial_BooleanOperators_"},"assets":{"ref":"Partial_TextOperators_"},"helicone-score-feedback":{"ref":"Partial_BooleanOperators_"},"prompt_id":{"ref":"Partial_TextOperators_"},"prompt_version":{"ref":"Partial_TextOperators_"},"request_referrer":{"ref":"Partial_TextOperators_"},"is_passthrough_billing":{"ref":"Partial_BooleanOperators_"}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Pick_FilterLeaf.users_view-or-request_response_rmt_": {
@@ -375,6 +377,64 @@ const models: TsoaRoute.Models = {
             "timeFilter": {"dataType":"nestedObjectLiteral","nestedProperties":{"endTimeUnixSeconds":{"dataType":"double","required":true},"startTimeUnixSeconds":{"dataType":"double","required":true}}},
         },
         "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Record_string.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"dataType":"string"},"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "CreateProviderKeyRequest": {
+        "dataType": "refAlias",
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"config":{"ref":"Record_string.string_","required":true},"byokEnabled":{"dataType":"boolean","required":true},"providerKeyName":{"dataType":"string","required":true},"providerSecretKey":{"dataType":"string"},"providerKey":{"dataType":"string","required":true},"providerName":{"dataType":"string","required":true}},"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ProviderKeyRow": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "provider_name": {"dataType":"string","required":true},
+            "provider_key_name": {"dataType":"string","required":true},
+            "created_at": {"dataType":"string"},
+            "soft_delete": {"dataType":"boolean","required":true},
+            "config": {"ref":"Record_string.any_"},
+            "byok_enabled": {"dataType":"boolean"},
+            "cuid": {"dataType":"string"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess__id-string--providerName-string__": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"providerName":{"dataType":"string","required":true},"id":{"dataType":"string","required":true}},"required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result__id-string--providerName-string_.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__id-string--providerName-string__"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "UpdateProviderKeyRequest": {
+        "dataType": "refAlias",
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"byokEnabled":{"dataType":"boolean"},"config":{"ref":"Record_string.string_"},"providerSecretKey":{"dataType":"string"},"providerKey":{"dataType":"string"}},"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"user_id":{"dataType":"string","required":true},"updated_at":{"dataType":"string","required":true},"temp_key":{"dataType":"boolean","required":true},"soft_delete":{"dataType":"boolean","required":true},"organization_id":{"dataType":"string","required":true},"key_permissions":{"dataType":"string","required":true},"id":{"dataType":"double","required":true},"governance":{"dataType":"boolean","required":true},"created_at":{"dataType":"string","required":true},"api_key_name":{"dataType":"string","required":true},"api_key_hash":{"dataType":"string","required":true}}},"required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "EvaluatorResult": {
@@ -500,11 +560,6 @@ const models: TsoaRoute.Models = {
     "Result__output-string--traces-string-Array--statusCode_63_-number_.string_": {
         "dataType": "refAlias",
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__output-string--traces-string-Array--statusCode_63_-number__"},{"ref":"ResultError_string_"}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Record_string.string_": {
-        "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"dataType":"string"},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "TestInput": {
@@ -1724,6 +1779,14 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_ScoreV2-or-null_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "CreateCloudGatewayCheckoutSessionRequest": {
+        "dataType": "refObject",
+        "properties": {
+            "amount": {"dataType":"double","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "UpgradeToProRequest": {
         "dataType": "refObject",
         "properties": {
@@ -2379,18 +2442,71 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ModelProviderName": {
+        "dataType": "refAlias",
+        "type": {"dataType":"enum","enums":["anthropic","openai","bedrock","vertex","azure-openai","perplexity","groq","deepseek","cohere","xai","google-ai-studio"],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "AuthorName": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["anthropic"]},{"dataType":"enum","enums":["openai"]},{"dataType":"enum","enums":["perplexity"]},{"dataType":"enum","enums":["deepseek"]},{"dataType":"enum","enums":["cohere"]},{"dataType":"enum","enums":["google"]},{"dataType":"enum","enums":["meta-llama"]},{"dataType":"enum","enums":["mistralai"]},{"dataType":"enum","enums":["amazon"]},{"dataType":"enum","enums":["microsoft"]},{"dataType":"enum","enums":["nvidia"]},{"dataType":"enum","enums":["qwen"]},{"dataType":"enum","enums":["x-ai"]},{"dataType":"enum","enums":["moonshotai"]}]},{"dataType":"enum","enums":["fallback"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "StandardParameter": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["max_tokens"]},{"dataType":"enum","enums":["temperature"]},{"dataType":"enum","enums":["top_p"]},{"dataType":"enum","enums":["top_k"]},{"dataType":"enum","enums":["stop"]},{"dataType":"enum","enums":["stream"]},{"dataType":"enum","enums":["frequency_penalty"]},{"dataType":"enum","enums":["presence_penalty"]},{"dataType":"enum","enums":["repetition_penalty"]},{"dataType":"enum","enums":["seed"]},{"dataType":"enum","enums":["tools"]},{"dataType":"enum","enums":["tool_choice"]},{"dataType":"enum","enums":["functions"]},{"dataType":"enum","enums":["function_call"]},{"dataType":"enum","enums":["reasoning"]},{"dataType":"enum","enums":["include_reasoning"]},{"dataType":"enum","enums":["thinking"]},{"dataType":"enum","enums":["response_format"]},{"dataType":"enum","enums":["json_mode"]},{"dataType":"enum","enums":["truncate"]},{"dataType":"enum","enums":["min_p"]},{"dataType":"enum","enums":["logit_bias"]},{"dataType":"enum","enums":["logprobs"]},{"dataType":"enum","enums":["top_logprobs"]},{"dataType":"enum","enums":["structured_outputs"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ModelPricing": {
+        "dataType": "refObject",
+        "properties": {
+            "threshold": {"dataType":"double","required":true},
+            "input": {"dataType":"double","required":true},
+            "output": {"dataType":"double","required":true},
+            "image": {"dataType":"double"},
+            "cacheMultipliers": {"dataType":"nestedObjectLiteral","nestedProperties":{"write1h":{"dataType":"double"},"write5m":{"dataType":"double","required":true},"read":{"dataType":"double","required":true}}},
+            "cacheStoragePerHour": {"dataType":"double"},
+            "thinking": {"dataType":"double"},
+            "request": {"dataType":"double"},
+            "audio": {"dataType":"double"},
+            "video": {"dataType":"double"},
+            "web_search": {"dataType":"double"},
+            "internal_reasoning": {"dataType":"double"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Endpoint": {
+        "dataType": "refObject",
+        "properties": {
+            "pricing": {"dataType":"array","array":{"dataType":"refObject","ref":"ModelPricing"},"required":true},
+            "contextLength": {"dataType":"double","required":true},
+            "maxCompletionTokens": {"dataType":"double","required":true},
+            "ptbEnabled": {"dataType":"boolean","required":true},
+            "version": {"dataType":"string"},
+            "baseUrl": {"dataType":"string","required":true},
+            "provider": {"ref":"ModelProviderName","required":true},
+            "author": {"ref":"AuthorName","required":true},
+            "providerModelId": {"dataType":"string","required":true},
+            "supportedParameters": {"dataType":"array","array":{"dataType":"refAlias","ref":"StandardParameter"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "SimplifiedPricing": {
         "dataType": "refObject",
         "properties": {
             "prompt": {"dataType":"double","required":true},
             "completion": {"dataType":"double","required":true},
             "audio": {"dataType":"double"},
-            "web_search": {"dataType":"double"},
-            "video": {"dataType":"double"},
-            "image": {"dataType":"double"},
             "thinking": {"dataType":"double"},
+            "web_search": {"dataType":"double"},
+            "image": {"dataType":"double"},
+            "video": {"dataType":"double"},
             "cacheRead": {"dataType":"double"},
             "cacheWrite": {"dataType":"double"},
+            "internal_reasoning": {"dataType":"double"},
+            "threshold": {"dataType":"double"},
         },
         "additionalProperties": false,
     },
@@ -2400,9 +2516,10 @@ const models: TsoaRoute.Models = {
         "properties": {
             "provider": {"dataType":"string","required":true},
             "providerSlug": {"dataType":"string","required":true},
+            "endpoint": {"ref":"Endpoint"},
+            "supportsPtb": {"dataType":"boolean"},
             "pricing": {"ref":"SimplifiedPricing","required":true},
             "pricingTiers": {"dataType":"array","array":{"dataType":"refObject","ref":"SimplifiedPricing"}},
-            "supportsPtb": {"dataType":"boolean"},
         },
         "additionalProperties": false,
     },
@@ -2415,11 +2532,6 @@ const models: TsoaRoute.Models = {
     "OutputModality": {
         "dataType": "refAlias",
         "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["text"]},{"dataType":"enum","enums":["image"]},{"dataType":"enum","enums":["audio"]},{"dataType":"enum","enums":["video"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "StandardParameter": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["max_tokens"]},{"dataType":"enum","enums":["temperature"]},{"dataType":"enum","enums":["top_p"]},{"dataType":"enum","enums":["top_k"]},{"dataType":"enum","enums":["stop"]},{"dataType":"enum","enums":["stream"]},{"dataType":"enum","enums":["frequency_penalty"]},{"dataType":"enum","enums":["presence_penalty"]},{"dataType":"enum","enums":["repetition_penalty"]},{"dataType":"enum","enums":["seed"]},{"dataType":"enum","enums":["tools"]},{"dataType":"enum","enums":["tool_choice"]},{"dataType":"enum","enums":["functions"]},{"dataType":"enum","enums":["function_call"]},{"dataType":"enum","enums":["reasoning"]},{"dataType":"enum","enums":["include_reasoning"]},{"dataType":"enum","enums":["thinking"]},{"dataType":"enum","enums":["response_format"]},{"dataType":"enum","enums":["json_mode"]},{"dataType":"enum","enums":["truncate"]},{"dataType":"enum","enums":["min_p"]},{"dataType":"enum","enums":["logit_bias"]},{"dataType":"enum","enums":["logprobs"]},{"dataType":"enum","enums":["top_logprobs"]},{"dataType":"enum","enums":["structured_outputs"]}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ModelRegistryItem": {
@@ -3531,18 +3643,77 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array_": {
+    "CreditBalanceResponse": {
         "dataType": "refObject",
         "properties": {
-            "data": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"user_id":{"dataType":"string","required":true},"updated_at":{"dataType":"string","required":true},"temp_key":{"dataType":"boolean","required":true},"soft_delete":{"dataType":"boolean","required":true},"organization_id":{"dataType":"string","required":true},"key_permissions":{"dataType":"string","required":true},"id":{"dataType":"double","required":true},"governance":{"dataType":"boolean","required":true},"created_at":{"dataType":"string","required":true},"api_key_name":{"dataType":"string","required":true},"api_key_hash":{"dataType":"string","required":true}}},"required":true},
+            "totalCreditsPurchased": {"dataType":"double","required":true},
+            "balance": {"dataType":"double","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_CreditBalanceResponse_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"ref":"CreditBalanceResponse","required":true},
             "error": {"dataType":"enum","enums":[null],"required":true},
         },
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array.string_": {
+    "Result_CreditBalanceResponse.string_": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array_"},{"ref":"ResultError_string_"}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_CreditBalanceResponse_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "PurchasedCredits": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "createdAt": {"dataType":"double","required":true},
+            "credits": {"dataType":"double","required":true},
+            "referenceId": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "PaginatedPurchasedCredits": {
+        "dataType": "refObject",
+        "properties": {
+            "purchases": {"dataType":"array","array":{"dataType":"refObject","ref":"PurchasedCredits"},"required":true},
+            "total": {"dataType":"double","required":true},
+            "page": {"dataType":"double","required":true},
+            "pageSize": {"dataType":"double","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_PaginatedPurchasedCredits_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"ref":"PaginatedPurchasedCredits","required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result_PaginatedPurchasedCredits.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_PaginatedPurchasedCredits_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess__totalSpend-number__": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"totalSpend":{"dataType":"double","required":true}},"required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result__totalSpend-number_.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__totalSpend-number__"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ResultSuccess__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array_": {
@@ -4152,6 +4323,326 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getUsers',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsApiKeyController_deleteProviderKey: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                providerKeyId: {"in":"path","name":"providerKeyId","required":true,"dataType":"string"},
+        };
+        app.delete('/v1/api-keys/provider-key/:providerKeyId',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(ApiKeyController)),
+            ...(fetchMiddlewares<RequestHandler>(ApiKeyController.prototype.deleteProviderKey)),
+
+            async function ApiKeyController_deleteProviderKey(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsApiKeyController_deleteProviderKey, request, response });
+
+                const controller = new ApiKeyController();
+
+              await templateService.apiHandler({
+                methodName: 'deleteProviderKey',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsApiKeyController_createProviderKey: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                body: {"in":"body","name":"body","required":true,"ref":"CreateProviderKeyRequest"},
+        };
+        app.post('/v1/api-keys/provider-key',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(ApiKeyController)),
+            ...(fetchMiddlewares<RequestHandler>(ApiKeyController.prototype.createProviderKey)),
+
+            async function ApiKeyController_createProviderKey(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsApiKeyController_createProviderKey, request, response });
+
+                const controller = new ApiKeyController();
+
+              await templateService.apiHandler({
+                methodName: 'createProviderKey',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsApiKeyController_getProviderKey: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                providerKeyId: {"in":"path","name":"providerKeyId","required":true,"dataType":"string"},
+        };
+        app.get('/v1/api-keys/provider-key/:providerKeyId',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(ApiKeyController)),
+            ...(fetchMiddlewares<RequestHandler>(ApiKeyController.prototype.getProviderKey)),
+
+            async function ApiKeyController_getProviderKey(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsApiKeyController_getProviderKey, request, response });
+
+                const controller = new ApiKeyController();
+
+              await templateService.apiHandler({
+                methodName: 'getProviderKey',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsApiKeyController_getProviderKeys: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.get('/v1/api-keys/provider-keys',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(ApiKeyController)),
+            ...(fetchMiddlewares<RequestHandler>(ApiKeyController.prototype.getProviderKeys)),
+
+            async function ApiKeyController_getProviderKeys(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsApiKeyController_getProviderKeys, request, response });
+
+                const controller = new ApiKeyController();
+
+              await templateService.apiHandler({
+                methodName: 'getProviderKeys',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsApiKeyController_updateProviderKey: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                providerKeyId: {"in":"path","name":"providerKeyId","required":true,"dataType":"string"},
+                body: {"in":"body","name":"body","required":true,"ref":"UpdateProviderKeyRequest"},
+        };
+        app.patch('/v1/api-keys/provider-key/:providerKeyId',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(ApiKeyController)),
+            ...(fetchMiddlewares<RequestHandler>(ApiKeyController.prototype.updateProviderKey)),
+
+            async function ApiKeyController_updateProviderKey(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsApiKeyController_updateProviderKey, request, response });
+
+                const controller = new ApiKeyController();
+
+              await templateService.apiHandler({
+                methodName: 'updateProviderKey',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsApiKeyController_getAPIKeys: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.get('/v1/api-keys',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(ApiKeyController)),
+            ...(fetchMiddlewares<RequestHandler>(ApiKeyController.prototype.getAPIKeys)),
+
+            async function ApiKeyController_getAPIKeys(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsApiKeyController_getAPIKeys, request, response });
+
+                const controller = new ApiKeyController();
+
+              await templateService.apiHandler({
+                methodName: 'getAPIKeys',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsApiKeyController_createAPIKey: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"key_permissions":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["rw"]},{"dataType":"enum","enums":["r"]},{"dataType":"enum","enums":["w"]}]},"api_key_name":{"dataType":"string","required":true}}},
+        };
+        app.post('/v1/api-keys',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(ApiKeyController)),
+            ...(fetchMiddlewares<RequestHandler>(ApiKeyController.prototype.createAPIKey)),
+
+            async function ApiKeyController_createAPIKey(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsApiKeyController_createAPIKey, request, response });
+
+                const controller = new ApiKeyController();
+
+              await templateService.apiHandler({
+                methodName: 'createAPIKey',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsApiKeyController_createProxyKey: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"proxyKeyName":{"dataType":"string","required":true},"providerKeyId":{"dataType":"string","required":true}}},
+        };
+        app.post('/v1/api-keys/proxy-key',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(ApiKeyController)),
+            ...(fetchMiddlewares<RequestHandler>(ApiKeyController.prototype.createProxyKey)),
+
+            async function ApiKeyController_createProxyKey(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsApiKeyController_createProxyKey, request, response });
+
+                const controller = new ApiKeyController();
+
+              await templateService.apiHandler({
+                methodName: 'createProxyKey',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsApiKeyController_deleteAPIKey: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                apiKeyId: {"in":"path","name":"apiKeyId","required":true,"dataType":"double"},
+        };
+        app.delete('/v1/api-keys/:apiKeyId',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(ApiKeyController)),
+            ...(fetchMiddlewares<RequestHandler>(ApiKeyController.prototype.deleteAPIKey)),
+
+            async function ApiKeyController_deleteAPIKey(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsApiKeyController_deleteAPIKey, request, response });
+
+                const controller = new ApiKeyController();
+
+              await templateService.apiHandler({
+                methodName: 'deleteAPIKey',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsApiKeyController_updateAPIKey: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                apiKeyId: {"in":"path","name":"apiKeyId","required":true,"dataType":"double"},
+                body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"api_key_name":{"dataType":"string","required":true}}},
+        };
+        app.patch('/v1/api-keys/:apiKeyId',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(ApiKeyController)),
+            ...(fetchMiddlewares<RequestHandler>(ApiKeyController.prototype.updateAPIKey)),
+
+            async function ApiKeyController_updateAPIKey(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsApiKeyController_updateAPIKey, request, response });
+
+                const controller = new ApiKeyController();
+
+              await templateService.apiHandler({
+                methodName: 'updateAPIKey',
                 controller,
                 response,
                 next,
@@ -6910,6 +7401,38 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsStripeController_createCloudGatewayCheckoutSession: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                body: {"in":"body","name":"body","required":true,"ref":"CreateCloudGatewayCheckoutSessionRequest"},
+        };
+        app.post('/v1/stripe/cloud/checkout-session',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(StripeController)),
+            ...(fetchMiddlewares<RequestHandler>(StripeController.prototype.createCloudGatewayCheckoutSession)),
+
+            async function StripeController_createCloudGatewayCheckoutSession(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsStripeController_createCloudGatewayCheckoutSession, request, response });
+
+                const controller = new StripeController();
+
+              await templateService.apiHandler({
+                methodName: 'createCloudGatewayCheckoutSession',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsStripeController_upgradeToPro: Record<string, TsoaRoute.ParameterSchema> = {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
                 body: {"in":"body","name":"body","required":true,"ref":"UpgradeToProRequest"},
@@ -7277,38 +7800,6 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getSubscription',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: undefined,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsStripeController_handleStripeWebhook: Record<string, TsoaRoute.ParameterSchema> = {
-                body: {"in":"body","name":"body","required":true,"dataType":"any"},
-                request: {"in":"request","name":"request","required":true,"dataType":"object"},
-        };
-        app.post('/v1/stripe/webhook',
-            authenticateMiddleware([{"api_key":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(StripeController)),
-            ...(fetchMiddlewares<RequestHandler>(StripeController.prototype.handleStripeWebhook)),
-
-            async function StripeController_handleStripeWebhook(request: ExRequest, response: ExResponse, next: any) {
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsStripeController_handleStripeWebhook, request, response });
-
-                const controller = new StripeController();
-
-              await templateService.apiHandler({
-                methodName: 'handleStripeWebhook',
                 controller,
                 response,
                 next,
@@ -10385,27 +10876,26 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsApiKeyController_deleteProviderKey: Record<string, TsoaRoute.ParameterSchema> = {
+        const argsCreditsController_getCreditsBalance: Record<string, TsoaRoute.ParameterSchema> = {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
-                providerKeyId: {"in":"path","name":"providerKeyId","required":true,"dataType":"string"},
         };
-        app.delete('/v1/api-keys/provider-key/:providerKeyId',
+        app.get('/v1/credits/balance',
             authenticateMiddleware([{"api_key":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(ApiKeyController)),
-            ...(fetchMiddlewares<RequestHandler>(ApiKeyController.prototype.deleteProviderKey)),
+            ...(fetchMiddlewares<RequestHandler>(CreditsController)),
+            ...(fetchMiddlewares<RequestHandler>(CreditsController.prototype.getCreditsBalance)),
 
-            async function ApiKeyController_deleteProviderKey(request: ExRequest, response: ExResponse, next: any) {
+            async function CreditsController_getCreditsBalance(request: ExRequest, response: ExResponse, next: any) {
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
             let validatedArgs: any[] = [];
             try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsApiKeyController_deleteProviderKey, request, response });
+                validatedArgs = templateService.getValidatedArgs({ args: argsCreditsController_getCreditsBalance, request, response });
 
-                const controller = new ApiKeyController();
+                const controller = new CreditsController();
 
               await templateService.apiHandler({
-                methodName: 'deleteProviderKey',
+                methodName: 'getCreditsBalance',
                 controller,
                 response,
                 next,
@@ -10417,27 +10907,28 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsApiKeyController_createProviderKey: Record<string, TsoaRoute.ParameterSchema> = {
+        const argsCreditsController_listTokenUsagePayments: Record<string, TsoaRoute.ParameterSchema> = {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
-                body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"providerKeyName":{"dataType":"string","required":true},"config":{"ref":"Record_string.string_","required":true},"providerSecretKey":{"dataType":"string"},"providerKey":{"dataType":"string","required":true},"providerName":{"dataType":"string","required":true}}},
+                page: {"in":"query","name":"page","dataType":"double"},
+                pageSize: {"in":"query","name":"pageSize","dataType":"double"},
         };
-        app.post('/v1/api-keys/provider-key',
+        app.get('/v1/credits/payments',
             authenticateMiddleware([{"api_key":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(ApiKeyController)),
-            ...(fetchMiddlewares<RequestHandler>(ApiKeyController.prototype.createProviderKey)),
+            ...(fetchMiddlewares<RequestHandler>(CreditsController)),
+            ...(fetchMiddlewares<RequestHandler>(CreditsController.prototype.listTokenUsagePayments)),
 
-            async function ApiKeyController_createProviderKey(request: ExRequest, response: ExResponse, next: any) {
+            async function CreditsController_listTokenUsagePayments(request: ExRequest, response: ExResponse, next: any) {
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
             let validatedArgs: any[] = [];
             try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsApiKeyController_createProviderKey, request, response });
+                validatedArgs = templateService.getValidatedArgs({ args: argsCreditsController_listTokenUsagePayments, request, response });
 
-                const controller = new ApiKeyController();
+                const controller = new CreditsController();
 
               await templateService.apiHandler({
-                methodName: 'createProviderKey',
+                methodName: 'listTokenUsagePayments',
                 controller,
                 response,
                 next,
@@ -10449,251 +10940,26 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsApiKeyController_getProviderKey: Record<string, TsoaRoute.ParameterSchema> = {
+        const argsCreditsController_getTotalSpend: Record<string, TsoaRoute.ParameterSchema> = {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
-                providerKeyId: {"in":"path","name":"providerKeyId","required":true,"dataType":"string"},
         };
-        app.get('/v1/api-keys/provider-key/:providerKeyId',
+        app.get('/v1/credits/totalSpend',
             authenticateMiddleware([{"api_key":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(ApiKeyController)),
-            ...(fetchMiddlewares<RequestHandler>(ApiKeyController.prototype.getProviderKey)),
+            ...(fetchMiddlewares<RequestHandler>(CreditsController)),
+            ...(fetchMiddlewares<RequestHandler>(CreditsController.prototype.getTotalSpend)),
 
-            async function ApiKeyController_getProviderKey(request: ExRequest, response: ExResponse, next: any) {
+            async function CreditsController_getTotalSpend(request: ExRequest, response: ExResponse, next: any) {
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
             let validatedArgs: any[] = [];
             try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsApiKeyController_getProviderKey, request, response });
+                validatedArgs = templateService.getValidatedArgs({ args: argsCreditsController_getTotalSpend, request, response });
 
-                const controller = new ApiKeyController();
-
-              await templateService.apiHandler({
-                methodName: 'getProviderKey',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: undefined,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsApiKeyController_getProviderKeys: Record<string, TsoaRoute.ParameterSchema> = {
-                request: {"in":"request","name":"request","required":true,"dataType":"object"},
-        };
-        app.get('/v1/api-keys/provider-keys',
-            authenticateMiddleware([{"api_key":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(ApiKeyController)),
-            ...(fetchMiddlewares<RequestHandler>(ApiKeyController.prototype.getProviderKeys)),
-
-            async function ApiKeyController_getProviderKeys(request: ExRequest, response: ExResponse, next: any) {
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsApiKeyController_getProviderKeys, request, response });
-
-                const controller = new ApiKeyController();
+                const controller = new CreditsController();
 
               await templateService.apiHandler({
-                methodName: 'getProviderKeys',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: undefined,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsApiKeyController_updateProviderKey: Record<string, TsoaRoute.ParameterSchema> = {
-                request: {"in":"request","name":"request","required":true,"dataType":"object"},
-                providerKeyId: {"in":"path","name":"providerKeyId","required":true,"dataType":"string"},
-                body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"config":{"ref":"Record_string.string_"},"providerSecretKey":{"dataType":"string"},"providerKey":{"dataType":"string"}}},
-        };
-        app.patch('/v1/api-keys/provider-key/:providerKeyId',
-            authenticateMiddleware([{"api_key":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(ApiKeyController)),
-            ...(fetchMiddlewares<RequestHandler>(ApiKeyController.prototype.updateProviderKey)),
-
-            async function ApiKeyController_updateProviderKey(request: ExRequest, response: ExResponse, next: any) {
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsApiKeyController_updateProviderKey, request, response });
-
-                const controller = new ApiKeyController();
-
-              await templateService.apiHandler({
-                methodName: 'updateProviderKey',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: undefined,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsApiKeyController_getAPIKeys: Record<string, TsoaRoute.ParameterSchema> = {
-                request: {"in":"request","name":"request","required":true,"dataType":"object"},
-        };
-        app.get('/v1/api-keys',
-            authenticateMiddleware([{"api_key":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(ApiKeyController)),
-            ...(fetchMiddlewares<RequestHandler>(ApiKeyController.prototype.getAPIKeys)),
-
-            async function ApiKeyController_getAPIKeys(request: ExRequest, response: ExResponse, next: any) {
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsApiKeyController_getAPIKeys, request, response });
-
-                const controller = new ApiKeyController();
-
-              await templateService.apiHandler({
-                methodName: 'getAPIKeys',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: undefined,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsApiKeyController_createAPIKey: Record<string, TsoaRoute.ParameterSchema> = {
-                request: {"in":"request","name":"request","required":true,"dataType":"object"},
-                body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"key_permissions":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["rw"]},{"dataType":"enum","enums":["r"]},{"dataType":"enum","enums":["w"]}]},"api_key_name":{"dataType":"string","required":true}}},
-        };
-        app.post('/v1/api-keys',
-            authenticateMiddleware([{"api_key":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(ApiKeyController)),
-            ...(fetchMiddlewares<RequestHandler>(ApiKeyController.prototype.createAPIKey)),
-
-            async function ApiKeyController_createAPIKey(request: ExRequest, response: ExResponse, next: any) {
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsApiKeyController_createAPIKey, request, response });
-
-                const controller = new ApiKeyController();
-
-              await templateService.apiHandler({
-                methodName: 'createAPIKey',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: undefined,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsApiKeyController_createProxyKey: Record<string, TsoaRoute.ParameterSchema> = {
-                request: {"in":"request","name":"request","required":true,"dataType":"object"},
-                body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"proxyKeyName":{"dataType":"string","required":true},"providerKeyId":{"dataType":"string","required":true}}},
-        };
-        app.post('/v1/api-keys/proxy-key',
-            authenticateMiddleware([{"api_key":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(ApiKeyController)),
-            ...(fetchMiddlewares<RequestHandler>(ApiKeyController.prototype.createProxyKey)),
-
-            async function ApiKeyController_createProxyKey(request: ExRequest, response: ExResponse, next: any) {
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsApiKeyController_createProxyKey, request, response });
-
-                const controller = new ApiKeyController();
-
-              await templateService.apiHandler({
-                methodName: 'createProxyKey',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: undefined,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsApiKeyController_deleteAPIKey: Record<string, TsoaRoute.ParameterSchema> = {
-                request: {"in":"request","name":"request","required":true,"dataType":"object"},
-                apiKeyId: {"in":"path","name":"apiKeyId","required":true,"dataType":"double"},
-        };
-        app.delete('/v1/api-keys/:apiKeyId',
-            authenticateMiddleware([{"api_key":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(ApiKeyController)),
-            ...(fetchMiddlewares<RequestHandler>(ApiKeyController.prototype.deleteAPIKey)),
-
-            async function ApiKeyController_deleteAPIKey(request: ExRequest, response: ExResponse, next: any) {
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsApiKeyController_deleteAPIKey, request, response });
-
-                const controller = new ApiKeyController();
-
-              await templateService.apiHandler({
-                methodName: 'deleteAPIKey',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: undefined,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsApiKeyController_updateAPIKey: Record<string, TsoaRoute.ParameterSchema> = {
-                request: {"in":"request","name":"request","required":true,"dataType":"object"},
-                apiKeyId: {"in":"path","name":"apiKeyId","required":true,"dataType":"double"},
-                body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"api_key_name":{"dataType":"string","required":true}}},
-        };
-        app.patch('/v1/api-keys/:apiKeyId',
-            authenticateMiddleware([{"api_key":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(ApiKeyController)),
-            ...(fetchMiddlewares<RequestHandler>(ApiKeyController.prototype.updateAPIKey)),
-
-            async function ApiKeyController_updateAPIKey(request: ExRequest, response: ExResponse, next: any) {
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsApiKeyController_updateAPIKey, request, response });
-
-                const controller = new ApiKeyController();
-
-              await templateService.apiHandler({
-                methodName: 'updateAPIKey',
+                methodName: 'getTotalSpend',
                 controller,
                 response,
                 next,

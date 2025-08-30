@@ -1,11 +1,10 @@
-import { type ProviderName } from "@helicone-package/cost/models/providers";
+import { type ModelProviderName } from "@helicone-package/cost/models/providers";
 import { removeFromCache, storeInCache } from "./clients/cloudflareKV";
 import { type Json } from "./db/database.types";
 import { ENVIRONMENT } from "./clients/constant";
-import { type CreateProviderKeyRequest } from "../controllers/public/apiKeyController";
 
 type ProviderKey = {
-  provider: ProviderName;
+  provider: ModelProviderName;
   decrypted_provider_key: string;
   decrypted_provider_secret_key: string;
   auth_type: "key" | "session_token";

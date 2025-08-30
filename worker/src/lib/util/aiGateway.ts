@@ -3,7 +3,7 @@ import {
   getProvider,
   authenticateRequest as authenticateProviderRequest,
 } from "@helicone-package/cost/models/provider-helpers";
-import { ProviderName } from "@helicone-package/cost/models/providers";
+import { ModelProviderName } from "@helicone-package/cost/models/providers";
 import { BaseProvider } from "@helicone-package/cost/models/providers/base";
 import { RequestWrapper } from "../RequestWrapper";
 import { toAnthropic } from "../clients/llmmapper/providers/openai/request/toAnthropic";
@@ -80,7 +80,7 @@ export const authenticate = async (
 
 type DirectProviderEndpoint = {
   type: "direct";
-  provider: ProviderName;
+  provider: ModelProviderName;
   providerConfig: BaseProvider;
   modelName: string;
   cuid?: string;
@@ -88,7 +88,7 @@ type DirectProviderEndpoint = {
 
 type EndpointsProviderEndpoint = {
   type: "endpoints";
-  providers: Set<ProviderName>;
+  providers: Set<ModelProviderName>;
 };
 
 type ValidateModelStringResult = Result<
@@ -127,7 +127,7 @@ const validateModelString = (model: string): ValidateModelStringResult => {
 
   return ok({
     type: "direct",
-    provider: providerName as ProviderName,
+    provider: providerName as ModelProviderName,
     modelName,
     providerConfig: providerResult.data,
     cuid: cuid ?? undefined,
