@@ -143,7 +143,7 @@ const QuickstartPage = () => {
     },
     {
       title: "Integrate",
-      description: "",  // TODO Add back once gateway route is fixed
+      description: "", // TODO Add back once gateway route is fixed
       link: "",
     },
   ];
