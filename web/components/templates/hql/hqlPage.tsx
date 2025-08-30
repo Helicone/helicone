@@ -266,7 +266,7 @@ function HQLPage() {
       <EmptyStateCard
         feature="hql"
         onPrimaryClick={() => {
-          window.open("mailto:support@helicone.ai?subject=HQL Access Request", "_blank");
+          window.open("https://forms.gle/YXYkFz9Zaa7fWF2v7", "_blank");
         }}
       />
     );
