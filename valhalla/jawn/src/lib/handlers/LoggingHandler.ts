@@ -28,6 +28,7 @@ import {
   modelCost,
 } from "@helicone-package/cost/costCalc";
 import { normalizeTier } from "../utils/tiers";
+import { atLeastZero } from "../utils/helicone_math";
 
 type S3Record = {
   requestId: string;
@@ -297,7 +298,13 @@ export class LoggingHandler extends AbstractLogHandler {
   ): PromiseGenericResult<string> {
     const uploadPromises: Promise<void>[] = Array.from(assets.entries()).map(
       ([assetId, imageUrl]) =>
-        this.handleImageUpload(assetId, imageUrl, requestId, organizationId, tier)
+        this.handleImageUpload(
+          assetId,
+          imageUrl,
+          requestId,
+          organizationId,
+          tier
+        )
     );
 
     await Promise.allSettled(uploadPromises);
@@ -540,46 +547,50 @@ export class LoggingHandler extends AbstractLogHandler {
       context.message.log.request.cacheReferenceId &&
       context.message.log.request.cacheReferenceId != DEFAULT_UUID;
 
-    let cost = response.cost
-      ? response.cost * COST_PRECISION_MULTIPLIER
-      : isCacheHit
-        ? 0
-        : modelCost({
-            provider: request.provider ?? "",
-            model: context.processedLog.model ?? "",
-            sum_prompt_tokens: usage.promptTokens ?? 0,
-            sum_completion_tokens: usage.completionTokens ?? 0,
-            prompt_cache_write_tokens: usage.promptCacheWriteTokens ?? 0,
-            prompt_cache_read_tokens: usage.promptCacheReadTokens ?? 0,
-            prompt_audio_tokens: usage.promptAudioTokens ?? 0,
-            completion_audio_tokens: usage.completionAudioTokens ?? 0,
-            sum_tokens:
-              (usage.promptTokens ?? 0) + (usage.completionTokens ?? 0),
-            multiple: COST_PRECISION_MULTIPLIER,
-          });
-    if (cost < 0) {
-      cost = 0;
-    }
+    let cost = atLeastZero(
+      response.cost
+        ? response.cost * COST_PRECISION_MULTIPLIER
+        : isCacheHit
+          ? 0
+          : modelCost({
+              provider: request.provider ?? "",
+              model: context.processedLog.model ?? "",
+              sum_prompt_tokens: usage.promptTokens ?? 0,
+              sum_completion_tokens: usage.completionTokens ?? 0,
+              prompt_cache_write_tokens: usage.promptCacheWriteTokens ?? 0,
+              prompt_cache_read_tokens: usage.promptCacheReadTokens ?? 0,
+              prompt_audio_tokens: usage.promptAudioTokens ?? 0,
+              completion_audio_tokens: usage.completionAudioTokens ?? 0,
+              sum_tokens:
+                (usage.promptTokens ?? 0) + (usage.completionTokens ?? 0),
+              multiple: COST_PRECISION_MULTIPLIER,
+            })
+    );
+
     const requestResponseLog: RequestResponseRMT = {
       user_id:
         typeof request.userId === "string"
           ? request.userId
           : String(request.userId),
       request_id: request.id,
-      completion_tokens: isCacheHit ? 0 : (usage.completionTokens ?? 0),
       latency: response.delayMs ?? 0,
       model: context.processedLog.model ?? "",
-      prompt_tokens: isCacheHit ? 0 : (usage.promptTokens ?? 0),
-      prompt_cache_write_tokens: isCacheHit
-        ? 0
-        : (usage.promptCacheWriteTokens ?? 0),
-      prompt_cache_read_tokens: isCacheHit
-        ? 0
-        : (usage.promptCacheReadTokens ?? 0),
-      prompt_audio_tokens: isCacheHit ? 0 : (usage.promptAudioTokens ?? 0),
-      completion_audio_tokens: isCacheHit
-        ? 0
-        : (usage.completionAudioTokens ?? 0),
+      completion_tokens: atLeastZero(
+        isCacheHit ? 0 : (usage.completionTokens ?? 0)
+      ),
+      prompt_tokens: atLeastZero(isCacheHit ? 0 : (usage.promptTokens ?? 0)),
+      prompt_cache_write_tokens: atLeastZero(
+        isCacheHit ? 0 : (usage.promptCacheWriteTokens ?? 0)
+      ),
+      prompt_cache_read_tokens: atLeastZero(
+        isCacheHit ? 0 : (usage.promptCacheReadTokens ?? 0)
+      ),
+      prompt_audio_tokens: atLeastZero(
+        isCacheHit ? 0 : (usage.promptAudioTokens ?? 0)
+      ),
+      completion_audio_tokens: atLeastZero(
+        isCacheHit ? 0 : (usage.completionAudioTokens ?? 0)
+      ),
       cost: cost,
       request_created_at: formatTimeString(
         request.requestCreatedAt.toISOString()
@@ -614,7 +625,8 @@ export class LoggingHandler extends AbstractLogHandler {
       prompt_id: context.message.heliconeMeta.promptId ?? "",
       prompt_version: context.message.heliconeMeta.promptVersionId ?? "",
       request_referrer: context.message.log.request.requestReferrer ?? "",
-      is_passthrough_billing: context.message.heliconeMeta.isPassthroughBilling ?? false,
+      is_passthrough_billing:
+        context.message.heliconeMeta.isPassthroughBilling ?? false,
     };
 
     return requestResponseLog;
