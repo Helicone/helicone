@@ -27,12 +27,13 @@ export class VertexProvider extends BaseProvider {
       throw new Error("Vertex AI requires projectId and region");
     }
     const modelId = endpoint.providerModelId || "";
+    const publisher = endpoint.author || "anthropic";
     const baseUrlWithRegion = this.baseUrl.replace("{region}", config.region);
-    return `${baseUrlWithRegion}/v1/projects/${config.projectId}/locations/${config.region}/publishers/anthropic/models/${modelId}:streamRawPredict`;
+    return `${baseUrlWithRegion}/v1/projects/${config.projectId}/locations/${config.region}/publishers/${publisher}/models/${modelId}:streamRawPredict`;
   }
 
   buildRequestBody(endpoint: Endpoint, context: RequestBodyContext): string {
-    if (endpoint.providerModelId.includes("claude-")) {
+    if (endpoint.author === "anthropic") {
       const anthropicBody =
         context.bodyMapping === "OPENAI"
           ? context.toAnthropic(context.parsedBody)

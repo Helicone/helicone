@@ -461,8 +461,9 @@ export function ModelRegistryPage() {
                               if (
                                 !(e.target as HTMLElement).closest("button")
                               ) {
+                                const currentParams = searchParams.toString();
                                 router.push(
-                                  `/model/${encodeURIComponent(model.id)}`
+                                  `/model/${encodeURIComponent(model.id)}${currentParams ? `?${currentParams}` : ''}`
                                 );
                               }
                             }}
@@ -470,7 +471,7 @@ export function ModelRegistryPage() {
                             <td className="px-6 pt-6 pb-1">
                               <div className="flex items-center gap-2">
                                 <Link
-                                  href={`/model/${encodeURIComponent(model.id)}`}
+                                  href={`/model/${encodeURIComponent(model.id)}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`}
                                   className="text-lg font-normal text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400"
                                   onClick={(e) => e.stopPropagation()}
                                 >
@@ -504,11 +505,12 @@ export function ModelRegistryPage() {
 
                           <tr
                             className="group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50"
-                            onClick={() =>
+                            onClick={() => {
+                              const currentParams = searchParams.toString();
                               router.push(
-                                `/model/${encodeURIComponent(model.id)}`
-                              )
-                            }
+                                `/model/${encodeURIComponent(model.id)}${currentParams ? `?${currentParams}` : ''}`
+                              );
+                            }}
                           >
                             <td className="px-6 pt-1 pb-6">
                               <div className="space-y-2">

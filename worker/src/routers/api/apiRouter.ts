@@ -14,7 +14,7 @@ import { ProviderKeysManager } from "../../lib/managers/ProviderKeysManager";
 import { ProviderKey, ProviderKeysStore } from "../../lib/db/ProviderKeysStore";
 import { APIKeysStore } from "../../lib/db/APIKeysStore";
 import { APIKeysManager } from "../../lib/managers/APIKeysManager";
-import { ProviderName } from "@helicone-package/cost/models/providers";
+import { ModelProviderName } from "@helicone-package/cost/models/providers";
 import { BaseOpenAPIRouter } from "../routerFactory";
 import { StripeManager } from "../../lib/managers/StripeManager";
 
@@ -92,7 +92,7 @@ function getAPIRouterV1(
 
       const data = await requestWrapper.getJson<
         {
-          provider: ProviderName;
+          provider: ModelProviderName;
           decryptedProviderKey: string;
           decryptedProviderSecretKey: string;
           authType: "key" | "session_token";

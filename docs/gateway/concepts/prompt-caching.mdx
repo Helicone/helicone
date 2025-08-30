@@ -1,0 +1,85 @@
+---
+title: "Prompt Caching"
+description: "Understanding prompt caching pricing and mechanics across LLM providers"
+---
+
+Prompt caching allows you to cache frequently-used context (system prompts, examples, documents) and reuse it across multiple requests at a discounted rate. This guide explains how caching works and is priced across different providers.
+
+## Overview
+
+When you cache content:
+1. **Cache Write**: You pay to store content in the cache (first use)
+2. **Cache Read**: You pay a discounted rate when reusing cached content
+3. **Storage** (Google only): Additional hourly storage costs
+
+## Anthropic (Claude)
+
+Anthropic uses a simple multiplier-based pricing model for prompt caching.
+
+### Pricing Structure
+
+| Operation | Multiplier | Example (Claude Sonnet @ $3/MTok) |
+|-----------|------------|-----------------------------------|
+| Cache Read | 0.1× | $0.30/MTok |
+| Cache Write (5 min) | 1.25× | $3.75/MTok |
+| Cache Write (1 hour) | 2.0× | $6.00/MTok |
+
+### Key Points
+- **TTL Options**: 5 minutes or 1 hour
+- **Providers**: Available on Anthropic API, Vertex AI, and AWS Bedrock
+- **Limitation**: Vertex AI and Bedrock only support 5-minute caching
+- **Minimum**: 1024 tokens for most models
+
+### Calculation Example
+```
+Base input price: $3/MTok
+5-min cache write: $3 × 1.25 = $3.75/MTok
+1-hour cache write: $3 × 2.0 = $6.00/MTok
+Cache read: $3 × 0.1 = $0.30/MTok
+```
+
+## Google Gemini
+
+Google uses a multiplier plus storage cost model for context caching.
+
+### Pricing Structure
+
+| Operation | Multiplier | Storage Cost |
+|-----------|------------|--------------|
+| Cache Read | 0.25× | N/A |
+| Cache Write | 1.0× | + Storage fee |
+
+**Storage Rates:**
+- Gemini 2.5 Pro: $4.50/MTok/hour
+- Gemini 2.5 Flash: $1.00/MTok/hour
+- Gemini 2.5 Flash-Lite: $1.00/MTok/hour
+
+### Key Points
+- **TTL**: 5 minutes only
+- **Cache Types**: Implicit (automatic) and Explicit (manual)
+- **Minimum**: 1024 tokens (Flash), 2048 tokens (Pro)
+- **Discount**: 75% off input costs for cache reads
+
+### Calculation Example
+
+For Gemini 2.5 Pro (≤200K tokens):
+```
+Base input price: $1.25/MTok
+Storage rate: $4.50/MTok/hour
+
+Cache write (5 min):
+- Input cost: $1.25 × 1.0 = $1.25
+- Storage cost: $4.50 × (5/60) = $0.375
+- Total: $1.625/MTok
+
+Cache read: $1.25 × 0.25 = $0.31/MTok
+```
+
+### Tiered Pricing
+
+Gemini 2.5 Pro has different rates for larger contexts:
+
+| Context Size | Input Price | Cache Read | Cache Write (5 min) |
+|--------------|-------------|------------|-------------------|
+| ≤200K tokens | $1.25/MTok | $0.31/MTok | $1.625/MTok |
+| >200K tokens | $2.50/MTok | $0.625/MTok | $2.875/MTok |

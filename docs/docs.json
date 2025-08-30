@@ -37,6 +37,12 @@
                   "features/advanced-usage/moderations",
                   "features/advanced-usage/retries"
                 ]
+              },
+              {
+                "group": "Concepts",
+                "pages": [
+                  "gateway/concepts/prompt-caching"
+                ]
               }
             ]
           },
