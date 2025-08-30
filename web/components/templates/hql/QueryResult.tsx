@@ -29,6 +29,7 @@ import useNotification from "@/components/shared/notification/useNotification";
 import { CircleCheckBig, CircleDashed } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { HqlErrorDisplay } from "./HqlErrorDisplay";
+import { PaginationControls } from "./PaginationControls";
 
 interface QueryResultProps {
   sql: string;
@@ -36,6 +37,11 @@ interface QueryResultProps {
   loading: boolean;
   error: string | null;
   queryStats: components["schemas"]["ExecuteSqlResponse"];
+  currentPage?: number;
+  rowsPerPage?: number;
+  totalRows?: number;
+  onPageChange?: (page: number) => void;
+  onRowsPerPageChange?: (rows: number) => void;
 }
 function QueryResult({
   sql,
@@ -43,6 +49,11 @@ function QueryResult({
   loading,
   error,
   queryStats,
+  currentPage = 1,
+  rowsPerPage = 50,
+  totalRows = 0,
+  onPageChange,
+  onRowsPerPageChange,
 }: QueryResultProps) {
   const columns = useMemo(() => {
     if (!result || result.length === 0) {
@@ -67,6 +78,11 @@ function QueryResult({
     );
   }
 
+  const effectiveTotalRows = totalRows || result.length;
+  const totalPages = Math.max(1, Math.ceil(effectiveTotalRows / rowsPerPage));
+  const startRow = result.length > 0 ? (currentPage - 1) * rowsPerPage + 1 : 0;
+  const endRow = Math.min(currentPage * rowsPerPage, effectiveTotalRows);
+
   return (
     <div className="flex flex-col">
       <StatusBar
@@ -82,36 +98,63 @@ function QueryResult({
           <LoadingAnimation />
         </div>
       ) : (
-        <ThemedTable
-          id="hql-result"
-          defaultData={result}
-          defaultColumns={[
-            {
-              header: "#",
-              accessorKey: "__rowNum",
-              cell: (info) => info.row.index + 1,
-            },
-            ...columns.map((col) => ({
-              header: col,
-              accessorKey: col,
-              cell: (info: CellContext<Record<string, any>, unknown>) => {
-                const value = info.getValue();
-                if (typeof value === "object" && value !== null) {
-                  return JSON.stringify(value);
-                }
-                return value;
+        <>
+          {effectiveTotalRows > 0 && (
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              rowsPerPage={rowsPerPage}
+              totalRows={effectiveTotalRows}
+              startRow={startRow}
+              endRow={endRow}
+              onPageChange={onPageChange}
+              onRowsPerPageChange={onRowsPerPageChange}
+            />
+          )}
+          <ThemedTable
+            id="hql-result"
+            defaultData={result}
+            defaultColumns={[
+              {
+                header: "#",
+                accessorKey: "__rowNum",
+                cell: (info) => info.row.index + 1,
               },
-            })),
-          ]}
-          skeletonLoading={false}
-          dataLoading={false}
-          checkboxMode="never"
-          onRowSelect={() => {}}
-          onSelectAll={() => {}}
-          selectedIds={[]}
-          activeColumns={[]}
-          setActiveColumns={() => {}}
-        />
+              ...columns.map((col) => ({
+                header: col,
+                accessorKey: col,
+                cell: (info: CellContext<Record<string, any>, unknown>) => {
+                  const value = info.getValue();
+                  if (typeof value === "object" && value !== null) {
+                    return JSON.stringify(value);
+                  }
+                  return value;
+                },
+              })),
+            ]}
+            skeletonLoading={false}
+            dataLoading={false}
+            checkboxMode="never"
+            onRowSelect={() => {}}
+            onSelectAll={() => {}}
+            selectedIds={[]}
+            activeColumns={[]}
+            setActiveColumns={() => {}}
+          />
+          {effectiveTotalRows > 0 && (
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              rowsPerPage={rowsPerPage}
+              totalRows={effectiveTotalRows}
+              startRow={startRow}
+              endRow={endRow}
+              onPageChange={onPageChange}
+              onRowsPerPageChange={onRowsPerPageChange}
+              isBottom={true}
+            />
+          )}
+        </>
       )}
     </div>
   );

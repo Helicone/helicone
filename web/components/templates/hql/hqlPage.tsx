@@ -24,8 +24,8 @@ import {
   parseSqlAndFindTableNameAndAliases,
   useSaveQueryMutation,
   createExecuteQueryMutation,
+  addPaginationToQuery,
 } from "./constants";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useHeliconeAgent } from "../agent/HeliconeAgentContext";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 
@@ -39,6 +39,9 @@ function HQLPage() {
   const clickhouseSchemas = useClickhouseSchemas();
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const [activeTab, setActiveTab] = useState<"tables" | "queries">("tables");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(50);
+  const [totalRows, setTotalRows] = useState(0);
 
   const [result, setResult] = useState<
     components["schemas"]["ExecuteSqlResponse"]
@@ -61,7 +64,14 @@ function HQLPage() {
   const [queryError, setQueryError] = useState<string | null>(null);
   const { mutate: handleExecuteQuery, mutateAsync: handleExecuteQueryAsync } =
     useMutation(
-      createExecuteQueryMutation(setResult, setQueryError, setQueryLoading),
+      createExecuteQueryMutation(
+        (data) => {
+          setResult(data);
+          setTotalRows(data.rowCount);
+        },
+        setQueryError,
+        setQueryLoading,
+      ),
     );
 
   // a hack to get the latest query in the editor
@@ -116,7 +126,12 @@ function HQLPage() {
 
   useEffect(() => {
     setToolHandler("hql-run-query", async () => {
-      const response = await handleExecuteQueryAsync(currentQuery.sql);
+      const paginatedSql = addPaginationToQuery(
+        currentQuery.sql,
+        (currentPage - 1) * rowsPerPage,
+        rowsPerPage,
+      );
+      const response = await handleExecuteQueryAsync(paginatedSql);
       return {
         success: !response.error && !response.data.error,
         message:
@@ -125,7 +140,7 @@ function HQLPage() {
           JSON.stringify((response?.data?.data || response?.data) ?? {}),
       };
     });
-  }, [currentQuery.sql]);
+  }, [currentQuery.sql, currentPage, rowsPerPage]);
 
   useEffect(() => {
     if (savedQueryDetails?.data) {
@@ -300,7 +315,11 @@ function HQLPage() {
           >
             <TopBar
               currentQuery={currentQuery}
-              handleExecuteQuery={handleExecuteQuery}
+              handleExecuteQuery={(sql) => {
+                setCurrentPage(1);
+                const paginatedSql = addPaginationToQuery(sql, 0, rowsPerPage);
+                handleExecuteQuery(paginatedSql);
+              }}
               handleSaveQuery={handleSaveQuery}
               handleRenameQuery={(newName) => {
                 setCurrentQuery({
@@ -392,7 +411,13 @@ function HQLPage() {
                   editor.addCommand(
                     monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
                     () => {
-                      handleExecuteQuery(latestQueryRef.current.sql);
+                      setCurrentPage(1);
+                      const paginatedSql = addPaginationToQuery(
+                        latestQueryRef.current.sql,
+                        0,
+                        rowsPerPage,
+                      );
+                      handleExecuteQuery(paginatedSql);
                     },
                   );
 
@@ -456,15 +481,6 @@ function HQLPage() {
             collapsedSize={10}
             defaultSize={25}
           >
-            {result.rowCount >= 100 && (
-              <Alert variant="warning" className="mb-2">
-                <AlertTitle>Row Limit Reached</AlertTitle>
-                <AlertDescription>
-                  Only the first 100 rows are shown. Please refine your query
-                  for more specific results. Or download for more data.
-                </AlertDescription>
-              </Alert>
-            )}
             <QueryResult
               sql={currentQuery.sql}
               result={result.rows}
@@ -476,6 +492,28 @@ function HQLPage() {
               }}
               loading={queryLoading}
               error={queryError}
+              currentPage={currentPage}
+              rowsPerPage={rowsPerPage}
+              totalRows={totalRows}
+              onPageChange={(page) => {
+                setCurrentPage(page);
+                const paginatedSql = addPaginationToQuery(
+                  currentQuery.sql,
+                  (page - 1) * rowsPerPage,
+                  rowsPerPage,
+                );
+                handleExecuteQuery(paginatedSql);
+              }}
+              onRowsPerPageChange={(rows) => {
+                setRowsPerPage(rows);
+                setCurrentPage(1);
+                const paginatedSql = addPaginationToQuery(
+                  currentQuery.sql,
+                  0,
+                  rows,
+                );
+                handleExecuteQuery(paginatedSql);
+              }}
             />
           </ResizablePanel>
         </ResizablePanelGroup>
