@@ -650,12 +650,18 @@ export class LoggingHandler extends AbstractLogHandler {
       provider: request.provider ?? "",
       cache_hit_count: 1,
       saved_latency_ms: context.message.log.response.cachedLatency ?? 0,
-      saved_completion_tokens: usage.completionTokens ?? 0,
-      saved_prompt_tokens: usage.promptTokens ?? 0,
-      saved_prompt_cache_write_tokens: usage.promptCacheWriteTokens ?? 0,
-      saved_prompt_cache_read_tokens: usage.promptCacheReadTokens ?? 0,
-      saved_prompt_audio_tokens: usage.promptAudioTokens ?? 0,
-      saved_completion_audio_tokens: usage.completionAudioTokens ?? 0,
+      saved_completion_tokens: atLeastZero(usage.completionTokens ?? 0),
+      saved_prompt_tokens: atLeastZero(usage.promptTokens ?? 0),
+      saved_prompt_cache_write_tokens: atLeastZero(
+        usage.promptCacheWriteTokens ?? 0
+      ),
+      saved_prompt_cache_read_tokens: atLeastZero(
+        usage.promptCacheReadTokens ?? 0
+      ),
+      saved_prompt_audio_tokens: atLeastZero(usage.promptAudioTokens ?? 0),
+      saved_completion_audio_tokens: atLeastZero(
+        usage.completionAudioTokens ?? 0
+      ),
       last_hit: formatTimeString(response.responseCreatedAt.toISOString()),
       first_hit: formatTimeString(response.responseCreatedAt.toISOString()),
       request_body: requestText,
