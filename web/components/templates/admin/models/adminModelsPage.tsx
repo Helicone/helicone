@@ -311,7 +311,10 @@ export default function AdminModelsPage() {
                 const isDisabled = endpoints.length === 0;
                 const costs = endpoints
                   .map((ep: ModelEndpoint) => ep.pricing?.[0]?.input)
-                  .filter((cost): cost is number => cost !== undefined && cost !== null);
+                  .filter(
+                    (cost): cost is number =>
+                      cost !== undefined && cost !== null,
+                  );
                 const minCost = costs.length > 0 ? Math.min(...costs) : 0;
                 const maxCost = costs.length > 0 ? Math.max(...costs) : 0;
 
@@ -368,7 +371,10 @@ export default function AdminModelsPage() {
                             minCost === maxCost ? (
                               <>${(minCost * 1000000).toFixed(2)}/1M</>
                             ) : (
-                              <>${(minCost * 1000000).toFixed(2)} - ${(maxCost * 1000000).toFixed(2)}/1M</>
+                              <>
+                                ${(minCost * 1000000).toFixed(2)} - $
+                                {(maxCost * 1000000).toFixed(2)}/1M
+                              </>
                             )
                           ) : (
                             <span className="text-muted-foreground">N/A</span>
@@ -383,7 +389,10 @@ export default function AdminModelsPage() {
                         const isVariantDisabled = variantEndpoints.length === 0;
                         const variantCosts = variantEndpoints
                           .map((ep: ModelEndpoint) => ep.pricing?.[0]?.input)
-                          .filter((cost): cost is number => cost !== undefined && cost !== null);
+                          .filter(
+                            (cost): cost is number =>
+                              cost !== undefined && cost !== null,
+                          );
                         const variantMinCost =
                           variantCosts.length > 0
                             ? Math.min(...variantCosts)
@@ -448,12 +457,21 @@ export default function AdminModelsPage() {
                               <div className="text-xs">
                                 {variantCosts.length > 0 ? (
                                   variantMinCost === variantMaxCost ? (
-                                    <>${(variantMinCost * 1000000).toFixed(2)}/1M</>
+                                    <>
+                                      ${(variantMinCost * 1000000).toFixed(2)}
+                                      /1M
+                                    </>
                                   ) : (
-                                    <>${(variantMinCost * 1000000).toFixed(2)} - ${(variantMaxCost * 1000000).toFixed(2)}/1M</>
+                                    <>
+                                      ${(variantMinCost * 1000000).toFixed(2)} -
+                                      ${(variantMaxCost * 1000000).toFixed(2)}
+                                      /1M
+                                    </>
                                   )
                                 ) : (
-                                  <span className="text-muted-foreground">N/A</span>
+                                  <span className="text-muted-foreground">
+                                    N/A
+                                  </span>
                                 )}
                               </div>
                             </TableCell>

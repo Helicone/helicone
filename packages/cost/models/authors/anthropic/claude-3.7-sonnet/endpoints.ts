@@ -1,4 +1,4 @@
-import { ProviderName } from "../../../providers";
+import { ModelProviderName } from "../../../providers";
 import type { ModelProviderConfig } from "../../../types";
 import { Claude37SonnetModelName } from "./model";
 
@@ -103,5 +103,5 @@ export const endpoints = {
     },
   },
 } satisfies Partial<
-  Record<`${Claude37SonnetModelName}:${ProviderName}`, ModelProviderConfig>
+  Record<`${Claude37SonnetModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

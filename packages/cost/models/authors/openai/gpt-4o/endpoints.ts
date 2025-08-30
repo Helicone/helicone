@@ -1,4 +1,4 @@
-import { ProviderName } from "../../../providers";
+import { ModelProviderName } from "../../../providers";
 import type { ModelProviderConfig } from "../../../types";
 import { GPT4oModelName } from "./models";
 export const endpoints = {
@@ -221,5 +221,5 @@ export const endpoints = {
     },
   },
 } satisfies Partial<
-  Record<`${GPT4oModelName}:${ProviderName}`, ModelProviderConfig>
+  Record<`${GPT4oModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

@@ -1,4 +1,4 @@
-import { ProviderName } from "../../../providers";
+import { ModelProviderName } from "../../../providers";
 import type { ModelProviderConfig } from "../../../types";
 import { GPTOSSModelName } from "./models";
 export const endpoints = {
@@ -91,5 +91,5 @@ export const endpoints = {
     },
   },
 } satisfies Partial<
-  Record<`${GPTOSSModelName}:${ProviderName}`, ModelProviderConfig>
+  Record<`${GPTOSSModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

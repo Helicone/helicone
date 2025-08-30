@@ -10,7 +10,7 @@ import type {
 } from "./types";
 import { buildIndexes, ModelIndexes } from "./build-indexes";
 import { buildEndpointUrl, buildModelId } from "./provider-helpers";
-import { ProviderName } from "./providers";
+import { ModelProviderName } from "./providers";
 import { Result, ok, err } from "../../common/result";
 import { ModelName, ModelProviderConfigId, EndpointId } from "./registry-types";
 
@@ -89,7 +89,7 @@ function getPtbEndpointsByModel(model: string): Result<Endpoint[]> {
 
 function createFallbackEndpoint(
   modelName: string,
-  provider: ProviderName,
+  provider: ModelProviderName,
   userEndpointConfig: UserEndpointConfig
 ): Result<Endpoint> {
   const endpointConfig: ModelProviderConfig = {
@@ -124,7 +124,7 @@ function getPtbEndpointsByProvider(
 
 function getProviderModels(provider: string): Result<Set<ModelName>> {
   const models =
-    indexes.providerToModels.get(provider as ProviderName) || new Set();
+    indexes.providerToModels.get(provider as ModelProviderName) || new Set();
   return ok(models);
 }
 
@@ -170,7 +170,7 @@ function getModelProviderConfigs(model: string): Result<ModelProviderConfig[]> {
   return ok(configs);
 }
 
-function getModelProviders(model: string): Result<Set<ProviderName>> {
+function getModelProviders(model: string): Result<Set<ModelProviderName>> {
   const providers =
     indexes.modelToProviders.get(model as ModelName) || new Set();
   return ok(providers);

@@ -7,21 +7,23 @@ import type {
   AuthResult,
   RequestBodyContext,
 } from "./types";
-import { providers, ProviderName } from "./providers";
+import { providers, ModelProviderName } from "./providers";
 import { BaseProvider } from "./providers/base";
 
 // Helper function to get provider instance
 export function getProvider(providerName: string): Result<BaseProvider> {
   const provider =
     providerName in providers
-      ? providers[providerName as ProviderName]
+      ? providers[providerName as ModelProviderName]
       : undefined;
 
   return provider ? ok(provider) : err(`Unknown provider: ${providerName}`);
 }
 
 // TODO: Remove once we normalize provider names in provider_keys table.
-export const dbProviderToProvider = (provider: string): ProviderName | null => {
+export const dbProviderToProvider = (
+  provider: string
+): ModelProviderName | null => {
   if (provider === "openai" || provider === "OpenAI") {
     return "openai";
   }
