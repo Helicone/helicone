@@ -11,14 +11,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
   Table,
   TableBody,
   TableCell,
@@ -65,7 +57,6 @@ export function ModelDetailPage() {
   const [model, setModel] = useState<Model | null>(null);
   const [loading, setLoading] = useState(true);
   const [copiedText, setCopiedText] = useState<string | null>(null);
-  const [relatedModels, setRelatedModels] = useState<Model[]>([]);
 
   const jawnClient = useJawnClient();
 
@@ -85,15 +76,6 @@ export function ModelDetailPage() {
 
           if (foundModel) {
             setModel(foundModel);
-
-            // Find related models from same author
-            const related = allModels
-              .filter(
-                (m: Model) =>
-                  m.author === foundModel.author && m.id !== foundModel.id
-              )
-              .slice(0, 4);
-            setRelatedModels(related);
           }
         }
       } catch (error) {
@@ -306,17 +288,8 @@ export function ModelDetailPage() {
           )}
         </div>
 
-        {/* Tabs for Additional Details */}
-        <Tabs defaultValue="overview" className="mb-12">
-          <TabsList className="grid w-full grid-cols-3 max-w-md">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="api">API</TabsTrigger>
-            <TabsTrigger value="related">Related</TabsTrigger>
-          </TabsList>
-
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="mt-6">
-            <div className="space-y-8">
+        {/* Overview Section */}
+        <div className="space-y-8">
               {/* Providers Section */}
               <div>
                 <h3 className="text-lg font-semibold mb-4">
@@ -537,117 +510,7 @@ export function ModelDetailPage() {
                   </div>
                 </div>
               )}
-            </div>
-          </TabsContent>
-
-          {/* API Tab */}
-          <TabsContent value="api" className="mt-6">
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-semibold mb-3">
-                  Supported Parameters
-                </h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                  {model.supportedParameters.map((param) => (
-                    <div
-                      key={param}
-                      className="flex items-center gap-2 p-2 border rounded"
-                    >
-                      <Check className="h-4 w-4 text-green-600" />
-                      <span className="text-sm">
-                        {parameterLabels[param] || param}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold mb-3">Example Usage</h3>
-                <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
-                  <pre className="text-sm overflow-x-auto">
-                    <code>{`curl https://api.helicone.ai/v1/chat/completions \\
-  -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer $API_KEY" \\
-  -d '{
-    "model": "${model.id}",
-    "messages": [
-      {
-        "role": "user",
-        "content": "Hello!"
-      }
-    ]
-  }'`}</code>
-                  </pre>
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-
-          {/* Related Models Tab */}
-          <TabsContent value="related" className="mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {relatedModels.map((related) => {
-                const relatedCleanName = related.name.replace(
-                  new RegExp(`^${related.author}:\s*`, "i"),
-                  ""
-                );
-                const relatedCheapest = related.endpoints.reduce((min, ep) => {
-                  const epPricing = ep.pricingTiers && ep.pricingTiers.length > 0
-                    ? ep.pricingTiers[0]
-                    : ep.pricing;
-                  const minPricing = min.pricingTiers && min.pricingTiers.length > 0
-                    ? min.pricingTiers[0]
-                    : min.pricing;
-                  if (!epPricing || !minPricing) return min;
-                  const epCost = (epPricing.prompt + epPricing.completion) / 2;
-                  const minCost = (minPricing.prompt + minPricing.completion) / 2;
-                  return epCost < minCost ? ep : min;
-                });
-
-                return (
-                  <Link
-                    key={related.id}
-                    href={`/models/${encodeURIComponent(related.id)}`}
-                    className="block"
-                  >
-                    <Card className="hover:shadow-lg transition-shadow">
-                      <CardHeader>
-                        <CardTitle className="text-lg">
-                          {relatedCleanName}
-                        </CardTitle>
-                        <CardDescription>{related.author}</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-gray-500">Context:</span>
-                            <span>{formatContext(related.contextLength)}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-500">Starting at:</span>
-                            <span className="font-mono">
-                              {formatCost(
-                                relatedCheapest.pricingTiers && relatedCheapest.pricingTiers.length > 0
-                                  ? relatedCheapest.pricingTiers[0].prompt
-                                  : relatedCheapest.pricing.prompt
-                              )}{" "}
-                              input
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-500">Providers:</span>
-                            <span>{related.endpoints.length}</span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                );
-              })}
-            </div>
-          </TabsContent>
-        </Tabs>
+        </div>
       </div>
     </div>
   );
