@@ -27,6 +27,7 @@ import {
 } from "./constants";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useHeliconeAgent } from "../agent/HeliconeAgentContext";
+import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 
 function HQLPage() {
   const organization = useOrg();
@@ -260,8 +261,15 @@ function HQLPage() {
     );
   }
 
-  if (!hasAccessToHQL) {
-    return <div>You do not have access to HQL</div>;
+  if (!hasAccessToHQL?.data) {
+    return (
+      <EmptyStateCard
+        feature="hql"
+        onPrimaryClick={() => {
+          window.open("mailto:support@helicone.ai?subject=HQL Access Request", "_blank");
+        }}
+      />
+    );
   }
 
   return (
