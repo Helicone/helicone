@@ -5,10 +5,6 @@ on:
   push:
     branches:
       - "**" # Run on ALL branches for every push
-  pull_request:
-    branches:
-      - "**" # Run on ALL branches for PRs
-    types: [opened, synchronize, reopened, ready_for_review]
 
 jobs:
   worker-ai-gateway-tests:
