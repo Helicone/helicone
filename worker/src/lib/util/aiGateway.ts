@@ -204,9 +204,9 @@ const sendRequest = async (
   providerKey: ProviderKey,
   forwarder: (
     targetBaseUrl: string | null,
-    escrowInfo?: EscrowInfo,
+    escrowInfo?: EscrowInfo
   ) => Promise<Response>,
-  escrowInfo?: EscrowInfo,
+  escrowInfo?: EscrowInfo
 ): Promise<Result<Response, Error>> => {
   const body = await buildRequestBody(endpoint, {
     parsedBody,
@@ -257,7 +257,7 @@ const attemptDirectProviderRequest = async (
   requestWrapper: RequestWrapper,
   forwarder: (
     targetBaseUrl: string | null,
-    escrowInfo?: EscrowInfo,
+    escrowInfo?: EscrowInfo
   ) => Promise<Response>,
   providerKeysManager: ProviderKeysManager,
   orgId: string,
@@ -267,11 +267,8 @@ const attemptDirectProviderRequest = async (
   disallowList: DisallowListEntry[]
 ): Promise<Result<Response, Error>> => {
   const { provider, modelName, cuid } = directProviderEndpoint;
-  const userProviderKeyWithConfig = await providerKeysManager.getProviderKeyWithFetch(
-    provider,
-    orgId,
-    cuid
-  );
+  const userProviderKeyWithConfig =
+    await providerKeysManager.getProviderKeyWithFetch(provider, orgId, cuid);
 
   const userEndpointConfig = {
     ...((userProviderKeyWithConfig?.config ?? {}) as UserEndpointConfig),
@@ -283,7 +280,10 @@ const attemptDirectProviderRequest = async (
   let endpoints: Endpoint[];
   if (endpointsResult.data && endpointsResult.data.length > 0) {
     endpoints = endpointsResult.data;
-  } else if (userProviderKeyWithConfig && isByokEnabled(userProviderKeyWithConfig)) {
+  } else if (
+    userProviderKeyWithConfig &&
+    isByokEnabled(userProviderKeyWithConfig)
+  ) {
     console.log("no PTB endpoints found");
     // Fall back to creating a custom endpoint
     const fallback = registry.createFallbackEndpoint(
@@ -304,7 +304,7 @@ const attemptDirectProviderRequest = async (
       parsedBody,
       requestWrapper,
       userProviderKeyWithConfig,
-      forwarder,
+      forwarder
     );
     if (isErr(result)) {
       return err(result.error);
@@ -363,10 +363,11 @@ const attemptDirectProviderRequest = async (
 
   // now fetch the helicone provider key since PTB must be enabled
   // and merge the helicone api key with the user config so that we pick up their settings
-  const heliconeKeyWithConfig = await providerKeysManager.getProviderKeyWithFetch(
-    provider,
-    env.HELICONE_ORG_ID
-  );
+  const heliconeKeyWithConfig =
+    await providerKeysManager.getProviderKeyWithFetch(
+      provider,
+      env.HELICONE_ORG_ID
+    );
   if (!heliconeKeyWithConfig) {
     console.error("no helicone key found");
     return err({
@@ -385,7 +386,6 @@ const attemptDirectProviderRequest = async (
       }
     : heliconeKeyWithConfig;
 
-
   const walletId = env.WALLET.idFromName(orgId);
   const walletStub = env.WALLET.get(walletId);
   for (const endpoint of endpoints) {
@@ -396,11 +396,12 @@ const attemptDirectProviderRequest = async (
     // if cloud billing is enabled, we want to 'reserve' the maximum possible
     // cost of the request in their wallet so that we can avoid overages
     const isDisallowed = disallowList.some(
-      entry => 
-        (entry.provider === endpoint.provider && entry.model === endpoint.providerModelId) ||
+      (entry) =>
+        (entry.provider === endpoint.provider &&
+          entry.model === endpoint.providerModelId) ||
         (entry.provider === endpoint.provider && entry.model === "*")
     );
-    
+
     if (isDisallowed) {
       return err({
         type: "request_failed",
@@ -456,7 +457,7 @@ const attemptProvidersRequest = async (
   requestWrapper: RequestWrapper,
   forwarder: (
     targetBaseUrl: string | null,
-    escrowInfo?: EscrowInfo,
+    escrowInfo?: EscrowInfo
   ) => Promise<Response>,
   providerKeysManager: ProviderKeysManager,
   orgId: string,
@@ -522,7 +523,7 @@ const attemptModelRequest = async ({
   requestWrapper: RequestWrapper;
   forwarder: (
     targetBaseUrl: string | null,
-    escrowInfo?: EscrowInfo,
+    escrowInfo?: EscrowInfo
   ) => Promise<Response>;
   providerKeysManager: ProviderKeysManager;
   orgId: string;
@@ -582,7 +583,7 @@ export const attemptModelRequestWithFallback = async ({
   requestWrapper: RequestWrapper;
   forwarder: (
     targetBaseUrl: string | null,
-    escrowInfo?: EscrowInfo,
+    escrowInfo?: EscrowInfo
   ) => Promise<Response>;
   providerKeysManager: ProviderKeysManager;
   promptManager: PromptManager;
@@ -686,7 +687,8 @@ export type EscrowInfo = {
 
 function isByokEnabled(providerKey: ProviderKey): boolean {
   // if not set, assume true to preserve backwards compatibility
-  const legacyByokEnabled = providerKey.byok_enabled === undefined || providerKey.byok_enabled === null;
+  const legacyByokEnabled =
+    providerKey.byok_enabled === undefined || providerKey.byok_enabled === null;
   return legacyByokEnabled || providerKey.byok_enabled === true;
 }
 
@@ -699,15 +701,14 @@ const reserveEscrow = async (
   const walletId = env.WALLET.idFromName(orgId);
   const walletStub = env.WALLET.get(walletId);
 
+  // Use first pricing tier (threshold 0)
+  const firstTierPricing = endpoint.pricing[0];
   if (
+    !firstTierPricing ||
     endpoint.contextLength === 0 ||
     endpoint.maxCompletionTokens === 0 ||
-    endpoint.pricing.prompt === 0 ||
-    endpoint.pricing.completion === 0 ||
-    endpoint.pricing.image === 0 ||
-    endpoint.pricing.cacheRead === 0 ||
-    endpoint.pricing.cacheWrite === 0 ||
-    endpoint.pricing.thinking === 0
+    firstTierPricing.input === 0 ||
+    firstTierPricing.output === 0
   ) {
     return err({
       type: "model_not_supported",
@@ -716,9 +717,9 @@ const reserveEscrow = async (
     });
   }
 
-  const maxPromptCost = endpoint.contextLength * endpoint.pricing.prompt;
+  const maxPromptCost = endpoint.contextLength * firstTierPricing.input;
   const maxCompletionCost =
-    endpoint.maxCompletionTokens * endpoint.pricing.completion;
+    endpoint.maxCompletionTokens * firstTierPricing.output;
   const worstCaseCost = maxPromptCost + maxCompletionCost;
   if (worstCaseCost <= 0) {
     return err({
