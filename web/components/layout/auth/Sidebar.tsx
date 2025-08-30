@@ -18,7 +18,6 @@ import { useMemo } from "react";
 import DesktopSidebar from "./DesktopSidebar";
 import { ChangelogItem, NavigationItem } from "./types";
 import { useOrg } from "../org/organizationContext";
-import { useFeatureFlag } from "@/services/hooks/admin";
 
 interface SidebarProps {
   setOpen: (open: boolean) => void;
@@ -30,10 +29,6 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
   const router = useRouter();
   const { pathname } = router;
   const org = useOrg();
-  const { data: hasHQLFeatureFlag } = useFeatureFlag(
-    "hql",
-    org?.currentOrg?.id ?? "",
-  );
 
   const NAVIGATION: NavigationItem[] = useMemo(
     () => [
@@ -79,16 +74,12 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
             icon: ArchiveIcon,
             current: pathname.includes("/cache"),
           },
-          ...(hasHQLFeatureFlag?.data
-            ? [
-                {
-                  name: "HQL",
-                  href: "/hql",
-                  icon: Code2Icon,
-                  current: pathname.includes("/hql"),
-                },
-              ]
-            : []),
+          {
+            name: "HQL",
+            href: "/hql",
+            icon: Code2Icon,
+            current: pathname.includes("/hql"),
+          },
         ],
       },
       {
@@ -138,7 +129,7 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
         ],
       },
     ],
-    [pathname, hasHQLFeatureFlag?.data],
+    [pathname],
   );
 
   return (
