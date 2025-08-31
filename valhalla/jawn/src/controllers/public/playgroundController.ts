@@ -145,6 +145,7 @@ export class PlaygroundController extends Controller {
           defaultHeaders: {
             "Helicone-Auth": `Bearer ${secretKey}`,
             "Helicone-User-Id": request.authParams.organizationId,
+            "Helicone-Property-Helicone-User-Id": request.authParams.userId,
             ...(!selfKey && {
               // 30 per month
               "Helicone-RateLimit-Policy": `{30};w={${30 * 24 * 60 * 60}};s=user`,
