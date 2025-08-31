@@ -144,10 +144,10 @@ export class PlaygroundController extends Controller {
           apiKey: useAIGateway ? secretKey : openRouterKey,
           defaultHeaders: {
             "Helicone-Auth": `Bearer ${secretKey}`,
-            "Helicone-User-Id": "helicone_playground",
+            "Helicone-User-Id": request.authParams.organizationId,
             ...(!selfKey && {
-              // 5 requests per user per year
-              "Helicone-RateLimit-Policy": "5;w=31536000;s=user",
+              // 30 per month
+              "Helicone-RateLimit-Policy": `{30};w={${30 * 24 * 60 * 60}};s=user`,
             }),
           },
         });
