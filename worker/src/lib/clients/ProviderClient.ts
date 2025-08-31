@@ -95,7 +95,19 @@ export async function callProvider(props: CallProps): Promise<Response> {
   const { headers, method, apiBase, body, increaseTimeout, originalUrl } =
     props;
 
-  const targetUrl = buildTargetUrl(originalUrl, apiBase);
+  // Extract deployment name from request body for Azure OpenAI
+  let deploymentName: string | undefined;
+  if (body && apiBase.includes(".openai.azure.com")) {
+    try {
+      const parsedBody = JSON.parse(body);
+      deploymentName = parsedBody.model;
+    } catch (e) {
+      // If we can't parse the body, continue without deployment name
+      // This will result in an error for Azure requests, which is correct
+    }
+  }
+
+  const targetUrl = buildTargetUrl(originalUrl, apiBase, deploymentName);
   const removedHeaders = removeHeliconeHeaders(headers);
 
   let headersWithExtra = removedHeaders;
@@ -128,9 +140,43 @@ export async function callProvider(props: CallProps): Promise<Response> {
   return response;
 }
 
-export function buildTargetUrl(originalUrl: URL, apiBase: string): URL {
+export function buildTargetUrl(originalUrl: URL, apiBase: string, deploymentName?: string): URL {
   const apiBaseUrl = new URL(apiBase.replace(/\/$/, ""));
+  
+  // Check if this is an Azure OpenAI endpoint
+  const isAzureOpenAI = apiBaseUrl.hostname.includes(".openai.azure.com");
+  
+  if (isAzureOpenAI) {
+    // For Azure OpenAI, we need to handle deployment URLs specially
+    // Original path: /v1/chat/completions
+    // Azure path: /openai/deployments/{deployment-name}/chat/completions
+    
+    // Extract the endpoint path (e.g., "chat/completions")
+    let azurePath = originalUrl.pathname;
+    
+    // Remove /v1 prefix if present
+    if (azurePath.startsWith('/v1/')) {
+      azurePath = azurePath.substring(3); // Remove '/v1'
+    } else if (azurePath.startsWith('/v1')) {
+      azurePath = azurePath.substring(3); // Remove '/v1'  
+    }
+    
+    // For Azure, construct the path: /openai/deployments/{deployment-name}/endpoint
+    if (deploymentName) {
+      const azureBasePath = `/openai/deployments/${deploymentName}${azurePath}`;
+      return new URL(
+        `${apiBaseUrl.origin}${azureBasePath}${originalUrl.search}`
+      );
+    } else {
+      // If no deployment name provided, we can't construct a proper Azure URL
+      // This will result in an error, which is correct behavior
+      return new URL(
+        `${apiBaseUrl.origin}/openai/deployments/MISSING_DEPLOYMENT${azurePath}${originalUrl.search}`
+      );
+    }
+  }
 
+  // For non-Azure endpoints, use the original logic
   return new URL(
     `${apiBaseUrl.origin}${originalUrl.pathname}${originalUrl.search}`
   );
