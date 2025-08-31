@@ -148,7 +148,7 @@ export class PlaygroundController extends Controller {
             "Helicone-Property-Org_Id": request.authParams.organizationId,
             ...(!selfKey && {
               // 30 per month
-              "Helicone-RateLimit-Policy": `{30};w={${30 * 24 * 60 * 60}};s=org_id`,
+              "Helicone-RateLimit-Policy": `30;w=${30 * 24 * 60 * 60};s=org_id`,
             }),
           },
         });
