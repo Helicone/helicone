@@ -119,7 +119,7 @@ export class PlaygroundController extends Controller {
          FROM decrypted_provider_keys_v2
          WHERE org_id = $1
          AND soft_delete = false
-         AND provider_name = 'OpenRouter'
+         AND provider_name = 'openrouter'
          LIMIT 1`,
         [request.authParams.organizationId]
       );
@@ -265,7 +265,7 @@ export class PlaygroundController extends Controller {
               }
 
               this.setStatus(400);
-              if (error.error.metadata?.raw) {
+              if (error.error?.metadata?.raw) {
                 try {
                   const raw = JSON.parse(error.error.metadata?.raw || "{}");
                   if (raw.error?.message) {
@@ -274,19 +274,19 @@ export class PlaygroundController extends Controller {
                 } catch (err) {}
               }
 
-              return err(error.error.message);
+              return err(error?.error?.message ?? JSON.stringify(error));
             }
             this.setStatus(500);
-            return err(error.message);
+            return err(error?.message ?? JSON.stringify(error));
           }
 
           this.setStatus(500);
-          return err("Failed to generate response");
+          return err("Failed to generate response: " + JSON.stringify(error));
         }
       });
     } catch (error) {
       this.setStatus(500);
-      return err("Failed to generate response");
+      return err("Failed to generate response: " + JSON.stringify(error));
     }
   }
 
