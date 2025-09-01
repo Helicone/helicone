@@ -9,7 +9,7 @@ export const models = {
     contextLength: 131000,
     maxOutputTokens: 131000,
     created: "2025-08-05T10:17:11",
-    modality: "text->text",
+    modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "GPT",
   },
   "gpt-oss-20b": {
@@ -20,7 +20,7 @@ export const models = {
     contextLength: 131000,
     maxOutputTokens: 131000,
     created: "2025-08-05T10:17:09",
-    modality: "text->text",
+    modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "GPT",
   },
 } satisfies Record<string, ModelConfig>;

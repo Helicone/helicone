@@ -13,11 +13,11 @@ import { AuthParams } from "../../packages/common/auth/types";
 import { Result, err, ok } from "../../packages/common/result";
 import { costOf } from "@helicone-package/cost";
 import { BaseManager } from "../BaseManager";
+import { SecretManager } from "@helicone-package/secrets/SecretManager";
 import { OrganizationManager } from "../organization/OrganizationManager";
-import { KVCache } from "../../lib/cache/kvCache";
-import { cacheResultCustom } from "../../utils/cacheResult";
+import { SettingsManager } from "../../utils/settings";
+
 type StripeMeterEvent = Stripe.V2.Billing.MeterEventStreamCreateParams.Event;
-const cache = new KVCache(60 * 1000); // 1 hour
 
 const DEFAULT_PRODUCT_PRICES = {
   "request-volume": process.env.PRICE_PROD_REQUEST_VOLUME_ID!, //(This is just growth)
@@ -106,7 +106,7 @@ export class StripeManager extends BaseManager {
 
   constructor(authParams: AuthParams) {
     super(authParams);
-    this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    this.stripe = new Stripe(SecretManager.getSecret("STRIPE_SECRET_KEY")!, {
       apiVersion: "2025-02-24.acacia",
     });
   }
@@ -348,7 +348,6 @@ WHERE (${builtFilter.filter})`,
           comment: "Downgrading to free tier at the end of the billing period",
         },
       });
-      console.log(result);
 
       return ok(null);
     } catch (error: any) {
@@ -1059,7 +1058,6 @@ WHERE (${builtFilter.filter})`,
         ],
         proration_behavior: "create_prorations",
       });
-      console.log("DELETED", result);
 
       console.log(
         `${productType} scheduled for removal at the end of the billing cycle`
@@ -1227,71 +1225,62 @@ WHERE (${builtFilter.filter})`,
     }
   }
 
-  public async reportUsageToStripe(
-    customerId: string,
-    usage: number
-  ): Promise<Result<null, string>> {
+  public async createCloudGatewayCheckoutSession(
+    origin: string,
+    amount: number,
+  ): Promise<Result<string, string>> {
     try {
-      // Assuming you have a usage item ID for each customer
-      const usageRecordParams: Stripe.SubscriptionItemCreateUsageRecordParams =
-        {
-          quantity: usage,
-          timestamp: Math.floor(Date.now() / 1000),
-          action: "set",
-        };
-
-      await this.stripe.subscriptionItems.createUsageRecord(
-        "si_1234", // Replace with actual subscription item ID
-        usageRecordParams
-      );
-
-      return ok(null);
-    } catch (error: any) {
-      return err(`Error reporting usage to Stripe: ${error.message}`);
-    }
-  }
-
-  public async handleStripeWebhook(
-    body: any,
-    signature: string
-  ): Promise<Result<null, string>> {
-    try {
-      const event = this.stripe.webhooks.constructEvent(
-        body,
-        signature,
-        process.env.STRIPE_WEBHOOK_SECRET!
-      );
-
-      if (event.type === "invoice.created") {
-        const invoice = event.data.object as Stripe.Invoice;
-        console.log("Invoice created:", invoice.id);
-        // Add your logic here to process the invoice
+      const customerId = await this.getOrCreateStripeCustomer();
+      if (customerId.error || !customerId.data) {
+        return err("Error getting or creating stripe customer");
       }
 
-      if (event.type === "invoice.upcoming") {
-        const invoice = event.data.object as Stripe.Invoice;
-        const customerId = invoice.customer as string;
+      const settingsManager = new SettingsManager();
+      const stripeProductSettings = await settingsManager.getSetting("stripe:products");
+      if (!stripeProductSettings || !stripeProductSettings.cloudGatewayTokenUsageProduct) {
+        return err("stripe:products setting is not configured");
+      }
+      const tokenUsageProductId = stripeProductSettings.cloudGatewayTokenUsageProduct;
 
-        // Get usage from your system
-        // You'll need to implement this method or use an appropriate service
-        const usage = await this.getCustomerUsage(customerId);
+      try {
+        const unitAmount = amount * 100;
 
-        if (usage) {
-          await this.reportUsageToStripe(customerId, usage);
+        const checkoutResult = await this.stripe.checkout.sessions.create({
+          customer: customerId.data,
+          success_url: `${origin}/settings/credits`,
+          cancel_url: `${origin}/settings/credits`,
+          mode: "payment",
+          line_items: [{
+            price_data: {
+                currency: "usd", 
+                unit_amount: unitAmount,
+                product: tokenUsageProductId,
+            },
+            quantity: 1,
+          }],
+          payment_intent_data: {
+            metadata: {
+              orgId: this.authParams.organizationId,
+              productId: tokenUsageProductId,
+            }
+          }
+        })
+
+        if (checkoutResult.lastResponse.statusCode !== 200) {
+          return err(`Got status code ${checkoutResult.lastResponse.statusCode} from Stripe`);
+        } else if (!checkoutResult.url) {
+          return err("Stripe did not return a session URL");
         }
-      }
 
-      return ok(null);
+        return ok(checkoutResult.url);
+      } catch (error: any) {
+        return err(`Error creating cloud gateway checkout session: ${error.message}`);
+      }
     } catch (error: any) {
-      return err(`Error processing webhook: ${error.message}`);
+      return err(`Error creating cloud gateway checkout session: ${error.message}`);
     }
   }
 
-  private async getCustomerUsage(customerId: string): Promise<number | null> {
-    // Implement this method to get the customer's usage
-    // This might involve querying your database or other services
-    return null;
-  }
   public async updateProUserCount(
     count: number
   ): Promise<Result<null, string>> {
@@ -1357,3 +1346,4 @@ WHERE (${builtFilter.filter})`,
     }
   }
 }
+

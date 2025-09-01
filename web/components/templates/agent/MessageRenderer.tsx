@@ -4,6 +4,8 @@ import { markdownComponents } from "@/components/shared/prompts/ResponsePanel";
 import { useState } from "react";
 import { ImageModal } from "../requests/components/chatComponent/single/images/ImageModal";
 import { User } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/router";
 
 const markdownStyling =
   "w-full text-[13px] prose-p:my-2 prose-h1:mt-2 prose-h1:font-bold prose-h2:mt-2 prose-h3:mt-2 prose-h3:mb-1 prose-a:text-brand prose-a:underline";
@@ -18,9 +20,16 @@ type Message = NonNullable<OpenAIChatRequest["messages"]>[0] & {
 
 interface MessageRendererProps {
   message: Message;
+  messageIndex?: number;
+  onQuickstartHelp?: () => void;
 }
 
-const MessageRenderer = ({ message }: MessageRendererProps) => {
+const MessageRenderer = ({
+  message,
+  messageIndex,
+  onQuickstartHelp,
+}: MessageRendererProps) => {
+  const router = useRouter();
   const [selectedImage, setSelectedImage] = useState<{
     src: string;
     alt: string;
@@ -41,17 +50,27 @@ const MessageRenderer = ({ message }: MessageRendererProps) => {
     return (
       <>
         <div className="flex w-full justify-end">
-          <div className="max-w-[80%] rounded-lg border border-blue-200 bg-blue-100 px-2.5 py-1 text-foreground dark:border-blue-950 dark:bg-blue-900/20">
+          <div className="w-full rounded-lg border border-blue-200 bg-blue-100 px-2.5 py-1 text-foreground dark:border-blue-950 dark:bg-blue-900/20">
+
             {typeof message.content === "string" ? (
-              <span className="text-[13px]">{message.content}</span>
+              <ReactMarkdown
+                components={markdownComponents}
+                className={markdownStyling}
+              >
+                {message.content}
+              </ReactMarkdown>
             ) : Array.isArray(message.content) ? (
               <div className="space-y-2">
                 {message.content
                   .filter((item: any) => item.type === "text")
                   .map((item: any, index: number) => (
-                    <span key={index} className="text-[13px]">
+                    <ReactMarkdown
+                      key={index}
+                      components={markdownComponents}
+                      className={markdownStyling}
+                    >
                       {item.text}
-                    </span>
+                    </ReactMarkdown>
                   ))}
               </div>
             ) : null}
@@ -105,8 +124,11 @@ const MessageRenderer = ({ message }: MessageRendererProps) => {
   }
 
   if (message.role === "assistant") {
-    // Check if this is a human response (has a name field from Slack)
     const isHumanResponse = !!message.name;
+    const isFirstMessage = messageIndex === 0;
+    const isQuickstartPage = router.pathname === "/quickstart";
+    const showQuickstartButton =
+      isFirstMessage && isQuickstartPage && onQuickstartHelp;
 
     return (
       <div
@@ -136,6 +158,18 @@ const MessageRenderer = ({ message }: MessageRendererProps) => {
             >
               {message.content}
             </ReactMarkdown>
+          )}
+          {showQuickstartButton && (
+            <div className="mt-3">
+              <Button
+                onClick={onQuickstartHelp}
+                variant="outline"
+                size="sm"
+                className="text-sm"
+              >
+                Help me integrate
+              </Button>
+            </div>
           )}
           {message.tool_calls && (
             <div className="mt-2 space-y-2">

@@ -211,20 +211,6 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
     table: "request_response_rmt",
   },
   {
-    id: "gateway_router_id",
-    label: "Gateway Router ID",
-    type: "string",
-    operators: ["eq", "neq", "like", "ilike", "contains"],
-    table: "request_response_rmt",
-  },
-  {
-    id: "gateway_deployment_target",
-    label: "Gateway Deployment Target",
-    type: "string",
-    operators: ["eq", "neq", "like", "ilike", "contains"],
-    table: "request_response_rmt",
-  },
-  {
     id: "prompt_id",
     label: "Prompt ID",
     type: "string",

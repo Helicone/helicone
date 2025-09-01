@@ -24,6 +24,10 @@ export interface SqsSettings {
   messagesPerMiniBatch: number;
 }
 
+export interface StripeProductSettings {
+  cloudGatewayTokenUsageProduct: string;
+}
+
 export interface SettingsType {
   "kafka:dlq": KafkaSettings;
   "kafka:log": KafkaSettings;
@@ -41,6 +45,7 @@ export interface SettingsType {
   "sqs:helicone-scores": SqsSettings;
   "sqs:request-response-logs-dlq": SqsSettings;
   "sqs:helicone-scores-dlq": SqsSettings;
+  "stripe:products": StripeProductSettings;
 }
 
 export type SettingName = keyof SettingsType;

@@ -29,12 +29,13 @@ export const AUTHORS = [
 
 export type AuthorName = (typeof AUTHORS)[number];
 
-export type Modality =
-  | "text"
-  | "text->text"
-  | "text+image->text"
-  | "text->image"
-  | "multimodal";
+export type InputModality = "text" | "image" | "audio" | "video";
+export type OutputModality = "text" | "image" | "audio" | "video";
+
+export interface Modality {
+  inputs: InputModality[];
+  outputs: OutputModality[];
+}
 
 export type Tokenizer =
   | "Claude"
@@ -143,8 +144,10 @@ export interface UserEndpointConfig {
   region?: string;
   location?: string;
   projectId?: string;
+  baseUri?: string; // Azure OpenAI
   deploymentName?: string;
   resourceName?: string;
+  apiVersion?: string; // Azure OpenAI
   crossRegion?: boolean;
   gatewayMapping?: "OPENAI" | "NO_MAPPING";
 }

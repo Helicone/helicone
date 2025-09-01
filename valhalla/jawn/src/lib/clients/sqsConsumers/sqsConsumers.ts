@@ -75,7 +75,6 @@ async function withMessages({
 
   if (messages.length === 0) {
     await new Promise((resolve) => setTimeout(resolve, 10_000));
-    console.log("No messages to process");
     return;
   }
 

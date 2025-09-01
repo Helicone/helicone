@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from "react";
-import LoadingAnimation from "@/components/shared/loadingAnimation";
 import ThemedTable from "@/components/shared/themed/table/themedTable";
 import ThemedModal from "@/components/shared/themed/themedModal";
 import { MAX_EXPORT_CSV } from "@/lib/constants";
@@ -77,42 +76,36 @@ function QueryResult({
         sql={sql}
         queryLoading={loading}
       />
-      {loading ? (
-        <div className="p-4 text-center text-muted-foreground">
-          <LoadingAnimation />
-        </div>
-      ) : (
-        <ThemedTable
-          id="hql-result"
-          defaultData={result}
-          defaultColumns={[
-            {
-              header: "#",
-              accessorKey: "__rowNum",
-              cell: (info) => info.row.index + 1,
+      <ThemedTable
+        id="hql-result"
+        defaultData={result}
+        defaultColumns={[
+          {
+            header: "#",
+            accessorKey: "__rowNum",
+            cell: (info) => info.row.index + 1,
+          },
+          ...columns.map((col) => ({
+            header: col,
+            accessorKey: col,
+            cell: (info: CellContext<Record<string, any>, unknown>) => {
+              const value = info.getValue();
+              if (typeof value === "object" && value !== null) {
+                return JSON.stringify(value);
+              }
+              return value;
             },
-            ...columns.map((col) => ({
-              header: col,
-              accessorKey: col,
-              cell: (info: CellContext<Record<string, any>, unknown>) => {
-                const value = info.getValue();
-                if (typeof value === "object" && value !== null) {
-                  return JSON.stringify(value);
-                }
-                return value;
-              },
-            })),
-          ]}
-          skeletonLoading={false}
-          dataLoading={false}
-          checkboxMode="never"
-          onRowSelect={() => {}}
-          onSelectAll={() => {}}
-          selectedIds={[]}
-          activeColumns={[]}
-          setActiveColumns={() => {}}
-        />
-      )}
+          })),
+        ]}
+        skeletonLoading={false}
+        dataLoading={false}
+        checkboxMode="never"
+        onRowSelect={() => {}}
+        onSelectAll={() => {}}
+        selectedIds={[]}
+        activeColumns={[]}
+        setActiveColumns={() => {}}
+      />
     </div>
   );
 }

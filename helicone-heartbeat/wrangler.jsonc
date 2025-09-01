@@ -25,6 +25,7 @@
 	 * Environment Variables
 	 * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
 	 */
+	 "keep_vars": true,
 	"env": {
 		"us": {
 			"vars": {

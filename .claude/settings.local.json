@@ -30,6 +30,9 @@
       "Bash(npx prettier:*)",
       "Bash(npx tsc:*)",
       "Bash(npx jest:*)",
+      "Bash(docker buildx build:*)",
+      "WebFetch(domain:developers.cloudflare.com)",
+      "WebSearch",
       "Bash(npx ts-node:*)",
       "WebFetch(domain:undici.nodejs.org)",
       "WebSearch",
@@ -38,7 +41,8 @@
       "Bash(gh run view:*)",
       "Bash(gh run watch:*)",
       "Bash(curl:*)",
-      "Bash(yarn lint:*)"
+      "Bash(yarn lint:*)",
+      "mcp__linear-server__list_comments"
     ],
     "deny": []
   }

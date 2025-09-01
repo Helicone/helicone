@@ -12,7 +12,6 @@ import {
   KeyIcon,
   LinkIcon,
   Plug,
-  ShuffleIcon,
   Webhook,
   Coins,
   Lock,
@@ -22,6 +21,7 @@ import { useRouter } from "next/router";
 import { ReactNode, useMemo } from "react";
 import { useIsGovernanceEnabled } from "../organization/hooks";
 import AuthHeader from "@/components/shared/authHeader";
+import { useFeatureFlag } from "@/services/hooks/admin";
 
 const ORGANIZATION_TABS = [
   {
@@ -76,12 +76,6 @@ const DEVELOPER_TABS = [
     href: "/settings/providers",
   },
   {
-    id: "ai-gateway",
-    title: "AI Gateway",
-    icon: ShuffleIcon,
-    href: "/settings/ai-gateway",
-  },
-  {
     id: "webhooks",
     title: "Webhooks",
     icon: Webhook,
@@ -115,23 +109,34 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
 
   const isGovernanceEnabled = useIsGovernanceEnabled();
   const isBetterAuthEnabled = process.env.NEXT_PUBLIC_BETTER_AUTH === "true";
+  const { data: hasCreditsFeatureFlag } = useFeatureFlag(
+    "credits",
+    org?.currentOrg?.id ?? "",
+  );
 
-  // Add access keys for governance orgs
+  // Add access keys for governance orgs and filter credits based on feature flag
   const organizationTabs = useMemo(() => {
+    let tabs = [...ORGANIZATION_TABS];
+
+    // Remove credits tab if feature flag is not enabled
+    if (!hasCreditsFeatureFlag?.data) {
+      tabs = tabs.filter((tab) => tab.id !== "credits");
+    }
+
     if (isGovernanceEnabled.data?.data?.data) {
       return [
-        ORGANIZATION_TABS[0], // General
+        tabs[0], // General
         {
           id: "access-keys",
           title: "Access Keys",
           icon: FingerprintIcon,
           href: "/settings/access-keys",
         },
-        ...ORGANIZATION_TABS.slice(1), // Rest of organization tabs
+        ...tabs.slice(1), // Rest of organization tabs
       ];
     }
-    return ORGANIZATION_TABS;
-  }, [isGovernanceEnabled.data?.data?.data]);
+    return tabs;
+  }, [isGovernanceEnabled.data?.data?.data, hasCreditsFeatureFlag?.data]);
 
   const renderNavSection = (title: string, tabs: typeof ORGANIZATION_TABS) => (
     <div className="space-y-2">

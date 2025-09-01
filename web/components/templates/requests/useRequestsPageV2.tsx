@@ -16,7 +16,7 @@ import {
 import { filterUITreeToFilterNode } from "@helicone-package/filters/helpers";
 import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
 import { useFilterAST } from "@/filterAST/context/filterContext";
-import { toFilterNode } from "@/filterAST/toFilterNode";
+import { toFilterNode } from "@helicone-package/filters/toFilterNode";
 
 const useRequestsPageV2 = (
   currentPage: number,

@@ -9,7 +9,7 @@ export const models = {
     contextLength: 1047576,
     maxOutputTokens: 32768,
     created: "2025-04-14T17:23:05.000Z",
-    modality: "text+image->text",
+    modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
   },
   "gpt-4.1-mini": {
@@ -20,7 +20,7 @@ export const models = {
     contextLength: 1047576,
     maxOutputTokens: 32768,
     created: "2025-04-14T17:23:01.000Z",
-    modality: "text+image->text",
+    modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
   },
   "gpt-4.1-nano": {
@@ -31,7 +31,7 @@ export const models = {
     contextLength: 1047576,
     maxOutputTokens: 32768,
     created: "2025-04-14T17:22:49.000Z",
-    modality: "text+image->text",
+    modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
   },
 } satisfies Record<string, ModelConfig>;

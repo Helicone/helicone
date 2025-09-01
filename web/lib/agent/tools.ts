@@ -59,6 +59,20 @@ export const universalTools = [
   },
 ];
 
+export const quickstartTools = [
+  {
+    type: "function" as const,
+    function: {
+      name: "quickstart-open-integration-guide",
+      description: "Shows the integration guide to the user.",
+      parameters: {
+        type: "object",
+        properties: {},
+      },
+    },
+  },
+];
+
 export const hqlTools = [
   {
     type: "function" as const,

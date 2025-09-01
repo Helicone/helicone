@@ -102,7 +102,10 @@ export function ModelDetailsDialog({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Small className="text-muted-foreground">Modality</Small>
-                <P>{model.modality}</P>
+                <P>
+                  {model.modality.inputs.join(", ")} →{" "}
+                  {model.modality.outputs.join(", ")}
+                </P>
               </div>
               <div>
                 <Small className="text-muted-foreground">Tokenizer</Small>

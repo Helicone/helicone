@@ -13,6 +13,7 @@ import { MAPPERS } from "@helicone-package/llm-mapper/utils/getMappedContent";
 import { getMapperType } from "@helicone-package/llm-mapper/utils/getMapperType";
 import { RateLimitOptions } from "../clients/DurableObjectRateLimiterClient";
 import { RateLimitOptionsBuilder } from "../util/rateLimitOptions";
+import { EscrowInfo } from "../util/aiGateway";
 
 export type RetryOptions = {
   retries: number; // number of times to retry the request
@@ -53,6 +54,7 @@ export interface HeliconeProxyRequest {
   threat?: boolean;
   flaggedForModeration?: boolean;
   cf?: CfProperties;
+  escrowInfo?: EscrowInfo;
 }
 
 const providerBaseUrlMappings: Record<
@@ -72,7 +74,8 @@ export class HeliconeProxyRequestMapper {
   constructor(
     private request: RequestWrapper,
     private provider: Provider,
-    private env: Env
+    private env: Env,
+    private escrowInfo?: EscrowInfo
   ) {
     this.tokenCalcUrl = env.VALHALLA_URL;
   }
@@ -87,6 +90,7 @@ export class HeliconeProxyRequestMapper {
           model: rawJson.model,
           provider: this.provider,
           path: this.request.url.pathname,
+          requestReferrer: this.request.requestReferrer,
         });
 
         // Map the request using the appropriate mapper
@@ -172,6 +176,7 @@ export class HeliconeProxyRequestMapper {
         nodeId: this.request.heliconeHeaders.nodeId ?? null,
         targetUrl,
         cf: this.request.cf ?? undefined,
+        escrowInfo: this.escrowInfo,
       },
       error: null,
     };

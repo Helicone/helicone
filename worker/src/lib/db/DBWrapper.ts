@@ -244,7 +244,6 @@ export class DBWrapper {
       this.env,
       async () => await this._getAuthParams()
     );
-
     if (!authParams || authParams.error || !authParams.data) {
       return err(authParams?.error || "Invalid authentication.");
     }

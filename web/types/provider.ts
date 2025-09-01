@@ -8,6 +8,7 @@ export interface Provider {
   apiKeyPlaceholder: string;
   relevanceScore: number; // Hidden score for sorting by relevance
   note?: string;
+  multipleAllowed?: boolean;
 }
 
 // Interface for provider configuration from API
@@ -28,6 +29,8 @@ export interface ProviderKey {
   created_at?: string;
   soft_delete: boolean;
   config?: Record<string, any>; // JSON config field for provider-specific settings
+  cuid?: string | null; // CUID for the provider key
+  byok_enabled?: boolean; // Indicates if key is enabled for AI Gateway (BYOK)
 }
 
 // Interface for decrypted provider key

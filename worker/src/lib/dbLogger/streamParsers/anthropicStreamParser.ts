@@ -40,7 +40,6 @@ export function recursivelyConsolidateAnthropicListForClaude(
       return acc;
     }
     if (item.type === "message_delta") {
-      console.log("Message Delta", item);
       return recursivelyConsolidateAnthropic(acc, {
         ...item.delta,
         ...item,
@@ -74,8 +73,6 @@ export function recursivelyConsolidateAnthropicListForClaude(
     if (item.type === "message_start") {
       return recursivelyConsolidateAnthropic(acc, item.message);
     }
-
-    // console.log("Item Without Ignore Keys", item);
 
     return recursivelyConsolidateAnthropic(acc, item);
   }, {});
@@ -111,7 +108,9 @@ export async function anthropicAIStream(
     if (
       getModel(requestBody ?? "{}").includes("claude-3") ||
       getModel(requestBody ?? "{}").includes("claude-sonnet-4") ||
-      getModel(requestBody ?? "{}").includes("claude-opus-4")
+      getModel(requestBody ?? "{}").includes("claude-opus-4") ||
+      // for AI SDK
+      getModel(requestBody ?? "{}").includes("claude-4")
     ) {
       return ok({
         ...recursivelyConsolidateAnthropicListForClaude(lines),

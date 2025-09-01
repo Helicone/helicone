@@ -11,6 +11,8 @@ const ALLOWED_LINES = [
   "message_start",
   "content_block_start",
   "content_block_stop",
+  "message_stop",
+  "ping",
 ];
 
 export class AnthropicStreamBodyProcessor implements IBodyProcessor {
@@ -44,9 +46,6 @@ export class AnthropicStreamBodyProcessor implements IBodyProcessor {
       // Process data lines
 
       try {
-        if (!ALLOWED_LINES.includes(line.replace("data:", "").trim())) {
-          continue;
-        }
         const data = JSON.parse(line.replace("data:", "").trim());
 
         // Handle input_json_delta for tool_use
@@ -66,9 +65,13 @@ export class AnthropicStreamBodyProcessor implements IBodyProcessor {
 
         processedLines.push(data);
       } catch (e) {
-        console.error("Error parsing line Anthropic", line);
-
-        processedLines.push({});
+        const cleanedLine = line
+          .replace("data:", "")
+          .replace("event:", "")
+          .trim();
+        if (!ALLOWED_LINES.includes(cleanedLine)) {
+          console.error("Error parsing line Anthropic", line);
+        }
       }
     }
 

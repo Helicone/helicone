@@ -119,7 +119,7 @@ export class PlaygroundController extends Controller {
          FROM decrypted_provider_keys_v2
          WHERE org_id = $1
          AND soft_delete = false
-         AND provider_name = 'OpenRouter'
+         AND provider_name = 'openrouter'
          LIMIT 1`,
         [request.authParams.organizationId]
       );
@@ -145,9 +145,10 @@ export class PlaygroundController extends Controller {
           defaultHeaders: {
             "Helicone-Auth": `Bearer ${secretKey}`,
             "Helicone-User-Id": "helicone_playground",
+            "Helicone-Property-Org_Id": request.authParams.organizationId,
             ...(!selfKey && {
-              // 5 requests per user per year
-              "Helicone-RateLimit-Policy": "5;w=31536000;s=user",
+              // 30 per month
+              "Helicone-RateLimit-Policy": `30;w=${30 * 24 * 60 * 60};s=org_id`,
             }),
           },
         });
@@ -254,8 +255,9 @@ export class PlaygroundController extends Controller {
             if (error instanceof OpenAI.APIError) {
               if (
                 error.status === 429 &&
-                "helicone-ratelimit-remaining" in error.headers &&
-                error.headers["helicone-ratelimit-remaining"] === "0"
+                // TODO: this should do a .get and check if it's 0 once the
+                // ratelimit logic is fixed in Helicone
+                error.headers.has("helicone-ratelimit-remaining")
               ) {
                 this.setStatus(429);
                 return err(
@@ -264,7 +266,7 @@ export class PlaygroundController extends Controller {
               }
 
               this.setStatus(400);
-              if (error.error.metadata?.raw) {
+              if (error.error?.metadata?.raw) {
                 try {
                   const raw = JSON.parse(error.error.metadata?.raw || "{}");
                   if (raw.error?.message) {
@@ -273,19 +275,19 @@ export class PlaygroundController extends Controller {
                 } catch (err) {}
               }
 
-              return err(error.error.message);
+              return err(error?.error?.message ?? JSON.stringify(error));
             }
             this.setStatus(500);
-            return err(error.message);
+            return err(error?.message ?? JSON.stringify(error));
           }
 
           this.setStatus(500);
-          return err("Failed to generate response");
+          return err("Failed to generate response: " + JSON.stringify(error));
         }
       });
     } catch (error) {
       this.setStatus(500);
-      return err("Failed to generate response");
+      return err("Failed to generate response: " + JSON.stringify(error));
     }
   }
 

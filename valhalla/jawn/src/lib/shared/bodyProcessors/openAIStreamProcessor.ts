@@ -59,15 +59,19 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
     const lines = responseBody
       .split("\n")
       .filter((line) => !line.includes("OPENROUTER PROCESSING"))
-      .filter((line) => line !== "")
-      .filter((line) => !NON_DATA_LINES.includes(line));
+      .filter((line) => !NON_DATA_LINES.includes(line))
+      .filter((line) => line !== "");
 
     const data = lines.map((line, i) => {
       try {
         return JSON.parse(line.replace("data:", ""));
       } catch (e) {
         // This line was filling up the logs
-        if (!line.includes("[DONE]")) {
+        if (
+          !line.includes("[DONE]") &&
+          line !== "" &&
+          !line.startsWith("event:") // we do not parse event lines
+        ) {
           console.log("Error parsing line OpenAI", line);
         }
         return err({ msg: `Error parsing line`, line });
@@ -76,28 +80,47 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
 
     try {
       const consolidatedData = consolidateTextFields(data);
+      // since we have pricing rates that are separate for audio, input, output, and cached tokens,
+      // we need to separate those components out here so that we can correctly calculate the cost.
+      const usageData = consolidatedData.usage;
+      let usage;
+      if (usageData) {
+        const effectivePromptTokens =
+          usageData?.prompt_tokens !== undefined
+            ? Math.max(
+                0,
+                (usageData.prompt_tokens ?? 0) -
+                  (usageData.prompt_tokens_details?.cached_tokens ?? 0)
+              )
+            : usageData?.input_tokens;
 
-      const usage =
-        "usage" in consolidatedData
-          ? {
-              totalTokens: consolidatedData.usage?.total_tokens,
-              completionTokens:
-                consolidatedData.usage?.completion_tokens ||
-                consolidatedData.usage?.output_tokens,
-              promptTokens:
-                consolidatedData.usage?.prompt_tokens ||
-                consolidatedData.usage?.input_tokens,
-              heliconeCalculated:
-                consolidatedData.usage?.helicone_calculated ?? false,
-            }
-          : {
-              total_tokens: -1,
-              completion_tokens: -1,
-              prompt_tokens: -1,
-              helicone_calculated: true,
-              helicone_error:
-                "counting tokens not supported, please see https://docs.helicone.ai/use-cases/enable-stream-usage",
-            };
+        const effectiveCompletionTokens =
+          usageData?.completion_tokens !== undefined
+            ? Math.max(
+                0,
+                (usageData.completion_tokens ?? 0) -
+                  (usageData.completion_tokens_details?.audio_tokens ?? 0)
+              )
+            : usageData?.output_tokens;
+
+        usage = {
+          totalTokens: usageData?.total_tokens,
+          completionTokens: effectiveCompletionTokens,
+          promptTokens: effectivePromptTokens,
+          promptCacheReadTokens:
+            usageData?.prompt_tokens_details?.cached_tokens,
+          heliconeCalculated: usageData?.helicone_calculated ?? false,
+        };
+      } else {
+        usage = {
+          totalTokens: -1,
+          completionTokens: -1,
+          promptTokens: -1,
+          heliconeCalculated: true,
+          helicone_error:
+            "counting tokens not supported, please see https://docs.helicone.ai/use-cases/enable-stream-usage",
+        };
+      }
 
       return ok({
         processedBody: {

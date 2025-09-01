@@ -8,7 +8,7 @@ import { CostOverTime } from "../../../pages/api/metrics/costOverTime";
 import { ErrorOverTime } from "../../../pages/api/metrics/errorOverTime";
 
 import { useFilterStore } from "@/filterAST/store/filterStore";
-import { toFilterNode } from "@/filterAST/toFilterNode";
+import { toFilterNode } from "@helicone-package/filters/toFilterNode";
 import { TokensOverTime } from "@/pages/api/metrics/TokensOverTimeType";
 import { getTokensPerRequest } from "../../../lib/api/metrics/averageTokensPerRequest";
 import { LatencyOverTime } from "../../../lib/api/metrics/getLatencyOverTime";

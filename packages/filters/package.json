@@ -1,6 +1,5 @@
 {
-  "name": "@helicone-package/filters",
+	"name": "@helicone-package/filters",
   "types": "./",
-  "sideEffects": false,
   "version": "1.0.0"
 }

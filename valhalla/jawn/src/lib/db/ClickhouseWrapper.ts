@@ -5,6 +5,7 @@ import {
 } from "@clickhouse/client";
 import { Result } from "../../packages/common/result";
 import { TestClickhouseClientWrapper } from "./test/TestClickhouseWrapper";
+import { SecretManager } from "@helicone-package/secrets/SecretManager";
 
 interface ClickhouseEnv {
   CLICKHOUSE_HOST: string;
@@ -120,8 +121,8 @@ export class ClickhouseClientWrapper {
         clickhouse_settings: {
           wait_end_of_query: 1,
           max_execution_time: 30,
-          max_memory_usage: "1000000000",
-          max_rows_to_read: `${100_000_000}`,
+          max_memory_usage: "4000000000",
+          max_rows_to_read: "10000000",
           max_result_rows: "10000",
           SQL_helicone_organization_id: organizationId,
           readonly: "1",
@@ -264,8 +265,6 @@ export interface InsertRequestResponseVersioned {
   request_body: string;
   response_body: string;
   assets: Array<string>;
-  gateway_router_id?: string;
-  gateway_deployment_target?: string;
 }
 
 export type RequestResponseVersioned =
@@ -303,11 +302,10 @@ export interface RequestResponseRMT {
   cache_reference_id?: string;
   cache_enabled: boolean;
   cost: number;
-  gateway_router_id?: string;
-  gateway_deployment_target?: string;
   prompt_id?: string;
   prompt_version?: string;
   request_referrer?: string;
+  is_passthrough_billing: boolean;
 }
 
 export interface Prompt2025Input {
@@ -377,19 +375,28 @@ export interface ClickhouseDB {
   };
 }
 
-const {
+let {
   CLICKHOUSE_USER,
   CLICKHOUSE_PASSWORD,
   CLICKHOUSE_HOST,
   CLICKHOUSE_HQL_USER,
   CLICKHOUSE_HQL_PASSWORD,
-} = JSON.parse(process.env.CLICKHOUSE_CREDS ?? "{}") as {
+} = JSON.parse(SecretManager.getSecret("CLICKHOUSE_CREDS") ?? "{}") as {
   CLICKHOUSE_USER?: string;
   CLICKHOUSE_PASSWORD?: string;
   CLICKHOUSE_HOST?: string;
   CLICKHOUSE_HQL_USER?: string;
   CLICKHOUSE_HQL_PASSWORD?: string;
 };
+
+CLICKHOUSE_HOST = CLICKHOUSE_HOST ?? SecretManager.getSecret("CLICKHOUSE_HOST");
+CLICKHOUSE_USER = CLICKHOUSE_USER ?? SecretManager.getSecret("CLICKHOUSE_USER");
+CLICKHOUSE_PASSWORD =
+  CLICKHOUSE_PASSWORD ?? SecretManager.getSecret("CLICKHOUSE_PASSWORD");
+CLICKHOUSE_HQL_USER =
+  CLICKHOUSE_HQL_USER ?? SecretManager.getSecret("CLICKHOUSE_HQL_USER");
+CLICKHOUSE_HQL_PASSWORD =
+  CLICKHOUSE_HQL_PASSWORD ?? SecretManager.getSecret("CLICKHOUSE_HQL_PASSWORD");
 
 export const clickhouseDb = (() => {
   if (process.env.NODE_ENV === "test") {

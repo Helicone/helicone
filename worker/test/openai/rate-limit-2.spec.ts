@@ -83,8 +83,6 @@ describe("Durable Object Rate Limiter Tests", () => {
           }),
         }
       );
-      console.log(response);
-      console.log(await response.json());
     });
     it("should enforce rate limits and return proper headers", async () => {
       expect(1 + 2).toBe(3);

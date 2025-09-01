@@ -218,7 +218,7 @@ export async function generate<T extends object | undefined = undefined>(
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.error || "Failed to generate response");
+    throw new Error(JSON.stringify(error));
   }
 
   if (params.stream) {
