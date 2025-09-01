@@ -689,7 +689,7 @@ function all(): AllExpression {
  *
  * @example
  * const statusFilter = Filter.condition("status", "eq", 200);
- * const modelFilter = Filter.condition("model", "like", "gpt-4");
+ * const modelFilter = Filter.condition("model", "like", "gpt-4%");
  *
  * @param column - Column name from request_response_rmt
  * @param operator - Comparison operator

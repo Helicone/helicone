@@ -1,4 +1,4 @@
-import { Trash2, AlertCircle, MessageSquareIcon } from "lucide-react";
+import { Trash2, Users, MessageSquareIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -36,7 +36,11 @@ export function SessionDropdown() {
         {sessions.map((session) => (
           <DropdownMenuItem
             key={session.id}
-            className="group relative flex items-start gap-3"
+            className={`group relative flex items-start gap-3 ${
+              session.escalated
+                ? "bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/20 dark:hover:bg-purple-950/40"
+                : ""
+            }`}
             onSelect={(e) => {
               e.preventDefault();
               switchToSession(session.id);
@@ -55,7 +59,12 @@ export function SessionDropdown() {
                   {session.name}
                 </span>
                 {session.escalated && (
-                  <AlertCircle className="h-3.5 w-3.5 shrink-0 text-orange-500" />
+                  <div className="flex items-center gap-1">
+                    <Users className="h-3 w-3 shrink-0 text-purple-600 dark:text-purple-400" />
+                    <span className="text-[10px] font-medium text-purple-600 dark:text-purple-400">
+                      Support
+                    </span>
+                  </div>
                 )}
               </div>
               {/* <div className="mt-0.5 text-xs text-muted-foreground">
