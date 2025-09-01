@@ -156,9 +156,9 @@ export function buildTargetUrl(originalUrl: URL, apiBase: string, deploymentName
     
     // Remove /v1 prefix if present
     if (azurePath.startsWith('/v1/')) {
-      azurePath = azurePath.substring(3); // Remove '/v1'
+      azurePath = azurePath.substring(3); // Remove '/v1' but keep the trailing slash
     } else if (azurePath.startsWith('/v1')) {
-      azurePath = azurePath.substring(3); // Remove '/v1'  
+      azurePath = azurePath.substring(3); // Remove '/v1'
     }
     
     // For Azure, construct the path: /openai/deployments/{deployment-name}/endpoint
@@ -169,7 +169,7 @@ export function buildTargetUrl(originalUrl: URL, apiBase: string, deploymentName
       );
     } else {
       // If no deployment name provided, we can't construct a proper Azure URL
-      // This will result in an error, which is correct behavior
+      console.error("Azure OpenAI deployment name is missing from request body 'model' field");
       return new URL(
         `${apiBaseUrl.origin}/openai/deployments/MISSING_DEPLOYMENT${azurePath}${originalUrl.search}`
       );
