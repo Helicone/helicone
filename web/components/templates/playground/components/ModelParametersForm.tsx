@@ -40,7 +40,6 @@ import { providers } from "@/data/providers";
 import { ProviderCard } from "@/components/providers/ProviderCard";
 import Image from "next/image";
 import { ModelParameters } from "@/lib/api/llm/generate";
-import { useOrg } from "@/components/layout/org/organizationContext";
 import { ResponseFormat, ResponseFormatType } from "../types";
 
 interface ModelParametersFormProps {
@@ -73,8 +72,6 @@ export default function ModelParametersForm({
   setUseAIGateway,
   error,
 }: ModelParametersFormProps) {
-  const organization = useOrg();
-
   const updateParameter = (key: keyof ModelParameters, value: any) => {
     onParametersChange({
       ...parameters,

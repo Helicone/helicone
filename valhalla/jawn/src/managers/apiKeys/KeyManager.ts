@@ -11,7 +11,10 @@ import { ProviderName } from "@helicone-package/cost/models/providers";
 import { dbProviderToProvider } from "@helicone-package/cost/models/provider-helpers";
 import { setProviderKeys } from "../../lib/refetchKeys";
 import { init } from "@paralleldrive/cuid2";
-import { CreateProviderKeyRequest, UpdateProviderKeyRequest } from "../../controllers/public/apiKeyController";
+import {
+  CreateProviderKeyRequest,
+  UpdateProviderKeyRequest,
+} from "../../controllers/public/apiKeyController";
 
 export type ProviderKey = {
   providerName: ProviderName;
@@ -37,7 +40,6 @@ export interface ProviderKeyRow {
 type HashedPasswordRow = {
   hashed_password: string;
 };
-
 
 export class KeyManager extends BaseManager {
   constructor(authParams: AuthParams) {
@@ -378,12 +380,12 @@ export class KeyManager extends BaseManager {
       const values = [];
       let paramIndex = 1;
 
-      if (providerKey !== "" && providerKey !== undefined) {
+      if (providerKey !== undefined) {
         updateParts.push(`provider_key = $${paramIndex++}`);
         values.push(providerKey);
       }
 
-      if (providerSecretKey !== "" && providerSecretKey !== undefined) {
+      if (providerSecretKey !== undefined) {
         updateParts.push(`provider_secret_key = $${paramIndex++}`);
         values.push(providerSecretKey);
       }

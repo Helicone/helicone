@@ -127,7 +127,10 @@ export class ApiKeyController extends Controller {
     body: UpdateProviderKeyRequest
   ): Promise<Result<{ id: string; providerName: string }, string>> {
     const keyManager = new KeyManager(request.authParams);
-    const result = await keyManager.updateProviderKey(providerKeyId, body);
+    const result = await keyManager.updateProviderKey({
+      providerKeyId,
+      ...body,
+    });
 
     if (result.error || !result.data) {
       this.setStatus(500);
