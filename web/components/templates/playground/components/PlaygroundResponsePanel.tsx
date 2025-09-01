@@ -57,7 +57,7 @@ const PlaygroundResponsePanel = ({
     }
   };
 
-  const { mode, toggleMode, setMode } = useRequestRenderModeStore();
+  const { mode, toggleMode } = useRequestRenderModeStore();
   const isShiftPressed = useShiftKeyPress();
 
   return (

@@ -144,11 +144,11 @@ export class PlaygroundController extends Controller {
           apiKey: useAIGateway ? secretKey : openRouterKey,
           defaultHeaders: {
             "Helicone-Auth": `Bearer ${secretKey}`,
-            "Helicone-User-Id": request.authParams.organizationId,
-            "Helicone-Property-Helicone-User-Id": request.authParams.userId,
+            "Helicone-User-Id": "helicone_playground",
+            "Helicone-Property-Org_Id": request.authParams.organizationId,
             ...(!selfKey && {
               // 30 per month
-              "Helicone-RateLimit-Policy": `{30};w={${30 * 24 * 60 * 60}};s=user`,
+              "Helicone-RateLimit-Policy": `30;w=${30 * 24 * 60 * 60};s=org_id`,
             }),
           },
         });
@@ -255,8 +255,9 @@ export class PlaygroundController extends Controller {
             if (error instanceof OpenAI.APIError) {
               if (
                 error.status === 429 &&
-                "helicone-ratelimit-remaining" in error.headers &&
-                error.headers["helicone-ratelimit-remaining"] === "0"
+                // TODO: this should do a .get and check if it's 0 once the
+                // ratelimit logic is fixed in Helicone
+                error.headers.has("helicone-ratelimit-remaining")
               ) {
                 this.setStatus(429);
                 return err(
