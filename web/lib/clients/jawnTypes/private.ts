@@ -15856,7 +15856,7 @@ export interface operations {
         content: {
           "application/json": ({
             /** @enum {string} */
-            providerName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure-openai" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "google";
+            providerName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure-openai" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "google-ai-studio";
           }) | {
             error: string;
           };

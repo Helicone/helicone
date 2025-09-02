@@ -12,7 +12,7 @@ import type {
   ModelConfig as Model,
   Endpoint as ModelEndpoint,
 } from "@helicone-package/cost/models/types";
-import { CheckCircle, XCircle, DollarSign, Clock, Globe } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Globe } from "lucide-react";
 
 interface ModelDetailsDialogProps {
   model: Model | null;
@@ -149,7 +149,7 @@ export function ModelDetailsDialog({
                         </Small>
                         {providerEndpoints.map((endpoint, idx) => (
                           <Card key={`${provider}-${idx}`} className="p-4">
-                            <div className="flex items-start justify-between">
+                            <div className="space-y-3">
                               <div className="flex items-center gap-2">
                                 <CheckCircle className="h-4 w-4 text-green-600" />
                                 <div>
@@ -164,89 +164,117 @@ export function ModelDetailsDialog({
                                   </div>
                                 </div>
                               </div>
-                              <div className="text-right">
-                                <div className="flex items-center gap-1 text-sm">
-                                  <DollarSign className="h-3 w-3" />
-                                  <span>
-                                    $
-                                    {(
-                                      endpoint.pricing.prompt / 1000000
-                                    ).toFixed(2)}
-                                  </span>
-                                  <span className="text-muted-foreground">
-                                    / 1K prompt
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-1 text-sm">
-                                  <DollarSign className="h-3 w-3" />
-                                  <span>
-                                    $
-                                    {(
-                                      endpoint.pricing.completion / 1000000
-                                    ).toFixed(2)}
-                                  </span>
-                                  <span className="text-muted-foreground">
-                                    / 1K completion
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
 
-                            {/* Additional pricing info */}
-                            {(endpoint.pricing.image ||
-                              endpoint.pricing.cacheRead ||
-                              endpoint.pricing.cacheWrite) && (
-                              <div className="mt-3 grid grid-cols-3 gap-2 border-t pt-3 text-xs">
-                                {endpoint.pricing.image && (
-                                  <div>
-                                    <span className="text-muted-foreground">
-                                      Image:
-                                    </span>{" "}
-                                    ${endpoint.pricing.image.toFixed(4)}
-                                  </div>
-                                )}
-                                {endpoint.pricing.cacheRead && (
-                                  <div>
-                                    <span className="text-muted-foreground">
-                                      Cache Read:
-                                    </span>{" "}
-                                    $
-                                    {(
-                                      endpoint.pricing.cacheRead / 1000000
-                                    ).toFixed(2)}
-                                    /1K
-                                  </div>
-                                )}
-                                {endpoint.pricing.cacheWrite && (
-                                  <div>
-                                    <span className="text-muted-foreground">
-                                      Cache Write:
-                                    </span>{" "}
-                                    {typeof endpoint.pricing.cacheWrite ===
-                                    "number" ? (
+                              {/* Pricing tiers table */}
+                              {endpoint.pricing.length > 0 && (
+                                <div className="ml-6">
+                                  <div className="grid grid-cols-3 gap-4 text-sm">
+                                    <div className="font-medium text-muted-foreground">
+                                      Tier
+                                    </div>
+                                    <div className="font-medium text-muted-foreground">
+                                      Input Price
+                                    </div>
+                                    <div className="font-medium text-muted-foreground">
+                                      Output Price
+                                    </div>
+
+                                    {endpoint.pricing.map((tier, tierIdx) => (
                                       <>
-                                        $
-                                        {(
-                                          endpoint.pricing.cacheWrite / 1000000
-                                        ).toFixed(2)}
-                                        /1K
+                                        <div
+                                          key={`tier-${tierIdx}`}
+                                          className="text-muted-foreground"
+                                        >
+                                          {tierIdx === 0 &&
+                                          endpoint.pricing.length > 1 ? (
+                                            <span>
+                                              ≤
+                                              {endpoint.pricing[1]?.threshold >=
+                                              1000000
+                                                ? `${(endpoint.pricing[1]?.threshold / 1000000).toFixed(0)}M`
+                                                : `${(endpoint.pricing[1]?.threshold / 1000).toFixed(0)}K`}
+                                            </span>
+                                          ) : tier.threshold > 0 ? (
+                                            <span>
+                                              &gt;
+                                              {tier.threshold >= 1000000
+                                                ? `${(tier.threshold / 1000000).toFixed(0)}M`
+                                                : `${(tier.threshold / 1000).toFixed(0)}K`}
+                                            </span>
+                                          ) : (
+                                            <span>Base</span>
+                                          )}
+                                        </div>
+                                        <div key={`input-${tierIdx}`}>
+                                          $
+                                          {(
+                                            (tier.input ?? 0) * 1000000
+                                          ).toFixed(2)}
+                                        </div>
+                                        <div key={`output-${tierIdx}`}>
+                                          $
+                                          {(
+                                            (tier.output ?? 0) * 1000000
+                                          ).toFixed(2)}
+                                        </div>
                                       </>
-                                    ) : (
-                                      <>
-                                        $
-                                        {(
-                                          (endpoint.pricing.cacheWrite
-                                            .default ||
-                                            endpoint.pricing.cacheWrite["5m"]) /
-                                          1000000
-                                        ).toFixed(2)}
-                                        /1K
-                                      </>
-                                    )}
+                                    ))}
                                   </div>
-                                )}
-                              </div>
-                            )}
+
+                                  {/* Additional prices for first tier */}
+                                  {(() => {
+                                    const tier = endpoint.pricing[0];
+                                    if (!tier) return null;
+
+                                    const additionalPrices = [];
+
+                                    if (tier.cacheMultipliers?.read) {
+                                      additionalPrices.push({
+                                        label: "Cache Read",
+                                        value: `$${(tier.input * tier.cacheMultipliers.read * 1000000).toFixed(2)}`,
+                                      });
+                                    }
+                                    if (tier.cacheMultipliers?.write5m) {
+                                      additionalPrices.push({
+                                        label: "Cache Write",
+                                        value: `$${(tier.input * tier.cacheMultipliers.write5m * 1000000).toFixed(2)}`,
+                                      });
+                                    }
+                                    if (tier.audio) {
+                                      additionalPrices.push({
+                                        label: "Input Audio",
+                                        value:
+                                          tier.audio === -1
+                                            ? "--"
+                                            : `$${(tier.audio * 1000000).toFixed(2)}`,
+                                      });
+                                    }
+                                    if (tier.thinking) {
+                                      additionalPrices.push({
+                                        label: "Thinking",
+                                        value: `$${(tier.thinking * 1000000).toFixed(2)}`,
+                                      });
+                                    }
+
+                                    if (additionalPrices.length === 0)
+                                      return null;
+
+                                    return (
+                                      <div className="mt-2 grid grid-cols-3 gap-4 text-sm text-muted-foreground">
+                                        {additionalPrices.map((price, idx) => (
+                                          <div key={idx}>
+                                            <span className="text-xs">
+                                              {price.label}:
+                                            </span>{" "}
+                                            {price.value}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    );
+                                  })()}
+                                </div>
+                              )}
+                            </div>
 
                             {/* Context and limits */}
                             {(endpoint.contextLength !== model.contextLength ||

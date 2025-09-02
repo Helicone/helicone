@@ -2761,37 +2761,94 @@ Json: JsonObject;
       /** Format: double */
       timeZoneDifference: number;
     };
+    /** @enum {string} */
+    ModelProviderName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure-openai" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "google-ai-studio";
+    /** @enum {string} */
+    AuthorName: "anthropic" | "openai" | "perplexity" | "deepseek" | "cohere" | "google" | "meta-llama" | "mistralai" | "amazon" | "microsoft" | "nvidia" | "qwen" | "x-ai" | "moonshotai" | "fallback";
+    /** @enum {string} */
+    StandardParameter: "max_tokens" | "temperature" | "top_p" | "top_k" | "stop" | "stream" | "frequency_penalty" | "presence_penalty" | "repetition_penalty" | "seed" | "tools" | "tool_choice" | "functions" | "function_call" | "reasoning" | "include_reasoning" | "thinking" | "response_format" | "json_mode" | "truncate" | "min_p" | "logit_bias" | "logprobs" | "top_logprobs" | "structured_outputs";
+    ModelPricing: {
+      /** Format: double */
+      threshold: number;
+      /** Format: double */
+      input: number;
+      /** Format: double */
+      output: number;
+      /** Format: double */
+      image?: number;
+      cacheMultipliers?: {
+        /** Format: double */
+        write1h?: number;
+        /** Format: double */
+        write5m: number;
+        /** Format: double */
+        read: number;
+      };
+      /** Format: double */
+      cacheStoragePerHour?: number;
+      /** Format: double */
+      thinking?: number;
+      /** Format: double */
+      request?: number;
+      /** Format: double */
+      audio?: number;
+      /** Format: double */
+      video?: number;
+      /** Format: double */
+      web_search?: number;
+      /** Format: double */
+      internal_reasoning?: number;
+    };
+    Endpoint: {
+      pricing: components["schemas"]["ModelPricing"][];
+      /** Format: double */
+      contextLength: number;
+      /** Format: double */
+      maxCompletionTokens: number;
+      ptbEnabled: boolean;
+      version?: string;
+      baseUrl: string;
+      provider: components["schemas"]["ModelProviderName"];
+      author: components["schemas"]["AuthorName"];
+      providerModelId: string;
+      supportedParameters: components["schemas"]["StandardParameter"][];
+    };
+    SimplifiedPricing: {
+      /** Format: double */
+      prompt: number;
+      /** Format: double */
+      completion: number;
+      /** Format: double */
+      audio?: number;
+      /** Format: double */
+      thinking?: number;
+      /** Format: double */
+      web_search?: number;
+      /** Format: double */
+      image?: number;
+      /** Format: double */
+      video?: number;
+      /** Format: double */
+      cacheRead?: number;
+      /** Format: double */
+      cacheWrite?: number;
+      /** Format: double */
+      internal_reasoning?: number;
+      /** Format: double */
+      threshold?: number;
+    };
     ModelEndpoint: {
       provider: string;
       providerSlug: string;
-      pricing: {
-        /** Format: double */
-        cacheWrite?: number;
-        /** Format: double */
-        cacheRead?: number;
-        /** Format: double */
-        thinking?: number;
-        /** Format: double */
-        image?: number;
-        /** Format: double */
-        video?: number;
-        /** Format: double */
-        web_search?: number;
-        /** Format: double */
-        audio?: number;
-        /** Format: double */
-        completion: number;
-        /** Format: double */
-        prompt: number;
-      };
+      endpoint?: components["schemas"]["Endpoint"];
       supportsPtb?: boolean;
+      pricing: components["schemas"]["SimplifiedPricing"];
+      pricingTiers?: components["schemas"]["SimplifiedPricing"][];
     };
     /** @enum {string} */
     InputModality: "text" | "image" | "audio" | "video";
     /** @enum {string} */
     OutputModality: "text" | "image" | "audio" | "video";
-    /** @enum {string} */
-    StandardParameter: "max_tokens" | "temperature" | "top_p" | "top_k" | "stop" | "stream" | "frequency_penalty" | "presence_penalty" | "repetition_penalty" | "seed" | "tools" | "tool_choice" | "functions" | "function_call" | "reasoning" | "include_reasoning" | "thinking" | "response_format" | "json_mode" | "truncate" | "min_p" | "logit_bias" | "logprobs" | "top_logprobs" | "structured_outputs";
     ModelRegistryItem: {
       id: string;
       name: string;
@@ -4114,7 +4171,7 @@ export interface operations {
         content: {
           "application/json": ({
             /** @enum {string} */
-            providerName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure-openai" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "google";
+            providerName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure-openai" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "google-ai-studio";
           }) | {
             error: string;
           };

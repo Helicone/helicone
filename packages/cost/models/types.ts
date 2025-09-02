@@ -1,4 +1,4 @@
-import { ProviderName } from "./providers";
+import { ModelProviderName } from "./providers";
 
 export interface AuthorMetadata {
   modelCount: number;
@@ -27,7 +27,7 @@ export const AUTHORS = [
   "perplexity",
 ] as const;
 
-export type AuthorName = (typeof AUTHORS)[number];
+export type AuthorName = (typeof AUTHORS)[number] | "fallback";
 
 export type InputModality = "text" | "image" | "audio" | "video";
 export type OutputModality = "text" | "image" | "audio" | "video";
@@ -77,18 +77,45 @@ export type StandardParameter =
   | "top_logprobs"
   | "structured_outputs";
 
+export const PARAMETER_LABELS: Record<StandardParameter, string> = {
+  max_tokens: "Max Tokens",
+  temperature: "Temperature",
+  top_p: "Top-P",
+  top_k: "Top-K",
+  stop: "Stop Sequences",
+  stream: "Streaming",
+  frequency_penalty: "Frequency Penalty",
+  presence_penalty: "Presence Penalty",
+  repetition_penalty: "Repetition Penalty",
+  seed: "Seed",
+  tools: "Function Calling",
+  tool_choice: "Tool Choice",
+  functions: "Functions",
+  function_call: "Function Call",
+  reasoning: "Reasoning",
+  include_reasoning: "Include Reasoning",
+  thinking: "Chain of Thought",
+  response_format: "Response Format",
+  json_mode: "JSON Mode",
+  truncate: "Truncate",
+  min_p: "Min-P",
+  logit_bias: "Logit Bias",
+  logprobs: "Log Probabilities",
+  top_logprobs: "Top Log Probs",
+  structured_outputs: "Structured Outputs",
+};
+
 export interface ModelPricing {
-  prompt: number;
-  completion: number;
+  threshold: number;
+  input: number;
+  output: number;
   image?: number;
-  cacheRead?: number;
-  cacheWrite?:
-    | number
-    | {
-        "5m": number;
-        "1h": number;
-        default: number;
-      };
+  cacheMultipliers?: {
+    read: number;
+    write5m: number;
+    write1h?: number;
+  };
+  cacheStoragePerHour?: number;
   thinking?: number;
   request?: number;
   audio?: number;
@@ -109,33 +136,42 @@ export interface ModelConfig {
 }
 
 interface BaseConfig {
-  pricing: ModelPricing;
+  pricing: ModelPricing[];
   contextLength: number;
   maxCompletionTokens: number;
   ptbEnabled: boolean;
   version?: string;
 }
 
+export interface RateLimits {
+  rpm?: number;
+  tpm?: number;
+}
+
 export interface ModelProviderConfig extends BaseConfig {
   providerModelId: string;
-  provider: ProviderName;
+  provider: ModelProviderName;
+  author: AuthorName;
   supportedParameters: StandardParameter[];
+  rateLimits?: RateLimits;
   endpointConfigs: Record<string, EndpointConfig>;
   crossRegion?: boolean;
 }
 
 export interface EndpointConfig extends UserEndpointConfig {
   providerModelId?: string;
-  pricing?: ModelPricing;
+  pricing?: ModelPricing[];
   contextLength?: number;
   maxCompletionTokens?: number;
   ptbEnabled?: boolean;
   version?: string;
+  rateLimits?: RateLimits;
 }
 
 export interface Endpoint extends BaseConfig {
   baseUrl: string;
-  provider: ProviderName;
+  provider: ModelProviderName;
+  author: AuthorName;
   providerModelId: string;
   supportedParameters: StandardParameter[];
 }

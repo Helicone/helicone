@@ -10,7 +10,7 @@ import type {
 } from "./types";
 import { buildIndexes, ModelIndexes } from "./build-indexes";
 import { buildEndpointUrl, buildModelId } from "./provider-helpers";
-import { ProviderName } from "./providers";
+import { ModelProviderName } from "./providers";
 import { Result, ok, err } from "../../common/result";
 import { ModelName, ModelProviderConfigId, EndpointId } from "./registry-types";
 
@@ -89,17 +89,21 @@ function getPtbEndpointsByModel(model: string): Result<Endpoint[]> {
 
 function createFallbackEndpoint(
   modelName: string,
-  provider: ProviderName,
+  provider: ModelProviderName,
   userEndpointConfig: UserEndpointConfig
 ): Result<Endpoint> {
   const endpointConfig: ModelProviderConfig = {
     providerModelId: modelName,
     ptbEnabled: false,
     provider,
-    pricing: {
-      prompt: 0,
-      completion: 0,
-    },
+    author: "fallback",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0,
+        output: 0,
+      },
+    ],
     contextLength: 0,
     maxCompletionTokens: 0,
     supportedParameters: [],
@@ -120,7 +124,7 @@ function getPtbEndpointsByProvider(
 
 function getProviderModels(provider: string): Result<Set<ModelName>> {
   const models =
-    indexes.providerToModels.get(provider as ProviderName) || new Set();
+    indexes.providerToModels.get(provider as ModelProviderName) || new Set();
   return ok(models);
 }
 
@@ -141,6 +145,7 @@ function buildEndpoint(
   return ok({
     baseUrl: baseUrlResult.data ?? "",
     provider: endpointConfig.provider,
+    author: endpointConfig.author,
     providerModelId: modelIdResult.data ?? "",
     supportedParameters: endpointConfig.supportedParameters,
     pricing: endpointConfig.pricing,
@@ -165,23 +170,26 @@ function getModelProviderConfigs(model: string): Result<ModelProviderConfig[]> {
   return ok(configs);
 }
 
-function getModelProviders(model: string): Result<Set<ProviderName>> {
+function getModelProviders(model: string): Result<Set<ModelProviderName>> {
   const providers =
     indexes.modelToProviders.get(model as ModelName) || new Set();
   return ok(providers);
 }
 
-function getPtbEndpointsWithIds(model: string, provider: string): Result<Record<string, string>> {
+function getPtbEndpointsWithIds(
+  model: string,
+  provider: string
+): Result<Record<string, string>> {
   const result: Record<string, string> = {};
   const prefix = `${model}:${provider}:`;
-  
+
   indexes.endpointIdToEndpoint.forEach((endpoint, endpointId) => {
     if (endpointId.startsWith(prefix) && endpoint.ptbEnabled) {
       const deploymentId = endpointId.substring(prefix.length);
       result[deploymentId] = endpoint.baseUrl;
     }
   });
-  
+
   return ok(result);
 }
 

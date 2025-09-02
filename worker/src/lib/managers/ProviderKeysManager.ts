@@ -1,4 +1,4 @@
-import { ProviderName } from "@helicone-package/cost/models/providers";
+import { ModelProviderName } from "@helicone-package/cost/models/providers";
 import { ProviderKey, ProviderKeysStore } from "../db/ProviderKeysStore";
 import {
   getFromKVCacheOnly,
@@ -40,7 +40,7 @@ export class ProviderKeysManager {
     );
   }
   async getProviderKey(
-    provider: ProviderName,
+    provider: ModelProviderName,
     orgId: string,
     keyCuid?: string
   ): Promise<ProviderKey | null> {
@@ -64,7 +64,7 @@ export class ProviderKeysManager {
   }
 
   async getProviderKeyWithFetch(
-    provider: ProviderName,
+    provider: ModelProviderName,
     orgId: string,
     keyCuid?: string
   ): Promise<ProviderKey | null> {

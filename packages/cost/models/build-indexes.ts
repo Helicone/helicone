@@ -1,5 +1,5 @@
 import { buildEndpointUrl } from "./provider-helpers";
-import { ProviderName } from "./providers";
+import { ModelProviderName } from "./providers";
 import { ModelProviderConfigId, EndpointId, ModelName } from "./registry-types";
 import type { Endpoint, ModelProviderConfig, EndpointConfig } from "./types";
 
@@ -18,6 +18,7 @@ function mergeConfigs(
   });
 
   return {
+    author: modelProviderConfig.author,
     baseUrl: baseUrl.data ?? "",
     provider: modelProviderConfig.provider,
     providerModelId:
@@ -42,9 +43,9 @@ export interface ModelIndexes {
   endpointIdToEndpoint: Map<EndpointId, Endpoint>;
   modelToPtbEndpoints: Map<ModelName, Endpoint[]>;
   modelProviderIdToPtbEndpoints: Map<ModelProviderConfigId, Endpoint[]>;
-  providerToModels: Map<ProviderName, Set<ModelName>>;
+  providerToModels: Map<ModelProviderName, Set<ModelName>>;
   modelToEndpointConfigs: Map<ModelName, ModelProviderConfig[]>;
-  modelToProviders: Map<ModelName, Set<ProviderName>>;
+  modelToProviders: Map<ModelName, Set<ModelProviderName>>;
 }
 
 export function buildIndexes(
@@ -58,16 +59,16 @@ export function buildIndexes(
   const modelToPtbEndpoints: Map<ModelName, Endpoint[]> = new Map();
   const endpointConfigIdToPtbEndpoints: Map<ModelProviderConfigId, Endpoint[]> =
     new Map();
-  const providerToModels: Map<ProviderName, Set<ModelName>> = new Map();
+  const providerToModels: Map<ModelProviderName, Set<ModelName>> = new Map();
   const modelToEndpointConfigs: Map<ModelName, ModelProviderConfig[]> =
     new Map();
-  const modelToProviders: Map<ModelName, Set<ProviderName>> = new Map();
+  const modelToProviders: Map<ModelName, Set<ModelProviderName>> = new Map();
 
   for (const [configKey, config] of Object.entries(modelProviderConfigs)) {
     const typedConfigKey = configKey as ModelProviderConfigId;
     const [modelName, provider] = configKey.split(":") as [
       ModelName,
-      ProviderName,
+      ModelProviderName,
     ];
 
     // Store base config for BYOK
@@ -117,8 +118,8 @@ export function buildIndexes(
 
   // Sort endpoints by cost (ascending)
   const sortByCost = (a: Endpoint, b: Endpoint) => {
-    const aCost = a.pricing.prompt + a.pricing.completion;
-    const bCost = b.pricing.prompt + b.pricing.completion;
+    const aCost = (a.pricing[0]?.input ?? 0) + (a.pricing[0]?.output ?? 0);
+    const bCost = (b.pricing[0]?.input ?? 0) + (b.pricing[0]?.output ?? 0);
     return aCost - bCost;
   };
 
