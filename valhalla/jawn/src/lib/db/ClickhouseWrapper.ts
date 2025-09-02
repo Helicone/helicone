@@ -3,6 +3,8 @@ import {
   createClient,
   ClickHouseSettings,
 } from "@clickhouse/client";
+import { ZodType } from "zod";
+import { validateRowsWithSchema } from "./validation";
 import { Result } from "../../packages/common/result";
 import { TestClickhouseClientWrapper } from "./test/TestClickhouseWrapper";
 import { SecretManager } from "@helicone-package/secrets/SecretManager";
@@ -63,7 +65,8 @@ export class ClickhouseClientWrapper {
 
   async dbQuery<T>(
     query: string,
-    parameters: (number | string | boolean | Date)[]
+    parameters: (number | string | boolean | Date)[],
+    schema?: ZodType<T>
   ): Promise<Result<T[], string>> {
     try {
       const query_params = paramsToValues(parameters);
@@ -80,7 +83,12 @@ export class ClickhouseClientWrapper {
           wait_end_of_query: 1,
         },
       });
-      return { data: await queryResult.json<T[]>(), error: null };
+      const raw = (await queryResult.json()) as unknown;
+      const validated = validateRowsWithSchema<T>(raw, schema);
+      if (!validated.ok) {
+        return { data: null, error: validated.error };
+      }
+      return { data: validated.data, error: null };
     } catch (err) {
       console.error("Error executing Clickhouse query: ", query, parameters);
       console.error(err);
@@ -95,10 +103,12 @@ export class ClickhouseClientWrapper {
     query,
     organizationId,
     parameters,
+    schema,
   }: {
     query: string;
     organizationId: string;
     parameters: (number | string | boolean | Date)[];
+    schema?: ZodType<T>;
   }): Promise<Result<T[], string>> {
     try {
       const query_params = paramsToValues(parameters);
@@ -129,7 +139,12 @@ export class ClickhouseClientWrapper {
           allow_ddl: 0,
         } as ClickHouseSettings,
       });
-      return { data: await queryResult.json<T[]>(), error: null };
+      const raw = (await queryResult.json()) as unknown;
+      const validated = validateRowsWithSchema<T>(raw, schema);
+      if (!validated.ok) {
+        return { data: null, error: validated.error };
+      }
+      return { data: validated.data, error: null };
     } catch (err) {
       console.error(
         "Error executing HQL query with context: ",
