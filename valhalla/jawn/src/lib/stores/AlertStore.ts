@@ -17,7 +17,7 @@ export class AlertStore extends BaseStore {
       const alertResult = await dbExecute<
         Database["public"]["Tables"]["alert"]["Row"]
       >(
-        `SELECT *
+        `SELECT id, org_id, metric, threshold, time_window, time_block_duration, emails, status, name, soft_delete, created_at, updated_at, minimum_request_count, slack_channels
          FROM alert
          WHERE org_id = $1
          AND (soft_delete IS NULL OR soft_delete = false)`,
@@ -27,7 +27,7 @@ export class AlertStore extends BaseStore {
       const alertHistoryResult = await dbExecute<
         Database["public"]["Tables"]["alert_history"]["Row"]
       >(
-        `SELECT *
+        `SELECT id, org_id, alert_id, alert_start_time, alert_end_time, alert_metric, alert_name, triggered_value, status, soft_delete, created_at, updated_at
          FROM alert_history
          WHERE org_id = $1
          AND (soft_delete IS NULL OR soft_delete = false)`,
