@@ -18,8 +18,8 @@ export const endpoints = {
         internal_reasoning: 0.0,
       },
     ],
-    contextLength: 131000,
-    maxCompletionTokens: 131000,
+    contextLength: 131_072,
+    maxCompletionTokens: 65_536,
     supportedParameters: [
       "frequency_penalty",
       "include_reasoning",
@@ -62,8 +62,8 @@ export const endpoints = {
         internal_reasoning: 0.0,
       },
     ],
-    contextLength: 131000,
-    maxCompletionTokens: 131000,
+    contextLength: 131_072,
+    maxCompletionTokens: 65_536,
     supportedParameters: [
       "frequency_penalty",
       "include_reasoning",
