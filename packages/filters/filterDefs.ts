@@ -182,6 +182,7 @@ interface RequestResponseRMTToOperators {
   country_code: SingleKey<TextOperators>;
   latency: SingleKey<NumberOperators>;
   cost: SingleKey<NumberOperators>;
+  provider: SingleKey<TextOperators>;
   time_to_first_token: SingleKey<NumberOperators>;
   status: SingleKey<NumberOperators>;
   request_created_at: SingleKey<TimestampOperatorsTyped>;
@@ -218,6 +219,8 @@ interface RequestResponseRMTToOperators {
   "helicone-score-feedback": SingleKey<BooleanOperators>; // TODO: make this not a string literal key
   prompt_id: SingleKey<TextOperators>;
   prompt_version: SingleKey<TextOperators>;
+  request_referrer: SingleKey<TextOperators>;
+  is_passthrough_billing: SingleKey<BooleanOperators>;
 }
 export type FilterLeafRequestResponseRMT =
   SingleKey<RequestResponseRMTToOperators>;

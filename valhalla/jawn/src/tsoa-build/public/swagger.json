@@ -260,6 +260,10 @@
 			},
 			"DecryptedProviderKey": {
 				"properties": {
+					"cuid": {
+						"type": "string",
+						"nullable": true
+					},
 					"provider_secret_key": {
 						"type": "string",
 						"nullable": true
@@ -572,6 +576,9 @@
 					"cost": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
+					"provider": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
 					"time_to_first_token": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
@@ -673,6 +680,12 @@
 					},
 					"prompt_version": {
 						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"request_referrer": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"is_passthrough_billing": {
+						"$ref": "#/components/schemas/Partial_BooleanOperators_"
 					}
 				},
 				"type": "object",
@@ -1035,6 +1048,221 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"Record_string.string_": {
+				"properties": {},
+				"additionalProperties": {
+					"type": "string"
+				},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
+			"CreateProviderKeyRequest": {
+				"properties": {
+					"config": {
+						"$ref": "#/components/schemas/Record_string.string_"
+					},
+					"byokEnabled": {
+						"type": "boolean"
+					},
+					"providerKeyName": {
+						"type": "string"
+					},
+					"providerSecretKey": {
+						"type": "string"
+					},
+					"providerKey": {
+						"type": "string"
+					},
+					"providerName": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"config",
+					"byokEnabled",
+					"providerKeyName",
+					"providerKey",
+					"providerName"
+				],
+				"type": "object"
+			},
+			"ProviderKeyRow": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"provider_name": {
+						"type": "string"
+					},
+					"provider_key_name": {
+						"type": "string"
+					},
+					"created_at": {
+						"type": "string"
+					},
+					"soft_delete": {
+						"type": "boolean"
+					},
+					"config": {
+						"$ref": "#/components/schemas/Record_string.any_"
+					},
+					"byok_enabled": {
+						"type": "boolean"
+					},
+					"cuid": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"provider_name",
+					"provider_key_name",
+					"soft_delete"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess__id-string--providerName-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"providerName": {
+								"type": "string"
+							},
+							"id": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"providerName",
+							"id"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__id-string--providerName-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__id-string--providerName-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"UpdateProviderKeyRequest": {
+				"properties": {
+					"byokEnabled": {
+						"type": "boolean"
+					},
+					"config": {
+						"$ref": "#/components/schemas/Record_string.string_"
+					},
+					"providerSecretKey": {
+						"type": "string"
+					},
+					"providerKey": {
+						"type": "string"
+					}
+				},
+				"type": "object"
+			},
+			"ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"properties": {
+								"user_id": {
+									"type": "string"
+								},
+								"updated_at": {
+									"type": "string"
+								},
+								"temp_key": {
+									"type": "boolean"
+								},
+								"soft_delete": {
+									"type": "boolean"
+								},
+								"organization_id": {
+									"type": "string"
+								},
+								"key_permissions": {
+									"type": "string"
+								},
+								"id": {
+									"type": "number",
+									"format": "double"
+								},
+								"governance": {
+									"type": "boolean"
+								},
+								"created_at": {
+									"type": "string"
+								},
+								"api_key_name": {
+									"type": "string"
+								},
+								"api_key_hash": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"user_id",
+								"updated_at",
+								"temp_key",
+								"soft_delete",
+								"organization_id",
+								"key_permissions",
+								"id",
+								"governance",
+								"created_at",
+								"api_key_name",
+								"api_key_hash"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"EvaluatorResult": {
 				"properties": {
 					"id": {
@@ -1327,14 +1555,6 @@
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
-			},
-			"Record_string.string_": {
-				"properties": {},
-				"additionalProperties": {
-					"type": "string"
-				},
-				"type": "object",
-				"description": "Construct a type with a set of properties K of type T"
 			},
 			"TestInput": {
 				"properties": {
@@ -5315,6 +5535,19 @@
 					}
 				]
 			},
+			"CreateCloudGatewayCheckoutSessionRequest": {
+				"properties": {
+					"amount": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"amount"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"UpgradeToProRequest": {
 				"properties": {
 					"addons": {
@@ -7329,6 +7562,285 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ModelEndpoint": {
+				"properties": {
+					"provider": {
+						"type": "string"
+					},
+					"providerSlug": {
+						"type": "string"
+					},
+					"pricing": {
+						"properties": {
+							"cacheWrite": {
+								"type": "number",
+								"format": "double"
+							},
+							"cacheRead": {
+								"type": "number",
+								"format": "double"
+							},
+							"thinking": {
+								"type": "number",
+								"format": "double"
+							},
+							"image": {
+								"type": "number",
+								"format": "double"
+							},
+							"video": {
+								"type": "number",
+								"format": "double"
+							},
+							"web_search": {
+								"type": "number",
+								"format": "double"
+							},
+							"audio": {
+								"type": "number",
+								"format": "double"
+							},
+							"completion": {
+								"type": "number",
+								"format": "double"
+							},
+							"prompt": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"completion",
+							"prompt"
+						],
+						"type": "object"
+					},
+					"supportsPtb": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"provider",
+					"providerSlug",
+					"pricing"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"InputModality": {
+				"type": "string",
+				"enum": [
+					"text",
+					"image",
+					"audio",
+					"video"
+				]
+			},
+			"OutputModality": {
+				"type": "string",
+				"enum": [
+					"text",
+					"image",
+					"audio",
+					"video"
+				]
+			},
+			"StandardParameter": {
+				"type": "string",
+				"enum": [
+					"max_tokens",
+					"temperature",
+					"top_p",
+					"top_k",
+					"stop",
+					"stream",
+					"frequency_penalty",
+					"presence_penalty",
+					"repetition_penalty",
+					"seed",
+					"tools",
+					"tool_choice",
+					"functions",
+					"function_call",
+					"reasoning",
+					"include_reasoning",
+					"thinking",
+					"response_format",
+					"json_mode",
+					"truncate",
+					"min_p",
+					"logit_bias",
+					"logprobs",
+					"top_logprobs",
+					"structured_outputs"
+				]
+			},
+			"ModelRegistryItem": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"author": {
+						"type": "string"
+					},
+					"contextLength": {
+						"type": "number",
+						"format": "double"
+					},
+					"endpoints": {
+						"items": {
+							"$ref": "#/components/schemas/ModelEndpoint"
+						},
+						"type": "array"
+					},
+					"maxOutput": {
+						"type": "number",
+						"format": "double"
+					},
+					"trainingDate": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"inputModalities": {
+						"items": {
+							"$ref": "#/components/schemas/InputModality"
+						},
+						"type": "array"
+					},
+					"outputModalities": {
+						"items": {
+							"$ref": "#/components/schemas/OutputModality"
+						},
+						"type": "array"
+					},
+					"supportedParameters": {
+						"items": {
+							"$ref": "#/components/schemas/StandardParameter"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"author",
+					"contextLength",
+					"endpoints",
+					"inputModalities",
+					"outputModalities",
+					"supportedParameters"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ModelCapability": {
+				"type": "string",
+				"enum": [
+					"audio",
+					"video",
+					"image",
+					"thinking",
+					"web_search",
+					"caching",
+					"reasoning"
+				]
+			},
+			"ModelRegistryResponse": {
+				"properties": {
+					"models": {
+						"items": {
+							"$ref": "#/components/schemas/ModelRegistryItem"
+						},
+						"type": "array"
+					},
+					"total": {
+						"type": "number",
+						"format": "double"
+					},
+					"filters": {
+						"properties": {
+							"capabilities": {
+								"items": {
+									"$ref": "#/components/schemas/ModelCapability"
+								},
+								"type": "array"
+							},
+							"authors": {
+								"items": {
+									"type": "string"
+								},
+								"type": "array"
+							},
+							"providers": {
+								"items": {
+									"properties": {
+										"displayName": {
+											"type": "string"
+										},
+										"name": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"displayName",
+										"name"
+									],
+									"type": "object"
+								},
+								"type": "array"
+							}
+						},
+						"required": [
+							"capabilities",
+							"authors",
+							"providers"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"models",
+					"total",
+					"filters"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_ModelRegistryResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/ModelRegistryResponse"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ModelRegistryResponse.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ModelRegistryResponse_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"MetricStats": {
 				"properties": {
 					"p99": {
@@ -8136,6 +8648,21 @@
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
+			},
+			"BulkDeleteSavedQueriesRequest": {
+				"properties": {
+					"ids": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"ids"
+				],
+				"type": "object",
+				"additionalProperties": false
 			},
 			"ResultSuccess_HqlSavedQuery-Array_": {
 				"properties": {
@@ -9580,335 +10107,6 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Router": {
-				"properties": {
-					"lastUpdatedAt": {
-						"type": "string"
-					},
-					"latestVersion": {
-						"type": "string"
-					},
-					"name": {
-						"type": "string"
-					},
-					"hash": {
-						"type": "string"
-					},
-					"id": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"lastUpdatedAt",
-					"latestVersion",
-					"name",
-					"hash",
-					"id"
-				],
-				"type": "object"
-			},
-			"ResultSuccess__routers-Router-Array__": {
-				"properties": {
-					"data": {
-						"properties": {
-							"routers": {
-								"items": {
-									"$ref": "#/components/schemas/Router"
-								},
-								"type": "array"
-							}
-						},
-						"required": [
-							"routers"
-						],
-						"type": "object"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result__routers-Router-Array_.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess__routers-Router-Array__"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"LatestRouterConfig": {
-				"properties": {
-					"config": {
-						"$ref": "#/components/schemas/Json"
-					},
-					"version": {
-						"type": "string"
-					},
-					"hash": {
-						"type": "string"
-					},
-					"name": {
-						"type": "string"
-					},
-					"id": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"config",
-					"version",
-					"hash",
-					"name",
-					"id"
-				],
-				"type": "object"
-			},
-			"ResultSuccess_LatestRouterConfig_": {
-				"properties": {
-					"data": {
-						"$ref": "#/components/schemas/LatestRouterConfig"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_LatestRouterConfig.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_LatestRouterConfig_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"RouterRequestsOverTime": {
-				"properties": {
-					"status": {
-						"type": "number",
-						"format": "double"
-					},
-					"count": {
-						"type": "number",
-						"format": "double"
-					},
-					"time": {
-						"type": "string",
-						"format": "date-time"
-					}
-				},
-				"required": [
-					"status",
-					"count",
-					"time"
-				],
-				"type": "object"
-			},
-			"ResultSuccess_RouterRequestsOverTime-Array_": {
-				"properties": {
-					"data": {
-						"items": {
-							"$ref": "#/components/schemas/RouterRequestsOverTime"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_RouterRequestsOverTime-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_RouterRequestsOverTime-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"RouterCostOverTime": {
-				"properties": {
-					"cost": {
-						"type": "number",
-						"format": "double"
-					},
-					"time": {
-						"type": "string",
-						"format": "date-time"
-					}
-				},
-				"required": [
-					"cost",
-					"time"
-				],
-				"type": "object"
-			},
-			"ResultSuccess_RouterCostOverTime-Array_": {
-				"properties": {
-					"data": {
-						"items": {
-							"$ref": "#/components/schemas/RouterCostOverTime"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_RouterCostOverTime-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_RouterCostOverTime-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"RouterLatencyOverTime": {
-				"properties": {
-					"duration": {
-						"type": "number",
-						"format": "double"
-					},
-					"time": {
-						"type": "string",
-						"format": "date-time"
-					}
-				},
-				"required": [
-					"duration",
-					"time"
-				],
-				"type": "object"
-			},
-			"ResultSuccess_RouterLatencyOverTime-Array_": {
-				"properties": {
-					"data": {
-						"items": {
-							"$ref": "#/components/schemas/RouterLatencyOverTime"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_RouterLatencyOverTime-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_RouterLatencyOverTime-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"CreateRouterResult": {
-				"properties": {
-					"routerVersionId": {
-						"type": "string"
-					},
-					"routerHash": {
-						"type": "string"
-					},
-					"routerId": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"routerVersionId",
-					"routerHash",
-					"routerId"
-				],
-				"type": "object"
-			},
-			"ResultSuccess_CreateRouterResult_": {
-				"properties": {
-					"data": {
-						"$ref": "#/components/schemas/CreateRouterResult"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_CreateRouterResult.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_CreateRouterResult_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
 			"Eval": {
 				"properties": {
 					"name": {
@@ -10754,62 +10952,28 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array_": {
+			"CreditBalanceResponse": {
+				"properties": {
+					"totalCreditsPurchased": {
+						"type": "number",
+						"format": "double"
+					},
+					"balance": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"totalCreditsPurchased",
+					"balance"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_CreditBalanceResponse_": {
 				"properties": {
 					"data": {
-						"items": {
-							"properties": {
-								"user_id": {
-									"type": "string"
-								},
-								"updated_at": {
-									"type": "string"
-								},
-								"temp_key": {
-									"type": "boolean"
-								},
-								"soft_delete": {
-									"type": "boolean"
-								},
-								"organization_id": {
-									"type": "string"
-								},
-								"key_permissions": {
-									"type": "string"
-								},
-								"id": {
-									"type": "number",
-									"format": "double"
-								},
-								"governance": {
-									"type": "boolean"
-								},
-								"created_at": {
-									"type": "string"
-								},
-								"api_key_name": {
-									"type": "string"
-								},
-								"api_key_hash": {
-									"type": "string"
-								}
-							},
-							"required": [
-								"user_id",
-								"updated_at",
-								"temp_key",
-								"soft_delete",
-								"organization_id",
-								"key_permissions",
-								"id",
-								"governance",
-								"created_at",
-								"api_key_name",
-								"api_key_hash"
-							],
-							"type": "object"
-						},
-						"type": "array"
+						"$ref": "#/components/schemas/CreditBalanceResponse"
 					},
 					"error": {
 						"type": "number",
@@ -10826,10 +10990,135 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array.string_": {
+			"Result_CreditBalanceResponse.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array_"
+						"$ref": "#/components/schemas/ResultSuccess_CreditBalanceResponse_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"PurchasedCredits": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"createdAt": {
+						"type": "number",
+						"format": "double"
+					},
+					"credits": {
+						"type": "number",
+						"format": "double"
+					},
+					"referenceId": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"createdAt",
+					"credits",
+					"referenceId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PaginatedPurchasedCredits": {
+				"properties": {
+					"purchases": {
+						"items": {
+							"$ref": "#/components/schemas/PurchasedCredits"
+						},
+						"type": "array"
+					},
+					"total": {
+						"type": "number",
+						"format": "double"
+					},
+					"page": {
+						"type": "number",
+						"format": "double"
+					},
+					"pageSize": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"purchases",
+					"total",
+					"page",
+					"pageSize"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_PaginatedPurchasedCredits_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/PaginatedPurchasedCredits"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_PaginatedPurchasedCredits.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_PaginatedPurchasedCredits_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__totalSpend-number__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"totalSpend": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"totalSpend"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__totalSpend-number_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__totalSpend-number__"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -12016,6 +12305,587 @@
 						"application/json": {
 							"schema": {
 								"$ref": "#/components/schemas/UserQueryParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/api-keys/provider-key/{providerKeyId}": {
+			"delete": {
+				"operationId": "DeleteProviderKey",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"properties": {
+												"providerName": {
+													"type": "string",
+													"enum": [
+														"anthropic",
+														"openai",
+														"bedrock",
+														"vertex",
+														"azure-openai",
+														"perplexity",
+														"groq",
+														"deepseek",
+														"cohere",
+														"xai",
+														"google"
+													]
+												}
+											},
+											"required": [
+												"providerName"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"error": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"error"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"API Key"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "providerKeyId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"get": {
+				"operationId": "GetProviderKey",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/DecryptedProviderKey"
+										},
+										{
+											"properties": {
+												"error": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"error"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"API Key"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "providerKeyId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"patch": {
+				"operationId": "UpdateProviderKey",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__id-string--providerName-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"API Key"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "providerKeyId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateProviderKeyRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/api-keys/provider-key": {
+			"post": {
+				"operationId": "CreateProviderKey",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"error": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"error"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"API Key"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateProviderKeyRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/api-keys/provider-keys": {
+			"get": {
+				"operationId": "GetProviderKeys",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"items": {
+												"$ref": "#/components/schemas/ProviderKeyRow"
+											},
+											"type": "array"
+										},
+										{
+											"properties": {
+												"error": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"error"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"API Key"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/api-keys": {
+			"get": {
+				"operationId": "GetAPIKeys",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"API Key"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "CreateAPIKey",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"properties": {
+												"hashedKey": {
+													"type": "string"
+												},
+												"apiKey": {
+													"type": "string"
+												},
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"hashedKey",
+												"apiKey",
+												"id"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"error": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"error"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"API Key"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"key_permissions": {
+										"type": "string",
+										"enum": [
+											"rw",
+											"r",
+											"w"
+										]
+									},
+									"api_key_name": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"api_key_name"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/api-keys/proxy-key": {
+			"post": {
+				"operationId": "CreateProxyKey",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"properties": {
+												"proxyKeyId": {
+													"type": "string"
+												},
+												"proxyKey": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"proxyKeyId",
+												"proxyKey"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"error": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"error"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"API Key"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"proxyKeyName": {
+										"type": "string"
+									},
+									"providerKeyId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"proxyKeyName",
+									"providerKeyId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/api-keys/{apiKeyId}": {
+			"delete": {
+				"operationId": "DeleteAPIKey",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"properties": {
+												"hashedKey": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"hashedKey"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"error": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"error"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"API Key"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "apiKeyId",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			},
+			"patch": {
+				"operationId": "UpdateAPIKey",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"properties": {
+												"hashedKey": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"hashedKey"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"error": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"error"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"API Key"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "apiKeyId",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"api_key_name": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"api_key_name"
+								],
+								"type": "object"
 							}
 						}
 					}
@@ -15649,6 +16519,50 @@
 				"parameters": []
 			}
 		},
+		"/v1/stripe/cloud/checkout-session": {
+			"post": {
+				"operationId": "CreateCloudGatewayCheckoutSession",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"checkoutUrl": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"checkoutUrl"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateCloudGatewayCheckoutSessionRequest"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/stripe/subscription/new-customer/upgrade-to-pro": {
 			"post": {
 				"operationId": "UpgradeToPro",
@@ -16222,33 +17136,6 @@
 					}
 				],
 				"parameters": []
-			}
-		},
-		"/v1/stripe/webhook": {
-			"post": {
-				"operationId": "HandleStripeWebhook",
-				"responses": {
-					"204": {
-						"description": "No content"
-					}
-				},
-				"tags": [
-					"Stripe"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {}
-						}
-					}
-				}
 			}
 		},
 		"/v1/trace/custom/v1/log": {
@@ -17213,6 +18100,28 @@
 				}
 			}
 		},
+		"/v1/public/model-registry/models": {
+			"get": {
+				"operationId": "GetModelRegistry",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ModelRegistryResponse.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Model Registry"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
 		"/v1/public/compare/models": {
 			"post": {
 				"operationId": "GetModelComparison",
@@ -17714,6 +18623,38 @@
 						}
 					}
 				]
+			}
+		},
+		"/v1/helicone-sql/saved-queries/bulk-delete": {
+			"post": {
+				"operationId": "BulkDeleteSavedQueries",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_void.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"HeliconeSql"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/BulkDeleteSavedQueriesRequest"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/helicone-sql/saved-query": {
@@ -19407,273 +20348,6 @@
 				]
 			}
 		},
-		"/v1/gateway": {
-			"get": {
-				"operationId": "GetRouters",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result__routers-Router-Array_.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Gateway"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": []
-			},
-			"post": {
-				"operationId": "CreateRouter",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_CreateRouterResult.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Gateway"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"config": {
-										"type": "string"
-									},
-									"name": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"config",
-									"name"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/gateway/{routerHash}": {
-			"get": {
-				"operationId": "GetLatestRouterConfig",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_LatestRouterConfig.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Gateway"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "routerHash",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			},
-			"put": {
-				"operationId": "UpdateRouter",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_null.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Gateway"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "routerHash",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"config": {
-										"type": "string"
-									},
-									"name": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"config",
-									"name"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/gateway/{routerHash}/requests-over-time": {
-			"get": {
-				"operationId": "GetRouterRequestsOverTime",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_RouterRequestsOverTime-Array.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Gateway"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "routerHash",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
-		"/v1/gateway/{routerHash}/cost-over-time": {
-			"get": {
-				"operationId": "GetRouterCostOverTime",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_RouterCostOverTime-Array.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Gateway"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "routerHash",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
-		"/v1/gateway/{routerHash}/latency-over-time": {
-			"get": {
-				"operationId": "GetRouterLatencyOverTime",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_RouterLatencyOverTime-Array.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Gateway"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "routerHash",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
 		"/v1/evals/query": {
 			"post": {
 				"operationId": "QueryEvals",
@@ -20264,321 +20938,23 @@
 				}
 			}
 		},
-		"/v1/api-keys/provider-key/{providerKeyId}": {
-			"delete": {
-				"operationId": "DeleteProviderKey",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{
-											"properties": {
-												"providerName": {
-													"type": "string",
-													"enum": [
-														"anthropic",
-														"openai",
-														"bedrock",
-														"vertex",
-														"azure-openai",
-														"perplexity",
-														"groq",
-														"deepseek",
-														"cohere",
-														"xai",
-														"google"
-													]
-												}
-											},
-											"required": [
-												"providerName"
-											],
-											"type": "object"
-										},
-										{
-											"properties": {
-												"error": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"error"
-											],
-											"type": "object"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"API Key"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "providerKeyId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			},
+		"/v1/credits/balance": {
 			"get": {
-				"operationId": "GetProviderKey",
+				"operationId": "GetCreditsBalance",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"anyOf": [
-										{
-											"$ref": "#/components/schemas/DecryptedProviderKey"
-										},
-										{
-											"properties": {
-												"error": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"error"
-											],
-											"type": "object"
-										}
-									]
+									"$ref": "#/components/schemas/Result_CreditBalanceResponse.string_"
 								}
 							}
 						}
 					}
 				},
 				"tags": [
-					"API Key"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "providerKeyId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			},
-			"patch": {
-				"operationId": "UpdateProviderKey",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{
-											"properties": {
-												"providerName": {
-													"type": "string"
-												},
-												"id": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"providerName",
-												"id"
-											],
-											"type": "object"
-										},
-										{
-											"properties": {
-												"error": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"error"
-											],
-											"type": "object"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"API Key"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "providerKeyId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"config": {
-										"$ref": "#/components/schemas/Record_string.string_"
-									},
-									"providerSecretKey": {
-										"type": "string"
-									},
-									"providerKey": {
-										"type": "string"
-									}
-								},
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/api-keys/provider-key": {
-			"post": {
-				"operationId": "CreateProviderKey",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{
-											"properties": {
-												"id": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"id"
-											],
-											"type": "object"
-										},
-										{
-											"properties": {
-												"error": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"error"
-											],
-											"type": "object"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"API Key"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"providerKeyName": {
-										"type": "string"
-									},
-									"config": {
-										"$ref": "#/components/schemas/Record_string.string_"
-									},
-									"providerSecretKey": {
-										"type": "string"
-									},
-									"providerKey": {
-										"type": "string"
-									},
-									"providerName": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"providerKeyName",
-									"config",
-									"providerKey",
-									"providerName"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/api-keys/provider-keys": {
-			"get": {
-				"operationId": "GetProviderKeys",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{
-											"items": {},
-											"type": "array"
-										},
-										{
-											"properties": {
-												"error": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"error"
-											],
-											"type": "object"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"API Key"
+					"Credits"
 				],
 				"security": [
 					{
@@ -20588,23 +20964,68 @@
 				"parameters": []
 			}
 		},
-		"/v1/api-keys": {
+		"/v1/credits/payments": {
 			"get": {
-				"operationId": "GetAPIKeys",
+				"operationId": "ListTokenUsagePayments",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array.string_"
+									"$ref": "#/components/schemas/Result_PaginatedPurchasedCredits.string_"
 								}
 							}
 						}
 					}
 				},
 				"tags": [
-					"API Key"
+					"Credits"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "pageSize",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/v1/credits/totalSpend": {
+			"get": {
+				"operationId": "GetTotalSpend",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__totalSpend-number_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Credits"
 				],
 				"security": [
 					{
@@ -20612,296 +21033,6 @@
 					}
 				],
 				"parameters": []
-			},
-			"post": {
-				"operationId": "CreateAPIKey",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{
-											"properties": {
-												"hashedKey": {
-													"type": "string"
-												},
-												"apiKey": {
-													"type": "string"
-												},
-												"id": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"hashedKey",
-												"apiKey",
-												"id"
-											],
-											"type": "object"
-										},
-										{
-											"properties": {
-												"error": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"error"
-											],
-											"type": "object"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"API Key"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"key_permissions": {
-										"type": "string",
-										"enum": [
-											"rw",
-											"r",
-											"w"
-										]
-									},
-									"api_key_name": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"api_key_name"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/api-keys/proxy-key": {
-			"post": {
-				"operationId": "CreateProxyKey",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{
-											"properties": {
-												"proxyKeyId": {
-													"type": "string"
-												},
-												"proxyKey": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"proxyKeyId",
-												"proxyKey"
-											],
-											"type": "object"
-										},
-										{
-											"properties": {
-												"error": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"error"
-											],
-											"type": "object"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"API Key"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"proxyKeyName": {
-										"type": "string"
-									},
-									"providerKeyId": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"proxyKeyName",
-									"providerKeyId"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/api-keys/{apiKeyId}": {
-			"delete": {
-				"operationId": "DeleteAPIKey",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{
-											"properties": {
-												"hashedKey": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"hashedKey"
-											],
-											"type": "object"
-										},
-										{
-											"properties": {
-												"error": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"error"
-											],
-											"type": "object"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"API Key"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "apiKeyId",
-						"required": true,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					}
-				]
-			},
-			"patch": {
-				"operationId": "UpdateAPIKey",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{
-											"properties": {
-												"hashedKey": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"hashedKey"
-											],
-											"type": "object"
-										},
-										{
-											"properties": {
-												"error": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"error"
-											],
-											"type": "object"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"API Key"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "apiKeyId",
-						"required": true,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"api_key_name": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"api_key_name"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
 			}
 		},
 		"/v1/public/alert-banner": {

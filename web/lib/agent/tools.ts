@@ -59,6 +59,20 @@ export const universalTools = [
   },
 ];
 
+export const quickstartTools = [
+  {
+    type: "function" as const,
+    function: {
+      name: "quickstart-open-integration-guide",
+      description: "Shows the integration guide to the user.",
+      parameters: {
+        type: "object",
+        properties: {},
+      },
+    },
+  },
+];
+
 export const hqlTools = [
   {
     type: "function" as const,
@@ -504,6 +518,7 @@ interface RequestResponseRMT {
   response_created_at: string;
   latency: number;
   cost: number;
+  provider: string;
   status: number;
   completion_tokens: number;
   prompt_tokens: number;

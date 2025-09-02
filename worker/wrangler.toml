@@ -5,10 +5,12 @@ compatibility_flags = [
 	"nodejs_compat_v2"
 ]
 logpush = true
+keep_vars = true
 
 durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
 	{ name = "RATE_LIMITER_SQL", class_name = "RateLimiterDO" },
+	{ name = "WALLET", class_name = "Wallet" },
 ]
 
 kv_namespaces = [
@@ -40,11 +42,12 @@ VAULT_ENABLED = "true"
 REQUEST_CACHE_KEY = "9984c295ec7d0f506b8af65e9d60773480eb0c9347a6bd8a2b08fb57b5117701"
 REQUEST_CACHE_KEY_2 = "9984c295ec7d0f506b8af65e9d60773480eb0c9347a6bd8a2b08fb57b5117701"
 VALHALLA_URL = "http://localhost:8585"
+EU_VALHALLA_URL = "http://localhost:8585"
 S3_ENDPOINT = "http://localhost:9000"
 S3_ACCESS_KEY = "minioadmin"
 S3_SECRET_KEY = "minioadmin"
 S3_BUCKET_NAME = "request-response-storage"
-HELICONE_MANUAL_ACCESS_KEY = "Q2xH5Cwid/gAmuLv8QWhgcpNXA4DG1Dxe0ypQTJ8oEA="
+HELICONE_MANUAL_ACCESS_KEY="sk-helicone-rrrrrrr-xxxxxxx-vvvvvvv-wwwwwww"
 APP_URL = "https://us.helicone.ai"
 ENVIRONMENT = "development"
 TOKENIZER_COUNT_API = "https://tokens.helicone.ai/anthropic/count_tokens"
@@ -79,6 +82,12 @@ EU_S3_BUCKET_NAME = "request-response-storage"
 EU_REQUEST_LOGS_QUEUE_URL = ""
 EU_REQUEST_LOGS_QUEUE_URL_LOW_PRIORITY = ""
 EU_AWS_REGION = "eu-west-1"
+SLACK_WEBHOOK_URL = ""
+SLACK_ALERT_CHANNEL = "C092GFJQP43"
+STRIPE_SECRET_KEY = "sk_test_"
+STRIPE_WEBHOOK_SECRET = "whsec_"
+HELICONE_ORG_ID = ""
+STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT="prod_StWk1FmJ88b9Ju"
 
 UPSTASH_KAFKA_URL=""
 UPSTASH_KAFKA_USERNAME=""
@@ -159,6 +168,7 @@ routes = [
 durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
 	{ name = "RATE_LIMITER_SQL", class_name = "RateLimiterDO" },
+	{ name = "WALLET", class_name = "Wallet" },
 ]
 
 kv_namespaces = [
@@ -233,6 +243,7 @@ kv_namespaces = [
 durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
 	{ name = "RATE_LIMITER_SQL", class_name = "RateLimiterDO" },
+	{ name = "WALLET", class_name = "Wallet" },
 ]
 
 queues.producers = [
@@ -279,3 +290,8 @@ deleted_classes = ["AtomicRateLimiter"]
 [[migrations]]
 tag = "v7"
 new_sqlite_classes = ["RateLimiterDO"]
+
+
+[[migrations]]
+tag = "v8"
+new_sqlite_classes = ["Wallet"]

@@ -47,6 +47,7 @@ export interface IHeliconeHeaders {
     cacheSeed: Nullable<number>;
     cacheBucketMaxSize: Nullable<number>;
     cacheControl: Nullable<string>;
+    cacheIgnoreKeys: Nullable<string[]>;
   };
   promptName: Nullable<string>;
   userId: Nullable<string>;
@@ -117,6 +118,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     cacheSeed: Nullable<number>;
     cacheBucketMaxSize: Nullable<number>;
     cacheControl: Nullable<string>;
+    cacheIgnoreKeys: Nullable<string[]>;
   };
   promptName: Nullable<string>;
   userId: Nullable<string>;
@@ -170,6 +172,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       cacheSeed: heliconeHeaders.cacheHeaders.cacheSeed,
       cacheBucketMaxSize: heliconeHeaders.cacheHeaders.cacheBucketMaxSize,
       cacheControl: heliconeHeaders.cacheHeaders.cacheControl,
+      cacheIgnoreKeys: heliconeHeaders.cacheHeaders.cacheIgnoreKeys,
     };
     this.promptName = heliconeHeaders.promptName;
     this.omitHeaders = heliconeHeaders.omitHeaders;
@@ -345,6 +348,11 @@ export class HeliconeHeaders implements IHeliconeHeaders {
           ? parseInt(this.headers.get("Helicone-Cache-Bucket-Max-Size") ?? "0")
           : null,
         cacheControl: this.headers.get("Helicone-Cache-Control") ?? null,
+        cacheIgnoreKeys: this.headers.get("Helicone-Cache-Ignore-Keys")
+          ? JSON.parse(
+              `[${this.headers.get("Helicone-Cache-Ignore-Keys") ?? ""}]`
+            )
+          : null,
       },
       promptName: this.headers.get("Helicone-Prompt-Name") ?? null,
       userId: this.headers.get("Helicone-User-Id") ?? null,

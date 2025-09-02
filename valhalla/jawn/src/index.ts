@@ -33,6 +33,7 @@ import { toExpressRequest } from "./utils/expressHelpers";
 import { webSocketControlPlaneServer } from "./controlPlane/controlPlane";
 import { startDBListener } from "./controlPlane/dbListener";
 import { ValidateError } from "tsoa";
+import { SecretManager } from "@helicone-package/secrets/SecretManager";
 
 if (ENVIRONMENT === "production" || process.env.ENABLE_CRON_JOB === "true") {
   runMainLoops();
@@ -124,11 +125,10 @@ app.use(
 );
 app.use(bodyParser.raw({ verify: rawBodySaver, type: "*/*", limit: "50mb" }));
 
-const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
-const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
+const SQS_ENABLED = SecretManager.getSecret("SQS_ENABLED") === "true";
 
-if (KAFKA_ENABLED) {
-  console.log("Starting Kafka consumers");
+if (SQS_ENABLED) {
+  console.log("Starting SQS consumers");
   startConsumers({
     dlqCount: 0,
     normalCount: 0,
@@ -229,6 +229,8 @@ function errorHandler(
   if (err instanceof Error) {
     return res.status(500).json({
       message: "Internal Server Error",
+      details: ENVIRONMENT === 'production' ? 'Internal Server Error' : err.message,
+      stack: ENVIRONMENT === 'production' ? undefined : err.stack,
     });
   }
 

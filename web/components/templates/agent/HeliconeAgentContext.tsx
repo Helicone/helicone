@@ -2,6 +2,7 @@ import {
   filtersTools,
   playgroundTools,
   promptsTools,
+  quickstartTools,
   universalTools,
   hqlTools,
 } from "@/lib/agent/tools";
@@ -12,6 +13,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 
 type Tool = NonNullable<OpenAIChatRequest["tools"]>[0];
 type Message = NonNullable<OpenAIChatRequest["messages"]>[0];
+type ToolCall = NonNullable<Message["tool_calls"]>[0];
 
 type ToolCallResult = {
   success: boolean;
@@ -20,6 +22,14 @@ type ToolCallResult = {
 
 interface HeliconeAgentTool extends Tool {
   handler?: (args: any) => Promise<ToolCallResult> | ToolCallResult;
+}
+
+export interface AgentExecutionState {
+  isProcessing: boolean;
+  pendingToolCalls: ToolCall[];
+  currentAssistantMessage?: Message;
+  needsAssistantResponse: boolean;
+  error?: string;
 }
 
 export interface ChatSession {
@@ -43,7 +53,7 @@ interface HeliconeAgentContextType {
   currentSession: ChatSession | undefined;
   currentSessionId: string | null;
   messages: Message[];
-  createNewSession: () => void;
+  createNewSession: (startingMessages?: Message[]) => void;
   updateCurrentSessionMessages: (
     messages: Message[],
     saveToDB: boolean,
@@ -53,6 +63,9 @@ interface HeliconeAgentContextType {
   escalateSession: () => void;
   agentChatOpen: boolean;
   setAgentChatOpen: (open: boolean) => void;
+
+  agentState: AgentExecutionState;
+  setAgentState: React.Dispatch<React.SetStateAction<AgentExecutionState>>;
 }
 
 const HeliconeAgentContext = createContext<
@@ -67,6 +80,8 @@ const getToolsForRoute = (pathname: string): HeliconeAgentTool[] => {
     tools.push(...promptsTools);
   } else if (pathname === "/playground") {
     tools.push(...playgroundTools);
+  } else if (pathname === "/quickstart") {
+    tools.push(...quickstartTools);
   }
 
   if (
@@ -207,13 +222,26 @@ export const HeliconeAgentProvider: React.FC<{
       ),
     );
   };
+
+  const getInitialMessage = () => {
+    if (router.pathname === "/quickstart") {
+      return "Hello, I'm Helix! I can provide personalized help for integrating with Helicone, so ask me anything.";
+    }
+    return "Hello! I'm Helix, your Helicone assistant. How can I help you today?";
+  };
+
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content:
-        "Hello! I'm Helix, your Helicone assistant. How can I help you today?",
+      content: getInitialMessage(),
     },
   ]);
+
+  const [agentState, setAgentState] = useState<AgentExecutionState>({
+    isProcessing: false,
+    pendingToolCalls: [],
+    needsAssistantResponse: false,
+  });
   useEffect(() => {
     if ((thread?.data?.chat as any)?.messages) {
       setMessages((thread?.data?.chat as any)?.messages);
@@ -280,13 +308,14 @@ export const HeliconeAgentProvider: React.FC<{
             },
           });
         },
-        createNewSession: () => {
+        createNewSession: (startingMessages?: Message[]) => {
           const newSessionId = crypto.randomUUID();
           const newChatMessages = [
             {
               role: "assistant",
-              content: "Hello, how can I help you today?",
+              content: getInitialMessage(),
             },
+            ...(startingMessages ?? []),
           ];
           upsertThreadMessage({
             params: {
@@ -334,6 +363,8 @@ export const HeliconeAgentProvider: React.FC<{
             },
           });
         },
+        agentState,
+        setAgentState,
       }}
     >
       {children}

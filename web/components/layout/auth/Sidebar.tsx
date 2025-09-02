@@ -9,16 +9,15 @@ import {
   ShieldCheckIcon,
   TagIcon,
   TestTube2,
+  TriangleAlertIcon,
   UsersIcon,
   Code2Icon,
 } from "lucide-react";
-import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
 import DesktopSidebar from "./DesktopSidebar";
 import { ChangelogItem, NavigationItem } from "./types";
 import { useOrg } from "../org/organizationContext";
-import { useFeatureFlag } from "@/services/hooks/admin";
 
 interface SidebarProps {
   setOpen: (open: boolean) => void;
@@ -30,14 +29,6 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
   const router = useRouter();
   const { pathname } = router;
   const org = useOrg();
-  const { data: hasFeatureFlag } = useFeatureFlag(
-    "ai_gateway",
-    org?.currentOrg?.id ?? "",
-  );
-  const { data: hasHQLFeatureFlag } = useFeatureFlag(
-    "hql",
-    org?.currentOrg?.id ?? "",
-  );
 
   const NAVIGATION: NavigationItem[] = useMemo(
     () => [
@@ -84,10 +75,10 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
             current: pathname.includes("/cache"),
           },
           {
-            name: "Rate Limits",
-            href: "/rate-limit",
-            icon: ShieldCheckIcon,
-            current: pathname === "/rate-limit",
+            name: "HQL",
+            href: "/hql",
+            icon: Code2Icon,
+            current: pathname.includes("/hql"),
           },
         ],
       },
@@ -118,23 +109,27 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
         ],
       },
       {
-        name: "Alerts",
-        href: "/alerts",
-        icon: ExclamationTriangleIcon,
-        current: pathname.includes("/alerts"),
+        name: "Monitor",
+        href: "/monitor",
+        icon: null,
+        current: false,
+        subItems: [
+          {
+            name: "Rate Limits",
+            href: "/rate-limit",
+            icon: ShieldCheckIcon,
+            current: pathname === "/rate-limit",
+          },
+          {
+            name: "Alerts",
+            href: "/alerts",
+            icon: TriangleAlertIcon,
+            current: pathname.includes("/alerts"),
+          },
+        ],
       },
-      ...(hasHQLFeatureFlag?.data
-        ? [
-            {
-              name: "HQL",
-              href: "/hql",
-              icon: Code2Icon,
-              current: pathname.includes("/hql"),
-            },
-          ]
-        : []),
     ],
-    [pathname, hasFeatureFlag?.data, hasHQLFeatureFlag?.data],
+    [pathname],
   );
 
   return (

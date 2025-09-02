@@ -31,6 +31,7 @@ import { costOfPrompt } from "@helicone-package/cost";
 import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
 import { MessageData } from "../clients/producers/types";
 import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
+import { EscrowInfo } from "../util/aiGateway";
 
 export interface DBLoggableProps {
   response: {
@@ -66,6 +67,7 @@ export interface DBLoggableProps {
     request_ip: string | null;
     country_code: string | null;
     requestReferrer: string | null;
+    escrowInfo?: EscrowInfo;
   };
   timing: {
     startTime: Date;
@@ -112,6 +114,7 @@ export function dbLoggableRequestFromProxyRequest(
     request_ip: null,
     country_code: (proxyRequest.requestWrapper.cf?.country as string) ?? null,
     requestReferrer: proxyRequest.requestWrapper.requestReferrer ?? null,
+    escrowInfo: proxyRequest.escrowInfo ?? undefined,
   };
 }
 
@@ -564,14 +567,7 @@ export class DBLoggable {
     requestHeaders?: HeliconeHeaders,
     cachedHeaders?: Headers,
     cacheSettings?: CacheSettings
-  ): Promise<
-    Result<
-      {
-        cost: number;
-      } | null,
-      string
-    >
-  > {
+  ): Promise<Result<void, string>> {
     try {
       const { data: authParams, error } = await db.dbWrapper.getAuthParams();
       if (error || !authParams?.organizationId) {
@@ -589,16 +585,13 @@ export class DBLoggable {
 
         const rateLimiter = await db.dbWrapper.getRateLimiter();
         if (rateLimiter.error !== null) {
-          return rateLimiter;
+          throw new Error(rateLimiter.error);
         }
-
         // TODO: Add an early exit if we really want to rate limit in the future
         const rateLimit = await rateLimiter.data.checkRateLimit(tier);
-
         if (rateLimit.data?.isRateLimited) {
           orgRateLimit = true;
         }
-
         if (rateLimit.error) {
           console.error(`Error checking rate limit: ${rateLimit.error}`);
         }
@@ -615,30 +608,7 @@ export class DBLoggable {
         cachedHeaders,
         cacheSettings
       );
-
-      // THIS IS ONLY USED FOR COST CALCULATION ON RATELIMITING
-      const readResponse = await this.readResponse();
-
-      const model =
-        this.request.modelOverride ??
-        readResponse.data?.response.model ??
-        "not-found";
-
-      const cost =
-        this.modelCost({
-          model: model,
-          sum_completion_tokens:
-            readResponse.data?.response?.completion_tokens ?? 0,
-          sum_prompt_tokens: readResponse.data?.response?.prompt_tokens ?? 0,
-          sum_tokens:
-            (readResponse.data?.response.completion_tokens ?? 0) +
-            (readResponse.data?.response.prompt_tokens ?? 0),
-          provider: this.request.provider ?? "",
-        }) ?? 0;
-
-      return ok({
-        cost: cost,
-      });
+      return ok(undefined);
     } catch (error) {
       return err("Error logging");
     }
@@ -705,7 +675,7 @@ export class DBLoggable {
       cacheSettings?.shouldReadFromCache && cachedHeaders
         ? cachedHeaders.get("Helicone-Id")
         : DEFAULT_UUID;
-
+      
     const kafkaMessage: MessageData = {
       id: this.request.requestId,
       authorization: requestHeaders.heliconeAuthV2.token,
@@ -724,6 +694,7 @@ export class DBLoggable {
         promptVersionId: this.request.prompt2025Settings.promptVersionId,
         promptInputs: this.request.prompt2025Settings.promptInputs,
         promptEnvironment: this.request.prompt2025Settings.environment,
+        isPassthroughBilling: this.request.escrowInfo ? true : false,
       },
       log: {
         request: {
@@ -831,6 +802,8 @@ export class DBLoggable {
     sum_prompt_tokens: number;
     sum_completion_tokens: number;
     sum_tokens: number;
+    prompt_cache_write_tokens: number;
+    prompt_cache_read_tokens: number;
   }): number {
     const model = modelRow.model;
     const promptTokens = modelRow.sum_prompt_tokens;
@@ -841,8 +814,8 @@ export class DBLoggable {
         promptTokens,
         completionTokens,
         provider: modelRow.provider,
-        promptCacheWriteTokens: 0,
-        promptCacheReadTokens: 0,
+        promptCacheWriteTokens: modelRow.prompt_cache_write_tokens,
+        promptCacheReadTokens: modelRow.prompt_cache_read_tokens,
         promptAudioTokens: 0,
         completionAudioTokens: 0,
       }) ?? 0

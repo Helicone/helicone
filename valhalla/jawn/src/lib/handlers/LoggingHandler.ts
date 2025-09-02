@@ -27,6 +27,8 @@ import {
   COST_PRECISION_MULTIPLIER,
   modelCost,
 } from "@helicone-package/cost/costCalc";
+import { normalizeTier } from "../utils/tiers";
+import { atLeastZero } from "../utils/helicone_math";
 
 type S3Record = {
   requestId: string;
@@ -34,6 +36,7 @@ type S3Record = {
   requestBody: string;
   responseBody: string;
   assets: Map<string, string>;
+  tier: string;
 };
 
 export type BatchPayload = {
@@ -94,6 +97,11 @@ export class LoggingHandler extends AbstractLogHandler {
   }
 
   async handle(context: HandlerContext): PromiseGenericResult<string> {
+    const start = performance.now();
+    context.timingMetrics.push({
+      constructor: this.constructor.name,
+      start,
+    });
     // Perform all mappings first and check for failures before updating the batch payload
     try {
       const requestMapped = this.mapRequest(context);
@@ -236,13 +244,18 @@ export class LoggingHandler extends AbstractLogHandler {
         s3Record.organizationId
       );
 
-      // Upload request and response body
+      // Get tier information from context (stored in s3Record)
+      const tags: Record<string, string> = {};
+      tags.tier = normalizeTier(s3Record.tier);
+
+      // Upload request and response body with tier tag
       const uploadRes = await this.s3Client.store(
         key,
         JSON.stringify({
           request: s3Record.requestBody,
           response: s3Record.responseBody,
-        })
+        }),
+        tags
       );
 
       if (uploadRes.error) {
@@ -256,7 +269,8 @@ export class LoggingHandler extends AbstractLogHandler {
         const imageUploadRes = await this.storeRequestResponseImage(
           s3Record.organizationId,
           s3Record.requestId,
-          s3Record.assets
+          s3Record.assets,
+          s3Record.tier
         );
 
         if (imageUploadRes.error) {
@@ -279,11 +293,18 @@ export class LoggingHandler extends AbstractLogHandler {
   private async storeRequestResponseImage(
     organizationId: string,
     requestId: string,
-    assets: Map<string, string>
+    assets: Map<string, string>,
+    tier: string
   ): PromiseGenericResult<string> {
     const uploadPromises: Promise<void>[] = Array.from(assets.entries()).map(
       ([assetId, imageUrl]) =>
-        this.handleImageUpload(assetId, imageUrl, requestId, organizationId)
+        this.handleImageUpload(
+          assetId,
+          imageUrl,
+          requestId,
+          organizationId,
+          tier
+        )
     );
 
     await Promise.allSettled(uploadPromises);
@@ -309,9 +330,14 @@ export class LoggingHandler extends AbstractLogHandler {
     assetId: string,
     imageUrl: string,
     requestId: string,
-    organizationId: string
+    organizationId: string,
+    tier: string
   ): Promise<void> {
     try {
+      // Prepare tags
+      const tags: Record<string, string> = {};
+      tags.tier = normalizeTier(tier);
+
       if (this.isBase64Image(imageUrl)) {
         const [assetType, base64Data] = this.extractBase64Data(imageUrl);
         const buffer = Buffer.from(base64Data, "base64");
@@ -320,7 +346,8 @@ export class LoggingHandler extends AbstractLogHandler {
           assetType,
           requestId,
           organizationId,
-          assetId
+          assetId,
+          tags
         );
       } else {
         const response = await fetch(imageUrl, {
@@ -336,7 +363,8 @@ export class LoggingHandler extends AbstractLogHandler {
           blob,
           requestId,
           organizationId,
-          assetId
+          assetId,
+          tags
         );
       }
     } catch (error) {
@@ -366,12 +394,16 @@ export class LoggingHandler extends AbstractLogHandler {
 
   async logToClickhouse(): PromiseGenericResult<string> {
     try {
-      const result = await this.requestStore.insertRequestResponseVersioned(
-        this.batchPayload.requestResponseVersionedCH
-      );
-
-      if (result.error) {
-        return err(`Error inserting request response logs: ${result.error}`);
+      if (
+        Array.isArray(this.batchPayload.requestResponseVersionedCH) &&
+        this.batchPayload.requestResponseVersionedCH.length > 0
+      ) {
+        const result = await this.requestStore.insertRequestResponseVersioned(
+          this.batchPayload.requestResponseVersionedCH
+        );
+        if (result.error) {
+          return err(`Error inserting request response logs: ${result.error}`);
+        }
       }
 
       if (this.batchPayload.cacheMetricCH.length > 0) {
@@ -409,6 +441,7 @@ export class LoggingHandler extends AbstractLogHandler {
       requestBody: context.processedLog.request.body,
       responseBody: context.processedLog.response.body,
       assets: assets ?? new Map(),
+      tier: orgParams.tier,
     };
 
     return s3Record;
@@ -514,43 +547,51 @@ export class LoggingHandler extends AbstractLogHandler {
       context.message.log.request.cacheReferenceId &&
       context.message.log.request.cacheReferenceId != DEFAULT_UUID;
 
+    let cost = atLeastZero(
+      response.cost
+        ? response.cost * COST_PRECISION_MULTIPLIER
+        : isCacheHit
+          ? 0
+          : modelCost({
+              provider: request.provider ?? "",
+              model: context.processedLog.model ?? "",
+              sum_prompt_tokens: usage.promptTokens ?? 0,
+              sum_completion_tokens: usage.completionTokens ?? 0,
+              prompt_cache_write_tokens: usage.promptCacheWriteTokens ?? 0,
+              prompt_cache_read_tokens: usage.promptCacheReadTokens ?? 0,
+              prompt_audio_tokens: usage.promptAudioTokens ?? 0,
+              completion_audio_tokens: usage.completionAudioTokens ?? 0,
+              sum_tokens:
+                (usage.promptTokens ?? 0) + (usage.completionTokens ?? 0),
+              multiple: COST_PRECISION_MULTIPLIER,
+            })
+    );
+
     const requestResponseLog: RequestResponseRMT = {
       user_id:
         typeof request.userId === "string"
           ? request.userId
           : String(request.userId),
       request_id: request.id,
-      completion_tokens: isCacheHit ? 0 : (usage.completionTokens ?? 0),
       latency: response.delayMs ?? 0,
       model: context.processedLog.model ?? "",
-      prompt_tokens: isCacheHit ? 0 : (usage.promptTokens ?? 0),
-      prompt_cache_write_tokens: isCacheHit
-        ? 0
-        : (usage.promptCacheWriteTokens ?? 0),
-      prompt_cache_read_tokens: isCacheHit
-        ? 0
-        : (usage.promptCacheReadTokens ?? 0),
-      prompt_audio_tokens: isCacheHit ? 0 : (usage.promptAudioTokens ?? 0),
-      completion_audio_tokens: isCacheHit
-        ? 0
-        : (usage.completionAudioTokens ?? 0),
-      cost: response.cost
-        ? (response.cost * COST_PRECISION_MULTIPLIER)
-        : isCacheHit
-        ? 0
-        : modelCost({
-            provider: request.provider ?? "",
-            model: context.processedLog.model ?? "",
-            sum_prompt_tokens: usage.promptTokens ?? 0,
-            sum_completion_tokens: usage.completionTokens ?? 0,
-            prompt_cache_write_tokens: usage.promptCacheWriteTokens ?? 0,
-            prompt_cache_read_tokens: usage.promptCacheReadTokens ?? 0,
-            prompt_audio_tokens: usage.promptAudioTokens ?? 0,
-            completion_audio_tokens: usage.completionAudioTokens ?? 0,
-            sum_tokens:
-              (usage.promptTokens ?? 0) + (usage.completionTokens ?? 0),
-            multiple: COST_PRECISION_MULTIPLIER,
-          }),
+      completion_tokens: atLeastZero(
+        isCacheHit ? 0 : (usage.completionTokens ?? 0)
+      ),
+      prompt_tokens: atLeastZero(isCacheHit ? 0 : (usage.promptTokens ?? 0)),
+      prompt_cache_write_tokens: atLeastZero(
+        isCacheHit ? 0 : (usage.promptCacheWriteTokens ?? 0)
+      ),
+      prompt_cache_read_tokens: atLeastZero(
+        isCacheHit ? 0 : (usage.promptCacheReadTokens ?? 0)
+      ),
+      prompt_audio_tokens: atLeastZero(
+        isCacheHit ? 0 : (usage.promptAudioTokens ?? 0)
+      ),
+      completion_audio_tokens: atLeastZero(
+        isCacheHit ? 0 : (usage.completionAudioTokens ?? 0)
+      ),
+      cost: cost,
       request_created_at: formatTimeString(
         request.requestCreatedAt.toISOString()
       ),
@@ -581,13 +622,11 @@ export class LoggingHandler extends AbstractLogHandler {
       cache_reference_id:
         context.message.log.request.cacheReferenceId ?? undefined,
       cache_enabled: context.message.log.request.cacheEnabled ?? false,
-      gateway_router_id:
-        context.message.heliconeMeta.gatewayRouterId ?? undefined,
-      gateway_deployment_target:
-        context.message.heliconeMeta.gatewayDeploymentTarget ?? undefined,
       prompt_id: context.message.heliconeMeta.promptId ?? "",
       prompt_version: context.message.heliconeMeta.promptVersionId ?? "",
       request_referrer: context.message.log.request.requestReferrer ?? "",
+      is_passthrough_billing:
+        context.message.heliconeMeta.isPassthroughBilling ?? false,
     };
 
     return requestResponseLog;
@@ -611,12 +650,18 @@ export class LoggingHandler extends AbstractLogHandler {
       provider: request.provider ?? "",
       cache_hit_count: 1,
       saved_latency_ms: context.message.log.response.cachedLatency ?? 0,
-      saved_completion_tokens: usage.completionTokens ?? 0,
-      saved_prompt_tokens: usage.promptTokens ?? 0,
-      saved_prompt_cache_write_tokens: usage.promptCacheWriteTokens ?? 0,
-      saved_prompt_cache_read_tokens: usage.promptCacheReadTokens ?? 0,
-      saved_prompt_audio_tokens: usage.promptAudioTokens ?? 0,
-      saved_completion_audio_tokens: usage.completionAudioTokens ?? 0,
+      saved_completion_tokens: atLeastZero(usage.completionTokens ?? 0),
+      saved_prompt_tokens: atLeastZero(usage.promptTokens ?? 0),
+      saved_prompt_cache_write_tokens: atLeastZero(
+        usage.promptCacheWriteTokens ?? 0
+      ),
+      saved_prompt_cache_read_tokens: atLeastZero(
+        usage.promptCacheReadTokens ?? 0
+      ),
+      saved_prompt_audio_tokens: atLeastZero(usage.promptAudioTokens ?? 0),
+      saved_completion_audio_tokens: atLeastZero(
+        usage.completionAudioTokens ?? 0
+      ),
       last_hit: formatTimeString(response.responseCreatedAt.toISOString()),
       first_hit: formatTimeString(response.responseCreatedAt.toISOString()),
       request_body: requestText,

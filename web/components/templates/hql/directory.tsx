@@ -5,6 +5,7 @@ import { components } from "@/lib/clients/jawnTypes/public";
 import { Dispatch, SetStateAction, useMemo, useState } from "react";
 import { clsx } from "clsx";
 import { ChevronDown, ChevronRight, Trash2 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -23,6 +24,7 @@ import {
 } from "@/components/ui/tooltip";
 import { $JAWN_API } from "@/lib/clients/jawn";
 import { CommandLineIcon } from "@heroicons/react/24/outline";
+import { useBulkDeleteQueryMutation } from "./constants";
 
 interface DirectoryProps {
   tables: {
@@ -81,12 +83,12 @@ export function Directory({
   );
 
   return (
-    <div className="flex h-screen w-80 flex-col border-r bg-background">
+    <div className="flex h-screen flex-col overflow-hidden border-r bg-background">
       {/* Tabs */}
       <section className="flex border-b">
         <button
           className={clsx(
-            "flex-1 border-b-2 px-4 py-3 text-sm font-medium",
+            "flex-1 truncate border-b-2 px-2 py-3 text-sm font-medium sm:px-4",
             activeTab === "tables"
               ? "border-primary text-primary"
               : "border-transparent text-muted-foreground hover:text-foreground",
@@ -97,7 +99,7 @@ export function Directory({
         </button>
         <button
           className={clsx(
-            "flex-1 border-b-2 px-4 py-3 text-sm font-medium",
+            "flex-1 truncate border-b-2 px-2 py-3 text-sm font-medium sm:px-4",
             activeTab === "queries"
               ? "border-primary text-primary"
               : "border-transparent text-muted-foreground hover:text-foreground",
@@ -199,16 +201,14 @@ function TableList({ tables }: { tables: any[] }) {
               className="group flex cursor-pointer items-center justify-between rounded-md px-2 py-2 hover:bg-muted/50"
               onClick={() => toggleTable(table.table_name, setExpandedTables)}
             >
-              <div className="flex items-center gap-2">
+              <div className="flex min-w-0 items-center gap-2">
                 {expandedTables.has(table.table_name) ? (
-                  <ChevronDown size={16} />
+                  <ChevronDown className="flex-shrink-0" size={16} />
                 ) : (
-                  <ChevronRight size={16} />
+                  <ChevronRight className="flex-shrink-0" size={16} />
                 )}
-                <Table size={16} />
-                <span className="truncate pr-2 text-sm">
-                  {table.table_name}
-                </span>
+                <Table className="flex-shrink-0" size={16} />
+                <span className="truncate text-sm">{table.table_name}</span>
               </div>
             </div>
             {expandedTables.has(table.table_name) && (
@@ -253,14 +253,53 @@ function QueryList({
   >;
 }) {
   const { setNotification } = useNotification();
+  const [selectedQueries, setSelectedQueries] = useState<Set<string>>(
+    new Set(),
+  );
 
   const deleteQueryMutation = useMutation(
     useDeleteQueryMutation(setNotification),
   );
 
+  const bulkDeleteMutation = useMutation(
+    useBulkDeleteQueryMutation(setNotification),
+  );
+
   const handleDeleteQuery = (queryId: string, queryName: string) => {
     if (confirm(`Are you sure you want to delete "${queryName}"?`)) {
       deleteQueryMutation.mutate(queryId);
+    }
+  };
+
+  const handleBulkDelete = () => {
+    const count = selectedQueries.size;
+    if (
+      confirm(
+        `Are you sure you want to delete ${count} selected ${count === 1 ? "query" : "queries"}?`,
+      )
+    ) {
+      bulkDeleteMutation.mutate(Array.from(selectedQueries));
+      setSelectedQueries(new Set());
+    }
+  };
+
+  const toggleQuerySelection = (queryId: string) => {
+    setSelectedQueries((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(queryId)) {
+        newSet.delete(queryId);
+      } else {
+        newSet.add(queryId);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedQueries.size === queries.length) {
+      setSelectedQueries(new Set());
+    } else {
+      setSelectedQueries(new Set(queries.map((q) => q.id)));
     }
   };
 
@@ -284,9 +323,29 @@ function QueryList({
       )}
 
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-sm font-medium text-muted-foreground">
-          Queries ({queries.length})
-        </h3>
+        <div className="flex items-center gap-2">
+          {queries.length > 0 && (
+            <Checkbox
+              checked={selectedQueries.size === queries.length}
+              onCheckedChange={toggleSelectAll}
+              aria-label="Select all queries"
+            />
+          )}
+          <h3 className="text-sm font-medium text-muted-foreground">
+            Queries ({queries.length})
+          </h3>
+        </div>
+        {selectedQueries.size > 0 && (
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={handleBulkDelete}
+            disabled={bulkDeleteMutation.isPending}
+          >
+            <Trash2 className="mr-1 h-3 w-3" />
+            Delete ({selectedQueries.size})
+          </Button>
+        )}
       </div>
       {isLoading ? (
         <div className="text-sm text-muted-foreground">Loading...</div>
@@ -295,21 +354,29 @@ function QueryList({
           {queries.map((query, index) => (
             <ContextMenu key={query.id || index}>
               <ContextMenuTrigger>
-                <div
-                  className="group flex cursor-pointer items-center justify-between rounded-md px-2 py-2 hover:bg-muted/50"
-                  onClick={() => {
-                    setCurrentQuery({
-                      id: query.id,
-                      name: query.name,
-                      sql: query.sql,
-                    });
-                  }}
-                >
-                  <span className="flex items-center gap-2 truncate pr-2 text-sm">
-                    <CommandLineIcon className="h-4 w-4" />
-
-                    {query.name}
-                  </span>
+                <div className="group flex cursor-pointer items-center justify-between rounded-md px-2 py-2 hover:bg-muted/50">
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      checked={selectedQueries.has(query.id)}
+                      onCheckedChange={() => toggleQuerySelection(query.id)}
+                      onClick={(e) => e.stopPropagation()}
+                      aria-label={`Select ${query.name}`}
+                    />
+                    <span
+                      className="flex items-center gap-2 truncate pr-2 text-sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentQuery({
+                          id: query.id,
+                          name: query.name,
+                          sql: query.sql,
+                        });
+                      }}
+                    >
+                      <CommandLineIcon className="h-4 w-4" />
+                      {query.name}
+                    </span>
+                  </div>
                 </div>
               </ContextMenuTrigger>
               <ContextMenuContent>

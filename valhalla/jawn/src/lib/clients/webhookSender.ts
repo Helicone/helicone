@@ -161,10 +161,6 @@ export async function sendToWebhook(
       console.error("Webhook request timed out after 2 minutes");
       return ok("Failed to send webhook: Request timed out after 2 minutes");
     }
-    console.error(
-      "Error sending to webhook",
-      error instanceof Error ? error.message : String(error)
-    );
     return ok(
       `Failed to send webhook: ${
         error instanceof Error ? error.message : "Unknown error"

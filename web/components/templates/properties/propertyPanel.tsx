@@ -16,6 +16,8 @@ import { UIFilterRow } from "@helicone-package/filters/types";
 import ThemedTableHeader from "../../shared/themed/themedHeader";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { formatNumber } from "../users/initialColumns";
+import { useFilterStore } from "@/filterAST/store/filterStore";
+import { toFilterNode } from "@helicone-package/filters/toFilterNode";
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -67,12 +69,18 @@ const PropertyPanel = (props: PropertyPanelProps) => {
     direction: "desc",
   });
 
+  const filterStore = useFilterStore();
+  const userFilters = filterStore.filter
+    ? toFilterNode(filterStore.filter)
+    : "all";
+
   const { keyMetrics, valueMetrics, isAnyLoading } = usePropertyCard({
     timeFilter,
     property,
     limit: showMore ? 100 : 11,
     sortKey: sortConfig.key,
     sortDirection: sortConfig.direction,
+    userFilters,
   });
 
   const { propertyFilters } = useGetPropertiesV2(getPropertyFiltersV2);

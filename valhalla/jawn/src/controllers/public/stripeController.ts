@@ -5,6 +5,7 @@ import {
   Get,
   Path,
   Post,
+  Query,
   Request,
   Route,
   Security,
@@ -12,6 +13,9 @@ import {
 } from "tsoa";
 import { StripeManager } from "../../managers/stripe/StripeManager";
 import type { JawnAuthenticatedRequest } from "../../types/request";
+import { isError } from "../../packages/common/result";
+import express from "express";
+import { checkFeatureFlag } from "../../lib/utils/featureFlags";
 
 export interface UpgradeToProRequest {
   addons?: {
@@ -27,6 +31,11 @@ export interface UpgradeToProRequest {
 export interface UpgradeToTeamBundleRequest {
   ui_mode?: "embedded" | "hosted";
 }
+
+export interface CreateCloudGatewayCheckoutSessionRequest {
+  amount: number;
+}
+
 
 export interface LLMUsage {
   model: string;
@@ -99,6 +108,44 @@ export class StripeController extends Controller {
 
     return result.data;
   }
+
+  @Post("/cloud/checkout-session")
+  public async createCloudGatewayCheckoutSession(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body() body: CreateCloudGatewayCheckoutSessionRequest
+  ): Promise<{ checkoutUrl: string }> {
+    const featureFlagResult = await checkFeatureFlag(
+      request.authParams.organizationId,
+      "credits"
+    );
+    
+    if (isError(featureFlagResult)) {
+      this.setStatus(500);
+      throw new Error(featureFlagResult.error);
+    } else if (!featureFlagResult.data) {
+      this.setStatus(403);
+      throw new Error("Credits feature is not enabled for this organization");
+    }
+    
+    const stripeManager = new StripeManager(request.authParams);
+    if (body.amount < 5) {
+      this.setStatus(400);
+      throw new Error("Amount must be at least 5");
+    }
+    const result = await stripeManager.createCloudGatewayCheckoutSession(
+      request.headers.origin ?? "",
+      body.amount,
+    );
+
+    if (isError(result)) {
+      console.error("Error creating checkout session", JSON.stringify(result.error));
+      this.setStatus(400);
+      throw new Error(result.error);
+    }
+
+    return { checkoutUrl: result.data };
+  }
+
 
   @Post("/subscription/new-customer/upgrade-to-pro")
   public async upgradeToPro(
@@ -362,23 +409,5 @@ export class StripeController extends Controller {
         },
       })),
     };
-  }
-
-  @Post("/webhook")
-  public async handleStripeWebhook(
-    @Body() body: any,
-    @Request() request: JawnAuthenticatedRequest
-  ): Promise<void> {
-    const stripeManager = new StripeManager(request.authParams);
-    const signature = request.headers["stripe-signature"] as string;
-
-    const result = await stripeManager.handleStripeWebhook(body, signature);
-
-    if (result.error) {
-      console.error("Error processing webhook:", result.error);
-      this.setStatus(400);
-    } else {
-      this.setStatus(200);
-    }
   }
 }

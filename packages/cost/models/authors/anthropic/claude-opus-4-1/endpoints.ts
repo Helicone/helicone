@@ -38,6 +38,7 @@ export const endpoints = {
     providerModelId: "claude-opus-4-1@20250805",
     provider: "vertex",
     version: "vertex-2023-10-16",
+    ptbEnabled: true,
     pricing: {
       prompt: 0.000015,
       completion: 0.000075,
@@ -55,7 +56,6 @@ export const endpoints = {
       "tools",
       "tool_choice",
     ],
-    ptbEnabled: true,
     endpointConfigs: {
       global: {
         providerModelId: "claude-opus-4-1@20250805",

@@ -248,6 +248,7 @@ const whereKeyMappings: KeyMappings = {
       country_code: "request_response_rmt.country_code",
       latency: "request_response_rmt.latency",
       cost: "request_response_rmt.cost",
+      provider: "request_response_rmt.provider",
       time_to_first_token: "request_response_rmt.time_to_first_token",
       status: "request_response_rmt.status",
       request_created_at: "request_response_rmt.request_created_at",
@@ -274,6 +275,8 @@ const whereKeyMappings: KeyMappings = {
         "request_response_rmt.prompt_cache_write_tokens",
       prompt_id: "request_response_rmt.prompt_id",
       prompt_version: "request_response_rmt.prompt_version",
+      request_referrer: "request_response_rmt.request_referrer",
+      is_passthrough_billing: "request_response_rmt.is_passthrough_billing",
     })(filter, placeValueSafely);
   },
   users_view: easyKeyMappings<"users_view">({}),

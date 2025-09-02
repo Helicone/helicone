@@ -22,8 +22,11 @@
     "moduleResolution": "Node",
     "noImplicitAny": true,
     "outDir": "dist",
-    "rootDir": ".",
-    "typeRoots": ["node_modules/@types"]
+    "rootDir": "../../../",
+    "typeRoots": ["node_modules/@types"],
+    "paths": {
+      "@helicone-package/*": ["../../../packages/*"]
+    }
   },
   "exclude": ["dist", "node_modules", "tests/UsageExample.ts"],
   "include": ["*.ts", "tests/**/*.ts"]

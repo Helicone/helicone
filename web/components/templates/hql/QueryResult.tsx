@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from "react";
-import LoadingAnimation from "@/components/shared/loadingAnimation";
 import ThemedTable from "@/components/shared/themed/table/themedTable";
 import ThemedModal from "@/components/shared/themed/themedModal";
 import { MAX_EXPORT_CSV } from "@/lib/constants";
@@ -28,6 +27,7 @@ import { components } from "@/lib/clients/jawnTypes/public";
 import useNotification from "@/components/shared/notification/useNotification";
 import { CircleCheckBig, CircleDashed } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { HqlErrorDisplay } from "./HqlErrorDisplay";
 
 interface QueryResultProps {
   sql: string;
@@ -51,7 +51,11 @@ function QueryResult({
   }, [result]);
 
   if (error) {
-    return <div className="p-4 text-center text-muted-foreground">{error}</div>;
+    return (
+      <div className="p-4">
+        <HqlErrorDisplay error={error} />
+      </div>
+    );
   }
 
   if (!result || result.length === 0) {
@@ -72,42 +76,36 @@ function QueryResult({
         sql={sql}
         queryLoading={loading}
       />
-      {loading ? (
-        <div className="p-4 text-center text-muted-foreground">
-          <LoadingAnimation />
-        </div>
-      ) : (
-        <ThemedTable
-          id="hql-result"
-          defaultData={result}
-          defaultColumns={[
-            {
-              header: "#",
-              accessorKey: "__rowNum",
-              cell: (info) => info.row.index + 1,
+      <ThemedTable
+        id="hql-result"
+        defaultData={result}
+        defaultColumns={[
+          {
+            header: "#",
+            accessorKey: "__rowNum",
+            cell: (info) => info.row.index + 1,
+          },
+          ...columns.map((col) => ({
+            header: col,
+            accessorKey: col,
+            cell: (info: CellContext<Record<string, any>, unknown>) => {
+              const value = info.getValue();
+              if (typeof value === "object" && value !== null) {
+                return JSON.stringify(value);
+              }
+              return value;
             },
-            ...columns.map((col) => ({
-              header: col,
-              accessorKey: col,
-              cell: (info: CellContext<Record<string, any>, unknown>) => {
-                const value = info.getValue();
-                if (typeof value === "object" && value !== null) {
-                  return JSON.stringify(value);
-                }
-                return value;
-              },
-            })),
-          ]}
-          skeletonLoading={false}
-          dataLoading={false}
-          checkboxMode="never"
-          onRowSelect={() => {}}
-          onSelectAll={() => {}}
-          selectedIds={[]}
-          activeColumns={[]}
-          setActiveColumns={() => {}}
-        />
-      )}
+          })),
+        ]}
+        skeletonLoading={false}
+        dataLoading={false}
+        checkboxMode="never"
+        onRowSelect={() => {}}
+        onSelectAll={() => {}}
+        selectedIds={[]}
+        activeColumns={[]}
+        setActiveColumns={() => {}}
+      />
     </div>
   );
 }

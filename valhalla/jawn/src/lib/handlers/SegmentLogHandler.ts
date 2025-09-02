@@ -56,7 +56,13 @@ async function getSegmentConfig(
       !writeKeyResult.data ||
       writeKeyResult.data.length === 0
     ) {
-      console.error("Error fetching segment write key:", writeKeyResult.error);
+      if (writeKeyResult.error) {
+        console.error(
+          "Error fetching segment write key:",
+          writeKeyResult.error
+        );
+      }
+
       return err("Failed to fetch segment write key");
     }
 
@@ -106,6 +112,11 @@ export class SegmentLogHandler extends AbstractLogHandler {
   }
 
   public async handle(context: HandlerContext): PromiseGenericResult<string> {
+    const start = performance.now();
+    context.timingMetrics.push({
+      constructor: this.constructor.name,
+      start,
+    });
     const segmentConfig = await cacheResultCustom(
       `segment-config-${context.authParams?.organizationId}`,
       async () => getSegmentConfig(context.authParams?.organizationId ?? ""),

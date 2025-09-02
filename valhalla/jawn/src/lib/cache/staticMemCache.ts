@@ -1,6 +1,7 @@
 import { hashAuth } from "../../utils/hash";
 import { redisClient } from "../clients/redisClient";
 import { Result, ok } from "../../packages/common/result";
+import { SecretManager } from "@helicone-package/secrets/SecretManager";
 
 export class CacheItem<T> {
   constructor(
@@ -78,8 +79,12 @@ export async function storeInCache(
 ): Promise<void> {
   const encrypted = await encrypt(value);
   const hashedKey = await hashAuth(key);
-  // redis
-  await redisClient?.set(hashedKey, JSON.stringify(encrypted), "EX", ttl);
+  try {
+    // redis
+    await redisClient?.set(hashedKey, JSON.stringify(encrypted), "EX", ttl);
+  } catch (e) {
+    console.error("Error storing in cache", e);
+  }
 
   ProviderKeyCache.getInstance().set<string>(
     hashedKey,
@@ -94,12 +99,16 @@ export async function getFromCache(key: string): Promise<string | null> {
     return decrypt(JSON.parse(encryptedMemory));
   }
 
-  const encryptedRemote = await redisClient?.get(hashedKey);
-  if (!encryptedRemote) {
+  try {
+    const encryptedRemote = await redisClient?.get(hashedKey);
+    if (!encryptedRemote) {
+      return null;
+    }
+    return decrypt(JSON.parse(encryptedRemote));
+  } catch (e) {
+    console.error("Error decrypting cached result", e);
     return null;
   }
-
-  return decrypt(JSON.parse(encryptedRemote));
 }
 
 export async function getAndStoreInCache<T, K>(
@@ -180,11 +189,12 @@ export async function decrypt(encrypted: {
 
 async function getCacheKey(): Promise<CryptoKey> {
   // Convert the hexadecimal key to a byte array
-  if (!process.env.REQUEST_CACHE_KEY) {
+  const requestCacheKey = SecretManager.getSecret("REQUEST_CACHE_KEY");
+  if (!requestCacheKey) {
     throw new Error("REQUEST_CACHE_KEY is not set");
   }
 
-  const keyBytes = Buffer.from(process.env.REQUEST_CACHE_KEY, "hex");
+  const keyBytes = Buffer.from(requestCacheKey, "hex");
 
   try {
     const cryptoKey = await crypto.subtle.importKey(

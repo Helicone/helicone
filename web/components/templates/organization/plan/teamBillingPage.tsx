@@ -123,9 +123,7 @@ export const TeamPlanCard = () => {
             {[
               "Unlimited seats",
               "All Pro features",
-              "Prompt Management",
-              "Experiments",
-              "Evaluators",
+              "Prompts workspace included",
               "Priority Support via Slack (email cole@helicone.ai for access)",
             ].map((feature) => (
               <div key={feature} className="flex items-start gap-2 text-sm">

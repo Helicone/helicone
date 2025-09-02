@@ -8,13 +8,6 @@ process.on("exit", () => {
   pgp.end();
 });
 
-const assetColumns = new pgp.helpers.ColumnSet(
-  ["id", "request_id", "organization_id", "created_at"],
-  { table: "asset" }
-);
-
-const onConflictAsset = " ON CONFLICT (id, request_id) DO NOTHING";
-
 export class LogStore {
   constructor() {}
 
@@ -42,12 +35,6 @@ export class LogStore {
             );
             // Don't fail the transaction if onboarding update fails
           }
-        }
-
-        if (payload.assets && payload.assets.length > 0) {
-          const insertResponse =
-            pgp.helpers.insert(payload.assets, assetColumns) + onConflictAsset;
-          await t.none(insertResponse);
         }
 
         if (payload.promptInputs && payload.promptInputs.length > 0) {

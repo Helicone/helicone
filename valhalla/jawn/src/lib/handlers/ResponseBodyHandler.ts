@@ -65,6 +65,12 @@ function isHTML(responseBody: string): boolean {
 
 export class ResponseBodyHandler extends AbstractLogHandler {
   public async handle(context: HandlerContext): PromiseGenericResult<string> {
+    const start = performance.now();
+    context.timingMetrics.push({
+      constructor: this.constructor.name,
+      start,
+    });
+
     try {
       const processedResponseBody = await this.processBody(context);
       context.processedLog.response.model = getModelFromResponse(
@@ -288,12 +294,18 @@ export class ResponseBodyHandler extends AbstractLogHandler {
   }
 
   private isVectorDBResponse(responseBody: any): boolean {
+    if (typeof responseBody !== "object" || responseBody === null) {
+      return false;
+    }
     return (
       responseBody.hasOwnProperty("_type") && responseBody._type === "vector_db"
     );
   }
 
   private isToolResponse(responseBody: any): boolean {
+    if (typeof responseBody !== "object" || responseBody === null) {
+      return false;
+    }
     return (
       responseBody.hasOwnProperty("_type") && responseBody._type === "tool"
     );
@@ -303,6 +315,9 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     responseBody: any,
     currentModel?: string
   ): { responseModel: string; model: string } {
+    if (typeof responseBody !== "object" || responseBody === null) {
+      return { responseModel: "Unknown", model: "unknown" };
+    }
     if (
       this.isAssistantResponse(responseBody) &&
       responseBody.hasOwnProperty("status") &&

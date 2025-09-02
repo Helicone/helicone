@@ -4,6 +4,7 @@ import { Job, isValidStatus, validateRun } from "../../lib/models/Runs";
 import { HeliconeNode, validateHeliconeNode } from "../../lib/models/Tasks";
 import { validateAlertCreate } from "../../lib/util/validators/alertValidators";
 
+import crypto, { timingSafeEqual } from "crypto";
 import { OpenAPIRouterType } from "@cloudflare/itty-router-openapi";
 import { Route } from "itty-router";
 import { logAsync } from "../../lib/managers/AsyncLogManager";
@@ -15,7 +16,7 @@ import { APIKeysStore } from "../../lib/db/APIKeysStore";
 import { APIKeysManager } from "../../lib/managers/APIKeysManager";
 import { ProviderName } from "@helicone-package/cost/models/providers";
 import { BaseOpenAPIRouter } from "../routerFactory";
-const RATE_LIMIT_MS = 1000 * 30;
+import { StripeManager } from "../../lib/managers/StripeManager";
 
 function getAPIRouterV1(
   router: OpenAPIRouterType<
@@ -78,9 +79,9 @@ function getAPIRouterV1(
   );
 
   router.post(
-    "/mock-set-provider-key",
+    "/mock-set-provider-keys/:orgId",
     async (
-      _,
+      { params: { orgId } },
       requestWrapper: RequestWrapper,
       env: Env,
       ctx: ExecutionContext
@@ -89,15 +90,18 @@ function getAPIRouterV1(
         return new Response("not allowed", { status: 403 });
       }
 
-      const data = await requestWrapper.getJson<{
-        provider: ProviderName;
-        decryptedProviderKey: string;
-        decryptedProviderSecretKey: string;
-        authType: "key" | "session_token";
-        config: Json | null;
-        orgId: string;
-        softDelete?: boolean;
-      }>();
+      const data = await requestWrapper.getJson<
+        {
+          provider: ProviderName;
+          decryptedProviderKey: string;
+          decryptedProviderSecretKey: string;
+          authType: "key" | "session_token";
+          config: Json | null;
+          orgId: string;
+          softDelete?: boolean;
+          byokEnabled: boolean;
+        }[]
+      >();
 
       const supabaseClientUS = createClient<Database>(
         env.SUPABASE_URL,
@@ -107,81 +111,27 @@ function getAPIRouterV1(
         env.EU_SUPABASE_URL,
         env.EU_SUPABASE_SERVICE_ROLE_KEY
       );
-      const providerKey: ProviderKey = {
-        provider: data.provider,
-        org_id: data.orgId,
-        decrypted_provider_key: data.decryptedProviderKey,
-        decrypted_provider_secret_key: data.decryptedProviderSecretKey,
-        auth_type: data.authType,
-        config: data.config,
-      };
+      const providerKeys: ProviderKey[] = data.map((providerKey) => ({
+        provider: providerKey.provider,
+        org_id: providerKey.orgId,
+        decrypted_provider_key: providerKey.decryptedProviderKey,
+        decrypted_provider_secret_key: providerKey.decryptedProviderSecretKey,
+        auth_type: providerKey.authType,
+        config: providerKey.config,
+        byok_enabled: providerKey.byokEnabled,
+      }));
 
       const providerKeysManagerUS = new ProviderKeysManager(
         new ProviderKeysStore(supabaseClientUS),
         env
       );
-      await providerKeysManagerUS.setProviderKey(
-        data.provider,
-        data.orgId,
-        providerKey
-      );
+      await providerKeysManagerUS.setOrgProviderKeys(orgId, providerKeys);
 
       const providerKeysManagerEU = new ProviderKeysManager(
         new ProviderKeysStore(supabaseClientEU),
         env
       );
-      await providerKeysManagerEU.setProviderKey(
-        data.provider,
-        data.orgId,
-        providerKey
-      );
-      return new Response("ok", { status: 200 });
-    }
-  );
-
-  router.post(
-    "/mock-delete-provider-key",
-    async (
-      _,
-      requestWrapper: RequestWrapper,
-      env: Env,
-      _ctx: ExecutionContext
-    ) => {
-      if (env.ENVIRONMENT !== "development") {
-        return new Response("not allowed", { status: 403 });
-      }
-
-      const data = await requestWrapper.getJson<{
-        providerName: ProviderName;
-        orgId: string;
-      }>();
-
-      const supabaseClientUS = createClient<Database>(
-        env.SUPABASE_URL,
-        env.SUPABASE_SERVICE_ROLE_KEY
-      );
-      const supabaseClientEU = createClient<Database>(
-        env.EU_SUPABASE_URL,
-        env.EU_SUPABASE_SERVICE_ROLE_KEY
-      );
-
-      const providerKeysManagerUS = new ProviderKeysManager(
-        new ProviderKeysStore(supabaseClientUS),
-        env
-      );
-      await providerKeysManagerUS.deleteProviderKey(
-        data.providerName,
-        data.orgId
-      );
-
-      const providerKeysManagerEU = new ProviderKeysManager(
-        new ProviderKeysStore(supabaseClientEU),
-        env
-      );
-      await providerKeysManagerEU.deleteProviderKey(
-        data.providerName,
-        data.orgId
-      );
+      await providerKeysManagerEU.setOrgProviderKeys(orgId, providerKeys);
       return new Response("ok", { status: 200 });
     }
   );
@@ -481,9 +431,10 @@ function getAPIRouterV1(
         return client.response.unauthorized();
       }
 
-      const requestData = await requestWrapper.getJson<
-        Database["public"]["Tables"]["alert"]["Insert"]
-      >();
+      const requestData =
+        await requestWrapper.getJson<
+          Database["public"]["Tables"]["alert"]["Insert"]
+        >();
 
       const alert = {
         ...requestData,
@@ -496,9 +447,8 @@ function getAPIRouterV1(
         return client.response.newError(validateError, 400);
       }
 
-      const { data: alertRow, error: alertError } = await client.db.insertAlert(
-        alert
-      );
+      const { data: alertRow, error: alertError } =
+        await client.db.insertAlert(alert);
 
       if (alertError || !alertRow) {
         return client.response.newError(alertError, 500);
@@ -535,6 +485,185 @@ function getAPIRouterV1(
       return client.response.successJSON({ ok: "true" }, true);
     }
   );
+
+    // Get the current wallet state, useful for debugging.
+    router.get(
+      "/wallet/state",
+      async (
+        _,
+        requestWrapper: RequestWrapper,
+        env: Env,
+        _ctx: ExecutionContext
+      ) => {
+        const client = await createAPIClient(env, _ctx, requestWrapper);
+        const authParams = await client.db.getAuthParams();
+        if (authParams.error !== null) {
+          return client.response.unauthorized();
+        }
+  
+        const orgId = authParams.data.organizationId;
+        const walletId = env.WALLET.idFromName(orgId);
+        const walletStub = env.WALLET.get(walletId);
+  
+        try {
+          const state = await walletStub.getWalletState(orgId);
+          return client.response.successJSON(state);
+        } catch (e) {
+          return client.response.newError(
+            e instanceof Error ? e.message : "Failed to fetch credits",
+            500
+          );
+        }
+      }
+    );
+  
+    // paginated get credits purchases
+    router.get(
+      "/wallet/credits/purchases",
+      async (
+        { query: { page, pageSize, orgId } },
+        requestWrapper: RequestWrapper,
+        env: Env,
+        _ctx: ExecutionContext
+      ) => {
+        const authHeader = requestWrapper.headers.get("Authorization");
+        if (!authHeader) {
+          return new Response("Unauthorized", { status: 401 });
+        }
+        const providedToken = authHeader.replace("Bearer ", "");
+        const expectedToken = env.HELICONE_MANUAL_ACCESS_KEY;
+  
+        if (!expectedToken) {
+          console.error("HELICONE_MANUAL_ACCESS_KEY not configured");
+          return new Response("Server configuration error", { status: 500 });
+        } else if (!timingSafeEqual(Buffer.from(providedToken), Buffer.from(expectedToken))) {
+          return new Response("Unauthorized", { status: 401 });
+        }
+  
+        const client = await createAPIClient(env, _ctx, requestWrapper);
+  
+        // Get orgId from query param (when called with internal auth)
+        const organizationId = Array.isArray(orgId) ? orgId[0] : orgId;
+  
+        if (!organizationId) {
+          return new Response("orgId is required", { status: 400 });
+        }
+  
+        const walletId = env.WALLET.idFromName(organizationId);
+        const walletStub = env.WALLET.get(walletId);
+        const pageStr = Array.isArray(page) ? page[0] : page;
+        const pageSizeStr = Array.isArray(pageSize) ? pageSize[0] : pageSize;
+        const pageValue = pageStr ? parseInt(pageStr, 10) : 0;
+        const pageSizeValue = pageSizeStr ? parseInt(pageSizeStr, 10) : 10;
+  
+        if (pageSizeValue > 100) {
+          return client.response.newError("Page size must be less than or equal to 100", 400);
+        }
+  
+        try {
+          const creditsPurchases = await walletStub.getCreditsPurchases(pageValue, pageSizeValue);
+          return client.response.successJSON(creditsPurchases);
+        } catch (e) {
+          return client.response.newError(
+            e instanceof Error ? e.message : "Failed to fetch total credits purchased",
+            500
+          );
+        }
+      }
+    );
+  
+      // get total credits purchased
+      router.get(
+        "/wallet/credits/total",
+        async (
+          { query: { orgId } },
+          requestWrapper: RequestWrapper,
+          env: Env,
+          _ctx: ExecutionContext
+        ) => {
+          const client = await createAPIClient(env, _ctx, requestWrapper);
+          if (!orgId || Array.isArray(orgId)) {
+            return new Response("orgId is required and must be a string", { status: 400 });
+          }
+          const authHeader = requestWrapper.headers.get("Authorization");
+          if (!authHeader) {
+            return new Response("Unauthorized", { status: 401 });
+          }
+  
+          const providedToken = authHeader.replace("Bearer ", "");
+          const expectedToken = env.HELICONE_MANUAL_ACCESS_KEY;
+  
+          if (!expectedToken) {
+            console.error("HELICONE_MANUAL_ACCESS_KEY not configured");
+            return new Response("Server configuration error", { status: 500 });
+          } else if (!timingSafeEqual(Buffer.from(providedToken), Buffer.from(expectedToken))) {
+            return new Response("Unauthorized", { status: 401 });
+          }
+  
+          const walletId = env.WALLET.idFromName(orgId);
+          const walletStub = env.WALLET.get(walletId);
+  
+          try {
+            const creditsPurchases = await walletStub.getTotalCreditsPurchased();
+            return client.response.successJSON(creditsPurchases);
+          } catch (e) {
+            return client.response.newError(
+              e instanceof Error ? e.message : "Failed to fetch total credits purchased",
+              500
+            );
+          }
+        }
+      );
+  
+    // Stripe Webhook Handler
+    router.post(
+      "/stripe/webhook",
+      async (
+        _,
+        requestWrapper: RequestWrapper,
+        env: Env,
+        _ctx: ExecutionContext
+      ) => {
+        if (!env.STRIPE_WEBHOOK_SECRET) {
+          console.error("STRIPE_WEBHOOK_SECRET not configured");
+          return new Response("Webhook endpoint not configured", { status: 500 });
+        }
+  
+        const signature = requestWrapper.headers.get("stripe-signature");
+        if (!signature) {
+          return new Response("Missing stripe-signature header", { status: 400 });
+        }
+  
+        const body = await requestWrapper.getRawText();
+        if (!body) {
+          return new Response("Missing request body", { status: 400 });
+        }
+  
+        const webhookManager = new StripeManager(
+          env.STRIPE_WEBHOOK_SECRET,
+          env.STRIPE_SECRET_KEY,
+          env.WALLET,
+          env
+        );
+  
+        const { data, error: verifyError } =
+          await webhookManager.verifyAndConstructEvent(body, signature);
+  
+        if (verifyError || !data) {
+          console.error("Webhook verification failed:", verifyError);
+          return new Response(verifyError || "Invalid webhook", { status: 400 });
+        }
+  
+        const { error: handleError } = await webhookManager.handleEvent(data);
+  
+        if (handleError) {
+          console.error("Error handling webhook event:", handleError);
+          return new Response("", { status: 500 });
+        }
+  
+        return new Response("", { status: 200 });
+      }
+    );
 
   router.options(
     "*",

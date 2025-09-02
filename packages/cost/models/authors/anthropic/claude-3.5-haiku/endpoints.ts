@@ -52,7 +52,7 @@ export const endpoints = {
       "top_k",
       "stop",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       global: {},
     },

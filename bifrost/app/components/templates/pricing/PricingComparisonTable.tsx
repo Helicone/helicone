@@ -141,8 +141,22 @@ const featureGroups: FeatureGroup[] = [
         enterprise: true,
       },
       {
+        name: "HQL (Query Language)",
+        hobby: false,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+      {
         name: "Alerts",
         hobby: "1",
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "Reports",
+        hobby: false,
         pro: true,
         team: true,
         enterprise: true,
@@ -186,13 +200,6 @@ const featureGroups: FeatureGroup[] = [
     title: "Evaluations",
     features: [
       {
-        name: "Human annotation queue",
-        hobby: "coming soon...",
-        pro: "coming soon...",
-        team: "coming soon...",
-        enterprise: "coming soon...",
-      },
-      {
         name: "User feedback",
         hobby: true,
         pro: true,
@@ -233,6 +240,13 @@ const featureGroups: FeatureGroup[] = [
         enterprise: true,
       },
       {
+        name: "Unified OpenAI SDK (100+ providers)",
+        hobby: true,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+      {
         name: "Caching",
         hobby: true,
         pro: true,
@@ -247,28 +261,14 @@ const featureGroups: FeatureGroup[] = [
         enterprise: true,
       },
       {
-        name: "LLM guardrails",
+        name: "Automatic fallbacks & routing",
         hobby: false,
         pro: true,
         team: true,
         enterprise: true,
       },
       {
-        name: "LLM moderation",
-        hobby: false,
-        pro: true,
-        team: true,
-        enterprise: true,
-      },
-      {
-        name: "Gateway fallbacks",
-        hobby: false,
-        pro: true,
-        team: true,
-        enterprise: true,
-      },
-      {
-        name: "Retries",
+        name: "LLM security",
         hobby: false,
         pro: true,
         team: true,
