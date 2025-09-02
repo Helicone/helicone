@@ -292,7 +292,6 @@ const buildFilterStore = (
   },
 });
 
-// Standalone (non-Zustand) store factory
 type Unsubscribe = () => void;
 export type FilterStandaloneStore = {
   getState: () => FilterState;
