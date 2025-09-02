@@ -70,7 +70,7 @@ export const useDashboardPage = ({
 }: DashboardPageData) => {
   const properties = useGetPropertiesV2(getPropertyFiltersV2);
   const filterStore = useFilterStore();
-  const filter = filterStore.filter ? toFilterNode(filterStore.filter) : "all";
+  const filter = filterStore.filter ? toFilterNode(filterStore.filter) : ({} as FilterLeaf);
 
   const { isLoading: isModelsLoading, models } = useModels(
     timeFilter,

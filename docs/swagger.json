@@ -14219,7 +14219,7 @@
 								"examples": {
 									"Example 1": {
 										"value": {
-											"filter": "all",
+											"filter": {},
 											"isCached": false,
 											"limit": 10,
 											"offset": 0,
@@ -14270,7 +14270,7 @@
 								"examples": {
 									"Example 1": {
 										"value": {
-											"filter": "all",
+											"filter": {},
 											"isCached": false,
 											"limit": 10,
 											"offset": 0,

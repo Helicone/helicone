@@ -3,19 +3,19 @@ const { FilterAST } = require("../../filters/filterExpressions");
 
 describe("toFilterNode", () => {
   describe("null and undefined inputs", () => {
-    it("should return 'all' for null input", () => {
+    it("should return empty JSON for null input", () => {
       const result = toFilterNode(null);
-      expect(result).toBe("all");
+      expect(result).toEqual({});
     });
 
-    it("should return 'all' for undefined input", () => {
+    it("should return empty JSON for undefined input", () => {
       const result = toFilterNode(undefined);
-      expect(result).toBe("all");
+      expect(result).toEqual({});
     });
 
-    it("should return 'all' for empty string", () => {
+    it("should return empty JSON for empty string", () => {
       const result = toFilterNode("");
-      expect(result).toBe("all");
+      expect(result).toEqual({});
     });
   });
 
@@ -58,10 +58,10 @@ describe("toFilterNode", () => {
   });
 
   describe("'all' expressions", () => {
-    it("should return 'all' for all expression", () => {
+    it("should return empty JSON for all expression", () => {
       const filter = FilterAST.all();
       const result = toFilterNode(filter);
-      expect(result).toBe("all");
+      expect(result).toEqual({});
     });
   });
 
@@ -275,14 +275,14 @@ describe("toFilterNode", () => {
   });
 
   describe("AND expressions", () => {
-    it("should return 'all' for empty AND expression", () => {
+    it("should return empty JSON for empty AND expression", () => {
       const filter = {
         type: "and",
         expressions: [],
       };
 
       const result = toFilterNode(filter);
-      expect(result).toBe("all");
+      expect(result).toEqual({});
     });
 
     it("should return the single expression for AND with one expression", () => {
@@ -345,14 +345,14 @@ describe("toFilterNode", () => {
   });
 
   describe("OR expressions", () => {
-    it("should return 'all' for empty OR expression", () => {
+    it("should return empty JSON for empty OR expression", () => {
       const filter = {
         type: "or",
         expressions: [],
       };
 
       const result = toFilterNode(filter);
-      expect(result).toBe("all");
+      expect(result).toEqual({});
     });
 
     it("should return the single expression for OR with one expression", () => {
