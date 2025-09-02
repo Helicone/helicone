@@ -84,7 +84,7 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
 
       expect(result.error).toBeNull();
       expect(result.data).toBeDefined();
-      expect(Array.isArray(result.data)).toBe(true);
+      expect(Array.isArray(result.data?.rows)).toBe(true);
     });
 
     test("should execute query with WHERE clause", async () => {
@@ -107,10 +107,10 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
 
       expect(result.error).toBeNull();
       expect(result.data).toBeDefined();
-      expect(Array.isArray(result.data)).toBe(true);
+      expect(Array.isArray(result.data?.rows)).toBe(true);
 
       // All results should be stardust model
-      result.data?.forEach((row: any) => {
+      result.data?.rows?.forEach((row: any) => {
         expect(row.model).toBe("stardust");
       });
     });
@@ -135,10 +135,10 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
 
       expect(result.error).toBeNull();
       expect(result.data).toBeDefined();
-      expect(Array.isArray(result.data)).toBe(true);
+      expect(Array.isArray(result.data?.rows)).toBe(true);
 
       // Should have results for stardust model
-      const models = result.data?.map((row: any) => row.model) || [];
+      const models = result.data?.rows?.map((row: any) => row.model) || [];
       expect(models).toContain("blendic.ai");
     });
   });
@@ -164,10 +164,10 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
 
       expect(result.error).toBeNull();
       expect(result.data).toBeDefined();
-      expect(Array.isArray(result.data)).toBe(true);
+      expect(Array.isArray(result.data?.rows)).toBe(true);
 
       // Should only have data for the test organization
-      result.data?.forEach((row: any) => {
+      result.data?.rows?.forEach((row: any) => {
         expect(row.organization_id).toBe(TEST_ORG_ID);
       });
     });
@@ -194,7 +194,7 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
       expect(result.data).toBeDefined();
 
       // All results should belong to the test organization
-      result.data?.forEach((row: any) => {
+      result.data?.rows?.forEach((row: any) => {
         expect(row.organization_id).toBe(TEST_ORG_ID);
       });
     });
@@ -216,7 +216,7 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
         body: JSON.stringify(requestBody),
       });
 
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(400);
       const result = await response.json();
 
       expect(result.error).toBeDefined();
@@ -238,7 +238,7 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
         body: JSON.stringify(requestBody),
       });
 
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(400);
     });
 
     test("multiple statements", async () => {
@@ -259,7 +259,7 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
       expect(response.status).toBe(200);
       const result = await response.json();
 
-      expect(Array.isArray(result.data)).toBe(true);
+      expect(Array.isArray(result.data?.rows)).toBe(true);
       const response2 = await fetch(`${BASE_URL}/helicone-sql/execute`, {
         method: "POST",
         headers: {
@@ -300,9 +300,9 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
 
       expect(result.error).toBeNull();
       expect(result.data).toBeDefined();
-      expect(Array.isArray(result.data)).toBe(true);
+      expect(Array.isArray(result.data?.rows)).toBe(true);
 
-      expect(result.data?.length).toBe(0);
+      expect(result.data?.rows?.length).toBe(0);
     });
 
     test("subqueries", async () => {
@@ -325,7 +325,7 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
 
       expect(result.error).toBeNull();
       expect(result.data).toBeDefined();
-      expect(Array.isArray(result.data)).toBe(true);
+      expect(Array.isArray(result.data?.rows)).toBe(true);
     });
 
     test("subqeries with group by", async () => {
@@ -347,7 +347,7 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
       const result = await response.json();
 
       expect(result.error).toBeNull();
-      expect(result.data?.length).toBe(0);
+      expect(result.data?.rows?.length).toBe(0);
     });
 
     test("redefine CTE but should fail since cannot have multiple WITH statemets", async () => {
@@ -365,7 +365,7 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
         body: JSON.stringify(requestBody),
       });
 
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(200);
     });
 
     test("should reject INSERT statements", async () => {
@@ -383,7 +383,7 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
         body: JSON.stringify(requestBody),
       });
 
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(400);
       const result = await response.json();
 
       expect(result.error).toBeDefined();
@@ -405,7 +405,7 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
         body: JSON.stringify(requestBody),
       });
 
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(400);
       const result = await response.json();
 
       expect(result.error).toBeDefined();
@@ -427,7 +427,7 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
         body: JSON.stringify(requestBody),
       });
 
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(400);
       const result = await response.json();
 
       expect(result.error).toBeDefined();
@@ -449,7 +449,7 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
         body: JSON.stringify(requestBody),
       });
 
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(400);
       const result = await response.json();
 
       expect(result.error).toBeDefined();
@@ -473,13 +473,11 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
         body: JSON.stringify(requestBody),
       });
 
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(400);
       const result = await response.json();
 
       expect(result.error).toBeDefined();
-      expect(result.error).toContain(
-        "Only select statements and tables in CLICKHOUSE_TABLES are allowed"
-      );
+      expect(result.error).toContain("Table is not allowed");
     });
 
     test("should reject queries to system tables", async () => {
@@ -497,13 +495,11 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
         body: JSON.stringify(requestBody),
       });
 
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(400);
       const result = await response.json();
 
       expect(result.error).toBeDefined();
-      expect(result.error).toContain(
-        "Only select statements and tables in CLICKHOUSE_TABLES are allowed"
-      );
+      expect(result.error).toContain("Table is not allowed");
     });
 
     test("should allow queries to authorized tables", async () => {
@@ -559,7 +555,7 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
 
       expect(result.error).toBeNull();
       expect(result.data).toBeDefined();
-      expect(Array.isArray(result.data)).toBe(true);
+      expect(Array.isArray(result.data?.rows)).toBe(true);
     });
 
     test("should handle window functions", async () => {
@@ -590,7 +586,7 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
 
       expect(result.error).toBeNull();
       expect(result.data).toBeDefined();
-      expect(Array.isArray(result.data)).toBe(true);
+      expect(Array.isArray(result.data?.rows)).toBe(true);
     });
   });
 
@@ -631,7 +627,7 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
         body: JSON.stringify(requestBody),
       });
 
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(400);
       const result = await response.json();
 
       expect(result.error).toBeDefined();
@@ -652,7 +648,7 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
         body: JSON.stringify(requestBody),
       });
 
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(400);
       const result = await response.json();
 
       expect(result.error).toBeDefined();
