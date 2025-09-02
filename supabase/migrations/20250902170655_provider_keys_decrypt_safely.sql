@@ -27,44 +27,42 @@ BEGIN
     -- Create view based on pgsodium availability
     IF has_pgsodium THEN
         -- Production view with pgsodium encryption
-      create or replace view public.decrypted_provider_keys_v2 as
-      with cleaned as (
+      with base as (
         select
           pk.*,
-          regexp_replace(pk.provider_key, '\s', '', 'g')        as pk_nowhite,
-          regexp_replace(pk.provider_secret_key, '\s', '', 'g') as sk_nowhite
+          -- normalize alphabet then strip ALL whitespace
+          regexp_replace(translate(pk.provider_key, '-_', '+/'), '\s', '', 'g')        as pk_nowhite,
+          regexp_replace(translate(pk.provider_secret_key, '-_', '+/'), '\s', '', 'g') as sk_nowhite
         from public.provider_keys pk
-      ),
-      norm as (
-        select
-          c.*,
-          replace(replace(c.pk_nowhite, '-', '+'), '_', '/')    as pk_std,
-          replace(replace(c.sk_nowhite, '-', '+'), '_', '/')    as sk_std
-        from cleaned c
-      ),
-      repad as (
-        select
-          n.*,
-          replace(n.pk_std, '=', '') ||
-            repeat('=', (4 - length(replace(n.pk_std, '=', '')) % 4) % 4) as pk_padded,
-          replace(n.sk_std, '=', '') ||
-            repeat('=', (4 - length(replace(n.sk_std, '=', '')) % 4) % 4) as sk_padded
-        from norm n
       ),
       decoded as (
         select
-          r.*,
+          b.*,
+
+          -- provider_key: decode "as-is" if it already looks like clean base64; else sanitize
           case
-            when r.pk_padded ~ '^[A-Za-z0-9+/]*$' and (length(r.pk_padded) % 4) <> 1
-            then decode(r.pk_padded, 'base64')
-            else null
+            when b.pk_nowhite ~ '^[A-Za-z0-9+/]+={0,2}$'
+              then decode(b.pk_nowhite, 'base64')
+            else
+              decode(
+                replace(b.pk_nowhite, '=', '') ||
+                repeat('=', (4 - length(replace(b.pk_nowhite, '=', '')) % 4) % 4),
+                'base64'
+              )
           end as pk_ct,
+
+          -- provider_secret_key: same logic
           case
-            when r.sk_padded ~ '^[A-Za-z0-9+/]*$' and (length(r.sk_padded) % 4) <> 1
-            then decode(r.sk_padded, 'base64')
-            else null
+            when b.sk_nowhite ~ '^[A-Za-z0-9+/]+={0,2}$'
+              then decode(b.sk_nowhite, 'base64')
+            else
+              decode(
+                replace(b.sk_nowhite, '=', '') ||
+                repeat('=', (4 - length(replace(b.sk_nowhite, '=', '')) % 4) % 4),
+                'base64'
+              )
           end as sk_ct
-        from repad r
+        from base b
       )
       select
         d.id,
@@ -77,20 +75,11 @@ BEGIN
         d.provider_key,
         d.provider_secret_key,
 
-        /* force C collation to match the existing view */
-        (
-          coalesce(
-            public.try_det_decrypt_utf8(d.pk_ct, convert_to(d.org_id::text, 'utf8'), d.key_id, d.nonce),
-            public.try_det_decrypt_utf8(d.pk_ct, ''::bytea,                           d.key_id, d.nonce)
-          )
-        )::text COLLATE "C" as decrypted_provider_key,
+        public.try_det_decrypt_utf8(d.pk_ct, convert_to(d.org_id::text, 'utf8'), d.key_id, d.nonce)
+          COLLATE "C" as decrypted_provider_key,
 
-        (
-          coalesce(
-            public.try_det_decrypt_utf8(d.sk_ct, convert_to(d.org_id::text, 'utf8'), d.key_id, d.nonce),
-            public.try_det_decrypt_utf8(d.sk_ct, ''::bytea,                           d.key_id, d.nonce)
-          )
-        )::text COLLATE "C" as decrypted_provider_secret_key,
+        public.try_det_decrypt_utf8(d.sk_ct, convert_to(d.org_id::text, 'utf8'), d.key_id, d.nonce)
+          COLLATE "C" as decrypted_provider_secret_key,
 
         d.key_id,
         d.auth_type,
