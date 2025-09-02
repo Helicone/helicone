@@ -334,17 +334,43 @@ export const createFilterStore = (
   };
 };
 
-export const useFilterStore = create<FilterState>()(
-  persist(
-    (set, get) => buildFilterStore(set, get) as FilterState,
-    {
-      name: "helicone-filter-storage",
-      partialize: (state) => ({
-        filter: state.filter,
-        activeFilterId: state.activeFilterId,
-        activeFilterName: state.activeFilterName,
-        hasUnsavedChanges: state.hasUnsavedChanges,
+export type MakeFilterStoreOptions = {
+  storageKey?: string;
+  initialState?: Partial<FilterState>;
+  partialize?: (state: FilterState) => Partial<FilterState>;
+};
+
+export const makeFilterStore = (options?: MakeFilterStoreOptions) => {
+  const { storageKey = "helicone-filter-storage", initialState, partialize } =
+    options || {};
+
+  return create<FilterState>()(
+    persist(
+      (set, get) => ({
+        ...(buildFilterStore(set, get) as FilterState),
+        ...(initialState || {}),
       }),
-    },
-  ),
-);
+      {
+        name: storageKey,
+        partialize:
+          partialize ||
+          ((state) => ({
+            filter: state.filter,
+            activeFilterId: state.activeFilterId,
+            activeFilterName: state.activeFilterName,
+            hasUnsavedChanges: state.hasUnsavedChanges,
+          })),
+      },
+    ),
+  );
+};
+
+export const useFilterStore = makeFilterStore({
+  storageKey: "helicone-filter-storage",
+  partialize: (state) => ({
+    filter: state.filter,
+    activeFilterId: state.activeFilterId,
+    activeFilterName: state.activeFilterName,
+    hasUnsavedChanges: state.hasUnsavedChanges,
+  }),
+});
