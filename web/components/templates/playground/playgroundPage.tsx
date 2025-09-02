@@ -36,7 +36,6 @@ import {
   useGetPromptInputs,
 } from "@/services/hooks/prompts";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
-import { useOrg } from "@/components/layout/org/organizationContext";
 
 import { HeliconeTemplateManager } from "@helicone-package/prompts/templates";
 import { TemplateVariable } from "@helicone-package/prompts/types";
@@ -216,7 +215,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { requestId, promptVersionId } = props;
   const { setNotification } = useNotification();
   const router = useRouter();
-  const organization = useOrg();
   const { initializeColorMap } = useVariableColorMapStore();
 
   useEffect(() => {
@@ -328,6 +326,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         }
       },
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mappedContent]);
 
   useEffect(() => {
@@ -447,6 +446,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
 
       router.push(`/playground?promptVersionId=${requestPromptVersionId}`);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     requestId,
     requestData,
@@ -866,7 +866,19 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         );
 
         if (result && result.error) {
-          setError(result.error.message);
+          if (typeof result.error.message === "string") {
+            try {
+              const error = JSON.parse(result.error.message);
+              if (error?.error) {
+                setError(error.error);
+              } else {
+                setError(error.message);
+              }
+            } catch (error) {
+              setError(result.error.message);
+            }
+          }
+          // setError(result.error.message || result.error?.error?.message);
           console.error("error", result.error);
         }
       } catch (error) {

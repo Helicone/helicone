@@ -229,6 +229,8 @@ function errorHandler(
   if (err instanceof Error) {
     return res.status(500).json({
       message: "Internal Server Error",
+      details: ENVIRONMENT === 'production' ? 'Internal Server Error' : err.message,
+      stack: ENVIRONMENT === 'production' ? undefined : err.stack,
     });
   }
 

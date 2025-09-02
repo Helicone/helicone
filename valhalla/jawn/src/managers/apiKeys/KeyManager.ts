@@ -388,12 +388,12 @@ export class KeyManager extends BaseManager {
       const values = [];
       let paramIndex = 1;
 
-      if (providerKey !== "" && providerKey !== undefined) {
+      if (providerKey !== undefined) {
         updateParts.push(`provider_key = $${paramIndex++}`);
         values.push(providerKey);
       }
 
-      if (providerSecretKey !== "" && providerSecretKey !== undefined) {
+      if (providerSecretKey !== undefined) {
         updateParts.push(`provider_secret_key = $${paramIndex++}`);
         values.push(providerSecretKey);
       }
