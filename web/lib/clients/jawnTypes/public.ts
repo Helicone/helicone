@@ -2766,7 +2766,7 @@ Json: JsonObject;
     /** @enum {string} */
     AuthorName: "anthropic" | "openai" | "perplexity" | "deepseek" | "cohere" | "google" | "meta-llama" | "mistralai" | "amazon" | "microsoft" | "nvidia" | "qwen" | "x-ai" | "moonshotai" | "fallback";
     /** @enum {string} */
-    StandardParameter: "max_tokens" | "temperature" | "top_p" | "top_k" | "stop" | "stream" | "frequency_penalty" | "presence_penalty" | "repetition_penalty" | "seed" | "tools" | "tool_choice" | "functions" | "function_call" | "reasoning" | "include_reasoning" | "thinking" | "response_format" | "json_mode" | "truncate" | "min_p" | "logit_bias" | "logprobs" | "top_logprobs" | "structured_outputs";
+    StandardParameter: "max_tokens" | "temperature" | "top_p" | "top_k" | "stop" | "stream" | "frequency_penalty" | "presence_penalty" | "repetition_penalty" | "seed" | "tools" | "tool_choice" | "functions" | "function_call" | "reasoning" | "include_reasoning" | "thinking" | "response_format" | "json_mode" | "truncate" | "min_p" | "logit_bias" | "logprobs" | "top_logprobs" | "structured_outputs" | "verbosity";
     ModelPricing: {
       /** Format: double */
       threshold: number;
@@ -2780,7 +2780,7 @@ Json: JsonObject;
         /** Format: double */
         write1h?: number;
         /** Format: double */
-        write5m: number;
+        write5m?: number;
         /** Format: double */
         read: number;
       };

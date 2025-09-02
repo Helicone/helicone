@@ -7626,7 +7626,8 @@
 					"logit_bias",
 					"logprobs",
 					"top_logprobs",
-					"structured_outputs"
+					"structured_outputs",
+					"verbosity"
 				]
 			},
 			"ModelPricing": {
@@ -7663,7 +7664,6 @@
 							}
 						},
 						"required": [
-							"write5m",
 							"read"
 						],
 						"type": "object"
