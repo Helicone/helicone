@@ -68,7 +68,9 @@ const DashboardPage = (props: DashboardPageProps) => {
   const searchParams = useSearchParams();
   const orgContext = useOrg();
   const filterStore = useFilterStore();
-  const filters = filterStore.filter ? toFilterNode(filterStore.filter) : ({} as FilterLeaf);
+  const filters = filterStore.filter
+    ? toFilterNode(filterStore.filter)
+    : ({} as FilterLeaf);
 
   const shouldShowMockData = orgContext?.currentOrg?.has_onboarded === false;
 

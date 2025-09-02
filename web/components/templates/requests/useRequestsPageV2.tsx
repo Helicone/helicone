@@ -76,7 +76,7 @@ const useRequestsPageV2 = (
     (filter: any) => filter.label?.trim() === "Helicone-Rate-Limit-Status",
   );
 
-  let rateLimitFilterNode: FilterNode = ({} as FilterLeaf);
+  let rateLimitFilterNode: FilterNode = {} as FilterLeaf;
   if (rateLimited && rateLimitFilterMapIndex !== -1) {
     rateLimitFilterNode = filterUITreeToFilterNode(filterMap, {
       filterMapIdx: rateLimitFilterMapIndex,
