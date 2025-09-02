@@ -50,6 +50,8 @@ import StyledAreaChart from "./styledAreaChart";
 import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
 import DashboardChartTooltipContent from "./DashboardChartTooltipContent";
+import { formatTimeValue, formatTokenCount, formatCost, formatWithSignificantFigures } from "@/components/shared/utils/smartNumberFormat";
+
 const ResponsiveGridLayout = WidthProvider(Responsive) as React.ComponentType<
   ResponsiveProps & { children?: React.ReactNode }
 >;
@@ -660,9 +662,9 @@ const DashboardPage = (props: DashboardPageProps) => {
                 <div key="time-to-first-token">
                   <StyledAreaChart
                     title={"Time to First Token"}
-                    value={`Average: ${new Intl.NumberFormat("us").format(
+                    value={`Average: ${formatTimeValue(
                       metrics.averageTimeToFirstToken.data?.data ?? 0,
-                    )} ms`}
+                    )}`}
                     isDataOverTimeLoading={
                       overTimeData.timeToFirstToken.isLoading
                     }
@@ -690,11 +692,12 @@ const DashboardPage = (props: DashboardPageProps) => {
                   </StyledAreaChart>
                 </div>
                 <div key="threats">
-                  <StyledAreaChart
+                  <MetricsPanel
                     title={"Threats"}
-                    value={`${formatLargeNumber(
+                    value={formatWithSignificantFigures(
                       Number(metrics.totalThreats.data?.data?.toFixed(0) ?? 0),
-                    )}`}
+                      { maxDecimalPlacesForLargeNumbers: 0 }
+                    )}
                     isDataOverTimeLoading={overTimeData.threats.isLoading}
                   >
                     <AreaChart
@@ -712,7 +715,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                       showYAxis={false}
                       curveType="monotone"
                     />
-                  </StyledAreaChart>
+                  </MetricsPanel>
                 </div>
                 <div key="suggest-more-graphs">
                   <div className="flex h-full w-full flex-col items-center justify-center space-y-2 rounded-lg border border-dashed border-slate-200 bg-white p-2 text-slate-950 shadow-sm dark:border-slate-900 dark:bg-black dark:text-slate-50">

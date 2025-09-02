@@ -1,20 +1,8 @@
 import { ColumnDef } from "@tanstack/react-table";
+import { formatWithSignificantFigures, formatCost, formatTimeValue } from "@/components/shared/utils/smartNumberFormat";
 
 function formatNumber(num: number) {
-  const numParts = num.toString().split(".");
-
-  if (numParts.length > 1) {
-    const decimalPlaces = numParts[1].length;
-    if (decimalPlaces < 2) {
-      return num.toFixed(2);
-    } else if (decimalPlaces > 6) {
-      return num.toFixed(6);
-    } else {
-      return num;
-    }
-  } else {
-    return num.toFixed(2);
-  }
+  return formatWithSignificantFigures(num);
 }
 
 export const INITIAL_COLUMNS: ColumnDef<{
