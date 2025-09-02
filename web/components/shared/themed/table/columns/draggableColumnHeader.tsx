@@ -76,7 +76,7 @@ export default function DraggableColumnHeader<T>(props: {
                 leaveFrom="transform opacity-100 scale-100"
                 leaveTo="transform opacity-0 scale-95"
               >
-                <Menu.Items className="absolute right-0 mt-2 w-24 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:divide-gray-900 dark:bg-black dark:ring-gray-500">
+                <Menu.Items className="absolute right-0 z-50 mt-2 w-24 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:divide-gray-900 dark:bg-black dark:ring-gray-500">
                   <div className="px-1 py-1">
                     <Menu.Item>
                       {({ active }) => (
