@@ -416,7 +416,7 @@ CLICKHOUSE_HQL_PASSWORD =
 export const clickhouseDb = (() => {
   if (process.env.NODE_ENV === "test") {
     return new TestClickhouseClientWrapper({
-      CLICKHOUSE_HOST: "http://localhost:18124",
+      CLICKHOUSE_HOST: "http://localhost:18123",
       CLICKHOUSE_USER: "default",
       CLICKHOUSE_HQL_USER:
         CLICKHOUSE_HQL_USER ?? process.env.CLICKHOUSE_HQL_USER ?? "hql_user",
