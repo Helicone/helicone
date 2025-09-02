@@ -11,33 +11,16 @@ export const endpoints = {
         threshold: 0,
         input: 0.0000011,
         output: 0.0000044,
+        cacheMultipliers: {
+          read: 0.25,
+        },
       },
     ],
-    contextLength: 200000,
-    maxCompletionTokens: 100000,
-    supportedParameters: [
-      "tools",
-      "tool_choice",
-      "seed",
-      "max_tokens",
-      "response_format",
-    ],
-    ptbEnabled: true,
-    endpointConfigs: {
-      "*": {},
+    rateLimits: {
+      rpm: 30000,
+      tpm: 150000000,
+      tpd: 15000000000,
     },
-  },
-  "o4-mini:azure-openai": {
-    providerModelId: "o4-mini",
-    provider: "azure-openai",
-    author: "openai",
-    pricing: [
-      {
-        threshold: 0,
-        input: 0.0000011,
-        output: 0.0000044,
-      },
-    ],
     contextLength: 200000,
     maxCompletionTokens: 100000,
     supportedParameters: [
@@ -47,32 +30,7 @@ export const endpoints = {
       "max_tokens",
       "response_format",
     ],
-    ptbEnabled: true,
-    endpointConfigs: {
-      "*": {},
-    },
-  },
-  "o4-mini-high:openai": {
-    providerModelId: "o4-mini-high-2025-04-16",
-    provider: "openai",
-    author: "openai",
-    pricing: [
-      {
-        threshold: 0,
-        input: 0.0000011,
-        output: 0.0000044,
-      },
-    ],
-    contextLength: 200000,
-    maxCompletionTokens: 100000,
-    supportedParameters: [
-      "tools",
-      "tool_choice",
-      "seed",
-      "max_tokens",
-      "response_format",
-    ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "*": {},
     },

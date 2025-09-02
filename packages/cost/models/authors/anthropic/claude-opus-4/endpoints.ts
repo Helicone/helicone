@@ -31,7 +31,7 @@ export const endpoints = {
       "tools",
       "tool_choice",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "*": {},
     },
@@ -42,7 +42,7 @@ export const endpoints = {
     provider: "vertex",
     author: "anthropic",
     version: "vertex-2023-10-16",
-    ptbEnabled: true,
+    ptbEnabled: false,
     pricing: [
       {
         threshold: 0,
@@ -101,7 +101,7 @@ export const endpoints = {
       "top_p",
       "top_k",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "us-east-1": {},
     },

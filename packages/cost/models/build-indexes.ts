@@ -46,6 +46,7 @@ export interface ModelIndexes {
   providerToModels: Map<ModelProviderName, Set<ModelName>>;
   modelToEndpointConfigs: Map<ModelName, ModelProviderConfig[]>;
   modelToProviders: Map<ModelName, Set<ModelProviderName>>;
+  modelToEndpoints: Map<ModelName, Endpoint[]>;
 }
 
 export function buildIndexes(
@@ -63,6 +64,7 @@ export function buildIndexes(
   const modelToEndpointConfigs: Map<ModelName, ModelProviderConfig[]> =
     new Map();
   const modelToProviders: Map<ModelName, Set<ModelProviderName>> = new Map();
+  const modelToEndpoints: Map<ModelName, Endpoint[]> = new Map();
 
   for (const [configKey, config] of Object.entries(modelProviderConfigs)) {
     const typedConfigKey = configKey as ModelProviderConfigId;
@@ -100,6 +102,12 @@ export function buildIndexes(
       const endpoint = mergeConfigs(config, deploymentConfig, deploymentId);
       endpointIdToEndpoint.set(endpointKey, endpoint);
 
+      // Add to ALL endpoints index (regardless of PTB status)
+      if (!modelToEndpoints.has(modelName)) {
+        modelToEndpoints.set(modelName, []);
+      }
+      modelToEndpoints.get(modelName)!.push(endpoint);
+
       // Add to PTB index if enabled
       if (endpoint.ptbEnabled) {
         if (!modelToPtbEndpoints.has(modelName)) {
@@ -123,6 +131,7 @@ export function buildIndexes(
     return aCost - bCost;
   };
 
+  modelToEndpoints.forEach((endpoints) => endpoints.sort(sortByCost));
   modelToPtbEndpoints.forEach((endpoints) => endpoints.sort(sortByCost));
   endpointConfigIdToPtbEndpoints.forEach((endpoints) =>
     endpoints.sort(sortByCost)
@@ -136,5 +145,6 @@ export function buildIndexes(
     providerToModels,
     modelToEndpointConfigs,
     modelToProviders,
+    modelToEndpoints,
   };
 }

@@ -45,28 +45,6 @@ export const models = {
     modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
   },
-  "gpt-4o-mini-search-preview": {
-    name: "OpenAI: GPT-4o-mini Search Preview",
-    author: "openai",
-    description:
-      "GPT-4o mini Search Preview is a specialized model for web search in Chat Completions. It is trained to understand and execute web search queries.",
-    contextLength: 128000,
-    maxOutputTokens: 16384,
-    created: "2025-03-12T22:22:02.000Z",
-    modality: { inputs: ["text"], outputs: ["text"] },
-    tokenizer: "GPT",
-  },
-  "gpt-4o-search-preview": {
-    name: "OpenAI: GPT-4o Search Preview",
-    author: "openai",
-    description:
-      "GPT-4o Search Preview is a specialized model for web search in Chat Completions. It is trained to understand and execute web search queries.",
-    contextLength: 128000,
-    maxOutputTokens: 16384,
-    created: "2025-03-12T22:19:09.000Z",
-    modality: { inputs: ["text"], outputs: ["text"] },
-    tokenizer: "GPT",
-  },
 } satisfies Record<string, ModelConfig>;
 
 export type GPT4oModelName = keyof typeof models;

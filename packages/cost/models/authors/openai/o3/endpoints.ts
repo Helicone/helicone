@@ -11,33 +11,16 @@ export const endpoints = {
         threshold: 0,
         input: 0.000002,
         output: 0.000008,
+        cacheMultipliers: {
+          read: 0.25,
+        },
       },
     ],
-    contextLength: 200000,
-    maxCompletionTokens: 100000,
-    supportedParameters: [
-      "tools",
-      "tool_choice",
-      "seed",
-      "max_tokens",
-      "response_format",
-    ],
-    ptbEnabled: true,
-    endpointConfigs: {
-      "*": {},
+    rateLimits: {
+      rpm: 10000,
+      tpm: 30000000,
+      tpd: 5000000000,
     },
-  },
-  "o3:azure-openai": {
-    providerModelId: "o3",
-    provider: "azure-openai",
-    author: "openai",
-    pricing: [
-      {
-        threshold: 0,
-        input: 0.000002,
-        output: 0.000008,
-      },
-    ],
     contextLength: 200000,
     maxCompletionTokens: 100000,
     supportedParameters: [
@@ -47,7 +30,7 @@ export const endpoints = {
       "max_tokens",
       "response_format",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "*": {},
     },
@@ -63,31 +46,11 @@ export const endpoints = {
         output: 0.00008,
       },
     ],
-    contextLength: 200000,
-    maxCompletionTokens: 100000,
-    supportedParameters: [
-      "tools",
-      "tool_choice",
-      "seed",
-      "max_tokens",
-      "response_format",
-    ],
-    ptbEnabled: true,
-    endpointConfigs: {
-      "*": {},
+    rateLimits: {
+      rpm: 10000,
+      tpm: 30000000,
+      tpd: 5000000000,
     },
-  },
-  "o3-pro:azure-openai": {
-    providerModelId: "o3-pro",
-    provider: "azure-openai",
-    author: "openai",
-    pricing: [
-      {
-        threshold: 0,
-        input: 0.00002,
-        output: 0.00008,
-      },
-    ],
     contextLength: 200000,
     maxCompletionTokens: 100000,
     supportedParameters: [
@@ -97,7 +60,7 @@ export const endpoints = {
       "max_tokens",
       "response_format",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "*": {},
     },
@@ -111,33 +74,16 @@ export const endpoints = {
         threshold: 0,
         input: 0.0000011,
         output: 0.0000044,
+        cacheMultipliers: {
+          read: 0.5,
+        },
       },
     ],
-    contextLength: 200000,
-    maxCompletionTokens: 100000,
-    supportedParameters: [
-      "tools",
-      "tool_choice",
-      "seed",
-      "max_tokens",
-      "response_format",
-    ],
-    ptbEnabled: true,
-    endpointConfigs: {
-      "*": {},
+    rateLimits: {
+      rpm: 30000,
+      tpm: 150000000,
+      tpd: 15000000000,
     },
-  },
-  "o3-mini:azure-openai": {
-    providerModelId: "o3-mini",
-    provider: "azure-openai",
-    author: "openai",
-    pricing: [
-      {
-        threshold: 0,
-        input: 0.0000011,
-        output: 0.0000044,
-      },
-    ],
     contextLength: 200000,
     maxCompletionTokens: 100000,
     supportedParameters: [
@@ -147,32 +93,7 @@ export const endpoints = {
       "max_tokens",
       "response_format",
     ],
-    ptbEnabled: true,
-    endpointConfigs: {
-      "*": {},
-    },
-  },
-  "o3-mini-high:openai": {
-    providerModelId: "o3-mini-high",
-    provider: "openai",
-    author: "openai",
-    pricing: [
-      {
-        threshold: 0,
-        input: 0.0000011,
-        output: 0.0000044,
-      },
-    ],
-    contextLength: 200000,
-    maxCompletionTokens: 100000,
-    supportedParameters: [
-      "tools",
-      "tool_choice",
-      "seed",
-      "max_tokens",
-      "response_format",
-    ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "*": {},
     },

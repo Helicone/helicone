@@ -1,0 +1,49 @@
+Category,Model,Token Limits (TPM),Request Limits (RPM),Batch Queue Limits (TPD),Input Price (per 1M),Cached Input Price (per 1M),Output Price (per 1M),Notes
+Chat,gpt-4.1,30000000,10000,15000000000,$2.00,$0.50,$8.00,Shared with gpt-4.1-2025-04-14
+Chat,gpt-4.1 (long context),10000000,4000,1000000000,$2.00,$0.50,$8.00,
+Chat,gpt-4.1-mini,150000000,30000,15000000000,$0.40,$0.10,$1.60,Shared with gpt-4.1-mini-2025-04-14
+Chat,gpt-4.1-mini (long context),20000000,8000,2000000000,$0.40,$0.10,$1.60,
+Chat,gpt-4.1-nano,150000000,30000,15000000000,$0.10,$0.025,$0.40,Shared with gpt-4.1-nano-2025-04-14
+Chat,gpt-4.1-nano (long context),20000000,8000,2000000000,$0.10,$0.025,$0.40,
+Chat,gpt-4o,30000000,10000,15000000000,$2.50,$1.25,$10.00,Shared with multiple gpt-4o variants
+Chat,gpt-4o-mini,150000000,30000,15000000000,$0.15,$0.075,$0.60,Shared with mini variants
+Chat,gpt-5,40000000,15000,15000000000,$1.25,$0.125,$10.00,
+Chat,gpt-5-chat-latest,40000000,15000,15000000000,$1.25,$0.125,$10.00,
+Chat,gpt-5-mini,180000000,30000,15000000000,$0.25,$0.025,$2.00,
+Chat,gpt-5-nano,180000000,30000,15000000000,$0.05,$0.005,$0.40,
+Text,o1,30000000,10000,10000000000,$15.00,$7.50,$60.00,
+Text,o1-mini,150000000,30000,15000000000,$1.10,$0.55,$4.40,
+Text,o1-pro,30000000,10000,5000000000,$150.00,-,$600.00,Shared with o1-pro-2025-03-19
+Text,o3,30000000,10000,10000000,$2.00,$0.50,$8.00,Shared with o3 variants
+Text,o3-mini,150000000,30000,15000000000,$1.10,$0.55,$4.40,Shared with o3-mini-2025-01-31
+Text,o3-pro,30000000,10000,5000000000,$20.00,-,$80.00,
+Text,o4-mini,150000000,30000,15000000000,$1.10,$0.275,$4.40,Shared with o4-mini-2025-04-16
+Chat,gpt-4o-2024-05-13,30000000,10000,15000000000,$5.00,-,$15.00,Shares limits with gpt-4o
+Chat,gpt-realtime,250000,3000,,$4.00,$0.40,$16.00,
+Chat,gpt-realtime-2025-08-28,250000,3000,,$4.00,$0.40,$16.00,
+Chat,gpt-audio,250000,3000,,$2.50,-,$10.00,
+Chat,gpt-audio-2025-08-28,250000,3000,,$2.50,-,$10.00,
+Chat,gpt-4o-audio-preview,30000000,10000,15000000000,$2.50,-,$10.00,Shares limits with gpt-4o
+Chat,gpt-4o-audio-preview-2024-10-01,30000000,10000,15000000000,$2.50,-,$10.00,Shares limits with gpt-4o
+Chat,gpt-4o-audio-preview-2024-12-17,30000000,10000,15000000000,$2.50,-,$10.00,Shares limits with gpt-4o
+Chat,gpt-4o-audio-preview-2025-06-03,250000,3000,,$2.50,-,$10.00,Separate audio preview limits
+Chat,gpt-4o-mini-audio-preview,150000000,30000,15000000000,$0.15,-,$0.60,Shares limits with gpt-4o-mini
+Chat,gpt-4o-mini-audio-preview-2024-12-17,150000000,30000,15000000000,$0.15,-,$0.60,Shares limits with gpt-4o-mini
+Chat,gpt-4o-mini-search-preview,3000000,1000,,$0.15,-,$0.60,
+Chat,gpt-4o-mini-search-preview-2025-03-11,3000000,1000,,$0.15,-,$0.60,
+Chat,gpt-4o-search-preview,3000000,1000,,$2.50,-,$10.00,
+Chat,gpt-4o-search-preview-2025-03-11,3000000,1000,,$2.50,-,$10.00,
+Text,o3-deep-research,30000000,10000,10000000,$10.00,$2.50,$40.00,Shares limits with o3
+Text,o3-deep-research-2025-06-26,250000,3000,,$10.00,$2.50,$40.00,Separate deep research limits
+Text,o4-mini-deep-research,150000000,10000,10000000,$2.00,$0.50,$8.00,
+Text,o4-mini-deep-research-2025-06-26,250000,3000,,$2.00,$0.50,$8.00,
+Text,codex-mini-latest,150000000,30000,15000000000,$1.50,$0.375,$6.00,
+Realtime,gpt-4o-realtime-preview,15000000,20000,,$5.00,$2.50,$20.00,Shared with realtime preview variants
+Realtime,gpt-4o-realtime-preview-2024-10-01,15000000,20000,,$5.00,$2.50,$20.00,Shares limits with gpt-4o-realtime-preview
+Realtime,gpt-4o-realtime-preview-2024-12-17,15000000,20000,,$5.00,$2.50,$20.00,Shares limits with gpt-4o-realtime-preview
+Realtime,gpt-4o-realtime-preview-2025-06-03,15000000,20000,,$5.00,$2.50,$20.00,Shares limits with gpt-4o-realtime-preview
+Realtime,gpt-4o-mini-realtime-preview,15000000,20000,,$0.60,$0.30,$2.40,Shared with gpt-4o-mini-realtime-preview-2024-12-17
+Realtime,gpt-4o-mini-realtime-preview-2024-12-17,15000000,20000,,$0.60,$0.30,$2.40,Shares limits with gpt-4o-mini-realtime-preview
+Computer Use,computer-use-preview,20000000,3000,450000000,$3.00,-,$12.00,Shared with computer-use-preview-2025-03-11
+Computer Use,computer-use-preview-2025-03-11,20000000,3000,450000000,$3.00,-,$12.00,Shares limits with computer-use-preview
+Image,gpt-image-1,,,,$5.00,$1.25,-,

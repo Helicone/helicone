@@ -11,8 +11,16 @@ export const endpoints = {
         threshold: 0,
         input: 0.0000025,
         output: 0.00001,
+        cacheMultipliers: {
+          read: 0.5,
+        },
       },
     ],
+    rateLimits: {
+      rpm: 10000,
+      tpm: 30000000,
+      tpd: 15000000000,
+    },
     contextLength: 128000,
     maxCompletionTokens: 16384,
     supportedParameters: [
@@ -27,7 +35,7 @@ export const endpoints = {
       "frequency_penalty",
       "presence_penalty",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "*": {},
     },
@@ -41,8 +49,16 @@ export const endpoints = {
         threshold: 0,
         input: 0.0000025,
         output: 0.00001,
+        cacheMultipliers: {
+          read: 0.5,
+        },
       },
     ],
+    rateLimits: {
+      rpm: 10000,
+      tpm: 30000000,
+      tpd: 15000000000,
+    },
     contextLength: 128000,
     maxCompletionTokens: 16384,
     supportedParameters: [
@@ -57,7 +73,7 @@ export const endpoints = {
       "frequency_penalty",
       "presence_penalty",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "*": {},
     },
@@ -71,8 +87,16 @@ export const endpoints = {
         threshold: 0,
         input: 0.0000025,
         output: 0.00001,
+        cacheMultipliers: {
+          read: 0.5,
+        },
       },
     ],
+    rateLimits: {
+      rpm: 10000,
+      tpm: 30000000,
+      tpd: 15000000000,
+    },
     contextLength: 128000,
     maxCompletionTokens: 64000,
     supportedParameters: [
@@ -87,7 +111,7 @@ export const endpoints = {
       "frequency_penalty",
       "presence_penalty",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "*": {},
     },
@@ -101,8 +125,16 @@ export const endpoints = {
         threshold: 0,
         input: 0.00000015,
         output: 0.0000006,
+        cacheMultipliers: {
+          read: 0.5,
+        },
       },
     ],
+    rateLimits: {
+      rpm: 30000,
+      tpm: 150000000,
+      tpd: 15000000000,
+    },
     contextLength: 128000,
     maxCompletionTokens: 16384,
     supportedParameters: [
@@ -117,7 +149,7 @@ export const endpoints = {
       "frequency_penalty",
       "presence_penalty",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "*": {},
     },
@@ -131,8 +163,16 @@ export const endpoints = {
         threshold: 0,
         input: 0.00000015,
         output: 0.0000006,
+        cacheMultipliers: {
+          read: 0.5,
+        },
       },
     ],
+    rateLimits: {
+      rpm: 30000,
+      tpm: 150000000,
+      tpd: 15000000000,
+    },
     contextLength: 128000,
     maxCompletionTokens: 16384,
     supportedParameters: [
@@ -147,7 +187,7 @@ export const endpoints = {
       "frequency_penalty",
       "presence_penalty",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "*": {},
     },
@@ -161,8 +201,16 @@ export const endpoints = {
         threshold: 0,
         input: 0.000005,
         output: 0.00002,
+        cacheMultipliers: {
+          read: 0.5,
+        },
       },
     ],
+    rateLimits: {
+      rpm: 10000,
+      tpm: 30000000,
+      tpd: 15000000000,
+    },
     contextLength: 128000,
     maxCompletionTokens: 16384,
     supportedParameters: [
@@ -177,45 +225,7 @@ export const endpoints = {
       "frequency_penalty",
       "presence_penalty",
     ],
-    ptbEnabled: true,
-    endpointConfigs: {
-      "*": {},
-    },
-  },
-  "gpt-4o-mini-search-preview:openai": {
-    providerModelId: "gpt-4o-mini-search-preview",
-    provider: "openai",
-    author: "openai",
-    pricing: [
-      {
-        threshold: 0,
-        input: 0.00000015,
-        output: 0.0000006,
-      },
-    ],
-    contextLength: 128000,
-    maxCompletionTokens: 16384,
-    supportedParameters: ["max_tokens", "response_format"],
-    ptbEnabled: true,
-    endpointConfigs: {
-      "*": {},
-    },
-  },
-  "gpt-4o-search-preview:openai": {
-    providerModelId: "gpt-4o-search-preview",
-    provider: "openai",
-    author: "openai",
-    pricing: [
-      {
-        threshold: 0,
-        input: 0.0000025,
-        output: 0.00001,
-      },
-    ],
-    contextLength: 128000,
-    maxCompletionTokens: 16384,
-    supportedParameters: ["max_tokens", "response_format"],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "*": {},
     },

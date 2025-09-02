@@ -37,7 +37,7 @@ export const endpoints = {
       "tools",
       "tool_choice",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "*": {},
     },
@@ -47,7 +47,7 @@ export const endpoints = {
     author: "anthropic",
     providerModelId: "claude-sonnet-4@20250514",
     version: "vertex-2023-10-16",
-    ptbEnabled: true,
+    ptbEnabled: false,
     pricing: [
       {
         threshold: 0,
@@ -116,7 +116,7 @@ export const endpoints = {
       "top_p",
       "top_k",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "us-east-1": {},
     },
