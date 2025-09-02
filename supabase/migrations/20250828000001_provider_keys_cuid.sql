@@ -14,6 +14,7 @@ BEGIN
 
     ALTER TABLE public.provider_keys
     ADD CONSTRAINT provider_keys_cuid_unique UNIQUE (cuid);
+    DROP VIEW if exists decrypted_provider_keys_v2;
 
     -- Create view based on pgsodium availability
     IF has_pgsodium THEN
