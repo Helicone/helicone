@@ -284,7 +284,6 @@ const attemptDirectProviderRequest = async (
     userProviderKeyWithConfig &&
     isByokEnabled(userProviderKeyWithConfig)
   ) {
-    console.log("no PTB endpoints found");
     // Fall back to creating a custom endpoint
     const fallback = registry.createFallbackEndpoint(
       modelName,

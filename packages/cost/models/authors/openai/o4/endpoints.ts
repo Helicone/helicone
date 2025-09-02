@@ -30,7 +30,7 @@ export const endpoints = {
       "max_tokens",
       "response_format",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },

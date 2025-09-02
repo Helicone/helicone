@@ -37,7 +37,7 @@ export const endpoints = {
       "presence_penalty",
       "verbosity",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
@@ -76,7 +76,7 @@ export const endpoints = {
       "presence_penalty",
       "verbosity",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
@@ -115,7 +115,7 @@ export const endpoints = {
       "presence_penalty",
       "verbosity",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
@@ -154,7 +154,7 @@ export const endpoints = {
       "presence_penalty",
       "verbosity",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
