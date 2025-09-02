@@ -12,17 +12,6 @@ export const models = {
     modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
   },
-  "gpt-4o:extended": {
-    name: "OpenAI: GPT-4o (extended)",
-    author: "openai",
-    description:
-      'GPT-4o ("o" for "omni") is OpenAI\'s latest AI model, supporting both text and image inputs with text outputs. It maintains the intelligence level of GPT-4 Turbo while being twice as fast and 50% more cost-effective. GPT-4o also offers improved performance in processing non-English languages and enhanced visual capabilities.\n\nFor benchmarking against other models, it was briefly called ["im-also-a-good-gpt2-chatbot"](https://twitter.com/LiamFedus/status/1790064963966370209)\n\n#multimodal',
-    contextLength: 128000,
-    maxOutputTokens: 64000,
-    created: "2024-05-13T00:00:00.000Z",
-    modality: { inputs: ["text", "image"], outputs: ["text"] },
-    tokenizer: "GPT",
-  },
   "gpt-4o-mini": {
     name: "OpenAI: GPT-4o-mini",
     author: "openai",
