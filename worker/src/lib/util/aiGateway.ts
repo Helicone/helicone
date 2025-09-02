@@ -708,7 +708,9 @@ const reserveEscrow = async (
     endpoint.contextLength === 0 ||
     endpoint.maxCompletionTokens === 0 ||
     firstTierPricing.input === 0 ||
-    firstTierPricing.output === 0
+    firstTierPricing.output === 0 ||
+    firstTierPricing.image === 0 ||
+    firstTierPricing.thinking === 0
   ) {
     return err({
       type: "model_not_supported",
