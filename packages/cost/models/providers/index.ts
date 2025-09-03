@@ -16,7 +16,7 @@ export const providers = {
   openai: new OpenAIProvider(),
   bedrock: new BedrockProvider(),
   vertex: new VertexProvider(),
-  "azure-openai": new AzureOpenAIProvider(),
+  azure: new AzureOpenAIProvider(),
   perplexity: new PerplexityProvider(),
   groq: new GroqProvider(),
   deepseek: new DeepSeekProvider(),
