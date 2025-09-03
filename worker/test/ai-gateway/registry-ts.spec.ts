@@ -254,8 +254,8 @@ describe("Registry Tests", () => {
 
           expect(response.status).toBe(429);
           const body = (await response.json()) as any;
-          expect(body).toHaveProperty("type");
-          expect(body).toHaveProperty("helicone-message");
+          expect(body).toHaveProperty("error");
+          expect(body.success).toBe(false);
         });
       });
     });

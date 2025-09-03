@@ -21,6 +21,7 @@ export class StripeManager {
     this.stripeSecretKey = stripeSecretKey;
     this.wallet = wallet;
     this.stripe = new Stripe(this.stripeSecretKey, {
+      // @ts-ignore
       apiVersion: "2025-07-30.basil",
       httpClient: Stripe.createFetchHttpClient(),
     });
