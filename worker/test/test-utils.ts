@@ -267,8 +267,11 @@ export function mockAzureOpenAIEndpoint(modelName: string) {
   return fetchMock
     .get("https://test-resource.openai.azure.com")
     .intercept({
-      path: "/openai/deployments/*/chat/completions",
+      path: `/openai/deployments/test-deployment/chat/completions`,
       method: "POST",
+      query: {
+        "api-version": "2025-01-01-preview",
+      },
     })
     .reply(() => ({
       statusCode: 200,
