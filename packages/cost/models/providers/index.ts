@@ -2,7 +2,7 @@ import { AnthropicProvider } from "./anthropic";
 import { OpenAIProvider } from "./openai";
 import { BedrockProvider } from "./bedrock";
 import { VertexProvider } from "./vertex";
-import { AzureOpenAIProvider } from "./azure-openai";
+import { AzureOpenAIProvider } from "./azure";
 import { PerplexityProvider } from "./perplexity";
 import { GroqProvider } from "./groq";
 import { DeepSeekProvider } from "./deepseek";
