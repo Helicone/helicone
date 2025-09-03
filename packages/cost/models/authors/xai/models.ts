@@ -10,7 +10,7 @@ export const models = {
     maxOutputTokens: 256000,
     created: "2024-08-25T00:00:00.000Z",
     modality: { inputs: ["text"], outputs: ["text"] },
-    tokenizer: "GPT",
+    tokenizer: "Grok",
   },
   "grok-4-0709": {
     name: "xAI: Grok 4",
@@ -21,7 +21,7 @@ export const models = {
     maxOutputTokens: 256000,
     created: "2024-07-09T00:00:00.000Z",
     modality: { inputs: ["text"], outputs: ["text"] },
-    tokenizer: "GPT",
+    tokenizer: "Grok",
   },
   "grok-3": {
     name: "xAI: Grok 3",
@@ -32,7 +32,7 @@ export const models = {
     maxOutputTokens: 131072,
     created: "2024-06-01T00:00:00.000Z",
     modality: { inputs: ["text"], outputs: ["text"] },
-    tokenizer: "GPT",
+    tokenizer: "Grok",
   },
   "grok-3-mini": {
     name: "xAI: Grok 3 Mini",
@@ -43,7 +43,7 @@ export const models = {
     maxOutputTokens: 131072,
     created: "2024-06-01T00:00:00.000Z",
     modality: { inputs: ["text"], outputs: ["text"] },
-    tokenizer: "GPT",
+    tokenizer: "Grok",
   },
 } satisfies Record<string, ModelConfig>;
 
