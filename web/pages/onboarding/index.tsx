@@ -59,7 +59,7 @@ export default function OnboardingPage() {
 
   if (subscription.isLoading || isLoading) {
     return (
-      <div className="flex min-h-screen w-full flex-col items-center">
+      <div className="flex min-h-dvh w-full flex-col items-center">
         <OnboardingHeader />
         <div className="mx-auto mt-12 w-full max-w-md px-4">
           <div className="flex flex-col gap-4">

@@ -110,7 +110,7 @@ export default function OnboardingMembersPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen w-full flex-col items-center">
+      <div className="flex min-h-dvh w-full flex-col items-center">
         <OnboardingHeader />
         <div className="mx-auto mt-12 w-full max-w-2xl px-4">
           <div className="flex flex-col gap-6">
