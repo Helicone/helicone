@@ -23,6 +23,7 @@ import { useOrg } from "../../layout/org/organizationContext";
 
 import { useFilterStore } from "@/filterAST/store/filterStore";
 import { toFilterNode } from "@helicone-package/filters/toFilterNode";
+import { FilterLeaf } from "@helicone-package/filters/filterDefs";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
@@ -67,7 +68,9 @@ const DashboardPage = (props: DashboardPageProps) => {
   const searchParams = useSearchParams();
   const orgContext = useOrg();
   const filterStore = useFilterStore();
-  const filters = filterStore.filter ? toFilterNode(filterStore.filter) : "all";
+  const filters = filterStore.filter
+    ? toFilterNode(filterStore.filter)
+    : ({} as FilterLeaf);
 
   const shouldShowMockData = orgContext?.currentOrg?.has_onboarded === false;
 

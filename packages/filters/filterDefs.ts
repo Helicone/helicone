@@ -387,7 +387,7 @@ export type TablesAndViews = {
 };
 export type FilterLeaf = SingleKey<TablesAndViews>;
 
-export type FilterNode = FilterLeaf | FilterBranch | "all";
+export type FilterNode = FilterLeaf | FilterBranch | {};
 
 export interface FilterBranch {
   left: FilterNode;

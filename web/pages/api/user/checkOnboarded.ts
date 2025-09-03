@@ -8,7 +8,7 @@ import { getRequestCountClickhouse } from "../../../lib/api/request/request";
 import { Result } from "@/packages/common/result";
 
 async function checkAndUpdateOrgs(orgId: string): Promise<boolean> {
-  const count = (await getRequestCountClickhouse(orgId, "all")).data ?? 0;
+  const count = (await getRequestCountClickhouse(orgId, {} as any)).data ?? 0;
   if (count > 0) {
     const { error } = await dbExecute(
       `UPDATE organization SET has_onboarded = true WHERE id = $1`,

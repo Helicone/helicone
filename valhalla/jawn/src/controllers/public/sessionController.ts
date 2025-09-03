@@ -77,7 +77,7 @@ export class SessionController extends Controller {
       async () => {
         const sessionManager = new SessionManager(request.authParams);
         const result = await sessionManager.getSessions({
-          filter: "all",
+          filter: {},
           search: "",
           timeFilter: {
             startTimeUnixMs: new Date().getTime() - 1000 * 60 * 60 * 30,

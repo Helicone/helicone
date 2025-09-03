@@ -440,7 +440,7 @@ export const OnboardingProvider = ({
     const setReady = async () => {
       const countResponse = await $JAWN_API.POST("/v1/request/count/query", {
         body: {
-          filter: "all",
+          filter: {},
         },
       });
 

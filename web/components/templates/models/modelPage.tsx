@@ -47,7 +47,7 @@ const ModelPage = (props: ModelPageProps) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          filter: "all",
+          filter: {},
           offset: 0,
           limit: 100,
           timeFilter,

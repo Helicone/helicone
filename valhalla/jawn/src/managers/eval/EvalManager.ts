@@ -125,7 +125,7 @@ export class EvalManager extends BaseManager {
     const builtFilter = await buildFilterWithAuthClickHouse({
       org_id: this.authParams.organizationId,
       argsAcc: [],
-      filter: "all",
+      filter: {},
     });
 
     const query = `
