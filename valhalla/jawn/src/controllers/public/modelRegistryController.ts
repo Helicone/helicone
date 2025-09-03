@@ -126,12 +126,12 @@ export class ModelRegistryController extends Controller {
 
         const endpoints: ModelEndpoint[] = [];
         
-        // Get PTB endpoints directly from registry
-        const ptbEndpointsResult = registry.getPtbEndpoints(modelId);
+        // Get ALL endpoints from registry (both PTB and non-PTB)
+        const allEndpointsResult = registry.getEndpointsByModel(modelId);
         
-        if (ptbEndpointsResult.data && ptbEndpointsResult.data.length > 0) {
-          // Use PTB endpoints directly - they already have the correct structure
-          for (const endpoint of ptbEndpointsResult.data) {
+        if (allEndpointsResult.data && allEndpointsResult.data.length > 0) {
+          // Use all endpoints - they already have the correct structure
+          for (const endpoint of allEndpointsResult.data) {
             // Convert to simplified pricing format
             const baseTier = endpoint.pricing[0];
             const simplifiedPricing: SimplifiedPricing = {
@@ -169,51 +169,7 @@ export class ModelRegistryController extends Controller {
               provider: endpoint.provider,
               providerSlug: this.getProviderSlug(endpoint.provider),
               endpoint: endpoint, // Still pass the entire endpoint object
-              supportsPtb: true,
-              pricing: simplifiedPricing,
-              pricingTiers: pricingTiers,
-            });
-          }
-        } else {
-          // Fallback: get provider configs if no PTB endpoints
-          for (const config of providerConfigsResult.data) {
-            // Convert to simplified pricing format
-            const baseTier = config.pricing[0];
-            const simplifiedPricing: SimplifiedPricing = {
-              prompt: baseTier.input * 1000000,
-              completion: baseTier.output * 1000000,
-              audio: baseTier.audio ? baseTier.audio * 1000000 : undefined,
-              thinking: baseTier.thinking ? baseTier.thinking * 1000000 : undefined,
-              web_search: baseTier.web_search ? baseTier.web_search * 1000000 : undefined,
-              image: baseTier.image ? baseTier.image * 1000000 : undefined,
-              video: baseTier.video ? baseTier.video * 1000000 : undefined,
-              cacheRead: baseTier.cacheMultipliers?.read ? baseTier.input * baseTier.cacheMultipliers.read * 1000000 : undefined,
-              cacheWrite: baseTier.cacheMultipliers?.write5m ? baseTier.input * baseTier.cacheMultipliers.write5m * 1000000 : undefined,
-              internal_reasoning: baseTier.internal_reasoning ? baseTier.internal_reasoning * 1000000 : undefined,
-            };
-
-            // Create pricing tiers if there are multiple
-            let pricingTiers: SimplifiedPricing[] | undefined;
-            if (config.pricing.length > 1) {
-              pricingTiers = config.pricing.map(tier => ({
-                prompt: tier.input * 1000000,
-                completion: tier.output * 1000000,
-                audio: tier.audio ? tier.audio * 1000000 : undefined,
-                thinking: tier.thinking ? tier.thinking * 1000000 : undefined,
-                web_search: tier.web_search ? tier.web_search * 1000000 : undefined,
-                image: tier.image ? tier.image * 1000000 : undefined,
-                video: tier.video ? tier.video * 1000000 : undefined,
-                cacheRead: tier.cacheMultipliers?.read ? tier.input * tier.cacheMultipliers.read * 1000000 : undefined,
-                cacheWrite: tier.cacheMultipliers?.write5m ? tier.input * tier.cacheMultipliers.write5m * 1000000 : undefined,
-                internal_reasoning: tier.internal_reasoning ? tier.internal_reasoning * 1000000 : undefined,
-                threshold: tier.threshold,  // Include threshold!
-              }));
-            }
-
-            endpoints.push({
-              provider: config.provider,
-              providerSlug: this.getProviderSlug(config.provider),
-              supportsPtb: config.ptbEnabled,
+              supportsPtb: endpoint.ptbEnabled,
               pricing: simplifiedPricing,
               pricingTiers: pricingTiers,
             });

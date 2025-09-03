@@ -75,7 +75,8 @@ export type StandardParameter =
   | "logit_bias"
   | "logprobs"
   | "top_logprobs"
-  | "structured_outputs";
+  | "structured_outputs"
+  | "verbosity";
 
 export const PARAMETER_LABELS: Record<StandardParameter, string> = {
   max_tokens: "Max Tokens",
@@ -103,6 +104,7 @@ export const PARAMETER_LABELS: Record<StandardParameter, string> = {
   logprobs: "Log Probabilities",
   top_logprobs: "Top Log Probs",
   structured_outputs: "Structured Outputs",
+  verbosity: "Verbosity",
 };
 
 export interface ModelPricing {
@@ -112,7 +114,7 @@ export interface ModelPricing {
   image?: number;
   cacheMultipliers?: {
     read: number;
-    write5m: number;
+    write5m?: number;
     write1h?: number;
   };
   cacheStoragePerHour?: number;
@@ -146,6 +148,7 @@ interface BaseConfig {
 export interface RateLimits {
   rpm?: number;
   tpm?: number;
+  tpd?: number;
 }
 
 export interface ModelProviderConfig extends BaseConfig {

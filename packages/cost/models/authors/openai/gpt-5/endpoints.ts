@@ -1,28 +1,29 @@
 import { ModelProviderName } from "../../../providers";
 import type { ModelProviderConfig } from "../../../types";
-import { GPT4oModelName } from "./models";
+import { GPT5ModelName } from "./models";
+
 export const endpoints = {
-  "gpt-4o:openai": {
-    providerModelId: "gpt-4o",
+  "gpt-5:openai": {
+    providerModelId: "gpt-5",
     provider: "openai",
     author: "openai",
     pricing: [
       {
         threshold: 0,
-        input: 0.0000025,
+        input: 0.00000125,
         output: 0.00001,
         cacheMultipliers: {
-          read: 0.5,
+          read: 0.1,
         },
       },
     ],
+    contextLength: 400000,
+    maxCompletionTokens: 128000,
     rateLimits: {
-      rpm: 10000,
-      tpm: 30000000,
+      rpm: 15000,
+      tpm: 40000000,
       tpd: 15000000000,
     },
-    contextLength: 128000,
-    maxCompletionTokens: 16384,
     supportedParameters: [
       "tools",
       "tool_choice",
@@ -34,33 +35,34 @@ export const endpoints = {
       "stop",
       "frequency_penalty",
       "presence_penalty",
+      "verbosity",
     ],
     ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
   },
-  "gpt-4o-mini:openai": {
-    providerModelId: "gpt-4o-mini",
+  "gpt-5-mini:openai": {
+    providerModelId: "gpt-5-mini",
     provider: "openai",
     author: "openai",
     pricing: [
       {
         threshold: 0,
-        input: 0.00000015,
-        output: 0.0000006,
+        input: 0.00000025,
+        output: 0.000002,
         cacheMultipliers: {
-          read: 0.5,
+          read: 0.1,
         },
       },
     ],
+    contextLength: 400000,
+    maxCompletionTokens: 128000,
     rateLimits: {
       rpm: 30000,
-      tpm: 150000000,
+      tpm: 180000000,
       tpd: 15000000000,
     },
-    contextLength: 128000,
-    maxCompletionTokens: 16384,
     supportedParameters: [
       "tools",
       "tool_choice",
@@ -72,33 +74,34 @@ export const endpoints = {
       "stop",
       "frequency_penalty",
       "presence_penalty",
+      "verbosity",
     ],
     ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
   },
-  "chatgpt-4o-latest:openai": {
-    providerModelId: "chatgpt-4o-latest",
+  "gpt-5-nano:openai": {
+    providerModelId: "gpt-5-nano",
     provider: "openai",
     author: "openai",
     pricing: [
       {
         threshold: 0,
-        input: 0.000005,
-        output: 0.00002,
+        input: 0.00000005,
+        output: 0.0000004,
         cacheMultipliers: {
-          read: 0.5,
+          read: 0.1,
         },
       },
     ],
+    contextLength: 400000,
+    maxCompletionTokens: 128000,
     rateLimits: {
-      rpm: 10000,
-      tpm: 30000000,
+      rpm: 30000,
+      tpm: 180000000,
       tpd: 15000000000,
     },
-    contextLength: 128000,
-    maxCompletionTokens: 16384,
     supportedParameters: [
       "tools",
       "tool_choice",
@@ -110,6 +113,46 @@ export const endpoints = {
       "stop",
       "frequency_penalty",
       "presence_penalty",
+      "verbosity",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "gpt-5-chat-latest:openai": {
+    providerModelId: "gpt-5-chat-latest",
+    provider: "openai",
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000125,
+        output: 0.00001,
+        cacheMultipliers: {
+          read: 0.1,
+        },
+      },
+    ],
+    contextLength: 128000,
+    maxCompletionTokens: 16384,
+    rateLimits: {
+      rpm: 15000,
+      tpm: 40000000,
+      tpd: 15000000000,
+    },
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "seed",
+      "max_tokens",
+      "response_format",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "verbosity",
     ],
     ptbEnabled: true,
     endpointConfigs: {
@@ -117,5 +160,5 @@ export const endpoints = {
     },
   },
 } satisfies Partial<
-  Record<`${GPT4oModelName}:${ModelProviderName}`, ModelProviderConfig>
+  Record<`${GPT5ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

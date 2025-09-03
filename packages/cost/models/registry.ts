@@ -87,6 +87,11 @@ function getPtbEndpointsByModel(model: string): Result<Endpoint[]> {
   return ok(endpoints);
 }
 
+function getEndpointsByModel(model: string): Result<Endpoint[]> {
+  const endpoints = indexes.modelToEndpoints.get(model as ModelName) || [];
+  return ok(endpoints);
+}
+
 function createFallbackEndpoint(
   modelName: string,
   provider: ModelProviderName,
@@ -210,4 +215,5 @@ export const registry = {
   getModelProviderConfig,
   getModelProviderConfigs,
   getModelProviders,
+  getEndpointsByModel,
 };

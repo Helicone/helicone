@@ -2454,7 +2454,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "StandardParameter": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["max_tokens"]},{"dataType":"enum","enums":["temperature"]},{"dataType":"enum","enums":["top_p"]},{"dataType":"enum","enums":["top_k"]},{"dataType":"enum","enums":["stop"]},{"dataType":"enum","enums":["stream"]},{"dataType":"enum","enums":["frequency_penalty"]},{"dataType":"enum","enums":["presence_penalty"]},{"dataType":"enum","enums":["repetition_penalty"]},{"dataType":"enum","enums":["seed"]},{"dataType":"enum","enums":["tools"]},{"dataType":"enum","enums":["tool_choice"]},{"dataType":"enum","enums":["functions"]},{"dataType":"enum","enums":["function_call"]},{"dataType":"enum","enums":["reasoning"]},{"dataType":"enum","enums":["include_reasoning"]},{"dataType":"enum","enums":["thinking"]},{"dataType":"enum","enums":["response_format"]},{"dataType":"enum","enums":["json_mode"]},{"dataType":"enum","enums":["truncate"]},{"dataType":"enum","enums":["min_p"]},{"dataType":"enum","enums":["logit_bias"]},{"dataType":"enum","enums":["logprobs"]},{"dataType":"enum","enums":["top_logprobs"]},{"dataType":"enum","enums":["structured_outputs"]}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["max_tokens"]},{"dataType":"enum","enums":["temperature"]},{"dataType":"enum","enums":["top_p"]},{"dataType":"enum","enums":["top_k"]},{"dataType":"enum","enums":["stop"]},{"dataType":"enum","enums":["stream"]},{"dataType":"enum","enums":["frequency_penalty"]},{"dataType":"enum","enums":["presence_penalty"]},{"dataType":"enum","enums":["repetition_penalty"]},{"dataType":"enum","enums":["seed"]},{"dataType":"enum","enums":["tools"]},{"dataType":"enum","enums":["tool_choice"]},{"dataType":"enum","enums":["functions"]},{"dataType":"enum","enums":["function_call"]},{"dataType":"enum","enums":["reasoning"]},{"dataType":"enum","enums":["include_reasoning"]},{"dataType":"enum","enums":["thinking"]},{"dataType":"enum","enums":["response_format"]},{"dataType":"enum","enums":["json_mode"]},{"dataType":"enum","enums":["truncate"]},{"dataType":"enum","enums":["min_p"]},{"dataType":"enum","enums":["logit_bias"]},{"dataType":"enum","enums":["logprobs"]},{"dataType":"enum","enums":["top_logprobs"]},{"dataType":"enum","enums":["structured_outputs"]},{"dataType":"enum","enums":["verbosity"]}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ModelPricing": {
@@ -2464,7 +2464,7 @@ const models: TsoaRoute.Models = {
             "input": {"dataType":"double","required":true},
             "output": {"dataType":"double","required":true},
             "image": {"dataType":"double"},
-            "cacheMultipliers": {"dataType":"nestedObjectLiteral","nestedProperties":{"write1h":{"dataType":"double"},"write5m":{"dataType":"double","required":true},"read":{"dataType":"double","required":true}}},
+            "cacheMultipliers": {"dataType":"nestedObjectLiteral","nestedProperties":{"write1h":{"dataType":"double"},"write5m":{"dataType":"double"},"read":{"dataType":"double","required":true}}},
             "cacheStoragePerHour": {"dataType":"double"},
             "thinking": {"dataType":"double"},
             "request": {"dataType":"double"},

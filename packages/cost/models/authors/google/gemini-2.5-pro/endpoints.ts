@@ -45,7 +45,7 @@ export const endpoints = {
       rpm: 2_000,
       tpm: 8_000_000,
     },
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "*": {},
     },
@@ -88,7 +88,7 @@ export const endpoints = {
       "tools",
       "top_p",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       global: {
         providerModelId: "gemini-2.5-pro",
