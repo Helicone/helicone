@@ -23,7 +23,7 @@
           },
           {
             "group": "AI Gateway",
-            "tag": "NEW",
+            "tag": "BETA",
             "pages": [
               "gateway/overview",
               "gateway/provider-routing",
@@ -40,9 +40,7 @@
               },
               {
                 "group": "Concepts",
-                "pages": [
-                  "gateway/concepts/prompt-caching"
-                ]
+                "pages": ["gateway/concepts/prompt-caching"]
               }
             ]
           },
@@ -322,9 +320,7 @@
           },
           {
             "group": "Trace",
-            "pages": [
-              "rest/trace/post-v1tracelog"
-            ]
+            "pages": ["rest/trace/post-v1tracelog"]
           },
           {
             "group": "Property",
