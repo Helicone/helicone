@@ -1,6 +1,5 @@
 import {
   calculateModel,
-  getModelFromResponse,
 } from "../../../utils/modelMapper";
 import { PromiseGenericResult, ok, err } from "../../../packages/common/result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
@@ -165,7 +164,7 @@ export class BedrockStreamProcessor implements IBodyProcessor {
         usage: {
           prompt_tokens: usage.promptTokens || 0,
           completion_tokens: usage.completionTokens || 0,
-          total_tokens: usage.totalTokens || 0,
+          total_tokens: (usage.promptTokens || 0) + (usage.completionTokens || 0),
         },
         streamed_data: originalResponseBody,
         bedrock_events: eventData,
@@ -182,7 +181,7 @@ export class BedrockStreamProcessor implements IBodyProcessor {
         usage: {
           promptTokens: usage.promptTokens || 0,
           completionTokens: usage.completionTokens || 0,
-          totalTokens: usage.totalTokens || 0,
+          totalTokens: (usage.promptTokens || 0) + (usage.completionTokens || 0),
           heliconeCalculated: false,
         },
       });
@@ -216,7 +215,8 @@ export class BedrockStreamProcessor implements IBodyProcessor {
       const usage = {
         promptTokens: body.usage.inputTokens || body.usage.prompt_tokens || body.usage.input_tokens || 0,
         completionTokens: body.usage.outputTokens || body.usage.completion_tokens || body.usage.output_tokens || 0,
-        totalTokens: body.usage.totalTokens || body.usage.total_tokens || 0,
+        totalTokens: (body.usage.promptTokens || body.usage.prompt_tokens || body.usage.input_tokens || 0) + 
+                     (body.usage.completionTokens || body.usage.completion_tokens || body.usage.output_tokens || 0),
         heliconeCalculated: false,
       };
       return usage;
