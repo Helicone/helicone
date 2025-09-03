@@ -332,16 +332,6 @@ const attemptDirectProviderRequest = async (
     });
   }
 
-  console.log({
-    userProviderKeyWithConfig,
-  });
-
-  if (userProviderKeyWithConfig) {
-    console.log({
-      isByokEnabled: isByokEnabled(userProviderKeyWithConfig),
-    });
-  }
-
   if (userProviderKeyWithConfig && isByokEnabled(userProviderKeyWithConfig)) {
     const byokEndpoint = registry.buildEndpoint(
       modelProviderConfig.data,
