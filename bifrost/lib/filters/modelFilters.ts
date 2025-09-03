@@ -4,6 +4,7 @@ import {
   OutputModality, 
   StandardParameter 
 } from "../../../packages/cost/models/types";
+import { getProviderDisplayName } from "../../../packages/cost/models/provider-helpers";
 
 // Define filtering-specific types
 export type ModelCapability = 
@@ -272,30 +273,13 @@ export const extractAvailableFilters = (models: Model[]) => {
   const authors = new Set<string>();
   const capabilities = new Set<ModelCapability>();
   
-  // Display name mapping for providers
-  const providerDisplayNames: Record<string, string> = {
-    'openai': 'OpenAI',
-    'anthropic': 'Anthropic',
-    'google': 'Google AI Studio',
-    'vertex': 'Vertex AI',
-    'bedrock': 'AWS Bedrock',
-    'azure-openai': 'Azure OpenAI',
-    'perplexity': 'Perplexity',
-    'groq': 'Groq',
-    'deepseek': 'DeepSeek',
-    'cohere': 'Cohere',
-    'xai': 'xAI',
-  };
-  
   models.forEach(model => {
     authors.add(model.author);
     
     model.endpoints.forEach(ep => {
       if (!providersMap.has(ep.provider)) {
-        providersMap.set(
-          ep.provider, 
-          providerDisplayNames[ep.provider.toLowerCase()] || ep.provider
-        );
+        const displayName = getProviderDisplayName(ep.provider);
+        providersMap.set(ep.provider, displayName);
       }
       
       if (ep.pricing.audio && ep.pricing.audio > 0) capabilities.add("audio");

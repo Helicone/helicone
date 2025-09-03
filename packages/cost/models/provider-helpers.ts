@@ -20,6 +20,11 @@ export function getProvider(providerName: string): Result<BaseProvider> {
   return provider ? ok(provider) : err(`Unknown provider: ${providerName}`);
 }
 
+export function getProviderDisplayName(providerName: string): string {
+  const provider = providers[providerName as ModelProviderName];
+  return provider?.displayName || providerName;
+}
+
 // TODO: Remove once we normalize provider names in provider_keys table.
 export const dbProviderToProvider = (
   provider: string
