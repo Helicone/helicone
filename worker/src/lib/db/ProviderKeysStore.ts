@@ -60,6 +60,9 @@ export class ProviderKeysStore {
       })
       .filter((key) => key !== null)
       .reduce<Record<string, ProviderKey[]>>((acc, key) => {
+        // this case should not happen but fixing types
+        if (!key) return acc;
+
         if (!acc[key.org_id]) {
           acc[key.org_id] = [];
         }
