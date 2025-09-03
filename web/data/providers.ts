@@ -25,7 +25,7 @@ export const providers: Provider[] = [
     relevanceScore: 95,
   },
   {
-    id: "azure",
+    id: "azure-openai",
     name: "Azure OpenAI",
     logoUrl: "/assets/home/providers/azure.webp",
     description: "Configure your Azure OpenAI API keys",
