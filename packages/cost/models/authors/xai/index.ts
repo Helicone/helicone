@@ -9,8 +9,8 @@ import type { ModelConfig, ModelProviderConfig } from "../../types";
 import { models as grokModels } from "./models";
 import { endpoints as grokEndpoints } from "./endpoints";
 
-// Export aggregated models
-export const grokModels_ = grokModels;
+// Re-export models
+export { grokModels };
 
 // Export aggregated endpoints
 export const grokEndpointConfig = grokEndpoints;

@@ -22,7 +22,6 @@ export const AUTHORS = [
   "cohere",
   "deepseek",
   "qwen",
-  "x-ai",
   "xai",
   "moonshotai",
   "perplexity",
