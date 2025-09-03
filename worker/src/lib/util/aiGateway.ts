@@ -30,6 +30,7 @@ type Error = {
     | "model_not_supported";
   message: string;
   statusCode: number;
+  details?: string;
 };
 
 const enableStreamUsage = async (
@@ -352,10 +353,6 @@ const attemptDirectProviderRequest = async (
       forwarder,
       undefined
     );
-
-    if (!isErr(result)) {
-      return result;
-    }
 
     return result;
   }

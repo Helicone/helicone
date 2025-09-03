@@ -17,6 +17,7 @@ import { isErr } from "../lib/util/results";
 import { PromptManager } from "../lib/managers/PromptManager";
 import { HeliconePromptManager } from "@helicone-package/prompts/HeliconePromptManager";
 import { PromptStore } from "../lib/db/PromptStore";
+import { errorForwarder } from "../lib/HeliconeProxyRequest/ErrorForwarder";
 
 export const getAIGatewayRouter = (router: BaseRouter) => {
   router.all(
@@ -28,7 +29,10 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
       ctx: ExecutionContext
     ) => {
       requestWrapper.setRequestReferrer("ai-gateway");
-      function forwarder(targetBaseUrl: string | null, escrowInfo?: EscrowInfo) {
+      function forwarder(
+        targetBaseUrl: string | null,
+        escrowInfo?: EscrowInfo
+      ) {
         return gatewayForwarder(
           {
             targetBaseUrl,
@@ -94,22 +98,14 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
       });
 
       if (isErr(result)) {
-        return new Response(
-          JSON.stringify({
-            "helicone-message":
-              "Helicone ran into an error servicing your request: " + result.error.message,
-            support:
-              "Please reach out on our discord or email us at help@helicone.ai, we'd love to help!",
-            type: result.error.type,
-          }),
-          {
-            status: result.error.statusCode,
-            headers: {
-              "content-type": "application/json;charset=UTF-8",
-              "helicone-error": "true",
-            },
-          }
-        );
+        requestWrapper.setBaseURLOverride("https://ai-gateway.helicone.ai");
+        const errorResponse = await errorForwarder(requestWrapper, env, ctx, {
+          code: result.error.type,
+          message: result.error.message,
+          statusCode: result.error.statusCode,
+          details: result.error.details,
+        });
+        return errorResponse;
       }
 
       return result.data;
