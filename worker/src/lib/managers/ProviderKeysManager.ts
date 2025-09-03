@@ -45,9 +45,6 @@ export class ProviderKeysManager {
     keyCuid?: string
   ): Promise<ProviderKey | null> {
     const keys = await getFromKVCacheOnly(`provider_keys_${orgId}`, this.env);
-    console.log({
-      keys,
-    });
     if (!keys) {
       return null;
     }
