@@ -530,112 +530,6 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
-  "grok/endpoints.ts": {
-    "grok-3-mini:xai": {
-      "context": 131072,
-      "crossRegion": false,
-      "maxTokens": 131072,
-      "modelId": "grok-3-mini",
-      "parameters": [
-        "frequency_penalty",
-        "logit_bias",
-        "logprobs",
-        "max_tokens",
-        "presence_penalty",
-        "response_format",
-        "seed",
-        "stop",
-        "temperature",
-        "tool_choice",
-        "tools",
-        "top_logprobs",
-        "top_p",
-      ],
-      "provider": "xai",
-      "ptbEnabled": true,
-      "regions": [
-        "*",
-      ],
-    },
-    "grok-3:xai": {
-      "context": 131072,
-      "crossRegion": false,
-      "maxTokens": 131072,
-      "modelId": "grok-3",
-      "parameters": [
-        "frequency_penalty",
-        "logit_bias",
-        "logprobs",
-        "max_tokens",
-        "presence_penalty",
-        "response_format",
-        "seed",
-        "stop",
-        "temperature",
-        "tool_choice",
-        "tools",
-        "top_logprobs",
-        "top_p",
-      ],
-      "provider": "xai",
-      "ptbEnabled": true,
-      "regions": [
-        "*",
-      ],
-    },
-    "grok-4-0709:xai": {
-      "context": 256000,
-      "crossRegion": false,
-      "maxTokens": 256000,
-      "modelId": "grok-4-0709",
-      "parameters": [
-        "frequency_penalty",
-        "logit_bias",
-        "logprobs",
-        "max_tokens",
-        "presence_penalty",
-        "response_format",
-        "seed",
-        "stop",
-        "temperature",
-        "tool_choice",
-        "tools",
-        "top_logprobs",
-        "top_p",
-      ],
-      "provider": "xai",
-      "ptbEnabled": true,
-      "regions": [
-        "*",
-      ],
-    },
-    "grok-code-fast-1:xai": {
-      "context": 256000,
-      "crossRegion": false,
-      "maxTokens": 256000,
-      "modelId": "grok-code-fast-1",
-      "parameters": [
-        "frequency_penalty",
-        "logit_bias",
-        "logprobs",
-        "max_tokens",
-        "presence_penalty",
-        "response_format",
-        "seed",
-        "stop",
-        "temperature",
-        "tool_choice",
-        "tools",
-        "top_logprobs",
-        "top_p",
-      ],
-      "provider": "xai",
-      "ptbEnabled": true,
-      "regions": [
-        "*",
-      ],
-    },
-  },
   "openai/gpt-4.1": {
     "gpt-4.1-mini:azure-openai": {
       "context": 1047576,
@@ -1169,6 +1063,112 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "xai/endpoints.ts": {
+    "grok-3-mini:xai": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "grok-3-mini",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "xai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "grok-3:xai": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "grok-3",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "xai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "grok-4-0709:xai": {
+      "context": 256000,
+      "crossRegion": false,
+      "maxTokens": 256000,
+      "modelId": "grok-4-0709",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "xai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "grok-code-fast-1:xai": {
+      "context": 256000,
+      "crossRegion": false,
+      "maxTokens": 256000,
+      "modelId": "grok-code-fast-1",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "xai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
 }
 `;
 
@@ -1216,12 +1216,6 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "google-ai-studio",
     "vertex",
   ],
-  "grok/endpoints.ts": [
-    "xai",
-    "xai",
-    "xai",
-    "xai",
-  ],
   "openai/gpt-4.1": [
     "azure-openai",
     "azure-openai",
@@ -1257,6 +1251,12 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "groq",
     "groq",
   ],
+  "xai/endpoints.ts": [
+    "xai",
+    "xai",
+    "xai",
+    "xai",
+  ],
 }
 `;
 
@@ -1266,7 +1266,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "anthropic": [
       {
         "cacheMultipliers": {
-          "read": 0.1,
+          "cachedInput": 0.1,
           "write1h": 2,
           "write5m": 1.25,
         },
@@ -1278,7 +1278,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "bedrock": [
       {
         "cacheMultipliers": {
-          "read": 0.1,
+          "cachedInput": 0.1,
           "write5m": 1.25,
         },
         "input": 8e-7,
@@ -1289,7 +1289,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "vertex": [
       {
         "cacheMultipliers": {
-          "read": 0.1,
+          "cachedInput": 0.1,
           "write5m": 1.25,
         },
         "input": 8e-7,
@@ -1302,7 +1302,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "anthropic": [
       {
         "cacheMultipliers": {
-          "read": 0.1,
+          "cachedInput": 0.1,
           "write1h": 2,
           "write5m": 1.25,
         },
@@ -1314,7 +1314,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "bedrock": [
       {
         "cacheMultipliers": {
-          "read": 0.1,
+          "cachedInput": 0.1,
           "write5m": 1.25,
         },
         "input": 0.000003,
@@ -1325,7 +1325,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "vertex": [
       {
         "cacheMultipliers": {
-          "read": 0.1,
+          "cachedInput": 0.1,
           "write5m": 1.25,
         },
         "input": 0.000003,
@@ -1338,7 +1338,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "anthropic": [
       {
         "cacheMultipliers": {
-          "read": 0.1,
+          "cachedInput": 0.1,
           "write1h": 2,
           "write5m": 1.25,
         },
@@ -1350,7 +1350,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "bedrock": [
       {
         "cacheMultipliers": {
-          "read": 0.1,
+          "cachedInput": 0.1,
           "write5m": 1.25,
         },
         "input": 0.000003,
@@ -1361,7 +1361,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "vertex": [
       {
         "cacheMultipliers": {
-          "read": 0.1,
+          "cachedInput": 0.1,
           "write5m": 1.25,
         },
         "input": 0.000003,
@@ -1374,7 +1374,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "anthropic": [
       {
         "cacheMultipliers": {
-          "read": 0.1,
+          "cachedInput": 0.1,
           "write1h": 2,
           "write5m": 1.25,
         },
@@ -1386,7 +1386,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "bedrock": [
       {
         "cacheMultipliers": {
-          "read": 0.1,
+          "cachedInput": 0.1,
           "write5m": 1.25,
         },
         "input": 0.000015,
@@ -1397,7 +1397,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "vertex": [
       {
         "cacheMultipliers": {
-          "read": 0.1,
+          "cachedInput": 0.1,
           "write5m": 1.25,
         },
         "input": 0.000015,
@@ -1410,7 +1410,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "anthropic": [
       {
         "cacheMultipliers": {
-          "read": 0.1,
+          "cachedInput": 0.1,
           "write1h": 2,
           "write5m": 1.25,
         },
@@ -1422,7 +1422,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "bedrock": [
       {
         "cacheMultipliers": {
-          "read": 0.1,
+          "cachedInput": 0.1,
           "write5m": 1.25,
         },
         "input": 0.000015,
@@ -1433,7 +1433,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "vertex": [
       {
         "cacheMultipliers": {
-          "read": 0.1,
+          "cachedInput": 0.1,
           "write5m": 1.25,
         },
         "input": 0.000015,
@@ -1446,7 +1446,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "anthropic": [
       {
         "cacheMultipliers": {
-          "read": 0.1,
+          "cachedInput": 0.1,
           "write1h": 2,
           "write5m": 1.25,
         },
@@ -1463,7 +1463,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "bedrock": [
       {
         "cacheMultipliers": {
-          "read": 0.1,
+          "cachedInput": 0.1,
           "write5m": 1.25,
         },
         "input": 0.000003,
@@ -1479,7 +1479,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "vertex": [
       {
         "cacheMultipliers": {
-          "read": 0.1,
+          "cachedInput": 0.1,
           "write5m": 1.25,
         },
         "input": 0.000003,
@@ -1498,7 +1498,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       {
         "audio": 0.000001,
         "cacheMultipliers": {
-          "read": 0.25,
+          "cachedInput": 0.25,
           "write5m": 1,
         },
         "cacheStoragePerHour": 0.000001,
@@ -1512,7 +1512,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       {
         "audio": 0.000001,
         "cacheMultipliers": {
-          "read": 0.25,
+          "cachedInput": 0.25,
           "write5m": 1,
         },
         "cacheStoragePerHour": 0.000001,
@@ -1528,7 +1528,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       {
         "audio": 3e-7,
         "cacheMultipliers": {
-          "read": 0.25,
+          "cachedInput": 0.25,
           "write5m": 1,
         },
         "cacheStoragePerHour": 0.000001,
@@ -1541,7 +1541,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       {
         "audio": 3e-7,
         "cacheMultipliers": {
-          "read": 0.25,
+          "cachedInput": 0.25,
           "write5m": 1,
         },
         "cacheStoragePerHour": 0.000001,
@@ -1555,7 +1555,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "google-ai-studio": [
       {
         "cacheMultipliers": {
-          "read": 0.25,
+          "cachedInput": 0.25,
           "write5m": 1,
         },
         "cacheStoragePerHour": 0.0000045,
@@ -1574,7 +1574,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "vertex": [
       {
         "cacheMultipliers": {
-          "read": 0.25,
+          "cachedInput": 0.25,
           "write5m": 1,
         },
         "cacheStoragePerHour": 0.0000045,
@@ -1591,28 +1591,11 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
-  "grok/endpoints.ts": {
-    "xai": [
-      {
-        "audio": 0,
-        "cacheMultipliers": {
-          "read": 0.25,
-        },
-        "image": 0,
-        "input": 3e-7,
-        "internal_reasoning": 0,
-        "output": 5e-7,
-        "request": 0,
-        "threshold": 0,
-        "web_search": 0.025,
-      },
-    ],
-  },
   "openai/gpt-4.1": {
     "azure-openai": [
       {
         "cacheMultipliers": {
-          "read": 0.3,
+          "cachedInput": 0.3,
         },
         "input": 1e-7,
         "output": 4e-7,
@@ -1622,7 +1605,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "openai": [
       {
         "cacheMultipliers": {
-          "read": 0.25,
+          "cachedInput": 0.25,
         },
         "input": 1e-7,
         "output": 4e-7,
@@ -1634,7 +1617,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "azure-openai": [
       {
         "cacheMultipliers": {
-          "read": 0.5,
+          "cachedInput": 0.5,
         },
         "input": 1.5e-7,
         "output": 6e-7,
@@ -1644,7 +1627,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "openai": [
       {
         "cacheMultipliers": {
-          "read": 0.5,
+          "cachedInput": 0.5,
         },
         "input": 0.000005,
         "output": 0.00002,
@@ -1656,7 +1639,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "openai": [
       {
         "cacheMultipliers": {
-          "read": 0.1,
+          "cachedInput": 0.1,
         },
         "input": 0.00000125,
         "output": 0.00001,
@@ -1668,7 +1651,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "azure-openai": [
       {
         "cacheMultipliers": {
-          "read": 0.5,
+          "cachedInput": 0.5,
         },
         "input": 0.0000011,
         "output": 0.0000044,
@@ -1678,7 +1661,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "openai": [
       {
         "cacheMultipliers": {
-          "read": 0.5,
+          "cachedInput": 0.5,
         },
         "input": 0.0000011,
         "output": 0.0000044,
@@ -1690,7 +1673,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "azure-openai": [
       {
         "cacheMultipliers": {
-          "read": 0.25,
+          "cachedInput": 0.25,
         },
         "input": 0.0000011,
         "output": 0.0000044,
@@ -1700,7 +1683,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "openai": [
       {
         "cacheMultipliers": {
-          "read": 0.25,
+          "cachedInput": 0.25,
         },
         "input": 0.0000011,
         "output": 0.0000044,
@@ -1719,6 +1702,23 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "request": 0,
         "threshold": 0,
         "web_search": 0,
+      },
+    ],
+  },
+  "xai/endpoints.ts": {
+    "xai": [
+      {
+        "audio": 0,
+        "cacheMultipliers": {
+          "cachedInput": 0.25,
+        },
+        "image": 0,
+        "input": 3e-7,
+        "internal_reasoning": 0,
+        "output": 5e-7,
+        "request": 0,
+        "threshold": 0,
+        "web_search": 0.025,
       },
     ],
   },

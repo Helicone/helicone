@@ -142,7 +142,7 @@ export class ModelRegistryController extends Controller {
               web_search: baseTier.web_search ? baseTier.web_search * 1000000 : undefined,
               image: baseTier.image ? baseTier.image * 1000000 : undefined,
               video: baseTier.video ? baseTier.video * 1000000 : undefined,
-              cacheRead: baseTier.cacheMultipliers?.read ? baseTier.input * baseTier.cacheMultipliers.read * 1000000 : undefined,
+              cacheRead: baseTier.cacheMultipliers?.cachedInput ? baseTier.input * baseTier.cacheMultipliers.cachedInput * 1000000 : undefined,
               cacheWrite: baseTier.cacheMultipliers?.write5m ? baseTier.input * baseTier.cacheMultipliers.write5m * 1000000 : undefined,
               internal_reasoning: baseTier.internal_reasoning ? baseTier.internal_reasoning * 1000000 : undefined,
             };
@@ -158,7 +158,7 @@ export class ModelRegistryController extends Controller {
                 web_search: tier.web_search ? tier.web_search * 1000000 : undefined,
                 image: tier.image ? tier.image * 1000000 : undefined,
                 video: tier.video ? tier.video * 1000000 : undefined,
-                cacheRead: tier.cacheMultipliers?.read ? tier.input * tier.cacheMultipliers.read * 1000000 : undefined,
+                cacheRead: tier.cacheMultipliers?.cachedInput ? tier.input * tier.cacheMultipliers.cachedInput * 1000000 : undefined,
                 cacheWrite: tier.cacheMultipliers?.write5m ? tier.input * tier.cacheMultipliers.write5m * 1000000 : undefined,
                 internal_reasoning: tier.internal_reasoning ? tier.internal_reasoning * 1000000 : undefined,
                 threshold: tier.threshold,  // Include threshold!

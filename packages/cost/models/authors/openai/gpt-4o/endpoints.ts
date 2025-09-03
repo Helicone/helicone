@@ -12,7 +12,7 @@ export const endpoints = {
         input: 0.0000025,
         output: 0.00001,
         cacheMultipliers: {
-          read: 0.5,
+          cachedInput: 0.5,
         },
       },
     ],
@@ -50,7 +50,7 @@ export const endpoints = {
         input: 0.0000025,
         output: 0.00001,
         cacheMultipliers: {
-          read: 0.5,
+          cachedInput: 0.5,
         },
       },
     ],
@@ -87,7 +87,7 @@ export const endpoints = {
         input: 0.00000015,
         output: 0.0000006,
         cacheMultipliers: {
-          read: 0.5,
+          cachedInput: 0.5,
         },
       },
     ],
@@ -125,7 +125,7 @@ export const endpoints = {
         input: 0.00000015,
         output: 0.0000006,
         cacheMultipliers: {
-          read: 0.5,
+          cachedInput: 0.5,
         },
       },
     ],
@@ -162,7 +162,7 @@ export const endpoints = {
         input: 0.000005,
         output: 0.00002,
         cacheMultipliers: {
-          read: 0.5,
+          cachedInput: 0.5,
         },
       },
     ],

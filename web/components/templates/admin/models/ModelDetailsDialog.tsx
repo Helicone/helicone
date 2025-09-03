@@ -228,10 +228,10 @@ export function ModelDetailsDialog({
 
                                     const additionalPrices = [];
 
-                                    if (tier.cacheMultipliers?.read) {
+                                    if (tier.cacheMultipliers?.cachedInput) {
                                       additionalPrices.push({
-                                        label: "Cache Read",
-                                        value: `$${(tier.input * tier.cacheMultipliers.read * 1000000).toFixed(2)}`,
+                                        label: "Cached Input",
+                                        value: `$${(tier.input * tier.cacheMultipliers.cachedInput * 1000000).toFixed(2)}`,
                                       });
                                     }
                                     if (tier.cacheMultipliers?.write5m) {
