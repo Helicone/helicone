@@ -40,6 +40,43 @@ export const endpoints = {
       "*": {},
     },
   },
+  "gpt-4o:azure-openai": {
+    providerModelId: "gpt-4o",
+    provider: "azure-openai",
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000025,
+        output: 0.00001,
+        cacheMultipliers: {
+          read: 0.5,
+        },
+      },
+    ],
+    contextLength: 128000,
+    maxCompletionTokens: 16384,
+    rateLimits: {
+      rpm: 300,
+      tpm: 50000,
+    },
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "seed",
+      "max_tokens",
+      "response_format",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
   "gpt-4o-mini:openai": {
     providerModelId: "gpt-4o-mini",
     provider: "openai",
@@ -61,6 +98,43 @@ export const endpoints = {
     },
     contextLength: 128000,
     maxCompletionTokens: 16384,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "seed",
+      "max_tokens",
+      "response_format",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "gpt-4o-mini:azure-openai": {
+    providerModelId: "gpt-4o-mini",
+    provider: "azure-openai",
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000015,
+        output: 0.0000006,
+        cacheMultipliers: {
+          read: 0.5,
+        },
+      },
+    ],
+    contextLength: 128000,
+    maxCompletionTokens: 16384,
+    rateLimits: {
+      rpm: 2000,
+      tpm: 200000,
+    },
     supportedParameters: [
       "tools",
       "tool_choice",

@@ -148,6 +148,19 @@ vi.mock("@supabase/supabase-js", () => ({
             config: null,
             byok_enabled: isByokEnabled,
           },
+          "azure-openai": {
+            org_id: "test-org-id",
+            provider_name: "azure-openai",
+            decrypted_provider_key: "test-azure-openai-api-key",
+            decrypted_provider_secret_key: null,
+            auth_type: "api_key",
+            config: {
+              baseUri: "https://test-resource.openai.azure.com",
+              deploymentName: "test-deployment",
+              apiVersion: "2025-01-01-preview",
+            },
+            byok_enabled: isByokEnabled,
+          },
         };
 
         // Helicone provider keys (for PTB when BYOK is disabled)
@@ -209,6 +222,19 @@ vi.mock("@supabase/supabase-js", () => ({
             decrypted_provider_secret_key: null,
             auth_type: "api_key",
             config: null,
+            byok_enabled: true,
+          },
+          "azure-openai": {
+            org_id: "0afe3a6e-d095-4ec0-bc1e-2af6f57bd2a5",
+            provider_name: "azure-openai",
+            decrypted_provider_key: "helicone-azure-openai-api-key",
+            decrypted_provider_secret_key: null,
+            auth_type: "api_key",
+            config: {
+              baseUri: "https://helicone-resource.openai.azure.com",
+              deploymentName: "helicone-deployment",
+              apiVersion: "2025-01-01-preview",
+            },
             byok_enabled: true,
           },
         };
