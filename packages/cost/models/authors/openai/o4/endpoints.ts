@@ -35,6 +35,38 @@ export const endpoints = {
       "*": {},
     },
   },
+  "o4-mini:azure-openai": {
+    providerModelId: "o4-mini",
+    provider: "azure-openai",
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000011,
+        output: 0.0000044,
+        cacheMultipliers: {
+          read: 0.25,
+        },
+      },
+    ],
+    contextLength: 200000,
+    maxCompletionTokens: 100000,
+    rateLimits: {
+      rpm: 20,
+      tpm: 20000,
+    },
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "seed",
+      "max_tokens",
+      "response_format",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${O4ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

@@ -530,6 +530,112 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "grok/endpoints.ts": {
+    "grok-3-mini:xai": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "grok-3-mini",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "xai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "grok-3:xai": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "grok-3",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "xai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "grok-4-0709:xai": {
+      "context": 256000,
+      "crossRegion": false,
+      "maxTokens": 256000,
+      "modelId": "grok-4-0709",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "xai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "grok-code-fast-1:xai": {
+      "context": 256000,
+      "crossRegion": false,
+      "maxTokens": 256000,
+      "modelId": "grok-code-fast-1",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "xai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
   "openai/gpt-4.1": {
     "gpt-4.1-mini:azure-openai": {
       "context": 1047576,
@@ -886,6 +992,24 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "openai/o3": {
+    "o3-mini:azure-openai": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 100000,
+      "modelId": "o3-mini",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "azure-openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "o3-mini:openai": {
       "context": 200000,
       "crossRegion": false,
@@ -942,6 +1066,24 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "openai/o4": {
+    "o4-mini:azure-openai": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 100000,
+      "modelId": "o4-mini",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "azure-openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "o4-mini:openai": {
       "context": 200000,
       "crossRegion": false,
@@ -1074,6 +1216,12 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "google-ai-studio",
     "vertex",
   ],
+  "grok/endpoints.ts": [
+    "xai",
+    "xai",
+    "xai",
+    "xai",
+  ],
   "openai/gpt-4.1": [
     "azure-openai",
     "azure-openai",
@@ -1096,11 +1244,13 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openai",
   ],
   "openai/o3": [
+    "azure-openai",
     "openai",
     "openai",
     "openai",
   ],
   "openai/o4": [
+    "azure-openai",
     "openai",
   ],
   "openai/oss": [
@@ -1441,6 +1591,23 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
+  "grok/endpoints.ts": {
+    "xai": [
+      {
+        "audio": 0,
+        "cacheMultipliers": {
+          "read": 0.25,
+        },
+        "image": 0,
+        "input": 3e-7,
+        "internal_reasoning": 0,
+        "output": 5e-7,
+        "request": 0,
+        "threshold": 0,
+        "web_search": 0.025,
+      },
+    ],
+  },
   "openai/gpt-4.1": {
     "azure-openai": [
       {
@@ -1498,6 +1665,16 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "openai/o3": {
+    "azure-openai": [
+      {
+        "cacheMultipliers": {
+          "read": 0.5,
+        },
+        "input": 0.0000011,
+        "output": 0.0000044,
+        "threshold": 0,
+      },
+    ],
     "openai": [
       {
         "cacheMultipliers": {
@@ -1510,6 +1687,16 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "openai/o4": {
+    "azure-openai": [
+      {
+        "cacheMultipliers": {
+          "read": 0.25,
+        },
+        "input": 0.0000011,
+        "output": 0.0000044,
+        "threshold": 0,
+      },
+    ],
     "openai": [
       {
         "cacheMultipliers": {
@@ -1688,6 +1875,30 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       ],
     },
     {
+      "model": "grok-3",
+      "providers": [
+        "xai",
+      ],
+    },
+    {
+      "model": "grok-3-mini",
+      "providers": [
+        "xai",
+      ],
+    },
+    {
+      "model": "grok-4-0709",
+      "providers": [
+        "xai",
+      ],
+    },
+    {
+      "model": "grok-code-fast-1",
+      "providers": [
+        "xai",
+      ],
+    },
+    {
       "model": "o3",
       "providers": [
         "openai",
@@ -1696,6 +1907,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     {
       "model": "o3-mini",
       "providers": [
+        "azure-openai",
         "openai",
       ],
     },
@@ -1708,6 +1920,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     {
       "model": "o4-mini",
       "providers": [
+        "azure-openai",
         "openai",
       ],
     },
@@ -1718,7 +1931,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "provider": "anthropic",
     },
     {
-      "modelCount": 5,
+      "modelCount": 7,
       "provider": "azure-openai",
     },
     {
@@ -1741,6 +1954,10 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "modelCount": 9,
       "provider": "vertex",
     },
+    {
+      "modelCount": 4,
+      "provider": "xai",
+    },
   ],
   "ptbEnabledModels": [
     "chatgpt-4o-latest",
@@ -1761,6 +1978,10 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "gpt-5-nano",
     "gpt-oss-120b",
     "gpt-oss-20b",
+    "grok-3",
+    "grok-3-mini",
+    "grok-4-0709",
+    "grok-code-fast-1",
     "o3",
     "o3-mini",
     "o3-pro",
@@ -1773,9 +1994,9 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "claude-3.5-sonnet-v2:anthropic:*",
     "claude-3.5-sonnet-v2:vertex:global",
   ],
-  "totalEndpoints": 45,
-  "totalModelProviderConfigs": 45,
-  "totalModelsWithPtb": 22,
-  "totalProviders": 7,
+  "totalEndpoints": 51,
+  "totalModelProviderConfigs": 51,
+  "totalModelsWithPtb": 26,
+  "totalProviders": 8,
 }
 `;

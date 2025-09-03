@@ -23,6 +23,7 @@ export const AUTHORS = [
   "deepseek",
   "qwen",
   "x-ai",
+  "xai",
   "moonshotai",
   "perplexity",
 ] as const;
