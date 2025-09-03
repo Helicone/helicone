@@ -24,6 +24,7 @@ import { useOrg } from "../../layout/org/organizationContext";
 import { useFilterStore } from "@/filterAST/store/filterStore";
 import { toFilterNode } from "@helicone-package/filters/toFilterNode";
 import AuthHeader from "../../shared/authHeader";
+import ShareButton from "./ShareButton";
 import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import {
@@ -302,19 +303,22 @@ const DashboardPage = (props: DashboardPageProps) => {
             isWithinIsland={true}
             title={"Dashboard"}
             headerActions={
-              <button
-                onClick={() => {
-                  refetch();
-                }}
-                className="flex flex-row items-center text-sm font-semibold text-black hover:text-sky-700 dark:text-white"
-              >
-                <ArrowPathIcon
-                  className={clsx(
-                    isAnyLoading || isLive ? "animate-spin" : "",
-                    "inline h-5 w-5",
-                  )}
-                />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    refetch();
+                  }}
+                  className="flex flex-row items-center text-sm font-semibold text-black hover:text-sky-700 dark:text-white"
+                >
+                  <ArrowPathIcon
+                    className={clsx(
+                      isAnyLoading || isLive ? "animate-spin" : "",
+                      "inline h-5 w-5",
+                    )}
+                  />
+                </button>
+                <ShareButton />
+              </div>
             }
             actions={
               <div>

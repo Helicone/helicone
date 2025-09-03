@@ -1,0 +1,41 @@
+#!/usr/bin/env expect -f
+# Robustly drive `vercel link` for the sequence:
+# Y -> (scope list) arrow-down -> Enter -> y -> 'helicone'
+set timeout 60
+proc send_down {} { send "\033\[B" }
+
+spawn vercel link
+
+# 1) "Set up ... ?"
+expect {
+  -re {Set up .*} { send "y\r" }
+  timeout { send_user "Timeout waiting for 'Set up' prompt\n"; exit 1 }
+}
+
+# 2) "Which scope should contain your project?"
+#    Move selection down once (from "Devin Ersoy's projects" to "Helicone"), then Enter
+expect {
+  -re {Which scope .*} {
+    # small pause to ensure the list is painted
+    after 200
+    send_down
+    after 150
+    send "\r"
+  }
+  timeout { send_user "Timeout waiting for 'Which scope' prompt\n"; exit 1 }
+}
+
+# 3) "Link to existing project? "
+expect {
+  -re {Link to existing project\?.*} { send "y\r" }
+  timeout { send_user "Timeout waiting for 'Link to existing project' prompt\n"; exit 1 }
+}
+
+# 4) "What’s the name of your existing project?"
+expect {
+  -re {name of your existing project\?.*} { send "helicone\r" }
+  timeout { send_user "Timeout waiting for 'name of your existing project' prompt\n"; exit 1 }
+}
+
+# Finish
+expect eof

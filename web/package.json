@@ -20,6 +20,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "html2canvas": "^1.4.1",
     "@ai-sdk/anthropic": "^0.0.53",
     "@ai-sdk/openai": "^0.0.70",
     "@anthropic-ai/sdk": "^0.20.8",

@@ -12,6 +12,15 @@ export interface paths {
   "/v1/user-feedback": {
     post: operations["PostUserFeedback"];
   };
+  "/v1/share/screenshot": {
+    post: operations["CreateShareScreenshot"];
+  };
+  "/v1/share": {
+    post: operations["CreateShare"];
+  };
+  "/v1/public/share/{id}": {
+    get: operations["GetShare"];
+  };
   "/v1/settings/query": {
     get: operations["GetSettings"];
   };
@@ -502,6 +511,45 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
+    "ResultSuccess__id-string--url-string__": {
+      data: {
+        url: string;
+        id: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    ResultError_string_: {
+      /** @enum {number|null} */
+      data: null;
+      error: string;
+    };
+    "Result__id-string--url-string_.string_": components["schemas"]["ResultSuccess__id-string--url-string__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__id-string__": {
+      data: {
+        id: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__id-string_.string_": components["schemas"]["ResultSuccess__id-string__"] | components["schemas"]["ResultError_string_"];
+    /** @enum {string} */
+    ShareScope: "dashboard" | "metrics" | "requests" | "logs";
+    "ResultSuccess__id-string--organization_id-string--scope-ShareScope--filters-unknown-or-null--time_start-string-or-null--time_end-string-or-null--name-string-or-null--allow_request_bodies-boolean__": {
+      data: {
+        allow_request_bodies: boolean;
+        name: string | null;
+        time_end: string | null;
+        time_start: string | null;
+        filters: unknown;
+        scope: components["schemas"]["ShareScope"];
+        organization_id: string;
+        id: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__id-string--organization_id-string--scope-ShareScope--filters-unknown-or-null--time_start-string-or-null--time_end-string-or-null--name-string-or-null--allow_request_bodies-boolean_.string_": components["schemas"]["ResultSuccess__id-string--organization_id-string--scope-ShareScope--filters-unknown-or-null--time_start-string-or-null--time_end-string-or-null--name-string-or-null--allow_request_bodies-boolean__"] | components["schemas"]["ResultError_string_"];
     RateLimitRuleView: {
       id: string;
       name: string;
@@ -519,11 +567,6 @@ export interface components {
       data: components["schemas"]["RateLimitRuleView"][];
       /** @enum {number|null} */
       error: null;
-    };
-    ResultError_string_: {
-      /** @enum {number|null} */
-      data: null;
-      error: string;
     };
     "Result_RateLimitRuleView-Array.string_": components["schemas"]["ResultSuccess_RateLimitRuleView-Array_"] | components["schemas"]["ResultError_string_"];
     ResultSuccess_RateLimitRuleView_: {
@@ -1210,14 +1253,6 @@ Json: JsonObject;
       };
       functions?: unknown[];
     };
-    "ResultSuccess__id-string__": {
-      data: {
-        id: string;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__id-string_.string_": components["schemas"]["ResultSuccess__id-string__"] | components["schemas"]["ResultError_string_"];
     ResultSuccess_number_: {
       /** Format: double */
       data: number;
@@ -15750,6 +15785,63 @@ export interface operations {
             error?: unknown;
             success: boolean;
           };
+        };
+      };
+    };
+  };
+  CreateShareScreenshot: {
+    requestBody: {
+      content: {
+        "application/json": {
+          image_base64?: string;
+          expires_at?: string | null;
+          name?: string | null;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string--url-string_.string_"];
+        };
+      };
+    };
+  };
+  CreateShare: {
+    requestBody: {
+      content: {
+        "application/json": {
+          expires_at?: string | null;
+          allow_request_bodies?: boolean | null;
+          name?: string | null;
+          time_end?: string | null;
+          time_start?: string | null;
+          filters?: unknown;
+          scope: components["schemas"]["ShareScope"];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string_.string_"];
+        };
+      };
+    };
+  };
+  GetShare: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string--organization_id-string--scope-ShareScope--filters-unknown-or-null--time_start-string-or-null--time_end-string-or-null--name-string-or-null--allow_request_bodies-boolean_.string_"];
         };
       };
     };

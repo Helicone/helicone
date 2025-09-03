@@ -357,6 +357,9 @@ export interface paths {
   "/v1/trace/log-python": {
     post: operations["LogPythonTrace"];
   };
+  "/v1/public/share/{id}/data": {
+    get: operations["GetShareData"];
+  };
   "/v1/session/has-session": {
     get: operations["HasSession"];
   };
@@ -2188,6 +2191,38 @@ Json: JsonObject;
           };
         }[];
     };
+    /** @enum {string} */
+    ShareScope: "dashboard" | "metrics" | "requests" | "logs";
+    ShareRow: {
+      allow_request_bodies: boolean;
+      name: string | null;
+      time_end: string | null;
+      time_start: string | null;
+      filters: unknown;
+      scope: components["schemas"]["ShareScope"];
+      organization_id: string;
+      id: string;
+    };
+    "ResultSuccess__share-ShareRow--metrics_58__totalRequests-number--requestsOverTime_58__created_at_trunc-string--count-number_-Array--totalCost-number_--requests-HeliconeRequest-Array__": {
+      data: {
+        requests: components["schemas"]["HeliconeRequest"][];
+        metrics: {
+          /** Format: double */
+          totalCost: number;
+          requestsOverTime: {
+              /** Format: double */
+              count: number;
+              created_at_trunc: string;
+            }[];
+          /** Format: double */
+          totalRequests: number;
+        };
+        share: components["schemas"]["ShareRow"];
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__share-ShareRow--metrics_58__totalRequests-number--requestsOverTime_58__created_at_trunc-string--count-number_-Array--totalCost-number_--requests-HeliconeRequest-Array_.string_": components["schemas"]["ResultSuccess__share-ShareRow--metrics_58__totalRequests-number--requestsOverTime_58__created_at_trunc-string--count-number_-Array--totalCost-number_--requests-HeliconeRequest-Array__"] | components["schemas"]["ResultError_string_"];
     SessionResult: {
       created_at: string;
       latest_request_created_at: string;
@@ -6048,6 +6083,25 @@ export interface operations {
       /** @description No content */
       204: {
         content: never;
+      };
+    };
+  };
+  GetShareData: {
+    parameters: {
+      query?: {
+        limit?: number;
+        offset?: number;
+      };
+      path: {
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__share-ShareRow--metrics_58__totalRequests-number--requestsOverTime_58__created_at_trunc-string--count-number_-Array--totalCost-number_--requests-HeliconeRequest-Array_.string_"];
+        };
       };
     };
   };
