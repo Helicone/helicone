@@ -261,12 +261,31 @@ export function mockOpenAIEndpoint(modelName: string) {
 }
 
 /**
+ * Mock Azure OpenAI endpoint for Azure-hosted OpenAI models
+ */
+export function mockAzureOpenAIEndpoint(modelName: string) {
+  return fetchMock
+    .get("https://test-resource.openai.azure.com")
+    .intercept({
+      path: "/openai/deployments/*/chat/completions",
+      method: "POST",
+    })
+    .reply(() => ({
+      statusCode: 200,
+      data: createOpenAIMockResponse(modelName),
+    }))
+    .persist();
+}
+
+/**
  * Mock Groq endpoint for OpenAI OSS models
  */
 export function mockGroqEndpoint(modelName: string) {
   // Groq uses the full model ID like "openai/gpt-oss-120b"
-  const groqModelId = modelName.startsWith("openai/") ? modelName : `openai/${modelName}`;
-  
+  const groqModelId = modelName.startsWith("openai/")
+    ? modelName
+    : `openai/${modelName}`;
+
   return fetchMock
     .get("https://api.groq.com")
     .intercept({

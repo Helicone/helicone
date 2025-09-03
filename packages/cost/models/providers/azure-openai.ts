@@ -22,7 +22,7 @@ export class AzureOpenAIProvider extends BaseProvider {
     if (!config.baseUri || !config.deploymentName) {
       throw new Error("Azure OpenAI requires baseUri and deploymentName");
     }
-    const apiVersion = config.apiVersion || "2024-02-15-preview";
+    const apiVersion = config.apiVersion || "2025-01-01-preview";
     const baseUri = config.baseUri.endsWith("/")
       ? config.baseUri
       : `${config.baseUri}/`;
