@@ -2449,7 +2449,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "AuthorName": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["anthropic"]},{"dataType":"enum","enums":["openai"]},{"dataType":"enum","enums":["perplexity"]},{"dataType":"enum","enums":["deepseek"]},{"dataType":"enum","enums":["cohere"]},{"dataType":"enum","enums":["google"]},{"dataType":"enum","enums":["meta-llama"]},{"dataType":"enum","enums":["mistralai"]},{"dataType":"enum","enums":["amazon"]},{"dataType":"enum","enums":["microsoft"]},{"dataType":"enum","enums":["nvidia"]},{"dataType":"enum","enums":["qwen"]},{"dataType":"enum","enums":["x-ai"]},{"dataType":"enum","enums":["moonshotai"]}]},{"dataType":"enum","enums":["fallback"]}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["anthropic"]},{"dataType":"enum","enums":["openai"]},{"dataType":"enum","enums":["perplexity"]},{"dataType":"enum","enums":["deepseek"]},{"dataType":"enum","enums":["cohere"]},{"dataType":"enum","enums":["xai"]},{"dataType":"enum","enums":["google"]},{"dataType":"enum","enums":["meta-llama"]},{"dataType":"enum","enums":["mistralai"]},{"dataType":"enum","enums":["amazon"]},{"dataType":"enum","enums":["microsoft"]},{"dataType":"enum","enums":["nvidia"]},{"dataType":"enum","enums":["qwen"]},{"dataType":"enum","enums":["moonshotai"]}]},{"dataType":"enum","enums":["fallback"]}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "StandardParameter": {
@@ -2464,7 +2464,7 @@ const models: TsoaRoute.Models = {
             "input": {"dataType":"double","required":true},
             "output": {"dataType":"double","required":true},
             "image": {"dataType":"double"},
-            "cacheMultipliers": {"dataType":"nestedObjectLiteral","nestedProperties":{"write1h":{"dataType":"double"},"write5m":{"dataType":"double"},"read":{"dataType":"double","required":true}}},
+            "cacheMultipliers": {"dataType":"nestedObjectLiteral","nestedProperties":{"write1h":{"dataType":"double"},"write5m":{"dataType":"double"},"cachedInput":{"dataType":"double","required":true}}},
             "cacheStoragePerHour": {"dataType":"double"},
             "thinking": {"dataType":"double"},
             "request": {"dataType":"double"},

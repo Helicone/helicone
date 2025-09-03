@@ -7587,6 +7587,7 @@
 					"perplexity",
 					"deepseek",
 					"cohere",
+					"xai",
 					"google",
 					"meta-llama",
 					"mistralai",
@@ -7594,7 +7595,6 @@
 					"microsoft",
 					"nvidia",
 					"qwen",
-					"x-ai",
 					"moonshotai",
 					"fallback"
 				]
@@ -7658,13 +7658,13 @@
 								"type": "number",
 								"format": "double"
 							},
-							"read": {
+							"cachedInput": {
 								"type": "number",
 								"format": "double"
 							}
 						},
 						"required": [
-							"read"
+							"cachedInput"
 						],
 						"type": "object"
 					},
