@@ -22,7 +22,7 @@ export const AUTHORS = [
   "cohere",
   "deepseek",
   "qwen",
-  "x-ai",
+  "xai",
   "moonshotai",
   "perplexity",
 ] as const;
@@ -113,7 +113,7 @@ export interface ModelPricing {
   output: number;
   image?: number;
   cacheMultipliers?: {
-    read: number;
+    cachedInput: number;
     write5m?: number;
     write1h?: number;
   };

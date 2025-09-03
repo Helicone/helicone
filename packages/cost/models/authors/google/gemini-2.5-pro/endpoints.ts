@@ -14,7 +14,7 @@ export const endpoints = {
         output: 0.00001,
         image: 0.00516,
         cacheMultipliers: {
-          read: 0.25,
+          cachedInput: 0.25,
           write5m: 1.0,
         },
         cacheStoragePerHour: 0.0000045,
@@ -61,7 +61,7 @@ export const endpoints = {
         output: 0.00001,
         image: 0.00516,
         cacheMultipliers: {
-          read: 0.25,
+          cachedInput: 0.25,
           write5m: 1.0,
         },
         cacheStoragePerHour: 0.0000045,

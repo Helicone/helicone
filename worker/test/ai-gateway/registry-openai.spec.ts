@@ -501,12 +501,45 @@ describe("OpenAI Registry Tests", () => {
         expect(response.status).toBe(200);
       });
 
+      it("should handle azure-openai provider", async () => {
+        mockAzureOpenAIEndpoint("o3-mini");
+
+        const response = await SELF.fetch(
+          "https://ai-gateway.helicone.ai/v1/chat/completions",
+          createAIGatewayRequest("o3-mini/azure-openai")
+        );
+
+        expect(response.status).toBe(200);
+      });
+
       it("should auto-select openai provider when none specified", async () => {
         mockOpenAIEndpoint("o3-mini");
 
         const response = await SELF.fetch(
           "https://ai-gateway.helicone.ai/v1/chat/completions",
           createAIGatewayRequest("o3-mini")
+        );
+
+        expect(response.status).toBe(200);
+      });
+
+      it("should fallback from openai to azure-openai when openai fails", async () => {
+        // Mock OpenAI failure
+        fetchMock
+          .get("https://api.openai.com")
+          .intercept({ path: "/v1/chat/completions", method: "POST" })
+          .reply(() => ({
+            statusCode: 500,
+            data: { error: "OpenAI provider failed" },
+          }))
+          .persist();
+
+        // Mock Azure success
+        mockAzureOpenAIEndpoint("o3-mini");
+
+        const response = await SELF.fetch(
+          "https://ai-gateway.helicone.ai/v1/chat/completions",
+          createAIGatewayRequest("o3-mini") // No provider specified, should try openai -> azure
         );
 
         expect(response.status).toBe(200);
@@ -526,12 +559,45 @@ describe("OpenAI Registry Tests", () => {
         expect(response.status).toBe(200);
       });
 
+      it("should handle azure-openai provider", async () => {
+        mockAzureOpenAIEndpoint("o4-mini");
+
+        const response = await SELF.fetch(
+          "https://ai-gateway.helicone.ai/v1/chat/completions",
+          createAIGatewayRequest("o4-mini/azure-openai")
+        );
+
+        expect(response.status).toBe(200);
+      });
+
       it("should auto-select openai provider when none specified", async () => {
         mockOpenAIEndpoint("o4-mini");
 
         const response = await SELF.fetch(
           "https://ai-gateway.helicone.ai/v1/chat/completions",
           createAIGatewayRequest("o4-mini")
+        );
+
+        expect(response.status).toBe(200);
+      });
+
+      it("should fallback from openai to azure-openai when openai fails", async () => {
+        // Mock OpenAI failure
+        fetchMock
+          .get("https://api.openai.com")
+          .intercept({ path: "/v1/chat/completions", method: "POST" })
+          .reply(() => ({
+            statusCode: 500,
+            data: { error: "OpenAI provider failed" },
+          }))
+          .persist();
+
+        // Mock Azure success
+        mockAzureOpenAIEndpoint("o4-mini");
+
+        const response = await SELF.fetch(
+          "https://ai-gateway.helicone.ai/v1/chat/completions",
+          createAIGatewayRequest("o4-mini") // No provider specified, should try openai -> azure
         );
 
         expect(response.status).toBe(200);

@@ -15,7 +15,7 @@ export const endpoints = {
         image: 0.001238,
         audio: 0.000001,
         cacheMultipliers: {
-          read: 0.25,
+          cachedInput: 0.25,
           write5m: 1.0,
         },
         cacheStoragePerHour: 0.000001,
@@ -57,7 +57,7 @@ export const endpoints = {
         image: 0.001238,
         audio: 0.000001,
         cacheMultipliers: {
-          read: 0.25,
+          cachedInput: 0.25,
           write5m: 1.0,
         },
         cacheStoragePerHour: 0.000001,

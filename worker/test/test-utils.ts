@@ -261,6 +261,23 @@ export function mockOpenAIEndpoint(modelName: string) {
 }
 
 /**
+ * Mock xAI endpoint for xAI models (Grok)
+ */
+export function mockXAIEndpoint(modelName: string) {
+  return fetchMock
+    .get("https://api.x.ai")
+    .intercept({
+      path: "/v1/chat/completions",
+      method: "POST",
+    })
+    .reply(() => ({
+      statusCode: 200,
+      data: createOpenAIMockResponse(modelName),
+    }))
+    .persist();
+}
+
+/**
  * Mock Azure OpenAI endpoint for Azure-hosted OpenAI models
  */
 export function mockAzureOpenAIEndpoint(modelName: string) {
