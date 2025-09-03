@@ -9,7 +9,8 @@ To run all services in a single Docker container, you can use the `helicone-all-
 
 Get [Docker](https://docs.docker.com/get-docker/) and run the container:
 ```bash
-docker run -d --name helicone-all-in-one -p 3000:3000 -p 8585:8585 -p 5432:5432 -p 8123:8123 -p 9000:9000 helicone/helicone-all-in-one
+docker pull helicone/helicone-all-in-one:v2025.08.08
+docker run -d --name helicone-all-in-one -p 3000:3000 -p 8585:8585 -p 5432:5432 -p 8123:8123 -p 9000:9000 helicone/helicone-all-in-one:v2025.08.08
 ```
 
 ## Example to test the Jawn service
