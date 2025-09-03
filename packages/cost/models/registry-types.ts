@@ -3,7 +3,7 @@
  * Separated to avoid circular dependencies
  */
 
-import type { ProviderName } from "./providers";
+import type { ModelProviderName } from "./providers";
 
 // Import configs to derive types
 import { anthropicEndpointConfig } from "./authors/anthropic";
@@ -38,4 +38,4 @@ export type DeploymentName = {
     : never;
 }[ModelProviderConfigId];
 
-export type EndpointId = `${ModelName}:${ProviderName}:${DeploymentName}`;
+export type EndpointId = `${ModelName}:${ModelProviderName}:${DeploymentName}`;

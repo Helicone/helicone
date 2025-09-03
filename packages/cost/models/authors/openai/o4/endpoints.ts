@@ -1,15 +1,25 @@
-import { ProviderName } from "../../../providers";
+import { ModelProviderName } from "../../../providers";
 import type { ModelProviderConfig } from "../../../types";
 import { O4ModelName } from "./models";
-
 export const endpoints = {
   "o4-mini:openai": {
     providerModelId: "o4-mini",
     provider: "openai",
-    pricing: {
-      prompt: 0.0000011,
-      completion: 0.0000044,
-      cacheRead: 0.000000275,
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000011,
+        output: 0.0000044,
+        cacheMultipliers: {
+          cachedInput: 0.25,
+        },
+      },
+    ],
+    rateLimits: {
+      rpm: 30000,
+      tpm: 150000000,
+      tpd: 15000000000,
     },
     contextLength: 200000,
     maxCompletionTokens: 100000,
@@ -28,35 +38,23 @@ export const endpoints = {
   "o4-mini:azure-openai": {
     providerModelId: "o4-mini",
     provider: "azure-openai",
-    pricing: {
-      prompt: 0.0000011,
-      completion: 0.0000044,
-      cacheRead: 0.000000275,
-    },
-    contextLength: 200000,
-    maxCompletionTokens: 100000,
-    supportedParameters: [
-      "tools",
-      "tool_choice",
-      "seed",
-      "max_tokens",
-      "response_format",
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000011,
+        output: 0.0000044,
+        cacheMultipliers: {
+          cachedInput: 0.25,
+        },
+      },
     ],
-    ptbEnabled: true,
-    endpointConfigs: {
-      "*": {},
-    },
-  },
-  "o4-mini-high:openai": {
-    providerModelId: "o4-mini-high-2025-04-16",
-    provider: "openai",
-    pricing: {
-      prompt: 0.0000011,
-      completion: 0.0000044,
-      cacheRead: 0.000000275,
-    },
     contextLength: 200000,
     maxCompletionTokens: 100000,
+    rateLimits: {
+      rpm: 20,
+      tpm: 20000,
+    },
     supportedParameters: [
       "tools",
       "tool_choice",
@@ -70,5 +68,5 @@ export const endpoints = {
     },
   },
 } satisfies Partial<
-  Record<`${O4ModelName}:${ProviderName}`, ModelProviderConfig>
+  Record<`${O4ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

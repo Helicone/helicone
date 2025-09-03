@@ -1,37 +1,25 @@
-import { ProviderName } from "../../../providers";
+import { ModelProviderName } from "../../../providers";
 import type { ModelProviderConfig } from "../../../types";
 import { O3ModelName } from "./models";
-
 export const endpoints = {
   "o3:openai": {
     providerModelId: "o3-2025-04-16",
     provider: "openai",
-    pricing: {
-      prompt: 0.000002,
-      completion: 0.000008,
-      cacheRead: 0.0000005,
-    },
-    contextLength: 200000,
-    maxCompletionTokens: 100000,
-    supportedParameters: [
-      "tools",
-      "tool_choice",
-      "seed",
-      "max_tokens",
-      "response_format",
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.000002,
+        output: 0.000008,
+        cacheMultipliers: {
+          cachedInput: 0.25,
+        },
+      },
     ],
-    ptbEnabled: true,
-    endpointConfigs: {
-      "*": {},
-    },
-  },
-  "o3:azure-openai": {
-    providerModelId: "o3",
-    provider: "azure-openai",
-    pricing: {
-      prompt: 0.000002,
-      completion: 0.000008,
-      cacheRead: 0.0000005,
+    rateLimits: {
+      rpm: 10000,
+      tpm: 30000000,
+      tpd: 5000000000,
     },
     contextLength: 200000,
     maxCompletionTokens: 100000,
@@ -50,30 +38,18 @@ export const endpoints = {
   "o3-pro:openai": {
     providerModelId: "o3-pro-2025-06-10",
     provider: "openai",
-    pricing: {
-      prompt: 0.00002,
-      completion: 0.00008,
-    },
-    contextLength: 200000,
-    maxCompletionTokens: 100000,
-    supportedParameters: [
-      "tools",
-      "tool_choice",
-      "seed",
-      "max_tokens",
-      "response_format",
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00002,
+        output: 0.00008,
+      },
     ],
-    ptbEnabled: true,
-    endpointConfigs: {
-      "*": {},
-    },
-  },
-  "o3-pro:azure-openai": {
-    providerModelId: "o3-pro",
-    provider: "azure-openai",
-    pricing: {
-      prompt: 0.00002,
-      completion: 0.00008,
+    rateLimits: {
+      rpm: 10000,
+      tpm: 30000000,
+      tpd: 5000000000,
     },
     contextLength: 200000,
     maxCompletionTokens: 100000,
@@ -92,10 +68,21 @@ export const endpoints = {
   "o3-mini:openai": {
     providerModelId: "o3-mini",
     provider: "openai",
-    pricing: {
-      prompt: 0.0000011,
-      completion: 0.0000044,
-      cacheRead: 0.00000055,
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000011,
+        output: 0.0000044,
+        cacheMultipliers: {
+          cachedInput: 0.5,
+        },
+      },
+    ],
+    rateLimits: {
+      rpm: 30000,
+      tpm: 150000000,
+      tpd: 15000000000,
     },
     contextLength: 200000,
     maxCompletionTokens: 100000,
@@ -114,35 +101,23 @@ export const endpoints = {
   "o3-mini:azure-openai": {
     providerModelId: "o3-mini",
     provider: "azure-openai",
-    pricing: {
-      prompt: 0.0000011,
-      completion: 0.0000044,
-      cacheRead: 0.00000055,
-    },
-    contextLength: 200000,
-    maxCompletionTokens: 100000,
-    supportedParameters: [
-      "tools",
-      "tool_choice",
-      "seed",
-      "max_tokens",
-      "response_format",
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000011,
+        output: 0.0000044,
+        cacheMultipliers: {
+          cachedInput: 0.5,
+        },
+      },
     ],
-    ptbEnabled: true,
-    endpointConfigs: {
-      "*": {},
-    },
-  },
-  "o3-mini-high:openai": {
-    providerModelId: "o3-mini-high",
-    provider: "openai",
-    pricing: {
-      prompt: 0.0000011,
-      completion: 0.0000044,
-      cacheRead: 0.00000055,
-    },
     contextLength: 200000,
     maxCompletionTokens: 100000,
+    rateLimits: {
+      rpm: 20,
+      tpm: 200000,
+    },
     supportedParameters: [
       "tools",
       "tool_choice",
@@ -156,5 +131,5 @@ export const endpoints = {
     },
   },
 } satisfies Partial<
-  Record<`${O3ModelName}:${ProviderName}`, ModelProviderConfig>
+  Record<`${O3ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

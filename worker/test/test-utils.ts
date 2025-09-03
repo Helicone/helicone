@@ -244,6 +244,85 @@ export function mockGoogleEndpoint(modelName: string) {
 }
 
 /**
+ * Mock OpenAI endpoint for OpenAI models
+ */
+export function mockOpenAIEndpoint(modelName: string) {
+  return fetchMock
+    .get("https://api.openai.com")
+    .intercept({
+      path: "/v1/chat/completions",
+      method: "POST",
+    })
+    .reply(() => ({
+      statusCode: 200,
+      data: createOpenAIMockResponse(modelName),
+    }))
+    .persist();
+}
+
+/**
+ * Mock xAI endpoint for xAI models (Grok)
+ */
+export function mockXAIEndpoint(modelName: string) {
+  return fetchMock
+    .get("https://api.x.ai")
+    .intercept({
+      path: "/v1/chat/completions",
+      method: "POST",
+    })
+    .reply(() => ({
+      statusCode: 200,
+      data: createOpenAIMockResponse(modelName),
+    }))
+    .persist();
+}
+
+/**
+ * Mock Azure OpenAI endpoint for Azure-hosted OpenAI models
+ */
+export function mockAzureOpenAIEndpoint(modelName: string) {
+  return fetchMock
+    .get("https://test-resource.openai.azure.com")
+    .intercept({
+      path: `/openai/deployments/test-deployment/chat/completions`,
+      method: "POST",
+      query: {
+        "api-version": "2025-01-01-preview",
+      },
+    })
+    .reply(() => ({
+      statusCode: 200,
+      data: createOpenAIMockResponse(modelName),
+    }))
+    .persist();
+}
+
+/**
+ * Mock Groq endpoint for OpenAI OSS models
+ */
+export function mockGroqEndpoint(modelName: string) {
+  // Groq uses the full model ID like "openai/gpt-oss-120b"
+  const groqModelId = modelName.startsWith("openai/")
+    ? modelName
+    : `openai/${modelName}`;
+
+  return fetchMock
+    .get("https://api.groq.com")
+    .intercept({
+      path: "/openai/v1/chat/completions",
+      method: "POST",
+    })
+    .reply(() => ({
+      statusCode: 200,
+      data: {
+        ...createOpenAIMockResponse(modelName),
+        model: groqModelId,
+      },
+    }))
+    .persist();
+}
+
+/**
  * Create a test request to AI Gateway
  */
 export function createAIGatewayRequest(

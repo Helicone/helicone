@@ -81,7 +81,7 @@ export class SecretManagerClass {
     )?.toLowerCase();
 
     // If rotation variables don't exist, fall back to original
-    if (!blueValue || !greenValue || !activeColor) {
+    if (!activeColor) {
       return {
         value: this.getSecretFromEnv(secretName),
         source: "fallback",
@@ -102,6 +102,14 @@ export class SecretManagerClass {
     }
 
     const activeValue = activeColor === "blue" ? blueValue : greenValue;
+
+    if (!activeValue) {
+      return {
+        value: this.getSecretFromEnv(secretName),
+        source: "fallback",
+        secretName,
+      };
+    }
 
     return {
       value: activeValue,

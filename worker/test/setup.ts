@@ -77,7 +77,11 @@ vi.mock("@supabase/supabase-js", () => ({
 
       // Mock decrypted_provider_keys_v2 table for AI Gateway
       let isByokEnabled;
-      if (currentTestCase?.byokEnabled || (currentTestCase && currentTestCase.byokEnabled === undefined) || currentTestCase === undefined) {
+      if (
+        currentTestCase?.byokEnabled ||
+        (currentTestCase && currentTestCase.byokEnabled === undefined) ||
+        currentTestCase === undefined
+      ) {
         isByokEnabled = true;
       } else {
         isByokEnabled = false;
@@ -115,9 +119,9 @@ vi.mock("@supabase/supabase-js", () => ({
             },
             byok_enabled: isByokEnabled,
           },
-          google: {
+          "google-ai-studio": {
             org_id: "test-org-id",
-            provider_name: "google",
+            provider_name: "google-ai-studio",
             decrypted_provider_key: "test-google-api-key",
             decrypted_provider_secret_key: null,
             auth_type: "api_key",
@@ -142,6 +146,28 @@ vi.mock("@supabase/supabase-js", () => ({
             decrypted_provider_secret_key: null,
             auth_type: "api_key",
             config: null,
+            byok_enabled: isByokEnabled,
+          },
+          xai: {
+            org_id: "test-org-id",
+            provider_name: "xai",
+            decrypted_provider_key: "test-xai-api-key",
+            decrypted_provider_secret_key: null,
+            auth_type: "api_key",
+            config: null,
+            byok_enabled: isByokEnabled,
+          },
+          "azure-openai": {
+            org_id: "test-org-id",
+            provider_name: "azure-openai",
+            decrypted_provider_key: "test-azure-openai-api-key",
+            decrypted_provider_secret_key: null,
+            auth_type: "api_key",
+            config: {
+              baseUri: "https://test-resource.openai.azure.com",
+              deploymentName: "test-deployment",
+              apiVersion: "2025-01-01-preview",
+            },
             byok_enabled: isByokEnabled,
           },
         };
@@ -178,9 +204,9 @@ vi.mock("@supabase/supabase-js", () => ({
             },
             byok_enabled: true,
           },
-          google: {
+          "google-ai-studio": {
             org_id: "0afe3a6e-d095-4ec0-bc1e-2af6f57bd2a5",
-            provider_name: "google",
+            provider_name: "google-ai-studio",
             decrypted_provider_key: "helicone-google-api-key",
             decrypted_provider_secret_key: null,
             auth_type: "api_key",
@@ -207,6 +233,28 @@ vi.mock("@supabase/supabase-js", () => ({
             config: null,
             byok_enabled: true,
           },
+          xai: {
+            org_id: "0afe3a6e-d095-4ec0-bc1e-2af6f57bd2a5",
+            provider_name: "xai",
+            decrypted_provider_key: "helicone-xai-api-key",
+            decrypted_provider_secret_key: null,
+            auth_type: "api_key",
+            config: null,
+            byok_enabled: true,
+          },
+          "azure-openai": {
+            org_id: "0afe3a6e-d095-4ec0-bc1e-2af6f57bd2a5",
+            provider_name: "azure-openai",
+            decrypted_provider_key: "helicone-azure-openai-api-key",
+            decrypted_provider_secret_key: null,
+            auth_type: "api_key",
+            config: {
+              baseUri: "https://helicone-resource.openai.azure.com",
+              deploymentName: "helicone-deployment",
+              apiVersion: "2025-01-01-preview",
+            },
+            byok_enabled: true,
+          },
         };
 
         // Track filters applied to the query
@@ -216,10 +264,15 @@ vi.mock("@supabase/supabase-js", () => ({
           filters[field] = value;
 
           // Once we have all required filters, return the matching provider key
-          if (filters.provider_name && filters.org_id && "soft_delete" in filters) {
+          if (
+            filters.provider_name &&
+            filters.org_id &&
+            "soft_delete" in filters
+          ) {
             // Check if it's the Helicone org ID
             if (filters.org_id === "0afe3a6e-d095-4ec0-bc1e-2af6f57bd2a5") {
-              const heliconeKey = mockHeliconeProviderKeys[filters.provider_name];
+              const heliconeKey =
+                mockHeliconeProviderKeys[filters.provider_name];
               if (heliconeKey && !filters.soft_delete) {
                 return {
                   ...chainObj,
@@ -243,7 +296,7 @@ vi.mock("@supabase/supabase-js", () => ({
                 };
               }
             }
-            
+
             // No matching provider key found
             return {
               ...chainObj,
@@ -254,7 +307,7 @@ vi.mock("@supabase/supabase-js", () => ({
                 }),
             };
           }
-          
+
           return chainObj;
         });
       }

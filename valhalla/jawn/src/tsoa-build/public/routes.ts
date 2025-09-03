@@ -2442,13 +2442,84 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ModelProviderName": {
+        "dataType": "refAlias",
+        "type": {"dataType":"enum","enums":["anthropic","openai","bedrock","vertex","azure-openai","perplexity","groq","deepseek","cohere","xai","google-ai-studio"],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "AuthorName": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["anthropic"]},{"dataType":"enum","enums":["openai"]},{"dataType":"enum","enums":["perplexity"]},{"dataType":"enum","enums":["deepseek"]},{"dataType":"enum","enums":["cohere"]},{"dataType":"enum","enums":["google"]},{"dataType":"enum","enums":["meta-llama"]},{"dataType":"enum","enums":["mistralai"]},{"dataType":"enum","enums":["amazon"]},{"dataType":"enum","enums":["microsoft"]},{"dataType":"enum","enums":["nvidia"]},{"dataType":"enum","enums":["qwen"]},{"dataType":"enum","enums":["x-ai"]},{"dataType":"enum","enums":["moonshotai"]}]},{"dataType":"enum","enums":["fallback"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "StandardParameter": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["max_tokens"]},{"dataType":"enum","enums":["temperature"]},{"dataType":"enum","enums":["top_p"]},{"dataType":"enum","enums":["top_k"]},{"dataType":"enum","enums":["stop"]},{"dataType":"enum","enums":["stream"]},{"dataType":"enum","enums":["frequency_penalty"]},{"dataType":"enum","enums":["presence_penalty"]},{"dataType":"enum","enums":["repetition_penalty"]},{"dataType":"enum","enums":["seed"]},{"dataType":"enum","enums":["tools"]},{"dataType":"enum","enums":["tool_choice"]},{"dataType":"enum","enums":["functions"]},{"dataType":"enum","enums":["function_call"]},{"dataType":"enum","enums":["reasoning"]},{"dataType":"enum","enums":["include_reasoning"]},{"dataType":"enum","enums":["thinking"]},{"dataType":"enum","enums":["response_format"]},{"dataType":"enum","enums":["json_mode"]},{"dataType":"enum","enums":["truncate"]},{"dataType":"enum","enums":["min_p"]},{"dataType":"enum","enums":["logit_bias"]},{"dataType":"enum","enums":["logprobs"]},{"dataType":"enum","enums":["top_logprobs"]},{"dataType":"enum","enums":["structured_outputs"]},{"dataType":"enum","enums":["verbosity"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ModelPricing": {
+        "dataType": "refObject",
+        "properties": {
+            "threshold": {"dataType":"double","required":true},
+            "input": {"dataType":"double","required":true},
+            "output": {"dataType":"double","required":true},
+            "image": {"dataType":"double"},
+            "cacheMultipliers": {"dataType":"nestedObjectLiteral","nestedProperties":{"write1h":{"dataType":"double"},"write5m":{"dataType":"double"},"read":{"dataType":"double","required":true}}},
+            "cacheStoragePerHour": {"dataType":"double"},
+            "thinking": {"dataType":"double"},
+            "request": {"dataType":"double"},
+            "audio": {"dataType":"double"},
+            "video": {"dataType":"double"},
+            "web_search": {"dataType":"double"},
+            "internal_reasoning": {"dataType":"double"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Endpoint": {
+        "dataType": "refObject",
+        "properties": {
+            "pricing": {"dataType":"array","array":{"dataType":"refObject","ref":"ModelPricing"},"required":true},
+            "contextLength": {"dataType":"double","required":true},
+            "maxCompletionTokens": {"dataType":"double","required":true},
+            "ptbEnabled": {"dataType":"boolean","required":true},
+            "version": {"dataType":"string"},
+            "baseUrl": {"dataType":"string","required":true},
+            "provider": {"ref":"ModelProviderName","required":true},
+            "author": {"ref":"AuthorName","required":true},
+            "providerModelId": {"dataType":"string","required":true},
+            "supportedParameters": {"dataType":"array","array":{"dataType":"refAlias","ref":"StandardParameter"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "SimplifiedPricing": {
+        "dataType": "refObject",
+        "properties": {
+            "prompt": {"dataType":"double","required":true},
+            "completion": {"dataType":"double","required":true},
+            "audio": {"dataType":"double"},
+            "thinking": {"dataType":"double"},
+            "web_search": {"dataType":"double"},
+            "image": {"dataType":"double"},
+            "video": {"dataType":"double"},
+            "cacheRead": {"dataType":"double"},
+            "cacheWrite": {"dataType":"double"},
+            "internal_reasoning": {"dataType":"double"},
+            "threshold": {"dataType":"double"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ModelEndpoint": {
         "dataType": "refObject",
         "properties": {
             "provider": {"dataType":"string","required":true},
             "providerSlug": {"dataType":"string","required":true},
-            "pricing": {"dataType":"nestedObjectLiteral","nestedProperties":{"cacheWrite":{"dataType":"double"},"cacheRead":{"dataType":"double"},"thinking":{"dataType":"double"},"image":{"dataType":"double"},"video":{"dataType":"double"},"web_search":{"dataType":"double"},"audio":{"dataType":"double"},"completion":{"dataType":"double","required":true},"prompt":{"dataType":"double","required":true}},"required":true},
+            "endpoint": {"ref":"Endpoint"},
             "supportsPtb": {"dataType":"boolean"},
+            "pricing": {"ref":"SimplifiedPricing","required":true},
+            "pricingTiers": {"dataType":"array","array":{"dataType":"refObject","ref":"SimplifiedPricing"}},
         },
         "additionalProperties": false,
     },
@@ -2461,11 +2532,6 @@ const models: TsoaRoute.Models = {
     "OutputModality": {
         "dataType": "refAlias",
         "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["text"]},{"dataType":"enum","enums":["image"]},{"dataType":"enum","enums":["audio"]},{"dataType":"enum","enums":["video"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "StandardParameter": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["max_tokens"]},{"dataType":"enum","enums":["temperature"]},{"dataType":"enum","enums":["top_p"]},{"dataType":"enum","enums":["top_k"]},{"dataType":"enum","enums":["stop"]},{"dataType":"enum","enums":["stream"]},{"dataType":"enum","enums":["frequency_penalty"]},{"dataType":"enum","enums":["presence_penalty"]},{"dataType":"enum","enums":["repetition_penalty"]},{"dataType":"enum","enums":["seed"]},{"dataType":"enum","enums":["tools"]},{"dataType":"enum","enums":["tool_choice"]},{"dataType":"enum","enums":["functions"]},{"dataType":"enum","enums":["function_call"]},{"dataType":"enum","enums":["reasoning"]},{"dataType":"enum","enums":["include_reasoning"]},{"dataType":"enum","enums":["thinking"]},{"dataType":"enum","enums":["response_format"]},{"dataType":"enum","enums":["json_mode"]},{"dataType":"enum","enums":["truncate"]},{"dataType":"enum","enums":["min_p"]},{"dataType":"enum","enums":["logit_bias"]},{"dataType":"enum","enums":["logprobs"]},{"dataType":"enum","enums":["top_logprobs"]},{"dataType":"enum","enums":["structured_outputs"]}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ModelRegistryItem": {

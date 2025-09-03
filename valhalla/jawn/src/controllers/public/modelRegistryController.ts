@@ -4,7 +4,9 @@ import { registry } from "../../../../../packages/cost/models/registry";
 import { 
   InputModality, 
   OutputModality, 
-  StandardParameter
+  StandardParameter,
+  ModelPricing,
+  Endpoint
 } from "../../../../../packages/cost/models/types";
 
 // Define capabilities based on ModelPricing fields
@@ -17,21 +19,27 @@ type ModelCapability =
   | "caching"       // has pricing.cacheRead or cacheWrite > 0
   | "reasoning";    // has pricing.internal_reasoning > 0
 
+interface SimplifiedPricing {
+  prompt: number;  // per million tokens
+  completion: number;  // per million tokens
+  audio?: number;
+  thinking?: number;
+  web_search?: number;
+  image?: number;
+  video?: number;
+  cacheRead?: number;
+  cacheWrite?: number;
+  internal_reasoning?: number;
+  threshold?: number;  // Add threshold for tiers
+}
+
 interface ModelEndpoint {
   provider: string;
   providerSlug: string;
-  pricing: {
-    prompt: number;      // per million tokens
-    completion: number;  // per million tokens
-    audio?: number;      // per million tokens, if > 0
-    web_search?: number; // per million tokens, if > 0
-    video?: number;      // per million tokens, if > 0
-    image?: number;      // per million tokens, if > 0
-    thinking?: number;   // per million tokens, if > 0
-    cacheRead?: number;  // per million tokens, if > 0
-    cacheWrite?: number; // per million tokens, if > 0
-  };
+  endpoint?: Endpoint; // Direct from package
   supportsPtb?: boolean;
+  pricing: SimplifiedPricing;  // Base pricing (simplified)
+  pricingTiers?: SimplifiedPricing[];  // Full tiers with thresholds
 }
 
 interface ModelRegistryItem {
@@ -64,10 +72,6 @@ interface ModelRegistryResponse {
 @Route("/v1/public/model-registry")
 @Tags("Model Registry")
 export class ModelRegistryController extends Controller {
-  // Helper function to format cost per million tokens
-  private formatCostPerMillion(costPerToken: number): number {
-    return costPerToken * 1000000;
-  }
 
   // Helper function to get provider slug for linking
   private getProviderSlug(provider: string): string {
@@ -122,56 +126,54 @@ export class ModelRegistryController extends Controller {
 
         const endpoints: ModelEndpoint[] = [];
         
-        // Transform each provider config into an endpoint
-        for (const config of providerConfigsResult.data) {
-          // Get PTB endpoints for cost information
-          const ptbEndpointsResult = registry.getPtbEndpointsByProvider(modelId, config.provider);
-          
-          // Use PTB endpoint pricing if available, otherwise use config pricing
-          const sourcePricing = ptbEndpointsResult.data && ptbEndpointsResult.data.length > 0
-            ? ptbEndpointsResult.data[0].pricing
-            : config.pricing;
+        // Get ALL endpoints from registry (both PTB and non-PTB)
+        const allEndpointsResult = registry.getEndpointsByModel(modelId);
+        
+        if (allEndpointsResult.data && allEndpointsResult.data.length > 0) {
+          // Use all endpoints - they already have the correct structure
+          for (const endpoint of allEndpointsResult.data) {
+            // Convert to simplified pricing format
+            const baseTier = endpoint.pricing[0];
+            const simplifiedPricing: SimplifiedPricing = {
+              prompt: baseTier.input * 1000000,
+              completion: baseTier.output * 1000000,
+              audio: baseTier.audio ? baseTier.audio * 1000000 : undefined,
+              thinking: baseTier.thinking ? baseTier.thinking * 1000000 : undefined,
+              web_search: baseTier.web_search ? baseTier.web_search * 1000000 : undefined,
+              image: baseTier.image ? baseTier.image * 1000000 : undefined,
+              video: baseTier.video ? baseTier.video * 1000000 : undefined,
+              cacheRead: baseTier.cacheMultipliers?.cachedInput ? baseTier.input * baseTier.cacheMultipliers.cachedInput * 1000000 : undefined,
+              cacheWrite: baseTier.cacheMultipliers?.write5m ? baseTier.input * baseTier.cacheMultipliers.write5m * 1000000 : undefined,
+              internal_reasoning: baseTier.internal_reasoning ? baseTier.internal_reasoning * 1000000 : undefined,
+            };
 
-          // Convert all costs to per-million tokens and only include if > 0
-          const pricing: any = {
-            prompt: this.formatCostPerMillion(sourcePricing.prompt),
-            completion: this.formatCostPerMillion(sourcePricing.completion),
-          };
-
-          // Add optional cost metrics only if they exist and are > 0
-          if (sourcePricing.audio && sourcePricing.audio > 0) {
-            pricing.audio = this.formatCostPerMillion(sourcePricing.audio);
-          }
-          if (sourcePricing.web_search && sourcePricing.web_search > 0) {
-            pricing.web_search = this.formatCostPerMillion(sourcePricing.web_search);
-          }
-          if (sourcePricing.video && sourcePricing.video > 0) {
-            pricing.video = this.formatCostPerMillion(sourcePricing.video);
-          }
-          if (sourcePricing.image && sourcePricing.image > 0) {
-            pricing.image = this.formatCostPerMillion(sourcePricing.image);
-          }
-          if (sourcePricing.thinking && sourcePricing.thinking > 0) {
-            pricing.thinking = this.formatCostPerMillion(sourcePricing.thinking);
-          }
-          if (sourcePricing.cacheRead && sourcePricing.cacheRead > 0) {
-            pricing.cacheRead = this.formatCostPerMillion(sourcePricing.cacheRead);
-          }
-          if (sourcePricing.cacheWrite) {
-            const cacheWriteCost = typeof sourcePricing.cacheWrite === 'number' 
-              ? sourcePricing.cacheWrite 
-              : sourcePricing.cacheWrite.default;
-            if (cacheWriteCost > 0) {
-              pricing.cacheWrite = this.formatCostPerMillion(cacheWriteCost);
+            // Create pricing tiers if there are multiple
+            let pricingTiers: SimplifiedPricing[] | undefined;
+            if (endpoint.pricing.length > 1) {
+              pricingTiers = endpoint.pricing.map(tier => ({
+                prompt: tier.input * 1000000,
+                completion: tier.output * 1000000,
+                audio: tier.audio ? tier.audio * 1000000 : undefined,
+                thinking: tier.thinking ? tier.thinking * 1000000 : undefined,
+                web_search: tier.web_search ? tier.web_search * 1000000 : undefined,
+                image: tier.image ? tier.image * 1000000 : undefined,
+                video: tier.video ? tier.video * 1000000 : undefined,
+                cacheRead: tier.cacheMultipliers?.cachedInput ? tier.input * tier.cacheMultipliers.cachedInput * 1000000 : undefined,
+                cacheWrite: tier.cacheMultipliers?.write5m ? tier.input * tier.cacheMultipliers.write5m * 1000000 : undefined,
+                internal_reasoning: tier.internal_reasoning ? tier.internal_reasoning * 1000000 : undefined,
+                threshold: tier.threshold,  // Include threshold!
+              }));
             }
-          }
 
-          endpoints.push({
-            provider: config.provider,
-            providerSlug: this.getProviderSlug(config.provider),
-            pricing,
-            supportsPtb: config.ptbEnabled,
-          });
+            endpoints.push({
+              provider: endpoint.provider,
+              providerSlug: this.getProviderSlug(endpoint.provider),
+              endpoint: endpoint, // Still pass the entire endpoint object
+              supportsPtb: endpoint.ptbEnabled,
+              pricing: simplifiedPricing,
+              pricingTiers: pricingTiers,
+            });
+          }
         }
 
         // Skip models without endpoints

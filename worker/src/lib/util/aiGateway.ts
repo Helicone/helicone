@@ -3,7 +3,7 @@ import {
   getProvider,
   authenticateRequest as authenticateProviderRequest,
 } from "@helicone-package/cost/models/provider-helpers";
-import { ProviderName } from "@helicone-package/cost/models/providers";
+import { ModelProviderName } from "@helicone-package/cost/models/providers";
 import { BaseProvider } from "@helicone-package/cost/models/providers/base";
 import { RequestWrapper } from "../RequestWrapper";
 import { toAnthropic } from "../clients/llmmapper/providers/openai/request/toAnthropic";
@@ -81,7 +81,7 @@ export const authenticate = async (
 
 type DirectProviderEndpoint = {
   type: "direct";
-  provider: ProviderName;
+  provider: ModelProviderName;
   providerConfig: BaseProvider;
   modelName: string;
   cuid?: string;
@@ -89,7 +89,7 @@ type DirectProviderEndpoint = {
 
 type EndpointsProviderEndpoint = {
   type: "endpoints";
-  providers: Set<ProviderName>;
+  providers: Set<ModelProviderName>;
 };
 
 type ValidateModelStringResult = Result<
@@ -128,7 +128,7 @@ const validateModelString = (model: string): ValidateModelStringResult => {
 
   return ok({
     type: "direct",
-    provider: providerName as ProviderName,
+    provider: providerName as ModelProviderName,
     modelName,
     providerConfig: providerResult.data,
     cuid: cuid ?? undefined,
@@ -285,7 +285,6 @@ const attemptDirectProviderRequest = async (
     userProviderKeyWithConfig &&
     isByokEnabled(userProviderKeyWithConfig)
   ) {
-    console.log("no PTB endpoints found");
     // Fall back to creating a custom endpoint
     const fallback = registry.createFallbackEndpoint(
       modelName,
@@ -698,15 +697,16 @@ const reserveEscrow = async (
   const walletId = env.WALLET.idFromName(orgId);
   const walletStub = env.WALLET.get(walletId);
 
+  // Use first pricing tier (threshold 0)
+  const firstTierPricing = endpoint.pricing[0];
   if (
+    !firstTierPricing ||
     endpoint.contextLength === 0 ||
     endpoint.maxCompletionTokens === 0 ||
-    endpoint.pricing.prompt === 0 ||
-    endpoint.pricing.completion === 0 ||
-    endpoint.pricing.image === 0 ||
-    endpoint.pricing.cacheRead === 0 ||
-    endpoint.pricing.cacheWrite === 0 ||
-    endpoint.pricing.thinking === 0
+    firstTierPricing.input === 0 ||
+    firstTierPricing.output === 0 ||
+    firstTierPricing.image === 0 ||
+    firstTierPricing.thinking === 0
   ) {
     return err({
       type: "model_not_supported",
@@ -715,9 +715,9 @@ const reserveEscrow = async (
     });
   }
 
-  const maxPromptCost = endpoint.contextLength * endpoint.pricing.prompt;
+  const maxPromptCost = endpoint.contextLength * firstTierPricing.input;
   const maxCompletionCost =
-    endpoint.maxCompletionTokens * endpoint.pricing.completion;
+    endpoint.maxCompletionTokens * firstTierPricing.output;
   const worstCaseCost = maxPromptCost + maxCompletionCost;
   if (worstCaseCost <= 0) {
     return err({
