@@ -26,6 +26,9 @@ export class HqlStore {
     // if result is ok, if over 100k store in s3 and return url
     const key = `${organizationId}/${fileName}`;
     // Determine column order from keys of first row
+    if (rows.length === 0) {
+      return err("No data to export");
+    }
     const headers = Object.keys(rows[0]);
     const csvWriter = createArrayCsvWriter({
       path: fileName,
