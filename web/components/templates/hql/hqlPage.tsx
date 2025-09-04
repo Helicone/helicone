@@ -171,7 +171,9 @@ function HQLPage() {
       // themes may already be defined; ignore
     }
 
-    mono.editor.setTheme(currentTheme === "dark" ? "custom-dark" : "custom-light");
+    mono.editor.setTheme(
+      currentTheme === "dark" ? "custom-dark" : "custom-light",
+    );
   }, [currentTheme]);
 
   // Setup autocompletion
