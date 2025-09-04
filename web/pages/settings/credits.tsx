@@ -26,6 +26,7 @@ import AuthLayout from "../../components/layout/auth/authLayout";
 import { NextPageWithLayout } from "../_app";
 import { useFeatureFlag } from "@/services/hooks/admin";
 import { FeatureWaitlist } from "@/components/templates/waitlist/FeatureWaitlist";
+import { cn } from "@/lib/utils";
 
 const CreditsSettings: NextPageWithLayout<void> = () => {
   const [currentPage, setCurrentPage] = useState(0);
@@ -60,21 +61,7 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
   const hasMore = currentPage < totalPages - 1;
   const hasPrevious = currentPage > 0;
 
-  // Show waitlist if feature flag is not enabled
-  if (!hasCreditsFeatureFlag?.data && !isFeatureFlagLoading) {
-    return (
-      <div className="flex w-full justify-center px-4 py-4">
-        <div className="w-full max-w-4xl">
-          <FeatureWaitlist
-            feature="credits"
-            title="Credits Feature - Coming Soon!"
-            description="Join the waitlist to be notified when our credits system becomes available for your organization."
-            organizationId={org?.currentOrg?.id}
-          />
-        </div>
-      </div>
-    );
-  }
+  const hasAccess = hasCreditsFeatureFlag?.data && !isFeatureFlagLoading;
 
   // Show loading state while checking feature flag
   if (isFeatureFlagLoading) {
@@ -93,11 +80,27 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
 
   return (
     <div className="flex w-full justify-center px-4 py-4">
-      <div className="w-full max-w-4xl">
-        <Card className="w-full">
+      <div className="w-full max-w-4xl space-y-4">
+        {/* Show waitlist banner if no access */}
+        {!hasAccess && (
+          <FeatureWaitlist
+            feature="credits"
+            title="Credits Feature - Coming Soon!"
+            description="Join the waitlist to be notified when our credits system becomes available for your organization."
+            organizationId={org?.currentOrg?.id}
+          />
+        )}
+
+        {/* Main credits card - disabled if no access */}
+        <Card className={cn("w-full", !hasAccess && "opacity-60")}>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-xl font-medium">Credits</CardTitle>
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-xl font-medium">Credits</CardTitle>
+                <Badge variant="secondary" className="text-xs">
+                  Beta
+                </Badge>
+              </div>
               <Button
                 variant="ghost"
                 size="icon"
@@ -105,7 +108,7 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
                   refetch();
                   refetchTransactions();
                 }}
-                disabled={isLoading || transactionsLoading}
+                disabled={!hasAccess || isLoading || transactionsLoading}
               >
                 <RefreshCcw
                   className={`h-4 w-4 ${isLoading || transactionsLoading ? "animate-spin" : ""}`}
@@ -119,7 +122,9 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
             <div className="rounded-lg border bg-muted/10 p-4">
               <Small className="text-muted-foreground">Current Balance</Small>
               <div className="mt-1 text-3xl font-bold">
-                {isLoading ? (
+                {!hasAccess ? (
+                  <span className="text-muted-foreground">--</span>
+                ) : isLoading ? (
                   <span className="text-muted-foreground">Loading...</span>
                 ) : creditError ? (
                   <span className="text-destructive">
@@ -140,11 +145,17 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
                     size="sm"
                     className="w-full"
                     onClick={() => setIsPaymentModalOpen(true)}
+                    disabled={!hasAccess}
                   >
                     Add Credits
                   </Button>
                   <Link href="/requests" className="w-full">
-                    <Button variant="outline" size="sm" className="w-full">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="w-full"
+                      disabled={!hasAccess}
+                    >
                       View Usage
                     </Button>
                   </Link>
@@ -187,6 +198,7 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
                       // Reset pagination when changing page size
                       setCurrentPage(0);
                     }}
+                    disabled={!hasAccess}
                   >
                     <SelectTrigger className="h-8 w-[60px]">
                       <SelectValue />
@@ -203,7 +215,11 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
 
               <div className="rounded-lg border">
                 <div className="p-4">
-                  {transactionsLoading ? (
+                  {!hasAccess ? (
+                    <div className="py-8 text-center">
+                      <Muted>Join the waitlist to view transactions</Muted>
+                    </div>
+                  ) : transactionsLoading ? (
                     <div className="py-8 text-center">
                       <Muted>Loading transactions...</Muted>
                     </div>
@@ -270,7 +286,7 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
                 </div>
 
                 {/* Pagination */}
-                {transactions.length > 0 && (
+                {hasAccess && transactions.length > 0 && (
                   <div className="border-t p-4">
                     <div className="flex items-center justify-center gap-2">
                       <Button
@@ -313,7 +329,7 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
 
       {/* Payment Modal */}
       <PaymentModal
-        isOpen={isPaymentModalOpen}
+        isOpen={isPaymentModalOpen && !!hasAccess}
         onClose={() => setIsPaymentModalOpen(false)}
       />
     </div>
