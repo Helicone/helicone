@@ -39,7 +39,7 @@ export const endpoints = {
       "top_logprobs",
       "top_p",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "*": {},
     },
@@ -93,7 +93,7 @@ export const endpoints = {
       "top_logprobs",
       "top_p",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "*": {},
     },
@@ -134,7 +134,7 @@ export const endpoints = {
       "top_logprobs",
       "top_p",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "*": {},
     },
@@ -175,7 +175,7 @@ export const endpoints = {
       "top_logprobs",
       "top_p",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "*": {},
     },

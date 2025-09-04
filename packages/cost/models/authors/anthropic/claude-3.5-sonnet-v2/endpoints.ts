@@ -30,7 +30,7 @@ export const endpoints = {
       "top_k",
       "stop",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "*": {},
     },
@@ -62,7 +62,7 @@ export const endpoints = {
       "top_k",
       "stop",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       global: {
         providerModelId: "claude-3-5-sonnet-v2@20241022",
@@ -97,7 +97,7 @@ export const endpoints = {
       "top_k",
       "stop",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "us-east-1": {},
     },
