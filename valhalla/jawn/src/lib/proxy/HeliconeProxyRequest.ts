@@ -94,6 +94,11 @@ export class HeliconeProxyRequestMapper {
       isStream = isStream || queryParams.get("alt") === "sse";
     }
 
+    if (this.provider === "AWS" || this.provider === "BEDROCK") {
+      // Bedrock uses invoke-with-response-stream endpoint for streaming
+      isStream = isStream || targetUrl.pathname.includes("invoke-with-response-stream");
+    }
+
     return {
       data: {
         heliconePromptTemplate: await this.getHeliconeTemplate(),
