@@ -130,7 +130,9 @@ export class AnthropicStreamBodyProcessor implements IBodyProcessor {
             usage: {
               totalTokens:
                 processedBody?.usage?.input_tokens +
-                processedBody?.usage?.output_tokens,
+                processedBody?.usage?.output_tokens +
+                processedBody?.usage?.cache_creation_input_tokens +
+                processedBody?.usage?.cache_read_input_tokens,
               promptTokens: processedBody?.usage?.input_tokens,
               promptCacheWriteTokens:
                 processedBody?.usage?.cache_creation_input_tokens,
