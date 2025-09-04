@@ -179,11 +179,11 @@ const useAddOrgMemberMutation = () => {
   const { setNotification } = useNotification();
   
   return $JAWN_API.useMutation("post", "/v1/organization/{organizationId}/add_member", {
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       setNotification("Member added successfully", "success");
       
       queryClient.invalidateQueries({
-        queryKey: ["get", "/v1/organization/{organizationId}/members"],
+        queryKey: ["get", "/v1/organization/{organizationId}/members", { params: { path: { organizationId: variables.params.path.organizationId } } }],
       });
       
       queryClient.invalidateQueries({
