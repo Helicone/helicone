@@ -90,8 +90,8 @@ export function FeatureWaitlist({
             <div>
               <H3 className="mb-2">You&lsquo;re on the list!</H3>
               <P className="text-muted-foreground">
-                We&lsquo;ll notify you at <strong>{email}</strong> when this feature
-                is available.
+                We&lsquo;ll notify you at <strong>{email}</strong> when this
+                feature is available.
               </P>
             </div>
           </div>
