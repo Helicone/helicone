@@ -60,10 +60,16 @@ export class CreditsManager extends BaseManager {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${process.env.HELICONE_MANUAL_ACCESS_KEY}`,
+            Authorization: `Bearer ${process.env.HELICONE_MANUAL_ACCESS_KEY}`,
           },
         }
       );
+      if (!paymentsResponse.ok) {
+        return err(
+          `Error retrieving credit balance transactions: ${paymentsResponse.statusText}`
+        );
+      }
+
       const payments = await paymentsResponse.json();
 
       return ok({

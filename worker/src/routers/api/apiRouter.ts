@@ -17,6 +17,7 @@ import { APIKeysManager } from "../../lib/managers/APIKeysManager";
 import { ModelProviderName } from "@helicone-package/cost/models/providers";
 import { BaseOpenAPIRouter } from "../routerFactory";
 import { StripeManager } from "../../lib/managers/StripeManager";
+import { InternalResponse } from "../../api/lib/internalResponse";
 
 function getAPIRouterV1(
   router: OpenAPIRouterType<
@@ -526,27 +527,36 @@ function getAPIRouterV1(
         env: Env,
         _ctx: ExecutionContext
       ) => {
+        
         const authHeader = requestWrapper.headers.get("Authorization");
         if (!authHeader) {
-          return new Response("Unauthorized", { status: 401 });
+          return InternalResponse.unauthorized();
         }
         const providedToken = authHeader.replace("Bearer ", "");
         const expectedToken = env.HELICONE_MANUAL_ACCESS_KEY;
   
         if (!expectedToken) {
           console.error("HELICONE_MANUAL_ACCESS_KEY not configured");
-          return new Response("Server configuration error", { status: 500 });
-        } else if (!timingSafeEqual(Buffer.from(providedToken), Buffer.from(expectedToken))) {
-          return new Response("Unauthorized", { status: 401 });
+          return InternalResponse.newError("Server configuration error", 500);
         }
-  
-        const client = await createAPIClient(env, _ctx, requestWrapper);
+        
+        const providedBuffer = Buffer.from(providedToken);
+        const expectedBuffer = Buffer.from(expectedToken);
+        
+        // Check length first to avoid timingSafeEqual error
+        if (providedBuffer.length !== expectedBuffer.length) {
+          return InternalResponse.unauthorized();
+        }
+        
+        if (!timingSafeEqual(providedBuffer, expectedBuffer)) {
+          return InternalResponse.unauthorized();
+        }
   
         // Get orgId from query param (when called with internal auth)
         const organizationId = Array.isArray(orgId) ? orgId[0] : orgId;
   
         if (!organizationId) {
-          return new Response("orgId is required", { status: 400 });
+          return InternalResponse.newError("orgId is required", 400);
         }
   
         const walletId = env.WALLET.idFromName(organizationId);
@@ -557,14 +567,14 @@ function getAPIRouterV1(
         const pageSizeValue = pageSizeStr ? parseInt(pageSizeStr, 10) : 10;
   
         if (pageSizeValue > 100) {
-          return client.response.newError("Page size must be less than or equal to 100", 400);
+          return InternalResponse.newError("Page size must be less than or equal to 100", 400);
         }
   
         try {
           const creditsPurchases = await walletStub.getCreditsPurchases(pageValue, pageSizeValue);
-          return client.response.successJSON(creditsPurchases);
+          return InternalResponse.successJSON(creditsPurchases);
         } catch (e) {
-          return client.response.newError(
+          return InternalResponse.newError(
             e instanceof Error ? e.message : "Failed to fetch total credits purchased",
             500
           );
@@ -581,13 +591,12 @@ function getAPIRouterV1(
           env: Env,
           _ctx: ExecutionContext
         ) => {
-          const client = await createAPIClient(env, _ctx, requestWrapper);
           if (!orgId || Array.isArray(orgId)) {
-            return new Response("orgId is required and must be a string", { status: 400 });
+            return InternalResponse.newError("orgId is required and must be a string", 400);
           }
           const authHeader = requestWrapper.headers.get("Authorization");
           if (!authHeader) {
-            return new Response("Unauthorized", { status: 401 });
+            return InternalResponse.unauthorized();
           }
   
           const providedToken = authHeader.replace("Bearer ", "");
@@ -595,9 +604,19 @@ function getAPIRouterV1(
   
           if (!expectedToken) {
             console.error("HELICONE_MANUAL_ACCESS_KEY not configured");
-            return new Response("Server configuration error", { status: 500 });
-          } else if (!timingSafeEqual(Buffer.from(providedToken), Buffer.from(expectedToken))) {
-            return new Response("Unauthorized", { status: 401 });
+            return InternalResponse.newError("Server configuration error", 500);
+          }
+          
+          const providedBuffer = Buffer.from(providedToken);
+          const expectedBuffer = Buffer.from(expectedToken);
+          
+          // Check length first to avoid timingSafeEqual error
+          if (providedBuffer.length !== expectedBuffer.length) {
+            return InternalResponse.unauthorized();
+          }
+          
+          if (!timingSafeEqual(providedBuffer, expectedBuffer)) {
+            return InternalResponse.unauthorized();
           }
   
           const walletId = env.WALLET.idFromName(orgId);
@@ -605,9 +624,9 @@ function getAPIRouterV1(
   
           try {
             const creditsPurchases = await walletStub.getTotalCreditsPurchased();
-            return client.response.successJSON(creditsPurchases);
+            return InternalResponse.successJSON(creditsPurchases);
           } catch (e) {
-            return client.response.newError(
+            return InternalResponse.newError(
               e instanceof Error ? e.message : "Failed to fetch total credits purchased",
               500
             );
