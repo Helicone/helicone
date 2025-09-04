@@ -355,16 +355,18 @@ export function ThemedTimeFilterShadCN({
                       const [year, month, day] = e.target.value
                         .split("-")
                         .map(Number);
-                      const newFromDate = new Date(year, month - 1, day);
-                      if (isValidDate(newFromDate) && date?.from) {
-                        newFromDate.setHours(
-                          date.from.getHours(),
-                          date.from.getMinutes(),
-                        );
-                        handleDateChange({ from: newFromDate, to: date.to });
-                      } else if (isValidDate(newFromDate)) {
-                        newFromDate.setHours(0, 0);
-                        handleDateChange({ from: newFromDate, to: date.to });
+                      if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+                        const newFromDate = new Date(year, month - 1, day);
+                        if (isValidDate(newFromDate) && date?.from) {
+                          newFromDate.setHours(
+                            date.from.getHours(),
+                            date.from.getMinutes(),
+                          );
+                          handleDateChange({ from: newFromDate, to: date.to });
+                        } else if (isValidDate(newFromDate)) {
+                          newFromDate.setHours(0, 0);
+                          handleDateChange({ from: newFromDate, to: date.to });
+                        }
                       }
                     }
                   }}
