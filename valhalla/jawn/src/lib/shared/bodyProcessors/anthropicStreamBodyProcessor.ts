@@ -138,9 +138,9 @@ export class AnthropicStreamBodyProcessor implements IBodyProcessor {
                 processedBody?.usage?.cache_read_input_tokens,
               completionTokens: processedBody?.usage?.output_tokens,
               promptCacheWrite5m:
-                processedBody?.usage?.cache_creation.ephemeral_5m_input_tokens,
+                processedBody?.usage?.cache_creation?.ephemeral_5m_input_tokens,
               promptCacheWrite1h:
-                processedBody?.usage?.cache_creation.ephemeral_1h_input_tokens,
+                processedBody?.usage?.cache_creation?.ephemeral_1h_input_tokens,
               heliconeCalculated: true,
             },
           });
