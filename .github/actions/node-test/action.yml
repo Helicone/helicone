@@ -1,0 +1,36 @@
+name: Node Test
+description: Setup Node, install dependencies, and run provided test command
+inputs:
+  node-version:
+    description: Node.js version
+    required: false
+    default: '20'
+  working-directory:
+    description: Optional working directory to run the test command
+    required: false
+    default: '.'
+  test-command:
+    description: Command to run tests
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: yarn
+
+    - name: Install dependencies
+      shell: bash
+      run: yarn install --frozen-lockfile
+
+    - name: Run tests
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: ${{ inputs.test-command }}
+
+
