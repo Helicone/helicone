@@ -36,12 +36,12 @@ describe("OpenAI Registry Tests", () => {
         expect(response.status).toBe(200);
       });
 
-      it("should handle azure-openai provider", async () => {
+      it("should handle azure provider", async () => {
         mockAzureOpenAIEndpoint("gpt-4o");
 
         const response = await SELF.fetch(
           "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-4o/azure-openai")
+          createAIGatewayRequest("gpt-4o/azure")
         );
 
         expect(response.status).toBe(200);
@@ -58,7 +58,7 @@ describe("OpenAI Registry Tests", () => {
         expect(response.status).toBe(200);
       });
 
-      it("should fallback from openai to azure-openai when openai fails", async () => {
+      it("should fallback from openai to azure when openai fails", async () => {
         // Mock OpenAI failure
         fetchMock
           .get("https://api.openai.com")
@@ -94,12 +94,12 @@ describe("OpenAI Registry Tests", () => {
         expect(response.status).toBe(200);
       });
 
-      it("should handle azure-openai provider", async () => {
+      it("should handle azure provider", async () => {
         mockAzureOpenAIEndpoint("gpt-4o-mini");
 
         const response = await SELF.fetch(
           "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-4o-mini/azure-openai")
+          createAIGatewayRequest("gpt-4o-mini/azure")
         );
 
         expect(response.status).toBe(200);
@@ -116,7 +116,7 @@ describe("OpenAI Registry Tests", () => {
         expect(response.status).toBe(200);
       });
 
-      it("should fallback from openai to azure-openai when openai fails", async () => {
+      it("should fallback from openai to azure when openai fails", async () => {
         // Mock OpenAI failure
         fetchMock
           .get("https://api.openai.com")
@@ -177,12 +177,12 @@ describe("OpenAI Registry Tests", () => {
         expect(response.status).toBe(200);
       });
 
-      it("should handle azure-openai provider", async () => {
+      it("should handle azure provider", async () => {
         mockAzureOpenAIEndpoint("gpt-4.1");
 
         const response = await SELF.fetch(
           "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-4.1/azure-openai")
+          createAIGatewayRequest("gpt-4.1/azure")
         );
 
         expect(response.status).toBe(200);
@@ -199,7 +199,7 @@ describe("OpenAI Registry Tests", () => {
         expect(response.status).toBe(200);
       });
 
-      it("should fallback from openai to azure-openai when openai fails", async () => {
+      it("should fallback from openai to azure when openai fails", async () => {
         // Mock OpenAI failure
         fetchMock
           .get("https://api.openai.com")
@@ -235,12 +235,12 @@ describe("OpenAI Registry Tests", () => {
         expect(response.status).toBe(200);
       });
 
-      it("should handle azure-openai provider", async () => {
+      it("should handle azure provider", async () => {
         mockAzureOpenAIEndpoint("gpt-4.1-mini");
 
         const response = await SELF.fetch(
           "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-4.1-mini/azure-openai")
+          createAIGatewayRequest("gpt-4.1-mini/azure")
         );
 
         expect(response.status).toBe(200);
@@ -257,7 +257,7 @@ describe("OpenAI Registry Tests", () => {
         expect(response.status).toBe(200);
       });
 
-      it("should fallback from openai to azure-openai when openai fails", async () => {
+      it("should fallback from openai to azure when openai fails", async () => {
         // Mock OpenAI failure
         fetchMock
           .get("https://api.openai.com")
@@ -293,12 +293,12 @@ describe("OpenAI Registry Tests", () => {
         expect(response.status).toBe(200);
       });
 
-      it("should handle azure-openai provider", async () => {
+      it("should handle azure provider", async () => {
         mockAzureOpenAIEndpoint("gpt-4.1-nano");
 
         const response = await SELF.fetch(
           "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-4.1-nano/azure-openai")
+          createAIGatewayRequest("gpt-4.1-nano/azure")
         );
 
         expect(response.status).toBe(200);
@@ -315,7 +315,7 @@ describe("OpenAI Registry Tests", () => {
         expect(response.status).toBe(200);
       });
 
-      it("should fallback from openai to azure-openai when openai fails", async () => {
+      it("should fallback from openai to azure when openai fails", async () => {
         // Mock OpenAI failure
         fetchMock
           .get("https://api.openai.com")
@@ -501,12 +501,12 @@ describe("OpenAI Registry Tests", () => {
         expect(response.status).toBe(200);
       });
 
-      it("should handle azure-openai provider", async () => {
+      it("should handle azure provider", async () => {
         mockAzureOpenAIEndpoint("o3-mini");
 
         const response = await SELF.fetch(
           "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("o3-mini/azure-openai")
+          createAIGatewayRequest("o3-mini/azure")
         );
 
         expect(response.status).toBe(200);
@@ -523,7 +523,7 @@ describe("OpenAI Registry Tests", () => {
         expect(response.status).toBe(200);
       });
 
-      it("should fallback from openai to azure-openai when openai fails", async () => {
+      it("should fallback from openai to azure when openai fails", async () => {
         // Mock OpenAI failure
         fetchMock
           .get("https://api.openai.com")
@@ -559,12 +559,12 @@ describe("OpenAI Registry Tests", () => {
         expect(response.status).toBe(200);
       });
 
-      it("should handle azure-openai provider", async () => {
+      it("should handle azure provider", async () => {
         mockAzureOpenAIEndpoint("o4-mini");
 
         const response = await SELF.fetch(
           "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("o4-mini/azure-openai")
+          createAIGatewayRequest("o4-mini/azure")
         );
 
         expect(response.status).toBe(200);
@@ -581,7 +581,7 @@ describe("OpenAI Registry Tests", () => {
         expect(response.status).toBe(200);
       });
 
-      it("should fallback from openai to azure-openai when openai fails", async () => {
+      it("should fallback from openai to azure when openai fails", async () => {
         // Mock OpenAI failure
         fetchMock
           .get("https://api.openai.com")

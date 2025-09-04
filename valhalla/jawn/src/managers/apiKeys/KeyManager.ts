@@ -242,7 +242,7 @@ export class KeyManager extends BaseManager {
   async getProviderKeys(): Promise<Result<ProviderKeyRow[], string>> {
     try {
       const result = await dbExecute<ProviderKeyRow>(
-        `SELECT id, org_id, provider_name, provider_key_name, created_at, soft_delete, config, byok_enabled
+        `SELECT id, org_id, provider_name, provider_key_name, created_at, soft_delete, config, cuid, byok_enabled
          FROM provider_keys
          WHERE org_id = $1
          AND soft_delete = false

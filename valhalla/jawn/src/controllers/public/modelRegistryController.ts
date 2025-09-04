@@ -78,7 +78,7 @@ export class ModelRegistryController extends Controller {
       google: "google",
       vertex: "google-vertex",
       bedrock: "aws-bedrock",
-      azure: "azure-openai",
+      azure: "azure",
     };
     return slugMap[provider.toLowerCase()] || provider.toLowerCase();
   }

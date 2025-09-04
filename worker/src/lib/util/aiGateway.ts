@@ -365,7 +365,7 @@ const attemptDirectProviderRequest = async (
       env.HELICONE_ORG_ID
     );
   if (!heliconeKeyWithConfig) {
-    console.error("no helicone key found");
+    console.error("no helicone key found for provider", provider);
     return err({
       type: "missing_provider_key",
       message: "Missing Helicone provider key required for PTB",

@@ -48,7 +48,7 @@ export const dbProviderToProvider = (
     return "google-ai-studio";
   }
   if (provider === "Azure OpenAI") {
-    return "azure-openai";
+    return "azure";
   }
   return null;
 };
