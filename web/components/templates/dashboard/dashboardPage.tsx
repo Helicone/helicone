@@ -104,7 +104,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
         return "custom";
       } else {
-        return currentTimeFilter || "24h";
+        return currentTimeFilter || "1m";
       }
     })(),
   );
@@ -370,9 +370,9 @@ const DashboardPage = (props: DashboardPageProps) => {
                         searchParams.get("t")?.startsWith("custom_") || false,
                       onClearTimeFilter: () => {
                         searchParams.delete("t");
-                        setInterval("24h");
+                        setInterval("1m");
                         setTimeFilter({
-                          start: getTimeIntervalAgo("24h"),
+                          start: getTimeIntervalAgo("1m"),
                           end: new Date(),
                         });
                       },
