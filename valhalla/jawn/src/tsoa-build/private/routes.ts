@@ -14181,7 +14181,7 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "model": {"ref":"TextOperator","required":true},
-            "cost": {"dataType":"nestedObjectLiteral","nestedProperties":{"completion_audio_token":{"dataType":"double"},"prompt_audio_token":{"dataType":"double"},"prompt_cache_read_token":{"dataType":"double"},"prompt_cache_write_token":{"dataType":"double"},"per_call":{"dataType":"double"},"per_image":{"dataType":"double"},"completion_token":{"dataType":"double","required":true},"prompt_token":{"dataType":"double","required":true}},"required":true},
+            "cost": {"dataType":"nestedObjectLiteral","nestedProperties":{"prompt_cache_creation_1h":{"dataType":"double"},"prompt_cache_creation_5m":{"dataType":"double"},"completion_audio_token":{"dataType":"double"},"prompt_audio_token":{"dataType":"double"},"prompt_cache_read_token":{"dataType":"double"},"prompt_cache_write_token":{"dataType":"double"},"per_call":{"dataType":"double"},"per_image":{"dataType":"double"},"completion_token":{"dataType":"double","required":true},"prompt_token":{"dataType":"double","required":true}},"required":true},
             "showInPlayground": {"dataType":"boolean"},
             "targetUrl": {"dataType":"string"},
             "dateRange": {"dataType":"nestedObjectLiteral","nestedProperties":{"end":{"dataType":"string","required":true},"start":{"dataType":"string","required":true}}},

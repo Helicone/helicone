@@ -15670,6 +15670,10 @@ Json: JsonObject;
       model: components["schemas"]["TextOperator"];
       cost: {
         /** Format: double */
+        prompt_cache_creation_1h?: number;
+        /** Format: double */
+        prompt_cache_creation_5m?: number;
+        /** Format: double */
         completion_audio_token?: number;
         /** Format: double */
         prompt_audio_token?: number;

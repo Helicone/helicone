@@ -41,6 +41,10 @@ export class AnthropicBodyProcessor implements IBodyProcessor {
             promptCacheReadTokens:
               parsedResponseBody?.usage?.cache_read_input_tokens,
             completionTokens: parsedResponseBody?.usage?.output_tokens,
+            promptCacheWrite5m:
+              parsedResponseBody?.usage?.cache_creation.ephemeral_5m_input_tokens,
+            promptCacheWrite1h:
+              parsedResponseBody?.usage?.cache_creation.ephemeral_1h_input_tokens,
             heliconeCalculated: true,
           },
         });

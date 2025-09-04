@@ -46655,6 +46655,14 @@
 					},
 					"cost": {
 						"properties": {
+							"prompt_cache_creation_1h": {
+								"type": "number",
+								"format": "double"
+							},
+							"prompt_cache_creation_5m": {
+								"type": "number",
+								"format": "double"
+							},
 							"completion_audio_token": {
 								"type": "number",
 								"format": "double"
