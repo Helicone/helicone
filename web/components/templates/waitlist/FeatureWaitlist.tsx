@@ -31,7 +31,7 @@ export function FeatureWaitlist({
         query: {
           email,
           feature,
-          organizationId: organizationId,
+          organizationId: organizationId ?? "",
         },
       },
     });
@@ -88,9 +88,9 @@ export function FeatureWaitlist({
               <CheckIcon className="h-6 w-6 text-green-600 dark:text-green-400" />
             </div>
             <div>
-              <H3 className="mb-2">You're on the list!</H3>
+              <H3 className="mb-2">You&lsquo;re on the list!</H3>
               <P className="text-muted-foreground">
-                We'll notify you at <strong>{email}</strong> when this feature
+                We&lsquo;ll notify you at <strong>{email}</strong> when this feature
                 is available.
               </P>
             </div>
