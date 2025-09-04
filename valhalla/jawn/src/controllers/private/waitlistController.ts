@@ -15,7 +15,7 @@ import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { err, ok, Result } from "../../packages/common/result";
 import { type JawnAuthenticatedRequest } from "../../types/request";
 
-const SUPPORTED_FEATURES = ["credits"] as const;
+const SUPPORTED_FEATURES = ["credits", "pass_through_billing"] as const;
 
 type SupportedFeature = (typeof SUPPORTED_FEATURES)[number];
 

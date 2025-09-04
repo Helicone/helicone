@@ -16,9 +16,6 @@ export interface paths {
   "/v1/webhooks/{webhookId}": {
     delete: operations["DeleteWebhook"];
   };
-  "/v1/public/waitlist/experiments": {
-    post: operations["AddToWaitlist"];
-  };
   "/v1/vault/add": {
     post: operations["AddKey"];
   };
@@ -697,11 +694,6 @@ export interface components {
       error: null;
     };
     "Result_null.string_": components["schemas"]["ResultSuccess_null_"] | components["schemas"]["ResultError_string_"];
-    ResultError_any_: {
-      /** @enum {number|null} */
-      data: null;
-      error: unknown;
-    };
     "ResultSuccess__id-string__": {
       data: {
         id: string;
@@ -4008,23 +4000,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  AddToWaitlist: {
-    requestBody: {
-      content: {
-        "application/json": {
-          email: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_any_"];
         };
       };
     };

@@ -1,11 +1,9 @@
-import { NextPageWithLayout } from "../_app";
+import { useOrg } from "@/components/layout/org/organizationContext";
+import PaymentModal from "@/components/templates/settings/PaymentModal";
 import SettingsLayout from "@/components/templates/settings/settingsLayout";
-import { ReactElement, useState } from "react";
-import AuthLayout from "../../components/layout/auth/authLayout";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Small, XSmall, Muted } from "@/components/ui/typography";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -13,37 +11,32 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { RefreshCcw, ChevronLeft, ChevronRight } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Muted, Small, XSmall } from "@/components/ui/typography";
 import {
   useCredits,
   useCreditTransactions,
   type PurchasedCredits,
 } from "@/services/hooks/useCredits";
-import Link from "next/link";
 import { formatDate } from "@/utils/date";
-import PaymentModal from "@/components/templates/settings/PaymentModal";
-import { useOrg } from "@/components/layout/org/organizationContext";
+import { ChevronLeft, ChevronRight, RefreshCcw } from "lucide-react";
+import Link from "next/link";
+import { ReactElement, useState } from "react";
+import AuthLayout from "../../components/layout/auth/authLayout";
+import { NextPageWithLayout } from "../_app";
 import { useFeatureFlag } from "@/services/hooks/admin";
-import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { FeatureWaitlist } from "@/components/templates/waitlist/FeatureWaitlist";
 
 const CreditsSettings: NextPageWithLayout<void> = () => {
-  const [autoTopUpEnabled, setAutoTopUpEnabled] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(5);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
   const org = useOrg();
-  const router = useRouter();
+  
   const { data: hasCreditsFeatureFlag, isLoading: isFeatureFlagLoading } =
     useFeatureFlag("credits", org?.currentOrg?.id ?? "");
 
-  useEffect(() => {
-    if (!isFeatureFlagLoading && !hasCreditsFeatureFlag?.data) {
-      router.push("/settings");
-    }
-  }, [hasCreditsFeatureFlag, isFeatureFlagLoading, router]);
 
   const {
     data: creditData,
@@ -67,7 +60,23 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
   const hasMore = currentPage < totalPages - 1;
   const hasPrevious = currentPage > 0;
 
-  // Show loading or redirect if feature flag is not enabled
+  // Show waitlist if feature flag is not enabled
+  if (!hasCreditsFeatureFlag?.data && !isFeatureFlagLoading) {
+    return (
+      <div className="flex w-full justify-center px-4 py-4">
+        <div className="w-full max-w-4xl">
+          <FeatureWaitlist
+            feature="credits"
+            title="Credits Feature - Coming Soon!"
+            description="Join the waitlist to be notified when our credits system becomes available for your organization."
+            organizationId={org?.currentOrg?.id}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading state while checking feature flag
   if (isFeatureFlagLoading) {
     return (
       <div className="flex w-full justify-center px-4 py-4">
@@ -80,10 +89,6 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
         </div>
       </div>
     );
-  }
-
-  if (!hasCreditsFeatureFlag?.data) {
-    return null;
   }
 
   return (
