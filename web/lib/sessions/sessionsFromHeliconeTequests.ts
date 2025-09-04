@@ -1,5 +1,4 @@
 import { heliconeRequestToMappedContent } from "@helicone-package/llm-mapper/utils/getMappedContent";
-import { modelCost } from "../api/metrics/costCalc";
 import { HeliconeRequest } from "@helicone-package/llm-mapper/types";
 import { Session, Trace } from "./sessionTypes";
 
@@ -43,21 +42,7 @@ export function sessionFromHeliconeRequests(
       "Helicone-Session-Id"
     ] as string,
     session_tags: [],
-    session_cost: sortedRequests // Use sortedRequests here
-      .map((r) =>
-        modelCost({
-          model: r.model_override ?? r.request_model ?? r.response_model ?? "",
-          provider: r.provider,
-          sum_completion_tokens: r.completion_tokens ?? 0,
-          sum_prompt_tokens: r.prompt_tokens ?? 0,
-          prompt_cache_write_tokens: r.prompt_cache_write_tokens ?? 0,
-          prompt_cache_read_tokens: r.prompt_cache_read_tokens ?? 0,
-          sum_tokens: (r.completion_tokens ?? 0) + (r.prompt_tokens ?? 0), // Fixed sum logic
-          prompt_audio_tokens: r.prompt_audio_tokens ?? 0,
-          completion_audio_tokens: r.completion_audio_tokens ?? 0,
-        }),
-      )
-      .reduce((a, b) => a + b, 0),
+    session_cost: sortedRequests.reduce((total, r) => total + (r.cost ?? 0), 0),
     traces: sortedRequests // Use sortedRequests here
       .map((request) => {
         const x: Trace = {
