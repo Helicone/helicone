@@ -268,6 +268,7 @@ const baseCosts: ModelRow[] = [
     cost: {
       prompt_token: 0.000005,
       completion_token: 0.000015,
+      prompt_cache_read_token: 0.000000125,
     },
     showInPlayground: true,
   },
@@ -279,6 +280,7 @@ const baseCosts: ModelRow[] = [
     cost: {
       prompt_token: 0.000005,
       completion_token: 0.000015,
+      prompt_cache_read_token: 0.000000125,
     },
     showInPlayground: true,
   },
@@ -290,6 +292,7 @@ const baseCosts: ModelRow[] = [
     cost: {
       prompt_token: 0.00000015,
       completion_token: 0.0000006,
+      prompt_cache_read_token: 0.000000025,
     },
     showInPlayground: true,
   },
@@ -301,6 +304,7 @@ const baseCosts: ModelRow[] = [
     cost: {
       prompt_token: 0.00000015,
       completion_token: 0.0000006,
+      prompt_cache_read_token: 0.000000025,
     },
     showInPlayground: true,
   },
@@ -460,6 +464,7 @@ const baseCosts: ModelRow[] = [
     cost: {
       prompt_token: 0.0000025,
       completion_token: 0.00001,
+      prompt_cache_read_token: 0.000000125,
     },
   },
   {
@@ -470,6 +475,7 @@ const baseCosts: ModelRow[] = [
     cost: {
       prompt_token: 0.0000025,
       completion_token: 0.00001,
+      prompt_cache_read_token: 0.000000125,
     },
     showInPlayground: true,
   },
@@ -503,6 +509,7 @@ const baseCosts: ModelRow[] = [
     cost: {
       prompt_token: 0.000003,
       completion_token: 0.000012,
+      prompt_cache_read_token: 0.00000055,
     },
     showInPlayground: true,
   },
@@ -514,6 +521,7 @@ const baseCosts: ModelRow[] = [
     cost: {
       prompt_token: 0.000003,
       completion_token: 0.000012,
+      prompt_cache_read_token: 0.00000055,
     },
     showInPlayground: true,
   },
@@ -557,6 +565,7 @@ const baseCosts: ModelRow[] = [
     cost: {
       prompt_token: 0.0000011,
       completion_token: 0.0000044,
+      prompt_cache_read_token: 0.00000055,
     },
     showInPlayground: true,
   },
@@ -568,6 +577,7 @@ const baseCosts: ModelRow[] = [
     cost: {
       prompt_token: 0.0000011,
       completion_token: 0.0000044,
+      prompt_cache_read_token: 0.00000055,
     },
     showInPlayground: true,
   },
@@ -591,6 +601,7 @@ const baseCosts: ModelRow[] = [
     cost: {
       prompt_token: 0.00002,
       completion_token: 0.00008,
+      prompt_cache_read_token: 0.0000005,
     },
   },
   {
@@ -698,6 +709,7 @@ const baseCosts: ModelRow[] = [
     cost: {
       prompt_token: 0.0000011,
       completion_token: 0.0000044,
+      prompt_cache_read_token: 0.000000275,
     },
     showInPlayground: true,
   },
@@ -709,6 +721,7 @@ const baseCosts: ModelRow[] = [
     cost: {
       prompt_token: 0.0000011,
       completion_token: 0.0000044,
+      prompt_cache_read_token: 0.000000275,
     },
     showInPlayground: true,
   },
@@ -740,6 +753,7 @@ const baseCosts: ModelRow[] = [
     cost: {
       prompt_token: 0.000005,
       completion_token: 0.000015,
+      prompt_cache_read_token: 0.000000125,
     },
   },
   {
@@ -761,6 +775,7 @@ const baseCosts: ModelRow[] = [
     cost: {
       prompt_token: 0.00000025,
       completion_token: 0.000002,
+      prompt_cache_read_token: 0.000000125,
     },
   },
   {
@@ -794,6 +809,7 @@ const baseCosts: ModelRow[] = [
     cost: {
       prompt_token: 0.00000025,
       completion_token: 0.000002,
+      prompt_cache_read_token: 0.000000125,
     },
   },
   {
