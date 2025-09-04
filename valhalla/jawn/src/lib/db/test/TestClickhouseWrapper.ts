@@ -1,4 +1,6 @@
 import { ClickHouseClient, createClient } from "@clickhouse/client";
+import { ZodType } from "zod";
+import { validateRowsWithSchema } from "../validation";
 import * as fs from "fs";
 import * as path from "path";
 import { ClickhouseDB, RequestResponseRMT } from "../ClickhouseWrapper";
@@ -59,7 +61,8 @@ export class TestClickhouseClientWrapper {
 
   async dbQuery<T>(
     query: string,
-    parameters: (number | string | boolean | Date)[]
+    parameters: (number | string | boolean | Date)[],
+    schema?: ZodType<T>
   ): Promise<Result<T[], string>> {
     try {
       const query_params = this.paramsToValues(parameters);
@@ -72,7 +75,12 @@ export class TestClickhouseClientWrapper {
           wait_end_of_query: 1,
         },
       });
-      return { data: await queryResult.json<T[]>(), error: null };
+      const raw = (await queryResult.json()) as unknown;
+      const validated = validateRowsWithSchema<T>(raw, schema);
+      if (!validated.ok) {
+        return { data: null, error: validated.error };
+      }
+      return { data: validated.data, error: null };
     } catch (err) {
       return {
         data: null,
@@ -83,7 +91,8 @@ export class TestClickhouseClientWrapper {
 
   async dbQueryHql<T>(
     query: string,
-    parameters: (number | string | boolean | Date)[]
+    parameters: (number | string | boolean | Date)[],
+    schema?: ZodType<T>
   ): Promise<Result<T[], string>> {
     try {
       const query_params = this.paramsToValues(parameters);
@@ -96,7 +105,12 @@ export class TestClickhouseClientWrapper {
           wait_end_of_query: 1,
         },
       });
-      return { data: await queryResult.json<T[]>(), error: null };
+      const raw = (await queryResult.json()) as unknown;
+      const validated = validateRowsWithSchema<T>(raw, schema);
+      if (!validated.ok) {
+        return { data: null, error: validated.error };
+      }
+      return { data: validated.data, error: null };
     } catch (err) {
       return {
         data: null,
@@ -109,10 +123,12 @@ export class TestClickhouseClientWrapper {
     query,
     organizationId,
     parameters,
+    schema,
   }: {
     query: string;
     organizationId: string;
     parameters: (number | string | boolean | Date)[];
+    schema?: ZodType<T>;
   }): Promise<Result<T[], string>> {
     try {
       const query_params = this.paramsToValues(parameters);
@@ -160,8 +176,12 @@ export class TestClickhouseClientWrapper {
         // DDL commands don't return data
         return { data: [] as T[], error: null };
       } else {
-        const rows = await queryResult.json<T[]>();
-        return { data: rows, error: null };
+        const raw = (await queryResult.json()) as unknown;
+        const validated = validateRowsWithSchema<T>(raw, schema);
+        if (!validated.ok) {
+          return { data: null, error: validated.error };
+        }
+        return { data: validated.data, error: null };
       }
     } catch (err) {
       console.error("Error executing HQL query with context: ", query, organizationId, parameters);
