@@ -15777,6 +15777,7 @@ export interface operations {
       query: {
         email: string;
         feature: string;
+        organizationId: string;
       };
     };
     responses: {

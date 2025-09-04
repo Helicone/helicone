@@ -14307,6 +14307,7 @@ export function RegisterRoutes(app: Router) {
         const argsWaitListController_isOnWaitlist: Record<string, TsoaRoute.ParameterSchema> = {
                 email: {"in":"query","name":"email","required":true,"dataType":"string"},
                 feature: {"in":"query","name":"feature","required":true,"dataType":"string"},
+                organizationId: {"in":"query","name":"organizationId","required":true,"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"undefined"}]},
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
         app.get('/v1/public/waitlist/feature/status',

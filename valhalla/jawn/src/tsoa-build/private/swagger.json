@@ -46994,6 +46994,14 @@
 						"schema": {
 							"type": "string"
 						}
+					},
+					{
+						"in": "query",
+						"name": "organizationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
 					}
 				]
 			}

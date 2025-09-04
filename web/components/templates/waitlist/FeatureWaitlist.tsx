@@ -22,9 +22,8 @@ export function FeatureWaitlist({
   description = "Be the first to know when this feature becomes available.",
   organizationId,
 }: FeatureWaitlistProps) {
-  const [submitted, setSubmitted] = useState(false);
   const user = useHeliconeAuthClient();
-  const org = useOrg();
+  
   const email = user.user?.email ?? "";
   const [error, setError] = useState<string | null>(null);
   const { data: isOnWaitlist, refetch: refetchIsOnWaitlist } = $JAWN_API.useQuery("get", "/v1/public/waitlist/feature/status", {
@@ -32,7 +31,7 @@ export function FeatureWaitlist({
       query: {
         email,
         feature,
-        organizationId: org?.currentOrg?.id,
+        organizationId: organizationId,
       }
     }
   });
@@ -72,8 +71,6 @@ export function FeatureWaitlist({
       } else {
         setError("Failed to join waitlist. Please try again.");
       }
-    } else {
-      setSubmitted(true);
     }
   };
 

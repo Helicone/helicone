@@ -15,7 +15,7 @@ import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { err, ok, Result } from "../../packages/common/result";
 import { type JawnAuthenticatedRequest } from "../../types/request";
 
-const SUPPORTED_FEATURES = ["credits", "pass_through_billing"] as const;
+const SUPPORTED_FEATURES = ["credits"] as const;
 
 type SupportedFeature = (typeof SUPPORTED_FEATURES)[number];
 
@@ -48,7 +48,7 @@ export class WaitListController extends Controller {
       const { error: dbError } = await dbExecute(
         `INSERT INTO feature_waitlist (email, feature, organization_id) 
          VALUES ($1, $2, $3)
-         ON CONFLICT (email, feature) DO NOTHING`,
+         ON CONFLICT (email, feature, organization_id) DO NOTHING`,
         [body.email, body.feature, organizationId || null]
       );
 
@@ -125,6 +125,7 @@ export class WaitListController extends Controller {
   public async isOnWaitlist(
     @Query() email: string,
     @Query() feature: string,
+    @Query() organizationId: string | undefined,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<{ isOnWaitlist: boolean }, string>> {
     // Validate feature
@@ -137,8 +138,9 @@ export class WaitListController extends Controller {
       const result = await dbExecute(
         `SELECT 1 FROM feature_waitlist 
          WHERE email = $1 AND feature = $2
+         ${organizationId ? `AND organization_id = $3` : ""}
          LIMIT 1`,
-        [email, feature]
+        [email, feature, ...(organizationId ? [organizationId] : [])]
       );
 
       if (result.error) {
