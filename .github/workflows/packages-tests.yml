@@ -1,0 +1,38 @@
+name: Packages Tests
+
+on:
+  push:
+    paths:
+      - 'packages/**'
+      - 'yarn.lock'
+      - 'package.json'
+      - '.github/workflows/packages-tests.yml'
+  pull_request:
+    paths:
+      - 'packages/**'
+      - 'yarn.lock'
+      - 'package.json'
+      - '.github/workflows/packages-tests.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run Jest for packages
+        run: npx jest --config packages/jest.config.ts --runInBand
+        env:
+          CI: true
+
+
