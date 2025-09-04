@@ -136,79 +136,84 @@ export abstract class BaseTestConfig {
 
   generateSuccessfulPtbTestCases(): TestCase[] {
     const cases: TestCase[] = [];
-    const models = registry.getProviderModels(this.provider).data;
-    if (!models || !(models instanceof Set)) return cases;
+    const modelEndpoints = registry.ptbEndpoints;
+    if (!modelEndpoints || !(modelEndpoints instanceof Map)) return cases;
 
-    models.forEach((modelId) => {
-      // Type 1: Direct provider test w/sufficient credit balance
-      cases.push({
-        name: `${this.provider} - ${modelId} - PTB direct`,
-        provider: this.provider,
-        modelId,
-        modelString: `${modelId}/${this.provider}`,
-        testType: "single-provider",
-        request: {
-          messages: [{ role: "user", content: "Hello, this is a test" }],
-          max_tokens: 100,
-        },
-        byokConfig: this.getByokConfig("*"),
-        byokEnabled: false,
-        currentCredits: 100,
-        orgId: "test-org-id",
-      });
+    modelEndpoints.forEach((endpoints, modelId) => {
+      endpoints.forEach((endpoint) => {
+        // Only process endpoints for this provider
+        if (endpoint.provider !== this.provider) return;
+        
+        // Type 1: Direct provider test w/sufficient credit balance
+        cases.push({
+          name: `${this.provider} - ${modelId} - PTB direct`,
+          provider: this.provider,
+          modelId,
+          modelString: `${modelId}/${this.provider}`,
+          testType: "single-provider",
+          request: {
+            messages: [{ role: "user", content: "Hello, this is a test" }],
+            max_tokens: 100,
+          },
+          byokConfig: this.getByokConfig("*"),
+          byokEnabled: false,
+          currentCredits: 100,
+          orgId: "test-org-id",
+        });
 
-      // Type 2: Multi-provider fallback w/sufficient credit balance
-      const allProviders = registry.getModelProviders(modelId).data;
-      if (allProviders && allProviders.size > 1) {
-        const providerArray = Array.from(allProviders);
-        const targetIndex = providerArray.indexOf(this.provider);
+        // Type 2: Multi-provider fallback w/sufficient credit balance
+        const allProviders = registry.getModelProviders(modelId).data;
+        if (allProviders && allProviders.size > 1) {
+          const providerArray = Array.from(allProviders);
+          const targetIndex = providerArray.indexOf(this.provider);
 
-        if (targetIndex > 0) {
-          cases.push({
-            name: `${modelId} - PTB fallback to ${this.provider}`,
-            provider: this.provider,
-            modelId,
-            modelString: modelId,
-            testType: "multi-provider-fallback",
-            failProviders: providerArray.slice(0, targetIndex),
-            request: {
-              messages: [{ role: "user", content: "Hello, this is a test" }],
-              max_tokens: 100,
-            },
-            byokConfig: this.getByokConfig("*"),
-            byokEnabled: false,
-            currentCredits: 100,
-            orgId: "test-org-id",
-          });
-        }
-      }
-
-      // Type 3: Different endpoint configs w/sufficient credit balance
-      const modelConfig = registry.getModelProviderConfig(
-        modelId,
-        this.provider
-      ).data;
-      if (modelConfig) {
-        Object.keys(modelConfig.endpointConfigs).forEach((configKey) => {
-          if (configKey !== "*") {
+          if (targetIndex > 0) {
             cases.push({
-              name: `${this.provider} - ${modelId} - BYOK config:${configKey}`,
+              name: `${modelId} - PTB fallback to ${this.provider}`,
               provider: this.provider,
               modelId,
-              modelString: `${modelId}/${this.provider}`,
-              testType: "endpoint-config",
+              modelString: modelId,
+              testType: "multi-provider-fallback",
+              failProviders: providerArray.slice(0, targetIndex),
               request: {
                 messages: [{ role: "user", content: "Hello, this is a test" }],
                 max_tokens: 100,
               },
-              byokConfig: this.getByokConfig(configKey),
+              byokConfig: this.getByokConfig("*"),
               byokEnabled: false,
               currentCredits: 100,
               orgId: "test-org-id",
             });
           }
-        });
-      }
+        }
+
+        // Type 3: Different endpoint configs w/sufficient credit balance
+        const modelConfig = registry.getModelProviderConfig(
+          modelId,
+          this.provider
+        ).data;
+        if (modelConfig) {
+          Object.keys(modelConfig.endpointConfigs).forEach((configKey) => {
+            if (configKey !== "*") {
+              cases.push({
+                name: `${this.provider} - ${modelId} - PTB config:${configKey}`,
+                provider: this.provider,
+                modelId,
+                modelString: `${modelId}/${this.provider}`,
+                testType: "endpoint-config",
+                request: {
+                  messages: [{ role: "user", content: "Hello, this is a test" }],
+                  max_tokens: 100,
+                },
+                byokConfig: this.getByokConfig(configKey),
+                byokEnabled: false,
+                currentCredits: 100,
+                orgId: "test-org-id",
+              });
+            }
+          });
+        }
+      });
     });
     return cases;
   }
