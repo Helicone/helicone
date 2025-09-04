@@ -91,10 +91,8 @@ const AuthLayout = (props: AuthLayoutProps) => {
   useEffect(() => {
     if (orgContext?.currentOrg?.has_onboarded === false) {
       router.push("/onboarding");
-    } else if (orgContext?.currentOrg?.has_integrated === false) {
-      router.push("/quickstart");
     }
-  }, [orgContext?.currentOrg?.has_integrated]);
+  }, [orgContext?.currentOrg?.has_onboarded]);
 
   const banner = useMemo((): BannerType | null => {
     const activeBanner = alertBanners?.data?.find((x) => x.active);
