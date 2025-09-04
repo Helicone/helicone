@@ -2,7 +2,7 @@
 
 ## Overview
 
-The AI Gateway routes LLM requests through multiple providers with fallback support, handling both BYOK (Bring Your Own Key) and PTB (Pass-Through-Billing) authentication.
+The AI Gateway routes LLM requests through multiple providers with failover support, handling both BYOK (Bring Your Own Key) and PTB (Pass-Through-Billing) authentication.
 
 ## Core Pattern: Attempt-based Routing with Fallback
 
@@ -63,7 +63,7 @@ isErr<T, K>(result: Result<T, K>): boolean
 registry.getPtbEndpoints(model, provider)  // Returns PTB endpoints sorted by cost
 registry.getEndpointsByModel(model)        // Returns all endpoints sorted by cost
 registry.getModelProviders(model)          // Returns Set<Provider> for auto-detect
-registry.createFallbackEndpoint(...)       // Creates endpoint when none exist
+registry.createPassthroughEndpoint(...)    // Creates dynamic endpoint for unknown models
 registry.buildEndpoint(config, userConfig) // Builds endpoint with user config
 ```
 
@@ -206,7 +206,7 @@ SimpleAIGateway.handle():
 - ✅ Added model string comma-split parsing
 - ✅ Integrated lazy prompt expansion
 - ✅ Added disallow list checking
-- ✅ Implemented fallback loop
+- ✅ Implemented failover loop
 - ✅ Added error response formatting
 
 #### Router Integration

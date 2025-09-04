@@ -1,12 +1,17 @@
 import { registry } from "@helicone-package/cost/models/registry";
+import { ModelProviderEntry } from "@helicone-package/cost/models/build-indexes";
 import {
   ModelProviderName,
   providers,
 } from "@helicone-package/cost/models/providers";
-import { UserEndpointConfig } from "@helicone-package/cost/models/types";
+import {
+  UserEndpointConfig,
+  Endpoint,
+} from "@helicone-package/cost/models/types";
 import { ProviderKeysManager } from "../managers/ProviderKeysManager";
 import { isErr, Result, ok, err } from "../util/results";
 import { Attempt, ModelSpec } from "./types";
+import { ProviderKey } from "../db/ProviderKeysStore";
 
 export class AttemptBuilder {
   constructor(
@@ -39,20 +44,12 @@ export class AttemptBuilder {
         );
         allAttempts.push(...providerAttempts);
       } else {
-        // No provider specified - try all providers that support this model
-        const providersResult = registry.getModelProviders(
-          modelSpec.data.modelName
+        // No provider specified - try all providers
+        const attempts = await this.buildAttemptsForAllProviders(
+          modelSpec.data.modelName,
+          orgId
         );
-        const providers = providersResult.data || new Set();
-
-        for (const provider of providers) {
-          const providerAttempts = await this.getProviderAttempts(
-            modelSpec.data.modelName,
-            provider,
-            orgId
-          );
-          allAttempts.push(...providerAttempts);
-        }
+        allAttempts.push(...attempts);
       }
     }
 
@@ -61,16 +58,51 @@ export class AttemptBuilder {
     return allAttempts.sort((a, b) => a.priority - b.priority);
   }
 
+  private async buildAttemptsForAllProviders(
+    modelName: string,
+    orgId: string
+  ): Promise<Attempt[]> {
+    // Get all provider data in one query
+    const providerDataResult =
+      registry.getModelProviderEntriesByModel(modelName);
+    const providerData = providerDataResult.data || [];
+
+    // Process all providers in parallel (we know model exists because parseModelString validated it)
+    const attemptArrays = await Promise.all(
+      providerData.map(async (data) => {
+        const [byokAttempts, ptbAttempts] = await Promise.all([
+          this.getByokAttempts(modelName, data, orgId),
+          this.getPtbAttempts(modelName, data),
+        ]);
+
+        return [...byokAttempts, ...ptbAttempts];
+      })
+    );
+
+    return attemptArrays.flat();
+  }
+
   private async getProviderAttempts(
     modelName: string,
     provider: ModelProviderName,
     orgId: string,
     customUid?: string
   ): Promise<Attempt[]> {
-    // Get both BYOK and PTB attempts
+    // Get provider data once
+    const providerDataResult = registry.getModelProviderEntry(
+      modelName,
+      provider
+    );
+    if (!providerDataResult.data) {
+      return []; // No data for this model/provider combination
+    }
+
+    const providerData = providerDataResult.data;
+
+    // Get both BYOK and PTB attempts with provider data
     const [byokAttempts, ptbAttempts] = await Promise.all([
-      this.getByokAttempts(modelName, provider, orgId, customUid),
-      this.getPtbAttempts(modelName, provider, orgId, customUid),
+      this.getByokAttempts(modelName, providerData, orgId, customUid),
+      this.getPtbAttempts(modelName, providerData),
     ]);
 
     return [...byokAttempts, ...ptbAttempts];
@@ -78,13 +110,13 @@ export class AttemptBuilder {
 
   private async getByokAttempts(
     modelName: string,
-    provider: ModelProviderName,
+    providerData: ModelProviderEntry,
     orgId: string,
     customUid?: string
   ): Promise<Attempt[]> {
     // Get user's provider key
     const userKey = await this.providerKeysManager.getProviderKeyWithFetch(
-      provider,
+      providerData.provider,
       orgId,
       customUid
     );
@@ -93,53 +125,62 @@ export class AttemptBuilder {
       return []; // No BYOK available
     }
 
-    // Get endpoints from registry (already sorted by cost!)
-    let endpoints = (registry.getEndpointsByModel(modelName).data || []).filter(
-      (e) => e.provider === provider
+    const userConfig = (userKey.config as UserEndpointConfig) || {};
+
+    // Build endpoint from provider data's config
+    const endpointResult = registry.buildEndpoint(
+      providerData.config,
+      userConfig
     );
 
-    // If no endpoints exist, try to create a fallback
-    if (endpoints.length === 0) {
-      const userConfig = (userKey.config as UserEndpointConfig) || {};
-      const fallbackResult = registry.createFallbackEndpoint(
-        modelName,
-        provider,
-        userConfig
-      );
-
-      if (!isErr(fallbackResult) && fallbackResult.data) {
-        endpoints = [fallbackResult.data];
-      }
+    if (!isErr(endpointResult) && endpointResult.data) {
+      return [
+        {
+          endpoint: endpointResult.data,
+          providerKey: userKey,
+          authType: "byok",
+          priority: 1,
+          needsEscrow: false,
+          source: `${modelName}/${providerData.provider}/byok${customUid ? `/${customUid}` : ""}`,
+        },
+      ];
     }
 
-    // Return BYOK attempt for each endpoint
-    return endpoints.map((endpoint) => ({
-      endpoint,
-      providerKey: userKey,
-      authType: "byok" as const,
-      priority: 1,
-      needsEscrow: false,
-      source: `${modelName}/${provider}/byok${customUid ? `/${customUid}` : ""}`,
-    }));
+    // Passthrough: create a dynamic endpoint for unknown models
+    const passthroughResult = registry.createPassthroughEndpoint(
+      modelName,
+      providerData.provider,
+      userConfig
+    );
+
+    if (!isErr(passthroughResult) && passthroughResult.data) {
+      return [
+        {
+          endpoint: passthroughResult.data,
+          providerKey: userKey,
+          authType: "byok" as const,
+          priority: 1,
+          needsEscrow: false,
+          source: `${modelName}/${providerData.provider}/byok${customUid ? `/${customUid}` : ""}`,
+        },
+      ];
+    }
+
+    return [];
   }
 
   private async getPtbAttempts(
     modelName: string,
-    provider: ModelProviderName,
-    orgId: string,
-    customUid?: string
+    providerData: ModelProviderEntry
   ): Promise<Attempt[]> {
-    // Get PTB-enabled endpoints (already sorted by cost!)
-    const ptbEndpoints =
-      registry.getPtbEndpoints(modelName, provider).data || [];
-
-    if (ptbEndpoints.length === 0) {
+    // Check if we have PTB endpoints
+    if (providerData.ptbEndpoints.length === 0) {
       return []; // No PTB endpoints available
     }
 
     // Get Helicone's provider key for PTB
     const heliconeKey = await this.providerKeysManager.getProviderKeyWithFetch(
-      provider,
+      providerData.provider,
       this.env.HELICONE_ORG_ID
     );
 
@@ -147,27 +188,24 @@ export class AttemptBuilder {
       return []; // Can't do PTB without Helicone's key
     }
 
-    // Check if user has a key (for config merging)
-    const userKey = await this.providerKeysManager.getProviderKeyWithFetch(
-      provider,
-      orgId,
-      customUid
+    // Use the helper method to build PTB attempts
+    return this.buildPtbAttemptsFromEndpoints(
+      modelName,
+      providerData.provider,
+      providerData.ptbEndpoints,
+      heliconeKey
     );
+  }
 
-    // Merge keys: use Helicone's credentials but preserve user's config
-    const mergedKey = userKey
-      ? {
-          ...userKey,
-          decrypted_provider_key: heliconeKey.decrypted_provider_key,
-          decrypted_provider_secret_key:
-            heliconeKey.decrypted_provider_secret_key,
-        }
-      : heliconeKey;
-
-    // Return PTB attempt for each endpoint
-    return ptbEndpoints.map((endpoint) => ({
+  private buildPtbAttemptsFromEndpoints(
+    modelName: string,
+    provider: ModelProviderName,
+    endpoints: Endpoint[],
+    providerKey: ProviderKey
+  ): Attempt[] {
+    return endpoints.map((endpoint) => ({
       endpoint,
-      providerKey: mergedKey,
+      providerKey,
       authType: "ptb" as const,
       priority: 2,
       needsEscrow: true,
@@ -192,15 +230,19 @@ export class AttemptBuilder {
     const parts = modelString.split("/");
     const modelName = parts[0];
 
-    const validModels = registry.getAllModelIds();
-    if (validModels.data && !validModels.data.includes(modelName as any)) {
-      console.warn(`Unknown model: ${modelName} - continuing for BYOK support`);
-      // TODO: Once model registry is comprehensive, return error instead:
-      // return { error: `Unknown model: ${modelName}. See supported models at https://helicone.ai/models` };
-    }
-
     // Just model name: "gpt-4"
     if (parts.length === 1) {
+      // Check if model is known
+      const validModels = registry.getAllModelIds();
+      const isKnownModel =
+        validModels.data && validModels.data.includes(modelName as any);
+
+      // Fail fast: unknown model with no provider
+      if (!isKnownModel) {
+        return err(
+          `Unknown model: ${modelName}. Please specify a provider (e.g., ${modelName}/openai) or use a supported model. See https://helicone.ai/models`
+        );
+      }
       return ok({ modelName });
     }
 
@@ -215,11 +257,28 @@ export class AttemptBuilder {
 
     // Model with provider: "gpt-4/openai"
     if (parts.length === 2) {
+      // With provider specified, unknown models are OK (passthrough)
+      // Only check and warn if needed
+      const validModels = registry.getAllModelIds();
+      const isKnownModel =
+        validModels.data && validModels.data.includes(modelName as any);
+      if (!isKnownModel) {
+        console.warn(
+          `Unknown model: ${modelName} - using passthrough with provider ${provider}`
+        );
+      }
       return ok({ modelName, provider });
     }
 
-    // Model with provider and custom UID: "gpt-4/openai/custom-123"
     if (parts.length === 3) {
+      const validModels = registry.getAllModelIds();
+      const isKnownModel =
+        validModels.data && validModels.data.includes(modelName as any);
+      if (!isKnownModel) {
+        console.warn(
+          `Unknown model: ${modelName} - using passthrough with provider ${provider}`
+        );
+      }
       return ok({
         modelName,
         provider,
