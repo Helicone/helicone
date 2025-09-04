@@ -16,6 +16,7 @@ import { FilterNode } from "@helicone-package/filters/filterDefs";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { getMockQuantiles } from "./mockDashboardData";
 import DashboardChartTooltipContent from "./DashboardChartTooltipContent";
+import { formatTimeValue, formatTokenCount } from "../../shared/utils/smartNumberFormat";
 
 type QuantilesGraphProps = {
   filters: FilterNode;
@@ -72,13 +73,11 @@ export const QuantilesGraph = ({
           <p className="text-sm text-gray-500">Quantiles</p>
           {currentMetric === "Latency" ? (
             <p className="text-xl font-semibold text-black dark:text-white">
-              {`Max: ${new Intl.NumberFormat("us").format(
-                maxQuantile / 1000,
-              )} s`}
+              {`Max: ${formatTimeValue(maxQuantile)}`}
             </p>
           ) : (
             <p className="text-xl font-semibold text-black dark:text-white">
-              {`Max: ${new Intl.NumberFormat("us").format(maxQuantile)} tokens`}
+              {`Max: ${formatTokenCount(maxQuantile)}`}
             </p>
           )}
         </div>
@@ -143,11 +142,9 @@ export const QuantilesGraph = ({
             curveType="monotone"
             valueFormatter={(number: number | bigint) => {
               if (currentMetric === "Latency") {
-                return `${new Intl.NumberFormat("us").format(
-                  Number(number) / 1000,
-                )} s`;
+                return formatTimeValue(Number(number));
               } else {
-                return `${new Intl.NumberFormat("us").format(number)} tokens`;
+                return formatTokenCount(Number(number));
               }
             }}
           />

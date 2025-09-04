@@ -1,22 +1,19 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { UserMetric } from "../../../lib/api/users/UserMetric";
 import { getUSDateFromString } from "../../shared/utils/utils";
+import { formatWithSignificantFigures, formatCost } from "@/components/shared/utils/smartNumberFormat";
 
 export function formatNumber(num: number, decimals: number = 4) {
-  const numParts = num.toString().split(".");
-
-  if (numParts.length > 1) {
-    const decimalPlaces = numParts[1].length;
-    if (decimalPlaces < 2) {
-      return num.toFixed(2);
-    } else if (decimalPlaces > decimals) {
-      return num.toFixed(decimals);
-    } else {
-      return num;
-    }
-  } else {
-    return num.toFixed(2);
+  // For cost values, use the formatCost function
+  if (decimals === 6) {
+    return formatCost(num);
   }
+  
+  // For other values, use the general formatting function
+  return formatWithSignificantFigures(num, {
+    maxSignificantFigures: decimals,
+    minSignificantFigures: Math.min(2, decimals)
+  });
 }
 
 export const INITIAL_COLUMNS: ColumnDef<UserMetric>[] = [
