@@ -231,8 +231,8 @@ describe("Registry Tests", () => {
     describe("with insufficient credits", () => {
       const ptbTestCases: TestCase[] = [
         // TODO add back anthropic
-        // ...anthropicTestConfig.generateSuccessfulPtbTestCases(),
-        ...openaiTestConfig.generateSuccessfulPtbTestCases(),
+        // ...anthropicTestConfig.generateUnsuccessfulPtbTestCases(),
+        ...openaiTestConfig.generateUnsuccessfulPtbTestCases(),
       ];
 
       ptbTestCases.forEach((testCase) => {

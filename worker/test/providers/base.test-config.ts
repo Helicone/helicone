@@ -220,52 +220,57 @@ export abstract class BaseTestConfig {
 
   generateUnsuccessfulPtbTestCases(): TestCase[] {
     const cases: TestCase[] = [];
-    const models = registry.getProviderModels(this.provider).data;
-    if (!models || !(models instanceof Set)) return cases;
+    const modelEndpoints = registry.ptbEndpoints;
+    if (!modelEndpoints || !(modelEndpoints instanceof Map)) return cases;
 
-    models.forEach((modelId) => {
-      // type 1: PTB direct w/insufficient credit balance
-      cases.push({
-        name: `${this.provider} - ${modelId} - PTB direct - insufficient credits`,
-        provider: this.provider,
-        modelId,
-        modelString: `${modelId}/${this.provider}`,
-        testType: "single-provider",
-        request: {
-          messages: [{ role: "user", content: "Hello, this is a test" }],
-          max_tokens: 100,
-        },
-        byokConfig: this.getByokConfig("*"),
-        byokEnabled: false,
-        currentCredits: 1,
-        orgId: "test-org-id",
-      });
+    modelEndpoints.forEach((endpoints, modelId) => {
+      endpoints.forEach((endpoint) => {
+        // Only process endpoints for this provider
+        if (endpoint.provider !== this.provider) return;
+        
+        // type 1: PTB direct w/insufficient credit balance
+        cases.push({
+          name: `${this.provider} - ${modelId} - PTB direct - insufficient credits`,
+          provider: this.provider,
+          modelId,
+          modelString: `${modelId}/${this.provider}`,
+          testType: "single-provider",
+          request: {
+            messages: [{ role: "user", content: "Hello, this is a test" }],
+            max_tokens: 100,
+          },
+          byokConfig: this.getByokConfig("*"),
+          byokEnabled: false,
+          currentCredits: 1,
+          orgId: "test-org-id",
+        });
 
-      // type 2: multi provider fallback w/insufficient credit balance
-      const allProviders = registry.getModelProviders(modelId).data;
-      if (allProviders && allProviders.size > 1) {
-        const providerArray = Array.from(allProviders);
-        const targetIndex = providerArray.indexOf(this.provider);
+        // type 2: multi provider fallback w/insufficient credit balance
+        const allProviders = registry.getModelProviders(modelId).data;
+        if (allProviders && allProviders.size > 1) {
+          const providerArray = Array.from(allProviders);
+          const targetIndex = providerArray.indexOf(this.provider);
 
-        if (targetIndex > 0) {
-          cases.push({
-            name: `${modelId} - PTB fallback to ${this.provider} - insufficient credits`,
-            provider: this.provider,
-            modelId,
-            modelString: modelId,
-            testType: "multi-provider-fallback",
-            failProviders: providerArray.slice(0, targetIndex),
-            request: {
-              messages: [{ role: "user", content: "Hello, this is a test" }],
-              max_tokens: 100,
-            },
-            byokConfig: this.getByokConfig("*"),
-            byokEnabled: false,
-            currentCredits: 1,
-            orgId: "test-org-id",
-          });
+          if (targetIndex > 0) {
+            cases.push({
+              name: `${modelId} - PTB fallback to ${this.provider} - insufficient credits`,
+              provider: this.provider,
+              modelId,
+              modelString: modelId,
+              testType: "multi-provider-fallback",
+              failProviders: providerArray.slice(0, targetIndex),
+              request: {
+                messages: [{ role: "user", content: "Hello, this is a test" }],
+                max_tokens: 100,
+              },
+              byokConfig: this.getByokConfig("*"),
+              byokEnabled: false,
+              currentCredits: 1,
+              orgId: "test-org-id",
+            });
+          }
         }
-      }
+      });
     });
     return cases;
   }
