@@ -63,4 +63,40 @@ export const costs: ModelRow[] = [
       prompt_cache_read_token: 0.0000015,
     },
   },
+  {
+    model: {
+      operator: "includes",
+      value: "claude-opus-4-1",
+    },
+    cost: {
+      prompt_token: 0.000015,
+      completion_token: 0.000075,
+      prompt_cache_write_token: 0.00001875,
+      prompt_cache_read_token: 0.0000015,
+    },
+  },
+  {
+    model: {
+      operator: "includes",
+      value: "claude-3-haiku",
+    },
+    cost: {
+      prompt_token: 0.00000025,
+      prompt_cache_write_token: 0.00000025 * 1.25,
+      prompt_cache_read_token: 0.00000025 * 0.1,
+      completion_token: 0.00000125,
+    },
+  },
+  {
+    model: {
+      operator: "includes",
+      value: "claude-3-5-haiku",
+    },
+    cost: {
+      prompt_token: 0.0000008,
+      prompt_cache_write_token: 0.0000008 * 1.25,
+      prompt_cache_read_token: 0.0000008 * 0.1,
+      completion_token: 0.000004,
+    },
+  },
 ];
