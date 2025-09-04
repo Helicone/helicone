@@ -176,6 +176,39 @@
   @apply cursor-grab rounded-full border border-solid border-slate-200/50 bg-slate-300/60 hover:bg-slate-400/80 dark:border-slate-800/50 dark:bg-slate-700/60 dark:hover:bg-slate-600/80;
 }
 
+/* Auto-hide scrollbar styles for sidebar */
+.scrollbar-auto-hide-hidden {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.scrollbar-auto-hide-hidden::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.scrollbar-auto-hide-visible {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: rgb(148 163 184 / 0.6) transparent; /* Firefox - thumb and track */
+}
+
+/* Dark mode support for Firefox */
+.dark .scrollbar-auto-hide-visible {
+  scrollbar-color: rgb(71 85 105 / 0.6) transparent; /* Firefox - dark mode thumb and track */
+}
+
+.scrollbar-auto-hide-visible::-webkit-scrollbar {
+  @apply w-2;
+}
+
+.scrollbar-auto-hide-visible::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+.scrollbar-auto-hide-visible::-webkit-scrollbar-thumb {
+  @apply cursor-grab rounded-full border border-solid border-slate-200/50 bg-slate-300/60 hover:bg-slate-400/80 dark:border-slate-800/50 dark:bg-slate-700/60 dark:hover:bg-slate-600/80;
+  transition: background-color 0.2s ease;
+}
+
 .text-primary {
   @apply text-black dark:text-white;
 }

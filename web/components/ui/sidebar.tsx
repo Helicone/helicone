@@ -419,12 +419,75 @@ const SidebarContent = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div">
 >(({ className, ...props }, ref) => {
+  const [isScrolling, setIsScrolling] = React.useState(false);
+  const [isHovered, setIsHovered] = React.useState(false);
+  const scrollTimeoutRef = React.useRef<NodeJS.Timeout>();
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  const handleScroll = React.useCallback(() => {
+    setIsScrolling(true);
+    
+    // Clear existing timeout
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+    
+    // Hide scrollbar after 1 second of no scrolling
+    scrollTimeoutRef.current = setTimeout(() => {
+      setIsScrolling(false);
+    }, 1000);
+  }, []);
+
+  const handleMouseEnter = React.useCallback(() => {
+    setIsHovered(true);
+  }, []);
+
+  const handleMouseLeave = React.useCallback(() => {
+    setIsHovered(false);
+  }, []);
+
+  React.useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    container.addEventListener("scroll", handleScroll, { passive: true });
+    container.addEventListener("mouseenter", handleMouseEnter);
+    container.addEventListener("mouseleave", handleMouseLeave);
+
+    return () => {
+      container.removeEventListener("scroll", handleScroll);
+      container.removeEventListener("mouseenter", handleMouseEnter);
+      container.removeEventListener("mouseleave", handleMouseLeave);
+      
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, [handleScroll, handleMouseEnter, handleMouseLeave]);
+
+  // Show scrollbar when scrolling or hovering
+  const showScrollbar = isScrolling || isHovered;
+  const scrollbarClasses = showScrollbar 
+    ? "scrollbar-auto-hide-visible" 
+    : "scrollbar-auto-hide-hidden";
+
+  // Combine refs
+  const combinedRef = React.useCallback((node: HTMLDivElement) => {
+    containerRef.current = node;
+    if (typeof ref === 'function') {
+      ref(node);
+    } else if (ref) {
+      ref.current = node;
+    }
+  }, [ref]);
+
   return (
     <div
-      ref={ref}
+      ref={combinedRef}
       data-sidebar="content"
       className={cn(
         "flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden",
+        scrollbarClasses,
         className,
       )}
       {...props}

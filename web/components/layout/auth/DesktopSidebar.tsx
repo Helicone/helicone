@@ -20,6 +20,7 @@ import NavItem from "./NavItem";
 import { ChangelogItem } from "./types";
 import SidebarQuickstepCard from "../SidebarQuickstartCard";
 import { useHeliconeAgent } from "@/components/templates/agent/HeliconeAgentContext";
+import { useAutoHideScrollbar } from "@/hooks/useAutoHideScrollbar";
 
 export interface NavigationItem {
   name: string;
@@ -100,6 +101,7 @@ const DesktopSidebar = ({
 
   const navItemsRef = useRef<HTMLDivElement>(null);
   const [canShowInfoBox, setCanShowInfoBox] = useState(false);
+  const { containerRef: scrollContainerRef, scrollbarClasses } = useAutoHideScrollbar();
 
   // Function to calculate if there's enough space to show the InfoBox
   const calculateAvailableSpace = () => {
@@ -258,7 +260,13 @@ const DesktopSidebar = ({
 
           {/* Main content area */}
           <div className="flex min-h-0 flex-1 flex-col">
-            <div className="mb-2 flex h-full flex-1 flex-col justify-between overflow-y-auto">
+            <div 
+              ref={scrollContainerRef}
+              className={cn(
+                "mb-2 flex h-full flex-1 flex-col justify-between overflow-y-auto",
+                scrollbarClasses
+              )}
+            >
               {/* Navigation items */}
               <div className="flex flex-col">
                 {/* Quickstart Card - Only show if organization hasn't integrated */}
