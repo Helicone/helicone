@@ -34,10 +34,9 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
   const org = useOrg();
-  
+
   const { data: hasCreditsFeatureFlag, isLoading: isFeatureFlagLoading } =
     useFeatureFlag("credits", org?.currentOrg?.id ?? "");
-
 
   const {
     data: creditData,
@@ -150,9 +149,9 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
                     Add Credits
                   </Button>
                   <Link href="/requests" className="w-full">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="w-full"
                       disabled={!hasAccess}
                     >

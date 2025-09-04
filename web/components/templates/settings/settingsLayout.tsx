@@ -7,18 +7,10 @@ import {
   NoSymbolIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
-import {
-  FingerprintIcon,
-  KeyIcon,
-  LinkIcon,
-  Plug,
-  Webhook,
-  Coins,
-  Lock,
-} from "lucide-react";
+import { KeyIcon, LinkIcon, Plug, Webhook, Coins, Lock } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { ReactNode, useMemo } from "react";
+import { ReactNode } from "react";
 import AuthHeader from "@/components/shared/authHeader";
 
 const ORGANIZATION_TABS = [
@@ -105,7 +97,6 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
   const currentPath = router.pathname;
   const org = useOrg();
   const isBetterAuthEnabled = process.env.NEXT_PUBLIC_BETTER_AUTH === "true";
-
 
   // Add access keys for governance orgs and filter credits based on feature flag
   const organizationTabs = ORGANIZATION_TABS;

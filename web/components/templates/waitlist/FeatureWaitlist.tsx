@@ -7,7 +7,6 @@ import { CheckIcon, Loader2, Mail } from "lucide-react";
 
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 import { $JAWN_API } from "@/lib/clients/jawn";
-import { useOrg } from "@/components/layout/org/organizationContext";
 
 interface FeatureWaitlistProps {
   feature: string;
@@ -23,25 +22,29 @@ export function FeatureWaitlist({
   organizationId,
 }: FeatureWaitlistProps) {
   const user = useHeliconeAuthClient();
-  
+
   const email = user.user?.email ?? "";
   const [error, setError] = useState<string | null>(null);
-  const { data: isOnWaitlist, refetch: refetchIsOnWaitlist } = $JAWN_API.useQuery("get", "/v1/public/waitlist/feature/status", {
-    params: {
-      query: {
-        email,
-        feature,
-        organizationId: organizationId,
-      }
-    }
-  });
+  const { data: isOnWaitlist, refetch: refetchIsOnWaitlist } =
+    $JAWN_API.useQuery("get", "/v1/public/waitlist/feature/status", {
+      params: {
+        query: {
+          email,
+          feature,
+          organizationId: organizationId,
+        },
+      },
+    });
 
-
-  const { mutateAsync: addToWaitlist, isPending } = $JAWN_API.useMutation("post", "/v1/public/waitlist/feature", {
-    onSuccess: () => {
-      refetchIsOnWaitlist();
+  const { mutateAsync: addToWaitlist, isPending } = $JAWN_API.useMutation(
+    "post",
+    "/v1/public/waitlist/feature",
+    {
+      onSuccess: () => {
+        refetchIsOnWaitlist();
+      },
     },
-  });
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,11 +62,13 @@ export function FeatureWaitlist({
       return;
     }
 
-    const result = await addToWaitlist({body: {
-      email,
-      feature,
-      organizationId,
-    }});
+    const result = await addToWaitlist({
+      body: {
+        email,
+        feature,
+        organizationId,
+      },
+    });
 
     if (result.error) {
       if (result.error === "already_on_waitlist") {
@@ -119,9 +124,7 @@ export function FeatureWaitlist({
               className="w-full"
               aria-label="Email address"
             />
-            {error && (
-              <Small className="text-destructive">{error}</Small>
-            )}
+            {error && <Small className="text-destructive">{error}</Small>}
           </div>
           <Button
             type="submit"
