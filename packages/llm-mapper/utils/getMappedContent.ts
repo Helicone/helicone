@@ -45,9 +45,11 @@ export const MAPPERS: Record<MapperType, MapperFn<any, any>> = {
 } satisfies Record<MapperType, MapperFn<any, any>>;
 
 const getStatusType = (
-  heliconeRequest: HeliconeRequest
+  heliconeRequest: HeliconeRequest,
 ): MappedLLMRequest["heliconeMetadata"]["status"]["statusType"] => {
   if (heliconeRequest.response_body?.error?.message) {
+    return "error";
+  } else if (typeof heliconeRequest.response_body === "string" && heliconeRequest.response_body.includes("overloaded_error")) {
     return "error";
   }
   switch (heliconeRequest.response_status) {
@@ -63,7 +65,6 @@ const getStatusType = (
 
 const metaDataFromHeliconeRequest = (
   heliconeRequest: HeliconeRequest,
-  model: string
 ): MappedLLMRequest["heliconeMetadata"] => {
   return {
     requestId: heliconeRequest.request_id,
@@ -150,7 +151,6 @@ const getUnsanitizedMappedContent = ({
     },
     heliconeMetadata: metaDataFromHeliconeRequest(
       heliconeRequest,
-      heliconeRequest.model
     ),
   };
 };
