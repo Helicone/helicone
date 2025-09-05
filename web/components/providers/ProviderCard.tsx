@@ -21,16 +21,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import useNotification from "@/components/shared/notification/useNotification";
 import { Muted, Small } from "@/components/ui/typography";
 import { Label } from "../ui/label";
@@ -66,7 +56,6 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
     isSavingKey,
     addProviderKey,
     updateProviderKey,
-    deleteProviderKey,
     viewDecryptedProviderKey,
   } = useProvider({ provider });
 
@@ -86,9 +75,6 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
   const [configVisible, setConfigVisible] = useState(false);
   const [configValues, setConfigValues] = useState<Record<string, string>>({});
   const [byokEnabled, setByokEnabled] = useState(false);
-  const [showUpdateConfirmation, setShowUpdateConfirmation] = useState(false);
-  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
-  const [showAddConfirmation, setShowAddConfirmation] = useState(false);
 
   // Ref for the name input to programmatically focus it
   const nameInputRef = React.useRef<HTMLInputElement>(null);
@@ -200,16 +186,6 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
     }
   }, [hasUnsavedChanges]);
 
-  // Show saved state for 3 seconds after successful update
-  useEffect(() => {
-    if (updateProviderKey.isSuccess && isSavedLocal) {
-      const timer = setTimeout(() => {
-        setIsSavedLocal(false);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [updateProviderKey.isSuccess, isSavedLocal]);
-
   // ====== Event handlers ======
   const handleToggleKeyVisibility = async () => {
     if (isViewingKey) {
@@ -296,12 +272,6 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
     }
   };
 
-  const handleDeleteKey = () => {
-    if (!existingKey) return;
-    deleteProviderKey.mutate(existingKey.id);
-    setShowDeleteConfirmation(false);
-  };
-
   // ====== Handle input value changes ======
   const handleKeyValueChange = (value: string) => {
     setKeyValue(value);
@@ -386,7 +356,6 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
                       checked ? "true" : "false",
                     )
                   }
-                  variant="helicone"
                 />
               ) : (
                 <Input
@@ -409,10 +378,10 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
   return (
     <div
       className={cn(
-        "bg-background",
+        "bg-background transition-colors",
         isMultipleMode
           ? "border-l-2 border-l-muted-foreground/20 pl-3"
-          : "border-b border-border last:border-b-0",
+          : "border-b border-border last:border-b-0 hover:bg-muted/50",
       )}
     >
       <div className={cn("p-3", isMultipleMode && "py-2")}>
@@ -420,6 +389,20 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
           {/* Provider info and key status */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
+              {!isMultipleMode && (
+                <div className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-md bg-muted">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={provider.logoUrl}
+                    alt={`${provider.name} logo`}
+                    className="h-4 w-4 object-contain"
+                    onError={(e) => {
+                      e.currentTarget.src =
+                        "/assets/home/providers/anthropic.png";
+                    }}
+                  />
+                </div>
+              )}
               {isMultipleMode && !isEditMode ? (
                 <div className="group flex items-center gap-1">
                   <Input
@@ -435,19 +418,33 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
                     onClick={handlePencilClick}
                   />
                 </div>
-              ) : isMultipleMode ? (
+              ) : (
                 <div className="text-xs font-medium">{displayName}</div>
-              ) : null}
-              {isEditMode && existingKey?.cuid && (
-                <div className="font-mono text-[10px] text-muted-foreground/60">
-                  {existingKey.cuid}
+              )}
+              {!isMultipleMode && provider.note && (
+                <div className="text-[10px] text-muted-foreground">
+                  {provider.note}
+                </div>
+              )}
+              {isEditMode && (
+                <div className="flex items-center gap-1">
+                  <div className="border border-muted-foreground/30 px-1 py-0.5 text-xs text-muted-foreground">
+                    Key set
+                  </div>
+                  {existingKey?.cuid && (
+                    <div className="font-mono text-[10px] text-muted-foreground/60">
+                      {existingKey.cuid}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
 
             <div className="flex items-center gap-2">
-              {/* Remove button for unsaved multiple instances */}
-              {isMultipleMode && onRemove && !isEditMode && (
+              {isViewingKey && (
+                <div className="text-xs text-blue-500">Showing key</div>
+              )}
+              {isMultipleMode && onRemove && (
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -551,16 +548,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
               </TooltipProvider>
 
               <Button
-                onClick={() => {
-                  if (isEditMode && hasUnsavedChanges) {
-                    setShowUpdateConfirmation(true);
-                  } else if (!isEditMode && provider.id === "azure") {
-                    // Show confirmation for new Azure keys
-                    setShowAddConfirmation(true);
-                  } else {
-                    handleSaveKey();
-                  }
-                }}
+                onClick={handleSaveKey}
                 disabled={
                   (!keyValue && !isEditMode && !hasUnsavedChanges) ||
                   isSavingKey
@@ -584,26 +572,6 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
                   </>
                 )}
               </Button>
-
-              {/* Delete button for existing keys */}
-              {isEditMode && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setShowDeleteConfirmation(true)}
-                        className="h-7 w-7 text-destructive hover:bg-destructive/10"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Delete key</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
             </div>
           </div>
 
@@ -613,7 +581,6 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
               id={`byok-${existingKey?.id || instanceIndex}`}
               checked={byokEnabled}
               onCheckedChange={(checked) => setByokEnabled(!!checked)}
-              variant="helicone"
             />
             <Label
               htmlFor={`byok-${existingKey?.id || instanceIndex}`}
@@ -651,110 +618,6 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
           )}
         </div>
       </div>
-
-      {/* Update Confirmation Dialog */}
-      <AlertDialog
-        open={showUpdateConfirmation}
-        onOpenChange={setShowUpdateConfirmation}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              Update API Key for {provider.name}?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to update this API key configuration? This
-              action will replace the existing API key settings
-              {existingKey?.provider_key_name
-                ? ` for "${existingKey.provider_key_name}"`
-                : ""}
-              .
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                handleSaveKey();
-                setShowUpdateConfirmation(false);
-              }}
-            >
-              Update
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog
-        open={showDeleteConfirmation}
-        onOpenChange={setShowDeleteConfirmation}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              Delete API Key for {provider.name}?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this API key? This action cannot
-              be undone
-              {existingKey?.provider_key_name
-                ? ` and will remove "${existingKey.provider_key_name}"`
-                : ""}
-              .
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteKey}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Add Confirmation Dialog for Azure */}
-      {provider.id === "azure" && (
-        <AlertDialog
-          open={showAddConfirmation}
-          onOpenChange={setShowAddConfirmation}
-        >
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Add Azure OpenAI API Key?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Please ensure you have configured the following Azure OpenAI
-                settings:
-                <br />
-                <br />• <strong>Base URI:</strong>{" "}
-                {configValues.baseUri || "Not set"}
-                <br />• <strong>API Version:</strong>{" "}
-                {configValues.apiVersion || "Not set"}
-                <br />• <strong>Deployment Name:</strong>{" "}
-                {configValues.deploymentName || "Not set"}
-                <br />
-                <br />
-                These settings are required for Azure OpenAI to work correctly
-                with Helicone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => {
-                  handleSaveKey();
-                  setShowAddConfirmation(false);
-                }}
-              >
-                Add Key
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
     </div>
   );
 };
@@ -770,7 +633,16 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
     (key) => key.provider_name === provider.id && !key.soft_delete,
   );
 
+  // If provider doesn't allow multiple instances, use the original behavior
+  if (!provider.multipleAllowed) {
+    return (
+      <ProviderInstance provider={provider} existingKey={existingKeys[0]} />
+    );
+  }
+
+  // For providers that allow multiple instances
   const handleAddInstance = () => {
+    setIsExpanded(true);
     setHasUnsavedForm(true);
   };
 
@@ -779,113 +651,110 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
     // This would call a delete mutation from useProvider
   };
 
-  // Unified collapsed/expanded view for all providers
   return (
     <div className="border-b border-border bg-background transition-colors last:border-b-0">
-      {/* Main header - always visible */}
-      <button
-        type="button"
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="flex w-full items-center justify-between p-3 text-left"
-      >
-        <div className="flex items-center gap-2">
-          <div className="flex h-6 w-6 items-center justify-center overflow-hidden">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={provider.logoUrl}
-              alt={`${provider.name} logo`}
-              className="h-5 w-5 object-contain"
-              onError={(e) => {
-                e.currentTarget.src = "/assets/home/providers/anthropic.png";
-              }}
-            />
-          </div>
-          <div className="text-[13px] font-medium">{provider.name}</div>
-          {provider.note && (
-            <div className="text-xs text-muted-foreground">{provider.note}</div>
-          )}
-          <div className="text-[13px]">
-            {existingKeys.length === 0 ? (
-              <span className="text-muted-foreground">No keys configured</span>
-            ) : (
-              <span className="font-medium text-green-600 dark:text-green-500">
+      {/* Main header */}
+      <div className="p-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-md bg-muted">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={provider.logoUrl}
+                alt={`${provider.name} logo`}
+                className="h-4 w-4 object-contain"
+                onError={(e) => {
+                  e.currentTarget.src = "/assets/home/providers/anthropic.png";
+                }}
+              />
+            </div>
+            <div className="text-xs font-medium">{provider.name}</div>
+            {provider.note && (
+              <div className="text-[10px] text-muted-foreground">
+                {provider.note}
+              </div>
+            )}
+            {existingKeys.length > 0 && (
+              <div className="border border-muted-foreground/30 px-1 py-0.5 text-xs text-muted-foreground">
                 {existingKeys.length} key{existingKeys.length > 1 ? "s" : ""}{" "}
-                configured
-              </span>
+                set
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* Add new instance button */}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleAddInstance}
+                    disabled={hasUnsavedForm}
+                    className="h-7 w-7 text-blue-500 hover:bg-blue-50 hover:text-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {hasUnsavedForm
+                    ? "Save current form first"
+                    : "Add new instance"}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+
+            {/* Expand/collapse button */}
+            {existingKeys.length > 0 && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="h-7 w-7 text-muted-foreground"
+              >
+                {isExpanded ? (
+                  <ChevronUp className="h-3.5 w-3.5" />
+                ) : (
+                  <ChevronDown className="h-3.5 w-3.5" />
+                )}
+              </Button>
             )}
           </div>
         </div>
+      </div>
 
-        <ChevronDown
-          className={cn(
-            "h-4 w-4 text-muted-foreground transition-transform",
-            isExpanded && "rotate-180",
-          )}
-        />
-      </button>
-
-      {/* Expanded content */}
+      {/* Expanded content - accordion */}
       {isExpanded && (
-        <div className="border-t border-border/50">
-          <div className="p-3">
-            {/* For providers that don't allow multiple, show single instance */}
-            {!provider.multipleAllowed ? (
-              <div className="space-y-3">
-                {existingKeys[0] ? (
-                  /* Show existing key */
-                  <ProviderInstance
-                    provider={provider}
-                    existingKey={existingKeys[0]}
-                  />
-                ) : (
-                  /* Show new key form */
-                  <ProviderInstance provider={provider} />
-                )}
-              </div>
-            ) : (
-              /* For providers that allow multiple instances */
-              <div className="space-y-3">
-                {/* Existing instances */}
-                {existingKeys.map((key, index) => (
-                  <ProviderInstance
-                    key={key.id}
-                    provider={provider}
-                    existingKey={key}
-                    onRemove={() => handleRemoveInstance(key.id)}
-                    isMultipleMode={true}
-                    instanceIndex={index}
-                  />
-                ))}
+        <div className="border-t border-border/50 bg-muted/20">
+          <div className="space-y-3 p-2">
+            {/* Existing instances */}
+            {existingKeys.map((key, index) => (
+              <ProviderInstance
+                key={key.id}
+                provider={provider}
+                existingKey={key}
+                onRemove={() => handleRemoveInstance(key.id)}
+                isMultipleMode={true}
+                instanceIndex={index}
+              />
+            ))}
 
-                {/* New instance form */}
-                {hasUnsavedForm && (
-                  <div className="border-t border-border/30 pt-3">
-                    <div className="mb-2 text-xs text-muted-foreground">
-                      Add new instance:
-                    </div>
-                    <ProviderInstance
-                      provider={provider}
-                      isMultipleMode={true}
-                      instanceIndex={existingKeys.length}
-                      onRemove={() => setHasUnsavedForm(false)}
-                      onSaveSuccess={() => setHasUnsavedForm(false)}
-                    />
-                  </div>
-                )}
-
-                {/* Add instance button */}
-                {!hasUnsavedForm && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleAddInstance}
-                    className="flex h-7 w-full items-center gap-1 text-xs"
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                    Add new key
-                  </Button>
-                )}
+            {/* New instance form - only show when hasUnsavedForm is true */}
+            {hasUnsavedForm && (
+              <div className="border-t border-border/30 pt-3">
+                <div className="mb-2 text-xs text-muted-foreground">
+                  Add new instance:
+                </div>
+                <ProviderInstance
+                  provider={provider}
+                  isMultipleMode={true}
+                  instanceIndex={existingKeys.length}
+                  onRemove={() => setHasUnsavedForm(false)}
+                  onSaveSuccess={() => setHasUnsavedForm(false)}
+                />
               </div>
             )}
           </div>
