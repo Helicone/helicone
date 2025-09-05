@@ -16,7 +16,7 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
       ctx: ExecutionContext
     ) => {
       requestWrapper.setRequestReferrer("ai-gateway");
-      
+
       // Authenticate first
       const isEU = requestWrapper.isEU();
       const supabaseClient = isEU
@@ -47,33 +47,28 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
       }
 
       // Create gateway with authenticated context
-      const gateway = new SimpleAIGateway(
-        requestWrapper,
-        env,
-        ctx,
-        {
-          orgId,
-          apiKey: rawAPIKey,
-          supabaseClient
-        }
-      );
+      const gateway = new SimpleAIGateway(requestWrapper, env, ctx, {
+        orgId,
+        apiKey: rawAPIKey,
+        supabaseClient,
+      });
 
       return gateway.handle();
     }
   );
 
   // Catch-all for non-POST methods
-  router.all(
-    "*",
-    async () => {
-      return new Response("Method not allowed. AI Gateway only accepts POST requests.", { 
+  router.all("*", async () => {
+    return new Response(
+      "Method not allowed. AI Gateway only accepts POST requests.",
+      {
         status: 405,
         headers: {
-          "Allow": "POST"
-        }
-      });
-    }
-  );
+          Allow: "POST",
+        },
+      }
+    );
+  });
 
   return router;
 };

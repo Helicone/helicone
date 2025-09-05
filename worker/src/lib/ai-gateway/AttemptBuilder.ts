@@ -21,7 +21,8 @@ export class AttemptBuilder {
 
   async buildAttempts(
     modelStrings: string[],
-    orgId: string
+    orgId: string,
+    bodyMapping: "OPENAI" | "NO_MAPPING" = "OPENAI"
   ): Promise<Attempt[]> {
     const allAttempts: Attempt[] = [];
 
@@ -41,6 +42,7 @@ export class AttemptBuilder {
           modelSpec.data.modelName,
           modelSpec.data.provider,
           orgId,
+          bodyMapping,
           modelSpec.data.customUid
         );
         allAttempts.push(...providerAttempts);
@@ -48,7 +50,8 @@ export class AttemptBuilder {
         // No provider specified - try all providers
         const attempts = await this.buildAttemptsForAllProviders(
           modelSpec.data.modelName,
-          orgId
+          orgId,
+          bodyMapping
         );
         allAttempts.push(...attempts);
       }
@@ -61,7 +64,8 @@ export class AttemptBuilder {
 
   private async buildAttemptsForAllProviders(
     modelName: string,
-    orgId: string
+    orgId: string,
+    bodyMapping: "OPENAI" | "NO_MAPPING" = "OPENAI"
   ): Promise<Attempt[]> {
     // Get all provider data in one query
     const providerDataResult =
@@ -72,7 +76,7 @@ export class AttemptBuilder {
     const attemptArrays = await Promise.all(
       providerData.map(async (data) => {
         const [byokAttempts, ptbAttempts] = await Promise.all([
-          this.buildByokAttempts(modelName, data, orgId),
+          this.buildByokAttempts(modelName, data, orgId, bodyMapping),
           this.buildPtbAttempts(modelName, data),
         ]);
 
@@ -87,6 +91,7 @@ export class AttemptBuilder {
     modelName: string,
     provider: ModelProviderName,
     orgId: string,
+    bodyMapping: "OPENAI" | "NO_MAPPING" = "OPENAI",
     customUid?: string
   ): Promise<Attempt[]> {
     // Get provider data once
@@ -101,6 +106,7 @@ export class AttemptBuilder {
         modelName,
         provider,
         orgId,
+        bodyMapping,
         customUid
       );
     }
@@ -109,7 +115,13 @@ export class AttemptBuilder {
 
     // Get both BYOK and PTB attempts with provider data
     const [byokAttempts, ptbAttempts] = await Promise.all([
-      this.buildByokAttempts(modelName, providerData, orgId, customUid),
+      this.buildByokAttempts(
+        modelName,
+        providerData,
+        orgId,
+        bodyMapping,
+        customUid
+      ),
       this.buildPtbAttempts(modelName, providerData),
     ]);
 
@@ -120,6 +132,7 @@ export class AttemptBuilder {
     modelName: string,
     providerData: ModelProviderEntry,
     orgId: string,
+    bodyMapping: "OPENAI" | "NO_MAPPING" = "OPENAI",
     customUid?: string
   ): Promise<Attempt[]> {
     // Get user's provider key
@@ -133,7 +146,10 @@ export class AttemptBuilder {
       return []; // No BYOK available
     }
 
-    const userConfig = (userKey.config as UserEndpointConfig) || {};
+    const userConfig = {
+      ...((userKey.config as UserEndpointConfig) || {}),
+      gatewayMapping: bodyMapping,
+    };
 
     // Build endpoint from provider data's config
     const endpointResult = registry.buildEndpoint(
@@ -160,6 +176,7 @@ export class AttemptBuilder {
     modelName: string,
     provider: ModelProviderName,
     orgId: string,
+    bodyMapping: "OPENAI" | "NO_MAPPING" = "OPENAI",
     customUid?: string
   ): Promise<Attempt[]> {
     // Get user's provider key for passthrough
@@ -173,7 +190,10 @@ export class AttemptBuilder {
       return []; // No BYOK available for passthrough
     }
 
-    const userConfig = (userKey.config as UserEndpointConfig) || {};
+    const userConfig = {
+      ...((userKey.config as UserEndpointConfig) || {}),
+      gatewayMapping: bodyMapping,
+    };
 
     // Create a dynamic passthrough endpoint for unknown models
     const passthroughResult = registry.createPassthroughEndpoint(

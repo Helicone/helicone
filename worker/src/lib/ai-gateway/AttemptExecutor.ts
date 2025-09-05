@@ -59,8 +59,7 @@ export class AttemptExecutor {
       parsedBody,
       requestWrapper,
       forwarder,
-      escrowInfo,
-      source
+      escrowInfo
     );
 
     // If error, cancel escrow and return the error
@@ -84,8 +83,7 @@ export class AttemptExecutor {
       targetBaseUrl: string | null,
       escrowInfo?: EscrowInfo
     ) => Promise<Response>,
-    escrowInfo: EscrowInfo | undefined,
-    source: string
+    escrowInfo: EscrowInfo | undefined
   ): Promise<Result<Response, AttemptError>> {
     try {
       // Build request body using provider helpers

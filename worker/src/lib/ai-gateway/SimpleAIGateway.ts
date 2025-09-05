@@ -65,7 +65,8 @@ export class SimpleAIGateway {
     // Step 3: Build all attempts
     const attempts = await this.attemptBuilder.buildAttempts(
       modelStrings,
-      this.orgId
+      this.orgId,
+      this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping
     );
     if (attempts.length === 0) {
       return new Response(
@@ -173,7 +174,7 @@ export class SimpleAIGateway {
 
     // Parse comma-separated models for fallback
     // Validate that model is a string before splitting
-    if (typeof parsedBody.model !== 'string') {
+    if (typeof parsedBody.model !== "string") {
       return err(
         new Response(
           "Invalid model type. Model must be a string. See supported models at https://helicone.ai/models",
@@ -181,7 +182,7 @@ export class SimpleAIGateway {
         )
       );
     }
-    
+
     const modelStrings = parsedBody.model
       .split(",")
       .map((m: string) => m.trim());
