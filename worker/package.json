@@ -10,6 +10,7 @@
     "dev": "wrangler dev",
     "start": "wrangler dev",
     "test": "vitest",
+    "test:debug": "vitest --inspect --no-file-parallelism",
     "test:run": "vitest run",
     "test:registry": "vitest registry-ts",
     "cf-typegen": "wrangler types --strict-vars false",
