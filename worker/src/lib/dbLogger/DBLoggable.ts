@@ -31,7 +31,7 @@ import { costOfPrompt } from "@helicone-package/cost";
 import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
 import { MessageData } from "../clients/producers/types";
 import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
-import { EscrowInfo } from "../util/aiGateway";
+import { EscrowInfo } from "../ai-gateway/types";
 
 export interface DBLoggableProps {
   response: {
@@ -675,7 +675,7 @@ export class DBLoggable {
       cacheSettings?.shouldReadFromCache && cachedHeaders
         ? cachedHeaders.get("Helicone-Id")
         : DEFAULT_UUID;
-      
+
     const kafkaMessage: MessageData = {
       id: this.request.requestId,
       authorization: requestHeaders.heliconeAuthV2.token,

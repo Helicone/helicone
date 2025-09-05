@@ -339,6 +339,12 @@
               "rest/session/post-v1sessionmetricsquery",
               "rest/session/post-v1session-feedback"
             ]
+          },
+          {
+            "group": "Models",
+            "pages": [
+              "rest/models/get-v1models"
+            ]
           }
         ]
       },
