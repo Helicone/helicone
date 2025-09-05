@@ -27,7 +27,7 @@ export const AUTHORS = [
   "perplexity",
 ] as const;
 
-export type AuthorName = (typeof AUTHORS)[number] | "fallback";
+export type AuthorName = (typeof AUTHORS)[number] | "passthrough";
 
 export type InputModality = "text" | "image" | "audio" | "video";
 export type OutputModality = "text" | "image" | "audio" | "video";
