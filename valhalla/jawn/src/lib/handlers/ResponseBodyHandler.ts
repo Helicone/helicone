@@ -16,6 +16,7 @@ import { OpenAIBodyProcessor } from "../shared/bodyProcessors/openaiBodyProcesso
 import { GoogleBodyProcessor } from "../shared/bodyProcessors/googleBodyProcessor";
 import { GoogleStreamBodyProcessor } from "../shared/bodyProcessors/googleStreamBodyProcessor";
 import { GroqStreamProcessor } from "../shared/bodyProcessors/groqStreamProcessor";
+import { BedrockStreamProcessor } from "../shared/bodyProcessors/bedrockStreamProcessor";
 import { OpenAIStreamProcessor } from "../shared/bodyProcessors/openAIStreamProcessor";
 import { TogetherAIStreamProcessor } from "../shared/bodyProcessors/togetherAIStreamProcessor";
 import { VercelBodyProcessor } from "../shared/bodyProcessors/vercelBodyProcessor";
@@ -393,6 +394,9 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       }
       if (provider === "VERCEL") {
         return new VercelStreamProcessor();
+      }
+      if (provider === "AWS" || provider === "BEDROCK") {
+        return new BedrockStreamProcessor();
       }
       return new OpenAIStreamProcessor();
     }

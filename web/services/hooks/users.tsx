@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { useFilterAST } from "@/filterAST/context/filterContext";
-import { FilterExpression } from "@/filterAST/filterAst";
-import { toFilterNode } from "@/filterAST/toFilterNode";
+import { FilterExpression } from "@helicone-package/filters/types";
+import { FilterLeaf } from "@helicone-package/filters/filterDefs";
+import { toFilterNode } from "@helicone-package/filters/toFilterNode";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { TimeFilter } from "@/types/timeFilter";
 
@@ -154,7 +155,7 @@ const useUsers = (
       const timeFilter = query.queryKey[6] as TimeFilter;
 
       const jawn = getJawnClient(orgId);
-      const filterNode = filter ? toFilterNode(filter) : "all";
+      const filterNode = filter ? toFilterNode(filter) : ({} as FilterLeaf);
 
       const result = await jawn.POST("/v1/user/metrics/query", {
         body: {

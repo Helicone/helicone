@@ -8,6 +8,7 @@ import {
   getBody,
   authenticate,
   attemptModelRequestWithFallback,
+  EscrowInfo,
 } from "../lib/util/aiGateway";
 import { gatewayForwarder } from "./gatewayRouter";
 import { ProviderKeysManager } from "../lib/managers/ProviderKeysManager";
@@ -16,6 +17,7 @@ import { isErr } from "../lib/util/results";
 import { PromptManager } from "../lib/managers/PromptManager";
 import { HeliconePromptManager } from "@helicone-package/prompts/HeliconePromptManager";
 import { PromptStore } from "../lib/db/PromptStore";
+import { errorForwarder } from "../lib/HeliconeProxyRequest/ErrorForwarder";
 
 export const getAIGatewayRouter = (router: BaseRouter) => {
   router.all(
@@ -27,27 +29,23 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
       ctx: ExecutionContext
     ) => {
       requestWrapper.setRequestReferrer("ai-gateway");
-      function forwarder(targetBaseUrl: string | null) {
+      function forwarder(
+        targetBaseUrl: string | null,
+        escrowInfo?: EscrowInfo
+      ) {
         return gatewayForwarder(
           {
             targetBaseUrl,
             setBaseURLOverride: (url) => {
               requestWrapper.setBaseURLOverride(url);
             },
+            escrowInfo,
           },
           requestWrapper,
           env,
           ctx
         );
       }
-
-      const body = await getBody(requestWrapper);
-      const parsedBody = tryJSONParse(body ?? "{}");
-      if (!parsedBody || !parsedBody.model) {
-        return new Response("Invalid body or missing model", { status: 400 });
-      }
-
-      const models = parsedBody.model.split(",").map((m) => m.trim());
 
       const isEU = requestWrapper.isEU();
       const supabaseClient = isEU
@@ -69,6 +67,13 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
       if (!orgId || !rawAPIKey) {
         return new Response("Invalid API key", { status: 401 });
       }
+      const body = await getBody(requestWrapper);
+      const parsedBody = tryJSONParse(body ?? "{}");
+      if (!parsedBody || !parsedBody.model) {
+        return new Response("Invalid body or missing model", { status: 400 });
+      }
+
+      const models = parsedBody.model.split(",").map((m) => m.trim());
 
       const result = await attemptModelRequestWithFallback({
         models,
@@ -88,12 +93,19 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
         ),
         orgId,
         parsedBody,
+        env,
+        ctx,
       });
 
       if (isErr(result)) {
-        return new Response(result.error.message, {
-          status: result.error.code,
+        requestWrapper.setBaseURLOverride("https://ai-gateway.helicone.ai");
+        const errorResponse = await errorForwarder(requestWrapper, env, ctx, {
+          code: result.error.type,
+          message: result.error.message,
+          statusCode: result.error.statusCode,
+          details: result.error.details,
         });
+        return errorResponse;
       }
 
       return result.data;

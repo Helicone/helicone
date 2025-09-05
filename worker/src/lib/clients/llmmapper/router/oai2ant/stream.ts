@@ -26,7 +26,6 @@ export function oaiStream2antStream(
                 const lastChunk = messages[messages.length - 1];
                 for (const line of firstChunks.join("\n\n").split("\n")) {
                   if (line.trim().startsWith("data: ")) {
-                    console.log("line", line);
                     const jsonData = toOpenAI(JSON.parse(line.slice(6)));
                     if (jsonData) {
                       controller.enqueue(

@@ -1,4 +1,4 @@
-import { ProviderName } from "@helicone-package/cost/models/providers";
+import { ModelProviderName } from "@helicone-package/cost/models/providers";
 import { ProviderKey, ProviderKeysStore } from "../db/ProviderKeysStore";
 import {
   getFromKVCacheOnly,
@@ -7,16 +7,19 @@ import {
 } from "../util/cache/secureCache";
 
 export class ProviderKeysManager {
-  constructor(private store: ProviderKeysStore, private env: Env) {}
+  constructor(
+    private store: ProviderKeysStore,
+    private env: Env
+  ) {}
 
   async setProviderKeys() {
     const providerKeys = await this.store.getProviderKeys();
     if (providerKeys) {
       await Promise.all(
-        providerKeys.map(async (key) => {
+        Object.entries(providerKeys).map(async ([orgId, keys]) => {
           await storeInCache(
-            `provider_keys_${key.provider}_${key.org_id}`,
-            JSON.stringify(key),
+            `provider_keys_${orgId}`,
+            JSON.stringify(keys),
             this.env
           );
         })
@@ -26,57 +29,73 @@ export class ProviderKeysManager {
     }
   }
 
-  async setProviderKey(
-    provider: ProviderName,
-    orgId: string,
-    key: ProviderKey
-  ) {
+  async setOrgProviderKeys(orgId: string, providerKeys: ProviderKey[]) {
     if (this.env.ENVIRONMENT !== "development") {
       return;
     }
-
     await storeInCache(
-      `provider_keys_${provider}_${orgId}`,
-      JSON.stringify(key),
+      `provider_keys_${orgId}`,
+      JSON.stringify(providerKeys),
       this.env
     );
   }
-
-  async deleteProviderKey(provider: ProviderName, orgId: string) {
-    if (this.env.ENVIRONMENT !== "development") {
-      return;
-    }
-    await removeFromCache(`provider_keys_${provider}_${orgId}`, this.env);
-  }
-
   async getProviderKey(
-    provider: ProviderName,
-    orgId: string
+    provider: ModelProviderName,
+    orgId: string,
+    keyCuid?: string
   ): Promise<ProviderKey | null> {
-    const key = await getFromKVCacheOnly(
-      `provider_keys_${provider}_${orgId}`,
-      this.env
-    );
-    if (!key) {
+    const keys = await getFromKVCacheOnly(`provider_keys_${orgId}`, this.env);
+    if (!keys) {
       return null;
     }
-    return JSON.parse(key) as ProviderKey;
+
+    const data = (JSON.parse(keys) as ProviderKey[]).filter(
+      (key) => "provider" in key && key.provider === provider
+    );
+
+    if (keyCuid) {
+      return data.find((key) => "cuid" in key && key.cuid === keyCuid) ?? null;
+    }
+
+    return data.length > 0
+      ? // pick the first key if there are multiple keys for the same provider and they haven't mentioned cuid
+        data[0]
+      : null;
   }
 
   async getProviderKeyWithFetch(
-    provider: ProviderName,
-    orgId: string
+    provider: ModelProviderName,
+    orgId: string,
+    keyCuid?: string
   ): Promise<ProviderKey | null> {
-    const key = await this.getProviderKey(provider, orgId);
+    const key = await this.getProviderKey(provider, orgId, keyCuid);
     if (!key) {
-      const key = await this.store.getProviderKeyWithFetch(provider, orgId);
+      const key = await this.store.getProviderKeyWithFetch(
+        provider,
+        orgId,
+        keyCuid
+      );
       if (!key) return null;
 
-      await storeInCache(
-        `provider_keys_${provider}_${orgId}`,
-        JSON.stringify(key),
+      const existingKeys = await getFromKVCacheOnly(
+        `provider_keys_${orgId}`,
         this.env
       );
+      if (existingKeys) {
+        const existingKeysData = JSON.parse(existingKeys) as ProviderKey[];
+        existingKeysData.push(key);
+        await storeInCache(
+          `provider_keys_${orgId}`,
+          JSON.stringify(existingKeysData),
+          this.env
+        );
+      } else {
+        await storeInCache(
+          `provider_keys_${orgId}`,
+          JSON.stringify([key]),
+          this.env
+        );
+      }
       return key;
     }
     return key;

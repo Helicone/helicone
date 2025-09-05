@@ -1,0 +1,196 @@
+---
+title: "Cost Tracking & Optimization"
+sidebarTitle: "Cost Tracking"
+description: "Monitor LLM spending, optimize costs, and understand unit economics across your AI application"
+---
+
+Track and optimize your LLM costs across all providers. Helicone provides detailed cost analytics and optimization tools to help you manage your AI budget effectively.
+
+## How We Calculate Costs
+
+Helicone uses two systems for cost calculation depending on your integration method:
+
+### AI Gateway (100% Accurate)
+When using Helicone's AI Gateway, we have complete visibility into model usage and calculate costs precisely using our [Model Registry v2](https://helicone.ai/models) system.
+
+### Best Effort (Without Gateway)
+For direct provider integrations, we use our open-source cost repository with pricing for 300+ models. This provides best-effort cost estimates based on model detection and token counts.
+
+<Note>
+**Cost not showing?** If your model costs aren't supported, [join our Discord](https://discord.com/invite/HwUbV3Q8qz) or email [help@helicone.ai](mailto:help@helicone.ai) and we'll add support quickly.
+</Note>
+
+## Understanding Unit Economics
+
+The most critical aspect of cost tracking is understanding your unit economics - what drives costs in your application and how to optimize them.
+
+<Frame caption="Session cost breakdown showing unit economics across different user interactions">
+  <img
+    src="/images/sessions/session-metrics.webp"
+    alt="Helicone dashboard showing session-level cost breakdown with request counts and average costs per session type"
+  />
+</Frame>
+
+### Sessions: Your Cost Foundation
+
+[Sessions](/features/sessions) group related requests to show the true cost of user interactions. Instead of seeing individual API calls, you see complete workflows:
+
+```typescript
+// Track a complete customer support interaction
+const response = await client.chat.completions.create(
+  { 
+    model: "gpt-4o", 
+    messages: [...] 
+  },
+  {
+    headers: {
+      "Helicone-Session-Id": "support-ticket-123",
+      "Helicone-Session-Name": "Customer Support"
+    }
+  }
+);
+```
+
+This reveals insights like:
+- A support chat costs $0.12 on average with 5 API calls
+- Document analysis workflows cost $0.45 with 12 API calls
+- Quick queries cost $0.02 with a single call
+
+### Segmentation That Matters
+
+Use [custom properties](/features/advanced-usage/custom-properties) to slice costs by the dimensions that matter to your business:
+
+<Frame caption="Cost breakdown by user tier showing premium users generate 3x more value than cost">
+  <img
+    src="/images/custom-properties/properties-page.webp"
+    alt="Dashboard showing cost segmentation by user tiers with ROI analysis"
+  />
+</Frame>
+
+```typescript
+headers: {
+  "Helicone-Property-UserTier": "premium",
+  "Helicone-Property-Feature": "document-analysis",
+  "Helicone-Property-Environment": "production"
+}
+```
+
+Now you can answer questions like:
+- Do premium users justify their higher usage costs?
+- Which features are cost-efficient vs. cost-intensive?
+- How much are we spending on development vs. production?
+
+## AI Gateway Cost Optimization
+
+The [AI Gateway](/gateway/overview) doesn't just track costs - it actively optimizes them through intelligent routing.
+
+### Automatic Model Selection
+
+The [Model Registry](https://helicone.ai/models) shows all supported models with real-time pricing across providers. The AI Gateway automatically sorts by cost to find the cheapest option:
+
+<Frame caption="Model Registry showing price comparison across providers">
+  <img
+    src="/images/model-selection.webp"
+    alt="Helicone Model Registry interface showing models sorted by price across different providers"
+  />
+</Frame>
+
+### How Automatic Optimization Works
+
+1. **[BYOK Priority](/gateway/provider-routing#option-2-your-own-keys-byok)** - Uses your existing credits first (AWS, Azure, etc.)
+2. **[Cost-Based Routing](/gateway/provider-routing#smart-routing-algorithm)** - Automatically selects the cheapest available provider
+3. **[Smart Fallbacks](/gateway/provider-routing#failover-triggers)** - If one provider fails, routes to the next cheapest option
+
+```typescript
+// One request, multiple potential providers
+await gateway.chat.completions.create({
+  model: "claude-3.5-sonnet",
+  messages: [...]
+});
+
+// Gateway automatically routes to cheapest available:
+// 1. Your AWS Bedrock key ($3/1M tokens)
+// 2. Your Anthropic key ($3/1M tokens)
+// 3. Next cheapest provider...
+```
+
+## Cost Prevention & Alerts
+
+<Frame caption="Cost alert configuration with spending thresholds and real-time notifications">
+  <img
+    src="/images/alerts/alert-triggered.webp"
+    alt="Alert configuration interface showing daily and monthly spending limits"
+  />
+</Frame>
+
+### Setting Smart Alerts
+
+Configure [cost alerts](/features/alerts) to catch spending issues before they become problems. Set graduated thresholds (50%, 80%, 95% of budget) and use different limits for development vs. production environments.
+
+The key is understanding your baseline spending patterns and setting alerts that give you time to react without causing alert fatigue.
+
+<Note>
+Cost alerts rely on accurate cost data. See [How We Calculate Costs](#how-we-calculate-costs) above. If you see "cost not supported" for your model, [contact us](https://discord.com/invite/HwUbV3Q8qz) to add support.
+</Note>
+
+### Caching for Cost Reduction
+
+Enable [caching](/features/advanced-usage/caching) to eliminate redundant API calls entirely:
+
+<Frame caption="Cache performance showing 73% hit rate saving $1,247 this month">
+  <img
+    src="/images/caching.webp"
+    alt="Dashboard showing cache hit rates and associated cost savings"
+  />
+</Frame>
+
+```typescript
+headers: {
+  "Helicone-Cache-Enabled": "true",
+  "Cache-Control": "max-age=3600"  // 1 hour cache
+}
+```
+
+Best caching opportunities:
+- FAQ responses in support bots
+- Static content generation
+- Development and testing environments
+
+
+
+## Automated Reports
+
+Get regular cost summaries delivered to your inbox or Slack channels. Reports provide insights into spending trends, model usage, and optimization opportunities.
+
+### What Reports Include
+- Weekly spending summaries and trends
+- Model usage breakdown by cost
+- Top cost drivers and expensive requests
+- Week-over-week comparisons
+- Optimization recommendations
+
+### Setting Up Reports
+Configure automated reports in **Settings → Reports** to receive them via:
+- **Email** - Weekly digests to any email address
+- **Slack** - Post to your team channels
+
+<Note>
+Reports help you stay on top of costs without checking the dashboard daily. Perfect for finance teams and engineering managers tracking AI spend.
+</Note>
+
+## Next Steps
+
+<CardGroup cols={2}>
+<Card title="Set Up Alerts" icon="bell" href="/features/alerts">
+  Configure spending thresholds before they become problems
+</Card>
+<Card title="Enable Caching" icon="database" href="/features/advanced-usage/caching">
+  Start saving immediately on repetitive requests
+</Card>
+<Card title="Configure Gateway" icon="route" href="/gateway/overview">
+  Let automatic routing optimize your costs
+</Card>
+<Card title="Track Sessions" icon="layer-group" href="/features/sessions">
+  Understand your true unit economics
+</Card>
+</CardGroup>

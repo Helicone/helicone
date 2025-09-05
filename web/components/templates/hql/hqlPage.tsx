@@ -27,6 +27,7 @@ import {
 } from "./constants";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useHeliconeAgent } from "../agent/HeliconeAgentContext";
+import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 
 function HQLPage() {
   const organization = useOrg();
@@ -260,17 +261,25 @@ function HQLPage() {
     );
   }
 
-  if (!hasAccessToHQL) {
-    return <div>You do not have access to HQL</div>;
+  if (!hasAccessToHQL?.data) {
+    return (
+      <EmptyStateCard
+        feature="hql"
+        onPrimaryClick={() => {
+          window.open("https://forms.gle/YXYkFz9Zaa7fWF2v7", "_blank");
+        }}
+      />
+    );
   }
 
   return (
-    <ResizablePanelGroup direction="horizontal">
+    <ResizablePanelGroup direction="horizontal" className="h-screen w-full">
       <ResizablePanel
-        defaultSize={20}
+        defaultSize={25}
+        minSize={18}
         maxSize={40}
         collapsible={true}
-        collapsedSize={4}
+        collapsedSize={0}
       >
         <Directory
           tables={clickhouseSchemas.data ?? []}

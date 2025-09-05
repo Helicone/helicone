@@ -16,9 +16,6 @@ export interface paths {
   "/v1/webhooks/{webhookId}": {
     delete: operations["DeleteWebhook"];
   };
-  "/v1/public/waitlist/experiments": {
-    post: operations["AddToWaitlist"];
-  };
   "/v1/vault/add": {
     post: operations["AddKey"];
   };
@@ -39,6 +36,28 @@ export interface paths {
   };
   "/v1/user/query": {
     post: operations["GetUsers"];
+  };
+  "/v1/api-keys/provider-key/{providerKeyId}": {
+    get: operations["GetProviderKey"];
+    delete: operations["DeleteProviderKey"];
+    patch: operations["UpdateProviderKey"];
+  };
+  "/v1/api-keys/provider-key": {
+    post: operations["CreateProviderKey"];
+  };
+  "/v1/api-keys/provider-keys": {
+    get: operations["GetProviderKeys"];
+  };
+  "/v1/api-keys": {
+    get: operations["GetAPIKeys"];
+    post: operations["CreateAPIKey"];
+  };
+  "/v1/api-keys/proxy-key": {
+    post: operations["CreateProxyKey"];
+  };
+  "/v1/api-keys/{apiKeyId}": {
+    delete: operations["DeleteAPIKey"];
+    patch: operations["UpdateAPIKey"];
   };
   "/v1/evaluator": {
     post: operations["CreateEvaluator"];
@@ -283,6 +302,9 @@ export interface paths {
   "/v1/stripe/subscription/free/usage": {
     get: operations["GetFreeUsage"];
   };
+  "/v1/stripe/cloud/checkout-session": {
+    post: operations["CreateCloudGatewayCheckoutSession"];
+  };
   "/v1/stripe/subscription/new-customer/upgrade-to-pro": {
     post: operations["UpgradeToPro"];
   };
@@ -316,9 +338,6 @@ export interface paths {
   };
   "/v1/stripe/subscription": {
     get: operations["GetSubscription"];
-  };
-  "/v1/stripe/webhook": {
-    post: operations["HandleStripeWebhook"];
   };
   "/v1/trace/custom/v1/log": {
     post: operations["LogCustomTraceLegacy"];
@@ -439,6 +458,9 @@ export interface paths {
   "/v1/helicone-sql/saved-query/{queryId}": {
     get: operations["GetSavedQuery"];
     delete: operations["DeleteSavedQuery"];
+  };
+  "/v1/helicone-sql/saved-queries/bulk-delete": {
+    post: operations["BulkDeleteSavedQueries"];
   };
   "/v1/helicone-sql/saved-query": {
     put: operations["UpdateSavedQuery"];
@@ -590,27 +612,14 @@ export interface paths {
   "/v1/customer/query": {
     post: operations["GetCustomers"];
   };
-  "/v1/api-keys/provider-key/{providerKeyId}": {
-    get: operations["GetProviderKey"];
-    delete: operations["DeleteProviderKey"];
-    patch: operations["UpdateProviderKey"];
+  "/v1/credits/balance": {
+    get: operations["GetCreditsBalance"];
   };
-  "/v1/api-keys/provider-key": {
-    post: operations["CreateProviderKey"];
+  "/v1/credits/payments": {
+    get: operations["ListTokenUsagePayments"];
   };
-  "/v1/api-keys/provider-keys": {
-    get: operations["GetProviderKeys"];
-  };
-  "/v1/api-keys": {
-    get: operations["GetAPIKeys"];
-    post: operations["CreateAPIKey"];
-  };
-  "/v1/api-keys/proxy-key": {
-    post: operations["CreateProxyKey"];
-  };
-  "/v1/api-keys/{apiKeyId}": {
-    delete: operations["DeleteAPIKey"];
-    patch: operations["UpdateAPIKey"];
+  "/v1/credits/totalSpend": {
+    get: operations["GetTotalSpend"];
   };
   "/v1/public/alert-banner": {
     get: operations["GetAlertBanners"];
@@ -685,11 +694,6 @@ export interface components {
       error: null;
     };
     "Result_null.string_": components["schemas"]["ResultSuccess_null_"] | components["schemas"]["ResultError_string_"];
-    ResultError_any_: {
-      /** @enum {number|null} */
-      data: null;
-      error: unknown;
-    };
     "ResultSuccess__id-string__": {
       data: {
         id: string;
@@ -704,6 +708,7 @@ export interface components {
       name?: string;
     };
     DecryptedProviderKey: {
+      cuid?: string | null;
       provider_secret_key: string | null;
       provider_key_name: string | null;
       provider_name: string | null;
@@ -838,6 +843,8 @@ export interface components {
       "helicone-score-feedback"?: components["schemas"]["Partial_BooleanOperators_"];
       prompt_id?: components["schemas"]["Partial_TextOperators_"];
       prompt_version?: components["schemas"]["Partial_TextOperators_"];
+      request_referrer?: components["schemas"]["Partial_TextOperators_"];
+      is_passthrough_billing?: components["schemas"]["Partial_BooleanOperators_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
     "Pick_FilterLeaf.users_view-or-request_response_rmt_": {
@@ -942,6 +949,62 @@ export interface components {
         startTimeUnixSeconds: number;
       };
     };
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.string_": {
+      [key: string]: string;
+    };
+    CreateProviderKeyRequest: {
+      config: components["schemas"]["Record_string.string_"];
+      byokEnabled: boolean;
+      providerKeyName: string;
+      providerSecretKey?: string;
+      providerKey: string;
+      providerName: string;
+    };
+    ProviderKeyRow: {
+      id: string;
+      provider_name: string;
+      provider_key_name: string;
+      created_at?: string;
+      soft_delete: boolean;
+      config?: components["schemas"]["Record_string.any_"];
+      byok_enabled?: boolean;
+      cuid?: string;
+    };
+    "ResultSuccess__id-string--providerName-string__": {
+      data: {
+        providerName: string;
+        id: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__id-string--providerName-string_.string_": components["schemas"]["ResultSuccess__id-string--providerName-string__"] | components["schemas"]["ResultError_string_"];
+    UpdateProviderKeyRequest: {
+      byokEnabled?: boolean;
+      config?: components["schemas"]["Record_string.string_"];
+      providerSecretKey?: string;
+      providerKey?: string;
+    };
+    "ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array_": {
+      data: {
+          user_id: string;
+          updated_at: string;
+          temp_key: boolean;
+          soft_delete: boolean;
+          organization_id: string;
+          key_permissions: string;
+          /** Format: double */
+          id: number;
+          governance: boolean;
+          created_at: string;
+          api_key_name: string;
+          api_key_hash: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array.string_": components["schemas"]["ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array_"] | components["schemas"]["ResultError_string_"];
     EvaluatorResult: {
       id: string;
       created_at: string;
@@ -1014,10 +1077,6 @@ export interface components {
       error: null;
     };
     "Result__output-string--traces-string-Array--statusCode_63_-number_.string_": components["schemas"]["ResultSuccess__output-string--traces-string-Array--statusCode_63_-number__"] | components["schemas"]["ResultError_string_"];
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.string_": {
-      [key: string]: string;
-    };
     TestInput: {
       promptTemplate?: string;
       inputs: {
@@ -1990,6 +2049,10 @@ Json: JsonObject;
       error: null;
     };
     "Result_ScoreV2-or-null.string_": components["schemas"]["ResultSuccess_ScoreV2-or-null_"] | components["schemas"]["ResultError_string_"];
+    CreateCloudGatewayCheckoutSessionRequest: {
+      /** Format: double */
+      amount: number;
+    };
     UpgradeToProRequest: {
       addons?: {
         evals?: boolean;
@@ -2690,37 +2753,94 @@ Json: JsonObject;
       /** Format: double */
       timeZoneDifference: number;
     };
+    /** @enum {string} */
+    ModelProviderName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "google-ai-studio";
+    /** @enum {string} */
+    AuthorName: "anthropic" | "openai" | "perplexity" | "deepseek" | "cohere" | "xai" | "google" | "meta-llama" | "mistralai" | "amazon" | "microsoft" | "nvidia" | "qwen" | "moonshotai" | "fallback";
+    /** @enum {string} */
+    StandardParameter: "max_tokens" | "temperature" | "top_p" | "top_k" | "stop" | "stream" | "frequency_penalty" | "presence_penalty" | "repetition_penalty" | "seed" | "tools" | "tool_choice" | "functions" | "function_call" | "reasoning" | "include_reasoning" | "thinking" | "response_format" | "json_mode" | "truncate" | "min_p" | "logit_bias" | "logprobs" | "top_logprobs" | "structured_outputs" | "verbosity";
+    ModelPricing: {
+      /** Format: double */
+      threshold: number;
+      /** Format: double */
+      input: number;
+      /** Format: double */
+      output: number;
+      /** Format: double */
+      image?: number;
+      cacheMultipliers?: {
+        /** Format: double */
+        write1h?: number;
+        /** Format: double */
+        write5m?: number;
+        /** Format: double */
+        cachedInput: number;
+      };
+      /** Format: double */
+      cacheStoragePerHour?: number;
+      /** Format: double */
+      thinking?: number;
+      /** Format: double */
+      request?: number;
+      /** Format: double */
+      audio?: number;
+      /** Format: double */
+      video?: number;
+      /** Format: double */
+      web_search?: number;
+      /** Format: double */
+      internal_reasoning?: number;
+    };
+    Endpoint: {
+      pricing: components["schemas"]["ModelPricing"][];
+      /** Format: double */
+      contextLength: number;
+      /** Format: double */
+      maxCompletionTokens: number;
+      ptbEnabled: boolean;
+      version?: string;
+      baseUrl: string;
+      provider: components["schemas"]["ModelProviderName"];
+      author: components["schemas"]["AuthorName"];
+      providerModelId: string;
+      supportedParameters: components["schemas"]["StandardParameter"][];
+    };
+    SimplifiedPricing: {
+      /** Format: double */
+      prompt: number;
+      /** Format: double */
+      completion: number;
+      /** Format: double */
+      audio?: number;
+      /** Format: double */
+      thinking?: number;
+      /** Format: double */
+      web_search?: number;
+      /** Format: double */
+      image?: number;
+      /** Format: double */
+      video?: number;
+      /** Format: double */
+      cacheRead?: number;
+      /** Format: double */
+      cacheWrite?: number;
+      /** Format: double */
+      internal_reasoning?: number;
+      /** Format: double */
+      threshold?: number;
+    };
     ModelEndpoint: {
       provider: string;
       providerSlug: string;
-      pricing: {
-        /** Format: double */
-        cacheWrite?: number;
-        /** Format: double */
-        cacheRead?: number;
-        /** Format: double */
-        thinking?: number;
-        /** Format: double */
-        image?: number;
-        /** Format: double */
-        video?: number;
-        /** Format: double */
-        web_search?: number;
-        /** Format: double */
-        audio?: number;
-        /** Format: double */
-        completion: number;
-        /** Format: double */
-        prompt: number;
-      };
+      endpoint?: components["schemas"]["Endpoint"];
       supportsPtb?: boolean;
+      pricing: components["schemas"]["SimplifiedPricing"];
+      pricingTiers?: components["schemas"]["SimplifiedPricing"][];
     };
     /** @enum {string} */
     InputModality: "text" | "image" | "audio" | "video";
     /** @enum {string} */
     OutputModality: "text" | "image" | "audio" | "video";
-    /** @enum {string} */
-    StandardParameter: "max_tokens" | "temperature" | "top_p" | "top_k" | "stop" | "stream" | "frequency_penalty" | "presence_penalty" | "repetition_penalty" | "seed" | "tools" | "tool_choice" | "functions" | "function_call" | "reasoning" | "include_reasoning" | "thinking" | "response_format" | "json_mode" | "truncate" | "min_p" | "logit_bias" | "logprobs" | "top_logprobs" | "structured_outputs";
     ModelRegistryItem: {
       id: string;
       name: string;
@@ -2745,7 +2865,10 @@ Json: JsonObject;
       filters: {
         capabilities: components["schemas"]["ModelCapability"][];
         authors: string[];
-        providers: string[];
+        providers: {
+            displayName: string;
+            name: string;
+          }[];
       };
     };
     ResultSuccess_ModelRegistryResponse_: {
@@ -2754,8 +2877,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_ModelRegistryResponse.string_": components["schemas"]["ResultSuccess_ModelRegistryResponse_"] | components["schemas"]["ResultError_string_"];
-    /** @enum {string} */
-    SortOption: "name" | "price-low" | "price-high" | "context" | "newest";
     MetricStats: {
       /** Format: double */
       p99: number;
@@ -2948,6 +3069,9 @@ Json: JsonObject;
       error: null;
     };
     "Result_void.string_": components["schemas"]["ResultSuccess_void_"] | components["schemas"]["ResultError_string_"];
+    BulkDeleteSavedQueriesRequest: {
+      ids: string[];
+    };
     "ResultSuccess_HqlSavedQuery-Array_": {
       data: components["schemas"]["HqlSavedQuery"][];
       /** @enum {number|null} */
@@ -3497,25 +3621,50 @@ Json: JsonObject;
       id: string;
       name: string;
     };
-    "ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array_": {
-      data: {
-          user_id: string;
-          updated_at: string;
-          temp_key: boolean;
-          soft_delete: boolean;
-          organization_id: string;
-          key_permissions: string;
-          /** Format: double */
-          id: number;
-          governance: boolean;
-          created_at: string;
-          api_key_name: string;
-          api_key_hash: string;
-        }[];
+    CreditBalanceResponse: {
+      /** Format: double */
+      totalCreditsPurchased: number;
+      /** Format: double */
+      balance: number;
+    };
+    ResultSuccess_CreditBalanceResponse_: {
+      data: components["schemas"]["CreditBalanceResponse"];
       /** @enum {number|null} */
       error: null;
     };
-    "Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array.string_": components["schemas"]["ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array_"] | components["schemas"]["ResultError_string_"];
+    "Result_CreditBalanceResponse.string_": components["schemas"]["ResultSuccess_CreditBalanceResponse_"] | components["schemas"]["ResultError_string_"];
+    PurchasedCredits: {
+      id: string;
+      /** Format: double */
+      createdAt: number;
+      /** Format: double */
+      credits: number;
+      referenceId: string;
+    };
+    PaginatedPurchasedCredits: {
+      purchases: components["schemas"]["PurchasedCredits"][];
+      /** Format: double */
+      total: number;
+      /** Format: double */
+      page: number;
+      /** Format: double */
+      pageSize: number;
+    };
+    ResultSuccess_PaginatedPurchasedCredits_: {
+      data: components["schemas"]["PaginatedPurchasedCredits"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PaginatedPurchasedCredits.string_": components["schemas"]["ResultSuccess_PaginatedPurchasedCredits_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__totalSpend-number__": {
+      data: {
+        /** Format: double */
+        totalSpend: number;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__totalSpend-number_.string_": components["schemas"]["ResultSuccess__totalSpend-number__"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array_": {
       data: {
           updated_at: string;
@@ -3855,23 +4004,6 @@ export interface operations {
       };
     };
   };
-  AddToWaitlist: {
-    requestBody: {
-      content: {
-        "application/json": {
-          email: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_any_"];
-        };
-      };
-    };
-  };
   AddKey: {
     requestBody: {
       content: {
@@ -3981,6 +4113,197 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array.string_"];
+        };
+      };
+    };
+  };
+  GetProviderKey: {
+    parameters: {
+      path: {
+        providerKeyId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["DecryptedProviderKey"] | {
+            error: string;
+          };
+        };
+      };
+    };
+  };
+  DeleteProviderKey: {
+    parameters: {
+      path: {
+        providerKeyId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": ({
+            /** @enum {string} */
+            providerName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "google-ai-studio";
+          }) | {
+            error: string;
+          };
+        };
+      };
+    };
+  };
+  UpdateProviderKey: {
+    parameters: {
+      path: {
+        providerKeyId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateProviderKeyRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string--providerName-string_.string_"];
+        };
+      };
+    };
+  };
+  CreateProviderKey: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateProviderKeyRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            id: string;
+          } | {
+            error: string;
+          };
+        };
+      };
+    };
+  };
+  GetProviderKeys: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ProviderKeyRow"][] | {
+            error: string;
+          };
+        };
+      };
+    };
+  };
+  GetAPIKeys: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array.string_"];
+        };
+      };
+    };
+  };
+  CreateAPIKey: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @enum {string} */
+          key_permissions?: "rw" | "r" | "w";
+          api_key_name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            hashedKey: string;
+            apiKey: string;
+            id: string;
+          } | {
+            error: string;
+          };
+        };
+      };
+    };
+  };
+  CreateProxyKey: {
+    requestBody: {
+      content: {
+        "application/json": {
+          proxyKeyName: string;
+          providerKeyId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            proxyKeyId: string;
+            proxyKey: string;
+          } | {
+            error: string;
+          };
+        };
+      };
+    };
+  };
+  DeleteAPIKey: {
+    parameters: {
+      path: {
+        apiKeyId: number;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            hashedKey: string;
+          } | {
+            error: string;
+          };
+        };
+      };
+    };
+  };
+  UpdateAPIKey: {
+    parameters: {
+      path: {
+        apiKeyId: number;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          api_key_name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            hashedKey: string;
+          } | {
+            error: string;
+          };
         };
       };
     };
@@ -5423,6 +5746,23 @@ export interface operations {
       };
     };
   };
+  CreateCloudGatewayCheckoutSession: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateCloudGatewayCheckoutSessionRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            checkoutUrl: string;
+          };
+        };
+      };
+    };
+  };
   UpgradeToPro: {
     requestBody: {
       content: {
@@ -5616,19 +5956,6 @@ export interface operations {
             status: string;
           }) | null;
         };
-      };
-    };
-  };
-  HandleStripeWebhook: {
-    requestBody: {
-      content: {
-        "application/json": unknown;
-      };
-    };
-    responses: {
-      /** @description No content */
-      204: {
-        content: never;
       };
     };
   };
@@ -6026,23 +6353,6 @@ export interface operations {
     };
   };
   GetModelRegistry: {
-    parameters: {
-      query?: {
-        providers?: string;
-        authors?: string;
-        inputModalities?: string;
-        outputModalities?: string;
-        parameters?: string;
-        capabilities?: string;
-        priceMin?: number;
-        priceMax?: number;
-        contextMin?: number;
-        search?: string;
-        sort?: components["schemas"]["SortOption"];
-        limit?: number;
-        offset?: number;
-      };
-    };
     responses: {
       /** @description Ok */
       200: {
@@ -6260,6 +6570,21 @@ export interface operations {
     parameters: {
       path: {
         queryId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_void.string_"];
+        };
+      };
+    };
+  };
+  BulkDeleteSavedQueries: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BulkDeleteSavedQueriesRequest"];
       };
     };
     responses: {
@@ -7157,208 +7482,38 @@ export interface operations {
       };
     };
   };
-  GetProviderKey: {
+  GetCreditsBalance: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_CreditBalanceResponse.string_"];
+        };
+      };
+    };
+  };
+  ListTokenUsagePayments: {
     parameters: {
-      path: {
-        providerKeyId: string;
+      query?: {
+        page?: number;
+        pageSize?: number;
       };
     };
     responses: {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["DecryptedProviderKey"] | {
-            error: string;
-          };
+          "application/json": components["schemas"]["Result_PaginatedPurchasedCredits.string_"];
         };
       };
     };
   };
-  DeleteProviderKey: {
-    parameters: {
-      path: {
-        providerKeyId: string;
-      };
-    };
+  GetTotalSpend: {
     responses: {
       /** @description Ok */
       200: {
         content: {
-          "application/json": ({
-            /** @enum {string} */
-            providerName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure-openai" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "google";
-          }) | {
-            error: string;
-          };
-        };
-      };
-    };
-  };
-  UpdateProviderKey: {
-    parameters: {
-      path: {
-        providerKeyId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          config?: components["schemas"]["Record_string.string_"];
-          providerSecretKey?: string;
-          providerKey?: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": {
-            providerName: string;
-            id: string;
-          } | {
-            error: string;
-          };
-        };
-      };
-    };
-  };
-  CreateProviderKey: {
-    requestBody: {
-      content: {
-        "application/json": {
-          providerKeyName: string;
-          config: components["schemas"]["Record_string.string_"];
-          providerSecretKey?: string;
-          providerKey: string;
-          providerName: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": {
-            id: string;
-          } | {
-            error: string;
-          };
-        };
-      };
-    };
-  };
-  GetProviderKeys: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": unknown[] | {
-            error: string;
-          };
-        };
-      };
-    };
-  };
-  GetAPIKeys: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--updated_at-string--user_id-string_-Array.string_"];
-        };
-      };
-    };
-  };
-  CreateAPIKey: {
-    requestBody: {
-      content: {
-        "application/json": {
-          /** @enum {string} */
-          key_permissions?: "rw" | "r" | "w";
-          api_key_name: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": {
-            hashedKey: string;
-            apiKey: string;
-            id: string;
-          } | {
-            error: string;
-          };
-        };
-      };
-    };
-  };
-  CreateProxyKey: {
-    requestBody: {
-      content: {
-        "application/json": {
-          proxyKeyName: string;
-          providerKeyId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": {
-            proxyKeyId: string;
-            proxyKey: string;
-          } | {
-            error: string;
-          };
-        };
-      };
-    };
-  };
-  DeleteAPIKey: {
-    parameters: {
-      path: {
-        apiKeyId: number;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": {
-            hashedKey: string;
-          } | {
-            error: string;
-          };
-        };
-      };
-    };
-  };
-  UpdateAPIKey: {
-    parameters: {
-      path: {
-        apiKeyId: number;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          api_key_name: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": {
-            hashedKey: string;
-          } | {
-            error: string;
-          };
+          "application/json": components["schemas"]["Result__totalSpend-number_.string_"];
         };
       };
     };

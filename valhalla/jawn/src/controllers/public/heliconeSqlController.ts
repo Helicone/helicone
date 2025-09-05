@@ -54,6 +54,10 @@ export interface UpdateSavedQueryRequest extends CreateSavedQueryRequest {
   id: string;
 }
 
+export interface BulkDeleteSavedQueriesRequest {
+  ids: string[];
+}
+
 export interface HqlSavedQuery {
   id: string;
   organization_id: string;
@@ -216,6 +220,21 @@ export class HeliconeSqlController extends Controller {
     }
     
     this.setStatus(204);
+    return ok(undefined);
+  }
+
+  @Post("saved-queries/bulk-delete")
+  public async bulkDeleteSavedQueries(
+    @Body() requestBody: BulkDeleteSavedQueriesRequest,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<void, string>> {
+    const heliconeSqlManager = new HqlQueryManager(request.authParams);
+    const result = await heliconeSqlManager.bulkDeleteSavedQueries(requestBody.ids);
+    if (result.error) {
+      this.setStatus(500);
+      return err(result.error);
+    }
+    this.setStatus(200);
     return ok(undefined);
   }
 

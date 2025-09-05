@@ -138,7 +138,7 @@ async function makeRequest(
   options: QueryOptions
 ): Promise<RequestResponse[]> {
   const requestBody = {
-    filter: "all",
+    filter: {},
     isCached: false,
     limit,
     offset,

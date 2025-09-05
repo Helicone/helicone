@@ -93,7 +93,7 @@ const CustomScrollbar = forwardRef<
       </div>
       {/* Custom overlay scrollbar */}
       {scrollHeight > clientHeight + 1 && (
-        <div className="pointer-events-none absolute bottom-0 right-0 top-0 z-10 w-[8px]">
+        <div className="pointer-events-none absolute bottom-0 right-0 top-0 z-50 w-[8px]">
           <div
             className={`absolute right-0 transition-opacity duration-200 ${
               withBorder

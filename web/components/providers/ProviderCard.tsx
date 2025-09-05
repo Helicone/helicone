@@ -1,4 +1,4 @@
-import React, { useReducer, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -10,8 +10,10 @@ import {
   Save,
   ChevronDown,
   ChevronUp,
+  Trash2,
+  Pencil,
 } from "lucide-react";
-import { Provider } from "@/types/provider";
+import { Provider, ProviderKey } from "@/types/provider";
 import { useProvider } from "@/hooks/useProvider";
 import {
   Tooltip,
@@ -31,52 +33,82 @@ interface ProviderCardProps {
   provider: Provider;
 }
 
-// Define our state structure
-interface ProviderCardState {
-  key: {
-    value: string;
-    secretValue?: string;
-    displayState: "hidden" | "viewing" | "loading";
-    decryptedValue: string | null;
-    decryptedSecretValue?: string | null;
-  };
-  config: {
-    isVisible: boolean;
-    values: Record<string, string>;
-  };
+interface ProviderInstanceProps {
+  provider: Provider;
+  existingKey?: ProviderKey;
+  onRemove?: () => void;
+  isMultipleMode?: boolean;
+  instanceIndex?: number;
+  onSaveSuccess?: () => void;
 }
 
-// Define action types
-type ProviderCardAction =
-  | { type: "SET_KEY_VALUE"; payload: string }
-  | { type: "SET_SECRET_KEY_VALUE"; payload: string }
-  | { type: "TOGGLE_KEY_VISIBILITY" }
-  | { type: "SET_KEY_LOADING" }
-  | {
-      type: "SET_DECRYPTED_KEY";
-      payload: { providerKey: string; providerSecretKey?: string | null };
-    }
-  | { type: "HIDE_KEY" }
-  | { type: "TOGGLE_CONFIG_VISIBILITY" }
-  | { type: "UPDATE_CONFIG_FIELD"; payload: { key: string; value: string } }
-  | { type: "INITIALIZE_CONFIG"; payload: Record<string, string> }
-  | { type: "RESET_VIEW" };
-
-// ====== Component ======
-export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
+// ====== Provider Instance Component ======
+const ProviderInstance: React.FC<ProviderInstanceProps> = ({
+  provider,
+  existingKey,
+  onRemove,
+  isMultipleMode = false,
+  instanceIndex = 0,
+  onSaveSuccess,
+}) => {
   const { setNotification } = useNotification();
   const {
-    existingKey,
     isSavingKey,
-    isSavedKey,
     addProviderKey,
     updateProviderKey,
     viewDecryptedProviderKey,
   } = useProvider({ provider });
 
-  // ====== Reducer ======
-  const getInitialState = (): ProviderCardState => {
-    // Initialize with empty defaults based on provider
+  // Track saved state locally to control when to show "Saved" vs "Update"
+  const [isSavedLocal, setIsSavedLocal] = useState(false);
+
+  // ====== State Management with useState ======
+  const [keyValue, setKeyValue] = useState("");
+  const [secretKeyValue, setSecretKeyValue] = useState("");
+  const [keyName, setKeyName] = useState("");
+  const [isViewingKey, setIsViewingKey] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [decryptedKey, setDecryptedKey] = useState<string | null>(null);
+  const [decryptedSecretKey, setDecryptedSecretKey] = useState<string | null>(
+    null,
+  );
+  const [configVisible, setConfigVisible] = useState(false);
+  const [configValues, setConfigValues] = useState<Record<string, string>>({});
+  const [byokEnabled, setByokEnabled] = useState(false);
+
+  // Ref for the name input to programmatically focus it
+  const nameInputRef = React.useRef<HTMLInputElement>(null);
+
+  // ====== Derived state ======
+  const isEditMode = !!existingKey;
+  const hasAdvancedConfig =
+    provider.id === "azure" ||
+    provider.id === "aws" ||
+    provider.id === "vertex";
+
+  // Track if there are unsaved changes
+  const hasUnsavedChanges =
+    isEditMode &&
+    (keyValue !== "" ||
+      secretKeyValue !== "" ||
+      byokEnabled !== (existingKey?.byok_enabled || false));
+
+  // Generate default name for new instances
+  const defaultKeyName =
+    isMultipleMode && !existingKey
+      ? `${provider.name} API Key ${instanceIndex + 1}`
+      : `${provider.name} API Key`;
+
+  // Display name for the instance
+  const displayName = isMultipleMode
+    ? isEditMode
+      ? existingKey?.provider_key_name || `Instance ${instanceIndex + 1}`
+      : keyName || defaultKeyName
+    : provider.name;
+
+  // ====== Initialize config values and key name ======
+  useEffect(() => {
+    // Initialize default config based on provider
     let initialConfig = {};
     if (provider.id === "azure") {
       initialConfig = {
@@ -91,206 +123,99 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
       };
     } else if (provider.id === "vertex") {
       initialConfig = {
-        location: "",
+        region: "",
         projectId: "",
       };
     }
 
-    return {
-      key: {
-        value: "",
-        displayState: "hidden",
-        decryptedValue: null,
-      },
-      config: {
-        isVisible: false,
-        values: initialConfig,
-      },
-    };
-  };
-
-  const reducer = (
-    state: ProviderCardState,
-    action: ProviderCardAction,
-  ): ProviderCardState => {
-    switch (action.type) {
-      case "SET_KEY_VALUE":
-        return {
-          ...state,
-          key: {
-            ...state.key,
-            value: action.payload,
-            // If we're editing while viewing a decrypted key, stop showing it
-            ...(state.key.displayState === "viewing" &&
-              state.key.decryptedValue && {
-                displayState: "hidden",
-                decryptedValue: null,
-              }),
-          },
-        };
-      case "SET_SECRET_KEY_VALUE":
-        return {
-          ...state,
-          key: {
-            ...state.key,
-            secretValue: action.payload,
-          },
-        };
-
-      case "TOGGLE_KEY_VISIBILITY":
-        // If already viewing, hide the key
-        if (state.key.displayState === "viewing") {
-          return {
-            ...state,
-            key: {
-              ...state.key,
-              displayState: "hidden",
-              decryptedValue: null,
-            },
-          };
-        }
-        // Otherwise show the key (for new keys, just toggle visibility)
-        return {
-          ...state,
-          key: {
-            ...state.key,
-            displayState: "viewing",
-          },
-        };
-
-      case "SET_KEY_LOADING":
-        return {
-          ...state,
-          key: {
-            ...state.key,
-            displayState: "loading",
-          },
-        };
-
-      case "SET_DECRYPTED_KEY":
-        return {
-          ...state,
-          key: {
-            ...state.key,
-            displayState: "viewing",
-            decryptedValue: action.payload.providerKey,
-            decryptedSecretValue: action.payload.providerSecretKey,
-          },
-        };
-
-      case "HIDE_KEY":
-        return {
-          ...state,
-          key: {
-            ...state.key,
-            displayState: "hidden",
-            decryptedValue: null,
-          },
-        };
-
-      case "TOGGLE_CONFIG_VISIBILITY":
-        return {
-          ...state,
-          config: {
-            ...state.config,
-            isVisible: !state.config.isVisible,
-          },
-        };
-
-      case "UPDATE_CONFIG_FIELD":
-        return {
-          ...state,
-          config: {
-            ...state.config,
-            values: {
-              ...state.config.values,
-              [action.payload.key]: action.payload.value,
-            },
-          },
-        };
-
-      case "INITIALIZE_CONFIG":
-        return {
-          ...state,
-          config: {
-            ...state.config,
-            values: action.payload,
-          },
-        };
-
-      case "RESET_VIEW":
-        return {
-          ...state,
-          key: {
-            ...state.key,
-            displayState: "hidden",
-            decryptedValue: null,
-          },
-        };
-
-      default:
-        return state;
-    }
-  };
-
-  const [state, dispatch] = useReducer(reducer, getInitialState());
-
-  // ====== Derived state ======
-  const isViewingKey = state.key.displayState === "viewing";
-  const isEditMode = !!existingKey;
-  const isLoadingKey = state.key.displayState === "loading";
-  const hasAdvancedConfig =
-    provider.id === "azure" ||
-    provider.id === "aws" ||
-    provider.id === "vertex";
-
-  // ====== Effects ======
-  // Initialize config from existing key
-  useEffect(() => {
+    // Override with existing config if available
     if (existingKey?.config) {
       try {
-        dispatch({
-          type: "INITIALIZE_CONFIG",
-          payload: existingKey.config as Record<string, string>,
+        setConfigValues({
+          ...initialConfig,
+          ...(existingKey.config as Record<string, string>),
         });
       } catch (error) {
         logger.error({ error, existingKey }, "Error parsing config");
+        setConfigValues(initialConfig);
       }
+    } else {
+      setConfigValues(initialConfig);
     }
-  }, [existingKey]);
+
+    // Initialize byokEnabled from existing key
+    if (existingKey?.byok_enabled !== undefined) {
+      setByokEnabled(existingKey.byok_enabled);
+    }
+
+    // Initialize key name for new instances
+    if (!existingKey && isMultipleMode) {
+      setKeyName(defaultKeyName);
+    }
+  }, [existingKey, provider.id, defaultKeyName, isMultipleMode]);
 
   // Reset key view when saving or after successful save
   useEffect(() => {
-    if (isSavingKey || isSavedKey) {
-      dispatch({ type: "RESET_VIEW" });
+    if (isSavingKey) {
+      setIsViewingKey(false);
+      setDecryptedKey(null);
+      setDecryptedSecretKey(null);
     }
-  }, [isSavingKey, isSavedKey]);
+
+    // Set local saved state when save completes
+    if (addProviderKey.isSuccess || updateProviderKey.isSuccess) {
+      setIsSavedLocal(true);
+
+      // Notify parent when save is successful (for new instances)
+      if (!existingKey && onSaveSuccess) {
+        onSaveSuccess();
+      }
+    }
+  }, [
+    isSavingKey,
+    addProviderKey.isSuccess,
+    updateProviderKey.isSuccess,
+    existingKey,
+    onSaveSuccess,
+  ]);
+
+  // Reset saved state when any changes are made
+  useEffect(() => {
+    if (hasUnsavedChanges) {
+      setIsSavedLocal(false);
+    }
+  }, [hasUnsavedChanges]);
 
   // ====== Event handlers ======
   const handleToggleKeyVisibility = async () => {
-    if (state.key.displayState === "viewing") {
-      dispatch({ type: "HIDE_KEY" });
+    if (isViewingKey) {
+      setIsViewingKey(false);
+      setDecryptedKey(null);
+      setDecryptedSecretKey(null);
       return;
     }
 
     // For existing keys, fetch the decrypted version
     if (existingKey) {
-      dispatch({ type: "SET_KEY_LOADING" });
+      setIsLoading(true);
 
       try {
         const key = (await viewDecryptedProviderKey(existingKey.id)) ?? {
           providerKey: "",
           providerSecretKey: null,
         };
-        dispatch({ type: "SET_DECRYPTED_KEY", payload: key });
+        setDecryptedKey(key.providerKey);
+        setDecryptedSecretKey(key.providerSecretKey || null);
+        setIsViewingKey(true);
       } catch (error) {
         logger.error({ error, keyId: existingKey.id }, "Error viewing key");
         setNotification("Failed to retrieve key", "error");
-        dispatch({ type: "HIDE_KEY" });
+      } finally {
+        setIsLoading(false);
       }
     } else {
       // For new keys, just toggle visibility
-      dispatch({ type: "TOGGLE_KEY_VISIBILITY" });
+      setIsViewingKey(true);
     }
   };
 
@@ -302,10 +227,17 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
   };
 
   const handleUpdateConfigField = (key: string, value: string) => {
-    dispatch({
-      type: "UPDATE_CONFIG_FIELD",
-      payload: { key, value },
-    });
+    setConfigValues((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
+  const handlePencilClick = () => {
+    if (nameInputRef.current) {
+      nameInputRef.current.focus();
+      nameInputRef.current.select();
+    }
   };
 
   const handleSaveKey = async () => {
@@ -314,21 +246,21 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
         if (!existingKey) return;
         // If we have an existing key, use updateProviderKey mutation
         updateProviderKey.mutate({
-          providerName: provider.name,
-          key: state.key.value,
-          secretKey: state.key.secretValue,
+          key: keyValue,
+          secretKey: secretKeyValue,
           keyId: existingKey.id,
-          providerKeyName: `${provider.name} API Key`,
-          config: state.config.values,
+          config: configValues,
+          byokEnabled,
         });
       } else {
         // Otherwise create a new key using addProviderKey mutation
         addProviderKey.mutate({
-          providerName: provider.name,
-          key: state.key.value,
-          secretKey: state.key.secretValue,
-          providerKeyName: `${provider.name} API Key`,
-          config: state.config.values,
+          providerName: provider.id,
+          key: keyValue,
+          secretKey: secretKeyValue,
+          providerKeyName: keyName || defaultKeyName,
+          config: configValues,
+          byokEnabled,
         });
       }
     } catch (error) {
@@ -337,6 +269,17 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
         "Error saving provider key",
       );
       setNotification("Failed to save provider key", "error");
+    }
+  };
+
+  // ====== Handle input value changes ======
+  const handleKeyValueChange = (value: string) => {
+    setKeyValue(value);
+    // If we're editing while viewing a decrypted key, stop showing it
+    if (isViewingKey && decryptedKey) {
+      setIsViewingKey(false);
+      setDecryptedKey(null);
+      setDecryptedSecretKey(null);
     }
   };
 
@@ -378,7 +321,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
       ];
     } else if (provider.id === "vertex") {
       configFields = [
-        { label: "Location", key: "location", placeholder: "us-east5" },
+        { label: "Region", key: "region", placeholder: "us-east5" },
         {
           label: "Project ID",
           key: "projectId",
@@ -406,7 +349,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
               <Small className="text-xs">{field.label}</Small>
               {field.type === "boolean" ? (
                 <Checkbox
-                  checked={state.config.values[field.key] === "true"}
+                  checked={configValues[field.key] === "true"}
                   onCheckedChange={(checked) =>
                     handleUpdateConfigField(
                       field.key,
@@ -418,7 +361,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
                 <Input
                   type={field.type ?? "text"}
                   placeholder={field.placeholder}
-                  value={state.config.values[field.key] || ""}
+                  value={configValues[field.key] || ""}
                   onChange={(e) =>
                     handleUpdateConfigField(field.key, e.target.value)
                   }
@@ -433,40 +376,93 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
   };
 
   return (
-    <div className="border-b border-border bg-background transition-colors last:border-b-0 hover:bg-muted/50">
-      <div className="p-3">
+    <div
+      className={cn(
+        "bg-background transition-colors",
+        isMultipleMode
+          ? "border-l-2 border-l-muted-foreground/20 pl-3"
+          : "border-b border-border last:border-b-0 hover:bg-muted/50",
+      )}
+    >
+      <div className={cn("p-3", isMultipleMode && "py-2")}>
         <div className="flex flex-col gap-1.5">
           {/* Provider info and key status */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-md bg-muted">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={provider.logoUrl}
-                  alt={`${provider.name} logo`}
-                  className="h-4 w-4 object-contain"
-                  onError={(e) => {
-                    e.currentTarget.src =
-                      "/assets/home/providers/anthropic.png";
-                  }}
-                />
-              </div>
-              <div className="text-xs font-medium">{provider.name}</div>
-              {provider.note && (
+              {!isMultipleMode && (
+                <div className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-md bg-muted">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={provider.logoUrl}
+                    alt={`${provider.name} logo`}
+                    className="h-4 w-4 object-contain"
+                    onError={(e) => {
+                      e.currentTarget.src =
+                        "/assets/home/providers/anthropic.png";
+                    }}
+                  />
+                </div>
+              )}
+              {isMultipleMode && !isEditMode ? (
+                <div className="group flex items-center gap-1">
+                  <Input
+                    ref={nameInputRef}
+                    type="text"
+                    value={keyName}
+                    onChange={(e) => setKeyName(e.target.value)}
+                    placeholder={defaultKeyName}
+                    className="h-6 w-32 border-0 bg-transparent p-0 text-xs font-medium focus:border focus:bg-background focus:px-2 group-hover:bg-muted/50"
+                  />
+                  <Pencil
+                    className="h-3 w-3 cursor-pointer text-muted-foreground opacity-70 group-hover:opacity-100"
+                    onClick={handlePencilClick}
+                  />
+                </div>
+              ) : (
+                <div className="text-xs font-medium">{displayName}</div>
+              )}
+              {!isMultipleMode && provider.note && (
                 <div className="text-[10px] text-muted-foreground">
                   {provider.note}
                 </div>
               )}
               {isEditMode && (
-                <div className="border border-muted-foreground/30 px-1 py-0.5 text-xs text-muted-foreground">
-                  Key set
+                <div className="flex items-center gap-1">
+                  <div className="border border-muted-foreground/30 px-1 py-0.5 text-xs text-muted-foreground">
+                    Key set
+                  </div>
+                  {existingKey?.cuid && (
+                    <div className="font-mono text-[10px] text-muted-foreground/60">
+                      {existingKey.cuid}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
 
-            {isViewingKey && (
-              <div className="text-xs text-blue-500">Showing key</div>
-            )}
+            <div className="flex items-center gap-2">
+              {isViewingKey && (
+                <div className="text-xs text-blue-500">Showing key</div>
+              )}
+              {isMultipleMode && onRemove && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={onRemove}
+                        className="h-6 w-6 text-destructive hover:bg-destructive/10"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Remove instance</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </div>
           </div>
 
           {/* Key input row */}
@@ -478,14 +474,8 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
                 placeholder={
                   isEditMode ? "••••••••••••••••" : provider.apiKeyPlaceholder
                 }
-                value={
-                  isViewingKey && state.key.decryptedValue
-                    ? state.key.decryptedValue
-                    : state.key.value
-                }
-                onChange={(e) =>
-                  dispatch({ type: "SET_KEY_VALUE", payload: e.target.value })
-                }
+                value={isViewingKey && decryptedKey ? decryptedKey : keyValue}
+                onChange={(e) => handleKeyValueChange(e.target.value)}
                 className="h-7 flex-1 py-1 text-xs"
               />
             </div>
@@ -496,16 +486,11 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
                   type={isViewingKey ? "text" : "password"}
                   placeholder={isEditMode ? "••••••••••••••••" : "..."}
                   value={
-                    isViewingKey && state.key.decryptedSecretValue
-                      ? state.key.decryptedSecretValue
-                      : state.key.secretValue
+                    isViewingKey && decryptedSecretKey
+                      ? decryptedSecretKey
+                      : secretKeyValue
                   }
-                  onChange={(e) =>
-                    dispatch({
-                      type: "SET_SECRET_KEY_VALUE",
-                      payload: e.target.value,
-                    })
-                  }
+                  onChange={(e) => setSecretKeyValue(e.target.value)}
                   className="h-7 flex-1 py-1 text-xs"
                 />
               </div>
@@ -514,7 +499,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
             {/* Action buttons */}
             <div className="flex items-center gap-1">
               {/* Show copy button only when viewing an existing decrypted key */}
-              {isViewingKey && state.key.decryptedValue && (
+              {isViewingKey && decryptedKey && (
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -523,7 +508,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
                         variant="ghost"
                         size="icon"
                         onClick={() =>
-                          handleCopyToClipboard(state.key.decryptedValue || "")
+                          handleCopyToClipboard(decryptedKey || "")
                         }
                         className="h-7 w-7 text-blue-500"
                       >
@@ -545,9 +530,9 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
                       size="icon"
                       onClick={handleToggleKeyVisibility}
                       className="h-7 w-7 text-blue-500"
-                      disabled={isLoadingKey}
+                      disabled={isLoading}
                     >
-                      {isLoadingKey ? (
+                      {isLoading ? (
                         <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
                       ) : isViewingKey ? (
                         <EyeOff className="h-3.5 w-3.5" />
@@ -564,13 +549,16 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
 
               <Button
                 onClick={handleSaveKey}
-                disabled={(!state.key.value && !isEditMode) || isSavingKey}
+                disabled={
+                  (!keyValue && !isEditMode && !hasUnsavedChanges) ||
+                  isSavingKey
+                }
                 size="sm"
                 className="flex h-7 items-center gap-1 whitespace-nowrap px-2 text-xs"
               >
                 {isSavingKey ? (
                   "Saving..."
-                ) : isSavedKey ? (
+                ) : isSavedLocal && !hasUnsavedChanges ? (
                   <>
                     <Check className="h-3.5 w-3.5" /> Saved
                   </>
@@ -587,6 +575,21 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
             </div>
           </div>
 
+          {/* BYOK toggle */}
+          <div className="mt-2 flex items-center gap-2">
+            <Checkbox
+              id={`byok-${existingKey?.id || instanceIndex}`}
+              checked={byokEnabled}
+              onCheckedChange={(checked) => setByokEnabled(!!checked)}
+            />
+            <Label
+              htmlFor={`byok-${existingKey?.id || instanceIndex}`}
+              className="cursor-pointer text-xs font-normal"
+            >
+              Enable for AI Gateway (BYOK)
+            </Label>
+          </div>
+
           {/* Advanced config toggle */}
           {hasAdvancedConfig && (
             <div className="mt-2">
@@ -594,10 +597,10 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
                 type="button"
                 variant="ghost"
                 size="sm"
-                onClick={() => dispatch({ type: "TOGGLE_CONFIG_VISIBILITY" })}
+                onClick={() => setConfigVisible(!configVisible)}
                 className="flex h-6 items-center gap-1 px-2 text-xs text-muted-foreground"
               >
-                {state.config.isVisible ? (
+                {configVisible ? (
                   <>
                     <ChevronUp className="h-3.5 w-3.5" /> Hide advanced settings
                   </>
@@ -610,11 +613,153 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
               </Button>
 
               {/* Render the config fields when expanded */}
-              {state.config.isVisible && renderConfigFields()}
+              {configVisible && renderConfigFields()}
             </div>
           )}
         </div>
       </div>
+    </div>
+  );
+};
+
+// ====== Main Provider Card Component ======
+export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [hasUnsavedForm, setHasUnsavedForm] = useState(false);
+  const { providerKeys } = useProvider({ provider });
+
+  // Filter provider keys for this specific provider
+  const existingKeys = providerKeys.filter(
+    (key) => key.provider_name === provider.id && !key.soft_delete,
+  );
+
+  // If provider doesn't allow multiple instances, use the original behavior
+  if (!provider.multipleAllowed) {
+    return (
+      <ProviderInstance provider={provider} existingKey={existingKeys[0]} />
+    );
+  }
+
+  // For providers that allow multiple instances
+  const handleAddInstance = () => {
+    setIsExpanded(true);
+    setHasUnsavedForm(true);
+  };
+
+  const handleRemoveInstance = (_keyId: string) => {
+    // TODO: Implement deletion logic
+    // This would call a delete mutation from useProvider
+  };
+
+  return (
+    <div className="border-b border-border bg-background transition-colors last:border-b-0">
+      {/* Main header */}
+      <div className="p-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-md bg-muted">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={provider.logoUrl}
+                alt={`${provider.name} logo`}
+                className="h-4 w-4 object-contain"
+                onError={(e) => {
+                  e.currentTarget.src = "/assets/home/providers/anthropic.png";
+                }}
+              />
+            </div>
+            <div className="text-xs font-medium">{provider.name}</div>
+            {provider.note && (
+              <div className="text-[10px] text-muted-foreground">
+                {provider.note}
+              </div>
+            )}
+            {existingKeys.length > 0 && (
+              <div className="border border-muted-foreground/30 px-1 py-0.5 text-xs text-muted-foreground">
+                {existingKeys.length} key{existingKeys.length > 1 ? "s" : ""}{" "}
+                set
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* Add new instance button */}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleAddInstance}
+                    disabled={hasUnsavedForm}
+                    className="h-7 w-7 text-blue-500 hover:bg-blue-50 hover:text-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {hasUnsavedForm
+                    ? "Save current form first"
+                    : "Add new instance"}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+
+            {/* Expand/collapse button */}
+            {existingKeys.length > 0 && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="h-7 w-7 text-muted-foreground"
+              >
+                {isExpanded ? (
+                  <ChevronUp className="h-3.5 w-3.5" />
+                ) : (
+                  <ChevronDown className="h-3.5 w-3.5" />
+                )}
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Expanded content - accordion */}
+      {isExpanded && (
+        <div className="border-t border-border/50 bg-muted/20">
+          <div className="space-y-3 p-2">
+            {/* Existing instances */}
+            {existingKeys.map((key, index) => (
+              <ProviderInstance
+                key={key.id}
+                provider={provider}
+                existingKey={key}
+                onRemove={() => handleRemoveInstance(key.id)}
+                isMultipleMode={true}
+                instanceIndex={index}
+              />
+            ))}
+
+            {/* New instance form - only show when hasUnsavedForm is true */}
+            {hasUnsavedForm && (
+              <div className="border-t border-border/30 pt-3">
+                <div className="mb-2 text-xs text-muted-foreground">
+                  Add new instance:
+                </div>
+                <ProviderInstance
+                  provider={provider}
+                  isMultipleMode={true}
+                  instanceIndex={existingKeys.length}
+                  onRemove={() => setHasUnsavedForm(false)}
+                  onSaveSuccess={() => setHasUnsavedForm(false)}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

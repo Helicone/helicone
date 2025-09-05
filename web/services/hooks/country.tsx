@@ -23,7 +23,7 @@ const useCountries = (
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          filter: userFilters ?? "all",
+          filter: userFilters ?? {},
           offset: 0,
           limit,
           timeFilter,

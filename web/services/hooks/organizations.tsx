@@ -13,6 +13,7 @@ import {
   $JAWN_API_WITH_ORG,
   getJawnClient,
 } from "../../lib/clients/jawn";
+import type { paths } from "../../lib/clients/jawnTypes/private";
 import { ORG_ID_COOKIE_KEY } from "../../lib/constants";
 import { OnboardingState } from "./useOrgOnboarding";
 
@@ -177,40 +178,12 @@ const useAddOrgMemberMutation = () => {
   const queryClient = useQueryClient();
   const { setNotification } = useNotification();
   
-  return useMutation({
-    mutationFn: async ({
-      orgId,
-      email,
-    }: {
-      orgId: string;
-      email: string;
-    }) => {
-      const jawn = getJawnClient(orgId);
-      const { data, error } = await jawn.POST(
-        "/v1/organization/{organizationId}/add_member",
-        {
-          params: {
-            path: {
-              organizationId: orgId,
-            },
-          },
-          body: {
-            email,
-          },
-        },
-      );
-
-      if (error || data?.error) {
-        throw new Error(data?.error ? JSON.stringify(data.error) : String(error));
-      }
-
-      return data;
-    },
-    onSuccess: (_, variables) => {
+  return $JAWN_API.useMutation("post", "/v1/organization/{organizationId}/add_member", {
+    onSuccess: (_data, variables) => {
       setNotification("Member added successfully", "success");
       
       queryClient.invalidateQueries({
-        queryKey: ["get", "/v1/organization/{organizationId}/members", { params: { path: { organizationId: variables.orgId } } }],
+        queryKey: ["get", "/v1/organization/{organizationId}/members", { params: { path: { organizationId: variables.params.path.organizationId } } }],
       });
       
       queryClient.invalidateQueries({
@@ -226,10 +199,7 @@ const useAddOrgMemberMutation = () => {
       });
     },
     onError: (error) => {
-      setNotification(
-        error instanceof Error ? error.message : "Failed to add member",
-        "error"
-      );
+      setNotification("Failed to add member", "error");
     },
   });
 };

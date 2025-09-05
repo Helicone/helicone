@@ -17,7 +17,7 @@ import ThemedTableHeader from "../../shared/themed/themedHeader";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { formatNumber } from "../users/initialColumns";
 import { useFilterStore } from "@/filterAST/store/filterStore";
-import { toFilterNode } from "@/filterAST/toFilterNode";
+import { toFilterNode } from "@helicone-package/filters/toFilterNode";
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";

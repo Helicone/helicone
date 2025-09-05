@@ -35,7 +35,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { columnDefsToDragColumnItems } from "../../shared/themed/table/columns/DragList";
 import RenderHeliconeRequest from "../requests/RenderHeliconeRequest";
 import { HeliconeRequest } from "@helicone-package/llm-mapper/types";
-import { FilterAST } from "@/filterAST/filterAst";
+import { FilterAST } from "@helicone-package/filters/types";
 import { useFilterAST } from "@/filterAST/context/filterContext";
 
 interface CachePageProps {

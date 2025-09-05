@@ -10,8 +10,8 @@ export class HqlStore {
 
   constructor() {
     this.s3Client = new S3Client(
-      process.env.S3_ACCESS_KEY ?? "",
-      process.env.S3_SECRET_KEY ?? "",
+      process.env.S3_ACCESS_KEY || undefined,
+      process.env.S3_SECRET_KEY || undefined,
       process.env.S3_ENDPOINT ?? "",
       HQL_STORE_BUCKET,
       (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
@@ -25,12 +25,36 @@ export class HqlStore {
   ): Promise<Result<string, string>> {
     // if result is ok, if over 100k store in s3 and return url
     const key = `${organizationId}/${fileName}`;
+    // Determine column order from keys of first row
+    if (rows.length === 0) {
+      return err("No data to export");
+    }
+    const headers = Object.keys(rows[0]);
     const csvWriter = createArrayCsvWriter({
       path: fileName,
-      header: Object.keys(rows[0]),
+      header: headers,
     });
 
-    await csvWriter.writeRecords(rows.map((row) => Object.values(row)));
+    // Normalize values: stringify objects/arrays to avoid [object Object]
+    const records = rows.map((row) =>
+      headers.map((key) => {
+        const value = row[key];
+        if (value === null || value === undefined) {
+          return "";
+        }
+        if (typeof value === "object") {
+          try {
+            return JSON.stringify(value);
+          } catch (_) {
+            // Fallback to string coercion if JSON fails
+            return String(value);
+          }
+        }
+        return value;
+      })
+    );
+
+    await csvWriter.writeRecords(records);
     const csvBuffer = fs.readFileSync(fileName);
     const uploadResult = await this.s3Client.uploadToS3(
       key,

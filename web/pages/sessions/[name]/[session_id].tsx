@@ -13,7 +13,7 @@ import { sessionFromHeliconeRequests } from "../../../lib/sessions/sessionsFromH
 import { useGetRequests } from "../../../services/hooks/requests";
 import { useRouter } from "next/router";
 import { useFilterAST } from "@/filterAST/context/filterContext";
-import { toFilterNode } from "@/filterAST/toFilterNode";
+import { toFilterNode } from "@helicone-package/filters/toFilterNode";
 
 export const SessionDetail = ({
   session_id,

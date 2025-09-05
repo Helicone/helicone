@@ -24,17 +24,18 @@ export const providers: Provider[] = [
     apiKeyPlaceholder: "sk-ant-...",
     relevanceScore: 95,
   },
-  // {
-  //   id: "azure",
-  //   name: "Azure OpenAI",
-  //   logoUrl: "/assets/home/providers/azure.webp",
-  //   description: "Configure your Azure OpenAI API keys",
-  //   docsUrl:
-  //     "https://docs.helicone.ai/getting-started/integration-methods/azure",
-  //   apiKeyLabel: "Azure API Key",
-  //   apiKeyPlaceholder: "...",
-  //   relevanceScore: 90,
-  // },
+  {
+    id: "azure",
+    name: "Azure OpenAI",
+    logoUrl: "/assets/home/providers/azure.webp",
+    description: "Configure your Azure OpenAI API keys",
+    docsUrl:
+      "https://docs.helicone.ai/getting-started/integration-methods/azure",
+    apiKeyLabel: "Azure API Key",
+    apiKeyPlaceholder: "...",
+    relevanceScore: 90,
+    multipleAllowed: true,
+  },
   {
     id: "vertex",
     name: "Vertex AI",
@@ -47,7 +48,7 @@ export const providers: Provider[] = [
     relevanceScore: 85,
   },
   {
-    id: "google",
+    id: "google-ai-studio",
     name: "Google AI (Gemini)",
     logoUrl: "/assets/home/providers/gemini.webp",
     description: "Configure your Gemini API Keys",
@@ -189,7 +190,7 @@ export const providers: Provider[] = [
     apiKeyLabel: "OpenRouter API Key",
     apiKeyPlaceholder: "...",
     relevanceScore: 35,
-    note: "We don't support OpenRouter in our AI Gateway but you can use it with our Playground.",
+    note: "We don't support OpenRouter in our AI Gateway, but you can use it with our Playground.",
   },
   // {
   //   id: "hyperbolic",

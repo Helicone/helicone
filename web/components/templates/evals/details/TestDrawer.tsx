@@ -42,7 +42,7 @@ export function TestDrawer({ evaluatorId, isOpen, onClose }: TestDrawerProps) {
       try {
         const requests = await jawn.POST("/v1/request/query-clickhouse", {
           body: {
-            filter: "all",
+            filter: {},
             limit: 1,
             sort: {
               created_at: "desc",

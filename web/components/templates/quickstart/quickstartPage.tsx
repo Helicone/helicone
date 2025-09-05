@@ -20,10 +20,11 @@ import {
   BookOpen,
   MessageSquare,
   Mail,
-  MoveUpRight,
   Copy,
   Loader,
   Check,
+  Bot,
+  MoveUpRight,
 } from "lucide-react";
 import Link from "next/link";
 import { useKeys } from "@/components/templates/keys/useKeys";
@@ -37,6 +38,8 @@ import {
   DialogDescription,
 } from "../../ui/dialog";
 import { ProviderKeySettings } from "../settings/providerKeySettings";
+import HelixIntegrationDialog from "./HelixIntegrationDialog";
+import { useHeliconeAgent } from "../agent/HeliconeAgentContext";
 
 const QuickstartPage = () => {
   const router = useRouter();
@@ -49,10 +52,19 @@ const QuickstartPage = () => {
   );
   const [isCreatingKey, setIsCreatingKey] = useState(false);
   const [isProviderModalOpen, setIsProviderModalOpen] = useState(false);
+  const [isHelixDialogOpen, setIsHelixDialogOpen] = useState(false);
 
   const { hasKeys, hasProviderKeys, updateOnboardingStatus } = useOrgOnboarding(
     org?.currentOrg?.id ?? "",
   );
+
+  const {
+    setAgentChatOpen,
+    setAgentState,
+    setToolHandler,
+    updateCurrentSessionMessages,
+    messages,
+  } = useHeliconeAgent();
 
   useEffect(() => {
     if (org?.currentOrg?.onboarding_status) {
@@ -68,6 +80,20 @@ const QuickstartPage = () => {
       setQuickstartKey(undefined);
     }
   }, [hasKeys]);
+
+  useEffect(() => {
+    setAgentChatOpen(true);
+  }, []);
+
+  useEffect(() => {
+    setToolHandler("quickstart-open-integration-guide", async () => {
+      setIsHelixDialogOpen(true);
+      return {
+        success: true,
+        message: "Successfully opened the integration guide dialog",
+      };
+    });
+  }, []);
 
   const handleCreateKey = async () => {
     try {
@@ -87,6 +113,23 @@ const QuickstartPage = () => {
     }
   };
 
+  const handleHelixSubmit = (message: string) => {
+    const helpMessage = {
+      role: "user" as const,
+      content: message,
+    };
+    updateCurrentSessionMessages([...messages, helpMessage], true);
+    setAgentChatOpen(true);
+
+    setTimeout(() => {
+      setAgentState((prev) => ({
+        ...prev,
+        needsAssistantResponse: true,
+        isProcessing: true,
+      }));
+    }, 100);
+  };
+
   const steps = [
     {
       title: "Create Helicone API key",
@@ -100,8 +143,8 @@ const QuickstartPage = () => {
     },
     {
       title: "Integrate",
-      description: "Gateway dashboard",
-      link: "/settings/ai-gateway",
+      description: "", // TODO Add back once gateway route is fixed
+      link: "",
     },
   ];
 
@@ -180,25 +223,27 @@ const QuickstartPage = () => {
                 <div className="mt-1">
                   <IntegrationGuide apiKey={quickstartKey} />
 
-                  <div
-                    className={`mx-4 my-2 rounded-sm border border-border p-3 ${org?.currentOrg?.has_integrated ? "bg-confirmative/10" : "bg-muted/30"}`}
-                  >
-                    <div className="flex items-center gap-2">
-                      {org?.currentOrg?.has_integrated ? (
-                        <Check size={16} className="text-confirmative" />
-                      ) : (
-                        <Loader
-                          size={16}
-                          className="animate-spin text-muted-foreground"
-                        />
-                      )}
-                      <span
-                        className={`text-sm ${org?.currentOrg?.has_integrated ? "text-confirmative" : "text-muted-foreground"}`}
-                      >
-                        {org?.currentOrg?.has_integrated
-                          ? "Requests detected!"
-                          : "Listening for requests..."}
-                      </span>
+                  <div className="mx-4 mb-2 flex flex-col gap-2">
+                    <div
+                      className={`rounded-sm border border-border p-3 ${org?.currentOrg?.has_integrated ? "bg-confirmative/10" : "bg-muted/30"}`}
+                    >
+                      <div className="flex items-center gap-2">
+                        {org?.currentOrg?.has_integrated ? (
+                          <Check size={16} className="text-confirmative" />
+                        ) : (
+                          <Loader
+                            size={16}
+                            className="animate-spin text-muted-foreground"
+                          />
+                        )}
+                        <span
+                          className={`text-sm ${org?.currentOrg?.has_integrated ? "text-confirmative" : "text-muted-foreground"}`}
+                        >
+                          {org?.currentOrg?.has_integrated
+                            ? "Requests detected!"
+                            : "Listening for requests..."}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
@@ -206,9 +251,11 @@ const QuickstartPage = () => {
                     href="https://docs.helicone.ai/getting-started/quick-start"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-fit"
                   >
-                    <Button variant="link" className="flex items-center gap-1">
+                    <Button
+                      variant="link"
+                      className="flex w-auto items-center gap-1"
+                    >
                       Using another SDK?
                       <MoveUpRight size={12} />
                     </Button>
@@ -248,6 +295,15 @@ const QuickstartPage = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
+              <DropdownMenuItem asChild>
+                <button
+                  onClick={() => setIsHelixDialogOpen(true)}
+                  className="flex w-full items-center"
+                >
+                  <Bot size={16} className="mr-2" />
+                  Ask Helix
+                </button>
+              </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link
                   href="https://docs.helicone.ai"
@@ -295,6 +351,12 @@ const QuickstartPage = () => {
           <ProviderKeySettings />
         </DialogContent>
       </Dialog>
+
+      <HelixIntegrationDialog
+        isOpen={isHelixDialogOpen}
+        onClose={() => setIsHelixDialogOpen(false)}
+        onSubmit={handleHelixSubmit}
+      />
     </div>
   );
 };

@@ -202,11 +202,6 @@ const generateHandler = async (
       headers: forwardHeaders,
       body: JSON.stringify(requestTemplate),
     });
-    console.log("New request:", {
-      targetUrl,
-      headers: forwardHeaders,
-      body: JSON.stringify(requestTemplate),
-    });
 
     // 8. EXECUTE REQUEST TO PROVIDER
     const { data: forwardRequestWrapper } = await RequestWrapper.create(
@@ -321,7 +316,6 @@ function getProviderConfig(
 
     const modelString = template?.model;
     const targetUrl = buildProviderUrl(provider, modelString, providerSettings);
-    console.log("Target URL:", targetUrl);
 
     return ok({
       provider,
@@ -359,8 +353,6 @@ async function getPromptVersion({
 }): Promise<
   Result<Database["public"]["Tables"]["prompts_versions"]["Row"], string>
 > {
-  console.log("Query params:", { promptId, orgId, version });
-
   // Build an optimized single query with join
   let query = supabaseClient
     .from("prompt_v2")
@@ -391,7 +383,6 @@ async function getPromptVersion({
   }
 
   const { data, error } = await query.limit(1);
-  console.log("Final query result:", { data, error });
 
   if (error) {
     console.error("Error fetching prompt version:", error);
@@ -430,7 +421,7 @@ type PromptMetadata = {
  * @param details Optional additional details about the error
  * @returns Response object with standardized error format
  */
-function createErrorResponse(
+export function createErrorResponse(
   message: string,
   code: string,
   status: number,

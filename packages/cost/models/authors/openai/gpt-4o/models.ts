@@ -12,17 +12,6 @@ export const models = {
     modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
   },
-  "gpt-4o:extended": {
-    name: "OpenAI: GPT-4o (extended)",
-    author: "openai",
-    description:
-      'GPT-4o ("o" for "omni") is OpenAI\'s latest AI model, supporting both text and image inputs with text outputs. It maintains the intelligence level of GPT-4 Turbo while being twice as fast and 50% more cost-effective. GPT-4o also offers improved performance in processing non-English languages and enhanced visual capabilities.\n\nFor benchmarking against other models, it was briefly called ["im-also-a-good-gpt2-chatbot"](https://twitter.com/LiamFedus/status/1790064963966370209)\n\n#multimodal',
-    contextLength: 128000,
-    maxOutputTokens: 64000,
-    created: "2024-05-13T00:00:00.000Z",
-    modality: { inputs: ["text", "image"], outputs: ["text"] },
-    tokenizer: "GPT",
-  },
   "gpt-4o-mini": {
     name: "OpenAI: GPT-4o-mini",
     author: "openai",
@@ -43,28 +32,6 @@ export const models = {
     maxOutputTokens: 16384,
     created: "2024-08-14T00:00:00.000Z",
     modality: { inputs: ["text", "image"], outputs: ["text"] },
-    tokenizer: "GPT",
-  },
-  "gpt-4o-mini-search-preview": {
-    name: "OpenAI: GPT-4o-mini Search Preview",
-    author: "openai",
-    description:
-      "GPT-4o mini Search Preview is a specialized model for web search in Chat Completions. It is trained to understand and execute web search queries.",
-    contextLength: 128000,
-    maxOutputTokens: 16384,
-    created: "2025-03-12T22:22:02.000Z",
-    modality: { inputs: ["text"], outputs: ["text"] },
-    tokenizer: "GPT",
-  },
-  "gpt-4o-search-preview": {
-    name: "OpenAI: GPT-4o Search Preview",
-    author: "openai",
-    description:
-      "GPT-4o Search Preview is a specialized model for web search in Chat Completions. It is trained to understand and execute web search queries.",
-    contextLength: 128000,
-    maxOutputTokens: 16384,
-    created: "2025-03-12T22:19:09.000Z",
-    modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "GPT",
   },
 } satisfies Record<string, ModelConfig>;

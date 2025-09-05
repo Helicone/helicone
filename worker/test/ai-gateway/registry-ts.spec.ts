@@ -1,10 +1,12 @@
-import { SELF, fetchMock } from "cloudflare:test";
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { SELF, fetchMock, env, runInDurableObject } from "cloudflare:test";
+import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import { registry } from "@helicone-package/cost/models/registry";
 import { UserEndpointConfig } from "@helicone-package/cost/models/types";
-import "../setup";
 import { type TestCase } from "../providers/base.test-config";
 import { anthropicTestConfig } from "../providers/anthropic.test-config";
+import { setSupabaseTestCase } from "../setup";
+
+const TEST_HELICONE_API_KEY = "sk-helicone-aaa1234-bbb1234-ccc1234-ddd1234";
 
 function mockRequiredServices() {
   const callTrackers = {
@@ -78,7 +80,23 @@ function mockProviderEndpoint(
   }
 }
 
-function setupTestMocks(testCase: TestCase) {
+async function seedDurableObject(testCase: TestCase) {
+  if (!testCase.orgId) {
+    return;
+  }
+  const walletId = env.WALLET.idFromName(testCase.orgId);
+  const walletStub = env.WALLET.get(walletId);
+  if (testCase.currentCredits !== undefined && testCase.currentCredits > 0) {
+    await runInDurableObject(walletStub, async (walletStub) => {
+      await walletStub.setCredits(
+        testCase.currentCredits ?? 0,
+        `test-credits-${Date.now()}`
+      );
+    });
+  }
+}
+
+async function setupTestMocks(testCase: TestCase) {
   const byokConfig = testCase.byokConfig || {};
 
   if (testCase.testType === "multi-provider-fallback") {
@@ -92,6 +110,24 @@ function setupTestMocks(testCase: TestCase) {
   if (testCase.provider) {
     mockProviderEndpoint(testCase.modelId, testCase.provider, 200, byokConfig);
   }
+
+  // Mock the /v1/credits/totalSpend endpoint
+  fetchMock
+    .get("http://localhost:8585")
+    .intercept({
+      path: "/v1/credits/totalSpend",
+      method: "GET",
+    })
+    .reply(() => ({
+      statusCode: 200,
+      data: { data: { totalSpend: 0 }, error: null },
+    }))
+    .persist();
+
+  // Add credits if specified in test case
+  seedDurableObject(testCase);
+
+  setSupabaseTestCase(testCase);
 }
 
 describe("Registry Tests", () => {
@@ -105,73 +141,125 @@ describe("Registry Tests", () => {
     fetchMock.deactivate();
   });
 
-  // PTB Tests commented out - PTB is not currently active (see aiGateway.ts line 241)
-  // describe("PTB Tests", () => {
-  //   const ptbTestCases: TestCase[] = [...anthropicTestConfig.generatePtbTestCases()];
+  describe("PTB Tests", () => {
+    describe("with sufficient credits", () => {
+      const ptbTestCases: TestCase[] = [
+        ...anthropicTestConfig.generateSuccessfulPtbTestCases(),
+      ];
 
-  //   ptbTestCases.forEach((testCase) => {
-  //     it(testCase.name, async () => {
-  //       if (!testCase.provider) {
-  //         console.warn(`No provider specified for ${testCase.name}`);
-  //         return;
-  //       }
-  //       const endpointsResult = registry.getPtbEndpointsByProvider(
-  //         testCase.modelId,
-  //         testCase.provider
-  //       );
-  //       const endpoints = endpointsResult.data || [];
+      ptbTestCases.forEach((testCase) => {
+        it(testCase.name, async () => {
+          await setupTestMocks(testCase);
+          if (!testCase.provider) {
+            console.warn(`No provider specified for ${testCase.name}`);
+            return;
+          }
+          const endpointsResult = registry.getPtbEndpointsByProvider(
+            testCase.modelId,
+            testCase.provider
+          );
+          const endpoints = endpointsResult.data || [];
 
-  //       endpoints.forEach((endpoint) => {
-  //         const url = new URL(endpoint.baseUrl);
-  //         const baseUrl = `${url.protocol}//${url.host}`;
-  //         const path = url.pathname;
+          endpoints.forEach((endpoint) => {
+            const url = new URL(endpoint.baseUrl);
+            const baseUrl = `${url.protocol}//${url.host}`;
+            const path = url.pathname;
 
-  //         fetchMock
-  //           .get(baseUrl)
-  //           .intercept({
-  //             path: path,
-  //             method: "POST",
-  //           })
-  //           .reply((request) => {
-  //             const body = JSON.parse(request.body as string);
-  //             const modelName = body.model?.split("/")[0] || body.model;
-  //             return {
-  //               statusCode: 200,
-  //               data: generateMockResponse(modelName),
-  //               responseOptions: {
-  //                 headers: { "content-type": "application/json" },
-  //               },
-  //             };
-  //           })
-  //           .persist();
-  //       });
+            fetchMock
+              .get(baseUrl)
+              .intercept({
+                path: path,
+                method: "POST",
+              })
+              .reply((request) => {
+                const body = JSON.parse(request.body as string);
+                const modelName = body.model?.split("/")[0] || body.model;
+                return {
+                  statusCode: 200,
+                  data: anthropicTestConfig.generateMockResponse(modelName),
+                  responseOptions: {
+                    headers: { "content-type": "application/json" },
+                  },
+                };
+              })
+              .persist();
+          });
 
-  //       const response = await SELF.fetch(
-  //         "https://ai-gateway.helicone.ai/v1/chat/completions",
-  //         {
-  //           method: "POST",
-  //           headers: {
-  //             "Content-Type": "application/json",
-  //             Authorization:
-  //               "Bearer sk-helicone-aaa1234-bbb1234-ccc1234-ddd1234",
-  //           },
-  //           body: JSON.stringify({
-  //             model: `${testCase.modelId}/${testCase.provider}`,
-  //             ...testCase.request,
-  //           }),
-  //         }
-  //       );
+          const response = await SELF.fetch(
+            "https://ai-gateway.helicone.ai/v1/chat/completions",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${TEST_HELICONE_API_KEY}`,
+              },
+              body: JSON.stringify({
+                model: `${testCase.modelId}/${testCase.provider}`,
+                ...testCase.request,
+              }),
+            }
+          );
 
-  //       expect(response.status).toBe(200);
-  //       const body = (await response.json()) as any;
-  //       expect(body).toHaveProperty("model");
-  //       expect(body).toHaveProperty("usage");
-  //       expect(body.usage.total_tokens).toBe(
-  //         body.usage.prompt_tokens + body.usage.completion_tokens
-  //       );
-  //     });
-  //   });
-  // });
+          const body = (await response.json()) as any;
+          expect(response.status).toBe(200);
+          expect(body).toHaveProperty("model");
+          expect(body).toHaveProperty("usage");
+          expect(body.usage.total_tokens).toBe(
+            body.usage.prompt_tokens + body.usage.completion_tokens
+          );
+
+          const orgId = testCase.orgId ?? "test-org-id";
+          const walletId = env.WALLET.idFromName(orgId);
+          const walletStub = env.WALLET.get(walletId);
+          await runInDurableObject(walletStub, async (walletStub) => {
+            const walletState = await walletStub.getWalletState(orgId);
+            expect(walletState.effectiveBalance).toBeLessThan(
+              walletState.balance
+            );
+            expect(walletState.effectiveBalance).toBeLessThan(
+              walletState.totalCredits
+            );
+            expect(walletState.totalEscrow).toBeGreaterThan(0);
+          });
+        });
+      });
+    });
+
+    describe("with insufficient credits", () => {
+      const ptbTestCases: TestCase[] = [
+        ...anthropicTestConfig.generateUnsuccessfulPtbTestCases(),
+      ];
+
+      ptbTestCases.forEach((testCase) => {
+        it(testCase.name, async () => {
+          await setupTestMocks(testCase);
+          if (!testCase.provider) {
+            console.warn(`No provider specified for ${testCase.name}`);
+            return;
+          }
+          const response = await SELF.fetch(
+            "https://ai-gateway.helicone.ai/v1/chat/completions",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${TEST_HELICONE_API_KEY}`,
+              },
+              body: JSON.stringify({
+                model: `${testCase.modelId}/${testCase.provider}`,
+                ...testCase.request,
+              }),
+            }
+          );
+
+          expect(response.status).toBe(429);
+          const body = (await response.json()) as any;
+          expect(body).toHaveProperty("error");
+          expect(body.success).toBe(false);
+        });
+      });
+    });
+  });
 
   describe("BYOK Tests", () => {
     const byokTestCases: TestCase[] = [
@@ -181,7 +269,7 @@ describe("Registry Tests", () => {
 
     byokTestCases.forEach((testCase) => {
       it(testCase.name, async () => {
-        setupTestMocks(testCase);
+        await setupTestMocks(testCase);
 
         const response = await SELF.fetch(
           "https://ai-gateway.helicone.ai/v1/chat/completions",
@@ -189,8 +277,7 @@ describe("Registry Tests", () => {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization:
-                "Bearer sk-helicone-aaa1234-bbb1234-ccc1234-ddd1234",
+              Authorization: `Bearer ${TEST_HELICONE_API_KEY}`,
             },
             body: JSON.stringify({
               model: testCase.modelString,
@@ -239,7 +326,7 @@ describe("Registry Tests", () => {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: "Bearer sk-helicone-test",
+              Authorization: `Bearer ${TEST_HELICONE_API_KEY}`,
               "Helicone-Gateway-Body-Mapping": "NO_MAPPING",
             },
             body: JSON.stringify({
@@ -292,7 +379,7 @@ describe("Registry Tests", () => {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: "Bearer sk-helicone-test",
+              Authorization: `Bearer ${TEST_HELICONE_API_KEY}`,
             },
             body: JSON.stringify({
               model:

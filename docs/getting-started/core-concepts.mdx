@@ -1,0 +1,259 @@
+---
+title: "Core Concepts"
+sidebarTitle: "Core Concepts"
+description: "Understand the fundamental building blocks of Helicone's AI Gateway and observability platform"
+---
+
+These core concepts form the foundation of how Helicone helps you build, monitor, and optimize production AI applications. Understanding them will help you get the most value from the platform.
+
+## The Request: Your Atomic Unit
+
+Everything in Helicone starts with a **request** - a single API call to an LLM provider through the AI Gateway or SDK. 
+
+<Note>
+Unlike other platforms, you don't need decorators throughout your code - just change your base URL and every request gets enriched with observability data.
+</Note>
+
+### What Makes a Helicone Request Special
+
+When you send a request through Helicone, we automatically capture:
+
+<CardGroup cols={2}>
+<Card icon="messages" color="#0CA5E9">
+  **Full conversation context**
+  
+  Input messages and model responses for debugging
+</Card>
+<Card icon="gauge" color="#0CA5E9">
+  **Performance metrics**
+  
+  Latency, token usage, and processing time
+</Card>
+<Card icon="dollar-sign" color="#0CA5E9">
+  **Cost attribution**
+  
+  Exact spend per request, calculated in real-time
+</Card>
+<Card icon="circle-exclamation" color="#0CA5E9">
+  **Error tracking**
+  
+  Failed requests with detailed error messages
+</Card>
+</CardGroup>
+
+This automatic enrichment means you can trace any issue, optimize any workflow, and understand any cost spike - all from a single request ID.
+
+## Organizing Your Data
+
+As your application scales, you need ways to slice and analyze thousands or millions of requests. Helicone provides powerful organizational tools.
+
+### Properties: Your Custom Taxonomy
+
+**Properties** are key-value pairs that tag requests with business context. They turn raw request logs into actionable insights.
+
+Common patterns:
+- `feature: "chat"` - Segment by feature
+- `env: "production"` - Track environments
+- `org_id: "acme-corp"` - Map organizations
+- `tier: "premium"` - Customer segmentation
+
+<Info>
+Properties enable you to answer critical questions:
+- Which features drive the most costs?
+- Are premium users experiencing more errors?
+- How does usage differ across organizations?
+</Info>
+
+### Users: Understanding Individual Usage
+
+**User tracking** attributes requests to specific individuals or entities in your system. This isn't just about identification - it's about understanding patterns and preventing abuse.
+
+Common patterns:
+- `user-123456` - Internal user IDs from your database
+- `alice@company.com` - Email addresses for B2B applications
+- `org-acme-corp` - Organization IDs when that's your primary breakdown
+
+<Info>
+User metrics reveal:
+- **Usage patterns** - How different users interact with your AI
+- **Cost per user** - Who's driving your LLM spend
+- **Rate limit enforcement** - Prevent individual users from overloading your system
+- **Quality of service** - Ensure fair resource distribution
+</Info>
+
+## Sessions: Tracking AI Workflows
+
+Modern AI applications orchestrate complex workflows with multiple steps. **Sessions** group these related requests together, giving you visibility into entire AI agent workflows.
+
+<Info>
+Sessions can track everything in your AI workflow:
+- **LLM calls** - Requests to OpenAI, Anthropic, and other models
+- **Vector database queries** - Embeddings, similarity searches, and retrievals
+- **Tool calls** - Function executions, API calls, and custom tools
+- **Any logged operation** - Database queries, external APIs, or custom events
+</Info>
+
+### Session Hierarchy
+
+Sessions use a path structure to show relationships between operations:
+
+```
+/task                           # Main workflow
+├── /task/research              # Research phase
+│   ├── /task/research/web_search
+│   └── /task/research/summarize
+└── /task/generate              # Generation phase
+    ├── /task/generate/draft
+    └── /task/generate/refine
+```
+
+<AccordionGroup>
+<Accordion title="Why Sessions Matter">
+Without sessions, debugging multi-step AI workflows is nearly impossible. You see individual requests but lose the context of how they connect. Sessions solve this by creating a hierarchical view that lets you:
+
+- **Trace failures** - See exactly where multi-step workflows break
+- **Optimize bottlenecks** - Identify slow or expensive steps
+- **Understand behavior** - Follow your AI's reasoning chain
+</Accordion>
+
+<Accordion title="Common Use Cases">
+- **Chatbot conversations** - Track entire dialogue threads with full context
+- **AI agents** - Monitor tool usage, decision paths, and multi-step reasoning
+- **Document processing** - Follow extraction → analysis → generation pipelines
+- **RAG workflows** - Trace retrieval → context building → generation steps
+</Accordion>
+</AccordionGroup>
+
+## Optimizing Your AI
+
+Once you understand what's happening, you need tools to improve performance, quality, and costs.
+
+<Tabs>
+<Tab title="Prompt Management">
+### Version Control Without Code Changes
+
+**Prompts** in Helicone aren't just templates - they're versioned, deployable assets that can be updated without touching code.
+
+<CardGroup cols={2}>
+<Card icon="code-branch" color="#10B981">
+  **Version control**
+  
+  Track every change with full history
+</Card>
+<Card icon="rocket" color="#10B981">
+  **Instant deployment**
+  
+  Update prompts without code changes
+</Card>
+<Card icon="layer-group" color="#10B981">
+  **Environment management**
+  
+  Different prompts for dev/staging/prod
+</Card>
+<Card icon="flask" color="#10B981">
+  **A/B testing**
+  
+  Compare prompt versions side-by-side
+</Card>
+</CardGroup>
+
+This transforms prompt engineering from a development bottleneck into a rapid iteration cycle.
+</Tab>
+
+<Tab title="Evaluation Scores">
+### Quality Metrics & Observability
+
+**Scores** measure the quality of your AI responses by attaching evaluation metrics to requests or sessions.
+
+How it works:
+1. Run your existing evaluation pipeline
+2. Post scores to Helicone for any request/session
+3. Track quality metrics over time
+4. Identify regressions before users complain
+
+<Note>
+Unlike traditional experiments, Helicone provides observability into your existing evaluation workflow - no need to change how you evaluate.
+</Note>
+</Tab>
+</Tabs>
+
+## Managing Resources
+
+Production AI applications need controls for reliability and cost management.
+
+<CardGroup cols={3}>
+<Card title="Cost & Token Tracking" icon="chart-line">
+Every request includes automatic cost calculation:
+
+- **Token usage** - Input, output, cached
+- **Model pricing** - Provider-specific rates
+- **Real-time updates** - Current pricing
+
+Enables budget alerts, cost allocation, and ROI analysis.
+</Card>
+
+<Card title="Caching" icon="database">
+Store and reuse previous responses:
+
+- **Exact match** - Identical requests
+- **Semantic** - Similar requests
+- **Auto management** - TTL handled
+
+Benefits: 10-100x faster, significant cost savings, improved reliability.
+</Card>
+
+<Card title="Rate Limiting" icon="shield-halved">
+Protect your application and budget:
+
+- **Per-user limits** - Prevent abuse
+- **Global limits** - Manage capacity
+- **Cost-based** - Cap spending
+- **Smart queuing** - Handle bursts
+
+Essential for production deployments.
+</Card>
+</CardGroup>
+
+## How It All Connects
+
+<Frame>
+<div style={{background: "#f9fafb", padding: "2rem", borderRadius: "8px"}}>
+
+Here's how these concepts work together in a real AI application:
+
+1. **User** makes a request to your application
+2. **Request** flows through the AI Gateway with automatic **property** tagging
+3. Multiple requests form a **session** representing the complete workflow
+4. **Prompt management** serves the right version for that environment
+5. **Caching** accelerates repeated operations
+6. **Rate limiting** ensures fair resource usage
+7. **Evaluation scores** track quality metrics
+8. **Cost tracking** monitors spending in real-time
+
+**Result:** Complete visibility and control over your AI application, from individual requests to complex multi-step workflows.
+
+</div>
+</Frame>
+
+## Next Steps
+
+Now that you understand the core concepts, put them into practice:
+
+<CardGroup cols={2}>
+<Card title="Explore Your Dashboard" icon="chart-line" href="/observability/request-monitoring">
+  See these concepts in action with your live data
+</Card>
+<Card title="Set Up Sessions" icon="git-branch" href="/features/sessions">
+  Start tracking multi-step AI workflows
+</Card>
+<Card title="Add Properties" icon="tag" href="/features/advanced-usage/custom-properties">
+  Organize requests for better insights
+</Card>
+<Card title="Manage Prompts" icon="wand-magic-sparkles" href="/features/advanced-usage/prompts">
+  Version and deploy prompts without code changes
+</Card>
+</CardGroup>
+
+<Tip>
+Start with request monitoring to understand your baseline, then layer in organization, workflow tracking, and optimization as your needs grow. Each concept builds on the others to give you complete observability and control.
+</Tip>

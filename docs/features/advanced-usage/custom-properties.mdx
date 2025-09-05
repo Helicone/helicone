@@ -6,7 +6,7 @@ sidebarTitle: "Custom Properties"
 
 import QuestionsSection from "/snippets/questions-section.mdx";
 
-When building AI applications, you often need to track and analyze requests by different dimensions like user ID, feature type, or workflow stage. Custom Properties let you tag LLM requests with metadata, enabling advanced filtering, cost analysis per user or feature, and performance tracking across different parts of your application.
+When building AI applications, you often need to track and analyze requests by different dimensions like project, feature, or workflow stage. Custom Properties let you tag LLM requests with metadata, enabling advanced filtering, cost analysis per user or feature, and performance tracking across different parts of your application.
 
 <Frame caption="Custom Properties appear as headers in the `Request` table. ">
   <img
@@ -34,14 +34,51 @@ Use headers to add Custom Properties to your LLM requests.
 
     <CodeGroup>
 
-    ```bash Curl
-    curl https://oai.helicone.ai/v1/chat/completions \
+    ```js Node.js
+    import { OpenAI } from "openai";
+    
+    const client = new OpenAI({
+      baseURL: "https://ai-gateway.helicone.ai",
+      apiKey: process.env.HELICONE_API_KEY,
+      defaultHeaders: {
+        "Helicone-Property-Conversation": "support_issue_2",
+        "Helicone-Property-App": "mobile",
+        "Helicone-Property-Environment": "production",
+      },
+    });
+
+    const response = await client.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: "Hello, how are you?" }]
+    });
+    ```
+
+    ```python Python
+    from openai import OpenAI
+    
+    client = OpenAI(
+        base_url="https://ai-gateway.helicone.ai",
+        api_key=os.getenv("HELICONE_API_KEY"),
+        default_headers={
+            "Helicone-Property-Conversation": "support_issue_2",
+            "Helicone-Property-App": "mobile",
+            "Helicone-Property-Environment": "production",
+        }
+    )
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": "Hello, how are you?"}]
+    )
+    ```
+
+    ```bash cURL
+    curl https://ai-gateway.helicone.ai/chat/completions \
       -H "Content-Type: application/json" \
-      -H "Authorization: Bearer $OPENAI_API_KEY" \
-      -H "Helicone-Auth: Bearer $HELICONE_API_KEY" \
-      -H "Helicone-Property-Conversation: "support_issue_2"" \
-      -H "Helicone-Property-App: "mobile"" \
-      -H "Helicone-Property-Environment: "production"" \
+      -H "Authorization: Bearer $HELICONE_API_KEY" \
+      -H "Helicone-Property-Conversation: support_issue_2" \
+      -H "Helicone-Property-App: mobile" \
+      -H "Helicone-Property-Environment: production" \
       -d '{
         "model": "gpt-4o-mini",
         "messages": [
@@ -49,49 +86,18 @@ Use headers to add Custom Properties to your LLM requests.
             "role": "user",
             "content": "Hello, how are you?"
           }
-        ],
-        "max_tokens": 50,
-        "temperature": 0.7
+        ]
       }'
     ```
 
-    ```python Python
-    openai.api_base = "https://oai.helicone.ai/v1"
-    openai
-
-    client.chat.completions.create(
-        model="text-davinci-003",
-        prompt="Say this is a test",
-        extra_headers={
-            "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
-            "Helicone-Property-Conversation": "support_issue_2",
-            "Helicone-Property-App": "mobile",
-            "Helicone-Property-Environment": "production",
-        }
-    )
-    ```
-
-    ```js Node.js
-    import { OpenAI } from "openai";
-    const configuration = {
-      apiKey: process.env.OPENAI_API_KEY,
-      basePath: "https://oai.helicone.ai/v1",
-      defaultHeaders: {
-        "Helicone-Auth": `Bearer ${HELICONE_API_KEY}`,
-        "Helicone-Property-Conversation": "support_issue_2",
-        "Helicone-Property-App": "mobile",
-        "Helicone-Property-Environment": "production",
-      },
-    };
-    const openai = new OpenAI(configuration);
-    ```
-
     ```python Langchain (Python)
+    from langchain_openai import ChatOpenAI
+    
     llm = ChatOpenAI(
-        openai_api_key="<OPENAI_API_KEY>",
-        openai_api_base="https://oai.helicone.ai/v1",
+        openai_api_key="<HELICONE_API_KEY>",
+        openai_api_base="https://ai-gateway.helicone.ai",
+        model_name="gpt-4o-mini",
         default_headers={
-            "Helicone-Auth": "Bearer <HELICONE_API_KEY>"
             "Helicone-Property-Type": "Course Outline"
         }
     )
@@ -99,8 +105,9 @@ Use headers to add Custom Properties to your LLM requests.
     course = llm.predict("Generate a course outline about AI.")
 
     # Update helicone properties/headers for each request
-    headers["Helicone-Property-Type"] = "Lesson"
-    llm.model_kwargs["headers"] = headers
+    llm.model_kwargs["headers"] = {
+        "Helicone-Property-Type": "Lesson"
+    }
 
     lesson = llm.predict("Generate a lesson for the AI course.")
     ```
@@ -108,114 +115,6 @@ Use headers to add Custom Properties to your LLM requests.
 
   </Step>
 </Steps>
-
-## Configuration Options
-
-### Basic Settings
-
-Custom properties use a simple header-based format:
-
-| Header Format | Type | Description | Example |
-|---------------|------|-------------|----------|
-| `Helicone-Property-[Name]` | `string` | Any custom metadata you want to track | `"Helicone-Property-Environment": "staging"` |
-| `Helicone-User-Id` | `string` | Special property for user tracking (reserved) | `"Helicone-User-Id": "user-123"` |
-
-## Use Cases
-
-<Tabs>
-<Tab title="User Cost Tracking">
-Track costs and usage per individual user for billing and optimization:
-
-<CodeGroup>
-```typescript Node.js
-import OpenAI from "openai";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  baseURL: "https://oai.helicone.ai/v1",
-  defaultHeaders: {
-    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-  },
-});
-
-// Track costs per user for billing
-const response = await openai.chat.completions.create(
-  {
-    model: "gpt-4o-mini",
-    messages: [{ role: "user", content: userQuery }]
-  },
-  {
-    headers: {
-      "Helicone-Property-Plan": "premium",
-      "Helicone-Property-Feature": "chat-completion"
-    }
-  }
-);
-
-// Now you can analyze costs by user, plan type, and feature
-```
-
-```python Python
-import openai
-
-client = openai.OpenAI(
-    api_key=os.environ.get("OPENAI_API_KEY"),
-    base_url="https://oai.helicone.ai/v1",
-    default_headers={
-        "Helicone-Auth": f"Bearer {os.environ.get('HELICONE_API_KEY')}",
-    }
-)
-
-response = client.chat.completions.create(
-    model="gpt-4o-mini",
-    messages=[{"role": "user", "content": user_query}],
-    extra_headers={
-        "Helicone-Property-Plan": "premium",
-        "Helicone-Property-Feature": "chat-completion"
-    }
-)
-```
-</CodeGroup>
-</Tab>
-
-<Tab title="Project Cost Tracking">
-Track costs across different projects and tasks for budget management:
-
-```typescript
-// Track project-level costs
-const response = await openai.chat.completions.create(
-  {
-    model: "gpt-4o",
-    messages: [{ role: "user", content: "Create a marketing strategy" }]
-  },
-  {
-    headers: {
-      "Helicone-Property-Project": "q4-product-launch",
-      "Helicone-Property-Task": "strategy",
-      "Helicone-Property-Client": "acme-corp"
-    }
-  }
-);
-
-// Different task, same project
-const adCopy = await openai.chat.completions.create(
-  {
-    model: "gpt-4o-mini",
-    messages: [{ role: "user", content: "Write ad copy" }]
-  },
-  {
-    headers: {
-      "Helicone-Property-Project": "q4-product-launch",
-      "Helicone-Property-Task": "copywriting",
-      "Helicone-Property-Client": "acme-corp"
-    }
-  }
-);
-
-// Analyze total cost per project and breakdown by task type
-```
-</Tab>
-</Tabs>
 
 ## Understanding Custom Properties
 
@@ -228,12 +127,161 @@ Custom properties are metadata attached to each request that help you:
 - Export data segmented by custom dimensions
 - Set up alerts based on property values
 
+## Use Cases
+
+<Tabs>
+<Tab title="Environment & Deployment Tracking">
+Track performance and costs across different environments and deployments:
+
+<CodeGroup>
+```typescript Node.js
+import { OpenAI } from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY,
+});
+
+// Production deployment
+const response = await client.chat.completions.create(
+  {
+    model: "gpt-4o-mini",
+    messages: [{ role: "user", content: "Process this customer request" }]
+  },
+  {
+    headers: {
+      "Helicone-Property-Environment": "production",
+      "Helicone-Property-Version": "v2.1.0",
+      "Helicone-Property-Region": "us-east-1"
+    }
+  }
+);
+
+// Staging deployment with different version
+const testResponse = await client.chat.completions.create(
+  {
+    model: "gpt-4o-mini", 
+    messages: [{ role: "user", content: "Test new feature" }]
+  },
+  {
+    headers: {
+      "Helicone-Property-Environment": "staging",
+      "Helicone-Property-Version": "v2.2.0-beta",
+      "Helicone-Property-Region": "us-west-2"
+    }
+  }
+);
+
+// Compare performance and costs across environments
+```
+
+```python Python
+from openai import OpenAI
+import os
+
+client = OpenAI(
+    base_url="https://ai-gateway.helicone.ai",
+    api_key=os.environ.get("HELICONE_API_KEY"),
+)
+
+# Production request
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Process this customer request"}],
+    extra_headers={
+        "Helicone-Property-Environment": "production",
+        "Helicone-Property-Version": "v2.1.0", 
+        "Helicone-Property-Region": "us-east-1"
+    }
+)
+
+# Development request 
+dev_response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Test prompt changes"}],
+    extra_headers={
+        "Helicone-Property-Environment": "development",
+        "Helicone-Property-Version": "v2.2.0-dev",
+        "Helicone-Property-Region": "local"
+    }
+)
+```
+</CodeGroup>
+</Tab>
+
+<Tab title="Customer Support Bot">
+Track support interactions by ticket ID and case details for debugging and cost analysis:
+
+```typescript
+// Initial customer inquiry
+const response = await client.chat.completions.create(
+  {
+    model: "gpt-4o-mini",
+    messages: [
+      { role: "system", content: "You are a helpful customer support agent." },
+      { role: "user", content: "My order hasn't arrived yet, what should I do?" }
+    ]
+  },
+  {
+    headers: {
+      "Helicone-Property-TicketId": "TICKET-12345",
+      "Helicone-Property-Category": "shipping",
+      "Helicone-Property-Priority": "medium",
+      "Helicone-Property-Channel": "chat"
+    }
+  }
+);
+
+// Follow-up question in same ticket
+const followUp = await client.chat.completions.create(
+  {
+    model: "gpt-4o-mini", 
+    messages: [
+      { role: "system", content: "You are a helpful customer support agent." },
+      { role: "user", content: "Can you help me track the package?" }
+    ]
+  },
+  {
+    headers: {
+      "Helicone-Property-TicketId": "TICKET-12345",
+      "Helicone-Property-Category": "shipping", 
+      "Helicone-Property-Priority": "high",  // Escalated priority
+      "Helicone-Property-Channel": "chat"
+    }
+  }
+);
+
+// Track costs per ticket, debug issues by category, analyze resolution patterns
+```
+</Tab>
+</Tabs>
+
+## Configuration Reference
+
+### Header Format
+
+Custom properties use a simple header-based format:
+
+<ParamField header="Helicone-Property-[Name]" type="string">
+  Any custom metadata you want to track. Replace `[Name]` with your property name.
+  
+  Example: `Helicone-Property-Environment: staging`
+</ParamField>
+
+<ParamField header="Helicone-User-Id" type="string">
+  Special reserved property for user tracking. Enables per-user cost analytics and usage metrics. See [User Metrics](/observability/user-metrics) for detailed tracking capabilities.
+  
+  Example: `Helicone-User-Id: user-123`
+</ParamField>
+
+## Advanced Features
+
 ### Updating Properties After Request
 You can update properties after a request is made using the [REST API](/rest/request/put-v1request-property):
 
 ```typescript
 // Get the request ID from the response
-const { data, response } = await openai.chat.completions
+const { data, response } = await client.chat.completions
   .create({ /* your request */ })
   .withResponse();
 

@@ -21,6 +21,7 @@ export type HeliconeMeta = {
   promptVersionId?: string;
   promptInputs?: Record<string, any>;
   promptEnvironment?: string;
+  isPassthroughBilling?: boolean;
 };
 export type MessageData = {
   id: string;

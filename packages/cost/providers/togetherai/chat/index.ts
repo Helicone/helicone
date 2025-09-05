@@ -507,8 +507,8 @@ export const costs: ModelRow[] = [
       value: "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
     },
     cost: {
-      prompt_token: 0.00027,
-      completion_token: 0.00085,
+      prompt_token: 0.00000027,
+      completion_token: 0.00000085,
     },
   },
 
@@ -518,8 +518,8 @@ export const costs: ModelRow[] = [
       value: "meta-llama/Llama-4-Scout-17B-16E-Instruct",
     },
     cost: {
-      prompt_token: 0.00018,
-      completion_token: 0.00059,
+      prompt_token: 0.00000018,
+      completion_token: 0.00000059,
     },
   },
 
@@ -529,8 +529,8 @@ export const costs: ModelRow[] = [
       value: "deepseek-ai/DeepSeek-V3",
     },
     cost: {
-      prompt_token: 0.00125,
-      completion_token: 0.00125,
+      prompt_token: 0.00000125,
+      completion_token: 0.00000125,
     },
   },
 
@@ -540,8 +540,8 @@ export const costs: ModelRow[] = [
       value: "deepseek-ai/DeepSeek-R1",
     },
     cost: {
-      prompt_token: 0.003,
-      completion_token: 0.007,
+      prompt_token: 0.000003,
+      completion_token: 0.000007,
     },
   },
 
@@ -551,8 +551,8 @@ export const costs: ModelRow[] = [
       value: "deepseek-ai/DeepSeek-R1-0528-tput",
     },
     cost: {
-      prompt_token: 0.00055,
-      completion_token: 0.00219,
+      prompt_token: 0.00000055,
+      completion_token: 0.00000219,
     },
   },
 
@@ -562,8 +562,8 @@ export const costs: ModelRow[] = [
       value: "Qwen/Qwen2.5-7B-Instruct-Turbo",
     },
     cost: {
-      prompt_token: 0.0003,
-      completion_token: 0.0003,
+      prompt_token: 0.0000003,
+      completion_token: 0.0000003,
     },
   },
 
@@ -573,8 +573,8 @@ export const costs: ModelRow[] = [
       value: "Qwen/Qwen2.5-72B-Instruct-Turbo",
     },
     cost: {
-      prompt_token: 0.0012,
-      completion_token: 0.0012,
+      prompt_token: 0.0000012,
+      completion_token: 0.0000012,
     },
   },
 
@@ -584,8 +584,8 @@ export const costs: ModelRow[] = [
       value: "Qwen/Qwen2.5-VL-72B-Instruct",
     },
     cost: {
-      prompt_token: 0.0012,
-      completion_token: 0.0012,
+      prompt_token: 0.0000012,
+      completion_token: 0.0000012,
     },
   },
 
@@ -595,8 +595,8 @@ export const costs: ModelRow[] = [
       value: "Qwen/Qwen2.5-Coder-32B-Instruct",
     },
     cost: {
-      prompt_token: 0.0008,
-      completion_token: 0.0008,
+      prompt_token: 0.0000008,
+      completion_token: 0.0000008,
     },
   },
 

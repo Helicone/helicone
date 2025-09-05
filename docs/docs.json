@@ -18,23 +18,63 @@
             "group": "Getting Started",
             "pages": [
               "getting-started/quick-start",
+              "getting-started/platform-overview"
+            ]
+          },
+          {
+            "group": "AI Gateway",
+            "tag": "BETA",
+            "pages": [
+              "gateway/overview",
+              "gateway/provider-routing",
               {
-                "group": "Self Host",
+                "group": "Features",
                 "pages": [
-                  "getting-started/self-host/overview",
-                  "getting-started/self-host/cloud",
-                  "getting-started/self-host/docker",
-                  "getting-started/self-host/kubernetes",
-                  "getting-started/self-host/manual"
+                  "features/advanced-usage/caching",
+                  "features/advanced-usage/custom-rate-limits",
+                  "gateway/prompt-integration",
+                  "features/advanced-usage/llm-security",
+                  "features/advanced-usage/moderations",
+                  "features/advanced-usage/retries"
                 ]
+              },
+              {
+                "group": "Concepts",
+                "pages": ["gateway/concepts/prompt-caching"]
               }
             ]
           },
           {
-            "group": "Integrations",
+            "group": "Observability & Analytics",
             "pages": [
+              "features/advanced-usage/custom-properties",
+              "features/sessions",
+              "features/advanced-usage/user-metrics",
+              "guides/cookbooks/cost-tracking",
+              "features/datasets",
+              "features/alerts",
+              "features/reports",
+              "features/hql"
+            ]
+          },
+          {
+            "group": "Prompt Management",
+            "pages": [
+              "features/advanced-usage/prompts",
+              "features/advanced-usage/scores",
+              "features/advanced-usage/feedback",
               {
-                "group": "LLM & Inference Providers",
+                "group": "Webhooks",
+                "pages": ["features/webhooks", "features/webhooks-testing"]
+              }
+            ]
+          },
+          {
+            "group": "Alternative Integrations",
+            "pages": [
+              "integrations/overview",
+              {
+                "group": "Provider-Specific",
                 "pages": [
                   {
                     "group": "Anthropic",
@@ -138,6 +178,7 @@
                       "integrations/openai/responses"
                     ]
                   },
+                  "getting-started/integration-method/openrouter",
                   "getting-started/integration-method/perplexity",
                   "getting-started/integration-method/together",
                   {
@@ -151,105 +192,14 @@
                 ]
               },
               {
-                "group": "Frameworks & Libraries",
+                "group": "Frameworks",
                 "pages": [
-                  "other-integrations/bubble",
+                  "other-integrations/langgraph",
+                  "getting-started/integration-method/litellm",
+                  "getting-started/integration-method/vercelai",
                   "getting-started/integration-method/crewai",
                   "other-integrations/dify",
-                  "other-integrations/embedchain",
-                  "other-integrations/firecrawl",
-                  "getting-started/integration-method/fireworks",
-                  "other-integrations/langgraph",
-                  {
-                    "group": "LiteLLM",
-                    "pages": [
-                      "getting-started/integration-method/litellm-openllmetry",
-                      "getting-started/integration-method/litellm",
-                      "getting-started/integration-method/litellm-proxy"
-                    ]
-                  },
-                  "other-integrations/meta-gpt",
-                  "other-integrations/open-devin",
-                  "other-integrations/open-webui",
-                  "getting-started/integration-method/openrouter",
-                  "other-integrations/ragas",
-                  "getting-started/integration-method/posthog",
-                  {
-                    "group": "Upstash",
-                    "pages": [
-                      "other-integrations/upstash-rag",
-                      "other-integrations/upstash-qstash"
-                    ]
-                  },
-                  {
-                    "group": "Vercel",
-                    "pages": [
-                      "getting-started/integration-method/vercelai",
-                      "getting-started/integration-method/vercel-ai-gateway"
-                    ]
-                  }
-                ]
-              },
-              {
-                "group": "Tools Logging",
-                "pages": [
-                  "integrations/tools/curl",
-                  "integrations/tools/logger-sdk"
-                ]
-              },
-              {
-                "group": "Any Vector DB",
-                "pages": [
-                  "integrations/vectordb/curl",
-                  "integrations/vectordb/logger-sdk"
-                ]
-              }
-            ]
-          },
-
-          {
-            "group": "Tracing",
-            "pages": [
-              "features/advanced-usage/caching",
-              "features/advanced-usage/custom-properties",
-              "features/sessions",
-              "features/advanced-usage/user-metrics",
-              "features/advanced-usage/omit-logs"
-            ]
-          },
-          {
-            "group": "Prompts & Evals",
-            "pages": [
-              "features/advanced-usage/prompts",
-              "features/advanced-usage/scores",
-              "features/advanced-usage/feedback",
-              {
-                "group": "Webhooks",
-                "pages": ["features/webhooks", "features/webhooks-testing"]
-              }
-            ]
-          },
-          {
-            "group": "Cloud AI Gateway",
-            "pages": [
-              "features/advanced-usage/cloud-ai-gateway-overview",
-              "features/advanced-usage/custom-rate-limits",
-              "getting-started/integration-method/gateway-fallbacks",
-              "features/advanced-usage/llm-security",
-              "features/advanced-usage/moderations",
-              "features/advanced-usage/retries",
-              "features/advanced-usage/vault"
-            ]
-          },
-          {
-            "group": "References",
-            "pages": [
-              {
-                "group": "Prompts (Legacy)",
-                "pages": [
-                  "features/prompts-legacy/editor",
-                  "features/prompts-legacy/generate",
-                  "features/prompts-legacy/import"
+                  "other-integrations/ragas"
                 ]
               },
               {
@@ -259,46 +209,57 @@
                   {
                     "group": "Manual Logger",
                     "pages": [
-                      "getting-started/integration-method/custom",
                       "getting-started/integration-method/manual-logger-curl",
-                      "getting-started/integration-method/manual-logger-python",
                       "getting-started/integration-method/manual-logger-typescript",
+                      "getting-started/integration-method/manual-logger-python",
                       "getting-started/integration-method/manual-logger-go"
                     ]
                   }
                 ]
               },
-              "references/how-we-calculate-cost",
-              "references/data-autonomy",
               {
-                "group": "Generic Gateway",
-                "pages": ["getting-started/integration-method/gateway"]
-              },
-              {
-                "group": "Prompts (Legacy)",
+                "group": "Tools",
                 "pages": [
-                  "rest/prompt/post-v1promptquery",
-                  "rest/prompt/post-v1prompt-query",
-                  "rest/prompt/delete-v1prompt",
-                  "rest/prompt/post-v1promptcreate",
-                  "rest/prompt/post-v1promptversion-edit-label",
-                  "rest/prompt/post-v1promptversion-edit-template",
-                  "rest/prompt/post-v1promptversion-subversion",
-                  "rest/prompt/post-v1promptversion-promote",
-                  "rest/prompt/post-v1promptversion-inputsquery",
-                  "rest/prompt/get-v1prompt-experiments",
-                  "rest/prompt/post-v1prompt-versionsquery",
-                  "rest/prompt/get-v1promptversion",
-                  "rest/prompt/delete-v1promptversion",
-                  "rest/prompt/post-v1prompt-compile",
-                  "rest/prompt/post-v1prompt-template"
+                  "integrations/tools/curl",
+                  "integrations/tools/logger-sdk"
                 ]
               },
+              {
+                "group": "Vector DB",
+                "pages": [
+                  "integrations/vectordb/curl",
+                  "integrations/vectordb/logger-sdk"
+                ]
+              }
+            ]
+          },
+
+          {
+            "group": "References",
+            "pages": [
+              {
+                "group": "Self-Hosting",
+                "pages": [
+                  "getting-started/self-host/overview",
+                  "getting-started/self-host/docker",
+                  "getting-started/self-host/kubernetes"
+                ]
+              },
+
+              "references/how-we-calculate-cost",
+              "references/data-autonomy",
               "helicone-headers/header-directory",
               "references/latency-affect",
               "references/open-source",
               "references/proxy-vs-async",
-              "references/availability"
+              "references/availability",
+              {
+                "group": "Legacy Features",
+                "pages": [
+                  "features/prompts-legacy/editor",
+                  "features/prompts-legacy/generate"
+                ]
+              }
             ]
           }
         ]
@@ -324,20 +285,14 @@
           {
             "group": "Prompts",
             "pages": [
-              "rest/prompts/get-v1prompt-2025-id-promptid",
-              "rest/prompts/post-v1prompt-2025-id-promptid-rename",
-              "rest/prompts/delete-v1prompt-2025-promptid",
-              "rest/prompts/delete-v1prompt-2025-promptid-versionid",
-              "rest/prompts/get-v1prompt-2025-tags",
               "rest/prompts/post-v1prompt-2025",
+              "rest/prompts/get-v1prompt-2025-id-promptid",
               "rest/prompts/post-v1prompt-2025-update",
-              "rest/prompts/post-v1prompt-2025-update-production-version",
-              "rest/prompts/get-v1prompt-2025-count",
+              "rest/prompts/delete-v1prompt-2025-promptid",
               "rest/prompts/post-v1prompt-2025-query",
-              "rest/prompts/post-v1prompt-2025-query-version",
               "rest/prompts/post-v1prompt-2025-query-versions",
-              "rest/prompts/post-v1prompt-2025-query-production-version",
-              "rest/prompts/post-v1prompt-2025-query-total-versions"
+              "rest/prompts/post-v1prompt-2025-update-production-version",
+              "rest/prompts/delete-v1prompt-2025-promptid-versionid"
             ]
           },
           {
@@ -366,98 +321,12 @@
             ]
           },
           {
-            "group": "Evaluator",
-            "pages": [
-              "rest/evaluator/post-v1evaluator",
-              "rest/evaluator/get-v1evaluator",
-              "rest/evaluator/put-v1evaluator",
-              "rest/evaluator/delete-v1evaluator",
-              "rest/evaluator/post-v1evaluatorquery",
-              "rest/evaluator/get-v1evaluator-experiments",
-              "rest/evaluator/get-v1evaluator-onlineevaluators",
-              "rest/evaluator/post-v1evaluator-onlineevaluators",
-              "rest/evaluator/delete-v1evaluator-onlineevaluators"
-            ]
-          },
-          {
-            "group": "Experiment",
-            "pages": [
-              "rest/experiment/post-v2experimentcreateempty",
-              "rest/experiment/post-v2experimentcreatefrom-request",
-              "rest/experiment/post-v2experimentnew",
-              "rest/experiment/get-v2experiment",
-              "rest/experiment/get-v2experiment-1",
-              "rest/experiment/post-v2experiment-prompt-version",
-              "rest/experiment/get-v2experiment-prompt-versions",
-              "rest/experiment/get-v2experiment-input-keys",
-              "rest/experiment/post-v2experiment-add-manual-row",
-              "rest/experiment/post-v2experiment-rowinsertbatch",
-              "rest/experiment/post-v2experiment-rowupdate",
-              "rest/experiment/post-v2experiment-run-hypothesis",
-              "rest/experiment/get-v2experiment-evaluators",
-              "rest/experiment/post-v2experiment-evaluators",
-              "rest/experiment/delete-v2experiment-evaluators",
-              "rest/experiment/post-v2experiment-evaluatorsrun",
-              "rest/experiment/get-v2experiment-should-run-evaluators",
-              "rest/experiment/get-v2experiment-scores",
-              "rest/experiment/get-v2experiment-",
-              "rest/experiment/post-v1experimentnew-empty",
-              "rest/experiment/post-v1experimenttablenew",
-              "rest/experiment/post-v1experimenttable-query",
-              "rest/experiment/post-v1experimenttable-metadataquery",
-              "rest/experiment/post-v1experimenttablesquery",
-              "rest/experiment/post-v1experimenttable-cell",
-              "rest/experiment/patch-v1experimenttable-cell",
-              "rest/experiment/post-v1experimenttable-column",
-              "rest/experiment/post-v1experimenttable-rownew",
-              "rest/experiment/delete-v1experimenttable-row",
-              "rest/experiment/post-v1experimenttable-rowinsertbatch",
-              "rest/experiment/post-v1experimentupdate-meta",
-              "rest/experiment/post-v1experiment",
-              "rest/experiment/post-v1experimenthypothesis",
-              "rest/experiment/post-v1experimenthypothesis-scoresquery",
-              "rest/experiment/get-v1experiment-evaluators",
-              "rest/experiment/post-v1experiment-evaluators",
-              "rest/experiment/post-v1experiment-evaluatorsrun",
-              "rest/experiment/delete-v1experiment-evaluators",
-              "rest/experiment/post-v1experimentquery"
-            ]
-          },
-          {
             "group": "Trace",
-            "pages": [
-              "rest/trace/post-v1tracelog",
-              "rest/trace/post-v1tracelog-python"
-            ]
+            "pages": ["rest/trace/post-v1tracelog"]
           },
           {
             "group": "Property",
             "pages": ["rest/property/post-v1propertyquery"]
-          },
-          {
-            "group": "Dataset",
-            "pages": [
-              "rest/dataset/post-v1experimentdataset",
-              "rest/dataset/post-v1experimentdatasetrandom",
-              "rest/dataset/post-v1experimentdatasetquery",
-              "rest/dataset/post-v1experimentdataset-rowinsert",
-              "rest/dataset/post-v1experimentdataset-version-rownew",
-              "rest/dataset/post-v1experimentdataset-inputsquery",
-              "rest/dataset/post-v1experimentdataset-mutate",
-              "rest/dataset/post-v1helicone-dataset",
-              "rest/dataset/post-v1helicone-dataset-mutate",
-              "rest/dataset/post-v1helicone-dataset-query",
-              "rest/dataset/post-v1helicone-dataset-count",
-              "rest/dataset/post-v1helicone-datasetquery",
-              "rest/dataset/post-v1helicone-dataset-request"
-            ]
-          },
-          {
-            "group": "Customer",
-            "pages": [
-              "rest/customer/post-v1customer-usagequery",
-              "rest/customer/post-v1customerquery"
-            ]
           },
           {
             "group": "Dashboard",
@@ -467,7 +336,6 @@
             "group": "Session",
             "pages": [
               "rest/session/post-v1sessionquery",
-              "rest/session/post-v1sessionnamequery",
               "rest/session/post-v1sessionmetricsquery",
               "rest/session/post-v1session-feedback"
             ]
@@ -757,6 +625,18 @@
     {
       "source": "/ai-gateway/debugging/telemetry",
       "destination": "/ai-gateway/self-hosted/debugging/telemetry"
+    },
+    {
+      "source": "/ai-gateway/overview",
+      "destination": "/gateway/overview"
+    },
+    {
+      "source": "/ai-gateway/fallbacks",
+      "destination": "/gateway/fallbacks"
+    },
+    {
+      "source": "/ai-gateway/prompt-integration",
+      "destination": "/gateway/prompt-integration"
     }
   ]
 }

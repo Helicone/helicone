@@ -7,19 +7,10 @@ import {
   NoSymbolIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
-import {
-  FingerprintIcon,
-  KeyIcon,
-  LinkIcon,
-  Plug,
-  Webhook,
-  Coins,
-  Lock,
-} from "lucide-react";
+import { KeyIcon, LinkIcon, Plug, Webhook, Coins, Lock } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { ReactNode, useMemo } from "react";
-import { useIsGovernanceEnabled } from "../organization/hooks";
+import { ReactNode } from "react";
 import AuthHeader from "@/components/shared/authHeader";
 
 const ORGANIZATION_TABS = [
@@ -105,26 +96,10 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
   const router = useRouter();
   const currentPath = router.pathname;
   const org = useOrg();
-
-  const isGovernanceEnabled = useIsGovernanceEnabled();
   const isBetterAuthEnabled = process.env.NEXT_PUBLIC_BETTER_AUTH === "true";
 
-  // Add access keys for governance orgs
-  const organizationTabs = useMemo(() => {
-    if (isGovernanceEnabled.data?.data?.data) {
-      return [
-        ORGANIZATION_TABS[0], // General
-        {
-          id: "access-keys",
-          title: "Access Keys",
-          icon: FingerprintIcon,
-          href: "/settings/access-keys",
-        },
-        ...ORGANIZATION_TABS.slice(1), // Rest of organization tabs
-      ];
-    }
-    return ORGANIZATION_TABS;
-  }, [isGovernanceEnabled.data?.data?.data]);
+  // Add access keys for governance orgs and filter credits based on feature flag
+  const organizationTabs = ORGANIZATION_TABS;
 
   const renderNavSection = (title: string, tabs: typeof ORGANIZATION_TABS) => (
     <div className="space-y-2">
@@ -156,7 +131,14 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
                       : "text-slate-500 dark:text-slate-400",
                   )}
                 />
-                {tab.title}
+                <span className="flex items-center gap-1.5">
+                  {tab.title}
+                  {tab.id === "credits" && (
+                    <span className="rounded-full bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
+                      Beta
+                    </span>
+                  )}
+                </span>
               </div>
             </Link>
           );

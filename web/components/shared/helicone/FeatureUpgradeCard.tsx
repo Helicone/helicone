@@ -9,7 +9,6 @@ import { RateLimitVisual } from "./RateLimitVisual";
 import { DatasetVisual } from "./DatasetVisual";
 import { SessionsFeatureVisual } from "./features/SessionsFeature";
 import { CodeExample } from "./CodeExample";
-import SimplePricingTable from "./SimplePricingTable";
 import { useUpgradePlan } from "@/hooks/useUpgradePlan";
 import {
   Feature,
@@ -399,8 +398,6 @@ export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
       </div>
 
       <FeaturePreviewSectionClean features={getFeatures()} />
-
-      <SimplePricingTable />
 
       <UpgradeProDialog
         open={isUpgradeDialogOpen}

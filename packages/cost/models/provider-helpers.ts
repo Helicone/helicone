@@ -7,65 +7,52 @@ import type {
   AuthResult,
   RequestBodyContext,
 } from "./types";
-import { providers, ProviderName } from "./providers";
+import { providers, ModelProviderName } from "./providers";
 import { BaseProvider } from "./providers/base";
 
 // Helper function to get provider instance
 export function getProvider(providerName: string): Result<BaseProvider> {
   const provider =
     providerName in providers
-      ? providers[providerName as ProviderName]
+      ? providers[providerName as ModelProviderName]
       : undefined;
 
   return provider ? ok(provider) : err(`Unknown provider: ${providerName}`);
 }
 
+export function getProviderDisplayName(providerName: string): string {
+  const provider = providers[providerName as ModelProviderName];
+  return provider?.displayName || providerName;
+}
+
 // TODO: Remove once we normalize provider names in provider_keys table.
-export const dbProviderToProvider = (provider: string): ProviderName | null => {
+export const dbProviderToProvider = (
+  provider: string
+): ModelProviderName | null => {
   if (provider === "openai" || provider === "OpenAI") {
     return "openai";
   }
-  if (provider === "Anthropic") {
+  if (provider === "anthropic" || provider === "Anthropic") {
     return "anthropic";
   }
-  if (provider === "AWS Bedrock") {
+  if (provider === "bedrock" || provider === "AWS Bedrock") {
     return "bedrock";
   }
-  if (provider === "Vertex AI") {
+  if (provider === "vertex" || provider === "Vertex AI") {
     return "vertex";
   }
-  if (provider === "Groq") {
+  if (provider === "groq" || provider === "Groq") {
     return "groq";
   }
-  if (provider === "Google AI (Gemini)") {
-    return "google";
+  if (provider === "google" || provider === "Google AI (Gemini)") {
+    return "google-ai-studio";
+  }
+  if (provider === "Azure OpenAI") {
+    return "azure";
   }
   return null;
 };
 
-export const providerToDbProvider = (provider: ProviderName): string => {
-  if (provider === "openai") {
-    return "OpenAI";
-  }
-  if (provider === "anthropic") {
-    return "Anthropic";
-  }
-  if (provider === "bedrock") {
-    return "AWS Bedrock";
-  }
-  if (provider === "vertex") {
-    return "Vertex AI";
-  }
-  if (provider === "groq") {
-    return "Groq";
-  }
-  if (provider === "google") {
-    return "Google AI (Gemini)";
-  }
-  return provider;
-};
-
-// Helper function to build URL for an endpoint
 export function buildEndpointUrl(
   endpointConfig: ModelProviderConfig,
   userConfig: UserEndpointConfig = {}

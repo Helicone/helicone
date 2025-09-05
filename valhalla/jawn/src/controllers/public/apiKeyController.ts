@@ -14,12 +14,25 @@ import {
 } from "tsoa";
 import { type JawnAuthenticatedRequest } from "../../types/request";
 import { KeyManager } from "../../managers/apiKeys/KeyManager";
-import {
-  deleteProviderKey,
-  setAPIKey,
-  setProviderKey,
-} from "../../lib/refetchKeys";
+import { setAPIKey } from "../../lib/refetchKeys";
 import { dbProviderToProvider } from "@helicone-package/cost/models/provider-helpers";
+import { err, isError, ok, Result } from "../../packages/common/result";
+
+export type UpdateProviderKeyRequest = {
+  providerKey?: string;
+  providerSecretKey?: string;
+  config?: Record<string, string>;
+  byokEnabled?: boolean;
+};
+
+export type CreateProviderKeyRequest = {
+  providerName: string;
+  providerKey: string;
+  providerSecretKey?: string;
+  providerKeyName: string;
+  byokEnabled: boolean;
+  config: Record<string, string>;
+};
 
 @Route("v1/api-keys")
 @Tags("API Key")
@@ -43,10 +56,7 @@ export class ApiKeyController extends Controller {
     }
 
     if (result.data.providerName) {
-      deleteProviderKey(
-        result.data.providerName,
-        request.authParams.organizationId
-      ).catch((error) => {
+      keyManager.resetProviderKeysInGatewayCache().catch((error) => {
         console.error("error refetching provider keys", error);
       });
     }
@@ -57,39 +67,22 @@ export class ApiKeyController extends Controller {
   public async createProviderKey(
     @Request() request: JawnAuthenticatedRequest,
     @Body()
-    body: {
-      providerName: string;
-      providerKey: string;
-      providerSecretKey?: string;
-      config: Record<string, string>;
-      providerKeyName: string;
-    }
+    body: CreateProviderKeyRequest
   ) {
     const keyManager = new KeyManager(request.authParams);
-    const result = await keyManager.createProviderKey({
-      providerName: body.providerName,
-      providerKeyName: body.providerKeyName,
-      providerKey: body.providerKey,
-      providerSecretKey: body.providerSecretKey,
-      config: body.config,
-    });
+    const result = await keyManager.createProviderKey(body);
 
-    if (result.error) {
+    if (isError(result)) {
       this.setStatus(500);
       return { error: result.error };
     }
 
     const providerName = dbProviderToProvider(body.providerName);
+
     if (providerName) {
-      setProviderKey({
-        provider: providerName,
-        decrypted_provider_key: body.providerKey,
-        decrypted_provider_secret_key: body.providerSecretKey ?? "",
-        auth_type: "key",
-        config: body.config,
-        orgId: request.authParams.organizationId,
-      }).catch((error) => {
-        console.error("error refetching provider keys", error);
+      // Reset cache for multiple keys support
+      keyManager.resetProviderKeysInGatewayCache().catch((error) => {
+        console.error("error resetting provider keys cache", error);
       });
     }
     return result.data;
@@ -125,44 +118,33 @@ export class ApiKeyController extends Controller {
     return result.data;
   }
 
+
   @Patch("/provider-key/{providerKeyId}")
   public async updateProviderKey(
     @Request() request: JawnAuthenticatedRequest,
     @Path() providerKeyId: string,
     @Body()
-    body: {
-      providerKey?: string;
-      providerSecretKey?: string;
-      config?: Record<string, string>;
-    }
-  ) {
+    body: UpdateProviderKeyRequest
+  ): Promise<Result<{ id: string; providerName: string }, string>> {
     const keyManager = new KeyManager(request.authParams);
     const result = await keyManager.updateProviderKey({
       providerKeyId,
-      providerKey: body.providerKey,
-      providerSecretKey: body.providerSecretKey,
-      config: body.config,
+      ...body,
     });
 
     if (result.error || !result.data) {
       this.setStatus(500);
-      return { error: result.error };
+      return err(result.error);
     }
 
     const providerName = dbProviderToProvider(result.data.providerName);
     if (providerName) {
-      setProviderKey({
-        provider: providerName,
-        decrypted_provider_key: body.providerKey ?? "",
-        decrypted_provider_secret_key: body.providerSecretKey ?? "",
-        auth_type: "key",
-        config: body.config ?? {},
-        orgId: request.authParams.organizationId,
-      }).catch((error) => {
-        console.error("error refetching provider keys", error);
+      // Reset cache for multiple keys support
+      keyManager.resetProviderKeysInGatewayCache().catch((error) => {
+        console.error("error resetting provider keys cache", error);
       });
     }
-    return result.data;
+    return ok({ id: providerKeyId, providerName: result.data.providerName });
   }
 
   @Get("/")

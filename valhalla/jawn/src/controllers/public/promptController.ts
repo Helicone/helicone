@@ -158,7 +158,7 @@ export class PromptController extends Controller {
     const promptManager = new PromptManager(request.authParams);
 
     const result = await promptManager.getPrompts({
-      filter: "all"
+      filter: {}
     });
     
     if (result.error) {
@@ -464,7 +464,7 @@ export class PromptController extends Controller {
     const promptManager = new PromptManager(request.authParams);
     const result = await promptManager.getPromptVersions(
       {
-        left: requestBody.filter ?? "all",
+        left: requestBody.filter ?? {},
         operator: "and",
         right: {
           prompt_v2: {
@@ -534,7 +534,7 @@ export class PromptController extends Controller {
     const promptManager = new PromptManager(request.authParams);
     const result = await promptManager.getCompiledPromptVersions(
       {
-        left: requestBody.filter ?? "all",
+        left: requestBody.filter ?? {},
         operator: "and",
         right: {
           prompt_v2: {
@@ -565,7 +565,7 @@ export class PromptController extends Controller {
     const promptManager = new PromptManager(request.authParams);
     const result = await promptManager.getPormptVersionsTemplates(
       {
-        left: requestBody.filter ?? "all",
+        left: requestBody.filter ?? {},
         operator: "and",
         right: {
           prompt_v2: {

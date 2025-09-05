@@ -42,7 +42,7 @@ export class PropertyController extends Controller {
     const builtFilter = await buildFilterWithAuthClickHouseOrganizationProperties({
       org_id: request.authParams.organizationId,
       argsAcc: [],
-      filter: "all",
+      filter: {},
     });
 
     const query = `

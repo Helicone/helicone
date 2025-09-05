@@ -11,6 +11,7 @@ import type {
  * Base Provider class - all methods are pure, no state mutation
  */
 export abstract class BaseProvider {
+  abstract readonly displayName: string;
   abstract readonly baseUrl: string;
   abstract readonly auth: "api-key" | "oauth" | "aws-signature";
   abstract readonly pricingPages: string[];

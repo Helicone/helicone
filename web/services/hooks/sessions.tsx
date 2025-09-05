@@ -2,8 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useOrg } from "../../components/layout/org/organizationContext";
 import { getJawnClient } from "../../lib/clients/jawn";
 import { useFilterAST } from "@/filterAST/context/filterContext";
-import { toFilterNode } from "@/filterAST/toFilterNode";
-import { FilterExpression } from "@/filterAST/filterAst";
+import { toFilterNode } from "@helicone-package/filters/toFilterNode";
+import { FilterExpression } from "@helicone-package/filters/types";
+import { FilterLeaf } from "@helicone-package/filters/filterDefs";
 import { TimeFilter } from "@/types/timeFilter";
 
 const useSessions = ({
@@ -45,7 +46,7 @@ const useSessions = ({
           },
           nameEquals: nameEquals ?? "",
           timezoneDifference: 0,
-          filter: filter ? (toFilterNode(filter) as any) : "all",
+          filter: filter ? (toFilterNode(filter) as any) : ({} as FilterLeaf),
         },
       });
       if (result.error || result.data.error) {
@@ -106,7 +107,7 @@ const useSessionNames = (
                 startTimeUnixMs: timeFilter.start.getTime(),
               }
             : undefined,
-          filter: filter ? (toFilterNode(filter) as any) : "all",
+          filter: filter ? (toFilterNode(filter) as any) : ({} as FilterLeaf),
         },
       });
       if (result.error || result.data.error) {
@@ -172,7 +173,7 @@ const useSessionMetrics = (
             endTimeUnixMs: timeFilter.end.getTime(),
             startTimeUnixMs: timeFilter.start.getTime(),
           },
-          filter: filter ? (toFilterNode(filter) as any) : "all",
+          filter: filter ? (toFilterNode(filter) as any) : ({} as FilterLeaf),
         },
       });
       if (result.error || result.data.error) {

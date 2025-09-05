@@ -1,14 +1,41 @@
 import generateApiKey from "generate-api-key";
 import { uuid } from "uuidv4";
-import { Database } from "../../lib/db/database.types";
+import { Database, Json } from "../../lib/db/database.types";
 import { AuthParams } from "../../packages/common/auth/types";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { Result, err, ok } from "../../packages/common/result";
+import { Result, err, isError, ok } from "../../packages/common/result";
 import { hashAuth } from "../../utils/hash";
 import { BaseManager } from "../BaseManager";
 import { DecryptedProviderKey } from "../VaultManager";
-import { ProviderName } from "@helicone-package/cost/models/providers";
+import { ModelProviderName } from "@helicone-package/cost/models/providers";
 import { dbProviderToProvider } from "@helicone-package/cost/models/provider-helpers";
+import { setProviderKeys } from "../../lib/refetchKeys";
+import { init } from "@paralleldrive/cuid2";
+import {
+  CreateProviderKeyRequest,
+  UpdateProviderKeyRequest,
+} from "../../controllers/public/apiKeyController";
+
+export type ProviderKey = {
+  providerName: ModelProviderName;
+  providerKey: string;
+  providerSecretKey?: string;
+  providerKeyName: string;
+  byokEnabled: boolean;
+  config: Json;
+  cuid?: string;
+};
+
+export interface ProviderKeyRow {
+  id: string;
+  provider_name: string;
+  provider_key_name: string;
+  created_at?: string;
+  soft_delete: boolean;
+  config?: Record<string, any>;
+  byok_enabled?: boolean;
+  cuid?: string;
+}
 
 type HashedPasswordRow = {
   hashed_password: string;
@@ -114,7 +141,7 @@ export class KeyManager extends BaseManager {
    */
   async deleteProviderKey(
     providerKeyId: string
-  ): Promise<Result<{ providerName: ProviderName | null }, string>> {
+  ): Promise<Result<{ providerName: ModelProviderName | null }, string>> {
     try {
       const providerName = await dbExecute<{ provider_name: string }>(
         `SELECT provider_name
@@ -212,13 +239,62 @@ export class KeyManager extends BaseManager {
   /**
    * Get all provider keys for an organization
    */
-  async getProviderKeys(): Promise<Result<any[], string>> {
+  async getProviderKeys(): Promise<Result<ProviderKeyRow[], string>> {
     try {
-      const result = await dbExecute(
-        `SELECT *
+      const result = await dbExecute<ProviderKeyRow>(
+        `SELECT id, org_id, provider_name, provider_key_name, created_at, soft_delete, config, cuid, byok_enabled
          FROM provider_keys
          WHERE org_id = $1
          AND soft_delete = false
+         ORDER BY created_at DESC`,
+        [this.authParams.organizationId]
+      );
+
+      if (isError(result)) {
+        return err(`Failed to get provider keys: ${result.error}`);
+      }
+
+      return ok(result.data || []);
+    } catch (error) {
+      return err(`Failed to get provider keys: ${error}`);
+    }
+  }
+
+  async getDecryptedProviderKeys(): Promise<
+    Result<
+      {
+        id: string;
+        org_id: string;
+        decrypted_provider_key: string;
+        decrypted_provider_secret_key: string | null;
+        provider_key_name: string;
+        provider_name: string;
+        auth_type: "key" | "session_token";
+        config: Json | null;
+        cuid: string;
+        byok_enabled: boolean;
+      }[],
+      string
+    >
+  > {
+    try {
+      const result = await dbExecute<{
+        id: string;
+        org_id: string;
+        decrypted_provider_key: string;
+        decrypted_provider_secret_key: string | null;
+        provider_key_name: string;
+        provider_name: string;
+        auth_type: "key" | "session_token";
+        config: Json | null;
+        cuid: string;
+        byok_enabled: boolean;
+      }>(
+        `SELECT id, org_id, decrypted_provider_key, decrypted_provider_secret_key, provider_key_name, provider_name, auth_type, config, cuid, byok_enabled
+         FROM decrypted_provider_keys_v2
+         WHERE org_id = $1
+         AND soft_delete = false
+         AND provider_name IS NOT NULL
          ORDER BY created_at DESC`,
         [this.authParams.organizationId]
       );
@@ -236,51 +312,27 @@ export class KeyManager extends BaseManager {
   /**
    * Create a provider key
    */
-  async createProviderKey(data: {
-    providerName: string;
-    providerKeyName: string;
-    providerKey: string;
-    providerSecretKey?: string;
-    config: Record<string, string>;
-  }): Promise<Result<{ id: string }, string>> {
+  async createProviderKey(
+    data: CreateProviderKeyRequest
+  ): Promise<Result<{ id: string }, string>> {
     try {
       const {
         providerName,
-        providerKey,
         providerKeyName,
-        config,
+        providerKey,
         providerSecretKey,
+        config,
+        byokEnabled,
       } = data;
 
-      // Check if a key already exists for this provider
-      const existingKeysResult = await dbExecute<{ id: string }>(
-        `SELECT id
-         FROM provider_keys
-         WHERE org_id = $1
-         AND provider_name = $2
-         AND soft_delete = false`,
-        [this.authParams.organizationId, providerName]
-      );
+      const createId = init({ length: 12 });
 
-      // If a key exists, soft delete it first
-      if (existingKeysResult.data && existingKeysResult.data.length > 0) {
-        const existingKeyId = existingKeysResult.data[0].id;
-        const deleteResult = await dbExecute(
-          `UPDATE provider_keys
-           SET soft_delete = true
-           WHERE id = $1`,
-          [existingKeyId]
-        );
-
-        if (deleteResult.error) {
-          return err(`Failed to replace existing key: ${deleteResult.error}`);
-        }
-      }
+      const providerKeyCUID = createId();
 
       // Insert the new key
       const result = await dbExecute<{ id: string }>(
-        `INSERT INTO provider_keys (provider_name, provider_key_name, provider_key, provider_secret_key, org_id, soft_delete, config)
-         VALUES ($1, $2, $3, $4, $5, $6, $7)
+        `INSERT INTO provider_keys (provider_name, provider_key_name, provider_key, provider_secret_key, org_id, soft_delete, config, cuid, byok_enabled)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
          RETURNING id`,
         [
           providerName,
@@ -290,6 +342,8 @@ export class KeyManager extends BaseManager {
           this.authParams.organizationId,
           false,
           config,
+          providerKeyCUID,
+          byokEnabled,
         ]
       );
 
@@ -312,9 +366,16 @@ export class KeyManager extends BaseManager {
     providerKey?: string;
     providerSecretKey?: string;
     config?: Record<string, string>;
+    byokEnabled?: boolean;
   }): Promise<Result<{ id: string; providerName: string }, string>> {
     try {
-      const { providerKeyId, providerKey, providerSecretKey, config } = params;
+      const {
+        providerKeyId,
+        providerKey,
+        providerSecretKey,
+        config,
+        byokEnabled,
+      } = params;
 
       // Verify the key belongs to this organization
       const hasAccess = await this.hasAccessToProviderKey(providerKeyId);
@@ -327,14 +388,12 @@ export class KeyManager extends BaseManager {
       const values = [];
       let paramIndex = 1;
 
-      updateParts.push(`provider_key = $${paramIndex++}`);
-      if (providerKey !== "" && providerKey !== undefined) {
+      if (providerKey !== undefined) {
+        updateParts.push(`provider_key = $${paramIndex++}`);
         values.push(providerKey);
-      } else {
-        values.push(null);
       }
 
-      if (providerSecretKey !== "" && providerSecretKey !== undefined) {
+      if (providerSecretKey !== undefined) {
         updateParts.push(`provider_secret_key = $${paramIndex++}`);
         values.push(providerSecretKey);
       }
@@ -342,6 +401,11 @@ export class KeyManager extends BaseManager {
       if (config !== undefined) {
         updateParts.push(`config = $${paramIndex++}`);
         values.push(config);
+      }
+
+      if (byokEnabled !== undefined) {
+        updateParts.push(`byok_enabled = $${paramIndex++}`);
+        values.push(byokEnabled);
       }
 
       if (updateParts.length === 0) {
@@ -397,8 +461,9 @@ export class KeyManager extends BaseManager {
         decrypted_provider_secret_key: string | null;
         provider_key_name: string;
         provider_name: string;
+        cuid?: string | null;
       }>(
-        `SELECT id, org_id, decrypted_provider_key, decrypted_provider_secret_key, provider_key_name, provider_name, provider_secret_key
+        `SELECT id, org_id, decrypted_provider_key, decrypted_provider_secret_key, provider_key_name, provider_name, provider_secret_key, cuid
          FROM decrypted_provider_keys_v2
          WHERE id = $1
          AND org_id = $2
@@ -419,6 +484,7 @@ export class KeyManager extends BaseManager {
         provider_name: key.provider_name,
         provider_key_name: key.provider_key_name,
         provider_secret_key: key.decrypted_provider_secret_key ?? null,
+        cuid: key.cuid,
       };
 
       return ok(providerKey);
@@ -596,6 +662,40 @@ export class KeyManager extends BaseManager {
       });
     } catch (error) {
       return err(`Failed to create temporary key: ${error}`);
+    }
+  }
+
+  async resetProviderKeysInGatewayCache(): Promise<Result<boolean, string>> {
+    try {
+      const allProviderKeys = await this.getDecryptedProviderKeys();
+      if (allProviderKeys.error) {
+        return err(allProviderKeys.error);
+      }
+
+      setProviderKeys(
+        this.authParams.organizationId,
+        allProviderKeys.data
+          ?.map((key) => {
+            const provider = dbProviderToProvider(key.provider_name ?? "");
+            if (!provider) return null;
+            return {
+              provider,
+              decrypted_provider_key: key.decrypted_provider_key,
+              decrypted_provider_secret_key:
+                key.decrypted_provider_secret_key ?? "",
+              auth_type: key.auth_type,
+              config: key.config,
+              orgId: this.authParams.organizationId,
+              cuid: key.cuid,
+              byok_enabled: key.byok_enabled,
+            };
+          })
+          .filter((key): key is NonNullable<typeof key> => key !== null) ?? []
+      );
+
+      return ok(true);
+    } catch (error) {
+      return err(`Failed to reset provider keys: ${error}`);
     }
   }
 }

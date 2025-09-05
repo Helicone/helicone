@@ -72,8 +72,8 @@ export class LogManager {
     logMetaData: LogMetaData
   ): Promise<void> {
     const s3Client = new S3Client(
-      process.env.S3_ACCESS_KEY ?? "",
-      process.env.S3_SECRET_KEY ?? "",
+      process.env.S3_ACCESS_KEY || undefined,
+      process.env.S3_SECRET_KEY || undefined,
       process.env.S3_ENDPOINT ?? "",
       process.env.S3_BUCKET_NAME ?? "",
       (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
@@ -166,7 +166,10 @@ export class LogManager {
               `Reproducing error for request ${logMessage.log.request.id} for batch ${logMetaData.batchId}: ${result.error}`
             );
           }
-          if (KAFKA_ENABLED) {
+
+          const pushToDLQ: boolean =
+            (process.env.SQS_ENABLED ?? "false") === "true" || KAFKA_ENABLED;
+          if (pushToDLQ) {
             const kafkaProducer = new HeliconeQueueProducer();
 
             const res = await kafkaProducer.sendMessages(
@@ -280,7 +283,10 @@ export class LogManager {
         }`
       );
 
-      if (KAFKA_ENABLED) {
+      const pushToDLQ: boolean =
+        (process.env.SQS_ENABLED ?? "false") === "true" || KAFKA_ENABLED;
+
+      if (pushToDLQ) {
         const kafkaProducer = new HeliconeQueueProducer();
         const kafkaResult = await kafkaProducer.sendMessages(
           logMessages,

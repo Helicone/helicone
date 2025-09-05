@@ -82,7 +82,7 @@ export const OnboardingHeader = ({ children }: OnboardingHeaderProps) => {
 
   if (isLoading || !org?.currentOrg?.id || org?.currentOrg?.has_onboarded) {
     return (
-      <div className="flex min-h-screen w-full flex-col">
+      <div className="flex min-h-dvh w-full flex-col">
         <div className="flex flex-1 items-center justify-center">
           <LoadingAnimation />
         </div>
@@ -91,7 +91,7 @@ export const OnboardingHeader = ({ children }: OnboardingHeaderProps) => {
   }
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-[hsl(var(--background))]">
+    <div className="flex min-h-dvh w-full flex-col bg-[hsl(var(--background))]">
       <header className="flex h-14 w-full items-center justify-between border-b border-[hsl(var(--border))] bg-[hsl(var(--background))] px-4 sm:px-6">
         <div className="flex min-w-0 items-center gap-4 overflow-x-auto pr-2 md:pr-0">
           <div className="flex-shrink-0">
@@ -153,7 +153,7 @@ export const OnboardingHeader = ({ children }: OnboardingHeaderProps) => {
           </button>
         </div>
       </header>
-      {children}
+      <main className="flex flex-1">{children}</main>
     </div>
   );
 };

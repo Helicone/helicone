@@ -3,6 +3,7 @@ import { H2, P } from "@/components/ui/typography";
 import {
   Archive,
   Bell,
+  Database,
   GitBranch,
   Layers,
   Plus,
@@ -18,7 +19,7 @@ import { createHighlighter } from "shiki";
 // Create a singleton highlighter instance
 const highlighterPromise = createHighlighter({
   themes: ["github-light", "github-dark"],
-  langs: ["javascript", "python", "bash", "http", "plaintext"],
+  langs: ["javascript", "python", "bash", "http", "plaintext", "sql"],
 });
 
 interface EmptyStateFeature {
@@ -231,6 +232,38 @@ Helicone-Property-UseCase: email_campaign`,
         text: "Create Alert",
         onClick: true,
         showPlusIcon: true,
+      },
+    },
+  },
+  hql: {
+    title: "Request Access to HQL",
+    description:
+      "Query your Helicone data with HQL (Helicone Query Language). Analyze requests, tokens, costs, and custom properties across your entire LLM usage.",
+    icon: Database,
+    featureImage: {
+      type: "code",
+      content: `-- Find your most expensive requests in the last 7 days
+SELECT 
+  request_created_at,
+  request_model,
+  response_body,
+  provider_total_cost
+FROM request_response_rmt
+WHERE request_created_at > now() - INTERVAL 7 DAY
+ORDER BY provider_total_cost DESC
+LIMIT 100`,
+      language: "sql",
+      maxWidth: "2xl",
+    },
+    cta: {
+      primary: {
+        text: "Request Access",
+        onClick: true,
+        showPlusIcon: false,
+      },
+      secondary: {
+        text: "View Docs",
+        link: "https://docs.helicone.ai/features/hql",
       },
     },
   },

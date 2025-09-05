@@ -120,4 +120,24 @@ export const costs: ModelRow[] = [
       completion_audio_token: 0.00002,
     },
   },
+  {
+    model: {
+      operator: "equals",
+      value: "grok-3",
+    },
+    cost: {
+      prompt_token: 0.000003,
+      completion_token: 0.000015,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "grok-3-mini",
+    },
+    cost: {
+      prompt_token: 0.00000025,
+      completion_token: 0.00000127,
+    },
+  },
 ];

@@ -41,7 +41,7 @@ export function TestEvaluator() {
       if (!requestId) {
         const requests = await jawn.POST("/v1/request/query-clickhouse", {
           body: {
-            filter: "all",
+            filter: {},
             limit: 1,
             sort: {
               created_at: "desc",
