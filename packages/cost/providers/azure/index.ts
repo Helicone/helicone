@@ -122,7 +122,7 @@ export const costs: ModelRow[] = [
   },
   {
     model: {
-      operator: "equals",
+      operator: "includes",
       value: "grok-3",
     },
     cost: {
@@ -132,7 +132,7 @@ export const costs: ModelRow[] = [
   },
   {
     model: {
-      operator: "equals",
+      operator: "includes",
       value: "grok-3-mini",
     },
     cost: {
