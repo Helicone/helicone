@@ -123,7 +123,6 @@ export interface ModelPricing {
   audio?: number;
   video?: number;
   web_search?: number;
-  internal_reasoning?: number;
 }
 
 export interface ModelConfig {

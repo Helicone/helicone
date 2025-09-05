@@ -16,7 +16,6 @@ export const endpoints = {
         image: 0.0,
         audio: 0.0,
         web_search: 0.0,
-        internal_reasoning: 0.0,
         cacheMultipliers: {
           cachedInput: 0.1, // $0.02 / $0.20 = 0.1
         },
@@ -57,7 +56,6 @@ export const endpoints = {
         image: 0.0,
         audio: 0.0,
         web_search: 0.025, // $25.00 per 1K sources
-        internal_reasoning: 0.0,
         cacheMultipliers: {
           cachedInput: 0.25, // $0.75 / $3.00 = 0.25
         },
@@ -70,7 +68,6 @@ export const endpoints = {
         image: 0.0,
         audio: 0.0,
         web_search: 0.025, // $25.00 per 1K sources
-        internal_reasoning: 0.0,
         cacheMultipliers: {
           cachedInput: 0.125, // $0.75 / $6.00 = 0.125
         },
@@ -111,7 +108,6 @@ export const endpoints = {
         image: 0.0,
         audio: 0.0,
         web_search: 0.025, // $25.00 per 1K sources
-        internal_reasoning: 0.0,
         cacheMultipliers: {
           cachedInput: 0.25, // $0.75 / $3.00 = 0.25
         },
@@ -152,7 +148,6 @@ export const endpoints = {
         image: 0.0,
         audio: 0.0,
         web_search: 0.025, // $25.00 per 1K sources
-        internal_reasoning: 0.0,
         cacheMultipliers: {
           cachedInput: 0.25, // $0.075 / $0.30 = 0.25
         },
