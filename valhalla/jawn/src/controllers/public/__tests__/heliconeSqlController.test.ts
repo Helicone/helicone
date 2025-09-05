@@ -350,7 +350,7 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
       expect(result.data?.rows?.length).toBe(0);
     });
 
-    test("redefine CTE but should fail since cannot have multiple WITH statemets", async () => {
+    test("redefine CTE but should fail since cannot have multiple WITH statements", async () => {
       const requestBody = {
         sql: "WITH request_response_rmt AS (SELECT * FROM request_response_rmt WHERE organization_id = '83635a30-5ba6-41a8-8cc6-fb7df941b24b') SELECT * FROM request_response_rmt",
       };

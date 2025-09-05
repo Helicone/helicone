@@ -5,7 +5,7 @@ import {
 } from "../controllers/public/heliconeSqlController";
 import { AuthParams } from "../packages/common/auth/types";
 import { dbExecute } from "../lib/shared/db/dbExecute";
-import { ok, Result, isError } from "../packages/common/result";
+import { ok, err, Result, isError } from "../packages/common/result";
 import { HqlError, HqlErrorCode, hqlError, parseDatabaseError } from "../lib/errors/HqlErrors";
 
 export class HqlQueryManager {
