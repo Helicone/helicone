@@ -7596,7 +7596,7 @@
 					"nvidia",
 					"qwen",
 					"moonshotai",
-					"fallback"
+					"passthrough"
 				]
 			},
 			"StandardParameter": {

@@ -214,9 +214,17 @@ async function getFromCacheWithHmac({
         return decrypt(JSON.parse(encryptedMemory), env, hmac_key);
       }
     }
-    const encryptedRemote = await env.SECURE_CACHE.get(hashedKey, {
-      cacheTtl: expirationTtl ?? 60 * 60, // 1 hour
-    });
+    let encryptedRemote: string | null = null;
+    try {
+      encryptedRemote = await env.SECURE_CACHE.get(hashedKey, {
+        cacheTtl: expirationTtl ?? 60 * 60, // 1 hour
+      });
+      encryptedRemote = encryptedRemote;
+    } catch (e) {
+      console.error("Error getting from cache", e);
+      return null;
+    }
+
     if (!encryptedRemote) {
       return null;
     }

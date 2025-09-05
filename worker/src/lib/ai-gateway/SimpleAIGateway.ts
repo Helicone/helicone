@@ -69,7 +69,7 @@ export class SimpleAIGateway {
     );
     if (attempts.length === 0) {
       return new Response(
-        "No available providers for the requested models. Check provider names and see supported models at https://helicone.ai/models", 
+        "No available providers for the requested models. Check provider names and see supported models at https://helicone.ai/models",
         { status: 400 }
       );
     }

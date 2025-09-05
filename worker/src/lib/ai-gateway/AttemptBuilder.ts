@@ -71,8 +71,8 @@ export class AttemptBuilder {
     const attemptArrays = await Promise.all(
       providerData.map(async (data) => {
         const [byokAttempts, ptbAttempts] = await Promise.all([
-          this.getByokAttempts(modelName, data, orgId),
-          this.getPtbAttempts(modelName, data),
+          this.buildByokAttempts(modelName, data, orgId),
+          this.buildPtbAttempts(modelName, data),
         ]);
 
         return [...byokAttempts, ...ptbAttempts];
@@ -93,22 +93,24 @@ export class AttemptBuilder {
       modelName,
       provider
     );
+    
     if (!providerDataResult.data) {
-      return []; // No data for this model/provider combination
+      // No registry data - try passthrough for unknown models
+      return this.buildPassthroughAttempt(modelName, provider, orgId, customUid);
     }
 
     const providerData = providerDataResult.data;
 
     // Get both BYOK and PTB attempts with provider data
     const [byokAttempts, ptbAttempts] = await Promise.all([
-      this.getByokAttempts(modelName, providerData, orgId, customUid),
-      this.getPtbAttempts(modelName, providerData),
+      this.buildByokAttempts(modelName, providerData, orgId, customUid),
+      this.buildPtbAttempts(modelName, providerData),
     ]);
 
     return [...byokAttempts, ...ptbAttempts];
   }
 
-  private async getByokAttempts(
+  private async buildByokAttempts(
     modelName: string,
     providerData: ModelProviderEntry,
     orgId: string,
@@ -146,10 +148,32 @@ export class AttemptBuilder {
       ];
     }
 
-    // Passthrough: create a dynamic endpoint for unknown models
+    return [];
+  }
+
+  private async buildPassthroughAttempt(
+    modelName: string,
+    provider: ModelProviderName,
+    orgId: string,
+    customUid?: string
+  ): Promise<Attempt[]> {
+    // Get user's provider key for passthrough
+    const userKey = await this.providerKeysManager.getProviderKeyWithFetch(
+      provider,
+      orgId,
+      customUid
+    );
+
+    if (!userKey || !this.isByokEnabled(userKey)) {
+      return []; // No BYOK available for passthrough
+    }
+
+    const userConfig = (userKey.config as UserEndpointConfig) || {};
+
+    // Create a dynamic passthrough endpoint for unknown models
     const passthroughResult = registry.createPassthroughEndpoint(
       modelName,
-      providerData.provider,
+      provider,
       userConfig
     );
 
@@ -161,7 +185,7 @@ export class AttemptBuilder {
           authType: "byok" as const,
           priority: 1,
           needsEscrow: false,
-          source: `${modelName}/${providerData.provider}/byok${customUid ? `/${customUid}` : ""}`,
+          source: `${modelName}/${provider}/byok${customUid ? `/${customUid}` : ""}`,
         },
       ];
     }
@@ -169,7 +193,7 @@ export class AttemptBuilder {
     return [];
   }
 
-  private async getPtbAttempts(
+  private async buildPtbAttempts(
     modelName: string,
     providerData: ModelProviderEntry
   ): Promise<Attempt[]> {
