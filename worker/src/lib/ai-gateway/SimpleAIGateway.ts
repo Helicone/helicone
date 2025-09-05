@@ -172,6 +172,16 @@ export class SimpleAIGateway {
     }
 
     // Parse comma-separated models for fallback
+    // Validate that model is a string before splitting
+    if (typeof parsedBody.model !== 'string') {
+      return err(
+        new Response(
+          "Invalid model type. Model must be a string. See supported models at https://helicone.ai/models",
+          { status: 400 }
+        )
+      );
+    }
+    
     const modelStrings = parsedBody.model
       .split(",")
       .map((m: string) => m.trim());
