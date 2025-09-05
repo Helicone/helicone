@@ -1922,6 +1922,8 @@ function modelCost(modelRow: {
       provider: modelRow.provider,
       promptAudioTokens: 0,
       completionAudioTokens: 0,
+      promptCacheWrite5m: 0,
+      promptCacheWrite1h: 0,
     }) ?? 0
   );
 }

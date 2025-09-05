@@ -65,9 +65,11 @@ export const costs: ModelRow[] = [
     },
     cost: {
       prompt_token: 0.000015,
-      prompt_cache_write_token: 0.000015 * 1.25,
-      prompt_cache_read_token: 0.000015 * 0.1,
+      prompt_cache_write_token: 0.00001875, // 5m cache write: $18.75 / MTok
+      prompt_cache_read_token: 0.0000015, // Cache hits/refreshes: $1.5 / MTok
       completion_token: 0.000075,
+      prompt_cache_creation_5m: 0.00001875, // $18.75 / MTok
+      prompt_cache_creation_1h: 0.00003, // $30 / MTok
     },
     showInPlayground: true,
   },
@@ -78,8 +80,6 @@ export const costs: ModelRow[] = [
     },
     cost: {
       prompt_token: 0.000003,
-      prompt_cache_write_token: 0.000003 * 1.25,
-      prompt_cache_read_token: 0.000003 * 0.1,
       completion_token: 0.000015,
     },
     showInPlayground: true,
@@ -91,9 +91,11 @@ export const costs: ModelRow[] = [
     },
     cost: {
       prompt_token: 0.000003,
-      prompt_cache_write_token: 0.000003 * 1.25,
-      prompt_cache_read_token: 0.000003 * 0.1,
+      prompt_cache_write_token: 0.00000375, // 5m cache write: $3.75 / MTok
+      prompt_cache_read_token: 0.0000003, // Cache hits/refreshes: $0.30 / MTok
       completion_token: 0.000015,
+      prompt_cache_creation_5m: 0.00000375, // $3.75 / MTok
+      prompt_cache_creation_1h: 0.000006, // $6 / MTok
     },
     showInPlayground: true,
   },
@@ -104,9 +106,11 @@ export const costs: ModelRow[] = [
     },
     cost: {
       prompt_token: 0.000003,
-      prompt_cache_write_token: 0.000003 * 1.25,
-      prompt_cache_read_token: 0.000003 * 0.1,
+      prompt_cache_write_token: 0.00000375, // 5m cache write: $3.75 / MTok
+      prompt_cache_read_token: 0.0000003, // Cache hits/refreshes: $0.30 / MTok
       completion_token: 0.000015,
+      prompt_cache_creation_5m: 0.00000375, // $3.75 / MTok
+      prompt_cache_creation_1h: 0.000006, // $6 / MTok
     },
     showInPlayground: true,
   },
@@ -117,9 +121,11 @@ export const costs: ModelRow[] = [
     },
     cost: {
       prompt_token: 0.000003,
-      prompt_cache_write_token: 0.000003 * 1.25,
-      prompt_cache_read_token: 0.000003 * 0.1,
+      prompt_cache_write_token: 0.00000375, // 5m cache write: $3.75 / MTok
+      prompt_cache_read_token: 0.0000003, // Cache hits/refreshes: $0.30 / MTok
       completion_token: 0.000015,
+      prompt_cache_creation_5m: 0.00000375, // $3.75 / MTok
+      prompt_cache_creation_1h: 0.000006, // $6 / MTok
     },
     showInPlayground: true,
   },
@@ -130,9 +136,11 @@ export const costs: ModelRow[] = [
     },
     cost: {
       prompt_token: 0.00000025,
-      prompt_cache_write_token: 0.00000025 * 1.25,
-      prompt_cache_read_token: 0.00000025 * 0.1,
+      prompt_cache_write_token: 0.0000003125, // 5m cache write: $0.30 / MTok (25% increase from $0.25)
+      prompt_cache_read_token: 0.000000025, // Cache hits/refreshes: $0.025 / MTok (10% of base)
       completion_token: 0.00000125,
+      prompt_cache_creation_5m: 0.0000003125, // $0.30 / MTok (rounded from $0.3125)
+      prompt_cache_creation_1h: 0.0000005, // $0.50 / MTok
     },
     showInPlayground: true,
   },
@@ -143,9 +151,11 @@ export const costs: ModelRow[] = [
     },
     cost: {
       prompt_token: 0.0000008,
-      prompt_cache_write_token: 0.0000008 * 1.25,
-      prompt_cache_read_token: 0.0000008 * 0.1,
+      prompt_cache_write_token: 0.000001, // 5m cache write: $1 / MTok
+      prompt_cache_read_token: 0.00000008, // Cache hits/refreshes: $0.08 / MTok
       completion_token: 0.000004,
+      prompt_cache_creation_5m: 0.000001, // $1 / MTok
+      prompt_cache_creation_1h: 0.0000016, // $1.6 / MTok
     },
     showInPlayground: true,
   },
@@ -157,8 +167,10 @@ export const costs: ModelRow[] = [
     cost: {
       prompt_token: 0.000003, // $3 / MTok
       completion_token: 0.000015, // $15 / MTok
-      prompt_cache_write_token: 0.00000375, // $3.75 / MTok
-      prompt_cache_read_token: 0.0000003, // $0.30 / MTok
+      prompt_cache_write_token: 0.00000375, // 5m cache write: $3.75 / MTok
+      prompt_cache_read_token: 0.0000003, // Cache hits/refreshes: $0.30 / MTok
+      prompt_cache_creation_5m: 0.00000375, // $3.75 / MTok
+      prompt_cache_creation_1h: 0.000006, // $6 / MTok
     },
   },
   {
@@ -169,8 +181,10 @@ export const costs: ModelRow[] = [
     cost: {
       prompt_token: 0.000015,
       completion_token: 0.000075,
-      prompt_cache_write_token: 0.00001875,
-      prompt_cache_read_token: 0.0000015,
+      prompt_cache_write_token: 0.00001875, // 5m cache write: $18.75 / MTok
+      prompt_cache_read_token: 0.0000015, // Cache hits/refreshes: $1.5 / MTok
+      prompt_cache_creation_5m: 0.00001875, // $18.75 / MTok
+      prompt_cache_creation_1h: 0.00003, // $30 / MTok
     },
   },
   {
@@ -181,8 +195,10 @@ export const costs: ModelRow[] = [
     cost: {
       prompt_token: 0.000015,
       completion_token: 0.000075,
-      prompt_cache_write_token: 0.00001875,
-      prompt_cache_read_token: 0.0000015,
+      prompt_cache_write_token: 0.00001875, // 5m cache write: $18.75 / MTok
+      prompt_cache_read_token: 0.0000015, // Cache hits/refreshes: $1.5 / MTok
+      prompt_cache_creation_5m: 0.00001875, // $18.75 / MTok
+      prompt_cache_creation_1h: 0.00003, // $30 / MTok
     },
   },
 ];

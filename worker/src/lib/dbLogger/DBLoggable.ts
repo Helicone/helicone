@@ -795,30 +795,4 @@ export class DBLoggable {
   ): string {
     return modelOverride ?? responseModel ?? requestModel ?? "not-found";
   }
-
-  modelCost(modelRow: {
-    model: string;
-    provider: string;
-    sum_prompt_tokens: number;
-    sum_completion_tokens: number;
-    sum_tokens: number;
-    prompt_cache_write_tokens: number;
-    prompt_cache_read_tokens: number;
-  }): number {
-    const model = modelRow.model;
-    const promptTokens = modelRow.sum_prompt_tokens;
-    const completionTokens = modelRow.sum_completion_tokens;
-    return (
-      costOfPrompt({
-        model,
-        promptTokens,
-        completionTokens,
-        provider: modelRow.provider,
-        promptCacheWriteTokens: modelRow.prompt_cache_write_tokens,
-        promptCacheReadTokens: modelRow.prompt_cache_read_tokens,
-        promptAudioTokens: 0,
-        completionAudioTokens: 0,
-      }) ?? 0
-    );
-  }
 }
