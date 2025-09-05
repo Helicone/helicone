@@ -333,14 +333,14 @@ export class OrganizationStore extends BaseStore {
     let query;
     if (process.env.NEXT_PUBLIC_BETTER_AUTH === "true") {
       query = `
-      select pu.email, member, org_role from organization_member om 
+      select distinct on (om.member), pu.email, org_role from organization_member om 
         left join auth.users u on u.id = om.member
         left join public.user pu on pu.auth_user_id = u.id
         where om.organization = $1
     `;
     } else {
       query = `
-      select u.email, member, org_role from organization_member om 
+      select distinct on (om.member), u.email, org_role from organization_member om 
         left join auth.users u on u.id = om.member
         where om.organization = $1
       `;
