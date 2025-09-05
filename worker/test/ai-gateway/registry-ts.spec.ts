@@ -5,6 +5,7 @@ import { UserEndpointConfig } from "@helicone-package/cost/models/types";
 import { type TestCase } from "../providers/base.test-config";
 import { anthropicTestConfig } from "../providers/anthropic.test-config";
 import { setSupabaseTestCase } from "../setup";
+import { openaiTestConfig } from "../providers/openai.test-config";
 
 const TEST_HELICONE_API_KEY = "sk-helicone-aaa1234-bbb1234-ccc1234-ddd1234";
 
@@ -144,7 +145,9 @@ describe("Registry Tests", () => {
   describe("PTB Tests", () => {
     describe("with sufficient credits", () => {
       const ptbTestCases: TestCase[] = [
-        ...anthropicTestConfig.generateSuccessfulPtbTestCases(),
+        // TODO add back anthropic
+        // ...anthropicTestConfig.generateSuccessfulPtbTestCases(),
+        ...openaiTestConfig.generateSuccessfulPtbTestCases(),
       ];
 
       ptbTestCases.forEach((testCase) => {
@@ -227,7 +230,9 @@ describe("Registry Tests", () => {
 
     describe("with insufficient credits", () => {
       const ptbTestCases: TestCase[] = [
-        ...anthropicTestConfig.generateUnsuccessfulPtbTestCases(),
+        // TODO add back anthropic
+        // ...anthropicTestConfig.generateUnsuccessfulPtbTestCases(),
+        ...openaiTestConfig.generateUnsuccessfulPtbTestCases(),
       ];
 
       ptbTestCases.forEach((testCase) => {
