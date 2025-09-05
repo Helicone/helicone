@@ -243,7 +243,7 @@ export class AttemptBuilder {
     );
   }
 
-  private isByokEnabled(providerKey: any): boolean {
+  private isByokEnabled(providerKey: ProviderKey): boolean {
     // Legacy support: if byok_enabled is not set, assume true
     return (
       providerKey.byok_enabled === undefined ||
