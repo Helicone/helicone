@@ -35,6 +35,8 @@ async function handler({
               prompt_cache_read_tokens: modelMetric.prompt_cache_read_tokens,
               prompt_audio_tokens: modelMetric.prompt_audio_tokens,
               completion_audio_tokens: modelMetric.completion_audio_tokens,
+              prompt_cache_write_5m: 0,
+              prompt_cache_write_1h: 0,
             }),
           0,
         ),
