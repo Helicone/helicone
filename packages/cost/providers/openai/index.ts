@@ -266,9 +266,9 @@ const baseCosts: ModelRow[] = [
       value: "gpt-4o",
     },
     cost: {
-      prompt_token: 0.000005,
-      completion_token: 0.000015,
-      prompt_cache_read_token: 0.000000125,
+      prompt_token: 0.0000025,
+      completion_token: 0.00001,
+      prompt_cache_read_token: 0.00000125,
     },
     showInPlayground: true,
   },
@@ -280,7 +280,6 @@ const baseCosts: ModelRow[] = [
     cost: {
       prompt_token: 0.000005,
       completion_token: 0.000015,
-      prompt_cache_read_token: 0.000000125,
     },
     showInPlayground: true,
   },
@@ -292,7 +291,7 @@ const baseCosts: ModelRow[] = [
     cost: {
       prompt_token: 0.00000015,
       completion_token: 0.0000006,
-      prompt_cache_read_token: 0.000000025,
+      prompt_cache_read_token: 0.000000075,
     },
     showInPlayground: true,
   },
@@ -304,7 +303,7 @@ const baseCosts: ModelRow[] = [
     cost: {
       prompt_token: 0.00000015,
       completion_token: 0.0000006,
-      prompt_cache_read_token: 0.000000025,
+      prompt_cache_read_token: 0.000000075,
     },
     showInPlayground: true,
   },
@@ -507,8 +506,8 @@ const baseCosts: ModelRow[] = [
       value: "o1-mini",
     },
     cost: {
-      prompt_token: 0.000003,
-      completion_token: 0.000012,
+      prompt_token: 0.0000011,
+      completion_token: 0.0000044,
       prompt_cache_read_token: 0.00000055,
     },
     showInPlayground: true,
@@ -519,8 +518,8 @@ const baseCosts: ModelRow[] = [
       value: "o1-mini-2024-09-12",
     },
     cost: {
-      prompt_token: 0.000003,
-      completion_token: 0.000012,
+      prompt_token: 0.0000011,
+      completion_token: 0.0000044,
       prompt_cache_read_token: 0.00000055,
     },
     showInPlayground: true,
@@ -544,6 +543,7 @@ const baseCosts: ModelRow[] = [
     cost: {
       prompt_token: 0.000015,
       completion_token: 0.00006,
+      prompt_cache_read_token: 0.0000075,
     },
     showInPlayground: true,
   },
@@ -601,7 +601,6 @@ const baseCosts: ModelRow[] = [
     cost: {
       prompt_token: 0.00002,
       completion_token: 0.00008,
-      prompt_cache_read_token: 0.0000005,
     },
   },
   {
@@ -682,11 +681,11 @@ const baseCosts: ModelRow[] = [
       value: "gpt-4o-realtime",
     },
     cost: {
-      prompt_token: 0.000005,
-      completion_token: 0.00002,
+      prompt_token: 0.000004,
+      completion_token: 0.000016,
       prompt_audio_token: 0.00004,
       completion_audio_token: 0.00008,
-      prompt_cache_read_token: 0.0000025,
+      prompt_cache_read_token: 0.0000004,
     },
   },
   {
@@ -695,10 +694,11 @@ const baseCosts: ModelRow[] = [
       value: "gpt-4o-mini-realtime",
     },
     cost: {
-      prompt_token: 0.00000015,
-      completion_token: 0.0000006,
+      prompt_token: 0.0000006,
+      completion_token: 0.0000024,
       prompt_audio_token: 0.00001,
       completion_audio_token: 0.00002,
+      prompt_cache_read_token: 0.0000003,
     },
   },
   {
@@ -775,7 +775,7 @@ const baseCosts: ModelRow[] = [
     cost: {
       prompt_token: 0.00000025,
       completion_token: 0.000002,
-      prompt_cache_read_token: 0.000000125,
+      prompt_cache_read_token: 0.000000025,
     },
   },
   {
@@ -784,10 +784,9 @@ const baseCosts: ModelRow[] = [
       value: "gpt-5-nano-2025-08-07",
     },
     cost: {
-      // 1m -> 0.050, 1 -> 0.05/1000000
-      prompt_token: 5e-8,
+      prompt_token: 0.00000005,
       completion_token: 0.0000004,
-      prompt_cache_read_token: 5e-9,
+      prompt_cache_read_token: 0.000000005,
     },
   },
   {
@@ -809,7 +808,7 @@ const baseCosts: ModelRow[] = [
     cost: {
       prompt_token: 0.00000025,
       completion_token: 0.000002,
-      prompt_cache_read_token: 0.000000125,
+      prompt_cache_read_token: 0.000000025,
     },
   },
   {
@@ -818,10 +817,9 @@ const baseCosts: ModelRow[] = [
       value: "gpt-5-nano",
     },
     cost: {
-      // 1m -> 0.050, 1 -> 0.05/1000000
-      prompt_token: 5e-8,
+      prompt_token: 0.00000005,
       completion_token: 0.0000004,
-      prompt_cache_read_token: 5e-9,
+      prompt_cache_read_token: 0.000000005,
     },
   },
   {
