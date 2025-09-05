@@ -207,6 +207,9 @@ const sendRequest = async (
     targetBaseUrl: string | null,
     escrowInfo?: EscrowInfo
   ) => Promise<Response>,
+  ctx: ExecutionContext,
+  env: Env,
+  orgId: string,
   escrowInfo?: EscrowInfo
 ): Promise<Result<Response, Error>> => {
   const body = await buildRequestBody(endpoint, {
@@ -216,6 +219,11 @@ const sendRequest = async (
   });
 
   if (isErr(body) || !body.data) {
+    if (escrowInfo) {
+      const walletId = env.WALLET.idFromName(orgId);
+      const walletStub = env.WALLET.get(walletId);
+      ctx.waitUntil(walletStub.cancelEscrow(escrowInfo.escrowId));
+    }
     return err({
       type: "request_failed",
       message: body.error || "Failed to build request body",
@@ -304,7 +312,10 @@ const attemptDirectProviderRequest = async (
       parsedBody,
       requestWrapper,
       userProviderKeyWithConfig,
-      forwarder
+      forwarder,
+      ctx,
+      env,
+      orgId
     );
     if (isErr(result)) {
       return err(result.error);
@@ -351,7 +362,9 @@ const attemptDirectProviderRequest = async (
       requestWrapper,
       userProviderKeyWithConfig,
       forwarder,
-      undefined
+      ctx,
+      env,
+      orgId
     );
 
     return result;
@@ -426,6 +439,9 @@ const attemptDirectProviderRequest = async (
       requestWrapper,
       finalConfig,
       forwarder,
+      ctx,
+      env,
+      orgId,
       escrowInfo
     );
 
