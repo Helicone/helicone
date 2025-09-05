@@ -5,7 +5,12 @@ import {
 import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
 import { AuthParams } from "../packages/common/auth/types";
 import { ok, Result, isError } from "../packages/common/result";
-import { HqlError, HqlErrorCode, hqlError, parseClickhouseError } from "../lib/errors/HqlErrors";
+import {
+  HqlError,
+  HqlErrorCode,
+  hqlError,
+  parseClickhouseError,
+} from "../lib/errors/HqlErrors";
 import { AST, Parser } from "node-sql-parser";
 import { HqlStore } from "../lib/stores/HqlStore";
 import { z } from "zod";
@@ -204,14 +209,16 @@ export class HeliconeSqlManager {
       const start = Date.now();
 
       // Execute query with organization context for row-level security
-      const result = await clickhouseDb.queryWithContext<ExecuteSqlResponse["rows"]>({
+      const result = await clickhouseDb.hqlQueryWithContext<
+        ExecuteSqlResponse["rows"]
+      >({
         query: firstSql,
         organizationId: this.authParams.organizationId,
         parameters: [],
       });
 
       const elapsedMilliseconds = Date.now() - start;
-      
+
       if (isError(result)) {
         const errorCode = parseClickhouseError(result.error);
         return hqlError(errorCode, result.error);
