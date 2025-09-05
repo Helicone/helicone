@@ -10,10 +10,9 @@ CREATE TABLE IF NOT EXISTS public.feature_waitlist (
 CREATE UNIQUE INDEX feature_waitlist_pkey ON public.feature_waitlist USING btree (id);
 ALTER TABLE public.feature_waitlist
 ADD CONSTRAINT feature_waitlist_pkey PRIMARY KEY USING INDEX feature_waitlist_pkey;
--- Create unique index on email + feature + organization_id to prevent duplicates
-CREATE UNIQUE INDEX feature_waitlist_email_feature_key ON public.feature_waitlist USING btree (email, feature, organization_id);
+-- Create unique constraint on email + feature + organization_id to prevent duplicates
 ALTER TABLE public.feature_waitlist
-ADD CONSTRAINT feature_waitlist_email_feature_key UNIQUE USING INDEX feature_waitlist_email_feature_key;
+ADD CONSTRAINT feature_waitlist_email_feature_key UNIQUE (email, feature, organization_id);
 REVOKE ALL ON TABLE public.feature_waitlist
 FROM PUBLIC;
 REVOKE ALL ON TABLE public.feature_waitlist
