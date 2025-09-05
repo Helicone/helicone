@@ -1,3 +1,4 @@
+import { azurePattern } from "@helicone-package/cost/providers/mappings";
 import { proxyForwarder } from "../lib/HeliconeProxyRequest/ProxyForwarder";
 import { RequestWrapper } from "../lib/RequestWrapper";
 import { BaseRouter } from "./routerFactory";
@@ -46,8 +47,12 @@ export const getOpenAIProxyRouter = (router: BaseRouter) => {
           body: requestWrapper.getBody(),
         });
       }
-
-      return await proxyForwarder(requestWrapper, env, ctx, "OPENAI");
+      
+      if (requestWrapper.heliconeHeaders.openaiBaseUrl && azurePattern.test(requestWrapper.heliconeHeaders.openaiBaseUrl)) {
+        return await proxyForwarder(requestWrapper, env, ctx, "AZURE");
+      } else {
+        return await proxyForwarder(requestWrapper, env, ctx, "OPENAI");
+      }
     }
   );
 
