@@ -253,7 +253,11 @@ function HQLPage() {
     latestQueryRef.current = currentQuery;
   }, [currentQuery]);
 
-  if (!organization?.currentOrg?.id || isLoadingFeatureFlag || savedQueryDetailsLoading) {
+  if (
+    !organization?.currentOrg?.id ||
+    isLoadingFeatureFlag ||
+    savedQueryDetailsLoading
+  ) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <div className="text-lg">Loading...</div>
