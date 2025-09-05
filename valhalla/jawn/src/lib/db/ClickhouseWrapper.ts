@@ -99,7 +99,7 @@ export class ClickhouseClientWrapper {
     }
   }
 
-  async queryWithContext<T>({
+  async hqlQueryWithContext<T>({
     query,
     organizationId,
     parameters,
@@ -132,7 +132,7 @@ export class ClickhouseClientWrapper {
           wait_end_of_query: 1,
           max_execution_time: 30,
           max_memory_usage: "4000000000",
-          max_rows_to_read: "10000000",
+          max_rows_to_read: Number(1_000_000_000).toString(), // 1 billion
           max_result_rows: "10000",
           SQL_helicone_organization_id: organizationId,
           readonly: "1",
