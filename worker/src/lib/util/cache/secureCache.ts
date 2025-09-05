@@ -214,17 +214,9 @@ async function getFromCacheWithHmac({
         return decrypt(JSON.parse(encryptedMemory), env, hmac_key);
       }
     }
-    let encryptedRemote: string | null = null;
-    try {
-      encryptedRemote = await env.SECURE_CACHE.get(hashedKey, {
-        cacheTtl: expirationTtl ?? 60 * 60, // 1 hour
-      });
-      encryptedRemote = encryptedRemote;
-    } catch (e) {
-      console.error("Error getting from cache", e);
-      return null;
-    }
-
+    const encryptedRemote = await env.SECURE_CACHE.get(hashedKey, {
+      cacheTtl: expirationTtl ?? 60 * 60, // 1 hour
+    });
     if (!encryptedRemote) {
       return null;
     }
@@ -277,7 +269,7 @@ export async function getFromKVCacheOnly(
   return getFromCache({
     key,
     env,
-    useMemoryCache: false, // TODO: Should we use memory cache?
+    useMemoryCache: false,
     expirationTtl: 60, // 1 minute
   });
 }
