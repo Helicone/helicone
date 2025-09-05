@@ -5,7 +5,7 @@ import {
   Wallet,
 } from "../durable-objects/Wallet";
 import { SlackAlertManager } from "./SlackAlertManager";
-import { Result } from "../util/results";
+import { err, ok, Result } from "../util/results";
 import { isError } from "../../../../packages/common/result";
 import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
 
@@ -29,9 +29,9 @@ export class WalletManager {
     proxyRequest: HeliconeProxyRequest,
     cost: number,
     cachedResponse?: Response
-  ): Promise<void> {
+  ): Promise<Result<void, string>> {
     if (!proxyRequest.escrowInfo) {
-      return;
+      return err("No escrow info");
     }
 
     try {
@@ -60,11 +60,13 @@ export class WalletManager {
           proxyRequest.requestWrapper.getRawProviderAuthHeader() ?? ""
         );
       }
+      return ok(undefined);
     } catch (error) {
       console.error(
         `Error finalizing escrow ${proxyRequest.escrowInfo.escrowId}:`,
         error
       );
+      return err(`Error finalizing escrow ${proxyRequest.escrowInfo.escrowId}: ${error}`);
     }
   }
 
