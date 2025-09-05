@@ -18,7 +18,8 @@ type keySlug =
   | "key:openrouter"
   | "key:together_ai"
   | "key:helix_prompt_id"
-  | "key:mintlify_mcp_tool";
+  | "key:mintlify_mcp_tool"
+  | "key:loops";
 
 const getKey = (key: string) => {
   if (process.env.PROVIDER_KEYS) {
