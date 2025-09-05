@@ -5,9 +5,15 @@ import {
 import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
 import { AuthParams } from "../packages/common/auth/types";
 import { ok, Result, isError } from "../packages/common/result";
-import { HqlError, HqlErrorCode, hqlError, parseClickhouseError } from "../lib/errors/HqlErrors";
+import {
+  HqlError,
+  HqlErrorCode,
+  hqlError,
+  parseClickhouseError,
+} from "../lib/errors/HqlErrors";
 import { AST, Parser } from "node-sql-parser";
 import { HqlStore } from "../lib/stores/HqlStore";
+import { z } from "zod";
 
 export const CLICKHOUSE_TABLES = ["request_response_rmt"];
 const MAX_LIMIT = 300000;
@@ -21,6 +27,16 @@ interface ClickHouseTableRow {
   codec_expression?: string;
   ttl_expression?: string;
 }
+
+const describeRowSchema = z.object({
+  name: z.string(),
+  type: z.string(),
+  default_type: z.string().optional(),
+  default_expression: z.string().optional(),
+  comment: z.string().optional(),
+  codec_expression: z.string().optional(),
+  ttl_expression: z.string().optional(),
+});
 
 function validateSql(sql: string): Result<null, HqlError> {
   try {
@@ -77,7 +93,7 @@ function addLimit(ast: AST, limit: number): AST {
   } else {
     // No existing limit, add one with 1000
     ast.limit = {
-      separator: ",",
+      seperator: ",",
       value: [
         {
           type: "number",
@@ -112,7 +128,8 @@ export class HeliconeSqlManager {
       const schemaPromises = CLICKHOUSE_TABLES.map(async (table_name) => {
         const columns = await clickhouseDb.dbQuery<ClickHouseTableRow>(
           `DESCRIBE TABLE ${table_name}`,
-          []
+          [],
+          describeRowSchema
         );
 
         if (isError(columns)) {
@@ -192,14 +209,16 @@ export class HeliconeSqlManager {
       const start = Date.now();
 
       // Execute query with organization context for row-level security
-      const result = await clickhouseDb.queryWithContext<ExecuteSqlResponse["rows"]>({
+      const result = await clickhouseDb.hqlQueryWithContext<
+        ExecuteSqlResponse["rows"]
+      >({
         query: firstSql,
         organizationId: this.authParams.organizationId,
         parameters: [],
       });
 
       const elapsedMilliseconds = Date.now() - start;
-      
+
       if (isError(result)) {
         const errorCode = parseClickhouseError(result.error);
         return hqlError(errorCode, result.error);

@@ -148,6 +148,10 @@ export class HeliconeProxyRequestMapper {
       isStream = isStream || queryParams.get("alt") === "sse";
     }
 
+    if (this.provider === "AWS" || this.provider === "BEDROCK") {
+      isStream = isStream || targetUrl.pathname.includes("invoke-with-response-stream");
+    }
+
     return {
       data: {
         heliconePromptTemplate: await this.getHeliconeTemplate(),

@@ -44,13 +44,19 @@ const AddMemberModal = (props: AddMemberModalProps) => {
 
     try {
       const result = await addMemberMutation.mutateAsync({
-        orgId,
-        email: email.value,
+        params: {
+          path: {
+            organizationId: orgId,
+          },
+        },
+        body: {
+          email: email.value.toLowerCase(),
+        },
       });
 
       // Check if Better Auth is enabled and we have a temporary password
       const isBetterAuth = process.env.NEXT_PUBLIC_BETTER_AUTH === "true";
-      if (isBetterAuth && result?.data?.temporaryPassword) {
+      if (isBetterAuth && result.data?.temporaryPassword) {
         setTemporaryPassword(result.data.temporaryPassword);
         // Reset form but keep modal open to show password
         email.value = "";
@@ -60,10 +66,8 @@ const AddMemberModal = (props: AddMemberModalProps) => {
         // Reset form
         email.value = "";
       }
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to add member";
-      setErrorMessage(errorMessage);
+    } catch (error: any) {
+      setErrorMessage(error.error || "Failed to add member");
     }
   };
 

@@ -81,7 +81,7 @@ export function toFilterNode(
 ): FilterNode {
   // Handle null or undefined filter
   if (!filter) {
-    return "all";
+    return {} as FilterLeaf;
   }
 
   // Handle string input (JSON string)
@@ -106,7 +106,7 @@ export function toFilterNode(
 
   // Handle "all" expression
   if (filter.type === "all") {
-    return "all";
+    return {} as FilterLeaf;
   }
 
   // Handle condition expression
@@ -213,7 +213,7 @@ export function toFilterNode(
 
     // If there are no expressions, return "all"
     if (andExpr.expressions.length === 0) {
-      return "all";
+      return {} as FilterLeaf;
     }
 
     // If there's only one expression, convert it directly
@@ -252,9 +252,8 @@ export function toFilterNode(
       );
     }
 
-    // If there are no expressions, return "all"
     if (orExpr.expressions.length === 0) {
-      return "all";
+      return {} as FilterLeaf;
     }
 
     // If there's only one expression, convert it directly

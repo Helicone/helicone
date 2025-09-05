@@ -9,7 +9,7 @@ async function handler(option: HandlerWrapperOptions<Result<boolean, string>>) {
     res,
     userData: { orgId },
   } = option;
-  const requests = await getRequests(orgId, "all", 0, 1, {
+  const requests = await getRequests(orgId, {} as any, 0, 1, {
     created_at: "desc",
   });
 

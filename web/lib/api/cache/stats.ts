@@ -31,7 +31,7 @@ export async function getCacheCountClickhouse(
 ): Promise<Result<number, string>> {
   const builtFilter = await buildFilterWithAuthClickHouseCacheMetrics({
     org_id: orgId,
-    filter: "all",
+    filter: {},
     argsAcc: [],
   });
 

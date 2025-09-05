@@ -98,9 +98,9 @@ export const endpoints = {
       "*": {},
     },
   },
-  "o3-mini:azure-openai": {
+  "o3-mini:azure": {
     providerModelId: "o3-mini",
-    provider: "azure-openai",
+    provider: "azure",
     author: "openai",
     pricing: [
       {

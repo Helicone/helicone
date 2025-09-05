@@ -12,7 +12,7 @@ export async function getProperties(
   const builtFilter = await buildFilterWithAuthClickHouseProperties({
     org_id,
     argsAcc: [],
-    filter: "all",
+    filter: {},
   });
   const query = `
   select distinct key as property
