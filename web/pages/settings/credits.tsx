@@ -60,7 +60,7 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
   const hasMore = currentPage < totalPages - 1;
   const hasPrevious = currentPage > 0;
 
-  const hasAccess = hasCreditsFeatureFlag?.data && !isFeatureFlagLoading;
+  const hasAccess = hasCreditsFeatureFlag?.data;
 
   // Show loading state while checking feature flag
   if (isFeatureFlagLoading) {
