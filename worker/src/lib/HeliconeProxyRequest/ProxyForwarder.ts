@@ -32,10 +32,10 @@ import {
   handleProxyRequest,
   handleThreatProxyRequest,
 } from "./ProxyRequestHandler";
-import { EscrowInfo } from "../util/aiGateway";
 import { WalletManager } from "../managers/WalletManager";
 import { costOfPrompt } from "@helicone-package/cost";
 import { getUsageProcessor } from "@helicone-package/cost/usage/getUsageProcessor";
+import { EscrowInfo } from "../ai-gateway/types";
 
 export async function proxyForwarder(
   request: RequestWrapper,

@@ -15,7 +15,6 @@ export const endpoints = {
         image: 0.0,
         audio: 0.0,
         web_search: 0.0,
-        internal_reasoning: 0.0,
       },
     ],
     contextLength: 131_072,
@@ -41,7 +40,7 @@ export const endpoints = {
       "top_logprobs",
       "top_p",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "*": {},
     },
@@ -59,7 +58,6 @@ export const endpoints = {
         image: 0.0,
         audio: 0.0,
         web_search: 0.0,
-        internal_reasoning: 0.0,
       },
     ],
     contextLength: 131_072,
@@ -85,7 +83,7 @@ export const endpoints = {
       "top_logprobs",
       "top_p",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "*": {},
     },

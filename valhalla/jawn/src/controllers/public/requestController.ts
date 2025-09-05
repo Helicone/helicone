@@ -22,6 +22,7 @@ import { ScoreManager } from "../../managers/score/ScoreManager";
 import type { ScoreRequest } from "../../managers/score/ScoreManager";
 import { HeliconeRequest } from "@helicone-package/llm-mapper/types";
 import type { JawnAuthenticatedRequest } from "../../types/request";
+import { azurePattern } from "@helicone-package/cost/providers/mappings";
 
 export type RequestClickhouseFilterBranch = {
   left: RequestClickhouseFilterNode;
@@ -140,9 +141,6 @@ export class RequestController extends Controller {
     // TODO This is a hack for backwards compatibility on previous requests tagged as OPENAI coming from Azure OpenAI.
     // TODO Move this to a separate function, since it is not specific to clickhouse
     function patchAzureProvider(requests: Result<HeliconeRequest[], string>) {
-      const azurePattern =
-        /^(https?:\/\/)?([^.]*\.)?(openai\.azure\.com|azure-api\.net|cognitiveservices\.azure\.com)(\/.*)?$/;
-
       if (requests.data && Array.isArray(requests.data)) {
         for (const request of requests.data) {
           const targetUrl = request?.["target_url"];

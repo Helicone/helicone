@@ -28,7 +28,6 @@ interface SimplifiedPricing {
   video?: number;
   cacheRead?: number;
   cacheWrite?: number;
-  internal_reasoning?: number;
   threshold?: number;
 }
 
@@ -131,9 +130,6 @@ export class ModelRegistryController extends Controller {
               cacheWrite: baseTier.cacheMultipliers?.write5m
                 ? baseTier.input * baseTier.cacheMultipliers.write5m * 1000000
                 : undefined,
-              internal_reasoning: baseTier.internal_reasoning
-                ? baseTier.internal_reasoning * 1000000
-                : undefined,
             };
 
             let pricingTiers: SimplifiedPricing[] | undefined;
@@ -153,9 +149,6 @@ export class ModelRegistryController extends Controller {
                   : undefined,
                 cacheWrite: tier.cacheMultipliers?.write5m
                   ? tier.input * tier.cacheMultipliers.write5m * 1000000
-                  : undefined,
-                internal_reasoning: tier.internal_reasoning
-                  ? tier.internal_reasoning * 1000000
                   : undefined,
                 threshold: tier.threshold,
               }));
