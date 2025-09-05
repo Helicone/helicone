@@ -3056,8 +3056,6 @@ Json: JsonObject;
      * @description The **`URL`** interface is used to parse, construct, normalize, and encode URL.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL)
-     * `URL` class is a global reference for `import { URL } from 'node:url'`
-     * https://nodejs.org/api/url.html#the-whatwg-url-api
      */
     "url.URL": string;
     /** @description The Application object. */
