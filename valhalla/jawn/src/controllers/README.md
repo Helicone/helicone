@@ -1,14 +1,16 @@
 # Controllers Structure
 
 ## Directory Structure
-- **`/private`** - Controllers for authenticated private API endpoints
-- **`/public`** - Controllers for both authenticated and unauthenticated public API endpoints
+The private/public folders only represent was is generated for docs
+
+- **`/private`** - Will not be in the public docs
+- **`/public`** - Will be in the docs
 
 ## Authentication & Routing
 
 ### Route Authentication Rules (in `middleware/auth.ts`):
 1. **Routes starting with `/v1/public`** - Bypass authentication entirely (no API key required)
-2. **All other routes** - Require API key authentication via `@Security("api_key")`
+2. **All other routes** - Require API key authentication by default (see middleware.ts). The `@Security("api_key")` was never implemented properly. We willimplement this properly in the future
 
 ### Documentation Generation:
 - **`/private`** controllers - No auto-generated docs (internal/admin use)
