@@ -57,4 +57,4 @@ export function useAutoHideScrollbar() {
       ? "scrollbar-auto-hide-visible" 
       : "scrollbar-auto-hide-hidden"
   };
-}
+};
