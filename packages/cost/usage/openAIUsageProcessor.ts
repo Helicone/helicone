@@ -2,7 +2,6 @@ import { IUsageProcessor, ParseInput, Result } from "./IUsageProcessor";
 import { ModelUsage } from "./types";
 
 
-// TODO: check logic, and check for video, image, etc.
 export class OpenAIUsageProcessor implements IUsageProcessor {
   public async parse(parseInput: ParseInput): Promise<Result<ModelUsage, string>> {
     try {
@@ -119,11 +118,10 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     const modelUsage: ModelUsage = {
       input: effectivePromptTokens,
       output: effectiveCompletionTokens,
-      total: usage.total_tokens,
     };
 
     if (cachedTokens > 0) {
-      modelUsage.cacheTokens = {
+      modelUsage.cacheDetails = {
         cachedInput: cachedTokens,
       };
     }
@@ -133,11 +131,9 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     }
 
     if (promptAudioTokens > 0 || completionAudioTokens > 0) {
+      // TODO: add audio output support since some models support it in the 
+      // chat completions endpoint
       modelUsage.audio = promptAudioTokens + completionAudioTokens;
-      modelUsage.audioDetails = {
-        input: promptAudioTokens,
-        output: completionAudioTokens,
-      };
     }
 
     const rejectedTokens = completionDetails.rejected_prediction_tokens ?? 0;
