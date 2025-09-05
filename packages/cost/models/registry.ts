@@ -166,6 +166,23 @@ export const getPtbEndpoints = (model: string): Result<Endpoint[]> => {
   return ok(endpoints);
 };
 
+function getPtbEndpointsForProvider(
+  provider: string
+): Result<{ endpoint: Endpoint; model: ModelName }[]> {
+  const topLevelEndpoints: { endpoint: Endpoint; model: ModelName }[] = [];
+  indexes.modelToPtbEndpoints.forEach((endpoints, model) => {
+    for (const endpoint of endpoints) {
+      if (endpoint.provider === provider) {
+        topLevelEndpoints.push({
+          endpoint: endpoint,
+          model: model as ModelName,
+        });
+      }
+    }
+  });
+  return ok(topLevelEndpoints);
+}
+
 export const registry = {
   getAllModelIds,
   getAllModelsWithIds,
@@ -175,6 +192,7 @@ export const registry = {
   getProviderModels,
   buildEndpoint,
   getModelProviderConfig,
+  getPtbEndpointsForProvider,
   getModelProviderConfigs,
   getModelProviders,
   getEndpointsByModel,
