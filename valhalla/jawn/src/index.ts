@@ -27,7 +27,7 @@ import { RegisterRoutes as registerPublicTSOARoutes } from "./tsoa-build/public/
 import * as publicSwaggerDoc from "./tsoa-build/public/swagger.json";
 import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
-import { startConsumers, startSQSConsumers } from "./workers/consumerInterface";
+import { startSQSConsumers } from "./workers/consumerInterface";
 import { IS_ON_PREM } from "./constants/IS_ON_PREM";
 import { toExpressRequest } from "./utils/expressHelpers";
 import { webSocketControlPlaneServer } from "./controlPlane/controlPlane";
@@ -129,13 +129,7 @@ const SQS_ENABLED = SecretManager.getSecret("SQS_ENABLED") === "true";
 
 if (SQS_ENABLED) {
   console.log("Starting SQS consumers");
-  startConsumers({
-    dlqCount: 0,
-    normalCount: 0,
-    scoresCount: 0,
-    scoresDlqCount: 0,
-    backFillCount: 0,
-  });
+
   startSQSConsumers({
     dlqCount: DLQ_WORKER_COUNT,
     normalCount: NORMAL_WORKER_COUNT,
