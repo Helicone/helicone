@@ -415,6 +415,13 @@ export class DBLoggable {
     return await this.response.status();
   }
 
+  // TODO: Refactor, see ProxyForwarder
+  async getRawResponse() {
+    const { body: responseBody, endTime: responseEndTime } =
+      await this.response.getResponseBody();
+    return responseBody.join("");
+  }
+
   async getResponse() {
     const { body: responseBody, endTime: responseEndTime } =
       await this.response.getResponseBody();

@@ -35,6 +35,7 @@ import {
 import { EscrowInfo } from "../util/aiGateway";
 import { WalletManager } from "../managers/WalletManager";
 import { costOfPrompt } from "@helicone-package/cost";
+import { getUsageProcessor } from "@helicone-package/cost/usage/getUsageProcessor";
 
 export async function proxyForwarder(
   request: RequestWrapper,
@@ -512,6 +513,18 @@ async function log(
     );
     return;
   }
+
+  // TODO: Refactor other code so we only pull response once
+  // reuse this usage, for now its just an example of using the new usage processors.
+  const rawResponse = await loggable.getRawResponse();
+  const usageProcessor = getUsageProcessor(proxyRequest.provider);
+  const usage = await usageProcessor.parse({
+    responseBody: rawResponse,
+    isStream: proxyRequest.isStream,
+  });
+
+  // TODO: use a new costOfRequest function that takes in the above usage
+  // conforming with new model registry.
 
   const model = responseBody.data?.response.model;
   const promptTokens = responseBody.data?.response.prompt_tokens ?? 0;
