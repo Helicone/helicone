@@ -9,7 +9,7 @@ import {
   providers,
 } from "@helicone-package/cost/providers/mappings";
 import { BaseRouter } from "./routerFactory";
-import { EscrowInfo } from "../lib/util/aiGateway";
+import { EscrowInfo } from "../lib/ai-gateway/types";
 
 function validateURL(url: string) {
   try {
