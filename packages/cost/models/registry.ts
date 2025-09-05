@@ -161,11 +161,17 @@ function getModelProviderEntry(
   return ok(providerData);
 }
 
+export const getPtbEndpoints = (model: string): Result<Endpoint[]> => {
+  const endpoints = indexes.modelToPtbEndpoints.get(model as ModelName) || [];
+  return ok(endpoints);
+};
+
 export const registry = {
   getAllModelIds,
   getAllModelsWithIds,
   createPassthroughEndpoint,
   getPtbEndpointsByProvider,
+  getPtbEndpoints,
   getProviderModels,
   buildEndpoint,
   getModelProviderConfig,

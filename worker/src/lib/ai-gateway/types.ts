@@ -7,7 +7,6 @@ export interface Attempt {
   providerKey: ProviderKey;
   authType: "byok" | "ptb";
   priority: number;
-  needsEscrow: boolean;
   source: string;
 }
 

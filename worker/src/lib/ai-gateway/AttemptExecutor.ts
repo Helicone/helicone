@@ -25,12 +25,12 @@ export class AttemptExecutor {
       escrowInfo?: EscrowInfo
     ) => Promise<Response>
   ): Promise<Result<Response, AttemptError>> {
-    const { endpoint, providerKey, needsEscrow, source } = attempt;
+    const { endpoint, providerKey, source } = attempt;
 
     let escrowInfo: EscrowInfo | undefined;
 
     // Reserve escrow if needed (PTB only)
-    if (needsEscrow && endpoint.ptbEnabled) {
+    if (attempt.authType === "ptb" && endpoint.ptbEnabled) {
       const escrowResult = await this.reserveEscrow(
         attempt,
         requestWrapper.heliconeHeaders.requestId,
@@ -92,7 +92,7 @@ export class AttemptExecutor {
       const bodyResult = await buildRequestBody(endpoint, {
         parsedBody,
         bodyMapping: requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
-        toAnthropic: toAnthropic,
+        toAnthropic: toAnthropic, // TODO: This is global, don't pass it in
       });
 
       if (isErr(bodyResult) || !bodyResult.data) {
@@ -149,7 +149,6 @@ export class AttemptExecutor {
         });
       }
 
-      console.log(`[${source}] Success`);
       return ok(response);
     } catch (error) {
       return err({

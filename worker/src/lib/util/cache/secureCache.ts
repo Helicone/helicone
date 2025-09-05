@@ -277,7 +277,7 @@ export async function getFromKVCacheOnly(
   return getFromCache({
     key,
     env,
-    useMemoryCache: false,
+    useMemoryCache: false, // TODO: Should we use memory cache?
     expirationTtl: 60, // 1 minute
   });
 }

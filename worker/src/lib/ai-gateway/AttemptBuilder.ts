@@ -29,6 +29,7 @@ export class AttemptBuilder {
       const modelSpec = this.parseModelString(modelString);
 
       // Skip invalid model specs
+      // TODO: Return error
       if (isErr(modelSpec)) {
         console.error(`Skipping invalid model: ${modelSpec.error}`);
         continue;
@@ -93,10 +94,15 @@ export class AttemptBuilder {
       modelName,
       provider
     );
-    
+
     if (!providerDataResult.data) {
       // No registry data - try passthrough for unknown models
-      return this.buildPassthroughAttempt(modelName, provider, orgId, customUid);
+      return this.buildPassthroughAttempt(
+        modelName,
+        provider,
+        orgId,
+        customUid
+      );
     }
 
     const providerData = providerDataResult.data;
@@ -135,20 +141,19 @@ export class AttemptBuilder {
       userConfig
     );
 
-    if (!isErr(endpointResult) && endpointResult.data) {
-      return [
-        {
-          endpoint: endpointResult.data,
-          providerKey: userKey,
-          authType: "byok",
-          priority: 1,
-          needsEscrow: false,
-          source: `${modelName}/${providerData.provider}/byok${customUid ? `/${customUid}` : ""}`,
-        },
-      ];
+    if (isErr(endpointResult) || !endpointResult.data) {
+      return [];
     }
 
-    return [];
+    return [
+      {
+        endpoint: endpointResult.data,
+        providerKey: userKey,
+        authType: "byok",
+        priority: 1,
+        source: `${modelName}/${providerData.provider}/byok${customUid ? `/${customUid}` : ""}`,
+      },
+    ];
   }
 
   private async buildPassthroughAttempt(
@@ -182,9 +187,8 @@ export class AttemptBuilder {
         {
           endpoint: passthroughResult.data,
           providerKey: userKey,
-          authType: "byok" as const,
+          authType: "byok",
           priority: 1,
-          needsEscrow: false,
           source: `${modelName}/${provider}/byok${customUid ? `/${customUid}` : ""}`,
         },
       ];
@@ -227,14 +231,16 @@ export class AttemptBuilder {
     endpoints: Endpoint[],
     providerKey: ProviderKey
   ): Attempt[] {
-    return endpoints.map((endpoint) => ({
-      endpoint,
-      providerKey,
-      authType: "ptb" as const,
-      priority: 2,
-      needsEscrow: true,
-      source: `${modelName}/${provider}/ptb`,
-    }));
+    return endpoints.map(
+      (endpoint) =>
+        ({
+          endpoint,
+          providerKey,
+          authType: "ptb",
+          priority: 2,
+          source: `${modelName}/${provider}/ptb`,
+        }) as Attempt
+    );
   }
 
   private isByokEnabled(providerKey: any): boolean {
@@ -279,38 +285,10 @@ export class AttemptBuilder {
       );
     }
 
-    // Model with provider: "gpt-4/openai"
-    if (parts.length === 2) {
-      // With provider specified, unknown models are OK (passthrough)
-      // Only check and warn if needed
-      const validModels = registry.getAllModelIds();
-      const isKnownModel =
-        validModels.data && validModels.data.includes(modelName as any);
-      if (!isKnownModel) {
-        console.warn(
-          `Unknown model: ${modelName} - using passthrough with provider ${provider}`
-        );
-      }
-      return ok({ modelName, provider });
-    }
-
-    if (parts.length === 3) {
-      const validModels = registry.getAllModelIds();
-      const isKnownModel =
-        validModels.data && validModels.data.includes(modelName as any);
-      if (!isKnownModel) {
-        console.warn(
-          `Unknown model: ${modelName} - using passthrough with provider ${provider}`
-        );
-      }
-      return ok({
-        modelName,
-        provider,
-        customUid: parts[2],
-      });
-    }
-
-    // Invalid format (too many parts), treat as model name only
-    return ok({ modelName: modelString });
+    return ok({
+      modelName,
+      provider,
+      customUid: parts.length === 3 ? parts[2] : undefined,
+    });
   }
 }
