@@ -97,36 +97,45 @@ export class SimpleAIGateway {
     };
 
     // Step 6: Try each attempt in order
-    const errors: Array<{ attempt: string; error: string }> = [];
+    const errors: Array<{ 
+      attempt: string; 
+      error: string;
+      type?: string;
+      statusCode?: number;
+    }> = [];
 
     for (const attempt of attempts) {
       // Check disallow list
       if (this.isDisallowed(attempt, disallowList)) {
         errors.push({
           attempt: attempt.source,
-          error: `Model ${attempt.endpoint.providerModelId} is disabled for provider ${attempt.endpoint.provider}`,
+          error: "Cloud billing is disabled for this model and provider. Please contact support@helicone.ai for help",
+          type: "disallowed",
+          statusCode: 400,
         });
         continue;
       }
 
-      try {
-        console.log(`Trying: ${attempt.source}`);
-        const response = await this.attemptExecutor.execute(
-          attempt,
-          this.requestWrapper,
-          finalBody,
-          this.orgId,
-          forwarder
-        );
+      console.log(`Trying: ${attempt.source}`);
+      const result = await this.attemptExecutor.execute(
+        attempt,
+        this.requestWrapper,
+        finalBody,
+        this.orgId,
+        forwarder
+      );
 
-        // Success!
-        return response;
-      } catch (error) {
+      if (isErr(result)) {
         errors.push({
           attempt: attempt.source,
-          error: error instanceof Error ? error.message : "Unknown error",
+          error: result.error.message,
+          type: result.error.type,
+          statusCode: result.error.statusCode,
         });
         // Continue to next attempt
+      } else {
+        // Success!
+        return result.data;
       }
     }
 
@@ -255,18 +264,53 @@ export class SimpleAIGateway {
   }
 
   private async createErrorResponse(
-    errors: Array<{ attempt: string; error: string }>
+    errors: Array<{ 
+      attempt: string; 
+      error: string;
+      type?: string;
+      statusCode?: number;
+    }>
   ): Promise<Response> {
     this.requestWrapper.setBaseURLOverride("https://ai-gateway.helicone.ai");
+
+    // Determine the appropriate status code based on error types
+    let statusCode = 500;
+    let message = "All attempts failed";
+    let code = "all_attempts_failed";
+    
+    // Priority order for status codes:
+    // 1. If ANY error is 429 (insufficient credits), return 429
+    // 2. If ANY error is 401 (authentication), return 401  
+    // 3. If ALL errors are disallowed (400), return 400
+    // 4. Otherwise return 500
+    
+    const has429 = errors.some(e => e.statusCode === 429);
+    const has401 = errors.some(e => e.statusCode === 401);
+    const allDisallowed = errors.length > 0 && 
+      errors.every(e => e.type === "disallowed");
+    
+    if (has429) {
+      statusCode = 429;
+      message = "Insufficient credits";
+      code = "request_failed";
+    } else if (has401) {
+      statusCode = 401;
+      message = "Authentication failed";
+      code = "request_failed";
+    } else if (allDisallowed) {
+      statusCode = 400;
+      message = "Cloud billing is disabled for all requested models. Please contact support@helicone.ai for help";
+      code = "request_failed";
+    }
 
     const errorResponse = await errorForwarder(
       this.requestWrapper,
       this.env,
       this.ctx,
       {
-        code: "all_attempts_failed",
-        message: "All attempts failed",
-        statusCode: 500,
+        code,
+        message,
+        statusCode,
         details: JSON.stringify(errors),
       }
     );

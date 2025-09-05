@@ -1,11 +1,13 @@
-import { 
-  buildRequestBody, 
-  authenticateRequest as authenticateProviderRequest 
+import {
+  buildRequestBody,
+  authenticateRequest,
 } from "@helicone-package/cost/models/provider-helpers";
 import { RequestWrapper } from "../RequestWrapper";
 import { toAnthropic } from "../clients/llmmapper/providers/openai/request/toAnthropic";
 import { isErr, Result, ok, err } from "../util/results";
-import { Attempt, EscrowReservation, EscrowInfo } from "./types";
+import { Attempt, EscrowInfo, AttemptError } from "./types";
+import { Endpoint } from "@helicone-package/cost/models/types";
+import { ProviderKey } from "../db/ProviderKeysStore";
 
 export class AttemptExecutor {
   constructor(
@@ -18,11 +20,14 @@ export class AttemptExecutor {
     requestWrapper: RequestWrapper,
     parsedBody: any,
     orgId: string,
-    forwarder: (targetBaseUrl: string | null, escrowInfo?: EscrowInfo) => Promise<Response>
-  ): Promise<Response> {
+    forwarder: (
+      targetBaseUrl: string | null,
+      escrowInfo?: EscrowInfo
+    ) => Promise<Response>
+  ): Promise<Result<Response, AttemptError>> {
     const { endpoint, providerKey, needsEscrow, source } = attempt;
-    
-    let escrowReservation: EscrowReservation | undefined;
+
+    let escrowInfo: EscrowInfo | undefined;
 
     // Reserve escrow if needed (PTB only)
     if (needsEscrow && endpoint.ptbEnabled) {
@@ -31,76 +36,127 @@ export class AttemptExecutor {
         requestWrapper.heliconeHeaders.requestId,
         orgId
       );
-      
+
       if (isErr(escrowResult)) {
-        throw new Error(`[${source}] Escrow failed: ${escrowResult.error}`);
+        return err({
+          type: "request_failed",
+          message: escrowResult.error.message,
+          statusCode: escrowResult.error.statusCode || 500,
+        });
       }
-      
-      escrowReservation = escrowResult.data;
+
+      // Build EscrowInfo once with all needed data
+      escrowInfo = {
+        escrowId: escrowResult.data.escrowId,
+        endpoint: endpoint,
+        model: endpoint.providerModelId,
+      };
     }
 
+    const result = await this.executeRequestWithProvider(
+      endpoint,
+      providerKey,
+      parsedBody,
+      requestWrapper,
+      forwarder,
+      escrowInfo,
+      source
+    );
+
+    // If error, cancel escrow and return the error
+    if (isErr(result)) {
+      if (escrowInfo) {
+        this.ctx.waitUntil(this.cancelEscrow(escrowInfo.escrowId, orgId));
+      }
+      return result;
+    }
+
+    // Success
+    return result;
+  }
+
+  private async executeRequestWithProvider(
+    endpoint: Endpoint,
+    providerKey: ProviderKey,
+    parsedBody: any,
+    requestWrapper: RequestWrapper,
+    forwarder: (
+      targetBaseUrl: string | null,
+      escrowInfo?: EscrowInfo
+    ) => Promise<Response>,
+    escrowInfo: EscrowInfo | undefined,
+    source: string
+  ): Promise<Result<Response, AttemptError>> {
     try {
       // Build request body using provider helpers
       const bodyResult = await buildRequestBody(endpoint, {
         parsedBody,
         bodyMapping: requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
-        toAnthropic: toAnthropic
+        toAnthropic: toAnthropic,
       });
 
       if (isErr(bodyResult) || !bodyResult.data) {
-        throw new Error(`[${source}] Failed to build request body: ${bodyResult.error || "Unknown error"}`);
+        return err({
+          type: "request_failed",
+          message: bodyResult.error || "Failed to build request body",
+          statusCode: 400,
+        });
       }
 
       // Set up authentication headers using provider helpers
-      const authResult = await authenticateProviderRequest(endpoint, {
+      const authResult = await authenticateRequest(endpoint, {
         config: (providerKey.config as any) || {},
         apiKey: providerKey.decrypted_provider_key,
         secretKey: providerKey.decrypted_provider_secret_key || undefined,
         bodyMapping: requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
         requestMethod: requestWrapper.getMethod(),
-        requestUrl: endpoint.baseUrl,
-        requestBody: bodyResult.data
+        requestUrl: endpoint.baseUrl ?? requestWrapper.url.toString(),
+        requestBody: bodyResult.data,
       });
 
       if (authResult.error) {
-        throw new Error(`[${source}] Authentication failed: ${authResult.error}`);
+        return err({
+          type: "request_failed",
+          message: `Authentication failed: ${authResult.error}`,
+          statusCode: 401,
+        });
       }
 
       // Apply headers and body to request wrapper
-      requestWrapper.setHeader("Helicone-Auth", requestWrapper.getAuthorization() ?? "");
+      requestWrapper.setHeader(
+        "Helicone-Auth",
+        requestWrapper.getAuthorization() ?? ""
+      );
       requestWrapper.resetObject();
-      requestWrapper.setUrl(endpoint.baseUrl);
+      requestWrapper.setUrl(endpoint.baseUrl ?? requestWrapper.url.toString());
       requestWrapper.setBody(bodyResult.data);
 
       // Apply auth headers from provider
-      for (const [key, value] of Object.entries(authResult.data?.headers || {})) {
+      for (const [key, value] of Object.entries(
+        authResult.data?.headers || {}
+      )) {
         requestWrapper.setHeader(key, value);
       }
 
       // Forward the request
-      const escrowInfo = escrowReservation ? {
-        escrowId: escrowReservation.escrowId,
-        endpoint: escrowReservation.endpoint,
-        model: endpoint.providerModelId
-      } : undefined;
-
       const response = await forwarder(endpoint.baseUrl, escrowInfo);
 
       if (!response.ok) {
-        throw new Error(`[${source}] Request failed with status ${response.status}`);
+        return err({
+          type: "request_failed",
+          message: `Request failed with status ${response.status}`,
+          statusCode: response.status,
+        });
       }
 
       console.log(`[${source}] Success`);
-      return response;
-
+      return ok(response);
     } catch (error) {
-      // Cancel escrow on failure
-      if (escrowReservation) {
-        this.ctx.waitUntil(
-          this.cancelEscrow(escrowReservation.escrowId, orgId)
-        );
-      }
-      throw error;
+      return err({
+        type: "request_failed",
+        message: error instanceof Error ? error.message : "Unknown error",
+        statusCode: 500,
+      });
     }
   }
 
@@ -108,31 +164,40 @@ export class AttemptExecutor {
     attempt: Attempt,
     requestId: string,
     orgId: string
-  ): Promise<Result<EscrowReservation, string>> {
+  ): Promise<
+    Result<{ escrowId: string }, { statusCode?: number; message: string }>
+  > {
     const { endpoint } = attempt;
-    
+
     // Calculate max cost using first pricing tier
     const firstTierPricing = endpoint.pricing?.[0];
-    if (!firstTierPricing || 
-        !endpoint.contextLength || 
-        !endpoint.maxCompletionTokens ||
-        firstTierPricing.input === 0 ||
-        firstTierPricing.output === 0) {
-      return err(`Cost not supported for ${endpoint.provider}/${endpoint.providerModelId}`);
+    if (
+      !firstTierPricing ||
+      !endpoint.contextLength ||
+      !endpoint.maxCompletionTokens ||
+      firstTierPricing.input === 0 ||
+      firstTierPricing.output === 0
+    ) {
+      return err({
+        message: `Cost not supported for ${endpoint.provider}/${endpoint.providerModelId}`,
+      });
     }
 
     const maxPromptCost = endpoint.contextLength * firstTierPricing.input;
-    const maxCompletionCost = endpoint.maxCompletionTokens * firstTierPricing.output;
+    const maxCompletionCost =
+      endpoint.maxCompletionTokens * firstTierPricing.output;
     const worstCaseCost = maxPromptCost + maxCompletionCost;
 
     if (worstCaseCost <= 0) {
-      return err(`Invalid cost calculation for ${endpoint.provider}/${endpoint.providerModelId}`);
+      return err({
+        message: `Invalid cost calculation for ${endpoint.provider}/${endpoint.providerModelId}`,
+      });
     }
 
     try {
       const walletId = this.env.WALLET.idFromName(orgId);
       const walletStub = this.env.WALLET.get(walletId);
-      
+
       const escrowResult = await walletStub.reserveCostInEscrow(
         orgId,
         requestId,
@@ -140,16 +205,18 @@ export class AttemptExecutor {
       );
 
       if (isErr(escrowResult)) {
-        return err(escrowResult.error.message);
+        return err({
+          statusCode: escrowResult.error.statusCode,
+          message: escrowResult.error.message,
+        });
       }
 
-      return ok({
-        escrowId: escrowResult.data.escrowId,
-        endpoint,
-        amount: worstCaseCost
-      });
+      return ok(escrowResult.data);
     } catch (error) {
-      return err(error instanceof Error ? error.message : "Unknown escrow error");
+      return err({
+        message:
+          error instanceof Error ? error.message : "Unknown escrow error",
+      });
     }
   }
 

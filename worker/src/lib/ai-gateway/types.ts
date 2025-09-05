@@ -17,12 +17,6 @@ export interface ModelSpec {
   customUid?: string;
 }
 
-export interface EscrowReservation {
-  escrowId: string;
-  endpoint: Endpoint;
-  amount: number;
-}
-
 export interface DisallowListEntry {
   provider: string;
   model: string;
@@ -34,3 +28,16 @@ export interface EscrowInfo {
   endpoint: Endpoint;
   model: string;
 }
+
+// Error type matching the old aiGateway pattern
+export type AttemptError = {
+  type:
+    | "invalid_format"
+    | "missing_provider_key"
+    | "request_failed"
+    | "invalid_prompt"
+    | "model_not_supported";
+  message: string;
+  statusCode: number;
+  details?: string;
+};
