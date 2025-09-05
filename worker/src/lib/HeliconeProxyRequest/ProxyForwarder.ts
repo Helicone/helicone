@@ -456,7 +456,19 @@ async function log(
     env.SUPABASE_URL,
     env.SUPABASE_SERVICE_ROLE_KEY
   );
-  const responseBodyPromise = loggable.readResponse();
+  const db = new DBWrapper(env, auth);
+  const { data: orgData, error: orgError } = await db.getAuthParams();
+  if (!orgData) {
+    console.error(
+      "Could not get org data for request w/ id: ",
+      proxyRequest.requestId
+    );
+    return;
+  }
+
+  const finalRateLimitOptions = proxyRequest.rateLimitOptions;
+
+  // Start logging in parallel with response processing
   const logPromise = loggable.log(
     {
       clickhouse: new ClickhouseClientWrapper(env),
@@ -491,91 +503,101 @@ async function log(
     cachedResponse ? cachedResponse.headers : undefined,
     cacheSettings ?? undefined
   );
-  const [responseBody, logResult] = await Promise.all([
-    responseBodyPromise,
-    logPromise,
+
+  // Chain response processing after readResponse
+  const responseProcessingPromise = loggable
+    .readResponse()
+    .then(async (responseBody) => {
+      if (responseBody.error !== null) {
+        console.error("Error reading response", responseBody.error);
+      }
+
+      const model = responseBody.data?.response.model;
+      const promptTokens = responseBody.data?.response.prompt_tokens ?? 0;
+      const completionTokens =
+        responseBody.data?.response.completion_tokens ?? 0;
+      const provider = proxyRequest.provider;
+      const promptCacheWriteTokens =
+        responseBody.data?.response.prompt_cache_write_tokens ?? 0;
+      const promptCacheReadTokens =
+        responseBody.data?.response.prompt_cache_read_tokens ?? 0;
+      const promptAudioTokens =
+        responseBody.data?.response.prompt_audio_tokens ?? 0;
+      const completionAudioTokens =
+        responseBody.data?.response.completion_audio_tokens ?? 0;
+
+      let cost;
+      if (model && provider) {
+        cost =
+          costOfPrompt({
+            model,
+            promptTokens,
+            completionTokens,
+            provider,
+            promptCacheWriteTokens,
+            promptCacheReadTokens,
+            promptAudioTokens,
+            completionAudioTokens,
+          }) ?? 0;
+      } else {
+        cost = 0;
+      }
+
+      // Handle escrow finalization if needed
+      if (responseBody.data && proxyRequest.escrowInfo) {
+        const walletId = env.WALLET.idFromName(orgData.organizationId);
+        const walletStub = env.WALLET.get(walletId);
+        const walletManager = new WalletManager(env, ctx, walletStub);
+        const escrowFinalizationResult =
+          await walletManager.finalizeEscrowAndSyncSpend(
+            orgData.organizationId,
+            proxyRequest,
+            cost,
+            cachedResponse
+          );
+        if (escrowFinalizationResult.error !== null) {
+          console.error(
+            "Error finalizing escrow and syncing spend",
+            escrowFinalizationResult.error
+          );
+        }
+      }
+
+      // Update rate limit counters if not a cached response
+      if (
+        (!rateLimited && cachedResponse === undefined) ||
+        (!rateLimited && cachedResponse === null)
+      ) {
+        if (
+          proxyRequest &&
+          finalRateLimitOptions &&
+          !orgError &&
+          orgData?.organizationId
+        ) {
+          const costInCents = cost * 100;
+          await updateRateLimitCounterDO({
+            organizationId: orgData?.organizationId,
+            heliconeProperties:
+              proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
+            rateLimiterDO: env.RATE_LIMITER_SQL,
+            rateLimitOptions: finalRateLimitOptions,
+            userId: proxyRequest.userId,
+            cost: costInCents,
+          });
+        }
+      }
+    })
+    .catch((error) => {
+      console.error("Error in response processing chain:", error);
+    });
+
+  // Wait for both logging and response processing to complete
+  await Promise.all([
+    logPromise.then((logResult) => {
+      if (logResult.error !== null) {
+        console.error("Error logging", logResult.error);
+      }
+    }),
+    responseProcessingPromise,
   ]);
-  const finalRateLimitOptions = proxyRequest.rateLimitOptions;
-
-  if (logResult.error !== null) {
-    console.error("Error logging", logResult.error);
-  }
-  if (responseBody.error !== null) {
-    console.error("Error reading response", responseBody.error);
-  }
-  const db = new DBWrapper(env, auth);
-  const { data: orgData, error: orgError } = await db.getAuthParams();
-  if (!orgData) {
-    console.error(
-      "Could not get org data for request w/ id: ",
-      proxyRequest.requestId
-    );
-    return;
-  }
-
-  const model = responseBody.data?.response.model;
-  const promptTokens = responseBody.data?.response.prompt_tokens ?? 0;
-  const completionTokens = responseBody.data?.response.completion_tokens ?? 0;
-  const provider = proxyRequest.provider;
-  const promptCacheWriteTokens =
-    responseBody.data?.response.prompt_cache_write_tokens ?? 0;
-  const promptCacheReadTokens =
-    responseBody.data?.response.prompt_cache_read_tokens ?? 0;
-  const promptAudioTokens =
-    responseBody.data?.response.prompt_audio_tokens ?? 0;
-  const completionAudioTokens =
-    responseBody.data?.response.completion_audio_tokens ?? 0;
-
-  let cost;
-  if (model && provider) {
-    cost =
-      costOfPrompt({
-        model,
-        promptTokens,
-        completionTokens,
-        provider,
-        promptCacheWriteTokens,
-        promptCacheReadTokens,
-        promptAudioTokens,
-        completionAudioTokens,
-      }) ?? 0;
-  } else {
-    cost = 0;
-  }
-
-  if (responseBody.data && proxyRequest.escrowInfo) {
-    const walletId = env.WALLET.idFromName(orgData.organizationId);
-    const walletStub = env.WALLET.get(walletId);
-    const walletManager = new WalletManager(env, ctx, walletStub);
-    await walletManager.finalizeEscrowAndSyncSpend(
-      orgData.organizationId,
-      proxyRequest,
-      cost,
-      cachedResponse
-    );
-  }
-
-  // if not a cached response, incur rate limits
-  if (
-    (!rateLimited && cachedResponse === undefined) ||
-    (!rateLimited && cachedResponse === null)
-  ) {
-    if (
-      proxyRequest &&
-      finalRateLimitOptions &&
-      !orgError &&
-      orgData?.organizationId
-    ) {
-      const costInCents = cost * 100;
-      await updateRateLimitCounterDO({
-        organizationId: orgData?.organizationId,
-        heliconeProperties:
-          proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
-        rateLimiterDO: env.RATE_LIMITER_SQL,
-        rateLimitOptions: finalRateLimitOptions,
-        userId: proxyRequest.userId,
-        cost: costInCents,
-      });
-    }
-  }
 }
