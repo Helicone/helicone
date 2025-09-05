@@ -1,11 +1,9 @@
-import { NextPageWithLayout } from "../_app";
+import { useOrg } from "@/components/layout/org/organizationContext";
+import PaymentModal from "@/components/templates/settings/PaymentModal";
 import SettingsLayout from "@/components/templates/settings/settingsLayout";
-import { ReactElement, useState } from "react";
-import AuthLayout from "../../components/layout/auth/authLayout";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Small, XSmall, Muted } from "@/components/ui/typography";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -13,37 +11,32 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { RefreshCcw, ChevronLeft, ChevronRight } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Muted, Small, XSmall } from "@/components/ui/typography";
 import {
   useCredits,
   useCreditTransactions,
   type PurchasedCredits,
 } from "@/services/hooks/useCredits";
-import Link from "next/link";
 import { formatDate } from "@/utils/date";
-import PaymentModal from "@/components/templates/settings/PaymentModal";
-import { useOrg } from "@/components/layout/org/organizationContext";
+import { ChevronLeft, ChevronRight, RefreshCcw } from "lucide-react";
+import Link from "next/link";
+import { ReactElement, useState } from "react";
+import AuthLayout from "../../components/layout/auth/authLayout";
+import { NextPageWithLayout } from "../_app";
 import { useFeatureFlag } from "@/services/hooks/admin";
-import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { FeatureWaitlist } from "@/components/templates/waitlist/FeatureWaitlist";
+import { cn } from "@/lib/utils";
 
 const CreditsSettings: NextPageWithLayout<void> = () => {
-  const [autoTopUpEnabled, setAutoTopUpEnabled] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(5);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
   const org = useOrg();
-  const router = useRouter();
+
   const { data: hasCreditsFeatureFlag, isLoading: isFeatureFlagLoading } =
     useFeatureFlag("credits", org?.currentOrg?.id ?? "");
-
-  useEffect(() => {
-    if (!isFeatureFlagLoading && !hasCreditsFeatureFlag?.data) {
-      router.push("/settings");
-    }
-  }, [hasCreditsFeatureFlag, isFeatureFlagLoading, router]);
 
   const {
     data: creditData,
@@ -67,7 +60,9 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
   const hasMore = currentPage < totalPages - 1;
   const hasPrevious = currentPage > 0;
 
-  // Show loading or redirect if feature flag is not enabled
+  const hasAccess = hasCreditsFeatureFlag?.data;
+
+  // Show loading state while checking feature flag
   if (isFeatureFlagLoading) {
     return (
       <div className="flex w-full justify-center px-4 py-4">
@@ -82,17 +77,29 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
     );
   }
 
-  if (!hasCreditsFeatureFlag?.data) {
-    return null;
-  }
-
   return (
     <div className="flex w-full justify-center px-4 py-4">
-      <div className="w-full max-w-4xl">
-        <Card className="w-full">
+      <div className="w-full max-w-4xl space-y-4">
+        {/* Show waitlist banner if no access */}
+        {!hasAccess && (
+          <FeatureWaitlist
+            feature="credits"
+            title="Credits Feature - Coming Soon!"
+            description="Join the waitlist to be notified when our credits system becomes available for your organization."
+            organizationId={org?.currentOrg?.id}
+          />
+        )}
+
+        {/* Main credits card - disabled if no access */}
+        <Card className={cn("w-full", !hasAccess && "opacity-60")}>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-xl font-medium">Credits</CardTitle>
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-xl font-medium">Credits</CardTitle>
+                <Badge variant="secondary" className="text-xs">
+                  Beta
+                </Badge>
+              </div>
               <Button
                 variant="ghost"
                 size="icon"
@@ -100,7 +107,7 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
                   refetch();
                   refetchTransactions();
                 }}
-                disabled={isLoading || transactionsLoading}
+                disabled={!hasAccess || isLoading || transactionsLoading}
               >
                 <RefreshCcw
                   className={`h-4 w-4 ${isLoading || transactionsLoading ? "animate-spin" : ""}`}
@@ -114,14 +121,29 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
             <div className="rounded-lg border bg-muted/10 p-4">
               <Small className="text-muted-foreground">Current Balance</Small>
               <div className="mt-1 text-3xl font-bold">
-                {isLoading ? (
+                {!hasAccess ? (
+                  <span className="text-muted-foreground">--</span>
+                ) : isLoading ? (
                   <span className="text-muted-foreground">Loading...</span>
                 ) : creditError ? (
                   <span className="text-destructive">
                     Error loading balance
                   </span>
                 ) : (
-                  `$${((creditData?.balance ?? 0) / 100).toFixed(2)}`
+                  `$${(() => {
+                    const balance = (creditData?.balance ?? 0) / 100;
+                    if (balance % 1 === 0) {
+                      return balance.toFixed(2);
+                    }
+                    if (balance >= 10) {
+                      return balance.toFixed(3);
+                    }
+                    if (balance >= 100) {
+                      return balance.toFixed(4);
+                    }
+                    const formattedBalance = balance.toFixed(5);
+                    return formattedBalance;
+                  })()}`
                 )}
               </div>
             </div>
@@ -135,11 +157,17 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
                     size="sm"
                     className="w-full"
                     onClick={() => setIsPaymentModalOpen(true)}
+                    disabled={!hasAccess}
                   >
                     Add Credits
                   </Button>
                   <Link href="/requests" className="w-full">
-                    <Button variant="outline" size="sm" className="w-full">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      disabled={!hasAccess}
+                    >
                       View Usage
                     </Button>
                   </Link>
@@ -182,6 +210,7 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
                       // Reset pagination when changing page size
                       setCurrentPage(0);
                     }}
+                    disabled={!hasAccess}
                   >
                     <SelectTrigger className="h-8 w-[60px]">
                       <SelectValue />
@@ -198,7 +227,11 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
 
               <div className="rounded-lg border">
                 <div className="p-4">
-                  {transactionsLoading ? (
+                  {!hasAccess ? (
+                    <div className="py-8 text-center">
+                      <Muted>Join the waitlist to view transactions</Muted>
+                    </div>
+                  ) : transactionsLoading ? (
                     <div className="py-8 text-center">
                       <Muted>Loading transactions...</Muted>
                     </div>
@@ -265,7 +298,7 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
                 </div>
 
                 {/* Pagination */}
-                {transactions.length > 0 && (
+                {hasAccess && transactions.length > 0 && (
                   <div className="border-t p-4">
                     <div className="flex items-center justify-center gap-2">
                       <Button
@@ -308,7 +341,7 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
 
       {/* Payment Modal */}
       <PaymentModal
-        isOpen={isPaymentModalOpen}
+        isOpen={isPaymentModalOpen && !!hasAccess}
         onClose={() => setIsPaymentModalOpen(false)}
       />
     </div>

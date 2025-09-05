@@ -77,11 +77,25 @@ export class ProviderKeysManager {
       );
       if (!key) return null;
 
-      await storeInCache(
-        `provider_keys_${provider}_${orgId}`,
-        JSON.stringify(key),
+      const existingKeys = await getFromKVCacheOnly(
+        `provider_keys_${orgId}`,
         this.env
       );
+      if (existingKeys) {
+        const existingKeysData = JSON.parse(existingKeys) as ProviderKey[];
+        existingKeysData.push(key);
+        await storeInCache(
+          `provider_keys_${orgId}`,
+          JSON.stringify(existingKeysData),
+          this.env
+        );
+      } else {
+        await storeInCache(
+          `provider_keys_${orgId}`,
+          JSON.stringify([key]),
+          this.env
+        );
+      }
       return key;
     }
     return key;

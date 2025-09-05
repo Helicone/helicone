@@ -7,6 +7,7 @@ export default defineConfig({
       "./test/openai/vitest.config.mts",
       "./test/ai-gateway/vitest.config.mts",
       "./test/cache/vitest.config.mts",
+      "./test/alerts/vitest.config.mts",
     ],
   },
 });

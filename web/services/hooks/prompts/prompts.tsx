@@ -64,7 +64,7 @@ export const usePrompts = (promptId?: string) => {
       const promptId = query.queryKey[2] as string;
       const jawn = getJawnClient(orgId);
 
-      let filterNode: any = "all";
+      let filterNode: any = {};
 
       if (promptId) {
         filterNode = {
@@ -181,7 +181,7 @@ export const useCreatePrompt = () => {
         (
           await jawn.POST("/v1/prompt/query", {
             body: {
-              filter: "all",
+              filter: {},
             },
           })
         )?.data?.data || [];

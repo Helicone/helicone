@@ -116,9 +116,9 @@ export const endpoints = {
       "*": {},
     },
   },
-  "gpt-4.1:azure-openai": {
+  "gpt-4.1:azure": {
     providerModelId: "gpt-4.1",
-    provider: "azure-openai",
+    provider: "azure",
     author: "openai",
     pricing: [
       {
@@ -153,9 +153,9 @@ export const endpoints = {
       "*": {},
     },
   },
-  "gpt-4.1-mini:azure-openai": {
+  "gpt-4.1-mini:azure": {
     providerModelId: "gpt-4.1-mini",
-    provider: "azure-openai",
+    provider: "azure",
     author: "openai",
     pricing: [
       {
@@ -190,9 +190,9 @@ export const endpoints = {
       "*": {},
     },
   },
-  "gpt-4.1-nano:azure-openai": {
+  "gpt-4.1-nano:azure": {
     providerModelId: "gpt-4.1-nano",
-    provider: "azure-openai",
+    provider: "azure",
     author: "openai",
     pricing: [
       {

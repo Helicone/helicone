@@ -40,9 +40,9 @@ export const endpoints = {
       "*": {},
     },
   },
-  "gpt-4o:azure-openai": {
+  "gpt-4o:azure": {
     providerModelId: "gpt-4o",
-    provider: "azure-openai",
+    provider: "azure",
     author: "openai",
     pricing: [
       {
@@ -115,9 +115,9 @@ export const endpoints = {
       "*": {},
     },
   },
-  "gpt-4o-mini:azure-openai": {
+  "gpt-4o-mini:azure": {
     providerModelId: "gpt-4o-mini",
-    provider: "azure-openai",
+    provider: "azure",
     author: "openai",
     pricing: [
       {

@@ -62,6 +62,8 @@ export function costOfPrompt({
   promptAudioTokens,
   completionTokens,
   completionAudioTokens,
+  promptCacheWrite5m,
+  promptCacheWrite1h,
   images = 1,
   perCall = 1,
   multiple,
@@ -74,6 +76,8 @@ export function costOfPrompt({
   promptAudioTokens: number;
   completionTokens: number;
   completionAudioTokens: number;
+  promptCacheWrite5m?: number;
+  promptCacheWrite1h?: number;
   images?: number;
   perCall?: number;
   multiple?: number;
@@ -90,7 +94,19 @@ export function costOfPrompt({
 
   // Add cost for cache write tokens if applicable
   if (cost.prompt_cache_write_token && promptCacheWriteTokens > 0) {
-    totalCost += promptCacheWriteTokens * cost.prompt_cache_write_token;
+    // For anthropic requests, the prompt cache write tokens are the sum of the 5m and 1h writes
+    // so we subtract to not double count
+    const effectivePromptCacheWriteTokens =
+      promptCacheWriteTokens -
+      (promptCacheWrite5m ?? 0) -
+      (promptCacheWrite1h ?? 0);
+    totalCost += effectivePromptCacheWriteTokens * cost.prompt_cache_write_token;
+    if (cost.prompt_cache_creation_5m && promptCacheWrite5m && promptCacheWrite5m > 0) {
+      totalCost += promptCacheWrite5m * cost.prompt_cache_creation_5m;
+    }
+    if (cost.prompt_cache_creation_1h && promptCacheWrite1h && promptCacheWrite1h > 0) {
+      totalCost += promptCacheWrite1h * cost.prompt_cache_creation_1h;
+    }
   } else if (promptCacheWriteTokens > 0) {
     totalCost += promptCacheWriteTokens * cost.prompt_token;
   }

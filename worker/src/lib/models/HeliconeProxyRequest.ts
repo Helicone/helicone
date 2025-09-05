@@ -13,7 +13,7 @@ import { MAPPERS } from "@helicone-package/llm-mapper/utils/getMappedContent";
 import { getMapperType } from "@helicone-package/llm-mapper/utils/getMapperType";
 import { RateLimitOptions } from "../clients/DurableObjectRateLimiterClient";
 import { RateLimitOptionsBuilder } from "../util/rateLimitOptions";
-import { EscrowInfo } from "../util/aiGateway";
+import { EscrowInfo } from "../ai-gateway/types";
 
 export type RetryOptions = {
   retries: number; // number of times to retry the request
@@ -146,6 +146,10 @@ export class HeliconeProxyRequestMapper {
       const queryParams = new URLSearchParams(targetUrl.search);
       // alt = sse is how Gemini determines if a request is a stream
       isStream = isStream || queryParams.get("alt") === "sse";
+    }
+
+    if (this.provider === "AWS" || this.provider === "BEDROCK") {
+      isStream = isStream || targetUrl.pathname.includes("invoke-with-response-stream");
     }
 
     return {

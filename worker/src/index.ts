@@ -48,7 +48,16 @@ async function modifyEnvBasedOnPath(
   request: RequestWrapper
 ): Promise<Env> {
   const secretManager = new SecretManagerClass([
-    (key: string) => process.env[key],
+    (key: string) => {
+      try {
+        if (typeof env[key as keyof Env] === "string") {
+          return env[key as keyof Env] as string;
+        }
+        return undefined;
+      } catch (e) {
+        return undefined;
+      }
+    },
   ]);
 
   // This configures all the blue <> green secrets

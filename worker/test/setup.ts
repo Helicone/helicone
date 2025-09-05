@@ -131,9 +131,9 @@ vi.mock("@supabase/supabase-js", () => ({
           bedrock: {
             org_id: "test-org-id",
             provider_name: "bedrock",
-            decrypted_provider_key: "test-bedrock-api-key",
-            decrypted_provider_secret_key: null,
-            auth_type: "api_key",
+            decrypted_provider_key: "test-bedrock-access-key-id",
+            decrypted_provider_secret_key: "test-bedrock-secret-access-key",
+            auth_type: "aws-signature",
             config: {
               region: "us-east-1",
             },
@@ -157,10 +157,10 @@ vi.mock("@supabase/supabase-js", () => ({
             config: null,
             byok_enabled: isByokEnabled,
           },
-          "azure-openai": {
+          azure: {
             org_id: "test-org-id",
-            provider_name: "azure-openai",
-            decrypted_provider_key: "test-azure-openai-api-key",
+            provider_name: "azure",
+            decrypted_provider_key: "test-azure-api-key",
             decrypted_provider_secret_key: null,
             auth_type: "api_key",
             config: {
@@ -216,9 +216,9 @@ vi.mock("@supabase/supabase-js", () => ({
           bedrock: {
             org_id: "0afe3a6e-d095-4ec0-bc1e-2af6f57bd2a5",
             provider_name: "bedrock",
-            decrypted_provider_key: "helicone-bedrock-api-key",
-            decrypted_provider_secret_key: null,
-            auth_type: "api_key",
+            decrypted_provider_key: "helicone-bedrock-access-key-id",
+            decrypted_provider_secret_key: "helicone-bedrock-secret-access-key",
+            auth_type: "aws-signature",
             config: {
               region: "us-east-1",
             },
@@ -242,10 +242,10 @@ vi.mock("@supabase/supabase-js", () => ({
             config: null,
             byok_enabled: true,
           },
-          "azure-openai": {
+          azure: {
             org_id: "0afe3a6e-d095-4ec0-bc1e-2af6f57bd2a5",
-            provider_name: "azure-openai",
-            decrypted_provider_key: "helicone-azure-openai-api-key",
+            provider_name: "azure",
+            decrypted_provider_key: "helicone-azure-api-key",
             decrypted_provider_secret_key: null,
             auth_type: "api_key",
             config: {

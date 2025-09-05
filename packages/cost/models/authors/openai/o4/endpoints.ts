@@ -35,9 +35,9 @@ export const endpoints = {
       "*": {},
     },
   },
-  "o4-mini:azure-openai": {
+  "o4-mini:azure": {
     providerModelId: "o4-mini",
-    provider: "azure-openai",
+    provider: "azure",
     author: "openai",
     pricing: [
       {

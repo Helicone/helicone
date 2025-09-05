@@ -3,6 +3,8 @@ import {
   createClient,
   ClickHouseSettings,
 } from "@clickhouse/client";
+import { ZodType } from "zod";
+import { validateRowsWithSchema } from "./validation";
 import { Result } from "../../packages/common/result";
 import { TestClickhouseClientWrapper } from "./test/TestClickhouseWrapper";
 import { SecretManager } from "@helicone-package/secrets/SecretManager";
@@ -63,7 +65,8 @@ export class ClickhouseClientWrapper {
 
   async dbQuery<T>(
     query: string,
-    parameters: (number | string | boolean | Date)[]
+    parameters: (number | string | boolean | Date)[],
+    schema?: ZodType<T>
   ): Promise<Result<T[], string>> {
     try {
       const query_params = paramsToValues(parameters);
@@ -80,7 +83,12 @@ export class ClickhouseClientWrapper {
           wait_end_of_query: 1,
         },
       });
-      return { data: await queryResult.json<T[]>(), error: null };
+      const raw = (await queryResult.json()) as unknown;
+      const validated = validateRowsWithSchema<T>(raw, schema);
+      if (!validated.ok) {
+        return { data: null, error: validated.error };
+      }
+      return { data: validated.data, error: null };
     } catch (err) {
       console.error("Error executing Clickhouse query: ", query, parameters);
       console.error(err);
@@ -91,14 +99,16 @@ export class ClickhouseClientWrapper {
     }
   }
 
-  async queryWithContext<T>({
+  async hqlQueryWithContext<T>({
     query,
     organizationId,
     parameters,
+    schema,
   }: {
     query: string;
     organizationId: string;
     parameters: (number | string | boolean | Date)[];
+    schema?: ZodType<T>;
   }): Promise<Result<T[], string>> {
     try {
       const query_params = paramsToValues(parameters);
@@ -122,14 +132,19 @@ export class ClickhouseClientWrapper {
           wait_end_of_query: 1,
           max_execution_time: 30,
           max_memory_usage: "4000000000",
-          max_rows_to_read: "10000000",
+          max_rows_to_read: Number(1_000_000_000).toString(), // 1 billion
           max_result_rows: "10000",
           SQL_helicone_organization_id: organizationId,
           readonly: "1",
           allow_ddl: 0,
         } as ClickHouseSettings,
       });
-      return { data: await queryResult.json<T[]>(), error: null };
+      const raw = (await queryResult.json()) as unknown;
+      const validated = validateRowsWithSchema<T>(raw, schema);
+      if (!validated.ok) {
+        return { data: null, error: validated.error };
+      }
+      return { data: validated.data, error: null };
     } catch (err) {
       console.error(
         "Error executing HQL query with context: ",
@@ -401,7 +416,7 @@ CLICKHOUSE_HQL_PASSWORD =
 export const clickhouseDb = (() => {
   if (process.env.NODE_ENV === "test") {
     return new TestClickhouseClientWrapper({
-      CLICKHOUSE_HOST: "http://localhost:18124",
+      CLICKHOUSE_HOST: "http://localhost:18123",
       CLICKHOUSE_USER: "default",
       CLICKHOUSE_HQL_USER:
         CLICKHOUSE_HQL_USER ?? process.env.CLICKHOUSE_HQL_USER ?? "hql_user",

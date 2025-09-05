@@ -20,8 +20,11 @@ export async function checkFeatureFlag(
       feature,
     ]);
 
-    if (process.env.NODE_ENV !== "test" && (!data || data.length === 0)) {
-      return err(`You do not have access to ${feature}`);
+    // Allow by default outside production to make local/dev/test flows easier
+    if (process.env.NODE_ENV === "production") {
+      if (!data || data.length === 0) {
+        return err(`You do not have access to ${feature}`);
+      }
     }
 
     return ok(true);
