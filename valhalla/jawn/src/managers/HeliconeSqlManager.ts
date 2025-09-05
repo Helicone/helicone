@@ -109,6 +109,25 @@ function normalizeAst(ast: AST | AST[]): AST[] {
   return [ast];
 }
 
+// TODO This is very ugly and needs a refactor
+function checkForbiddenColumns(ast: AST): boolean {
+  if ((ast as any)?.type !== "select") return false;
+  const columns = (ast as any)?.columns ?? [];
+  const forbidden = new Set(["request_body", "response_body"]);
+  for (const col of columns) {
+    const expr = (col as any)?.expr;
+    if (expr?.type !== "column_ref") continue;
+    const raw = (expr as any)?.column;
+    const nameCandidate = typeof raw === "string" ? raw : (raw as any)?.expr?.value;
+    if (typeof nameCandidate !== "string") continue;
+    const name = nameCandidate.startsWith('"') && nameCandidate.endsWith('"')
+      ? nameCandidate.slice(1, -1)
+      : nameCandidate;
+    if (forbidden.has(name.toLowerCase())) return true;
+  }
+  return false;
+}
+
 export class HeliconeSqlManager {
   private readonly hqlStore: HqlStore;
 
@@ -179,8 +198,14 @@ export class HeliconeSqlManager {
         );
       }
       
-      // Always get first statement to prevent SQL injection
       const normalizedAst = normalizeAst(ast)[0];
+
+      if (checkForbiddenColumns(normalizedAst)) {
+        return hqlError(
+          HqlErrorCode.FORBIDDEN_SELECT_COLUMN,
+          "Selecting request_body or response_body is not allowed in HQL"
+        );
+      }
       
       // Add limit to prevent excessive data retrieval
       let limitedAst;
