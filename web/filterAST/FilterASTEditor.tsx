@@ -13,9 +13,9 @@ import {
   OrExpression,
 } from "@helicone-package/filters/types";
 
-interface FilterASTEditorProps {}
+interface FilterASTEditorProps { }
 
-export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({}) => {
+export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({ }) => {
   const { store: filterStore, helpers } = useFilterAST();
 
   return (
@@ -53,7 +53,6 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({}) => {
               </Button>
             )}
           </Row>
-          <SavedFiltersDropdown />
         </div>
       </div>
 
