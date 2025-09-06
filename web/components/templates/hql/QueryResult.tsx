@@ -170,8 +170,6 @@ interface ExportButtonProps {
 }
 
 function ExportButton({ sql }: ExportButtonProps) {
-  const [open, setOpen] = useState(false);
-  const [format, setFormat] = useState<"CSV">("CSV");
   const [downloadingCSV, setDownloadingCSV] = useState(false);
   const notify = useNotification();
 
@@ -188,7 +186,7 @@ function ExportButton({ sql }: ExportButtonProps) {
       if (url) {
         const link = document.createElement("a");
         link.href = url;
-        link.download = ""; // Let the server suggest the filename, or set one here
+        link.download = "";
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -208,82 +206,23 @@ function ExportButton({ sql }: ExportButtonProps) {
             variant="none"
             size="none"
             className="flex h-9 w-9 shrink-0 items-center justify-center text-slate-700 hover:bg-slate-200 dark:text-slate-300 dark:hover:bg-slate-800"
-            onClick={() => setOpen(true)}
+            onClick={() => {
+              if (downloadingCSV) return;
+              setDownloadingCSV(true);
+              download(sql);
+            }}
+            aria-label="Export CSV"
+            title="Export CSV"
           >
-            <LuDownload className="h-4 w-4" />
+            {downloadingCSV ? (
+              <ArrowPathIcon className={clsx("h-4 w-4 animate-spin")} />
+            ) : (
+              <LuDownload className="h-4 w-4" />
+            )}
           </Button>
         </TooltipTrigger>
         <TooltipContent>Export data</TooltipContent>
       </Tooltip>
-
-      <ThemedModal open={open} setOpen={setOpen}>
-        <div className="flex w-full min-w-[350px] max-w-sm flex-col space-y-4 sm:space-y-8">
-          <div className="flex flex-col space-y-8">
-            <div className="flex flex-col space-y-4">
-              <p className="text-md font-semibold text-gray-900 dark:text-gray-100 sm:text-lg">
-                Export {format}
-              </p>
-              <p className="sm:text-md text-sm text-gray-500">
-                Exporting is limited to {MAX_EXPORT_CSV} rows due to the huge
-                amounts of data in the requests. For larger exports, please use
-                our{" "}
-                <Link
-                  href="https://docs.helicone.ai/helicone-api/getting-started"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-semibold text-blue-600 underline"
-                >
-                  API
-                </Link>
-                .
-              </p>
-            </div>
-
-            <Select
-              value={format}
-              onValueChange={(value) => setFormat(value as "CSV")}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select format" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="CSV">CSV</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <p className="sm:text-md text-sm text-gray-500">
-              Exporting may take a while depending on the amount of data. Please
-              do not close this modal once export is started.
-            </p>
-          </div>
-
-          <div className="flex w-full justify-end space-x-4 text-sm">
-            <Button
-              variant="none"
-              size="none"
-              onClick={() => setOpen(false)}
-              disabled={downloadingCSV}
-            >
-              Cancel
-            </Button>
-            <Button
-              className="flex items-center rounded-md bg-black px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:bg-white dark:text-black dark:hover:bg-gray-200"
-              onClick={() => download(sql)}
-            >
-              {downloadingCSV ? (
-                <>
-                  <ArrowPathIcon
-                    className={clsx("mr-2 inline h-5 w-5 animate-spin")}
-                  />
-                  Exporting
-                </>
-              ) : (
-                <p>Export</p>
-              )}
-            </Button>
-          </div>
-        </div>
-      </ThemedModal>
     </TooltipProvider>
   );
 }
