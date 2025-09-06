@@ -12,6 +12,7 @@ export enum HqlErrorCode {
   INVALID_TABLE = "HQL_INVALID_TABLE",
   SYNTAX_ERROR = "HQL_SYNTAX_ERROR",
   SQL_INJECTION_ATTEMPT = "HQL_SQL_INJECTION_ATTEMPT",
+  FORBIDDEN_SELECT_COLUMN = "HQL_FORBIDDEN_SELECT_COLUMN",
   
   // Query Execution Errors
   QUERY_TIMEOUT = "HQL_QUERY_TIMEOUT",
@@ -58,6 +59,7 @@ export const HqlErrorMessages: Record<HqlErrorCode, string> = {
   [HqlErrorCode.INVALID_TABLE]: "Table is not allowed for querying",
   [HqlErrorCode.SYNTAX_ERROR]: "SQL syntax error",
   [HqlErrorCode.SQL_INJECTION_ATTEMPT]: "Query contains forbidden keywords",
+  [HqlErrorCode.FORBIDDEN_SELECT_COLUMN]: "Selecting request_body or response_body in SELECT is not allowed",
   
   [HqlErrorCode.QUERY_TIMEOUT]: "Query execution timeout (30 seconds). Please optimize your query.",
   [HqlErrorCode.MEMORY_LIMIT_EXCEEDED]: "Query exceeded memory limit. Please reduce the data scope.",
@@ -90,6 +92,7 @@ export const StatusCodeMap: Partial<Record<HqlErrorCode, number>> = {
   [HqlErrorCode.INVALID_TABLE]: 400,
   [HqlErrorCode.SYNTAX_ERROR]: 400,
   [HqlErrorCode.SQL_INJECTION_ATTEMPT]: 400,
+  [HqlErrorCode.FORBIDDEN_SELECT_COLUMN]: 400,
   [HqlErrorCode.MISSING_QUERY_ID]: 400,
   [HqlErrorCode.MISSING_QUERY_NAME]: 400,
   [HqlErrorCode.MISSING_QUERY_SQL]: 400,

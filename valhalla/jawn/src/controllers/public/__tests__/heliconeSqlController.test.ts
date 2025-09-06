@@ -457,6 +457,49 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
     });
   });
 
+  describe("POST /helicone-sql/execute - Forbidden SELECT columns", () => {
+    test("should reject selecting request_body in projection", async () => {
+      const requestBody = {
+        sql: "SELECT request_body FROM request_response_rmt LIMIT 1",
+      };
+
+      const response = await fetch(`${BASE_URL}/helicone-sql/execute`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+          "Helicone-Organization-Id": TEST_ORG_ID,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      expect(response.status).toBe(400);
+      const result = await response.json();
+      expect(result.error).toContain("HQL_FORBIDDEN_SELECT_COLUMN");
+    });
+
+    test("should allow using request_body in WHERE clause", async () => {
+      const requestBody = {
+        sql: "SELECT status FROM request_response_rmt WHERE request_body ILIKE '%hello%' LIMIT 1",
+      };
+
+      const response = await fetch(`${BASE_URL}/helicone-sql/execute`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+          "Helicone-Organization-Id": TEST_ORG_ID,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      expect(response.status).toBe(200);
+      const result = await response.json();
+      expect(result.error).toBeNull();
+      expect(Array.isArray(result.data?.rows)).toBe(true);
+    });
+  });
+
   describe("POST /helicone-sql/execute - Table Access Control", () => {
     test("should reject queries to unauthorized tables", async () => {
       const requestBody = {
