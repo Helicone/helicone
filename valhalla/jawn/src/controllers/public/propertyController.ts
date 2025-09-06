@@ -121,10 +121,6 @@ export class PropertyController extends Controller {
       return insRes;
     }
 
-    // Ensure dependent dictionary reflects the change immediately
-    const reloadDict = `SYSTEM RELOAD DICTIONARY default.hidden_props`;
-    await clickhouseDb.dbQuery(reloadDict, []);
-
     await clearCache("v1/property/query" + orgId);
 
     return { data: { ok: true }, error: null };
