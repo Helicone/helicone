@@ -49,3 +49,4 @@ override.tf.json
 settings.local.json
 examples/**/*/package-lock.json
 examples/**/*/yarn.lock
+coverage/
