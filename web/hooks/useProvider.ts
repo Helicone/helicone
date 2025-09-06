@@ -81,6 +81,7 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: providerKeysQueryKey });
+      setNotification("Provider key updated successfully", "success");
     },
     onError: (error: Error) => {
       setNotification(
@@ -133,10 +134,39 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: providerKeysQueryKey });
+      setNotification("Provider key added successfully", "success");
     },
     onError: (error: Error) => {
       setNotification(
         "Failed to add key: " + (error.message || "Unknown error"),
+        "error",
+      );
+    },
+  });
+
+  const deleteProviderKey = useMutation({
+    mutationFn: async (keyId: string) => {
+      if (!orgId) throw new Error("No organization selected");
+      const jawnClient = getJawnClient(orgId);
+
+      const response = await jawnClient.DELETE("/v1/api-keys/provider-key/{providerKeyId}", {
+        params: {
+          path: {
+            providerKeyId: keyId,
+          },
+        },
+      });
+
+      if (response.error) throw new Error(response.error);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: providerKeysQueryKey });
+      setNotification("Provider key deleted successfully", "success");
+    },
+    onError: (error: Error) => {
+      setNotification(
+        "Failed to delete key: " + (error.message || "Unknown error"),
         "error",
       );
     },
@@ -208,6 +238,7 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
     existingKey,
     addProviderKey,
     updateProviderKey,
+    deleteProviderKey,
     isSavingKey: updateProviderKey.isPending || addProviderKey.isPending,
     isSavedKey: updateProviderKey.isSuccess || addProviderKey.isSuccess,
     viewDecryptedProviderKey,
