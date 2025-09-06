@@ -1,0 +1,67 @@
+name: Test Filters Package
+
+on:
+  push:
+    branches: [ main, develop, filter-test-ci ]
+    paths:
+      - 'packages/filters/**'
+  pull_request:
+    branches: [ main, develop, filter-test-ci ]
+    paths:
+      - 'packages/filters/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Use Node.js 20.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20.x
+    
+    - name: Install dependencies
+      working-directory: ./packages/filters
+      run: npm install --legacy-peer-deps
+    
+    - name: Run tests
+      working-directory: ./packages/filters
+      run: npx jest __tests__/ --preset ts-jest --testEnvironment node
+    
+    - name: Run tests with coverage
+      working-directory: ./packages/filters
+      run: npx jest __tests__/ --preset ts-jest --testEnvironment node --coverage
+
+  test-individual:
+    runs-on: ubuntu-latest
+    needs: test
+    
+    strategy:
+      matrix:
+        test-file: [
+          "filterExpressions.test.ts",
+          "filters.test.ts", 
+          "helpers.test.ts",
+          "frontendFilterDefs.test.ts",
+          "edgeCases.test.ts"
+        ]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Use Node.js 20.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20.x
+    
+    - name: Install dependencies
+      working-directory: ./packages/filters
+      run: npm install --legacy-peer-deps
+    
+    - name: Run ${{ matrix.test-file }} tests
+      working-directory: ./packages/filters
+      run: npx jest __tests__/${{ matrix.test-file }} --preset ts-jest --testEnvironment node
