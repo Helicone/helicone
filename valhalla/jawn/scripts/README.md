@@ -1,0 +1,1 @@
+To seed: yarn seed:clickhouse --count=500
