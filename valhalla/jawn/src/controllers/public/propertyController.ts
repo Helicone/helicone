@@ -10,6 +10,7 @@ import {
 } from "tsoa";
 import { KVCache } from "../../lib/cache/kvCache";
 import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
+import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
 import { buildFilterWithAuthClickHouse, buildFilterWithAuthClickHouseOrganizationProperties } from "@helicone-package/filters/filters";
 import { resultMap } from "../../packages/common/result";
 import type { JawnAuthenticatedRequest } from "../../types/request";
@@ -50,6 +51,9 @@ export class PropertyController extends Controller {
     FROM organization_properties
     WHERE (
       ${builtFilter.filter}
+      AND (organization_id, property_key) NOT IN (
+        SELECT organization_id, key FROM default.hidden_property_keys WHERE is_hidden = 1
+      )
     )
   `;
 
@@ -58,6 +62,39 @@ export class PropertyController extends Controller {
       async () => await dbQueryClickhouse<Property>(query, builtFilter.argsAcc),
       longCache
     );
+  }
+
+  @Post("hide")
+  public async hideProperty(
+    @Body()
+    requestBody: { key: string },
+    @Request() request: JawnAuthenticatedRequest
+  ) {
+    const orgId = request.authParams.organizationId;
+    const key = requestBody.key;
+
+    if (!key || typeof key !== "string") {
+      throw new Error("Property key is required");
+    }
+
+    // Ensure any existing entry is removed, then insert hidden flag
+    const deleteQuery = `
+      ALTER TABLE default.hidden_property_keys
+      DELETE WHERE organization_id = {val_0: UUID} AND key = {val_1: String}
+    `;
+    const delRes = await dbQueryClickhouse(deleteQuery, [orgId, key]);
+    if (delRes.error) {
+      return delRes;
+    }
+
+    const insRes = await clickhouseDb.dbInsertClickhouse("hidden_property_keys", [
+      { organization_id: orgId, key, is_hidden: 1 },
+    ]);
+    if (insRes.error) {
+      return insRes;
+    }
+
+    return { data: { ok: true }, error: null };
   }
 
   // Gets all possible values for a property

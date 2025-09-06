@@ -37,7 +37,6 @@ export function printRunnableQuery(
   console.log(`\n\n${setParams}\n\n${query}\n\n`);
 }
 
-// DEPRECATED
 export async function dbQueryClickhouse<T>(
   query: string,
   parameters: (number | string | boolean | Date)[]
@@ -49,11 +48,19 @@ export function getPGClient() {
   const ssl =
     process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "development"
       ? {
+<<<<<<< Updated upstream
           rejectUnauthorized: true,
           ca: SecretManager.getSecret("SUPABASE_SSL_CERT_CONTENTS")!
             .split("\\n")
             .join("\n"),
         }
+=======
+        rejectUnauthorized: true,
+        ca: SecretManager.getSecret("SUPABASE_SSL_CERT_CONTENTS")!
+          .split("\\n")
+          .join("\n"),
+      }
+>>>>>>> Stashed changes
       : undefined;
   const client = new Client({
     connectionString: SecretManager.getSecret("SUPABASE_DATABASE_URL"),
