@@ -37,7 +37,7 @@ export const FilterASTButton: React.FC<FilterASTButtonProps> = ({ }) => {
   const numFilters = store.getFilterNodeCount();
 
   return (
-    <Row className="space-x-2">
+    <Row className="space-x-2 mr-4">
       <Popover onOpenChange={setIsOpen} open={isOpen}>
         <PopoverTrigger asChild>
           <Button variant="outline" className="gap-2" size="sm">
