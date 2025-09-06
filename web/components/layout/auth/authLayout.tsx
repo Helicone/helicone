@@ -64,6 +64,10 @@ const AuthLayout = (props: AuthLayoutProps) => {
     const checkAuth = async () => {
       try {
         const user = await auth.getUser();
+        // Avoid redirecting while the auth client is still initializing
+        if (user.error === "Supabase client not found") {
+          return;
+        }
         if (user.error || !user.data) {
           router.push("/signin?unauthorized=true");
         }
@@ -74,7 +78,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
     };
 
     checkAuth();
-  }, [router]);
+  }, [router, auth]);
 
   const currentPage = useMemo(() => {
     const path = pathname.split("/")[1];
