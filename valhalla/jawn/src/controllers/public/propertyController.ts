@@ -8,13 +8,13 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { KVCache } from "../../lib/cache/kvCache";
 import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
+import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
 import { buildFilterWithAuthClickHouse, buildFilterWithAuthClickHouseOrganizationProperties } from "@helicone-package/filters/filters";
 import { resultMap } from "../../packages/common/result";
 import type { JawnAuthenticatedRequest } from "../../types/request";
-import { quickCacheResultCustom } from "../../utils/cacheResult";
 import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
+import { getFromCache, storeInCache, clearCache } from "../../lib/cache/staticMemCache";
 
 export interface Property {
   property: string;
@@ -27,7 +27,7 @@ export interface TimeFilterRequest {
   };
 }
 
-const longCache = new KVCache(60 * 60 * 1000 * 7); // 1 week
+// Properties queries are cached per-org via staticMemCache (see below)
 
 @Route("v1/property")
 @Tags("Property")
@@ -46,18 +46,88 @@ export class PropertyController extends Controller {
     });
 
     const query = `
-    SELECT DISTINCT property_key AS property
+    SELECT DISTINCT organization_properties.property_key AS property
     FROM organization_properties
+    LEFT JOIN default.hidden_property_keys AS hp
+      ON hp.organization_id = organization_properties.organization_id
+     AND hp.key = organization_properties.property_key
     WHERE (
       ${builtFilter.filter}
+      AND (hp.is_hidden = 0 OR hp.is_hidden IS NULL)
     )
   `;
 
-    return await quickCacheResultCustom(
-      "v1/property/query" + request.authParams.organizationId,
-      async () => await dbQueryClickhouse<Property>(query, builtFilter.argsAcc),
-      longCache
+    // Cache the properties per org; if absent, fetch and store. Fail open on cache errors.
+    const key = "v1/property/query" + request.authParams.organizationId;
+    try {
+      const cached = await getFromCache(key);
+      if (cached) {
+        try {
+          const parsed: Property[] = JSON.parse(cached);
+          return { data: parsed, error: null };
+        } catch (_) {
+          // fall through to fetch
+        }
+      }
+    } catch (_) {
+      // ignore cache read errors
+    }
+
+    const properties = await dbQueryClickhouse<Property>(
+      query,
+      builtFilter.argsAcc
     );
+
+    if (properties.error === null) {
+      try {
+        const ttl = Number(process.env.PROPERTIES_CACHE_TTL_SECONDS ?? "15");
+        await storeInCache(key, JSON.stringify(properties.data), ttl);
+      } catch (_) {
+        // ignore cache write errors
+      }
+    }
+    return properties;
+
+
+  }
+
+  @Post("hide")
+  public async hideProperty(
+    @Body()
+    requestBody: { key: string },
+    @Request() request: JawnAuthenticatedRequest
+  ) {
+    const orgId = request.authParams.organizationId;
+    const key = requestBody.key;
+
+    if (!key || typeof key !== "string") {
+      throw new Error("Property key is required");
+    }
+
+    // Ensure any existing entry is removed, then insert hidden flag
+    const deleteQuery = `
+      ALTER TABLE default.hidden_property_keys
+      DELETE WHERE organization_id = {val_0: UUID} AND key = {val_1: String}
+    `;
+    const delRes = await dbQueryClickhouse(deleteQuery, [orgId, key]);
+    if (delRes.error) {
+      return delRes;
+    }
+
+    const insRes = await clickhouseDb.dbInsertClickhouse("hidden_property_keys", [
+      { organization_id: orgId, key, is_hidden: 1 },
+    ]);
+    if (insRes.error) {
+      return insRes;
+    }
+
+    // Ensure dependent dictionary reflects the change immediately
+    const reloadDict = `SYSTEM RELOAD DICTIONARY default.hidden_props`;
+    await clickhouseDb.dbQuery(reloadDict, []);
+
+    await clearCache("v1/property/query" + orgId);
+
+    return { data: { ok: true }, error: null };
   }
 
   // Gets all possible values for a property

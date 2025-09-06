@@ -99,6 +99,29 @@ export class ClickhouseClientWrapper {
     }
   }
 
+  // Run DDL/commands that don't support FORMAT (e.g., SYSTEM RELOAD DICTIONARY)
+  async dbCommand(
+    query: string
+  ): Promise<Result<string, string>> {
+    try {
+      // @clickhouse/client supports .command for non-SELECT statements
+      // that should not include a FORMAT clause.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const command = (this.clickHouseClient as any).command?.bind(
+        this.clickHouseClient
+      );
+      if (!command) {
+        throw new Error("ClickHouse client does not support command()");
+      }
+      const result = await command({ query });
+      return { data: result.query_id, error: null };
+    } catch (err) {
+      console.error("Error executing Clickhouse command: ", query);
+      console.error(err);
+      return { data: null, error: JSON.stringify(err) };
+    }
+  }
+
   async hqlQueryWithContext<T>({
     query,
     organizationId,
@@ -366,6 +389,12 @@ export interface JawnHttpLogs {
   properties: Record<string, string>;
 }
 
+export interface HiddenPropertyKeyRow {
+  organization_id: string;
+  key: string;
+  is_hidden: number; // UInt8 in ClickHouse
+}
+
 export interface Tags {
   organization_id: string;
   entity_type: string;
@@ -387,6 +416,7 @@ export interface ClickhouseDB {
     request_response_rmt: RequestResponseRMT;
     tags: Tags;
     jawn_http_logs: JawnHttpLogs;
+    hidden_property_keys: HiddenPropertyKeyRow;
   };
 }
 
