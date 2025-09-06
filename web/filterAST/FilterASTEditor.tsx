@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Plus } from "lucide-react";
 import React from "react";
 import FilterGroupNode from "./components/FilterGroupNode";
-import SavedFiltersDropdown from "./components/SavedFiltersDropdown";
 import { useFilterAST } from "./context/filterContext";
 import {
   AndExpression,
