@@ -3,6 +3,7 @@ import { $JAWN_API } from "@/lib/clients/jawn";
 import React from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { TableSchema } from "./types";
+import { normalizeJawnResponse } from "./utils/normalizeJawnResponse";
 
 export const SQL_KEYWORDS = [
   "SELECT",
@@ -108,14 +109,14 @@ export const createExecuteQueryMutation = (
   setQueryLoading: (loading: boolean) => void,
 ) => {
   return {
-    mutationFn: async (sql: string) => {
+    mutationFn: async (sql: string): Promise<{ error?: { error: string }; data?: { data: components["schemas"]["ExecuteSqlResponse"] } }> => {
       setQueryLoading(true);
       const response = await $JAWN_API.POST("/v1/helicone-sql/execute", {
         body: {
           sql: sql,
         },
       });
-      return response;
+      return normalizeJawnResponse<components["schemas"]["ExecuteSqlResponse"]>(response);
     },
     onSuccess: (data: { error?: { error: string }; data?: { data: components["schemas"]["ExecuteSqlResponse"] } }) => {
       setQueryLoading(false);

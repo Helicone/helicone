@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useMonaco } from "@monaco-editor/react";
-import { editor } from "monaco-editor";
-import * as monaco from "monaco-editor";
+import type { editor as MonacoEditor } from "monaco-editor";
+import type * as monaco from "monaco-editor";
 import { components } from "@/lib/clients/jawnTypes/public";
 import { ALL_KEYWORDS, getTableNames, getTableNamesSet, parseSqlAndFindTableNameAndAliases } from "../constants";
 
@@ -17,7 +17,7 @@ interface UseMonacoSetupProps {
 
 export function useMonacoSetup({ clickhouseSchemas, currentQuery }: UseMonacoSetupProps) {
   const monacoInstance = useMonaco();
-  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
+  const editorRef = useRef<MonacoEditor.IStandaloneCodeEditor | null>(null);
 
   useEffect(() => {
     if (!monacoInstance || !clickhouseSchemas) return;
