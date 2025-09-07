@@ -32,7 +32,8 @@ export function useMonacoSetup({
   useEffect(() => {
     if (!monacoInstance || !clickhouseSchemas) return;
 
-    const tableSchema = clickhouseSchemas;
+    const schemaTableNames = getTableNames(clickhouseSchemas);
+    const schemaTableNamesSet = getTableNamesSet(clickhouseSchemas);
     const schemaTableNames = getTableNames(tableSchema);
     const schemaTableNamesSet = getTableNamesSet(tableSchema);
 
