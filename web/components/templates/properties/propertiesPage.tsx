@@ -14,6 +14,15 @@ import { getPropertyFiltersV2 } from "@helicone-package/filters/frontendFilterDe
 import PropertyPanel from "./propertyPanel";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useOrg } from "@/components/layout/org/organizationContext";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 const PropertiesPage = (props: { initialPropertyKey?: string }) => {
   const { initialPropertyKey } = props;
@@ -25,6 +34,8 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [hiddenKeysLocal, setHiddenKeysLocal] = useState<Set<string>>(new Set());
   const [hidingKey, setHidingKey] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
 
   // Filter properties based on search query
   const filteredProperties = useMemo(() => {
@@ -187,8 +198,8 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
                     ) : (
                       <div
                         className={`group flex w-full items-center justify-between px-4 py-3 transition-colors ${isSelected
-                            ? "bg-muted text-foreground"
-                            : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                          ? "bg-muted text-foreground"
+                          : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                           }`}
                       >
                         <button
@@ -199,11 +210,12 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
                           <XSmall className="truncate">{property}</XSmall>
                         </button>
                         <button
-                          className={`ml-2 opacity-0 transition-opacity group-hover:opacity-100 text-red-500 hover:text-red-600 disabled:opacity-50`}
-                          title="Hide property"
+                          className={`ml-2 opacity-0 transition-opacity group-hover:opacity-100 text-destructive hover:text-destructive/90 disabled:opacity-50`}
+                          title="Delete property"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleHideProperty(property);
+                            setPendingDelete(property);
+                            setConfirmOpen(true);
                           }}
                           disabled={hidingKey === property}
                         >
@@ -222,8 +234,66 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
           </div>
         </div>
       </div>
+
+      <HidePropertyConfirmDialog
+        open={confirmOpen}
+        onOpenChange={(open) => {
+          setConfirmOpen(open);
+          if (!open) setPendingDelete(null);
+        }}
+        property={pendingDelete}
+        isLoading={hidingKey === pendingDelete && hidingKey !== null}
+        onConfirm={async () => {
+          if (!pendingDelete) return;
+          await handleHideProperty(pendingDelete);
+          setConfirmOpen(false);
+          setPendingDelete(null);
+        }}
+      />
     </div>
   );
 };
 
 export default PropertiesPage;
+
+// Confirmation dialog for hiding a property
+const HidePropertyConfirmDialog = ({
+  open,
+  onOpenChange,
+  property,
+  onConfirm,
+  isLoading,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  property: string | null;
+  onConfirm: () => void;
+  isLoading: boolean;
+}) => {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader className="space-y-4">
+          <DialogTitle>Delete property?</DialogTitle>
+          <DialogDescription>
+            {property
+              ? `This will delete the property "${property}" from your Properties list.`
+              : "This will delete the selected property from your Properties list."}
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
+            Cancel
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={onConfirm}
+            disabled={isLoading || !property}
+          >
+            {isLoading ? "Deleting..." : "Delete"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
