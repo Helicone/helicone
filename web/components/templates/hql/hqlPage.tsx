@@ -88,7 +88,8 @@ function HQLPage() {
   useAgentHandlers({
     clickhouseSchemas,
     currentQuery,
-    setCurrentQuery: (q) => setCurrentQuery({ id: q.id, name: q.name, sql: q.sql }),
+    setCurrentQuery: (q) =>
+      setCurrentQuery({ id: q.id, name: q.name, sql: q.sql }),
     handleExecuteQueryAsync,
   });
 
@@ -173,7 +174,11 @@ function HQLPage() {
               <QueryEditor
                 sql={currentQuery.sql}
                 onSqlChange={(value) =>
-                  setCurrentQuery({ id: currentQuery.id, name: currentQuery.name, sql: value })
+                  setCurrentQuery({
+                    id: currentQuery.id,
+                    name: currentQuery.name,
+                    sql: value,
+                  })
                 }
                 onExecute={(sql) => handleExecuteQuery(sql)}
                 onSave={(query) => handleSaveQuery(query)}
@@ -194,8 +199,9 @@ function HQLPage() {
               <Alert variant="warning" className="mb-2">
                 <AlertTitle>Row Limit Reached</AlertTitle>
                 <AlertDescription>
-                  Only the first {QUERY_RESULT_LIMIT} rows are shown. Please refine your query
-                  for more specific results. Or download for more data.
+                  Only the first {QUERY_RESULT_LIMIT} rows are shown. Please
+                  refine your query for more specific results. Or download for
+                  more data.
                 </AlertDescription>
               </Alert>
             )}

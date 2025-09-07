@@ -23,7 +23,7 @@ export function useQueryExecution() {
 
   const { mutate: handleExecuteQuery, mutateAsync: handleExecuteQueryAsync } =
     useMutation(
-      createExecuteQueryMutation(setResult, setQueryError, setQueryLoading)
+      createExecuteQueryMutation(setResult, setQueryError, setQueryLoading),
     );
 
   return {
@@ -37,4 +37,3 @@ export function useQueryExecution() {
     setQueryLoading,
   };
 }
-

@@ -73,13 +73,11 @@ export const CLICKHOUSE_KEYWORDS = [
 
 export const ALL_KEYWORDS = [...SQL_KEYWORDS, ...CLICKHOUSE_KEYWORDS];
 
-export const getTableNames = (
-  schemas: TableSchema[],
-) => Array.from(new Set(schemas?.map((d) => d.table_name) ?? []));
+export const getTableNames = (schemas: TableSchema[]) =>
+  Array.from(new Set(schemas?.map((d) => d.table_name) ?? []));
 
-export const getTableNamesSet = (
-  schemas: TableSchema[],
-) => new Set(getTableNames(schemas));
+export const getTableNamesSet = (schemas: TableSchema[]) =>
+  new Set(getTableNames(schemas));
 
 export function parseSqlAndFindTableNameAndAliases(sql: string) {
   const regex =
@@ -109,16 +107,26 @@ export const createExecuteQueryMutation = (
   setQueryLoading: (loading: boolean) => void,
 ) => {
   return {
-    mutationFn: async (sql: string): Promise<{ error?: { error: string }; data?: { data: components["schemas"]["ExecuteSqlResponse"] } }> => {
+    mutationFn: async (
+      sql: string,
+    ): Promise<{
+      error?: { error: string };
+      data?: { data: components["schemas"]["ExecuteSqlResponse"] };
+    }> => {
       setQueryLoading(true);
       const response = await $JAWN_API.POST("/v1/helicone-sql/execute", {
         body: {
           sql: sql,
         },
       });
-      return normalizeJawnResponse<components["schemas"]["ExecuteSqlResponse"]>(response);
+      return normalizeJawnResponse<components["schemas"]["ExecuteSqlResponse"]>(
+        response,
+      );
     },
-    onSuccess: (data: { error?: { error: string }; data?: { data: components["schemas"]["ExecuteSqlResponse"] } }) => {
+    onSuccess: (data: {
+      error?: { error: string };
+      data?: { data: components["schemas"]["ExecuteSqlResponse"] };
+    }) => {
       setQueryLoading(false);
       if (data.error || !data.data?.data) {
         setQueryError(data.error?.error || "Query execution failed");

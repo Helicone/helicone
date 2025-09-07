@@ -30,5 +30,3 @@ export interface QueryState {
   name: string;
   sql: string;
 }
-
-

@@ -3,7 +3,9 @@ export type NormalizedJawnResponse<T> = {
   data?: { data: T };
 };
 
-export function normalizeJawnResponse<T>(response: unknown): NormalizedJawnResponse<T> {
+export function normalizeJawnResponse<T>(
+  response: unknown,
+): NormalizedJawnResponse<T> {
   const res = response as { data?: { data?: T; error?: string } } | undefined;
   const normalized: NormalizedJawnResponse<T> = {};
   if (res?.data?.error) {
@@ -14,5 +16,3 @@ export function normalizeJawnResponse<T>(response: unknown): NormalizedJawnRespo
   }
   return normalized;
 }
-
-

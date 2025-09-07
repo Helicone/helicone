@@ -1,6 +1,9 @@
 import type { editor as MonacoEditor } from "monaco-editor";
 
-import { SQL_WRITE_OPERATIONS_REGEX, SQL_VALIDATION_ERROR_MESSAGE } from "../config";
+import {
+  SQL_WRITE_OPERATIONS_REGEX,
+  SQL_VALIDATION_ERROR_MESSAGE,
+} from "../config";
 
 export function validateSqlQuery(
   sql: string,

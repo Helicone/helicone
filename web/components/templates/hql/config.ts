@@ -46,5 +46,3 @@ export const SQL_VALIDATION_ERROR_MESSAGE =
 export const QUERY_RESULT_LIMIT = 100;
 
 export const HQL_WAITLIST_FORM_URL = "https://forms.gle/YXYkFz9Zaa7fWF2v7";
-
-
