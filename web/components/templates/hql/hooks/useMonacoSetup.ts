@@ -34,8 +34,6 @@ export function useMonacoSetup({
 
     const schemaTableNames = getTableNames(clickhouseSchemas);
     const schemaTableNamesSet = getTableNamesSet(clickhouseSchemas);
-    const schemaTableNames = getTableNames(tableSchema);
-    const schemaTableNamesSet = getTableNamesSet(tableSchema);
 
     const disposable = monacoInstance.languages.registerCompletionItemProvider(
       "*",
@@ -93,7 +91,7 @@ export function useMonacoSetup({
             }
             if (table_name) {
               suggestions.push(
-                ...tableSchema
+                ...clickhouseSchemas
                   .filter((d) => d.table_name === table_name)
                   .flatMap((d) =>
                     d.columns.map((col) => ({
