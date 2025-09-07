@@ -164,28 +164,13 @@ export async function runGatewayTest(
           expect(requestWrapper.getMethod()).toBe(method);
         }
 
-        // Check body contains
-        // Note: Commenting out body checks because getText() consumes the stream
-        // and breaks fallback tests where multiple providers need to read the body
-        // if (bodyContains && requestWrapper.getText) {
-        //   const body = await requestWrapper.getText();
-        //   for (const text of bodyContains) {
-        //     expect(body).toContain(text);
-        //   }
-        // }
+        if (bodyContains && requestWrapper.getText) {
+          const body = await requestWrapper.getText();
+          for (const text of bodyContains) {
+            expect(body).toContain(text);
+          }
+        }
       }
-
-      // Verify full URL with path
-      // if (expectation && requestWrapper.getUrl) {
-      //   const fullUrl = requestWrapper.getUrl();
-      //   const expectedPath = expectation.url.includes("/v1/")
-      //     ? expectation.url.substring(expectation.url.indexOf("/v1/"))
-      //     : "";
-      //   if (expectedPath) {
-      //     expect(fullUrl).toContain(expectedPath);
-      //   }
-      // }
-
       // Custom verification for complex cases
       if (expectation?.customVerify) {
         expectation.customVerify({ targetProps, requestWrapper, env, ctx });
@@ -245,24 +230,21 @@ export async function runGatewayTest(
   );
 
   // Build request with custom headers if provided
-  const requestOptions = createAIGatewayRequest(scenario.model, scenario.request);
-  
+  const requestOptions = createAIGatewayRequest(
+    scenario.model,
+    scenario.request
+  );
+
   // Add custom headers like NO_MAPPING if specified
   if (scenario.request?.bodyMapping) {
-    requestOptions.headers = {
-      ...requestOptions.headers,
-      "Helicone-Gateway-Body-Mapping": scenario.request.bodyMapping,
-    };
+    (requestOptions.headers as any)["Helicone-Gateway-Body-Mapping"] = scenario.request.bodyMapping;
   }
-  
+
   // Add any additional custom headers
   if (scenario.request?.headers) {
-    requestOptions.headers = {
-      ...requestOptions.headers,
-      ...scenario.request.headers,
-    };
+    Object.assign(requestOptions.headers, scenario.request.headers);
   }
-  
+
   const response = await SELF.fetch(
     "https://ai-gateway.helicone.ai/v1/chat/completions",
     requestOptions

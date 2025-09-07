@@ -92,7 +92,7 @@ describe("Pass-Through Tests", () => {
                 expects: {
                   headers: {
                     // Without NO_MAPPING, Anthropic uses OpenAI compatibility mode with Authorization header
-                    "Authorization": /^Bearer /,
+                    Authorization: /^Bearer /,
                   },
                 },
               },
@@ -315,7 +315,8 @@ describe("Pass-Through Tests", () => {
 
       it("should route to Bedrock endpoint with ap-southeast prefix", () =>
         runGatewayTest({
-          model: "ap-southeast-2.anthropic.claude-3-7-sonnet-20250219-v1:0/bedrock",
+          model:
+            "ap-southeast-2.anthropic.claude-3-7-sonnet-20250219-v1:0/bedrock",
           request: {
             messages: [{ role: "user", content: "Test APAC Bedrock" }],
             maxTokens: 100,
@@ -326,7 +327,8 @@ describe("Pass-Through Tests", () => {
                 // Note: AP prefix in model doesn't change the region, still uses us-east-1
                 url: "https://bedrock-runtime.us-east-1.amazonaws.com/model/ap-southeast-2.anthropic.claude-3-7-sonnet-20250219-v1:0/invoke",
                 response: "success",
-                model: "ap-southeast-2.anthropic.claude-3-7-sonnet-20250219-v1:0",
+                model:
+                  "ap-southeast-2.anthropic.claude-3-7-sonnet-20250219-v1:0",
                 data: {
                   id: "msg_bedrock_apac",
                   type: "message",
@@ -350,7 +352,8 @@ describe("Pass-Through Tests", () => {
     describe("Mixed provider fallback scenarios", () => {
       it("should fallback from Groq to OpenAI to Anthropic", () =>
         runGatewayTest({
-          model: "llama-3.3-70b-versatile/groq,gpt-4-turbo/openai,claude-3-7-sonnet-20250219/anthropic",
+          model:
+            "llama-3.3-70b-versatile/groq,gpt-4-turbo/openai,claude-3-7-sonnet-20250219/anthropic",
           request: {
             messages: [{ role: "user", content: "Test triple fallback" }],
             maxTokens: 100,
@@ -387,7 +390,7 @@ describe("Pass-Through Tests", () => {
                 expects: {
                   headers: {
                     // Without NO_MAPPING, Anthropic uses OpenAI compatibility mode with Authorization header
-                    "Authorization": /^Bearer /,
+                    Authorization: /^Bearer /,
                   },
                 },
               },
@@ -422,7 +425,9 @@ describe("Pass-Through Tests", () => {
                   id: "msg_no_mapping_fallback",
                   type: "message",
                   role: "assistant",
-                  content: [{ type: "text", text: "NO_MAPPING fallback response" }],
+                  content: [
+                    { type: "text", text: "NO_MAPPING fallback response" },
+                  ],
                   model: "claude-3-7-sonnet-20250219",
                   usage: { input_tokens: 10, output_tokens: 5 },
                 },
