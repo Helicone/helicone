@@ -1,5 +1,4 @@
 "use client";
-import { components } from "@/lib/clients/jawnTypes/public";
 import { useClickhouseSchemas } from "@/services/hooks/heliconeSql";
 import { useEffect, useRef, useState } from "react";
 import TopBar from "./topBar";
@@ -16,7 +15,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useFeatureFlag } from "@/services/hooks/admin";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import useNotification from "@/components/shared/notification/useNotification";
-import { useSaveQueryMutation, createExecuteQueryMutation } from "./constants";
+import { useSaveQueryMutation } from "./constants";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 const QueryEditor = dynamic(() => import("./QueryEditor"), {
@@ -34,7 +33,6 @@ import {
   DEFAULT_QUERY_NAME,
   DEFAULT_QUERY_SQL,
   HQL_WAITLIST_FORM_URL,
-  MONACO_EDITOR_OPTIONS,
   QUERY_RESULT_LIMIT,
   RESIZABLE_PANEL_SIZES,
 } from "./config";
@@ -71,10 +69,6 @@ function HQLPage() {
     name: DEFAULT_QUERY_NAME,
     sql: DEFAULT_QUERY_SQL,
   });
-  const { mutate: handleExecuteQueryMutation, mutateAsync: handleExecuteQueryAsyncLegacy } =
-    useMutation(
-      createExecuteQueryMutation(setResult, setQueryError, setQueryLoading),
-    );
 
   // a hack to get the latest query in the editor
   const latestQueryRef = useRef(currentQuery);
