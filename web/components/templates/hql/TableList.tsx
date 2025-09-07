@@ -68,5 +68,3 @@ const TableList: React.FC<TableListProps> = React.memo(({ tables }) => {
 TableList.displayName = "TableList";
 
 export default TableList;
-
-

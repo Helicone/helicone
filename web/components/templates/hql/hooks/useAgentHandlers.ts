@@ -60,5 +60,3 @@ export function useAgentHandlers({
     });
   }, [currentQuery.sql, handleExecuteQueryAsync, setToolHandler]);
 }
-
-
