@@ -4,7 +4,7 @@ import { useFilterStore, type FilterState } from "../filterStore";
 
 // Helper to access state outside React
 const getState = () => useFilterStore.getState();
-const setState = (partial: Partial<FilterState>) => useFilterStore.setState(partial as any);
+const getState = () => useFilterStore.getState();
 
 describe("useFilterStore", () => {
   beforeEach(() => {
