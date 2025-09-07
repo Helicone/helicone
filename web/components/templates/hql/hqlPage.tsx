@@ -349,7 +349,7 @@ function HQLPage() {
               <Editor
                 defaultLanguage="sql"
                 defaultValue={currentQuery.sql}
-                theme={currentTheme === "dark" ? "vs-dark" : "vs-light"}
+                theme={currentTheme === "dark" ? "vs-dark" : "vs"}
                 options={{
                   minimap: {
                     enabled: true,
@@ -369,30 +369,11 @@ function HQLPage() {
                   const model = editor.getModel();
                   if (!model) return;
 
-                  // Ensure custom theme is applied on mount
-                  try {
-                    monaco.editor.defineTheme("custom-dark", {
-                      base: "vs-dark",
-                      inherit: true,
-                      rules: [],
-                      colors: {
-                        "editor.background": "#00000000",
-                      },
-                    });
-                    monaco.editor.defineTheme("custom-light", {
-                      base: "vs",
-                      inherit: true,
-                      rules: [],
-                      colors: {
-                        "editor.background": "#00000000",
-                      },
-                    });
-                    monaco.editor.setTheme(
-                      currentTheme === "dark" ? "custom-dark" : "custom-light",
-                    );
-                  } catch (e) {
-                    // ignore if already defined
-                  }
+                  // Define and apply transparent background themes
+                  // Apply the custom theme immediately
+                  monaco.editor.setTheme(
+                    currentTheme === "dark" ? "custom-dark" : "custom-light"
+                  );
 
                   // Regex to match forbidden write statements (case-insensitive, at start of line ignoring whitespace)
                   const forbidden =
