@@ -22,7 +22,7 @@ export function useQueryExecution() {
   const [queryError, setQueryError] = useState<string | null>(null);
 
   const { mutate: handleExecuteQuery, mutateAsync: handleExecuteQueryAsync } =
-    useMutation<components["schemas"]["ExecuteSqlResponse"], Error, string>(
+    useMutation(
       createExecuteQueryMutation(setResult, setQueryError, setQueryLoading)
     );
 
@@ -37,5 +37,4 @@ export function useQueryExecution() {
     setQueryLoading,
   };
 }
-
 
