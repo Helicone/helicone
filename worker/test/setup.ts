@@ -321,3 +321,6 @@ vi.mock("@supabase/supabase-js", () => ({
     rpc: vi.fn(() => Promise.resolve({ data: null, error: null })),
   })),
 }));
+
+// Clear module cache so test file mocks can work
+vi.resetModules();

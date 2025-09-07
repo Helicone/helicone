@@ -4,7 +4,6 @@
 
 import { fetchMock } from "cloudflare:test";
 import {
-  TEST_ENDPOINTS,
   TEST_HEADERS,
   TEST_USER_MESSAGE,
   TEST_MAX_TOKENS,
@@ -131,48 +130,6 @@ export function createVertexMockResponse(model: string) {
 }
 
 /**
- * Setup common test environment
- */
-export function setupTestEnvironment() {
-  fetchMock.activate();
-  fetchMock.disableNetConnect();
-
-  // Mock S3 and logging services
-  const s3Mock = fetchMock
-    .get(TEST_ENDPOINTS.S3)
-    .intercept({
-      path: /.*/,
-      method: "PUT",
-    })
-    .reply(() => ({
-      statusCode: 200,
-      data: "",
-    }))
-    .persist();
-
-  const loggingMock = fetchMock
-    .get(TEST_ENDPOINTS.LOGGING)
-    .intercept({
-      path: "/v1/log/request",
-      method: "POST",
-    })
-    .reply(() => ({
-      statusCode: 200,
-      data: { success: true },
-    }))
-    .persist();
-
-  return { s3Mock, loggingMock };
-}
-
-/**
- * Cleanup test environment
- */
-export function cleanupTestEnvironment() {
-  fetchMock.deactivate();
-}
-
-/**
  * Mock Anthropic endpoint for AI Gateway tests
  * The AI Gateway uses OpenAI-compatible endpoints for Anthropic
  */
@@ -186,8 +143,7 @@ export function mockAnthropicEndpoint(modelName: string) {
     .reply(() => ({
       statusCode: 200,
       data: createAnthropicMockResponse(modelName),
-    }))
-    .persist();
+    }));
 }
 
 /**
@@ -206,8 +162,7 @@ export function mockVertexAnthropicEndpoint(modelId: string) {
     .reply(() => ({
       statusCode: 200,
       data: createVertexMockResponse(modelId),
-    }))
-    .persist();
+    }));
 }
 
 /**
@@ -225,8 +180,7 @@ export function mockBedrockAnthropicEndpoint(modelId: string) {
     .reply(() => ({
       statusCode: 200,
       data: createAnthropicMockResponse(modelId),
-    }))
-    .persist();
+    }));
 }
 
 export function mockGoogleEndpoint(modelName: string) {
@@ -239,87 +193,7 @@ export function mockGoogleEndpoint(modelName: string) {
     .reply(() => ({
       statusCode: 200,
       data: createOpenAIMockResponse(modelName),
-    }))
-    .persist();
-}
-
-/**
- * Mock OpenAI endpoint for OpenAI models
- */
-export function mockOpenAIEndpoint(modelName: string) {
-  return fetchMock
-    .get("https://api.openai.com")
-    .intercept({
-      path: "/v1/chat/completions",
-      method: "POST",
-    })
-    .reply(() => ({
-      statusCode: 200,
-      data: createOpenAIMockResponse(modelName),
-    }))
-    .persist();
-}
-
-/**
- * Mock xAI endpoint for xAI models (Grok)
- */
-export function mockXAIEndpoint(modelName: string) {
-  return fetchMock
-    .get("https://api.x.ai")
-    .intercept({
-      path: "/v1/chat/completions",
-      method: "POST",
-    })
-    .reply(() => ({
-      statusCode: 200,
-      data: createOpenAIMockResponse(modelName),
-    }))
-    .persist();
-}
-
-/**
- * Mock Azure OpenAI endpoint for Azure-hosted OpenAI models
- */
-export function mockAzureOpenAIEndpoint(modelName: string) {
-  return fetchMock
-    .get("https://test-resource.openai.azure.com")
-    .intercept({
-      path: `/openai/deployments/test-deployment/chat/completions`,
-      method: "POST",
-      query: {
-        "api-version": "2025-01-01-preview",
-      },
-    })
-    .reply(() => ({
-      statusCode: 200,
-      data: createOpenAIMockResponse(modelName),
-    }))
-    .persist();
-}
-
-/**
- * Mock Groq endpoint for OpenAI OSS models
- */
-export function mockGroqEndpoint(modelName: string) {
-  // Groq uses the full model ID like "openai/gpt-oss-120b"
-  const groqModelId = modelName.startsWith("openai/")
-    ? modelName
-    : `openai/${modelName}`;
-
-  return fetchMock
-    .get("https://api.groq.com")
-    .intercept({
-      path: "/openai/v1/chat/completions",
-      method: "POST",
-    })
-    .reply(() => ({
-      statusCode: 200,
-      data: {
-        ...createOpenAIMockResponse(modelName),
-        model: groqModelId,
-      },
-    }))
-    .persist();
+    }));
 }
 
 /**
@@ -330,6 +204,7 @@ export function createAIGatewayRequest(
   options?: {
     messages?: Array<{ role: string; content: string }>;
     maxTokens?: number;
+    stream?: boolean;
   }
 ) {
   return {
@@ -344,6 +219,7 @@ export function createAIGatewayRequest(
         { role: "user", content: TEST_USER_MESSAGE },
       ],
       max_tokens: options?.maxTokens || TEST_MAX_TOKENS,
+      ...(options?.stream !== undefined && { stream: options.stream }),
     }),
   };
 }
