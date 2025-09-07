@@ -13,7 +13,15 @@ export default defineWorkersConfig({
             WORKER_TYPE: "AI_GATEWAY_API",
             HELICONE_ORG_ID: "0afe3a6e-d095-4ec0-bc1e-2af6f57bd2a5",
           },
-          kvNamespaces: ["CACHE_KV", "SECURE_CACHE", "EU_SECURE_CACHE", "RATE_LIMIT_KV", "INSERT_KV", "UTILITY_KV", "REQUEST_AND_RESPONSE_QUEUE_KV"],
+          kvNamespaces: [
+            "CACHE_KV",
+            "SECURE_CACHE",
+            "EU_SECURE_CACHE",
+            "RATE_LIMIT_KV",
+            "INSERT_KV",
+            "UTILITY_KV",
+            "REQUEST_AND_RESPONSE_QUEUE_KV",
+          ],
           durableObjects: {
             WALLET: {
               className: "Wallet",
