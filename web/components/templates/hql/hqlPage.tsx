@@ -1,3 +1,4 @@
+"use client";
 import { components } from "@/lib/clients/jawnTypes/public";
 import { useClickhouseSchemas } from "@/services/hooks/heliconeSql";
 import { useEffect, useRef, useState } from "react";
@@ -9,7 +10,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { editor } from "monaco-editor";
+import dynamic from "next/dynamic";
 import { $JAWN_API } from "@/lib/clients/jawn";
 import { useMutation } from "@tanstack/react-query";
 import { useFeatureFlag } from "@/services/hooks/admin";
@@ -18,7 +19,14 @@ import useNotification from "@/components/shared/notification/useNotification";
 import { useSaveQueryMutation, createExecuteQueryMutation } from "./constants";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
-import QueryEditor from "./QueryEditor";
+const QueryEditor = dynamic(() => import("./QueryEditor"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-40 w-full items-center justify-center">
+      <div className="text-sm">Loading editor…</div>
+    </div>
+  ),
+});
 import { useMonacoSetup } from "./hooks/useMonacoSetup";
 import { useQueryExecution } from "./hooks/useQueryExecution";
 import { useAgentHandlers } from "./hooks/useAgentHandlers";
@@ -64,7 +72,9 @@ function HQLPage() {
     sql: DEFAULT_QUERY_SQL,
   });
   const { mutate: handleExecuteQueryMutation, mutateAsync: handleExecuteQueryAsyncLegacy } =
-    useMutation(createExecuteQueryMutation(setResult, setQueryError, setQueryLoading));
+    useMutation(
+      createExecuteQueryMutation(setResult, setQueryError, setQueryLoading),
+    );
 
   // a hack to get the latest query in the editor
   const latestQueryRef = useRef(currentQuery);
@@ -87,7 +97,7 @@ function HQLPage() {
   useAgentHandlers({
     clickhouseSchemas,
     currentQuery,
-    setCurrentQuery,
+    setCurrentQuery: (q) => setCurrentQuery({ id: q.id, name: q.name, sql: q.sql }),
     handleExecuteQueryAsync,
   });
 

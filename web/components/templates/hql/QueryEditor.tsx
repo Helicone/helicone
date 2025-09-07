@@ -1,7 +1,7 @@
 import React, { useCallback, MutableRefObject } from "react";
 import { Editor } from "@monaco-editor/react";
-import { editor } from "monaco-editor";
-import * as monaco from "monaco-editor";
+import type { editor as MonacoEditor } from "monaco-editor";
+import type * as monaco from "monaco-editor";
 import { MONACO_EDITOR_OPTIONS } from "./config";
 import { validateSqlQuery } from "./utils/sqlValidation";
 
@@ -10,7 +10,7 @@ interface QueryEditorProps {
   onSqlChange: (value: string) => void;
   onExecute: (sql: string) => void;
   onSave: (query: { id?: string; name: string; sql: string }) => void;
-  editorRef: MutableRefObject<editor.IStandaloneCodeEditor | null>;
+  editorRef: MutableRefObject<MonacoEditor.IStandaloneCodeEditor | null>;
   latestQueryRef: MutableRefObject<{ id?: string; name: string; sql: string }>;
   currentQuery: { id?: string; name: string; sql: string };
 }
@@ -26,7 +26,7 @@ const QueryEditor: React.FC<QueryEditorProps> = React.memo(({
 }) => {
 
   const handleEditorMount = useCallback(
-    async (editor: editor.IStandaloneCodeEditor, monacoInstance: typeof monaco) => {
+    async (editor: MonacoEditor.IStandaloneCodeEditor, monacoInstance: typeof monaco) => {
       editorRef.current = editor;
       const model = editor.getModel();
       if (!model) return;
