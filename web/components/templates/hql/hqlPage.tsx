@@ -56,9 +56,6 @@ function HQLPage() {
     queryError,
     handleExecuteQuery,
     handleExecuteQueryAsync,
-    setResult,
-    setQueryError,
-    setQueryLoading,
   } = useQueryExecution();
   const [currentQuery, setCurrentQuery] = useState<{
     id: string | undefined;
