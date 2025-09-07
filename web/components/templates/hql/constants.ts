@@ -2,6 +2,7 @@ import { components } from "@/lib/clients/jawnTypes/public";
 import { $JAWN_API } from "@/lib/clients/jawn";
 import React from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { TableSchema } from "./types";
 
 export const SQL_KEYWORDS = [
   "SELECT",
@@ -72,17 +73,11 @@ export const CLICKHOUSE_KEYWORDS = [
 export const ALL_KEYWORDS = [...SQL_KEYWORDS, ...CLICKHOUSE_KEYWORDS];
 
 export const getTableNames = (
-  schemas: {
-    table_name: string;
-    columns: components["schemas"]["ClickHouseTableColumn"][];
-  }[],
+  schemas: TableSchema[],
 ) => Array.from(new Set(schemas?.map((d) => d.table_name) ?? []));
 
 export const getTableNamesSet = (
-  schemas: {
-    table_name: string;
-    columns: components["schemas"]["ClickHouseTableColumn"][];
-  }[],
+  schemas: TableSchema[],
 ) => new Set(getTableNames(schemas));
 
 export function parseSqlAndFindTableNameAndAliases(sql: string) {
@@ -122,11 +117,10 @@ export const createExecuteQueryMutation = (
       });
       return response;
     },
-    onSuccess: (data: any) => {
+    onSuccess: (data: { error?: { error: string }; data?: { data: components["schemas"]["ExecuteSqlResponse"] } }) => {
       setQueryLoading(false);
       if (data.error || !data.data?.data) {
-        // @ts-ignore
-        setQueryError(data.error.error);
+        setQueryError(data.error?.error || "Query execution failed");
         setResult({
           rows: [],
           elapsedMilliseconds: 0,
@@ -143,7 +137,7 @@ export const createExecuteQueryMutation = (
         });
       }
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       setQueryError(error.message);
       setResult({
         rows: [],
@@ -203,7 +197,7 @@ export const useSaveQueryMutation = (
       });
       setNotification("Successfully saved query", "success");
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       setNotification(error.message, "error");
     },
   };
@@ -252,7 +246,7 @@ export const useBulkDeleteQueryMutation = (
       );
       return response;
     },
-    onSuccess: (_data: any, queryIds: string[]) => {
+    onSuccess: (_data: unknown, queryIds: string[]) => {
       const count = queryIds.length;
       setNotification(
         `${count} ${count === 1 ? "query" : "queries"} deleted successfully`,
