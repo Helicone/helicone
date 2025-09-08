@@ -78,6 +78,7 @@ export function Trace(configOrName?: string | TraceConfig) {
               span.setTag(k, v as any);
             }
           }
+          span.finish();
           return result;
         }
       } catch (error) {
@@ -89,13 +90,8 @@ export function Trace(configOrName?: string | TraceConfig) {
             span.setTag(k, v as any);
           }
         }
+        span.finish();
         throw error;
-      } finally {
-        // If it was a Promise we already finished in finally above
-        // This covers sync functions
-        try {
-          span.finish();
-        } catch {}
       }
     };
 
