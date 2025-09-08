@@ -9,7 +9,7 @@ import {
   getValueFilters,
   DASHBOARD_PAGE_TABLE_FILTERS,
   REQUEST_TABLE_FILTERS,
-} from '../frontendFilterDefs';
+} from '../../filters/frontendFilterDefs';
 
 describe('Frontend Filter Definitions', () => {
   describe('Types', () => {

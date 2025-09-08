@@ -1,20 +1,8 @@
 import {
-  buildFilter,
-  buildFilterLeaf,
-  buildFilterBranch,
-  buildFilterClickHouse,
-  buildFilterPostgres,
-  buildFilterWithAuth,
-  buildFilterWithAuthClickHouse,
   clickhouseParam,
   FilterNotImplemented,
   TagType,
-} from '../filters';
-import {
-  FilterLeaf,
-  FilterBranch,
-  FilterNode,
-} from '../filterDefs';
+} from '../../filters/filters';
 
 describe('Filter Building', () => {
   describe('clickhouseParam', () => {

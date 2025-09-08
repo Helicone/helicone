@@ -9,7 +9,7 @@ import {
   DEFAULT_FILTER_EXPRESSION,
   DEFAULT_FILTER_GROUP_EXPRESSION,
   EMPTY_FILTER_GROUP_EXPRESSION,
-} from '../filterExpressions';
+} from '../../filters/filterExpressions';
 
 describe('FilterAST', () => {
   describe('Basic Expression Creation', () => {

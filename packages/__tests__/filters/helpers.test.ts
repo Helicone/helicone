@@ -9,18 +9,18 @@ import {
   filterUITreeToFilterNode,
   filterUIToFilterLeafs,
   uiFilterRowTreeToFilterLeafArray,
-} from '../helpers';
+} from '../../filters/helpers';
 import {
   UIFilterRow,
   UIFilterRowNode,
   UIFilterRowTree,
-} from '../types';
+} from '../../filters/types';
 import {
   FilterLeaf,
   FilterNode,
   TimeFilter,
-} from '../filterDefs';
-import { SingleFilterDef } from '../frontendFilterDefs';
+} from '../../filters/filterDefs';
+import { SingleFilterDef } from '../../filters/frontendFilterDefs';
 
 describe('Helpers', () => {
   describe('TimeFilterSchema', () => {

@@ -1,22 +1,22 @@
 import {
   FilterAST,
   FilterExpression,
-} from '../filterExpressions';
+} from '../../filters/filterExpressions';
 import {
   buildFilter,
   buildFilterLeaf,
   FilterNotImplemented,
-} from '../filters';
+} from '../../filters/filters';
 import {
   FilterLeaf,
   FilterBranch,
   FilterNode,
-} from '../filterDefs';
+} from '../../filters/filterDefs';
 import {
   uiFilterRowToFilterLeaf,
   filterUITreeToFilterNode,
-} from '../helpers';
-import { SingleFilterDef } from '../frontendFilterDefs';
+} from '../../filters/helpers';
+import { SingleFilterDef } from '../../filters/frontendFilterDefs';
 
 describe('Edge Cases and Error Conditions', () => {
   describe('FilterAST Edge Cases', () => {
