@@ -9,7 +9,6 @@ import type {
 } from "./types";
 import { providers, ModelProviderName } from "./providers";
 import { BaseProvider } from "./providers/base";
-import { Provider } from "../../llm-mapper/types";
 
 // Helper function to get provider instance
 export function getProvider(providerName: string): Result<BaseProvider> {
@@ -52,46 +51,6 @@ export const dbProviderToProvider = (
     return "azure";
   }
   return null;
-};
-
-export const heliconeProviderToProvider: Record<Provider, ModelProviderName | null> = {
-  OPENAI: "openai",
-  ANTHROPIC: "anthropic",
-  BEDROCK: "bedrock",
-  AWS: "bedrock",
-  GOOGLE: "google-ai-studio",
-  AZURE: "azure",
-  GROQ: "groq",
-  DEEPSEEK: "deepseek",
-  COHERE: "cohere",
-  X: "xai",
-  PERPLEXITY: "perplexity",
-  
-  LOCAL: null,
-  HELICONE: null,
-  AMDBARTEK: null,
-  ANYSCALE: null,
-  CLOUDFLARE: null,
-  "2YFV": null,
-  TOGETHER: null,
-  LEMONFOX: null,
-  FIREWORKS: null,
-  OPENROUTER: null,
-  WISDOMINANUTSHELL: null,
-  MISTRAL: null,
-  DEEPINFRA: null,
-  QSTASH: null,
-  FIRECRAWL: null,
-  AVIAN: null,
-  NEBIUS: null,
-  NOVITA: null,
-  OPENPIPE: null,
-  CHUTES: null,
-  LLAMA: null,
-  NVIDIA: null,
-  VERCEL: null,
-  
-  CUSTOM: null,
 };
 
 export function buildEndpointUrl(

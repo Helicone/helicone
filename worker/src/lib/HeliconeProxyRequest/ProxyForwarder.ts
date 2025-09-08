@@ -36,7 +36,6 @@ import { WalletManager } from "../managers/WalletManager";
 import { costOfPrompt } from "@helicone-package/cost";
 import { getUsageProcessor } from "@helicone-package/cost/usage/getUsageProcessor";
 import { EscrowInfo } from "../ai-gateway/types";
-import { heliconeProviderToProvider } from "@helicone-package/cost/models/provider-helpers";
 import { modelCostBreakdownFromRegistry } from "@helicone-package/cost/costCalc";
 
 export async function proxyForwarder(
@@ -516,27 +515,28 @@ async function log(
       }
 
   const rawResponse = await loggable.getRawResponse();
-  const registryProviderName = heliconeProviderToProvider[proxyRequest.provider] ?? "openai";
-  const usageProcessor = getUsageProcessor(registryProviderName);
-  const usage = await usageProcessor.parse({
-    responseBody: rawResponse,
-    isStream: proxyRequest.isStream,
-  });
-
   const successfulAttempt = proxyRequest.requestWrapper.getSuccessfulAttempt();
-  if (usage.data && successfulAttempt) {
+  if (successfulAttempt) {
     const attemptModel = successfulAttempt.endpoint.providerModelId;
     const attemptProvider = successfulAttempt.endpoint.provider;
-    
+
+    const usageProcessor = getUsageProcessor(attemptProvider);
+    const usage = await usageProcessor.parse({
+      responseBody: rawResponse,
+      isStream: proxyRequest.isStream,
+    });
+
+    if (usage.error !== null) {
+      throw new Error(`Error parsing usage for provider ${attemptProvider}: ${usage.error}`);
+    }
+
     const breakdown = modelCostBreakdownFromRegistry({
       modelUsage: usage.data,
       model: attemptModel,
       provider: attemptProvider,
     });
-
-    console.log("breakdown", breakdown);
     // TODO: Refactor other code so we only pull response once
-    // apply breakdown totalCost to escrow
+    // apply breakdown totalCost to escrow    
   }
 
   const model = responseBody.data?.response.model;
