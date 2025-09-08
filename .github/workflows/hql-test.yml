@@ -39,7 +39,7 @@ jobs:
         with:
           node-version: "20"
           cache: "yarn"
-          cache-dependency-path: valhalla/jawn/yarn.lock
+          cache-dependency-path: "**/yarn.lock"
 
       - name: Install dependencies
         run: |
@@ -87,7 +87,7 @@ jobs:
         with:
           node-version: "20"
           cache: "yarn"
-          cache-dependency-path: valhalla/jawn/yarn.lock
+          cache-dependency-path: "**/yarn.lock"
 
       - name: Install dependencies
         run: |
@@ -163,7 +163,7 @@ jobs:
         with:
           node-version: "20"
           cache: "yarn"
-          cache-dependency-path: valhalla/jawn/yarn.lock
+          cache-dependency-path: "**/yarn.lock"
 
       - name: Install dependencies
         run: |
