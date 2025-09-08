@@ -343,7 +343,7 @@
           {
             "group": "Models",
             "pages": [
-              "rest/models/get-v1models"
+              "rest/models/get-v1public-model-registry-models"
             ]
           }
         ]

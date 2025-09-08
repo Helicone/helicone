@@ -1,0 +1,10 @@
+---
+title: "Get Model Registry"
+sidebarTitle: "Get All Available Models"
+description: "Returns all models and endpoints supported by the Helicone AI Gateway"
+openapi: get /v1/public/model-registry/models
+---
+
+This endpoint returns the complete catalog of AI models and provider endpoints that the Helicone AI Gateway can route to. The gateway uses this registry to determine which providers support a requested model and how to intelligently route requests for maximum reliability and cost optimization.
+
+When you request a model through the AI Gateway (like `gpt-4o-mini`), the gateway consults this registry to find all providers offering that model, then applies routing logic to select the best provider based on your configuration, availability, and pricing.
