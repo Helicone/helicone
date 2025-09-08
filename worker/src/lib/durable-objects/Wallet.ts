@@ -185,44 +185,6 @@ export class Wallet extends DurableObject<Env> {
     });
   }
 
-  getCreditsPurchases(
-    page?: number,
-    pageSize?: number,
-  ): PaginatedPurchasedCredits {
-    return this.ctx.storage.transactionSync(() => {
-      const pageSizeValue = pageSize ?? 10;
-      const pageValue = page ?? 0;
-      const result = this.ctx.storage.sql.exec<{
-        id: string;
-        created_at: number;
-        credits: number;
-        reference_id: string;
-      }>(
-        "SELECT id, created_at, credits, reference_id FROM credit_purchases LIMIT ? OFFSET ?",
-        pageSizeValue,
-        pageValue * pageSizeValue
-      ).toArray();
-      const total = this.ctx.storage.sql.exec<{ total: number }>(
-        "SELECT COALESCE(COUNT(*), 0) as total FROM credit_purchases"
-      ).one().total;
-      let purchases: PurchasedCredits[] = [];
-      if (result.length > 0) {
-        purchases = result.map((row) => ({
-          id: row.id,
-          createdAt: row.created_at,
-          credits: row.credits / SCALE_FACTOR,
-          referenceId: row.reference_id,
-        }));
-      }
-      return {
-        purchases,
-        total,
-        page: pageValue,
-        pageSize: pageSizeValue,
-      } as PaginatedPurchasedCredits;
-    });
-  }
-
   getTotalCreditsPurchased(): TotalCreditsPurchased {
     const result = this.ctx.storage.sql.exec<{ totalCredits: number }>(
       "SELECT COALESCE(SUM(credits), 0) as totalCredits FROM credit_purchases"
