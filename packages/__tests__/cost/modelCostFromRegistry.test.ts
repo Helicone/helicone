@@ -27,7 +27,7 @@ describe("modelCostBreakdownFromRegistry", () => {
 
   it("should calculate cost for Claude with cache", () => {
     const modelUsage: ModelUsage = {
-      input: 1500,  // Regular input tokens (already excludes cached)
+      input: 1500,
       output: 1000,
       cacheDetails: {
         cachedInput: 500,
@@ -92,7 +92,7 @@ describe("modelCostBreakdownFromRegistry", () => {
 
   it("should calculate cost breakdown correctly", () => {
     const modelUsage: ModelUsage = {
-      input: 800,  // Regular input tokens (already excludes cached)
+      input: 800,
       output: 500,
       cacheDetails: {
         cachedInput: 200,
@@ -131,7 +131,6 @@ describe("modelCostBreakdownFromRegistry", () => {
 
     expect(breakdown).not.toBeNull();
     if (breakdown) {
-      // Gemini pricing includes specific audio pricing
       expect(breakdown.audioCost).toBeGreaterThan(0);
       expect(breakdown.totalCost).toBeGreaterThan(0);
     }
@@ -144,7 +143,6 @@ describe("modelCostBreakdownFromRegistry", () => {
       web_search: 5,
     };
 
-    // First check the standard grok model with xai provider
     const breakdown = calculateModelCostBreakdown({
       modelUsage,
       model: "grok-3",
