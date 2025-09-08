@@ -1,4 +1,4 @@
-name: HQL ClickHouse Wrapper Tests
+name: ClickHouse Wrapper Tests
 
 on:
   push:
