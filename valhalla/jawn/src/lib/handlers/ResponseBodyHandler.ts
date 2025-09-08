@@ -74,6 +74,10 @@ export class ResponseBodyHandler extends AbstractLogHandler {
 
     try {
       const processedResponseBody = await this.processBody(context);
+      if (processedResponseBody.data?.statusOverride) {
+        context.message.log.response.status =
+          processedResponseBody.data.statusOverride;
+      }
       context.processedLog.response.model = getModelFromResponse(
         processedResponseBody.data?.processedBody
       );
