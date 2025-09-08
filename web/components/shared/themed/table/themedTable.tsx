@@ -19,7 +19,7 @@ import {
 } from "@tanstack/react-table";
 import { ChevronDown, ChevronRight, ChevronsUpDown } from "lucide-react";
 import Link from "next/link";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useCallback, memo } from "react";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { Result } from "@/packages/common/result";
 import { SingleFilterDef } from "@helicone-package/filters/frontendFilterDefs";
@@ -32,7 +32,7 @@ import DraggableColumnHeader from "./columns/draggableColumnHeader";
 
 type CheckboxMode = "always_visible" | "on_hover" | "never";
 
-function ConditionalLink({
+const ConditionalLink = memo(function ConditionalLink({
   children,
   href,
   className,
@@ -48,7 +48,223 @@ function ConditionalLink({
   ) : (
     children
   );
-}
+});
+
+// Memoized table row component
+const TableRow = memo(function TableRow<T extends { id?: string; subRows?: T[] }>({
+  row,
+  index,
+  rowLink,
+  selectedIds,
+  currentRow,
+  onRowSelect,
+  checkboxMode,
+  dataLoading,
+  topLevelPathColorMap,
+  onToggleAllRows,
+}: {
+  row: Row<T>;
+  index: number;
+  rowLink?: (row: T) => string;
+  selectedIds?: string[];
+  currentRow?: T;
+  onRowSelect?: (row: T, index: number, event?: React.MouseEvent) => void;
+  checkboxMode: CheckboxMode;
+  dataLoading: boolean;
+  topLevelPathColorMap: Record<string, string>;
+  onToggleAllRows?: any;
+}) {
+  const handleRowClick = useCallback((e: React.MouseEvent) => {
+    if (row.getCanExpand()) {
+      if (
+        e.target instanceof HTMLElement &&
+        e.target.closest('a, button, input[type="checkbox"]')
+      ) {
+        return;
+      }
+      row.getToggleExpandedHandler()();
+    } else if (onRowSelect) {
+      onRowSelect(row.original, index, e);
+    }
+  }, [row, index, onRowSelect]);
+
+  const isSelected = selectedIds?.includes(row.id ?? "") ||
+    (currentRow && currentRow.id === row.original.id);
+
+  return (
+    <tr
+      className={clsx(
+        "group relative",
+        rowLink && "relative",
+        isSelected
+          ? "!bg-sky-100 dark:!bg-slate-800/50"
+          : clsx(
+              "hover:bg-sky-50 dark:hover:bg-slate-700/50",
+              row.getCanExpand()
+                ? "cursor-pointer bg-muted font-semibold"
+                : row.depth > 0
+                  ? "bg-slate-50 dark:bg-slate-950/50"
+                  : "bg-white dark:bg-black",
+            ),
+      )}
+      onClick={handleRowClick}
+    >
+      <td
+        className={clsx(
+          "sticky bottom-[-2px] left-0 z-[1] h-[1px]",
+          checkboxMode === "on_hover"
+            ? clsx(
+                "m-0 !border-0 px-0 pb-0 pt-[1px] opacity-0 !outline-none group-hover:opacity-100",
+                selectedIds?.includes(row.id ?? "") && "!opacity-100",
+              )
+            : "",
+          checkboxMode === "never" && "hidden",
+        )}
+        style={{ verticalAlign: "middle" }}
+      >
+        <div
+          className={clsx(
+            "flex h-full w-full items-center justify-center",
+            isSelected
+              ? "bg-inherit"
+              : row.getCanExpand()
+                ? "bg-inherit"
+                : row.depth > 0
+                  ? "bg-slate-50 dark:bg-slate-950/50"
+                  : "bg-white dark:bg-black",
+          )}
+        >
+          <Checkbox
+            variant="helicone"
+            checked={selectedIds?.includes(row.id ?? "")}
+          />
+        </div>
+      </td>
+      {row.getVisibleCells().map((cell, i) => (
+        <td
+          key={cell.id}
+          className={clsx(
+            "select-none truncate text-slate-700 dark:text-slate-300",
+            !rowLink?.(row.original) &&
+              clsx(
+                "py-3",
+                i === 0 && "pr-2",
+                i > 0 && "px-2",
+                onRowSelect && "cursor-pointer",
+              ),
+            i === 0 && "relative",
+            isSelected
+              ? "bg-inherit"
+              : row.getCanExpand()
+                ? "bg-inherit"
+                : row.depth > 0
+                  ? "bg-slate-50 dark:bg-slate-950/50"
+                  : "bg-white dark:bg-black",
+            i === row.getVisibleCells().length - 1 && "border-r border-border",
+          )}
+          style={{
+            maxWidth: cell.column.getSize(),
+          }}
+        >
+          <ConditionalLink
+            href={rowLink?.(row.original)}
+            className={clsx(
+              "block h-full w-full",
+              "py-3",
+              i === 0 && "pr-2",
+              i > 0 && "px-2",
+            )}
+          >
+            <div
+              className={clsx("flex items-center gap-1")}
+              style={
+                i === 0
+                  ? {
+                      paddingLeft: `${
+                        row.depth * 24 +
+                        (onToggleAllRows !== undefined ? 24 : 0) +
+                        (row.getCanExpand() ? 0 : 8)
+                      }px`,
+                    }
+                  : {}
+              }
+            >
+              {i === 0 &&
+                (() => {
+                  const getAncestorPath = (
+                    currentRow: Row<T>,
+                  ): string | undefined => {
+                    if (currentRow.depth === 0) {
+                      return (currentRow.original as any)?.path as string;
+                    }
+                    let currentParent = currentRow.getParentRow();
+                    while (currentParent && currentParent.depth > 0) {
+                      currentParent = currentParent.getParentRow();
+                    }
+                    return currentParent
+                      ? ((currentParent.original as any)?.path as string)
+                      : undefined;
+                  };
+
+                  const ancestorPath = getAncestorPath(row);
+                  const groupColorClass =
+                    (ancestorPath && topLevelPathColorMap[ancestorPath]) ||
+                    "bg-transparent";
+
+                  if (groupColorClass !== "bg-transparent") {
+                    return (
+                      <div
+                        className={clsx(
+                          "absolute bottom-0 left-0 top-0 z-30 w-1",
+                          groupColorClass,
+                        )}
+                      />
+                    );
+                  }
+                  return null;
+                })()}
+
+              {i === 0 && row.getCanExpand() && (
+                <button
+                  {...{
+                    onClick: row.getToggleExpandedHandler(),
+                    style: { cursor: "pointer" },
+                    "data-expander": true,
+                  }}
+                  className="p-0.5"
+                >
+                  {row.getIsExpanded() ? (
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </button>
+              )}
+              {dataLoading &&
+              (cell.column.id == "requestText" ||
+                cell.column.id == "responseText") ? (
+                <span
+                  className={clsx(
+                    "flex w-full flex-grow",
+                    (cell.column.id == "requestText" ||
+                      cell.column.id == "responseText") &&
+                      dataLoading
+                      ? "animate-pulse rounded-md bg-slate-200"
+                      : "hidden",
+                  )}
+                >
+                  &nbsp;
+                </span>
+              ) : (
+                flexRender(cell.column.columnDef.cell, cell.getContext())
+              )}
+            </div>
+          </ConditionalLink>
+        </td>
+      ))}
+    </tr>
+  );
+});
 
 interface ThemedTableProps<T extends { id?: string; subRows?: T[] }> {
   id: string;
@@ -209,13 +425,13 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
     table.setColumnVisibility(columnVisibility);
   }, [activeColumns, columns, table]);
 
-  const handleSelectAll = (checked: boolean) => {
+  const handleSelectAll = useCallback((checked: boolean) => {
     onSelectAll?.(checked);
-  };
+  }, [onSelectAll]);
 
-  const handleRowSelect = (row: T, index: number, event: React.MouseEvent) => {
+  const handleRowSelect = useCallback((row: T, index: number, event: React.MouseEvent) => {
     onRowSelect?.(row, index, event);
-  };
+  }, [onRowSelect]);
 
   return (
     <ScrollArea className="sentry-mask-me h-full w-full" orientation="both">
@@ -322,204 +538,19 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
             </thead>
             <tbody className="divide-y divide-border text-[13px]">
               {rows.map((row, index) => (
-                <tr
+                <TableRow
                   key={row.id}
-                  className={clsx(
-                    "group relative",
-                    rowLink && "relative",
-                    selectedIds?.includes(row.id ?? "") ||
-                      (currentRow && currentRow.id === row.original.id)
-                      ? "!bg-sky-100 dark:!bg-slate-800/50"
-                      : clsx(
-                          "hover:bg-sky-50 dark:hover:bg-slate-700/50",
-                          row.getCanExpand()
-                            ? "cursor-pointer bg-muted font-semibold"
-                            : row.depth > 0
-                              ? "bg-slate-50 dark:bg-slate-950/50"
-                              : "bg-white dark:bg-black",
-                        ),
-                  )}
-                  onClick={(e: React.MouseEvent) => {
-                    if (row.getCanExpand()) {
-                      if (
-                        e.target instanceof HTMLElement &&
-                        e.target.closest('a, button, input[type="checkbox"]')
-                      ) {
-                        return;
-                      }
-                      row.getToggleExpandedHandler()();
-                    } else if (onRowSelect) {
-                      handleRowSelect(row.original, index, e);
-                    }
-                  }}
-                >
-                  <td
-                    className={clsx(
-                      "sticky bottom-[-2px] left-0 z-[1] h-[1px]",
-                      checkboxMode === "on_hover"
-                        ? clsx(
-                            "m-0 !border-0 px-0 pb-0 pt-[1px] opacity-0 !outline-none group-hover:opacity-100",
-                            selectedIds?.includes(row.id ?? "") &&
-                              "!opacity-100",
-                          )
-                        : "",
-                      checkboxMode === "never" && "hidden",
-                    )}
-                    style={{ verticalAlign: "middle" }}
-                  >
-                    <div
-                      className={clsx(
-                        "flex h-full w-full items-center justify-center",
-                        selectedIds?.includes(row.id ?? "") ||
-                          (currentRow && currentRow.id === row.original.id)
-                          ? "bg-inherit"
-                          : row.getCanExpand()
-                            ? "bg-inherit"
-                            : row.depth > 0
-                              ? "bg-slate-50 dark:bg-slate-950/50"
-                              : "bg-white dark:bg-black",
-                      )}
-                    >
-                      <Checkbox
-                        variant="helicone"
-                        checked={selectedIds?.includes(row.id ?? "")}
-                      />
-                    </div>
-                  </td>
-                  {row.getVisibleCells().map((cell, i) => (
-                    <td
-                      key={cell.id}
-                      className={clsx(
-                        "select-none truncate text-slate-700 dark:text-slate-300",
-                        !rowLink?.(row.original) &&
-                          clsx(
-                            "py-3",
-                            i === 0 && "pr-2",
-                            i > 0 && "px-2",
-                            onRowSelect && "cursor-pointer",
-                          ),
-                        i === 0 && "relative",
-                        selectedIds?.includes(row.id ?? "") ||
-                          (currentRow && currentRow.id === row.original.id)
-                          ? "bg-inherit"
-                          : row.getCanExpand()
-                            ? "bg-inherit"
-                            : row.depth > 0
-                              ? "bg-slate-50 dark:bg-slate-950/50"
-                              : "bg-white dark:bg-black",
-                        i === row.getVisibleCells().length - 1 &&
-                          "border-r border-border",
-                      )}
-                      style={{
-                        maxWidth: cell.column.getSize(),
-                      }}
-                    >
-                      <ConditionalLink
-                        href={rowLink?.(row.original)}
-                        className={clsx(
-                          "block h-full w-full",
-                          "py-3",
-                          i === 0 && "pr-2",
-                          i > 0 && "px-2",
-                        )}
-                      >
-                        <div
-                          className={clsx("flex items-center gap-1")}
-                          style={
-                            i === 0
-                              ? {
-                                  paddingLeft: `${
-                                    row.depth * 24 +
-                                    (onToggleAllRows !== undefined ? 24 : 0) +
-                                    (row.getCanExpand() ? 0 : 8)
-                                  }px`,
-                                }
-                              : {}
-                          }
-                        >
-                          {i === 0 &&
-                            (() => {
-                              const getAncestorPath = (
-                                currentRow: Row<T>,
-                              ): string | undefined => {
-                                if (currentRow.depth === 0) {
-                                  return (currentRow.original as any)
-                                    ?.path as string;
-                                }
-                                let currentParent = currentRow.getParentRow();
-                                while (
-                                  currentParent &&
-                                  currentParent.depth > 0
-                                ) {
-                                  currentParent = currentParent.getParentRow();
-                                }
-                                return currentParent
-                                  ? ((currentParent.original as any)
-                                      ?.path as string)
-                                  : undefined;
-                              };
-
-                              const ancestorPath = getAncestorPath(row);
-                              const groupColorClass =
-                                (ancestorPath &&
-                                  topLevelPathColorMap[ancestorPath]) ||
-                                "bg-transparent";
-
-                              if (groupColorClass !== "bg-transparent") {
-                                return (
-                                  <div
-                                    className={clsx(
-                                      "absolute bottom-0 left-0 top-0 z-30 w-1",
-                                      groupColorClass,
-                                    )}
-                                  />
-                                );
-                              }
-                              return null;
-                            })()}
-
-                          {i === 0 && row.getCanExpand() && (
-                            <button
-                              {...{
-                                onClick: row.getToggleExpandedHandler(),
-                                style: { cursor: "pointer" },
-                                "data-expander": true,
-                              }}
-                              className="p-0.5"
-                            >
-                              {row.getIsExpanded() ? (
-                                <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                              ) : (
-                                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                              )}
-                            </button>
-                          )}
-                          {dataLoading &&
-                          (cell.column.id == "requestText" ||
-                            cell.column.id == "responseText") ? (
-                            <span
-                              className={clsx(
-                                "flex w-full flex-grow",
-                                (cell.column.id == "requestText" ||
-                                  cell.column.id == "responseText") &&
-                                  dataLoading
-                                  ? "animate-pulse rounded-md bg-slate-200"
-                                  : "hidden",
-                              )}
-                            >
-                              &nbsp;
-                            </span>
-                          ) : (
-                            flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext(),
-                            )
-                          )}
-                        </div>
-                      </ConditionalLink>
-                    </td>
-                  ))}
-                </tr>
+                  row={row as any}
+                  index={index}
+                  rowLink={rowLink as any}
+                  selectedIds={selectedIds}
+                  currentRow={currentRow}
+                  onRowSelect={onRowSelect as any}
+                  checkboxMode={checkboxMode}
+                  dataLoading={dataLoading}
+                  topLevelPathColorMap={topLevelPathColorMap}
+                  onToggleAllRows={onToggleAllRows}
+                />
               ))}
             </tbody>
           </table>

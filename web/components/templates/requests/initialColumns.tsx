@@ -17,6 +17,7 @@ import { COUTNRY_CODE_DIRECTORY } from "./countryCodeDirectory";
 import ModelPill from "./modelPill";
 import StatusBadge from "./statusBadge";
 import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
+import { memo } from "react";
 
 function formatNumber(num: number) {
   const numParts = num.toString().split(".");
@@ -35,6 +36,96 @@ function formatNumber(num: number) {
   }
 }
 
+// Memoized cell components for better performance
+const DateCell = memo(function DateCell({ value }: { value: string }) {
+  return (
+    <TooltipProvider>
+      <Tooltip delayDuration={100}>
+        <TooltipTrigger asChild>
+          <span className="cursor-default font-medium text-gray-900 dark:text-gray-100">
+            {getUSDateFromString(value)}
+          </span>
+        </TooltipTrigger>
+        <TooltipContent side="bottom" className="text-xs">
+          <p>{get24HourFromString(value)}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+});
+
+const StatusCell = memo(function StatusCell({ 
+  status, 
+  isCached 
+}: { 
+  status: any; 
+  isCached: boolean;
+}) {
+  if (!status) {
+    return <span>{JSON.stringify(status)}</span>;
+  }
+
+  const { code, statusType } = status;
+  return (
+    <StatusBadge
+      statusType={isCached ? "cached" : statusType}
+      errorCode={code}
+    />
+  );
+});
+
+const ModelCell = memo(function ModelCell({ 
+  model, 
+  provider 
+}: { 
+  model: string; 
+  provider: any;
+}) {
+  return <ModelPill model={model} provider={provider} />;
+});
+
+const CostCell = memo(function CostCell({
+  cost,
+  statusCode,
+  isCached,
+}: {
+  cost: number;
+  statusCode: number;
+  isCached: boolean;
+}) {
+  const num = Number(cost);
+  if (Number(num) === 0 && !isCached && statusCode === 200) {
+    return <CostPill />;
+  }
+  return <span>${formatNumber(num)}</span>;
+});
+
+const FeedbackCell = memo(function FeedbackCell({
+  scores,
+}: {
+  scores: Record<string, any> | undefined | null;
+}) {
+  const rating =
+    scores && scores["helicone-score-feedback"]
+      ? Number(scores["helicone-score-feedback"]) === 1
+        ? true
+        : false
+      : null;
+  if (rating === null) {
+    return <span className="text-gray-500"></span>;
+  }
+
+  return (
+    <span className={clsx(rating ? "text-green-500" : "text-red-500")}>
+      {rating ? (
+        <HandThumbUpIcon className="inline h-5 w-5" />
+      ) : (
+        <HandThumbDownIcon className="inline h-5 w-5" />
+      )}
+    </span>
+  );
+});
+
 export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
   {
     id: "createdAt",
@@ -42,20 +133,7 @@ export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
     header: "Created At",
     cell: (info) => {
       const value = info.row.original.heliconeMetadata.createdAt;
-      return (
-        <TooltipProvider>
-          <Tooltip delayDuration={100}>
-            <TooltipTrigger asChild>
-              <span className="cursor-default font-medium text-gray-900 dark:text-gray-100">
-                {getUSDateFromString(value)}
-              </span>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="text-xs">
-              <p>{get24HourFromString(value)}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      );
+      return <DateCell value={value} />;
     },
     meta: {
       sortKey: "created_at",
@@ -68,21 +146,11 @@ export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
     header: "Status",
     cell: (info) => {
       const status = info.row.original.heliconeMetadata.status;
-      const isCached =
+      const isCached = !!(
         info.row.original.heliconeMetadata.cacheReferenceId &&
-        info.row.original.heliconeMetadata.cacheReferenceId !== DEFAULT_UUID;
-
-      if (!status) {
-        return <span>{JSON.stringify(status)}</span>;
-      }
-
-      const { code, statusType } = status;
-      return (
-        <StatusBadge
-          statusType={isCached ? "cached" : statusType}
-          errorCode={code}
-        />
+        info.row.original.heliconeMetadata.cacheReferenceId !== DEFAULT_UUID
       );
+      return <StatusCell status={status} isCached={isCached} />;
     },
     size: 100,
   },
@@ -109,7 +177,7 @@ export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
     accessorKey: "model",
     header: "Model",
     cell: (info) => (
-      <ModelPill
+      <ModelCell
         model={info.row.original.model}
         provider={info.row.original.heliconeMetadata.provider}
       />
@@ -214,14 +282,16 @@ export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
     header: "Cost",
     cell: (info) => {
       const statusCode = info.row.original.heliconeMetadata.status.code;
-      const num = Number(info.row.original.heliconeMetadata.cost);
+      const cost = info.row.original.heliconeMetadata.cost;
       const isCached =
         info.row.original.heliconeMetadata.cacheReferenceId !== DEFAULT_UUID;
-
-      if (Number(num) === 0 && !isCached && statusCode === 200) {
-        return <CostPill />;
-      }
-      return <span>${formatNumber(num)}</span>;
+      return (
+        <CostCell
+          cost={cost}
+          statusCode={statusCode}
+          isCached={isCached}
+        />
+      );
     },
     meta: {
       sortKey: "cost",
@@ -234,25 +304,7 @@ export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
     header: "Feedback",
     cell: (info) => {
       const scores = info.row.original.heliconeMetadata.scores;
-      const rating =
-        scores && scores["helicone-score-feedback"]
-          ? Number(scores["helicone-score-feedback"]) === 1
-            ? true
-            : false
-          : null;
-      if (rating === null) {
-        return <span className="text-gray-500"></span>;
-      }
-
-      return (
-        <span className={clsx(rating ? "text-green-500" : "text-red-500")}>
-          {rating ? (
-            <HandThumbUpIcon className="inline h-5 w-5" />
-          ) : (
-            <HandThumbDownIcon className="inline h-5 w-5" />
-          )}
-        </span>
-      );
+      return <FeedbackCell scores={scores} />;
     },
   },
   {
