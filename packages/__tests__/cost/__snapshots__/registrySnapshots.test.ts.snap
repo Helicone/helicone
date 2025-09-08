@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
 {
@@ -1961,11 +1961,11 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "gpt-5-nano",
   ],
   "sampleEndpointIds": [
+    "chatgpt-4o-latest:openai:*",
     "claude-3.5-haiku:anthropic:*",
     "claude-3.5-haiku:bedrock:us-east-1",
     "claude-3.5-haiku:vertex:global",
     "claude-3.5-sonnet-v2:anthropic:*",
-    "claude-3.5-sonnet-v2:vertex:global",
   ],
   "totalEndpoints": 51,
   "totalModelProviderConfigs": 51,
