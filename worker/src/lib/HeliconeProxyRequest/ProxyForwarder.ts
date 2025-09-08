@@ -36,6 +36,7 @@ import { WalletManager } from "../managers/WalletManager";
 import { costOfPrompt } from "@helicone-package/cost";
 import { getUsageProcessor } from "@helicone-package/cost/usage/getUsageProcessor";
 import { EscrowInfo } from "../ai-gateway/types";
+import { heliconeProviderToProvider } from "@helicone-package/cost/models/provider-helpers";
 
 export async function proxyForwarder(
   request: RequestWrapper,
@@ -516,7 +517,7 @@ async function log(
   // TODO: Refactor other code so we only pull response once
   // reuse this usage, for now its just an example of using the new usage processors.
   const rawResponse = await loggable.getRawResponse();
-  const usageProcessor = getUsageProcessor(proxyRequest.provider);
+  const usageProcessor = getUsageProcessor(heliconeProviderToProvider(proxyRequest.provider) ?? "openai");
   const usage = await usageProcessor.parse({
     responseBody: rawResponse,
     isStream: proxyRequest.isStream,

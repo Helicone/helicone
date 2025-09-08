@@ -9,6 +9,7 @@ import type {
 } from "./types";
 import { providers, ModelProviderName } from "./providers";
 import { BaseProvider } from "./providers/base";
+import { Provider } from "../../llm-mapper/types";
 
 // Helper function to get provider instance
 export function getProvider(providerName: string): Result<BaseProvider> {
@@ -52,6 +53,44 @@ export const dbProviderToProvider = (
   }
   return null;
 };
+
+
+export function heliconeProviderToProvider(
+  provider: Provider
+): ModelProviderName | null {
+  if (provider === "OPENAI") {
+    return "openai";
+  }
+  if (provider === "ANTHROPIC") {
+    return "anthropic";
+  }
+  if (provider === "BEDROCK" || provider === "AWS") {
+    return "bedrock";
+  }
+  if (provider === "GOOGLE") {
+    return "google-ai-studio";
+  }
+  if (provider === "AZURE") {
+    return "azure";
+  }
+  if (provider === "GROQ") {
+    return "groq";
+  }
+  if (provider === "DEEPSEEK") {
+    return "deepseek";
+  }
+  if (provider === "COHERE") {
+    return "cohere";
+  }
+  if (provider === "X") {
+    return "xai";
+  }
+  if (provider === "PERPLEXITY") {
+    return "perplexity";
+  }
+  // Note: does not catch all possible providers and CUSTOM
+  return null;
+}
 
 export function buildEndpointUrl(
   endpointConfig: ModelProviderConfig,
