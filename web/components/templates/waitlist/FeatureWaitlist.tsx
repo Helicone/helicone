@@ -13,6 +13,7 @@ interface FeatureWaitlistProps {
   title?: string;
   description?: string;
   organizationId?: string;
+  variant?: "card" | "flat";
 }
 
 export function FeatureWaitlist({
@@ -20,6 +21,7 @@ export function FeatureWaitlist({
   title = "Join the Waitlist",
   description = "Be the first to know when this feature becomes available.",
   organizationId,
+  variant = "card",
 }: FeatureWaitlistProps) {
   const user = useHeliconeAuthClient();
 
@@ -80,32 +82,84 @@ export function FeatureWaitlist({
   };
 
   if (isOnWaitlist?.data?.isOnWaitlist) {
+    const content = (
+      <div className="flex flex-col items-center gap-4 py-8 text-center">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+          <CheckIcon className="h-6 w-6 text-green-600 dark:text-green-400" />
+        </div>
+        <div>
+          <H3 className="mb-2">You&lsquo;re on the list!</H3>
+          <P className="text-muted-foreground">
+            We&lsquo;ll notify you at <strong>{email}</strong> when this feature
+            is available.
+          </P>
+        </div>
+      </div>
+    );
+
+    if (variant === "flat") {
+      return <div className="w-full">{content}</div>;
+    }
+
     return (
       <Card className="w-full">
-        <CardContent className="pt-6">
-          <div className="flex flex-col items-center gap-4 py-8 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
-              <CheckIcon className="h-6 w-6 text-green-600 dark:text-green-400" />
-            </div>
-            <div>
-              <H3 className="mb-2">You&lsquo;re on the list!</H3>
-              <P className="text-muted-foreground">
-                We&lsquo;ll notify you at <strong>{email}</strong> when this
-                feature is available.
-              </P>
-            </div>
-          </div>
-        </CardContent>
+        <CardContent className="pt-6">{content}</CardContent>
       </Card>
     );
+  }
+
+  const content = (
+    <>
+      <div className="mb-4 flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-border">
+          <Mail className="h-5 w-5 text-muted-foreground" />
+        </div>
+        <div>
+          <H3>{title}</H3>
+          <Small className="text-muted-foreground">{description}</Small>
+        </div>
+      </div>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
+          <Input
+            type="email"
+            placeholder="Enter your email"
+            value={email}
+            disabled={true}
+            className="w-full"
+            aria-label="Email address"
+          />
+          {error && <Small className="text-destructive">{error}</Small>}
+        </div>
+        <Button
+          type="submit"
+          variant="secondary"
+          disabled={isPending || !email}
+          className="w-full"
+        >
+          {isPending ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Joining...
+            </>
+          ) : (
+            "Join Waitlist"
+          )}
+        </Button>
+      </form>
+    </>
+  );
+
+  if (variant === "flat") {
+    return <div className="w-full">{content}</div>;
   }
 
   return (
     <Card className="w-full">
       <CardHeader>
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30">
-            <Mail className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-border">
+            <Mail className="h-5 w-5 text-muted-foreground" />
           </div>
           <div>
             <H3>{title}</H3>
