@@ -110,6 +110,7 @@ export async function proxyForwarder(
                 env,
                 ctx,
                 rateLimited,
+                response.status,
                 "false", // S3_ENABLED
                 cachedResponse,
                 cacheSettings
@@ -232,6 +233,7 @@ export async function proxyForwarder(
             env,
             ctx,
             rateLimited,
+            response.status,
             undefined,
             undefined,
             undefined
@@ -302,6 +304,7 @@ export async function proxyForwarder(
           env,
           ctx,
           rateLimited,
+          moderationRes.response?.status ?? 500,
           undefined,
           undefined,
           undefined
@@ -397,6 +400,7 @@ export async function proxyForwarder(
         env,
         ctx,
         rateLimited,
+        response.status,
         undefined,
         undefined,
         undefined
@@ -442,6 +446,7 @@ async function log(
   env: Env,
   ctx: ExecutionContext,
   rateLimited: boolean,
+  statusCode: number,
   S3_ENABLED?: Env["S3_ENABLED"],
   cachedResponse?: Response,
   cacheSettings?: CacheSettings
@@ -553,6 +558,7 @@ async function log(
             orgData.organizationId,
             proxyRequest,
             cost,
+            statusCode,
             cachedResponse
           );
         if (escrowFinalizationResult.error !== null) {
