@@ -230,9 +230,9 @@ export class HeliconeSqlController extends Controller {
   ): Promise<Result<void, string>> {
     const heliconeSqlManager = new HqlQueryManager(request.authParams);
     const result = await heliconeSqlManager.bulkDeleteSavedQueries(requestBody.ids);
-    if (result.error) {
-      this.setStatus(500);
-      return err(result.error);
+    if (isError(result)) {
+      this.setStatus(result.error.statusCode || 500);
+      return err(formatHqlError(result.error));
     }
     this.setStatus(200);
     return ok(undefined);
