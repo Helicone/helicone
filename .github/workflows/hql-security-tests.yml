@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - devin/eng-3012-ci
   pull_request:
     branches:
       - main
