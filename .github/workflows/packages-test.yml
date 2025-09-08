@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - devin/eng-3006-package-ci
   pull_request:
     branches:
       - main
