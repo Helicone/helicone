@@ -14,10 +14,9 @@ import {
   Code2Icon,
 } from "lucide-react";
 import { useRouter } from "next/router";
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import DesktopSidebar from "./DesktopSidebar";
 import { ChangelogItem, NavigationItem } from "./types";
-import { useOrg } from "../org/organizationContext";
 
 interface SidebarProps {
   setOpen: (open: boolean) => void;
@@ -28,7 +27,6 @@ interface SidebarProps {
 const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
   const router = useRouter();
   const { pathname } = router;
-  const org = useOrg();
 
   const NAVIGATION: NavigationItem[] = useMemo(
     () => [

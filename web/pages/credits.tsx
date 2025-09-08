@@ -1,6 +1,5 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
 import PaymentModal from "@/components/templates/settings/PaymentModal";
-import SettingsLayout from "@/components/templates/settings/settingsLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,13 +21,13 @@ import { formatDate } from "@/utils/date";
 import { ChevronLeft, ChevronRight, RefreshCcw } from "lucide-react";
 import Link from "next/link";
 import { ReactElement, useState } from "react";
-import AuthLayout from "../../components/layout/auth/authLayout";
-import { NextPageWithLayout } from "../_app";
+import AuthLayout from "../components/layout/auth/authLayout";
+import { NextPageWithLayout } from "./_app";
 import { useFeatureFlag } from "@/services/hooks/admin";
 import { FeatureWaitlist } from "@/components/templates/waitlist/FeatureWaitlist";
 import { cn } from "@/lib/utils";
 
-const CreditsSettings: NextPageWithLayout<void> = () => {
+const Credits: NextPageWithLayout<void> = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(5);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -135,11 +134,11 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
                     if (balance % 1 === 0) {
                       return balance.toFixed(2);
                     }
-                    if (balance >= 10) {
-                      return balance.toFixed(3);
-                    }
                     if (balance >= 100) {
                       return balance.toFixed(4);
+                    }
+                    if (balance >= 10) {
+                      return balance.toFixed(3);
                     }
                     const formattedBalance = balance.toFixed(5);
                     return formattedBalance;
@@ -348,12 +347,8 @@ const CreditsSettings: NextPageWithLayout<void> = () => {
   );
 };
 
-CreditsSettings.getLayout = function getLayout(page: ReactElement) {
-  return (
-    <AuthLayout>
-      <SettingsLayout>{page}</SettingsLayout>
-    </AuthLayout>
-  );
+Credits.getLayout = function getLayout(page: ReactElement) {
+  return <AuthLayout>{page}</AuthLayout>;
 };
 
-export default CreditsSettings;
+export default Credits;

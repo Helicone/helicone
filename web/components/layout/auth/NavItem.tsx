@@ -7,6 +7,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ChevronDownIcon } from "lucide-react";
 import Link from "next/link";
+import React from "react";
 
 interface NavigationItem {
   name: string;

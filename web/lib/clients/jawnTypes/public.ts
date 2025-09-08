@@ -2788,8 +2788,6 @@ Json: JsonObject;
       video?: number;
       /** Format: double */
       web_search?: number;
-      /** Format: double */
-      internal_reasoning?: number;
     };
     Endpoint: {
       pricing: components["schemas"]["ModelPricing"][];
@@ -2824,8 +2822,6 @@ Json: JsonObject;
       cacheRead?: number;
       /** Format: double */
       cacheWrite?: number;
-      /** Format: double */
-      internal_reasoning?: number;
       /** Format: double */
       threshold?: number;
     };

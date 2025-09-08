@@ -7673,10 +7673,6 @@
 					"web_search": {
 						"type": "number",
 						"format": "double"
-					},
-					"internal_reasoning": {
-						"type": "number",
-						"format": "double"
 					}
 				},
 				"required": [
@@ -7777,10 +7773,6 @@
 						"format": "double"
 					},
 					"cacheWrite": {
-						"type": "number",
-						"format": "double"
-					},
-					"internal_reasoning": {
 						"type": "number",
 						"format": "double"
 					},
