@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useOrg } from "../../components/layout/org/organizationContext";
 import { HeliconeRequest } from "@helicone-package/llm-mapper/types";
 import { $JAWN_API, getJawnClient } from "../../lib/clients/jawn";
@@ -94,6 +94,150 @@ export const useGetRequestWithBodies = (requestId: string) => {
   });
 };
 
+// Optimized version that returns data immediately, then progressively loads bodies
+// TODO Replace useGetRequestsWithBodies with this
+export const useGetRequestsWithLazyBodies = (
+  currentPage: number,
+  currentPageSize: number,
+  advancedFilter: FilterNode,
+  sortLeaf: SortLeafRequest,
+  isLive: boolean = false,
+  isCached: boolean = false,
+) => {
+  const [bodiesLoaded, setBodiesLoaded] = useState<Record<string, boolean>>({});
+  const [requestsWithBodies, setRequestsWithBodies] = useState<HeliconeRequest[]>([]);
+
+  // First query to fetch the initial request data
+  const requestQuery = $JAWN_API.useQuery(
+    "post",
+    "/v1/request/query-clickhouse",
+    {
+      body: {
+        filter: advancedFilter as any,
+        offset: (currentPage - 1) * currentPageSize,
+        limit: currentPageSize,
+        sort: sortLeaf as any,
+        isCached: isCached as any,
+      },
+    },
+    {
+      refetchOnWindowFocus: false,
+      refetchInterval: isLive ? 1_000 : false,
+      keepPreviousData: true,
+    },
+  );
+
+  // Initialize requests immediately when data arrives
+  useEffect(() => {
+    if (requestQuery.data?.data) {
+      setRequestsWithBodies(requestQuery.data.data);
+      setBodiesLoaded({});
+    }
+  }, [requestQuery.data?.data]);
+
+  // Progressively load bodies in background
+  useEffect(() => {
+    if (!requestQuery.data?.data?.length) return;
+
+    const loadBodies = async () => {
+      const allRequests = requestQuery.data?.data ?? [];
+      const BATCH_SIZE = 5; // Smaller batch size for progressive loading
+      
+      for (let i = 0; i < allRequests.length; i += BATCH_SIZE) {
+        const batch = allRequests.slice(i, i + BATCH_SIZE);
+        
+        const batchResults = await Promise.all(
+          batch.map(async (request) => {
+            // Skip if already loaded
+            if (bodiesLoaded[request.request_id]) return null;
+
+            // Return from cache if available
+            if (requestBodyCache.has(request.request_id)) {
+              const bodyContent = requestBodyCache.get(request.request_id);
+              return {
+                ...request,
+                request_body: bodyContent?.request,
+                response_body: bodyContent?.response,
+              };
+            }
+
+            // Skip if no signed URL is available
+            if (!request.signed_body_url) {
+              setBodiesLoaded(prev => ({ ...prev, [request.request_id]: true }));
+              return null;
+            }
+
+            try {
+              const contentResponse = await fetch(request.signed_body_url);
+              if (!contentResponse.ok) {
+                logger.error({ status: contentResponse.status }, "Error fetching request body");
+                return null;
+              }
+
+              const text = await contentResponse.text();
+              let content = JSON.parse(text);
+
+              if (request.asset_urls) {
+                content = placeAssetIdValues(request.asset_urls, content);
+              }
+
+              // Update cache
+              requestBodyCache.set(request.request_id, content);
+              if (requestBodyCache.size > 10_000) {
+                requestBodyCache.clear();
+              }
+
+              return {
+                ...request,
+                request_body: content.request,
+                response_body: content.response,
+              };
+            } catch (error) {
+              logger.error({ error }, "Error processing request body");
+              return null;
+            }
+          }),
+        );
+
+        // Update state with loaded bodies
+        setRequestsWithBodies(prev => {
+          const updated = [...prev];
+          batchResults.forEach(result => {
+            if (result) {
+              const index = updated.findIndex(r => r.request_id === result.request_id);
+              if (index !== -1) {
+                updated[index] = result;
+              }
+              setBodiesLoaded(prevLoaded => ({
+                ...prevLoaded,
+                [result.request_id]: true,
+              }));
+            }
+          });
+          return updated;
+        });
+      }
+    };
+
+    loadBodies();
+  }, [requestQuery.data?.data]);
+
+  const allBodiesLoaded = useMemo(() => {
+    if (!requestQuery.data?.data?.length) return false;
+    return requestQuery.data.data.every(r => bodiesLoaded[r.request_id]);
+  }, [requestQuery.data?.data, bodiesLoaded]);
+
+  return {
+    isLoading: requestQuery.isLoading,
+    refetch: requestQuery.refetch,
+    isRefetching: requestQuery.isRefetching,
+    requests: requestsWithBodies,
+    completedQueries: requestsWithBodies?.length ?? 0,
+    totalQueries: requestsWithBodies?.length ?? 0,
+    bodiesLoading: !allBodiesLoaded,
+  };
+};
+
 export const useGetRequestsWithBodies = (
   currentPage: number,
   currentPageSize: number,
@@ -122,7 +266,7 @@ export const useGetRequestsWithBodies = (
     },
   );
 
-  // Second query to fetch and process request bodies
+  // Second query to fetch and process request bodies in batches
   const { data: requests, isLoading: bodiesLoading } = useQuery<
     HeliconeRequest[]
   >({
@@ -131,52 +275,65 @@ export const useGetRequestsWithBodies = (
     enabled: !!requestQuery.data?.data?.length,
     queryFn: async () => {
       try {
-        return await Promise.all(
-          requestQuery.data?.data?.map(async (request) => {
-            // Return from cache if available
-            if (requestBodyCache.has(request.request_id)) {
-              const bodyContent = requestBodyCache.get(request.request_id);
-              return {
-                ...request,
-                request_body: bodyContent?.request,
-                response_body: bodyContent?.response,
-              };
-            }
+        const allRequests = requestQuery.data?.data ?? [];
+        const BATCH_SIZE = 10; // Process 10 requests at a time
+        const results: HeliconeRequest[] = [];
+        
+        // Process requests in batches
+        for (let i = 0; i < allRequests.length; i += BATCH_SIZE) {
+          const batch = allRequests.slice(i, i + BATCH_SIZE);
+          
+          const batchResults = await Promise.all(
+            batch.map(async (request) => {
+              // Return from cache if available
+              if (requestBodyCache.has(request.request_id)) {
+                const bodyContent = requestBodyCache.get(request.request_id);
+                return {
+                  ...request,
+                  request_body: bodyContent?.request,
+                  response_body: bodyContent?.response,
+                };
+              }
 
-            // Skip if no signed URL is available
-            if (!request.signed_body_url) return request;
+              // Skip if no signed URL is available
+              if (!request.signed_body_url) return request;
 
-            try {
-              const contentResponse = await fetch(request.signed_body_url);
-              if (!contentResponse.ok) {
-                logger.error({ status: contentResponse.status }, "Error fetching request body");
+              try {
+                const contentResponse = await fetch(request.signed_body_url);
+                if (!contentResponse.ok) {
+                  logger.error({ status: contentResponse.status }, "Error fetching request body");
+                  return request;
+                }
+
+                const text = await contentResponse.text();
+                let content = JSON.parse(text);
+
+                if (request.asset_urls) {
+                  content = placeAssetIdValues(request.asset_urls, content);
+                }
+
+                // Update cache with size limit protection
+                requestBodyCache.set(request.request_id, content);
+                if (requestBodyCache.size > 10_000) {
+                  requestBodyCache.clear();
+                }
+
+                return {
+                  ...request,
+                  request_body: content.request,
+                  response_body: content.response,
+                };
+              } catch (error) {
+                logger.error({ error }, "Error processing request body");
                 return request;
               }
-
-              const text = await contentResponse.text();
-              let content = JSON.parse(text);
-
-              if (request.asset_urls) {
-                content = placeAssetIdValues(request.asset_urls, content);
-              }
-
-              // Update cache with size limit protection
-              requestBodyCache.set(request.request_id, content);
-              if (requestBodyCache.size > 10_000) {
-                requestBodyCache.clear();
-              }
-
-              return {
-                ...request,
-                request_body: content.request,
-                response_body: content.response,
-              };
-            } catch (error) {
-              logger.error({ error }, "Error processing request body");
-              return request;
-            }
-          }) ?? [],
-        );
+            }),
+          );
+          
+          results.push(...batchResults);
+        }
+        
+        return results;
       } catch (error) {
         logger.error({ error }, "Error processing requests with bodies");
         return [];
@@ -245,7 +402,7 @@ const useGetRequests = (
   isLive: boolean = false,
 ) => {
   return {
-    requests: useGetRequestsWithBodies(
+    requests: useGetRequestsWithLazyBodies(
       currentPage,
       currentPageSize,
       advancedFilter,
