@@ -534,7 +534,7 @@ async function log(
       provider: attemptProvider,
     });
 
-    console.log("breakdown", breakdown); // TODO: apply to esc
+    console.log("breakdown", breakdown);
     // TODO: Refactor other code so we only pull response once
     // apply breakdown totalCost to escrow
   }
