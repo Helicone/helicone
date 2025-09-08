@@ -4,10 +4,10 @@ on:
   push:
     branches:
       - main
+      - devin/eng-3012-ci
   pull_request:
     branches:
       - main
-      - devin/eng-3012-ci
     paths:
       # HQL implementation files
       - "valhalla/jawn/src/lib/db/ClickhouseWrapper.ts"
