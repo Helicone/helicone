@@ -1,7 +1,6 @@
 import type { ModelUsage } from "../../cost/usage/types";
 import type { ModelProviderName } from "../../cost/models/providers";
 import { modelCostBreakdownFromRegistry } from "../../cost/costCalc";
-import { calculateModelCostBreakdown } from "../../cost/models/calculate-cost";
 
 describe("modelCostBreakdownFromRegistry", () => {
   it("should calculate cost for basic GPT-4o usage", () => {
@@ -99,7 +98,7 @@ describe("modelCostBreakdownFromRegistry", () => {
       },
     };
 
-    const breakdown = calculateModelCostBreakdown({
+    const breakdown = modelCostBreakdownFromRegistry({
       modelUsage,
       model: "gpt-4o",
       provider: "openai" as ModelProviderName,
@@ -143,7 +142,7 @@ describe("modelCostBreakdownFromRegistry", () => {
       web_search: 5,
     };
 
-    const breakdown = calculateModelCostBreakdown({
+    const breakdown = modelCostBreakdownFromRegistry({
       modelUsage,
       model: "grok-3",
       provider: "xai" as ModelProviderName,
@@ -162,7 +161,7 @@ describe("modelCostBreakdownFromRegistry", () => {
       image: 3,
     };
 
-    const breakdown = calculateModelCostBreakdown({
+    const breakdown = modelCostBreakdownFromRegistry({
       modelUsage,
       model: "gemini-2.5-flash",
       provider: "vertex" as ModelProviderName,
