@@ -33,6 +33,6 @@ jobs:
         run: yarn install --frozen-lockfile
         working-directory: packages
 
-      - name: Run llm-mapper tests
+      - name: Run packages tests
         run: npx jest __tests__/
         working-directory: packages
