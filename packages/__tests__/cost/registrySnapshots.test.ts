@@ -120,8 +120,8 @@ describe("Registry Snapshots", () => {
 
       // Sample endpoint IDs to ensure format is correct
       sampleEndpointIds: Array.from(indexes.endpointIdToEndpoint.keys())
-        .slice(0, 5)
-        .sort(),
+        .sort()
+        .slice(0, 5),
     };
 
     expect(snapshot).toMatchSnapshot();
